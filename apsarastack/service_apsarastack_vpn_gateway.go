@@ -12,6 +12,14 @@ import (
 	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
 )
 
+
+
+
+
+
+
+
+
 type VpnGatewayService struct {
 	client *connectivity.ApsaraStackClient
 }
