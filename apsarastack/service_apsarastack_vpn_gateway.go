@@ -93,6 +93,7 @@ func (s *VpnGatewayService) DescribeVpnConnection(id string) (v vpc.DescribeVpnC
 	if response.VpnConnectionId != id {
 		return v, WrapErrorf(Error(GetNotFoundMessage("VpnConnection", id)), NotFoundMsg, ProviderERROR)
 	}
+        a = b
 	return *response, nil
 }
 
