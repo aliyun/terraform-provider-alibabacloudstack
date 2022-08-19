@@ -1,0 +1,96 @@
+---
+subcategory: "AnalyticDB for PostgreSQL (GPDB)"
+layout: "apsarastack"
+page_title: "Apsarastack: apsarastack_gpdb_account"
+sidebar_current: "docs-apsarastack-resource-gpdb-account"
+description: |-
+  Provides a Apsarastack GPDB Account resource.
+---
+
+# apsarastack\_gpdb\_account
+
+Provides a GPDB Account resource.
+
+For information about GPDB Account and how to use it, see [What is Account](https://help.aliyun.com/apsara/enterprise/v_3_16_0_20220117/gpdb/enterprise-ascm-developer-guide/CreateAccount-1.html?spm=a2c4g.14484438.10001.131).
+
+-> **NOTE:** Available in v1.142.0+.
+
+## Example Usage
+
+Basic Usage
+
+```terraform
+ 
+variable "name" {
+  default = "tftest6355"
+}
+data "apsarastack_gpdb_zones" "default" {}
+data "apsarastack_zones" "default" {}
+data "apsarastack_vpcs" "default" {
+  name_regex = "default-NODELETING"
+}
+resource "apsarastack_vpc" "default" {
+name       = var.name
+cidr_block = "172.16.0.0/16"
+}
+resource "apsarastack_vswitch" "default" {
+  vpc_id       = "${apsarastack_vpc.default.id}"
+  cidr_block   = "172.16.0.0/24"
+  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+   name              = "${var.name}"
+}
+resource "apsarastack_gpdb_instance" "default" {
+  availability_zone      = "${data.apsarastack_zones.default.zones.0.id}"
+  engine                 = "gpdb"
+  engine_version         = "4.3"
+  instance_class         = "gpdb.group.segsdx2"
+  instance_group_count   = 2
+  description            = "tf-testAccGpdbInstance_new"
+  vswitch_id             = "${apsarastack_vswitch.default.id}"
+}
+resource "apsarastack_gpdb_account" "default" {
+  account_name = "tftest6355"
+  account_password = "TFTest123update"
+  account_description = "tftest6355"
+  db_instance_id = "${apsarastack_gpdb_instance.default.id}"
+}
+
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `account_description` - (Optional, ForceNew) The description of the account.
+  * Starts with a letter.
+  * Does not start with `http://` or `https://`.
+  * Contains letters, underscores (_), hyphens (-), or digits.
+  * Be 2 to 256 characters in length.
+* `account_name` - (Required, ForceNew) The name of the account. The account name must be unique and meet the following requirements:
+  * Starts with a letter.
+  * Contains only lowercase letters, digits, or underscores (_).
+  * Be up to 16 characters in length.
+  * Contains no reserved keywords.
+* `account_password` - (Required) The password of the account. The password must be 8 to 32 characters in length and contain at least three of the following character types: uppercase letters, lowercase letters, digits, and special characters. Special characters include `! @ # $ % ^ & * ( ) _ + - =`.
+* `db_instance_id` - (Required, ForceNew) The ID of the instance.
+
+## Attributes Reference
+
+The following attributes are exported:
+
+* `id` - The resource ID of Account. The value formats as `<db_instance_id>:<account_name>`.
+* `status` - The status of the account. Valid values: `Active`, `Creating` and `Deleting`.
+
+### Timeouts
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
+
+* `create` - (Defaults to 5 mins) Used when create the Account.
+
+## Import
+
+GPDB Account can be imported using the id, e.g.
+
+```
+$ terraform import alicloud_gpdb_account.example <db_instance_id>:<account_name>
+```
