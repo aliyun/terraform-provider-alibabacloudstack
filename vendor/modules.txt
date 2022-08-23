@@ -17,6 +17,18 @@ github.com/PaesslerAG/jsonpath
 github.com/agext/levenshtein
 # github.com/alibabacloud-go/debug v0.0.0-20190504072949-9472017b5c68
 github.com/alibabacloud-go/debug/debug
+# github.com/alibabacloud-go/cs-20151215/v2 v2.4.5
+## explicit
+github.com/alibabacloud-go/cs-20151215/v2/client
+# github.com/alibabacloud-go/darabonba-openapi v0.1.18
+## explicit
+github.com/alibabacloud-go/darabonba-openapi
+# github.com/alibabacloud-go/tea-xml v1.1.2
+## explicit
+github.com/alibabacloud-go/tea-xml
+# github.com/clbanning/mxj/v2 v2.5.6
+## explicit
+github.com/clbanning/mxj/v2
 # github.com/alibabacloud-go/tea v1.1.17
 ## explicit
 github.com/alibabacloud-go/tea/tea
