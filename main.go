@@ -5,7 +5,7 @@ import (
 	"flag"
 	"log"
 
-	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/apsarastack"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
 

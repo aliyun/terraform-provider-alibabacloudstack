@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 
-	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/apsarastack/connectivity"
 
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 )

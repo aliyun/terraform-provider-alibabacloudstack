@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
-	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )

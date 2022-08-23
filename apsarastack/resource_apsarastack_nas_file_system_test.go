@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"log"

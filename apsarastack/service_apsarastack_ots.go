@@ -10,7 +10,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ots"
 	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore"
-	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 

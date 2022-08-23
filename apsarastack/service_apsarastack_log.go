@@ -10,7 +10,7 @@ import (
 
 	slsPop "github.com/aliyun/alibaba-cloud-sdk-go/services/sls"
 	sls "github.com/aliyun/aliyun-log-go-sdk"
-	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 

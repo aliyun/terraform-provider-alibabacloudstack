@@ -1,4 +1,4 @@
-module github.com/aliyun/terraform-provider-alibabaCloudStack
+module github.com/aliyun/terraform-provider-alibabacloudstack
 
 go 1.14
 

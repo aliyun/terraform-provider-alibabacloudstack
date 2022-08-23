@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/helper/hashcode"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/apsarastack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 

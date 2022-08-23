@@ -25,17 +25,17 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/aliyun/terraform-provider-alibabaCloudStack`
+Clone repository to: `$GOPATH/src/github.com/aliyun/terraform-provider-alibabacloudstack`
 
 ```sh
 $ mkdir -p $GOPATH/src/github.com/apsara-stack; cd $GOPATH/src/github.com/apsara-stack
-$ git clone git@github.com:aliyun/terraform-provider-alibabaCloudStack.git
+$ git clone git@github.com:aliyun/terraform-provider-alibabacloudstack.git
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabaCloudStack
+$ cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabacloudstack
 $ go build
 ```
 
@@ -83,7 +83,7 @@ To compile the provider, run `make build`. This will build the provider and put 
 ```sh
 $ go build
 ...
-$ $GOPATH/bin/terraform-provider-alibabaCloudStack
+$ $GOPATH/bin/terraform-provider-alibabacloudstack
 ...
 ```
 
@@ -108,7 +108,7 @@ $ make testacc
 Before making a release, the resources and data sources are tested automatically with acceptance tests (the tests are located in the apsarastack/*_test.go files).
 You can run them by entering the following instructions in a terminal:
 ```
-cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabaCloudStack
+cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabacloudstack
 export APSARASTACK_ACCESS_KEY=xxx
 export APSARASTACK_SECRET_KEY=xxx
 export APSARASTACK_REGION=xxx
