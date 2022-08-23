@@ -26,7 +26,7 @@ github.com/alibabacloud-go/tea/utils
 github.com/alibabacloud-go/tea-rpc/client
 # github.com/alibabacloud-go/tea-rpc-utils v1.1.2
 github.com/alibabacloud-go/tea-rpc-utils/service
-# github.com/alibabacloud-go/tea-utils v1.4.1
+# github.com/alibabacloud-go/tea-utils v1.4.3
 ## explicit
 github.com/alibabacloud-go/tea-utils/service
 # github.com/aliyun/alibaba-cloud-sdk-go v1.61.577
