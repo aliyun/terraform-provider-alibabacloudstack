@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 )
 
 func TestAccApsaraStackCSKubernetesClustersDataSource(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"

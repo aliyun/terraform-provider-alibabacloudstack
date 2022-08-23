@@ -15,7 +15,7 @@ import (
 
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -50,8 +50,8 @@ func resourceApsaraStackDatahubSubscription() *schema.Resource {
 				},
 			},
 			"comment": {
-				Type:         schema.TypeString,
-				Optional:     true,
+				Type:     schema.TypeString,
+				Optional: true,
 				//Default:      "subscription added by terraform",
 				ValidateFunc: validation.StringLenBetween(0, 255),
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
@@ -116,7 +116,7 @@ func resourceApsaraStackDatahubSubscriptionCreate(d *schema.ResourceData, meta i
 		return WrapErrorf(err, DefaultErrorMsg, "apsarastack_datahub_subscription", "CreateSubscription", ApsaraStackDatahubSdkGo)
 	}
 	bresponse := raw.(*responses.CommonResponse)
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), subscription)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), subscription)
 
 	if debugOn() {
 		requestMap := make(map[string]string)
@@ -125,7 +125,7 @@ func resourceApsaraStackDatahubSubscriptionCreate(d *schema.ResourceData, meta i
 		requestMap["SubComment"] = subComment
 		addDebug("CreateSubscription", raw, requestInfo, requestMap)
 	}
-	d.SetId(fmt.Sprintf("%s%s%s%s%s", strings.ToLower(projectName), COLON_SEPARATED, strings.ToLower(topicName), COLON_SEPARATED,subscription.SubId))
+	d.SetId(fmt.Sprintf("%s%s%s%s%s", strings.ToLower(projectName), COLON_SEPARATED, strings.ToLower(topicName), COLON_SEPARATED, subscription.SubId))
 	return resourceApsaraStackDatahubSubscriptionRead(d, meta)
 }
 
@@ -224,11 +224,9 @@ func resourceApsaraStackDatahubSubscriptionDelete(d *schema.ResourceData, meta i
 		"Action":          "DeleteSubscription",
 		"Version":         "2019-11-20",
 		"ProjectName":     projectName,
-		"TopicName":         topicName,
-		"SubscriptionId":         subId,
+		"TopicName":       topicName,
+		"SubscriptionId":  subId,
 	}
-
-
 
 	var requestInfo *datahub.DataHub
 

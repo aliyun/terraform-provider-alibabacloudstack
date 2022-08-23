@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alikafka"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -143,8 +143,8 @@ func TestAccApsaraStackAlikafkaTopic_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"topic":         fmt.Sprintf("tf-testacc-alikafkatopicbasic%v", rand),
-						"local_topic":   "true",
+						"topic":       fmt.Sprintf("tf-testacc-alikafkatopicbasic%v", rand),
+						"local_topic": "true",
 						//"compact_topic": "false",
 						//"partition_num": "6",
 						//"remark":        "apsarastack_alikafka_topic_remark",

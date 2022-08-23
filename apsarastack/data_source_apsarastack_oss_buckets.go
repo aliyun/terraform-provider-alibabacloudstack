@@ -7,7 +7,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"regexp"
@@ -346,8 +346,8 @@ func dataSourceApsaraStackOssBucketsRead(d *schema.ResourceData, meta interface{
 				Name:     k.Name,
 				Location: k.Location,
 				//CreationDate: ,
-				StorageClass: k.StorageClass,
-				CreationDate: k.CreationDate,
+				StorageClass:     k.StorageClass,
+				CreationDate:     k.CreationDate,
 				Extranetendpoint: k.ExtranetEndpoint,
 				Intranetendpoint: k.IntranetEndpoint,
 			})
@@ -383,10 +383,10 @@ func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []oss.BucketPr
 	//var requestInfo *oss.Client
 	for _, bucket := range buckets {
 		mapping := map[string]interface{}{
-			"name":          bucket.Name,
-			"location":      bucket.Location,
-			"storage_class": bucket.StorageClass,
-			"creation_date": bucket.CreationDate,
+			"name":              bucket.Name,
+			"location":          bucket.Location,
+			"storage_class":     bucket.StorageClass,
+			"creation_date":     bucket.CreationDate,
 			"extranet_endpoint": bucket.Extranetendpoint,
 			"intranet_endpoint": bucket.Intranetendpoint,
 			//"creation_date": bucket.CreationDate.Format("2006-01-02"),

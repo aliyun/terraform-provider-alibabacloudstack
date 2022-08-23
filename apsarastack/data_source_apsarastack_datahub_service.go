@@ -1,16 +1,14 @@
 package apsarastack
 
 import (
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
 	"strings"
 	"time"
 
-
 	_ "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -68,7 +66,7 @@ func dataSourceApsaraStackDatahubServiceRead(d *schema.ResourceData, meta interf
 	}
 
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response , err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
+		response, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
 			return dataHubClient.ProcessCommonRequest(request)
 		})
 		if err != nil {

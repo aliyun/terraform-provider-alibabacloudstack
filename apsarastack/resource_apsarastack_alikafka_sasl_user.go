@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alikafka"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -39,9 +39,9 @@ func resourceApsaraStackAlikafkaSaslUser() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(1, 64),
 			},
 			"type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Sensitive:    true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"plain",
 					"scram",

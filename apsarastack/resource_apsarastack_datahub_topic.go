@@ -15,7 +15,7 @@ import (
 
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -191,10 +191,9 @@ func resourceApsaraStackDatahubTopicRead(d *schema.ResourceData, meta interface{
 	d.Set("comment", object.Comment)
 	d.Set("record_type", object.RecordType)
 
-
 	var recordSchema []datahub.Field
-	err=json.Unmarshal([]byte(object.RecordSchema), &recordSchema)
-	
+	err = json.Unmarshal([]byte(object.RecordSchema), &recordSchema)
+
 	if err == nil {
 		d.Set("record_schema", recordSchemaToMap(recordSchema))
 	}

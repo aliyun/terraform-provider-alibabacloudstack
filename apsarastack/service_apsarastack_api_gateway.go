@@ -11,7 +11,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cloudapi"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 )
 
 type CloudApiService struct {
@@ -89,7 +89,7 @@ func (s *CloudApiService) DescribeApiGatewayApp(id string) (*cloudapi.DescribeAp
 	}
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":    s.client.AccessKey,
+		"AccessKeyId":     s.client.AccessKey,
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -150,7 +150,7 @@ func (s *CloudApiService) DescribeApiGatewayApi(id string) (*cloudapi.DescribeAp
 	}
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":    s.client.AccessKey,
+		"AccessKeyId":     s.client.AccessKey,
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -214,7 +214,7 @@ func (s *CloudApiService) DescribeApiGatewayAppAttachment(id string) (*cloudapi.
 	}
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":    s.client.AccessKey,
+		"AccessKeyId":     s.client.AccessKey,
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -275,7 +275,7 @@ func (s *CloudApiService) DescribeApiGatewayVpcAccess(id string) (*cloudapi.VpcA
 	}
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":    s.client.AccessKey,
+		"AccessKeyId":     s.client.AccessKey,
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -370,7 +370,7 @@ func (s *CloudApiService) DescribeDeployedApi(id string, stageName string) (*clo
 	}
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":    s.client.AccessKey,
+		"AccessKeyId":     s.client.AccessKey,
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -409,7 +409,7 @@ func (s *CloudApiService) DeployedApi(id string, stageName string) (err error) {
 	}
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":    s.client.AccessKey,
+		"AccessKeyId":     s.client.AccessKey,
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -442,7 +442,7 @@ func (s *CloudApiService) AbolishApi(id string, stageName string) (err error) {
 	}
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":    s.client.AccessKey,
+		"AccessKeyId":     s.client.AccessKey,
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -475,7 +475,7 @@ func (s *CloudApiService) DescribeTags(resourceId string, resourceTags map[strin
 	}
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":    s.client.AccessKey,
+		"AccessKeyId":     s.client.AccessKey,
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -527,7 +527,7 @@ func (s *CloudApiService) setInstanceTags(d *schema.ResourceData, resourceType T
 		}
 		request.QueryParams = map[string]string{
 			"AccessKeySecret": s.client.SecretKey,
-			"AccessKeyId":    s.client.AccessKey,
+			"AccessKeyId":     s.client.AccessKey,
 			"Product":         "CloudAPI",
 			"RegionId":        s.client.RegionId,
 			"Department":      s.client.Department,
@@ -555,7 +555,7 @@ func (s *CloudApiService) setInstanceTags(d *schema.ResourceData, resourceType T
 		}
 		request.QueryParams = map[string]string{
 			"AccessKeySecret": s.client.SecretKey,
-			"AccessKeyId":    s.client.AccessKey,
+			"AccessKeyId":     s.client.AccessKey,
 			"Product":         "CloudAPI",
 			"RegionId":        s.client.RegionId,
 			"Department":      s.client.Department,

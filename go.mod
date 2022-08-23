@@ -1,12 +1,15 @@
-module github.com/apsara-stack/terraform-provider-apsarastack
+module github.com/aliyun/terraform-provider-alibabaCloudStack
 
 go 1.14
 
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1
+	github.com/alibabacloud-go/cs-20151215/v2 v2.4.5
+	github.com/alibabacloud-go/darabonba-openapi v0.1.18
 	github.com/alibabacloud-go/tea v1.1.17
 	github.com/alibabacloud-go/tea-rpc v1.2.0
-	github.com/alibabacloud-go/tea-utils v1.4.1
+	github.com/alibabacloud-go/tea-utils v1.4.3
+	github.com/alibabacloud-go/tea-xml v1.1.2 // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.577
 	github.com/aliyun/aliyun-datahub-sdk-go v0.1.5
 	github.com/aliyun/aliyun-log-go-sdk v0.1.14
@@ -14,6 +17,7 @@ require (
 	github.com/aliyun/aliyun-tablestore-go-sdk v4.1.2+incompatible
 	github.com/aliyun/credentials-go v1.1.2
 	github.com/aliyun/fc-go-sdk v0.0.0-20200619091938-0882be48e49f
+	github.com/clbanning/mxj/v2 v2.5.6 // indirect
 	github.com/denverdino/aliyungo v0.0.0-20200831100606-661b4d73f397
 	github.com/go-yaml/yaml v2.1.0+incompatible
 	github.com/google/uuid v1.1.2

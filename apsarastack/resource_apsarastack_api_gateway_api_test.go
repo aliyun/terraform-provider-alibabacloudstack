@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cloudapi"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -318,15 +318,15 @@ func TestAccApsaraStackApigatewayApi_vpc(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
-				//Check: resource.ComposeTestCheckFunc(
-				//	testAccCheck(map[string]string{
-				//		//"name":                                name,
-				//		//"http_vpc_service_config.0.name":      name,
-				//		//"http_vpc_service_config.0.method":    "GET",
-				//		//"http_vpc_service_config.0.path":      "/web/cloudapi/vpc",
-				//		//"http_vpc_service_config.0.timeout":   "20",
-				//		//"http_vpc_service_config.0.aone_name": "cloudapi-openapi",
-				//	}),
+					//Check: resource.ComposeTestCheckFunc(
+					//	testAccCheck(map[string]string{
+					//		//"name":                                name,
+					//		//"http_vpc_service_config.0.name":      name,
+					//		//"http_vpc_service_config.0.method":    "GET",
+					//		//"http_vpc_service_config.0.path":      "/web/cloudapi/vpc",
+					//		//"http_vpc_service_config.0.timeout":   "20",
+					//		//"http_vpc_service_config.0.aone_name": "cloudapi-openapi",
+					//	}),
 				),
 			},
 		},
@@ -512,4 +512,3 @@ var apiGatewayApiMap = map[string]string{
 	"service_type":              CHECKSET,
 	"api_id":                    CHECKSET,
 }
-

@@ -11,7 +11,7 @@ import (
 
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -126,31 +126,31 @@ func resourceApsaraStackDatahubProjectRead(d *schema.ResourceData, meta interfac
 
 func resourceApsaraStackDatahubProjectUpdate(d *schema.ResourceData, meta interface{}) error {
 	/*
-	client := meta.(*connectivity.ApsaraStackClient)
+		client := meta.(*connectivity.ApsaraStackClient)
 
-	if d.HasChange("comment") {
+		if d.HasChange("comment") {
 
-		projectName := d.Id()
-		projectComment := d.Get("comment").(string)
+			projectName := d.Id()
+			projectComment := d.Get("comment").(string)
 
-		var requestInfo *datahub.DataHub
+			var requestInfo *datahub.DataHub
 
-		raw, err := client.WithDataHubClient(func(dataHubClient datahub.DataHubApi) (interface{}, error) {
-			requestInfo = dataHubClient.(*datahub.DataHub)
-			return dataHubClient.UpdateProject(projectName, projectComment)
-		})
-		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), "UpdateProject", ApsaraStackDatahubSdkGo)
+			raw, err := client.WithDataHubClient(func(dataHubClient datahub.DataHubApi) (interface{}, error) {
+				requestInfo = dataHubClient.(*datahub.DataHub)
+				return dataHubClient.UpdateProject(projectName, projectComment)
+			})
+			if err != nil {
+				return WrapErrorf(err, DefaultErrorMsg, d.Id(), "UpdateProject", ApsaraStackDatahubSdkGo)
+			}
+			if debugOn() {
+				requestMap := make(map[string]string)
+				requestMap["ProjectName"] = projectName
+				requestMap["ProjectComment"] = projectComment
+				addDebug("UpdateProject", raw, requestInfo, requestMap)
+			}
 		}
-		if debugOn() {
-			requestMap := make(map[string]string)
-			requestMap["ProjectName"] = projectName
-			requestMap["ProjectComment"] = projectComment
-			addDebug("UpdateProject", raw, requestInfo, requestMap)
-		}
-	}
 
-	 */
+	*/
 
 	return resourceApsaraStackDatahubProjectRead(d, meta)
 }

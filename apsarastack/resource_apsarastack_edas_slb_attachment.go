@@ -3,7 +3,7 @@ package apsarastack
 import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -141,7 +141,7 @@ func resourceApsaraStackEdasSlbAttachmentRead(d *schema.ResourceData, meta inter
 
 	rs := raw.(*edas.GetApplicationResponse)
 	if rs.Applcation.AppId != appId {
-	//if rs.Applcation.SlbId != slbId && rs.Applcation.ExtSlbId != slbId {
+		//if rs.Applcation.SlbId != slbId && rs.Applcation.ExtSlbId != slbId {
 		return WrapError(Error("can not find appid:" + appId))
 	}
 

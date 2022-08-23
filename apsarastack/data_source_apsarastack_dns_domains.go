@@ -5,7 +5,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"regexp"
 	"strconv"
@@ -135,8 +135,8 @@ func dataSourceApsaraStackDnsDomainsRead(d *schema.ResourceData, meta interface{
 		"RegionId":        client.RegionId,
 		"Action":          "ObtainGlobalAuthZoneList",
 		"Version":         "2018-07-20",
-		"PageSize": 	   "2000",
-		"PageNumber": 	   "1",
+		"PageSize":        "2000",
+		"PageNumber":      "1",
 	}
 
 	var addDomains = DnsDomains{}

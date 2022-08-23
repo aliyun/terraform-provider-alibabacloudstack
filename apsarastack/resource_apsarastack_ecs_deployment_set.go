@@ -13,7 +13,7 @@ import (
 	"time"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -43,13 +43,13 @@ func resourceApsaraStackEcsDeploymentSet() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Default","default"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"Default", "default"}, false),
 			},
 			"granularity": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Host","host"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"Host", "host"}, false),
 			},
 			"on_unable_to_redeploy_failed_instance": {
 				Type:         schema.TypeString,
@@ -117,21 +117,21 @@ func resourceApsaraStackEcsDeploymentSetCreate(d *schema.ResourceData, meta inte
 	request.ApiName = action
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":  client.SecretKey,
-		"AccessKeyId":      client.AccessKey,
-		"Product":          "Ecs",
-		"RegionId":         client.RegionId,
-		"Department":       client.Department,
-		"ResourceGroup":    client.ResourceGroup,
-		"Action":           action,
-		"Version":          "2014-05-26",
-		"DeploymentSetName":DeploymentSetName,
-		"Domain":           "Default",
-		"Description":      Description,
-		"Granularity":      "Host",
-		"OnUnableToRedeployFailedInstance":         OnUnableToRedeployFailedInstance,
-		"Strategy":         Strategy,
-		"ClientToken":      ClientToken,
+		"AccessKeySecret":                  client.SecretKey,
+		"AccessKeyId":                      client.AccessKey,
+		"Product":                          "Ecs",
+		"RegionId":                         client.RegionId,
+		"Department":                       client.Department,
+		"ResourceGroup":                    client.ResourceGroup,
+		"Action":                           action,
+		"Version":                          "2014-05-26",
+		"DeploymentSetName":                DeploymentSetName,
+		"Domain":                           "Default",
+		"Description":                      Description,
+		"Granularity":                      "Host",
+		"OnUnableToRedeployFailedInstance": OnUnableToRedeployFailedInstance,
+		"Strategy":                         Strategy,
+		"ClientToken":                      ClientToken,
 	}
 	runtime := util.RuntimeOptions{}
 	runtime.SetAutoretry(true)
@@ -187,13 +187,13 @@ func resourceApsaraStackEcsDeploymentSetUpdate(d *schema.ResourceData, meta inte
 	request := requests.NewCommonRequest()
 
 	update := false
-		DeploymentSetId := d.Id()
+	DeploymentSetId := d.Id()
 
 	var DeploymentSetName string
 	if d.HasChange("deployment_set_name") {
 		update = true
 		if v, ok := d.GetOk("deployment_set_name"); ok {
-			DeploymentSetName  = fmt.Sprint(v.(string))
+			DeploymentSetName = fmt.Sprint(v.(string))
 		}
 	}
 	//var Description string
@@ -217,17 +217,17 @@ func resourceApsaraStackEcsDeploymentSetUpdate(d *schema.ResourceData, meta inte
 	request.ApiName = action
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
-		"Product":         "Ecs",
-		"RegionId":        client.RegionId,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          action,
-		"Version":         "2014-05-26",
-		"DeploymentSetId": DeploymentSetId,
+		"AccessKeySecret":   client.SecretKey,
+		"AccessKeyId":       client.AccessKey,
+		"Product":           "Ecs",
+		"RegionId":          client.RegionId,
+		"Department":        client.Department,
+		"ResourceGroup":     client.ResourceGroup,
+		"Action":            action,
+		"Version":           "2014-05-26",
+		"DeploymentSetId":   DeploymentSetId,
 		"DeploymentSetName": DeploymentSetName,
-		"Description": Description,
+		"Description":       Description,
 	}
 	if update {
 
@@ -255,7 +255,7 @@ func resourceApsaraStackEcsDeploymentSetUpdate(d *schema.ResourceData, meta inte
 func resourceApsaraStackEcsDeploymentSetDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.ApsaraStackClient)
 	action := "DeleteDeploymentSet"
-	DeploymentSetId:= d.Id()
+	DeploymentSetId := d.Id()
 	request := requests.NewCommonRequest()
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"

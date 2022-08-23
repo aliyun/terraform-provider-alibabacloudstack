@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -38,10 +38,10 @@ func TestAccApsaraStackEdasSlbAttachment_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					//"app_id": "${apsarastack_edas_application.default.id}",
-					"app_id": "22ba7083-ac60-4884-9d28-b0eaf71ac427",
-					"slb_id": "${apsarastack_slb.default.id}",
-					"slb_ip": "${apsarastack_slb.default.address}",
-					"type":   "${apsarastack_slb.default.address_type}",
+					"app_id":        "22ba7083-ac60-4884-9d28-b0eaf71ac427",
+					"slb_id":        "${apsarastack_slb.default.id}",
+					"slb_ip":        "${apsarastack_slb.default.address}",
+					"type":          "${apsarastack_slb.default.address_type}",
 					"listener_port": "22",
 				}),
 				Check: resource.ComposeTestCheckFunc(

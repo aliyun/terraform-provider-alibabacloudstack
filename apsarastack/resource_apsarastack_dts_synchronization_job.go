@@ -6,7 +6,7 @@ import (
 	"time"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -280,8 +280,8 @@ func resourceApsaraStackDtsSynchronizationJobCreate(d *schema.ResourceData, meta
 	}
 
 	if v, ok := d.GetOk("destination_endpoint_region"); ok {
-				request["DestinationEndpointRegion"] = v
-			}
+		request["DestinationEndpointRegion"] = v
+	}
 
 	if v, ok := d.GetOk("destination_endpoint_user_name"); ok {
 		request["DestinationEndpointUserName"] = v
@@ -326,8 +326,8 @@ func resourceApsaraStackDtsSynchronizationJobCreate(d *schema.ResourceData, meta
 	}
 
 	if v, ok := d.GetOk("source_endpoint_region"); ok {
-				request["SourceEndpointRegion"] = v
-			}
+		request["SourceEndpointRegion"] = v
+	}
 
 	if v, ok := d.GetOk("source_endpoint_role"); ok {
 		request["SourceEndpointRole"] = v

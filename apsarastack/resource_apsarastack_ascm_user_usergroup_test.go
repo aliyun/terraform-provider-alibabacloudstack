@@ -2,13 +2,12 @@ package apsarastack
 
 import (
 	"fmt"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
 )
-
 
 func TestAccApsaraStackAscm_UserGroup_User_Basic(t *testing.T) {
 	var v *User
@@ -34,7 +33,7 @@ func TestAccApsaraStackAscm_UserGroup_User_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckAscmUserGroupUserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckAscmUserGroupUserRoleBinding, name,rand),
+				Config: fmt.Sprintf(testAccCheckAscmUserGroupUserRoleBinding, name, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -97,6 +96,6 @@ resource "apsarastack_ascm_usergroup_user" "default" {
 `
 
 var testAccCheckUserGroupUserBinding = map[string]string{
-	"user_group_id":   CHECKSET,
+	"user_group_id": CHECKSET,
 	//"login_name": CHECKSET,
 }

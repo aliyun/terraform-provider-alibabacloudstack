@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -289,7 +289,7 @@ func resourceApsaraStackEdasApplicationRead(d *schema.ResourceData, meta interfa
 			d.Set("package_type", "WAR")
 		}
 
-		if _,ok := component_ids[appId]; ok {
+		if _, ok := component_ids[appId]; ok {
 			component_id = component_ids[appId].(int)
 			d.Set("component_id", component_id)
 		}

@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -45,8 +45,8 @@ func resourceApsaraStackEdasK8sApplication() *schema.Resource {
 				Default:  1,
 			},
 			"image_url": {
-				Type:          schema.TypeString,
-				Optional:      true,
+				Type:     schema.TypeString,
+				Optional: true,
 				//ConflictsWith: []string{"package_url"},
 			},
 			"package_type": {
@@ -154,8 +154,8 @@ func resourceApsaraStackEdasK8sApplication() *schema.Resource {
 				Optional: true,
 			},
 			"package_url": {
-				Type:          schema.TypeString,
-				Optional:      true,
+				Type:     schema.TypeString,
+				Optional: true,
 				//ConflictsWith: []string{"image_url"},
 			},
 			"package_version": {

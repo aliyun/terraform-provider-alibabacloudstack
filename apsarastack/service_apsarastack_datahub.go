@@ -9,7 +9,7 @@ import (
 	"encoding/json"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 )
@@ -122,21 +122,20 @@ func (s *DatahubService) DescribeDatahubSubscription(id string) (*datahub.GetSub
 		"x-acs-organizationid":  s.client.Department,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
-		"Product":         "datahub",
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"RegionId":        s.client.RegionId,
-		"Action":          "GetSubscriptionOffset",
-		"Version":         "2019-11-20",
-		"ProjectName":     projectName,
-		"TopicName":       topicName,
-		"SubscriptionId":  subId,
-		"SignatureMethod": "HMAC-SHA256",
-		"Format":          "JSON",
+		"AccessKeySecret":  s.client.SecretKey,
+		"AccessKeyId":      s.client.AccessKey,
+		"Product":          "datahub",
+		"Department":       s.client.Department,
+		"ResourceGroup":    s.client.ResourceGroup,
+		"RegionId":         s.client.RegionId,
+		"Action":           "GetSubscriptionOffset",
+		"Version":          "2019-11-20",
+		"ProjectName":      projectName,
+		"TopicName":        topicName,
+		"SubscriptionId":   subId,
+		"SignatureMethod":  "HMAC-SHA256",
+		"Format":           "JSON",
 		"SignatureVersion": "2.1",
-
 	}
 
 	raw, err := s.client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
@@ -172,22 +171,22 @@ func (s *DatahubService) WaitForDatahubSubscription(id string, status Status, ti
 	}
 	topicName, subId := parts[1], parts[2]
 	//for {
-		object, err := s.DescribeDatahubSubscription(id)
-		if err != nil {
-			if NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return WrapError(err)
+	object, err := s.DescribeDatahubSubscription(id)
+	if err != nil {
+		if NotFoundError(err) {
+			if status == Deleted {
+				return nil
 			}
+		} else {
+			return WrapError(err)
 		}
-		if object.TopicName == topicName && object.SubId == subId && status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.TopicName+":"+object.SubId, parts[1]+":"+parts[2], ProviderERROR)
-		}
+	}
+	if object.TopicName == topicName && object.SubId == subId && status != Deleted {
+		return nil
+	}
+	if time.Now().After(deadline) {
+		return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.TopicName+":"+object.SubId, parts[1]+":"+parts[2], ProviderERROR)
+	}
 
 	return nil
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
 	"strings"
@@ -24,7 +24,7 @@ func resourceApsaraStackAscmUserGroupUser() *schema.Resource {
 				ForceNew: true,
 			},
 			"login_names": {
-				Type:     schema.TypeSet,
+				Type: schema.TypeSet,
 				//Computed: true,
 				Required: true,
 				ForceNew: true,
@@ -63,7 +63,7 @@ func resourceApsaraStackAscmUserGroupUserCreate(d *schema.ResourceData, meta int
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 
 	QueryParams := map[string]interface{}{
-		"userGroupId":      userGroupId,
+		"userGroupId":   userGroupId,
 		"LoginNameList": loginNamesList,
 	}
 
@@ -72,7 +72,7 @@ func resourceApsaraStackAscmUserGroupUserCreate(d *schema.ResourceData, meta int
 	request.Version = "2019-05-10"
 	request.ServiceCode = "ascm"
 	request.Domain = client.Domain
-	requeststring,err := json.Marshal(QueryParams)
+	requeststring, err := json.Marshal(QueryParams)
 
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
@@ -154,7 +154,7 @@ func resourceApsaraStackAscmUserGroupUserDelete(d *schema.ResourceData, meta int
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 
 	QueryParams := map[string]interface{}{
-		"userGroupId":      userGroupId,
+		"userGroupId":   userGroupId,
 		"LoginNameList": login_names,
 	}
 
@@ -163,7 +163,7 @@ func resourceApsaraStackAscmUserGroupUserDelete(d *schema.ResourceData, meta int
 	request.Version = "2019-05-10"
 	request.ServiceCode = "ascm"
 	request.Domain = client.Domain
-	requeststring,err := json.Marshal(QueryParams)
+	requeststring, err := json.Marshal(QueryParams)
 
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"

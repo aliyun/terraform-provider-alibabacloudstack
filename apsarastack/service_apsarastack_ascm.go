@@ -5,7 +5,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"strconv"
 	"strings"
 )
@@ -1079,7 +1079,7 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 		"Product":         "ascm",
 		"Action":          "ListUsersInUserGroup",
 		"Version":         "2019-05-10",
-		"userGroupId":      id,
+		"userGroupId":     id,
 	}
 	request.Method = "POST"
 	request.Product = "Ascm"

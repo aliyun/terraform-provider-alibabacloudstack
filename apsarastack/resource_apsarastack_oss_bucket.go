@@ -15,8 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/helper/hashcode"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )

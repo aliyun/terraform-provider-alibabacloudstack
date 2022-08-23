@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cloudapi"
-	"github.com/apsara-stack/terraform-provider-apsarastack/apsarastack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabaCloudStack/apsarastack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -57,7 +57,6 @@ func resourceApsaraStackApigatewayGroupCreate(d *schema.ResourceData, meta inter
 		"ResourceGroup":   client.ResourceGroup,
 		"Action":          "CreateApiGroup",
 		"Version":         "2016-07-14",
-
 	}
 	request.RegionId = client.RegionId
 	request.GroupName = d.Get("name").(string)
@@ -155,7 +154,6 @@ func resourceApsaraStackApigatewayGroupDelete(d *schema.ResourceData, meta inter
 		"ResourceGroup":   client.ResourceGroup,
 		"Action":          "DeleteApiGroup",
 		"Version":         "2016-07-14",
-
 	}
 	raw, err := client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 		return cloudApiClient.DeleteApiGroup(request)
