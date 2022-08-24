@@ -34,12 +34,12 @@ builds:
       goos: freebsd
     - goarch: arm64
       goos: windows
-  binary: '{{ .ProjectName }}_v{{ .Version }}'
+  binary: '{{ terraform-provider-apsarastack }}_v{{ .Version }}'
 archives:
 - format: zip
-  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  name_template: '{{ terraform-provider-apsarastack }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 checksum:
-  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
+  name_template: '{{ terraform-provider-apsarastack }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
 #signs:
 #  - artifacts: checksum
