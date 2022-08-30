@@ -20,15 +20,15 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
       -
         name: Unshallow
         run: git fetch --prune --unshallow
       -
         name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v2
         with:
-          go-version: 1.16
+          go-version: 1.18
       -
         name: Import GPG key
         id: import_gpg
@@ -42,7 +42,7 @@ jobs:
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
       -
         name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
           args: release --rm-dist --timeout 180m0s
