@@ -36,7 +36,7 @@ Enter the provider directory and build the provider
 
 ```sh
 $ cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabacloudstack
-$ go build
+$ go build -o terraform-provider-apsarastack
 ```
 
 Using the provider
