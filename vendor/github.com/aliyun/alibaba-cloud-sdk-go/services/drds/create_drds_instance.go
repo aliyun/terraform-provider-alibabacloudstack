@@ -103,7 +103,7 @@ func CreateCreateDrdsInstanceRequest() (request *CreateDrdsInstanceRequest) {
 	request = &CreateDrdsInstanceRequest{
 		RpcRequest: &requests.RpcRequest{},
 	}
-	request.InitWithApiInfo("Drds", "2019-01-23", "CreateDrdsInstance", "drds", "openAPI")
+	request.InitWithApiInfo("Drds", "2017-10-16", "CreateDrdsInstance", "drds", "openAPI")
 	request.Method = requests.POST
 	return
 }
