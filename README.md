@@ -81,7 +81,7 @@ If you wish to work on the provider, you'll first need [Go](http://www.golang.or
 To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
 ```sh
-$ go build
+$ go build -o terraform-provider-apsarastack
 ...
 $ $GOPATH/bin/terraform-provider-alibabacloudstack
 ...
