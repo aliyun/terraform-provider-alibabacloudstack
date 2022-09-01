@@ -76,6 +76,24 @@ func resourceApsaraStackGpdbInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"instance_inner_connection": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+				Computed: true,
+			},
+			"instance_inner_port": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+				Computed: true,
+			},
+			"instance_vpc_id": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+				Computed: true,
+			},
 			"security_ip_list": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -132,7 +150,9 @@ func resourceApsaraStackGpdbInstanceRead(d *schema.ResourceData, meta interface{
 	//d.Set("create_time", instance.CreationTime)
 	d.Set("instance_charge_type", instance.PayType)
 	d.Set("tags", gpdbService.tagsToMap(instance.Tags.Tag))
-
+	d.Set("instance_inner_connection", instance.ConnectionString)
+	d.Set("instance_inner_port", instance.Port)
+	d.Set("instance_vpc_id", instance.VpcId)
 	return nil
 }
 

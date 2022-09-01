@@ -191,6 +191,24 @@ func resourceApsaraStackAdbDbCluster() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"instance_inner_connection": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+				Computed: true,
+			},
+			"instance_inner_port": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+				Computed: true,
+			},
+			"instance_vpc_id": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+				Computed: true,
+			},
 			"zone_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -334,6 +352,8 @@ func resourceApsaraStackAdbDbClusterRead(d *schema.ResourceData, meta interface{
 	client := meta.(*connectivity.ApsaraStackClient)
 	adbService := AdbService{client}
 	object, err := adbService.DescribeAdbDbCluster(d.Id())
+	info, err := adbService.DescribeAdbClusterNetInfo2(d.Id())
+
 	if err != nil {
 		if NotFoundError(err) {
 			log.Printf("[DEBUG] Resource ApsaraStack_analyticdb_for_mysql3.0_db_cluster adbService.DescribeAdbDbCluster Failed!!! %s", err)
@@ -342,6 +362,10 @@ func resourceApsaraStackAdbDbClusterRead(d *schema.ResourceData, meta interface{
 		}
 		return WrapError(err)
 	}
+
+	d.Set("instance_inner_connection", info.ConnectionString)
+	d.Set("instance_inner_port", info.Port)
+	d.Set("instance_vpc_id", info.VPCId)
 	d.Set("compute_resource", object["ComputeResource"])
 	//d.Set("connection_string", object["ConnectionString"])
 	d.Set("db_cluster_category", object["Category"])

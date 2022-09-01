@@ -178,7 +178,33 @@ func (s *AdbService) DescribeAdbClusterNetInfo(id string) ([]adb.Address, error)
 
 	return response.Items.Address, nil
 }
+func (s *AdbService) DescribeAdbClusterNetInfo2(id string) (address adb.Address, err error) {
 
+	request := adb.CreateDescribeDBClusterNetInfoRequest()
+	request.RegionId = s.client.RegionId
+	request.DBClusterId = id
+	request.Headers["x-ascm-product-name"] = "adb"
+	request.Headers["x-acs-organizationid"] = s.client.Department
+	raw, err := s.client.WithAdbClient(func(adbClient *adb.Client) (interface{}, error) {
+		return adbClient.DescribeDBClusterNetInfo(request)
+	})
+
+	if err != nil {
+		if IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
+			return address, WrapErrorf(err, NotFoundMsg, ApsaraStackSdkGoERROR)
+		}
+		return address, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), ApsaraStackSdkGoERROR)
+	}
+
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+
+	response, _ := raw.(*adb.DescribeDBClusterNetInfoResponse)
+	if len(response.Items.Address) < 1 {
+		return address, WrapErrorf(Error(GetNotFoundMessage("DBInstanceNetInfo", id)), NotFoundMsg, ProviderERROR)
+	}
+
+	return response.Items.Address[0], nil
+}
 func (s *AdbService) WaitForAdbAccount(id string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
