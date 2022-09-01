@@ -104,6 +104,7 @@ func testSweepGpdbInstances(region string) error {
 		// Waiting 30 seconds to ensure these DB instances have been deleted.
 		time.Sleep(30 * time.Second)
 	}
+
 	return nil
 }
 
