@@ -47,7 +47,7 @@ Using the provider
  terraform {
   required_providers {
     apsarastack = {
-      source = "apsara-stack/apsarastack"
+      source = "aliyun/alibabacloudstack"
       version = "1.0.1"
     }
   }
