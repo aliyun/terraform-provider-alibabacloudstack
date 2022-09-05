@@ -122,4 +122,4 @@ go2xunit -input $outfile -output $GOPATH/tests.xml
 
 ## Refer
 
-ApsaraStack Cloud Provider [Official Docs](https://registry.terraform.io/providers/apsara-stack/apsarastack/latest/docs)
+ApsaraStack Cloud Provider [Official Docs](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)
