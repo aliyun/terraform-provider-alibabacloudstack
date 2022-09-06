@@ -86,7 +86,7 @@ func resourceApsaraStackAdbDbCluster() *schema.Resource {
 			"cpu_type": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"intel"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"intel", "hygon"}, false),
 			},
 			"db_node_class": {
 				Type:     schema.TypeString,
