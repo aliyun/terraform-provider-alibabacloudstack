@@ -1,27 +1,27 @@
 ---
 subcategory: "DNS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_dns_record"
-sidebar_current: "docs-apsarastack-resource-dns-record"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dns_record"
+sidebar_current: "docs-alibabacloudstack-resource-dns-record"
 description: |-
   Provides a DNS Record resource.
 ---
 
-# apsarastack\_dns\_record
+# alibabacloudstack\_dns\_record
 
 Provides a DNS Record resource.
 
 ## Example Usage
 
 ```
-resource "apsarastack_dns_domain" "default" {
+resource "alibabacloudstack_dns_domain" "default" {
   domain_name = "domaintest."
   remark = "testing Domain"
 }
 
 # Create a new Domain record
-resource "apsarastack_dns_record" "default" {
-  domain_id   = apsarastack_dns_domain.default.id
+resource "alibabacloudstack_dns_record" "default" {
+  domain_id   = alibabacloudstack_dns_domain.default.id
   host_record = "testing_record"
   type        = "A"
   description = "testing Record"
@@ -30,7 +30,7 @@ resource "apsarastack_dns_record" "default" {
 }
 
 output "record" {
-  value = apsarastack_dns_record.default.*
+  value = alibabacloudstack_dns_record.default.*
 }
 ```
 

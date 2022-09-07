@@ -1,13 +1,13 @@
 ---
 subcategory: "KMS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_kms_key"
-sidebar_current: "docs-apsarastack-resource-kms-key"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_kms_key"
+sidebar_current: "docs-alibabacloudstack-resource-kms-key"
 description: |-
-  Provides a Apsarastackms key resource.
+  Provides a Alibabacloudstackms key resource.
 ---
 
-# apsarastack\_kms\_key
+# alibabacloudstack\_kms\_key
 
 A kms key can help user to protect data security in the transmission process.
 
@@ -18,7 +18,7 @@ A kms key can help user to protect data security in the transmission process.
 Basic Usage
 
 ```
-resource "apsarastack_kms_key" "key" {
+resource "alibabacloudstack_kms_key" "key" {
   description             = "Hello KMS"
   pending_window_in_days  = "7"
   key_state               = "Enabled"
@@ -28,7 +28,7 @@ resource "apsarastack_kms_key" "key" {
 
 The following arguments are supported:
 
-* `description` - (Optional) The description of the key as viewed in Apsarastack console.
+* `description` - (Optional) The description of the key as viewed in Alibabacloudstack console.
 * `key_usage` - (Optional, ForceNew) Specifies the usage of CMK. Currently, default to 'ENCRYPT/DECRYPT', indicating that CMK is used for encryption and decryption.
 * `automatic_rotation` - (Optional) Specifies whether to enable automatic key rotation. Default:"Disabled".
 * `key_spec`   - (Optional, ForceNew) The type of the CMK.
@@ -44,7 +44,7 @@ The following arguments are supported:
 ## Attributes Reference
 
 * `id` - The ID of the key.
-* `arn` - The Apsarastack Resource Name (ARN) of the key.
+* `arn` - The Alibabacloudstack Resource Name (ARN) of the key.
 * `creation_date` -The date and time when the CMK was created. The time is displayed in UTC.
 * `creator` -The creator of the CMK.
 * `delete_date` -The scheduled date to delete CMK. The time is displayed in UTC. This value is returned only when the KeyState value is PendingDeletion.

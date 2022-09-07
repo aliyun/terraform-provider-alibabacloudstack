@@ -1,26 +1,26 @@
 ---
 subcategory: "Auto Scaling(ESS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ess_scaling_groups"
-sidebar_current: "docs-apsarastack_ess_scaling_groups"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ess_scaling_groups"
+sidebar_current: "docs-alibabacloudstack_ess_scaling_groups"
 description: |-
     Provides a list of scaling groups available to the user.
 ---
 
-# apsarastack_ess_scaling_groups
+# alibabacloudstack_ess_scaling_groups
 
 This data source provides available scaling group resources. 
 
 ## Example Usage
 
 ```
-data "apsarastack_ess_scaling_groups" "scalinggroups_ds" {
+data "alibabacloudstack_ess_scaling_groups" "scalinggroups_ds" {
   ids        = ["scaling_group_id1", "scaling_group_id2"]
   name_regex = "scaling_group_name"
 }
 
 output "first_scaling_group" {
-  value = "${data.apsarastack_ess_scaling_groups.scalinggroups_ds.groups.0.id}"
+  value = "${data.alibabacloudstack_ess_scaling_groups.scalinggroups_ds.groups.0.id}"
 }
 ```
 

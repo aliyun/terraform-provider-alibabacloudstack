@@ -1,13 +1,13 @@
 ---
 subcategory: "Elasticsearch"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_elasticsearch_zones"
-sidebar_current: "docs-apsarastack-datasource-elasticsearch-zones"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_elasticsearch_zones"
+sidebar_current: "docs-alibabacloudstack-datasource-elasticsearch-zones"
 description: |-
     Provides a list of availability zones for Elasticsearch that can be used by an Alibaba Cloud account.
 ---
 
-# apsarastack\_elasticsearch\_zones
+# alibabacloudstack\_elasticsearch\_zones
 
 This data source provides availability zones for Elasticsearch that can be accessed by an Alibaba Cloud account within the region configured in the provider.
 
@@ -17,7 +17,7 @@ This data source provides availability zones for Elasticsearch that can be acces
 
 ```
 # Declare the data source
-data "apsarastack_elasticsearch_zones" "zones_ids" {}
+data "alibabacloudstack_elasticsearch_zones" "zones_ids" {}
 ```
 
 ## Argument Reference

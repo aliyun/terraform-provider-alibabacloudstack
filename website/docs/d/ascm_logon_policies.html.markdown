@@ -1,31 +1,31 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_logon_policies"
-sidebar_current: "docs-apsarastack-ascm-logon-policies"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_logon_policies"
+sidebar_current: "docs-alibabacloudstack-ascm-logon-policies"
 description: |-
   Provides a list of Logon Policies.
 ---
-# apsarastack\_ascm_logon_policy
+# alibabacloudstack\_ascm_logon_policy
 
 Provides a list of Logon Policies.
 
 Basic Usage
 
 ```
-resource "apsarastack_ascm_logon_policy" "default" {
+resource "alibabacloudstack_ascm_logon_policy" "default" {
   name="Test_login_policy"
   description="testing policy"
   rule="ALLOW"
 }
 output "login" {
-  value = apsarastack_ascm_logon_policy.default.id
+  value = alibabacloudstack_ascm_logon_policy.default.id
 }
-data "apsarastack_ascm_logon_policies" "default"{
-  name = apsarastack_ascm_logon_policy.default.name
+data "alibabacloudstack_ascm_logon_policies" "default"{
+  name = alibabacloudstack_ascm_logon_policy.default.name
 }
 output "policies" {
-  value = data.apsarastack_ascm_logon_policies.default.*
+  value = data.alibabacloudstack_ascm_logon_policies.default.*
 }
 ```
 ## Argument Reference

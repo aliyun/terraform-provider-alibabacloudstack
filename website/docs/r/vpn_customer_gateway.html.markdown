@@ -1,24 +1,24 @@
 ---
 subcategory: "VPN"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpn_customer_gateway"
-sidebar_current: "docs-apsarastack-resource-vpn-customer-gateway"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpn_customer_gateway"
+sidebar_current: "docs-alibabacloudstack-resource-vpn-customer-gateway"
 description: |-
-  Provides a Apsarastack VPN customer gateway resource.
+  Provides a Alibabacloudstack VPN customer gateway resource.
 ---
 
-# apsarastack\_vpn_customer_gateway
+# alibabacloudstack\_vpn_customer_gateway
 
 Provides a VPN customer gateway resource.
 
--> **NOTE:** Terraform will auto build vpn customer gateway instance  while it uses `apsarastack_vpn_customer_gateway` to build a vpn customer gateway resource.
+-> **NOTE:** Terraform will auto build vpn customer gateway instance  while it uses `alibabacloudstack_vpn_customer_gateway` to build a vpn customer gateway resource.
 
 ## Example Usage
 
 Basic Usage
 
 ```
-resource "apsarastack_vpn_customer_gateway" "foo" {
+resource "alibabacloudstack_vpn_customer_gateway" "foo" {
   name        = "vpnCgwNameExample"
   ip_address  = "43.104.22.228"
   description = "vpnCgwDescriptionExample"
@@ -43,7 +43,7 @@ The following attributes are exported:
 VPN customer gateway can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_vpn_customer_gateway.example cgw-abc123456
+$ terraform import alibabacloudstack_vpn_customer_gateway.example cgw-abc123456
 ```
 
 

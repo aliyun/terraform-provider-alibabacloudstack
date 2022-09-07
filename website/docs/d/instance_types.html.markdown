@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_instance_types"
-sidebar_current: "docs-apsarastack-datasource-instance-types"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_instance_types"
+sidebar_current: "docs-alibabacloudstack-datasource-instance-types"
 description: |-
-    Provides a list of ECS Instance Types to be used by the apsarastack_instance resource.
+    Provides a list of ECS Instance Types to be used by the alibabacloudstack_instance resource.
 ---
 
-# apsarastack\_instance\_types
+# alibabacloudstack\_instance\_types
 
 This data source provides the ECS instance types of ApsarStack.
 
@@ -19,13 +19,13 @@ This data source provides the ECS instance types of ApsarStack.
 
 ```
 # Declare the data source
-data "apsarastack_instance_types" "types_ds" {
+data "alibabacloudstack_instance_types" "types_ds" {
   cpu_core_count = 1
   memory_size    = 2
 }
 
 output "instance_types"{
-  value=data.apsarastack_instance_types.types_ds.*
+  value=data.alibabacloudstack_instance_types.types_ds.*
 }
 ```
 

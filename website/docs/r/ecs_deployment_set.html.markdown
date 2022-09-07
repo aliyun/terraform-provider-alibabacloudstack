@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ecs_deployment_set"
-sidebar_current: "docs-apsarastack-resource-ecs-deployment-set"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_deployment_set"
+sidebar_current: "docs-alibabacloudstack-resource-ecs-deployment-set"
 description: |-
-  Provides a Apsarastack ECS Deployment Set resource.
+  Provides a Alibabacloudstack ECS Deployment Set resource.
 ---
 
-# apsarastack\_ecs\_deployment\_set
+# alibabacloudstack\_ecs\_deployment\_set
 
 Provides a ECS Deployment Set resource.
 
@@ -20,7 +20,7 @@ For information about ECS Deployment Set and how to use it, see [What is Deploym
 Basic Usage
 
 ```terraform
-resource "apsarastack_ecs_deployment_set" "default" {
+resource "alibabacloudstack_ecs_deployment_set" "default" {
   strategy            = "Availability"
   domain              = "Default"
   granularity         = "Host"
@@ -53,5 +53,5 @@ The following attributes are exported:
 ECS Deployment Set can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_ecs_deployment_set.example <id>
+$ terraform import alibabacloudstack_ecs_deployment_set.example <id>
 ```

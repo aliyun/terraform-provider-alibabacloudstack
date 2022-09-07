@@ -1,10 +1,10 @@
 ---
 subcategory: "ROS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ros_template"
-sidebar_current: "docs-apsarastack-resource-ros-template"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ros_template"
+sidebar_current: "docs-alibabacloudstack-resource-ros-template"
 description: |-
-  Provides a Apsarastack ROS Template resource.
+  Provides a Alibabacloudstack ROS Template resource.
 ---
 
 # alicloud\_ros\_template
@@ -20,7 +20,7 @@ For information about ROS Template and how to use it, see [What is Template](htt
 Basic Usage
 
 ```terraform
-resource "apsarastack_ros_template" "example" {
+resource "alibabacloudstack_ros_template" "example" {
   template_name = "example_value"
   template_body = <<EOF
     {

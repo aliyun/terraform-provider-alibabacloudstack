@@ -1,13 +1,13 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_acl"
-sidebar_current: "docs-apsarastack-resource-slb-acl"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_acl"
+sidebar_current: "docs-alibabacloudstack-resource-slb-acl"
 description: |-
   Provides a Load Banlancer Access Control List resource.
 ---
 
-# apsarastack\_slb\_acl
+# alibabacloudstack\_slb\_acl
 
 An access control list contains multiple IP addresses or CIDR blocks.
 The access control list can help you to define multiple instance listening dimension,
@@ -44,7 +44,7 @@ variable "ip_version" {
   default = "ipv4"
 }
 
-resource "apsarastack_slb_acl" "default" {
+resource "alibabacloudstack_slb_acl" "default" {
   name       = "${var.name}"
   ip_version = "${var.ip_version}"
   entry_list {

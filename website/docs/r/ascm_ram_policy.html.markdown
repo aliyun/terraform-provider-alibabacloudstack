@@ -1,26 +1,26 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_ram_policy"
-sidebar_current: "docs-apsarastack-resource-ascm-ram-policy"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_ram_policy"
+sidebar_current: "docs-alibabacloudstack-resource-ascm-ram-policy"
 description: |-
   Provides Ascm ram policy.
 ---
 
-# apsarastack\_ascm_ram_policy
+# alibabacloudstack\_ascm_ram_policy
 
 Provides Ascm ram policy.
 
 ## Example Usage
 
 ```
-resource "apsarastack_ascm_ram_policy" "default" {
+resource "alibabacloudstack_ascm_ram_policy" "default" {
   name = "TestPolicy"
   description = "Testing"
   policy_document = "{\"Statement\":[{\"Action\":\"ecs:*\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"1\"}"
 }
 output "rampolicy" {
-  value = apsarastack_ascm_ram_policy.default.*
+  value = alibabacloudstack_ascm_ram_policy.default.*
 }
 ```
 ## Argument Reference

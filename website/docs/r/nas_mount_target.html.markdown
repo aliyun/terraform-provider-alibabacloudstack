@@ -1,13 +1,13 @@
 ---
 subcategory: "Network Attached Storage (NAS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_nas_mount_target"
-sidebar_current: "docs-apsarastack-resource-nas-mount-target"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_nas_mount_target"
+sidebar_current: "docs-alibabacloudstack-resource-nas-mount-target"
 description: |-
-  Provides a Apsarastack NAS MountTarget resource.
+  Provides a Alibabacloudstack NAS MountTarget resource.
 ---
 
-# apsarastack\_nas_mount_target
+# alibabacloudstack\_nas_mount_target
 
 Provides a NAS Mount Target resource.
 For information about NAS Mount Target and how to use it, see [Manage NAS Mount Targets](https://www.alibabacloud.com/help/en/doc-detail/27531.htm).
@@ -25,21 +25,21 @@ See [Add a mount point](https://www.alibabacloud.com/help/doc-detail/60431.htm) 
 Basic Usage
 
 ```terraform
-resource "apsarastack_nas_file_system" "example" {
+resource "alibabacloudstack_nas_file_system" "example" {
   protocol_type = "NFS"
   storage_type  = "Performance"
   description   = "test file system"
 }
 
-resource "apsarastack_nas_access_group" "example" {
+resource "alibabacloudstack_nas_access_group" "example" {
   access_group_name = "test_name"
   access_group_type = "Classic"
   description       = "test access group"
 }
 
-resource "apsarastack_nas_mount_target" "example" {
-  file_system_id    = apsarastack_nas_file_system.example.id
-  access_group_name = apsarastack_nas_access_group.example.access_group_name
+resource "alibabacloudstack_nas_mount_target" "example" {
+  file_system_id    = alibabacloudstack_nas_file_system.example.id
+  access_group_name = alibabacloudstack_nas_access_group.example.access_group_name
 }
 ```
 
@@ -64,5 +64,5 @@ The following attributes are exported:
 NAS MountTarget  can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_nas_mount_target.foo 192094b415:192094b415-luw38.cn-beijing.nas.aliyuncs.com
+$ terraform import alibabacloudstack_nas_mount_target.foo 192094b415:192094b415-luw38.cn-beijing.nas.aliyuncs.com
 ```

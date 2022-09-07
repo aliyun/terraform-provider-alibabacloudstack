@@ -1,20 +1,20 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_image"
-sidebar_current: "docs-apsarastack-resource-image"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_image"
+sidebar_current: "docs-alibabacloudstack-resource-image"
 description: |-
   Provides an ECS image resource.
 ---
 
-# apsarastack\_image
+# alibabacloudstack\_image
 
 Creates a custom image. You can then use a custom image to create ECS instances (RunInstances) or change the system disk for an existing instance (ReplaceSystemDisk).
 
 ## Example Usage
 
 ```
-resource "apsarastack_image" "default" {
+resource "alibabacloudstack_image" "default" {
   instance_id        = "i-bp1g6zv0ce8oghu7k***"
   image_name         = "test-image"
   description        = "test-image"

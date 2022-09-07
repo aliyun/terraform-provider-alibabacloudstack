@@ -1,15 +1,15 @@
 ---
 subcategory: "Container Registry (CR)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cr_repos"
-sidebar_current: "docs-apsarastack-datasource-cr-repos"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cr_repos"
+sidebar_current: "docs-alibabacloudstack-datasource-cr-repos"
 description: |-
   Provides a list of Container Registry repositories.
 ---
 
-# apsarastack\_cr\_repos
+# alibabacloudstack\_cr\_repos
 
-This data source provides a list Container Registry repositories on Apsarastack Cloud.
+This data source provides a list Container Registry repositories on Alibabacloudstack Cloud.
 
 
 
@@ -17,13 +17,13 @@ This data source provides a list Container Registry repositories on Apsarastack 
 
 ```
 # Declare the data source
-data "apsarastack_cr_repos" "my_repos" {
+data "alibabacloudstack_cr_repos" "my_repos" {
   name_regex  = "my-repos"
   output_file = "my-repo-json"
 }
 
 output "output" {
-  value = "${data.apsarastack_cr_repos.my_repos.repos}"
+  value = "${data.alibabacloudstack_cr_repos.my_repos.repos}"
 }
 ```
 

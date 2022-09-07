@@ -1,25 +1,25 @@
 ---
 subcategory: "Redis And Memcache (KVStore)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_kvstore_instance_engines"
-sidebar_current: "docs-apsarastack-datasource-kvstore-instance-engines"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_kvstore_instance_engines"
+sidebar_current: "docs-alibabacloudstack-datasource-kvstore-instance-engines"
 description: |-
     Provides a list of KVStore instacne engines info.
 ---
 
-# apsarastack\_kvstore\_instances\_engines
+# alibabacloudstack\_kvstore\_instances\_engines
 
 This data source provides the KVStore instance engines resource available info of Apsara Stack Cloud.
 
 ## Example Usage
 
 ```tf
-data "apsarastack_zones" "resources" {
+data "alibabacloudstack_zones" "resources" {
   available_resource_creation = "KVStore"
 }
 
-data "apsarastack_kvstore_instance_engines" "resources" {
-  zone_id              = "${data.apsarastack_zones.resources.zones.0.id}"
+data "alibabacloudstack_kvstore_instance_engines" "resources" {
+  zone_id              = "${data.alibabacloudstack_zones.resources.zones.0.id}"
   instance_charge_type = "PrePaid"
   engine               = "Redis"
   engine_version       = "5.0"
@@ -27,7 +27,7 @@ data "apsarastack_kvstore_instance_engines" "resources" {
 }
 
 output "first_kvstore_instance_class" {
-  value = "${data.apsarastack_kvstore_instance_engines.resources.instance_engines.0.engine}"
+  value = "${data.alibabacloudstack_kvstore_instance_engines.resources.instance_engines.0.engine}"
 }
 ```
 

@@ -1,26 +1,26 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_quotas"
-sidebar_current: "docs-apsarastack-datasource-ascm-quotas"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_quotas"
+sidebar_current: "docs-alibabacloudstack-datasource-ascm-quotas"
 description: |-
     Provides a list of quota to the user.
 ---
 
-# apsarastack\_ascm_quotas
+# alibabacloudstack\_ascm_quotas
 
 This data source provides the quota of the current Apsara Stack Cloud user.
 
 ## Example Usage
 
 ```
-resource "apsarastack_ascm_organization" "default" {
+resource "alibabacloudstack_ascm_organization" "default" {
     name = "Dummy_Test_1"
 }
 
-resource "apsarastack_ascm_quota" "default" {
+resource "alibabacloudstack_ascm_quota" "default" {
     quota_type = "organization"
-    quota_type_id = apsarastack_ascm_organization.default.parent_id
+    quota_type_id = alibabacloudstack_ascm_organization.default.parent_id
     product_name = "RDS"
     total_cpu = 1500
     total_disk = 1500
@@ -28,15 +28,15 @@ resource "apsarastack_ascm_quota" "default" {
     target_type = "MySql"
 }
 
-data "apsarastack_ascm_quotas" "default" {
+data "alibabacloudstack_ascm_quotas" "default" {
     quota_type = "organization"
-    quota_type_id = apsarastack_ascm_organization.default.parent_id
+    quota_type_id = alibabacloudstack_ascm_organization.default.parent_id
     product_name = "RDS"
     target_type = "MySql"
     output_file = "Rds_quota"
 }
 output "quota" {
-    value = data.apsarastack_ascm_quotas.default.*
+    value = data.alibabacloudstack_ascm_quotas.default.*
 }
 ```
 

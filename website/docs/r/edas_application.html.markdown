@@ -1,13 +1,13 @@
 ---
 subcategory: "EDAS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_edas_application"
-sidebar_current: "docs-apsarastack-resource-edas-application"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_edas_application"
+sidebar_current: "docs-alibabacloudstack-resource-edas-application"
 description: |-
   Creates an EDAS ecs application on EDAS.
 ---
 
-# apsarastack\_edas\_application
+# alibabacloudstack\_edas\_application
 
 Creates an EDAS ecs application on EDAS. The application will be deployed when `group_id` and `war_url` are given.
 
@@ -18,7 +18,7 @@ Creates an EDAS ecs application on EDAS. The application will be deployed when `
 Basic Usage
 
 ```
-resource "apsarastack_edas_application" "default" {
+resource "alibabacloudstack_edas_application" "default" {
   application_name  = "xxx"
   cluster_id        = "xxx"
   package_type      = "JAR"
@@ -62,5 +62,5 @@ The following attributes are exported:
 EDAS application can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_edas_application.app app_Id
+$ terraform import alibabacloudstack_edas_application.app app_Id
 ```

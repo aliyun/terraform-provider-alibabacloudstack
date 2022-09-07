@@ -1,34 +1,34 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_common_bandwidth_packages"
-sidebar_current: "docs-apsarastack-datasource-common-bandwidth-packages"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_common_bandwidth_packages"
+sidebar_current: "docs-alibabacloudstack-datasource-common-bandwidth-packages"
 description: |-
-    Provides a list of Common Bandwidth Packages owned by an Apsarastack Cloud account.
+    Provides a list of Common Bandwidth Packages owned by an Alibabacloudstack Cloud account.
 ---
 
-# apsarastack\_common\_bandwidth\_packages
+# alibabacloudstack\_common\_bandwidth\_packages
 
-This data source provides a list of Common Bandwidth Packages owned by an Apsarastack Cloud account.
+This data source provides a list of Common Bandwidth Packages owned by an Alibabacloudstack Cloud account.
 
 
 ## Example Usage
 
 ```
 
-resource "apsarastack_common_bandwidth_package" "foo" {
+resource "alibabacloudstack_common_bandwidth_package" "foo" {
   bandwidth   = "2"
   name        = "tf-testAccCommonBandwidthPackage"
   description = "tf-testAcc-CommonBandwidthPackage"
 }
 
-data "apsarastack_common_bandwidth_packages" "foo" {
+data "alibabacloudstack_common_bandwidth_packages" "foo" {
   name_regex = "^tf-testAcc.*"
-  ids        = ["${apsarastack_common_bandwidth_package.foo.id}"]
+  ids        = ["${alibabacloudstack_common_bandwidth_package.foo.id}"]
 }
 
 output "common_bandwidth_packages" {
-  value = "${data.apsarastack_common_bandwidth_packages.foo.packages}"
+  value = "${data.alibabacloudstack_common_bandwidth_packages.foo.packages}"
 }
 ```
 

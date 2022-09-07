@@ -1,38 +1,38 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_network_interfaces"
-sidebar_current: "docs-apsarastack-datasource-network-interfaces"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_network_interfaces"
+sidebar_current: "docs-alibabacloudstack-datasource-network-interfaces"
 description: |-
   Provides a data source to get a list of elastic network interfaces according to the specified filters.
 ---
 
-# apsarastack\_network_interfaces
+# alibabacloudstack\_network_interfaces
 
-Use this data source to get a list of elastic network interfaces according to the specified filters in an ApsaraStack account.
+Use this data source to get a list of elastic network interfaces according to the specified filters in an AlibabacloudStack account.
 
 ## Example Usage
 
 ```
-resource "apsarastack_network_interface" "NetInterface" {
+resource "alibabacloudstack_network_interface" "NetInterface" {
   name              = "net_interface"
-  vswitch_id        = apsarastack_vswitch.vsw.id
-  security_groups   = [apsarastack_security_group.secgroup.id]
+  vswitch_id        = alibabacloudstack_vswitch.vsw.id
+  security_groups   = [alibabacloudstack_security_group.secgroup.id]
   private_ip        = "192.168.0.2"
   private_ips_count = 1
   description = "Hello Network Interface"
 }
 
-data "apsarastack_network_interfaces" "NetInterfaces" {
+data "alibabacloudstack_network_interfaces" "NetInterfaces" {
   ids = [
-    apsarastack_network_interface.NetInterface.id
+    alibabacloudstack_network_interface.NetInterface.id
   ]
-  name_regex = apsarastack_network_interface.NetInterface.name
-  vswitch_id = apsarastack_vswitch.vsw.id
+  name_regex = alibabacloudstack_network_interface.NetInterface.name
+  vswitch_id = alibabacloudstack_vswitch.vsw.id
 }
 
 output "eni_name" {
-    value = "${data.apsarastack_network_interface.NetInterface.interfaces.0.name}"
+    value = "${data.alibabacloudstack_network_interface.NetInterface.interfaces.0.name}"
 }
 ```
 

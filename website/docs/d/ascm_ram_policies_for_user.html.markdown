@@ -1,24 +1,24 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "ApsaraStack: apsarastack_ascm_ram_policies_for_user"
-sidebar_current: "docs-apsarastack-datasource-ascm-ram-policies-for-user"
+layout: "alibabacloudstack"
+page_title: "AlibabacloudStack: alibabacloudstack_ascm_ram_policies_for_user"
+sidebar_current: "docs-alibabacloudstack-datasource-ascm-ram-policies-for-user"
 description: |-
     Provides a list of ram policy of the user.
 ---
 
-# apsarastack\_ascm_ram_policies_for_user
+# alibabacloudstack\_ascm_ram_policies_for_user
 
 This data source provides the ram policy for user of the current Apsara Stack Cloud user.
 
 ## Example Usage
 
 ```
-data "apsarastack_ascm_ram_policies_for_user" "default" {
+data "alibabacloudstack_ascm_ram_policies_for_user" "default" {
   login_name = "test_admin"
 }
 output "ramPolicy" {
-  value = data.apsarastack_ascm_ram_policies_for_user.default.*
+  value = data.alibabacloudstack_ascm_ram_policies_for_user.default.*
 }
 
 ```

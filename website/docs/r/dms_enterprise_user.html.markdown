@@ -1,20 +1,20 @@
 ---
 subcategory: "DMS Enterprise"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_dms_enterprise_user"
-sidebar_current: "docs-apsarastack-resource-dms-enterprise-user"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dms_enterprise_user"
+sidebar_current: "docs-alibabacloudstack-resource-dms-enterprise-user"
 description: |-
   Provides a DMS Enterprise User resource.
 ---
 
-# apsarastack\_dms\_enterprise\_user
+# alibabacloudstack\_dms\_enterprise\_user
 
 Provides a DMS Enterprise User resource. For information about Alidms Enterprise User and how to use it, see [What is Resource Alidms Enterprise User](https://www.alibabacloud.com/help/doc-detail/98001.htm).
 
 ## Example Usage
 
 ```terraform
-resource "apsarastack_dms_enterprise_user" "example" {
+resource "alibabacloudstack_dms_enterprise_user" "example" {
   uid        = "uid"
   user_name  = "tf-test"
   role_names = ["DBA"]
@@ -51,5 +51,5 @@ The following attributes are exported:
 DMS Enterprise User can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_dms_enterprise_user.example 24356xxx
+$ terraform import alibabacloudstack_dms_enterprise_user.example 24356xxx
 ```

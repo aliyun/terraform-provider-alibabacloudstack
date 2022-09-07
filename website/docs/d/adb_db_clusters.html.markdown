@@ -1,13 +1,13 @@
 ---
 subcategory: "AnalyticDB for MySQL (ADB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_adb_db_clusters"
-sidebar_current: "docs-apsarastack-datasource-adb-db-clusters"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_adb_db_clusters"
+sidebar_current: "docs-alibabacloudstack-datasource-adb-db-clusters"
 description: |-
   Provides a list of Adb DBClusters to the user.
 ---
 
-# apsarastack\_adb\_db\_clusters
+# alibabacloudstack\_adb\_db\_clusters
 
 This data source provides the Adb DBClusters of the current Alibaba Cloud user.
 
@@ -16,12 +16,12 @@ This data source provides the Adb DBClusters of the current Alibaba Cloud user.
 Basic Usage
 
 ```terraform
-data "apsarastack_adb_db_clusters" "example" {
+data "alibabacloudstack_adb_db_clusters" "example" {
   description_regex = "example"
 }
 
 output "first_adb_db_cluster_id" {
-  value = data.apsarastack_adb_db_clusters.example.clusters.0.id
+  value = data.alibabacloudstack_adb_db_clusters.example.clusters.0.id
 }
 ```
 

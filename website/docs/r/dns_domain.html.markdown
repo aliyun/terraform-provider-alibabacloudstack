@@ -1,13 +1,13 @@
 ---
 subcategory: "DNS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_dns_domain"
-sidebar_current: "docs-apsarastack-resource-dns-domain"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dns_domain"
+sidebar_current: "docs-alibabacloudstack-resource-dns-domain"
 description: |-
   Provides a DNS domain resource.
 ---
 
-# apsarastack\_dns\_domain
+# alibabacloudstack\_dns\_domain
 
 Provides a DNS domain resource.
 
@@ -17,12 +17,12 @@ Provides a DNS domain resource.
 
 ```
 # Add a new Domain.
-resource "apsarastack_dns_domain" "default" {
+resource "alibabacloudstack_dns_domain" "default" {
   domain_name     = "starmove."
   remark   =  "testing Domain"
 }
 output "dns" {
-  value = apsarastack_dns_domain.default.*
+  value = alibabacloudstack_dns_domain.default.*
 }
 ```
 ## Argument Reference

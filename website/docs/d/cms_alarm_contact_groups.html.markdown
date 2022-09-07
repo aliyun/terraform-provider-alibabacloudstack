@@ -1,15 +1,15 @@
 ---
 subcategory: "Cloud Monitor"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cms_alarm_contact_groups"
-sidebar_current: "docs-apsarastack-datasource-cms-alarm-contact-groups"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cms_alarm_contact_groups"
+sidebar_current: "docs-alibabacloudstack-datasource-cms-alarm-contact-groups"
 description: |-
   Provides a list of CMS Groups to the user.
 ---
 
-# apsarastack\_cms\_contact\_groups
+# alibabacloudstack\_cms\_contact\_groups
 
-This data source provides the CMS Groups of the current Apsarastack Cloud user.
+This data source provides the CMS Groups of the current Alibabacloudstack Cloud user.
 
 
 
@@ -18,12 +18,12 @@ This data source provides the CMS Groups of the current Apsarastack Cloud user.
 Basic Usage
 
 ```
-data "apsarastack_cms_alarm_contact_group" "example" {
+data "alibabacloudstack_cms_alarm_contact_group" "example" {
   name_regex = "tf-testacc"
 }
 
 output "contact_groups" {
-  value = data.apsarastack_cms_alarm_contact_group.example
+  value = data.alibabacloudstack_cms_alarm_contact_group.example
 }
 ```
 

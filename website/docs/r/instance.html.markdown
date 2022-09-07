@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_instance"
-sidebar_current: "docs-apsarastack-resource-instance"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_instance"
+sidebar_current: "docs-alibabacloudstack-resource-instance"
 description: |-
   Provides an ECS instance resource.
 ---
 
-# apsarastack\_instance
+# alibabacloudstack\_instance
 
 Provides a ECS instance resource.
 
@@ -16,31 +16,31 @@ Provides a ECS instance resource.
 ```
 
 # Create a new ECS instance for VPC
-resource "apsarastack_vpc" "vpc" {
+resource "alibabacloudstack_vpc" "vpc" {
   name       = "tf_test_foo"
   cidr_block = "${var.cidr_block}"
 }
 
-resource "apsarastack_vswitch" "vsw" {
-  vpc_id            = "${apsarastack_vpc.vpc.id}"
+resource "alibabacloudstack_vswitch" "vsw" {
+  vpc_id            = "${alibabacloudstack_vpc.vpc.id}"
   cidr_block        = "${var.cidr_block}"
   availability_zone = "${var.availability_zone}"
 }
 
-resource "apsarastack_security_group" "group" {
+resource "alibabacloudstack_security_group" "group" {
   name   = "new-group"
-  vpc_id = "${apsarastack_vpc.vpc.id}"
+  vpc_id = "${alibabacloudstack_vpc.vpc.id}"
 }
 
-resource "apsarastack_instance" "instance" {
+resource "alibabacloudstack_instance" "instance" {
   image_id              = "ubuntu_18_04_64_20G_alibase_20190624.vhd"
   instance_type        = "ecs.n4.large"
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 40
   system_disk_name     = "test_sys_disk"
-  security_groups      = [apsarastack_security_group.group.id]
+  security_groups      = [alibabacloudstack_security_group.group.id]
   instance_name        = "test_apsara_instance"
-  vswitch_id           = apsarastack_vswitch.vsw.id
+  vswitch_id           = alibabacloudstack_vswitch.vsw.id
 }
 
 
@@ -75,7 +75,7 @@ On other OSs such as Linux, the host name can contain a maximum of 30 characters
     - Value: It can be up to 128 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It can be a null string.
 * `user_data` - (Optional) User-defined data to customize the startup behaviors of an ECS instance and to pass data into an ECS instance. If updated, the instance will reboot to make the change take effect. Note: Not all of changes will take effect and it depends on [cloud-init module type](https://cloudinit.readthedocs.io/en/latest/topics/modules.html).
 * `key_name` - (Optional, Force new resource) The name of key pair that can login ECS instance successfully without password. If it is specified, the password would be invalid.
-* `role_name` - (Optional, Force new resource) Instance RAM role name. The name is provided and maintained by RAM. You can use `apsarastack_ram_role` to create a new one.
+* `role_name` - (Optional, Force new resource) Instance RAM role name. The name is provided and maintained by RAM. You can use `alibabacloudstack_ram_role` to create a new one.
 * `private_ip` - (Optional) Instance private IP address can be specified when you creating new instance. It is valid when `vswitch_id` is specified. When it is changed, the instance will reboot to make the change take effect.
     Default to NoSpot. Note: Currently, the spot instance only supports domestic site account.
     Default to false.

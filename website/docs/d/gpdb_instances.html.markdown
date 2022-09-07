@@ -1,29 +1,29 @@
 ---
 subcategory: "AnalyticDB for PostgreSQL (GPDB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_gpdb_instances"
-sidebar_current: "docs-apsarastack-datasource-gpdb-instances"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_gpdb_instances"
+sidebar_current: "docs-alibabacloudstack-datasource-gpdb-instances"
 description: |-
     Provides a collection of AnalyticDB for PostgreSQL instances according to the specified filters.
 ---
 
-# apsarastack\_gpdb\_instances
+# alibabacloudstack\_gpdb\_instances
 
-The `apsarastack_gpdb_instances` data source provides a collection of AnalyticDB for PostgreSQL instances available in ApsaraStack account.
+The `alibabacloudstack_gpdb_instances` data source provides a collection of AnalyticDB for PostgreSQL instances available in AlibabacloudStack account.
 Filters support regular expression for the instance name or availability_zone.
 
 
 ## Example Usage
 
 ```
-data "apsarastack_gpdb_instances" "gpdb" {
+data "alibabacloudstack_gpdb_instances" "gpdb" {
   availability_zone = "cn-beijing-c"
   name_regex        = "gp-.+\\d+"
   output_file       = "instances.txt"
 }
 
 output "instance_id" {
-  value = "${data.apsarastack_gpdb_instances.gpdb.instances.0.id}"
+  value = "${data.alibabacloudstack_gpdb_instances.gpdb.instances.0.id}"
 }
 ```
 

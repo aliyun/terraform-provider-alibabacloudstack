@@ -1,13 +1,13 @@
 ---
 subcategory: "EDAS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_edas_instance_cluster_attachment"
-sidebar_current: "docs-apsarastack-resource-edas-instance-cluster-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_edas_instance_cluster_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-edas-instance-cluster-attachment"
 description: |-
   Provides an EDAS instance cluster attachment resource.
 ---
 
-# apsarastack\_edas\_instance\_cluster\_attachment
+# alibabacloudstack\_edas\_instance\_cluster\_attachment
 
 Provides an EDAS instance cluster attachment resource.
 
@@ -19,7 +19,7 @@ Provides an EDAS instance cluster attachment resource.
 Basic Usage
 
 ```
-resource "apsarastack_edas_instance_cluster_attachment" "default" {
+resource "alibabacloudstack_edas_instance_cluster_attachment" "default" {
   cluster_id   = var.cluster_id
   instance_ids = var.instance_ids
 }

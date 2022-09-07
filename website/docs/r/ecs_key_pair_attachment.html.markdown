@@ -1,14 +1,14 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ecs_key_pair_attachment"
-sidebar_current: "docs-apsarastack-resource-ecs-key-pair-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_key_pair_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-ecs-key-pair-attachment"
 description: |-
-  Provides a Apsarastack ECS Key Pair Attachment resource.
+  Provides a Alibabacloudstack ECS Key Pair Attachment resource.
 ---
 
 
-# apsarastack\_ecs\_key\_pair\_attachment
+# alibabacloudstack\_ecs\_key\_pair\_attachment
 
 Provides a ECS Key Pair Attachment resource.
 
@@ -21,7 +21,7 @@ For information about ECS Key Pair Attachment and how to use it, see [What is Ke
 Basic Usage
 
 ```terraform
-resource "apsarastack_ecs_key_pair_attachment" "example" {
+resource "alibabacloudstack_ecs_key_pair_attachment" "example" {
   key_pair_name = "key_pair_name"
   instance_ids  = [i-gw80pxxxxxxxxxx]
 }

@@ -1,4 +1,4 @@
-Terraform Provider For ApsaraStack Cloud
+Terraform Provider For AlibabacloudStack Cloud
 ==================
 
 
@@ -36,7 +36,7 @@ Enter the provider directory and build the provider
 
 ```sh
 $ cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabacloudstack
-$ go build -o terraform-provider-apsarastack
+$ go build -o terraform-provider-alibabacloudstack
 ```
 
 Using the provider
@@ -46,15 +46,15 @@ Using the provider
 ````
  terraform {
   required_providers {
-    apsarastack = {
+    alibabacloudstack = {
       source = "aliyun/alibabacloudstack"
       version = "1.0.1"
     }
   }
 }
 
-# Configure the ApsaraStack Provider
- provider "apsarastack" {
+# Configure the AlibabacloudStack Provider
+ provider "alibabacloudstack" {
   access_key = "ckhCs1K*********"
   secret_key = "2lY9uNh***********************"
   region =  "cn-xxxxxx-env00-d01"
@@ -67,7 +67,7 @@ Using the provider
 ````                                               
 - Add following data in main.tf to create the resource vpc from terraform
 ```
-resource "apsarastack_vpc" "default_vpc" {
+resource "alibabacloudstack_vpc" "default_vpc" {
   name       = "vpc-test"
   cidr_block = "172.16.0.0/12"
 }
@@ -81,7 +81,7 @@ If you wish to work on the provider, you'll first need [Go](http://www.golang.or
 To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
 
 ```sh
-$ go build -o terraform-provider-apsarastack
+$ go build -o terraform-provider-alibabacloudstack
 ...
 $ $GOPATH/bin/terraform-provider-alibabacloudstack
 ...
@@ -105,21 +105,21 @@ $ make testacc
 ```
 
 ## Acceptance Testing
-Before making a release, the resources and data sources are tested automatically with acceptance tests (the tests are located in the apsarastack/*_test.go files).
+Before making a release, the resources and data sources are tested automatically with acceptance tests (the tests are located in the alibabacloudstack/*_test.go files).
 You can run them by entering the following instructions in a terminal:
 ```
 cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabacloudstack
-export APSARASTACK_ACCESS_KEY=xxx
-export APSARASTACK_SECRET_KEY=xxx
-export APSARASTACK_REGION=xxx
-export APSARASTACK_DOMAIN=xxx
-export APSARASTACK_RESOURCE_GROUP_SET=xxx
+export ALIBABACLOUDSTACK_ACCESS_KEY=xxx
+export ALIBABACLOUDSTACK_SECRET_KEY=xxx
+export ALIBABACLOUDSTACK_REGION=xxx
+export ALIBABACLOUDSTACK_DOMAIN=xxx
+export ALIBABACLOUDSTACK_RESOURCE_GROUP_SET=xxx
 export outfile=gotest.out
-TF_ACC=1 TF_LOG=INFO go test ./apsarastack -v -run=TestAccApsaraStack -timeout=1440m | tee $outfile
+TF_ACC=1 TF_LOG=INFO go test ./alibabacloudstack -v -run=TestAccAlibabacloudStack -timeout=1440m | tee $outfile
 go2xunit -input $outfile -output $GOPATH/tests.xml
 ```
 
 
 ## Refer
 
-ApsaraStack Cloud Provider [Official Docs](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)
+AlibabacloudStack Cloud Provider [Official Docs](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)

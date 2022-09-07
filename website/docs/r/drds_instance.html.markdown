@@ -1,13 +1,13 @@
 ---
 subcategory: "Distributed Relational Database Service (DRDS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_drds_instance"
-sidebar_current: "docs-apsarastack-resource-drds-instance"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_drds_instance"
+sidebar_current: "docs-alibabacloudstack-resource-drds-instance"
 description: |-
   Provides an DRDS instance resource.
 ---
 
-# apsarastack\_drds\_instance
+# alibabacloudstack\_drds\_instance
 
 Distributed Relational Database Service (DRDS) is a lightweight (stateless), flexible, stable, and efficient middleware product independently developed by Alibaba Group to resolve scalability issues with single-host relational databases.
 With its compatibility with MySQL protocols and syntaxes, DRDS enables database/table sharding, smooth scaling, configuration upgrade/downgrade,
@@ -22,7 +22,7 @@ For information about DRDS and how to use it, see [What is DRDS](https://www.ali
 ## Example Usage
 
 ```
-resource "apsarastack_drds_instance" "default" {
+resource "alibabacloudstack_drds_instance" "default" {
   description          = "drds instance"
   instance_charge_type = "PostPaid"
   zone_id              = "cn-hangzhou-e"
@@ -76,5 +76,5 @@ The following attributes are exported:
 Distributed Relational Database Service (DRDS) can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_drds_instance.example drds-abc123456
+$ terraform import alibabacloudstack_drds_instance.example drds-abc123456
 ```

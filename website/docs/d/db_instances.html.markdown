@@ -1,21 +1,21 @@
 ---
 subcategory: "RDS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_db_instances"
-sidebar_current: "docs-apsarastack-datasource-db-instances"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_db_instances"
+sidebar_current: "docs-alibabacloudstack-datasource-db-instances"
 description: |-
     Provides a collection of RDS instances according to the specified filters.
 ---
 
-# apsarastack\_db\_instances
+# alibabacloudstack\_db\_instances
 
-The `apsarastack_db_instances` data source provides a collection of RDS instances available in ApsaraStack account.
+The `alibabacloudstack_db_instances` data source provides a collection of RDS instances available in AlibabacloudStack account.
 Filters support regular expression for the instance name, searches by tags, and other filters which are listed below.
 
 ## Example Usage
 
 ```
-data "apsarastack_db_instances" "db_instances_ds" {
+data "alibabacloudstack_db_instances" "db_instances_ds" {
   name_regex = "data-\\d+"
   status     = "Running"
   tags       = {
@@ -26,7 +26,7 @@ data "apsarastack_db_instances" "db_instances_ds" {
 }
 
 output "first_db_instance_id" {
-  value = "${data.apsarastack_db_instances.db_instances_ds.instances.0.id}"
+  value = "${data.alibabacloudstack_db_instances.db_instances_ds.instances.0.id}"
 }
 ```
 

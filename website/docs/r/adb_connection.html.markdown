@@ -1,13 +1,13 @@
 ---
 subcategory: "AnalyticDB for MySQL (ADB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_adb_connection"
-sidebar_current: "docs-apsarastack-resource-adb-connection"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_adb_connection"
+sidebar_current: "docs-alibabacloudstack-resource-adb-connection"
 description: |-
   Provides an ADB cluster connection resource.
 ---
 
-# apsarastack\_adb\_connection
+# alibabacloudstack\_adb\_connection
 
 Provides an ADB connection resource to allocate an Internet connection string for ADB cluster.
 
@@ -25,37 +25,37 @@ variable "name" {
   default = "adbaccountmysql"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = var.creation
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   vpc_name       = var.name
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = apsarastack_vpc.default.id
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = alibabacloudstack_vpc.default.id
   cidr_block        = "172.16.0.0/24"
-  zone_id           = data.apsarastack_zones.default.zones[0].id
+  zone_id           = data.alibabacloudstack_zones.default.zones[0].id
   vswitch_name      = var.name
 }
 
-resource "apsarastack_adb_db_cluster" "cluster" {
+resource "alibabacloudstack_adb_db_cluster" "cluster" {
   db_cluster_version  = "3.0"
   db_cluster_category = "Basic"
   db_node_class       = "C8"
   db_node_count       = 2
   db_node_storage     = 200
   mode				  = "reserver"
-  vswitch_id          = apsarastack_vswitch.default.id
+  vswitch_id          = alibabacloudstack_vswitch.default.id
   description         = var.name
   cluster_type      = "analyticdb"
   cpu_type          = "intel"
 }
 
-resource "apsarastack_adb_connection" "connection" {
-  db_cluster_id     = apsarastack_adb_db_cluster.cluster.id
+resource "alibabacloudstack_adb_connection" "connection" {
+  db_cluster_id     = alibabacloudstack_adb_db_cluster.cluster.id
   connection_prefix = "testabc"
 }
 ```
@@ -82,5 +82,5 @@ The following attributes are exported:
 ADB connection can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_adb_connection.example am-12345678
+$ terraform import alibabacloudstack_adb_connection.example am-12345678
 ```

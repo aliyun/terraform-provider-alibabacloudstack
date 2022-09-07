@@ -1,13 +1,13 @@
 ---
 subcategory: "HBase"
-layout: "apsarastack"
-page_title: "Apsarastack: "
-sidebar_current: "docs-apsarastack-resource-hbase-instance"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: "
+sidebar_current: "docs-alibabacloudstack-resource-hbase-instance"
 description: |-
   Provides a HBase instance resource.
 ---
 
-# apsarastack\_hbase\_instance
+# alibabacloudstack\_hbase\_instance
 
 Provides a HBase instance resource supports replica set instances only. The HBase provides stable, reliable, and automatic scalable database services.
 It offers a full range of database solutions, such as disaster recovery, backup, recovery, monitoring, and alarms.
@@ -27,42 +27,42 @@ The official website mark  more regions. or you can call [DescribeRegions](https
 
 ```terraform
 
-data "apsarastack_hbase_zones" "default" {}
+data "alibabacloudstack_hbase_zones" "default" {}
 variable "name" {
 	default = "tf-testAcccn-qingdao-env17-d01Vpc4335548"
 }
-data "apsarastack_zones" "default" {}
+data "alibabacloudstack_zones" "default" {}
 
-data "apsarastack_vpcs" "default" {
+data "alibabacloudstack_vpcs" "default" {
 	name_regex = "default-NODELETING"
 }
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
 name       = var.name
 cidr_block = "172.16.0.0/16"
 }
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = data.apsarastack_hbase_zones.default.ids.0
+  availability_zone = data.alibabacloudstack_hbase_zones.default.ids.0
   name              = "${var.name}"
 }
 
-resource "apsarastack_security_group" "default" {
+resource "alibabacloudstack_security_group" "default" {
 	count = 2
-	vpc_id = apsarastack_vpc.default.id
+	vpc_id = alibabacloudstack_vpc.default.id
 	name = var.name
 }
 
 
-resource "apsarastack_hbase_instance" "default" {
+resource "alibabacloudstack_hbase_instance" "default" {
   name = "tf-testAcccn-qingdao-env17-d01Vpc4335548"
   ip_white = "192.168.1.2"
-  vswitch_id = "${apsarastack_vswitch.default.id}"
+  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
   account = "adminu"
-  zone_id = "${data.apsarastack_zones.default.zones.0.id}"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
   security_groups = [
-                      "${apsarastack_security_group.default.0.id}",
-                      "${apsarastack_security_group.default.1.id}"
+                      "${alibabacloudstack_security_group.default.0.id}",
+                      "${alibabacloudstack_security_group.default.1.id}"
                     ]
   core_disk_size = "480"
   engine_version = "2.0"

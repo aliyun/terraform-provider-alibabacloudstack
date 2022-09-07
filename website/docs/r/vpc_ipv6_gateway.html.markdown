@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpc_ipv6_gateway"
-sidebar_current: "docs-apsarastack-resource-vpc-ipv6-gateway"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6_gateway"
+sidebar_current: "docs-alibabacloudstack-resource-vpc-ipv6-gateway"
 description: |-
-  Provides a Apsarastack VPC Ipv6 Gateway resource.
+  Provides a Alibabacloudstack VPC Ipv6 Gateway resource.
 ---
 
-# apsarastack\_vpc\_ipv6\_gateway
+# alibabacloudstack\_vpc\_ipv6\_gateway
 
 Provides a VPC Ipv6 Gateway resource.
 
@@ -20,14 +20,14 @@ For information about VPC Ipv6 Gateway and how to use it, see [What is Ipv6 Gate
 Basic Usage
 
 ```terraform
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   vpc_name    = "example_value"
   enable_ipv6 = "true"
 }
 
-resource "apsarastack_vpc_ipv6_gateway" "example" {
+resource "alibabacloudstack_vpc_ipv6_gateway" "example" {
   ipv6_gateway_name = "example_value"
-  vpc_id            = apsarastack_vpc.default.id
+  vpc_id            = alibabacloudstack_vpc.default.id
 }
 
 ```
@@ -61,5 +61,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 VPC Ipv6 Gateway can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_vpc_ipv6_gateway.example <id>
+$ terraform import alibabacloudstack_vpc_ipv6_gateway.example <id>
 ```

@@ -1,21 +1,21 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_snapshot"
-sidebar_current: "docs-apsarastack-resource-snapshot"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_snapshot"
+sidebar_current: "docs-alibabacloudstack-resource-snapshot"
 description: |-
   Provides an ECS snapshot resource.
 ---
 
-# apsarastack\_snapshot
+# alibabacloudstack\_snapshot
 
 Provides an ECS snapshot resource.
 
 ## Example Usage
 
 ```
-resource "apsarastack_snapshot" "snapshot" {
-  disk_id     = "${apsarastack_disk_attachment.instance-attachment.disk_id}"
+resource "alibabacloudstack_snapshot" "snapshot" {
+  disk_id     = "${alibabacloudstack_disk_attachment.instance-attachment.disk_id}"
   name        = "test-snapshot"
   description = "this snapshot is created for testing"
   tags = {

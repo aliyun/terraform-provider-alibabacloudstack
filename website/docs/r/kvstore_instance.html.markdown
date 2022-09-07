@@ -1,13 +1,13 @@
 ---
 subcategory: "Redis And Memcache (KVStore)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_kvstore_instance"
-sidebar_current: "docs-apsarastack-resource-kvstore-instance"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_kvstore_instance"
+sidebar_current: "docs-alibabacloudstack-resource-kvstore-instance"
 description: |-
   Provides an ApsaraDB Redis / Memcache instance resource.
 ---
 
-# apsarastack\_kvstore\_instance
+# alibabacloudstack\_kvstore\_instance
 
 Provides an ApsaraDB Redis / Memcache instance resource. A DB instance is an isolated database environment in the cloud. It can be associated with IP whitelists and backup configuration which are separate resource providers.
 
@@ -22,23 +22,23 @@ variable "creation" {
 variable "name" {
   default = "kvstoreinstancevpc"
 }
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "${var.creation}"
 }
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = "${var.name}"
   cidr_block = "172.16.0.0/16"
 }
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
-resource "apsarastack_kvstore_instance" "default" {
+resource "alibabacloudstack_kvstore_instance" "default" {
   instance_class = "redis.master.small.default"
   instance_name  = "${var.name}"
-  vswitch_id     = "${apsarastack_vswitch.default.id}"
+  vswitch_id     = "${alibabacloudstack_vswitch.default.id}"
   private_ip     = "172.16.0.10"
   security_ips   = ["10.0.0.1"]
   instance_type  = "Redis"
@@ -53,7 +53,7 @@ The following arguments are supported:
 * `password`- (Optional, Sensitive) The password of the DB instance. The password is a string of 8 to 30 characters and must contain uppercase letters, lowercase letters, and numbers.
 * `kms_encrypted_password` - (Optional) An KMS encrypts password used to a instance. If the `password` is filled in, this field will be ignored.
 * `kms_encryption_context` - (Optional, MapString) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating instance with `kms_encrypted_password`. See [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm). It is valid when `kms_encrypted_password` is set.
-* `instance_class` - (Required) Type of the applied ApsaraDB for Redis instance. It can be retrieved by data source [`apsarastack_kvstore_instance_classes`](https://www.terraform.io/docs/providers/apsarastack/d/kvstore_instance_classes.html)
+* `instance_class` - (Required) Type of the applied ApsaraDB for Redis instance. It can be retrieved by data source [`alibabacloudstack_kvstore_instance_classes`](https://www.terraform.io/docs/providers/alibabacloudstack/d/kvstore_instance_classes.html)
 * `availability_zone` - (Optional, ForceNew) The Zone to launch the DB instance.
 * `instance_charge_type` - (Optional) Valid values are `PrePaid`, `PostPaid`, Default to `PostPaid`.
 * `period` - (Optional) The duration that you will buy DB instance (in month). It is valid when instance_charge_type is `PrePaid`. Valid values: [1~9], 12, 24, 36. Default to 1.
@@ -92,5 +92,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 KVStore instance can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_kvstore_instance.example r-abc12345678
+$ terraform import alibabacloudstack_kvstore_instance.example r-abc12345678
 ```

@@ -1,12 +1,12 @@
 ---
 subcategory: "Data Works"
-layout: "apsarastack"
-page_title: "ApsaraStack: apsarastack_data_works_project"
-sidebar_current: "docs-apsarastack-resource-data-works-project"
-description: |- Provides a ApsaraStack Data Works Project resource.
+layout: "alibabacloudstack"
+page_title: "AlibabacloudStack: alibabacloudstack_data_works_project"
+sidebar_current: "docs-alibabacloudstack-resource-data-works-project"
+description: |- Provides a AlibabacloudStack Data Works Project resource.
 ---
 
-# apsarastack\_data\_works\_project
+# alibabacloudstack\_data\_works\_project
 
 Provides a Data Works Project resource.
 
@@ -17,7 +17,7 @@ For information about Data Works Project and how to use it,
 Basic Usage
 
 ```terraform
-resource "apsarastack_data_works_project" "default" {
+resource "alibabacloudstack_data_works_project" "default" {
   project_name = "tf_testacc46774"
   task_auth_type = "PROJECT"
 }

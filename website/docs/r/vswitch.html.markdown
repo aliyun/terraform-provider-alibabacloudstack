@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vswitch"
-sidebar_current: "docs-apsarastack-resource-vswitch"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vswitch"
+sidebar_current: "docs-alibabacloudstack-resource-vswitch"
 description: |-
-  Provides a Apsarastack VPC switch resource.
+  Provides a Alibabacloudstack VPC switch resource.
 ---
 
-# apsarastack\_vswitch
+# alibabacloudstack\_vswitch
 
 Provides a VPC switch resource.
 
@@ -16,13 +16,13 @@ Provides a VPC switch resource.
 Basic Usage
 
 ```
-resource "apsarastack_vpc" "vpc" {
+resource "alibabacloudstack_vpc" "vpc" {
   name       = "${var.name}"
   cidr_block = "${var.cidr_block}"
 }
 
-resource "apsarastack_vswitch" "vsw" {
-  vpc_id            = "${apsarastack_vpc.vpc.id}"
+resource "alibabacloudstack_vswitch" "vsw" {
+  vpc_id            = "${alibabacloudstack_vpc.vpc.id}"
   cidr_block        = "${var.cidr_block}"
   availability_zone = "${var.availability_zone}"
 }

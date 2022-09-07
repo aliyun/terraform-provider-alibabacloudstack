@@ -1,13 +1,13 @@
 ---
 subcategory: "Datahub Service"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_datahub_service"
-sidebar_current: "docs-apsarastack-datasource-datahub-service"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_datahub_service"
+sidebar_current: "docs-alibabacloudstack-datasource-datahub-service"
 description: |-
     Provides a datasource to open the DataHub service automatically.
 ---
 
-# apsarastack\_datahub\_service
+# alibabacloudstack\_datahub\_service
 
 Using this data source can open DataHub service automatically. If the service has been opened, it will return opened.
 
@@ -18,7 +18,7 @@ For information about DataHub and how to use it, see [What is DataHub](https://h
 ## Example Usage
 
 ```terraform
-data "apsarastack_datahub_service" "open" {
+data "alibabacloudstack_datahub_service" "open" {
   enable = "On"
 }
 ```

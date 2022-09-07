@@ -1,22 +1,22 @@
 ---
 subcategory: "KMS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_kms_secrets"
-sidebar_current: "docs-apsarastack-datasource-kms-secrets"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_kms_secrets"
+sidebar_current: "docs-alibabacloudstack-datasource-kms-secrets"
 description: |-
     Provides a list of available KMS Secrets.
 ---
 
-# apsarastack\_kms\_secrets
+# alibabacloudstack\_kms\_secrets
 
-This data source provides a list of KMS Secrets in an Apsarastack Cloud account according to the specified filters.
+This data source provides a list of KMS Secrets in an Alibabacloudstack Cloud account according to the specified filters.
  
 
 ## Example Usage
 
 ```
 # Declare the data source
-data "apsarastack_kms_secrets" "kms_secrets_ds" {
+data "alibabacloudstack_kms_secrets" "kms_secrets_ds" {
   fetch_tags = true
   name_regex = "name_regex"
   tags = {
@@ -26,7 +26,7 @@ data "apsarastack_kms_secrets" "kms_secrets_ds" {
 }
 
 output "first_secret_id" {
-  value = "${data.apsarastack_kms_secrets.kms_secrets_ds.secrets.0.id}"
+  value = "${data.alibabacloudstack_kms_secrets.kms_secrets_ds.secrets.0.id}"
 }
 ```
 

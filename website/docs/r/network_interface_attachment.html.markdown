@@ -1,15 +1,15 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_network_interface_attachment"
-sidebar_current: "docs-apsarastack-resource-network-interface-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_network_interface_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-network-interface-attachment"
 description: |-
-  Provides an apsarastack ECS Elastic Network Interface Attachment as a resource to attach ENI to or detach ENI from ECS Instances.
+  Provides an alibabacloudstack ECS Elastic Network Interface Attachment as a resource to attach ENI to or detach ENI from ECS Instances.
 ---
 
-# apsarastack\_network\_interface\_attachment
+# alibabacloudstack\_network\_interface\_attachment
 
-Provides an apsarastack ECS Elastic Network Interface Attachment as a resource to attach ENI to or detach ENI from ECS Instances.
+Provides an alibabacloudstack ECS Elastic Network Interface Attachment as a resource to attach ENI to or detach ENI from ECS Instances.
 
 ## Example Usage
 
@@ -17,7 +17,7 @@ Bacis Usage
 
 ```
 
-resource "apsarastack_instance" "apsarainstance" {
+resource "alibabacloudstack_instance" "apsarainstance" {
   image_id              = "gj2j1g3-45h3nnc-454hj5g"
   instance_type        = "ecs.n4.large"
   system_disk_category = "cloud_efficiency"
@@ -26,18 +26,18 @@ resource "apsarastack_instance" "apsarainstance" {
   vswitch_id           = "vsw-abc1345"
 }
 
-resource "apsarastack_network_interface" "NetInterface" {
+resource "alibabacloudstack_network_interface" "NetInterface" {
   name              = "ENI"
-  vswitch_id        = apsarastack_instance.apsarainstance.vswitch_id
-  security_groups   = apsarastack_instance.apsarainstance.security_groups
+  vswitch_id        = alibabacloudstack_instance.apsarainstance.vswitch_id
+  security_groups   = alibabacloudstack_instance.apsarainstance.security_groups
   private_ip        = "192.168.0.2"
   private_ips_count = 3
 }
 
-resource "apsarastack_network_interface_attachment" "NetIntAttachment" {
-  count                = apsarastack_network_interface.NetInterface.private_ips_count
-  instance_id          = apsarastack_instance.apsarainstance.id
-  network_interface_id = apsarastack_network_interface.NetInterface.*.id
+resource "alibabacloudstack_network_interface_attachment" "NetIntAttachment" {
+  count                = alibabacloudstack_network_interface.NetInterface.private_ips_count
+  instance_id          = alibabacloudstack_instance.apsarainstance.id
+  network_interface_id = alibabacloudstack_network_interface.NetInterface.*.id
 }
 ```
 

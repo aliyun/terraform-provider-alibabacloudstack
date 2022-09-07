@@ -1,13 +1,13 @@
 ---
 subcategory: "EDAS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_edas_deploy_group"
-sidebar_current: "docs-apsarastack-resource-edas-deploy-group"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_edas_deploy_group"
+sidebar_current: "docs-alibabacloudstack-resource-edas-deploy-group"
 description: |-
   Provides an EDAS deploy group resource.
 ---
 
-# apsarastack\_edas\_deploy\_group
+# alibabacloudstack\_edas\_deploy\_group
 
 Provides an EDAS deploy group resource.
 
@@ -19,7 +19,7 @@ Provides an EDAS deploy group resource.
 Basic Usage
 
 ```
-resource "apsarastack_edas_deploy_group" "default" {
+resource "alibabacloudstack_edas_deploy_group" "default" {
   app_id     = var.app_id
   group_name = var.group_name
 }
@@ -45,5 +45,5 @@ The following attributes are exported:
 EDAS deploy group can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_edas_deploy_group.group app_id:group_name:group_id
+$ terraform import alibabacloudstack_edas_deploy_group.group app_id:group_name:group_id
 ```

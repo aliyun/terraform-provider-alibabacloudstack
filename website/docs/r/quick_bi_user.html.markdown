@@ -1,13 +1,13 @@
 ---
 subcategory: "Quick BI"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_quick_bi_user"
-sidebar_current: "docs-apsarastack-resource-quick-bi-user"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_quick_bi_user"
+sidebar_current: "docs-alibabacloudstack-resource-quick-bi-user"
 description: |-
-  Provides a Apsarastack Quick BI User resource.
+  Provides a Alibabacloudstack Quick BI User resource.
 ---
 
-# apsarastack\_quick\_bi\_user
+# alibabacloudstack\_quick\_bi\_user
 
 Provides a Quick BI User resource.
 
@@ -18,7 +18,7 @@ For information about Quick BI User and how to use it, see [What is User](https:
 Basic Usage
 
 ```terraform
-resource "apsarastack_quick_bi_user" "example" {
+resource "alibabacloudstack_quick_bi_user" "example" {
   account_name    = "example_value"
   admin_user      = false
   auth_admin_user = false
@@ -50,5 +50,5 @@ The following attributes are exported:
 Quick BI User can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_quick_bi_user.example <id>
+$ terraform import alibabacloudstack_quick_bi_user.example <id>
 ```

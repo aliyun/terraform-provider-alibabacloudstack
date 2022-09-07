@@ -1,27 +1,27 @@
 ---
 subcategory: "Auto Scaling(ESS)"
-layout: "apsarastack"
-page_title: "apsarastack: apsarastack_ess_scaling_rules"
-sidebar_current: "docs-apsarastack_ess_scaling_rules"
+layout: "alibabacloudstack"
+page_title: "alibabacloudstack: alibabacloudstack_ess_scaling_rules"
+sidebar_current: "docs-alibabacloudstack_ess_scaling_rules"
 description: |-
     Provides a list of scaling rules available to the user.
 ---
 
-# apsarastack_ess_scaling_rules
+# alibabacloudstack_ess_scaling_rules
 
 This data source provides available scaling rule resources. 
 
 ## Example Usage
 
 ```
-data "apsarastack_ess_scaling_rules" "scalingrules_ds" {
+data "alibabacloudstack_ess_scaling_rules" "scalingrules_ds" {
   scaling_group_id = "scaling_group_id"
   ids              = ["scaling_rule_id1", "scaling_rule_id2"]
   name_regex       = "scaling_rule_name"
 }
 
 output "first_scaling_rule" {
-  value = "${data.apsarastack_ess_scaling_rules.scalingrules_ds.rules.0.id}"
+  value = "${data.alibabacloudstack_ess_scaling_rules.scalingrules_ds.rules.0.id}"
 }
 ```
 

@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ecs_dedicated_host"
-sidebar_current: "docs-apsarastack-resource-ecs-dedicated-host"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_dedicated_host"
+sidebar_current: "docs-alibabacloudstack-resource-ecs-dedicated-host"
 description: |-
-  Provides a Apsarastack ecs dedicated host resource.
+  Provides a Alibabacloudstack ecs dedicated host resource.
 ---
 
-# apsarastack\_ecs\_dedicated\_host
+# alibabacloudstack\_ecs\_dedicated\_host
 
 This resouce used to create a dedicated host and store its initial version. For information about Aliecs Dedicated Host and how to use it, see [What is Resource Aliecs Dedicated Host](https://www.alibabacloud.com/help/doc-detail/134238.htm).
 
@@ -17,7 +17,7 @@ This resouce used to create a dedicated host and store its initial version. For 
 Basic Usage
 
 ```
-resource "apsarastack_ecs_dedicated_host" "default" {
+resource "alibabacloudstack_ecs_dedicated_host" "default" {
   dedicated_host_type = "ddh.g5"
   tags = {
     Create = "Terraform",
@@ -31,7 +31,7 @@ resource "apsarastack_ecs_dedicated_host" "default" {
 Create Prepaid DDH
 
 ```
-resource "apsarastack_ecs_dedicated_host" "default" {
+resource "alibabacloudstack_ecs_dedicated_host" "default" {
   dedicated_host_type = "ddh.g5"
   tags = {
     Create = "Terraform",
@@ -90,5 +90,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 Ecs dedicated host can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_ecs_dedicated_host.default dh-2zedmxxxx
+$ terraform import alibabacloudstack_ecs_dedicated_host.default dh-2zedmxxxx
 ```

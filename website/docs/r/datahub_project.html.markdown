@@ -1,13 +1,13 @@
 ---
 subcategory: "Datahub Service"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_datahub_project"
-sidebar_current: "docs-apsarastack-resource-datahub-project"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_datahub_project"
+sidebar_current: "docs-alibabacloudstack-resource-datahub-project"
 description: |-
-  Provides a Apsarastack datahub project resource.
+  Provides a Alibabacloudstack datahub project resource.
 ---
 
-# apsarastack\_datahub\_project
+# alibabacloudstack\_datahub\_project
 
 The project is the basic unit of resource management in Datahub Service and is used to isolate and control resources. It contains a set of Topics. You can manage the datahub sources of an application by using projects. [Refer to details](https://help.aliyun.com/document_detail/47440.html).
 
@@ -18,7 +18,7 @@ The project is the basic unit of resource management in Datahub Service and is u
 Basic Usage
 
 ```
-resource "apsarastack_datahub_project" "example" {
+resource "alibabacloudstack_datahub_project" "example" {
   name    = "tf_datahub_project"
   comment = "created by terraform"
 }
@@ -43,5 +43,5 @@ The following attributes are exported:
 Datahub project can be imported using the *name* or ID, e.g.
 
 ```
-$ terraform import apsarastack_datahub_project.example tf_datahub_project
+$ terraform import alibabacloudstack_datahub_project.example tf_datahub_project
 ```

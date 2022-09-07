@@ -1,17 +1,17 @@
 ---
 subcategory: "Auto Scaling(ESS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ess_scaling_configuration"
-sidebar_current: "docs-apsarastack-resource-ess-scaling-configuration"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ess_scaling_configuration"
+sidebar_current: "docs-alibabacloudstack-resource-ess-scaling-configuration"
 description: |-
   Provides a ESS scaling configuration resource.
 ---
 
-# apsarastack\_ess\_scaling\_configuration
+# alibabacloudstack\_ess\_scaling\_configuration
 
 Provides a ESS scaling configuration resource.
 
--> **NOTE:** Several instance types have outdated in some regions and availability zones, such as `ecs.t1.*`, `ecs.s2.*`, `ecs.n1.*` and so on. If you want to keep them, you should set `is_outdated` to true. For more about the upgraded instance type, refer to `apsarastack_instance_types` datasource.
+-> **NOTE:** Several instance types have outdated in some regions and availability zones, such as `ecs.t1.*`, `ecs.s2.*`, `ecs.n1.*` and so on. If you want to keep them, you should set `is_outdated` to true. For more about the upgraded instance type, refer to `alibabacloudstack_instance_types` datasource.
 
 ## Example Usage
 
@@ -20,64 +20,64 @@ variable "name" {
   default = "essscalingconfiguration"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_disk_category     = "cloud_efficiency"
   available_resource_creation = "VSwitch"
 }
 
-data "apsarastack_instance_types" "default" {
-  availability_zone = data.apsarastack_zones.default.zones[0].id
+data "alibabacloudstack_instance_types" "default" {
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   cpu_core_count    = 2
   memory_size       = 4
 }
 
-data "apsarastack_images" "default" {
+data "alibabacloudstack_images" "default" {
   name_regex  = "^ubuntu_18.*64"
   most_recent = true
   owners      = "system"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = var.name
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = apsarastack_vpc.default.id
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = alibabacloudstack_vpc.default.id
   cidr_block        = "172.16.0.0/24"
-  availability_zone = data.apsarastack_zones.default.zones[0].id
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   name              = var.name
 }
 
-resource "apsarastack_security_group" "default" {
+resource "alibabacloudstack_security_group" "default" {
   name   = var.name
-  vpc_id = apsarastack_vpc.default.id
+  vpc_id = alibabacloudstack_vpc.default.id
 }
 
-resource "apsarastack_security_group_rule" "default" {
+resource "alibabacloudstack_security_group_rule" "default" {
   type              = "ingress"
   ip_protocol       = "tcp"
   nic_type          = "intranet"
   policy            = "accept"
   port_range        = "22/22"
   priority          = 1
-  security_group_id = apsarastack_security_group.default.id
+  security_group_id = alibabacloudstack_security_group.default.id
   cidr_ip           = "172.16.0.0/24"
 }
 
-resource "apsarastack_ess_scaling_group" "default" {
+resource "alibabacloudstack_ess_scaling_group" "default" {
   min_size           = 1
   max_size           = 1
   scaling_group_name = var.name
   removal_policies   = ["OldestInstance", "NewestInstance"]
-  vswitch_ids        = [apsarastack_vswitch.default.id]
+  vswitch_ids        = [alibabacloudstack_vswitch.default.id]
 }
 
-resource "apsarastack_ess_scaling_configuration" "default" {
-  scaling_group_id  = apsarastack_ess_scaling_group.default.id
-  image_id          = data.apsarastack_images.default.images[0].id
-  instance_type     = data.apsarastack_instance_types.default.instance_types[0].id
-  security_group_id = apsarastack_security_group.default.id
+resource "alibabacloudstack_ess_scaling_configuration" "default" {
+  scaling_group_id  = alibabacloudstack_ess_scaling_group.default.id
+  image_id          = data.alibabacloudstack_images.default.images[0].id
+  instance_type     = data.alibabacloudstack_instance_types.default.instance_types[0].id
+  security_group_id = alibabacloudstack_security_group.default.id
   force_delete      = true
   active            = true
 }
@@ -109,7 +109,7 @@ The following arguments are supported:
 * `substitute` - (Optional) The another scaling configuration which will be active automatically and replace current configuration when setting `active` to 'false'. It is invalid when `active` is 'true'.
 * `user_data` - (Optional) User-defined data to customize the startup behaviors of the ECS instance and to pass data into the ECS instance.
 * `key_name` - (Optional) The name of key pair that can login ECS instance successfully without password. If it is specified, the password would be invalid.
-* `role_name` - (Optional) Instance RAM role name. The name is provided and maintained by RAM. You can use `apsarastack_ram_role` to create a new one.
+* `role_name` - (Optional) Instance RAM role name. The name is provided and maintained by RAM. You can use `alibabacloudstack_ram_role` to create a new one.
 * `force_delete` - (Optional) The last scaling configuration will be deleted forcibly with deleting its scaling group. Default to false.
 * `data_disk` - (Optional) DataDisk mappings to attach to ecs instance. See [Block datadisk](#block-datadisk) below for details.
 * `tags` - (Optional) A mapping of tags to assign to the resource. It will be applied for ECS instances finally.

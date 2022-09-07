@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpc_ipv6_egress_rules"
-sidebar_current: "docs-apsarastack-datasource-vpc-ipv6-egress-rules"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6_egress_rules"
+sidebar_current: "docs-alibabacloudstack-datasource-vpc-ipv6-egress-rules"
 description: |-
   Provides a list of Vpc Ipv6 Egress Rules to the user.
 ---
 
-# apsarastack\_vpc\_ipv6\_egress\_rules
+# alibabacloudstack\_vpc\_ipv6\_egress\_rules
 
 This data source provides the Vpc Ipv6 Egress Rules of the current Alibaba Cloud user.
 
@@ -18,36 +18,36 @@ This data source provides the Vpc Ipv6 Egress Rules of the current Alibaba Cloud
 Basic Usage
 
 ```terraform
-data "apsarastack_vpc_ipv6_egress_rules" "ids" {
+data "alibabacloudstack_vpc_ipv6_egress_rules" "ids" {
   ipv6_gateway_id = "example_value"
   ids             = ["example_value-1", "example_value-2"]
 }
 output "vpc_ipv6_egress_rule_id_1" {
-  value = data.apsarastack_vpc_ipv6_egress_rules.ids.rules.0.id
+  value = data.alibabacloudstack_vpc_ipv6_egress_rules.ids.rules.0.id
 }
 
-data "apsarastack_vpc_ipv6_egress_rules" "nameRegex" {
+data "alibabacloudstack_vpc_ipv6_egress_rules" "nameRegex" {
   ipv6_gateway_id = "example_value"
   name_regex      = "^my-Ipv6EgressRule"
 }
 output "vpc_ipv6_egress_rule_id_2" {
-  value = data.apsarastack_vpc_ipv6_egress_rules.nameRegex.rules.0.id
+  value = data.alibabacloudstack_vpc_ipv6_egress_rules.nameRegex.rules.0.id
 }
 
-data "apsarastack_vpc_ipv6_egress_rules" "status" {
+data "alibabacloudstack_vpc_ipv6_egress_rules" "status" {
   ipv6_gateway_id = "example_value"
   status          = "Available"
 }
 output "vpc_ipv6_egress_rule_id_3" {
-  value = data.apsarastack_vpc_ipv6_egress_rules.status.rules.0.id
+  value = data.alibabacloudstack_vpc_ipv6_egress_rules.status.rules.0.id
 }
 
-data "apsarastack_vpc_ipv6_egress_rules" "ipv6EgressRuleName" {
+data "alibabacloudstack_vpc_ipv6_egress_rules" "ipv6EgressRuleName" {
   ipv6_gateway_id       = "example_value"
   ipv6_egress_rule_name = "example_value"
 }
 output "vpc_ipv6_egress_rule_id_4" {
-  value = data.apsarastack_vpc_ipv6_egress_rules.ipv6EgressRuleName.rules.0.id
+  value = data.alibabacloudstack_vpc_ipv6_egress_rules.ipv6EgressRuleName.rules.0.id
 }
 
 ```

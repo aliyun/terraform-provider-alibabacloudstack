@@ -1,20 +1,20 @@
 ---
 subcategory: "VPN"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpn_gateways"
-sidebar_current: "docs-apsarastack-datasource-vpn-gateways"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpn_gateways"
+sidebar_current: "docs-alibabacloudstack-datasource-vpn-gateways"
 description: |-
-    Provides a list of VPNs which owned by an Apsarastack account.
+    Provides a list of VPNs which owned by an Alibabacloudstack account.
 ---
 
-# apsarastack\_vpn_gateways
+# alibabacloudstack\_vpn_gateways
 
-The VPNs data source lists a number of VPNs resource information owned by an Apsarastack account.
+The VPNs data source lists a number of VPNs resource information owned by an Alibabacloudstack account.
 
 ## Example Usage
 
 ```
-data "apsarastack_vpn_gateways" "vpn_gateways" {
+data "alibabacloudstack_vpn_gateways" "vpn_gateways" {
   vpc_id          = "fake-vpc-id"
   ids             = ["fake-vpn-id1", "fake-vpn-id2"]
   status          = "active"

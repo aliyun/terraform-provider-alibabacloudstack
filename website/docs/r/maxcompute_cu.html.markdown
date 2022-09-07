@@ -1,13 +1,13 @@
 ---
 subcategory: "MaxCompute"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_maxcompute_cu"
-sidebar_current: "docs-apsarastack-resource-maxcompute-cu"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_cu"
+sidebar_current: "docs-alibabacloudstack-resource-maxcompute-cu"
 description: |-
-  Provides a Apsarastack maxcompute cu resource.
+  Provides a Alibabacloudstack maxcompute cu resource.
 ---
 
-# apsarastack\_maxcompute\_project
+# alibabacloudstack\_maxcompute\_project
 
 The cu is the basic unit of operation in maxcompute. 
 
@@ -18,8 +18,8 @@ The cu is the basic unit of operation in maxcompute.
 Basic Usage
 
 ```terraform
-resource "apsarastack_maxcompute_cu" "example" {
-   cu_name      = "tf_testAccApsaraStack7898"
+resource "alibabacloudstack_maxcompute_cu" "example" {
+   cu_name      = "tf_testAccAlibabacloudStack7898"
    cu_num       = "1"
    cluster_name = "HYBRIDODPSCLUSTER-A-20210520-07B0"
 }
@@ -38,5 +38,5 @@ The following arguments are supported:
 MaxCompute project can be imported using the *name* or ID, e.g.
 
 ```
-$ terraform import apsarastack_maxcompute_project.example tf_maxcompute_project
+$ terraform import alibabacloudstack_maxcompute_project.example tf_maxcompute_project
 ```

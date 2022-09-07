@@ -1,25 +1,25 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_backend_servers"
-sidebar_current: "docs-apsarastack-datasource-slb-backend_servers"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_backend_servers"
+sidebar_current: "docs-alibabacloudstack-datasource-slb-backend_servers"
 description: |-
     Provides a list of server load balancer backend servers to the user.
 ---
 
-# apsarastack\_slb_backend_servers
+# alibabacloudstack\_slb_backend_servers
 
 This data source provides the server load balancer backend servers related to a server load balancer..
 
 ## Example Usage
 
 ```
-data "apsarastack_slb_beckend_servers" "sample_ds" {
-  load_balancer_id = "${apsarastack_slb.sample_slb.id}"
+data "alibabacloudstack_slb_beckend_servers" "sample_ds" {
+  load_balancer_id = "${alibabacloudstack_slb.sample_slb.id}"
 }
 
 output "first_slb_backend_server_id" {
-  value = "${data.apsarastack_slb_beckend_servers.sample_ds.backend_servers.0.id}"
+  value = "${data.alibabacloudstack_slb_beckend_servers.sample_ds.backend_servers.0.id}"
 }
 ```
 

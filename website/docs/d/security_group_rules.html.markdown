@@ -1,17 +1,17 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_security_group_rules"
-sidebar_current: "docs-apsarastack-datasource-security-group-rules"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_security_group_rules"
+sidebar_current: "docs-alibabacloudstack-datasource-security-group-rules"
 description: |-
     Provides a collection of Security Group Rules available to the user.
 ---
 
-# apsarastack\_security\_group\_rules
+# alibabacloudstack\_security\_group\_rules
 
-The `apsarastack_security_group_rules` data source provides a collection of security permissions of a specific security group.
+The `alibabacloudstack_security_group_rules` data source provides a collection of security permissions of a specific security group.
 Each collection item represents a single `ingress` or `egress` permission rule.
-The ID of the security group can be provided via a variable or the result from the other data source `apsarastack_security_groups`.
+The ID of the security group can be provided via a variable or the result from the other data source `alibabacloudstack_security_groups`.
 
 ## Example Usage
 
@@ -21,22 +21,22 @@ The following example shows how to obtain details about a security group rule an
 # Get the security group id from a variable
 variable "security_group_id" {}
 
-# Or get it from the apsarastack_security_groups data source.
+# Or get it from the alibabacloudstack_security_groups data source.
 # Please note that the data source arguments must be enough to filter results to one security group.
-data "apsarastack_security_groups" "groups_ds" {
+data "alibabacloudstack_security_groups" "groups_ds" {
   name_regex = "api"
 }
 
 # Filter the security group rule by group
-data "apsarastack_security_group_rules" "ingress_rules_ds" {
-  group_id    = "${data.apsarastack_security_groups.groups_ds.groups.0.id}" # or ${var.security_group_id}
+data "alibabacloudstack_security_group_rules" "ingress_rules_ds" {
+  group_id    = "${data.alibabacloudstack_security_groups.groups_ds.groups.0.id}" # or ${var.security_group_id}
   nic_type    = "internet"
   direction   = "ingress"
   ip_protocol = "TCP"
 }
 
 output "security_group_rules" {
-  value = data.apsarastack_security_group_rules.ingress_rules_ds
+  value = data.alibabacloudstack_security_group_rules.ingress_rules_ds
 }
 
 ```
@@ -63,9 +63,9 @@ The following attributes are exported in addition to the arguments listed above:
     * `ip_protocol` - The protocol. Can be `tcp`, `udp`, `icmp`, `gre` or `all`.
     * `port_range` - The range of port numbers.
     * `source_cidr_ip` - Source IP address segment for ingress authorization.
-    * `source_group_owner_account` - Apsarastack Cloud account of the source security group.
+    * `source_group_owner_account` - Alibabacloudstack Cloud account of the source security group.
     * `dest_cidr_ip` - Target IP address segment for egress authorization.
-    * `dest_group_owner_account` - Apsarastack Cloud account of the target security group.
+    * `dest_group_owner_account` - Alibabacloudstack Cloud account of the target security group.
     * `policy` - Authorization policy. Can be either `accept` or `drop`.
     * `nic_type` - Network type, `internet` or `intranet`.
     * `priority` - Rule priority.

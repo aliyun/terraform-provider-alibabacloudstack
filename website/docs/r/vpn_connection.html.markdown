@@ -1,17 +1,17 @@
 ---
 subcategory: "VPN"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpn_connection"
-sidebar_current: "docs-apsarastack-resource-vpn-connection"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpn_connection"
+sidebar_current: "docs-alibabacloudstack-resource-vpn-connection"
 description: |-
-  Provides a Apsarastack VPN connection resource.
+  Provides a Alibabacloudstack VPN connection resource.
 ---
 
-# apsarastack\_vpn\_connection
+# alibabacloudstack\_vpn\_connection
 
 Provides a VPN connection resource.
 
--> **NOTE:** Terraform will auto build vpn connection while it uses `apsarastack_vpn_connection` to build a vpn connection resource.
+-> **NOTE:** Terraform will auto build vpn connection while it uses `alibabacloudstack_vpn_connection` to build a vpn connection resource.
              The vpn connection depends on VPN and VPN customer gateway.
 
 ## Example Usage
@@ -19,7 +19,7 @@ Provides a VPN connection resource.
 Basic Usage
 
 ```
-resource "apsarastack_vpn_gateway" "foo" {
+resource "alibabacloudstack_vpn_gateway" "foo" {
   name                 = "testAccVpnConfig_create"
   vpc_id               = "vpc-fake-id"
   bandwidth            = "10"
@@ -28,16 +28,16 @@ resource "apsarastack_vpn_gateway" "foo" {
   description          = "test_create_description"
 }
 
-resource "apsarastack_vpn_customer_gateway" "foo" {
+resource "alibabacloudstack_vpn_customer_gateway" "foo" {
   name        = "testAccVpnCgwName"
   ip_address  = "42.104.22.228"
   description = "testAccVpnCgwDesc"
 }
 
-resource "apsarastack_vpn_connection" "foo" {
+resource "alibabacloudstack_vpn_connection" "foo" {
   name                = "tf-vco_test1"
-  vpn_gateway_id      = apsarastack_vpn_gateway.foo.id
-  customer_gateway_id = apsarastack_vpn_customer_gateway.foo.id
+  vpn_gateway_id      = alibabacloudstack_vpn_gateway.foo.id
+  customer_gateway_id = alibabacloudstack_vpn_customer_gateway.foo.id
   local_subnet        = ["172.16.0.0/24", "172.16.1.0/24"]
   remote_subnet       = ["10.0.0.0/24", "10.0.1.0/24"]
   effect_immediately  = true
@@ -110,7 +110,7 @@ The following attributes are exported:
 VPN connection can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_vpn_connection.example vco-abc123456
+$ terraform import alibabacloudstack_vpn_connection.example vco-abc123456
 ```
 
 

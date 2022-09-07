@@ -1,20 +1,20 @@
 ---
 subcategory: "VPN"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpn_customer_gateways"
-sidebar_current: "docs-apsarastack-datasource-vpn-customer-gateways"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpn_customer_gateways"
+sidebar_current: "docs-alibabacloudstack-datasource-vpn-customer-gateways"
 description: |-
-    Provides a list of VPN customer gateways which owned by an Apsarastack account.
+    Provides a list of VPN customer gateways which owned by an Alibabacloudstack account.
 ---
 
-# apsarastack\_vpn_customer_gateways
+# alibabacloudstack\_vpn_customer_gateways
 
-The VPN customers gateways data source lists a number of VPN customer gateways resource information owned by an Apsarastack account.
+The VPN customers gateways data source lists a number of VPN customer gateways resource information owned by an Alibabacloudstack account.
 
 ## Example Usage
 
 ```
-data "apsarastack_vpn_customer_gateways" "foo" {
+data "alibabacloudstack_vpn_customer_gateways" "foo" {
   name_regex          = "testAcc*"
   ids                 = ["fake-id1", "fake-id2"] 
   output_file         = "/tmp/cgws"

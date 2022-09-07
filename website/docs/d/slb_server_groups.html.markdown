@@ -1,25 +1,25 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_server_groups"
-sidebar_current: "docs-apsarastack-datasource-slb-server_groups"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_server_groups"
+sidebar_current: "docs-alibabacloudstack-datasource-slb-server_groups"
 description: |-
     Provides a list of VServer groups related to a server load balancer to the user.
 ---
 
-# apsarastack\_slb_server_groups
+# alibabacloudstack\_slb_server_groups
 
 This data source provides the VServer groups related to a server load balancer.
 
 ## Example Usage
 
 ```
-data "apsarastack_slb_server_groups" "sample_ds" {
-  load_balancer_id = "${apsarastack_slb.sample_slb.id}"
+data "alibabacloudstack_slb_server_groups" "sample_ds" {
+  load_balancer_id = "${alibabacloudstack_slb.sample_slb.id}"
 }
 
 output "first_slb_server_group_id" {
-  value = "${data.apsarastack_slb_server_groups.sample_ds.slb_server_groups.0.id}"
+  value = "${data.alibabacloudstack_slb_server_groups.sample_ds.slb_server_groups.0.id}"
 }
 ```
 

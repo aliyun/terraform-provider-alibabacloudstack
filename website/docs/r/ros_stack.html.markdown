@@ -1,10 +1,10 @@
 ---
 subcategory: "ROS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ros_stack"
-sidebar_current: "docs-apsarastack-resource-ros-stack"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ros_stack"
+sidebar_current: "docs-alibabacloudstack-resource-ros-stack"
 description: |-
-  Provides a Apsarastack ROS Stack resource.
+  Provides a Alibabacloudstack ROS Stack resource.
 ---
 
 # alicloud\_ros\_stack
@@ -20,7 +20,7 @@ For information about ROS Stack and how to use it, see [What is Stack](https://w
 Basic Usage
 
 ```terraform
-resource "apsarastack_ros_stack" "example" {
+resource "alibabacloudstack_ros_stack" "example" {
   stack_name        = "tf-testaccstack"
   template_body     = <<EOF
     {

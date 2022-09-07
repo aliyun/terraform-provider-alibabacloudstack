@@ -1,13 +1,13 @@
 ---
 subcategory: "DMS Enterprise"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_dms_enterprise_users"
-sidebar_current: "docs-apsarastack-datasource-dms-enterprise-users"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dms_enterprise_users"
+sidebar_current: "docs-alibabacloudstack-datasource-dms-enterprise-users"
 description: |-
     Provides a list of available DMS Enterprise Users.
 ---
 
-# apsarastack\_dms\_enterprise\_users
+# alibabacloudstack\_dms\_enterprise\_users
 
 This data source provides a list of DMS Enterprise Users in an Alibaba Cloud account according to the specified filters.
 
@@ -15,14 +15,14 @@ This data source provides a list of DMS Enterprise Users in an Alibaba Cloud acc
 
 ```terraform
 # Declare the data source
-data "apsarastack_dms_enterprise_users" "dms_enterprise_users_ds" {
+data "alibabacloudstack_dms_enterprise_users" "dms_enterprise_users_ds" {
   ids    = ["uid"]
   role   = "USER"
   status = "NORMAL"
 }
 
 output "first_user_id" {
-  value = "${data.apsarastack_dms_enterprise_users.dms_enterprise_users_ds.users.0.id}"
+  value = "${data.alibabacloudstack_dms_enterprise_users.dms_enterprise_users_ds.users.0.id}"
 }
 ```
 

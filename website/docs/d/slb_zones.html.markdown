@@ -1,25 +1,25 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_zones"
-sidebar_current: "docs-apsarastack-datasource-slb-zones"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_zones"
+sidebar_current: "docs-alibabacloudstack-datasource-slb-zones"
 description: |-
-    Provides a list of availability zones for SLB that can be used by an ApsaraStack Cloud account.
+    Provides a list of availability zones for SLB that can be used by an AlibabacloudStack Cloud account.
 ---
 
-# apsarastack\_slb\_zones
+# alibabacloudstack\_slb\_zones
 
-This data source provides availability zones for SLB that can be accessed by an ApsaraStack Cloud account within the region configured in the provider.
+This data source provides availability zones for SLB that can be accessed by an AlibabacloudStack Cloud account within the region configured in the provider.
 
 
 ## Example Usage
 
 ```
 # Declare the data source
-data "apsarastack_slb_zones" "zones_ids" {}
+data "alibabacloudstack_slb_zones" "zones_ids" {}
 
 output "slb_zones" {
-  value = data.apsarastack_slb_zones.zones_ids.*
+  value = data.alibabacloudstack_slb_zones.zones_ids.*
 }
 ```
 

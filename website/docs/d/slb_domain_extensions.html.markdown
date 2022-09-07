@@ -1,26 +1,26 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_domain_extensions"
-sidebar_current: "docs-apsarastack-resource-slb-domain-extensions"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_domain_extensions"
+sidebar_current: "docs-alibabacloudstack-resource-slb-domain-extensions"
 description: |-
   Provides a Load Banlancer domain extension Resource and add it to one Listener.
 ---
 
-# apsarastack\_slb\_domain_extensions
+# alibabacloudstack\_slb\_domain_extensions
 
 This data source provides the domain extensions associated with a server load balancer listener.
 
 ## Example Usage
 ```
-data "apsarastack_slb_domain_extensions" "foo" {
+data "alibabacloudstack_slb_domain_extensions" "foo" {
   ids               = ["fake-de-id"]
   load_balancer_id  = "fake-lb-id"
   frontend_port     = "fake-port"
 }
 
 output "slb_domain_extension" {
-  value = "${data.apsarastack_slb_domain_extensions.foo.extensions.0.id}"
+  value = "${data.alibabacloudstack_slb_domain_extensions.foo.extensions.0.id}"
 }
 
 ```

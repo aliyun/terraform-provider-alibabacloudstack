@@ -1,25 +1,25 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slbs"
-sidebar_current: "docs-apsarastack-datasource-slbs"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slbs"
+sidebar_current: "docs-alibabacloudstack-datasource-slbs"
 description: |-
     Provides a list of server load balancers to the user.
 ---
 
-# apsarastack\_slbs
+# alibabacloudstack\_slbs
 
-This data source provides the server load balancers of the current Apsarastack Cloud user.
+This data source provides the server load balancers of the current Alibabacloudstack Cloud user.
 
 ## Example Usage
 
 ```
-data "apsarastack_slbs" "slbs_ds" {
+data "alibabacloudstack_slbs" "slbs_ds" {
   name_regex = "sample_slb"
 }
 
 output "first_slb_id" {
-  value = "${data.apsarastack_slbs.slbs_ds.slbs.0.id}"
+  value = "${data.alibabacloudstack_slbs.slbs_ds.slbs.0.id}"
 }
 ```
 

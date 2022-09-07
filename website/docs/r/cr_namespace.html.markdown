@@ -1,13 +1,13 @@
 ---
 subcategory: "Container Registry (CR)"
-layout: "apsarastack"
-page_title: "Apsarastack:apsarastack_cr_namespace"
-sidebar_current: "docs-apsarastack-resource-container-registry"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack:alibabacloudstack_cr_namespace"
+sidebar_current: "docs-alibabacloudstack-resource-container-registry"
 description: |-
-  Provides a Apsarastack resource to manage Container Registry namespaces.
+  Provides a Alibabacloudstack resource to manage Container Registry namespaces.
 ---
 
-# apsarastack\_cr\_namespace
+# alibabacloudstack\_cr\_namespace
 
 This resource will help you to manager Container Registry namespaces.
 
@@ -17,7 +17,7 @@ This resource will help you to manager Container Registry namespaces.
 Basic Usage
 
 ```
-resource "apsarastack_cr_namespace" "my-namespace" {
+resource "alibabacloudstack_cr_namespace" "my-namespace" {
   name               = "my-namespace"
   auto_create        = false
   default_visibility = "PUBLIC"

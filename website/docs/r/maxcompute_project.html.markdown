@@ -1,13 +1,13 @@
 ---
 subcategory: "MaxCompute"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_maxcompute_project"
-sidebar_current: "docs-apsarastack-resource-maxcompute-project"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_project"
+sidebar_current: "docs-alibabacloudstack-resource-maxcompute-project"
 description: |-
-  Provides a Apsarastack maxcompute project resource.
+  Provides a Alibabacloudstack maxcompute project resource.
 ---
 
-# apsarastack\_maxcompute\_project
+# alibabacloudstack\_maxcompute\_project
 
 The project is the basic unit of operation in maxcompute. 
 
@@ -18,7 +18,7 @@ The project is the basic unit of operation in maxcompute.
 Basic Usage
 
 ```terraform
-resource "apsarastack_maxcompute_project" "example" {
+resource "alibabacloudstack_maxcompute_project" "example" {
   project_name       = "tf_maxcompute_project"
   specification_type = "OdpsStandard"
   order_type         = "PayAsYouGo"
@@ -43,5 +43,5 @@ The following attributes are exported:
 MaxCompute project can be imported using the *name* or ID, e.g.
 
 ```
-$ terraform import apsarastack_maxcompute_project.example tf_maxcompute_project
+$ terraform import alibabacloudstack_maxcompute_project.example tf_maxcompute_project
 ```

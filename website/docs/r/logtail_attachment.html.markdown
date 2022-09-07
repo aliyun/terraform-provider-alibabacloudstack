@@ -1,13 +1,13 @@
 ---
 subcategory: "Log Service (SLS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_logtail_attachment"
-sidebar_current: "docs-apsarastack-resource-logtail-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_logtail_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-logtail-attachment"
 description: |-
-  Provides a Apsarastack logtail attachment resource.
+  Provides a Alibabacloudstack logtail attachment resource.
 ---
 
-# apsarastack\_logtail\_attachment
+# alibabacloudstack\_logtail\_attachment
 
 The Logtail access service is a log collection agent provided by Log Service.
 You can use Logtail to collect logs from servers such as Alibaba Cloud Elastic
@@ -22,13 +22,13 @@ This resource amis to attach one logtail configure to a machine group.
 Basic Usage
 
 ```
-resource "apsarastack_log_project" "test" {
+resource "alibabacloudstack_log_project" "test" {
   name        = "test-tf2"
   description = "create by terraform"
 }
 
-resource "apsarastack_log_store" "test" {
-  project               = apsarastack_log_project.test.name
+resource "alibabacloudstack_log_store" "test" {
+  project               = alibabacloudstack_log_project.test.name
   name                  = "tf-test-logstore"
   retention_period      = 3650
   shard_count           = 3
@@ -37,16 +37,16 @@ resource "apsarastack_log_store" "test" {
   append_meta           = true
 }
 
-resource "apsarastack_log_machine_group" "test" {
-  project       = apsarastack_log_project.test.name
+resource "alibabacloudstack_log_machine_group" "test" {
+  project       = alibabacloudstack_log_project.test.name
   name          = "tf-log-machine-group"
   topic         = "terraform"
   identify_list = ["10.0.0.1", "10.0.0.3", "10.0.0.2"]
 }
 
-resource "apsarastack_logtail_config" "test" {
-  project      = apsarastack_log_project.test.name
-  logstore     = apsarastack_log_store.test.name
+resource "alibabacloudstack_logtail_config" "test" {
+  project      = alibabacloudstack_log_project.test.name
+  logstore     = alibabacloudstack_log_store.test.name
   input_type   = "file"
   log_sample   = "test"
   name         = "tf-log-config"
@@ -67,10 +67,10 @@ DEFINITION
 
 }
 
-resource "apsarastack_logtail_attachment" "test" {
-  project             = apsarastack_log_project.test.name
-  logtail_config_name = apsarastack_logtail_config.test.name
-  machine_group_name  = apsarastack_log_machine_group.test.name
+resource "alibabacloudstack_logtail_attachment" "test" {
+  project             = alibabacloudstack_log_project.test.name
+  logtail_config_name = alibabacloudstack_logtail_config.test.name
+  machine_group_name  = alibabacloudstack_log_machine_group.test.name
 }
 ```
 
@@ -94,5 +94,5 @@ The following attributes are exported:
 Logtial to machine group can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_logtail_to_machine_group.example tf-log:tf-log-config:tf-log-machine-group
+$ terraform import alibabacloudstack_logtail_to_machine_group.example tf-log:tf-log-config:tf-log-machine-group
 ```

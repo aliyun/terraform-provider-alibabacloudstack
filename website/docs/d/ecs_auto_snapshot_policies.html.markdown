@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ecs_auto_snapshot_policies"
-sidebar_current: "docs-apsarastack-datasource-ecs-auto-snapshot-policies"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_auto_snapshot_policies"
+sidebar_current: "docs-alibabacloudstack-datasource-ecs-auto-snapshot-policies"
 description: |-
   Provides a list of Ecs Auto Snapshot Policies to the user.
 ---
 
-# apsarastack\_ecs\_auto\_snapshot\_policies
+# alibabacloudstack\_ecs\_auto\_snapshot\_policies
 
 This data source provides the Ecs Auto Snapshot Policies of the current Apsara Stack Cloud user.
 
@@ -18,13 +18,13 @@ This data source provides the Ecs Auto Snapshot Policies of the current Apsara S
 Basic Usage
 
 ```terraform
-data "apsarastack_ecs_auto_snapshot_policies" "example" {
+data "alibabacloudstack_ecs_auto_snapshot_policies" "example" {
   ids        = ["sp-bp14e66xxxxxxxx"]
   name_regex = "tf-testAcc"
 }
 
 output "first_ecs_auto_snapshot_policy_id" {
-  value = data.apsarastack_ecs_auto_snapshot_policies.example.policies.0.id
+  value = data.alibabacloudstack_ecs_auto_snapshot_policies.example.policies.0.id
 }
 ```
 

@@ -1,13 +1,13 @@
 ---
 subcategory: "DNS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_dns_domain_attachment"
-sidebar_current: "docs-apsarastack-resource-dns-domain-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dns_domain_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-dns-domain-attachment"
 description: |-
   Provides bind the domain name to the DNS instance resource.
 ---
 
-# apsarastack\_dns\_domain\_attachment
+# alibabacloudstack\_dns\_domain\_attachment
 
 Provides bind the domain name to the DNS instance resource.
 
@@ -15,7 +15,7 @@ Provides bind the domain name to the DNS instance resource.
 ## Example Usage
 
 ```
-resource "apsarastack_dns_domain_attachment" "dns" {
+resource "alibabacloudstack_dns_domain_attachment" "dns" {
   instance_id     = "dns-cn-mp91lyq9xxxx"
   domain_names    = ["test111.abc", "test222.abc"]
 }

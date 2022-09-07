@@ -1,13 +1,13 @@
 ---
 subcategory: "Cloud Monitor"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cms_alarm"
-sidebar_current: "docs-apsarastack-resource-cms-alarm"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cms_alarm"
+sidebar_current: "docs-alibabacloudstack-resource-cms-alarm"
 description: |-
   Provides a resource to build a alarm rule for cloud monitor.
 ---
 
-# apsarastack\_cms\_alarm
+# alibabacloudstack\_cms\_alarm
 
 This resource provides a alarm rule resource and it can be used to monitor several cloud services according different metrics.
 
@@ -16,7 +16,7 @@ This resource provides a alarm rule resource and it can be used to monitor sever
 Basic Usage
 
 ``` 
-resource "apsarastack_cms_alarm" "basic1" {
+resource "alibabacloudstack_cms_alarm" "basic1" {
   name    = "tf-testAccCmsAlarm_basic"
   project = "acs_slb_dashboard"
   metric  = "ActiveConnection"
@@ -96,5 +96,5 @@ The following attributes are exported:
 Alarm rule can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_cms_alarm.alarm abc12345
+$ terraform import alibabacloudstack_cms_alarm.alarm abc12345
 ```

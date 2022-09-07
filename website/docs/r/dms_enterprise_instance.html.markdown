@@ -1,13 +1,13 @@
 ---
 subcategory: "DMS Enterprise"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_dms_enterprise_instance"
-sidebar_current: "docs-apsarastack-resource-dms-enterprise-instance"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dms_enterprise_instance"
+sidebar_current: "docs-alibabacloudstack-resource-dms-enterprise-instance"
 description: |-
   Provides a DMS Enterprise Instance resource.
 ---
 
-# apsarastack\_dms\_enterprise\_instance
+# alibabacloudstack\_dms\_enterprise\_instance
 
 Provides a DMS Enterprise Instance resource.
 
@@ -16,7 +16,7 @@ Provides a DMS Enterprise Instance resource.
 ## Example Usage
 
 ```terraform
-resource "apsarastack_dms_enterprise_instance" "default" {
+resource "alibabacloudstack_dms_enterprise_instance" "default" {
   tid               = "12345"
   instance_type     = "MySQL"
   instance_source   = "RDS"
@@ -81,5 +81,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 DMS Enterprise can be imported using host and port, e.g.
 
 ```
-$ terraform import apsarastack_dms_enterprise_instance.example rm-uf648hgs7874xxxx.mysql.rds.aliyuncs.com:3306
+$ terraform import alibabacloudstack_dms_enterprise_instance.example rm-uf648hgs7874xxxx.mysql.rds.aliyuncs.com:3306
 ```

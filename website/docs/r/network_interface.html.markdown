@@ -1,48 +1,48 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_network_interface"
-sidebar_current: "docs-apsarastack-resource-network-interface"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_network_interface"
+sidebar_current: "docs-alibabacloudstack-resource-network-interface"
 description: |-
   Provides an ECS Elastic Network Interface resource.
 ---
 
-# apsarastack\_network\_interface
+# alibabacloudstack\_network\_interface
 
 Provides an ECS Elastic Network Interface resource.
 
 ## Example Usage
 
 ```
-resource "apsarastack_security_group" "secgroup" {
+resource "alibabacloudstack_security_group" "secgroup" {
   name        = "SecurityGroup-Name"
   description = "Security Group"
-  vpc_id      = apsarastack_vpc.vpc.id
+  vpc_id      = alibabacloudstack_vpc.vpc.id
 }
-resource "apsarastack_vpc" "vpc" {
+resource "alibabacloudstack_vpc" "vpc" {
   name       = "VPC-Name"
   cidr_block = "10.0.0.0/16"
 }
 
-resource "apsarastack_vswitch" "vsw" {
+resource "alibabacloudstack_vswitch" "vsw" {
   name       = "VSW-Name"
-  vpc_id            = apsarastack_vpc.vpc.id
-  cidr_block        = apsarastack_vpc.vpc.cidr_block
+  vpc_id            = alibabacloudstack_vpc.vpc.id
+  cidr_block        = alibabacloudstack_vpc.vpc.cidr_block
   availability_zone = "cn-beijing-b"
 }
-resource "apsarastack_instance" "apsarainstance" {
+resource "alibabacloudstack_instance" "apsarainstance" {
   image_id              = "gj2j1g3-45h3nnc-454hj5g"
   instance_type        = "ecs.n4.large"
   system_disk_category = "cloud_efficiency"
-  security_groups      = [apsarastack_security_group.secgroup.id]
+  security_groups      = [alibabacloudstack_security_group.secgroup.id]
   instance_name        = "apsarainstance"
-  vswitch_id           = apsarastack_vswitch.vsw.id
+  vswitch_id           = alibabacloudstack_vswitch.vsw.id
 }
 
-resource "apsarastack_network_interface" "NetInterface" {
+resource "alibabacloudstack_network_interface" "NetInterface" {
   name              = "ENI"
-  vswitch_id        = apsarastack_vswitch.vsw.id
-  security_groups   = apsarastack_security_group.secgroup.id
+  vswitch_id        = alibabacloudstack_vswitch.vsw.id
+  security_groups   = alibabacloudstack_security_group.secgroup.id
   private_ips_count = 1
   description = "Network Interface"
 }

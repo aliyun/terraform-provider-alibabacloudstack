@@ -1,13 +1,13 @@
 ---
 subcategory: "Quick BI"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_quick_bi_user_group"
-sidebar_current: "docs-apsarastack-resource-quick-bi-user-group"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_quick_bi_user_group"
+sidebar_current: "docs-alibabacloudstack-resource-quick-bi-user-group"
 description: |-
-  Provides a Apsarastack Quick BI UserGroup resource.
+  Provides a Alibabacloudstack Quick BI UserGroup resource.
 ---
 
-# apsarastack\_quick\_bi\_user\_group
+# alibabacloudstack\_quick\_bi\_user\_group
 
 Provides a Quick BI UserGroup resource.
 
@@ -18,7 +18,7 @@ Basic Usage
 
 ```terraform
 
-resource "apsarastack_quick_bi_user_group" "example" {
+resource "alibabacloudstack_quick_bi_user_group" "example" {
   user_group_name = "example_value"
   user_group_description = "example_value"
   parent_user_group_id = "-1"
@@ -45,5 +45,5 @@ The following attributes are exported:
 Quick BI UserGroup can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_quick_bi_user_group.example <id>
+$ terraform import alibabacloudstack_quick_bi_user_group.example <id>
 ```

@@ -1,26 +1,26 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_rules"
-sidebar_current: "docs-apsarastack-datasource-slb-rules"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_rules"
+sidebar_current: "docs-alibabacloudstack-datasource-slb-rules"
 description: |-
     Provides a list of server load balancer rules to the user.
 ---
 
-# apsarastack\_slb_rules
+# alibabacloudstack\_slb_rules
 
 This data source provides the rules associated with a server load balancer listener.
 
 ## Example Usage
 
 ```
-data "apsarastack_slb_rules" "sample_ds" {
-  load_balancer_id = "${apsarastack_slb.sample_slb.id}"
+data "alibabacloudstack_slb_rules" "sample_ds" {
+  load_balancer_id = "${alibabacloudstack_slb.sample_slb.id}"
   frontend_port    = 80
 }
 
 output "first_slb_rule_id" {
-  value = "${data.apsarastack_slb_rules.sample_ds.slb_rules.0.id}"
+  value = "${data.alibabacloudstack_slb_rules.sample_ds.slb_rules.0.id}"
 }
 ```
 

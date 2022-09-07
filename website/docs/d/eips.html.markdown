@@ -1,24 +1,24 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_eips"
-sidebar_current: "docs-apsarastack-datasource-eips"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_eips"
+sidebar_current: "docs-alibabacloudstack-datasource-eips"
 description: |-
-    Provides a list of EIP owned by an Apsarastack Cloud account.
+    Provides a list of EIP owned by an Alibabacloudstack Cloud account.
 ---
 
-# apsarastack\_eips
+# alibabacloudstack\_eips
 
-This data source provides a list of EIPs (Elastic IP address) owned by an Apsarastack Cloud account.
+This data source provides a list of EIPs (Elastic IP address) owned by an Alibabacloudstack Cloud account.
 
 ## Example Usage
 
 ```
-data "apsarastack_eips" "eips_ds" {
+data "alibabacloudstack_eips" "eips_ds" {
 }
 
 output "first_eip_id" {
-  value = "${data.apsarastack_eips.eips_ds.eips.0.id}"
+  value = "${data.alibabacloudstack_eips.eips_ds.eips.0.id}"
 }
 ```
 

@@ -1,20 +1,20 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_custom_role"
-sidebar_current: "docs-apsarastack-resource-ascm-custom-role"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_custom_role"
+sidebar_current: "docs-alibabacloudstack-resource-ascm-custom-role"
 description: |-
   Provides Ascm custom role.
 ---
 
-# apsarastack\_ascm_custom_role
+# alibabacloudstack\_ascm_custom_role
 
 Provides Ascm custom role.
 
 ## Example Usage
 
 ```
-resource "apsarastack_ascm_custom_role" "ramrole" {
+resource "alibabacloudstack_ascm_custom_role" "ramrole" {
   role_name = "Test_DELTA_Custom"
   description = "TestingComplete"
   organization_visibility = "organizationVisibility.global"
@@ -67,7 +67,7 @@ resource "apsarastack_ascm_custom_role" "ramrole" {
           ]
 }
 output "Custom_role" {
-  value = apsarastack_ascm_custom_role.ramrole.*
+  value = alibabacloudstack_ascm_custom_role.ramrole.*
 }
 ```
 ## Argument Reference

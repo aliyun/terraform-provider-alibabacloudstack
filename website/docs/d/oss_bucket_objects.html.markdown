@@ -1,26 +1,26 @@
 ---
 subcategory: "OSS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_oss_bucket_objects"
-sidebar_current: "docs-apsarastack-datasource-oss-bucket-objects"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_objects"
+sidebar_current: "docs-alibabacloudstack-datasource-oss-bucket-objects"
 description: |-
     Provides a list of bucket objects to the user.
 ---
 
-# apsarastack\_oss_bucket_objects
+# alibabacloudstack\_oss_bucket_objects
 
 This data source provides the objects of an OSS bucket.
 
 ## Example Usage
 
 ```
-data "apsarastack_oss_bucket_objects" "bucket_objects_ds" {
+data "alibabacloudstack_oss_bucket_objects" "bucket_objects_ds" {
   bucket_name = "sample_bucket"
   key_regex   = "sample/sample_object.txt"
 }
 
 output "first_object_key" {
-  value = "${data.apsarastack_oss_bucket_objects.bucket_objects_ds.objects.0.key}"
+  value = "${data.alibabacloudstack_oss_bucket_objects.bucket_objects_ds.objects.0.key}"
 }
 ```
 

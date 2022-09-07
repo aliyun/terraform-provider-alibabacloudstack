@@ -1,12 +1,12 @@
 ---
 subcategory: "Data Works"
-layout: "apsarastack"
-page_title: "ApsaraStack: apsarastack_data_works_user"
-sidebar_current: "docs-apsarastack-resource-data-works-user"
-description: |- Provides a ApsaraStack Data Works User resource.
+layout: "alibabacloudstack"
+page_title: "AlibabacloudStack: alibabacloudstack_data_works_user"
+sidebar_current: "docs-alibabacloudstack-resource-data-works-user"
+description: |- Provides a AlibabacloudStack Data Works User resource.
 ---
 
-# apsarastack\_data\_works\_user
+# alibabacloudstack\_data\_works\_user
 
 Provides a Data Works User resource.
 
@@ -18,7 +18,7 @@ see [What is User](https://help.aliyun.com/apsara/enterprise/v_3_14_0_20210519/d
 Basic Usage
 
 ```terraform
-resource "apsarastack_data_works_user" "default" {
+resource "alibabacloudstack_data_works_user" "default" {
   user_id = "5225501456060119238"
   project_id = "10060"
 }

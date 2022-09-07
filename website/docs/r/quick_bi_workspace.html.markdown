@@ -1,13 +1,13 @@
 ---
 subcategory: "Quick BI"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_quick_bi_workspace"
-sidebar_current: "docs-apsarastack-resource-quick-bi-workspace"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_quick_bi_workspace"
+sidebar_current: "docs-alibabacloudstack-resource-quick-bi-workspace"
 description: |-
-  Provides a Apsarastack Quick BI Workspace resource.
+  Provides a Alibabacloudstack Quick BI Workspace resource.
 ---
 
-# apsarastack\_quick\_bi\_workspace
+# alibabacloudstack\_quick\_bi\_workspace
 
 Provides a Quick BI Workspace resource.
 
@@ -17,7 +17,7 @@ Basic Usage
 
 ```terraform
 
-resource "apsarastack_quick_bi_workspace" "default" {
+resource "alibabacloudstack_quick_bi_workspace" "default" {
   workspace_name = "example_value"
   workspace_desc = "example_value"
   use_comment = "false"
@@ -48,5 +48,5 @@ The following attributes are exported:
 Quick BI Workspace can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_quick_bi_workspace.example <id>
+$ terraform import alibabacloudstack_quick_bi_workspace.example <id>
 ```

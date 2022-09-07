@@ -1,13 +1,13 @@
 ---
 subcategory: "Table Store (OTS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ots_instance"
-sidebar_current: "docs-apsarastack-resource-ots-instance"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ots_instance"
+sidebar_current: "docs-alibabacloudstack-resource-ots-instance"
 description: |-
   Provides an OTS (Open Table Service) instance resource.
 ---
 
-# apsarastack\_ots\_instance
+# alibabacloudstack\_ots\_instance
 
 This resource will help you to manager a [Table Store](https://www.alibabacloud.com/help/doc-detail/27280.htm) Instance.
 It is foundation of creating data table.
@@ -16,7 +16,7 @@ It is foundation of creating data table.
 
 ```
 # Create an OTS instance
-resource "apsarastack_ots_instance" "foo" {
+resource "alibabacloudstack_ots_instance" "foo" {
   name        = "my-ots-instance"
   description = "for table"
   accessed_by = "Vpc"
@@ -58,6 +58,6 @@ The following attributes are exported:
 OTS instance can be imported using instance id or name, e.g.
 
 ```
-$ terraform import apsarastack_ots_instance.foo "my-ots-instance"
+$ terraform import alibabacloudstack_ots_instance.foo "my-ots-instance"
 ```
 

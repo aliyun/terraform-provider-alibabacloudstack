@@ -1,12 +1,12 @@
 ---
 subcategory: "Data Works"
-layout: "apsarastack"
-page_title: "ApsaraStack: apsarastack_data_works_user_role_binding"
-sidebar_current: "docs-apsarastack-resource-data-works-user-role-binding"
-description: |- Provides a ApsaraStack Data Works UserRoleBinding resource.
+layout: "alibabacloudstack"
+page_title: "AlibabacloudStack: alibabacloudstack_data_works_user_role_binding"
+sidebar_current: "docs-alibabacloudstack-resource-data-works-user-role-binding"
+description: |- Provides a AlibabacloudStack Data Works UserRoleBinding resource.
 ---
 
-# apsarastack\_data\_works\_connection
+# alibabacloudstack\_data\_works\_connection
 
 Provides a Data Works UserRoleBinding resource.
 
@@ -18,7 +18,7 @@ see [What is UserRoleBinding](https://help.aliyun.com/apsara/enterprise/v_3_14_0
 Basic Usage
 
 ```terraform
-resource "apsarastack_data_works_user_role_binding" "default" {
+resource "alibabacloudstack_data_works_user_role_binding" "default" {
   project_id = "10060"
   user_id = "5225501456060119238"
   role_code = "role_project_guest"

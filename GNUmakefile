@@ -1,7 +1,7 @@
 TEST?=$$(go list ./... |grep -v 'vendor')
 GOFMT_FILES?=$$(find . -name '*.go' |grep -v vendor)
 WEBSITE_REPO=github.com/Click2Cloud/terraform-website
-PKG_NAME=apsarastack
+PKG_NAME=alibabacloudstack
 
 default: build
 
@@ -67,28 +67,28 @@ devlinux: clean fmt linux linuxcopy
 devwin: clean fmt windows windowscopy
 
 copy:
-	tar -xvf bin/terraform-provider-apsarastack_darwin-amd64.tgz && mv bin/terraform-provider-apsarastack $(shell dirname `which terraform`)
+	tar -xvf bin/terraform-provider-alibabacloudstack_darwin-amd64.tgz && mv bin/terraform-provider-alibabacloudstack $(shell dirname `which terraform`)
 
 clean:
 	rm -rf bin/*
 
 mac:
-	GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-apsarastack
-	tar czvf bin/terraform-provider-apsarastack_darwin-amd64.tgz bin/terraform-provider-apsarastack
-	rm -rf bin/terraform-provider-apsarastack
+	GOOS=darwin GOARCH=amd64 go build -o bin/terraform-provider-alibabacloudstack
+	tar czvf bin/terraform-provider-alibabacloudstack_darwin-amd64.tgz bin/terraform-provider-alibabacloudstack
+	rm -rf bin/terraform-provider-alibabacloudstack
 
 windowscopy:
-	tar -xvf bin/terraform-provider-apsarastack_windows-amd64.tgz && mv bin/terraform-provider-apsarastack $(shell dirname `which terraform`)
+	tar -xvf bin/terraform-provider-alibabacloudstack_windows-amd64.tgz && mv bin/terraform-provider-alibabacloudstack $(shell dirname `which terraform`)
     
 windows:
-	GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-apsarastack.exe
-	tar czvf bin/terraform-provider-apsarastack_windows-amd64.tgz bin/terraform-provider-apsarastack.exe
-	rm -rf bin/terraform-provider-apsarastack.exe
+	GOOS=windows GOARCH=amd64 go build -o bin/terraform-provider-alibabacloudstack.exe
+	tar czvf bin/terraform-provider-alibabacloudstack_windows-amd64.tgz bin/terraform-provider-alibabacloudstack.exe
+	rm -rf bin/terraform-provider-alibabacloudstack.exe
 
 linuxcopy:
-	tar -xvf bin/terraform-provider-apsarastack_linux-amd64.tgz && mv bin/terraform-provider-apsarastack $(shell dirname `which terraform`)
+	tar -xvf bin/terraform-provider-alibabacloudstack_linux-amd64.tgz && mv bin/terraform-provider-alibabacloudstack $(shell dirname `which terraform`)
 
 linux:
-	GOOS=linux GOARCH=amd64 go build -o bin/terraform-provider-apsarastack
-	tar czvf bin/terraform-provider-apsarastack_linux-amd64.tgz bin/terraform-provider-apsarastack
-	rm -rf bin/terraform-provider-apsarastack
+	GOOS=linux GOARCH=amd64 go build -o bin/terraform-provider-alibabacloudstack
+	tar czvf bin/terraform-provider-alibabacloudstack_linux-amd64.tgz bin/terraform-provider-alibabacloudstack
+	rm -rf bin/terraform-provider-alibabacloudstack

@@ -1,27 +1,27 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpcs"
-sidebar_current: "docs-apsarastack-datasource-vpcs"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpcs"
+sidebar_current: "docs-alibabacloudstack-datasource-vpcs"
 description: |-
-    Provides a list of VPCs owned by an ApsaraStack Cloud account.
+    Provides a list of VPCs owned by an AlibabacloudStack Cloud account.
 ---
 
-# apsarastack\_vpcs
+# alibabacloudstack\_vpcs
 
 This data source provides VPCs available to the user.
 
 ## Example Usage
 
 ```
-data "apsarastack_vpcs" "vpcs_ds" {
+data "alibabacloudstack_vpcs" "vpcs_ds" {
   cidr_block = "172.16.0.0/12"
   status     = "Available"
   name_regex = "^foo"
 }
 
 output "first_vpc_id" {
-  value = "${data.apsarastack_vpcs.vpcs_ds.vpcs.0.id}"
+  value = "${data.alibabacloudstack_vpcs.vpcs_ds.vpcs.0.id}"
 }
 ```
 

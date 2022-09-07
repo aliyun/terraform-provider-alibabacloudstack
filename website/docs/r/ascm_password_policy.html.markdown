@@ -1,19 +1,19 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_password_policy"
-sidebar_current: "docs-apsarastack-resource-ascm-password-policy"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_password_policy"
+sidebar_current: "docs-alibabacloudstack-resource-ascm-password-policy"
 description: |-
    Provides a Ascm password policy configuration.
 ---
-# apsarastack\_ascm_password_policy
+# alibabacloudstack\_ascm_password_policy
 
 Provides an Ascm Password Policy resource.
 
 ## Example Usage
 
 ```
-resource "apsarastack_ascm_password_policy" "default"{
+resource "alibabacloudstack_ascm_password_policy" "default"{
   minimum_password_length = 20
   max_login_attempts      = 8
   hard_expiry             = true

@@ -1,29 +1,29 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_instance_type_families"
-sidebar_current: "docs-apsarastack-datasource-instance-type-families"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_instance_type_families"
+sidebar_current: "docs-alibabacloudstack-datasource-instance-type-families"
 description: |-
-    Provides a list of ECS Instance Type Families to be used by the apsarastack_instance resource.
+    Provides a list of ECS Instance Type Families to be used by the alibabacloudstack_instance resource.
 ---
 
-# apsarastack\_instance\_type\_families
+# alibabacloudstack\_instance\_type\_families
 
-This data source provides the ECS instance type families of ApsaraStack.
+This data source provides the ECS instance type families of AlibabacloudStack.
 
 ## Example Usage
 
 ```
-data "apsarastack_instance_type_families" "default" {
+data "alibabacloudstack_instance_type_families" "default" {
   
 }
 
 output "first_instance_type_family_id" {
-  value = "${data.apsarastack_instance_type_families.default.instance_type_families.0.id}"
+  value = "${data.alibabacloudstack_instance_type_families.default.instance_type_families.0.id}"
 }
 
 output "instance_ids" {
-  value = "${data.apsarastack_instance_type_families.default.ids}"
+  value = "${data.alibabacloudstack_instance_type_families.default.ids}"
 }
 ```
 

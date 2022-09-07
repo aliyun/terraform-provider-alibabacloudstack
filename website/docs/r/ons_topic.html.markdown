@@ -1,13 +1,13 @@
 ---
 subcategory: "RocketMQ"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ons_topic"
-sidebar_current: "docs-apsarastack-resource-ons-topic"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ons_topic"
+sidebar_current: "docs-alibabacloudstack-resource-ons-topic"
 description: |-
-  Provides a apsarastack ONS Topic resource.
+  Provides a alibabacloudstack ONS Topic resource.
 ---
 
-# apsarastack\_ons\_topic
+# alibabacloudstack\_ons\_topic
 
 Provides an ONS topic resource.
 
@@ -25,7 +25,7 @@ variable "topic" {
   default = "onsTopicName"
 }
 
-resource "apsarastack_ons_instance" "default" {
+resource "alibabacloudstack_ons_instance" "default" {
   tps_receive_max = 500
   tps_send_max = 500
   topic_capacity = 50
@@ -35,9 +35,9 @@ resource "apsarastack_ons_instance" "default" {
   remark = "Ons Instance"
 }
 
-resource "apsarastack_ons_topic" "default" {
+resource "alibabacloudstack_ons_topic" "default" {
   topic = var.topic
-  instance_id = apsarastack_ons_instance.default.id
+  instance_id = alibabacloudstack_ons_instance.default.id
   message_type = 0
   remark = "dafault_ons_topic_remark"
 }

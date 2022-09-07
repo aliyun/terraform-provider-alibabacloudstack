@@ -1,26 +1,26 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_service_cluster_by_product"
-sidebar_current: "docs-apsarastack-datasource-ascm-service-clusters-by-product"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_service_cluster_by_product"
+sidebar_current: "docs-alibabacloudstack-datasource-ascm-service-clusters-by-product"
 description: |-
     Provides a list of service cluster to the user.
 ---
 
-# apsarastack\_ascm_service_clusters_by_product
+# alibabacloudstack\_ascm_service_clusters_by_product
 
 This data source provides the service clusters of the current Apsara Stack Cloud user.
 
 ## Example Usage
 
 ```
-data "apsarastack_ascm_service_cluster_by_product" "cluster" {
+data "alibabacloudstack_ascm_service_cluster_by_product" "cluster" {
   output_file = "cluster"
   product_name = "slb"
 }
 
 output "cluster" {
-  value = data.apsarastack_ascm_service_cluster_by_product.cluster.*
+  value = data.alibabacloudstack_ascm_service_cluster_by_product.cluster.*
 }
 ```
 

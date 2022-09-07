@@ -1,17 +1,17 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_common_bandwidth_package_attachment"
-sidebar_current: "docs-apsarastack-resource-common-bandwidth-package-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_common_bandwidth_package_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-common-bandwidth-package-attachment"
 description: |-
-  Provides an Apsarastack Common  Attachment resource.
+  Provides an Alibabacloudstack Common  Attachment resource.
 ---
 
-# apsarastack\_common\_bandwidth\_package\_attachment
+# alibabacloudstack\_common\_bandwidth\_package\_attachment
 
-Provides an apsarastack Common Bandwidth Package Attachment resource for associating Common Bandwidth Package to EIP Instance.
+Provides an alibabacloudstack Common Bandwidth Package Attachment resource for associating Common Bandwidth Package to EIP Instance.
 
--> **NOTE:** Terraform will auto build common bandwidth package attachment while it uses `apsarastack_common_bandwidth_package_attachment` to build a common bandwidth package attachment resource.
+-> **NOTE:** Terraform will auto build common bandwidth package attachment while it uses `alibabacloudstack_common_bandwidth_package_attachment` to build a common bandwidth package attachment resource.
 
 
 ## Example Usage
@@ -19,19 +19,19 @@ Provides an apsarastack Common Bandwidth Package Attachment resource for associa
 Basic Usage
 
 ```
-resource "apsarastack_common_bandwidth_package" "foo" {
+resource "alibabacloudstack_common_bandwidth_package" "foo" {
   bandwidth   = "2"
   name        = "test_common_bandwidth_package"
   description = "test_common_bandwidth_package"
 }
 
-resource "apsarastack_eip" "foo" {
+resource "alibabacloudstack_eip" "foo" {
   bandwidth            = "2"
 }
 
-resource "apsarastack_common_bandwidth_package_attachment" "foo" {
-  bandwidth_package_id = "${apsarastack_common_bandwidth_package.foo.id}"
-  instance_id          = "${apsarastack_eip.foo.id}"
+resource "alibabacloudstack_common_bandwidth_package_attachment" "foo" {
+  bandwidth_package_id = "${alibabacloudstack_common_bandwidth_package.foo.id}"
+  instance_id          = "${alibabacloudstack_eip.foo.id}"
 }
 
 ```

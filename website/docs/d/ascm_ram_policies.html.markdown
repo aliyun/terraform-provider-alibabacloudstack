@@ -1,30 +1,30 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "ApsaraStack: apsarastack_ascm_ram_policies"
-sidebar_current: "docs-apsarastack-datasource-ascm-ram-policies"
+layout: "alibabacloudstack"
+page_title: "AlibabacloudStack: alibabacloudstack_ascm_ram_policies"
+sidebar_current: "docs-alibabacloudstack-datasource-ascm-ram-policies"
 description: |-
     Provides a list of ram policies to the user.
 ---
 
-# apsarastack\_ascm_ram_policies
+# alibabacloudstack\_ascm_ram_policies
 
 This data source provides the ram policies of the current Apsara Stack Cloud user.
 
 ## Example Usage
 
 ```
-resource "apsarastack_ascm_ram_policy" "default" {
+resource "alibabacloudstack_ascm_ram_policy" "default" {
   name = "TestPolicy"
   description = "Testing"
   policy_document = "{\"Statement\":[{\"Action\":\"ecs:*\",\"Effect\":\"Allow\",\"Resource\":\"*\"}],\"Version\":\"1\"}"
 
 }
-data "apsarastack_ascm_ram_policies" "default" {
-  name_regex = apsarastack_ascm_ram_policy.default.name
+data "alibabacloudstack_ascm_ram_policies" "default" {
+  name_regex = alibabacloudstack_ascm_ram_policy.default.name
 }
 output "ram_policies" {
-  value = data.apsarastack_ascm_ram_policies.default.*
+  value = data.alibabacloudstack_ascm_ram_policies.default.*
 }
 
 

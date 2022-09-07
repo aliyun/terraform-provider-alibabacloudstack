@@ -1,13 +1,13 @@
 ---
 subcategory: "Log Service (SLS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_logtail_config"
-sidebar_current: "docs-apsarastack-resource-logtail-config"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_logtail_config"
+sidebar_current: "docs-alibabacloudstack-resource-logtail-config"
 description: |-
-  Provides a Apsarastack logtail config resource.
+  Provides a Alibabacloudstack logtail config resource.
 ---
 
-# apsarastack\_logtail\_config
+# alibabacloudstack\_logtail\_config
 
 The Logtail access service is a log collection agent provided by Log Service. 
 You can use Logtail to collect logs from servers such as Alibaba Cloud Elastic
@@ -19,13 +19,13 @@ Compute Service (ECS) instances in real time in the Log Service console. [Refer 
 Basic Usage
 
 ```
-resource "apsarastack_log_project" "example" {
+resource "alibabacloudstack_log_project" "example" {
   name        = "test-tf"
   description = "create by terraform"
 }
 
-resource "apsarastack_log_store" "example" {
-  project               = apsarastack_log_project.example.name
+resource "alibabacloudstack_log_store" "example" {
+  project               = alibabacloudstack_log_project.example.name
   name                  = "tf-test-logstore"
   retention_period      = 3650
   shard_count           = 3
@@ -34,9 +34,9 @@ resource "apsarastack_log_store" "example" {
   append_meta           = true
 }
 
-resource "apsarastack_logtail_config" "example" {
-  project      = apsarastack_log_project.example.name
-  logstore     = apsarastack_log_store.example.name
+resource "alibabacloudstack_logtail_config" "example" {
+  project      = alibabacloudstack_log_project.example.name
+  logstore     = alibabacloudstack_log_store.example.name
   input_type   = "file"
   log_sample   = "test"
   name         = "tf-log-config"
@@ -69,5 +69,5 @@ The following attributes are exported:
 Logtial config can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_logtail_config.example tf-log:tf-log-store:tf-log-config
+$ terraform import alibabacloudstack_logtail_config.example tf-log:tf-log-store:tf-log-config
 ```

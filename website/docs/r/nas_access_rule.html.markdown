@@ -1,13 +1,13 @@
 ---
 subcategory: "Network Attached Storage (NAS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_nas_access_rule"
-sidebar_current: "docs-apsarastack-resource-nas-access-rule"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_nas_access_rule"
+sidebar_current: "docs-alibabacloudstack-resource-nas-access-rule"
 description: |-
-  Provides a Apsarastack Nas Access Rule resource.
+  Provides a Alibabacloudstack Nas Access Rule resource.
 ---
 
-# apsarastack\_nas_access_rule
+# alibabacloudstack\_nas_access_rule
 
 Provides a Nas Access Rule resource.
 
@@ -20,14 +20,14 @@ When NAS is activated, the Default VPC Permission Group is automatically generat
 Basic Usage
 
 ```terraform
-resource "apsarastack_nas_access_group" "foo" {
+resource "alibabacloudstack_nas_access_group" "foo" {
   access_group_name = "tf-NasConfigName"
   access_group_type = "Vpc"
   description       = "tf-testAccNasConfig"
 }
 
-resource "apsarastack_nas_access_rule" "foo" {
-  access_group_name = apsarastack_nas_access_group.foo.access_group_name
+resource "alibabacloudstack_nas_access_rule" "foo" {
+  access_group_name = alibabacloudstack_nas_access_group.foo.access_group_name
   source_cidr_ip    = "168.1.1.0/16"
   rw_access_type    = "RDWR"
   user_access_type  = "no_squash"
@@ -59,6 +59,6 @@ The following attributes are exported:
 Nas Access Rule can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_nas_access_rule.foo tf-testAccNasConfigName:1
+$ terraform import alibabacloudstack_nas_access_rule.foo tf-testAccNasConfigName:1
 ```
 

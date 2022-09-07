@@ -1,25 +1,25 @@
 ---
 subcategory: "OSS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_oss_buckets"
-sidebar_current: "docs-apsarastack-datasource-oss-buckets"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_oss_buckets"
+sidebar_current: "docs-alibabacloudstack-datasource-oss-buckets"
 description: |-
     Provides a list of OSS buckets to the user.
 ---
 
-# apsarastack\_oss_buckets
+# alibabacloudstack\_oss_buckets
 
-This data source provides the OSS buckets of the current ApsaraStack Cloud user.
+This data source provides the OSS buckets of the current AlibabacloudStack Cloud user.
 
 ## Example Usage
 
 ```
-data "apsarastack_oss_buckets" "oss_buckets_ds" {
+data "alibabacloudstack_oss_buckets" "oss_buckets_ds" {
   name_regex = "sample_oss_bucket"
 }
 
 output "first_oss_bucket_name" {
-  value = "${data.apsarastack_oss_buckets.oss_buckets_ds.buckets.0.name}"
+  value = "${data.alibabacloudstack_oss_buckets.oss_buckets_ds.buckets.0.name}"
 }
 ```
 

@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_image_import"
-sidebar_current: "docs-apsarastack-resource-image-import"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_image_import"
+sidebar_current: "docs-alibabacloudstack-resource-image-import"
 description: |-
   Provides an ECS image import resource.
 ---
 
-# apsarastack\_image\_import
+# alibabacloudstack\_image\_import
 
 Import a copy of your local on-premise file to ECS, and appear as a custom replacement in the corresponding domain.
 
@@ -18,7 +18,7 @@ Import a copy of your local on-premise file to ECS, and appear as a custom repla
 ## Example Usage
 
 ```
-resource "apsarastack_image_import" "this" {
+resource "alibabacloudstack_image_import" "this" {
   description  = "test import image"
   architecture = "x86_64"
   image_name   = "test-import-image"

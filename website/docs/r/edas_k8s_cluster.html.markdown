@@ -1,13 +1,13 @@
 ---
 subcategory: "EDAS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_edas_k8s_cluster"
-sidebar_current: "docs-apsarastack-resource-edas-k8s-cluster"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_edas_k8s_cluster"
+sidebar_current: "docs-alibabacloudstack-resource-edas-k8s-cluster"
 description: |-
   Provides an EDAS K8s cluster resource.
 ---
 
-# apsarastack\_edas\_k8s\_cluster
+# alibabacloudstack\_edas\_k8s\_cluster
 
 Provides an EDAS K8s cluster resource. For information about EDAS K8s Cluster and how to use it, see[What is EDAS K8s Cluster](https://www.alibabacloud.com/help/en/doc-detail/85108.htm).
 
@@ -18,7 +18,7 @@ Provides an EDAS K8s cluster resource. For information about EDAS K8s Cluster an
 Basic Usage
 
 ```
-resource "apsarastack_edas_k8s_cluster" "default" {
+resource "alibabacloudstack_edas_k8s_cluster" "default" {
   cs_cluster_id = "xxxx-xxx-xxx"
 }
 ```
@@ -27,7 +27,7 @@ resource "apsarastack_edas_k8s_cluster" "default" {
 
 The following arguments are supported:
 
-* `cs_cluster_id` - (Required, ForceNew) The ID of the apsarastack container service kubernetes cluster that you want to import.
+* `cs_cluster_id` - (Required, ForceNew) The ID of the alibabacloudstack container service kubernetes cluster that you want to import.
 * `namespace_id` - (Optional, ForceNew) The ID of the namespace where you want to import. You can call the [ListUserDefineRegion](https://www.alibabacloud.com/help/en/doc-detail/149377.htm?spm=a2c63.p38356.879954.34.331054faK2yNvC#doc-api-Edas-ListUserDefineRegion) operation to query the namespace ID.
 
 
@@ -51,5 +51,5 @@ The following attributes are exported:
 EDAS cluster can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_edas_k8s_cluster.cluster cluster_id
+$ terraform import alibabacloudstack_edas_k8s_cluster.cluster cluster_id
 ```

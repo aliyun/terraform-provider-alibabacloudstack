@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_security_group_rule"
-sidebar_current: "docs-apsarastack-resource-security-group-rule"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_security_group_rule"
+sidebar_current: "docs-alibabacloudstack-resource-security-group-rule"
 description: |-
-  Provides a Apsarastack Security Group Rule resource.
+  Provides a Alibabacloudstack Security Group Rule resource.
 ---
 
-# apsarastack\_security\_group\_rule
+# alibabacloudstack\_security\_group\_rule
 
 Provides a security group rule resource.
 Represents a single `ingress` or `egress` group rule, which can be added to external Security Groups.
@@ -20,23 +20,23 @@ Represents a single `ingress` or `egress` group rule, which can be added to exte
 Basic Usage
 
 ```
-resource "apsarastack_vpc" "vpc" {
+resource "alibabacloudstack_vpc" "vpc" {
   cidr_block = "10.1.0.0/21"
 }
 
-resource "apsarastack_security_group" "group" {
+resource "alibabacloudstack_security_group" "group" {
   name   = "new-group"
-  vpc_id = "${apsarastack_vpc.vpc.id}"
+  vpc_id = "${alibabacloudstack_vpc.vpc.id}"
 }
 
-resource "apsarastack_security_group_rule" "allow_all_tcp" {
+resource "alibabacloudstack_security_group_rule" "allow_all_tcp" {
   type              = "ingress"
   ip_protocol       = "tcp"
   nic_type          = "intranet"
   policy            = "accept"
   port_range        = "1/65535"
   priority          = 1
-  security_group_id = "${apsarastack_security_group.default.id}"
+  security_group_id = "${alibabacloudstack_security_group.default.id}"
   cidr_ip           = "0.0.0.0/0"
 }
 ```

@@ -1,13 +1,13 @@
 ---
 subcategory: "Log Service (SLS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_log_store"
-sidebar_current: "docs-apsarastack-resource-log-store"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_log_store"
+sidebar_current: "docs-alibabacloudstack-resource-log-store"
 description: |-
-  Provides a Apsarastack log store resource.
+  Provides a Alibabacloudstack log store resource.
 ---
 
-# apsarastack\_log\_store
+# alibabacloudstack\_log\_store
 
 The log store is a unit in Log Service to collect, store, and query the log data. Each log store belongs to a project,
 and each project can create multiple Logstores. [Refer to details](https://help.aliyun.com/apsara/enterprise/v_3_16_0_20220117/sls/enterprise-ascm-developer-guide/CreateLogstore.html?spm=a2c4g.14484438.10001.307)
@@ -17,13 +17,13 @@ and each project can create multiple Logstores. [Refer to details](https://help.
 Basic Usage
 
 ```
-resource "apsarastack_log_project" "example" {
+resource "alibabacloudstack_log_project" "example" {
   name        = "tf-log"
   description = "created by terraform"
 }
 
-resource "apsarastack_log_store" "example" {
-  project               = apsarastack_log_project.example.name
+resource "alibabacloudstack_log_store" "example" {
+  project               = alibabacloudstack_log_project.example.name
   name                  = "tf-log-store"
   shard_count           = 3
   auto_split            = true
@@ -33,13 +33,13 @@ resource "apsarastack_log_store" "example" {
 ```
 Encrypt Usage
 ```
-resource "apsarastack_log_project" "example" {
+resource "alibabacloudstack_log_project" "example" {
   name        = "tf-log"
   description = "created by terraform"
 }
 
-resource "apsarastack_log_store" "example" {
-  project               = apsarastack_log_project.example.name
+resource "alibabacloudstack_log_store" "example" {
+  project               = alibabacloudstack_log_project.example.name
   name                  = "tf-log-store"
   shard_count           = 3
   auto_split            = true
@@ -139,6 +139,6 @@ Log store can be imported using the id, e.g.
 <<<<<<< HEAD
 $ terraform import alicloud_log_store.example tf-log:tf-log-store
 =======
-$ terraform import apsarastack_log_store.example tf-log:tf-log-store
+$ terraform import alibabacloudstack_log_store.example tf-log:tf-log-store
 >>>>>>> 153c5e75 (add 314 r doc)
 ```

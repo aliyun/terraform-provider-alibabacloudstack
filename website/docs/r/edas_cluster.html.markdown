@@ -1,13 +1,13 @@
 ---
 subcategory: "EDAS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_edas_cluster"
-sidebar_current: "docs-apsarastack-resource-edas-cluster"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_edas_cluster"
+sidebar_current: "docs-alibabacloudstack-resource-edas-cluster"
 description: |-
   Provides an EDAS cluster resource.
 ---
 
-# apsarastack\_edas\_cluster
+# alibabacloudstack\_edas\_cluster
 
 Provides an EDAS cluster resource.
 
@@ -18,7 +18,7 @@ Provides an EDAS cluster resource.
 Basic Usage
 
 ```
-resource "apsarastack_edas_cluster" "default" {
+resource "alibabacloudstack_edas_cluster" "default" {
   cluster_name      = var.cluster_name
   cluster_type      = var.cluster_type
   network_mode      = var.network_mode
@@ -48,5 +48,5 @@ The following attributes are exported:
 EDAS cluster can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_edas_cluster.cluster cluster_id
+$ terraform import alibabacloudstack_edas_cluster.cluster cluster_id
 ```

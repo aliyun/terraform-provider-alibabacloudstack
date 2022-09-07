@@ -1,13 +1,13 @@
 ---
 subcategory: "RocketMQ"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ons_groups"
-sidebar_current: "docs-apsarastack-datasource-ons-groups"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ons_groups"
+sidebar_current: "docs-alibabacloudstack-datasource-ons-groups"
 description: |-
     Provides a list of ons groups available to the user.
 ---
 
-# apsarastack\_ons\_groups
+# alibabacloudstack\_ons\_groups
 
 This data source provides a list of ONS Groups in an Apsara Stack Cloud account according to the specified filters.
 
@@ -23,7 +23,7 @@ variable "group_id" {
   default = "GID-onsGroupDatasourceName"
 }
 
-resource "apsarastack_ons_instance" "default" {
+resource "alibabacloudstack_ons_instance" "default" {
   tps_receive_max = 500
   tps_send_max = 500
   topic_capacity = 50
@@ -33,18 +33,18 @@ resource "apsarastack_ons_instance" "default" {
   remark = "Ons Instance"
 }
 
-resource "apsarastack_ons_group" "default" {
+resource "alibabacloudstack_ons_group" "default" {
   group_id = var.group_id
-  instance_id = "${apsarastack_ons_instance.default.id}"
+  instance_id = "${alibabacloudstack_ons_instance.default.id}"
   remark = "dafault_ons_group_remark"
 }
 
-data "apsarastack_ons_groups" "default" {
-  instance_id = apsarastack_ons_group.default.instance_id
+data "alibabacloudstack_ons_groups" "default" {
+  instance_id = alibabacloudstack_ons_group.default.instance_id
 
 }
 output "onsgroups" {
-  value = data.apsarastack_ons_groups.default.*
+  value = data.alibabacloudstack_ons_groups.default.*
 }
 ```
 

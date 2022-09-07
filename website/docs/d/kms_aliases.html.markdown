@@ -1,27 +1,27 @@
 ---
 subcategory: "KMS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_kms_aliases"
-sidebar_current: "docs-apsarastack-datasource-kms-aliases"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_kms_aliases"
+sidebar_current: "docs-alibabacloudstack-datasource-kms-aliases"
 description: |-
     Provides a list of available KMS Aliases.
 ---
 
-# apsarastack\_kms\_aliases
+# alibabacloudstack\_kms\_aliases
 
-This data source provides a list of KMS aliases in an Apsarastack Cloud account according to the specified filters.
+This data source provides a list of KMS aliases in an Alibabacloudstack Cloud account according to the specified filters.
  
 
 ## Example Usage
 
 ```
 # Declare the data source
-data "apsarastack_kms_aliases" "kms_aliases" {  
+data "alibabacloudstack_kms_aliases" "kms_aliases" {  
   name_regex = "alias/tf-testKmsAlias_123"
 }
 
 output "first_key_id" {
-  value = "${data.apsarastack_kms_keys.kms_keys_ds.keys.0.id}"
+  value = "${data.alibabacloudstack_kms_keys.kms_keys_ds.keys.0.id}"
 }
 ```
 

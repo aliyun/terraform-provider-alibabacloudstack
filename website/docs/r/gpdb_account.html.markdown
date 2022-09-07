@@ -1,13 +1,13 @@
 ---
 subcategory: "AnalyticDB for PostgreSQL (GPDB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_gpdb_account"
-sidebar_current: "docs-apsarastack-resource-gpdb-account"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_gpdb_account"
+sidebar_current: "docs-alibabacloudstack-resource-gpdb-account"
 description: |-
-  Provides a Apsarastack GPDB Account resource.
+  Provides a Alibabacloudstack GPDB Account resource.
 ---
 
-# apsarastack\_gpdb\_account
+# alibabacloudstack\_gpdb\_account
 
 Provides a GPDB Account resource.
 
@@ -24,35 +24,35 @@ Basic Usage
 variable "name" {
   default = "tftest6355"
 }
-data "apsarastack_gpdb_zones" "default" {}
-data "apsarastack_zones" "default" {}
-data "apsarastack_vpcs" "default" {
+data "alibabacloudstack_gpdb_zones" "default" {}
+data "alibabacloudstack_zones" "default" {}
+data "alibabacloudstack_vpcs" "default" {
   name_regex = "default-NODELETING"
 }
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
 name       = var.name
 cidr_block = "172.16.0.0/16"
 }
-resource "apsarastack_vswitch" "default" {
-  vpc_id       = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id       = "${alibabacloudstack_vpc.default.id}"
   cidr_block   = "172.16.0.0/24"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
    name              = "${var.name}"
 }
-resource "apsarastack_gpdb_instance" "default" {
-  availability_zone      = "${data.apsarastack_zones.default.zones.0.id}"
+resource "alibabacloudstack_gpdb_instance" "default" {
+  availability_zone      = "${data.alibabacloudstack_zones.default.zones.0.id}"
   engine                 = "gpdb"
   engine_version         = "4.3"
   instance_class         = "gpdb.group.segsdx2"
   instance_group_count   = 2
   description            = "tf-testAccGpdbInstance_new"
-  vswitch_id             = "${apsarastack_vswitch.default.id}"
+  vswitch_id             = "${alibabacloudstack_vswitch.default.id}"
 }
-resource "apsarastack_gpdb_account" "default" {
+resource "alibabacloudstack_gpdb_account" "default" {
   account_name = "tftest6355"
   account_password = "TFTest123update"
   account_description = "tftest6355"
-  db_instance_id = "${apsarastack_gpdb_instance.default.id}"
+  db_instance_id = "${alibabacloudstack_gpdb_instance.default.id}"
 }
 
 ```

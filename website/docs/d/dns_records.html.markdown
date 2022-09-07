@@ -1,27 +1,27 @@
 ---
 subcategory: "DNS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_dns_records"
-sidebar_current: "docs-apsarastack-datasource-dns-records"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dns_records"
+sidebar_current: "docs-alibabacloudstack-datasource-dns-records"
 description: |-
     Provides a list of records available to the dns.
 ---
 
-# apsarastack\_dns\_records
+# alibabacloudstack\_dns\_records
 
-This data source provides a list of DNS Domain Records in an ApsaraStack Cloud account according to the specified filters.
+This data source provides a list of DNS Domain Records in an AlibabacloudStack Cloud account according to the specified filters.
 
 ## Example Usage
 
 ```
-resource "apsarastack_dns_domain" "default" {
+resource "alibabacloudstack_dns_domain" "default" {
   domain_name = "domaintest."
   remark = "testing Domain"
 }
 
 # Create a new Domain record
-resource "apsarastack_dns_record" "default" {
-  domain_id   = apsarastack_dns_domain.default.id
+resource "alibabacloudstack_dns_record" "default" {
+  domain_id   = alibabacloudstack_dns_domain.default.id
   host_record = "testing_record"
   type        = "A"
   description = "testing Record"
@@ -29,12 +29,12 @@ resource "apsarastack_dns_record" "default" {
   rr_set      = ["192.168.2.4","192.168.2.7","10.0.0.4"]
 }
 
-data "apsarastack_dns_records" "default"{
-  domain_id         = apsarastack_dns_record.default.domain_id
-  host_record_regex = apsarastack_dns_record.default.host_record
+data "alibabacloudstack_dns_records" "default"{
+  domain_id         = alibabacloudstack_dns_record.default.domain_id
+  host_record_regex = alibabacloudstack_dns_record.default.host_record
 }
 output "records" {
-  value = data.apsarastack_dns_records.default.*
+  value = data.alibabacloudstack_dns_records.default.*
 }
 ```
 

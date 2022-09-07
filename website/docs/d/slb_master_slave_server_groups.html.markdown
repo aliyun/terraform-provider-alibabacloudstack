@@ -1,25 +1,25 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_master_slave_server_groups"
-sidebar_current: "docs-apsarastack-datasource-slb-master-slave-server-groups"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_master_slave_server_groups"
+sidebar_current: "docs-alibabacloudstack-datasource-slb-master-slave-server-groups"
 description: |-
     Provides a list of master slave server groups related to a server load balancer to the user.
 ---
 
-# apsarastack\_slb\_master\_slave\_server\_groups
+# alibabacloudstack\_slb\_master\_slave\_server\_groups
 
 This data source provides the master slave server groups related to a server load balancer.
 
 ## Example Usage
 
 ```
-data "apsarastack_slb_master_slave_server_groups" "sample_ds" {
-  load_balancer_id = "${apsarastack_slb.sample_slb.id}"
+data "alibabacloudstack_slb_master_slave_server_groups" "sample_ds" {
+  load_balancer_id = "${alibabacloudstack_slb.sample_slb.id}"
 }
 
 output "first_slb_server_group_id" {
-  value = "${data.apsarastack_slb_master_slave_server_groups.sample_ds.groups.0.id}"
+  value = "${data.alibabacloudstack_slb_master_slave_server_groups.sample_ds.groups.0.id}"
 }
 ```
 

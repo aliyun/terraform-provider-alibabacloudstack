@@ -1,50 +1,50 @@
 ---
 subcategory: "Auto Scaling(ESS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ess_lifecycle_hook"
-sidebar_current: "docs-apsarastack-resource-ess-lifecycle-hook"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ess_lifecycle_hook"
+sidebar_current: "docs-alibabacloudstack-resource-ess-lifecycle-hook"
 description: |-
   Provides a ESS lifecycle hook resource.
 ---
 
-# apsarastack\_ess\_lifecycle\_hook
+# alibabacloudstack\_ess\_lifecycle\_hook
 
 Provides a ESS lifecycle hook resource.
 
 ## Example Usage
 ```
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_disk_category     = "cloud_efficiency"
   available_resource_creation = "VSwitch"
 }
 
-resource "apsarastack_vpc" "foo" {
+resource "alibabacloudstack_vpc" "foo" {
   name       = "testAccEssScalingGroup_vpc"
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "foo" {
-  vpc_id            = "${apsarastack_vpc.foo.id}"
+resource "alibabacloudstack_vswitch" "foo" {
+  vpc_id            = "${alibabacloudstack_vpc.foo.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
 
-resource "apsarastack_vswitch" "bar" {
-  vpc_id            = "${apsarastack_vpc.foo.id}"
+resource "alibabacloudstack_vswitch" "bar" {
+  vpc_id            = "${alibabacloudstack_vpc.foo.id}"
   cidr_block        = "172.16.1.0/24"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
 
-resource "apsarastack_ess_scaling_group" "foo" {
+resource "alibabacloudstack_ess_scaling_group" "foo" {
   min_size           = 1
   max_size           = 1
   scaling_group_name = "testAccEssScaling_group"
   removal_policies   = ["OldestInstance", "NewestInstance"]
-  vswitch_ids        = ["${apsarastack_vswitch.foo.id}", "${apsarastack_vswitch.bar.id}"]
+  vswitch_ids        = ["${alibabacloudstack_vswitch.foo.id}", "${alibabacloudstack_vswitch.bar.id}"]
 }
 
-resource "apsarastack_ess_lifecycle_hook" "foo" {
-  scaling_group_id      = "${apsarastack_ess_scaling_group.foo.id}"
+resource "alibabacloudstack_ess_lifecycle_hook" "foo" {
+  scaling_group_id      = "${alibabacloudstack_ess_scaling_group.foo.id}"
   name                  = "testAccEssLifecycle_hook"
   lifecycle_transition  = "SCALE_OUT"
   heartbeat_timeout     = 400

@@ -1,26 +1,26 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_ram_role"
-sidebar_current: "docs-apsarastack-resource-ascm-ram-role"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_ram_role"
+sidebar_current: "docs-alibabacloudstack-resource-ascm-ram-role"
 description: |-
   Provides Ascm ram role.
 ---
 
-# apsarastack\_ascm_ram_role
+# alibabacloudstack\_ascm_ram_role
 
 Provides Ascm ram role.
 
 ## Example Usage
 
 ```
-resource "apsarastack_ascm_ram_role" "default" {
+resource "alibabacloudstack_ascm_ram_role" "default" {
   role_name = "TestingRamRole"
   description = "TestingRam"
   organization_visibility = "organizationVisibility.global"
 }
 output "ramrole" {
-  value = apsarastack_ascm_ram_role.default.*
+  value = alibabacloudstack_ascm_ram_role.default.*
 }
 ```
 ## Argument Reference

@@ -1,13 +1,13 @@
 ---
 subcategory: "Network Attached Storage (NAS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_nas_file_system"
-sidebar_current: "docs-apsarastack-resource-nas-file-system"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_nas_file_system"
+sidebar_current: "docs-alibabacloudstack-resource-nas-file-system"
 description: |-
-  Provides a Apsarastack NAS File System resource.
+  Provides a Alibabacloudstack NAS File System resource.
 ---
 
-# apsarastack\_nas_file_system
+# alibabacloudstack\_nas_file_system
 
 Provides a Nas File System resource.
 
@@ -22,7 +22,7 @@ For information about NAS file system and how to use it, see [Manage file system
 Basic Usage
 
 ```terraform
-resource "apsarastack_nas_file_system" "foo" {
+resource "alibabacloudstack_nas_file_system" "foo" {
   protocol_type = "NFS"
   storage_type  = "Performance"
   description   = "tf-testAccNasConfig"
@@ -31,7 +31,7 @@ resource "apsarastack_nas_file_system" "foo" {
 ```
 
 ```terraform
-resource "apsarastack_nas_file_system" "foo" {
+resource "alibabacloudstack_nas_file_system" "foo" {
   file_system_type = "extreme"
   protocol_type    = "NFS"
   zone_id          = "cn-hangzhou-f"
@@ -81,5 +81,5 @@ The following attributes are exported:
 Nas File System can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_nas_file_system.foo 1337849c59
+$ terraform import alibabacloudstack_nas_file_system.foo 1337849c59
 ```

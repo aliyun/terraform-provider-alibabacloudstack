@@ -1,13 +1,13 @@
 ---
 subcategory: "Elasticsearch"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_elasticsearch_instance"
-sidebar_current: "docs-apsarastack-resource-elasticsearch-instance"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_elasticsearch_instance"
+sidebar_current: "docs-alibabacloudstack-resource-elasticsearch-instance"
 description: |-
-  Provides a Apsarastack Elasticsearch instance resource.
+  Provides a Alibabacloudstack Elasticsearch instance resource.
 ---
 
-# apsarastack\_elasticsearch\_instance
+# alibabacloudstack\_elasticsearch\_instance
 
 Provides a Elasticsearch instance resource. It contains data nodes, dedicated master node(optional) and etc. It can be associated with private IP whitelists and kibana IP whitelist.
 
@@ -20,7 +20,7 @@ Provides a Elasticsearch instance resource. It contains data nodes, dedicated ma
 Basic Usage
 
 ```
-resource "apsarastack_elasticsearch_instance" "instance" {
+resource "alibabacloudstack_elasticsearch_instance" "instance" {
   instance_charge_type = "PostPaid"
   data_node_amount     = "2"
   data_node_spec       = "elasticsearch.sn2ne.large"
@@ -103,6 +103,6 @@ The following attributes are exported:
 Elasticsearch can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_elasticsearch_instance.example es-cn-abcde123456
+$ terraform import alibabacloudstack_elasticsearch_instance.example es-cn-abcde123456
 ```
 

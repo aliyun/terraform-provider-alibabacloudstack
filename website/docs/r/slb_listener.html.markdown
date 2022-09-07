@@ -1,13 +1,13 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_listener"
-sidebar_current: "docs-apsarastack-resource-slb-listener"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_listener"
+sidebar_current: "docs-alibabacloudstack-resource-slb-listener"
 description: |-
   Provides an Application Load Balancer resource.
 ---
 
-# apsarastack\_slb\_listener
+# alibabacloudstack\_slb\_listener
 
 Provides an Application Load Balancer Listener resource.
 
@@ -16,38 +16,38 @@ Provides an Application Load Balancer Listener resource.
 ## Example Usage
 
 ```
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
 }
-resource "apsarastack_vpc" "vpc" {
+resource "alibabacloudstack_vpc" "vpc" {
   name       = "vpc"
   cidr_block = "10.0.0.0/16"
 }
 
-resource "apsarastack_vswitch" "vsw" {
+resource "alibabacloudstack_vswitch" "vsw" {
   name       = "vsw"
-  vpc_id            = apsarastack_vpc.vpc.id
-  cidr_block        = apsarastack_vpc.vpc.cidr_block
-  availability_zone =  "${data.apsarastack_zones.default.zones.0.id}"
+  vpc_id            = alibabacloudstack_vpc.vpc.id
+  cidr_block        = alibabacloudstack_vpc.vpc.cidr_block
+  availability_zone =  "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
-resource "apsarastack_slb" "slb" {
+resource "alibabacloudstack_slb" "slb" {
   name          = "slb"
-  vswitch_id    = apsarastack_vswitch.vsw.id
+  vswitch_id    = alibabacloudstack_vswitch.vsw.id
 }
 
-resource "apsarastack_slb_server_certificate" "servercertificate" {
+resource "alibabacloudstack_slb_server_certificate" "servercertificate" {
   name               = "slbservercertificate"
   server_certificate = "-----BEGIN CERTIFICATE-----\nMIIDRjCCAq+gAwIBAgIJAJn3ox4K13PoMA0GCSqGSIb3DQEBBQUAMHYxCzAJBgNV\nBAYTAkNOMQswCQYDVQQIEwJCSjELMAkGA1UEBxMCQkoxDDAKBgNVBAoTA0FMSTEP\nMA0GA1UECxMGQUxJWVVOMQ0wCwYDVQQDEwR0ZXN0MR8wHQYJKoZIhvcNAQkBFhB0\nZXN0QGhvdG1haWwuY29tMB4XDTE0MTEyNDA2MDQyNVoXDTI0MTEyMTA2MDQyNVow\ndjELMAkGA1UEBhMCQ04xCzAJBgNVBAgTAkJKMQswCQYDVQQHEwJCSjEMMAoGA1UE\nChMDQUxJMQ8wDQYDVQQLEwZBTElZVU4xDTALBgNVBAMTBHRlc3QxHzAdBgkqhkiG\n9w0BCQEWEHRlc3RAaG90bWFpbC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJ\nAoGBAM7SS3e9+Nj0HKAsRuIDNSsS3UK6b+62YQb2uuhKrp1HMrOx61WSDR2qkAnB\ncoG00Uz38EE+9DLYNUVQBK7aSgLP5M1Ak4wr4GqGyCgjejzzh3DshUzLCCy2rook\nKOyRTlPX+Q5l7rE1fcSNzgepcae5i2sE1XXXzLRIDIvQxcspAgMBAAGjgdswgdgw\nHQYDVR0OBBYEFBdy+OuMsvbkV7R14f0OyoLoh2z4MIGoBgNVHSMEgaAwgZ2AFBdy\n+OuMsvbkV7R14f0OyoLoh2z4oXqkeDB2MQswCQYDVQQGEwJDTjELMAkGA1UECBMC\nQkoxCzAJBgNVBAcTAkJKMQwwCgYDVQQKEwNBTEkxDzANBgNVBAsTBkFMSVlVTjEN\nMAsGA1UEAxMEdGVzdDEfMB0GCSqGSIb3DQEJARYQdGVzdEBob3RtYWlsLmNvbYIJ\nAJn3ox4K13PoMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAY7KOsnyT\ncQzfhiiG7ASjiPakw5wXoycHt5GCvLG5htp2TKVzgv9QTliA3gtfv6oV4zRZx7X1\nOfi6hVgErtHaXJheuPVeW6eAW8mHBoEfvDAfU3y9waYrtUevSl07643bzKL6v+Qd\nDUBTxOAvSYfXTtI90EAxEG/bJJyOm5LqoiA=\n-----END CERTIFICATE-----"
   private_key        = "-----BEGIN RSA PRIVATE KEY-----\nMIICXAIBAAKBgQDO0kt3vfjY9BygLEbiAzUrEt1Cum/utmEG9rroSq6dRzKzsetV\nkg0dqpAJwXKBtNFM9/BBPvQy2DVFUASu2koCz+TNQJOMK+BqhsgoI3o884dw7IVM\nywgstq6KJCjskU5T1/kOZe6xNX3Ejc4HqXGnuYtrBNV118y0SAyL0MXLKQIDAQAB\nAoGAfe3NxbsGKhN42o4bGsKZPQDfeCHMxayGp5bTd10BtQIE/ST4BcJH+ihAS7Bd\n6FwQlKzivNd4GP1MckemklCXfsVckdL94e8ZbJl23GdWul3v8V+KndJHqv5zVJmP\nhwWoKimwIBTb2s0ctVryr2f18N4hhyFw1yGp0VxclGHkjgECQQD9CvllsnOwHpP4\nMdrDHbdb29QrobKyKW8pPcDd+sth+kP6Y8MnCVuAKXCKj5FeIsgVtfluPOsZjPzz\n71QQWS1dAkEA0T0KXO8gaBQwJhIoo/w6hy5JGZnrNSpOPp5xvJuMAafs2eyvmhJm\nEv9SN/Pf2VYa1z6FEnBaLOVD6hf6YQIsPQJAX/CZPoW6dzwgvimo1/GcY6eleiWE\nqygqjWhsh71e/3bz7yuEAnj5yE3t7Zshcp+dXR3xxGo0eSuLfLFxHgGxwQJAAxf8\n9DzQ5NkPkTCJi0sqbl8/03IUKTgT6hcbpWdDXa7m8J3wRr3o5nUB+TPQ5nzAbthM\nzWX931YQeACcwhxvHQJBAN5mTzzJD4w4Ma6YTaNHyXakdYfyAWrOkPIWZxfhMfXe\nDrlNdiysTI4Dd1dLeErVpjsckAaOW/JDG5PCSwkaMxk=\n-----END RSA PRIVATE KEY-----"
 }
 
-resource "apsarastack_slb_listener" "listener" {
-  load_balancer_id          = apsarastack_slb.slb.id
+resource "alibabacloudstack_slb_listener" "listener" {
+  load_balancer_id          = alibabacloudstack_slb.slb.id
   backend_port              = 80
   frontend_port             = 80
   protocol                  = "http"
   bandwidth                 = 10
-  server_certificate_id     =apsarastack_slb_server_certificate.servercertificate.id
+  server_certificate_id     =alibabacloudstack_slb_server_certificate.servercertificate.id
   sticky_session            = "on"
   sticky_session_type       = "insert"
   cookie_timeout            = 86400
@@ -99,13 +99,13 @@ The following arguments are supported:
 * `gzip` - (Optional) Whether to enable "Gzip Compression". If enabled, files of specific file types will be compressed, otherwise, no files will be compressed. Default to true.
 * `x_forwarded_for` - (Optional) Whether to set additional HTTP Header field "X-Forwarded-For" (documented below).
 * `established_timeout` - (Optional) Timeout of tcp listener established connection idle timeout. Valid value range: [10-900] in seconds. Default to 900.
-* `server_group_id` - (Optional) the id of server group to be apply on the listener, is the id of resource `apsarastack_slb_server_group`.
+* `server_group_id` - (Optional) the id of server group to be apply on the listener, is the id of resource `alibabacloudstack_slb_server_group`.
 * `listener_forward` - (Optional, ForceNew) Whether to enable http redirect to https, Valid values are `on` and `off`. Default to `off`.
 * `forward_port` - (Optional, ForceNew) The port that http redirect to https.
 * `health_check_method` - (Optional, ForceNew, Available in 1.70.0+) The method of health check. Valid values: ["head", "get"].
 * `delete_protection_validation` - (Optional, Available in 1.63.0+) Checking DeleteProtection of SLB instance before deleting. If true, this resource will not be deleted when its SLB instance enabled DeleteProtection. Default to false.
 
--> **NOTE:** Once enable the http redirect to https function, any parameters excepted forward_port,listener_forward,load_balancer_id,frontend_port,protocol will be ignored. More info, please refer to [Redirect http to https](https://apsarastackdocument.oss-cn-hangzhou.aliyuncs.com/01_ApsaraStackEnterprise/V3.11.0-intl-en/Alibaba%20Cloud%20Apsara%20Stack%20Enterprise%202001%2C%20Internal_%20V3.11.0%20Developer%20Guide%20-%20Cloud%20Essentials%20and%20Security%2020200513.pdf?spm=a3c0i.214467.3807842930.7.61e76bdb1JWVyX&file=Alibaba%20Cloud%20Apsara%20Stack%20Enterprise%202001%2C%20Internal_%20V3.11.0%20Developer%20Guide%20-%20Cloud%20Essentials%20and%20Security%2020200513.pdf).
+-> **NOTE:** Once enable the http redirect to https function, any parameters excepted forward_port,listener_forward,load_balancer_id,frontend_port,protocol will be ignored. More info, please refer to [Redirect http to https](https://alibabacloudstackdocument.oss-cn-hangzhou.aliyuncs.com/01_AlibabacloudStackEnterprise/V3.11.0-intl-en/Alibaba%20Cloud%20Apsara%20Stack%20Enterprise%202001%2C%20Internal_%20V3.11.0%20Developer%20Guide%20-%20Cloud%20Essentials%20and%20Security%2020200513.pdf?spm=a3c0i.214467.3807842930.7.61e76bdb1JWVyX&file=Alibaba%20Cloud%20Apsara%20Stack%20Enterprise%202001%2C%20Internal_%20V3.11.0%20Developer%20Guide%20-%20Cloud%20Essentials%20and%20Security%2020200513.pdf).
 
 
 ### Block x_forwarded_for
@@ -147,7 +147,7 @@ server_certificate_id | https |  |
 gzip | http & https | true or false  |
 x_forwarded_for | http & https |  |
 established_timeout | tcp       | 10-900|
-server_group_id    | http & https & tcp & udp | the id of resource apsarastack_slb_server_group |
+server_group_id    | http & https & tcp & udp | the id of resource alibabacloudstack_slb_server_group |
 
 The listener mapping supports the following:
 

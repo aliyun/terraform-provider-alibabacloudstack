@@ -1,25 +1,25 @@
 ---
 subcategory: "Redis And Memcache (KVStore)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_kvstore_instances"
-sidebar_current: "docs-apsarastack-datasource-kvstore-instances"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_kvstore_instances"
+sidebar_current: "docs-alibabacloudstack-datasource-kvstore-instances"
 description: |-
     Provides a collection of kvstore instances according to the specified filters.
 ---
 
-# apsarastack\_kvstore\_instances
+# alibabacloudstack\_kvstore\_instances
 
-The `apsarastack_kvstore_instances` data source provides a collection of kvstore instances available in apsarastack account.
+The `alibabacloudstack_kvstore_instances` data source provides a collection of kvstore instances available in alibabacloudstack account.
 Filters support regular expression for the instance name, searches by tags, and other filters which are listed below.
 
 ## Example Usage
 
 ```
-data "apsarastack_kvstore_instances" "default" {
-    name_regex = "checkapsarastackkvinstancesdatasoource"
+data "alibabacloudstack_kvstore_instances" "default" {
+    name_regex = "checkalibabacloudstackkvinstancesdatasoource"
 }
 output "first_instance_name" {
-    value = data.apsarastack_kvstore_instances.default.instances.name
+    value = data.alibabacloudstack_kvstore_instances.default.instances.name
 }
 ```
 

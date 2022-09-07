@@ -1,26 +1,26 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_specific_fields"
-sidebar_current: "docs-apsarastack-datasource-ascm-specific-fields"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_specific_fields"
+sidebar_current: "docs-alibabacloudstack-datasource-ascm-specific-fields"
 description: |-
     Provides a list of specific fields to the user.
 ---
 
-# apsarastack\_ascm_specific_fields
+# alibabacloudstack\_ascm_specific_fields
 
 This data source provides the specific fields of the current Apsara Stack Cloud user.
 
 ## Example Usage
 
 ```
-data "apsarastack_ascm_specific_fields" "specifields" {
+data "alibabacloudstack_ascm_specific_fields" "specifields" {
   group_filed ="storageType"
   resource_type ="OSS"
   output_file = "fields"
 }
 output "specifields" {
-  value = data.apsarastack_ascm_specific_fields.specifields.*
+  value = data.alibabacloudstack_ascm_specific_fields.specifields.*
 }
 ```
 
