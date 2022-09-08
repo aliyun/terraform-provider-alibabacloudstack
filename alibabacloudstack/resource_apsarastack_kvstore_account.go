@@ -86,7 +86,7 @@ func resourceAlibabacloudStackKVStoreAccountCreate(d *schema.ResourceData, meta 
 	request.AccountPrivilege = d.Get("account_privilege").(string)
 	password := d.Get("account_password").(string)
 	kmsPassword := d.Get("kms_encrypted_password").(string)
-
+	request.AccountPrivilege = d.Get("account_privilege").(string)
 	if password == "" && kmsPassword == "" {
 		return WrapError(Error("One of the 'account_password' and 'kms_encrypted_password' should be set."))
 	}
