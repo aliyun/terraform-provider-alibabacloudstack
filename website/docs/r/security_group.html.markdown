@@ -1,24 +1,24 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_security_group"
-sidebar_current: "docs-apsarastack-resource-security-group"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_security_group"
+sidebar_current: "docs-alibabacloudstack-resource-security-group"
 description: |-
-  Provides a Apsarastack Security Group resource.
+  Provides a Alibabacloudstack Security Group resource.
 ---
 
-# apsarastack\_security\_group
+# alibabacloudstack\_security\_group
 
 Provides a security group resource.
 
--> **NOTE:** `apsarastack_security_group` is used to build and manage a security group
+-> **NOTE:** `alibabacloudstack_security_group` is used to build and manage a security group
 
 ## Example Usage
 
 Basic Usage
 
 ```
-resource "apsarastack_security_group" "group" {
+resource "alibabacloudstack_security_group" "group" {
   name        = "terraform-test-group"
   description = "New security group"
 }
@@ -26,12 +26,12 @@ resource "apsarastack_security_group" "group" {
 Basic usage for vpc
 
 ```
-resource "apsarastack_security_group" "group" {
+resource "alibabacloudstack_security_group" "group" {
   name   = "new-group"
-  vpc_id = "${apsarastack_vpc.vpc.id}"
+  vpc_id = "${alibabacloudstack_vpc.vpc.id}"
 }
 
-resource "apsarastack_vpc" "vpc" {
+resource "alibabacloudstack_vpc" "vpc" {
   cidr_block = "10.1.0.0/21"
 }
 ```

@@ -1,26 +1,26 @@
 ---
 subcategory: "DNS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_dns_groups"
-sidebar_current: "docs-apsarastack-datasource-dns-groups"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dns_groups"
+sidebar_current: "docs-alibabacloudstack-datasource-dns-groups"
 description: |-
     Provides a list of groups available to the dns.
 ---
 
-# apsarastack\_dns\_groups
+# alibabacloudstack\_dns\_groups
 
-This data source provides a list of DNS Domain Groups in an Apsarastack Cloud account according to the specified filters.
+This data source provides a list of DNS Domain Groups in an Alibabacloudstack Cloud account according to the specified filters.
 
 ## Example Usage
 
 ```
-data "apsarastack_dns_groups" "groups_ds" {
+data "alibabacloudstack_dns_groups" "groups_ds" {
   name_regex  = "^y[A-Za-z]+"
   output_file = "groups.txt"
 }
 
 output "first_group_name" {
-  value = "${data.apsarastack_dns_groups.groups_ds.groups.0.group_name}"
+  value = "${data.alibabacloudstack_dns_groups.groups_ds.groups.0.group_name}"
 }
 ```
 

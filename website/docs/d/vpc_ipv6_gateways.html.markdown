@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpc_ipv6_gateways"
-sidebar_current: "docs-apsarastack-datasource-vpc-ipv6-gateways"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6_gateways"
+sidebar_current: "docs-alibabacloudstack-datasource-vpc-ipv6-gateways"
 description: |-
   Provides a list of Vpc Ipv6 Gateways to the user.
 ---
 
-# apsarastack\_vpc\_ipv6\_gateways
+# alibabacloudstack\_vpc\_ipv6\_gateways
 
 This data source provides the Vpc Ipv6 Gateways of the current Alibaba Cloud user.
 
@@ -18,34 +18,34 @@ This data source provides the Vpc Ipv6 Gateways of the current Alibaba Cloud use
 Basic Usage
 
 ```terraform
-data "apsarastack_vpc_ipv6_gateways" "ids" {
+data "alibabacloudstack_vpc_ipv6_gateways" "ids" {
   ids = ["example_id"]
 }
 output "vpc_ipv6_gateway_id_1" {
-  value = data.apsarastack_vpc_ipv6_gateways.ids.gateways.0.id
+  value = data.alibabacloudstack_vpc_ipv6_gateways.ids.gateways.0.id
 }
 
-data "apsarastack_vpc_ipv6_gateways" "nameRegex" {
+data "alibabacloudstack_vpc_ipv6_gateways" "nameRegex" {
   name_regex = "^my-Ipv6Gateway"
 }
 output "vpc_ipv6_gateway_id_2" {
-  value = data.apsarastack_vpc_ipv6_gateways.nameRegex.gateways.0.id
+  value = data.alibabacloudstack_vpc_ipv6_gateways.nameRegex.gateways.0.id
 }
 
-data "apsarastack_vpc_ipv6_gateways" "vpcId" {
+data "alibabacloudstack_vpc_ipv6_gateways" "vpcId" {
   ids    = ["example_id"]
   vpc_id = "example_value"
 }
 output "vpc_ipv6_gateway_id_3" {
-  value = data.apsarastack_vpc_ipv6_gateways.vpcId.gateways.0.id
+  value = data.alibabacloudstack_vpc_ipv6_gateways.vpcId.gateways.0.id
 }
 
-data "apsarastack_vpc_ipv6_gateways" "status" {
+data "alibabacloudstack_vpc_ipv6_gateways" "status" {
   ids    = ["example_id"]
   status = "Available"
 }
 output "vpc_ipv6_gateway_id_4" {
-  value = data.apsarastack_vpc_ipv6_gateways.status.gateways.0.id
+  value = data.alibabacloudstack_vpc_ipv6_gateways.status.gateways.0.id
 }
 
 ```

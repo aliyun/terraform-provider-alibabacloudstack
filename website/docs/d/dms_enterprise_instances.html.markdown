@@ -1,13 +1,13 @@
 ---
 subcategory: "DMS Enterprise"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_dms_enterprise_instances"
-sidebar_current: "docs-apsarastack-datasource-dms-enterprise-instances"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dms_enterprise_instances"
+sidebar_current: "docs-alibabacloudstack-datasource-dms-enterprise-instances"
 description: |-
     Provides a list of available DMS Enterprise Instances.
 ---
 
-# apsarastack\_dms\_enterprise\_instances
+# alibabacloudstack\_dms\_enterprise\_instances
 
 This data source provides a list of DMS Enterprise Instances in an Alibaba Cloud account according to the specified filters.
 
@@ -15,7 +15,7 @@ This data source provides a list of DMS Enterprise Instances in an Alibaba Cloud
 
 ```terraform
 # Declare the data source
-data "apsarastack_dms_enterprise_instances" "dms_enterprise_instances_ds" {
+data "alibabacloudstack_dms_enterprise_instances" "dms_enterprise_instances_ds" {
   net_type      = "CLASSIC"
   instance_type = "mysql"
   env_type      = "test"
@@ -24,7 +24,7 @@ data "apsarastack_dms_enterprise_instances" "dms_enterprise_instances_ds" {
 }
 
 output "first_database_instance_id" {
-  value = "${data.apsarastack_dms_enterprise_instances.dms_enterprise_instances_ds.instances.0.instance_id}"
+  value = "${data.alibabacloudstack_dms_enterprise_instances.dms_enterprise_instances_ds.instances.0.instance_id}"
 }
 ```
 

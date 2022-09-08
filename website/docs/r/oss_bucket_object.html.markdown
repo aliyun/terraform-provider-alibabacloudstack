@@ -1,13 +1,13 @@
 ---
 subcategory: "OSS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_oss_bucket_object"
-sidebar_current: "docs-apsarastack-resource-oss-bucket-object"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket_object"
+sidebar_current: "docs-alibabacloudstack-resource-oss-bucket-object"
 description: |-
   Provides a resource to create a oss bucket object.
 ---
 
-# apsarastack\_oss\_bucket\_object
+# alibabacloudstack\_oss\_bucket\_object
 
 Provides a resource to put a object(content or file) to a oss bucket.
 
@@ -16,7 +16,7 @@ Provides a resource to put a object(content or file) to a oss bucket.
 ### Uploading a file to a bucket
 
 ```
-resource "apsarastack_oss_bucket_object" "object-source" {
+resource "alibabacloudstack_oss_bucket_object" "object-source" {
   bucket = "your-bucket-name"
   key    = "new_object_key"
   source = "path/to/file"
@@ -26,13 +26,13 @@ resource "apsarastack_oss_bucket_object" "object-source" {
 ### Uploading a content to a bucket
 
 ```
-resource "apsarastack_oss_bucket" "example" {
+resource "alibabacloudstack_oss_bucket" "example" {
   bucket = "your_bucket_name"
   acl    = "public-read"
 }
 
-resource "apsarastack_oss_bucket_object" "object-content" {
-  bucket  = "${apsarastack_oss_bucket.example.bucket}"
+resource "alibabacloudstack_oss_bucket_object" "object-content" {
+  bucket  = "${alibabacloudstack_oss_bucket.example.bucket}"
   key     = "new_object_key"
   content = "the content that you want to upload."
 }

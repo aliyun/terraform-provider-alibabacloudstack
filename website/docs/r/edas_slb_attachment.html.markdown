@@ -1,13 +1,13 @@
 ---
 subcategory: "EDAS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_edas_slb_attachment"
-sidebar_current: "docs-apsarastack-resource-edas-slb-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_edas_slb_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-edas-slb-attachment"
 description: |-
   Binds SLB to an EDAS application.
 ---
 
-# apsarastack\_edas\_slb\_attachment
+# alibabacloudstack\_edas\_slb\_attachment
 
 Binds SLB to an EDAS application.
 
@@ -18,7 +18,7 @@ Binds SLB to an EDAS application.
 Basic Usage
 
 ```
-resource "apsarastack_edas_slb_attachment" "default" {
+resource "alibabacloudstack_edas_slb_attachment" "default" {
   app_id           = var.app_id
   slb_id           = var.slb_id
   slb_ip           = var.slb_ip

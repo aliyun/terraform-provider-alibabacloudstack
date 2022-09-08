@@ -1,24 +1,24 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_acls"
-sidebar_current: "docs-apsarastack-datasource-slb-acls"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_acls"
+sidebar_current: "docs-alibabacloudstack-datasource-slb-acls"
 description: |-
     Provides a list of server load balancer acls (access control lists) to the user.
 ---
 
-# apsarastack\_slb_acls
+# alibabacloudstack\_slb_acls
 
 This data source provides the acls in the region.
 
 ## Example Usage
 
 ```
-data "apsarastack_slb_acls" "sample_ds" {
+data "alibabacloudstack_slb_acls" "sample_ds" {
 }
 
 output "first_slb_acl_id" {
-  value = "${data.apsarastack_slb_acls.sample_ds.acls.0.id}"
+  value = "${data.alibabacloudstack_slb_acls.sample_ds.acls.0.id}"
 }
 ```
 

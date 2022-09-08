@@ -1,33 +1,33 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_launch_template"
-sidebar_current: "docs-apsarastack-resource-launch-tempate"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_launch_template"
+sidebar_current: "docs-alibabacloudstack-resource-launch-tempate"
 description: |-
   Provides an ECS Launch Template resource.
 ---
 
-# apsarastack\_launch\_template
+# alibabacloudstack\_launch\_template
 
 Provides an ECS Launch Template resource.
 
 ## Example Usage
 
 ```
-data "apsarastack_images" "images" {
+data "alibabacloudstack_images" "images" {
   owners = "system"
 }
 
-data "apsarastack_instances" "instances" {
+data "alibabacloudstack_instances" "instances" {
 }
 
-resource "apsarastack_launch_template" "template" {
+resource "alibabacloudstack_launch_template" "template" {
   name                          = "tf-test-template"
   description                   = "test1"
-  image_id                      = "${data.apsarastack_images.images.images.0.id}"
+  image_id                      = "${data.alibabacloudstack_images.images.images.0.id}"
   host_name                     = "tf-test-host"
   instance_name                 = "tf-instance-name"
-  instance_type                 = "${data.apsarastack_instances.instances.instances.0.instance_type}"
+  instance_type                 = "${data.alibabacloudstack_instances.instances.instances.0.instance_type}"
   internet_max_bandwidth_in     = 5
   internet_max_bandwidth_out    = 0
   io_optimized                  = "none"
@@ -79,7 +79,7 @@ The following arguments are supported:
 * `host_name` - (Optional) Instance host name.It cannot start or end with a period (.) or a hyphen (-) and it cannot have two or more consecutive periods (.) or hyphens (-).For Windows: The host name can be [2, 15] characters in length. It can contain A-Z, a-z, numbers, periods (.), and hyphens (-). It cannot only contain numbers. For other operating systems: The host name can be [2, 64] characters in length. It can be segments separated by periods (.). It can contain A-Z, a-z, numbers, and hyphens (-).
 * `image_id` - (Optional) Image ID.
 * `instance_name` - (Optional) The name of the instance. The name is a string of 2 to 128 characters. It must begin with an English or a Chinese character. It can contain A-Z, a-z, Chinese characters, numbers, periods (.), colons (:), underscores (_), and hyphens (-).
-* `instance_type` - (Optional) Instance type. For more information, call resource_apsarastack_instances to obtain the latest instance type list.
+* `instance_type` - (Optional) Instance type. For more information, call resource_alibabacloudstack_instances to obtain the latest instance type list.
 * `auto_release_time` - (Optional) Instance auto release time. The time is presented using the ISO8601 standard and in UTC time. The format is  YYYY-MM-DDTHH:MM:SSZ.
 * `internet_max_bandwidth_in` - (Optional) The maximum inbound bandwidth from the Internet network, measured in Mbit/s. Value range: [1, 200].
 * `internet_max_bandwidth_out` - (Optional) Maximum outbound bandwidth from the Internet, its unit of measurement is Mbit/s. Value range: [0, 100].

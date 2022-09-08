@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_image_export"
-sidebar_current: "docs-apsarastack-resource-image-export"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_image_export"
+sidebar_current: "docs-alibabacloudstack-resource-image-export"
 description: |-
   Provides an ECS image export resource.
 ---
 
-# apsarastack\_image\_export
+# alibabacloudstack\_image\_export
 
 Export a custom image to the OSS bucket in the same region as the custom image.
 
@@ -20,7 +20,7 @@ Export a custom image to the OSS bucket in the same region as the custom image.
 ## Example Usage
 
 ```
-resource "apsarastack_image_export" "default" {
+resource "alibabacloudstack_image_export" "default" {
   image_id           = "m-bp1gxy***"
   oss_bucket         = "ecsimageexportconfig"
   oss_prefix         = "ecsExport"

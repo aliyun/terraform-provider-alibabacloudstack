@@ -1,13 +1,13 @@
 ---
 subcategory: "Container Registry (CR)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cr_repo"
-sidebar_current: "docs-apsarastack-resource-container-registry"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cr_repo"
+sidebar_current: "docs-alibabacloudstack-resource-container-registry"
 description: |-
-  Provides a Apsarastack resource to manage Container Registry repositories.
+  Provides a Alibabacloudstack resource to manage Container Registry repositories.
 ---
 
-# apsarastack\_cr\_repo
+# alibabacloudstack\_cr\_repo
 
 This resource will help you to manager Container Registry repositories.
 
@@ -17,14 +17,14 @@ This resource will help you to manager Container Registry repositories.
 Basic Usage
 
 ```
-resource "apsarastack_cr_namespace" "my-namespace" {
+resource "alibabacloudstack_cr_namespace" "my-namespace" {
   name               = "my-namespace"
   auto_create        = false
   default_visibility = "PUBLIC"
 }
 
-resource "apsarastack_cr_repo" "my-repo" {
-  namespace = apsarastack_cr_namespace.my-namespace.name
+resource "alibabacloudstack_cr_repo" "my-repo" {
+  namespace = alibabacloudstack_cr_namespace.my-namespace.name
   name      = "my-repo"
   summary   = "this is summary of my new repo"
   repo_type = "PUBLIC"

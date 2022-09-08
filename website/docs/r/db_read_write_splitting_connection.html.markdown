@@ -1,13 +1,13 @@
 ---
 subcategory: "RDS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_db_read_write_splitting_connection"
-sidebar_current: "docs-apsarastack-resource-db-read-write-splitting-connection"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_db_read_write_splitting_connection"
+sidebar_current: "docs-alibabacloudstack-resource-db-read-write-splitting-connection"
 description: |-
   Provides an RDS instance read write splitting connection resource.
 ---
 
-# apsarastack\_db\_read\_write\_splitting\_connection
+# alibabacloudstack\_db\_read\_write\_splitting\_connection
 
 Provides an RDS read write splitting connection resource to allocate an Intranet connection string for RDS instance.
 
@@ -22,52 +22,52 @@ variable "name" {
   default = "dbInstancevpc"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "${var.creation}"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = "${var.name}"
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
 
-resource "apsarastack_db_instance" "default" {
+resource "alibabacloudstack_db_instance" "default" {
   engine               = "MySQL"
   engine_version       = "5.6"
   instance_type        = "rds.mysql.t1.small"
   instance_storage     = "20"
   instance_charge_type = "Postpaid"
   instance_name        = "${var.name}"
-  vswitch_id           = "${apsarastack_vswitch.default.id}"
+  vswitch_id           = "${alibabacloudstack_vswitch.default.id}"
   security_ips         = ["10.168.1.12", "100.69.7.112"]
 }
 
-resource "apsarastack_db_readonly_instance" "default" {
-  master_db_instance_id = "${apsarastack_db_instance.default.id}"
-  zone_id               = "${apsarastack_db_instance.default.zone_id}"
-  engine_version        = "${apsarastack_db_instance.default.engine_version}"
-  instance_type         = "${apsarastack_db_instance.default.instance_type}"
+resource "alibabacloudstack_db_readonly_instance" "default" {
+  master_db_instance_id = "${alibabacloudstack_db_instance.default.id}"
+  zone_id               = "${alibabacloudstack_db_instance.default.zone_id}"
+  engine_version        = "${alibabacloudstack_db_instance.default.engine_version}"
+  instance_type         = "${alibabacloudstack_db_instance.default.instance_type}"
   instance_storage      = "30"
   instance_name         = "${var.name}ro"
-  vswitch_id            = "${apsarastack_vswitch.default.id}"
+  vswitch_id            = "${alibabacloudstack_vswitch.default.id}"
 }
 
-resource "apsarastack_db_read_write_splitting_connection" "default" {
-  instance_id       = "${apsarastack_db_instance.default.id}"
+resource "alibabacloudstack_db_read_write_splitting_connection" "default" {
+  instance_id       = "${alibabacloudstack_db_instance.default.id}"
   connection_prefix = "t-con-123"
   distribution_type = "Standard"
-  depends_on = ["apsarastack_db_readonly_instance.default"]
+  depends_on = ["alibabacloudstack_db_readonly_instance.default"]
 }
 ```
 
--> **NOTE:** Resource `apsarastack_db_read_write_splitting_connection` should be created after `apsarastack_db_readonly_instance`, so the `depends_on` statement is necessary.
+-> **NOTE:** Resource `alibabacloudstack_db_read_write_splitting_connection` should be created after `alibabacloudstack_db_readonly_instance`, so the `depends_on` statement is necessary.
 
 ## Argument Reference
 

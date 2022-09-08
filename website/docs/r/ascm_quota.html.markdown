@@ -1,27 +1,27 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_quota"
-sidebar_current: "docs-apsarastack-resource-ascm-quota"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_quota"
+sidebar_current: "docs-alibabacloudstack-resource-ascm-quota"
 description: |-
   Provides a Ascm quota resource.
 ---
 
-# apsarastack\_ascm_quota
+# alibabacloudstack\_ascm_quota
 
 Provides a Ascm quota resource.
 
 ## Example Usage
 
 ```
-resource "apsarastack_ascm_organization" "default" {
+resource "alibabacloudstack_ascm_organization" "default" {
   name = "Dummy_Test_1"
 }
 
-resource "apsarastack_ascm_quota" "default" {
+resource "alibabacloudstack_ascm_quota" "default" {
   quota_type = "organization"
-  quota_type_id = apsarastack_ascm_organization.default.parent_id // For creating FatherQuota
-  //quota_type_id = apsarastack_ascm_organization.default.org_id
+  quota_type_id = alibabacloudstack_ascm_organization.default.parent_id // For creating FatherQuota
+  //quota_type_id = alibabacloudstack_ascm_organization.default.org_id
   product_name = "ECS"
   total_cpu = 1000
   total_mem = 1000
@@ -31,7 +31,7 @@ resource "apsarastack_ascm_quota" "default" {
 }
 
 output "quota" {
-  value = apsarastack_ascm_quota.default.*
+  value = alibabacloudstack_ascm_quota.default.*
 }
 ```
 ## Argument Reference

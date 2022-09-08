@@ -1,33 +1,33 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "ApsaraStack: apsarastack_ascm_roles"
-sidebar_current: "docs-apsarastack-datasource-ascm-roles"
+layout: "alibabacloudstack"
+page_title: "AlibabacloudStack: alibabacloudstack_ascm_roles"
+sidebar_current: "docs-alibabacloudstack-datasource-ascm-roles"
 description: |-
     Provides a list of roles to the user.
 ---
 
-# apsarastack\_ascm_roles
+# alibabacloudstack\_ascm_roles
 
 This data source provides the roles of the current Apsara Stack Cloud user.
 
 ## Example Usage
 
 ```
-resource "apsarastack_ascm_ram_role" "default" {
+resource "alibabacloudstack_ascm_ram_role" "default" {
   role_name = "DELTA1"
   description = "Testing Complete"
   organization_visibility = "organizationVisibility.global"
 }
 
-data "apsarastack_ascm_roles" "default" {
-  id = apsarastack_ascm_ram_role.default.role_id
-  name_regex = apsarastack_ascm_ram_role.default.role_name
+data "alibabacloudstack_ascm_roles" "default" {
+  id = alibabacloudstack_ascm_ram_role.default.role_id
+  name_regex = alibabacloudstack_ascm_ram_role.default.role_name
   role_type = "ROLETYPE_RAM"
 }
 
 output "roles" {
-  value = data.apsarastack_ascm_roles.default.*
+  value = data.alibabacloudstack_ascm_roles.default.*
 }
 
 

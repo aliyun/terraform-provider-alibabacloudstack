@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ecs_launch_template"
-sidebar_current: "docs-apsarastack-resource-ecs-launch-template"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_launch_template"
+sidebar_current: "docs-alibabacloudstack-resource-ecs-launch-template"
 description: |-
-  Provides a Apsarastack ECS Launch Template resource.
+  Provides a Alibabacloudstack ECS Launch Template resource.
 ---
 
-# apsarastack\_ecs\_launch\_template
+# alibabacloudstack\_ecs\_launch\_template
 
 Provides a ECS Launch Template resource.
 
@@ -20,19 +20,19 @@ For information about ECS Launch Template and how to use it, see [What is Launch
 Basic Usage
 
 ```
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
 }
-data "apsarastack_instance_types" "default" {
-  availability_zone = data.apsarastack_zones.default.zones[0].id
+data "alibabacloudstack_instance_types" "default" {
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   cpu_core_count    = 2
   sorted_by         = "Memory"
  }
  locals {
-  instance_type_id = sort(data.apsarastack_instance_types.default.ids)[0]
+  instance_type_id = sort(data.alibabacloudstack_instance_types.default.ids)[0]
 }
  
-data "apsarastack_images" "default" {
+data "alibabacloudstack_images" "default" {
   name_regex  = "^ubuntu_18.*64"
   most_recent = true
   owners      = "system"
@@ -40,36 +40,36 @@ data "apsarastack_images" "default" {
 variable "name" {
   default = "tf-testaccLaunchTemplateBasic3141889771392864639"
 }
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = "${var.name}"
   cidr_block = "172.16.0.0/16"
 }
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
-resource "apsarastack_security_group" "default" {
+resource "alibabacloudstack_security_group" "default" {
   name   = "${var.name}"
-  vpc_id = "${apsarastack_vpc.default.id}"
+  vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
-resource "apsarastack_security_group_rule" "default" {
+resource "alibabacloudstack_security_group_rule" "default" {
   	type = "ingress"
   	ip_protocol = "tcp"
   	nic_type = "intranet"
   	policy = "accept"
   	port_range = "22/22"
   	priority = 1
-  	security_group_id = "${apsarastack_security_group.default.id}"
+  	security_group_id = "${alibabacloudstack_security_group.default.id}"
   	cidr_ip = "172.16.0.0/24"
 }
 
-resource "apsarastack_launch_template" "default" {
+resource "alibabacloudstack_launch_template" "default" {
   network_type = "vpc"
   key_pair_name = "tf-testaccLaunchTemplateBasic3141889771392864639"
   host_name = "tf-testaccLaunchTemplateBasic3141889771392864639"
-  image_id = "${data.apsarastack_images.default.images.0.id}"
+  image_id = "${data.alibabacloudstack_images.default.images.0.id}"
   spot_price_limit = "5"
   instance_name = "tf-testaccLaunchTemplateBasic3141889771392864639"
   internet_max_bandwidth_in = "5"
@@ -104,12 +104,12 @@ resource "apsarastack_launch_template" "default" {
   security_enhancement_strategy = "Active"
   internet_max_bandwidth_out = "0"
   system_disk_category = "cloud_ssd"
-  security_group_id = "${apsarastack_security_group.default.id}"
+  security_group_id = "${alibabacloudstack_security_group.default.id}"
   io_optimized = "none"
   system_disk_size = "40"
   system_disk_description = "tf-testaccLaunchTemplateBasic3141889771392864639"
   resource_group_id = "rg-zkdfjahg9zxncv0"
-  instance_type = "${data.apsarastack_instance_types.default.instance_types.0.id}"
+  instance_type = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
   system_disk_name = "tf-testaccLaunchTemplateBasic3141889771392864639"
   userdata = "xxxxxxxxxxxxxx"
   description = "tf-testaccLaunchTemplateBasic3141889771392864639"

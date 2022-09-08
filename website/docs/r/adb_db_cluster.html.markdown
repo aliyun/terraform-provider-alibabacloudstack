@@ -1,13 +1,13 @@
 ---
 subcategory: "AnalyticDB for MySQL (ADB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_adb_db_cluster"
-sidebar_current: "docs-apsarastack-resource-adb-db-cluster"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_adb_db_cluster"
+sidebar_current: "docs-alibabacloudstack-resource-adb-db-cluster"
 description: |-
-  Provides a Apsarastack AnalyticDB for MySQL (ADB) DBCluster resource.
+  Provides a Alibabacloudstack AnalyticDB for MySQL (ADB) DBCluster resource.
 ---
 
-# apsarastack\_adb\_db\_cluster
+# alibabacloudstack\_adb\_db\_cluster
 
 Provides a AnalyticDB for MySQL (ADB) DBCluster resource.
 
@@ -26,23 +26,23 @@ variable "creation" {
   default = "ADB"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = var.creation
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   vpc_name   = var.name
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id       = apsarastack_vpc.default.id
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id       = alibabacloudstack_vpc.default.id
   cidr_block   = "172.16.0.0/24"
-  zone_id      = data.apsarastack_zones.default.zones[0].id
+  zone_id      = data.alibabacloudstack_zones.default.zones[0].id
   vswitch_name = var.name
 }
 
-resource "apsarastack_adb_db_cluster" "this" {
+resource "alibabacloudstack_adb_db_cluster" "this" {
   db_cluster_category = "Basic"
   db_cluster_class    = "C8"
   db_node_count       = "2"
@@ -50,7 +50,7 @@ resource "apsarastack_adb_db_cluster" "this" {
   mode                = "reserver"
   db_cluster_version  = "3.0"
   payment_type        = "PayAsYouGo"
-  vswitch_id          = apsarastack_vswitch.default.id
+  vswitch_id          = alibabacloudstack_vswitch.default.id
   description         = "Test new adb again."
   maintain_time       = "23:00Z-00:00Z"
   security_ips      = ["10.168.1.12", "10.168.1.11"]
@@ -89,9 +89,9 @@ The following arguments are supported:
 
 -> **NOTE:** Because of data backup and migration, change DB cluster type and storage would cost 15~30 minutes. Please make full preparation before changing them.
 
-### Removing apsarastack_adb_cluster from your configuration
+### Removing alibabacloudstack_adb_cluster from your configuration
  
-The apsarastack_adb_cluster resource allows you to manage your adb cluster, but Terraform cannot destroy it if your cluster type is pre paid(post paid type can destroy normally). Removing this resource from your configuration will remove it from your statefile and management, but will not destroy the cluster. You can resume managing the cluster via the adb Console.
+The alibabacloudstack_adb_cluster resource allows you to manage your adb cluster, but Terraform cannot destroy it if your cluster type is pre paid(post paid type can destroy normally). Removing this resource from your configuration will remove it from your statefile and management, but will not destroy the cluster. You can resume managing the cluster via the adb Console.
 
 ## Attributes Reference
 
@@ -114,5 +114,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 AnalyticDB for MySQL (ADB) DBCluster can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_adb_db_cluster.example <id>
+$ terraform import alibabacloudstack_adb_db_cluster.example <id>
 ```

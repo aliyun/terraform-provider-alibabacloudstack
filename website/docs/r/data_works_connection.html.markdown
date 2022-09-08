@@ -1,12 +1,12 @@
 ---
 subcategory: "Data Works"
-layout: "apsarastack"
-page_title: "ApsaraStack: apsarastack_data_works_connection"
-sidebar_current: "docs-apsarastack-resource-data-works-connection"
-description: |- Provides a ApsaraStack Data Works Connection resource.
+layout: "alibabacloudstack"
+page_title: "AlibabacloudStack: alibabacloudstack_data_works_connection"
+sidebar_current: "docs-alibabacloudstack-resource-data-works-connection"
+description: |- Provides a AlibabacloudStack Data Works Connection resource.
 ---
 
-# apsarastack\_data\_works\_connection
+# alibabacloudstack\_data\_works\_connection
 
 Provides a Data Works Connection resource.
 
@@ -18,7 +18,7 @@ see [What is Connection](https://help.aliyun.com/apsara/enterprise/v_3_14_0_2021
 Basic Usage
 
 ```terraform
-resource "apsarastack_data_works_connection" "default" {
+resource "alibabacloudstack_data_works_connection" "default" {
   project_id = "10060"
   connection_type = "rds"
   content = {
@@ -61,5 +61,5 @@ The following attributes are exported:
 Data Works Connection can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_data_works_connection.example <connection_id>:<$.ProjectId>
+$ terraform import alibabacloudstack_data_works_connection.example <connection_id>:<$.ProjectId>
 ```

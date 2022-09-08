@@ -1,25 +1,25 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_disks"
-sidebar_current: "docs-apsarastack-datasource-disks"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_disks"
+sidebar_current: "docs-alibabacloudstack-datasource-disks"
 description: |-
 Provides a list of disks to the user.
 ---
 
-# apsarastack\_disks
+# alibabacloudstack\_disks
 
 This data source provides the disks of the current Apsara Stack Cloud user.
 
 ## Example Usage
 
 ```
-data "apsarastack_disks" "disks_ds" {
+data "alibabacloudstack_disks" "disks_ds" {
   name_regex = "sample_disk"
 }
 
 output "first_disk_id" {
-  value = "${data.apsarastack_disks.disks_ds.disks.0.id}"
+  value = "${data.alibabacloudstack_disks.disks_ds.disks.0.id}"
 }
 ```
 
@@ -34,7 +34,7 @@ The following arguments are supported:
 * `instance_id` - (Optional) Filter the results by the specified ECS instance ID.
 * `tags` - (Optional) A map of tags assigned to the disks. It must be in the format:
   ```
-  data "apsarastack_disks" "disks_ds" {
+  data "alibabacloudstack_disks" "disks_ds" {
     tags = {
       tagKey1 = "tagValue1",
       tagKey2 = "tagValue2"

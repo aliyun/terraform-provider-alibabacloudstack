@@ -1,24 +1,24 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpc"
-sidebar_current: "docs-apsarastack-resource-vpc"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpc"
+sidebar_current: "docs-alibabacloudstack-resource-vpc"
 description: |-
-  Provides a Apsarastack VPC resource.
+  Provides a Alibabacloudstack VPC resource.
 ---
 
-# apsarastack\_vpc
+# alibabacloudstack\_vpc
 
 Provides a VPC resource.
 
--> **NOTE:** Terraform will auto build a router and a route table while it uses `apsarastack_vpc` to build a vpc resource.
+-> **NOTE:** Terraform will auto build a router and a route table while it uses `alibabacloudstack_vpc` to build a vpc resource.
 
 ## Example Usage
 
 Basic Usage
 
 ```
-resource "apsarastack_vpc" "vpc" {
+resource "alibabacloudstack_vpc" "vpc" {
   name       = "tf_test_foo"
   cidr_block     = "172.16.0.0/12"
 }

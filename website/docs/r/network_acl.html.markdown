@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_network_acl"
-sidebar_current: "docs-apsarastack-resource-network-acl"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_network_acl"
+sidebar_current: "docs-alibabacloudstack-resource-network-acl"
 description: |-
-  Provides a Apsarastack Network Acl resource.
+  Provides a Alibabacloudstack Network Acl resource.
 ---
 
-# apsarastack\_network_acl
+# alibabacloudstack\_network_acl
 
 Provides a network acl resource to add network acls.
 
@@ -18,24 +18,24 @@ Provides a network acl resource to add network acls.
 Basic Usage
 
 ```terraform
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   cidr_block = "172.16.0.0/12"
   vpc_name   = "VpcConfig"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id       = apsarastack_vpc.default.id
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id       = alibabacloudstack_vpc.default.id
   vswitch_name = "vswitch"
-  cidr_block   = cidrsubnet(apsarastack_vpc.default.cidr_block, 4, 4)
-  zone_id      = data.apsarastack_zones.default.ids.0
+  cidr_block   = cidrsubnet(alibabacloudstack_vpc.default.cidr_block, 4, 4)
+  zone_id      = data.alibabacloudstack_zones.default.ids.0
 }
 
-resource "apsarastack_network_acl" "default" {
-  vpc_id           = apsarastack_vpc.default.id
+resource "alibabacloudstack_network_acl" "default" {
+  vpc_id           = alibabacloudstack_vpc.default.id
   network_acl_name = "network_acl"
   description      = "network_acl"
   ingress_acl_entries {
@@ -55,7 +55,7 @@ resource "apsarastack_network_acl" "default" {
     protocol               = "all"
   }
   resources {
-    resource_id   = apsarastack_vswitch.default.id
+    resource_id   = alibabacloudstack_vswitch.default.id
     resource_type = "VSwitch"
   }
 }
@@ -117,7 +117,7 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 The network acl can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_network_acl.default nacl-abc123456
+$ terraform import alibabacloudstack_network_acl.default nacl-abc123456
 ```
 
 

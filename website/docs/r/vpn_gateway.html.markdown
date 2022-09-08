@@ -1,17 +1,17 @@
 ---
 subcategory: "VPN"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpn_gateway"
-sidebar_current: "docs-apsarastack-resource-vpn-gateway"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpn_gateway"
+sidebar_current: "docs-alibabacloudstack-resource-vpn-gateway"
 description: |-
-  Provides a Apsarastack VPN gateway resource.
+  Provides a Alibabacloudstack VPN gateway resource.
 ---
 
-# apsarastack\_vpn_gateway
+# alibabacloudstack\_vpn_gateway
 
 Provides a VPN gateway resource.
 
--> **NOTE:** Terraform will auto build vpn instance  while it uses `apsarastack_vpn_gateway` to build a vpn resource.
+-> **NOTE:** Terraform will auto build vpn instance  while it uses `alibabacloudstack_vpn_gateway` to build a vpn resource.
 
 -> Currently International-Site account can open `PostPaid` VPN gateway and China-Site account can open `PrePaid` VPN gateway.
 
@@ -20,25 +20,25 @@ Provides a VPN gateway resource.
 Basic Usage
 
 ```
-resource "apsarastack_vpc" "vpc" {
+resource "alibabacloudstack_vpc" "vpc" {
   name       = "tf_test_foo"
   cidr_block = "172.16.0.0/12"
 }
 
-resource "apsarastack_vswitch" "vsw" {
-  vpc_id            = apsarastack_vpc.vpc.id
+resource "alibabacloudstack_vswitch" "vsw" {
+  vpc_id            = alibabacloudstack_vpc.vpc.id
   cidr_block        = "172.16.0.0/21"
   availability_zone = "cn-beijing-b"
 }
 
-resource "apsarastack_vpn_gateway" "foo" {
+resource "alibabacloudstack_vpn_gateway" "foo" {
   name                 = "vpnGatewayConfig"
-  vpc_id               = apsarastack_vpc.vpc.id
+  vpc_id               = alibabacloudstack_vpc.vpc.id
   bandwidth            = "10"
   enable_ssl           = true
   instance_charge_type = "PostPaid"
   description          = "test_create_description"
-  vswitch_id           = apsarastack_vswitch.vsw.id
+  vswitch_id           = alibabacloudstack_vswitch.vsw.id
 }
 ```
 ## Argument Reference
@@ -73,7 +73,7 @@ The following attributes are exported:
 VPN gateway can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_vpn_gateway.example vpn-abc123456
+$ terraform import alibabacloudstack_vpn_gateway.example vpn-abc123456
 ```
 
 

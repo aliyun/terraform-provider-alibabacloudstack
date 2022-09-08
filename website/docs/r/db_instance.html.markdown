@@ -1,13 +1,13 @@
 ---
 subcategory: "RDS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_db_instance"
-sidebar_current: "docs-apsarastack-resource-db-instance"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_db_instance"
+sidebar_current: "docs-alibabacloudstack-resource-db-instance"
 description: |-
   Provides an RDS instance resource.
 ---
 
-# apsarastack\_db\_instance
+# alibabacloudstack\_db\_instance
 
 Provides an RDS instance resource. A DB instance is an isolated database
 environment in the cloud. A DB instance can contain multiple user-created
@@ -24,65 +24,65 @@ variable "name" {
 variable "creation" {
   default = "Rds"
 }
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "${var.creation}"
 }
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = "${var.name}"
   cidr_block = "172.16.0.0/16"
 }
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
-resource "apsarastack_db_instance" "default" {
+resource "alibabacloudstack_db_instance" "default" {
   engine               = "MySQL"
   engine_version       = "5.6"
   instance_type        = "rds.mysql.s2.large"
   instance_storage     = "30"
   storage_type     = "local_ssd"
   instance_name        = "${var.name}"
-  vswitch_id           = "${apsarastack_vswitch.default.id}"
+  vswitch_id           = "${alibabacloudstack_vswitch.default.id}"
   encryption_key="f23ed1c9-b91f-......"
   tde_status=false
   enable_ssl=false
-  zone_id_slave1="${data.apsarastack_zones.default.zones.0.id}"
-  zone_id="${data.apsarastack_zones.default.zones.0.id}"
+  zone_id_slave1="${data.alibabacloudstack_zones.default.zones.0.id}"
+  zone_id="${data.alibabacloudstack_zones.default.zones.0.id}"
 }
 ```
 
 ### Create a RDS MySQL instance with specific parameters
 
 ```
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = "vpc-123456"
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "vpc-123456"
 }
 
-resource "apsarastack_db_instance" "default1" {
+resource "alibabacloudstack_db_instance" "default1" {
   engine              = "MySQL"
   engine_version      = "5.6"
   instance_type   = "rds.mysql.t1.small"
   instance_storage = "10"
-  vswitch_id          = "${apsarastack_vswitch.default.id}"
+  vswitch_id          = "${alibabacloudstack_vswitch.default.id}"
   storage_type     = "local_ssd"
   encryption_key="f23ed1c9-b91f-......"
-  zone_id_slave1="${data.apsarastack_zones.default.zones.0.id}"
-  zone_id="${data.apsarastack_zones.default.zones.0.id}"
+  zone_id_slave1="${data.alibabacloudstack_zones.default.zones.0.id}"
+  zone_id="${data.alibabacloudstack_zones.default.zones.0.id}"
   tde_status=false
   enable_ssl=false
 }
 
-resource "apsarastack_db_instance" "default2" {
+resource "alibabacloudstack_db_instance" "default2" {
   engine              = "MySQL"
   engine_version      = "5.6"
   instance_type   = "rds.mysql.t1.small"
@@ -115,7 +115,7 @@ The following arguments are supported:
 * `tde_status` - (Optional) Enables the Transparent Data Encryption (TDE) function for an ApsaraDB for RDS instance.
 * `enable_ssl` - (Optional) To enable the SSL encryption of an ApsaraDB RDS instance.
 If it is a multi-zone and `vswitch_id` is specified, the vswitch must in the one of them.
-The multiple zone ID can be retrieved by setting `multi` to "true" in the data source `apsarastack_zones`.
+The multiple zone ID can be retrieved by setting `multi` to "true" in the data source `alibabacloudstack_zones`.
 * `vswitch_id` - (ForceNew) The virtual switch ID to launch DB instances in one VPC.
 * `security_ips` - (Optional) List of IP addresses allowed to access all databases of an instance. The list contains up to 1,000 IP addresses, separated by commas. Supported formats include 0.0.0.0/0, 10.23.12.24 (IP), and 10.23.12.24/24 (Classless Inter-Domain Routing (CIDR) mode. /24 represents the length of the prefix in an IP address. The range of the prefix length is [1,32]).
 

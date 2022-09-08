@@ -1,13 +1,13 @@
 ---
 subcategory: "Redis And Memcache (KVStore)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_kvstore_zones"
-sidebar_current: "docs-apsarastack-datasource-kvstore-zones"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_kvstore_zones"
+sidebar_current: "docs-alibabacloudstack-datasource-kvstore-zones"
 description: |-
     Provides a list of availability zones for KVStore that can be used by an Apsara Stack Cloud account.
 ---
 
-# apsarastack\_kvstore\_zones
+# alibabacloudstack\_kvstore\_zones
 
 This data source provides availability zones for KVStore that can be accessed by an Apsara Stack Cloud account within the region configured in the provider.
 
@@ -16,10 +16,10 @@ This data source provides availability zones for KVStore that can be accessed by
 
 ```
 # Declare the data source
-data "apsarastack_kvstore_zones" "zones_ids" {}
+data "alibabacloudstack_kvstore_zones" "zones_ids" {}
 
 output "kvstore_zones" {
-  value = "${data.apsarastack_kvstore_zones.zones_ids.zones}"
+  value = "${data.alibabacloudstack_kvstore_zones.zones_ids.zones}"
 }
 ```
 

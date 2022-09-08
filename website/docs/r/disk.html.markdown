@@ -1,23 +1,23 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "ApsaraStack: apsarastack_disk"
-sidebar_current: "docs-apsarastack-resource-disk"
+layout: "alibabacloudstack"
+page_title: "AlibabacloudStack: alibabacloudstack_disk"
+sidebar_current: "docs-alibabacloudstack-resource-disk"
 description: |-
   Provides a ECS Disk resource.
 ---
 
-# apsarastack\_disk
+# alibabacloudstack\_disk
 
 Provides a ECS disk resource.
 
--> **NOTE:** One of `size` or `snapshot_id` is required when specifying an ECS disk. If all of them be specified, `size` must more than the size of snapshot which `snapshot_id` represents. Currently, `apsarastack_disk` doesn't resize disk.
+-> **NOTE:** One of `size` or `snapshot_id` is required when specifying an ECS disk. If all of them be specified, `size` must more than the size of snapshot which `snapshot_id` represents. Currently, `alibabacloudstack_disk` doesn't resize disk.
 
 ## Example Usage
 
 ```
 # Create a new ECS disk.
-resource "apsarastack_disk" "ecs_disk" { 
+resource "alibabacloudstack_disk" "ecs_disk" { 
   availability_zone = "${var.availability_zone}"
   name              = "New-disk"
   description       = "ECS-Disk"

@@ -1,23 +1,23 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_password_policies"
-sidebar_current: "docs-apsarastack-datasource-ascm-password-policies"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_password_policies"
+sidebar_current: "docs-alibabacloudstack-datasource-ascm-password-policies"
 description: |-
     Provides a list of password policies to the user.
 ---
 
-# apsarastack\_ascm_password_policies
+# alibabacloudstack\_ascm_password_policies
 
 This data source provides the password policies of the current Apsara Stack Cloud user.
 
 ## Example Usage
 
 ```
-data "apsarastack_ascm_password_policies" "default" {}
+data "alibabacloudstack_ascm_password_policies" "default" {}
 
 output "families" {
-  value = data.apsarastack_ascm_password_policies.default.*
+  value = data.alibabacloudstack_ascm_password_policies.default.*
 }
 ```
 

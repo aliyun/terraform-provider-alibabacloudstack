@@ -1,25 +1,25 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_ecs_instance_families"
-sidebar_current: "docs-apsarastack-datasource-ascm-ecs-instance-families"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_ecs_instance_families"
+sidebar_current: "docs-alibabacloudstack-datasource-ascm-ecs-instance-families"
 description: |-
     Provides a list of ecs instance families to the user.
 ---
 
-# apsarastack\_ascm_ecs_instance_families
+# alibabacloudstack\_ascm_ecs_instance_families
 
 This data source provides the ecs instance families of the current Apsara Stack Cloud user.
 
 ## Example Usage
 
 ```
-data "apsarastack_ascm_ecs_instance_families" "default" {
+data "alibabacloudstack_ascm_ecs_instance_families" "default" {
   status = "Available"
   output_file = "ecs_instance"
 }
 output "ecs_instance" {
-  value = data.apsarastack_ascm_ecs_instance_families.default.*
+  value = data.alibabacloudstack_ascm_ecs_instance_families.default.*
 }
 ```
 

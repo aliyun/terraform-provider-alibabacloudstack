@@ -1,37 +1,37 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vswitches"
-sidebar_current: "docs-apsarastack-datasource-vswitches"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vswitches"
+sidebar_current: "docs-alibabacloudstack-datasource-vswitches"
 description: |-
-    Provides a list of VSwitch owned by an Apsarastack Cloud account.
+    Provides a list of VSwitch owned by an Alibabacloudstack Cloud account.
 ---
 
-# apsarastack\_vswitches
+# alibabacloudstack\_vswitches
 
-This data source provides a list of VSwitches owned by an Apsarastack Cloud account.
+This data source provides a list of VSwitches owned by an Alibabacloudstack Cloud account.
 
 ## Example Usage
 
 ```
-resource "apsarastack_vpc" "vpc" {
+resource "alibabacloudstack_vpc" "vpc" {
   cidr_block = "172.16.0.0/16"
   name       = "${var.name}"
 }
 
-resource "apsarastack_vswitch" "vswitch" {
+resource "alibabacloudstack_vswitch" "vswitch" {
   name              = "${var.name}"
   cidr_block        = "172.16.0.0/24"
-  vpc_id            = "${apsarastack_vpc.vpc.id}"
+  vpc_id            = "${alibabacloudstack_vpc.vpc.id}"
   availability_zone = "${var.availability_zone}"
 }
 
-data "apsarastack_vswitches" "default" {
-  name_regex = "${apsarastack_vswitch.vswitch.name}"
+data "alibabacloudstack_vswitches" "default" {
+  name_regex = "${alibabacloudstack_vswitch.vswitch.name}"
 }
 
 output "vswitches" {
-  value = data.apsarastack_vswitches.default.vswitches.*
+  value = data.alibabacloudstack_vswitches.default.vswitches.*
 }
 ```
 

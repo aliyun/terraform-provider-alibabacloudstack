@@ -1,13 +1,13 @@
 ---
 subcategory: "Cloud Monitor"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cms_alarm_contact"
-sidebar_current: "docs-apsarastack-resource-cms-alarm-contact"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cms_alarm_contact"
+sidebar_current: "docs-alibabacloudstack-resource-cms-alarm-contact"
 description: |-
   Provides a resource to add a alarm contact for cloud monitor.
 ---
 
-# apsarastack\_cms\_alarm\_contact
+# alibabacloudstack\_cms\_alarm\_contact
 
 Creates or modifies an alarm contact. For information about alarm contact and how to use it, see [What is alarm contact](https://www.alibabacloud.com/help/en/doc-detail/114923.htm).
 
@@ -19,7 +19,7 @@ Basic Usage
 
 ```terraform
 # If you use this template, you need to activate the link before you can return to the alarm contact information, otherwise diff will appear in terraform. So please confirm the activation link as soon as possible.
-resource "apsarastack_cms_alarm_contact" "example" {
+resource "alibabacloudstack_cms_alarm_contact" "example" {
   alarm_contact_name = "zhangsan"
   describe           = "For Test"
   channels_mail      = "terraform.test.com"
@@ -28,7 +28,7 @@ resource "apsarastack_cms_alarm_contact" "example" {
 
 ```terraform
 # If you use this template, you can ignore the diff of the alarm contact information by `lifestyle`. We recommend the above usage and activate the link in time.
-resource "apsarastack_cms_alarm_contact" "example" {
+resource "alibabacloudstack_cms_alarm_contact" "example" {
   alarm_contact_name = "zhangsan"
   describe           = "For Test"
   channels_mail      = "terraform.test.com"
@@ -63,5 +63,5 @@ The following attributes are exported:
 Alarm contact can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_cms_alarm_contact.example abc12345
+$ terraform import alibabacloudstack_cms_alarm_contact.example abc12345
 ```

@@ -1,13 +1,13 @@
 ---
 subcategory: "Log Service (SLS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_log_machine_group"
-sidebar_current: "docs-apsarastack-resource-log-machine-group"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_log_machine_group"
+sidebar_current: "docs-alibabacloudstack-resource-log-machine-group"
 description: |-
-  Provides a Apsarastack log tail machine group resource.
+  Provides a Alibabacloudstack log tail machine group resource.
 ---
 
-# apsarastack\_log\_machine\_group
+# alibabacloudstack\_log\_machine\_group
 
 Log Service manages all the ECS instances whose logs need to be collected by using the Logtail client in the form of machine groups.
  [Refer to details](https://www.alibabacloud.com/help/doc-detail/28966.htm)
@@ -17,13 +17,13 @@ Log Service manages all the ECS instances whose logs need to be collected by usi
 Basic Usage
 
 ```
-resource "apsarastack_log_project" "example" {
+resource "alibabacloudstack_log_project" "example" {
   name        = "tf-log"
   description = "created by terraform"
 }
 
-resource "apsarastack_log_machine_group" "example" {
-  project       = apsarastack_log_project.example.name
+resource "alibabacloudstack_log_machine_group" "example" {
+  project       = alibabacloudstack_log_project.example.name
   name          = "tf-machine-group"
   identify_type = "ip"
   topic         = "terraform"
@@ -58,5 +58,5 @@ The following attributes are exported:
 Log machine group can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_log_machine_group.example tf-log:tf-machine-group
+$ terraform import alibabacloudstack_log_machine_group.example tf-log:tf-machine-group
 ```

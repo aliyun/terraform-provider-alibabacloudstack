@@ -1,15 +1,15 @@
 ---
 subcategory: "Container Registry (CR)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cr_namespaces"
-sidebar_current: "docs-apsarastack-datasource-cr-namespaces"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cr_namespaces"
+sidebar_current: "docs-alibabacloudstack-datasource-cr-namespaces"
 description: |-
   Provides a list of Container Registry namespaces.
 ---
 
-# apsarastack\_cr\_namespaces
+# alibabacloudstack\_cr\_namespaces
 
-This data source provides a list Container Registry namespaces on Apsarastack Cloud.
+This data source provides a list Container Registry namespaces on Alibabacloudstack Cloud.
 
 
 
@@ -17,13 +17,13 @@ This data source provides a list Container Registry namespaces on Apsarastack Cl
 
 ```
 # Declare the data source
-data "apsarastack_cr_namespaces" "my_namespaces" {
+data "alibabacloudstack_cr_namespaces" "my_namespaces" {
   name_regex  = "my-namespace"
   output_file = "my-namespace-json"
 }
 
 output "output" {
-  value = "${data.apsarastack_cr_namespaces.my_namespaces.namespaces}"
+  value = "${data.alibabacloudstack_cr_namespaces.my_namespaces.namespaces}"
 }
 ```
 

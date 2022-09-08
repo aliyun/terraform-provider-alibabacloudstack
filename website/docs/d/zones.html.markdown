@@ -1,14 +1,14 @@
 ---
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack"
-sidebar_current: "docs-apsarastack-datasource-zones"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack"
+sidebar_current: "docs-alibabacloudstack-datasource-zones"
 description: |-
-    Provides a list of availability zones that can be used by an Apsarastack Cloud account.
+    Provides a list of availability zones that can be used by an Alibabacloudstack Cloud account.
 ---
 
-# apsarastack\_zones
+# alibabacloudstack\_zones
 
-This data source provides availability zones that can be accessed by an Apsarastack Cloud account within the region configured in the provider.
+This data source provides availability zones that can be accessed by an Alibabacloudstack Cloud account within the region configured in the provider.
 
 
 -> **NOTE:** If one zone is sold out, it will not be exported.
@@ -17,13 +17,13 @@ This data source provides availability zones that can be accessed by an Apsarast
 
 ```
 # Declare the data source
-data "apsarastack_zones" "zones_ds" {
+data "alibabacloudstack_zones" "zones_ds" {
   available_instance_type = "ecs.n4.large"
   available_disk_category = "cloud_ssd"
 }
 
 output "zones" {
-  value = data.apsarastack_zones.zones_ds.zones.*
+  value = data.alibabacloudstack_zones.zones_ds.zones.*
 }
 ```
 

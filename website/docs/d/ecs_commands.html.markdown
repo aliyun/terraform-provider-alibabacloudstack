@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ecs_commands"
-sidebar_current: "docs-apsarastack-datasource-ecs-commands"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_commands"
+sidebar_current: "docs-alibabacloudstack-datasource-ecs-commands"
 description: |-
   Provides a list of Ecs Commands to the user.
 ---
 
-# apsarastack\_ecs\_commands
+# alibabacloudstack\_ecs\_commands
 
 This data source provides the Ecs Commands of the current Apsara Stack Cloud user.
 
@@ -18,13 +18,13 @@ This data source provides the Ecs Commands of the current Apsara Stack Cloud use
 Basic Usage
 
 ```terraform
-data "apsarastack_ecs_commands" "example" {
+data "alibabacloudstack_ecs_commands" "example" {
   ids        = ["E2RY53-xxxx"]
   name_regex = "tf-testAcc"
 }
 
 output "first_ecs_command_id" {
-  value = data.apsarastack_ecs_commands.example.commands.0.id
+  value = data.alibabacloudstack_ecs_commands.example.commands.0.id
 }
 ```
 

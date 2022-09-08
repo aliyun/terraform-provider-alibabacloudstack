@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_eip"
-sidebar_current: "docs-apsarastack-resource-eip"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_eip"
+sidebar_current: "docs-alibabacloudstack-resource-eip"
 description: |-
   Provides a ECS EIP resource.
 ---
 
-# apsarastack\_eip
+# alibabacloudstack\_eip
 
 Provides an elastic IP resource.
 
@@ -15,7 +15,7 @@ Provides an elastic IP resource.
 
 ```
 # Create a new EIP.
-resource "apsarastack_eip" "example" {
+resource "alibabacloudstack_eip" "example" {
   bandwidth            = "10"
 }
 ```

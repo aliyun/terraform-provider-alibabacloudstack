@@ -1,18 +1,18 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_network_acl_attachment"
-sidebar_current: "docs-apsarastack-resource-network-acl-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_network_acl_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-network-acl-attachment"
 description: |-
-  Provides a Apsarastack Network Acl Attachment resource.
+  Provides a Alibabacloudstack Network Acl Attachment resource.
 ---
 
-# apsarastack\_network_acl_attachment
+# alibabacloudstack\_network_acl_attachment
 
 Provides a network acl attachment resource to associate network acls to vswitches.
 
--> **DEPRECATED:**  This resource  has been deprecated. Replace by `resources` with the resource [apsarastack_network_acl](https://www.terraform.io/docs/providers/apsarastack/r/network_acl.html). 
-Note that because this resource conflicts with the `resources` attribute of `apsarastack_network_acl`, this resource can no be used.
+-> **DEPRECATED:**  This resource  has been deprecated. Replace by `resources` with the resource [alibabacloudstack_network_acl](https://www.terraform.io/docs/providers/alibabacloudstack/r/network_acl.html). 
+Note that because this resource conflicts with the `resources` attribute of `alibabacloudstack_network_acl`, this resource can no be used.
 
 -> **NOTE:** Currently, the resource are only available in Hongkong(cn-hongkong), India(ap-south-1), and Indonesia(ap-southeast-1) regions.
 
@@ -25,31 +25,31 @@ variable "name" {
   default = "NatGatewayConfigSpec"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   vpc_name   = var.name
   cidr_block = "172.16.0.0/12"
 }
 
-resource "apsarastack_network_acl" "default" {
-  vpc_id           = apsarastack_vpc.default.id
+resource "alibabacloudstack_network_acl" "default" {
+  vpc_id           = alibabacloudstack_vpc.default.id
   network_acl_name = var.name
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = apsarastack_vpc.default.id
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = alibabacloudstack_vpc.default.id
   cidr_block        = "172.16.0.0/21"
-  zone_id           = data.apsarastack_zones.default.zones[0].id
+  zone_id           = data.alibabacloudstack_zones.default.zones[0].id
   vswitch_name      = var.name
 }
 
-resource "apsarastack_network_acl_attachment" "default" {
-  network_acl_id = apsarastack_network_acl.default.id
+resource "alibabacloudstack_network_acl_attachment" "default" {
+  network_acl_id = alibabacloudstack_network_acl.default.id
   resources {
-    resource_id   = apsarastack_vswitch.default.id
+    resource_id   = alibabacloudstack_vswitch.default.id
     resource_type = "VSwitch"
   }
 }

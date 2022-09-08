@@ -1,32 +1,32 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_security_groups"
-sidebar_current: "docs-apsarastack-datasource-security-groups"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_security_groups"
+sidebar_current: "docs-alibabacloudstack-datasource-security-groups"
 description: |-
     Provides a list of Security Groups available to the user.
 ---
 
-# apsarastack\_security\_groups
+# alibabacloudstack\_security\_groups
 
-This data source provides a list of Security Groups in an ApsaraStack account according to the specified filters.
+This data source provides a list of Security Groups in an AlibabacloudStack account according to the specified filters.
 
 ## Example Usage
 
 ```
 # Filter security groups and print the results into a file
-data "apsarastack_security_groups" "sec_groups_ds" {
+data "alibabacloudstack_security_groups" "sec_groups_ds" {
   name_regex  = "^web-"
 }
 
 # In conjunction with a VPC
 
-data "apsarastack_security_groups" "primary_sec_groups_ds" {
+data "alibabacloudstack_security_groups" "primary_sec_groups_ds" {
   vpc_id = var.vpc_id
 }
 
 output "first_group_id" {
-  value = "${data.apsarastack_security_groups.primary_sec_groups_ds.groups.0.id}"
+  value = "${data.alibabacloudstack_security_groups.primary_sec_groups_ds.groups.0.id}"
 }
 ```
 
@@ -40,7 +40,7 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `tags` - (Optional) A map of tags assigned to the ECS instances. It must be in the format:
   ```
-  data "apsarastack_security_groups" "taggedSecurityGroups" {
+  data "alibabacloudstack_security_groups" "taggedSecurityGroups" {
     tags = {
       tagKey1 = "tagValue1",
       tagKey2 = "tagValue2"

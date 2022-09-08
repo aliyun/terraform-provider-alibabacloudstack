@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpc_ipv6_internet_bandwidths"
-sidebar_current: "docs-apsarastack-datasource-vpc-ipv6-internet-bandwidths"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6_internet_bandwidths"
+sidebar_current: "docs-alibabacloudstack-datasource-vpc-ipv6-internet-bandwidths"
 description: |-
   Provides a list of Vpc Ipv6 Internet Bandwidths to the user.
 ---
 
-# apsarastack\_vpc\_ipv6\_internet\_bandwidths
+# alibabacloudstack\_vpc\_ipv6\_internet\_bandwidths
 
 This data source provides the Vpc Ipv6 Internet Bandwidths of the current Alibaba Cloud user.
 
@@ -18,32 +18,32 @@ This data source provides the Vpc Ipv6 Internet Bandwidths of the current Alibab
 Basic Usage
 
 ```terraform
-data "apsarastack_vpc_ipv6_internet_bandwidths" "ids" {
+data "alibabacloudstack_vpc_ipv6_internet_bandwidths" "ids" {
   ids = ["example_id"]
 }
 output "vpc_ipv6_internet_bandwidth_id_1" {
-  value = data.apsarastack_vpc_ipv6_internet_bandwidths.ids.bandwidths.0.id
+  value = data.alibabacloudstack_vpc_ipv6_internet_bandwidths.ids.bandwidths.0.id
 }
 
-data "apsarastack_vpc_ipv6_internet_bandwidths" "ipv6InternetBandwidthId" {
+data "alibabacloudstack_vpc_ipv6_internet_bandwidths" "ipv6InternetBandwidthId" {
   ipv6_internet_bandwidth_id = "example_value"
 }
 output "vpc_ipv6_internet_bandwidth_id_2" {
-  value = data.apsarastack_vpc_ipv6_internet_bandwidths.ipv6InternetBandwidthId.bandwidths.0.id
+  value = data.alibabacloudstack_vpc_ipv6_internet_bandwidths.ipv6InternetBandwidthId.bandwidths.0.id
 }
 
-data "apsarastack_vpc_ipv6_internet_bandwidths" "ipv6AddressId" {
+data "alibabacloudstack_vpc_ipv6_internet_bandwidths" "ipv6AddressId" {
   ipv6_address_id = "example_value"
 }
 output "vpc_ipv6_internet_bandwidth_id_3" {
-  value = data.apsarastack_vpc_ipv6_internet_bandwidths.ipv6AddressId.bandwidths.0.id
+  value = data.alibabacloudstack_vpc_ipv6_internet_bandwidths.ipv6AddressId.bandwidths.0.id
 }
 
-data "apsarastack_vpc_ipv6_internet_bandwidths" "status" {
+data "alibabacloudstack_vpc_ipv6_internet_bandwidths" "status" {
   status = "Normal"
 }
 output "vpc_ipv6_internet_bandwidth_id_4" {
-  value = data.apsarastack_vpc_ipv6_internet_bandwidths.status.bandwidths.0.id
+  value = data.alibabacloudstack_vpc_ipv6_internet_bandwidths.status.bandwidths.0.id
 }
 ```
 

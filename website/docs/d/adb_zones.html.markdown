@@ -1,13 +1,13 @@
 ---
 subcategory: "AnalyticDB for MySQL (ADB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_adb_zones"
-sidebar_current: "docs-apsarastack-datasource-adb-zones"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_adb_zones"
+sidebar_current: "docs-alibabacloudstack-datasource-adb-zones"
 description: |-
     Provides a list of availability zones for ADB that can be used by an Alibaba Cloud account.
 ---
 
-# apsarastack\_adb\_zones
+# alibabacloudstack\_adb\_zones
 
 This data source provides availability zones for ADB that can be accessed by an Alibaba Cloud account within the region configured in the provider.
 
@@ -15,7 +15,7 @@ This data source provides availability zones for ADB that can be accessed by an 
 
 ```
 # Declare the data source
-data "apsarastack_adb_zones" "zones_ids" {}
+data "alibabacloudstack_adb_zones" "zones_ids" {}
 ```
 
 ## Argument Reference

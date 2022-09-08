@@ -1,15 +1,15 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_disk_attachment"
-sidebar_current: "docs-apsarastack-resource-disk-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_disk_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-disk-attachment"
 description: |-
   Provides a ECS Disk Attachment resource.
 ---
 
 # apsaratack\_disk\_attachment
 
-Provides an apsarastack ECS Disk Attachment as a resource, to attach and detach disks from ECS Instances.
+Provides an alibabacloudstack ECS Disk Attachment as a resource, to attach and detach disks from ECS Instances.
 
 ## Example Usage
 
@@ -18,7 +18,7 @@ Basic usage
 ```
 # Create a new ECS disk-attachment and use it attach one disk to a new instance.
 
-resource "apsarastack_disk" "ecs_disk" {
+resource "alibabacloudstack_disk" "ecs_disk" {
   availability_zone = "${var.availability_zone}"
   size              = "50"
 
@@ -27,7 +27,7 @@ resource "apsarastack_disk" "ecs_disk" {
   }
 }
 
-resource "apsarastack_instance" "instance" {
+resource "alibabacloudstack_instance" "instance" {
   image_id              = "ubuntu_18_04_64_20G_alibase_20190624.vhd"
   instance_type        = "ecs.n4.large"
   system_disk_category = "cloud_efficiency"
@@ -41,9 +41,9 @@ resource "apsarastack_instance" "instance" {
   }
 }
 
-resource "apsarastack_disk_attachment" "ecs_disk_att" {
-  disk_id     = "${apsarastack_disk.ecs_disk.id}"
-  instance_id = "${apsarastack_instance.instance.id}"
+resource "alibabacloudstack_disk_attachment" "ecs_disk_att" {
+  disk_id     = "${alibabacloudstack_disk.ecs_disk.id}"
+  instance_id = "${alibabacloudstack_instance.instance.id}"
 }
 ```
 ## Argument Reference

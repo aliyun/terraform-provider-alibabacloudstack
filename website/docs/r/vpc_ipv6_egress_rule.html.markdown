@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpc_ipv6_egress_rule"
-sidebar_current: "docs-apsarastack-resource-vpc-ipv6-egress-rule"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6_egress_rule"
+sidebar_current: "docs-alibabacloudstack-resource-vpc-ipv6-egress-rule"
 description: |-
-  Provides a Apsarastack VPC Ipv6 Egress Rule resource.
+  Provides a Alibabacloudstack VPC Ipv6 Egress Rule resource.
 ---
 
-# apsarastack\_vpc\_ipv6\_egress\_rule
+# alibabacloudstack\_vpc\_ipv6\_egress\_rule
 
 Provides a VPC Ipv6 Egress Rule resource.
 
@@ -20,31 +20,31 @@ For information about VPC Ipv6 Egress Rule and how to use it, see [What is Ipv6 
 Basic Usage
 
 ```terraform
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   vpc_name    = "example_value"
   enable_ipv6 = "true"
 }
 
-resource "apsarastack_vpc_ipv6_gateway" "example" {
+resource "alibabacloudstack_vpc_ipv6_gateway" "example" {
   ipv6_gateway_name = "example_value"
-  vpc_id            = apsarastack_vpc.default.id
+  vpc_id            = alibabacloudstack_vpc.default.id
 }
 
-data "apsarastack_instances" "default" {
+data "alibabacloudstack_instances" "default" {
   name_regex = "ecs_with_ipv6_address"
   status     = "Running"
 }
 
-data "apsarastack_vpc_ipv6_addresses" "default" {
-  associated_instance_id = data.apsarastack_instances.default.instances.0.id
+data "alibabacloudstack_vpc_ipv6_addresses" "default" {
+  associated_instance_id = data.alibabacloudstack_instances.default.instances.0.id
   status                 = "Available"
 }
 
-resource "apsarastack_vpc_ipv6_egress_rule" "example" {
-  instance_id           = data.apsarastack_vpc_ipv6_addresses.default.ids.0
+resource "alibabacloudstack_vpc_ipv6_egress_rule" "example" {
+  instance_id           = data.alibabacloudstack_vpc_ipv6_addresses.default.ids.0
   ipv6_egress_rule_name = "example_value"
   description           = "example_value"
-  ipv6_gateway_id       = apsarastack_vpc_ipv6_gateway.example.id
+  ipv6_gateway_id       = alibabacloudstack_vpc_ipv6_gateway.example.id
   instance_type         = "Ipv6Address"
 }
 
@@ -79,5 +79,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 VPC Ipv6 Egress Rule can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_vpc_ipv6_egress_rule.example <ipv6_gateway_id>:<ipv6_egress_rule_id>
+$ terraform import alibabacloudstack_vpc_ipv6_egress_rule.example <ipv6_gateway_id>:<ipv6_egress_rule_id>
 ```

@@ -1,13 +1,13 @@
 ---
 subcategory: "MaxCompute"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_maxcompute_user"
-sidebar_current: "docs-apsarastack-resource-maxcompute-user"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_user"
+sidebar_current: "docs-alibabacloudstack-resource-maxcompute-user"
 description: |-
-  Provides a Apsarastack maxcompute user resource.
+  Provides a Alibabacloudstack maxcompute user resource.
 ---
 
-# apsarastack\_maxcompute\_user
+# alibabacloudstack\_maxcompute\_user
 
 The user is the basic unit of operation in maxcompute. It is similar to the concept of Database or Schema in traditional databases, and sets the boundary for maxcompute multi-user isolation and access control.
 ->**NOTE:** Available in 1.0.18+.
@@ -17,9 +17,9 @@ The user is the basic unit of operation in maxcompute. It is similar to the conc
 Basic Usage
 
 ```terraform
-resource "apsarastack_maxcompute_user" "example" {
+resource "alibabacloudstack_maxcompute_user" "example" {
   user_name             = "%s"
-  description           = "TestAccApsaraStackMaxcomputeUser"
+  description           = "TestAccAlibabacloudStackMaxcomputeUser"
   lifecycle {
     ignore_changes = [
       organization_id,
@@ -43,5 +43,5 @@ The following arguments are supported:
 MaxCompute project can be imported using the *name* or ID, e.g.
 
 ```
-$ terraform import apsarastack_maxcompute_cu.example tf_maxcompute_cu
+$ terraform import alibabacloudstack_maxcompute_cu.example tf_maxcompute_cu
 ```

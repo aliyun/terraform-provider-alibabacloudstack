@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_forward_entries"
-sidebar_current: "docs-apsarastack-datasource-forward-entries"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_forward_entries"
+sidebar_current: "docs-alibabacloudstack-datasource-forward-entries"
 description: |-
     Provides a list of Forward Entries owned by an Apsara Stack Cloud account.
 ---
 
-# apsarastack\_forward\_entries
+# alibabacloudstack\_forward\_entries
 
 This data source provides a list of Forward Entries owned by an Apsara Stack Cloud account.
 
@@ -19,52 +19,52 @@ variable "name" {
   default = "forward-entry-config-example-name"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = "${var.name}"
   cidr_block = "172.16.0.0/12"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/21"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
 
-resource "apsarastack_nat_gateway" "default" {
-  vpc_id        = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_nat_gateway" "default" {
+  vpc_id        = "${alibabacloudstack_vpc.default.id}"
   specification = "Small"
   name          = "${var.name}"
 }
 
-resource "apsarastack_eip" "default" {
+resource "alibabacloudstack_eip" "default" {
   name = "${var.name}"
 }
 
-resource "apsarastack_eip_association" "default" {
-  allocation_id = "${apsarastack_eip.default.id}"
-  instance_id   = "${apsarastack_nat_gateway.default.id}"
+resource "alibabacloudstack_eip_association" "default" {
+  allocation_id = "${alibabacloudstack_eip.default.id}"
+  instance_id   = "${alibabacloudstack_nat_gateway.default.id}"
 }
 
-resource "apsarastack_forward_entry" "default" {
-  forward_table_id = "${apsarastack_nat_gateway.default.forward_table_ids}"
-  external_ip      = "${apsarastack_eip.default.ip_address}"
+resource "alibabacloudstack_forward_entry" "default" {
+  forward_table_id = "${alibabacloudstack_nat_gateway.default.forward_table_ids}"
+  external_ip      = "${alibabacloudstack_eip.default.ip_address}"
   external_port    = "80"
   ip_protocol      = "tcp"
   internal_ip      = "172.16.0.3"
   internal_port    = "8080"
 }
 
-data "apsarastack_forward_entries" "default" {
-  forward_table_id = "${apsarastack_forward_entry.default.forward_table_id}"
+data "alibabacloudstack_forward_entries" "default" {
+  forward_table_id = "${alibabacloudstack_forward_entry.default.forward_table_id}"
 }
 
 output "forward_entries" {
-  value = "${data.apsarastack_forward_entries.default.entries}"
+  value = "${data.alibabacloudstack_forward_entries.default.entries}"
 }
 
 ```

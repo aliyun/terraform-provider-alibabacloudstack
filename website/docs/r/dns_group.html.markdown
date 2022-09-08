@@ -1,13 +1,13 @@
 ---
 subcategory: "DNS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_dns_group"
-sidebar_current: "docs-apsarastack-resource-dns-group"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dns_group"
+sidebar_current: "docs-alibabacloudstack-resource-dns-group"
 description: |-
   Provides a DNS Group resource.
 ---
 
-# apsarastack\_dns\_group
+# alibabacloudstack\_dns\_group
 
 Provides a DNS Group resource.
 
@@ -15,7 +15,7 @@ Provides a DNS Group resource.
 
 ```
 # Add a new Domain group.
-resource "apsarastack_dns_group" "group" {
+resource "alibabacloudstack_dns_group" "group" {
   name = "testgroup"
 }
 ```

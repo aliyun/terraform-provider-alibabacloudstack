@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ecs_network_interface"
-sidebar_current: "docs-apsarastack-resource-ecs-network-interface"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_network_interface"
+sidebar_current: "docs-alibabacloudstack-resource-ecs-network-interface"
 description: |-
-  Provides a Apsarastack ECS Network Interface resource.
+  Provides a Alibabacloudstack ECS Network Interface resource.
 ---
 
-# apsarastack\_ecs\_network\_interface
+# alibabacloudstack\_ecs\_network\_interface
 
 Provides a ECS Network Interface resource.
 
@@ -26,31 +26,31 @@ variable "name" {
   default = "tf-testAccNetworkInterface"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
     name = "${var.name}"
     cidr_block = "192.168.0.0/24"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
     available_resource_creation= "VSwitch"
 }
 
-resource "apsarastack_vswitch" "default" {
+resource "alibabacloudstack_vswitch" "default" {
     name = "${var.name}"
     cidr_block = "192.168.0.0/24"
-    availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
-    vpc_id = "${apsarastack_vpc.default.id}"
+    availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+    vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
 
-resource "apsarastack_security_group" "default" {
+resource "alibabacloudstack_security_group" "default" {
     name = "${var.name}"
-    vpc_id = "${apsarastack_vpc.default.id}"
+    vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
 
-resource "apsarastack_network_interface" "default" {
+resource "alibabacloudstack_network_interface" "default" {
 	name = "${var.name}6122"
-    vswitch_id = "${apsarastack_vswitch.default.id}"
-    security_groups = [ "${apsarastack_security_group.default.id}" ]
+    vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+    security_groups = [ "${alibabacloudstack_security_group.default.id}" ]
 	private_ip = "192.168.0.2"
 	private_ips = ["192.168.0.3", "192.168.0.5", "192.168.0.6"]	
 }

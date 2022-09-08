@@ -1,13 +1,13 @@
 ---
 subcategory: "Cloud Monitor Service"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cms_site_monitor"
-sidebar_current: "docs-apsarastack-resource-cms-site-monitor"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cms_site_monitor"
+sidebar_current: "docs-alibabacloudstack-resource-cms-site-monitor"
 description: |-
   Provides a resource to build a site monitor rule for cloud monitor.
 ---
 
-# apsarastack\_cms\_site\_monitor
+# alibabacloudstack\_cms\_site\_monitor
 
 This resource provides a site monitor resource and it can be used to monitor public endpoints and websites.
 Details at https://www.alibabacloud.com/help/doc-detail/67907.htm
@@ -19,7 +19,7 @@ Available in 1.72.0+
 Basic Usage
 
 ```
-resource "apsarastack_cms_site_monitor" "basic" {
+resource "alibabacloudstack_cms_site_monitor" "basic" {
   address   = "http://www.alibabacloud.com"
   task_name = "tf-testAccCmsSiteMonitor_basic"
   task_type = "HTTP"
@@ -54,5 +54,5 @@ The following attributes are exported:
 Alarm rule can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_cms_site_monitor.alarm abc12345
+$ terraform import alibabacloudstack_cms_site_monitor.alarm abc12345
 ```

@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpc_ipv6_internet_bandwidth"
-sidebar_current: "docs-apsarastack-resource-vpc-ipv6-internet-bandwidth"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6_internet_bandwidth"
+sidebar_current: "docs-alibabacloudstack-resource-vpc-ipv6-internet-bandwidth"
 description: |-
-  Provides a Apsarastack VPC Ipv6 Internet Bandwidth resource.
+  Provides a Alibabacloudstack VPC Ipv6 Internet Bandwidth resource.
 ---
 
-# apsarastack\_vpc\_ipv6\_internet\_bandwidth
+# alibabacloudstack\_vpc\_ipv6\_internet\_bandwidth
 
 Provides a VPC Ipv6 Internet Bandwidth resource.
 
@@ -20,19 +20,19 @@ For information about VPC Ipv6 Internet Bandwidth and how to use it, see [What i
 Basic Usage
 
 ```terraform
-data "apsarastack_instances" "example" {
+data "alibabacloudstack_instances" "example" {
   name_regex = "ecs_with_ipv6_address"
   status     = "Running"
 }
 
-data "apsarastack_vpc_ipv6_addresses" "example" {
-  associated_instance_id = data.apsarastack_instances.example.instances.0.id
+data "alibabacloudstack_vpc_ipv6_addresses" "example" {
+  associated_instance_id = data.alibabacloudstack_instances.example.instances.0.id
   status                 = "Available"
 }
 
-resource "apsarastack_vpc_ipv6_internet_bandwidth" "example" {
-  ipv6_address_id      = data.apsarastack_vpc_ipv6_addresses.example.addresses.0.id
-  ipv6_gateway_id      = data.apsarastack_vpc_ipv6_addresses.example.addresses.0.ipv6_gateway_id
+resource "alibabacloudstack_vpc_ipv6_internet_bandwidth" "example" {
+  ipv6_address_id      = data.alibabacloudstack_vpc_ipv6_addresses.example.addresses.0.id
+  ipv6_gateway_id      = data.alibabacloudstack_vpc_ipv6_addresses.example.addresses.0.ipv6_gateway_id
   internet_charge_type = "PayByBandwidth"
   bandwidth            = "20"
 }
@@ -60,5 +60,5 @@ The following attributes are exported:
 VPC Ipv6 Internet Bandwidth can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_vpc_ipv6_internet_bandwidth.example <id>
+$ terraform import alibabacloudstack_vpc_ipv6_internet_bandwidth.example <id>
 ```

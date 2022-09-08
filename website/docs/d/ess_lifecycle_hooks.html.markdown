@@ -1,13 +1,13 @@
 ---
 subcategory: "Auto Scaling(ESS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ess_lifecycle_hooks"
-sidebar_current: "docs-apsarastack_ess_lifecycle_hooks"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ess_lifecycle_hooks"
+sidebar_current: "docs-alibabacloudstack_ess_lifecycle_hooks"
 description: |-
     Provides a list of lifecycle hooks available to the user.
 ---
 
-# apsarastack_ess_lifecycle_hooks
+# alibabacloudstack_ess_lifecycle_hooks
 
 This data source provides available lifecycle hook resources. 
 
@@ -15,13 +15,13 @@ This data source provides available lifecycle hook resources.
 ## Example Usage
 
 ```
-data "apsarastack_ess_lifecycle_hooks" "ds" {
+data "alibabacloudstack_ess_lifecycle_hooks" "ds" {
   scaling_group_id = "scaling_group_id"
   name_regex       = "lifecyclehook_name"
 }
 
 output "first_lifecycle_hook" {
-  value = "${data.apsarastack_ess_lifecycle_hooks.ds.hooks.0.id}"
+  value = "${data.alibabacloudstack_ess_lifecycle_hooks.ds.hooks.0.id}"
 }
 ```
 

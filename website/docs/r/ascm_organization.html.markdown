@@ -1,25 +1,25 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_organization"
-sidebar_current: "docs-apsarastack-resource-ascm-organization"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_organization"
+sidebar_current: "docs-alibabacloudstack-resource-ascm-organization"
 description: |-
   Provides an Ascm organization resource.
 ---
 
-# apsarastack\_ascm_organization
+# alibabacloudstack\_ascm_organization
 
 Provides an Ascm organization resource.
 
 ## Example Usage
 
 ```
-resource "apsarastack_ascm_organization" "default" {
+resource "alibabacloudstack_ascm_organization" "default" {
   name = "apsara_Organization"
   parent_id = "19"
 }
 output "org" {
-  value = apsarastack_ascm_organization.default.*
+  value = alibabacloudstack_ascm_organization.default.*
 }
 ```
 ## Argument Reference

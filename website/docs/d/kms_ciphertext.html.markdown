@@ -1,13 +1,13 @@
 ---
 subcategory: "KMS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_kms_ciphertext"
-sidebar_current: "docs-apsarastack-datasource-kms-ciphertext"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_kms_ciphertext"
+sidebar_current: "docs-alibabacloudstack-datasource-kms-ciphertext"
 description: |-
     Encrypt data with KMS.
 ---
 
-# apsarastack\_kms\_ciphertext
+# alibabacloudstack\_kms\_ciphertext
 
 Encrypt a given plaintext with KMS. 
 
@@ -16,18 +16,18 @@ Encrypt a given plaintext with KMS.
 ## Example Usage
 
 ```
-resource "apsarastack_kms_key" "key" {
+resource "alibabacloudstack_kms_key" "key" {
   description             = "example key"
   is_enabled              = true
 }
 
-data "apsarastack_kms_ciphertext" "encrypted" {
-  key_id    = apsarastack_kms_key.key.id
+data "alibabacloudstack_kms_ciphertext" "encrypted" {
+  key_id    = alibabacloudstack_kms_key.key.id
   plaintext = "example"
 }
 
-output "apsarastack_kms_ciphertext" {
-  value = "${data.apsarastack_kms_ciphertext.encrypted}"
+output "alibabacloudstack_kms_ciphertext" {
+  value = "${data.alibabacloudstack_kms_ciphertext.encrypted}"
 }
 ```
 

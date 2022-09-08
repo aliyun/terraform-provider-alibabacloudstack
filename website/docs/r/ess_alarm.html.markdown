@@ -1,74 +1,74 @@
 ---
 subcategory: "Auto Scaling(ESS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ess_alarm"
-sidebar_current: "docs-apsarastack-resource-ess-alarm"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ess_alarm"
+sidebar_current: "docs-alibabacloudstack-resource-ess-alarm"
 description: |-
     Provides a ESS alarm task resource.
 ---
 
-# apsarastack\_ess\_alarm
+# alibabacloudstack\_ess\_alarm
 
 Provides a ESS alarm task resource.
 
 ## Example Usage
 ```
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_disk_category     = "cloud_efficiency"
   available_resource_creation = "VSwitch"
 }
 
-data "apsarastack_images" "ecs_image" {
+data "alibabacloudstack_images" "ecs_image" {
   most_recent = true
   name_regex  = "^centos_6\\w{1,5}[64].*"
 }
 
-data "apsarastack_instance_types" "default" {
-  availability_zone = data.apsarastack_zones.default.zones[0].id
+data "alibabacloudstack_instance_types" "default" {
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   cpu_core_count    = 1
   memory_size       = 2
 }
 
-resource "apsarastack_vpc" "foo" {
+resource "alibabacloudstack_vpc" "foo" {
   name       = "tf-testAccEssAlarm_basic"
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "foo" {
+resource "alibabacloudstack_vswitch" "foo" {
   vswitch_name      = "tf-testAccEssAlarm_basic_foo"
-  vpc_id            = apsarastack_vpc.foo.id
+  vpc_id            = alibabacloudstack_vpc.foo.id
   cidr_block        = "172.16.0.0/24"
-  zone_id           = data.apsarastack_zones.default.zones[0].id
+  zone_id           = data.alibabacloudstack_zones.default.zones[0].id
 }
 
-resource "apsarastack_vswitch" "bar" {
+resource "alibabacloudstack_vswitch" "bar" {
   vswitch_name      = "tf-testAccEssAlarm_basic_bar"
-  vpc_id            = apsarastack_vpc.foo.id
+  vpc_id            = alibabacloudstack_vpc.foo.id
   cidr_block        = "172.16.1.0/24"
-  zone_id           = data.apsarastack_zones.default.zones[0].id
+  zone_id           = data.alibabacloudstack_zones.default.zones[0].id
 }
 
-resource "apsarastack_ess_scaling_group" "foo" {
+resource "alibabacloudstack_ess_scaling_group" "foo" {
   min_size           = 1
   max_size           = 1
   scaling_group_name = "tf-testAccEssAlarm_basic"
   removal_policies   = ["OldestInstance", "NewestInstance"]
-  vswitch_ids        = [apsarastack_vswitch.foo.id, apsarastack_vswitch.bar.id]
+  vswitch_ids        = [alibabacloudstack_vswitch.foo.id, alibabacloudstack_vswitch.bar.id]
 }
 
-resource "apsarastack_ess_scaling_rule" "foo" {
+resource "alibabacloudstack_ess_scaling_rule" "foo" {
   scaling_rule_name = "tf-testAccEssAlarm_basic"
-  scaling_group_id  = apsarastack_ess_scaling_group.foo.id
+  scaling_group_id  = alibabacloudstack_ess_scaling_group.foo.id
   adjustment_type   = "TotalCapacity"
   adjustment_value  = 2
   cooldown          = 60
 }
 
-resource "apsarastack_ess_alarm" "foo" {
+resource "alibabacloudstack_ess_alarm" "foo" {
   name                = "tf-testAccEssAlarm_basic"
   description         = "Acc alarm test"
-  alarm_actions       = [apsarastack_ess_scaling_rule.foo.ari]
-  scaling_group_id    = apsarastack_ess_scaling_group.foo.id
+  alarm_actions       = [alibabacloudstack_ess_scaling_rule.foo.ari]
+  scaling_group_id    = alibabacloudstack_ess_scaling_group.foo.id
   metric_type         = "system"
   metric_name         = "CpuUtilization"
   period              = 300
@@ -135,5 +135,5 @@ The following attributes are exported:
 Ess alarm can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_ess_alarm.example asg-2ze500_045efffe-4d05
+$ terraform import alibabacloudstack_ess_alarm.example asg-2ze500_045efffe-4d05
 ```

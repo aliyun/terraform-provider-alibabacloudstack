@@ -1,13 +1,13 @@
 ---
 subcategory: "RDS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_db_account"
-sidebar_current: "docs-apsarastack-resource-db-account"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_db_account"
+sidebar_current: "docs-alibabacloudstack-resource-db-account"
 description: |-
   Provides an RDS account resource.
 ---
 
-# apsarastack\_db\_account
+# alibabacloudstack\_db\_account
 
 Provides an RDS account resource and used to manage databases.
 
@@ -22,33 +22,33 @@ variable "name" {
   default = "dbaccountmysql"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "${var.creation}"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = "${var.name}"
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
 
-resource "apsarastack_db_instance" "instance" {
+resource "alibabacloudstack_db_instance" "instance" {
   engine           = "MySQL"
   engine_version   = "5.6"
   instance_type    = "rds.mysql.s1.small"
   instance_storage = "10"
-  vswitch_id       = "${apsarastack_vswitch.default.id}"
+  vswitch_id       = "${alibabacloudstack_vswitch.default.id}"
   instance_name    = "${var.name}"
 }
 
-resource "apsarastack_db_account" "account" {
-  instance_id = "${apsarastack_db_instance.instance.id}"
+resource "alibabacloudstack_db_account" "account" {
+  instance_id = "${alibabacloudstack_db_instance.instance.id}"
   name        = "tftestnormal"
   password    = "Test12345"
 }

@@ -1,15 +1,15 @@
 ---
 subcategory: "Redis And Memcache (KVStore)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_kvstore_connection"
-sidebar_current: "docs-apsarastack-resource-kvstore-connection"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_kvstore_connection"
+sidebar_current: "docs-alibabacloudstack-resource-kvstore-connection"
 description: |-
   Operate the public network ip of the specified resource.
 ---
 
 # alicloud\_kvstore\_connection
 
-Operate the public network ip of the specified resource. How to use it, see [What is Resource Apsarastack KVStore Connection](https://www.alibabacloud.com/help/doc-detail/125795.htm).
+Operate the public network ip of the specified resource. How to use it, see [What is Resource Alibabacloudstack KVStore Connection](https://www.alibabacloud.com/help/doc-detail/125795.htm).
 
 -> **NOTE:** Available in v1.101.0+.
 
@@ -18,7 +18,7 @@ Operate the public network ip of the specified resource. How to use it, see [Wha
 Basic Usage
 
 ```terraform
-resource "apsarastack_kvstore_connection" "default" {
+resource "alibabacloudstack_kvstore_connection" "default" {
   connection_string_prefix = "allocatetestupdate"
   instance_id              = "r-abc123456"
   port                     = "6370"

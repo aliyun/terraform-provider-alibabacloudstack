@@ -1,19 +1,19 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_logon_policy"
-sidebar_current: "docs-apsarastack_ascm_logon_policy"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_logon_policy"
+sidebar_current: "docs-alibabacloudstack_ascm_logon_policy"
 description: |-
-  Provides a Apsarastack Logon Policy resource.
+  Provides a Alibabacloudstack Logon Policy resource.
 ---
-# apsarastack\_ascm_logon_policy
+# alibabacloudstack\_ascm_logon_policy
 
-Provides a Apsarastack Logon Policy resource.
+Provides a Alibabacloudstack Logon Policy resource.
 
 Basic Usage
 
 ```
-resource "apsarastack_ascm_logon_policy" "login" {
+resource "alibabacloudstack_ascm_logon_policy" "login" {
   name="test_foo"
   description="testing purpose"
   rule="ALLOW"

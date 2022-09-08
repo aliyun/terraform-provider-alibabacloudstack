@@ -1,13 +1,13 @@
 ---
 subcategory: "OSS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_oss_bucket"
-sidebar_current: "docs-apsarastack-resource-oss-bucket"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_oss_bucket"
+sidebar_current: "docs-alibabacloudstack-resource-oss-bucket"
 description: |-
   Provides a resource to create an oss bucket.
 ---
 
-# apsarastack\_oss\_bucket
+# alibabacloudstack\_oss\_bucket
 
 Provides a resource to create an oss bucket and set its attribution.
 
@@ -19,7 +19,7 @@ Provides a resource to create an oss bucket and set its attribution.
 Private Bucket
 
 ```
-resource "apsarastack_oss_bucket" "demo" {
+resource "alibabacloudstack_oss_bucket" "demo" {
   bucket = "sample_bucket"
   acl    = "public-read"
 }

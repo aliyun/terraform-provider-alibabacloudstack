@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ecs_command"
-sidebar_current: "docs-apsarastack-resource-ecs-command"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_command"
+sidebar_current: "docs-alibabacloudstack-resource-ecs-command"
 description: |-
-  Provides a Apsarastack ECS Command resource.
+  Provides a Alibabacloudstack ECS Command resource.
 ---
 
-# apsarastack\_ecs\_command
+# alibabacloudstack\_ecs\_command
 
 Provides a ECS Command resource.
 
@@ -20,7 +20,7 @@ For information about ECS Command and how to use it, see [What is Command](https
 Basic Usage
 
 ```terraform
-resource "apsarastack_ecs_command" "example" {
+resource "alibabacloudstack_ecs_command" "example" {
   name            = "tf-testAcc"
   command_content = "bHMK"
   description     = "For Terraform Test"
@@ -53,5 +53,5 @@ The following attributes are exported:
 ECS Command can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_ecs_command.example <id>
+$ terraform import alibabacloudstack_ecs_command.example <id>
 ```

@@ -1,13 +1,13 @@
 ---
 subcategory: "Auto Scaling(ESS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ess_notifications"
-sidebar_current: "docs-apsarastack_ess_notifications"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ess_notifications"
+sidebar_current: "docs-alibabacloudstack_ess_notifications"
 description: |-
     Provides a list of notifications available to the user.
 ---
 
-# apsarastack_ess_notifications
+# alibabacloudstack_ess_notifications
 
 This data source provides available notification resources. 
 
@@ -15,12 +15,12 @@ This data source provides available notification resources.
 ## Example Usage
 
 ```
-data "apsarastack_ess_notifications" "ds" {
+data "alibabacloudstack_ess_notifications" "ds" {
   scaling_group_id = "scaling_group_id"
 }
 
 output "first_notification" {
-  value = "${data.apsarastack_ess_notifications.ds.notifications.0.id}"
+  value = "${data.alibabacloudstack_ess_notifications.ds.notifications.0.id}"
 }
 ```
 

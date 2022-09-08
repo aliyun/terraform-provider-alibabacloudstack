@@ -1,15 +1,15 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_route_tables"
-sidebar_current: "docs-apsarastack-datasource-route-tables"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_route_tables"
+sidebar_current: "docs-alibabacloudstack-datasource-route-tables"
 description: |-
-    Provides a list of Route Tables owned by an Apsarastack Cloud account.
+    Provides a list of Route Tables owned by an Alibabacloudstack Cloud account.
 ---
 
-# apsarastack\_route\_tables
+# alibabacloudstack\_route\_tables
 
-This data source provides a list of Route Tables owned by an Apsarastack Cloud account.
+This data source provides a list of Route Tables owned by an Alibabacloudstack Cloud account.
 
 
 ## Example Usage
@@ -19,23 +19,23 @@ variable "name" {
   default = "route-tables-datasource-example-name"
 }
 
-resource "apsarastack_vpc" "foo" {
+resource "alibabacloudstack_vpc" "foo" {
   cidr_block = "172.16.0.0/12"
   name       = "${var.name}"
 }
 
-resource "apsarastack_route_table" "foo" {
-  vpc_id      = "${apsarastack_vpc.foo.id}"
+resource "alibabacloudstack_route_table" "foo" {
+  vpc_id      = "${alibabacloudstack_vpc.foo.id}"
   name        = "${var.name}"
   description = "${var.name}"
 }
 
-data "apsarastack_route_tables" "foo" {
-  ids = ["${apsarastack_route_table.foo.id}"]
+data "alibabacloudstack_route_tables" "foo" {
+  ids = ["${alibabacloudstack_route_table.foo.id}"]
 }
 
 output "route_table_ids" {
-  value = "${data.apsarastack_route_tables.foo.ids}"
+  value = "${data.alibabacloudstack_route_tables.foo.ids}"
 }
 ```
 

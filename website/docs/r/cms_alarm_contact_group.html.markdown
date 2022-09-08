@@ -1,13 +1,13 @@
 ---
 subcategory: "Cloud Monitor Service"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cms_alarm_contact_group"
-sidebar_current: "docs-apsarastack-resource-cms-alarm-contact-group"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cms_alarm_contact_group"
+sidebar_current: "docs-alibabacloudstack-resource-cms-alarm-contact-group"
 description: |-
-  Provides a Apsarastack CMS Alarm Contact Group resource.
+  Provides a Alibabacloudstack CMS Alarm Contact Group resource.
 ---
 
-# apsarastack\_cms\_alarm\_contact\_group
+# alibabacloudstack\_cms\_alarm\_contact\_group
 
 Provides a CMS Alarm Contact Group resource.
 
@@ -20,7 +20,7 @@ For information about CMS Alarm Contact Group and how to use it, see [What is Al
 Basic Usage
 
 ```terraform
-resource "apsarastack_cms_alarm_contact_group" "example" {
+resource "alibabacloudstack_cms_alarm_contact_group" "example" {
   alarm_contact_group_name = "tf-test"
 }
 ```
@@ -45,5 +45,5 @@ The following attributes are exported:
 CMS Alarm Contact Group can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_cms_alarm_contact_group.example tf-testacc123
+$ terraform import alibabacloudstack_cms_alarm_contact_group.example tf-testacc123
 ```

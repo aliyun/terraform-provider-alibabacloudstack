@@ -1,25 +1,25 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_listeners"
-sidebar_current: "docs-apsarastack-datasource-slb-listeners"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_listeners"
+sidebar_current: "docs-alibabacloudstack-datasource-slb-listeners"
 description: |-
     Provides a list of server load balancer listeners to the user.
 ---
 
-# apsarastack\_slb_listeners
+# alibabacloudstack\_slb_listeners
 
-This data source provides the listeners related to a server load balancer of the current Apsarastack Cloud user.
+This data source provides the listeners related to a server load balancer of the current Alibabacloudstack Cloud user.
 
 ## Example Usage
 
 ```
-data "apsarastack_slb_listeners" "sample_ds" {
-  load_balancer_id = "${apsarastack_slb.sample_slb.id}"
+data "alibabacloudstack_slb_listeners" "sample_ds" {
+  load_balancer_id = "${alibabacloudstack_slb.sample_slb.id}"
 }
 
 output "first_slb_listener_protocol" {
-  value = "${data.apsarastack_slb_listeners.sample_ds.slb_listeners.0.protocol}"
+  value = "${data.alibabacloudstack_slb_listeners.sample_ds.slb_listeners.0.protocol}"
 }
 ```
 

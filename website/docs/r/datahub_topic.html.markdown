@@ -1,13 +1,13 @@
 ---
 subcategory: "Datahub Service"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_datahub_topic"
-sidebar_current: "docs-apsarastack-resource-datahub-topic"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_datahub_topic"
+sidebar_current: "docs-alibabacloudstack-resource-datahub-topic"
 description: |-
-  Provides a Apsarastack datahub topic resource.
+  Provides a Alibabacloudstack datahub topic resource.
 ---
 
-# apsarastack\_datahub\_topic
+# alibabacloudstack\_datahub\_topic
 
 The topic is the basic unit of Datahub data source and is used to define one kind of data or stream. It contains a set of subscriptions. You can manage the datahub source of an application by using topics. [Refer to details](https://help.aliyun.com/document_detail/47440.html).
 
@@ -18,7 +18,7 @@ Basic Usage
 - BLob Topic
 
 ```
-resource "apsarastack_datahub_topic" "example" {
+resource "alibabacloudstack_datahub_topic" "example" {
   name         = "tf_datahub_topic"
   project_name = "tf_datahub_project"
   record_type  = "BLOB"
@@ -30,7 +30,7 @@ resource "apsarastack_datahub_topic" "example" {
 - Tuple Topic
 
 ```
-resource "apsarastack_datahub_topic" "example" {
+resource "alibabacloudstack_datahub_topic" "example" {
   name         = "tf_datahub_topic"
   project_name = "tf_datahub_project"
   record_type  = "TUPLE"
@@ -79,5 +79,5 @@ The following attributes are exported:
 Datahub topic can be imported using the ID, e.g.
 
 ```
-$ terraform import apsarastack_datahub_topic.example tf_datahub_project:tf_datahub_topic
+$ terraform import alibabacloudstack_datahub_topic.example tf_datahub_project:tf_datahub_topic
 ```

@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_vpc_ipv6_addresses"
-sidebar_current: "docs-apsarastack-datasource-vpc-ipv6-addresses"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_vpc_ipv6_addresses"
+sidebar_current: "docs-alibabacloudstack-datasource-vpc-ipv6-addresses"
 description: |-
   Provides a list of Vpc Ipv6 Addresses to the user.
 ---
 
-# apsarastack\_vpc\_ipv6\_addresses
+# alibabacloudstack\_vpc\_ipv6\_addresses
 
 This data source provides the Vpc Ipv6 Addresses of the current Alibaba Cloud user.
 
@@ -18,32 +18,32 @@ This data source provides the Vpc Ipv6 Addresses of the current Alibaba Cloud us
 Basic Usage
 
 ```terraform
-data "apsarastack_vpc_ipv6_addresses" "associatedInstanceId" {
+data "alibabacloudstack_vpc_ipv6_addresses" "associatedInstanceId" {
   associated_instance_id = "example_value"
 }
 output "vpc_ipv6_address_id_1" {
-  value = data.apsarastack_vpc_ipv6_addresses.associatedInstanceId.addresses.0.id
+  value = data.alibabacloudstack_vpc_ipv6_addresses.associatedInstanceId.addresses.0.id
 }
 
-data "apsarastack_vpc_ipv6_addresses" "vswitchId" {
+data "alibabacloudstack_vpc_ipv6_addresses" "vswitchId" {
   vswitch_id = "example_value"
 }
 output "vpc_ipv6_address_id_2" {
-  value = data.apsarastack_vpc_ipv6_addresses.vswitchId.addresses.0.id
+  value = data.alibabacloudstack_vpc_ipv6_addresses.vswitchId.addresses.0.id
 }
 
-data "apsarastack_vpc_ipv6_addresses" "vpcId" {
+data "alibabacloudstack_vpc_ipv6_addresses" "vpcId" {
   vpc_id = "example_value"
 }
 output "vpc_ipv6_address_id_3" {
-  value = data.apsarastack_vpc_ipv6_addresses.vpcId.addresses.0.id
+  value = data.alibabacloudstack_vpc_ipv6_addresses.vpcId.addresses.0.id
 }
 
-data "apsarastack_vpc_ipv6_addresses" "status" {
+data "alibabacloudstack_vpc_ipv6_addresses" "status" {
   status = "Available"
 }
 output "vpc_ipv6_address_id_4" {
-  value = data.apsarastack_vpc_ipv6_addresses.status.addresses.0.id
+  value = data.alibabacloudstack_vpc_ipv6_addresses.status.addresses.0.id
 }
 
 ```

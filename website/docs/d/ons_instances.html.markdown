@@ -1,13 +1,13 @@
 ---
 subcategory: "RocketMQ"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ons_instances"
-sidebar_current: "docs-apsarastack-datasource-ons-instances"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ons_instances"
+sidebar_current: "docs-alibabacloudstack-datasource-ons-instances"
 description: |-
     Provides a list of ons instances available to the user.
 ---
 
-# apsarastack\_ons\_instances
+# alibabacloudstack\_ons\_instances
 
 This data source provides a list of ONS Instances in an Apsara Stack Cloud account according to the specified filters.
 
@@ -19,7 +19,7 @@ variable "name" {
   default = "onsInstanceDatasourceName"
 }
 
-resource "apsarastack_ons_instance" "default" {
+resource "alibabacloudstack_ons_instance" "default" {
   tps_receive_max = 500
   tps_send_max = 500
   topic_capacity = 50
@@ -29,13 +29,13 @@ resource "apsarastack_ons_instance" "default" {
   remark = "Ons Instance"
 }
 
-data "apsarastack_ons_instances" "instances_ds" {
-  name_regex = apsarastack_ons_instance.inst.name
+data "alibabacloudstack_ons_instances" "instances_ds" {
+  name_regex = alibabacloudstack_ons_instance.inst.name
   output_file = "instances.txt"
 }
 
 output "first_instance_id" {
-  value = data.apsarastack_ons_instances.instances_ds.*
+  value = data.alibabacloudstack_ons_instances.instances_ds.*
 }
 ```
 

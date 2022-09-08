@@ -1,13 +1,13 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_master_slave_server_group"
-sidebar_current: "docs-apsarastack-resource-slb-master-slave-server-group"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_master_slave_server_group"
+sidebar_current: "docs-alibabacloudstack-resource-slb-master-slave-server-group"
 description: |-
   Provides a Load Balancer Master Slave Server Group resource.
 ---
 
-# apsarastack\_slb\_master\_slave\_server\_group
+# alibabacloudstack\_slb\_master\_slave\_server\_group
 
 A master slave server group contains two ECS instances. The master slave server group can help you to define multiple listening dimension.
 
@@ -25,17 +25,17 @@ A master slave server group contains two ECS instances. The master slave server 
 ## Example Usage
 
 ```
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_disk_category     = "cloud_efficiency"
   available_resource_creation = "VSwitch"
 }
 
-data "apsarastack_instance_types" "default" {
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+data "alibabacloudstack_instance_types" "default" {
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   eni_amount        = 2
 }
 
-data "apsarastack_images" "image" {
+data "alibabacloudstack_images" "image" {
   name_regex  = "^ubuntu_18.*64"
   most_recent = true
   owners      = "system"
@@ -49,66 +49,66 @@ variable "number" {
   default = "1"
 }
 
-resource "apsarastack_vpc" "main" {
+resource "alibabacloudstack_vpc" "main" {
   name       = "${var.name}"
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "main" {
-  vpc_id            = "${apsarastack_vpc.main.id}"
+resource "alibabacloudstack_vswitch" "main" {
+  vpc_id            = "${alibabacloudstack_vpc.main.id}"
   cidr_block        = "172.16.0.0/16"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
 
-resource "apsarastack_security_group" "group" {
+resource "alibabacloudstack_security_group" "group" {
   name   = "${var.name}"
-  vpc_id = "${apsarastack_vpc.main.id}"
+  vpc_id = "${alibabacloudstack_vpc.main.id}"
 }
 
-resource "apsarastack_instance" "instance" {
-  image_id                   = "${data.apsarastack_images.image.images.0.id}"
-  instance_type              = "${data.apsarastack_instance_types.default.instance_types.0.id}"
+resource "alibabacloudstack_instance" "instance" {
+  image_id                   = "${data.alibabacloudstack_images.image.images.0.id}"
+  instance_type              = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
   instance_name              = "${var.name}"
   count                      = "2"
-  security_groups            = ["${apsarastack_security_group.group.id}"]
+  security_groups            = ["${alibabacloudstack_security_group.group.id}"]
   internet_max_bandwidth_out = "10"
-  availability_zone          = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone          = "${data.alibabacloudstack_zones.default.zones.0.id}"
   system_disk_category       = "cloud_efficiency"
-  vswitch_id                 = "${apsarastack_vswitch.main.id}"
+  vswitch_id                 = "${alibabacloudstack_vswitch.main.id}"
 }
 
-resource "apsarastack_slb" "instance" {
+resource "alibabacloudstack_slb" "instance" {
   name          = "${var.name}"
-  vswitch_id    = "${apsarastack_vswitch.main.id}"
+  vswitch_id    = "${alibabacloudstack_vswitch.main.id}"
 }
 
-resource "apsarastack_network_interface" "default" {
+resource "alibabacloudstack_network_interface" "default" {
   count           = "${var.number}"
   name            = "${var.name}"
-  vswitch_id      = "${apsarastack_vswitch.main.id}"
-  security_groups = ["${apsarastack_security_group.group.id}"]
+  vswitch_id      = "${alibabacloudstack_vswitch.main.id}"
+  security_groups = ["${alibabacloudstack_security_group.group.id}"]
 }
 
-resource "apsarastack_network_interface_attachment" "default" {
+resource "alibabacloudstack_network_interface_attachment" "default" {
   count                = "${var.number}"
-  instance_id          = "${apsarastack_instance.instance.0.id}"
-  network_interface_id = "${element(apsarastack_network_interface.default.*.id, count.index)}"
+  instance_id          = "${alibabacloudstack_instance.instance.0.id}"
+  network_interface_id = "${element(alibabacloudstack_network_interface.default.*.id, count.index)}"
 }
 
-resource "apsarastack_slb_master_slave_server_group" "group" {
-  load_balancer_id = "${apsarastack_slb.instance.id}"
+resource "alibabacloudstack_slb_master_slave_server_group" "group" {
+  load_balancer_id = "${alibabacloudstack_slb.instance.id}"
   name             = "${var.name}"
 
   servers {
-    server_id = "${apsarastack_instance.instance.0.id}"
+    server_id = "${alibabacloudstack_instance.instance.0.id}"
     port       = 100
     weight     = 100
     server_type = "Master"
   }
 
   servers {
-    server_id = "${apsarastack_instance.instance.1.id}"
+    server_id = "${alibabacloudstack_instance.instance.1.id}"
     port       = 100
     weight     = 100
     server_type = "Slave"

@@ -1,26 +1,26 @@
 ---
 subcategory: "Distributed Relational Database Service (DRDS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_drds_instances"
-sidebar_current: "docs-apsarastack-drds-instances"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_drds_instances"
+sidebar_current: "docs-alibabacloudstack-drds-instances"
 description: |-
   Provides a collection of DRDS instances according to the specified filters.
 ---
 
-# apsarastack_drds_instance
+# alibabacloudstack_drds_instance
 
- The `apsarastack_drds_instance` data source provides a collection of DRDS instances available in Alibaba Cloud account.
+ The `alibabacloudstack_drds_instance` data source provides a collection of DRDS instances available in Alibaba Cloud account.
 Filters support regular expression for the instance name, searches by tags, and other filters which are listed below.
 
 ## Example Usage
 
  ```
-data "apsarastack_drds_instances" "drds_instances_ds" {
+data "alibabacloudstack_drds_instances" "drds_instances_ds" {
   name_regex = "drds-\\d+"
   ids        = ["drdsabc123456"]
 }
 output "first_db_instance_id" {
-  value = "${data.apsarastack_drds_instances.drds_instances_ds.instances.0.id}"
+  value = "${data.alibabacloudstack_drds_instances.drds_instances_ds.instances.0.id}"
 }
 ```
 

@@ -1,24 +1,24 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_ram_service_roles"
-sidebar_current: "docs-apsarastack-datasource-ascm-ram-service-roles"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_ram_service_roles"
+sidebar_current: "docs-alibabacloudstack-datasource-ascm-ram-service-roles"
 description: |-
     Provides a list of RAM Service roles to the user.
 ---
 
-# apsarastack\_ascm_ram_service_roles
+# alibabacloudstack\_ascm_ram_service_roles
 
 This data source provides the ram roles of the current Apsara Stack Cloud user.
 
 ## Example Usage
 
 ```
-data "apsarastack_ascm_ram_service_roles" "role" {
+data "alibabacloudstack_ascm_ram_service_roles" "role" {
   product = "ECS"
 }
 output "role" {
-  value = data.apsarastack_ascm_ram_service_roles.role.*
+  value = data.alibabacloudstack_ascm_ram_service_roles.role.*
 }
 ```
 

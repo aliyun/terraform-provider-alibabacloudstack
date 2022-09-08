@@ -1,30 +1,30 @@
 ---
 subcategory: "RAM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ram_role_attachment"
-sidebar_current: "docs-apsarastack-resource-ram-role-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ram_role_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-ram-role-attachment"
 description: |-
   Provides a RAM role attachment resource to bind role for several ECS instances.
 ---
 
-# apsarastack\_ram\_role\_attachment
+# alibabacloudstack\_ram\_role\_attachment
 
 Provides a RAM role attachment resource to bind role for several ECS instances.
 
 ## Example Usage
 
 ```
-data "apsarastack_ascm_ram_service_roles" "role" {
+data "alibabacloudstack_ascm_ram_service_roles" "role" {
   product = "ecs"
 }
 
-resource "apsarastack_ram_role_attachment" "attach" {
-  role_name    = data.apsarastack_ascm_ram_service_roles.role.roles.0.name
+resource "alibabacloudstack_ram_role_attachment" "attach" {
+  role_name    = data.alibabacloudstack_ascm_ram_service_roles.role.roles.0.name
   instance_ids = ["i-23jkek3dkhsdby8kba"]
 }
 
 output "attach" {
-  value = apsarastack_ram_role_attachment.attach.*
+  value = alibabacloudstack_ram_role_attachment.attach.*
 }
 ```
 

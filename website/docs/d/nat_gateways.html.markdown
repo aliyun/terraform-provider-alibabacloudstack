@@ -1,15 +1,15 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_nat_gateways"
-sidebar_current: "docs-apsarastack-datasource-nat-gateways"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_nat_gateways"
+sidebar_current: "docs-alibabacloudstack-datasource-nat-gateways"
 description: |-
-    Provides a list of Nat Gateways owned by an Apsarastack Cloud account.
+    Provides a list of Nat Gateways owned by an Alibabacloudstack Cloud account.
 ---
 
-# apsarastack\_nat\_gateways
+# alibabacloudstack\_nat\_gateways
 
-This data source provides a list of Nat Gateways owned by an Apsarastack Cloud account.
+This data source provides a list of Nat Gateways owned by an Alibabacloudstack Cloud account.
 
 
 
@@ -20,29 +20,29 @@ variable "name" {
   default = "natGatewaysDatasource"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
 }
 
-resource "apsarastack_vpc" "foo" {
+resource "alibabacloudstack_vpc" "foo" {
   name       = "${var.name}"
   cidr_block = "172.16.0.0/12"
 }
 
-resource "apsarastack_nat_gateway" "foo" {
-  vpc_id        = "${apsarastack_vpc.foo.id}"
+resource "alibabacloudstack_nat_gateway" "foo" {
+  vpc_id        = "${alibabacloudstack_vpc.foo.id}"
   specification = "Small"
   name          = "${var.name}"
 }
 
-data "apsarastack_nat_gateways" "foo" {
-  vpc_id     = "${apsarastack_vpc.foo.id}"
-  name_regex = "${apsarastack_nat_gateway.foo.name}"
-  ids        = ["${apsarastack_nat_gateway.foo.id}"]
+data "alibabacloudstack_nat_gateways" "foo" {
+  vpc_id     = "${alibabacloudstack_vpc.foo.id}"
+  name_regex = "${alibabacloudstack_nat_gateway.foo.name}"
+  ids        = ["${alibabacloudstack_nat_gateway.foo.id}"]
 }
 
 output "nat_gateways" {
-  value = "${data.apsarastack_nat_gateways.foo.gateways}"
+  value = "${data.alibabacloudstack_nat_gateways.foo.gateways}"
 }
 
 ```

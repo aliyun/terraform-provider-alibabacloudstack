@@ -1,13 +1,13 @@
 ---
 subcategory: "EDAS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_edas_k8s_application"
-sidebar_current: "docs-apsarastack-resource-edas-k8s-application"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_edas_k8s_application"
+sidebar_current: "docs-alibabacloudstack-resource-edas-k8s-application"
 description: |-
   Provides an EDAS K8s cluster resource.
 ---
 
-# apsarastack\_edas\_k8s\_application
+# alibabacloudstack\_edas\_k8s\_application
 
 Create an EDAS k8s application.For information about EDAS K8s Application and how to use it, see [What is EDAS K8s Application](https://www.alibabacloud.com/help/doc-detail/85029.htm). 
 
@@ -18,7 +18,7 @@ Create an EDAS k8s application.For information about EDAS K8s Application and ho
 Basic Usage
 
 ```terraform
-resource "apsarastack_edas_k8s_application" "default" {
+resource "alibabacloudstack_edas_k8s_application" "default" {
   // package type is Image / FatJar / War
   package_type            = "Image"
   application_name        = "DemoApplication"
@@ -68,7 +68,7 @@ resource "apsarastack_edas_k8s_application" "default" {
 The following arguments are supported:
 
 * `application_name` - (Required, ForceNew) The name of the application you want to create. Must start with character,supports numbers, letters and dashes (-), supports up to 36 characters
-* `cluster_id` - (Required, ForceNew) The ID of the apsarastack container service kubernetes cluster that you want to import to. You can call the ListCluster operation to query.
+* `cluster_id` - (Required, ForceNew) The ID of the alibabacloudstack container service kubernetes cluster that you want to import to. You can call the ListCluster operation to query.
 * `package_type` - (Required, ForceNew) Application package type. Optional parameter values include: FatJar, WAR and Image.
 * `replicas` - (Optional) Number of application instances.
 * `image_url` - (Optional) Mirror address. When the package_type is set to 'Image', this parameter item is required.
@@ -108,7 +108,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `application_name` - The name of the application you want to create. Must start with character,supports numbers, letters and dashes (-), supports up to 36 characters
-* `cluster_id` - The ID of the apsarastack container service kubernetes cluster that you want to import to. You can call the ListCluster operation to query.
+* `cluster_id` - The ID of the alibabacloudstack container service kubernetes cluster that you want to import to. You can call the ListCluster operation to query.
 * `replicas` - Number of application instances.
 * `package_type` -  Application package type. Optional parameter values include: FatJar, WAR and Image.
 * `image_url` - Mirror address. When the package_type is set to 'Image', this parameter item is available.
@@ -118,5 +118,5 @@ The following attributes are exported:
 EDAS k8s application can be imported as below, e.g.
 
 ```
-$ terraform import apsarastack_edas_k8s_application.new_k8s_application application_id
+$ terraform import alibabacloudstack_edas_k8s_application.new_k8s_application application_id
 ```

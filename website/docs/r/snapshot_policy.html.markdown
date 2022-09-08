@@ -1,20 +1,20 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_snapshot_policy"
-sidebar_current: "docs-apsarastack-resource-snapshot-policy"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_snapshot_policy"
+sidebar_current: "docs-alibabacloudstack-resource-snapshot-policy"
 description: |-
   Provides an ECS snapshot policy resource.
 ---
 
-# apsarastack\_snapshot\_policy
+# alibabacloudstack\_snapshot\_policy
 
 Provides an ECS snapshot policy resource.
 
 ## Example Usage
 
 ```
-resource "apsarastack_snapshot_policy" "sp" {
+resource "alibabacloudstack_snapshot_policy" "sp" {
   name            = "${var.name}"
   repeat_weekdays = ["1", "2", "3"]
   retention_days  = -1

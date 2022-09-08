@@ -1,13 +1,13 @@
 ---
 subcategory: "Auto Scaling(ESS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ess_scalinggroup_vserver_groups"
-sidebar_current: "docs-apsarastack-resource-ess_scalinggroup_vserver_groups"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ess_scalinggroup_vserver_groups"
+sidebar_current: "docs-alibabacloudstack-resource-ess_scalinggroup_vserver_groups"
 description: |-
   Provides a ESS Attachment resource to attach or remove vserver groups.
 ---
 
-# apsarastack\_ess\_scalinggroup\_vserver\_groups
+# alibabacloudstack\_ess\_scalinggroup\_vserver\_groups
 
 Attaches/Detaches vserver groups to a specified scaling group.
 
@@ -35,36 +35,36 @@ variable "name" {
   default = "testAccEssVserverGroupsAttachment"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_disk_category     = "cloud_efficiency"
   available_resource_creation = "VSwitch"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = "${var.name}"
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
 
-resource "apsarastack_slb" "default" {
+resource "alibabacloudstack_slb" "default" {
   name = "${var.name}"
-  vswitch_id = "${apsarastack_vswitch.default.id}"
+  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
 }
 
-resource "apsarastackapsarastack_slb_server_group" "default" {
-  load_balancer_id = "${apsarastack_slb.default.id}"
+resource "alibabacloudstackalibabacloudstack_slb_server_group" "default" {
+  load_balancer_id = "${alibabacloudstack_slb.default.id}"
   name = "test"
 }
 	
-resource "apsarastack_slb_listener" "default" {
+resource "alibabacloudstack_slb_listener" "default" {
   count = 2
-  load_balancer_id = "${element(apsarastack_slb.default.*.id, count.index)}"
+  load_balancer_id = "${element(alibabacloudstack_slb.default.*.id, count.index)}"
   backend_port = "22"
   frontend_port = "22"
   protocol = "tcp"
@@ -72,20 +72,20 @@ resource "apsarastack_slb_listener" "default" {
   health_check_type = "tcp"
 }
 
-resource "apsarastack_ess_scaling_group" "default" {
+resource "alibabacloudstack_ess_scaling_group" "default" {
   min_size = "2"
   max_size = "2"
   scaling_group_name = "${var.name}"
-  vswitch_ids = ["${apsarastack_vswitch.default.id}"]
-  depends_on = ["apsarastack_slb_listener.default"]
+  vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+  depends_on = ["alibabacloudstack_slb_listener.default"]
 }
 
-resource "apsarastack_ess_scalinggroup_vserver_groups" "default" {
-  scaling_group_id = "${apsarastack_ess_scaling_group.default.id}"
+resource "alibabacloudstack_ess_scalinggroup_vserver_groups" "default" {
+  scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
   vserver_groups {
-  loadbalancer_id = "${apsarastack_slb.default.id}"
+  loadbalancer_id = "${alibabacloudstack_slb.default.id}"
   vserver_attributes {
-    vserver_group_id = "${apsarastack_slb_server_group.default.id}"
+    vserver_group_id = "${alibabacloudstack_slb_server_group.default.id}"
     port = "100"
     weight = "60"
     }

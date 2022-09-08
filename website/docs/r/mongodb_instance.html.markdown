@@ -1,13 +1,13 @@
 ---
 subcategory: "MongoDB"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_mongodb_instance"
-sidebar_current: "docs-apsarastack-resource-mongodb-instance"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_mongodb_instance"
+sidebar_current: "docs-alibabacloudstack-resource-mongodb-instance"
 description: |-
   Provides a MongoDB instance resource supports replica set instances only. the MongoDB provides stable, reliable, and automatic scalable database services. It offers a full range of database solutions, such as disaster recovery, backup, recovery, monitoring, and alarms.
 ---
 
-# apsarastack\_mongodb\_instance
+# alibabacloudstack\_mongodb\_instance
 
 Provides a MongoDB instance resource supports replica set instances only. the MongoDB provides stable, reliable, and automatic scalable database services. It offers a full range of database solutions, such as disaster recovery, backup, recovery, monitoring, and alarms.
 
@@ -18,15 +18,15 @@ Basic usage
 
 ```
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
 }
 
-resource "apsarastack_mongodb_instance" "example" {
+resource "alibabacloudstack_mongodb_instance" "example" {
   engine_version      = "3.0"
   db_instance_class   = "dds.mongo.mid"
   db_instance_storage = 10
-  zone_id=data.apsarastack_zones.default.zones[0].id
+  zone_id=data.alibabacloudstack_zones.default.zones[0].id
   backup_period=["Monday","Wednesday","Thursday","Friday","Saturday","Sunday"]
   backup_time="20:00Z-21:00Z"
   name="testMongoDB"

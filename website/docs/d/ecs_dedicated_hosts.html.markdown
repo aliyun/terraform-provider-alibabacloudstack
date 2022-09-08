@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ecs_dedicated_hosts"
-sidebar_current: "docs-apsarastack-datasource-ecs-dedicated-hosts"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_dedicated_hosts"
+sidebar_current: "docs-alibabacloudstack-datasource-ecs-dedicated-hosts"
 description: |-
     Provides a list of available ECS Dedicated Hosts.
 ---
 
-# apsarastack\_ecs\_dedicated\_hosts
+# alibabacloudstack\_ecs\_dedicated\_hosts
 
 This data source provides a list of ECS Dedicated Hosts in an Apsara Stack Cloud account according to the specified filters.
  
@@ -17,14 +17,14 @@ This data source provides a list of ECS Dedicated Hosts in an Apsara Stack Cloud
 
 ```
 # Declare the data source
-data "apsarastack_ecs_dedicated_hosts" "dedicated_hosts_ds" {
+data "alibabacloudstack_ecs_dedicated_hosts" "dedicated_hosts_ds" {
   name_regex = "tf-testAcc"
   dedicated_host_type = "ddh.g5"
   status = "Available"
 }
 
 output "first_dedicated_hosts_id" {
-  value = "${data.apsarastack_ecs_dedicated_hosts.dedicated_hosts_ds.hosts.0.id}"
+  value = "${data.alibabacloudstack_ecs_dedicated_hosts.dedicated_hosts_ds.hosts.0.id}"
 }
 ```
 

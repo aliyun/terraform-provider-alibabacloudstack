@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_router_interface"
-sidebar_current: "docs-apsarastack-resource-router-interface"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_router_interface"
+sidebar_current: "docs-alibabacloudstack-resource-router-interface"
 description: |-
   Provides a VPC router interface resource to connect two VPCs.
 ---
 
-# apsarastack\_router\_interface
+# alibabacloudstack\_router\_interface
 
 Provides a VPC router interface resource aim to build a connection between two VPCs.
 
@@ -18,15 +18,15 @@ Provides a VPC router interface resource aim to build a connection between two V
 ## Example Usage
 
 ```
-resource "apsarastack_vpc" "foo" {
+resource "alibabacloudstack_vpc" "foo" {
   name       = "tf_test_foo12345"
   cidr_block = "172.16.0.0/12"
 }
 
-resource "apsarastack_router_interface" "interface" {
+resource "alibabacloudstack_router_interface" "interface" {
   opposite_region = region
   router_type     = "VRouter"
-  router_id       = apsarastack_vpc.foo.router_id
+  router_id       = alibabacloudstack_vpc.foo.router_id
   role            = "InitiatingSide"
   specification   = "Large.2"
   name            = "test1"

@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_nat_gateway"
-sidebar_current: "docs-apsarastack-resource-nat-gateway"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_nat_gateway"
+sidebar_current: "docs-alibabacloudstack-resource-nat-gateway"
 description: |-
   Provides a resource to create a VPC NAT Gateway.
 ---
 
-# apsarastack\_nat\_gateway
+# alibabacloudstack\_nat\_gateway
 
 Provides a resource to create a VPC NAT Gateway.
 
@@ -21,24 +21,24 @@ variable "name" {
   default = "natGatewayExampleName"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = "${var.name}"
   cidr_block = "172.16.0.0/12"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/21"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
 
-resource "apsarastack_nat_gateway" "default" {
-  vpc_id = "${apsarastack_vswitch.default.vpc_id}"
+resource "alibabacloudstack_nat_gateway" "default" {
+  vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
   name   = "${var.name}"
 }
 ```

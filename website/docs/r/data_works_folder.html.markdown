@@ -1,13 +1,13 @@
 ---
 subcategory: "Data Works"
-layout: "apsarastack"
-page_title: "ApsaraStack: apsarastack_data_works_folder"
-sidebar_current: "docs-apsarastack-resource-data-works-folder"
+layout: "alibabacloudstack"
+page_title: "AlibabacloudStack: alibabacloudstack_data_works_folder"
+sidebar_current: "docs-alibabacloudstack-resource-data-works-folder"
 description: |-
-  Provides a ApsaraStack Data Works Folder resource.
+  Provides a AlibabacloudStack Data Works Folder resource.
 ---
 
-# apsarastack\_data\_works\_folder
+# alibabacloudstack\_data\_works\_folder
 
 Provides a Data Works Folder resource.
 
@@ -18,7 +18,7 @@ For information about Data Works Folder and how to use it, see [What is Folder](
 Basic Usage
 
 ```terraform
-resource "apsarastack_data_works_folder" "example" {
+resource "alibabacloudstack_data_works_folder" "example" {
   project_id  = "320687"
   folder_path = "Business Flow/tfTestAcc/folderDi/tftest1"
 }
@@ -42,5 +42,5 @@ The following attributes are exported:
 Data Works Folder can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_data_works_folder.example <folder_id>:<$.ProjectId>
+$ terraform import alibabacloudstack_data_works_folder.example <folder_id>:<$.ProjectId>
 ```

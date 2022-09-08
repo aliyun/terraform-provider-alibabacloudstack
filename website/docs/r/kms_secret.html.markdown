@@ -1,13 +1,13 @@
 ---
 subcategory: "KMS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_kms_secret"
-sidebar_current: "docs-apsarastack-resource-kms-secret"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_kms_secret"
+sidebar_current: "docs-alibabacloudstack-resource-kms-secret"
 description: |-
-  Provides a Apsarastack Cloud kms secret resource.
+  Provides a Alibabacloudstack Cloud kms secret resource.
 ---
 
-# apsarastack\_kms\_key
+# alibabacloudstack\_kms\_key
 
 This resouce used to create a secret and store its initial version.
 
@@ -18,7 +18,7 @@ This resouce used to create a secret and store its initial version.
 Basic Usage
 
 ```
-resource "apsarastack_kms_secret" "default" {
+resource "alibabacloudstack_kms_secret" "default" {
   secret_name                   = "secret-foo"
   description                   = "from terraform"
   secret_data                   = "Secret data."
@@ -45,6 +45,6 @@ The following arguments are supported:
 ## Attributes Reference
 
 * `id` - The ID of the secret. It same with `secret_name`.
-* `arn` - The Apsarastack Resource Name (ARN) of the secret.
+* `arn` - The Alibabacloudstack Resource Name (ARN) of the secret.
 * `planned_delete_time` - The time when the secret is scheduled to be deleted.
 

@@ -1,13 +1,13 @@
 ---
 subcategory: "Redis And Memcache (KVStore)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_kvstore_account"
-sidebar_current: "docs-apsarastack-resource-kvstore-account"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_kvstore_account"
+sidebar_current: "docs-alibabacloudstack-resource-kvstore-account"
 description: |-
   Provides a kvstore account resource.
 ---
 
-# apsarastack\_kvstore\_account
+# alibabacloudstack\_kvstore\_account
 
 Provides a kvstore account resource and used to manage databases.
 
@@ -22,31 +22,31 @@ variable "creation" {
 variable "name" {
   default = "kvstoreinstancevpc"
 }
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "${var.creation}"
 }
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = "${var.name}"
   cidr_block = "172.16.0.0/16"
 }
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.apsarastack_zones.default.zones.0.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
-resource "apsarastack_kvstore_instance" "default" {
+resource "alibabacloudstack_kvstore_instance" "default" {
   instance_class = "redis.master.small.default"
   instance_name  = "${var.name}"
-  vswitch_id     = "${apsarastack_vswitch.default.id}"
+  vswitch_id     = "${alibabacloudstack_vswitch.default.id}"
   private_ip     = "172.16.0.10"
   security_ips   = ["10.0.0.1"]
   instance_type  = "Redis"
   engine_version = "4.0"
 }
 
-resource "apsarastack_kvstore_account" "account" {
-  instance_id = "${apsarastack_kvstore_instance.default.id}"
+resource "alibabacloudstack_kvstore_account" "account" {
+  instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
   account_name        = "tftestnormal"
   account_password    = "Test12345"
 }
@@ -84,5 +84,5 @@ The following attributes are exported:
 kvstore account can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_KVStore_account.example "rm-12345:tf_account"
+$ terraform import alibabacloudstack_KVStore_account.example "rm-12345:tf_account"
 ```

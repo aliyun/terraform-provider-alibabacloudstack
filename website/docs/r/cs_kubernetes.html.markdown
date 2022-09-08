@@ -1,15 +1,15 @@
 ---
 subcategory: "Container Service for Kubernetes (ACK)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cs_kubernetes"
-sidebar_current: "docs-apsarastack-resource-cs-kubernetes"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cs_kubernetes"
+sidebar_current: "docs-alibabacloudstack-resource-cs-kubernetes"
 description: |-
-  Provides a Apsarastack resource to manage container kubernetes cluster.
+  Provides a Alibabacloudstack resource to manage container kubernetes cluster.
 ---
 
-# apsarastack\_cs\_kubernetes
+# alibabacloudstack\_cs\_kubernetes
 
-This resource will help you to manage a Kubernetes Cluster in Apsarastack Kubernetes Service. 
+This resource will help you to manage a Kubernetes Cluster in Alibabacloudstack Kubernetes Service. 
 
 -> **NOTE:** Each kubernetes cluster contains 3 master nodes and those number cannot be changed at now.
 
@@ -18,30 +18,30 @@ This resource will help you to manage a Kubernetes Cluster in Apsarastack Kubern
 ```$xslt
 
 // If there is not specifying vpc_id, the module will launch a new vpc
-resource "apsarastack_vpc" "vpc" {
+resource "alibabacloudstack_vpc" "vpc" {
    name = "testing_cs"
    cidr_block = "192.168.0.0/16"
 }
 
 // According to the vswitch cidr blocks to launch several vswitches
 
-resource "apsarastack_vswitch" "VSwitch1" {
-  vpc_id = apsarastack_vpc.vpc.id
+resource "alibabacloudstack_vswitch" "VSwitch1" {
+  vpc_id = alibabacloudstack_vpc.vpc.id
   availability_zone=var.availability_zone
   cidr_block = "192.168.4.0/24"
 }
-resource "apsarastack_vswitch" "VSwitch2" {
+resource "alibabacloudstack_vswitch" "VSwitch2" {
 
   availability_zone=var.availability_zone
-  vpc_id = apsarastack_vpc.vpc.id
+  vpc_id = alibabacloudstack_vpc.vpc.id
   cidr_block = "192.168.3.0/24"
 
 }
 // For Flannel
-resource "apsarastack_cs_kubernetes" "k8s" {
+resource "alibabacloudstack_cs_kubernetes" "k8s" {
    name="apsara_test"
-   master_vswitch_ids=[apsarastack_vswitch.VSwitch1.id,apsarastack_vswitch.VSwitch1.id,apsarastack_vswitch.VSwitch1.id]
-   worker_vswitch_ids=[apsarastack_vswitch.VSwitch1.id]
+   master_vswitch_ids=[alibabacloudstack_vswitch.VSwitch1.id,alibabacloudstack_vswitch.VSwitch1.id,alibabacloudstack_vswitch.VSwitch1.id]
+   worker_vswitch_ids=[alibabacloudstack_vswitch.VSwitch1.id]
    version = "1.18.8-aliyun.1"
    master_count=3
    timeout_mins=60
@@ -51,7 +51,7 @@ resource "apsarastack_cs_kubernetes" "k8s" {
    worker_disk_size=30
    delete_protection=false
    new_nat_gateway=false
-   vpc_id=apsarastack_vpc.vpc.id
+   vpc_id=alibabacloudstack_vpc.vpc.id
    slb_internet_enabled=false
    proxy_mode="ipvs"
    master_instance_types = ["ecs.e4.large","ecs.e4.large","ecs.e4.large"]
@@ -112,7 +112,7 @@ variable "cluster_addons" {
 
 // For Terway
 
-resource "apsarastack_cs_kubernetes" "k8s" {
+resource "alibabacloudstack_cs_kubernetes" "k8s" {
   name = "apsara_test007-02"
   os_type = "linux"
   platform = "CentOS"
@@ -127,19 +127,19 @@ resource "apsarastack_cs_kubernetes" "k8s" {
   is_enterprise_security_group=true
   new_nat_gateway = true
   slb_internet_enabled = false
-  worker_vswitch_ids = [apsarastack_vswitch.VSwitch1.id]
-  vpc_id = apsarastack_vpc.EcsVpc.id
+  worker_vswitch_ids = [alibabacloudstack_vswitch.VSwitch1.id]
+  vpc_id = alibabacloudstack_vpc.EcsVpc.id
   master_vswitch_ids = [
-    apsarastack_vswitch.VSwitch1.id,
-    apsarastack_vswitch.VSwitch1.id,
-    apsarastack_vswitch.VSwitch1.id]
+    alibabacloudstack_vswitch.VSwitch1.id,
+    alibabacloudstack_vswitch.VSwitch1.id,
+    alibabacloudstack_vswitch.VSwitch1.id]
   master_instance_types = [var.type_ins_mas,var.type_ins_mas,var.type_ins_mas]
   worker_instance_types = [var.type_ins_wor]
   proxy_mode = "ipvs"
   num_of_nodes = 4
   enable_ssh = true
   password = "Test@123"
-  pod_vswitch_ids=[apsarastack_vswitch.VSwitch2.id]
+  pod_vswitch_ids=[alibabacloudstack_vswitch.VSwitch2.id]
   service_cidr = "172.16.0.0/16"
   node_cidr_mask = "26"
   runtime {
@@ -199,7 +199,7 @@ variable "cluster_addons" {
 The following arguments are supported:
 
 #### Global params
-* `name` - (Optional) The kubernetes cluster's name. It is unique in one Apsarastack account.
+* `name` - (Optional) The kubernetes cluster's name. It is unique in one Alibabacloudstack account.
 * `version` - (Optional) Desired Kubernetes version. If you do not specify a value, the latest available version at resource creation is used and no upgrades will occur except you set a higher version number. The value must be configured and increased to upgrade the version when desired. Downgrades are not supported by ACK.
 * `password` - (Required, Sensitive) The password of ssh login cluster node. You have to specify one of `password` `key_name` `kms_encrypted_password` fields.
 * `kms_encrypted_password` - (Required) An KMS encrypts password used to a cs kubernetes. You have to specify one of `password` `key_name` `kms_encrypted_password` fields.
@@ -218,7 +218,7 @@ The following arguments are supported:
 #### Network
 * `pod_cidr` - (Required) [Flannel Specific] The CIDR block for the pod network when using Flannel. 
 * `pod_vswitch_ids` - (Required) [Terway Specific] The vswitches for the pod network when using Terway.Be careful the `pod_vswitch_ids` can not equal to `worker_vswtich_ids` or `master_vswtich_ids` but must be in same availability zones.
-* `new_nat_gateway` - (Optional) Whether to create a new nat gateway while creating kubernetes cluster. Default to true. Then openapi in Apsarastack are not all on intranet, So turn this option on is a good choice.
+* `new_nat_gateway` - (Optional) Whether to create a new nat gateway while creating kubernetes cluster. Default to true. Then openapi in Alibabacloudstack are not all on intranet, So turn this option on is a good choice.
 * `service_cidr` - (Optional) The CIDR block for the service network. It cannot be duplicated with the VPC CIDR and CIDR used by Kubernetes cluster in VPC, cannot be modified after creation.
 * `node_cidr_mask` - (Optional) The node cidr block to specific how many pods can run on single node. 24-28 is allowed. 24 means 2^(32-24)-1=255 and the node can run at most 255 pods. default: 24
 * `slb_internet_enabled` - (Optional) Whether to create internet load balancer for API Server. Default to true.

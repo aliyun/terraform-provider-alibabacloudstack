@@ -1,27 +1,27 @@
 ---
 subcategory: "Cloud Monitor"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cms_project_meta"
-sidebar_current: "docs-apsarastack-datasource-cms-project-meta"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cms_project_meta"
+sidebar_current: "docs-alibabacloudstack-datasource-cms-project-meta"
 description: |-
-    Provides a list of project meta owned by an Apsarastack Cloud account.
+    Provides a list of project meta owned by an Alibabacloudstack Cloud account.
 ---
 
-# apsarastack\_cms\_project\_meta
+# alibabacloudstack\_cms\_project\_meta
 
-Provides a list of project meta owned by an Apsarastack Cloud account.
+Provides a list of project meta owned by an Alibabacloudstack Cloud account.
 
 ## Example Usage
 
 Basic Usage
 
 ```
-data "apsarastack_cms_project_meta" "default" {
+data "alibabacloudstack_cms_project_meta" "default" {
   name_regex = "OSS"
 }
 
 output "project_meta" {
-  value = data.apsarastack_cms_project_meta.default.*
+  value = data.alibabacloudstack_cms_project_meta.default.*
 }
 ```
 

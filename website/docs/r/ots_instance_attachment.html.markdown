@@ -1,13 +1,13 @@
 ---
 subcategory: "Table Store (OTS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ots_instance_attachment"
-sidebar_current: "docs-apsarastack-resource-ots-instance-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ots_instance_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-ots-instance-attachment"
 description: |-
   Provides an OTS (Open Table Service) resource to attach VPC to instance.
 ---
 
-# apsarastack\_ots\_instance\_attachment
+# alibabacloudstack\_ots\_instance\_attachment
 
 This resource will help you to bind a VPC to an OTS instance.
 
@@ -15,7 +15,7 @@ This resource will help you to bind a VPC to an OTS instance.
 
 ```
 # Create an OTS instance
-resource "apsarastack_ots_instance" "foo" {
+resource "alibabacloudstack_ots_instance" "foo" {
   name        = "my-ots-instance"
   description = "for table"
   accessed_by = "Vpc"
@@ -25,26 +25,26 @@ resource "apsarastack_ots_instance" "foo" {
   }
 }
 
-data "apsarastack_zones" "foo" {
+data "alibabacloudstack_zones" "foo" {
   available_resource_creation = "VSwitch"
 }
 
-resource "apsarastack_vpc" "foo" {
+resource "alibabacloudstack_vpc" "foo" {
   cidr_block = "172.16.0.0/16"
   name       = "for-ots-instance"
 }
 
-resource "apsarastack_vswitch" "foo" {
-  vpc_id            = apsarastack_vpc.foo.id
+resource "alibabacloudstack_vswitch" "foo" {
+  vpc_id            = alibabacloudstack_vpc.foo.id
   vswitch_name      = "for-ots-instance"
   cidr_block        = "172.16.1.0/24"
-  zone_id           = data.apsarastack_zones.foo.zones[0].id
+  zone_id           = data.alibabacloudstack_zones.foo.zones[0].id
 }
 
-resource "apsarastack_ots_instance_attachment" "foo" {
-  instance_name = apsarastack_ots_instance.foo.name
+resource "alibabacloudstack_ots_instance_attachment" "foo" {
+  instance_name = alibabacloudstack_ots_instance.foo.name
   vpc_name      = "attachment1"
-  vswitch_id    = apsarastack_vswitch.foo.id
+  vswitch_id    = alibabacloudstack_vswitch.foo.id
 }
 ```
 

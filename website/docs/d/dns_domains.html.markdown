@@ -1,28 +1,28 @@
 ---
 subcategory: "DNS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_dns_domains"
-sidebar_current: "docs-apsarastack-datasource-dns-domains"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_dns_domains"
+sidebar_current: "docs-alibabacloudstack-datasource-dns-domains"
 description: |-
     Provides a list of domains available to the user.
 ---
 
-# apsarastack\_dns\_domains
+# alibabacloudstack\_dns\_domains
 
-This data source provides a list of DNS Domains in an Apsarastack Cloud account according to the specified filters.
+This data source provides a list of DNS Domains in an Alibabacloudstack Cloud account according to the specified filters.
 
 ## Example Usage
 
 ```
-resource "apsarastack_dns_domain" "default" {
+resource "alibabacloudstack_dns_domain" "default" {
   domain_name = "domaintest."
   remark = "testing Domain"
 }
-data "apsarastack_dns_domains" "default"{
-  domain_name_regex         = apsarastack_dns_domain.default.domain_name
+data "alibabacloudstack_dns_domains" "default"{
+  domain_name_regex         = alibabacloudstack_dns_domain.default.domain_name
 }
 output "domains" {
-  value = data.apsarastack_dns_domains.default.*
+  value = data.alibabacloudstack_dns_domains.default.*
 }
 ```
 

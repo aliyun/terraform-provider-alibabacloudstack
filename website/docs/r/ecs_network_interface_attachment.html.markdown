@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ecs_network_interface_attachment"
-sidebar_current: "docs-apsarastack-resource-ecs-network-interface-attachment"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_network_interface_attachment"
+sidebar_current: "docs-alibabacloudstack-resource-ecs-network-interface-attachment"
 description: |-
-  Provides a Apsarastack ECS Network Interface Attachment resource.
+  Provides a Alibabacloudstack ECS Network Interface Attachment resource.
 ---
 
-# apsarastack\_ecs\_network\_interface\_attachment 
+# alibabacloudstack\_ecs\_network\_interface\_attachment 
 
 Provides a ECS Network Interface Attachment resource.
 
@@ -20,21 +20,21 @@ For information about ECS Network Interface Attachment and how to use it, see [W
 Basic Usage
 
 ```terraform
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
 }
 
-data "apsarastack_instance_types" "default" {
-  availability_zone = data.apsarastack_zones.default.zones[0].id
+data "alibabacloudstack_instance_types" "default" {
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   eni_amount        = 2
   sorted_by         = "Memory"
 }
 
 locals {
-  instance_type_id = sort(data.apsarastack_instance_types.default.ids)[0]
+  instance_type_id = sort(data.alibabacloudstack_instance_types.default.ids)[0]
 }
 
-data "apsarastack_images" "default" {
+data "alibabacloudstack_images" "default" {
   name_regex  = "^ubuntu_18.*64"
   most_recent = true
   owners      = "system"
@@ -44,44 +44,44 @@ variable "name" {
   default = "tf-testAccNetworkInterfaceAttachment"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
     name = "${var.name}"
     cidr_block = "192.168.0.0/24"
 }
 
-resource "apsarastack_vswitch" "default" {
+resource "alibabacloudstack_vswitch" "default" {
     name = "${var.name}"
     cidr_block = "192.168.0.0/24"
-    availability_zone = "${reverse(data.apsarastack_zones.default.zones).0.id}"
-    vpc_id = "${apsarastack_vpc.default.id}"
+    availability_zone = "${reverse(data.alibabacloudstack_zones.default.zones).0.id}"
+    vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
 
-resource "apsarastack_security_group" "default" {
+resource "alibabacloudstack_security_group" "default" {
     name = "${var.name}"
-    vpc_id = "${apsarastack_vpc.default.id}"
+    vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
 
-resource "apsarastack_instance" "default" {
-    availability_zone = "${reverse(data.apsarastack_zones.default.zones).0.id}"
-    security_groups = ["${apsarastack_security_group.default.id}"]
+resource "alibabacloudstack_instance" "default" {
+    availability_zone = "${reverse(data.alibabacloudstack_zones.default.zones).0.id}"
+    security_groups = ["${alibabacloudstack_security_group.default.id}"]
 
     instance_type = "${local.instance_type_id}"
     system_disk_category = "cloud_efficiency"
-    image_id             = "${data.apsarastack_images.default.images.0.id}"
+    image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
     instance_name        = "${var.name}"
-    vswitch_id = "${apsarastack_vswitch.default.id}"
+    vswitch_id = "${alibabacloudstack_vswitch.default.id}"
     internet_max_bandwidth_out = 10
 }
 
-resource "apsarastack_network_interface" "default" {
+resource "alibabacloudstack_network_interface" "default" {
     name = "${var.name}"
-    vswitch_id = "${apsarastack_vswitch.default.id}"
-    security_groups = [ "${apsarastack_security_group.default.id}" ]
+    vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+    security_groups = [ "${alibabacloudstack_security_group.default.id}" ]
 }
 
-resource "apsarastack_network_interface_attachment" "default" {
-    instance_id = "${apsarastack_instance.default.id}"
-    network_interface_id = "${apsarastack_network_interface.default.id}"
+resource "alibabacloudstack_network_interface_attachment" "default" {
+    instance_id = "${alibabacloudstack_instance.default.id}"
+    network_interface_id = "${alibabacloudstack_network_interface.default.id}"
 }
 
 

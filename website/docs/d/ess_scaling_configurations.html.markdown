@@ -1,27 +1,27 @@
 ---
 subcategory: "Auto Scaling(ESS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ess_scaling_configurations"
-sidebar_current: "docs-apsarastack_ess_scaling_configurations"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ess_scaling_configurations"
+sidebar_current: "docs-alibabacloudstack_ess_scaling_configurations"
 description: |-
     Provides a list of scaling configurations available to the user.
 ---
 
-# apsarastack_ess_scaling_configurations
+# alibabacloudstack_ess_scaling_configurations
 
 This data source provides available scaling configuration resources. 
 
 ## Example Usage
 
 ```
-data "apsarastack_ess_scaling_configurations" "scalingconfigurations_ds" {
+data "alibabacloudstack_ess_scaling_configurations" "scalingconfigurations_ds" {
   scaling_group_id = "scaling_group_id"
   ids              = ["scaling_configuration_id1", "scaling_configuration_id2"]
   name_regex       = "scaling_configuration_name"
 }
 
 output "first_scaling_rule" {
-  value = "${data.apsarastack_ess_scaling_configurations.scalingconfigurations_ds.configurations.0.id}"
+  value = "${data.alibabacloudstack_ess_scaling_configurations.scalingconfigurations_ds.configurations.0.id}"
 }
 ```
 

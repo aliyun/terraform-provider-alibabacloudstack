@@ -1,27 +1,27 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_images"
-sidebar_current: "docs-apsarastack-datasource-images"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_images"
+sidebar_current: "docs-alibabacloudstack-datasource-images"
 description: |-
     Provides a list of images available to the user.
 ---
 
-# apsarastack\_images
+# alibabacloudstack\_images
 
-This data source provides available image resources. It contains user's private images, system images provided by Apsarastack Cloud, 
+This data source provides available image resources. It contains user's private images, system images provided by Alibabacloudstack Cloud, 
 other public images and the ones available on the image market. 
 
 ## Example Usage
 
 ```
-data "apsarastack_images" "images_ds" {
+data "alibabacloudstack_images" "images_ds" {
   owners     = "system"
   name_regex = "^centos_6"
 }
 
 output "first_image_id" {
-  value = "${data.apsarastack_images.images_ds.images.0.id}"
+  value = "${data.alibabacloudstack_images.images_ds.images.0.id}"
 }
 ```
 

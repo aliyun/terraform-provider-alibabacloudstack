@@ -1,13 +1,13 @@
 ---
 subcategory: "AnalyticDB for MySQL (ADB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_adb_account"
-sidebar_current: "docs-apsarastack-resource-adb-account"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_adb_account"
+sidebar_current: "docs-alibabacloudstack-resource-adb-account"
 description: |-
   Provides a ADB account resource.
 ---
 
-# apsarastack\_adb\_account
+# alibabacloudstack\_adb\_account
 
 Provides a [ADB](https://www.alibabacloud.com/help/product/92664.htm) account resource and used to manage databases.
 
@@ -22,35 +22,35 @@ variable "name" {
   default = "adbaccountmysql"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = var.creation
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = var.name
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = apsarastack_vpc.default.id
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = alibabacloudstack_vpc.default.id
   cidr_block        = "172.16.0.0/24"
-  zone_id           = data.apsarastack_zones.default.zones[0].id
+  zone_id           = data.alibabacloudstack_zones.default.zones[0].id
   name              = var.name
 }
 
-resource "apsarastack_adb_db_cluster" "cluster" {
+resource "alibabacloudstack_adb_db_cluster" "cluster" {
   db_cluster_version  = "3.0"
   db_cluster_category = "Cluster"
   db_node_class       = "C8"
   db_node_count       = 2
   db_node_storage     = 200
   pay_type            = "PostPaid"
-  vswitch_id          = apsarastack_vswitch.default.id
+  vswitch_id          = alibabacloudstack_vswitch.default.id
   description         = var.name
 }
 
-resource "apsarastack_adb_account" "account" {
-  db_cluster_id       = apsarastack_adb_db_cluster.cluster.id
+resource "alibabacloudstack_adb_account" "account" {
+  db_cluster_id       = alibabacloudstack_adb_db_cluster.cluster.id
   account_name        = "tftestnormal"
   account_password    = "Test12345"
   account_description = var.name
@@ -79,5 +79,5 @@ The following attributes are exported:
 ADB account can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_adb_account.example "am-12345:tf_account"
+$ terraform import alibabacloudstack_adb_account.example "am-12345:tf_account"
 ```

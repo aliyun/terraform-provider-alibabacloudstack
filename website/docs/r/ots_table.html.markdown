@@ -1,18 +1,18 @@
 ---
 subcategory: "Table Store (OTS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ots_table"
-sidebar_current: "docs-apsarastack-resource-ots-table"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ots_table"
+sidebar_current: "docs-alibabacloudstack-resource-ots-table"
 description: |-
   Provides an OTS (Open Table Service) table resource.
 ---
 
-# apsarastack\_ots\_table
+# alibabacloudstack\_ots\_table
 
 Provides an OTS table resource.
 
 -> **NOTE:** From Provider version 1.10.0, the provider field 'ots_instance_name' has been deprecated and
-you should use resource apsarastack_ots_table's new field 'instance_name' and 'table_name' to re-import this resource.
+you should use resource alibabacloudstack_ots_table's new field 'instance_name' and 'table_name' to re-import this resource.
 
 ## Example Usage
 
@@ -21,7 +21,7 @@ variable "name" {
   default = "terraformtest"
 }
 
-resource "apsarastack_ots_instance" "foo" {
+resource "alibabacloudstack_ots_instance" "foo" {
   name        = var.name
   description = var.name
   accessed_by = "Any"
@@ -31,8 +31,8 @@ resource "apsarastack_ots_instance" "foo" {
   }
 }
 
-resource "apsarastack_ots_table" "basic" {
-  instance_name = apsarastack_ots_instance.foo.name
+resource "alibabacloudstack_ots_table" "basic" {
+  instance_name = alibabacloudstack_ots_instance.foo.name
   table_name    = var.name
   primary_key {
     name = "pk1"
@@ -83,6 +83,6 @@ The following attributes are exported:
 OTS table can be imported using id, e.g.
 
 ```
-$ terraform import apsarastack_ots_table.table "my-ots:ots_table"
+$ terraform import alibabacloudstack_ots_table.table "my-ots:ots_table"
 ```
 

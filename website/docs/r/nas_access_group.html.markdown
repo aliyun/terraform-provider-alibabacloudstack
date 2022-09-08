@@ -1,13 +1,13 @@
 ---
 subcategory: "Network Attached Storage (NAS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_nas_access_group"
-sidebar_current: "docs-apsarastack-resource-nas-access-group"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_nas_access_group"
+sidebar_current: "docs-alibabacloudstack-resource-nas-access-group"
 description: |-
-  Provides a Apsarastack NAS Access Group resource.
+  Provides a Alibabacloudstack NAS Access Group resource.
 ---
 
-# apsarastack\_nas\_access\_group
+# alibabacloudstack\_nas\_access\_group
 
 Provides a NAS Access Group resource.
 
@@ -21,7 +21,7 @@ For information about NAS Access Group and how to use it, see [What is NAS Acces
 Basic Usage
 
 ```terraform
-resource "apsarastack_nas_access_group" "foo" {
+resource "alibabacloudstack_nas_access_group" "foo" {
   name        = "CreateAccessGroup"
   type        = "Classic"
   description = "test_AccessG"
@@ -32,7 +32,7 @@ resource "apsarastack_nas_access_group" "foo" {
 Example after v1.92.0
 
 ```terraform
-resource "apsarastack_nas_access_group" "foo" {
+resource "alibabacloudstack_nas_access_group" "foo" {
   access_group_name = "CreateAccessGroup"
   access_group_type = "Vpc"
   description       = "test_AccessG"
@@ -64,5 +64,5 @@ The following attributes are exported:
 NAS Access Group can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_nas_access_group.foo tf_testAccNasConfig:standard
+$ terraform import alibabacloudstack_nas_access_group.foo tf_testAccNasConfig:standard
 ```

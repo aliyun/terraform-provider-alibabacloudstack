@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_network_acls"
-sidebar_current: "docs-apsarastack-datasource-network-acls"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_network_acls"
+sidebar_current: "docs-alibabacloudstack-datasource-network-acls"
 description: |-
   Provides a list of Network Acls to the user.
 ---
 
-# apsarastack\_network\_acls
+# alibabacloudstack\_network\_acls
 
 This data source provides the Network Acls of the current Alibaba Cloud user.
 
@@ -16,13 +16,13 @@ This data source provides the Network Acls of the current Alibaba Cloud user.
 Basic Usage
 
 ```terraform
-data "apsarastack_network_acls" "example" {
+data "alibabacloudstack_network_acls" "example" {
   ids        = ["example_value"]
   name_regex = "the_resource_name"
 }
 
 output "first_network_acl_id" {
-  value = data.apsarastack_network_acls.example.acls.0.id
+  value = data.alibabacloudstack_network_acls.example.acls.0.id
 }
 ```
 

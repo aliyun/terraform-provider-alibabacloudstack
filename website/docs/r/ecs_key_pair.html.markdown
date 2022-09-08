@@ -1,13 +1,13 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ecs_key_pair"
-sidebar_current: "docs-apsarastack-resource-ecs-key-pair"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ecs_key_pair"
+sidebar_current: "docs-alibabacloudstack-resource-ecs-key-pair"
 description: |-
-  Provides a Apsarastack ECS Key Pair resource.
+  Provides a Alibabacloudstack ECS Key Pair resource.
 ---
 
-# apsarastack\_ecs\_key\_pair
+# alibabacloudstack\_ecs\_key\_pair
 
 Provides a ECS Key Pair resource.
 
@@ -20,7 +20,7 @@ For information about ECS Key Pair and how to use it, see [What is Key Pair](htt
 Basic Usage
 
 ```terraform
-resource "apsarastack_key_pair" "default" {
+resource "alibabacloudstack_key_pair" "default" {
 	key_name ="tf-testAccKeyPairConfig4427256049161700561"
 	public_key = "ssh-rsa AAAAB3Nza12345678qwertyuudsfsg"
 }

@@ -1,13 +1,13 @@
 ---
 subcategory: "Container Service for Kubernetes (ACK)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cs_kubernetes_node_pool"
-sidebar_current: "docs-apsarastack-resource-cs-kubernetes-node-pool"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cs_kubernetes_node_pool"
+sidebar_current: "docs-alibabacloudstack-resource-cs-kubernetes-node-pool"
 description: |-
-  Provides a Apsarastack resource to manage container kubernetes node pool.
+  Provides a Alibabacloudstack resource to manage container kubernetes node pool.
 ---
 
-# apsarastack\_cs\_kubernetes\_node\_pool
+# alibabacloudstack\_cs\_kubernetes\_node\_pool
 
 This resource will help you to manage node pool in Kubernetes Cluster. 
 
@@ -37,29 +37,29 @@ The managed cluster configuration,
 variable "name" {
   default = "tf-test"
 }
-data "apsarastack_zones" default {
+data "alibabacloudstack_zones" default {
   available_resource_creation = "VSwitch"
 }
-data "apsarastack_instance_types" "default" {
-  availability_zone    = data.apsarastack_zones.default.zones.0.id
+data "alibabacloudstack_instance_types" "default" {
+  availability_zone    = data.alibabacloudstack_zones.default.zones.0.id
   cpu_core_count       = 2
   memory_size          = 4
   kubernetes_node_role = "Worker"
 }
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   vpc_name   = var.name
   cidr_block = "10.1.0.0/21"
 }
-resource "apsarastack_vswitch" "default" {
+resource "alibabacloudstack_vswitch" "default" {
   vswitch_name = var.name
-  vpc_id       = apsarastack_vpc.default.id
+  vpc_id       = alibabacloudstack_vpc.default.id
   cidr_block   = "10.1.1.0/24"
-  zone_id      = data.apsarastack_zones.default.zones.0.id
+  zone_id      = data.alibabacloudstack_zones.default.zones.0.id
 }
-resource "apsarastack_key_pair" "default" {
+resource "alibabacloudstack_key_pair" "default" {
   key_pair_name = var.name
 }
-resource "apsarastack_cs_managed_kubernetes" "default" {
+resource "alibabacloudstack_cs_managed_kubernetes" "default" {
   name                         = var.name
   count                        = 1
   cluster_spec                 = "ack.pro.small"
@@ -68,42 +68,42 @@ resource "apsarastack_cs_managed_kubernetes" "default" {
   password                     = "Hello1234"
   pod_cidr                     = "172.20.0.0/16"
   service_cidr                 = "172.21.0.0/20"
-  worker_vswitch_ids           = [apsarastack_vswitch.default.id]
-  worker_instance_types        = [data.apsarastack_instance_types.default.instance_types.0.id]
+  worker_vswitch_ids           = [alibabacloudstack_vswitch.default.id]
+  worker_instance_types        = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
 }
 ```
 
 Create a node pool.
 
 ```terraform
-resource "apsarastack_cs_kubernetes_node_pool" "default" {
+resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   name           = var.name
-  cluster_id     = apsarastack_cs_managed_kubernetes.default.0.id
-  vswitch_ids    = [apsarastack_vswitch.default.id]
-  instance_types = [data.apsarastack_instance_types.default.instance_types.0.id]
+  cluster_id     = alibabacloudstack_cs_managed_kubernetes.default.0.id
+  vswitch_ids    = [alibabacloudstack_vswitch.default.id]
+  instance_types = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
 
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 40
-  key_name             = apsarastack_key_pair.default.key_name
+  key_name             = alibabacloudstack_key_pair.default.key_name
 
   # you need to specify the number of nodes in the node pool, which can be 0
   node_count = 1
 }
 ```
 
-Create a managed node pool. If you need to enable maintenance window, you need to set the maintenance window in `apsarastack_cs_managed_kubernetes`.
+Create a managed node pool. If you need to enable maintenance window, you need to set the maintenance window in `alibabacloudstack_cs_managed_kubernetes`.
 
 ```terraform
-resource "apsarastack_cs_kubernetes_node_pool" "default" {
+resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   name                 = var.name
-  cluster_id           = apsarastack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [apsarastack_vswitch.default.id]
-  instance_types       = [data.apsarastack_instance_types.default.instance_types.0.id]
+  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
+  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
+  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 40
 
   # only key_name is supported in the management node pool
-  key_name = apsarastack_key_pair.default.key_name
+  key_name = alibabacloudstack_key_pair.default.key_name
 
   # you need to specify the number of nodes in the node pool, which can be zero
   node_count = 1
@@ -122,14 +122,14 @@ resource "apsarastack_cs_kubernetes_node_pool" "default" {
 Enable automatic scaling for the node pool. `scaling_config` is required.
 
 ```terraform
-resource "apsarastack_cs_kubernetes_node_pool" "default" {
+resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   name                 = var.name
-  cluster_id           = apsarastack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [apsarastack_vswitch.default.id]
-  instance_types       = [data.apsarastack_instance_types.default.instance_types.0.id]
+  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
+  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
+  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 40
-  key_name             = apsarastack_key_pair.default.key_name
+  key_name             = alibabacloudstack_key_pair.default.key_name
 
   # automatic scaling node pool configuration.
   # With auto-scaling is enabled, the nodes in the node pool will be labeled with `k8s.aliyun.com=true` to prevent system pods such as coredns, metrics-servers from being scheduled to elastic nodes, and to prevent node shrinkage from causing business abnormalities.
@@ -144,14 +144,14 @@ resource "apsarastack_cs_kubernetes_node_pool" "default" {
 Enable automatic scaling for managed node pool.
 
 ```terraform
-resource "apsarastack_cs_kubernetes_node_pool" "default" {
+resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   name                 = var.name
-  cluster_id           = apsarastack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [apsarastack_vswitch.default.id]
-  instance_types       = [data.apsarastack_instance_types.default.instance_types.0.id]
+  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
+  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
+  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 40
-  key_name             = apsarastack_key_pair.default.key_name
+  key_name             = alibabacloudstack_key_pair.default.key_name
   # management node pool configuration.
   management {
     auto_repair     = true
@@ -165,21 +165,21 @@ resource "apsarastack_cs_kubernetes_node_pool" "default" {
     max_size = 10
     type     = "cpu"
   }
-  # Rely on auto-scaling configuration, please create auto-scaling configuration through apsarastack_cs_autoscaling_config first.
-  depends_on = [apsarastack_cs_autoscaling_config.default]
+  # Rely on auto-scaling configuration, please create auto-scaling configuration through alibabacloudstack_cs_autoscaling_config first.
+  depends_on = [alibabacloudstack_cs_autoscaling_config.default]
 }
 ```
 
 Create a `PrePaid` node pool.
 ```terraform
-resource "apsarastack_cs_kubernetes_node_pool" "default" {
+resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   name                 = var.name
-  cluster_id           = apsarastack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [apsarastack_vswitch.default.id]
-  instance_types       = [data.apsarastack_instance_types.default.instance_types.0.id]
+  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
+  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
+  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 40
-  key_name             = apsarastack_key_pair.default.key_name
+  key_name             = alibabacloudstack_key_pair.default.key_name
   # use PrePaid
   instance_charge_type = "PrePaid"
   period               = 1
@@ -201,15 +201,15 @@ resource "apsarastack_cs_kubernetes_node_pool" "default" {
 
 Create a node pool with spot instance.
 ```terraform
-resource "apsarastack_cs_kubernetes_node_pool" "default" {
+resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   name           = var.name
   cluster_id     = v_cs_managed_kubernetes.default.0.id
-  vswitch_ids    = [apsarastack_vswitch.default.id]
-  instance_types = [data.apsarastack_instance_types.default.instance_types.0.id]
+  vswitch_ids    = [alibabacloudstack_vswitch.default.id]
+  instance_types = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
 
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 40
-  key_name             = apsarastack_key_pair.default.key_name
+  key_name             = alibabacloudstack_key_pair.default.key_name
 
   # you need to specify the number of nodes in the node pool, which can be 0
   node_count = 1
@@ -217,7 +217,7 @@ resource "apsarastack_cs_kubernetes_node_pool" "default" {
   # spot config
   spot_strategy = "SpotWithPriceLimit"
   spot_price_limit {
-    instance_type = data.apsarastack_instance_types.default.instance_types.0.id
+    instance_type = data.alibabacloudstack_instance_types.default.instance_types.0.id
     # Different instance types have different price caps
     price_limit = "0.70"
   }
@@ -226,14 +226,14 @@ resource "apsarastack_cs_kubernetes_node_pool" "default" {
 
 Use Spot instances to create a node pool with auto-scaling enabled 
 ```terraform
-resource "apsarastack_cs_kubernetes_node_pool" "default" {
+resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   name                 = var.name
-  cluster_id           = apsarastack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [apsarastack_vswitch.default.id]
-  instance_types       = [data.apsarastack_instance_types.default.instance_types.0.id]
+  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
+  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
+  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 40
-  key_name             = apsarastack_key_pair.default.key_name
+  key_name             = alibabacloudstack_key_pair.default.key_name
 
   # automatic scaling node pool configuration.
   scaling_config {
@@ -244,7 +244,7 @@ resource "apsarastack_cs_kubernetes_node_pool" "default" {
   # spot price config
   spot_strategy = "SpotWithPriceLimit"
   spot_price_limit {
-    instance_type = data.apsarastack_instance_types.default.instance_types.0.id
+    instance_type = data.alibabacloudstack_instance_types.default.instance_types.0.id
     price_limit   = "0.70"
   }
 }
@@ -252,11 +252,11 @@ resource "apsarastack_cs_kubernetes_node_pool" "default" {
 
 Create a node pool with platform as Windows 
 ```terraform
-resource "apsarastack_cs_kubernetes_node_pool" "default" {
+resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   name                 = "windows-np"
-  cluster_id           = apsarastack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [apsarastack_vswitch.default.id]
-  instance_types       = [data.apsarastack_instance_types.default.instance_types.0.id]
+  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
+  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
+  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 40
   instance_charge_type = "PostPaid"
@@ -274,11 +274,11 @@ Add an existing node to the node pool
 In order to distinguish automatically created nodes, it is recommended that existing nodes be placed separately in a node pool for management. 
 
 ```terraform
-resource "apsarastack_cs_kubernetes_node_pool" "default" {
+resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   name                 = "existing-node"
-  cluster_id           = apsarastack_cs_managed_kubernetes.default.0.id
-  vswitch_ids          = [apsarastack_vswitch.default.id]
-  instance_types       = [data.apsarastack_instance_types.default.instance_types.0.id]
+  cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
+  vswitch_ids          = [alibabacloudstack_vswitch.default.id]
+  instance_types       = [data.alibabacloudstack_instance_types.default.instance_types.0.id]
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 40
   instance_charge_type = "PostPaid"
@@ -399,5 +399,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 Cluster nodepool can be imported using the id, e.g. Then complete the nodepool.tf accords to the result of `terraform plan`.
 
 ```
-  $ terraform import apsarastack_cs_node_pool.custom_nodepool cluster_id:nodepool_id
+  $ terraform import alibabacloudstack_cs_node_pool.custom_nodepool cluster_id:nodepool_id
 ```

@@ -1,24 +1,24 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_user_role_binding"
-sidebar_current: "docs-apsarastack-resource-ascm-user-role-binding"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_user_role_binding"
+sidebar_current: "docs-alibabacloudstack-resource-ascm-user-role-binding"
 description: |-
   Provides Ascm User Role Binding.
 ---
 
-# apsarastack\_ascm_user_role_binding
+# alibabacloudstack\_ascm_user_role_binding
 
 ## Example Usage
 
 ```
-resource "apsarastack_ascm_user_role_binding" "default" {
+resource "alibabacloudstack_ascm_user_role_binding" "default" {
   role_id = 5
   login_name = "testUser"
 }
 
 output "binder" {
-  value = apsarastack_ascm_user_role_binding.default.*
+  value = alibabacloudstack_ascm_user_role_binding.default.*
 }
 ```
 ## Argument Reference

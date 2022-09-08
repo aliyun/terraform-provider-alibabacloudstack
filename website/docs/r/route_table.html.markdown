@@ -1,30 +1,30 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_route_table"
-sidebar_current: "docs-apsarastack-resource-route-table"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_route_table"
+sidebar_current: "docs-alibabacloudstack-resource-route-table"
 description: |-
-  Provides a Apsarastack Route Table resource.
+  Provides a Alibabacloudstack Route Table resource.
 ---
 
-# apsarastack\_route_table
+# alibabacloudstack\_route_table
 
 Provides a route table resource to add customized route tables.
 
--> **NOTE:** Terraform will auto build route table instance while it uses `apsarastack_route_table` to build a route table resource.
+-> **NOTE:** Terraform will auto build route table instance while it uses `alibabacloudstack_route_table` to build a route table resource.
 
 ## Example Usage
 
 Basic Usage
 
 ```
-resource "apsarastack_vpc" "foo" {
+resource "alibabacloudstack_vpc" "foo" {
   cidr_block = "172.16.0.0/12"
   name       = "vpc-example-name"
 }
 
-resource "apsarastack_route_table" "foo" {
-  vpc_id      = "${apsarastack_vpc.foo.id}"
+resource "alibabacloudstack_route_table" "foo" {
+  vpc_id      = "${alibabacloudstack_vpc.foo.id}"
   name        = "route-table-example-name"
   description = "route-table-example-description"
 }

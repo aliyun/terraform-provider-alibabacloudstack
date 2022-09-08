@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_router_interfaces"
-sidebar_current: "docs-apsarastack-datasource-router-interfaces"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_router_interfaces"
+sidebar_current: "docs-alibabacloudstack-datasource-router-interfaces"
 description: |-
     Provides a list of router interfaces to the user.
 ---
 
-# apsarastack\_router\_interfaces
+# alibabacloudstack\_router\_interfaces
 
 This data source provides information about router interfaces
 that connect VPCs together.
@@ -15,13 +15,13 @@ that connect VPCs together.
 ## Example Usage
 
 ```
-data "apsarastack_router_interfaces" "router_interfaces_ds" {
+data "alibabacloudstack_router_interfaces" "router_interfaces_ds" {
   name_regex = "^testenv"
   status     = "Active"
 }
 
 output "first_router_interface_id" {
-  value = "${data.apsarastack_router_interfaces.router_interfaces_ds.interfaces.id}"
+  value = "${data.alibabacloudstack_router_interfaces.router_interfaces_ds.interfaces.id}"
 }
 ```
 

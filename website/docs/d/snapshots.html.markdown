@@ -1,25 +1,25 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_snapshots"
-sidebar_current: "docs-apsarastack-datasource-snapshots"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_snapshots"
+sidebar_current: "docs-alibabacloudstack-datasource-snapshots"
 description: |-
   Provides a data source to get a list of snapshot according to the specified filters.
 ---
 
-# apsarastack\_snapshots
+# alibabacloudstack\_snapshots
 
-Use this data source to get a list of snapshot according to the specified filters in an Apsarastack Cloud account.
+Use this data source to get a list of snapshot according to the specified filters in an Alibabacloudstack Cloud account.
 
 ## Example Usage
 
 ```
-data "apsarastack_snapshots" "snapshots" {
+data "alibabacloudstack_snapshots" "snapshots" {
   name_regex = "${var.name_regex}"
 }
 
 output "snapshots" {
-  value = data.apsarastack_snapshots.snapshots
+  value = data.alibabacloudstack_snapshots.snapshots
 }
 ```
 

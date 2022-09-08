@@ -1,13 +1,13 @@
 ---
 subcategory: "VPC"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_network_acl_entries"
-sidebar_current: "docs-apsarastack-resource-network-acl-entries"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_network_acl_entries"
+sidebar_current: "docs-alibabacloudstack-resource-network-acl-entries"
 description: |-
-  Provides a Apsarastack Network Acl Entries resource.
+  Provides a Alibabacloudstack Network Acl Entries resource.
 ---
 
-# apsarastack\_network_acl_entries
+# alibabacloudstack\_network_acl_entries
 
 Provides a network acl entries resource to create ingress and egress entries.
 
@@ -17,7 +17,7 @@ Provides a network acl entries resource to create ingress and egress entries.
 
 -> **NOTE:** Using this resource need to open a whitelist.
 
--> **DEPRECATED:**  This resource  has been deprecated . Replace by `ingress_acl_entries` and `egress_acl_entries` with the resource [apsarastack_network_acl](https://www.terraform.io/docs/providers/apsarastack/r/network_acl.html).
+-> **DEPRECATED:**  This resource  has been deprecated . Replace by `ingress_acl_entries` and `egress_acl_entries` with the resource [alibabacloudstack_network_acl](https://www.terraform.io/docs/providers/alibabacloudstack/r/network_acl.html).
 
 ## Example Usage
 
@@ -28,37 +28,37 @@ variable "name" {
   default = "NetworkAclEntries"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = var.name
   cidr_block = "172.16.0.0/12"
 }
 
-resource "apsarastack_network_acl" "default" {
-  vpc_id = apsarastack_vpc.default.id
+resource "alibabacloudstack_network_acl" "default" {
+  vpc_id = alibabacloudstack_vpc.default.id
   name   = var.name
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = apsarastack_vpc.default.id
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = alibabacloudstack_vpc.default.id
   cidr_block        = "172.16.0.0/21"
-  zone_id           = data.apsarastack_zones.default.zones[0].id
+  zone_id           = data.alibabacloudstack_zones.default.zones[0].id
   name              = var.name
 }
 
-resource "apsarastack_network_acl_attachment" "default" {
-  network_acl_id = apsarastack_network_acl.default.id
+resource "alibabacloudstack_network_acl_attachment" "default" {
+  network_acl_id = alibabacloudstack_network_acl.default.id
   resources {
-    resource_id   = apsarastack_vswitch.default.id
+    resource_id   = alibabacloudstack_vswitch.default.id
     resource_type = "VSwitch"
   }
 }
 
-resource "apsarastack_network_acl_entries" "default" {
-  network_acl_id = apsarastack_network_acl.default.id
+resource "alibabacloudstack_network_acl_entries" "default" {
+  network_acl_id = alibabacloudstack_network_acl.default.id
   ingress {
     protocol       = "all"
     port           = "-1/-1"

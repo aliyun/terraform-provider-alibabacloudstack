@@ -1,13 +1,13 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_ca_certificate"
-sidebar_current: "docs-apsarastack-resource-slb-ca-certificate"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_ca_certificate"
+sidebar_current: "docs-alibabacloudstack-resource-slb-ca-certificate"
 description: |-
   Provides a Load Banlancer CA Certificate resource.
 ---
 
-# apsarastack\_slb\_ca\_certificate
+# alibabacloudstack\_slb\_ca\_certificate
 
 A Load Balancer CA Certificate is used by the listener of the protocol https.
 
@@ -18,7 +18,7 @@ A Load Balancer CA Certificate is used by the listener of the protocol https.
 
 ```
 # create a CA certificate
-resource "apsarastack_slb_ca_certificate" "foo" {
+resource "alibabacloudstack_slb_ca_certificate" "foo" {
   name           = "tf-testAccSlbCACertificate"
   ca_certificate = "-----BEGIN CERTIFICATE-----\nMIIDRjCCAq+gAwIBAgIJAJnI******90EAxEG/bJJyOm5LqoiA=\n-----END CERTIFICATE-----"
 }
@@ -27,7 +27,7 @@ resource "apsarastack_slb_ca_certificate" "foo" {
 * using CA certificate file
 
 ```
-resource "apsarastack_slb_ca_certificate" "foo-file" {
+resource "alibabacloudstack_slb_ca_certificate" "foo-file" {
   name           = "tf-testAccSlbCACertificate"
   ca_certificate = file("${path.module}/ca_certificate.pem")
 }

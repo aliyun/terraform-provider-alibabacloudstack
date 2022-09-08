@@ -1,30 +1,30 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_key_pairs"
-sidebar_current: "docs-apsarastack-datasource-key-pairs"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_key_pairs"
+sidebar_current: "docs-alibabacloudstack-datasource-key-pairs"
 description: |-
-    Provides a list of available key pairs that can be used by an Apsarastack Cloud account.
+    Provides a list of available key pairs that can be used by an Alibabacloudstack Cloud account.
 ---
 
-# apsarastack\_key\_pairs
+# alibabacloudstack\_key\_pairs
 
-This data source provides a list of key pairs in an Apsarastack Cloud account according to the specified filters.
+This data source provides a list of key pairs in an Alibabacloudstack Cloud account according to the specified filters.
 
 ## Example Usage
 
 ```
 # Declare the data source
-resource "apsarastack_key_pair" "default" {
+resource "alibabacloudstack_key_pair" "default" {
   key_name = "keyPairDatasource"
 }
 
-data "apsarastack_key_pairs" "default" {
-  name_regex = "${apsarastack_key_pair.default.key_name}"
+data "alibabacloudstack_key_pairs" "default" {
+  name_regex = "${alibabacloudstack_key_pair.default.key_name}"
 }
 
 output "key_pairs" {
-  value=data.apsarastack_key_pairs.default.*
+  value=data.alibabacloudstack_key_pairs.default.*
 }
 ```
 

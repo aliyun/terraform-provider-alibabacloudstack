@@ -1,25 +1,25 @@
 ---
 subcategory: "RDS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_db_zones"
-sidebar_current: "docs-apsarastack-datasource-db-zones"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_db_zones"
+sidebar_current: "docs-alibabacloudstack-datasource-db-zones"
 description: |-
-    Provides a list of availability zones for RDS that can be used by an Apsarastack Cloud account.
+    Provides a list of availability zones for RDS that can be used by an Alibabacloudstack Cloud account.
 ---
 
-# apsarastack\_db\_zones
+# alibabacloudstack\_db\_zones
 
-This data source provides availability zones for RDS that can be accessed by an Apsarastack Cloud account within the region configured in the provider.
+This data source provides availability zones for RDS that can be accessed by an Alibabacloudstack Cloud account within the region configured in the provider.
 
 
 ## Example Usage
 
 ```
 # Declare the data source
-data "apsarastack_db_zones" "zones_ids" {}
+data "alibabacloudstack_db_zones" "zones_ids" {}
 
 output "db_zones" {
-  value = data.apsarastack_db_zones.zones_ids.zones.*
+  value = data.alibabacloudstack_db_zones.zones_ids.zones.*
 }
 
 ```

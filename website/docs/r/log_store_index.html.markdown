@@ -1,13 +1,13 @@
 ---
 subcategory: "Log Service (SLS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_log_store_index"
-sidebar_current: "docs-apsarastack-resource-log-store-index"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_log_store_index"
+sidebar_current: "docs-alibabacloudstack-resource-log-store-index"
 description: |-
-  Provides a Apsarastack log store index resource.
+  Provides a Alibabacloudstack log store index resource.
 ---
 
-# apsarastack\_log\_store\_index
+# alibabacloudstack\_log\_store\_index
 
 Log Service provides the LogSearch/Analytics function to query and analyze large amounts of logs in real time.
 You can use this function by enabling the index and field statistics. [Refer to details](https://www.alibabacloud.com/help/doc-detail/43772.htm)
@@ -17,20 +17,20 @@ You can use this function by enabling the index and field statistics. [Refer to 
 Basic Usage
 
 ```
-resource "apsarastack_log_project" "example" {
+resource "alibabacloudstack_log_project" "example" {
   name        = "tf-log"
   description = "created by terraform"
 }
 
-resource "apsarastack_log_store" "example" {
-  project = apsarastack_log_project.example.name
+resource "alibabacloudstack_log_store" "example" {
+  project = alibabacloudstack_log_project.example.name
   name    = "tf-log-store"
   description = "created by terraform"
 }
 
-resource "apsarastack_log_store_index" "example" {
-  project  = apsarastack_log_project.example.name
-  logstore = apsarastack_log_store.example.name
+resource "alibabacloudstack_log_store_index" "example" {
+  project  = alibabacloudstack_log_project.example.name
+  logstore = alibabacloudstack_log_store.example.name
   full_text {
     case_sensitive = true
     token          = " #$%^*\r\n	"
@@ -83,5 +83,5 @@ The following attributes are exported:
 Log store index can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_log_store_index.example tf-log:tf-log-store
+$ terraform import alibabacloudstack_log_store_index.example tf-log:tf-log-store
 ```

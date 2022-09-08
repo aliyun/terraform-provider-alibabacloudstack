@@ -1,27 +1,27 @@
 ---
 subcategory: "Container Service (CS)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cs_kubernetes_clusters"
-sidebar_current: "docs-apsarastack-datasource-cs-kubernetes-clusters"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cs_kubernetes_clusters"
+sidebar_current: "docs-alibabacloudstack-datasource-cs-kubernetes-clusters"
 description: |-
-  Provides a list of Container Service Kubernetes Clusters to be used by the apsarastack_cs_kubernetes_cluster resource.
+  Provides a list of Container Service Kubernetes Clusters to be used by the alibabacloudstack_cs_kubernetes_cluster resource.
 ---
 
-# apsarastack\_cs\_kubernetes\_clusters
+# alibabacloudstack\_cs\_kubernetes\_clusters
 
-This data source provides a list Container Service Kubernetes Clusters on ApsaraStack.
+This data source provides a list Container Service Kubernetes Clusters on AlibabacloudStack.
 
 
 ## Example Usage
 
 ```
 # Declare the data source
-data "apsarastack_cs_kubernetes_clusters" "k8s_clusters" {
+data "alibabacloudstack_cs_kubernetes_clusters" "k8s_clusters" {
   name_regex  = "my-first-k8s"
 }
 
 output "output" {
-  value = data.apsarastack_cs_kubernetes_clusters.k8s_clusters.*
+  value = data.alibabacloudstack_cs_kubernetes_clusters.k8s_clusters.*
 }
 ```
 

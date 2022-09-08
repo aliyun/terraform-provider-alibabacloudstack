@@ -1,23 +1,23 @@
 ---
 subcategory: "Cloud Monitor"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cms_alarms"
-sidebar_current: "docs-apsarastack-datasource-cms-alarms"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cms_alarms"
+sidebar_current: "docs-alibabacloudstack-datasource-cms-alarms"
 description: |-
    Provides a list of Cms alarms.
 ---
-# apsarastack\_cms_alarms
+# alibabacloudstack\_cms_alarms
 
 Provides a list of Cms alarms.
 
 Basic Usage
 
 ```
-data "apsarastack_cms_alarms" "example" {
+data "alibabacloudstack_cms_alarms" "example" {
   name_regex= "TEST123456"
 }
 output "alarms_list" {
-  value = data.apsarastack_cms_alarms.example
+  value = data.alibabacloudstack_cms_alarms.example
 }
 ```
 ## Argument Reference

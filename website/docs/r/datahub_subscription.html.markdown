@@ -1,13 +1,13 @@
 ---
 subcategory: "Datahub Service"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_datahub_subscription"
-sidebar_current: "docs-apsarastack-resource-datahub-subscription"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_datahub_subscription"
+sidebar_current: "docs-alibabacloudstack-resource-datahub-subscription"
 description: |-
-  Provides a Apsarastack datahub subscription resource.
+  Provides a Alibabacloudstack datahub subscription resource.
 ---
 
-# apsarastack\_datahub\_subscription
+# alibabacloudstack\_datahub\_subscription
 
 The subscription is the basic unit of resource usage in Datahub Service under Publish/Subscribe model. You can manage the relationships between user and topics by using subscriptions. [Refer to details](https://help.aliyun.com/document_detail/47440.html).
 
@@ -16,7 +16,7 @@ The subscription is the basic unit of resource usage in Datahub Service under Pu
 Basic Usage
 
 ```
-resource "apsarastack_datahub_subscription" "example" {
+resource "alibabacloudstack_datahub_subscription" "example" {
   project_name = "tf_datahub_project"
   topic_name   = "tf_datahub_topic"
   comment      = "created by terraform"
@@ -45,5 +45,5 @@ The following attributes are exported:
 Datahub subscription can be imported using the ID, e.g.
 
 ```
-$ terraform import apsarastack_datahub_subscription.example tf_datahub_project:tf_datahub_topic:1539073399567UgCzY
+$ terraform import alibabacloudstack_datahub_subscription.example tf_datahub_project:tf_datahub_topic:1539073399567UgCzY
 ```

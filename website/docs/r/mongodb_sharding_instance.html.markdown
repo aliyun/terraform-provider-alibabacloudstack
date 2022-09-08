@@ -1,13 +1,13 @@
 ---
 subcategory: "MongoDB"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_mongodb_sharding_instance"
-sidebar_current: "docs-apsarastack-resource-mongodb-instance"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_mongodb_sharding_instance"
+sidebar_current: "docs-alibabacloudstack-resource-mongodb-instance"
 description: |-
   Provides a MongoDB sharding instance resource.
 ---
 
-# apsarastack\_mongodb\_sharding_instance
+# alibabacloudstack\_mongodb\_sharding_instance
 
 Provides a MongoDB sharding instance resource supports replica set instances only. the MongoDB provides stable, reliable, and automatic scalable database services. 
 It offers a full range of database solutions, such as disaster recovery, backup, recovery, monitoring, and alarms.
@@ -38,25 +38,25 @@ variable "mongo" {
   }
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = var.name
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id     = apsarastack_vpc.default.id
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id     = alibabacloudstack_vpc.default.id
   cidr_block = "172.16.0.0/24"
-  zone_id    = data.apsarastack_zones.default.zones[0].id
+  zone_id    = data.alibabacloudstack_zones.default.zones[0].id
   name       = var.name
 }
 
-resource "apsarastack_mongodb_sharding_instance" "foo" {
-  zone_id        = data.apsarastack_zones.default.zones[0].id
-  vswitch_id     = apsarastack_vswitch.default.id
+resource "alibabacloudstack_mongodb_sharding_instance" "foo" {
+  zone_id        = data.alibabacloudstack_zones.default.zones[0].id
+  vswitch_id     = alibabacloudstack_vswitch.default.id
   engine_version = "3.4"
   name           = var.name
   dynamic "shard_list" {
@@ -186,5 +186,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 MongoDB can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_mongodb_sharding_instance.example dds-bp1291daeda44195
+$ terraform import alibabacloudstack_mongodb_sharding_instance.example dds-bp1291daeda44195
 ```

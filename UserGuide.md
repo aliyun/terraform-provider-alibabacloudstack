@@ -60,8 +60,8 @@ Download terraform for macos of  [0.12](https://releases.hashicorp.com/terraform
 ### To download apsasrastack terraform provider
 
 
-You can download the apsarastack terraform provider 
-binary from [Github](https://github.com/Click2Cloud/terraform-provider-apsarastack/releases/tag/V0.6.6) , extract  and keep the binary on working directory for terraform  0.12+ and for terraform 0.13+ keep the binary at the location as mentioned above.
+You can download the alibabacloudstack terraform provider 
+binary from [Github](https://github.com/Click2Cloud/terraform-provider-alibabacloudstack/releases/tag/V0.6.6) , extract  and keep the binary on working directory for terraform  0.12+ and for terraform 0.13+ keep the binary at the location as mentioned above.
 
 Using terraform:
 - To Prepare your working directory for other commands:
@@ -84,7 +84,7 @@ terraform destroy --auto-approve
 ### Create the main.tf on working directory & add following portion to configure provider
 
 ````
- provider "apsarastack" {
+ provider "alibabacloudstack" {
   access_key = "ckhCs1K*********"
   secret_key = "2lY9uNh***********************"
   region =  "cn-xxxxxx-env00-d01"
@@ -97,7 +97,7 @@ terraform destroy --auto-approve
 ````                                               
 - Add following data in main.tf to create the resource vpc from terraform
 ```
-resource "apsarastack_vpc" "default_vpc" {
+resource "alibabacloudstack_vpc" "default_vpc" {
   name       = "vpc-test"
   cidr_block = "172.16.0.0/12"
 }
@@ -109,36 +109,36 @@ variable "name" {
   default = "ecs-test"
 }
 
-data "apsarastack_instance_types" "default" {
+data "alibabacloudstack_instance_types" "default" {
   eni_amount        = 2
 }
-data "apsarastack_images" "default" {
+data "alibabacloudstack_images" "default" {
   most_recent = true
   owners = "system"
 }
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name = "${var.name}"
   cidr_block = "172.16.0.0/16"
 }
-resource "apsarastack_vswitch" "default" {
-  vpc_id = "${apsarastack_vpc.default.id}"
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id = "${alibabacloudstack_vpc.default.id}"
   cidr_block = "172.16.0.0/16"
-  availability_zone = "${data.apsarastack_instance_types.default.instance_types.0.availability_zones.0}"
+  availability_zone = "${data.alibabacloudstack_instance_types.default.instance_types.0.availability_zones.0}"
   name = "${var.name}"
 }
-resource "apsarastack_security_group" "default" {
+resource "alibabacloudstack_security_group" "default" {
   name = "${var.name}"
-  vpc_id = "${apsarastack_vpc.default.id}"
+  vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
-resource "apsarastack_instance" "default" {
-  image_id = "${data.apsarastack_images.default.images.0.id}"
-  instance_type = "${data.apsarastack_instance_types.default.instance_types.0.id}"
+resource "alibabacloudstack_instance" "default" {
+  image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+  instance_type = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
   instance_name = "${var.name}"
   internet_max_bandwidth_out = "10"
-  security_groups = "${apsarastack_security_group.default.*.id}"
-  availability_zone = "${data.apsarastack_instance_types.default.instance_types.0.availability_zones.0}"
+  security_groups = "${alibabacloudstack_security_group.default.*.id}"
+  availability_zone = "${data.alibabacloudstack_instance_types.default.instance_types.0.availability_zones.0}"
   system_disk_category = "cloud_efficiency"
-  vswitch_id = "${apsarastack_vswitch.default.id}"
+  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
 }
 ````
 

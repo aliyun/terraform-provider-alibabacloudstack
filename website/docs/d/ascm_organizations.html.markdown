@@ -1,31 +1,31 @@
 ---
 subcategory: "ASCM"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ascm_organizations"
-sidebar_current: "docs-apsarastack-datasource-ascm-organizations"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ascm_organizations"
+sidebar_current: "docs-alibabacloudstack-datasource-ascm-organizations"
 description: |-
     Provides a list of organizations to the user.
 ---
 
-# apsarastack\_ascm_organizations
+# alibabacloudstack\_ascm_organizations
 
 This data source provides the organizations of the current Apsara Stack Cloud user.
 
 ## Example Usage
 
 ```
-resource "apsarastack_ascm_organization" "default" {
+resource "alibabacloudstack_ascm_organization" "default" {
   name = "Test_org"
 }
 output "orgres" {
-  value = apsarastack_ascm_organization.default.*
+  value = alibabacloudstack_ascm_organization.default.*
 }
-data "apsarastack_ascm_organizations" "default" {
-    name_regex = apsarastack_ascm_organization.default.name
-    parent_id = apsarastack_ascm_organization.default.parent_id
+data "alibabacloudstack_ascm_organizations" "default" {
+    name_regex = alibabacloudstack_ascm_organization.default.name
+    parent_id = alibabacloudstack_ascm_organization.default.parent_id
 }
 output "orgs" {
-  value = data.apsarastack_ascm_organizations.default.*
+  value = data.alibabacloudstack_ascm_organizations.default.*
 }
 ```
 

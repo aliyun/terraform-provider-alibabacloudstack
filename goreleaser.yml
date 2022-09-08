@@ -16,14 +16,14 @@ builds:
   ldflags:
     - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
   goos:
-    #- freebsd
-    #- windows
+    - freebsd
+    - windows
     - linux
-    #- darwin
+    - darwin
   goarch:
-    #- amd64
-    #- '386'
-    #- arm
+    - amd64
+    - '386'
+    - arm
     - arm64
   ignore:
     - goarch: '386'
@@ -34,12 +34,12 @@ builds:
       goos: freebsd
     - goarch: arm64
       goos: windows
-  binary: 'terraform-provider-apsarastack_v{{ .Version }}'
+  binary: '{{ .ProjectName }}_v{{ .Version }}'
 archives:
 - format: zip
-  name_template: 'terraform-provider-apsarastack_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
 checksum:
-  name_template: 'terraform-provider-apsarastack_{{ .Version }}_SHA256SUMS'
+  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
 signs:
   - artifacts: checksum
@@ -55,6 +55,6 @@ signs:
       - "${artifact}"
 release:
   # If you want to manually examine the release before its live, uncomment this line:
-  draft: true
+  # draft: true
 changelog:
   skip: true

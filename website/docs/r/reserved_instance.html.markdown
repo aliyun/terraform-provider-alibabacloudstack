@@ -1,20 +1,20 @@
 ---
 subcategory: "ECS"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_reserved_instance"
-sidebar_current: "docs-apsarastack-resource-reserved-instance"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_reserved_instance"
+sidebar_current: "docs-alibabacloudstack-resource-reserved-instance"
 description: |-
   Provides an ECS Reserved Instance resource.
 ---
 
-# apsarastack\_reserved\_instance\_offering
+# alibabacloudstack\_reserved\_instance\_offering
 
 Provides an Reserved Instance resource.
 
 ## Example Usage
 
 ```
-resource "apsarastack_reserved_instance" "default" {
+resource "alibabacloudstack_reserved_instance" "default" {
   instance_type      ="ecs.g6.large"
   instance_amount    ="1"
   period_unit        ="Year"
@@ -43,9 +43,9 @@ The following arguments are supported:
 * `name` - (Optional) Name of the RI. The name must be a string of 2 to 128 characters in length and can contain letters, numbers, colons (:), underscores (_), and hyphens. It must start with a letter. It cannot start with http:// or https://.
 * `platform` - (Optional, ForceNew) The operating system type of the image used by the instance. Optional values: `Windows`, `Linux`. Default is `Linux`.
 
-### Removing apsarastack_reserved_instance from your configuration
+### Removing alibabacloudstack_reserved_instance from your configuration
  
-The apsarastack_reserved_instance resource allows you to manage your ReservedInstance, but Terraform cannot destroy it. Removing this resource from your configuration will remove it from your statefile and management, but will not destroy the ReservedInstance.
+The alibabacloudstack_reserved_instance resource allows you to manage your ReservedInstance, but Terraform cannot destroy it. Removing this resource from your configuration will remove it from your statefile and management, but will not destroy the ReservedInstance.
  
 
 ## Attributes Reference

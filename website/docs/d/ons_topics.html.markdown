@@ -1,13 +1,13 @@
 ---
 subcategory: "RocketMQ"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_ons_topics"
-sidebar_current: "docs-apsarastack-datasource-ons-topics"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_ons_topics"
+sidebar_current: "docs-alibabacloudstack-datasource-ons-topics"
 description: |-
     Provides a list of ons topics available to the user.
 ---
 
-# apsarastack\_ons\_topics
+# alibabacloudstack\_ons\_topics
 
 This data source provides a list of ONS Topics in an Apsara Stack Cloud account according to the specified filters.
 
@@ -24,7 +24,7 @@ variable "topic" {
   default = "onsTopicDatasourceName"
 }
 
-resource "apsarastack_ons_instance" "default" {
+resource "alibabacloudstack_ons_instance" "default" {
   tps_receive_max = 500
   tps_send_max = 500
   topic_capacity = 50
@@ -34,20 +34,20 @@ resource "apsarastack_ons_instance" "default" {
   remark = "Ons Instance"
 }
 
-resource "apsarastack_ons_topic" "default" {
+resource "alibabacloudstack_ons_topic" "default" {
   topic = var.topic
-  instance_id = apsarastack_ons_instance.default.id
+  instance_id = alibabacloudstack_ons_instance.default.id
   message_type = 0
   remark = "dafault_ons_topic_remark"
 }
 
-data "apsarastack_ons_topics" "topics_ds" {
- instance_id = apsarastack_ons_topic.topic.instance_id
+data "alibabacloudstack_ons_topics" "topics_ds" {
+ instance_id = alibabacloudstack_ons_topic.topic.instance_id
   output_file = "topics.txt"
 }
 
 output "first_topic_name" {
-   value = data.apsarastack_ons_topics.topics_ds.*
+   value = data.alibabacloudstack_ons_topics.topics_ds.*
 }
 
 ```

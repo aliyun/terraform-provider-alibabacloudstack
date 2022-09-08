@@ -1,27 +1,27 @@
 ---
 subcategory: "Cloud Monitor"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_cms_metric_metalist"
-sidebar_current: "docs-apsarastack-datasource-cms-metric-metalist"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_cms_metric_metalist"
+sidebar_current: "docs-alibabacloudstack-datasource-cms-metric-metalist"
 description: |-
-    Provides a Metalist owned by an Apsarastack Cloud account.
+    Provides a Metalist owned by an Alibabacloudstack Cloud account.
 ---
 
-# apsarastack\_cms\_project\_metalist
+# alibabacloudstack\_cms\_project\_metalist
 
-Provides a Metalist of project  owned by an Apsarastack Cloud account.
+Provides a Metalist of project  owned by an Alibabacloudstack Cloud account.
 
 ## Example Usage
 
 Basic Usage
 
 ```
-data "apsarastack_cms_metric_metalist" "default" {
+data "alibabacloudstack_cms_metric_metalist" "default" {
   namespace="acs_slb_dashboard"
 }
 
 output "metric_metalist" {
-  value = data.apsarastack_cms_metric_metalist.default
+  value = data.alibabacloudstack_cms_metric_metalist.default
 }
 ```
 

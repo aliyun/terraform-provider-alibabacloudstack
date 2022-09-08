@@ -1,23 +1,23 @@
 ---
 subcategory: "Server Load Balancer (SLB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_slb_server_certificates"
-sidebar_current: "docs-apsarastack-datasource-slb-server-certificates"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_slb_server_certificates"
+sidebar_current: "docs-alibabacloudstack-datasource-slb-server-certificates"
 description: |-
     Provides a list of slb server certificates.
 ---
-# apsarastack\_slb_server_certificates
+# alibabacloudstack\_slb_server_certificates
 
 This data source provides the server certificate list.
 
 ## Example Usage
 
 ```
-data "apsarastack_slb_server_certificates" "sample_ds" {
+data "alibabacloudstack_slb_server_certificates" "sample_ds" {
 }
 
 output "first_slb_server_certificate_id" {
-  value = "${data.apsarastack_slb_server_certificates.sample_ds.certificates.0.id}"
+  value = "${data.alibabacloudstack_slb_server_certificates.sample_ds.certificates.0.id}"
 }
 ```
 

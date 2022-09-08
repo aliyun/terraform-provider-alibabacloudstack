@@ -1,12 +1,12 @@
 ---
 subcategory: "Data Works"
-layout: "apsarastack"
-page_title: "ApsaraStack: apsarastack_data_works_remind"
-sidebar_current: "docs-apsarastack-resource-data-works-remind"
-description: |- Provides a ApsaraStack Data Works Remind resource.
+layout: "alibabacloudstack"
+page_title: "AlibabacloudStack: alibabacloudstack_data_works_remind"
+sidebar_current: "docs-alibabacloudstack-resource-data-works-remind"
+description: |- Provides a AlibabacloudStack Data Works Remind resource.
 ---
 
-# apsarastack\_data\_works\_remind
+# alibabacloudstack\_data\_works\_remind
 
 Provides a Data Works Remind resource.
 
@@ -18,7 +18,7 @@ see [What is Remind](https://help.aliyun.com/apsara/enterprise/v_3_14_0_20210519
 Basic Usage
 
 ```terraform
-resource "apsarastack_data_works_remind" "default" {
+resource "alibabacloudstack_data_works_remind" "default" {
   remind_type = "FINISHED"
   remind_unit = "PROJECT"
   project_id = "10060"
@@ -67,5 +67,5 @@ The following attributes are exported:
 Data Works Remind can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_data_works_remind.example <remind_id>:<$.ProjectId>
+$ terraform import alibabacloudstack_data_works_remind.example <remind_id>:<$.ProjectId>
 ```

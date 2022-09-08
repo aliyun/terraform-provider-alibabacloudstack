@@ -1,13 +1,13 @@
 ---
 subcategory: "AnalyticDB for PostgreSQL (GPDB)"
-layout: "apsarastack"
-page_title: "Apsarastack: apsarastack_gpdb_connection"
-sidebar_current: "docs-apsarastack-resource-gpdb-connection"
+layout: "alibabacloudstack"
+page_title: "Alibabacloudstack: alibabacloudstack_gpdb_connection"
+sidebar_current: "docs-alibabacloudstack-resource-gpdb-connection"
 description: |-
   Provides an AnalyticDB for PostgreSQL instance connection resource.
 ---
 
-# apsarastack\_gpdb\_connection
+# alibabacloudstack\_gpdb\_connection
 
 Provides a connection resource to allocate an Internet connection string for instance.
 
@@ -25,24 +25,24 @@ variable "name" {
   default = "gpdbConnectionBasic"
 }
 
-data "apsarastack_zones" "default" {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = var.creation
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
   name       = var.name
   cidr_block = "172.16.0.0/16"
 }
 
-resource "apsarastack_vswitch" "default" {
-  vpc_id            = apsarastack_vpc.default.id
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id            = alibabacloudstack_vpc.default.id
   cidr_block        = "172.16.0.0/24"
-  availability_zone = data.apsarastack_zones.default.zones[0].id
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   name              = var.name
 }
 
-resource "apsarastack_gpdb_instance" "default" {
-  vswitch_id           = apsarastack_vswitch.default.id
+resource "alibabacloudstack_gpdb_instance" "default" {
+  vswitch_id           = alibabacloudstack_vswitch.default.id
   engine               = "gpdb"
   engine_version       = "4.3"
   instance_class       = "gpdb.group.segsdx2"
@@ -50,8 +50,8 @@ resource "apsarastack_gpdb_instance" "default" {
   description          = var.name
 }
 
-resource "apsarastack_gpdb_connection" "default" {
-  instance_id       = apsarastack_gpdb_instance.default.id
+resource "alibabacloudstack_gpdb_connection" "default" {
+  instance_id       = alibabacloudstack_gpdb_instance.default.id
   connection_prefix = "testAbc"
 }
 ```
@@ -85,5 +85,5 @@ The following attributes are exported:
 AnalyticDB for PostgreSQL's connection can be imported using the id, e.g.
 
 ```
-$ terraform import apsarastack_gpdb_connection.example abc12345678
+$ terraform import alibabacloudstack_gpdb_connection.example abc12345678
 ```
