@@ -28,14 +28,14 @@ Building The Provider
 Clone repository to: `$GOPATH/src/github.com/aliyun/terraform-provider-alibabacloudstack`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/apsara-stack; cd $GOPATH/src/github.com/apsara-stack
+$ mkdir -p $GOPATH/src/github.com/aliyun; cd $GOPATH/src/github.com/aliyun
 $ git clone git@github.com:aliyun/terraform-provider-alibabacloudstack.git
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabacloudstack
+$ cd $GOPATH/src/github.com/aliyun/terraform-provider-alibabacloudstack
 $ go build -o terraform-provider-alibabacloudstack
 ```
 
@@ -108,7 +108,7 @@ $ make testacc
 Before making a release, the resources and data sources are tested automatically with acceptance tests (the tests are located in the alibabacloudstack/*_test.go files).
 You can run them by entering the following instructions in a terminal:
 ```
-cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabacloudstack
+cd $GOPATH/src/github.com/aliyun/terraform-provider-alibabacloudstack
 export ALIBABACLOUDSTACK_ACCESS_KEY=xxx
 export ALIBABACLOUDSTACK_SECRET_KEY=xxx
 export ALIBABACLOUDSTACK_REGION=xxx
