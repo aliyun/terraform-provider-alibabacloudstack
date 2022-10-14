@@ -364,6 +364,8 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_zones":                                dataSourceAlibabacloudStackZones(),
 			"alibabacloudstack_elasticsearch_instances":              dataSourceAlibabacloudStackElasticsearch(),
 			"alibabacloudstack_elasticsearch_zones":                  dataSourceAlibabacloudStackElaticsearchZones(),
+			"alibabacloudstack_oos_executions":                       dataSourceAlibabacloudStackOosExecutions(),
+			"alibabacloudstack_oos_templates":                        dataSourceAlibabacloudStackOosTemplates(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"alibabacloudstack_ess_scaling_configuration":            resourceAlibabacloudStackEssScalingConfiguration(),
@@ -552,6 +554,8 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_data_works_remind":                    resourceAlibabacloudStackDataWorksRemind(),
 			"alibabacloudstack_elasticsearch_instance":               resourceAlibabacloudStackElasticsearch(),
 			"alibabacloudstack_dbs_backup_plan":                      resourceAlibabacloudStackDbsBackupPlan(),
+			"alibabacloudstack_oos_template":                         resourceAlibabacloudStackOosTemplate(),
+			"alibabacloudstack_oos_execution":                        resourceAlibabacloudStackOosExecution(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
@@ -687,6 +691,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.ElasticsearchEndpoint = domain
 		config.DataworkspublicEndpoint = domain
 		config.DbsEndpoint = domain
+		config.OosEndpoint = domain
 	} else {
 
 		endpointsSet := d.Get("endpoints").(*schema.Set)
@@ -725,6 +730,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 			config.QuickbiEndpoint = strings.TrimSpace(endpoints["quickbi"].(string))
 			config.DataworkspublicEndpoint = strings.TrimSpace(endpoints["dataworkspublic"].(string))
 			config.DbsEndpoint = strings.TrimSpace(endpoints["dbs"].(string))
+			config.OosEndpoint = strings.TrimSpace(endpoints["oos"].(string))
 		}
 	}
 	DbsEndpoint := d.Get("dbs_endpoint").(string)

@@ -808,3 +808,16 @@ func compareJsonTemplateAreEquivalent(tem1, tem2 string) (bool, error) {
 	}
 	return equal, nil
 }
+func convertMapFloat64ToJsonString(m map[string]interface{}) (string, error) {
+	sm := make(map[string]json.Number, len(m))
+
+	for k, v := range m {
+		sm[k] = v.(json.Number)
+	}
+
+	if result, err := json.Marshal(sm); err != nil {
+		return "", err
+	} else {
+		return string(result), nil
+	}
+}

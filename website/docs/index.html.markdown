@@ -20,7 +20,7 @@ Use the navigation on the left to read about the available resources.
 terraform {
   required_providers {
     alibabacloudstack = {
-      source = "apsara-stack/alibabacloudstack"
+      source = "aliyun/alibabacloudstack"
       version = "1.0.8"
     }
   }
