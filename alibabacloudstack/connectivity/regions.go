@@ -88,3 +88,5 @@ var FcNoSupportedRegions = []Region{MEEast1}
 var DrdsSupportedRegions = []Region{Beijing, Shenzhen, Hangzhou, Qingdao, Hongkong, Shanghai, Huhehaote, Zhangjiakou, APSouthEast1}
 var DrdsClassicNoSupportedRegions = []Region{Hongkong}
 var AlbSupportRegions = []Region{Hangzhou, Shanghai, Qingdao, Zhangjiakou, Beijing, WuLanChaBu, Shenzhen, ChengDu, Hongkong, APSouthEast1, APSouthEast2, APSouthEast3, APSouthEast5, APNorthEast1, EUCentral1, USEast1, APSouth1}
+var ARMSSupportRegions = []Region{QingdaoEnv15, QingdaoEnv66, WulanEnv205, WulanEnv230, NeimengEnv127, Qingdao, Beijing, Zhangjiakou, Huhehaote, WuLanChaBu, Hangzhou, Shanghai, Shenzhen, GuangZhou, Hongkong, ChengDu, HeYuan, APSouthEast1, APSouthEast6, USEast1, EUCentral1}
+var VbrSupportRegions = []Region{QingdaoEnv15, QingdaoEnv66, WulanEnv205, Hangzhou, QingdaoEnv17}
