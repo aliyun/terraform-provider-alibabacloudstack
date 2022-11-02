@@ -98,8 +98,8 @@ func resourceAliCloudDRDSInstanceCreate(d *schema.ResourceData, meta interface{}
 	if request.PayType == string(PrePaid) {
 		request.PayType = "drdsPre"
 	}
-	request.ResourceGroupId = client.Department
-
+	request.ResourceGroupId = client.ResourceGroup
+	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Drds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.Headers["x-ascm-product-name"] = "Drds"
 	request.Headers["x-acs-organizationId"] = client.Department
 	raw, err := client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
@@ -140,6 +140,7 @@ func resourceAliCloudDRDSInstanceUpdate(d *schema.ResourceData, meta interface{}
 		request.RegionId = client.RegionId
 		request.Headers["x-ascm-product-name"] = "Drds"
 		request.Headers["x-acs-organizationId"] = client.Department
+		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Drds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		raw, err := client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
 			return drdsClient.ModifyDrdsInstanceDescription(request)
 		})
