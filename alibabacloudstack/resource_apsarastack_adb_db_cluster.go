@@ -330,6 +330,7 @@ func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta in
 	request.ClientToken = buildClientToken("CreateDBCluster")
 	request.Headers["x-ascm-product-name"] = "adb"
 	request.Headers["x-acs-organizationId"] = client.Department
+	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "adb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	raw, err := client.WithAdbClient(func(adbClient *adb.Client) (interface{}, error) {
 		return adbClient.CreateDBCluster(request)
@@ -447,6 +448,8 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
 			request["Product"] = "adb"
 			request["OrganizationId"] = client.Department
+			request["Department"] = client.Department
+			request["ResourceGroup"] = client.ResourceGroup
 			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-03-15"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
 			if err != nil {
 				if NeedRetry(err) {
@@ -584,6 +587,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 	modifyDBClusterAccessWhiteListReq["Product"] = "adb"
 	modifyDBClusterAccessWhiteListReq["OrganizationId"] = client.Department
 	modifyDBClusterAccessWhiteListReq["RegionId"] = client.RegionId
+
 	if d.HasChange("security_ips") {
 		update = true
 	}

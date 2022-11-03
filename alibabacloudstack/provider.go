@@ -85,7 +85,7 @@ func Provider() *schema.Provider {
 			"insecure": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_INSECURE", nil),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_INSECURE", false),
 				Description: descriptions["insecure"],
 			},
 			"assume_role": assumeRoleSchema(),
