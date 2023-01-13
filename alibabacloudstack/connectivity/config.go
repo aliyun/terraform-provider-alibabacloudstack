@@ -117,6 +117,7 @@ type Config struct {
 	Proxy                   string
 	Domain                  string
 	QuickbiEndpoint         string
+	CsbEndpoint             string
 }
 
 func (c *Config) loadAndValidate() error {
