@@ -560,6 +560,7 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_oos_execution":                         resourceAlibabacloudStackOosExecution(),
 			"alibabacloudstack_express_connect_physical_connection":   resourceAlibabacloudStackExpressConnectPhysicalConnection(),
 			"alibabacloudstack_express_connect_virtual_border_router": resourceAlibabacloudStackExpressConnectVirtualBorderRouter(),
+			"alibabacloudstack_csb_project":                           resourceAlibabacloudStackCsbProject(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
@@ -696,6 +697,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.DataworkspublicEndpoint = domain
 		config.DbsEndpoint = domain
 		config.OosEndpoint = domain
+		config.CsbEndpoint = domain
 	} else {
 
 		endpointsSet := d.Get("endpoints").(*schema.Set)
@@ -735,6 +737,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 			config.DataworkspublicEndpoint = strings.TrimSpace(endpoints["dataworkspublic"].(string))
 			config.DbsEndpoint = strings.TrimSpace(endpoints["dbs"].(string))
 			config.OosEndpoint = strings.TrimSpace(endpoints["oos"].(string))
+			config.CsbEndpoint = strings.TrimSpace(endpoints["csb"].(string))
 		}
 	}
 	DbsEndpoint := d.Get("dbs_endpoint").(string)
