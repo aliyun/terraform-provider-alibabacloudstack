@@ -20,6 +20,13 @@ import (
 type Encrypt_conf struct {
 	Enable           bool  `json:"enable"`
 	Encrypt_type       string `json:"encrypt_type"`
+	UserCmkInfo *EncryptUserCmkConf `json:"user_cmk_info,omitempty"`
+}
+// EncryptUserCmkConf struct
+type EncryptUserCmkConf struct {
+	CmkKeyId string `json:"cmk_key_id"`
+	Arn      string `json:"arn"`
+	RegionId string `json:"region_id"`
 }
 // LogStore defines LogStore struct
 type LogStore struct {
