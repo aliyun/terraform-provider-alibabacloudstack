@@ -99,6 +99,21 @@ func resourceAlibabacloudStackLogStore() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"cmk_key_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"arn": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"encrypt_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "sm4_gcm",
+				ValidateFunc: validation.StringInSlice([]string{"sm4_gcm", "aes_gcm"}, false),
+			},
 		},
 	}
 }
@@ -110,15 +125,15 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 		update = v.(bool)
 	}
 
-	//logstore := &sls.LogStore{
-	//	Name:          d.Get("name").(string),
-	//	TTL:           d.Get("retention_period").(int),
-	//	ShardCount:    d.Get("shard_count").(int),
-	//	WebTracking:   d.Get("enable_web_tracking").(bool),
-	//	AutoSplit:     d.Get("auto_split").(bool),
-	//	MaxSplitShard: d.Get("max_split_shard_count").(int),
-	//	AppendMeta:    d.Get("append_meta").(bool),
-	//}
+	logstore := &sls.LogStore{
+		Name:          d.Get("name").(string),
+		TTL:           d.Get("retention_period").(int),
+		ShardCount:    d.Get("shard_count").(int),
+		WebTracking:   d.Get("enable_web_tracking").(bool),
+		AutoSplit:     d.Get("auto_split").(bool),
+		MaxSplitShard: d.Get("max_split_shard_count").(int),
+		AppendMeta:    d.Get("append_meta").(bool),
+	}
 	var requestinfo *sls.Client
 	if update {
 		logstore := &sls.LogStore{
@@ -133,6 +148,13 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 				Enable:       true,
 				Encrypt_type: "sm4_gcm",
 			},
+		}
+		if v, ok := d.GetOk("cmk_key_id"); ok {
+			logstore.Encrypt_conf.UserCmkInfo.CmkKeyId = v.(string)
+			logstore.Encrypt_conf.UserCmkInfo.RegionId = client.RegionId
+		}
+		if v, ok := d.GetOk("arn"); ok {
+			logstore.Encrypt_conf.UserCmkInfo.Arn = v.(string)
 		}
 		err := resource.Retry(3*time.Minute, func() *resource.RetryError {
 
@@ -158,7 +180,34 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_log_store", "CreateLogStoreV2", AlibabacloudStackLogGoSdkERROR)
 		}
 		d.SetId(fmt.Sprintf("%s%s%s", d.Get("project").(string), COLON_SEPARATED, d.Get("name").(string)))
+		return resourceAlibabacloudStackLogStoreUpdate(d, meta)
 	}
+
+	err := resource.Retry(3*time.Minute, func() *resource.RetryError {
+
+		raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+			requestinfo = slsClient
+			return nil, slsClient.CreateLogStoreV2(d.Get("project").(string), logstore)
+		})
+		if err != nil {
+			if IsExpectedErrors(err, []string{"InternalServerError", LogClientTimeout}) {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		if debugOn() {
+			addDebug("CreateLogStoreV2", raw, requestinfo, map[string]interface{}{
+				"project":  d.Get("project").(string),
+				"logstore": logstore,
+			})
+		}
+		return nil
+	})
+	if err != nil {
+		return WrapErrorf(err, DefaultErrorMsg, "apsarastack_log_store", "CreateLogStoreV2", AlibabacloudStackLogGoSdkERROR)
+	}
+	d.SetId(fmt.Sprintf("%s%s%s", d.Get("project").(string), COLON_SEPARATED, d.Get("name").(string)))
+
 	return resourceAlibabacloudStackLogStoreUpdate(d, meta)
 }
 
