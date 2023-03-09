@@ -58,7 +58,7 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprint("tf-testdnsrecordbasic.")
+	name := fmt.Sprint("tf-testdnsrecordbasic11.")
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccDnsRecordConfigBasicConfigBasic)
 
 	resource.Test(t, resource.TestCase{
@@ -72,11 +72,12 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"domain_id":   "${alibabacloudstack_dns_domain.default.domain_id}",
-					"host_record": "test",
-					"type":        "A",
-					"ttl":         "0",
-					"rr_set":      []string{"10.0.0.1", "10.0.0.3", "10.0.0.2"},
+					"zone_id":      "${alibabacloudstack_dns_domain.default.domain_id}",
+					"lba_strategy": "ALL_RR",
+					"name":         "test",
+					"type":         "A",
+					"ttl":          "0",
+					"rr_set":       []string{"10.0.0.1", "10.0.0.3", "10.0.0.2"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
@@ -92,13 +93,10 @@ func testAccDnsRecordConfigBasicConfigBasic(name string) string {
 
 resource "alibabacloudstack_dns_domain" "default" {
  domain_name = "%s"
- remark = "test_dummy_1"
 }
 `, name)
 }
 
 var dnsRecordBasicMap = map[string]string{
-	"domain_id":   CHECKSET,
-	"host_record": CHECKSET,
-	"type":        CHECKSET,
+	"zone_id": CHECKSET,
 }

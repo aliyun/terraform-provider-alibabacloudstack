@@ -118,25 +118,27 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := requests.NewCommonRequest()
 	request.Method = "POST"
-	request.Product = "GenesisDns"
+	request.Product = "CloudDns"
 	request.Domain = client.Domain
-	request.Version = "2018-07-20"
+	request.Version = "2022-06-24"
+	name := d.Get("domain_name").(string)
+	request.PageNumber = requests.NewInteger(2)
+	request.PageSize = requests.NewInteger(PageSizeLarge)
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
 		request.Scheme = "http"
 	}
-	request.ApiName = "ObtainGlobalAuthZoneList"
+	request.ApiName = "DescribeGlobalZones"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": client.SecretKey,
 		"AccessKeyId":     client.AccessKey,
-		"Product":         "GenesisDns",
+		"Product":         "CloudDns",
 		"RegionId":        client.RegionId,
-		"Action":          "ObtainGlobalAuthZoneList",
-		"Version":         "2018-07-20",
-		"PageSize":        "2000",
-		"PageNumber":      "1",
+		"Action":          "DescribeGlobalZones",
+		"Version":         "2022-06-24",
+		"Name":            name,
 	}
 
 	var addDomains = DnsDomains{}
@@ -153,7 +155,7 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 		if err != nil {
 			return WrapError(err)
 		}
-		if response.IsSuccess() == true || len(addDomains.ZoneList) < 1 {
+		if response.IsSuccess() == true || len(addDomains.Data) < 1 {
 			break
 		}
 
@@ -165,17 +167,17 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 	var ids []string
 	var names []string
 	var s []map[string]interface{}
-	for _, rg := range addDomains.ZoneList {
-		if r != nil && !r.MatchString(rg.DomainName) {
+	for _, rg := range addDomains.Data {
+		if r != nil && !r.MatchString(rg.Name) {
 			continue
 		}
-		id := strconv.Itoa(rg.DomainID)
+		id := strconv.Itoa(rg.Id)
 		mapping := map[string]interface{}{
 			"domain_id":   id,
-			"domain_name": rg.DomainName,
+			"domain_name": rg.Name,
 		}
 
-		names = append(names, rg.DomainName)
+		names = append(names, rg.Name)
 		ids = append(ids, id)
 		s = append(s, mapping)
 	}

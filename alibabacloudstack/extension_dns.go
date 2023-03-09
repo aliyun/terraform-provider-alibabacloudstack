@@ -10,19 +10,19 @@ type DnsRecord struct {
 	PageSize     int    `json:"PageSize"`
 	PageNumber   int    `json:"PageNumber"`
 	TotalItems   int    `json:"TotalItems"`
-	Records      []struct {
-		DomainID        string    `json:"Id"`
-		Rr              string    `json:"Rr"`
-		Type            string    `json:"Type"`
-		CreateTime      time.Time `json:"CreateTime"`
-		RrSet           []string  `json:"RrSet"`
-		RecordID        int       `json:"RecordId"`
-		UpdateTimestamp int64     `json:"UpdateTimestamp"`
-		TTL             int       `json:"Ttl"`
-		ZoneID          string    `json:"ZoneId"`
-		CreateTimestamp int64     `json:"CreateTimestamp"`
-		Remark          string    `json:"Remark,omitempty"`
-	} `json:"Records"`
+	Data         []struct {
+		ZoneId     int       `json:"ZoneId"`
+		Name       string    `json:"Name"`
+		Type       string    `json:"Type"`
+		CreateTime time.Time `json:"CreateTime"`
+		//RDatas          string    `json:"RDatas"`
+		Id              int    `json:"Id"`
+		UpdateTimestamp int64  `json:"UpdateTimestamp"`
+		TTL             int    `json:"Ttl"`
+		CreateTimestamp int64  `json:"CreateTimestamp"`
+		Remark          string `json:"Remark"`
+		LbaStrategy     string `json:"LbaStrategy"`
+	} `json:"Data"`
 }
 
 type DnsDomains struct {
@@ -32,17 +32,17 @@ type DnsDomains struct {
 	RequestID      string `json:"RequestId"`
 	PageNumber     int    `json:"PageNumber"`
 	TotalItems     int    `json:"TotalItems"`
-	ZoneList       []struct {
-		DomainID        int       `json:"DomainId"`
+	Data           []struct {
+		Id              int       `json:"Id"`
 		VpcNumber       int       `json:"VpcNumber"`
-		DomainName      string    `json:"DomainName"`
+		Name            string    `json:"Name"`
 		CreateTime      time.Time `json:"CreateTime"`
 		UpdateTime      time.Time `json:"UpdateTime"`
 		UpdateTimestamp int64     `json:"UpdateTimestamp"`
 		CreateTimestamp int64     `json:"CreateTimestamp"`
 		RecordCount     int       `json:"RecordCount"`
 		Remark          string    `json:"Remark,omitempty"`
-	} `json:"ZoneList"`
+	} `json:"Data"`
 }
 
 type DnsDomain struct {

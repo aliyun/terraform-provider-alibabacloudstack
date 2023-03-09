@@ -593,7 +593,6 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 	}
 	modifyDBClusterAccessWhiteListReq["SecurityIps"] = convertListToCommaSeparate(d.Get("security_ips").(*schema.Set).List())
 	runtime := util.RuntimeOptions{}
-	log.Printf("client.Config.Insecure %s", client.Config.Insecure)
 	runtime.SetIgnoreSSL(client.Config.Insecure)
 	if update {
 		action := "ModifyDBClusterAccessWhiteList"
@@ -694,7 +693,6 @@ func resourceAlibabacloudStackAdbDbClusterDelete(d *schema.ResourceData, meta in
 	request["Product"] = "adb"
 	request["OrganizationId"] = client.Department
 	runtime := util.RuntimeOptions{}
-	log.Printf("client.Config.Insecure %s", client.Config.Insecure)
 	runtime.SetIgnoreSSL(client.Config.Insecure)
 	//var taskId string
 	wait := incrementalWait(3*time.Second, 3*time.Second)
