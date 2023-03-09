@@ -72,6 +72,12 @@ func TestAccAlibabacloudStackDnsDomain_basic(t *testing.T) {
 					testAccCheck(nil),
 				),
 			},
+			{
+				Config: resourceAlibabacloudStackDns_Domain2,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(nil),
+				),
+			},
 		},
 	})
 
@@ -80,11 +86,17 @@ func TestAccAlibabacloudStackDnsDomain_basic(t *testing.T) {
 const resourceAlibabacloudStackDns_Domain = `
 resource "alibabacloudstack_dns_domain" "default" {
 	domain_name = "testdummy."
-	remark = "test_dummy_1"
+
+}
+`
+const resourceAlibabacloudStackDns_Domain2 = `
+resource "alibabacloudstack_dns_domain" "default" {
+	domain_name = "testdummy."
+     remark = "test_dummy_1"
+
 }
 `
 
 var dnsDomainBasicMap = map[string]string{
 	"domain_name": CHECKSET,
-	"remark":      CHECKSET,
 }

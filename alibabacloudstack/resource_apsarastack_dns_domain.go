@@ -67,28 +67,28 @@ func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta inter
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dns_domain", "domain alreadyExist", AlibabacloudStackSdkGoERROR)
 	}
-	if len(check.ZoneList) == 0 {
+	if len(check.Data) == 0 {
 
 		request := requests.NewCommonRequest()
 		request.Method = "POST"        // Set request method
-		request.Product = "GenesisDns" // Specify product
+		request.Product = "CloudDns"   // Specify product
 		request.Domain = client.Domain // Location Service will not be enabled if the host is specified. For example, service with a Certification type-Bearer Token should be specified
-		request.Version = "2018-07-20" // Specify product version
+		request.Version = "2022-06-24" // Specify product version
 		if strings.ToLower(client.Config.Protocol) == "https" {
 			request.Scheme = "https"
 		} else {
 			request.Scheme = "http"
 		}
-		request.ApiName = "AddGlobalAuthZone"
+		request.ApiName = "AddGlobalZone"
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
 			"AccessKeySecret": client.SecretKey,
 			"AccessKeyId":     client.AccessKey,
-			"Product":         "GenesisDns",
+			"Product":         "CloudDns",
 			"RegionId":        client.RegionId,
-			"Action":          "AddGlobalAuthZone",
-			"Version":         "2018-07-20",
-			"DomainName":      DomainName,
+			"Action":          "AddGlobalZone",
+			"Version":         "2022-06-24",
+			"Name":            DomainName,
 		}
 		raw, err := client.WithEcsClient(func(dnsClient *ecs.Client) (interface{}, error) {
 			return dnsClient.ProcessCommonRequest(request)
@@ -99,9 +99,9 @@ func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta inter
 		addDebug(request.GetActionName(), raw)
 		bresponse, _ := raw.(*responses.CommonResponse)
 		if bresponse.GetHttpStatus() != 200 {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dns_domain", "AddGlobalAuthZone", AlibabacloudStackSdkGoERROR)
+			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dns_domain", "AddGlobalZone", AlibabacloudStackSdkGoERROR)
 		}
-		addDebug("AddGlobalAuthZone", raw, requestInfo, bresponse.GetHttpContentString())
+		addDebug("AddGlobalZone", raw, requestInfo, bresponse.GetHttpContentString())
 	}
 	//err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 	check, err = dnsService.DescribeDnsDomain(DomainName)
@@ -115,8 +115,8 @@ func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta inter
 	}
 	//id := strconv.Itoa(dnsresp.ID)
 	//d.SetId(id)
-	d.SetId(check.ZoneList[0].DomainName + COLON_SEPARATED + fmt.Sprint(check.ZoneList[0].DomainID))
-
+	d.SetId(check.Data[0].Name + COLON_SEPARATED + fmt.Sprint(check.Data[0].Id))
+	//d.SetId(DomainName)
 	return resourceAlibabacloudStackDnsDomainUpdate(d, meta)
 }
 func resourceAlibabacloudStackDnsDomainRead(d *schema.ResourceData, meta interface{}) error {
@@ -133,8 +133,8 @@ func resourceAlibabacloudStackDnsDomainRead(d *schema.ResourceData, meta interfa
 	}
 
 	d.Set("domain_name", did[0])
-	d.Set("domain_id", strconv.Itoa(object.ZoneList[0].DomainID))
-	d.Set("remark", object.ZoneList[0].Remark)
+	d.Set("domain_id", strconv.Itoa(object.Data[0].Id))
+	d.Set("remark", object.Data[0].Remark)
 	return nil
 }
 func resourceAlibabacloudStackDnsDomainUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -154,35 +154,36 @@ func resourceAlibabacloudStackDnsDomainUpdate(d *schema.ResourceData, meta inter
 		if v, ok := d.GetOk("remark"); ok {
 			desc = v.(string)
 		}
-		check.ZoneList[0].Remark = desc
+		check.Data[0].Remark = desc
 		remarkUpdate = true
 	} else {
 		if v, ok := d.GetOk("remark"); ok {
 			desc = v.(string)
 		}
-		check.ZoneList[0].Remark = desc
+		check.Data[0].Remark = desc
 	}
 	request := requests.NewCommonRequest()
 	request.Method = "POST"
-	request.Product = "GenesisDns"
+	request.Product = "CloudDns"
 	request.Domain = client.Domain
-	request.Version = "2018-07-20"
+	request.Version = "2021-06-24"
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
 		request.Scheme = "http"
 	}
-	request.ApiName = "RemarkGlobalAuthZone"
+	request.ApiName = "UpdateGlobalZoneRemark"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.RegionId = client.RegionId
 
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": client.SecretKey,
 		"AccessKeyId":     client.AccessKey,
-		"Product":         "GenesisDns",
+		"Product":         "CloudDns",
 		"RegionId":        client.RegionId,
-		"Action":          "RemarkGlobalAuthZone",
-		"Version":         "2018-07-20",
+		"Action":          "UpdateGlobalZoneRemark",
+		"Version":         "2021-06-24",
+		"Name":            did[0],
 		"Id":              did[1],
 		"Remark":          desc,
 	}
@@ -191,14 +192,15 @@ func resourceAlibabacloudStackDnsDomainUpdate(d *schema.ResourceData, meta inter
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
-		log.Printf(" response of raw RemarkGlobalAuthZone : %s", raw)
+		log.Printf(" response of raw UpdateGlobalZoneRemark : %s", raw)
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dns_domain", "RemarkGlobalAuthZone", raw)
+			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dns_domain", "UpdateGlobalZoneRemark", raw)
 		}
 		addDebug(request.GetActionName(), raw, request)
 	}
-	d.SetId(check.ZoneList[0].DomainName + COLON_SEPARATED + fmt.Sprint(check.ZoneList[0].DomainID))
+	d.SetId(check.Data[0].Name + COLON_SEPARATED + fmt.Sprint(check.Data[0].Id))
+	//d.SetId(did[0])
 	return resourceAlibabacloudStackDnsDomainRead(d, meta)
 }
 func resourceAlibabacloudStackDnsDomainDelete(d *schema.ResourceData, meta interface{}) error {
@@ -212,12 +214,12 @@ func resourceAlibabacloudStackDnsDomainDelete(d *schema.ResourceData, meta inter
 	}
 	addDebug("IsDomainExist", check, requestInfo, map[string]string{"Id": did[1]})
 
-	if len(check.ZoneList) != 0 {
+	if len(check.Data) != 0 {
 		request := requests.NewCommonRequest()
 		request.Method = "POST"        // Set request method
-		request.Product = "GenesisDns" // Specify product
+		request.Product = "CloudDns"   // Specify product
 		request.Domain = client.Domain // Location Service will not be enabled if the host is specified. For example, service with a Certification type-Bearer Token should be specified
-		request.Version = "2018-07-20" // Specify product version
+		request.Version = "2021-06-24" // Specify product version
 		if strings.ToLower(client.Config.Protocol) == "https" {
 			request.Scheme = "https"
 		} else {
@@ -228,10 +230,10 @@ func resourceAlibabacloudStackDnsDomainDelete(d *schema.ResourceData, meta inter
 		request.QueryParams = map[string]string{
 			"AccessKeySecret": client.SecretKey,
 			"AccessKeyId":     client.AccessKey,
-			"Product":         "GenesisDns",
+			"Product":         "CloudDns",
 			"RegionId":        client.RegionId,
 			"Action":          "DeleteGlobalZone",
-			"Version":         "2018-07-20",
+			"Version":         "2021-06-24",
 			"Id":              did[1],
 		}
 		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {

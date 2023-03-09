@@ -56,11 +56,11 @@ func dataSourceAlibabacloudStackDnsRecords() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"domain_id": {
+						"zone_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"host_record": {
+						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -68,7 +68,7 @@ func dataSourceAlibabacloudStackDnsRecords() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"description": {
+						"remark": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -90,27 +90,29 @@ func dataSourceAlibabacloudStackDnsRecords() *schema.Resource {
 
 func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	DomainId := d.Get("domain_id").(string)
+	ZoneId := d.Get("zone_id").(string)
 	request := requests.NewCommonRequest()
-	request.Method = "POST"
-	request.Product = "GenesisDns"
+
 	request.Domain = client.Domain
-	request.Version = "2018-07-20"
+	request.Method = "POST"
+	request.Product = "CloudDns"
+	request.Version = "2021-06-24"
+	request.ServiceCode = "CloudDns"
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
 		request.Scheme = "http"
 	}
-	request.ApiName = "ObtainGlobalAuthRecordList"
+	request.ApiName = "DescribeGlobalZoneRecords"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": client.SecretKey,
 		"AccessKeyId":     client.AccessKey,
-		"Product":         "GenesisDns",
 		"RegionId":        client.RegionId,
-		"Action":          "ObtainGlobalAuthRecordList",
-		"Version":         "2018-07-20",
-		"Id":              DomainId,
+		"Product":         "CloudDns",
+		"Action":          "DescribeGlobalZoneRecords",
+		"Version":         "2021-06-24",
+		"ZoneId":          ZoneId,
 	}
 
 	response := DnsRecord{}
@@ -131,32 +133,32 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 		if err != nil {
 			return WrapError(err)
 		}
-		if response.Records != nil {
+		if response.Data != nil {
 			break
 		}
 
 	}
 	var r *regexp.Regexp
-	if nameRegex, ok := d.GetOk("host_record_regex"); ok && nameRegex.(string) != "" {
+	if nameRegex, ok := d.GetOk("name"); ok && nameRegex.(string) != "" {
 		r = regexp.MustCompile(nameRegex.(string))
 	}
 
 	var ids []string
 	var s []map[string]interface{}
-	for _, record := range response.Records {
-		if r != nil && !r.MatchString(record.Rr) {
+	for _, record := range response.Data {
+		if r != nil && !r.MatchString(record.Name) {
 			continue
 		}
 		mapping := map[string]interface{}{
-			"record_id":   record.RecordID,
-			"domain_id":   DomainId,
-			"host_record": record.Rr,
-			"type":        record.Type,
-			"description": record.Remark,
-			"rr_set":      record.RrSet,
-			"ttl":         record.TTL,
+			"record_id": record.Id,
+			"zone_id":   ZoneId,
+			"name":      record.Name,
+			"type":      record.Type,
+			"remark":    record.Remark,
+			//"rr_set":      record.RDatas,
+			"ttl": record.TTL,
 		}
-		ids = append(ids, strconv.Itoa(record.RecordID))
+		ids = append(ids, strconv.Itoa(record.Id))
 		s = append(s, mapping)
 	}
 
