@@ -31,7 +31,7 @@ resource "alibabacloudstack_dns_domain" "default" {
  domain_name = "testdummy."
 }
 data "alibabacloudstack_dns_domains" "default"{
- domain_name_regex  = alibabacloudstack_dns_domain.default.domain_name
+ domain_name  = alibabacloudstack_dns_domain.default.domain_name
 }
 
 `

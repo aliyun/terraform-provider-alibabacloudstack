@@ -17,7 +17,7 @@ func dataSourceAlibabacloudStackDnsDomains() *schema.Resource {
 		Read: dataSourceAlibabacloudStackDnsDomainsRead,
 
 		Schema: map[string]*schema.Schema{
-			"domain_name_regex": {
+			"domain_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -161,7 +161,7 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 
 	}
 	var r *regexp.Regexp
-	if nameRegex, ok := d.GetOk("domain_name_regex"); ok && nameRegex.(string) != "" {
+	if nameRegex, ok := d.GetOk("domain_name"); ok && nameRegex.(string) != "" {
 		r = regexp.MustCompile(nameRegex.(string))
 	}
 	var ids []string
