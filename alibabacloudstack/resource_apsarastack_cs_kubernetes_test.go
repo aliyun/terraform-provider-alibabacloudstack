@@ -2,6 +2,8 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/denverdino/aliyungo/cs"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"log"
 	"testing"
@@ -37,7 +39,7 @@ func testAccCheckCsK8sDestroy(s *terraform.State) error {
 }
 
 func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
-	var v Cluster
+	var v *cs.KubernetesClusterDetail
 	resourceId := "alibabacloudstack_cs_kubernetes.k8s"
 	ra := resourceAttrInit(resourceId, CsK8sMap)
 	serviceFunc := func() interface{} {
@@ -61,37 +63,56 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name": "${var.name}",
-					//"count":        "${var.k8s_number}",
-					"version":      "1.18.8-aliyun.1",
-					"os_type":      "linux",
-					"platform":     "CentOS",
-					"timeout_mins": "25",
-					"vpc_id":       "${var.vpc_id}",
 
-					"master_count":          "3",
-					"master_disk_category":  "cloud_efficiency",
-					"master_disk_size":      "45",
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "acceptance test",
+					},
+					"runtime": []map[string]interface{}{
+						{
+							"name":    "containerd",
+							"version": "1.5.13",
+						},
+					},
+					"addons": []map[string]interface{}{
+						{
+							"name": "flannel",
+						},
+						{
+							"name": "csi-plugin",
+						},
+						{
+							"name": "csi-provisioner",
+						},
+						{
+							"name": "nginx-ingress-controller",
+						},
+					},
+					"name":                 "${var.name}",
+					"version":              "1.22.15-aliyun.1",
+					"os_type":              "linux",
+					"platform":             "AliyunLinux",
+					"timeout_mins":         "60",
+					"vpc_id":               "${var.vpc_id}",
+					"master_count":         "3",
+					"master_disk_category": "cloud_ssd",
+					//"master_disk_category":  "cloud_sperf",
+					"master_disk_size":      "120",
 					"master_instance_types": "${var.master_instance_types}",
-					"master_vswitch_ids":    "${var.vswitch_ids}",
-
-					"num_of_nodes":         "${var.worker_number}",
-					"worker_disk_category": "cloud_efficiency",
-					"worker_disk_size":     "30",
-
-					//"worker_data_disks",
-					//"worker_data_disk":          "true",
-					//"worker_data_disk_category": "cloud_ssd",
-					//"worker_data_disk_size":     "100",
+					"master_vswitch_ids":    "${var.master_vswitch_ids}",
+					"num_of_nodes":          "1",
+					"worker_disk_category":  "cloud_ssd",
+					//"worker_disk_category": "cloud_sperf",
+					"worker_disk_size": "120",
 					"worker_data_disks": []map[string]interface{}{
 						{
-							"size":      "100",
+							"size":      "120",
 							"encrypted": "false",
-							"category":  "cloud_efficiency",
+							"category":  "cloud_ssd",
 						},
 					},
 					"worker_instance_types": "${var.worker_instance_types}",
-					//"worker_vswitch_ids":    "${var.vswitch_ids}",
+					"worker_vswitch_ids":    "${var.vswitch_ids}",
 
 					"enable_ssh":        "${var.enable_ssh}",
 					"password":          "${var.password}",
@@ -176,39 +197,47 @@ variable "vpc_cidr" {
 }
 
 # leave it to empty then terraform will create several vswitches
-variable "vswitch_ids" {
+variable "master_vswitch_ids" {
  description = "List of existing vswitch id."
  type        = list(string)
  default     = ["vsw-bs1xvmkkekuy8i7zlhv3j","vsw-bs1xvmkkekuy8i7zlhv3j","vsw-bs1xvmkkekuy8i7zlhv3j"]
 }
+variable "runtime" {
+ default     = [
+		{
+			name = "containerd"
+  			version = "1.5.13"
+		}
+	]
+}
 
-
-variable "vswitch_cidrs" {
-  description = "List of cidr blocks used to create several new vswitches when 'vswitch_ids' is not specified."
-  type        = list(string)
-  default     = ["172.31.0.0/16","172.31.0.0/16","172.31.0.0/16"]
+variable "worker_vswitch_ids" {
+ description = "List of existing vswitch id."
+ type        = list(string)
+ default     = ["vsw-5gbxjbea5i0izljqlpghv"]
+ //default     = ["vsw-3sko93y006hillsuxldox"]
 }
 
 variable "new_nat_gateway" {
   description = "Whether to create a new nat gateway. In this template, a new nat gateway will create a nat gateway, eip and server snat entries."
-  default     = "true"
+  default     = "false"
 }
 
 # 3 masters is default settings,so choose three appropriate instance types in the availability zones above.
 variable "master_instance_types" {
   description = "The ecs instance types used to launch master nodes."
-  default     = ["ecs.e4.large","ecs.e4.large","ecs.e4.large"]
+   default     = ["ecs.n4.large","ecs.n4.large","ecs.n4.large"]
 }
 
 variable "worker_instance_types" {
   description = "The ecs instance types used to launch worker nodes."
-  default     = ["ecs.e4.large"]
+  default     = ["ecs.n4.large"]
 }
 
 # options: between 24-28
 variable "node_cidr_mask" {
   description = "The node cidr block to specific how many pods can run on single node."
-  default     = 24
+  default     = 26
 }
 
 variable "enable_ssh" {
@@ -230,45 +259,15 @@ variable "worker_number" {
 # k8s_pod_cidr is only for flannel network
 variable "pod_cidr" {
   description = "The kubernetes pod cidr block. It cannot be equals to vpc's or vswitch's and cannot be in them."
-  default     = "172.20.0.0/16"
+  default     = "172.24.0.0/16"
 }
 
 variable "service_cidr" {
   description = "The kubernetes service cidr block. It cannot be equals to vpc's or vswitch's or pod's and cannot be in them."
-  default     = "172.21.0.0/20"
+  default     = "172.25.0.0/16"
 }
 
-variable "cluster_addons" {
-  description = "Addon components in kubernetes cluster"
 
-  type = list(object({
-    name      = string
-    config    = string
-  }))
-
-  default = [
-    {
-      "name"     = "terway",
-      "config"   = "",
-    },
-    {
-      "name"     = "csi-plugin",
-      "config"   = "",
-    },
-    {
-      "name"     = "csi-provisioner",
-      "config"   = "",
-    },
-    {
-      "name"     = "logtail-ds",
-      "config"   = "{\"IngressDashboardEnabled\":\"true\",\"sls_project_name\":\"alibaba-test\"}",
-    },
-    {
-      "name"     = "nginx-ingress-controller",
-      "config"   = "{\"IngressSlbNetworkType\":\"internet\"}",
-    }
-  ]
-}
 `, name)
 }
 

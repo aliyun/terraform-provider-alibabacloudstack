@@ -663,19 +663,20 @@ type ClustersV1 struct {
 	PureListData bool   `json:"pureListData"`
 	API          string `json:"api"`
 	Clusters     []struct {
-		ResourceGroupID        string `json:"resource_group_id"`
-		PrivateZone            bool   `json:"private_zone"`
-		VpcID                  string `json:"vpc_id"`
-		NetworkMode            string `json:"network_mode"`
-		SecurityGroupID        string `json:"security_group_id"`
-		ClusterType            string `json:"cluster_type"`
-		DockerVersion          string `json:"docker_version"`
-		DataDiskCategory       string `json:"data_disk_category"`
-		NextVersion            string `json:"next_version"`
-		ZoneID                 string `json:"zone_id"`
-		ClusterID              string `json:"cluster_id"`
-		Department             int    `json:"Department"`
-		ExternalLoadbalancerID string `json:"external_loadbalancer_id"`
+		Tags                   []cs.Tag `json:"tags"`
+		ResourceGroupID        string   `json:"resource_group_id"`
+		PrivateZone            bool     `json:"private_zone"`
+		VpcID                  string   `json:"vpc_id"`
+		NetworkMode            string   `json:"network_mode"`
+		SecurityGroupID        string   `json:"security_group_id"`
+		ClusterType            string   `json:"cluster_type"`
+		DockerVersion          string   `json:"docker_version"`
+		DataDiskCategory       string   `json:"data_disk_category"`
+		NextVersion            string   `json:"next_version"`
+		ZoneID                 string   `json:"zone_id"`
+		ClusterID              string   `json:"cluster_id"`
+		Department             int      `json:"Department"`
+		ExternalLoadbalancerID string   `json:"external_loadbalancer_id"`
 		//MetaData struct {
 		//	Addons []struct {
 		//		//Config      string      `json:"config"`
