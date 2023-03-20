@@ -42,6 +42,8 @@ resource "alibabacloudstack_kvstore_instance" "default" {
   private_ip     = "172.16.0.10"
   security_ips   = ["10.0.0.1"]
   instance_type  = "Redis"
+      cpu_type = "intel"
+  architecture_type = "standard"
 }
 ```
 
@@ -68,7 +70,8 @@ The following arguments are supported:
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 * `maintain_start_time` - (Optional) The start time of the operation and maintenance time period of the instance, in the format of HH:mmZ (UTC time).
 * `maintain_end_time` - (Optional) The end time of the operation and maintenance time period of the instance, in the format of HH:mmZ (UTC time).
-
+* `architecture_type` - (Required) The architecture type of the resource. Valid values: `standard`.
+* `cpu_type` - (Required) The cpu type of the resource.Valid values: `intel`.
 -> **NOTE:** The start time to the end time must be 1 hour. For example, the MaintainStartTime is 01:00Z, then the MaintainEndTime must be 02:00Z.
 
 ## Attributes Reference
