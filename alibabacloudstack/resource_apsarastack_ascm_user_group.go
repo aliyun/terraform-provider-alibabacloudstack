@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -32,11 +33,11 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			//"role_ids": {
-			//	Type:     schema.TypeList,
-			//	Computed: true,
-			//	Elem:     &schema.Schema{Type: schema.TypeInt},
-			//},
+			"role_in_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 			"role_ids": {
 				Type:     schema.TypeSet,
 				Computed: true,
@@ -51,26 +52,30 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 	var requestInfo *ecs.Client
 
 	groupName := d.Get("group_name").(string)
-
 	organizationId := d.Get("organization_id").(string)
-	if organizationId == "" {
-		organizationId = client.Department
+
+	var loginNamesList []string
+
+	if v, ok := d.GetOk("role_in_ids"); ok {
+		loginNames := expandStringList(v.(*schema.Set).List())
+
+		for _, loginName := range loginNames {
+			loginNamesList = append(loginNamesList, loginName)
+		}
 	}
 
 	request := requests.NewCommonRequest()
 	if client.Config.Insecure {
 		request.SetHTTPSInsecure(client.Config.Insecure)
 	}
-	request.QueryParams = map[string]string{
-		"RegionId":        client.RegionId,
-		"AccessKeySecret": client.SecretKey,
-		"Product":         "Ascm",
-		"Action":          "CreateUserGroup",
-		"Version":         "2019-05-10",
-		"ProductName":     "ascm",
-		"groupName":       groupName,
-		"OrganizationId":  organizationId,
-		//"roleIdList":      ,
+
+	request.Headers["x-ascm-product-name"] = "ascm"
+	request.Headers["x-ascm-product-version"] = "2019-05-10"
+
+	QueryParams := map[string]interface{}{
+		"groupName":      groupName,
+		"organizationId": organizationId,
+		"roleIdList":     loginNamesList,
 	}
 
 	request.Method = "POST"
@@ -78,14 +83,19 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 	request.Version = "2019-05-10"
 	request.ServiceCode = "ascm"
 	request.Domain = client.Domain
+	requeststring, err := json.Marshal(QueryParams)
+
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
 		request.Scheme = "http"
 	}
+	request.Headers["Content-Type"] = requests.Json
+	request.SetContent(requeststring)
+	request.PathPattern = "/roa/ascm/auth/user/createUserGroup"
 	request.ApiName = "CreateUserGroup"
 	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.Headers["RegionId"] = client.RegionId
 
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
