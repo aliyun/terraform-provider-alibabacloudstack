@@ -43,6 +43,7 @@ func TestAccAlibabacloudStackAscm_User_Group_Basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"group_name":      name,
 					"organization_id": org_id,
+					"role_in_ids":     []string{"2", "6"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),

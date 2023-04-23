@@ -32,6 +32,11 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBinding() *schema.Resource
 				Required: true,
 				ForceNew: true,
 			},
+			"ascm_role_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -61,7 +66,7 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate(d *schema.Re
 	//	return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_organization", "ORG alreadyExist", AlibabacloudStackSdkGoERROR)
 	//}
 	//if len(check.Data) == 0 {
-
+	ascmRoleId := d.Get("ascm_role_id").(string)
 	request := requests.NewCommonRequest()
 	request.Method = "POST"
 	request.Product = "Ascm"
@@ -84,7 +89,7 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate(d *schema.Re
 		"Action":          "AddResourceSetToUserGroup",
 		"Version":         "2019-05-10",
 		"ProductName":     "ascm",
-		"ascmRoleId":      "2",
+		"ascmRoleId":      ascmRoleId,
 		"userGroupId":     userGroupId,
 		"resourceSetId":   resourceSetId,
 	}

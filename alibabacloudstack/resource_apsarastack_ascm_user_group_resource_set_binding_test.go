@@ -5,7 +5,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/hashicorp/terraform/helper/acctest"
 	"testing"
 )
 
@@ -16,8 +15,6 @@ func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding(t *testing.T) {
 	serviceFunc := func() interface{} {
 		return &AscmService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rand := acctest.RandInt()
-	name := fmt.Sprintf("tf-ascmusergroup%v", rand)
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -33,7 +30,7 @@ func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding(t *testing.T) {
 		CheckDestroy: testAccCheckAscmUserGroupResourceSetBindingDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckAscmUserGroupResourceSetRoleBinding, name),
+				Config: fmt.Sprintf(testAccCheckAscmUserGroupResourceSetRoleBinding),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -72,11 +69,6 @@ resource "alibabacloudstack_ascm_organization" "default" {
  parent_id = "1"
 }
 
-resource "alibabacloudstack_ascm_user_group" "default" {
- group_name =      "%s"
- organization_id = alibabacloudstack_ascm_organization.default.org_id
-}
-
 
 resource "alibabacloudstack_ascm_resource_group" "default" {
   organization_id = alibabacloudstack_ascm_organization.default.org_id
@@ -85,7 +77,8 @@ resource "alibabacloudstack_ascm_resource_group" "default" {
 
 resource "alibabacloudstack_ascm_user_group_resource_set_binding" "default" {
   resource_set_id = alibabacloudstack_ascm_resource_group.default.rg_id
-  user_group_id = alibabacloudstack_ascm_user_group.default.user_group_id
+  user_group_id = "82"
+ascm_role_id="2"
 }
 `
 
