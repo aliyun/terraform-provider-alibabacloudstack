@@ -62,16 +62,22 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 	request.ApiName = "CreateNamespace"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
-		"Product":         "cr-ee",
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"RegionId":        client.RegionId,
-		"Action":          "CreateNamespace",
-		"Version":         "2016-06-07",
-		"X-acs-body": fmt.Sprintf("{\"%s\":{\"%s\":\"%s\"}}",
-			"Namespace", "Namespace", namespaceName),
+		"AccessKeySecret":  client.SecretKey,
+		"AccessKeyId":      client.AccessKey,
+		"Product":          "cr",
+		"Department":       client.Department,
+		"ResourceGroup":    client.ResourceGroup,
+		"RegionId":         client.RegionId,
+		"Action":           "CreateNamespace",
+		"Version":          "2016-06-07",
+		"Format":           "JSON",
+		"NamespaceName":    namespaceName,
+		"Arch":             "x86_64",
+		"HaApsaraStack":    "false",
+		"SignatureVersion": "2.1",
+		"Language":         "zh",
+		"X-acs-body": fmt.Sprintf("{\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%d\",\"%s\":\"%d\"}}",
+			"namespace", "NamespaceName", namespaceName, "namespace", namespaceName, "Language", "zh", "haApsaraStack", "false", "arch", "x86_64", "RegionId", "cn-wulan-env48-d01", "Department", 37, "ResourceGroup", 124),
 	}
 	raw, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
 		return crClient.ProcessCommonRequest(request)
@@ -90,15 +96,20 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 	visibility := d.Get("default_visibility").(string)
 	if create == false || visibility == "PUBLIC" {
 		request.ApiName = "UpdateNamespace"
+		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-instanceId": namespaceName, "x-acs-content-type": "application/json;charset=UTF-8", "Content-type": "application/json;charset=UTF-8"}
+		request.SetContentType("application/json")
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
-			"Product":         "cr",
-			"Department":      client.Department,
-			"ResourceGroup":   client.ResourceGroup,
-			"RegionId":        client.RegionId,
-			"Action":          "UpdateNamespace",
-			"Version":         "2016-06-07",
+			"AccessKeySecret":  client.SecretKey,
+			"AccessKeyId":      client.AccessKey,
+			"Product":          "cr",
+			"Department":       client.Department,
+			"ResourceGroup":    client.ResourceGroup,
+			"RegionId":         client.RegionId,
+			"Action":           "UpdateNamespace",
+			"Method":           "POST",
+			"Version":          "2016-06-07",
+			"SignatureVersion": "2.1",
+			"Accept-Language":  "zh-CN",
 			"X-acs-body": fmt.Sprintf("{\"%s\":{\"%s\":%t,\"%s\":\"%s\"}}",
 				"Namespace", "AutoCreate", create, "DefaultVisibility", visibility),
 			"Namespace": namespaceName,
@@ -141,15 +152,20 @@ func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta int
 			request.Scheme = "http"
 		}
 		request.ApiName = "UpdateNamespace"
+		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-instanceId": d.Id(), "x-acs-content-type": "application/json;charset=UTF-8", "Content-type": "application/json;charset=UTF-8"}
+		request.SetContentType("application/json")
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
-			"Product":         "cr",
-			"Department":      client.Department,
-			"ResourceGroup":   client.ResourceGroup,
-			"RegionId":        client.RegionId,
-			"Action":          "UpdateNamespace",
-			"Version":         "2016-06-07",
+			"AccessKeySecret":  client.SecretKey,
+			"AccessKeyId":      client.AccessKey,
+			"Product":          "cr",
+			"Department":       client.Department,
+			"ResourceGroup":    client.ResourceGroup,
+			"RegionId":         client.RegionId,
+			"Action":           "UpdateNamespace",
+			"Method":           "POST",
+			"Version":          "2016-06-07",
+			"SignatureVersion": "2.1",
+			"Accept-Language":  "zh-CN",
 			"X-acs-body": fmt.Sprintf("{\"%s\":{\"%s\":%t,\"%s\":\"%s\"}}",
 				"Namespace", "AutoCreate", create, "DefaultVisibility", visibility),
 			"Namespace": d.Id(),
