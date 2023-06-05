@@ -96,6 +96,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"vpc_id":               "${var.vpc_id}",
 					"master_count":         "3",
 					"master_disk_category": "cloud_ssd",
+					"image_id":             "${var.image_id}",
 					//"master_disk_category":  "cloud_sperf",
 					"master_disk_size":      "120",
 					"master_instance_types": "${var.master_instance_types}",
@@ -183,7 +184,9 @@ variable "k8s_number" {
   default     = 1
 }
 
-
+variable "image_id" {
+  default     = "centos_7_9_x64_20G_alibase_20220322.vhd"
+}
 
 # leave it to empty would create a new one
 variable "vpc_id" {
