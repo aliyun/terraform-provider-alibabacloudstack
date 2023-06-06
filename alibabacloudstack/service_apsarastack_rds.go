@@ -1541,10 +1541,8 @@ func (s *RdsService) setInstanceTags(d *schema.ResourceData) error {
 }
 
 func (s *RdsService) describeTags(d *schema.ResourceData) (tags []Tag, err error) {
-	//request := rds.CreateDescribeTagsRequest()
-	request := rds.CreateListTagResourcesRequest()
-	request.ResourceId = &[]string{d.Id()}
-	request.ResourceType = "INSTANCE"
+	request := rds.CreateDescribeTagsRequest()
+	request.DBInstanceId = d.Id()
 	if strings.ToLower(s.client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -1554,7 +1552,7 @@ func (s *RdsService) describeTags(d *schema.ResourceData) (tags []Tag, err error
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
 	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	raw, err := s.client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
-		return client.ListTagResources(request)
+		return client.DescribeTags(request)
 	})
 	if err != nil {
 		tmp := make([]Tag, 0)
@@ -1563,11 +1561,11 @@ func (s *RdsService) describeTags(d *schema.ResourceData) (tags []Tag, err error
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	response, _ := raw.(*rds.ListTagResourcesResponse)
-	return s.respToTags(response.TagResources.TagResource), nil
+	response, _ := raw.(*rds.DescribeTagsResponse)
+	return s.respToTags(response.Items.TagInfos), nil
 }
 
-func (s *RdsService) respToTags(tagSet []rds.TagResource) (tags []Tag) {
+func (s *RdsService) respToTags(tagSet []rds.TagInfos) (tags []Tag) {
 	result := make([]Tag, 0, len(tagSet))
 	for _, t := range tagSet {
 		tag := Tag{
