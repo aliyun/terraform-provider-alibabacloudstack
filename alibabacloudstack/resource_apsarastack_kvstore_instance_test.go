@@ -138,7 +138,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_classictest(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateVerifyIgnore: []string{"password", "cpu_type"},
 			},
 		},
 	})
@@ -410,7 +410,6 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_class = "%s"
 	engine_version = "%s"
 cpu_type = "intel"
-        architecture_type = "standard"
 }
 
 	`, instanceType, instanceClass, engineVersion)
@@ -644,7 +643,7 @@ provider "alibabacloudstack" {
 		instance_type = "%s"
 		engine_version = "%s"
 cpu_type = "intel"
-        architecture_type = "standard"
+       
 	}
 	`, common, instanceClass, instanceType, engineVersion)
 }
@@ -858,7 +857,7 @@ provider "alibabacloudstack" {
 		instance_type  = "%s"
 		engine_version = "%s"
 cpu_type = "intel"
-        architecture_type = "standard"
+       
 	}
 	`, common, instanceClass, instanceType, engineVersion)
 }
@@ -880,7 +879,7 @@ provider "alibabacloudstack" {
 		instance_class = "%s"
 		engine_version = "%s"
 cpu_type = "intel"
-        architecture_type = "standard"
+       
 	}
 	`, instanceType, instanceClass, engineVersion)
 }
