@@ -71,7 +71,7 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			"master_disk_category": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  DiskCloudEfficiency,
+				Default:  DiskCloudSSD,
 				ValidateFunc: validation.StringInSlice([]string{
 					string(DiskCloudEfficiency), string(DiskCloudSSD), string(DiskCloudPPERF), string(DiskCloudSPERF)}, false),
 				DiffSuppressFunc: csForceUpdateSuppressFunc,
@@ -95,7 +95,7 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			"worker_disk_category": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  DiskCloudEfficiency,
+				Default:  DiskCloudSSD,
 				ValidateFunc: validation.StringInSlice([]string{
 					string(DiskCloudEfficiency), string(DiskCloudSSD), string(DiskCloudPPERF), string(DiskCloudSPERF)}, false),
 				DiffSuppressFunc: csForceUpdateSuppressFunc,

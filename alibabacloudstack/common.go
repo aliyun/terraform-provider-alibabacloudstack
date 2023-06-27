@@ -427,6 +427,17 @@ func BuildStateConf(pending, target []string, timeout, delay time.Duration, f re
 		MinTimeout: 3 * time.Second,
 	}
 }
+func BuildStateConfByTimes(pending, target []string, timeout, delay time.Duration, f resource.StateRefreshFunc, notFoundChecks int) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending:        pending,
+		Target:         target,
+		Refresh:        f,
+		Timeout:        timeout,
+		Delay:          delay,
+		MinTimeout:     3 * time.Second,
+		NotFoundChecks: notFoundChecks,
+	}
+}
 func convertJsonStringToList(configured string) ([]interface{}, error) {
 	result := make([]interface{}, 0)
 	if err := json.Unmarshal([]byte(configured), &result); err != nil {
