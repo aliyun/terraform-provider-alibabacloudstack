@@ -1067,6 +1067,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	} // Set request scheme. Default: http
 	request.ApiName = "CreateCluster"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
 
 	var err error
 	err = nil
