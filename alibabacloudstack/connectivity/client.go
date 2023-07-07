@@ -1156,9 +1156,14 @@ func (client *AlibabacloudStackClient) WithCsClient(do func(*cs.Client) (interfa
 			return nil, fmt.Errorf("unable to initialize the cs client: endpoint or domain is not provided for cs service")
 		}
 		if endpoint != "" {
-			if !strings.HasPrefix(endpoint, "http") {
-				endpoint = fmt.Sprintf("https://%s", strings.TrimPrefix(endpoint, "://"))
+			if strings.HasPrefix(endpoint, "http") {
+				endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
 			}
+			if strings.ToLower(client.Config.Protocol) == "https" {
+				endpoint = fmt.Sprintf("https://%s", endpoint)
+			} else {
+				endpoint = fmt.Sprintf("http://%s", endpoint)
+			}				
 			csconn.SetEndpoint(endpoint)
 		}
 		if client.Config.Proxy != "" {
