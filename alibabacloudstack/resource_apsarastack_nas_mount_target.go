@@ -71,6 +71,8 @@ func resourceAlibabacloudStackNasMountTargetCreate(d *schema.ResourceData, meta 
 	request["RegionId"] = client.RegionId
 	request["Product"] = "Nas"
 	request["OrganizationId"] = client.Department
+	request["Department"] = client.Department
+	request["ResourceGroup"] = client.ResourceGroup
 	request["FileSystemId"] = d.Get("file_system_id")
 	request["NetworkType"] = string(Classic)
 	if v, ok := d.GetOk("security_group_id"); ok {
@@ -156,6 +158,8 @@ func resourceAlibabacloudStackNasMountTargetUpdate(d *schema.ResourceData, meta 
 	request["RegionId"] = client.RegionId
 	request["Product"] = "Nas"
 	request["OrganizationId"] = client.Department
+	request["Department"] = client.Department
+	request["ResourceGroup"] = client.ResourceGroup
 	if !d.IsNewResource() && d.HasChange("access_group_name") {
 		update = true
 		request["AccessGroupName"] = d.Get("access_group_name")
@@ -211,6 +215,8 @@ func resourceAlibabacloudStackNasMountTargetDelete(d *schema.ResourceData, meta 
 	request["RegionId"] = client.RegionId
 	request["Product"] = "Nas"
 	request["OrganizationId"] = client.Department
+	request["Department"] = client.Department
+	request["ResourceGroup"] = client.ResourceGroup
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
