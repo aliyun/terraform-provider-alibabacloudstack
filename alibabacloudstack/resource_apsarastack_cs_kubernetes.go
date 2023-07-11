@@ -1191,6 +1191,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 		} // Set request scheme. Default: http
 		request.ApiName = "ScaleClusterNodePool"
 		request.Headers = map[string]string{"RegionId": client.RegionId}
+		request.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
 		//var err error
 		err = nil
 		if err = invoker.Run(func() error {
@@ -1306,6 +1307,7 @@ func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta in
 	} // Set request scheme. Default: http
 	request.ApiName = "DeleteCluster"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
 	var response interface{}
 	err := resource.Retry(30*time.Minute, func() *resource.RetryError {
 		if err := invoker.Run(func() error {
