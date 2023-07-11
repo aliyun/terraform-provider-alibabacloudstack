@@ -1129,7 +1129,13 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 	}
 	var nodepoolid string
 	for _, k := range nodepool.Nodepools {
-		nodepoolid = k.NodepoolInfo.NodepoolID
+		//Considering multiple nodepools
+		if k.NodepoolInfo.IsDefault {
+		    nodepoolid = k.NodepoolInfo.NodepoolID
+		}
+	}
+	if nodepoolid == "" {
+		return WrapErrorf(fmt.Errorf("can not found default node_pool"), "DescribeClusterNodePools", nodepool.Nodepools)
 	}
 	if d.HasChange("num_of_nodes") && !d.IsNewResource() {
 		password := d.Get("password").(string)
