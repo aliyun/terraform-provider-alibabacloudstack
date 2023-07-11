@@ -106,6 +106,8 @@ func resourceAlibabacloudStackNasAccessGroupCreate(d *schema.ResourceData, meta 
 	request["RegionId"] = client.RegionId
 	request["Product"] = "Nas"
 	request["OrganizationId"] = client.Department
+	request["Department"] = client.Department
+	request["ResourceGroup"] = client.ResourceGroup
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
@@ -173,6 +175,8 @@ func resourceAlibabacloudStackNasAccessGroupUpdate(d *schema.ResourceData, meta 
 		request["RegionId"] = client.RegionId
 		request["Product"] = "Nas"
 		request["OrganizationId"] = client.Department
+		request["Department"] = client.Department
+	        request["ResourceGroup"] = client.ResourceGroup
 		action := "ModifyAccessGroup"
 		conn, err := client.NewNasClient()
 		if err != nil {
@@ -219,6 +223,8 @@ func resourceAlibabacloudStackNasAccessGroupDelete(d *schema.ResourceData, meta 
 	request["RegionId"] = client.RegionId
 	request["Product"] = "Nas"
 	request["OrganizationId"] = client.Department
+	request["Department"] = client.Department
+	request["ResourceGroup"] = client.ResourceGroup
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})

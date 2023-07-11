@@ -95,6 +95,8 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 	request["ProtocolType"] = d.Get("protocol_type")
 	request["Product"] = "Nas"
 	request["OrganizationId"] = client.Department
+	request["Department"] = client.Department
+	request["ResourceGroup"] = client.ResourceGroup
 	if v, ok := d.GetOk("file_system_type"); ok {
 		request["FileSystemType"] = v
 	}
@@ -150,6 +152,8 @@ func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta i
 		request["Description"] = d.Get("description")
 		request["Product"] = "Nas"
 		request["OrganizationId"] = client.Department
+		request["Department"] = client.Department
+	        request["ResourceGroup"] = client.ResourceGroup
 		action := "ModifyFileSystem"
 		conn, err := client.NewNasClient()
 		if err != nil {
@@ -213,6 +217,8 @@ func resourceAlibabacloudStackNasFileSystemDelete(d *schema.ResourceData, meta i
 	request["RegionId"] = client.RegionId
 	request["Product"] = "Nas"
 	request["OrganizationId"] = client.Department
+	request["Department"] = client.Department
+	request["ResourceGroup"] = client.ResourceGroup
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})

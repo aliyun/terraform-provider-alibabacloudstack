@@ -74,6 +74,8 @@ func resourceAlibabacloudStackNasAccessRuleCreate(d *schema.ResourceData, meta i
 	request["SourceCidrIp"] = d.Get("source_cidr_ip")
 	request["Product"] = "Nas"
 	request["OrganizationId"] = client.Department
+	request["Department"] = client.Department
+	request["ResourceGroup"] = client.ResourceGroup
 	if v, ok := d.GetOk("rw_access_type"); ok && v.(string) != "" {
 		request["RWAccessType"] = v
 	}
@@ -116,6 +118,8 @@ func resourceAlibabacloudStackNasAccessRuleUpdate(d *schema.ResourceData, meta i
 	}
 	request["Product"] = "Nas"
 	request["OrganizationId"] = client.Department
+	request["Department"] = client.Department
+	request["ResourceGroup"] = client.ResourceGroup
 	update := false
 	if d.HasChange("source_cidr_ip") {
 		update = true
@@ -209,6 +213,8 @@ func resourceAlibabacloudStackNasAccessRuleDelete(d *schema.ResourceData, meta i
 	}
 	request["Product"] = "Nas"
 	request["OrganizationId"] = client.Department
+	request["Department"] = client.Department
+	request["ResourceGroup"] = client.ResourceGroup
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
