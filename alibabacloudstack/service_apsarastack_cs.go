@@ -3,6 +3,10 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -10,9 +14,6 @@ import (
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"log"
-	"strings"
-	"time"
 )
 
 type CsService struct {
@@ -149,7 +150,7 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 		"Version":          "2015-12-15",
 		"SignatureVersion": "1.0",
 		"ProductName":      "cs",
-		"NodepoolId":       nodepoolid,
+		"nodepool_id":      nodepoolid,
 		"ClusterId":        id,
 	}
 	request.Method = "POST" // Set request method
@@ -258,9 +259,9 @@ func (s *CsService) CsKubernetesInstanceStateRefreshFunc(id string, failStates [
 		return object, object.State, nil
 	}
 }
-func (s *CsService) CsKubernetesNodePoolStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+func (s *CsService) CsKubernetesNodePoolStateRefreshFunc(id, clusterid string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		object, err := s.DescribeCsKubernetesNodePool(id)
+		object, err := s.DescribeCsKubernetesNodePool(id, clusterid)
 		if err != nil {
 			if NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
@@ -270,53 +271,68 @@ func (s *CsService) CsKubernetesNodePoolStateRefreshFunc(id string, failStates [
 		}
 
 		for _, failState := range failStates {
-			if string(object.State) == failState {
-				return object, string(object.State), WrapError(Error(FailedToReachTargetStatus, string(object.State)))
+			if string(object.Status.State) == failState {
+				return object, string(object.Status.State), WrapError(Error(FailedToReachTargetStatus, string(object.Status.State)))
 			}
 		}
-		return object, string(object.State), nil
+		return object, string(object.Status.State), nil
 	}
 }
-func (s *CsService) DescribeCsKubernetesNodePool(id string) (nodePool *cs.NodePoolDetail, err error) {
-	invoker := NewInvoker()
-	var requestInfo *cs.Client
-	var response interface{}
+func (s *CsService) DescribeCsKubernetesNodePool(id, clusterid string) (*NodePoolAlone, error) {
+	req := requests.NewCommonRequest()
+	if s.client.Config.Insecure {
+		req.SetHTTPSInsecure(s.client.Config.Insecure)
+	}
+	req.QueryParams = map[string]string{
+		"RegionId":         s.client.RegionId,
+		"AccessKeySecret":  s.client.SecretKey,
+		"Product":          "CS",
+		"Department":       s.client.Department,
+		"ResourceGroup":    s.client.ResourceGroup,
+		"Action":           "DescribeClusterNodePoolDetail",
+		"AccountInfo":      "123456",
+		"Version":          "2015-12-15",
+		"SignatureVersion": "1.0",
+		"ProductName":      "cs",
+		"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\"}",
 
-	parts, err := ParseResourceId(id, 2)
+			"ClusterId", clusterid,
+			"NodepoolId", id,
+		),
+	}
+	req.Method = "POST"        // Set request method
+	req.Product = "CS"         // Specify product
+	req.Version = "2015-12-15" // Specify product version
+	req.ServiceCode = "cs"
+	if strings.ToLower(s.client.Config.Protocol) == "https" {
+		req.Scheme = "https"
+	} else {
+		req.Scheme = "http"
+	} // Set request scheme. Default: http
+	req.ApiName = "DescribeClusterNodePoolDetail"
+	req.Headers = map[string]string{"RegionId": s.client.RegionId}
+	req.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
+	//if err = invoker.Run(func() error {
+	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.ProcessCommonRequest(req)
+	})
+	//return err
 	if err != nil {
-		return nil, WrapError(err)
-	}
-	clusterId := parts[0]
-	nodePoolId := parts[1]
-
-	if err := invoker.Run(func() error {
-		raw, err := s.client.WithCsClient(func(csClient *cs.Client) (interface{}, error) {
-			requestInfo = csClient
-			return csClient.DescribeNodePoolDetail(clusterId, nodePoolId)
-		})
-		response = raw
-		return err
-	}); err != nil {
-		if e, ok := err.(*common.Error); ok {
-			for _, code := range []int{400} {
-				if e.StatusCode == code {
-					return nil, WrapErrorf(err, NotFoundMsg, DenverdinoAliyungo)
-				}
-			}
+		if IsExpectedErrors(err, []string{"<QuerySeter> no row found"}) {
+			return nil, WrapErrorf(err, NotFoundMsg, DenverdinoAlibabacloudStackgo)
 		}
-		return nil, WrapErrorf(err, DefaultErrorMsg, nodePoolId, "DescribeNodePool", DenverdinoAliyungo)
+		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_nodepool", "DescribeNodePool", raw)
 	}
-	if debugOn() {
-		requestMap := make(map[string]interface{})
-		requestMap["ClusterId"] = clusterId
-		requestMap["NodePoolId"] = nodePoolId
-		addDebug("DescribeNodepool", response, requestInfo, requestMap)
+	var node *NodePoolAlone
+	nodePool, _ := raw.(*responses.CommonResponse)
+	if nodePool.IsSuccess() == false {
+		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", nodePool.GetHttpContentString())
 	}
-	nodePool, _ = response.(*cs.NodePoolDetail)
-	if nodePool.NodePoolId != nodePoolId {
-		return nil, WrapErrorf(Error(GetNotFoundMessage("CsNodePool", nodePoolId)), NotFoundMsg, ProviderERROR)
+	ok := json.Unmarshal(nodePool.GetHttpContentBytes(), &node)
+	if ok != nil {
+		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_nodepool", "ParsenodepoolResponse", raw)
 	}
-	return
+	return node, nil
 }
 func (s *CsService) UpgradeCluster(clusterId string, args *cs.UpgradeClusterArgs) error {
 	invoker := NewInvoker()
@@ -568,81 +584,74 @@ type NodePools struct {
 	} `json:"page"`
 }
 type NodePool struct {
-	Nodepools []struct {
-		TeeConfig struct {
-			TeeEnable bool   `json:"tee_enable"`
-			TeeType   string `json:"tee_type"`
-		} `json:"tee_config"`
-		ScalingGroup struct {
-			InstanceTypes         []string      `json:"instance_types"`
-			PeriodUnit            string        `json:"period_unit"`
-			SecurityGroupID       string        `json:"security_group_id"`
-			MultiAzPolicy         string        `json:"multi_az_policy"`
-			Platform              string        `json:"platform"`
-			WorkerHpcClusterID    string        `json:"worker_hpc_cluster_id"`
-			DataDisks             []interface{} `json:"data_disks"`
-			RAMPolicy             string        `json:"ram_policy"`
-			LoginPassword         string        `json:"login_password"`
-			InstanceChargeType    string        `json:"instance_charge_type"`
-			VswitchIds            []string      `json:"vswitch_ids"`
-			ScalingGroupID        string        `json:"scaling_group_id"`
-			Period                int           `json:"period"`
-			AutoRenewPeriod       int           `json:"auto_renew_period"`
-			WorkerDeploymentsetID string        `json:"worker_deploymentset_id"`
-			KeyPair               string        `json:"key_pair"`
-			SpotStrategy          string        `json:"spot_strategy"`
-			SystemDiskSize        int           `json:"system_disk_size"`
-			Tags                  []struct {
-				Value string `json:"value"`
-				Key   string `json:"key"`
-			} `json:"tags"`
-			SpotPriceLimit                   []interface{} `json:"spot_price_limit"`
-			AutoRenew                        bool          `json:"auto_renew"`
-			SystemDiskCategory               string        `json:"system_disk_category"`
-			RdsInstances                     []interface{} `json:"rds_instances"`
-			WorkerSystemDiskSnapshotPolicyID string        `json:"worker_system_disk_snapshot_policy_id"`
-			ImageID                          string        `json:"image_id"`
-			ScalingPolicy                    string        `json:"scaling_policy"`
-		} `json:"scaling_group"`
-		KubernetesConfig struct {
-			RuntimeVersion    string `json:"runtime_version"`
-			CPUPolicy         string `json:"cpu_policy"`
-			CmsEnabled        bool   `json:"cms_enabled"`
-			Runtime           string `json:"runtime"`
-			OverwriteHostname bool   `json:"overwrite_hostname"`
-			UserData          string `json:"user_data"`
-			NodeNameMode      string `json:"node_name_mode"`
-		} `json:"kubernetes_config"`
-		AutoScaling struct {
-			HealthCheckType       string `json:"health_check_type"`
-			EipInternetChargeType string `json:"eip_internet_charge_type"`
-			Enable                bool   `json:"enable"`
-			MaxInstances          int    `json:"max_instances"`
-			MinInstances          int    `json:"min_instances"`
-			Type                  string `json:"type"`
-			EipBandwidth          int    `json:"eip_bandwidth"`
-		} `json:"auto_scaling"`
-		NodepoolInfo struct {
-			ResourceGroupID string    `json:"resource_group_id"`
-			Created         time.Time `json:"created"`
-			RegionID        string    `json:"region_id"`
-			Name            string    `json:"name"`
-			IsDefault       bool      `json:"is_default"`
-			Type            string    `json:"type"`
-			NodepoolID      string    `json:"nodepool_id"`
-			Updated         time.Time `json:"updated"`
-		} `json:"nodepool_info"`
-		Status struct {
-			ServingNodes  int    `json:"serving_nodes"`
-			TotalNodes    int    `json:"total_nodes"`
-			State         string `json:"state"`
-			OfflineNodes  int    `json:"offline_nodes"`
-			RemovingNodes int    `json:"removing_nodes"`
-			InitialNodes  int    `json:"initial_nodes"`
-			FailedNodes   int    `json:"failed_nodes"`
-			HealthyNodes  int    `json:"healthy_nodes"`
-		} `json:"status"`
-	} `json:"nodepools"`
+	Nodepools []NodePoolAlone `json:"nodepools"`
+}
+type NodePoolAlone struct {
+	TeeConfig struct {
+		TeeEnable bool   `json:"tee_enable"`
+		TeeType   string `json:"tee_type"`
+	} `json:"tee_config"`
+	ScalingGroup struct {
+		InstanceTypes                    []string              `json:"instance_types"`
+		PeriodUnit                       string                `json:"period_unit"`
+		SecurityGroupID                  string                `json:"security_group_id"`
+		MultiAzPolicy                    string                `json:"multi_az_policy"`
+		Platform                         string                `json:"platform"`
+		WorkerHpcClusterID               string                `json:"worker_hpc_cluster_id"`
+		DataDisks                        []cs.NodePoolDataDisk `json:"data_disks"`
+		RAMPolicy                        string                `json:"ram_policy"`
+		LoginPassword                    string                `json:"login_password"`
+		InstanceChargeType               string                `json:"instance_charge_type"`
+		VswitchIds                       []string              `json:"vswitch_ids"`
+		ScalingGroupID                   string                `json:"scaling_group_id"`
+		Period                           int                   `json:"period"`
+		AutoRenewPeriod                  int                   `json:"auto_renew_period"`
+		WorkerDeploymentsetID            string                `json:"worker_deploymentset_id"`
+		KeyPair                          string                `json:"key_pair"`
+		SpotStrategy                     string                `json:"spot_strategy"`
+		SystemDiskSize                   int                   `json:"system_disk_size"`
+		Tags                             []cs.Tag              `json:"tags"`
+		SpotPriceLimit                   []cs.SpotPrice        `json:"spot_price_limit"`
+		AutoRenew                        bool                  `json:"auto_renew"`
+		SystemDiskCategory               string                `json:"system_disk_category"`
+		RdsInstances                     []interface{}         `json:"rds_instances"`
+		WorkerSystemDiskSnapshotPolicyID string                `json:"worker_system_disk_snapshot_policy_id"`
+		ImageID                          string                `json:"image_id"`
+		ScalingPolicy                    string                `json:"scaling_policy"`
+	} `json:"scaling_group"`
+	KubernetesConfig struct {
+		RuntimeVersion    string     `json:"runtime_version"`
+		CPUPolicy         string     `json:"cpu_policy"`
+		CmsEnabled        bool       `json:"cms_enabled"`
+		Runtime           string     `json:"runtime"`
+		OverwriteHostname bool       `json:"overwrite_hostname"`
+		UserData          string     `json:"user_data"`
+		NodeNameMode      string     `json:"node_name_mode"`
+		Unschedulable     bool       `json:"unschedulable"`
+		Taints            []cs.Taint `json:"taints"`
+		Labels            []cs.Label `json:"labels"`
+	} `json:"kubernetes_config"`
+	AutoScaling  cs.AutoScaling `json:"auto_scaling"`
+	NodepoolInfo struct {
+		ResourceGroupID string    `json:"resource_group_id"`
+		Created         time.Time `json:"created"`
+		RegionID        string    `json:"region_id"`
+		Name            string    `json:"name"`
+		IsDefault       bool      `json:"is_default"`
+		Type            string    `json:"type"`
+		NodepoolID      string    `json:"nodepool_id"`
+		Updated         time.Time `json:"updated"`
+	} `json:"nodepool_info"`
+	Status struct {
+		ServingNodes  int    `json:"serving_nodes"`
+		TotalNodes    int    `json:"total_nodes"`
+		State         string `json:"state"`
+		OfflineNodes  int    `json:"offline_nodes"`
+		RemovingNodes int    `json:"removing_nodes"`
+		InitialNodes  int    `json:"initial_nodes"`
+		FailedNodes   int    `json:"failed_nodes"`
+		HealthyNodes  int    `json:"healthy_nodes"`
+	} `json:"status"`
 }
 type ClustersV1 struct {
 	Redirect        bool   `json:"redirect"`
