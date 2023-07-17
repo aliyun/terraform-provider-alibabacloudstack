@@ -506,11 +506,11 @@ func resourceAlibabacloudStackCSKubernetesNodePoolCreate(d *schema.ResourceData,
 	request.ApiName = "CreateClusterNodePool"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
-	log.Printf("@@@@@@@@@@@@@@@@@@@@@@ %s", request)
+	
 
 	if err = invoker.Run(func() error {
 		raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			//log.Printf("##################### %s", *csClient)
+			
 			return ecsClient.ProcessCommonRequest(request)
 		})
 		return err
@@ -535,7 +535,7 @@ func resourceAlibabacloudStackCSKubernetesNodePoolCreate(d *schema.ResourceData,
 	if ok != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "ParseKubernetesNodePoolResponse", raw)
 	}
-	log.Printf("YYYYYYYYYYYYYYYYYYYYYYY %s", nodepoolresponse)
+	
 	d.SetId(nodepoolresponse.NodePoolID)
 
 	// reset interval to 10s
