@@ -4,12 +4,16 @@ import (
 	//	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"log"
 	"strings"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+
 	//	"github.com/aliyun/alibaba-cloud-sdk-go/services/cs"
+	"regexp"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/denverdino/aliyungo/common"
@@ -17,8 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"regexp"
-	"time"
 )
 
 const (
@@ -1129,8 +1131,15 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 	}
 	var nodepoolid string
 	for _, k := range nodepool.Nodepools {
-		nodepoolid = k.NodepoolInfo.NodepoolID
+		//Considering multiple nodepools
+		if k.NodepoolInfo.IsDefault {
+			nodepoolid = k.NodepoolInfo.NodepoolID
+		}
 	}
+	if nodepoolid == "" {
+		return WrapErrorf(fmt.Errorf("can not found default node_pool"), "DescribeClusterNodePools", nodepool.Nodepools)
+	}
+	d.Set("nodepool_id", nodepoolid)
 	if d.HasChange("num_of_nodes") && !d.IsNewResource() {
 		password := d.Get("password").(string)
 		if password == "" {
@@ -1155,69 +1164,141 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 		}
 
 		if newValue < oldValue {
-			return WrapErrorf(fmt.Errorf("num_of_nodes can not be less than before"), "scaleOutFailed %d:%d", newValue, oldValue)
+			//return WrapErrorf(fmt.Errorf("num_of_nodes can not be less than before"), "scaleOutFailed %d:%d", newValue, oldValue)
+			object, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
+			if err != nil {
+				if NotFoundError(err) {
+					d.SetId("")
+					return nil
+				}
+				return WrapError(err)
+			}
+			var allNodeName []string
+			for _, value := range object.Nodes {
+				allNodeName = append(allNodeName, value.NodeName)
+			}
+			count := oldValue - newValue
+			removeNodesName := allNodeName[:count]
+			if len(removeNodesName) > 0 {
+			}
+			req := requests.NewCommonRequest()
+			if csService.client.Config.Insecure {
+				req.SetHTTPSInsecure(csService.client.Config.Insecure)
+			}
+			req.QueryParams = map[string]string{
+				"RegionId":         csService.client.RegionId,
+				"AccessKeySecret":  csService.client.SecretKey,
+				"Product":          "CS",
+				"Department":       csService.client.Department,
+				"ResourceGroup":    csService.client.ResourceGroup,
+				"Action":           "RemoveClusterNodes",
+				"AccountInfo":      "123456",
+				"Version":          "2015-12-15",
+				"SignatureVersion": "1.0",
+				"ProductName":      "cs",
+
+				"X-acs-body": fmt.Sprintf("{\"%s\":%t,\"%s\":%t,\"%s\":%q,\"%s\":\"%s\"}",
+
+					"release_node", true,
+					"drain_node", true,
+					"nodes", removeNodesName,
+					"ClusterId", d.Id(),
+				),
+			}
+			req.Method = "POST"        // Set request method
+			req.Product = "CS"         // Specify product
+			req.Version = "2015-12-15" // Specify product version
+			req.ServiceCode = "cs"
+			if strings.ToLower(csService.client.Config.Protocol) == "https" {
+				req.Scheme = "https"
+			} else {
+				req.Scheme = "http"
+			} // Set request scheme. Default: http
+			req.ApiName = "RemoveClusterNodes"
+			req.Headers = map[string]string{"RegionId": csService.client.RegionId}
+			req.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
+			if err := invoker.Run(func() error {
+				var err error
+				raw, err = csService.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+					return ecsClient.ProcessCommonRequest(req)
+				})
+
+				return err
+			}); err != nil {
+				return WrapErrorf(err, DefaultErrorMsg, nodepoolid, "DeleteKubernetesClusterNodes", DenverdinoAliyungo)
+			}
+			resp, _ := raw.(*responses.CommonResponse)
+			if resp.IsSuccess() == false {
+				//return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", cluster.GetHttpContentString())
+				return err
+			}
+			stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(nodepoolid, d.Id(), []string{"deleting", "failed"}))
+			if _, err := stateConf.WaitForState(); err != nil {
+				return WrapErrorf(err, IdMsg, d.Id())
+			}
 		}
 
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":         client.RegionId,
-			"AccessKeySecret":  client.SecretKey,
-			"Product":          "CS",
-			"Department":       client.Department,
-			"ResourceGroup":    client.ResourceGroup,
-			"Action":           "ScaleClusterNodePool",
-			"AccountInfo":      "123456",
-			"Version":          "2015-12-15",
-			"SignatureVersion": "1.0",
-			"ProductName":      "cs",
-			"NodepoolId":       nodepoolid,
-			"ClusterId":        d.Id(),
-			"X-acs-body": fmt.Sprintf("{\"%s\":%d}",
+		if newValue > oldValue {
+			request := requests.NewCommonRequest()
+			if client.Config.Insecure {
+				request.SetHTTPSInsecure(client.Config.Insecure)
+			}
+			request.QueryParams = map[string]string{
+				"RegionId":         client.RegionId,
+				"AccessKeySecret":  client.SecretKey,
+				"Product":          "CS",
+				"Department":       client.Department,
+				"ResourceGroup":    client.ResourceGroup,
+				"Action":           "ScaleClusterNodePool",
+				"AccountInfo":      "123456",
+				"Version":          "2015-12-15",
+				"SignatureVersion": "1.0",
+				"ProductName":      "cs",
+				"NodepoolId":       nodepoolid,
+				"ClusterId":        d.Id(),
+				"X-acs-body": fmt.Sprintf("{\"%s\":%d}",
 
-				"count", int64(newValue)-int64(oldValue),
-			),
-		}
-		request.Method = "POST"        // Set request method
-		request.Product = "CS"         // Specify product
-		request.Version = "2015-12-15" // Specify product version
-		request.ServiceCode = "cs"
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		} // Set request scheme. Default: http
-		request.ApiName = "ScaleClusterNodePool"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
-		//var err error
-		err = nil
-		if err = invoker.Run(func() error {
-			raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-				return ecsClient.ProcessCommonRequest(request)
-			})
-			return err
-		}); err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", raw)
-		}
+					"count", int64(newValue)-int64(oldValue),
+				),
+			}
+			request.Method = "POST"        // Set request method
+			request.Product = "CS"         // Specify product
+			request.Version = "2015-12-15" // Specify product version
+			request.ServiceCode = "cs"
+			if strings.ToLower(client.Config.Protocol) == "https" {
+				request.Scheme = "https"
+			} else {
+				request.Scheme = "http"
+			} // Set request scheme. Default: http
+			request.ApiName = "ScaleClusterNodePool"
+			request.Headers = map[string]string{"RegionId": client.RegionId}
+			request.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
+			//var err error
+			err = nil
+			if err = invoker.Run(func() error {
+				raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+					return ecsClient.ProcessCommonRequest(request)
+				})
+				return err
+			}); err != nil {
+				return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", raw)
+			}
 
-		if debugOn() {
-			resizeRequestMap := make(map[string]interface{})
-			resizeRequestMap["ClusterId"] = d.Id()
-			resizeRequestMap["Args"] = request.GetQueryParams()
-			addDebug("ResizeKubernetesCluster", raw, resizeRequestMap)
-		}
+			if debugOn() {
+				resizeRequestMap := make(map[string]interface{})
+				resizeRequestMap["ClusterId"] = d.Id()
+				resizeRequestMap["Args"] = request.GetQueryParams()
+				addDebug("ResizeKubernetesCluster", raw, resizeRequestMap)
+			}
 
-		stateConf := BuildStateConf([]string{"scaling"}, []string{"running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
+			stateConf := BuildStateConf([]string{"scaling"}, []string{"running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
 
-		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			if _, err := stateConf.WaitForState(); err != nil {
+				return WrapErrorf(err, IdMsg, d.Id())
+			}
+			//d.SetPartial("num_of_nodes")
 		}
-		//d.SetPartial("num_of_nodes")
 	}
-
 	d.Partial(false)
 	return resourceAlibabacloudStackCSKubernetesRead(d, meta)
 
@@ -1238,6 +1319,9 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	}
 	nodepoolid := d.Get("nodepool_id").(string)
 	clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
+	if err != nil {
+		return WrapError(err)
+	}
 	d.Set("name", object.Name)
 	//d.Set("id", object.ClusterId)
 	//d.Set("state", object.State)

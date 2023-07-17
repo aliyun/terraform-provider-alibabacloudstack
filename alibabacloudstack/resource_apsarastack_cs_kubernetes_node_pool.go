@@ -2,8 +2,11 @@ package alibabacloudstack
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/alibabacloud-go/tea/tea"
@@ -11,11 +14,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	roacs "github.com/alibabacloud-go/cs-20151215/v2/client"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/cs"
-	aliyungoecs "github.com/denverdino/aliyungo/ecs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -411,6 +415,71 @@ func resourceAlibabacloudStackCSKubernetesNodePool() *schema.Resource {
 	}
 }
 
+type NodePoolCommonResponse struct {
+	Response
+	NodePoolID string `json:"nodepool_id,omitempty"`
+
+	TaskId string `json:"task_id,omitempty"`
+}
+type nodePoolDataDisk struct {
+	Category string `json:"category"`
+
+	Encrypted string `json:"encrypted"` // true|false
+
+	Size int `json:"size"`
+}
+type autoScaling struct {
+	Enable       bool   `json:"enable"`
+	MaxInstances int64  `json:"max_instances"`
+	MinInstances int64  `json:"min_instances"`
+	Type         string `json:"type"`
+}
+type kubernetesConfig struct {
+	Taints []cs.Taint `json:"taints"`
+	Labels []cs.Label `json:"labels"`
+
+	UserData string `json:"user_data"`
+
+	Runtime        string `json:"runtime,omitempty"`
+	RuntimeVersion string `json:"runtime_version"`
+	CmsEnabled     bool   `json:"cms_enabled"`
+
+	Unschedulable bool `json:"unschedulable"`
+}
+type tEEConfig struct {
+	TEEEnable bool `json:"tee_enable"`
+}
+type scalingGroup struct {
+	VswitchIds    []string `json:"vswitch_ids"`
+	InstanceTypes []string `json:"instance_types"`
+	LoginPassword string   `json:"login_password"`
+
+	SystemDiskCategory string `json:"system_disk_category"`
+	SystemDiskSize     int64  `json:"system_disk_size"`
+
+	DataDisks []nodePoolDataDisk `json:"data_disks"` //支持多个数据盘
+	Tags      []cs.Tag           `json:"tags"`
+	ImageId   string             `json:"image_id"`
+	Platform  string             `json:"platform"`
+	// 支持包年包月
+	InstanceChargeType string `json:"instance_charge_type"`
+
+	ScalingPolicy string `json:"scaling_policy"`
+
+	// 公网ip
+	InternetChargeType      string `json:"internet_charge_type"`
+	InternetMaxBandwidthOut int    `json:"internet_max_bandwidth_out"`
+}
+type CreateNodePoolRequest struct {
+	ClusterID        string           `json:"ClusterId"`
+	NodepoolID       string           `json:"NodepoolId"`
+	UpdateNodes      bool             `json:"update_nodes"`
+	ScalingGroup     scalingGroup     `json:"scaling_group"`
+	KubernetesConfig kubernetesConfig `json:"kubernetes_config"`
+	TEEConfig        tEEConfig        `json:"tee_config"`
+	AutoScaling      autoScaling      `json:"auto_scaling"`
+}
+
 func resourceAlibabacloudStackCSKubernetesNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
@@ -421,38 +490,58 @@ func resourceAlibabacloudStackCSKubernetesNodePoolCreate(d *schema.ResourceData,
 
 	clusterId := d.Get("cluster_id").(string)
 	// prepare args and set default value
-	args, err := buildNodePoolArgs(d, meta)
+	request, err := buildNodePoolArgs(d, meta)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "PrepareKubernetesNodePoolArgs", err)
 	}
+	request.Method = "POST"        // Set request method
+	request.Product = "CS"         // Specify product
+	request.Version = "2015-12-15" // Specify product version
+	request.ServiceCode = "cs"
+	if strings.ToLower(client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	} // Set request scheme. Default: http
+	request.ApiName = "CreateClusterNodePool"
+	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
+	
 
 	if err = invoker.Run(func() error {
-		raw, err = client.WithCsClient(func(csClient *cs.Client) (interface{}, error) {
-			return csClient.CreateNodePool(args, d.Get("cluster_id").(string))
+		raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			
+			return ecsClient.ProcessCommonRequest(request)
 		})
 		return err
 	}); err != nil {
+
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "CreateKubernetesNodePool", raw)
 	}
 
 	if debugOn() {
 		requestMap := make(map[string]interface{})
 		requestMap["RegionId"] = common.Region(client.RegionId)
-		requestMap["Params"] = args
+		requestMap["Params"] = request.GetQueryParams()
 		addDebug("CreateKubernetesNodePool", raw, requestInfo, requestMap)
 	}
-
-	nodePool, ok := raw.(*cs.CreateNodePoolResponse)
-	if ok != true {
+	nodepoolresponse := NodePoolCommonResponse{}
+	nodePool, _ := raw.(*responses.CommonResponse)
+	if nodePool.IsSuccess() == false {
+		//return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", cluster.GetHttpContentString())
+		return err
+	}
+	ok := json.Unmarshal(nodePool.GetHttpContentBytes(), &nodepoolresponse)
+	if ok != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "ParseKubernetesNodePoolResponse", raw)
 	}
-
-	d.SetId(fmt.Sprintf("%s%s%s", clusterId, COLON_SEPARATED, nodePool.NodePoolID))
+	
+	d.SetId(nodepoolresponse.NodePoolID)
 
 	// reset interval to 10s
-	stateConf := BuildStateConf([]string{"initial", "scaling"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
+	stateConf := BuildStateConf([]string{"initial", "scaling"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterId, []string{"deleting", "failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, "ResourceID:%s , TaskID:%s ", d.Id(), nodePool.TaskID)
+		return WrapErrorf(err, "ResourceID:%s , TaskID:%s ", d.Id(), nodepoolresponse.TaskId)
 	}
 
 	// attach existing node
@@ -466,23 +555,21 @@ func resourceAlibabacloudStackCSKubernetesNodePoolCreate(d *schema.ResourceData,
 func resourceAlibabacloudStackCSNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
-	vpcService := VpcService{client}
+
+	clusterId := d.Get("cluster_id").(string)
 	d.Partial(true)
 	update := false
 	invoker := NewInvoker()
-	args := &cs.UpdateNodePoolRequest{
-		RegionId:         common.Region(client.RegionId),
-		NodePoolInfo:     cs.NodePoolInfo{},
-		ScalingGroup:     cs.ScalingGroup{},
-		KubernetesConfig: cs.KubernetesConfig{},
-		AutoScaling:      cs.AutoScaling{},
-	}
 
-	parts, err := ParseResourceId(d.Id(), 2)
-	if err != nil {
-		return WrapError(err)
+	args := &CreateNodePoolRequest{
+		ClusterID:        clusterId,
+		NodepoolID:       d.Id(),
+		UpdateNodes:      true,
+		ScalingGroup:     scalingGroup{},
+		KubernetesConfig: kubernetesConfig{},
+		TEEConfig:        tEEConfig{},
+		AutoScaling:      autoScaling{},
 	}
-
 	if d.HasChange("node_count") {
 		oldV, newV := d.GetChange("node_count")
 
@@ -494,61 +581,46 @@ func resourceAlibabacloudStackCSNodePoolUpdate(d *schema.ResourceData, meta inte
 		if ok != true {
 			return WrapErrorf(fmt.Errorf("node_count new value can not be parsed"), "parseError %d", newValue)
 		}
-
+		log.Printf("UUUUUUUUUUUUUUUUUUUUUUUUUUUU %d , %d", newValue, oldValue)
 		if newValue < oldValue {
-			removeNodePoolNodes(d, meta, parts, nil, nil)
-			// The removal of a node is logically independent.
-			// The removal of a node should not involve parameter changes.
-			return resourceAlibabacloudStackCSNodePoolRead(d, meta)
-		}
-		update = true
-		args.Count = int64(newValue) - int64(oldValue)
-	}
-	args.NodePoolInfo.Name = d.Get("name").(string)
-	if d.HasChange("name") {
-		update = true
-		args.NodePoolInfo.Name = d.Get("name").(string)
-	}
-	if d.HasChange("vswitch_ids") {
-		update = true
-		var vswitchID string
-		if list := expandStringList(d.Get("vswitch_ids").([]interface{})); len(list) > 0 {
-			vswitchID = list[0]
-		} else {
-			vswitchID = ""
-		}
-
-		var vpcId string
-		if vswitchID != "" {
-			vsw, err := vpcService.DescribeVSwitch(vswitchID)
+			err := RemoveNodePoolNodes(d, meta, clusterId, d.Id(), nil, nil)
 			if err != nil {
 				return err
 			}
-			vpcId = vsw.VpcId
+
+			// The removal of a node is logically independent.
+			// The removal of a node should not involve parameter changes.
+			return resourceAlibabacloudStackCSNodePoolRead(d, meta)
+
 		}
-		args.ScalingGroup.VpcId = vpcId
-		args.ScalingGroup.VswitchIds = expandStringList(d.Get("vswitch_ids").([]interface{}))
+		//update = true
+		if newValue > oldValue {
+			err := ScaleClusterNodePool(d, meta, clusterId, d.Id(), oldValue, newValue)
+			if err != nil {
+				return err
+			}
+
+			// The removal of a node is logically independent.
+			// The removal of a node should not involve parameter changes.
+			return resourceAlibabacloudStackCSNodePoolRead(d, meta)
+
+		}
 	}
 
-	if v, ok := d.GetOk("instance_charge_type"); ok {
-		args.InstanceChargeType = v.(string)
-		if args.InstanceChargeType == string(PrePaid) {
-			update = true
-			args.Period = d.Get("period").(int)
-			args.PeriodUnit = d.Get("period_unit").(string)
-			args.AutoRenew = d.Get("auto_renew").(bool)
-			args.AutoRenewPeriod = d.Get("auto_renew_period").(int)
-		}
+	if d.HasChange("vswitch_ids") {
+		update = true
+
+		args.ScalingGroup.VswitchIds = expandStringList(d.Get("vswitch_ids").([]interface{}))
 	}
 
 	if d.HasChange("install_cloud_monitor") {
 		update = true
-		args.CmsEnabled = d.Get("install_cloud_monitor").(bool)
+		args.KubernetesConfig.CmsEnabled = d.Get("install_cloud_monitor").(bool)
 	}
 
 	if d.HasChange("unschedulable") {
 		update = true
-		args.Unschedulable = d.Get("unschedulable").(bool)
+		args.KubernetesConfig.Unschedulable = d.Get("unschedulable").(bool)
 	}
 
 	if d.HasChange("instance_types") {
@@ -563,30 +635,14 @@ func resourceAlibabacloudStackCSNodePoolUpdate(d *schema.ResourceData, meta inte
 		args.ScalingGroup.LoginPassword = d.Get("password").(string)
 	}
 
-	args.ScalingGroup.KeyPair = d.Get("key_name").(string)
-	if d.HasChange("key_name") {
-		update = true
-		args.ScalingGroup.KeyPair = d.Get("key_name").(string)
-	}
-
-	if d.HasChange("security_group_id") {
-		update = true
-		args.ScalingGroup.SecurityGroupId = d.Get("security_group_id").(string)
-	}
-
 	if d.HasChange("system_disk_category") {
 		update = true
-		args.ScalingGroup.SystemDiskCategory = aliyungoecs.DiskCategory(d.Get("system_disk_category").(string))
+		args.ScalingGroup.SystemDiskCategory = d.Get("system_disk_category").(string)
 	}
 
 	if d.HasChange("system_disk_size") {
 		update = true
 		args.ScalingGroup.SystemDiskSize = int64(d.Get("system_disk_size").(int))
-	}
-
-	if d.HasChange("system_disk_performance_level") {
-		update = true
-		args.SystemDiskPerformanceLevel = d.Get("system_disk_performance_level").(string)
 	}
 
 	if d.HasChange("image_id") {
@@ -614,11 +670,6 @@ func resourceAlibabacloudStackCSNodePoolUpdate(d *schema.ResourceData, meta inte
 		setNodePoolTaints(&args.KubernetesConfig, d)
 	}
 
-	if d.HasChange("node_name_mode") {
-		update = true
-		args.KubernetesConfig.NodeNameMode = d.Get("node_name_mode").(string)
-	}
-
 	if d.HasChange("user_data") {
 		update = true
 		if v := d.Get("user_data").(string); v != "" {
@@ -638,63 +689,80 @@ func resourceAlibabacloudStackCSNodePoolUpdate(d *schema.ResourceData, meta inte
 		}
 	}
 
-	if v, ok := d.Get("management").([]interface{}); len(v) > 0 && ok {
-		update = true
-		args.Management = setManagedNodepoolConfig(v)
-	}
-
 	if v, ok := d.GetOk("internet_charge_type"); ok {
 		update = true
-		args.InternetChargeType = v.(string)
+		args.ScalingGroup.InternetChargeType = v.(string)
 	}
 
 	if v, ok := d.GetOk("internet_max_bandwidth_out"); ok {
 		update = true
-		args.InternetMaxBandwidthOut = v.(int)
+		args.ScalingGroup.InternetMaxBandwidthOut = v.(int)
 	}
 
 	if v, ok := d.GetOk("platform"); ok {
 		update = true
-		args.Platform = v.(string)
+		args.ScalingGroup.Platform = v.(string)
 	}
 
 	if d.HasChange("scaling_policy") {
 		update = true
-		args.ScalingPolicy = d.Get("scaling_policy").(string)
-	}
-
-	// spot
-	if d.HasChange("spot_strategy") {
-		update = true
-		args.SpotStrategy = d.Get("spot_strategy").(string)
-	}
-	if d.HasChange("spot_price_limit") {
-		update = true
-		args.SpotPriceLimit = setSpotPriceLimit(d.Get("spot_price_limit").([]interface{}))
+		args.ScalingGroup.ScalingPolicy = d.Get("scaling_policy").(string)
 	}
 
 	if update {
+		//begin
+		request := requests.NewCommonRequest()
+		if client.Config.Insecure {
+			request.SetHTTPSInsecure(client.Config.Insecure)
+		}
+		argJson, _ := json.Marshal(args)
+		request.QueryParams = map[string]string{
+			"RegionId":         client.RegionId,
+			"AccessKeySecret":  client.SecretKey,
+			"Product":          "CS",
+			"Department":       client.Department,
+			"ResourceGroup":    client.ResourceGroup,
+			"Action":           "ModifyClusterNodePool",
+			"ClusterId":        d.Get("cluster_id").(string),
+			"AccountInfo":      "123456",
+			"Version":          "2015-12-15",
+			"SignatureVersion": "1.0",
+			"ProductName":      "cs",
+			"X-acs-body":       fmt.Sprintf("%s", argJson),
+		}
+		request.Method = "POST"        // Set request method
+		request.Product = "CS"         // Specify product
+		request.Version = "2015-12-15" // Specify product version
+		request.ServiceCode = "cs"
+		if strings.ToLower(client.Config.Protocol) == "https" {
+			request.Scheme = "https"
+		} else {
+			request.Scheme = "http"
+		} // Set request scheme. Default: http
+		request.ApiName = "ModifyClusterNodePool"
+		request.Headers = map[string]string{"RegionId": client.RegionId}
+		request.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
 
-		var resoponse interface{}
+		var raw interface{}
 		if err := invoker.Run(func() error {
 			var err error
-			resoponse, err = client.WithCsClient(func(csClient *cs.Client) (interface{}, error) {
-				resp, err := csClient.UpdateNodePool(parts[0], parts[1], args)
-				return resp, err
+			raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+				//log.Printf("##################### %s", *csClient)
+				return ecsClient.ProcessCommonRequest(request)
 			})
 			return err
 		}); err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), "UpdateKubernetesNodePool", DenverdinoAliyungo)
+			return WrapErrorf(err, DefaultErrorMsg, d.Id(), "UpdateKubernetesNodePool", raw)
 		}
 		if debugOn() {
 			resizeRequestMap := make(map[string]interface{})
-			resizeRequestMap["ClusterId"] = parts[0]
-			resizeRequestMap["NodePoolId"] = parts[1]
+			resizeRequestMap["ClusterId"] = clusterId
+			resizeRequestMap["NodePoolId"] = d.Id()
 			resizeRequestMap["Args"] = args
-			addDebug("UpdateKubernetesNodePool", resoponse, resizeRequestMap)
+			addDebug("UpdateKubernetesNodePool", raw, resizeRequestMap)
 		}
 
-		stateConf := BuildStateConf([]string{"scaling", "updating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
+		stateConf := BuildStateConf([]string{"scaling", "updating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterId, []string{"deleting", "failed"}))
 
 		if _, err := stateConf.WaitForState(); err != nil {
 			return WrapErrorf(err, IdMsg, d.Id())
@@ -716,7 +784,10 @@ func resourceAlibabacloudStackCSNodePoolUpdate(d *schema.ResourceData, meta inte
 		if len(newValue) > len(oldValue) {
 			attachExistingInstance(d, meta)
 		} else {
-			removeNodePoolNodes(d, meta, parts, oldValue, newValue)
+			err := RemoveNodePoolNodes(d, meta, clusterId, d.Id(), oldValue, newValue)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -727,9 +798,10 @@ func resourceAlibabacloudStackCSNodePoolUpdate(d *schema.ResourceData, meta inte
 
 func resourceAlibabacloudStackCSNodePoolRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	clusterId := d.Get("cluster_id").(string)
 	csService := CsService{client}
 
-	object, err := csService.DescribeCsKubernetesNodePool(d.Id())
+	object, err := csService.DescribeCsKubernetesNodePool(d.Id(), clusterId)
 	if err != nil {
 		if NotFoundError(err) {
 			d.SetId("")
@@ -738,67 +810,67 @@ func resourceAlibabacloudStackCSNodePoolRead(d *schema.ResourceData, meta interf
 		return WrapError(err)
 	}
 
-	d.Set("node_count", object.TotalNodes)
-	d.Set("name", object.Name)
-	d.Set("vpc_id", object.VpcId)
-	d.Set("vswitch_ids", object.VswitchIds)
-	d.Set("instance_types", object.InstanceTypes)
-	d.Set("key_name", object.KeyPair)
-	d.Set("security_group_id", object.SecurityGroupId)
-	d.Set("system_disk_category", object.SystemDiskCategory)
-	d.Set("system_disk_size", object.SystemDiskSize)
-	d.Set("system_disk_performance_level", object.SystemDiskPerformanceLevel)
-	d.Set("image_id", object.ImageId)
-	d.Set("platform", object.Platform)
-	d.Set("scaling_policy", object.ScalingPolicy)
-	d.Set("node_name_mode", object.NodeNameMode)
-	d.Set("user_data", object.UserData)
-	d.Set("scaling_group_id", object.ScalingGroupId)
-	d.Set("unschedulable", object.Unschedulable)
-	d.Set("instance_charge_type", object.InstanceChargeType)
-	d.Set("resource_group_id", object.ResourceGroupId)
-	d.Set("spot_strategy", object.SpotStrategy)
-	d.Set("internet_charge_type", object.InternetChargeType)
-	d.Set("internet_max_bandwidth_out", object.InternetMaxBandwidthOut)
-	d.Set("install_cloud_monitor", object.CmsEnabled)
-	if object.InstanceChargeType == "PrePaid" {
-		d.Set("period", object.Period)
-		d.Set("period_unit", object.PeriodUnit)
-		d.Set("auto_renew", object.AutoRenew)
-		d.Set("auto_renew_period", object.AutoRenewPeriod)
+	d.Set("node_count", object.Status.TotalNodes)
+	d.Set("name", object.NodepoolInfo.Name)
+	//d.Set("vpc_id", object.VpcId)
+	d.Set("vswitch_ids", object.ScalingGroup.VswitchIds)
+	d.Set("instance_types", object.ScalingGroup.InstanceTypes)
+	d.Set("key_name", object.ScalingGroup.KeyPair)
+	d.Set("security_group_id", object.ScalingGroup.SecurityGroupID)
+	d.Set("system_disk_category", object.ScalingGroup.SystemDiskCategory)
+	d.Set("system_disk_size", object.ScalingGroup.SystemDiskSize)
+
+	d.Set("image_id", object.ScalingGroup.ImageID)
+	d.Set("platform", object.ScalingGroup.Platform)
+	d.Set("scaling_policy", object.ScalingGroup.ScalingPolicy)
+	d.Set("node_name_mode", object.KubernetesConfig.NodeNameMode)
+	d.Set("user_data", object.KubernetesConfig.UserData)
+	d.Set("scaling_group_id", object.ScalingGroup.ScalingGroupID)
+	d.Set("unschedulable", object.KubernetesConfig.Unschedulable)
+	d.Set("instance_charge_type", object.ScalingGroup.InstanceChargeType)
+	d.Set("resource_group_id", object.NodepoolInfo.ResourceGroupID)
+	d.Set("spot_strategy", object.ScalingGroup.SpotStrategy)
+	//d.Set("internet_charge_type", object.ScalingGroup.InternetChargeType)
+	//d.Set("internet_max_bandwidth_out", object.ScalingGroup.InternetMaxBandwidthOut)
+	d.Set("install_cloud_monitor", object.KubernetesConfig.CmsEnabled)
+	if object.ScalingGroup.InstanceChargeType == "PrePaid" {
+		d.Set("period", object.ScalingGroup.Period)
+		d.Set("period_unit", object.ScalingGroup.PeriodUnit)
+		d.Set("auto_renew", object.ScalingGroup.AutoRenew)
+		d.Set("auto_renew_period", object.ScalingGroup.AutoRenewPeriod)
 	}
 
 	if passwd, ok := d.GetOk("password"); ok && passwd.(string) != "" {
 		d.Set("password", passwd)
 	}
 
-	if parts, err := ParseResourceId(d.Id(), 2); err != nil {
-		return WrapError(err)
-	} else {
-		d.Set("cluster_id", string(parts[0]))
-	}
+	// if parts, err := ParseResourceId(d.Id(), 2); err != nil {
+	// 	return WrapError(err)
+	// } else {
+	// 	d.Set("cluster_id", string(parts[0]))
+	// }
 
-	if err := d.Set("data_disks", flattenNodeDataDisksConfig(object.DataDisks)); err != nil {
-		return WrapError(err)
-	}
-
-	if err := d.Set("taints", flattenTaintsConfig(object.Taints)); err != nil {
+	if err := d.Set("data_disks", flattenNodeDataDisksConfig(object.ScalingGroup.DataDisks)); err != nil {
 		return WrapError(err)
 	}
 
-	if err := d.Set("labels", flattenLabelsConfig(object.Labels)); err != nil {
+	if err := d.Set("taints", flattenTaintsConfig(object.KubernetesConfig.Taints)); err != nil {
 		return WrapError(err)
 	}
 
-	if err := d.Set("tags", flattenTagsConfig(object.Tags)); err != nil {
+	if err := d.Set("labels", flattenLabelsConfig(object.KubernetesConfig.Labels)); err != nil {
 		return WrapError(err)
 	}
 
-	if object.Management.Enable == true {
-		if err := d.Set("management", flattenManagementNodepoolConfig(&object.Management)); err != nil {
-			return WrapError(err)
-		}
+	if err := d.Set("tags", flattenTagsConfig(object.ScalingGroup.Tags)); err != nil {
+		return WrapError(err)
 	}
+
+	// if object.Management.Enable == true {
+	// 	if err := d.Set("management", flattenManagementNodepoolConfig(&object.Management)); err != nil {
+	// 		return WrapError(err)
+	// 	}
+	// }
 
 	if object.AutoScaling.Enable == true {
 		if err := d.Set("scaling_config", flattenAutoScalingConfig(&object.AutoScaling)); err != nil {
@@ -806,7 +878,7 @@ func resourceAlibabacloudStackCSNodePoolRead(d *schema.ResourceData, meta interf
 		}
 	}
 
-	if err := d.Set("spot_price_limit", flattenSpotPriceLimit(object.SpotPriceLimit)); err != nil {
+	if err := d.Set("spot_price_limit", flattenSpotPriceLimit(object.ScalingGroup.SpotPriceLimit)); err != nil {
 		return WrapError(err)
 	}
 
@@ -817,68 +889,75 @@ func resourceAlibabacloudStackCSNodePoolDelete(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 	invoker := NewInvoker()
-
-	parts, err := ParseResourceId(d.Id(), 2)
-	if err != nil {
-		return WrapError(err)
-	}
-
+	clusterId := d.Get("cluster_id").(string)
+	var raw interface{}
 	// delete all nodes
-	removeNodePoolNodes(d, meta, parts, nil, nil)
-
-	var response interface{}
-	err = resource.Retry(30*time.Minute, func() *resource.RetryError {
-		if err := invoker.Run(func() error {
-			raw, err := client.WithCsClient(func(csClient *cs.Client) (interface{}, error) {
-				return nil, csClient.DeleteNodePool(parts[0], parts[1])
-			})
-			response = raw
-			return err
-		}); err != nil {
-			return resource.RetryableError(err)
-		}
-		if debugOn() {
-			requestMap := make(map[string]interface{})
-			requestMap["ClusterId"] = parts[0]
-			requestMap["NodePoolId"] = parts[1]
-			addDebug("DeleteClusterNodePool", response, d.Id(), requestMap)
-		}
-		return nil
-	})
+	err := RemoveNodePoolNodes(d, meta, clusterId, d.Id(), nil, nil)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorClusterNodePoolNotFound"}) {
-			return nil
-		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "DeleteClusterNodePool", DenverdinoAliyungo)
+		return err
 	}
 
-	stateConf := BuildStateConf([]string{"active", "deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{}))
+	req := requests.NewCommonRequest()
+	if csService.client.Config.Insecure {
+		req.SetHTTPSInsecure(csService.client.Config.Insecure)
+	}
+	req.QueryParams = map[string]string{
+		"RegionId":         csService.client.RegionId,
+		"AccessKeySecret":  csService.client.SecretKey,
+		"Product":          "CS",
+		"Department":       csService.client.Department,
+		"ResourceGroup":    csService.client.ResourceGroup,
+		"Action":           "DeleteClusterNodepool",
+		"AccountInfo":      "123456",
+		"Version":          "2015-12-15",
+		"SignatureVersion": "1.0",
+		"ProductName":      "cs",
+
+		"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\"}",
+
+			"ClusterId", clusterId,
+			"NodepoolId", d.Id(),
+		),
+	}
+	req.Method = "POST"        // Set request method
+	req.Product = "CS"         // Specify product
+	req.Version = "2015-12-15" // Specify product version
+	req.ServiceCode = "cs"
+	if strings.ToLower(csService.client.Config.Protocol) == "https" {
+		req.Scheme = "https"
+	} else {
+		req.Scheme = "http"
+	} // Set request scheme. Default: http
+	req.ApiName = "DeleteClusterNodepool"
+	req.Headers = map[string]string{"RegionId": csService.client.RegionId}
+	req.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
+	if err := invoker.Run(func() error {
+		var err error
+		raw, err = csService.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			return ecsClient.ProcessCommonRequest(req)
+		})
+
+		return err
+	}); err != nil {
+		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "DeleteClusterNodePool", raw)
+	}
+	if debugOn() {
+		requestMap := make(map[string]interface{})
+		requestMap["ClusterId"] = clusterId
+		requestMap["NodePoolId"] = d.Id()
+		addDebug("DeleteClusterNodePool", raw, d.Id(), requestMap)
+	}
+
+	stateConf := BuildStateConf([]string{"deleting"}, []string{}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterId, []string{"failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
 	}
+
 	return nil
 }
 
-func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*cs.CreateNodePoolRequest, error) {
+func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*requests.CommonRequest, error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
-	vpcService := VpcService{client}
-
-	var vswitchID string
-	if list := expandStringList(d.Get("vswitch_ids").([]interface{})); len(list) > 0 {
-		vswitchID = list[0]
-	} else {
-		vswitchID = ""
-	}
-
-	var vpcId string
-	if vswitchID != "" {
-		vsw, err := vpcService.DescribeVSwitch(vswitchID)
-		if err != nil {
-			return nil, err
-		}
-		vpcId = vsw.VpcId
-	}
 
 	password := d.Get("password").(string)
 	if password == "" {
@@ -891,105 +970,108 @@ func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*cs.CreateNode
 			password = decryptResp
 		}
 	}
-
-	creationArgs := &cs.CreateNodePoolRequest{
-		RegionId: common.Region(client.RegionId),
-		Count:    int64(d.Get("node_count").(int)),
-		NodePoolInfo: cs.NodePoolInfo{
-			Name:         d.Get("name").(string),
-			NodePoolType: "ess", // hard code the type
-		},
-		ScalingGroup: cs.ScalingGroup{
-			VpcId:              vpcId,
-			VswitchIds:         expandStringList(d.Get("vswitch_ids").([]interface{})),
-			InstanceTypes:      expandStringList(d.Get("instance_types").([]interface{})),
-			LoginPassword:      password,
-			KeyPair:            d.Get("key_name").(string),
-			SystemDiskCategory: aliyungoecs.DiskCategory(d.Get("system_disk_category").(string)),
-			SystemDiskSize:     int64(d.Get("system_disk_size").(int)),
-			SecurityGroupId:    d.Get("security_group_id").(string),
-			ImageId:            d.Get("image_id").(string),
-			Platform:           d.Get("platform").(string),
-		},
-		KubernetesConfig: cs.KubernetesConfig{
-			NodeNameMode: d.Get("node_name_mode").(string),
-		},
+	request := requests.NewCommonRequest()
+	if client.Config.Insecure {
+		request.SetHTTPSInsecure(client.Config.Insecure)
 	}
+	//begin
+	NodePoolInfo := cs.NodePoolInfo{
+		Name:         d.Get("name").(string),
+		NodePoolType: "ess", // hard code the type
+	}
+	ScalingGroup := scalingGroup{
 
-	setNodePoolDataDisks(&creationArgs.ScalingGroup, d)
-	setNodePoolTags(&creationArgs.ScalingGroup, d)
-	setNodePoolTaints(&creationArgs.KubernetesConfig, d)
-	setNodePoolLabels(&creationArgs.KubernetesConfig, d)
+		VswitchIds:    expandStringList(d.Get("vswitch_ids").([]interface{})),
+		InstanceTypes: expandStringList(d.Get("instance_types").([]interface{})),
+		LoginPassword: password,
+
+		SystemDiskCategory: d.Get("system_disk_category").(string),
+		SystemDiskSize:     int64(d.Get("system_disk_size").(int)),
+
+		ImageId:  d.Get("image_id").(string),
+		Platform: d.Get("platform").(string),
+	}
+	KubernetesConfig := kubernetesConfig{}
+	AutoScaling := autoScaling{}
+
+	setNodePoolDataDisks(&ScalingGroup, d)
+	setNodePoolTags(&ScalingGroup, d)
+	setNodePoolTaints(&KubernetesConfig, d)
+	setNodePoolLabels(&KubernetesConfig, d)
 
 	if v, ok := d.GetOk("instance_charge_type"); ok {
-		creationArgs.InstanceChargeType = v.(string)
-		if creationArgs.InstanceChargeType == string(PrePaid) {
-			creationArgs.Period = d.Get("period").(int)
-			creationArgs.PeriodUnit = d.Get("period_unit").(string)
-			creationArgs.AutoRenew = d.Get("auto_renew").(bool)
-			creationArgs.AutoRenewPeriod = d.Get("auto_renew_period").(int)
-		}
-	}
+		ScalingGroup.InstanceChargeType = v.(string)
 
+	}
 	if v, ok := d.GetOk("install_cloud_monitor"); ok {
-		creationArgs.CmsEnabled = v.(bool)
+		KubernetesConfig.CmsEnabled = v.(bool)
 	}
 
 	if v, ok := d.GetOk("unschedulable"); ok {
-		creationArgs.Unschedulable = v.(bool)
+		KubernetesConfig.Unschedulable = v.(bool)
 	}
 
 	if v, ok := d.GetOk("user_data"); ok && v != "" {
 		_, base64DecodeError := base64.StdEncoding.DecodeString(v.(string))
 		if base64DecodeError == nil {
-			creationArgs.KubernetesConfig.UserData = v.(string)
+			KubernetesConfig.UserData = v.(string)
 		} else {
-			creationArgs.KubernetesConfig.UserData = base64.StdEncoding.EncodeToString([]byte(v.(string)))
+			KubernetesConfig.UserData = base64.StdEncoding.EncodeToString([]byte(v.(string)))
 		}
 	}
 
 	// set auto scaling config
 	if v, ok := d.GetOk("scaling_policy"); ok {
-		creationArgs.ScalingPolicy = v.(string)
+		ScalingGroup.ScalingPolicy = v.(string)
 	}
 
 	if v, ok := d.GetOk("scaling_config"); ok {
 		if sc, ok := v.([]interface{}); len(sc) > 0 && ok {
-			creationArgs.AutoScaling = setAutoScalingConfig(sc)
+			AutoScaling = setAutoScalingConfig(sc)
 		}
 	}
 
 	// set manage nodepool params
-	if v, ok := d.GetOk("management"); ok {
-		if management, ok := v.([]interface{}); len(management) > 0 && ok {
-			creationArgs.Management = setManagedNodepoolConfig(management)
-		}
-	}
 
-	if v, ok := d.GetOk("system_disk_performance_level"); ok {
-		creationArgs.SystemDiskPerformanceLevel = v.(string)
-	}
-
-	if v, ok := d.GetOk("resource_group_id"); ok {
-		creationArgs.ResourceGroupId = v.(string)
-	}
+	// if v, ok := d.GetOk("resource_group_id"); ok {
+	// 	ScalingGroup.ResourceGroupId = v.(string)
+	// }
 
 	// setting spot instance
-	if v, ok := d.GetOk("spot_strategy"); ok {
-		creationArgs.SpotStrategy = v.(string)
-	}
 
-	if v, ok := d.GetOk("spot_price_limit"); ok {
-		creationArgs.SpotPriceLimit = setSpotPriceLimit(v.([]interface{}))
-	}
 	if v, ok := d.GetOk("internet_charge_type"); ok {
-		creationArgs.InternetChargeType = v.(string)
+		ScalingGroup.InternetChargeType = v.(string)
 	}
 	if v, ok := d.GetOk("internet_max_bandwidth_out"); ok {
-		creationArgs.InternetMaxBandwidthOut = v.(int)
+		ScalingGroup.InternetMaxBandwidthOut = v.(int)
+	}
+	NodePoolInfoJson, _ := json.Marshal(NodePoolInfo)
+	ScalingGroupJson, _ := json.Marshal(ScalingGroup)
+	KubernetesConfigJson, _ := json.Marshal(KubernetesConfig)
+	AutoScalingJson, _ := json.Marshal(AutoScaling)
+	request.QueryParams = map[string]string{
+		"RegionId":         client.RegionId,
+		"AccessKeySecret":  client.SecretKey,
+		"Product":          "CS",
+		"Department":       client.Department,
+		"ResourceGroup":    client.ResourceGroup,
+		"Action":           "CreateClusterNodePool",
+		"ClusterId":        d.Get("cluster_id").(string),
+		"AccountInfo":      "123456",
+		"Version":          "2015-12-15",
+		"SignatureVersion": "1.0",
+		"ProductName":      "cs",
+		"X-acs-body": fmt.Sprintf("{\"%s\":%d,\"%s\":%s,\"%s\":%s,\"%s\":%s,\"%s\":%s}",
+
+			"count", int64(d.Get("node_count").(int)),
+			"nodepool_info", NodePoolInfoJson,
+			"scaling_group", ScalingGroupJson,
+			"kubernetes_config", KubernetesConfigJson,
+			"auto_scaling", AutoScalingJson,
+		),
 	}
 
-	return creationArgs, nil
+	return request, nil
 }
 
 func ConvertCsTags(d *schema.ResourceData) ([]cs.Tag, error) {
@@ -1011,7 +1093,7 @@ func ConvertCsTags(d *schema.ResourceData) ([]cs.Tag, error) {
 	return tags, nil
 }
 
-func setNodePoolTags(scalingGroup *cs.ScalingGroup, d *schema.ResourceData) error {
+func setNodePoolTags(scalingGroup *scalingGroup, d *schema.ResourceData) error {
 	if _, ok := d.GetOk("tags"); ok {
 		if tags, err := ConvertCsTags(d); err == nil {
 			scalingGroup.Tags = tags
@@ -1021,7 +1103,7 @@ func setNodePoolTags(scalingGroup *cs.ScalingGroup, d *schema.ResourceData) erro
 	return nil
 }
 
-func setNodePoolLabels(config *cs.KubernetesConfig, d *schema.ResourceData) error {
+func setNodePoolLabels(config *kubernetesConfig, d *schema.ResourceData) error {
 	if v, ok := d.GetOk("labels"); ok && len(v.([]interface{})) > 0 {
 		vl := v.([]interface{})
 		labels := make([]cs.Label, 0)
@@ -1040,21 +1122,18 @@ func setNodePoolLabels(config *cs.KubernetesConfig, d *schema.ResourceData) erro
 	return nil
 }
 
-func setNodePoolDataDisks(scalingGroup *cs.ScalingGroup, d *schema.ResourceData) error {
+func setNodePoolDataDisks(scalingGroup *scalingGroup, d *schema.ResourceData) error {
 	if dds, ok := d.GetOk("data_disks"); ok {
 		disks := dds.([]interface{})
-		createDataDisks := make([]cs.NodePoolDataDisk, 0, len(disks))
+		createDataDisks := make([]nodePoolDataDisk, 0, len(disks))
 		for _, e := range disks {
 			pack := e.(map[string]interface{})
-			dataDisk := cs.NodePoolDataDisk{
-				Size:                 pack["size"].(int),
-				DiskName:             pack["name"].(string),
-				Category:             pack["category"].(string),
-				Device:               pack["device"].(string),
-				AutoSnapshotPolicyId: pack["auto_snapshot_policy_id"].(string),
-				KMSKeyId:             pack["kms_key_id"].(string),
-				Encrypted:            pack["encrypted"].(string),
-				PerformanceLevel:     pack["performance_level"].(string),
+			dataDisk := nodePoolDataDisk{
+				Size: pack["size"].(int),
+
+				Category: pack["category"].(string),
+
+				Encrypted: pack["encrypted"].(string),
 			}
 			createDataDisks = append(createDataDisks, dataDisk)
 		}
@@ -1064,7 +1143,7 @@ func setNodePoolDataDisks(scalingGroup *cs.ScalingGroup, d *schema.ResourceData)
 	return nil
 }
 
-func setNodePoolTaints(config *cs.KubernetesConfig, d *schema.ResourceData) error {
+func setNodePoolTaints(config *kubernetesConfig, d *schema.ResourceData) error {
 	if v, ok := d.GetOk("taints"); ok && len(v.([]interface{})) > 0 {
 		vl := v.([]interface{})
 		taints := make([]cs.Taint, 0)
@@ -1113,7 +1192,7 @@ func setManagedNodepoolConfig(l []interface{}) (config cs.Management) {
 	return config
 }
 
-func setAutoScalingConfig(l []interface{}) (config cs.AutoScaling) {
+func setAutoScalingConfig(l []interface{}) (config autoScaling) {
 	if len(l) == 0 || l[0] == nil {
 		return config
 	}
@@ -1131,15 +1210,6 @@ func setAutoScalingConfig(l []interface{}) (config cs.AutoScaling) {
 	}
 	if v, ok := m["type"].(string); ok {
 		config.Type = v
-	}
-	if v, ok := m["is_bond_eip"].(bool); ok {
-		config.IsBindEip = &v
-	}
-	if v, ok := m["eip_internet_charge_type"].(string); ok {
-		config.EipInternetChargeType = v
-	}
-	if v, ok := m["eip_bandwidth"].(int); ok {
-		config.EipBandWidth = int64(v)
 	}
 
 	return config
@@ -1269,29 +1339,24 @@ func flattenTagsConfig(config []cs.Tag) map[string]string {
 
 	return m
 }
-
-func removeNodePoolNodes(d *schema.ResourceData, meta interface{}, parseId []string, oldNodes []interface{}, newNodes []interface{}) error {
+func RemoveNodePoolNodes(d *schema.ResourceData, meta interface{}, clusterid, nodepoolid string, oldNodes []interface{}, newNodes []interface{}) error {
+	var raw interface{}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 	invoker := NewInvoker()
 
-	var response interface{}
 	// list all nodes of the nodepool
-	if err := invoker.Run(func() error {
-		var err error
-		response, err = client.WithCsClient(func(csClient *cs.Client) (interface{}, error) {
-			nodes, _, err := csClient.GetKubernetesClusterNodes2(parseId[0], common.Pagination{PageNumber: 1, PageSize: PageSizeLarge}, parseId[1])
-			return nodes, err
-		})
-		return err
-	}); err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "GetKubernetesClusterNodes", DenverdinoAliyungo)
+	object, err := csService.DescribeClusterNodes(clusterid, d.Id())
+	if err != nil {
+		if NotFoundError(err) {
+			d.SetId("")
+			return nil
+		}
+		return WrapError(err)
 	}
-
-	ret := response.([]cs.KubernetesNodeType)
 	// fetch the NodeName of all nodes
 	var allNodeName []string
-	for _, value := range ret {
+	for _, value := range object.Nodes {
 		allNodeName = append(allNodeName, value.NodeName)
 	}
 
@@ -1314,38 +1379,132 @@ func removeNodePoolNodes(d *schema.ResourceData, meta interface{}, parseId []str
 		if len(newNodes) == 0 {
 			attachNodeList = expandStringList(oldNodes)
 		}
-		for _, v := range ret {
+		for _, v := range object.Nodes {
 			for _, name := range attachNodeList {
-				if name == v.InstanceId {
+				if name == v.InstanceID {
 					removeInstanceList = append(removeInstanceList, v.NodeName)
 				}
 			}
 		}
 		removeNodesName = removeInstanceList
 	}
+	if len(removeNodesName) > 0 {
+		req := requests.NewCommonRequest()
+		if csService.client.Config.Insecure {
+			req.SetHTTPSInsecure(csService.client.Config.Insecure)
+		}
+		req.QueryParams = map[string]string{
+			"RegionId":         csService.client.RegionId,
+			"AccessKeySecret":  csService.client.SecretKey,
+			"Product":          "CS",
+			"Department":       csService.client.Department,
+			"ResourceGroup":    csService.client.ResourceGroup,
+			"Action":           "RemoveClusterNodes",
+			"AccountInfo":      "123456",
+			"Version":          "2015-12-15",
+			"SignatureVersion": "1.0",
+			"ProductName":      "cs",
 
-	removeNodesArgs := &cs.DeleteKubernetesClusterNodesRequest{
-		Nodes:       removeNodesName,
-		ReleaseNode: true,
-		DrainNode:   false,
+			"X-acs-body": fmt.Sprintf("{\"%s\":%t,\"%s\":%t,\"%s\":%q,\"%s\":\"%s\"}",
+
+				"release_node", true,
+				"drain_node", true,
+				"nodes", removeNodesName,
+				"ClusterId", clusterid,
+			),
+		}
+		req.Method = "POST"        // Set request method
+		req.Product = "CS"         // Specify product
+		req.Version = "2015-12-15" // Specify product version
+		req.ServiceCode = "cs"
+		if strings.ToLower(csService.client.Config.Protocol) == "https" {
+			req.Scheme = "https"
+		} else {
+			req.Scheme = "http"
+		} // Set request scheme. Default: http
+		req.ApiName = "RemoveClusterNodes"
+		req.Headers = map[string]string{"RegionId": csService.client.RegionId}
+		req.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
+		if err := invoker.Run(func() error {
+			var err error
+			raw, err = csService.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+				return ecsClient.ProcessCommonRequest(req)
+			})
+
+			return err
+		}); err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, d.Id(), "DeleteKubernetesClusterNodes", DenverdinoAliyungo)
+		}
+		resp, _ := raw.(*responses.CommonResponse)
+		if resp.IsSuccess() == false {
+			//return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", cluster.GetHttpContentString())
+			return err
+		}
+		stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterid, []string{"deleting", "failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return WrapErrorf(err, IdMsg, d.Id())
+		}
 	}
+	return nil
+}
+func ScaleClusterNodePool(d *schema.ResourceData, meta interface{}, clusterid, nodepoolid string, oldValue, newValue int) error {
+	var raw interface{}
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	csService := CsService{client}
+	invoker := NewInvoker()
+
+	// list all nodes of the nodepool
+
+	req := requests.NewCommonRequest()
+	if csService.client.Config.Insecure {
+		req.SetHTTPSInsecure(csService.client.Config.Insecure)
+	}
+	req.QueryParams = map[string]string{
+		"RegionId":         csService.client.RegionId,
+		"AccessKeySecret":  csService.client.SecretKey,
+		"Product":          "CS",
+		"Department":       csService.client.Department,
+		"ResourceGroup":    csService.client.ResourceGroup,
+		"Action":           "ScaleClusterNodePool",
+		"AccountInfo":      "123456",
+		"Version":          "2015-12-15",
+		"SignatureVersion": "1.0",
+		"ProductName":      "cs",
+
+		"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d}",
+
+			"ClusterId", clusterid,
+			"NodepoolId", nodepoolid,
+			"count", int64(newValue)-int64(oldValue),
+		),
+	}
+	req.Method = "POST"        // Set request method
+	req.Product = "CS"         // Specify product
+	req.Version = "2015-12-15" // Specify product version
+	req.ServiceCode = "cs"
+	if strings.ToLower(csService.client.Config.Protocol) == "https" {
+		req.Scheme = "https"
+	} else {
+		req.Scheme = "http"
+	} // Set request scheme. Default: http
+	req.ApiName = "ScaleClusterNodePool"
+	req.Headers = map[string]string{"RegionId": csService.client.RegionId}
+	req.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
 	if err := invoker.Run(func() error {
 		var err error
-		response, err = client.WithCsClient(func(csClient *cs.Client) (interface{}, error) {
-			resp, err := csClient.DeleteKubernetesClusterNodes(parseId[0], removeNodesArgs)
-			return resp, err
+		raw, err = csService.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			return ecsClient.ProcessCommonRequest(req)
 		})
+
 		return err
 	}); err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "DeleteKubernetesClusterNodes", DenverdinoAliyungo)
+		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "ScaleClusterNodePool", raw)
 	}
 
-	stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
+	stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterid, []string{"deleting", "failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
 	}
-
-	d.SetPartial("node_count")
 
 	return nil
 }
@@ -1378,16 +1537,10 @@ func attachExistingInstance(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, ResourceName, "InitializeClient", err)
 	}
-
-	parts, err := ParseResourceId(d.Id(), 2)
-	if err != nil {
-		return WrapError(err)
-	}
-	clusterId := parts[0]
-	nodePoolId := parts[1]
+	clusterId := d.Get("cluster_id").(string)
 
 	args := &roacs.AttachInstancesRequest{
-		NodepoolId:       tea.String(nodePoolId),
+		NodepoolId:       tea.String(d.Id()),
 		FormatDisk:       tea.Bool(false),
 		KeepInstanceName: tea.Bool(true),
 	}
@@ -1421,7 +1574,7 @@ func attachExistingInstance(d *schema.ResourceData, meta interface{}) error {
 		return WrapErrorf(err, DefaultErrorMsg, ResourceName, "AttachInstances", AliyunTablestoreGoSdk)
 	}
 
-	stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
+	stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterId, []string{"deleting", "failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
 	}
