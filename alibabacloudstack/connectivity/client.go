@@ -1163,7 +1163,7 @@ func (client *AlibabacloudStackClient) WithCsClient(do func(*cs.Client) (interfa
 				endpoint = fmt.Sprintf("https://%s", endpoint)
 			} else {
 				endpoint = fmt.Sprintf("http://%s", endpoint)
-			}				
+			}
 			csconn.SetEndpoint(endpoint)
 		}
 		if client.Config.Proxy != "" {
@@ -1336,6 +1336,10 @@ func (client *AlibabacloudStackClient) WithEdasClient(do func(*edas.Client) (int
 		edasconn.AppendUserAgent(Terraform, terraformVersion)
 		edasconn.AppendUserAgent(Provider, providerVersion)
 		edasconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
+		if client.Config.Proxy != "" {
+			edasconn.SetHttpsProxy(client.Config.Proxy)
+			edasconn.SetHttpProxy(client.Config.Proxy)
+		}
 		client.edasconn = edasconn
 	}
 
