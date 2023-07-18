@@ -93,6 +93,7 @@ func resourceAlibabacloudStackAlikafkaTopicCreate(d *schema.ResourceData, meta i
 		request.Remark = v.(string)
 	}
 	request.Domain = client.Config.AlikafkaOpenAPIEndpoint
+	request.QueryParams["Product"] = "alikafka"
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 			return alikafkaClient.CreateTopic(request)
@@ -139,6 +140,7 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 		modifyRemarkRequest.RegionId = client.RegionId
 		modifyRemarkRequest.Topic = topic
 		modifyRemarkRequest.Remark = remark
+		modifyRemarkRequest.QueryParams["Product"] = "alikafka"
 		err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 			raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 				return alikafkaClient.ModifyTopicRemark(modifyRemarkRequest)
@@ -173,6 +175,7 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 			modifyPartitionReq.RegionId = client.RegionId
 			modifyPartitionReq.Topic = topic
 			modifyPartitionReq.AddPartitionNum = requests.NewInteger(newPartitionNum - oldPartitionNum)
+			modifyRemarkRequest.QueryParams["Product"] = "alikafka"
 
 			err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 				raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
