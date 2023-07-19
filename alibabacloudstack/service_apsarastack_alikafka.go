@@ -242,7 +242,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*alika
 	request.InstanceId = instanceId
 	request.RegionId = alikafkaService.client.RegionId
 	request.Domain = alikafkaService.client.Config.AlikafkaOpenAPIEndpoint
-	request.QueryParams["Product"] = "alikafka"
+	
 
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	var raw interface{}
