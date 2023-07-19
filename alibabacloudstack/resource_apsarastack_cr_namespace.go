@@ -96,8 +96,8 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 	visibility := d.Get("default_visibility").(string)
 	if create == false || visibility == "PUBLIC" {
 		request.ApiName = "UpdateNamespace"
-		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-content-type": "application/json;charset=UTF-8", "Content-type": "application/json;charset=UTF-8"}
-		//request.SetContentType("application/json")
+		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-instanceId": namespaceName, "x-acs-content-type": "application/json;charset=UTF-8", "Content-type": "application/json;charset=UTF-8"}
+
 		request.QueryParams = map[string]string{
 			"AccessKeySecret":  client.SecretKey,
 			"AccessKeyId":      client.AccessKey,
@@ -153,8 +153,8 @@ func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta int
 			request.Scheme = "http"
 		}
 		request.ApiName = "UpdateNamespace"
-		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-content-type": "application/json;charset=UTF-8", "Content-type": "application/json;charset=UTF-8"}
-		//request.SetContentType("application/json")
+		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-instanceId": d.Id(), "x-acs-content-type": "application/json;charset=UTF-8", "Content-type": "application/json;charset=UTF-8"}
+
 		request.QueryParams = map[string]string{
 			"AccessKeySecret":  client.SecretKey,
 			"AccessKeyId":      client.AccessKey,
@@ -219,7 +219,8 @@ func resourceAlibabacloudStackCRNamespaceDelete(d *schema.ResourceData, meta int
 		request.Scheme = "http"
 	}
 	request.ApiName = "DeleteNamespace"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-instanceId": d.Id(), "x-acs-content-type": "application/json;charset=UTF-8", "Content-type": "application/json;charset=UTF-8"}
+
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": client.SecretKey,
 		"AccessKeyId":     client.AccessKey,

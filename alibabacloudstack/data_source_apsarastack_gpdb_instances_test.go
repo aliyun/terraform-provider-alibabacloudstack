@@ -26,6 +26,9 @@ func TestAccAlibabacloudStackGpdbInstancesDataSource(t *testing.T) {
 }
 
 const testAccCheckAlibabacloudStackGpdbInstancesDataSource = `
+provider "alibabacloudstack" {
+	assume_role {}
+}
 		data "alibabacloudstack_zones" "default" {
 
        }

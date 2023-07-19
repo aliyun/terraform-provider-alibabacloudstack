@@ -148,7 +148,7 @@ func TestAccAlibabacloudStackVpnGatewayBasic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithAccountSiteType(t, IntlSite)
+			testAccPreCheckWithAccountSiteType(t, DomesticSite)
 		},
 
 		// module name
@@ -189,8 +189,11 @@ func TestAccAlibabacloudStackVpnGatewayBasic(t *testing.T) {
 				Config: testAccVpnConfig_all(rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":        fmt.Sprintf("tf-testAccVpnConfig%d", rand),
-						"description": fmt.Sprintf("tf-testAccVpnConfig%d", rand),
+						"name":         fmt.Sprintf("tf-testAccVpnConfig%d", rand),
+						"description":  fmt.Sprintf("tf-testAccVpnConfig%d", rand),
+						"tags.%":       "2",
+						"tags.Created": "TF",
+						"tags.For":     "Test",
 					}),
 				),
 			},
@@ -391,6 +394,10 @@ resource "alibabacloudstack_vpn_gateway" "default" {
 	instance_charge_type = "PostPaid"
 	description = "${var.name}"
 	vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	tags = {
+		Created= "TF",
+		For=     "Test",
+	}
 }
 `, rand)
 }

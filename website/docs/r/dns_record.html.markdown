@@ -40,7 +40,7 @@ output "record" {
 The following arguments are supported:
 
 * `zone_id` - (Required) ID of the Dns Domain where this record belongs.
-* `name` - (Required) Host record for the domain record. This host_record can have at most 253 characters, and each part split with "." can have at most 63 characters, and must contain only alphanumeric characters or hyphens, such as "-",".","*","@",  and must not begin or end with "-".
+* `name` - (Required) name for the domain record. This host_record can have at most 253 characters, and each part split with "." can have at most 63 characters, and must contain only alphanumeric characters or hyphens, such as "-",".","*","@",  and must not begin or end with "-".
 * `type` - (Required) The type of domain record. Valid values are `A`,`NS`,`MX`,`TXT`,`CNAME`,`SRV`,`AAAA`,`CAA`, `REDIRECT_URL` and `FORWORD_URL`.
 * `rr_set` - (Optional) The value of domain record, When the `type` is `MX`,`NS`,`CNAME`,`SRV`, the server will treat the `value` as a fully qualified domain name, so it's no need to add a `.` at the end.
 * `ttl` - (Optional) The effective time of domain record. Its scope depends on the edition of the cloud resolution. Free is `[600, 86400]`, Basic is `[120, 86400]`, Standard is `[60, 86400]`, Ultimate is `[10, 86400]`, Exclusive is `[1, 86400]`. Default value is `300`.
@@ -52,7 +52,7 @@ The following attributes are exported:
 
 * `record_id` - ID of the Dns Record.
 * `type` - The record type.
-* `name` - The host record of record.
+* `name` - The name of record.
 * `rr_set` - The record value.
 * `ttl` - The record effective time.
 * `zone_id` - ID of the Dns Domain where this record belongs.

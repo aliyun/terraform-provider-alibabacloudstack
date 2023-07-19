@@ -100,7 +100,7 @@ provider "alibabacloudstack" {
   region = "${var.region}"
 }
 variable "region" {
-  default = "cn-qingdao-env66-d01"
+  default = "cn-wulan-env200-d01"
 }
 variable "name" {
   default = "tf-test%d"
@@ -110,7 +110,6 @@ resource "alibabacloudstack_vpc" "foo" {
   cidr_block = "172.16.0.0/12"
 }
 resource "alibabacloudstack_vpc" "bar" {
-  provider = "alibabacloudstack"
   name = "${var.name}"
   cidr_block = "192.168.0.0/16"
 }

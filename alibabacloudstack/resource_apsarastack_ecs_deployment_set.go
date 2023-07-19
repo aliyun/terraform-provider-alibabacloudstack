@@ -62,6 +62,7 @@ func resourceAlibabacloudStackEcsDeploymentSet() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Availability"}, false),
 			},
+			"tags": tagsSchema(),
 		},
 	}
 }
@@ -173,17 +174,29 @@ func resourceAlibabacloudStackEcsDeploymentSetRead(d *schema.ResourceData, meta 
 		}
 		return WrapError(err)
 	}
-	d.Set("domain", object.DeploymentSets.DeploymentSet[0].Domain)
-	d.Set("granularity", object.DeploymentSets.DeploymentSet[0].Granularity)
-	d.Set("deployment_set_name", object.DeploymentSets.DeploymentSet[0].DeploymentSetName)
-	d.Set("description", object.DeploymentSets.DeploymentSet[0].DeploymentSetDescription)
-	d.Set("strategy", object.DeploymentSets.DeploymentSet[0].DeploymentStrategy)
-	//d.Set("DeploymentSetId", d.Get("DeploymentSetId"))
+	d.Set("domain", convertEcsDeploymentSetDomainResponse(object["Domain"]))
+	d.Set("granularity", convertEcsDeploymentSetGranularityResponse(object["Granularity"]))
+	d.Set("deployment_set_name", object["DeploymentSetName"])
+	d.Set("description", object["DeploymentSetDescription"])
+	d.Set("strategy", object["DeploymentStrategy"])
+
+	if object["Tags"] != nil {
+		tags := object["Tags"].(map[string]interface{})["Tag"]
+		d.Set("tags", tagsToMap(tags))
+	}
 
 	return nil
 }
 func resourceAlibabacloudStackEcsDeploymentSetUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+
+	ecsService := EcsService{client}
+	if d.HasChange("tags") {
+		if err := ecsService.SetResourceTagsNew(d, "deployment_set"); err != nil {
+			return WrapError(err)
+		}
+	}
+
 	request := requests.NewCommonRequest()
 
 	update := false

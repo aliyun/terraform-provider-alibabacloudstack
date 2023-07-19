@@ -61,7 +61,10 @@ func resourceAlibabacloudStackDataWorksUserCreate(d *schema.ResourceData, meta i
 		request["RoleCode"] = v.(string)
 	}
 
-	request["RegionId"] = "default"
+	request["RegionId"] = client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = client.Department
 	request["ClientToken"] = fmt.Sprint(uuid.NewRandom())
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
@@ -127,7 +130,10 @@ func resourceAlibabacloudStackDataWorksUserDelete(d *schema.ResourceData, meta i
 		"UserId":    parts[2],
 	}
 
-	request["RegionId"] = "default"
+	request["RegionId"] = client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = client.Department
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})

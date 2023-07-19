@@ -819,6 +819,16 @@ func compareJsonTemplateAreEquivalent(tem1, tem2 string) (bool, error) {
 	}
 	return equal, nil
 }
+func convertArrayToString(src interface{}, sep string) string {
+	if src == nil {
+		return ""
+	}
+	items := make([]string, 0)
+	for _, v := range src.([]interface{}) {
+		items = append(items, fmt.Sprint(v))
+	}
+	return strings.Join(items, sep)
+}
 func convertMapFloat64ToJsonString(m map[string]interface{}) (string, error) {
 	sm := make(map[string]json.Number, len(m))
 

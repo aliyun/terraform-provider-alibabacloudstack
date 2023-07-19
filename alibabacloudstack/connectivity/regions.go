@@ -9,6 +9,8 @@ const (
 	QingdaoEnv66  = Region("cn-qingdao-env66-d01")
 	QingdaoEnv17  = Region("cn-qingdao-env17-d01")
 	WulanEnv230   = Region("cn-wulan-env230-d01")
+	WulanEnv200   = Region("cn-wulan-env200-d01")
+	WulanEnv48    = Region("cn-wulan-env48-d01")
 	WulanEnv205   = Region("cn-wulan-env205-d01")
 	WulanEnv82    = Region("cn-wulan-env82-d01")
 	QingdaoEnv15  = Region("cn-qingdao-env15-d01")
@@ -55,7 +57,7 @@ var ValidRegions = []Region{
 	MEEast1,
 	EUCentral1, EUWest1,
 }
-var OtsCapacityNoSupportedRegions = []Region{APSouthEast1, USWest1, USEast1}
+var OtsCapacityNoSupportedRegions = []Region{APSouthEast1, USWest1, USEast1, WulanEnv200}
 var EcsClassicSupportedRegions = []Region{Shenzhen, Shanghai, Beijing, Qingdao, Hangzhou, Hongkong, USWest1, APSouthEast1}
 var EcsSpotNoSupportedRegions = []Region{APSouth1}
 var RdsClassicNoSupportedRegions = []Region{APSouth1, APSouthEast2, APSouthEast3, APNorthEast1, EUCentral1, EUWest1, MEEast1}
@@ -77,7 +79,7 @@ var DatahubSupportedRegions = []Region{Beijing, Hangzhou, Shanghai, Shenzhen, AP
 var OtsHighPerformanceNoSupportedRegions = []Region{Qingdao, Zhangjiakou, Huhehaote, APSouthEast2, APSouthEast5, APNorthEast1, EUCentral1, MEEast1}
 var EdasSupportedRegions = []Region{Hangzhou, Beijing, Shanghai, Shenzhen, Zhangjiakou, Qingdao, Hongkong}
 var AdbReserverUnSupportRegions = []Region{EUCentral1}
-var VpcIpv6GatewaySupportRegions = []Region{QingdaoEnv15, QingdaoEnv66, WulanEnv205, WulanEnv230, NeimengEnv127, Qingdao, Beijing, Zhangjiakou, Huhehaote, WuLanChaBu, Hangzhou, Shanghai, Shenzhen, GuangZhou, Hongkong, ChengDu, HeYuan, APSouthEast1, APSouthEast6, USEast1, EUCentral1}
+var VpcIpv6GatewaySupportRegions = []Region{QingdaoEnv15, QingdaoEnv66, WulanEnv205, WulanEnv230, NeimengEnv127, Qingdao, Beijing, Zhangjiakou, Huhehaote, WuLanChaBu, Hangzhou, Shanghai, Shenzhen, GuangZhou, Hongkong, ChengDu, HeYuan, APSouthEast1, APSouthEast6, USEast1, EUCentral1, WulanEnv200}
 var VpcIpv6SupportRegions = []Region{QingdaoEnv15, Hangzhou, Shanghai, Shenzhen, Beijing, Huhehaote, Hongkong, APSouthEast1}
 var ManagedKubernetesSupportedRegions = []Region{QingdaoEnv15, Beijing, Hangzhou, Shanghai, Shenzhen, ChengDu, Hongkong, APSouthEast1, APSouthEast2, EUCentral1, USWest1}
 var AlikafkaSupportedRegions = []Region{Hangzhou, Qingdao, Beijing, Hongkong, Shenzhen, Shanghai, Zhangjiakou, Huhehaote, ChengDu, HeYuan, APNorthEast1, APSouthEast1, APSouthEast3, EUCentral1, EUWest1, USEast1, USWest1}

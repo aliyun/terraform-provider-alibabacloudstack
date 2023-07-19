@@ -102,8 +102,10 @@ func resourceAlibabacloudStackDataWorksConnectionCreate(d *schema.ResourceData, 
 	if v, ok := d.GetOk("sub_type"); ok {
 		request["SubType"] = v.(string)
 	}
-
-	request["RegionId"] = "default"
+	request["RegionId"] = client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = client.Department
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
@@ -178,8 +180,10 @@ func resourceAlibabacloudStackDataWorksConnectionUpdate(d *schema.ResourceData, 
 	if d.HasChange("description") {
 		request["Description"] = d.Get("description").(string)
 	}
-
-	request["RegionId"] = "default"
+	request["RegionId"] = client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = client.Department
 	action := "UpdateConnection"
 	conn, err := client.NewDataworkspublicClient()
 	if err != nil {
@@ -218,8 +222,10 @@ func resourceAlibabacloudStackDataWorksConnectionDelete(d *schema.ResourceData, 
 	request := map[string]interface{}{
 		"ConnectionId": parts[0],
 	}
-
-	request["RegionId"] = "default"
+	request["RegionId"] = client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = client.Department
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})

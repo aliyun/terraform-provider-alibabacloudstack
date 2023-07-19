@@ -57,7 +57,10 @@ func resourceAlibabacloudStackDataWorksProjectCreate(d *schema.ResourceData, met
 		request["TaskAuthType"] = v.(string)
 	}
 
-	request["RegionId"] = "default"
+	request["RegionId"] = client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = client.Department
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-01-17"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})

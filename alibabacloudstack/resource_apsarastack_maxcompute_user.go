@@ -108,7 +108,7 @@ func resourceAlibabacloudStackMaxcomputeUserCreate(d *schema.ResourceData, meta 
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_maxcompute_project", action, AlibabacloudStackSdkGoERROR)
 	}
 	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		return WrapError(Error("CreateUpdateOdpsCu failed for " + response["Message"].(string)))
+		return WrapError(Error("CreateUpdateOdpsUser failed for "))
 	}
 
 	return resourceAlibabacloudStackMaxcomputeUserRead(d, meta)

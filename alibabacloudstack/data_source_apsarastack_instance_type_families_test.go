@@ -20,7 +20,7 @@ func TestAccAlibabacloudStackInstanceTypeFamiliesDataSource(t *testing.T) {
 			"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}-F",
+			"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}",
 		}),
 	}
 
@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackInstanceTypeFamiliesDataSource(t *testing.T) {
 			"generation": "ecs-3",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"zone_id":    "${data.alibabacloudstack_zones.default.zones.0.id}-F",
+			"zone_id":    "${data.alibabacloudstack_zones.default.zones.0.id}",
 			"generation": "ecs-3",
 		}),
 	}
@@ -55,8 +55,8 @@ func TestAccAlibabacloudStackInstanceTypeFamiliesDataSource(t *testing.T) {
 
 	var fakeInstanceTypeFamiliesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":      "0",
-			"families.#": "0",
+			"ids.#":      CHECKSET,
+			"families.#": CHECKSET,
 		}
 	}
 

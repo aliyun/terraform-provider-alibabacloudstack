@@ -15,6 +15,7 @@ func dataSourceAlibabacloudStackEcsInstanceFamilies() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackEcsInstanceFamiliesRead,
 		Schema: map[string]*schema.Schema{
+
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,

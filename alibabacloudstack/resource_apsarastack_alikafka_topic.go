@@ -80,6 +80,17 @@ func resourceAlibabacloudStackAlikafkaTopicCreate(d *schema.ResourceData, meta i
 	request.InstanceId = instanceId
 	request.RegionId = regionId
 	request.Topic = topic
+
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": client.SecretKey,
+		"AccessKeyId":     client.AccessKey,
+		"Product":         "alikafka",
+		"RegionId":        client.RegionId,
+		"Department":      client.Department,
+		"ResourceGroup":   client.ResourceGroup,
+		"Action":          "CreateTopic",
+		"Version":         "2019-09-16",
+	}
 	if v, ok := d.GetOk("local_topic"); ok {
 		request.LocalTopic = requests.NewBoolean(v.(bool))
 	}
@@ -139,6 +150,16 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 		modifyRemarkRequest.RegionId = client.RegionId
 		modifyRemarkRequest.Topic = topic
 		modifyRemarkRequest.Remark = remark
+		modifyRemarkRequest.QueryParams = map[string]string{
+			"AccessKeySecret": client.SecretKey,
+			"AccessKeyId":     client.AccessKey,
+			"Product":         "alikafka",
+			"RegionId":        client.RegionId,
+			"Department":      client.Department,
+			"ResourceGroup":   client.ResourceGroup,
+			"Action":          "ModifyTopicRemark",
+			"Version":         "2019-09-16",
+		}
 		err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 			raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 				return alikafkaClient.ModifyTopicRemark(modifyRemarkRequest)
@@ -156,7 +177,7 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), modifyRemarkRequest.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
-		d.SetPartial("remark")
+		//d.SetPartial("remark")
 	}
 
 	if d.HasChange("partition_num") {
@@ -173,7 +194,16 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 			modifyPartitionReq.RegionId = client.RegionId
 			modifyPartitionReq.Topic = topic
 			modifyPartitionReq.AddPartitionNum = requests.NewInteger(newPartitionNum - oldPartitionNum)
-
+			modifyPartitionReq.QueryParams = map[string]string{
+				"AccessKeySecret": client.SecretKey,
+				"AccessKeyId":     client.AccessKey,
+				"Product":         "alikafka",
+				"RegionId":        client.RegionId,
+				"Department":      client.Department,
+				"ResourceGroup":   client.ResourceGroup,
+				"Action":          "ModifyPartitionNum",
+				"Version":         "2019-09-16",
+			}
 			err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 				raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 					return alikafkaClient.ModifyPartitionNum(modifyPartitionReq)
@@ -191,7 +221,7 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 			if err != nil {
 				return WrapErrorf(err, DefaultErrorMsg, d.Id(), modifyPartitionReq.GetActionName(), AlibabacloudStackSdkGoERROR)
 			}
-			d.SetPartial("partition_num")
+			//d.SetPartial("partition_num")
 		}
 	}
 
@@ -245,6 +275,16 @@ func resourceAlibabacloudStackAlikafkaTopicDelete(d *schema.ResourceData, meta i
 	request.InstanceId = instanceId
 	request.RegionId = client.RegionId
 	request.Domain = client.Config.AlikafkaOpenAPIEndpoint
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": client.SecretKey,
+		"AccessKeyId":     client.AccessKey,
+		"Product":         "alikafka",
+		"RegionId":        client.RegionId,
+		"Department":      client.Department,
+		"ResourceGroup":   client.ResourceGroup,
+		"Action":          "DeleteTopic",
+		"Version":         "2019-09-16",
+	}
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 			return alikafkaClient.DeleteTopic(request)

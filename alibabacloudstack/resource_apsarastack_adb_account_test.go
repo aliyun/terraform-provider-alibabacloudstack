@@ -119,7 +119,7 @@ func resourceAdbAccountConfigDependence(name string) string {
 	    db_cluster_version = "3.0"
 	    db_node_count = "2"
 		mode					= "reserver"
-		cluster_type =        "analyticdb"
+		cluster_type =        "AnalyticdbOnPanguSSD"
 		cpu_type =            "intel"
 	}`, AdbCommonTestCase, name)
 }

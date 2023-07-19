@@ -21,7 +21,7 @@ resource "alibabacloudstack_dns_domain" "default" {
 
 # Create a new Domain record
 resource "alibabacloudstack_dns_record" "default" {
- zone_id   = alibabacloudstack_dns_domain.default.domain_id
+  zone_id   = alibabacloudstack_dns_domain.default.domain_id
   name = "testing_record"
   type        = "A"
   remark = "testing Record"
@@ -31,7 +31,6 @@ resource "alibabacloudstack_dns_record" "default" {
 }
 
 data "alibabacloudstack_dns_records" "default"{
-
  zone_id         = alibabacloudstack_dns_record.default.zone_id
  name = alibabacloudstack_dns_record.default.name
 }

@@ -98,6 +98,8 @@ private_ip     = "172.16.0.10"
 security_ips   = ["10.0.0.1"]
 instance_type  = "Redis"
 engine_version = "4.0"	
+ architecture_type = "standard"
+cpu_type = "intel"
 }
 	`, name)
 }

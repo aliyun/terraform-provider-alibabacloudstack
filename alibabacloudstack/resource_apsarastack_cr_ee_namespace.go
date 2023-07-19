@@ -56,7 +56,7 @@ func resourceAlibabacloudStackCrEENamespaceCreate(d *schema.ResourceData, meta i
 	request.RegionId = crService.client.RegionId
 
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "cr", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "cr-ee", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.InstanceId = instanceId
 	request.NamespaceName = namespace

@@ -32,6 +32,7 @@ resource "alibabacloudstack_ascm_ram_role" "default" {
   role_name = "TestRamRoles"
   description = "TestingRam"
   organization_visibility = "global"
+role_range = "roleRange.allOrganizations"
 }
 
 data "alibabacloudstack_ascm_roles" "default" {

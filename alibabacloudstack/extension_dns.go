@@ -26,14 +26,15 @@ type DnsRecord struct {
 }
 
 type DnsDomains struct {
-	AsapiSuccess   bool   `json:"asapiSuccess"`
-	AsapiRequestID string `json:"asapiRequestId"`
-	PageSize       int    `json:"PageSize"`
-	RequestID      string `json:"RequestId"`
-	PageNumber     int    `json:"PageNumber"`
-	TotalItems     int    `json:"TotalItems"`
-	Data           []struct {
-		Id              int       `json:"Id"`
+	AsapiSuccess    bool   `json:"asapiSuccess"`
+	AsapiRequestID  string `json:"asapiRequestId"`
+	PageSize        int    `json:"PageSize"`
+	RequestID       string `json:"RequestId"`
+	PageNumber      int    `json:"PageNumber"`
+	TotalItems      int    `json:"TotalItems"`
+	EagleEyeTraceId string `json:"eagleEyeTraceId"`
+	Data            []struct {
+		Id              string    `json:"Id"`
 		VpcNumber       int       `json:"VpcNumber"`
 		Name            string    `json:"Name"`
 		CreateTime      time.Time `json:"CreateTime"`

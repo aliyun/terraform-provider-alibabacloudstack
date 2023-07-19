@@ -363,11 +363,13 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_zones":                                  dataSourceAlibabacloudStackZones(),
 			"alibabacloudstack_elasticsearch_instances":                dataSourceAlibabacloudStackElasticsearch(),
 			"alibabacloudstack_elasticsearch_zones":                    dataSourceAlibabacloudStackElaticsearchZones(),
+			"alibabacloudstack_ehpc_job_templates":                     dataSourceAlibabacloudStackEhpcJobTemplates(),
 			"alibabacloudstack_oos_executions":                         dataSourceAlibabacloudStackOosExecutions(),
 			"alibabacloudstack_oos_templates":                          dataSourceAlibabacloudStackOosTemplates(),
 			"alibabacloudstack_express_connect_physical_connections":   dataSourceAlibabacloudStackExpressConnectPhysicalConnections(),
 			"alibabacloudstack_express_connect_access_points":          dataSourceAlibabacloudStackExpressConnectAccessPoints(),
 			"alibabacloudstack_express_connect_virtual_border_routers": dataSourceAlibabacloudStackExpressConnectVirtualBorderRouters(),
+			"alibabacloudStack_cloud_firewall_control_policies":        dataSourceAlibabacloudStackCloudFirewallControlPolicies(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"alibabacloudstack_ess_scaling_configuration":             resourceAlibabacloudStackEssScalingConfiguration(),
@@ -488,9 +490,9 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_log_store_index":                       resourceAlibabacloudStackLogStoreIndex(),
 			"alibabacloudstack_logtail_attachment":                    resourceAlibabacloudStackLogtailAttachment(),
 			"alibabacloudstack_logtail_config":                        resourceAlibabacloudStackLogtailConfig(),
-			"alibabacloudstack_maxcompute_cu":                         resourceAlibabacloudStackMaxcomputeCu(),
 			"alibabacloudstack_maxcompute_project":                    resourceAlibabacloudStackMaxcomputeProject(),
 			"alibabacloudstack_maxcompute_user":                       resourceAlibabacloudStackMaxcomputeUser(),
+			"alibabacloudstack_maxcompute_cu":                         resourceAlibabacloudStackMaxcomputeCu(),
 			"alibabacloudstack_mongodb_instance":                      resourceAlibabacloudStackMongoDBInstance(),
 			"alibabacloudstack_mongodb_sharding_instance":             resourceAlibabacloudStackMongoDBShardingInstance(),
 			"alibabacloudstack_nas_access_group":                      resourceAlibabacloudStackNasAccessGroup(),
@@ -556,11 +558,19 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_data_works_remind":                     resourceAlibabacloudStackDataWorksRemind(),
 			"alibabacloudstack_elasticsearch_instance":                resourceAlibabacloudStackElasticsearch(),
 			"alibabacloudstack_dbs_backup_plan":                       resourceAlibabacloudStackDbsBackupPlan(),
-			"alibabacloudstack_oos_template":                          resourceAlibabacloudStackOosTemplate(),
-			"alibabacloudstack_oos_execution":                         resourceAlibabacloudStackOosExecution(),
 			"alibabacloudstack_express_connect_physical_connection":   resourceAlibabacloudStackExpressConnectPhysicalConnection(),
 			"alibabacloudstack_express_connect_virtual_border_router": resourceAlibabacloudStackExpressConnectVirtualBorderRouter(),
+			"alibabacloudstack_oos_template":                          resourceAlibabacloudStackOosTemplate(),
+			"alibabacloudstack_oos_execution":                         resourceAlibabacloudStackOosExecution(),
+			"alibabacloudstack_arms_alert_contact":                    resourceAlibabacloudStackArmsAlertContact(),
+			"alibabacloudstack_arms_alert_contact_group":              resourceAlibabacloudStackArmsAlertContactGroup(),
+			"alibabacloudstack_arms_dispatch_rule":                    resourceAlibabacloudStackArmsDispatchRule(),
+			"alibabacloudstack_arms_prometheus_alert_rule":            resourceAlibabacloudStackArmsPrometheusAlertRule(),
+			"alibabacloudstack_elasticsearch_k8s_instance":            resourceAlibabacloudStackElasticsearchOnk8s(),
+			"alibabacloudstack_cloud_firewall_control_policy":         resourceAlibabacloudStackCloudFirewallControlPolicy(),
+			"alibabacloudstack_cloud_firewall_control_policy_order":   resourceAlibabacloudStackCloudFirewallControlPolicyOrder(),
 			"alibabacloudstack_csb_project":                           resourceAlibabacloudStackCsbProject(),
+			"alibabacloudstack_graph_database_db_instance":            resourceAlibabacloudStackGraphDatabaseDbInstance(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
@@ -697,7 +707,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.DataworkspublicEndpoint = domain
 		config.DbsEndpoint = domain
 		config.OosEndpoint = domain
+		config.ArmsEndpoint = domain
+		config.CloudfwEndpoint = domain
 		config.CsbEndpoint = domain
+		config.GdbEndpoint = domain
 	} else {
 
 		endpointsSet := d.Get("endpoints").(*schema.Set)
@@ -734,10 +747,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 			config.HBaseEndpoint = strings.TrimSpace(endpoints["hbase"].(string))
 			config.DrdsEndpoint = strings.TrimSpace(endpoints["drds"].(string))
 			config.QuickbiEndpoint = strings.TrimSpace(endpoints["quickbi"].(string))
+			config.CsbEndpoint = strings.TrimSpace(endpoints["csb"].(string))
+			config.GdbEndpoint = strings.TrimSpace(endpoints["gdb"].(string))
 			config.DataworkspublicEndpoint = strings.TrimSpace(endpoints["dataworkspublic"].(string))
 			config.DbsEndpoint = strings.TrimSpace(endpoints["dbs"].(string))
 			config.OosEndpoint = strings.TrimSpace(endpoints["oos"].(string))
-			config.CsbEndpoint = strings.TrimSpace(endpoints["csb"].(string))
+			config.ArmsEndpoint = strings.TrimSpace(endpoints["arms"].(string))
+			config.CloudfwEndpoint = strings.TrimSpace(endpoints["cloudfw"].(string))
 		}
 	}
 	DbsEndpoint := d.Get("dbs_endpoint").(string)
@@ -1299,7 +1315,8 @@ func getAssumeRoleAK(config *connectivity.Config) (string, string, string, error
 	//request.DurationSeconds = requests.NewInteger(config.RamRoleSessionExpiration)
 	request.Policy = config.RamRolePolicy
 	request.Scheme = "https"
-	request.SetHTTPSInsecure(true)
+	request.SetHTTPSInsecure(config.Insecure)
+
 	request.Domain = config.StsEndpoint
 	request.Headers["x-ascm-product-name"] = "sts"
 	request.Headers["x-acs-organizationId"] = config.Department

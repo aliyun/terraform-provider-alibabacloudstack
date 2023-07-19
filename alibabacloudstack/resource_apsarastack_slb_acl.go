@@ -123,9 +123,9 @@ func resourceAlibabacloudStackSlbAclUpdate(d *schema.ResourceData, meta interfac
 
 	d.Partial(true)
 
-	if err := slbService.setInstanceTags(d, TagResourceAcl); err != nil {
-		return WrapError(err)
-	}
+	//if err := slbService.setInstanceTags(d, TagResourceAcl); err != nil {
+	//	return WrapError(err)
+	//}
 
 	if !d.IsNewResource() && d.HasChange("name") {
 		request := slb.CreateSetAccessControlListAttributeRequest()

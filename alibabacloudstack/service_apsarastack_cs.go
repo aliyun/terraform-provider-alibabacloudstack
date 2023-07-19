@@ -103,6 +103,7 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDet
 	cluster = &cs.KubernetesClusterDetail{}
 	for _, k := range Cdetails.Clusters {
 		if k.ClusterID == id {
+			cluster.Tags = k.Tags
 			cluster.Name = k.Name
 			cluster.State = k.State
 			cluster.ClusterId = k.ClusterID

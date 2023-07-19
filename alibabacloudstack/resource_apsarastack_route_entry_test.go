@@ -221,7 +221,7 @@ resource "alibabacloudstack_instance" "default" {
    vswitch_id = "${alibabacloudstack_vswitch.default.id}"
    instance_type = "${local.instance_type_id}"
    internet_max_bandwidth_out = 5
-   system_disk_category = "cloud_efficiency"
+   system_disk_category = "cloud_pperf"
    image_id = "${data.alibabacloudstack_images.default.images.0.id}"
    instance_name = "${var.name}"
 }
@@ -271,7 +271,7 @@ resource "alibabacloudstack_security_group_rule" "default" {
 }
 
 resource "alibabacloudstack_router_interface" "default" {
-  opposite_region = "cn-qingdao-env66-d01"
+  opposite_region = "cn-wulan-env200-d01"
   router_type = "VRouter"
   router_id = "${alibabacloudstack_vpc.default.router_id}"
   role = "InitiatingSide"

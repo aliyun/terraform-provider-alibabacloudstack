@@ -109,7 +109,8 @@ func resourceAlibabacloudStackDbsBackupPlanCreate(d *schema.ResourceData, meta i
 	if v, ok := d.GetOk("from_app"); ok {
 		request["FromApp"] = v.(string)
 	}
-
+	request["product"] = "dbs"
+	request["Product"] = "dbs"
 	request["ClientToken"] = buildClientToken("CreateBackupPlan")
 	request["RegionId"] = client.RegionId
 	wait := incrementalWait(3*time.Second, 3*time.Second)
@@ -166,7 +167,8 @@ func resourceAlibabacloudStackDbsBackupPlanUpdate(d *schema.ResourceData, meta i
 	var response map[string]interface{}
 
 	request["BackupPlanId"] = d.Id()
-
+	request["product"] = "dbs"
+	request["Product"] = "dbs"
 	if d.HasChange("backup_plan_name") {
 		request["BackupPlanName"] = d.Get("backup_plan_name").(string)
 	}
