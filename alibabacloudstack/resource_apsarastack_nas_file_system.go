@@ -131,13 +131,13 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 
 	d.SetId(fmt.Sprint(response["FileSystemId"]))
 	// Creating an extreme filesystem is asynchronous, so you need to block and wait until the creation is complete
-	if d.Get("file_system_type") == "extreme" {
-		nasService := NasService{client}
-		stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutRead), 3*time.Second, nasService.DescribeNasFileSystemStateRefreshFunc(d.Id(), "Pending", []string{"Stopped", "Stopping", "Deleting"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
-		}
+	//if d.Get("file_system_type") == "extreme" {
+	nasService := NasService{client}
+	stateConf := BuildStateConf([]string{}, []string{"Running"}, d.Timeout(schema.TimeoutRead), 3*time.Second, nasService.DescribeNasFileSystemStateRefreshFunc(d.Id(), "Pending", []string{"Stopped", "Stopping", "Deleting"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return WrapErrorf(err, IdMsg, d.Id())
 	}
+	//}
 	return resourceAlibabacloudStackNasFileSystemUpdate(d, meta)
 }
 

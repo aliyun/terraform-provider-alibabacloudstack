@@ -20,7 +20,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstance(instanceId stri
 	alikafkaInstance := &alikafka.InstanceVO{}
 	instanceListReq := alikafka.CreateGetInstanceListRequest()
 	instanceListReq.RegionId = alikafkaService.client.RegionId
-
+        instanceListReq.QueryParams["Product"] = "alikafka"
 	wait := incrementalWait(2*time.Second, 1*time.Second)
 	var raw interface{}
 	var err error
@@ -61,7 +61,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaNodeStatus(instanceId st
 	describeNodeStatusReq := alikafka.CreateDescribeNodeStatusRequest()
 	describeNodeStatusReq.RegionId = alikafkaService.client.RegionId
 	describeNodeStatusReq.InstanceId = instanceId
-
+        describeNodeStatusReq.QueryParams["Product"] = "alikafka"
 	wait := incrementalWait(2*time.Second, 1*time.Second)
 	var raw interface{}
 	var err error
@@ -95,7 +95,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstanceByOrderId(orderI
 	instanceListReq := alikafka.CreateGetInstanceListRequest()
 	instanceListReq.RegionId = alikafkaService.client.RegionId
 	instanceListReq.OrderId = orderId
-
+        instanceListReq.QueryParams["Product"] = "alikafka"
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
 
@@ -147,7 +147,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaConsumerGroup(id string)
 	request := alikafka.CreateGetConsumerListRequest()
 	request.InstanceId = instanceId
 	request.RegionId = alikafkaService.client.RegionId
-
+        request.QueryParams["Product"] = "alikafka"
 	wait := incrementalWait(2*time.Second, 1*time.Second)
 	var raw interface{}
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
@@ -194,6 +194,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopicStatus(id string) (
 	request.InstanceId = instanceId
 	request.RegionId = alikafkaService.client.RegionId
 	request.Topic = topic
+	request.QueryParams["Product"] = "alikafka"
 
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	var raw interface{}
@@ -241,6 +242,10 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*alika
 	request.InstanceId = instanceId
 	request.RegionId = alikafkaService.client.RegionId
 	request.Domain = alikafkaService.client.Config.AlikafkaOpenAPIEndpoint
+
+	
+
+
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": alikafkaService.client.SecretKey,
 		"AccessKeyId":     alikafkaService.client.AccessKey,
@@ -251,6 +256,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*alika
 		"Action":          "GetTopicList",
 		"Version":         "2019-09-16",
 	}
+
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	var raw interface{}
 
@@ -297,6 +303,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaSaslUser(id string) (*al
 	request.InstanceId = instanceId
 	request.RegionId = alikafkaService.client.RegionId
 	request.Domain = alikafkaService.client.Config.AlikafkaOpenAPIEndpoint
+	request.QueryParams["Product"] = "alikafka"
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	var raw interface{}
 
@@ -352,6 +359,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaSaslAcl(id string) (*ali
 	request.AclResourceName = aclResourceName
 	request.AclResourcePatternType = aclResourcePatternType
 	request.Domain = alikafkaService.client.Config.AlikafkaOpenAPIEndpoint
+	request.QueryParams["Product"] = "alikafka"
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	var raw interface{}
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -627,6 +635,7 @@ func (s *AlikafkaService) DescribeTags(resourceId string, resourceTags map[strin
 	request.ResourceType = string(resourceType)
 	request.ResourceId = &[]string{resourceId}
 	request.Domain = s.client.Config.AlikafkaOpenAPIEndpoint
+	request.QueryParams["Product"] = "alikafka"
 	if resourceTags != nil && len(resourceTags) > 0 {
 		var reqTags []alikafka.ListTagResourcesTag
 		for key, value := range resourceTags {
@@ -681,6 +690,7 @@ func (s *AlikafkaService) setInstanceTags(d *schema.ResourceData, resourceType T
 			request.ResourceType = string(resourceType)
 			request.TagKey = &tagKey
 			request.RegionId = s.client.RegionId
+			request.QueryParams["Product"] = "alikafka"
 
 			wait := incrementalWait(2*time.Second, 1*time.Second)
 			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
@@ -709,6 +719,7 @@ func (s *AlikafkaService) setInstanceTags(d *schema.ResourceData, resourceType T
 			request.Tag = &create
 			request.ResourceType = string(resourceType)
 			request.RegionId = s.client.RegionId
+			request.QueryParams["Product"] = "alikafka"
 
 			wait := incrementalWait(2*time.Second, 1*time.Second)
 			err := resource.Retry(10*time.Minute, func() *resource.RetryError {

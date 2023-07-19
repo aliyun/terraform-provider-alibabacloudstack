@@ -104,6 +104,7 @@ func resourceAlibabacloudStackAlikafkaTopicCreate(d *schema.ResourceData, meta i
 		request.Remark = v.(string)
 	}
 	request.Domain = client.Config.AlikafkaOpenAPIEndpoint
+	request.QueryParams["Product"] = "alikafka"
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 			return alikafkaClient.CreateTopic(request)
@@ -150,6 +151,9 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 		modifyRemarkRequest.RegionId = client.RegionId
 		modifyRemarkRequest.Topic = topic
 		modifyRemarkRequest.Remark = remark
+
+		
+
 		modifyRemarkRequest.QueryParams = map[string]string{
 			"AccessKeySecret": client.SecretKey,
 			"AccessKeyId":     client.AccessKey,
@@ -160,6 +164,7 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 			"Action":          "ModifyTopicRemark",
 			"Version":         "2019-09-16",
 		}
+
 		err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 			raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 				return alikafkaClient.ModifyTopicRemark(modifyRemarkRequest)
@@ -194,6 +199,10 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 			modifyPartitionReq.RegionId = client.RegionId
 			modifyPartitionReq.Topic = topic
 			modifyPartitionReq.AddPartitionNum = requests.NewInteger(newPartitionNum - oldPartitionNum)
+
+			
+
+
 			modifyPartitionReq.QueryParams = map[string]string{
 				"AccessKeySecret": client.SecretKey,
 				"AccessKeyId":     client.AccessKey,
@@ -204,6 +213,7 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 				"Action":          "ModifyPartitionNum",
 				"Version":         "2019-09-16",
 			}
+
 			err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 				raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 					return alikafkaClient.ModifyPartitionNum(modifyPartitionReq)
