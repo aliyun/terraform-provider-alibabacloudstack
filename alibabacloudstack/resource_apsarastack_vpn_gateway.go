@@ -108,6 +108,7 @@ func resourceAlibabacloudStackVpnGateway() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"tags": tagsSchema(),
 		},
 	}
 }
@@ -183,6 +184,7 @@ func resourceAlibabacloudStackVpnGatewayRead(d *schema.ResourceData, meta interf
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpnGatewayService := VpnGatewayService{client}
+	vpcService := VpcService{client}
 
 	object, err := vpnGatewayService.DescribeVpnGateway(d.Id())
 	if err != nil {
@@ -218,18 +220,31 @@ func resourceAlibabacloudStackVpnGatewayRead(d *schema.ResourceData, meta interf
 	} else {
 		d.Set("instance_charge_type", string(PrePaid))
 	}
+	listTagResourcesObject, err := vpcService.ListTagResources(d.Id(), "VpnGateWay")
+	if err != nil {
+		return WrapError(err)
+	}
+	d.Set("tags", tagsToMap(listTagResourcesObject))
 
 	return nil
 }
 
 func resourceAlibabacloudStackVpnGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	vpcService := VpcService{client}
+
 	request := vpc.CreateModifyVpnGatewayAttributeRequest()
 	request.Headers["x-ascm-product-name"] = "Vpc"
 	request.Headers["x-acs-organizationId"] = client.Department
 	request.RegionId = client.RegionId
 	request.VpnGatewayId = d.Id()
 	update := false
+	if d.HasChange("tags") {
+		if err := vpcService.SetResourceTags(d, "VpnGateWay"); err != nil {
+			return WrapError(err)
+		}
+		d.SetPartial("tags")
+	}
 	d.Partial(true)
 	if d.HasChange("name") {
 		request.Name = d.Get("name").(string)

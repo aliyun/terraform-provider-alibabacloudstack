@@ -190,6 +190,9 @@ func TestAccAlibabacloudStackNatGatewayBasic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"specification": "Small",
 						"name":          fmt.Sprintf("tf-testAccNatGatewayConfig%d_all", rand),
+						"tags.%":        "2",
+						"tags.Created":  "TF",
+						"tags.For":      "Test",
 					}),
 				),
 			},
@@ -345,6 +348,10 @@ resource "alibabacloudstack_nat_gateway" "default" {
 	vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
 	name = "${var.name}_all"
 	specification = "Small"
+	tags = {
+	Created= "TF",
+	For=     "Test",
+	}
 }
 `, rand)
 }

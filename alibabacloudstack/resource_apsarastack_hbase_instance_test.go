@@ -110,7 +110,7 @@ func testSweepHBaseInstances(region string) error {
 
 func AlibabacloudStackHbaseBasicDependence(name string) string {
 	return fmt.Sprintf(`
-data "alibabacloudstack_hbase_zones" "default" {}
+
 variable "name" {
 	default = "%s"
 }
@@ -126,7 +126,7 @@ cidr_block = "172.16.0.0/16"
 resource "alibabacloudstack_vswitch" "default" {
   vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = data.alibabacloudstack_hbase_zones.default.ids.0
+  availability_zone = data.alibabacloudstack_zones.default.ids.0
   name              = "${var.name}"
 }
 

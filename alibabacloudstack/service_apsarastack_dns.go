@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
@@ -282,7 +283,11 @@ func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err err
 		"Action":          "DescribeGlobalZones",
 		"Version":         "2022-06-24",
 		//"Id":              did[1],
-		"Name": did[0],
+		"Name":              did[0],
+		"Forwardedregionid": s.client.RegionId,
+		"SignatureVersion":  "2.1",
+		"PageNumber":        fmt.Sprint(1),
+		"PageSize":          fmt.Sprint(PageSizeLarge),
 	}
 	resp := &DnsDomains{}
 	raw, err := s.client.WithEcsClient(func(cmsClient *ecs.Client) (interface{}, error) {

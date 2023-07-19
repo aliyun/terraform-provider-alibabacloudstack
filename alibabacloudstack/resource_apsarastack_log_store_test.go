@@ -34,9 +34,13 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name":        name,
-					"project":     "${alibabacloudstack_log_project.foo.name}",
-					"shard_count": "1",
+					"name":         name,
+					"project":      "${alibabacloudstack_log_project.foo.name}",
+					"shard_count":  "1",
+					"cmk_key_id":   "45b6b43c-a479-4db5-8c79-f941e25ac216",
+					"encryption":   "true",
+					"encrypt_type": "sm4_gcm",
+					"arn":          "acs:ram::1056100926092423:role/aliyunlogaccessingkmsrole",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{

@@ -89,7 +89,7 @@ resource "alibabacloudstack_instance" "default" {
   instance_name = var.name
   security_groups = [alibabacloudstack_security_group.default.id]
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  system_disk_category = "cloud_efficiency"
+  system_disk_category = "cloud_pperf"
   system_disk_size = 100
   vswitch_id = alibabacloudstack_vswitch.default.id
 }

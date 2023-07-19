@@ -100,6 +100,7 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+
 	log.Printf("response of raw CreateUserGroup is : %s", raw)
 
 	if err != nil {

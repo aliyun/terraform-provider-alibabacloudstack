@@ -27,17 +27,17 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"cidr_block": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validateSwitchCIDRNetworkAddress,
 			},
@@ -49,6 +49,7 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"tags": tagsSchema(),
 		},
 	}
 }
@@ -127,12 +128,25 @@ func resourceAlibabacloudStackSwitchRead(d *schema.ResourceData, meta interface{
 	d.Set("vpc_id", vswitch.VpcId)
 	d.Set("cidr_block", vswitch.CidrBlock)
 	d.Set("name", vswitch.VSwitchName)
+	listTagResourcesObject, err := vpcService.ListTagResources(d.Id(), "VSWITCH")
+	if err != nil {
+		return WrapError(err)
+	}
+	d.Set("tags", tagsToMap(listTagResourcesObject))
 	d.Set("description", vswitch.Description)
 	return nil
 }
 
 func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	vpcService := VpcService{client}
+
+	if d.HasChange("tags") {
+		if err := vpcService.SetResourceTags(d, "VSWITCH"); err != nil {
+			return WrapError(err)
+		}
+	}
+
 	if d.IsNewResource() {
 		d.Partial(false)
 		return resourceAlibabacloudStackSwitchRead(d, meta)

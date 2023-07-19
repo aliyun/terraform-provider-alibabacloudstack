@@ -73,7 +73,7 @@ func dataSourceAlibabacloudStackSlbBackendServersRead(d *schema.ResourceData, me
 		return slbClient.DescribeLoadBalancerAttribute(request)
 	})
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "ALIBABACLOUDSTACK_slb_backend_servers", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_slb_backend_servers", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ := raw.(*slb.DescribeLoadBalancerAttributeResponse)

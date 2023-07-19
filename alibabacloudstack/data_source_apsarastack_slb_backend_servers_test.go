@@ -55,10 +55,8 @@ resource "alibabacloudstack_slb" "default" {
 
 resource "alibabacloudstack_instance" "default" {
   image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-
   instance_type = "${local.instance_type_id}"
   system_disk_category = "cloud_efficiency"
-
   security_groups = ["${alibabacloudstack_security_group.default.id}"]
   instance_name = "${var.name}"
   vswitch_id = "${alibabacloudstack_vswitch.default.id}"

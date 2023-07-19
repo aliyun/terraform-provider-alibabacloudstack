@@ -38,6 +38,7 @@ func resourceAlibabacloudStackSnapshotPolicy() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"tags": tagsSchema(),
 			"time_points": {
 				Type:     schema.TypeSet,
 				Required: true,
@@ -106,6 +107,7 @@ func resourceAlibabacloudStackSnapshotPolicyRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return WrapError(err)
 	}
+	d.Set("tags", ecsService.tagsToMap(object.Tags.Tag))
 	d.Set("time_points", timePoints)
 
 	return nil
@@ -113,6 +115,13 @@ func resourceAlibabacloudStackSnapshotPolicyRead(d *schema.ResourceData, meta in
 
 func resourceAlibabacloudStackSnapshotPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+
+	ecsService := EcsService{client}
+	if d.HasChange("tags") {
+		if err := ecsService.SetResourceTagsNew(d, "auto_snapshot_policy"); err != nil {
+			return WrapError(err)
+		}
+	}
 
 	request := ecs.CreateModifyAutoSnapshotPolicyExRequest()
 	request.RegionId = client.RegionId

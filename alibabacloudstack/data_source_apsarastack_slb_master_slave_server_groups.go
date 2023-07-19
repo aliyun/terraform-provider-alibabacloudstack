@@ -168,7 +168,7 @@ func slbMasterSlaveServerGroupsDescriptionAttributes(d *schema.ResourceData, ser
 			return slbClient.DescribeMasterSlaveServerGroupAttribute(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "ALIBABACLOUDSTACK_slb_master_slave_server_groups", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_slb_master_slave_server_groups", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		response, _ := raw.(*slb.DescribeMasterSlaveServerGroupAttributeResponse)

@@ -51,7 +51,7 @@ resource "alibabacloudstack_instance" "default" {
   internet_max_bandwidth_out = "10"
   security_groups = "${alibabacloudstack_security_group.default.*.id}"
   availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  system_disk_category = "cloud_ssd"
+  system_disk_category = "cloud_sperf"
   vswitch_id = "${alibabacloudstack_vswitch.default.id}"
 }
 data "alibabacloudstack_instances" "default" {

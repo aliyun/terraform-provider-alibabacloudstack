@@ -12,7 +12,7 @@ func TestAccAlibabacloudStackMaxcomputeCu(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	rand := acctest.RandIntRange(1000, 9999)
-	name := fmt.Sprintf("tf_testAccAlibabacloudStack%d", rand)
+	name := fmt.Sprintf("tf_testAcck%d", rand)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

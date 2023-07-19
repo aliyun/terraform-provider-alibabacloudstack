@@ -201,7 +201,7 @@ func dataSourceAlibabacloudStackSlbsRead(d *schema.ResourceData, meta interface{
 			break
 		}
 		log.Printf("sss %s", raw)
-		err = json.Unmarshal(response.GetHttpContentBytes(), response)
+		err = json.Unmarshal(response.BaseResponse.GetHttpContentBytes(), response)
 		if err != nil {
 			return WrapError(err)
 		}

@@ -87,6 +87,7 @@ func resourceAlibabacloudStackNatGateway() *schema.Resource {
 				MaxItems: 4,
 				Optional: true,
 			},
+			"tags": tagsSchema(),
 		},
 	}
 }
@@ -181,6 +182,11 @@ func resourceAlibabacloudStackNatGatewayRead(d *schema.ResourceData, meta interf
 	} else {
 		d.Set("bandwidth_packages", bindWidthPackages)
 	}
+	listTagResourcesObject, err := vpcService.ListTagResources(d.Id(), "NATGATEWAY")
+	if err != nil {
+		return WrapError(err)
+	}
+	d.Set("tags", tagsToMap(listTagResourcesObject))
 
 	return nil
 }
@@ -189,6 +195,12 @@ func resourceAlibabacloudStackNatGatewayUpdate(d *schema.ResourceData, meta inte
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
+
+	if d.HasChange("tags") {
+		if err := vpcService.SetResourceTags(d, "NATGATEWAY"); err != nil {
+			return WrapError(err)
+		}
+	}
 
 	natGateway, err := vpcService.DescribeNatGateway(d.Id())
 	if err != nil {

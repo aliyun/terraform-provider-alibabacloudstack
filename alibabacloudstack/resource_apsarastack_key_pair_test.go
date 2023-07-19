@@ -199,16 +199,20 @@ func TestAccAlibabacloudStackKeyPairBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: providerCommon + testAccKeyPairConfig_tag(rand),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-			{
 				Config: providerCommon + testAccKeyPairConfig_key_name(rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"key_name": fmt.Sprintf("tf-testAccKeyPairConfig%d", rand),
+					}),
+				),
+			},
+			{
+				Config: providerCommon + testAccKeyPairConfig_tag(rand),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "Terraform",
+						"tags.For":     "KeyPairTest",
 					}),
 				),
 			},
@@ -276,7 +280,10 @@ func testAccKeyPairConfig_tag(rand int) string {
 resource "alibabacloudstack_key_pair" "default" {
 	key_name ="tf-testAccKeyPairConfig%d"
 	public_key = "ssh-rsa AAAAB3Nza12345678qwertyuudsfsg"
-    
+    tags = {
+			Created = "Terraform"
+			For		= "KeyPairTest"
+	}
 }
 `, rand)
 }

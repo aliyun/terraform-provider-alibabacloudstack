@@ -374,7 +374,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_multizone(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description":          name,
-					"vswitch_id":           "${local.vswitch_id}",
+					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
 					"version":              "5.5.3_with_X-Pack",
 					"password":             "inputYourCodeHere",
 					"data_node_spec":       DataNodeSpec,
@@ -432,7 +432,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_version(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description":          name,
-					"vswitch_id":           "${local.vswitch_id}",
+					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
 					"version":              "6.3_with_X-Pack",
 					"password":             "inputYourCodeHere",
 					"data_node_spec":       DataNodeSpec,
@@ -546,7 +546,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_encrypt_disk(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description":              name,
-					"vswitch_id":               "${local.vswitch_id}",
+					"vswitch_id":               "${alibabacloudstack_vswitch.default.id}",
 					"version":                  "5.5.3_with_X-Pack",
 					"password":                 "inputYourCodeHere",
 					"data_node_spec":           DataNodeSpec,
@@ -606,7 +606,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_client_node(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description":          name,
-					"vswitch_id":           "${local.vswitch_id}",
+					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
 					"version":              "6.3_with_X-Pack",
 					"password":             "inputYourCodeHere",
 					"data_node_spec":       DataNodeSpec,
@@ -673,7 +673,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_https(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description":          name,
-					"vswitch_id":           "${local.vswitch_id}",
+					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
 					"version":              "6.3_with_X-Pack",
 					"password":             "inputYourCodeHere",
 					"data_node_spec":       DataNodeSpec,
@@ -748,7 +748,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) 
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description":          name,
-					"vswitch_id":           "${local.vswitch_id}",
+					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
 					"version":              "6.7_with_X-Pack",
 					"password":             "inputYourCodeHere",
 					"data_node_spec":       DataNodeSpec,

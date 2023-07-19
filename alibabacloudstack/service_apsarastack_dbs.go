@@ -25,6 +25,8 @@ func (s *DbsService) DescribeDbsBackupPlan(id string) (object map[string]interfa
 		"BackupPlanId": id,
 		"RegionId":     s.client.RegionId,
 	}
+	request["product"] = "dbs"
+	request["Product"] = "dbs"
 	request["ClientToken"] = buildClientToken("DescribeBackupPlanList")
 	runtime := util.RuntimeOptions{}
 	runtime.SetAutoretry(true)

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
@@ -1849,6 +1850,89 @@ func (s *EcsService) SetResourceTags(d *schema.ResourceData, resourceType string
 	return nil
 }
 
+func (s *EcsService) SetResourceTagsNew(d *schema.ResourceData, resourceType string) error {
+
+	if d.HasChange("tags") {
+		added, removed := parsingTags(d)
+		conn, err := s.client.NewEcsClient()
+		if err != nil {
+			return WrapError(err)
+		}
+
+		removedTagKeys := make([]string, 0)
+		for _, v := range removed {
+			if !ignoredTags(v, "") {
+				removedTagKeys = append(removedTagKeys, v)
+			}
+		}
+		if len(removedTagKeys) > 0 {
+			action := "UnTagResources"
+			request := map[string]interface{}{
+				"RegionId":     s.client.RegionId,
+				"ResourceType": resourceType,
+				"ResourceId.1": d.Id(),
+			}
+			for i, key := range removedTagKeys {
+				request[fmt.Sprintf("TagKey.%d", i+1)] = key
+			}
+			wait := incrementalWait(2*time.Second, 1*time.Second)
+			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
+				request["Product"] = "ascm"
+				request["OrganizationId"] = s.client.Department
+				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+				if err != nil {
+					if IsThrottling(err) {
+						wait()
+						return resource.RetryableError(err)
+
+					}
+					return resource.NonRetryableError(err)
+				}
+				addDebug(action, response, request)
+				return nil
+			})
+			if err != nil {
+				return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+			}
+		}
+		if len(added) > 0 {
+			action := "TagResources"
+			request := map[string]interface{}{
+				"RegionId":     s.client.RegionId,
+				"ResourceType": resourceType,
+				"ResourceId.1": d.Id(),
+			}
+			count := 1
+			for key, value := range added {
+				request[fmt.Sprintf("Tag.%d.Key", count)] = key
+				request[fmt.Sprintf("Tag.%d.Value", count)] = value
+				count++
+			}
+
+			wait := incrementalWait(2*time.Second, 1*time.Second)
+			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
+				request["Product"] = "ascm"
+				request["OrganizationId"] = s.client.Department
+				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+				if err != nil {
+					if IsThrottling(err) {
+						wait()
+						return resource.RetryableError(err)
+
+					}
+					return resource.NonRetryableError(err)
+				}
+				addDebug(action, response, request)
+				return nil
+			})
+			if err != nil {
+				return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+			}
+		}
+	}
+	return nil
+}
+
 func (s *EcsService) DescribeEcsDedicatedHost(id string) (object ecs.DedicatedHost, err error) {
 	request := ecs.CreateDescribeDedicatedHostsRequest()
 	request.RegionId = s.client.RegionId
@@ -2052,67 +2136,6 @@ func (s *EcsService) DescribeEcsCommand(id string) (result *datahub.EcsDescribeE
 	//object = v.([]interface{})[0].(map[string]interface{})
 	return resp, nil
 }
-func (s *EcsService) DescribeEcsDeploymentSet(id string) (result *datahub.EcsDescribeDeploymentSetsResult, err error) {
-	//var response map[string]interface{}
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "DescribeDeploymentSets"
-	//request := map[string]interface{}{
-	//	"RegionId":         s.client.RegionId,
-	//	"DeploymentSetIds": convertListToJsonString([]interface{}{id}),
-	//}
-
-	resp := &datahub.EcsDescribeDeploymentSetsResult{}
-	request := requests.NewCommonRequest()
-	request.Method = "POST"
-	request.Product = "Ecs"
-	request.Domain = s.client.Domain
-	request.Version = "2014-05-26"
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = action
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{
-		"AccessKeySecret":  s.client.SecretKey,
-		"AccessKeyId":      s.client.AccessKey,
-		"RegionId":         s.client.RegionId,
-		"Product":          "Ecs",
-		"Department":       s.client.Department,
-		"ResourceGroup":    s.client.ResourceGroup,
-		"Action":           action,
-		"DeploymentSetIds": convertListToJsonString([]interface{}{id}),
-	}
-
-	runtime := util.RuntimeOptions{}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-			return EcsClient.ProcessCommonRequest(request)
-		})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, raw, request)
-		bresponse := raw.(*responses.CommonResponse)
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
-
-		return nil
-	})
-	if err != nil {
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
-	}
-	return resp, nil
-}
 func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub.EcsDescribeEcsHpcClusterResult, err error) {
 	//var response map[string]interface{}
 
@@ -2185,4 +2208,50 @@ func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub.EcsDescri
 	//}
 	//object = v.([]interface{})[0].(map[string]interface{})
 	return resp, nil
+}
+func (s *EcsService) DescribeEcsDeploymentSet(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	conn, err := s.client.NewEcsClient()
+	if err != nil {
+		return nil, WrapError(err)
+	}
+	action := "DescribeDeploymentSets"
+	request := map[string]interface{}{
+		"RegionId":         s.client.RegionId,
+		"DeploymentSetIds": convertListToJsonString([]interface{}{id}),
+		"Product":          "Ecs",
+		"Department":       s.client.Department,
+		"OrganizationId":   s.client.Department,
+	}
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &runtime)
+		if err != nil {
+			if NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	addDebug(action, response, request)
+	if err != nil {
+		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+	}
+	v, err := jsonpath.Get("$.DeploymentSets.DeploymentSet", response)
+	if err != nil {
+		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.DeploymentSets.DeploymentSet", response)
+	}
+	if len(v.([]interface{})) < 1 {
+		return object, WrapErrorf(Error(GetNotFoundMessage("ECS", id)), NotFoundWithResponse, response)
+	} else {
+		if v.([]interface{})[0].(map[string]interface{})["DeploymentSetId"].(string) != id {
+			return object, WrapErrorf(Error(GetNotFoundMessage("ECS", id)), NotFoundWithResponse, response)
+		}
+	}
+	object = v.([]interface{})[0].(map[string]interface{})
+	return object, nil
 }

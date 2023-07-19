@@ -8,7 +8,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
-	"strconv"
 	"strings"
 )
 
@@ -133,7 +132,7 @@ func resourceAlibabacloudStackDnsDomainRead(d *schema.ResourceData, meta interfa
 	}
 
 	d.Set("domain_name", did[0])
-	d.Set("domain_id", strconv.Itoa(object.Data[0].Id))
+	d.Set("domain_id", (object.Data[0].Id))
 	d.Set("remark", object.Data[0].Remark)
 	return nil
 }

@@ -242,7 +242,20 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*alika
 	request.InstanceId = instanceId
 	request.RegionId = alikafkaService.client.RegionId
 	request.Domain = alikafkaService.client.Config.AlikafkaOpenAPIEndpoint
+
 	
+
+
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": alikafkaService.client.SecretKey,
+		"AccessKeyId":     alikafkaService.client.AccessKey,
+		"Product":         "alikafka",
+		"RegionId":        alikafkaService.client.RegionId,
+		"Department":      alikafkaService.client.Department,
+		"ResourceGroup":   alikafkaService.client.ResourceGroup,
+		"Action":          "GetTopicList",
+		"Version":         "2019-09-16",
+	}
 
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	var raw interface{}

@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackDnsDomainDataSource(t *testing.T) {
 const dataSourceAlibabacloudStackDnsDomain = `
 
 resource "alibabacloudstack_dns_domain" "default" {
- domain_name = "testdummy."
+ domain_name = "testdummy11."
 }
 data "alibabacloudstack_dns_domains" "default"{
  domain_name  = alibabacloudstack_dns_domain.default.domain_name

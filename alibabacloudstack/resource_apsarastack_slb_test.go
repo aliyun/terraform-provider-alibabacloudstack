@@ -310,7 +310,7 @@ func TestAccAlibabacloudStackSlb_vpcmulti(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"count":        "3",
 					"name":         name,
-					"address_type": "VPC",
+					"address_type": "intranet",
 					"vswitch_id":   "${alibabacloudstack_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(

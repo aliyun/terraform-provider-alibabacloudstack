@@ -112,7 +112,7 @@ resource "alibabacloudstack_instance" "default" {
    # series III
    instance_type = "${local.instance_type_id}"
    internet_max_bandwidth_out = 5
-   system_disk_category = "cloud_efficiency"
+   system_disk_category = "cloud_pperf"
    image_id = "${data.alibabacloudstack_images.default.images.0.id}"
    instance_name = "${var.name}"
 }

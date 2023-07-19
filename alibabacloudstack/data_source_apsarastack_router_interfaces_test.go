@@ -32,7 +32,7 @@ provider "alibabacloudstack" {
   region = "${var.region}"
 }
 variable "region" {
-  default = "cn-neimeng-env30-d01"
+  default = "cn-wulan-env200-d01"
 }
 variable "name" {
   default = "tf-testAccCheckAlibabacloudStackRouterInterfacesDataSourceConfig"

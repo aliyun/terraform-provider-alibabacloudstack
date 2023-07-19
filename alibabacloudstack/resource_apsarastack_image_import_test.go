@@ -43,8 +43,10 @@ func TestAccAlibabacloudStackImportImage(t *testing.T) {
 					"os_type":      "linux",
 					"disk_device_mapping": []map[string]interface{}{
 						{
-							"oss_bucket": os.Getenv("ALIBABACLOUDSTACK_OSS_BUCKET_FOR_IMAGE"),
-							"oss_object": os.Getenv("ALIBABACLOUDSTACK_OSS_OBJECT_FOR_IMAGE"),
+							"disk_image_size": "10",
+							"format":          "RAW",
+							"oss_bucket":      os.Getenv("ALIBABACLOUDSTACK_OSS_BUCKET_FOR_IMAGE"),
+							"oss_object":      os.Getenv("ALIBABACLOUDSTACK_OSS_OBJECT_FOR_IMAGE"),
 						},
 					},
 				}),

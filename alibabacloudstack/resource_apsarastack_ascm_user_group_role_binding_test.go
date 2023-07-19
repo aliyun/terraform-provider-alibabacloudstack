@@ -77,7 +77,7 @@ resource "alibabacloudstack_ascm_organization" "default" {
 
 resource "alibabacloudstack_ascm_user_group" "default" {
  group_name =      "%s"
- organization_id = alibabacloudstack_ascm_organization.default.org_id
+ organization_id = "alibabacloudstack_ascm_organization.default.org_id"
 }
 
 resource "alibabacloudstack_ascm_user_group_role_binding" "default" {

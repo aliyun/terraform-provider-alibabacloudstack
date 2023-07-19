@@ -121,6 +121,10 @@ func resourceAlibabacloudStackDataWorksRemindCreate(d *schema.ResourceData, meta
 	}
 
 	request := buildRemindArgs(d)
+	request["RegionId"] = client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = client.Department
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
@@ -249,7 +253,10 @@ func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta
 	}
 
 	action := "UpdateRemind"
-	request["RegionId"] = "default"
+	request["RegionId"] = client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = client.Department
 	conn, err := client.NewDataworkspublicClient()
 	if err != nil {
 		return WrapError(err)
@@ -353,7 +360,6 @@ func buildRemindArgs(d *schema.ResourceData) map[string]interface{} {
 		request["RobotUrls"] = v.(string)
 	}
 
-	request["RegionId"] = "default"
 	return request
 }
 

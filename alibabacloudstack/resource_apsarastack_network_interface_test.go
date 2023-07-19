@@ -263,6 +263,65 @@ func TestAccAlibabacloudStackNetworkInterfaceMulti(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackECSNetworkInterfaceBasicTag(t *testing.T) {
+	var v ecs.NetworkInterfaceSet
+	resourceId := "alibabacloudstack_network_interface.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudStackEcsNetworkInterfaceMap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeNetworkInterface")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := acctest.RandIntRange(1, 255)
+	name := fmt.Sprintf("tf-testacc%secsnetworkinterface%d", defaultRegionToTest, rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackEcsNetworkInterfaceBasicDependence)
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"name":            name,
+					"vswitch_id":      "${alibabacloudstack_vswitch.default.id}",
+					"security_groups": []string{"${alibabacloudstack_security_group.default.id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name":              CHECKSET,
+						"vswitch_id":        CHECKSET,
+						"security_groups.#": "1",
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "Test",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "TF",
+						"tags.For":     "Test",
+					}),
+				),
+			},
+		},
+	})
+}
+
 func testAccNetworkInterfaceConfigBasic(rand int) string {
 	return fmt.Sprintf(`
 variable "name" {
@@ -418,4 +477,40 @@ var testAccCheckNetworkInterfaceCheckMap = map[string]string{
 	"private_ips_count": "0",
 	"description":       "",
 	"tags.%":            NOSET,
+}
+
+var AlibabacloudStackEcsNetworkInterfaceMap = map[string]string{
+	"mac":        CHECKSET,
+	"name":       CHECKSET,
+	"vswitch_id": CHECKSET,
+}
+
+func AlibabacloudStackEcsNetworkInterfaceBasicDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
+}
+
+resource "alibabacloudstack_vpc" "default" {
+    name = "${var.name}"
+    cidr_block = "192.168.0.0/24"
+}
+
+data "alibabacloudstack_zones" "default" {
+    available_resource_creation= "VSwitch"
+}
+
+resource "alibabacloudstack_vswitch" "default" {
+    name = "${var.name}"
+    cidr_block = "192.168.0.0/24"
+    availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+    vpc_id = "${alibabacloudstack_vpc.default.id}"
+}
+
+resource "alibabacloudstack_security_group" "default" {
+    name = "${var.name}"
+    vpc_id = "${alibabacloudstack_vpc.default.id}"
+}
+
+`, name)
 }
