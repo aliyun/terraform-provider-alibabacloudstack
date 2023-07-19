@@ -125,7 +125,7 @@ func testSweepExpressConnectVirtualBorderRouters(region string) error {
 }
 
 func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
-	checkoutSupportedRegions(t, true, connectivity.VbrSupportRegions)
+	//	checkoutSupportedRegions(t, true, connectivity.VbrSupportRegions)
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_express_connect_virtual_border_router.default"
 	ra := resourceAttrInit(resourceId, AlicloudExpressConnectVirtualBorderRouterMap0)

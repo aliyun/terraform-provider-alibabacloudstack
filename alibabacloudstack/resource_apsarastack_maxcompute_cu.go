@@ -85,7 +85,7 @@ func resourceAlibabacloudStackMaxcomputeCuCreate(d *schema.ResourceData, meta in
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_maxcompute_project", action, AlibabacloudStackSdkGoERROR)
+		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_maxcompute_cu", action, AlibabacloudStackSdkGoERROR)
 	}
 	if fmt.Sprintf(`%v`, response["code"]) != "200" {
 		return WrapError(Error("CreateUpdateOdpsCu failed for " + response["asapiErrorMessage"].(string)))

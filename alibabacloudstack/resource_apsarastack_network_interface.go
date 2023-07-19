@@ -156,7 +156,7 @@ func resourceNetworkInterfaceRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if len(tags) > 0 {
-		d.Set("tags", tagsToMap(tags))
+		d.Set("tags", ecsService.tagsToMap(tags))
 	}
 
 	return nil
@@ -365,8 +365,6 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 
 	if err := setTags(client, TagResourceEni, d); err != nil {
 		return WrapError(err)
-	} else {
-		//d.SetPartial("tags")
 	}
 
 	d.Partial(false)

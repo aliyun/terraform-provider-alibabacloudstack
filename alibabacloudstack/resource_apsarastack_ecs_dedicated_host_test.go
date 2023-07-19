@@ -33,13 +33,13 @@ func TestAccAlibabacloudStackEcsDedicatedHost_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"dedicated_host_type": "ddh.sn2ne",
+					"dedicated_host_type": "ddh.c5",
 					"description":         "From_Terraform",
 					"dedicated_host_name": name,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"dedicated_host_type": "ddh.sn2ne",
+						"dedicated_host_type": "ddh.c5",
 						"description":         "From_Terraform",
 						"dedicated_host_name": name,
 					}),

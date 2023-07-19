@@ -46,12 +46,12 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 
 			"image_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			"instance_type": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^ecs\..*`), "prefix must be 'ecs.'"),
 			},
 
@@ -463,10 +463,9 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 	d.Partial(true)
 
 	if !d.IsNewResource() {
-		if err := setTags(client, TagResourceInstance, d); err != nil {
+		err := setTags(client, TagResourceInstance, d)
+		if err != nil {
 			return WrapError(err)
-		} else {
-			//d.SetPartial("tags")
 		}
 	}
 

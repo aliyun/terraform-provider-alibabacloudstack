@@ -240,8 +240,11 @@ func TestAccAlibabacloudstackVSwitchBasic(t *testing.T) {
 				Config: testAccVSwitchConfig_all(rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":        fmt.Sprintf("tf-testAccVswitchConfig%d_all", rand),
-						"description": fmt.Sprintf("tf-testAccVswitchConfig%d_description_all", rand),
+						"name":         fmt.Sprintf("tf-testAccVswitchConfig%d_all", rand),
+						"description":  fmt.Sprintf("tf-testAccVswitchConfig%d_description_all", rand),
+						"tags.%":       "2",
+						"tags.Created": "TF",
+						"tags.For":     "Test",
 					}),
 				),
 			},
@@ -375,6 +378,10 @@ resource "alibabacloudstack_vswitch" "default" {
   availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name = "${var.name}_all"
   description = "${var.name}_description_all"
+  tags = {
+	Created= "TF",
+	For=     "Test",
+  }
 }
 `, rand)
 }

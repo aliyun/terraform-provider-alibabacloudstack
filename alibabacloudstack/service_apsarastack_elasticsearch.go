@@ -59,6 +59,44 @@ func (s *ElasticsearchService) DescribeElasticsearchInstance(id string) (object 
 
 }
 
+func (s *ElasticsearchService) DescribeElasticsearchOnk8sInstance(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	conn, err := s.client.NewElasticsearchClient()
+	if err != nil {
+		return nil, WrapError(err)
+	}
+	action := "DescribeInstance"
+	request := map[string]interface{}{
+		"RegionId": s.client.RegionId,
+	}
+	request["product"] = "elasticsearch-k8s"
+	request["OrganizationId"] = s.client.Department
+	request["ResourceId"] = s.client.ResourceGroup
+	runtime := util.RuntimeOptions{}
+	runtime.SetAutoretry(true)
+	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, request, &runtime)
+	addDebug(action, response, nil)
+	if err != nil {
+		if IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+			return object, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		}
+		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+	}
+	if fmt.Sprint(response["Success"]) == "false" {
+		return object, WrapError(fmt.Errorf("%s failed, response: %v", action, response))
+	}
+	v, err := jsonpath.Get("$", response)
+	if err != nil {
+		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+	}
+	object = v.(map[string]interface{})
+	if (object["instanceId"].(string)) != id {
+		return object, WrapErrorf(Error(GetNotFoundMessage("Elasticsearch Instance", id)), NotFoundWithResponse, response)
+	}
+	return object, nil
+
+}
+
 func (s *ElasticsearchService) ElasticsearchStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeElasticsearchInstance(id)

@@ -12,10 +12,10 @@ import (
 
 func resourceAlibabacloudStackDRDSInstance() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAliCloudDRDSInstanceCreate,
-		Read:   resourceAliCloudDRDSInstanceRead,
-		Update: resourceAliCloudDRDSInstanceUpdate,
-		Delete: resourceAliCloudDRDSInstanceDelete,
+		Create: resourceAlibabacloudStackDRDSInstanceCreate,
+		Read:   resourceAlibabacloudStackDRDSInstanceRead,
+		Update: resourceAlibabacloudStackDRDSInstanceUpdate,
+		Delete: resourceAlibabacloudStackDRDSInstanceDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -64,7 +64,7 @@ func resourceAlibabacloudStackDRDSInstance() *schema.Resource {
 	}
 }
 
-func resourceAliCloudDRDSInstanceCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackDRDSInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	drdsService := DrdsService{client}
 
@@ -122,11 +122,11 @@ func resourceAliCloudDRDSInstanceCreate(d *schema.ResourceData, meta interface{}
 		return WrapErrorf(err, IdMsg, d.Id())
 	}
 
-	return resourceAliCloudDRDSInstanceUpdate(d, meta)
+	return resourceAlibabacloudStackDRDSInstanceUpdate(d, meta)
 
 }
 
-func resourceAliCloudDRDSInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackDRDSInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	drdsService := DrdsService{client}
 
@@ -160,10 +160,10 @@ func resourceAliCloudDRDSInstanceUpdate(d *schema.ResourceData, meta interface{}
 		return WrapErrorf(err, IdMsg, d.Id())
 	}
 
-	return resourceAliCloudDRDSInstanceRead(d, meta)
+	return resourceAlibabacloudStackDRDSInstanceRead(d, meta)
 }
 
-func resourceAliCloudDRDSInstanceRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackDRDSInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	drdsService := DrdsService{client}
 
@@ -183,7 +183,7 @@ func resourceAliCloudDRDSInstanceRead(d *schema.ResourceData, meta interface{}) 
 	return nil
 }
 
-func resourceAliCloudDRDSInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackDRDSInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	drdsService := DrdsService{client}
 	request := drds.CreateRemoveDrdsInstanceRequest()

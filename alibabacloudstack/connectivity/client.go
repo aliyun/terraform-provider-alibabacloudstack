@@ -845,6 +845,7 @@ func (client *AlibabacloudStackClient) GetCallerInfo() (*responses.BaseResponse,
 	request.ApiName = "GetUserInfo"
 	request.QueryParams = map[string]string{
 		"AccessKeySecret":  client.Config.SecretKey,
+		"SecurityToken":    client.Config.SecurityToken,
 		"Product":          "ascm",
 		"Department":       client.Config.Department,
 		"ResourceGroup":    client.Config.ResourceGroup,
@@ -877,6 +878,9 @@ func (client *AlibabacloudStackClient) GetCallerIdentity() (string, error) {
 func (client *AlibabacloudStackClient) GetCallerDefaultRole() (int, error) {
 
 	resp, err := client.GetCallerInfo()
+	if err != nil {
+		return 1, err
+	}
 	response := &RoleId{}
 	err = json.Unmarshal(resp.GetHttpContentBytes(), response)
 	roleId := response.Data.DefaultRole.Id
@@ -2027,7 +2031,54 @@ func (client *AlibabacloudStackClient) NewQuickbiClient() (*rpc.Client, error) {
 	}
 	return conn, nil
 }
-
+func (client *AlibabacloudStackClient) NewCsbClient() (*rpc.Client, error) {
+	productCode := "csb"
+	endpoint := client.Config.CsbEndpoint
+	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
+		if err := client.loadEndpoint(productCode); err != nil {
+			endpoint = fmt.Sprintf("csb.%s.aliyuncs.com", client.Config.RegionId)
+			client.Config.Endpoints[productCode] = endpoint
+			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
+		}
+	}
+	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
+		endpoint = v.(string)
+	}
+	if endpoint == "" {
+		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
+	}
+	sdkConfig := client.teaSdkConfig
+	sdkConfig.SetEndpoint(endpoint)
+	conn, err := rpc.NewClient(&sdkConfig)
+	if err != nil {
+		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
+	}
+	return conn, nil
+}
+func (client *AlibabacloudStackClient) NewGdbClient() (*rpc.Client, error) {
+	productCode := "gdb"
+	endpoint := client.Config.GdbEndpoint
+	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
+		if err := client.loadEndpoint(productCode); err != nil {
+			endpoint = fmt.Sprintf("gdb.%s.aliyuncs.com", client.Config.RegionId)
+			client.Config.Endpoints[productCode] = endpoint
+			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
+		}
+	}
+	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
+		endpoint = v.(string)
+	}
+	if endpoint == "" {
+		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
+	}
+	sdkConfig := client.teaSdkConfig
+	sdkConfig.SetEndpoint(endpoint)
+	conn, err := rpc.NewClient(&sdkConfig)
+	if err != nil {
+		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
+	}
+	return conn, nil
+}
 func (client *AlibabacloudStackClient) NewDataworkspublicClient() (*rpc.Client, error) {
 	productCode := "dataworkspublic"
 	endpoint := client.Config.DataworkspublicEndpoint
@@ -2107,6 +2158,31 @@ func (client *AlibabacloudStackClient) NewDbsClient() (*rpc.Client, error) {
 	}
 	return conn, nil
 }
+func (client *AlibabacloudStackClient) NewArmsClient() (*rpc.Client, error) {
+	productCode := "arms"
+	endpoint := client.Config.ArmsEndpoint
+	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
+		if err := client.loadEndpoint(productCode); err != nil {
+			endpoint = fmt.Sprintf("arms.%s.aliyuncs.com", client.Config.RegionId)
+			client.Config.Endpoints[productCode] = endpoint
+			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
+		}
+	}
+	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
+		endpoint = v.(string)
+	}
+	if endpoint == "" {
+		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
+	}
+	sdkConfig := client.teaSdkConfig
+	sdkConfig.SetEndpoint(endpoint)
+	conn, err := rpc.NewClient(&sdkConfig)
+	if err != nil {
+		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
+	}
+	return conn, nil
+}
+
 func (client *AlibabacloudStackClient) NewOosClient() (*rpc.Client, error) {
 	productCode := "oos"
 	endpoint := client.Config.OosEndpoint
@@ -2129,14 +2205,12 @@ func (client *AlibabacloudStackClient) NewOosClient() (*rpc.Client, error) {
 	}
 	return conn, nil
 }
-func (client *AlibabacloudStackClient) NewCsbClient() (*rpc.Client, error) {
-	productCode := "csb"
-	endpoint := client.Config.CsbEndpoint
+func (client *AlibabacloudStackClient) NewCloudfwClient() (*rpc.Client, error) {
+	productCode := "cloudfw"
+	endpoint := client.Config.CloudfwEndpoint
 	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
 		if err := client.loadEndpoint(productCode); err != nil {
-			endpoint = fmt.Sprintf("csb.%s.aliyuncs.com", client.Config.RegionId)
-			client.Config.Endpoints[productCode] = endpoint
-			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
+			return nil, err
 		}
 	}
 	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {

@@ -153,7 +153,7 @@ func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta i
 		request["Product"] = "Nas"
 		request["OrganizationId"] = client.Department
 		request["Department"] = client.Department
-	        request["ResourceGroup"] = client.ResourceGroup
+		request["ResourceGroup"] = client.ResourceGroup
 		action := "ModifyFileSystem"
 		conn, err := client.NewNasClient()
 		if err != nil {

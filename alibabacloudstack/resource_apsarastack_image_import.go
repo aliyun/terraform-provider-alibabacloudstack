@@ -151,7 +151,6 @@ func resourceAlibabacloudStackImageImportCreate(d *schema.ResourceData, meta int
 			mapping := diskDeviceMapping.(map[string]interface{})
 			size := strconv.Itoa(mapping["disk_image_size"].(int))
 			diskmapping := ecs.ImportImageDiskDeviceMapping{
-				Device:        mapping["device"].(string),
 				DiskImageSize: size,
 				Format:        mapping["format"].(string),
 				OSSBucket:     mapping["oss_bucket"].(string),
@@ -171,7 +170,7 @@ func resourceAlibabacloudStackImageImportCreate(d *schema.ResourceData, meta int
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	resp, _ := raw.(*ecs.ImportImageResponse)
 	d.SetId(resp.ImageId)
-	stateConf := BuildStateConf([]string{"Waiting"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ecsService.ImageStateRefreshFunc(d.Id(), []string{"CreateFailed", "UnAvailable"}))
+	stateConf := BuildStateConfByTimes([]string{"Waiting"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ecsService.ImageStateRefreshFunc(d.Id(), []string{"CreateFailed", "UnAvailable"}), 200)
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
 	}
@@ -208,7 +207,7 @@ func resourceAlibabacloudStackImageImportUpdate(d *schema.ResourceData, meta int
 	if err != nil {
 		return WrapError(err)
 	}
-	return resourceAlibabacloudStackImageRead(d, meta)
+	return resourceAlibabacloudStackImageImportRead(d, meta)
 }
 
 func resourceAlibabacloudStackImageImportDelete(d *schema.ResourceData, meta interface{}) error {
@@ -222,7 +221,6 @@ func FlattenImageImportDiskDeviceMappings(list []ecs.DiskDeviceMapping) []map[st
 	for _, i := range list {
 		size, _ := strconv.Atoi(i.Size)
 		l := map[string]interface{}{
-			"device":          i.Device,
 			"disk_image_size": size,
 			"format":          i.Format,
 			"oss_bucket":      i.ImportOSSBucket,

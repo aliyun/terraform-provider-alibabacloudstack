@@ -81,7 +81,7 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			"cluster_type": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"analyticdb", "AnalyticdbOnPanguHybrid"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"analyticdb", "AnalyticdbOnPanguHybrid", "AnalyticdbOnPanguSSD"}, false),
 			},
 			"cpu_type": {
 				Type:         schema.TypeString,
@@ -308,6 +308,8 @@ func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta in
 		request.ZoneId = v.(string)
 	}
 
+	request.DBClusterNetworkType = "Classic"
+
 	vswitchId := Trim(d.Get("vswitch_id").(string))
 	if vswitchId != "" {
 		vpcService := VpcService{client}
@@ -331,7 +333,6 @@ func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta in
 	request.Headers["x-ascm-product-name"] = "adb"
 	request.Headers["x-acs-organizationId"] = client.Department
 	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "adb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
 	raw, err := client.WithAdbClient(func(adbClient *adb.Client) (interface{}, error) {
 		return adbClient.CreateDBCluster(request)
 	})

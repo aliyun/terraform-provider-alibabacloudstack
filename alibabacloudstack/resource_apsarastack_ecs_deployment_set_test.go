@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	"log"
 	"strings"
 	"testing"
@@ -111,7 +110,7 @@ func testSweepEcsDeploymentSet(region string) error {
 }
 
 func TestAccAlibabacloudStackECSDeploymentSet_basic0(t *testing.T) {
-	var v *datahub.EcsDescribeDeploymentSetsResult
+	var v map[string]interface{}
 	resourceId := "alibabacloudstack_ecs_deployment_set.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackECSDeploymentSetMap0)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
@@ -133,18 +132,33 @@ func TestAccAlibabacloudStackECSDeploymentSet_basic0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"strategy":            "Availability",
-					"domain":              "default",
-					"granularity":         "host",
+					"domain":              "Default",
+					"granularity":         "Host",
 					"deployment_set_name": name,
 					"description":         name,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"strategy":            "Availability",
-						"domain":              "default",
-						"granularity":         "host",
+						"domain":              "Default",
+						"granularity":         "Host",
 						"deployment_set_name": name,
 						"description":         name,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "Test",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "TF",
+						"tags.For":     "Test",
 					}),
 				),
 			},

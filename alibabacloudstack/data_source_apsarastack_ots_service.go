@@ -31,19 +31,24 @@ func dataSourceAlibabacloudStackOtsService() *schema.Resource {
 	}
 }
 func dataSourceAlibabacloudStackOtsServiceRead(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	request := make(map[string]interface{})
 	if v, ok := d.GetOk("enable"); !ok || v.(string) != "On" {
 		d.SetId("OtsServicHasNotBeenOpened")
 		d.Set("status", "")
+		request["enable"] = v
 		return nil
 	}
-
-	conn, err := meta.(*connectivity.AlibabacloudStackClient).NewTeaCommonClient(connectivity.OpenOtsService)
+	conn, err := client.NewCloudfwClient()
 	if err != nil {
 		return WrapError(err)
 	}
 	action := "OpenOtsService"
+	request["RegionId"] = client.RegionId
+	request["Product"] = "Ots"
+	request["OrganizationId"] = client.Department
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-06-20"), StringPointer("AK"), nil, nil, &util.RuntimeOptions{})
+		response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-06-20"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
 		if err != nil {
 			if NeedRetry(err) {
 				return resource.RetryableError(err)

@@ -213,14 +213,14 @@ func TestAccAlibabacloudStackDisk_basic(t *testing.T) {
 					}),
 				),
 			},
-			/*{
+			{
 				Config: testAccDiskConfig_all(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"tags.%":               "0",
-						"tags.name1":           REMOVEKEY,
-						"tags.Name2":           REMOVEKEY,
-						"tags.name3":           REMOVEKEY,
+						"tags.%":               "3",
+						"tags.name1":           "name1",
+						"tags.name2":           "name2",
+						"tags.name3":           "name3",
 						"name":                 "tf-testAccDiskConfig_all",
 						"description":          "nothing",
 						"delete_auto_snapshot": "false",
@@ -228,7 +228,7 @@ func TestAccAlibabacloudStackDisk_basic(t *testing.T) {
 						"enable_auto_snapshot": "false",
 					}),
 				),
-			},*/
+			},
 		},
 	})
 
@@ -415,6 +415,36 @@ resource "alibabacloudstack_disk" "default" {
 	delete_auto_snapshot = "true"
 	delete_with_instance = "true"
 	enable_auto_snapshot = "true"
+}
+`)
+}
+
+func testAccDiskConfig_all() string {
+	return fmt.Sprintf(`
+data "alibabacloudstack_zones" "default" {
+	available_resource_creation= "VSwitch"
+}
+
+
+variable "name" {
+	default = "tf-testAccDiskConfig_all"
+}
+
+resource "alibabacloudstack_disk" "default" {
+	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  	size = "70"
+	name = "${var.name}"
+	description = "nothing"
+	category = "cloud_efficiency"
+	encrypted = "false"
+	tags = {
+		name1 = "name1"
+		name2 = "name2"
+		name3 = "name3"
+			}
+	delete_auto_snapshot = "false"
+	delete_with_instance = "false"
+	enable_auto_snapshot = "false"
 }
 `)
 }

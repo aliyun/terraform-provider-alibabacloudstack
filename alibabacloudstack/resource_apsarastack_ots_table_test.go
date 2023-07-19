@@ -275,7 +275,7 @@ func resourceOtsTableConfigDependence(name string) string {
 	    For = "acceptance test"
 	  }
 	}
-	`, name, string(OtsHighPerformance))
+	`, name, string(OtsCapacity))
 }
 
 func resourceOtsTableConfigDependenceHighperformance(name string) string {
@@ -293,7 +293,7 @@ func resourceOtsTableConfigDependenceHighperformance(name string) string {
 	    For = "acceptance test"
 	  }
 	}
-	`, name, string(OtsHighPerformance))
+	`, name, string(OtsCapacity))
 }
 
 var otsTableBasicMap = map[string]string{

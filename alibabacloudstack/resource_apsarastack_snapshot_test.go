@@ -282,7 +282,7 @@ resource "alibabacloudstack_disk" "default" {
   count = "2"
   name = "${var.name}"
   availability_zone = data.alibabacloudstack_zones.default.zones.0.id
-  category          = "cloud_efficiency"
+  category          = "cloud_sperf"
   size              = "20"
 }
 

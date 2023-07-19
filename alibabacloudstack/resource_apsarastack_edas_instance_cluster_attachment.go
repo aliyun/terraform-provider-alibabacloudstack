@@ -112,7 +112,7 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentCreate(d *schema.Reso
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "ALIBABACLOUDSTACK_edas_instance_cluster_attachment", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_instance_cluster_attachment", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
 	//使用这种方法有问题，超过120s还没有导入成功，则用例失败，需要改成
 	//time.Sleep(120 * time.Second)

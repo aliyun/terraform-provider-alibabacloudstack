@@ -138,8 +138,11 @@ func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta in
 	request.Headers = map[string]string{
 		"RegionId":      client.RegionId,
 		"Authorization": "AuthorizationString",
-		"Content-Type":  "application/json",
+		//"Content-Type":  "application/json",
 	}
+	var recordschema string
+	recordschema = fmt.Sprintf("[{'Type':'%s','AllowNull':'%t','Name':'%s'}]", t.RecordSchema.Fields[0].Type.String(), t.RecordSchema.Fields[0].AllowNull, t.RecordSchema.Fields[0].Name)
+
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": client.SecretKey,
 		"AccessKeyId":     client.AccessKey,
@@ -155,7 +158,7 @@ func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta in
 		"TopicName":       t.TopicName,
 		"RecordType":      recordType,
 		"Comment":         t.Comment,
-		"RecordSchema":    "[{\"Type\":\"STRING\",\"AllowNull\":true,\"Name\":\"createtopic\"}]",
+		"RecordSchema":    recordschema,
 	}
 
 	raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {

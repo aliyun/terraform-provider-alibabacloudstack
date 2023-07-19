@@ -1299,6 +1299,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 			//d.SetPartial("num_of_nodes")
 		}
 	}
+
 	d.Partial(false)
 	return resourceAlibabacloudStackCSKubernetesRead(d, meta)
 

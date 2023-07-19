@@ -62,7 +62,10 @@ func resourceAlibabacloudStackDataWorksFolderCreate(d *schema.ResourceData, meta
 	if v, ok := d.GetOk("project_identifier"); ok {
 		request["ProjectIdentifier"] = v
 	}
-	request["RegionId"] = "default"
+	request["RegionId"] = client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = client.Department
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
@@ -125,7 +128,10 @@ func resourceAlibabacloudStackDataWorksFolderUpdate(d *schema.ResourceData, meta
 	if v, ok := d.GetOk("project_identifier"); ok {
 		request["ProjectIdentifier"] = v
 	}
-	request["RegionId"] = "default"
+	request["RegionId"] = client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = client.Department
 	action := "UpdateFolder"
 	conn, err := client.NewDataworkspublicClient()
 	if err != nil {
@@ -169,7 +175,10 @@ func resourceAlibabacloudStackDataWorksFolderDelete(d *schema.ResourceData, meta
 	if v, ok := d.GetOk("project_identifier"); ok {
 		request["ProjectIdentifier"] = v
 	}
-	request["RegionId"] = "default"
+	request["RegionId"] = client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = client.Department
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})

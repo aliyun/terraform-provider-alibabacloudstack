@@ -38,7 +38,7 @@ func TestAccAlibabacloudStackAscm_PasswordPolicy(t *testing.T) {
 
 const testAccAlibabacloudstackPasswordPolicyMinimumPasswordLength = `
 resource "alibabacloudstack_ascm_password_policy" "default" {
-		minimum_password_length = 12
+		minimum_password_length = 10
 	    require_lowercase_characters = true
 	   require_uppercase_characters = true
        require_numbers = true
@@ -51,7 +51,7 @@ resource "alibabacloudstack_ascm_password_policy" "default" {
 `
 
 var ascmPassword = map[string]string{
-	"minimum_password_length":      "12",
+	"minimum_password_length":      "10",
 	"require_lowercase_characters": "true",
 	"require_uppercase_characters": "true",
 	"require_numbers":              "true",

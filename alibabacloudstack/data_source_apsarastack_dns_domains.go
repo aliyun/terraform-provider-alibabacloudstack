@@ -2,13 +2,13 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -132,13 +132,17 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 	request.ApiName = "DescribeGlobalZones"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
-		"Product":         "CloudDns",
-		"RegionId":        client.RegionId,
-		"Action":          "DescribeGlobalZones",
-		"Version":         "2022-06-24",
-		"Name":            name,
+		"AccessKeySecret":   client.SecretKey,
+		"AccessKeyId":       client.AccessKey,
+		"Product":           "CloudDns",
+		"RegionId":          client.RegionId,
+		"Action":            "DescribeGlobalZones",
+		"Version":           "2022-06-24",
+		"PageNumber":        fmt.Sprint(1),
+		"PageSize":          fmt.Sprint(PageSizeLarge),
+		"Name":              name,
+		"Forwardedregionid": client.RegionId,
+		"SignatureVersion":  "2.1",
 	}
 
 	var addDomains = DnsDomains{}
@@ -171,7 +175,7 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 		if r != nil && !r.MatchString(rg.Name) {
 			continue
 		}
-		id := strconv.Itoa(rg.Id)
+		id := (rg.Id)
 		mapping := map[string]interface{}{
 			"domain_id":   id,
 			"domain_name": rg.Name,

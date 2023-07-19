@@ -154,6 +154,7 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 				},
 			},
 		}
+
 		err := resource.Retry(3*time.Minute, func() *resource.RetryError {
 
 			raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {

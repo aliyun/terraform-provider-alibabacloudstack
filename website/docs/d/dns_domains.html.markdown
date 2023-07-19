@@ -19,7 +19,7 @@ resource "alibabacloudstack_dns_domain" "default" {
   remark = "testing Domain"
 }
 data "alibabacloudstack_dns_domains" "default"{
-  domain_name        = alibabacloudstack_dns_domain.default.domain_name
+  domain_name   = alibabacloudstack_dns_domain.default.domain_name
 }
 output "domains" {
   value = data.alibabacloudstack_dns_domains.default.*

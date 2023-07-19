@@ -29,7 +29,10 @@ func (s *DataworksPublicService) DescribeDataWorksFolder(id string) (object map[
 		"FolderId":  parts[0],
 		"ProjectId": parts[1],
 	}
-	request["RegionId"] = "default"
+	request["RegionId"] = s.client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = s.client.Department
 	runtime := util.RuntimeOptions{}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
@@ -75,7 +78,10 @@ func (s *DataworksPublicService) GetFolder(id string) (object map[string]interfa
 		"FolderId":  parts[0],
 		"ProjectId": parts[1],
 	}
-	request["RegionId"] = "default"
+	request["RegionId"] = s.client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = s.client.Department
 	runtime := util.RuntimeOptions{}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
@@ -118,7 +124,10 @@ func (s *DataworksPublicService) DescribeDataWorksConnection(id string) (object 
 		"ProjectId": parts[1],
 		"Name":      parts[2],
 	}
-	request["RegionId"] = "default"
+	request["RegionId"] = s.client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = s.client.Department
 	runtime := util.RuntimeOptions{}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
@@ -166,7 +175,10 @@ func (s *DataworksPublicService) DescribeDataWorksUser(id string) (object map[st
 	request := map[string]interface{}{
 		"ProjectId": parts[1],
 	}
-	request["RegionId"] = "default"
+	request["RegionId"] = s.client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = s.client.Department
 	runtime := util.RuntimeOptions{}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
@@ -215,7 +227,10 @@ func (s *DataworksPublicService) DescribeDataWorksUserRoleBinding(id string) (ob
 	request := map[string]interface{}{
 		"ProjectId": parts[1],
 	}
-	request["RegionId"] = "default"
+	request["RegionId"] = s.client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = s.client.Department
 	runtime := util.RuntimeOptions{}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
@@ -259,8 +274,11 @@ func (s *DataworksPublicService) DescribeDataWorksRemind(id string) (object map[
 
 	request := map[string]interface{}{
 		"RemindId": id,
-		"RegionId": "default",
 	}
+	request["RegionId"] = s.client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = s.client.Department
 	runtime := util.RuntimeOptions{}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
@@ -307,7 +325,10 @@ func (s *DataworksPublicService) DescribeDataWorksProject(id string) (object map
 	request := map[string]interface{}{
 		"ProjectId": parts[1],
 	}
-	request["RegionId"] = "default"
+	request["RegionId"] = s.client.RegionId
+	request["Product"] = "dataworks-public"
+	request["product"] = "dataworks-public"
+	request["OrganizationId"] = s.client.Department
 	runtime := util.RuntimeOptions{}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)

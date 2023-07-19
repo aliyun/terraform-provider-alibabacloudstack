@@ -89,9 +89,9 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate(d *schema.Re
 		"Action":          "AddResourceSetToUserGroup",
 		"Version":         "2019-05-10",
 		"ProductName":     "ascm",
-		"ascmRoleId":      ascmRoleId,
 		"userGroupId":     userGroupId,
 		"resourceSetId":   resourceSetId,
+		"ascmRoleId":      ascmRoleId,
 	}
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)

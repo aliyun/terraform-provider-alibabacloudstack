@@ -92,7 +92,7 @@ func TestAccAlibabacloudStackSlbAcl_basic(t *testing.T) {
 	})
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testAccSlbAcl")
+	name := fmt.Sprintf("tf-testAccSlbAcl2")
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceSLBAclDependence)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
