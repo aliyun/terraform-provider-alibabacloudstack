@@ -195,6 +195,7 @@ func resourceAlibabacloudStackNasMountTargetUpdate(d *schema.ResourceData, meta 
 }
 func resourceAlibabacloudStackNasMountTargetDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	nasService := NasService{client}
 	if len(strings.Split(d.Id(), ":")) != 2 {
 		d.SetId(fmt.Sprintf("%v:%v", strings.Split(d.Id(), "-")[0], d.Id()))
 	}
