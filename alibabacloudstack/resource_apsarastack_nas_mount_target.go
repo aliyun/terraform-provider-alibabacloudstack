@@ -236,5 +236,9 @@ func resourceAlibabacloudStackNasMountTargetDelete(d *schema.ResourceData, meta 
 		}
 		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 	}
+	stateConf := BuildStateConf([]string{"Active"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, nasService.NasMountTargetStateRefreshFunc(d.Id(), []string{"delete_failed"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return WrapErrorf(err, IdMsg, d.Id())
+	}
 	return nil
 }
