@@ -182,13 +182,14 @@ func TestAccAlibabacloudStackInstanceBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"image_id":        "${data.alibabacloudstack_images.default.images.0.id}",
-					"security_groups": []string{"${alibabacloudstack_security_group.default.id}"},
-					"instance_type":   "${local.instance_type_id}",
-
-					"availability_zone":    "${data.alibabacloudstack_zones.default.zones[0].id}",
-					"system_disk_category": "cloud_sperf",
-					"instance_name":        "${var.name}",
+					"image_id":                     "${data.alibabacloudstack_images.default.images.0.id}",
+					"security_groups":              []string{"${alibabacloudstack_security_group.default.id}"},
+					"instance_type":                "${local.instance_type_id}",
+					"storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.default.id}",
+					"storage_set_partition_number": "1",
+					"availability_zone":            "${data.alibabacloudstack_zones.default.zones[0].id}",
+					"system_disk_category":         "cloud_efficiency",
+					"instance_name":                "${var.name}",
 					//"key_name":                      "${alibabacloudstack_key_pair.default.key_name}",
 					"user_data":                     "I_am_user_data",
 					"security_enhancement_strategy": "Active",
@@ -617,6 +618,7 @@ resource "alibabacloudstack_security_group" "default" {
   name   = "${var.name}"
   vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
+
 resource "alibabacloudstack_security_group_rule" "default" {
    count = 2
    type = "ingress"
@@ -705,6 +707,11 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_security_group" "default" {
   name   = "${var.name}"
   vpc_id = "${alibabacloudstack_vpc.default.id}"
+}
+resource "alibabacloudstack_ecs_ebs_storage_set" "default" {
+  storage_set_name = "testcc"
+  maxpartition_number = "2"
+  zone_id = data.alibabacloudstack_zones.default.zones[0].id
 }
 resource "alibabacloudstack_security_group_rule" "default" {
   type = "ingress"
