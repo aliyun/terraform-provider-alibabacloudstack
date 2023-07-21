@@ -240,7 +240,19 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-
+			"storage_set_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"storage_set_partition_number": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1, 2000),
+			},
 			"security_enhancement_strategy": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -342,6 +354,7 @@ func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interfac
 	d.Set("system_disk_size", disk.Size)
 	d.Set("system_disk_name", disk.DiskName)
 	d.Set("system_disk_description", disk.Description)
+	d.Set("storage_set_id", disk.StorageSetId)
 	d.Set("instance_name", instance.InstanceName)
 	d.Set("description", instance.Description)
 	d.Set("status", instance.Status)
@@ -353,6 +366,7 @@ func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interfac
 	d.Set("internet_max_bandwidth_out", instance.InternetMaxBandwidthOut)
 	d.Set("internet_max_bandwidth_in", instance.InternetMaxBandwidthIn)
 	d.Set("key_name", instance.KeyPairName)
+
 	d.Set("hpc_cluster_id", instance.HpcClusterId)
 	d.Set("tags", ecsService.tagsToMap(instance.Tags.Tag))
 
@@ -715,8 +729,6 @@ func buildAlibabacloudStackInstanceArgs(d *schema.ResourceData, meta interface{}
 		request.Description = v
 	}
 
-	request.InternetMaxBandwidthOut = requests.NewInteger(d.Get("internet_max_bandwidth_out").(int))
-
 	if v, ok := d.GetOk("internet_max_bandwidth_in"); ok {
 		request.InternetMaxBandwidthIn = requests.NewInteger(v.(int))
 	}
@@ -764,6 +776,16 @@ func buildAlibabacloudStackInstanceArgs(d *schema.ResourceData, meta interface{}
 
 	if v := d.Get("key_name").(string); v != "" {
 		request.KeyPairName = v
+	}
+	request.InternetMaxBandwidthOut = requests.NewInteger(d.Get("internet_max_bandwidth_out").(int))
+	i := d.Get("storage_set_partition_number").(int)
+	if v := d.Get("storage_set_id").(string); v != "" {
+		request.StorageSetId = v
+		if i >= 1 {
+			request.StorageSetPartitionNumber = requests.NewInteger(d.Get("storage_set_partition_number").(int))
+		} else {
+			return nil, fmt.Errorf("cant empty storage_set_partition_number when you set storage_set_id and >=2 ")
+		}
 	}
 
 	if v, ok := d.GetOk("security_enhancement_strategy"); ok {
