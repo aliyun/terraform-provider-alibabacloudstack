@@ -509,6 +509,7 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_ons_instance":                          resourceAlibabacloudStackOnsInstance(),
 			"alibabacloudstack_ons_topic":                             resourceAlibabacloudStackOnsTopic(),
 			"alibabacloudstack_oss_bucket":                            resourceAlibabacloudStackOssBucket(),
+			"alibabacloudstack_oss_bucket_quota":                      resourceAlibabacloudStackOssBucketQuota(),
 			"alibabacloudstack_oss_bucket_kms":                        resourceAlibabacloudStackOssBucketKms(),
 			"alibabacloudstack_oss_bucket_object":                     resourceAlibabacloudStackOssBucketObject(),
 			"alibabacloudstack_ots_instance":                          resourceAlibabacloudStackOtsInstance(),
