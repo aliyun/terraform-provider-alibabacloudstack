@@ -370,6 +370,7 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_express_connect_access_points":          dataSourceAlibabacloudStackExpressConnectAccessPoints(),
 			"alibabacloudstack_express_connect_virtual_border_routers": dataSourceAlibabacloudStackExpressConnectVirtualBorderRouters(),
 			"alibabacloudStack_cloud_firewall_control_policies":        dataSourceAlibabacloudStackCloudFirewallControlPolicies(),
+			"alibabacloudstack_ecs_ebs_storage_sets":                   dataSourceAlibabacloudStackEcsEbsStorageSets(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"alibabacloudstack_ess_scaling_configuration":             resourceAlibabacloudStackEssScalingConfiguration(),

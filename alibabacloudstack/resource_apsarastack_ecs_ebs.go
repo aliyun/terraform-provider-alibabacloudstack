@@ -40,6 +40,11 @@ func resourceAlibabacloudStackEcsEbsStorageSets() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"storage_set_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -134,6 +139,7 @@ func resourceAlibabacloudStackEcsEbsStorageSetsRead(d *schema.ResourceData, meta
 	d.Set("storage_set_name", object.StorageSets.StorageSet[0].StorageSetName)
 	d.Set("zone_id", object.StorageSets.StorageSet[0].ZoneId)
 	d.Set("maxpartition_number", strconv.Itoa(object.StorageSets.StorageSet[0].StorageSetPartitionNumber))
+	d.Set("storage_set_id", object.StorageSets.StorageSet[0].StorageSetId)
 	return nil
 }
 func resourceAlibabacloudStackEcsEbsStorageSetsDelete(d *schema.ResourceData, meta interface{}) error {

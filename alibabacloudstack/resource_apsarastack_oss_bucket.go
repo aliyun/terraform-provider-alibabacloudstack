@@ -364,7 +364,6 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 			"OpenApiAction":    "PutBucket",
 			"ProductName":      "oss",
 			"Params":           params,
-
 		}
 		request.Method = "POST"        // Set request method
 		request.Product = "OneRouter"  // Specify product

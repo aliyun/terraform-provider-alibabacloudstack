@@ -133,6 +133,10 @@ func dataSourceAlibabacloudStackDisks() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"storage_set_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"tags": tagsSchema(),
 					},
 				},
@@ -265,6 +269,7 @@ func disksDescriptionAttributes(d *schema.ResourceData, disks []ecs.Disk, meta i
 			"attached_time":     disk.AttachedTime,
 			"detached_time":     disk.DetachedTime,
 			"expiration_time":   disk.ExpiredTime,
+			"storage_set_id":    disk.StorageSetId,
 			"kms_key_id":        disk.KMSKeyId,
 			"tags":              ecsService.tagsToMap(disk.Tags.Tag),
 		}
