@@ -20,7 +20,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstance(instanceId stri
 	alikafkaInstance := &alikafka.InstanceVO{}
 	instanceListReq := alikafka.CreateGetInstanceListRequest()
 	instanceListReq.RegionId = alikafkaService.client.RegionId
-	instanceListReq.QueryParams["Product"] = "alikafka"
+        instanceListReq.QueryParams["Product"] = "alikafka"
 	wait := incrementalWait(2*time.Second, 1*time.Second)
 	var raw interface{}
 	var err error
@@ -61,7 +61,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaNodeStatus(instanceId st
 	describeNodeStatusReq := alikafka.CreateDescribeNodeStatusRequest()
 	describeNodeStatusReq.RegionId = alikafkaService.client.RegionId
 	describeNodeStatusReq.InstanceId = instanceId
-	describeNodeStatusReq.QueryParams["Product"] = "alikafka"
+        describeNodeStatusReq.QueryParams["Product"] = "alikafka"
 	wait := incrementalWait(2*time.Second, 1*time.Second)
 	var raw interface{}
 	var err error
@@ -95,7 +95,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstanceByOrderId(orderI
 	instanceListReq := alikafka.CreateGetInstanceListRequest()
 	instanceListReq.RegionId = alikafkaService.client.RegionId
 	instanceListReq.OrderId = orderId
-	instanceListReq.QueryParams["Product"] = "alikafka"
+        instanceListReq.QueryParams["Product"] = "alikafka"
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
 
@@ -147,7 +147,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaConsumerGroup(id string)
 	request := alikafka.CreateGetConsumerListRequest()
 	request.InstanceId = instanceId
 	request.RegionId = alikafkaService.client.RegionId
-	request.QueryParams["Product"] = "alikafka"
+        request.QueryParams["Product"] = "alikafka"
 	wait := incrementalWait(2*time.Second, 1*time.Second)
 	var raw interface{}
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
@@ -242,6 +242,9 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*alika
 	request.InstanceId = instanceId
 	request.RegionId = alikafkaService.client.RegionId
 	request.Domain = alikafkaService.client.Config.AlikafkaOpenAPIEndpoint
+
+	
+
 
 	request.QueryParams = map[string]string{
 		"AccessKeySecret": alikafkaService.client.SecretKey,
