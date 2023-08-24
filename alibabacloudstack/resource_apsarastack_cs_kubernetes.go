@@ -1332,7 +1332,7 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	d.Set("version", object.CurrentVersion)
 	d.Set("delete_protection", object.DeletionProtection)
 	d.Set("version", object.InitVersion)
-	var smaster, sworker []map[string]interface{}
+	var sc, smaster, sworker []map[string]interface{}
 	//var MasterNodes, WorkerNodes map[string]interface{}
 	for _, k := range clusternode.Nodes {
 		if k.InstanceRole == "Master" {
@@ -1351,7 +1351,18 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 			sworker = append(sworker, WorkerNodes)
 		}
 	}
-
+	MasterApi := strings.Replace(object.MasterUrl, "\\", "", -1)
+	urlMap := make(map[string]interface{})
+	err = json.Unmarshal([]byte(MasterApi), &urlMap)
+	intranetApi, ok := urlMap["intranet_api_server_endpoint"]
+	if !ok {
+		intranetApi = ""
+	}
+	Connections := map[string]interface{}{
+		"api_server_intranet": intranetApi,
+	}
+	sc = append(sc, Connections)
+	d.Set("connections", sc)
 	d.Set("master_nodes", smaster)
 	d.Set("worker_nodes", sworker)
 	if err := d.Set("tags", flattenTagsConfig(object.Tags)); err != nil {
