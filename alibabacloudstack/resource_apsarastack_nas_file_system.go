@@ -202,7 +202,7 @@ func resourceAlibabacloudStackNasFileSystemRead(d *schema.ResourceData, meta int
 	d.Set("storage_type", object["StorageType"])
 	d.Set("encrypt_type", object["EncryptType"])
 	d.Set("file_system_type", object["FileSystemType"])
-	d.Set("capacity", object["Capacity"])
+	d.Set("capacity", object["VolumeSize"])
 	d.Set("zone_id", object["ZoneId"])
 	d.Set("kms_key_id", object["KMSKeyId"])
 	return nil
