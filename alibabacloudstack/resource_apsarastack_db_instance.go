@@ -3,11 +3,12 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -245,7 +246,7 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 	EncryptionKey := d.Get("encryption_key").(string)
 	encryption = d.Get("encryption").(bool)
 	log.Print("Encryption key input")
-	if EncryptionKey != "" && encryption == true {
+	if EncryptionKey != "" && encryption {
 		log.Print("Encryption key condition passed")
 		req := requests.NewCommonRequest()
 		req.Method = "POST"
@@ -469,11 +470,11 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 	d.Partial(true)
 	stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Minute, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 
-	//if d.HasChange("parameters") {
-	//	if err := rdsService.ModifyParameters(d, "parameters"); err != nil {
-	//		return WrapError(err)
-	//	}
-	//}
+	if d.HasChange("parameters") {
+		if err := rdsService.ModifyParameters(d, "parameters"); err != nil {
+			return WrapError(err)
+		}
+	}
 
 	if err := rdsService.setInstanceTags(d); err != nil {
 		return WrapError(err)
@@ -848,9 +849,9 @@ func resourceAlibabacloudStackDBInstanceRead(d *schema.ResourceData, meta interf
 	d.Set("maintain_time", instance.MaintainTime)
 	d.Set("storage_type", instance.DBInstanceStorageType)
 
-	//if err = rdsService.RefreshParameters(d, "parameters"); err != nil {
-	//	return WrapError(err)
-	//}
+	if err = rdsService.RefreshParameters(d, "parameters"); err != nil {
+		return WrapError(err)
+	}
 
 	if instance.PayType == string(Prepaid) {
 		request := rds.CreateDescribeInstanceAutoRenewalAttributeRequest()
