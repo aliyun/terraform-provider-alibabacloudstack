@@ -81,7 +81,7 @@ func resourceAlibabacloudstackCmsAlarmContactGroupCreate(d *schema.ResourceData,
 	return resourceAlibabacloudstackCmsAlarmContactGroupRead(d, meta)
 }
 func resourceAlibabacloudstackCmsAlarmContactGroupRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cmsService := CmsService{client}
 	object, err := cmsService.DescribeCmsAlarmContactGroup(d.Id())

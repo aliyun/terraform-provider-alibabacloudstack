@@ -279,7 +279,7 @@ func resourceAlibabacloudStackMongoDBInstanceCreate(d *schema.ResourceData, meta
 }
 
 func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
 

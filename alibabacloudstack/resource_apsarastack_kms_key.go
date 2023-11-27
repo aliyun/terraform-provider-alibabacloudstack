@@ -155,7 +155,7 @@ func resourceAlibabacloudStackKmsKeyCreate(d *schema.ResourceData, meta interfac
 	return resourceAlibabacloudStackKmsKeyRead(d, meta)
 }
 func resourceAlibabacloudStackKmsKeyRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kmsService := KmsService{client}
 	object, err := kmsService.DescribeKmsKey(d.Id())

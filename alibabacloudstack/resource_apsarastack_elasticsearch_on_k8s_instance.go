@@ -1,11 +1,12 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
+	"log"
 	"regexp"
 	"strings"
 	"time"
 
-	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
@@ -13,6 +14,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -242,42 +246,82 @@ func resourceAlibabacloudStackElasticsearchOnk8sCreate(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	elasticsearchService := ElasticsearchService{client}
 	action := "createInstance"
+	requestBody, _ := buildElasticsearchOnk8sCreateRequestBody(d, meta)
+	body, _ := json.Marshal(requestBody)
+	bodydata := string(body)
+	// Params := make(map[string]interface{})
+	// Params["AccessKeySecret"] = client.SecretKey
+	// Params["Product"] = "elasticsearch-k8s"
+	// Params["Action"] = action
+	// Params["Version"] = "2017-06-13"
+	// Params["X-acs-body"] = bodydata
+	// Params["OrganizationId"] = client.Department
+	// Params["RegionId"] = client.RegionId
+	// Params["ClientToken"] = buildClientToken("createInstance")
 
-	requestBody, err := buildElasticsearchOnk8sCreateRequestBody(d, meta)
-	var response map[string]interface{}
+	// var response map[string]interface{}
 
-	// retry
-	wait := incrementalWait(3*time.Second, 5*time.Second)
-	errorCodeList := []string{"TokenPreviousRequestProcessError"}
-	conn, err := elasticsearchService.client.NewElasticsearchClient()
+	// // // retry
+	// // wait := incrementalWait(3*time.Second, 5*time.Second)
+	// // errorCodeList := []string{"TokenPreviousRequestProcessError"}
+	// conn, _ := elasticsearchService.client.NewElasticsearchClient()
 
-	runtime := util.RuntimeOptions{}
-	runtime.SetAutoretry(true)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, requestBody, &runtime)
-		if err != nil {
-			if IsExpectedErrors(err, errorCodeList) || NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, nil)
-		return nil
+	// runtime := util.RuntimeOptions{}
+	// runtime.SetAutoretry(true)
+
+	// response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, Params, &runtime)
+
+	request := requests.NewCommonRequest()
+	if client.Config.Insecure {
+		request.SetHTTPSInsecure(client.Config.Insecure)
+	}
+	request.QueryParams = map[string]string{
+		"RegionId":        client.RegionId,
+		"AccessKeySecret": client.SecretKey,
+		"Product":         "elasticsearch-k8s",
+		"Action":          "createInstance",
+		"Version":         "2017-06-13",
+		"X-acs-body":      bodydata,
+		"ClientToken":     buildClientToken("createInstance"),
+		"OrganizationId":  client.Department,
+	}
+	request.Method = "POST"
+	request.Product = "elasticsearch-k8s"
+	request.Version = "2017-06-13"
+	request.Domain = client.Domain
+	if strings.ToLower(client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.ApiName = "createInstance"
+	request.RegionId = client.RegionId
+	request.Headers = map[string]string{"RegionId": client.RegionId, "Content-Type": "application/json"}
+
+	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.ProcessCommonRequest(request)
 	})
 
-	addDebug(action, response, nil)
+	addDebug(action, raw, request.QueryParams)
+
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_elasticsearch_k8s_instance", action, AlibabacloudStackSdkGoERROR)
 	}
 
-	resp, err := jsonpath.Get("$.body.Result.instanceId", response)
-	if err != nil {
-		return WrapErrorf(err, FailedGetAttributeMsg, action, "$.body.Result.instanceId", response)
-	}
-	d.SetId(resp.(string))
+	var resp CreateElasticsearchOnk8sResponse
 
-	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 5*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+	response, _ := raw.(*responses.CommonResponse)
+	err = json.Unmarshal(response.GetHttpContentBytes(), &resp)
+
+	if err != nil {
+		return WrapErrorf(err, DefaultErrorMsg, "apsarastack_elasticsearch_on_k8s_instance", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+	}
+	Result := resp.Result
+	log.Printf("############## Result : %s", Result)
+
+	d.SetId(Result["instanceId"])
+
+	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 5*time.Minute, elasticsearchService.ElasticsearchOnK8sStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 5 * time.Second
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
@@ -297,6 +341,9 @@ func resourceAlibabacloudStackElasticsearchOnk8sRead(d *schema.ResourceData, met
 			return nil
 		}
 		return WrapError(err)
+	}
+	if (object["instanceId"].(string)) != d.Id() {
+		return WrapErrorf(Error(GetNotFoundMessage("ElasticsearchOnK8s Instance", d.Id())), NotFoundWithResponse)
 	}
 
 	d.Set("description", object["description"])
@@ -342,7 +389,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sRead(d *schema.ResourceData, met
 
 	// Cross zone configuration
 	d.Set("zone_count", object["zoneCount"])
-	d.Set("resource_group_id", object["resourceGroupId"])
+	d.Set("resource_group_id", object["resourceGroup"])
 
 	esConfig := object["esConfig"].(map[string]interface{})
 	if esConfig != nil {
@@ -365,7 +412,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	elasticsearchService := ElasticsearchService{client}
 	d.Partial(true)
-	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 5*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 5*time.Minute, elasticsearchService.ElasticsearchOnK8sStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 5 * time.Second
 
 	if d.HasChange("description") {
@@ -541,7 +588,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 		if err != nil && !IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 		}
-		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 5*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 5*time.Minute, elasticsearchService.ElasticsearchOnK8sStateRefreshFunc(d.Id(), []string{"inactive"}))
 		stateConf.PollInterval = 5 * time.Second
 		if _, err := stateConf.WaitForState(); err != nil {
 			return WrapErrorf(err, IdMsg, d.Id())
@@ -673,7 +720,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sDelete(d *schema.ResourceData, m
 		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 	}
 
-	stateConf := BuildStateConf([]string{"activating", "inactive", "active"}, []string{}, d.Timeout(schema.TimeoutDelete), 5*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutDelete), 5*time.Minute, elasticsearchService.ElasticsearchOnK8sStateRefreshFunc(d.Id(), []string{}))
 	stateConf.PollInterval = 5 * time.Second
 
 	if _, err = stateConf.WaitForState(); err != nil {
@@ -691,13 +738,13 @@ func buildElasticsearchOnk8sCreateRequestBody(d *schema.ResourceData, meta inter
 
 	content := make(map[string]interface{})
 	if v, ok := d.GetOk("resource_group_id"); ok && v.(string) != "" {
-		content["resourceGroupId"] = v.(string)
+		content["ResourceGroup"] = v.(string)
+	} else {
+		content["ResourceGroup"] = client.ResourceGroup
 	}
-	content["Product"] = "elasticsearch-k8s"
-	content["product"] = "elasticsearch-k8s"
 	content["OrganizationId"] = client.Department
-	content["RegionId"] = client.RegionId
-	content["ClientToken"] = buildClientToken("createInstance")
+	content["region"] = client.RegionId
+	content["Department"] = client.Department
 	content["paymentType"] = strings.ToLower(d.Get("instance_charge_type").(string))
 	if d.Get("instance_charge_type").(string) == string(PrePaid) {
 		paymentInfo := make(map[string]interface{})
@@ -738,7 +785,7 @@ func buildElasticsearchOnk8sCreateRequestBody(d *schema.ResourceData, meta inter
 	if d.Get("data_node_spec") != nil && d.Get("data_node_spec") != "" {
 		dataNodeSpec := make(map[string]interface{})
 		dataNodeSpec["spec"] = d.Get("data_node_spec")
-		dataNodeSpec["disk"] = "500"
+		dataNodeSpec["disk"] = d.Get("data_node_disk_size")
 		dataNodeSpec["diskType"] = "fast-disks"
 		content["dataNode"] = true
 		content["nodeSpec"] = dataNodeSpec
@@ -798,6 +845,42 @@ func buildElasticsearchOnk8sCreateRequestBody(d *schema.ResourceData, meta inter
 	if d.Get("zone_count") != nil && d.Get("zone_count") != "" {
 		content["zoneCount"] = d.Get("zone_count")
 	}
+	var zones []map[string]interface{}
+	zones = append(zones, map[string]interface{}{
+		"zoneName": vsw.ZoneId,
+	})
+	content["zones"] = zones
+	content["zoneName"] = vsw.ZoneId
 
 	return content, nil
+}
+
+type CreateElasticsearchOnk8sResponse struct {
+	*responses.BaseResponse
+	RequestId      string `json:"RequestId" xml:"RequestId"`
+	AsapiRequestId string `json:"asapiRequestId" xml:"asapiRequestId"`
+	Result         map[string]string
+}
+
+// {"eagleEyeTraceId":"0a1c830b16989984038808531d0052","asapiSuccess":true,"asapiRequestId":"D0D646B0-0205-4B73-9E83-B198419B88E7","RequestId":"D0D646B0-0205-4B73-9E83-B198419B88E7","Result":{"instanceId":"es-cn-re90hg799q019d250"}}
+
+func (s *ElasticsearchService) ElasticsearchOnK8sStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeElasticsearchOnk8sInstance(id)
+		if err != nil {
+			if NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object["status"].(string) == failState {
+				return object, object["status"].(string), WrapError(Error(FailedToReachTargetStatus, object["status"].(string)))
+			}
+		}
+		log.Printf("DescribeElasticsearchOnk8sInstance result status: %s", object["status"])
+		return object, object["status"].(string), nil
+	}
 }

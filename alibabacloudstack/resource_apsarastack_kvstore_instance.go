@@ -2,9 +2,10 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"strings"
 	"time"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
 	"github.com/denverdino/aliyungo/common"
 
@@ -518,7 +519,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 }
 
 func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kvstoreService := KvstoreService{client}
 	object, err := kvstoreService.DescribeKVstoreInstance(d.Id())

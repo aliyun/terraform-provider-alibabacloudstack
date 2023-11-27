@@ -310,7 +310,7 @@ func resourceAlibabacloudStackInstanceCreate(d *schema.ResourceData, meta interf
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_instance", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
 
-	stateConf := BuildStateConf([]string{"Pending", "Starting", "Stopped"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 120*time.Second, ecsService.InstanceStateRefreshFunc(d.Id(), []string{"Stopping"}))
+	stateConf := BuildStateConf([]string{"Pending", "Starting", "Stopped"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 60*time.Second, ecsService.InstanceStateRefreshFunc(d.Id(), []string{"Stopping"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
@@ -328,7 +328,7 @@ func resourceAlibabacloudStackInstanceCreate(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 

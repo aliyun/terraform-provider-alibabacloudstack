@@ -98,7 +98,7 @@ func resourceAlibabacloudStackImageCopyUpdate(d *schema.ResourceData, meta inter
 	return resourceAlibabacloudStackImageRead(d, meta)
 }
 func resourceAlibabacloudStackImageCopyRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	ecsService := EcsService{client}

@@ -1,9 +1,10 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -93,7 +94,7 @@ func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackSnapshotRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	snapshot, err := ecsService.DescribeSnapshot(d.Id())

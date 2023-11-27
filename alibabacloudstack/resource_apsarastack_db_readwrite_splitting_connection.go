@@ -132,7 +132,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionCreate(d *schema.Res
 }
 
 func resourceAlibabacloudStackDBReadWriteSplittingConnectionRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}

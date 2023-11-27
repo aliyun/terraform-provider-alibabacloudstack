@@ -1,8 +1,9 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -185,7 +186,7 @@ func resourceAlibabacloudStackReservedInstanceUpdate(d *schema.ResourceData, met
 	return resourceAlibabacloudStackReservedInstanceRead(d, meta)
 }
 func resourceAlibabacloudStackReservedInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	reservedInstances, err := ecsService.DescribeReservedInstance(d.Id())

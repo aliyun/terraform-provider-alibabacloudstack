@@ -50,7 +50,7 @@ func resourceAlibabacloudStackKmsAliasCreate(d *schema.ResourceData, meta interf
 	return resourceAlibabacloudStackKmsAliasRead(d, meta)
 }
 func resourceAlibabacloudStackKmsAliasRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kmsService := KmsService{client}
 	object, err := kmsService.DescribeKmsAlias(d.Id())

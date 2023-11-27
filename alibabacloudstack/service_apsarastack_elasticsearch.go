@@ -11,6 +11,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/elasticsearch"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
@@ -60,39 +63,60 @@ func (s *ElasticsearchService) DescribeElasticsearchInstance(id string) (object 
 }
 
 func (s *ElasticsearchService) DescribeElasticsearchOnk8sInstance(id string) (object map[string]interface{}, err error) {
-	var response map[string]interface{}
-	conn, err := s.client.NewElasticsearchClient()
-	if err != nil {
-		return nil, WrapError(err)
+	request := requests.NewCommonRequest()
+	if s.client.Config.Insecure {
+		request.SetHTTPSInsecure(s.client.Config.Insecure)
 	}
-	action := "DescribeInstance"
-	request := map[string]interface{}{
-		"RegionId": s.client.RegionId,
+	request.QueryParams = map[string]string{
+		"RegionId":        s.client.RegionId,
+		"AccessKeySecret": s.client.SecretKey,
+		"Product":         "elasticsearch-k8s",
+		"product":         "elasticsearch-k8s",
+		"Action":          "DescribeInstance",
+		"Version":         "2017-06-13",
+		"InstanceId":      id,
+		"ClientToken":     buildClientToken("DescribeInstance"),
+		"OrganizationId":  s.client.Department,
 	}
-	request["product"] = "elasticsearch-k8s"
-	request["OrganizationId"] = s.client.Department
-	request["ResourceId"] = s.client.ResourceGroup
-	runtime := util.RuntimeOptions{}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, request, &runtime)
-	addDebug(action, response, nil)
+	request.Method = "POST"
+	request.Product = "elasticsearch-k8s"
+	request.Version = "2017-06-13"
+	request.Domain = s.client.Domain
+	if strings.ToLower(s.client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.ApiName = "DescribeInstance"
+	request.RegionId = s.client.RegionId
+	request.Headers = map[string]string{"RegionId": s.client.RegionId, "Content-Type": "application/json"}
+
+	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.ProcessCommonRequest(request)
+	})
+
 	if err != nil {
 		if IsExpectedErrors(err, []string{"InstanceNotFound"}) {
-			return object, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+			return nil, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
 		}
-		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+		return nil, WrapErrorf(err, DefaultErrorMsg, id, "DescribeInstance", AlibabacloudStackSdkGoERROR)
 	}
-	if fmt.Sprint(response["Success"]) == "false" {
-		return object, WrapError(fmt.Errorf("%s failed, response: %v", action, response))
-	}
-	v, err := jsonpath.Get("$", response)
+	addDebug("DescribeInstance", raw, request.QueryParams)
+	response, _ := raw.(*responses.CommonResponse)
+	var resp map[string]interface{}
+	err = json.Unmarshal(response.GetHttpContentBytes(), &resp)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+		return nil, WrapErrorf(Error(GetNotFoundMessage("ElasticsearchOnK8s Instance", id)), NotFoundWithResponse, response)
+	}
+
+	if fmt.Sprint(resp["asapiSuccess"]) == "false" {
+		return nil, WrapError(fmt.Errorf("%s failed, response: %v", "DescribeInstance", resp))
+	}
+	v, err := jsonpath.Get("$.Result", resp)
+	if err != nil {
+		return nil, WrapErrorf(err, FailedGetAttributeMsg, id, "$.Result", response)
 	}
 	object = v.(map[string]interface{})
-	if (object["instanceId"].(string)) != id {
-		return object, WrapErrorf(Error(GetNotFoundMessage("Elasticsearch Instance", id)), NotFoundWithResponse, response)
-	}
 	return object, nil
 
 }

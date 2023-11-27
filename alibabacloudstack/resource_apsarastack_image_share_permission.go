@@ -1,10 +1,11 @@
 package alibabacloudstack
 
 import (
+	"strings"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strings"
 )
 
 func resourceAlibabacloudStackImageSharePermission() *schema.Resource {
@@ -59,7 +60,7 @@ func resourceAlibabacloudStackImageSharePermissionCreate(d *schema.ResourceData,
 }
 
 func resourceAlibabacloudStackImageSharePermissionRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client: client}
 	object, err := ecsService.DescribeImageShareByImageId(d.Id())

@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
 
 	"strings"
 	"time"
@@ -116,19 +117,20 @@ func resourceAliyunOtsTableCreate(d *schema.ResourceData, meta interface{}) erro
 	request.TableMeta = tableMeta
 	request.TableOption = tableOption
 	request.ReservedThroughput = reservedThroughput
-	var requestinfo *tablestore.TableStoreClient
+	// var requestinfo *tablestore.TableStoreClient
 	if err := resource.Retry(6*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithTableStoreClient(instanceName, func(tableStoreClient *tablestore.TableStoreClient) (interface{}, error) {
-			requestinfo = tableStoreClient
+			// requestinfo = tableStoreClient
 			return tableStoreClient.CreateTable(request)
 		})
+		log.Printf("====================  CreateTable Response  ===================  \n%s\n", raw)
+		log.Printf("====================  CreateTable Response err  ===================  \n%s\n", err)
 		if err != nil {
 			if IsExpectedErrors(err, OtsTableIsTemporarilyUnavailable) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
 		}
-		addDebug("CreateTable", raw, requestinfo, request)
 		return nil
 	}); err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ots_table", "CreateTable", AliyunTablestoreGoSdk)

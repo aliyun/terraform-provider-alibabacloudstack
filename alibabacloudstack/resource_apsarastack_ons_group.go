@@ -3,11 +3,12 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"errors"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -120,7 +121,7 @@ func resourceAlibabacloudStackOnsGroupCreate(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackOnsGroupRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	onsService := OnsService{client}
 

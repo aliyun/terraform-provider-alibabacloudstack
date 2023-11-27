@@ -238,7 +238,7 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 //return resourceAlibabacloudStackLogStoreUpdate(d, meta)
 
 func resourceAlibabacloudStackLogStoreRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 	parts, err := ParseResourceId(d.Id(), 2)

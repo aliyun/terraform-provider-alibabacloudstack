@@ -4,6 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"runtime"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/endpoints"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
@@ -15,13 +23,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/go-homedir"
-	"io/ioutil"
-	"log"
-	"os"
-	"runtime"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func Provider() *schema.Provider {
@@ -1320,7 +1321,8 @@ func getAssumeRoleAK(config *connectivity.Config) (string, string, string, error
 	request.SetHTTPSInsecure(config.Insecure)
 
 	request.Domain = config.StsEndpoint
-	request.Headers["x-ascm-product-name"] = "sts"
+	request.QueryParams["Region"] = config.RegionId
+	request.Headers["x-ascm-product-name"] = "Sts"
 	request.Headers["x-acs-organizationId"] = config.Department
 
 	var client *sts.Client
@@ -1342,8 +1344,10 @@ func getAssumeRoleAK(config *connectivity.Config) (string, string, string, error
 	client.SetHTTPSInsecure(config.Insecure)
 	if config.Proxy != "" {
 		client.SetHttpProxy(config.Proxy)
+		client.SetHttpsProxy(config.Proxy)
 	}
 	response, err := client.AssumeRole(request)
+	addDebug(request.GetActionName(), response, request.RpcRequest, request)
 	if err != nil {
 		return config.AccessKey, config.SecretKey, config.SecurityToken, err
 	}
@@ -1447,7 +1451,7 @@ func getResourceCredentials(config *connectivity.Config) (string, string, error)
 
 }
 
-func wiatSecondsIfWithTest(second int) {
+func waitSecondsIfWithTest(second int) {
 	// 测试模式下休眠一秒，防止数据缓存导致二次plan失败
 	if os.Getenv("TF_ACC") == "1" {
 		time.Sleep(time.Duration(second) * time.Second)

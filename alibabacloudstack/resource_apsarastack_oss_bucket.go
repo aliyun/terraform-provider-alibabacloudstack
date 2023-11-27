@@ -446,7 +446,7 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 }
 
 func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	object, err := ossService.DescribeOssBucket(d.Id())

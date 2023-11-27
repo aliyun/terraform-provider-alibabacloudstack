@@ -146,7 +146,7 @@ func resourceAlibabacloudStackCrEESyncRuleCreate(d *schema.ResourceData, meta in
 }
 
 func resourceAlibabacloudStackCrEESyncRuleRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
 	resp, err := crService.DescribeCrEESyncRule(d.Id())

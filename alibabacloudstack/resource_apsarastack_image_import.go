@@ -178,7 +178,7 @@ func resourceAlibabacloudStackImageImportCreate(d *schema.ResourceData, meta int
 }
 
 func resourceAlibabacloudStackImageImportRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client: client}
 

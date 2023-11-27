@@ -100,7 +100,7 @@ func resourceAlibabacloudStackSnatEntryCreate(d *schema.ResourceData, meta inter
 }
 
 func resourceAlibabacloudStackSnatEntryRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	if strings.HasPrefix(d.Id(), "snat-") {

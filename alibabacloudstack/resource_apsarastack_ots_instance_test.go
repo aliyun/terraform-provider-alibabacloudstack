@@ -397,7 +397,7 @@ var otsInstanceBasicMap = map[string]string{
 	"description":   CHECKSET,
 }
 
-func testAccCheckOtsInstanceExist(n string, instance *ots.InstanceInfo) resource.TestCheckFunc {
+func testAccCheckOtsInstanceExist(n string, instance InstanceInfo) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
@@ -416,7 +416,7 @@ func testAccCheckOtsInstanceExist(n string, instance *ots.InstanceInfo) resource
 		if err != nil {
 			return err
 		}
-		instance = &response
+		instance = response
 		return nil
 	}
 }

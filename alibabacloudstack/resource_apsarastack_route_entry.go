@@ -126,7 +126,7 @@ func resourceAlibabacloudStackRouteEntryCreate(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackRouteEntryRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	parts, err := ParseResourceId(d.Id(), 5)

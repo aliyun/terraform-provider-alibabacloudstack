@@ -372,7 +372,7 @@ func resourceAlibabacloudStackLaunchTemplateCreate(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackLaunchTemplateRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	object, err := ecsService.DescribeLaunchTemplate(d.Id())

@@ -2,6 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -9,9 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"strings"
-	"time"
 )
 
 func resourceAlibabacloudStackDnsRecord() *schema.Resource {
@@ -123,7 +124,7 @@ func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta inter
 }
 
 func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	dnsService := &DnsService{client: client}

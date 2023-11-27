@@ -246,11 +246,11 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 	EncryptionKey := d.Get("encryption_key").(string)
 	encryption = d.Get("encryption").(bool)
 	log.Print("Encryption key input")
-	if EncryptionKey != "" && encryption {
+	if EncryptionKey != "" && encryption == true {
 		log.Print("Encryption key condition passed")
 		req := requests.NewCommonRequest()
 		req.Method = "POST"
-		request.Product = "Rds"
+		req.Product = "Rds"
 		req.Domain = client.Domain
 		req.Version = "2014-08-15"
 		req.Scheme = "http"
@@ -413,8 +413,12 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		tde_req := rds.CreateModifyDBInstanceTDERequest()
 		tde_req.RegionId = client.RegionId
 		tde_req.Headers = map[string]string{"RegionId": client.RegionId}
-		tde_req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		tde_req.DBInstanceId = d.Id()
+		if EncryptionKey != "" {
+			tde_req.EncryptionKey = EncryptionKey
+		}
+		tde_req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "RoleARN": arnrole}
+
 		tde_req.TDEStatus = "Enabled"
 		if strings.ToLower(client.Config.Protocol) == "https" {
 			request.Scheme = "https"
@@ -470,11 +474,11 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 	d.Partial(true)
 	stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Minute, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 
-	if d.HasChange("parameters") {
-		if err := rdsService.ModifyParameters(d, "parameters"); err != nil {
-			return WrapError(err)
-		}
-	}
+	//if d.HasChange("parameters") {
+	//	if err := rdsService.ModifyParameters(d, "parameters"); err != nil {
+	//		return WrapError(err)
+	//	}
+	//}
 
 	if err := rdsService.setInstanceTags(d); err != nil {
 		return WrapError(err)
@@ -801,7 +805,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackDBInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
 
@@ -849,9 +853,9 @@ func resourceAlibabacloudStackDBInstanceRead(d *schema.ResourceData, meta interf
 	d.Set("maintain_time", instance.MaintainTime)
 	d.Set("storage_type", instance.DBInstanceStorageType)
 
-	if err = rdsService.RefreshParameters(d, "parameters"); err != nil {
-		return WrapError(err)
-	}
+	//if err = rdsService.RefreshParameters(d, "parameters"); err != nil {
+	//	return WrapError(err)
+	//}
 
 	if instance.PayType == string(Prepaid) {
 		request := rds.CreateDescribeInstanceAutoRenewalAttributeRequest()

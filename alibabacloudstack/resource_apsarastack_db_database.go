@@ -96,7 +96,7 @@ func resourceAlibabacloudStackDBDatabaseCreate(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackDBDatabaseRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rsdService := RdsService{client}
 	object, err := rsdService.DescribeDBDatabase(d.Id())
