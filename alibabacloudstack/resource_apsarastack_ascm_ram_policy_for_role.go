@@ -2,15 +2,16 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func resourceAlibabacloudStackAscmRamPolicyForRole() *schema.Resource {
@@ -86,7 +87,7 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleCreate(d *schema.ResourceData,
 }
 
 func resourceAlibabacloudStackAscmRamPolicyForRoleRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	_, err := ascmService.DescribeAscmRamPolicyForRole(d.Id())

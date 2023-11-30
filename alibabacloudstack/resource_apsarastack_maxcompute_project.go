@@ -79,7 +79,7 @@ func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
 			},
 			"aliyun_account": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 		},
 	}
@@ -124,8 +124,8 @@ func resourceAlibabacloudStackMaxcomputeProjectCreate(d *schema.ResourceData, me
 	pk := d.Get("pk").(string)
 
 	request.QueryParams = map[string]string{
-		"Action": "CreateCalcEngineForAscm",
-		//"KmsRegion": "cn-neimeng-env30-d01", //不需要
+		"Action":          "CreateCalcEngineForAscm",
+		"KmsRegion":       string(client.Region),
 		"ResourceGroupId": client.ResourceGroup,
 		"Product":         "dataworks-private-cloud",
 		"CalcEngineType":  "ODPS", // 固定值
@@ -139,7 +139,7 @@ func resourceAlibabacloudStackMaxcomputeProjectCreate(d *schema.ResourceData, me
 		//"XRealIp": "10.30.208.219",
 		//"Language": "zh",
 		//"VpcTunnelIdList": "cn-neimeng-env30-d01_vpc-3rqm203vt5n0nv1gv52fr,cn-neimeng-env30-d01_vpc-3rq45siuthzs2da1ras0k",
-		//"Version": "2019-01-17",
+		"Version":     "2019-01-17",
 		"ClusterItem": "{\"cluster\":\"" + cluster_name + "\",\"core_arch\":\"" + cluster["core_arch"].(string) + "\",\"project\":\"" + cluster["project"].(string) + "\",\"region\":\"" + cluster["region"].(string) + "\"}",
 		//"McEncryptAlgorithm": "RC4",
 		//"McEncryptKey":       "DEFAULT",
@@ -147,7 +147,7 @@ func resourceAlibabacloudStackMaxcomputeProjectCreate(d *schema.ResourceData, me
 		"ResourceGroup": client.ResourceGroup,
 		"ExternalTable": strconv.FormatBool(d.Get("external_table").(bool)),
 		//"HaAlibabacloudStack": "false", //不需要
-		"TaskPk":   "1380537809230745",
+		"TaskPk":   pk,
 		"OdpsName": name,
 		//"CsrfToken": "jnzqHxYi-J7EDkvbD4tNwcpp19qoQV-K9B30",
 		//"SignatureVersion": "2.1",

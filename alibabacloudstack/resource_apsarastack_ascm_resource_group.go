@@ -2,6 +2,11 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -9,10 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func resourceAlibabacloudStackAscmResourceGroup() *schema.Resource {
@@ -182,7 +183,7 @@ func resourceAlibabacloudStackAscmResourceGroupUpdate(d *schema.ResourceData, me
 }
 
 func resourceAlibabacloudStackAscmResourceGroupRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}

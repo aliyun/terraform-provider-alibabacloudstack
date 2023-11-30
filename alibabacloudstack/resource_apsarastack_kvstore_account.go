@@ -137,7 +137,7 @@ func resourceAlibabacloudStackKVStoreAccountCreate(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackKVStoreAccountRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kvstoreService := KvstoreService{client}
 	object, err := kvstoreService.DescribeKVstoreAccount(d.Id())

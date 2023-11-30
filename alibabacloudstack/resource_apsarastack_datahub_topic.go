@@ -123,7 +123,7 @@ func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta in
 	} else if recordType == string(datahub.BLOB) {
 		t.RecordType = datahub.BLOB
 	}
-	var requestInfo *datahub.DataHub
+	// var requestInfo *datahub.DataHub
 	request := requests.NewCommonRequest()
 	request.Method = "POST"
 	request.Product = "datahub"
@@ -140,35 +140,49 @@ func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta in
 		"Authorization": "AuthorizationString",
 		//"Content-Type":  "application/json",
 	}
-	var recordschema string
-	recordschema = fmt.Sprintf("[{'Type':'%s','AllowNull':'%t','Name':'%s'}]", t.RecordSchema.Fields[0].Type.String(), t.RecordSchema.Fields[0].AllowNull, t.RecordSchema.Fields[0].Name)
 
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
-		"Product":         "datahub",
-		"RegionId":        client.RegionId,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          "CreateTopic",
-		"Version":         "2019-11-20",
-		"ProjectName":     t.ProjectName,
-		"Lifecycle":       strconv.Itoa(t.LifeCycle),
-		"ShardCount":      strconv.Itoa(t.ShardCount),
-		"TopicName":       t.TopicName,
-		"RecordType":      recordType,
-		"Comment":         t.Comment,
-		"RecordSchema":    recordschema,
+		"AccessKeySecret":   client.SecretKey,
+		"AccessKeyId":       client.AccessKey,
+		"Product":           "datahub",
+		"RegionId":          client.RegionId,
+		"Department":        client.Department,
+		"ResourceGroup":     client.ResourceGroup,
+		"Action":            "CreateTopic",
+		"Version":           "2019-11-20",
+		"ProjectName":       t.ProjectName,
+		"Lifecycle":         strconv.Itoa(t.LifeCycle),
+		"ShardCount":        strconv.Itoa(t.ShardCount),
+		"TopicName":         t.TopicName,
+		"RecordType":        recordType,
+		"Comment":           t.Comment,
+		"SignatureVersion":  "2.1",
+		"AcceptLanguage":    "zh-CN",
+		"ExpandMode":        "false",
+		"Forwardedregionid": client.RegionId,
+	}
+	if t.RecordSchema != nil {
+		var record_schema []map[string]string
+		for _, v := range t.RecordSchema.Fields {
+			item := map[string]string{
+				"Type":      v.Type.String(),
+				"AllowNull": strconv.FormatBool(v.AllowNull),
+				"Name":      v.Name,
+			}
+			record_schema = append(record_schema, item)
+		}
+		record_schema_json, _ := json.Marshal(record_schema)
+		record_schema_str := string(record_schema_json)
+		request.QueryParams["RecordSchema"] = record_schema_str
 	}
 
 	raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
 		return dataHubClient.ProcessCommonRequest(request)
 	})
-
+	addDebug("CreateTopic", raw, request.Content, t)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_datahub_topic", "CreateTopic", AlibabacloudStackDatahubSdkGo)
+		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_datahub_topic", "CreateTopic")
 	}
-	addDebug("CreateTopic", raw, requestInfo, t)
 
 	d.SetId(strings.ToLower(fmt.Sprintf("%s%s%s", t.ProjectName, COLON_SEPARATED, t.TopicName)))
 	return resourceAlibabacloudStackDatahubTopicRead(d, meta)

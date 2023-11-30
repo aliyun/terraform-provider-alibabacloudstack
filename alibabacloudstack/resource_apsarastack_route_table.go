@@ -1,11 +1,12 @@
 package alibabacloudstack
 
 import (
+	"strings"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"strings"
 )
 
 func resourceAlibabacloudStackRouteTable() *schema.Resource {
@@ -77,7 +78,7 @@ func resourceAliyunRouteTableCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceAliyunRouteTableRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}

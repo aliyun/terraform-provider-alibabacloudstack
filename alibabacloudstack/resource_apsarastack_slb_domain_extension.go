@@ -94,7 +94,7 @@ func resourceAlibabacloudStackSlbDomainExtensionCreate(d *schema.ResourceData, m
 }
 
 func resourceAlibabacloudStackSlbDomainExtensionRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 

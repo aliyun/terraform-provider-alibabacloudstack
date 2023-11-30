@@ -112,7 +112,7 @@ func resourceAlibabacloudStackDiskAttachmentCreate(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackDiskAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	disk, err := ecsService.DescribeDiskAttachment(d.Id())

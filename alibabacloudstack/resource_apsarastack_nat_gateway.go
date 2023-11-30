@@ -156,7 +156,7 @@ func resourceAlibabacloudStackNatGatewayCreate(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 

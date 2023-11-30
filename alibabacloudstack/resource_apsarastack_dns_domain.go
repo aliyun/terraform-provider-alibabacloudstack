@@ -2,13 +2,14 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
-	"strings"
 )
 
 func resourceAlibabacloudStackDnsDomain() *schema.Resource {
@@ -119,7 +120,7 @@ func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta inter
 	return resourceAlibabacloudStackDnsDomainUpdate(d, meta)
 }
 func resourceAlibabacloudStackDnsDomainRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	dnsService := DnsService{client}
 	object, err := dnsService.DescribeDnsDomain(d.Id())

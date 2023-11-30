@@ -114,7 +114,7 @@ func resourceAlibabacloudStackGpdbConnectionCreate(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackGpdbConnectionRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
 		return WrapError(err)

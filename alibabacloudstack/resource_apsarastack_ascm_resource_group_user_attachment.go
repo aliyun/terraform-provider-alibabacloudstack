@@ -2,15 +2,16 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
-	"strings"
-	"time"
 )
 
 func resourceAlibabacloudStackAscmResourceGroupUserAttachment() *schema.Resource {
@@ -123,7 +124,7 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate(d *schema.Re
 }
 
 func resourceAlibabacloudStackAscmResourceGroupUserAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	ascmService := &AscmService{client: client}

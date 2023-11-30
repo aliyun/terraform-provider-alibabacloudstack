@@ -3,16 +3,17 @@ package alibabacloudstack
 import (
 	"encoding/base64"
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"regexp"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
@@ -499,7 +500,7 @@ func enableEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceAlibabacloudStackEssScalingConfigurationRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}

@@ -2,6 +2,8 @@ package connectivity
 
 import (
 	"encoding/json"
+	"log"
+
 	roaCS "github.com/alibabacloud-go/cs-20151215/v2/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
 	rpc "github.com/alibabacloud-go/tea-rpc/client"
@@ -31,7 +33,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ots"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/polardb"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
+	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	slsPop "github.com/aliyun/alibaba-cloud-sdk-go/services/sls"
@@ -40,7 +42,6 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore"
 	"github.com/aliyun/fc-go-sdk"
-	"log"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
@@ -48,9 +49,10 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/denverdino/aliyungo/cdn"
 
+	"sync"
+
 	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"sync"
 
 	"fmt"
 	"net/http"
@@ -1653,17 +1655,21 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 	// Initialize the TABLESTORE client if necessary
 	tableStoreClient, ok := client.tablestoreconnByInstanceName[instanceName]
 	if !ok {
-		endpoint := client.Config.OtsEndpoint
-		if endpoint == "" {
-			endpoint = loadEndpoint(client.RegionId, OTSCode)
-		}
-		if endpoint == "" {
-			endpoint = fmt.Sprintf("%s.%s.ots.aliyuncs.com", instanceName, client.RegionId)
-		}
-		if !strings.HasPrefix(endpoint, "https") && !strings.HasPrefix(endpoint, "http") {
-			endpoint = fmt.Sprintf("https://%s", endpoint)
-		}
-
+		// endpoint := client.Config.OtsEndpoint
+		// if endpoint == "" {
+		// 	endpoint = loadEndpoint(client.RegionId, OTSCode)
+		// }
+		// if endpoint == "" {
+		// 	endpoint = fmt.Sprintf("%s.%s.ots-internal.aliyuncs.com", instanceName, client.RegionId)
+		// }
+		// if !strings.HasPrefix(endpoint, "https") && !strings.HasPrefix(endpoint, "http") {
+		// 	endpoint = fmt.Sprintf("https://%s", endpoint)
+		// }
+		endpoint := fmt.Sprintf("http://%s.%s.ots-internal.aliyuncs.com", instanceName, client.RegionId)
+		// if !strings.HasPrefix(endpoint, "https") && !strings.HasPrefix(endpoint, "http") {
+		// 	endpoint = fmt.Sprintf("https://%s", endpoint)
+		// }
+		// endpoint := "http://test1111.cn-wulan-env212-d01.ots-internal.inter.env212.shuguang.com"
 		tableStoreClient = tablestore.NewClientWithConfig(endpoint, instanceName, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken, tablestore.NewDefaultTableStoreConfig())
 		client.tablestoreconnByInstanceName[instanceName] = tableStoreClient
 	}

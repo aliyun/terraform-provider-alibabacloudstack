@@ -104,7 +104,7 @@ func resourceAlibabacloudStackLogtailConfigCreate(d *schema.ResourceData, meta i
 }
 
 func resourceAlibabacloudStackLogtailConfigRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 	split := strings.Split(d.Id(), COLON_SEPARATED)

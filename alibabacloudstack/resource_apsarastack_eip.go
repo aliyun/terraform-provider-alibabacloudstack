@@ -1,14 +1,15 @@
 package alibabacloudstack
 
 import (
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func resourceAlibabacloudStackEip() *schema.Resource {
@@ -84,7 +85,7 @@ func resourceAlibabacloudStackEipCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceAlibabacloudStackEipRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 

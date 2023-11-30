@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"regexp"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ots"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -137,7 +136,7 @@ func dataSourceAlibabacloudStackOtsInstancesRead(d *schema.ResourceData, meta in
 	}
 
 	// get full instance info via GetInstance
-	var allInstances []ots.InstanceInfo
+	var allInstances []InstanceInfo
 	for _, instanceName := range filteredInstanceNames {
 		instanceInfo, err := otsService.DescribeOtsInstance(instanceName)
 		if err != nil {
@@ -147,11 +146,12 @@ func dataSourceAlibabacloudStackOtsInstancesRead(d *schema.ResourceData, meta in
 	}
 
 	// filter by tag.
-	var filteredInstances []ots.InstanceInfo
+	var filteredInstances []InstanceInfo
 	if v, ok := d.GetOk("tags"); ok {
 		if vmap, ok := v.(map[string]interface{}); ok && len(vmap) > 0 {
 			for _, instance := range allInstances {
-				if tagsMapEqual(vmap, otsTagsToMap(instance.TagInfos.TagInfo)) {
+				tags := otsTagsToMapFun(instance.TagInfos)
+				if tagsMapEqual(vmap, tags) {
 					filteredInstances = append(filteredInstances, instance)
 				}
 			}
@@ -164,7 +164,7 @@ func dataSourceAlibabacloudStackOtsInstancesRead(d *schema.ResourceData, meta in
 	return otsInstancesDecriptionAttributes(d, filteredInstances, meta)
 }
 
-func otsInstancesDecriptionAttributes(d *schema.ResourceData, instances []ots.InstanceInfo, meta interface{}) error {
+func otsInstancesDecriptionAttributes(d *schema.ResourceData, instances []InstanceInfo, meta interface{}) error {
 	var ids []string
 	var names []string
 	var s []map[string]interface{}
@@ -180,8 +180,8 @@ func otsInstancesDecriptionAttributes(d *schema.ResourceData, instances []ots.In
 			"user_id":        instance.UserId,
 			"network":        instance.Network,
 			"description":    instance.Description,
-			"entity_quota":   instance.Quota.EntityQuota,
-			"tags":           otsTagsToMap(instance.TagInfos.TagInfo),
+			"entity_quota":   instance.Quota["EntityQuota"],
+			"tags":           otsTagsToMapFun(instance.TagInfos),
 		}
 		names = append(names, instance.InstanceName)
 		ids = append(ids, instance.InstanceName)
@@ -206,4 +206,12 @@ func otsInstancesDecriptionAttributes(d *schema.ResourceData, instances []ots.In
 		writeToFile(output.(string), s)
 	}
 	return nil
+}
+
+func otsTagsToMapFun(tags TagInfos) map[string]string {
+	m := make(map[string]string)
+	for _, t := range tags.TagInfo {
+		m[t["TagKey"]] = t["TagValue"]
+	}
+	return m
 }

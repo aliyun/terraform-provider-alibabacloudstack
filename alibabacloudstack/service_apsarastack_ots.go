@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"strings"
 
 	"time"
@@ -8,6 +9,8 @@ import (
 	"fmt"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ots"
 	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -153,6 +156,7 @@ func (s *OtsService) ListOtsInstance(pageSize int, pageNum int) ([]string, error
 	req.PageSize = requests.NewInteger(pageSize)
 	req.PageNum = requests.NewInteger(pageNum)
 	req.Headers = map[string]string{"RegionId": s.client.RegionId}
+	req.Domain = s.client.Domain
 
 	req.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "Ots", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	var allInstanceNames []string
@@ -188,22 +192,37 @@ func (s *OtsService) ListOtsInstance(pageSize int, pageNum int) ([]string, error
 	return allInstanceNames, nil
 }
 
-func (s *OtsService) DescribeOtsInstance(id string) (inst ots.InstanceInfo, err error) {
-	request := ots.CreateGetInstanceRequest()
-	request.RegionId = s.client.RegionId
-	request.InstanceName = id
+func (s *OtsService) DescribeOtsInstance(id string) (inst InstanceInfo, err error) {
+	request := requests.NewCommonRequest()
 	request.Method = "GET"
-	//request.Headers["x-ascm-product-name"] = "Ots"
-	//request.Headers["x-acs-roleid"] = "1"
-	//request.Headers["x-acs-organizationid"] = "6"
-	//request.Headers["x-acs-resourcegroupid"] = ""
+	request.Product = "Ots"
+	request.Version = "2016-06-20"
+	request.Domain = s.client.Domain
+	if strings.ToLower(s.client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.ApiName = "GetInstance"
+	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "Ots", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-	raw, err := s.client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
-		return otsClient.GetInstance(request)
+	request.QueryParams = map[string]string{
+		"AccessKeyId":     s.client.AccessKey,
+		"InstanceName":    id,
+		"RegionId":        s.client.RegionId,
+		"apiName":         "GetInstance",
+		"Action":          "GetInstance",
+		"version":         "2016-06-20",
+		"AccessKeySecret": s.client.SecretKey,
+		"Product":         "Ots",
+		"Department":      s.client.Department,
+		"ResourceGroup":   s.client.ResourceGroup,
+		"ResourceOwnerId": s.client.ResourceGroup,
+	}
+	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.ProcessCommonRequest(request)
 	})
-
+	addDebug(request.GetActionName(), raw, request.QueryParams, AlibabacloudStackSdkGoERROR)
 	// OTS instance not found error code is "NotFound"
 	if err != nil {
 		if NotFoundError(err) {
@@ -211,12 +230,21 @@ func (s *OtsService) DescribeOtsInstance(id string) (inst ots.InstanceInfo, err 
 		}
 		return inst, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*ots.GetInstanceResponse)
-	if response.InstanceInfo.InstanceName != id {
+	var instmap GetInstanceResponse
+	bresponse, _ := raw.(*responses.CommonResponse)
+	if bresponse == nil {
 		return inst, WrapErrorf(Error(GetNotFoundMessage("OtsInstance", id)), NotFoundMsg, ProviderERROR)
 	}
-	return response.InstanceInfo, nil
+	e := json.Unmarshal(bresponse.GetHttpContentBytes(), &instmap)
+	if e != nil {
+		return inst, WrapErrorf(e, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+	}
+	if instmap.AsapiSuccess {
+		inst = instmap.InstanceInfo
+		return inst, nil
+	} else {
+		return inst, WrapErrorf(Error(GetNotFoundMessage("OtsInstance", id)), NotFoundMsg, ProviderERROR)
+	}
 }
 
 func (s *OtsService) DescribeOtsInstanceAttachment(id string) (inst ots.VpcInfo, err error) {
@@ -339,4 +367,30 @@ func (s *OtsService) DescribeOtsInstanceTypes() (types []string, err error) {
 		return resp.ClusterTypeInfos.ClusterType, nil
 	}
 	return
+}
+
+type TagInfos struct {
+	TagInfo []map[string]string `json:"TagInfo" xml:"TagInfo"`
+}
+
+type InstanceInfo struct {
+	InstanceName  string                 `json:"InstanceName" xml:"InstanceName"`
+	Status        int                    `json:"Status" xml:"Status"`
+	TagInfos      TagInfos               `json:"TagInfos" xml:"TagInfos"`
+	Description   string                 `json:"Description" xml:"Description"`
+	Quota         map[string]interface{} `json:"Quota" xml:"Quota"`
+	UserId        string                 `json:"UserId" xml:"UserId"`
+	Network       string                 `json:"Network" xml:"Network"`
+	CreateTime    string                 `json:"CreateTime" xml:"CreateTime"`
+	ClusterType   string                 `json:"ClusterType" xml:"ClusterType"`
+	WriteCapacity int                    `json:"WriteCapacity" xml:"WriteCapacity"`
+	ReadCapacity  int                    `json:"ReadCapacity" xml:"ReadCapacity"`
+}
+
+type GetInstanceResponse struct {
+	EagleEyeTraceId string       `json:"eagleEyeTraceId" xml:"eagleEyeTraceId"`
+	AsapiSuccess    bool         `json:"asapiSuccess" xml:"asapiSuccess"`
+	RequestId       string       `json:"RequestId" xml:"RequestId"`
+	AsapiRequestId  string       `json:"asapiRequestId" xml:"asapiRequestId"`
+	InstanceInfo    InstanceInfo `json:"InstanceInfo" xml:"InstanceInfo"`
 }

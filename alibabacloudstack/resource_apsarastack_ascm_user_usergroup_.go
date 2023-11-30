@@ -2,13 +2,14 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"log"
+	"strings"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
-	"strings"
 	//"encoding/json"
 )
 
@@ -109,7 +110,7 @@ func resourceAlibabacloudStackAscmUserGroupUserCreate(d *schema.ResourceData, me
 }
 
 func resourceAlibabacloudStackAscmUserGroupUserRead(d *schema.ResourceData, meta interface{}) error {
-	wiatSecondsIfWithTest(1)
+	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}

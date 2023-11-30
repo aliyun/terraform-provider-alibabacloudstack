@@ -122,7 +122,7 @@ func resourceAliyunOtsInstanceRead(d *schema.ResourceData, meta interface{}) err
 	d.Set("accessed_by", convertInstanceAccessedByRevert(object.Network))
 	d.Set("instance_type", convertInstanceTypeRevert(object.ClusterType))
 	d.Set("description", object.Description)
-	d.Set("tags", otsTagsToMap(object.TagInfos.TagInfo))
+	d.Set("tags", otsTagsToMapFun(object.TagInfos))
 	return nil
 }
 
