@@ -100,6 +100,10 @@ func dataSourceAlibabacloudStackAscmUsers() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
+						"primary_key": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -122,6 +126,7 @@ func dataSourceAlibabacloudStackAscmUsersRead(d *schema.ResourceData, meta inter
 		request.Scheme = "http"
 	}
 	loginName := d.Get("name_regex").(string)
+	orgId := d.Get("organization_id")
 
 	request.RegionId = client.RegionId
 	request.ApiName = "ListUsers"
@@ -137,6 +142,7 @@ func dataSourceAlibabacloudStackAscmUsersRead(d *schema.ResourceData, meta inter
 		"Action":          "ListUsers",
 		"Version":         "2019-05-10",
 		"loginName":       loginName,
+		"organizationId":  fmt.Sprint(orgId),
 	}
 
 	for {
@@ -185,6 +191,7 @@ func dataSourceAlibabacloudStackAscmUsersRead(d *schema.ResourceData, meta inter
 			"cell_phone_number":  u.CellphoneNum,
 			"display_name":       u.DisplayName,
 			"email":              u.Email,
+			"primary_key":        u.PrimaryKey,
 			"mobile_nation_code": u.MobileNationCode,
 			"default_role_id":    u.DefaultRole.ID,
 			"role_ids":           roleids,
