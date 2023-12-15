@@ -70,6 +70,7 @@ func (s *ElasticsearchService) DescribeElasticsearchOnk8sInstance(id string) (ob
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
 		"AccessKeySecret": s.client.SecretKey,
+		"AccessKeyId":     s.client.AccessKey,
 		"Product":         "elasticsearch-k8s",
 		"product":         "elasticsearch-k8s",
 		"Action":          "DescribeInstance",
@@ -308,39 +309,97 @@ func (s *ElasticsearchService) getActionType(actionType bool) string {
 }
 
 func updateDescription(d *schema.ResourceData, meta interface{}) error {
-	var response map[string]interface{}
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	action := "UpdateDescription"
-	request := map[string]interface{}{
-		"RegionId":    client.RegionId,
-		"clientToken": StringPointer(buildClientToken(action)),
-		"description": d.Get("description").(string),
-	}
+	// var response map[string]interface{}
+	// client := meta.(*connectivity.AlibabacloudStackClient)
+	// action := "UpdateDescription"
+	// request := map[string]interface{}{
+	// 	"RegionId":    client.RegionId,
+	// 	"clientToken": StringPointer(buildClientToken(action)),
+	// 	"description": d.Get("description").(string),
+	// }
 
-	request["description"] = d.Get("description").(string)
-	elasticsearchClient, err := client.NewElasticsearchClient()
-	wait := incrementalWait(3*time.Second, 5*time.Second)
-	request["product"] = "elasticsearch"
-	request["OrganizationId"] = client.Department
-	request["ResourceId"] = client.ResourceGroup
-	runtime := util.RuntimeOptions{}
-	runtime.SetAutoretry(true)
-	//response, err = elasticsearchClient.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, request, &runtime)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = elasticsearchClient.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-			if IsExpectedErrors(err, []string{"GetCustomerLabelFail"}) || NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, nil)
-		return nil
-	})
-	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+	// request["description"] = d.Get("description").(string)
+	// elasticsearchClient, err := client.NewElasticsearchClient()
+	// wait := incrementalWait(3*time.Second, 5*time.Second)
+	// request["product"] = "elasticsearch"
+	// request["OrganizationId"] = client.Department
+	// request["ResourceId"] = client.ResourceGroup
+	// runtime := util.RuntimeOptions{}
+	// runtime.SetAutoretry(true)
+	// //response, err = elasticsearchClient.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, request, &runtime)
+	// err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+	// 	response, err = elasticsearchClient.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, request, &runtime)
+	// 	if err != nil {
+	// 		if IsExpectedErrors(err, []string{"GetCustomerLabelFail"}) || NeedRetry(err) {
+	// 			wait()
+	// 			return resource.RetryableError(err)
+	// 		}
+	// 		return resource.NonRetryableError(err)
+	// 	}
+	// 	addDebug(action, response, nil)
+	// 	return nil
+	// })
+	// if err != nil {
+	// 	return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+	// }
+	// return nil
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	request := requests.NewCommonRequest()
+	if client.Config.Insecure {
+		request.SetHTTPSInsecure(client.Config.Insecure)
 	}
+	request.QueryParams = map[string]string{
+		"RegionId":        client.RegionId,
+		"AccessKeySecret": client.SecretKey,
+		"AccessKeyId":     client.AccessKey,
+		"Product":         "elasticsearch-k8s",
+		"product":         "elasticsearch-k8s",
+		"Action":          "UpdateDescription",
+		"Version":         "2017-06-13",
+		"InstanceId":      d.Id(),
+		"description":     d.Get("description").(string),
+		"ClientToken":     buildClientToken("UpdateDescription"),
+		"OrganizationId":  client.Department,
+	}
+	request.Method = "POST"
+	request.Product = "elasticsearch-k8s"
+	request.Version = "2017-06-13"
+	request.Domain = client.Domain
+	if strings.ToLower(client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.ApiName = "UpdateDescription"
+	request.RegionId = client.RegionId
+	request.Headers = map[string]string{"RegionId": client.RegionId, "Content-Type": "application/json"}
+
+	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.ProcessCommonRequest(request)
+	})
+
+	if err != nil {
+		if IsExpectedErrors(err, []string{"UpdateDescriptionFailed"}) {
+			return WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		}
+		return WrapErrorf(err, DefaultErrorMsg, d.Get("description").(string), "UpdateDescription", AlibabacloudStackSdkGoERROR)
+	}
+	addDebug("UpdateDescription", raw, request.QueryParams)
+	// response, _ := raw.(*responses.CommonResponse)
+	// var resp map[string]interface{}
+	// err = json.Unmarshal(response.GetHttpContentBytes(), &resp)
+	// if err != nil {
+	// 	return nil, WrapErrorf(Error(GetNotFoundMessage("ElasticsearchOnK8s Instance", id)), NotFoundWithResponse, response)
+	// }
+
+	// if fmt.Sprint(resp["asapiSuccess"]) == "false" {
+	// 	return nil, WrapError(fmt.Errorf("%s failed, response: %v", "DescribeInstance", resp))
+	// }
+	// v, err := jsonpath.Get("$.Result", resp)
+	// if err != nil {
+	// 	return nil, WrapErrorf(err, FailedGetAttributeMsg, id, "$.Result", response)
+	// }
+	// object = v.(map[string]interface{})
 	return nil
 }
 

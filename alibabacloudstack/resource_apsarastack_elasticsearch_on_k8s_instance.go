@@ -278,6 +278,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sCreate(d *schema.ResourceData, m
 	request.QueryParams = map[string]string{
 		"RegionId":        client.RegionId,
 		"AccessKeySecret": client.SecretKey,
+		"AccessKeyId":     client.AccessKey,
 		"Product":         "elasticsearch-k8s",
 		"Action":          "createInstance",
 		"Version":         "2017-06-13",
@@ -327,7 +328,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sCreate(d *schema.ResourceData, m
 		return WrapErrorf(err, IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackElasticsearchOnk8sUpdate(d, meta)
+	return resourceAlibabacloudStackElasticsearchOnk8sRead(d, meta)
 }
 
 func resourceAlibabacloudStackElasticsearchOnk8sRead(d *schema.ResourceData, meta interface{}) error {
@@ -435,19 +436,19 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 		//d.SetPartial("private_whitelist")
 	}
 
-	if d.HasChange("enable_public") {
-		content := make(map[string]interface{})
-		content["networkType"] = string(PUBLIC)
-		content["nodeType"] = string(WORKER)
-		content["actionType"] = elasticsearchService.getActionType(d.Get("enable_public").(bool))
-		if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-			return WrapError(err)
-		}
+	// if d.HasChange("enable_public") {
+	// 	content := make(map[string]interface{})
+	// 	content["networkType"] = string(PUBLIC)
+	// 	content["nodeType"] = string(WORKER)
+	// 	content["actionType"] = elasticsearchService.getActionType(d.Get("enable_public").(bool))
+	// 	if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
+	// 		return WrapError(err)
+	// 	}
 
-		//d.SetPartial("enable_public")
-	}
+	// 	//d.SetPartial("enable_public")
+	// }
 
-	if d.Get("enable_public").(bool) == true && d.HasChange("public_whitelist") {
+	if d.Get("enable_public").(bool) && d.HasChange("public_whitelist") {
 		content := make(map[string]interface{})
 		content["networkType"] = string(PUBLIC)
 		content["nodeType"] = string(WORKER)
@@ -459,19 +460,19 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 		//d.SetPartial("public_whitelist")
 	}
 
-	if d.HasChange("enable_kibana_public_network") || d.IsNewResource() {
-		content := make(map[string]interface{})
-		content["networkType"] = string(PUBLIC)
-		content["nodeType"] = string(KIBANA)
-		content["actionType"] = elasticsearchService.getActionType(d.Get("enable_kibana_public_network").(bool))
-		if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-			return WrapError(err)
-		}
+	// if d.HasChange("enable_kibana_public_network") || d.IsNewResource() {
+	// 	content := make(map[string]interface{})
+	// 	content["networkType"] = string(PUBLIC)
+	// 	content["nodeType"] = string(KIBANA)
+	// 	content["actionType"] = elasticsearchService.getActionType(d.Get("enable_kibana_public_network").(bool))
+	// 	if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
+	// 		return WrapError(err)
+	// 	}
 
-		//d.SetPartial("enable_kibana_public_network")
-	}
+	// 	//d.SetPartial("enable_kibana_public_network")
+	// }
 
-	if d.Get("enable_kibana_public_network").(bool) == true && d.HasChange("kibana_whitelist") {
+	if d.Get("enable_kibana_public_network").(bool) && d.HasChange("kibana_whitelist") {
 		content := make(map[string]interface{})
 		content["networkType"] = string(PUBLIC)
 		content["nodeType"] = string(KIBANA)
@@ -483,17 +484,17 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 		//d.SetPartial("kibana_whitelist")
 	}
 
-	if d.HasChange("enable_kibana_private_network") {
-		content := make(map[string]interface{})
-		content["networkType"] = string(PRIVATE)
-		content["nodeType"] = string(KIBANA)
-		content["actionType"] = elasticsearchService.getActionType(d.Get("enable_kibana_private_network").(bool))
-		if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-			return WrapError(err)
-		}
+	// if d.HasChange("enable_kibana_private_network") {
+	// 	content := make(map[string]interface{})
+	// 	content["networkType"] = string(PRIVATE)
+	// 	content["nodeType"] = string(KIBANA)
+	// 	content["actionType"] = elasticsearchService.getActionType(d.Get("enable_kibana_private_network").(bool))
+	// 	if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
+	// 		return WrapError(err)
+	// 	}
 
-		//d.SetPartial("enable_kibana_private_network")
-	}
+	// 	//d.SetPartial("enable_kibana_private_network")
+	// }
 
 	if d.Get("enable_kibana_private_network").(bool) == true && d.HasChange("kibana_private_whitelist") {
 		content := make(map[string]interface{})
@@ -529,28 +530,28 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 		//d.SetPartial("client_node_amount")
 	}
 
-	if d.HasChange("protocol") {
+	// if d.HasChange("protocol") {
 
-		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
-		}
+	// 	if _, err := stateConf.WaitForState(); err != nil {
+	// 		return WrapErrorf(err, IdMsg, d.Id())
+	// 	}
 
-		var https func(*schema.ResourceData, interface{}) error
+	// 	var https func(*schema.ResourceData, interface{}) error
 
-		if d.Get("protocol") == "HTTPS" {
-			https = openHttps
-		} else if d.Get("protocol") == "HTTP" {
-			https = closeHttps
-		}
+	// 	if d.Get("protocol") == "HTTPS" {
+	// 		https = openHttps
+	// 	} else if d.Get("protocol") == "HTTP" {
+	// 		https = closeHttps
+	// 	}
 
-		if nil != https {
-			if err := https(d, meta); err != nil {
-				return WrapError(err)
-			}
-		}
+	// 	if nil != https {
+	// 		if err := https(d, meta); err != nil {
+	// 			return WrapError(err)
+	// 		}
+	// 	}
 
-		//d.SetPartial("protocol")
-	}
+	// 	//d.SetPartial("protocol")
+	// }
 	if d.HasChange("setting_config") {
 		conn, err := client.NewElasticsearchClient()
 		if err != nil {
@@ -672,7 +673,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackElasticsearchOnk8sRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackElasticsearchOnk8sDelete(d *schema.ResourceData, meta interface{}) error {
