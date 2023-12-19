@@ -28,26 +28,30 @@ func resourceAlibabacloudStackGraphDatabaseDbInstance() *schema.Resource {
 			Update: schema.DefaultTimeout(60 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"db_instance_ip_array": {
-				Type:     schema.TypeSet,
+			// "db_instance_ip_array": {
+			// 	Type:     schema.TypeSet,
+			// 	Optional: true,
+			// 	Computed: true,
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"db_instance_ip_array_attribute": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 			},
+			// 			"db_instance_ip_array_name": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 			},
+			// 			"security_ips": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 			},
+			// 		},
+			// 	},
+			// },
+			"security_ips": {
+				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"db_instance_ip_array_attribute": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"db_instance_ip_array_name": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"security_ips": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
 			},
 			"db_instance_category": {
 				Type:         schema.TypeString,
@@ -100,11 +104,21 @@ func resourceAlibabacloudStackGraphDatabaseDbInstance() *schema.Resource {
 			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
+				ForceNew: true,
+			},
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
 			},
 			"zone_id": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
+				ForceNew: true,
 			},
 		},
 	}
@@ -132,6 +146,7 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceCreate(d *schema.ResourceDa
 	request["ClientToken"] = buildClientToken("CreateDBInstance")
 	request["RegionId"] = client.RegionId
 	request["product"] = "gdb"
+	request["VSwitchId"] = d.Get("vswitch_id")
 	request["OrganizationId"] = client.Department
 	runtime := util.RuntimeOptions{}
 	runtime.SetAutoretry(true)
@@ -174,22 +189,23 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceRead(d *schema.ResourceData
 	d.Set("status", object["DBInstanceStatus"])
 	d.Set("vswitch_id", object["VSwitchId"])
 	d.Set("zone_id", object["ZoneId"])
-	if DBInstanceIPArray, ok := object["DBInstanceIPArray"]; ok {
-		DBInstanceIPArrayAry, ok := DBInstanceIPArray.([]interface{})
-		if ok && len(DBInstanceIPArrayAry) > 0 {
-			DBInstanceIPArraySli := make([]map[string]interface{}, 0)
-			for _, DBInstanceIPArrayArg := range DBInstanceIPArrayAry {
-				DBInstanceIPArrayMap := make(map[string]interface{})
-				DBInstanceIPArrayMap["security_ips"] = DBInstanceIPArrayArg.(map[string]interface{})["SecurityIps"]
-				DBInstanceIPArrayMap["db_instance_ip_array_name"] = DBInstanceIPArrayArg.(map[string]interface{})["DBInstanceIPArrayName"]
-				if v, ok := DBInstanceIPArrayArg.(map[string]interface{})["DBInstanceIPArrayAttribute"]; ok {
-					DBInstanceIPArrayMap["db_instance_ip_array_attribute"] = v
-				}
-				DBInstanceIPArraySli = append(DBInstanceIPArraySli, DBInstanceIPArrayMap)
-			}
-			d.Set("db_instance_ip_array", DBInstanceIPArraySli)
-		}
-	}
+	d.Set("security_ips", object["SecurityIps"])
+	// if DBInstanceIPArray, ok := object["DBInstanceIPArray"]; ok {
+	// 	DBInstanceIPArrayAry, ok := DBInstanceIPArray.([]interface{})
+	// 	if ok && len(DBInstanceIPArrayAry) > 0 {
+	// 		DBInstanceIPArraySli := make([]map[string]interface{}, 0)
+	// 		for _, DBInstanceIPArrayArg := range DBInstanceIPArrayAry {
+	// 			DBInstanceIPArrayMap := make(map[string]interface{})
+	// 			DBInstanceIPArrayMap["security_ips"] = DBInstanceIPArrayArg.(map[string]interface{})["SecurityIps"]
+	// 			DBInstanceIPArrayMap["db_instance_ip_array_name"] = DBInstanceIPArrayArg.(map[string]interface{})["DBInstanceIPArrayName"]
+	// 			if v, ok := DBInstanceIPArrayArg.(map[string]interface{})["DBInstanceIPArrayAttribute"]; ok {
+	// 				DBInstanceIPArrayMap["db_instance_ip_array_attribute"] = v
+	// 			}
+	// 			DBInstanceIPArraySli = append(DBInstanceIPArraySli, DBInstanceIPArrayMap)
+	// 		}
+	// 		d.Set("db_instance_ip_array", DBInstanceIPArraySli)
+	// 	}
+	// }
 	return nil
 }
 func resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
