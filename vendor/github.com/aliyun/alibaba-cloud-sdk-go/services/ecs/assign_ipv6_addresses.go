@@ -84,6 +84,9 @@ type AssignIpv6AddressesRequest struct {
 type AssignIpv6AddressesResponse struct {
 	*responses.BaseResponse
 	RequestId string `json:"RequestId" xml:"RequestId"`
+	Ipv6Sets  struct {
+		Ipv6Address []string `json:"Ipv6Address" xml:"Ipv6Address"`
+	} `json:"Ipv6Sets" xml:"Ipv6Sets"`
 }
 
 // CreateAssignIpv6AddressesRequest creates a request to invoke AssignIpv6Addresses API

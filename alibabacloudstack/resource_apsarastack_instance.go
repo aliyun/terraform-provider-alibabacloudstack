@@ -262,7 +262,26 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 					string(DeactiveSecurityEnhancementStrategy),
 				}, false),
 			},
-
+			"enable_ipv6": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"ipv6_cidr_block": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"ipv6_address_count": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      0,
+				ValidateFunc: validation.IntBetween(0, 10),
+			},
+			"ipv6_address_list": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 			"tags": tagsSchema(),
 		},
 	}
@@ -278,7 +297,7 @@ func resourceAlibabacloudStackInstanceCreate(d *schema.ResourceData, meta interf
 	}
 	request.IoOptimized = string(IOOptimized)
 
-	if d.Get("is_outdated").(bool) == true {
+	if d.Get("is_outdated").(bool) {
 		request.IoOptimized = string(NoneOptimized)
 	}
 	if strings.ToLower(client.Config.Protocol) == "https" {
@@ -322,6 +341,14 @@ func resourceAlibabacloudStackInstanceCreate(d *schema.ResourceData, meta interf
 			if err != nil {
 				return WrapError(err)
 			}
+		}
+	}
+	if d.Get("enable_ipv6").(bool) && d.Get("ipv6_address_count").(int) > 0 {
+		ipv6s, err := AssignIpv6AddressesFunc(d.Id(), d.Get("ipv6_address_count").(int), meta)
+		if err != nil {
+			return WrapError(err)
+		} else {
+			d.Set("ipv6_address_list", ipv6s)
 		}
 	}
 	return resourceAlibabacloudStackInstanceUpdate(d, meta)
@@ -622,6 +649,14 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 	if err := modifyInstanceNetworkSpec(d, meta); err != nil {
 		return WrapError(err)
 	}
+	// if d.HasChange("ipv6_address_count") && d.Get("ipv6_address_count").(int) != len(d.Get("ipv6_address_list").([]interface{})) {
+	// 	ipv6s, err := AssignIpv6AddressesFunc(d.Id(), d.Get("ipv6_address_count").(int), meta)
+	// 	if err != nil {
+	// 		return WrapError(err)
+	// 	} else {
+	// 		d.Set("ipv6_address_list", ipv6s)
+	// 	}
+	// }
 
 	d.Partial(false)
 	return resourceAlibabacloudStackInstanceRead(d, meta)
@@ -697,7 +732,19 @@ func buildAlibabacloudStackInstanceArgs(d *schema.ResourceData, meta interface{}
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": client.SecretKey,
+		"Product":         "ecs",
+		"Department":      client.Department,
+		"ResourceGroup":   client.ResourceGroup,
+	}
+	if v := d.Get("enable_ipv6").(bool); v {
+		request.QueryParams["Ipv6CidrBlock"] = d.Get("ipv6_cidr_block").(string)
+		if d.Get("ipv6_address_count").(int) <= 0 {
+			return nil, WrapError(Error("if enable_ipv6 = true, ipv6_address_count must be greater than 0"))
+		}
+		request.QueryParams["Ipv6AddressCount"] = "0"
+	}
 	request.InstanceType = d.Get("instance_type").(string)
 	request.SystemDiskDiskName = d.Get("system_disk_name").(string)
 	imageID := d.Get("image_id").(string)
@@ -817,7 +864,7 @@ func buildAlibabacloudStackInstanceArgs(d *schema.ResourceData, meta interface{}
 				Encrypted:          strconv.FormatBool(disk["encrypted"].(bool)),
 			}
 			if enc, ok := disk["encrypted"]; ok {
-				if enc.(bool) == true {
+				if enc.(bool) {
 					if j, ok := disk["kms_key_id"]; ok {
 						dataDiskRequest.KMSKeyId = j.(string)
 					}
@@ -1284,4 +1331,31 @@ func modifyInstanceNetworkSpec(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 	return nil
+}
+
+func AssignIpv6AddressesFunc(id string, ipv6_addresses_count int, meta interface{}) ([]string, error) {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	ecsService := EcsService{client: client}
+	var ipv6s []string
+	request := ecs.CreateAssignIpv6AddressesRequest()
+	instance, err := ecsService.DescribeInstance(id)
+
+	if err != nil {
+		return ipv6s, WrapErrorf(err, DefaultErrorMsg, id, "DescribeInstance", AlibabacloudStackSdkGoERROR)
+	}
+	request.NetworkInterfaceId = instance.NetworkInterfaces.NetworkInterface[0].NetworkInterfaceId
+	request.Ipv6AddressCount = requests.NewInteger(ipv6_addresses_count)
+	request.RegionId = client.RegionId
+	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	raw, ipv6_err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.AssignIpv6Addresses(request)
+	})
+	if ipv6_err != nil {
+		return ipv6s, WrapErrorf(ipv6_err, DefaultErrorMsg, "AssignIpv6Addresses", AlibabacloudStackSdkGoERROR)
+	}
+	addDebug("AssignIpv6Addresses", raw, request.RpcRequest, request)
+	response, _ := raw.(*ecs.AssignIpv6AddressesResponse)
+	ipv6s = response.Ipv6Sets.Ipv6Address
+	return ipv6s, nil
 }

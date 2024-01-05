@@ -19,12 +19,14 @@ Provides a ECS instance resource.
 resource "alibabacloudstack_vpc" "vpc" {
   name       = "tf_test_foo"
   cidr_block = "${var.cidr_block}"
+  enable_ipv6    = true
 }
 
 resource "alibabacloudstack_vswitch" "vsw" {
   vpc_id            = "${alibabacloudstack_vpc.vpc.id}"
   cidr_block        = "${var.cidr_block}"
   availability_zone = "${var.availability_zone}"
+  ipv6_cidr_block   = "${var.ipv6_cidr_block}"
 }
 
 resource "alibabacloudstack_security_group" "group" {
@@ -33,7 +35,7 @@ resource "alibabacloudstack_security_group" "group" {
 }
 
 resource "alibabacloudstack_instance" "instance" {
-  image_id              = "ubuntu_18_04_64_20G_alibase_20190624.vhd"
+  image_id             = "ubuntu_18_04_64_20G_alibase_20190624.vhd"
   instance_type        = "ecs.n4.large"
   system_disk_category = "cloud_efficiency"
   system_disk_size     = 40
@@ -41,6 +43,9 @@ resource "alibabacloudstack_instance" "instance" {
   security_groups      = [alibabacloudstack_security_group.group.id]
   instance_name        = "test_apsara_instance"
   vswitch_id           = alibabacloudstack_vswitch.vsw.id
+  ipv6_cidr_block      = "${var.ipv6_cidr_block}"
+  enable_ipv6          = true
+  ipv6_address_count   = 3
 }
 
 
@@ -69,6 +74,7 @@ On other OSs such as Linux, the host name can contain a maximum of 30 characters
 * `password` - (Optional, Sensitive) Password to an instance is a string of 8 to 30 characters. It must contain uppercase/lowercase letters and numerals, but cannot contain special symbols. When it is changed, the instance will reboot to make the change take effect./if you want to use random password See [Random Password](random_password.html.markdown).
 * `kms_encrypted_password` - (Optional) An KMS encrypts password used to an instance. If the `password` is filled in, this field will be ignored. When it is changed, the instance will reboot to make the change take effect.
 * `kms_encryption_context` - (Optional) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating an instance with `kms_encrypted_password`. See [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm). It is valid when `kms_encrypted_password` is set. When it is changed, the instance will reboot to make the change take effect.
+
 * `vswitch_id` - (Optional) The virtual switch ID to launch in VPC. This parameter must be set unless you can create classic network instances. When it is changed, the instance will reboot to make the change take effect.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
     - Key: It can be up to 64 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It cannot be a null string.
@@ -104,7 +110,9 @@ On other OSs such as Linux, the host name can contain a maximum of 30 characters
     * `delete_with_instance` - (Optional, ForceNew) Delete this data disk when the instance is destroyed. It only works on cloud, cloud_efficiency, cloud_essd, cloud_ssd disk. If the category of this data disk was ephemeral_ssd, please don't set this param.
 
         Default to true
-    
+* `enable_ipv6` - (Optional, ForceNew) Specifies whether to enable the IPv6 block. Valid values: `false` (Default): disables IPv6 blocks. `true`: enables IPv6 blocks. 
+* `ipv6_cidr_block` - (Optional) The ipv6 cidr block of VPC.
+* `ipv6_address_count` - (Optional) The count of ipv6_address requested for allocation. If `enable_ipv6` is true. `ipv6_address_count` must be greater than 0.
 
 ### Timeouts
 
