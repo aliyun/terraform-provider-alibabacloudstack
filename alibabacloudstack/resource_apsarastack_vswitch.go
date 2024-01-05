@@ -41,6 +41,11 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateSwitchCIDRNetworkAddress,
 			},
+			"ipv6_cidr_block": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -66,7 +71,12 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	log.Printf("[DEBUG] alibabacloud_vswitch ipv6CidrBlock: %s", d.Get("ipv6_cidr_block").(string))
+	var ipv6_cidr_block string
+	if d.Get("ipv6_cidr_block").(string) != "" {
+		ipv6_cidr_block = "0"
+	}
+	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ipv6CidrBlock": ipv6_cidr_block, "ResourceGroup": client.ResourceGroup}
 
 	request.VpcId = Trim(d.Get("vpc_id").(string))
 	request.ZoneId = d.Get("availability_zone").(string)
@@ -74,6 +84,7 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 
 	if v, ok := d.GetOk("name"); ok && v != "" {
 		request.VSwitchName = v.(string)
+
 	}
 
 	if v, ok := d.GetOk("description"); ok && v != "" {
@@ -96,7 +107,7 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		response, _ := raw.(*vpc.CreateVSwitchResponse)
-		log.Printf("Vswitch Request %s", response)
+		log.Printf("Vswitch response %s", response)
 		d.SetId(response.VSwitchId)
 		return nil
 	}); err != nil {
@@ -107,7 +118,6 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
 	}
-
 	return resourceAlibabacloudStackSwitchUpdate(d, meta)
 }
 
@@ -127,6 +137,7 @@ func resourceAlibabacloudStackSwitchRead(d *schema.ResourceData, meta interface{
 	d.Set("availability_zone", vswitch.ZoneId)
 	d.Set("vpc_id", vswitch.VpcId)
 	d.Set("cidr_block", vswitch.CidrBlock)
+	d.Set("ipv6_cidr_block", vswitch.Ipv6CidrBlock)
 	d.Set("name", vswitch.VSwitchName)
 	listTagResourcesObject, err := vpcService.ListTagResources(d.Id(), "VSWITCH")
 	if err != nil {
@@ -151,6 +162,18 @@ func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interfac
 		d.Partial(false)
 		return resourceAlibabacloudStackSwitchRead(d, meta)
 	}
+	// object, err := vpcService.DescribeVpc(d.Get("vpc_id").(string))
+	// if err != nil {
+	// 	if NotFoundError(err) {
+	// 		log.Printf("[DEBUG] Resource alibabacloudstack_vswitch_update :vpcService.DescribeVpc Failed!!! %s", err)
+	// 		addDebug("DescribeVpc", object, d.Get("vpc_id").(string))
+	// 		return err
+	// 	}
+	// 	return WrapError(err)
+	// }
+	// log.Printf("[DEBUG] Resource alibabacloudstack_vswitch_update :Ipv6CidrBlock %s", object.Ipv6CidrBlock)
+	// ipv6_cidr_block := object.Ipv6CidrBlock
+	// d.Set("ipv6_cidr_block", ipv6_cidr_block)
 	update := false
 	request := vpc.CreateModifyVSwitchAttributeRequest()
 	request.RegionId = client.RegionId
@@ -159,9 +182,11 @@ func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interfac
 	} else {
 		request.Scheme = "http"
 	}
+	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Ipv6CidrBlock": d.Get("ipv6_cidr_block").(string), "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	// if ipv6_cidr_block != "" {
+	// 	update = true
+	// }
 
 	request.VSwitchId = d.Id()
 
@@ -174,6 +199,7 @@ func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interfac
 		request.Description = d.Get("description").(string)
 		update = true
 	}
+
 	if update {
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.ModifyVSwitchAttribute(request)

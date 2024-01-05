@@ -29,11 +29,10 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"cidr_block": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Default:       "172.16.0.0/12",
-				ValidateFunc:  validateCIDRNetworkAddress,
-				ConflictsWith: []string{"enable_ipv6"},
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "172.16.0.0/12",
+				ValidateFunc: validateCIDRNetworkAddress,
 			},
 			"name": {
 				Type:          schema.TypeString,
@@ -62,9 +61,9 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 				ForceNew: true,
 			},
 			"enable_ipv6": {
-				Type:          schema.TypeBool,
-				Optional:      true,
-				ConflictsWith: []string{"cidr_block"},
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
@@ -320,9 +319,9 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 		request.CidrBlock = d.Get("cidr_block").(string)
 		attributeUpdate = true
 	}
-
+	enable_ipv6 := d.Get("enable_ipv6").(bool)
 	if attributeUpdate {
-		if _, ok := d.GetOkExists("enable_ipv6"); ok {
+		if enable_ipv6 {
 			request.EnableIPv6 = requests.NewBoolean(d.Get("enable_ipv6").(bool))
 		}
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
@@ -394,9 +393,7 @@ func buildAlibabacloudStackVpcArgs(d *schema.ResourceData, meta interface{}) *vp
 		request.DryRun = requests.NewBoolean(v.(bool))
 	}
 
-	if v, ok := d.GetOkExists("enable_ipv6"); ok {
-		request.EnableIpv6 = requests.NewBoolean(v.(bool))
-	}
+	request.EnableIpv6 = requests.NewBoolean(d.Get("enable_ipv6").(bool))
 
 	if v, ok := d.GetOk("resource_group_id"); ok {
 		request.ResourceGroupId = v.(string)
