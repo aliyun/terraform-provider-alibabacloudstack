@@ -80,9 +80,16 @@ func resourceAlibabacloudStackSecurityGroupRule() *schema.Resource {
 			},
 
 			"cidr_ip": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				AtLeastOneOf: []string{"cidr_ip", "ipv6_cidr_ip", "source_security_group_id"},
+			},
+			"ipv6_cidr_ip": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"cidr_ip"},
 			},
 
 			"source_security_group_id": {
@@ -379,6 +386,12 @@ func buildAlibabacloudStackSGRuleRequest(d *schema.ResourceData, meta interface{
 			request.QueryParams["SourceCidrIp"] = v.(string)
 		} else {
 			request.QueryParams["DestCidrIp"] = v.(string)
+		}
+	} else if v, ok := d.GetOk("ipv6_cidr_ip"); ok {
+		if direction == string(DirectionIngress) {
+			request.QueryParams["Ipv6SourceGroupId"] = v.(string)
+		} else {
+			request.QueryParams["Ipv6DestCidrIp"] = v.(string)
 		}
 	}
 

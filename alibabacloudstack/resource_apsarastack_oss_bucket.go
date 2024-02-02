@@ -217,10 +217,7 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				},
 				MaxItems: 1000,
 			},
-			"endpoint": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+
 			"policy": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -316,11 +313,11 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	var requestInfo *oss.Client
 	bucketName := d.Get("bucket").(string)
 	det, err := ossService.DescribeOssBucket(bucketName)
+	log.Printf("======================== det:%v", det)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", AlibabacloudStackOssGoSdk)
 	}
 	acl := d.Get("acl").(string)
-	endpoint := d.Get("endpoint").(string)
 	storageClass := d.Get("storage_class")
 	if storageClass == "" {
 		storageClass = "Standard"
@@ -332,20 +329,6 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	sse_algo := d.Get("storage_class")
 	// If not present, Create Bucket
 	if det.BucketInfo.Name == "" {
-		var params string
-		if endpoint != "" {
-			if strings.HasPrefix(endpoint, "http") {
-				endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
-			}
-			if strings.ToLower(client.Config.Protocol) == "https" {
-				endpoint = fmt.Sprintf("https://%s", endpoint)
-			} else {
-				endpoint = fmt.Sprintf("http://%s", endpoint)
-			}
-			params = fmt.Sprintf("{\"%s\":%s,\"%s\":%s,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}", "Department", client.Department, "ResourceGroup", client.ResourceGroup, "RegionId", client.RegionId, "asVersion", "enterprise", "asArchitechture", "x86", "haAlibabacloudStack", "true", "Language", "en", "BucketName", bucketName, "StorageClass", storageClass, "x-oss-acl", acl, "SSEAlgorithm", sse_algo, "x-one-console-endpoint", endpoint)
-		} else {
-			params = fmt.Sprintf("{\"%s\":%s,\"%s\":%s,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}", "Department", client.Department, "ResourceGroup", client.ResourceGroup, "RegionId", client.RegionId, "asVersion", "enterprise", "asArchitechture", "x86", "haAlibabacloudStack", "true", "Language", "en", "BucketName", bucketName, "StorageClass", storageClass, "x-oss-acl", acl, "SSEAlgorithm", sse_algo) //,"x-one-console-endpoint","http://oss-cn-neimeng-env30-d01-a.intra.env30.shuguang.com"),
-		}
 		request := requests.NewCommonRequest()
 		if client.Config.Insecure {
 			request.SetHTTPSInsecure(client.Config.Insecure)
@@ -363,7 +346,7 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 			"SignatureVersion": "1.0",
 			"OpenApiAction":    "PutBucket",
 			"ProductName":      "oss",
-			"Params":           params,
+			"Params":           fmt.Sprintf("{\"%s\":%s,\"%s\":%s,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}", "Department", client.Department, "ResourceGroup", client.ResourceGroup, "RegionId", client.RegionId, "asVersion", "enterprise", "asArchitechture", "x86", "haAlibabacloudStack", "true", "Language", "en", "BucketName", bucketName, "StorageClass", storageClass, "x-oss-acl", acl, "SSEAlgorithm", sse_algo), //,"x-one-console-endpoint","http://oss-cn-neimeng-env30-d01-a.intra.env30.shuguang.com"),
 		}
 		request.Method = "POST"        // Set request method
 		request.Product = "OneRouter"  // Specify product

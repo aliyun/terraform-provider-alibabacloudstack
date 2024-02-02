@@ -4,6 +4,7 @@ const (
 	Average          = "Average"
 	Minimum          = "Minimum"
 	Maximum          = "Maximum"
+	Value            = "Value"
 	ErrorCodeMaximum = "ErrorCodeMaximum"
 )
 

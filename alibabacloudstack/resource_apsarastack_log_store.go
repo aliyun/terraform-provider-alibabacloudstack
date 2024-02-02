@@ -161,18 +161,24 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 				requestinfo = slsClient
 				return nil, slsClient.CreateLogStoreV2(d.Get("project").(string), logstore)
 			})
-			if err != nil {
-				if IsExpectedErrors(err, []string{"InternalServerError", LogClientTimeout}) {
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
 			if debugOn() {
 				addDebug("CreateLogStoreV2", raw, requestinfo, map[string]interface{}{
 					"project":  d.Get("project").(string),
 					"logstore": logstore,
 				})
 			}
+			if err != nil {
+				if IsExpectedErrors(err, []string{"InternalServerError", LogClientTimeout}) {
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			// if debugOn() {
+			// 	addDebug("CreateLogStoreV2", raw, requestinfo, map[string]interface{}{
+			// 		"project":  d.Get("project").(string),
+			// 		"logstore": logstore,
+			// 	})
+			// }
 			return nil
 		})
 		if err != nil {
@@ -188,17 +194,17 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 			requestinfo = slsClient
 			return nil, slsClient.CreateLogStoreV2(d.Get("project").(string), logstore)
 		})
-		if err != nil {
-			if IsExpectedErrors(err, []string{"InternalServerError", LogClientTimeout}) {
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
 		if debugOn() {
 			addDebug("CreateLogStoreV2", raw, requestinfo, map[string]interface{}{
 				"project":  d.Get("project").(string),
 				"logstore": logstore,
 			})
+		}
+		if err != nil {
+			if IsExpectedErrors(err, []string{"InternalServerError", LogClientTimeout}) {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
 		}
 		return nil
 	})
