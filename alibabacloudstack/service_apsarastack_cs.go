@@ -19,7 +19,10 @@ import (
 type CsService struct {
 	client *connectivity.AlibabacloudStackClient
 }
-
+type KubernetesClusterDetail struct {
+	cs.KubernetesClusterDetail
+	MasterUrl string
+}
 const (
 	COMPONENT_AUTO_SCALER      = "cluster-autoscaler"
 	COMPONENT_DEFAULT_VRESION  = "v1.0.0"
@@ -40,9 +43,9 @@ const (
 	UpgradeClusterTimeout = 30 * time.Minute
 )
 
-func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDetail, err error) {
+func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail, err error) {
 	invoker := NewInvoker()
-	cluster := &cs.KubernetesClusterDetail{}
+	cluster := &KubernetesClusterDetail{}
 	cluster.ClusterId = ""
 	var requestInfo *cs.Client
 	var response interface{}
@@ -100,7 +103,7 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDet
 	//	return cluster, nil
 	//}
 
-	cluster = &cs.KubernetesClusterDetail{}
+	cluster = &KubernetesClusterDetail{}
 	for _, k := range Cdetails.Clusters {
 		if k.ClusterID == id {
 			cluster.Tags = k.Tags
@@ -122,6 +125,7 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDet
 			cluster.PrivateZone = k.PrivateZone
 			cluster.Profile = k.Profile
 			cluster.VSwitchIds = k.VswitchID
+			cluster.MasterUrl = k.MasterURL
 			//cluster.Updated=k.Updated
 			//cluster.Created= k.Created.
 			break

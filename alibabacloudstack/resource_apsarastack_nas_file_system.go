@@ -106,7 +106,7 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 		request["ZoneId"] = v
 	}
 	if v, ok := d.GetOk("capacity"); ok {
-		request["Capacity"] = v
+		request["VolumeSize"] = v
 	}
 	if v, ok := d.GetOk("kms_key_id"); ok {
 		request["KmsKeyId"] = v
@@ -148,8 +148,13 @@ func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta i
 		"RegionId":     client.RegionId,
 		"FileSystemId": d.Id(),
 	}
-	if d.HasChange("description") {
-		request["Description"] = d.Get("description")
+	if d.HasChange("description") || d.HasChange("capacity") {
+		if d.HasChange("description") {
+			request["Description"] = d.Get("description")
+		}
+		if d.HasChange("capacity") {
+			request["VolumeSize"] = d.Get("capacity")
+		}
 		request["Product"] = "Nas"
 		request["OrganizationId"] = client.Department
 		request["Department"] = client.Department
@@ -197,7 +202,7 @@ func resourceAlibabacloudStackNasFileSystemRead(d *schema.ResourceData, meta int
 	d.Set("storage_type", object["StorageType"])
 	d.Set("encrypt_type", object["EncryptType"])
 	d.Set("file_system_type", object["FileSystemType"])
-	d.Set("capacity", object["Capacity"])
+	d.Set("capacity", object["VolumeSize"])
 	d.Set("zone_id", object["ZoneId"])
 	d.Set("kms_key_id", object["KMSKeyId"])
 	return nil

@@ -96,6 +96,19 @@ func resourceAlibabacloudStackDisk() *schema.Resource {
 			},
 
 			"tags": tagsSchema(),
+			"storage_set_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"storage_set_partition_number": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1, 2000),
+			},
 		},
 	}
 }
@@ -162,6 +175,15 @@ func resourceAlibabacloudStackDiskCreate(d *schema.ResourceData, meta interface{
 		}
 		request.Tag = &tags
 	}
+	i := d.Get("storage_set_partition_number").(int)
+	if v := d.Get("storage_set_id").(string); v != "" {
+		request.StorageSetId = v
+		if i >= 1 {
+			request.StorageSetPartitionNumber = requests.NewInteger(d.Get("storage_set_partition_number").(int))
+		} else {
+			 return WrapError(errors.New("cant empty storage_set_partition_number when you set storage_set_id and >=2"))
+		}
+	}
 	request.ClientToken = buildClientToken(request.GetActionName())
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.CreateDisk(request)
@@ -206,6 +228,7 @@ func resourceAlibabacloudStackDiskRead(d *schema.ResourceData, meta interface{})
 	d.Set("delete_with_instance", object.DeleteWithInstance)
 	d.Set("enable_auto_snapshot", object.EnableAutoSnapshot)
 	d.Set("tags", ecsService.tagsToMap(object.Tags.Tag))
+	d.Set("storage_set_id", object.StorageSetId)
 
 	return nil
 }
