@@ -63,7 +63,7 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      Average,
-							ValidateFunc: validation.StringInSlice([]string{Average, Minimum, Maximum, ErrorCodeMaximum}, false),
+							ValidateFunc: validation.StringInSlice([]string{Average, Minimum, Maximum, ErrorCodeMaximum, Value}, false),
 						},
 						"comparison_operator": {
 							Type:     schema.TypeString,
@@ -96,7 +96,7 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      Average,
-							ValidateFunc: validation.StringInSlice([]string{Average, Minimum, Maximum, ErrorCodeMaximum}, false),
+							ValidateFunc: validation.StringInSlice([]string{Average, Minimum, Maximum, ErrorCodeMaximum, Value}, false),
 						},
 						"comparison_operator": {
 							Type:     schema.TypeString,
@@ -129,7 +129,7 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      Average,
-							ValidateFunc: validation.StringInSlice([]string{Average, Minimum, Maximum, ErrorCodeMaximum}, false),
+							ValidateFunc: validation.StringInSlice([]string{Average, Minimum, Maximum, ErrorCodeMaximum, Value}, false),
 						},
 						"comparison_operator": {
 							Type:     schema.TypeString,
