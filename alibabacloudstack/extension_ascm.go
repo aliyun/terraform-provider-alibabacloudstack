@@ -986,3 +986,20 @@ type RamPolicyUser struct {
 	API            string `json:"api"`
 	AsapiErrorCode string `json:"asapiErrorCode"`
 }
+
+type InitPasswordListResponse struct {
+	SuccessResponse bool        `json:"successResponse"`
+	EagleEyeTraceID string      `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool        `json:"asapiSuccess"`
+	Code            string      `json:"code"`
+	Cost            int         `json:"cost"`
+	Message         string      `json:"message"`
+	Success         bool        `json:"success"`
+	DynamicMessages interface{} `json:"dynamicMessages"`
+	Data            []struct {
+		DisplayName string `json:"displayName"`
+		Password    string `json:"initPassword"`
+		Id          int    `json:"id"`
+		LoginName   string `json:"loginName"`
+	} `json:"data"`
+}

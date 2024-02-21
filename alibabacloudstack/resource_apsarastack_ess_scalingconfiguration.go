@@ -70,6 +70,14 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"deployment_set_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"zone_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"scaling_configuration_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -128,6 +136,18 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 							Optional: true,
 							Default:  true,
 						},
+						"description": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"auto_snapshot_policy_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 			},
@@ -137,7 +157,10 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-
+			"system_disk_auto_snapshot_policy_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"user_data": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -175,6 +198,10 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+			},
+			"host_name": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 	}
@@ -366,7 +393,10 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 		request.InstanceName = d.Get("instance_name").(string)
 		//d.SetPartial("instance_name")
 	}
+	if d.HasChange("system_disk_auto_snapshot_policy_id") {
+		request.SystemDiskAutoSnapshotPolicyId = d.Get("system_disk_auto_snapshot_policy_id").(string)
 
+	}
 	if d.HasChange("tags") {
 		if v, ok := d.GetOk("tags"); ok {
 			tags := "{"
@@ -377,7 +407,9 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 		}
 		//d.SetPartial("tags")
 	}
-
+	if d.HasChange("host_name") {
+		request.HostName = d.Get("host_name").(string)
+	}
 	if d.HasChange("data_disk") {
 		dds, ok := d.GetOk("data_disk")
 		if ok {
@@ -386,12 +418,16 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 			for _, e := range disks {
 				pack := e.(map[string]interface{})
 				dataDisk := ess.ModifyScalingConfigurationDataDisk{
-					Size:               strconv.Itoa(pack["size"].(int)),
-					Category:           pack["category"].(string),
-					SnapshotId:         pack["snapshot_id"].(string),
-					Encrypted:          pack["encrypted"].(string),
-					KMSKeyId:           pack["kms_key_id"].(string),
-					DeleteWithInstance: strconv.FormatBool(pack["delete_with_instance"].(bool)),
+					Size:                 strconv.Itoa(pack["size"].(int)),
+					Category:             pack["category"].(string),
+					SnapshotId:           pack["snapshot_id"].(string),
+					Encrypted:            pack["encrypted"].(string),
+					KMSKeyId:             pack["kms_key_id"].(string),
+					DeleteWithInstance:   strconv.FormatBool(pack["delete_with_instance"].(bool)),
+					Device:               pack["device"].(string),
+					Description:          pack["description"].(string),
+					AutoSnapshotPolicyId: pack["auto_snapshot_policy_id"].(string),
+					DiskName:             pack["name"].(string),
 				}
 				createDataDisks = append(createDataDisks, dataDisk)
 			}
@@ -523,6 +559,7 @@ func resourceAlibabacloudStackEssScalingConfigurationRead(d *schema.ResourceData
 	d.Set("internet_max_bandwidth_in", object.InternetMaxBandwidthIn)
 	d.Set("system_disk_category", object.SystemDiskCategory)
 	d.Set("system_disk_size", object.SystemDiskSize)
+	d.Set("system_disk_auto_snapshot_policy_id", object.SystemDiskAutoSnapshotPolicyId)
 	d.Set("data_disk", essService.flattenDataDiskMappings(object.DataDisks.DataDisk))
 	d.Set("role_name", object.RamRoleName)
 	d.Set("key_name", object.KeyPairName)
@@ -530,13 +567,11 @@ func resourceAlibabacloudStackEssScalingConfigurationRead(d *schema.ResourceData
 	d.Set("tags", essTagsToMap(object.Tags.Tag))
 	d.Set("instance_name", object.InstanceName)
 	d.Set("override", d.Get("override").(bool))
-
+	d.Set("host_name", object.HostName)
 	if sg, ok := d.GetOk("security_group_id"); ok && sg.(string) != "" {
 		d.Set("security_group_id", object.SecurityGroupId)
 	}
-	if sgs, ok := d.GetOk("security_group_ids"); ok && len(sgs.([]interface{})) > 0 {
-		d.Set("security_group_ids", object.SecurityGroupIds.SecurityGroupId)
-	}
+
 	if instanceType, ok := d.GetOk("instance_type"); ok && instanceType.(string) != "" {
 		d.Set("instance_type", object.InstanceType)
 	}
@@ -660,7 +695,7 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 	request := ess.CreateCreateScalingConfigurationRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "ZoneId": d.Get("zone_id").(string)}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -679,6 +714,8 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 	if securityGroupId != "" {
 		request.SecurityGroupId = securityGroupId
 	}
+	request.DeploymentSetId = d.Get("deployment_set_id").(string)
+	request.InstanceName = d.Get("instance_name").(string)
 
 	types := make([]string, 0, int(MaxScalingConfigurationInstanceTypes))
 	instanceType := d.Get("instance_type").(string)
@@ -707,7 +744,9 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 	if v := d.Get("system_disk_category").(string); v != "" {
 		request.SystemDiskCategory = v
 	}
-
+	if v := d.Get("system_disk_auto_snapshot_policy_id").(string); v != "" {
+		request.SystemDiskAutoSnapshotPolicyId = v
+	}
 	if v := d.Get("system_disk_size").(int); v != 0 {
 		request.SystemDiskSize = requests.NewInteger(v)
 	}
@@ -719,12 +758,16 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 		for _, e := range disks {
 			pack := e.(map[string]interface{})
 			dataDisk := ess.CreateScalingConfigurationDataDisk{
-				Size:               strconv.Itoa(pack["size"].(int)),
-				Category:           pack["category"].(string),
-				SnapshotId:         pack["snapshot_id"].(string),
-				Encrypted:          pack["encrypted"].(string),
-				KMSKeyId:           pack["kms_key_id"].(string),
-				DeleteWithInstance: strconv.FormatBool(pack["delete_with_instance"].(bool)),
+				Size:                 strconv.Itoa(pack["size"].(int)),
+				Category:             pack["category"].(string),
+				SnapshotId:           pack["snapshot_id"].(string),
+				DeleteWithInstance:   strconv.FormatBool(pack["delete_with_instance"].(bool)),
+				Device:               pack["device"].(string),
+				Encrypted:            pack["encrypted"].(string),
+				KMSKeyId:             pack["kms_key_id"].(string),
+				DiskName:             pack["name"].(string),
+				Description:          pack["description"].(string),
+				AutoSnapshotPolicyId: pack["auto_snapshot_policy_id"].(string),
 			}
 			createDataDisks = append(createDataDisks, dataDisk)
 		}
@@ -759,7 +802,9 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 	if v, ok := d.GetOk("instance_name"); ok && v.(string) != "" {
 		request.InstanceName = v.(string)
 	}
-
+	if v, ok := d.GetOk("host_name"); ok && v.(string) != "" {
+		request.HostName = v.(string)
+	}
 	return request, nil
 }
 

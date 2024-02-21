@@ -150,8 +150,10 @@ func resourceAlibabacloudStackAscmUserGroupRead(d *schema.ResourceData, meta int
 	d.Set("organization_id", strconv.Itoa(object.Data[0].OrganizationId))
 
 	var roleIds []string
-	for _, role := range object.Data[0].Roles {
-		roleIds = append(roleIds, strconv.Itoa(role.Id))
+	if len(object.Data[0].Roles) >= 0 {
+		for _, role := range object.Data[0].Roles {
+			roleIds = append(roleIds, strconv.Itoa(role.Id))
+		}
 	}
 	d.Set("role_ids", roleIds)
 

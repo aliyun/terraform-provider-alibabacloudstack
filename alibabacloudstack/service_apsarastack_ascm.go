@@ -2,12 +2,14 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"log"
+	"strconv"
+	"strings"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"strconv"
-	"strings"
 )
 
 type AscmService struct {
@@ -1118,4 +1120,71 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 	}
 
 	return resp, nil
+}
+
+func (s *AscmService) ExportInitPasswordByLoginName(loginname string) (initPassword string, err error) {
+	request := requests.NewCommonRequest()
+	if s.client.Config.Insecure {
+		request.SetHTTPSInsecure(s.client.Config.Insecure)
+	}
+	var loginnamelist []string
+	loginnamelist = append(loginnamelist, loginname)
+	QueryParams := map[string]interface{}{
+		"AccessKeySecret":  s.client.SecretKey,
+		"AccessKeyId":      s.client.AccessKey,
+		"Department":       s.client.Department,
+		"ResourceGroup":    s.client.ResourceGroup,
+		"RegionId":         s.client.RegionId,
+		"Product":          "ascm",
+		"Action":           "ExportInitPasswordByLoginNameList",
+		"Version":          "2019-05-10",
+		"SecurityToken":    s.client.Config.SecurityToken,
+		"SignatureVersion": "1.0",
+		"SignatureMethod":  "HMAC-SHA1",
+		"LoginNameList":    loginnamelist,
+	}
+	request.Method = "POST"
+	request.Product = "Ascm"
+	request.Version = "2019-05-10"
+	request.ServiceCode = "ascm"
+	request.Domain = s.client.Domain
+	requeststring, jsonerr := json.Marshal(QueryParams)
+	log.Printf("=========================  ExportInitPasswordByLoginNameList jsonerr:%v", jsonerr)
+	request.SetContent(requeststring)
+	if strings.ToLower(s.client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.ApiName = "ExportInitPasswordByLoginNameList"
+	request.Headers = map[string]string{
+		"RegionId":               s.client.RegionId,
+		"x-ascm-product-name":    "ascm",
+		"x-ascm-product-version": "2019-05-10",
+	}
+	request.RegionId = s.client.RegionId
+	request.SetContentType("application/json")
+	request.PathPattern = "/roa/ascm/auth/user/exportInitPasswordByLoginNameList"
+	log.Printf("ExportInitPasswordByLoginNameList loginname:%v", loginname)
+	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.ProcessCommonRequest(request)
+	})
+	if err != nil {
+		log.Printf("ExportInitPasswordByLoginNameList err:%v", err)
+		return initPassword, WrapErrorf(err, DefaultErrorMsg, "", "ExportInitPasswordByLoginNameList", AlibabacloudStackSdkGoERROR)
+	}
+	bresponse, _ := raw.(*responses.CommonResponse)
+	addDebug("ExportInitPasswordByLoginNameList", bresponse, request, loginname)
+	var response InitPasswordListResponse
+	e := json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	log.Printf("ExportInitPasswordByLoginNameList response:%v", response)
+	if e != nil {
+		log.Printf("ExportInitPasswordByLoginNameList err:%v", e)
+		return initPassword, WrapErrorf(e, DefaultErrorMsg, "", "ExportInitPasswordByLoginNameList", AlibabacloudStackSdkGoERROR)
+	}
+	if len(response.Data) > 0 {
+		initPassword = response.Data[0].Password
+	}
+	log.Printf("ExportInitPasswordByLoginNameList initPassword:%v", initPassword)
+	return initPassword, err
 }
