@@ -1259,8 +1259,10 @@ func (client *AlibabacloudStackClient) WithLogClient(do func(*sls.Client) (inter
 			os.Setenv("http_proxy", client.Config.Proxy)
 		}
 		client.logconn = &sls.Client{
-			AccessKeyID:     client.Config.OrganizationAccessKey,
-			AccessKeySecret: client.Config.OrganizationSecretKey,
+			// AccessKeyID:     client.Config.OrganizationAccessKey,
+			// AccessKeySecret: client.Config.OrganizationSecretKey,
+			AccessKeyID:     client.Config.AccessKey,
+			AccessKeySecret: client.Config.SecretKey,
 			Endpoint:        client.Config.SLSOpenAPIEndpoint,
 			SecurityToken:   client.Config.SecurityToken,
 			UserAgent:       client.getUserAgent(),

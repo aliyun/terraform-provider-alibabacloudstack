@@ -124,8 +124,8 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 	if v, ok := d.GetOk("encryption"); ok {
 		update = v.(bool)
 	}
-
-	logstore := &sls.LogStore{
+	var logstore *sls.LogStore
+	logstore = &sls.LogStore{
 		Name:          d.Get("name").(string),
 		TTL:           d.Get("retention_period").(int),
 		ShardCount:    d.Get("shard_count").(int),
@@ -136,7 +136,7 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 	}
 	var requestinfo *sls.Client
 	if update {
-		logstore := &sls.LogStore{
+		logstore = &sls.LogStore{
 			Name:          d.Get("name").(string),
 			TTL:           d.Get("retention_period").(int),
 			ShardCount:    d.Get("shard_count").(int),
