@@ -54,14 +54,17 @@ func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, 
 				request.SetHTTPSInsecure(client.Config.Insecure)
 			}
 			request.QueryParams = map[string]string{
-				"RegionId":        client.RegionId,
-				"AccessKeySecret": client.SecretKey,
-				"Product":         "Ascm",
-				"Action":          "AddRoleToUser",
-				"Version":         "2019-05-10",
-				"ProductName":     "ascm",
-				"LoginName":       lname,
-				"RoleId":          fmt.Sprint(roleids[i]),
+				"RegionId":         client.RegionId,
+				"AccessKeySecret":  client.SecretKey,
+				"Product":          "Ascm",
+				"Action":           "AddRoleToUser",
+				"Version":          "2019-05-10",
+				"ProductName":      "ascm",
+				"LoginName":        lname,
+				"RoleId":           fmt.Sprint(roleids[i]),
+				"SecurityToken":    client.Config.SecurityToken,
+				"SignatureVersion": "1.0",
+				"SignatureMethod":  "HMAC-SHA1",
 			}
 			request.Method = "POST"
 			request.Product = "Ascm"
@@ -79,7 +82,7 @@ func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, 
 			raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 				return ecsClient.ProcessCommonRequest(request)
 			})
-			log.Printf("response of raw AddRoleToUser Role(%d) is : %s", roleids[i], raw)
+			log.Printf("response of raw AddRoleToUser Role(%s) is : %s", roleids[i], raw)
 
 			if err != nil {
 				return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user_role_binding", "AddRoleToUser", raw)
@@ -145,8 +148,11 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 
 	QueryParams := map[string]interface{}{
-		"loginName":  lname,
-		"roleIdList": roleIdList,
+		"loginName":        lname,
+		"roleIdList":       roleIdList,
+		"SecurityToken":    client.Config.SecurityToken,
+		"SignatureVersion": "1.0",
+		"SignatureMethod":  "HMAC-SHA1",
 	}
 
 	request.Method = "POST"
@@ -217,14 +223,17 @@ func resourceAlibabacloudStackAscmUserRoleBindingDelete(d *schema.ResourceData, 
 				request.SetHTTPSInsecure(client.Config.Insecure)
 			}
 			request.QueryParams = map[string]string{
-				"RegionId":        client.RegionId,
-				"AccessKeySecret": client.SecretKey,
-				"Product":         "ascm",
-				"Action":          "RemoveRoleFromUser",
-				"Version":         "2019-05-10",
-				"ProductName":     "ascm",
-				"LoginName":       d.Id(),
-				"RoleId":          fmt.Sprint(roleid),
+				"RegionId":         client.RegionId,
+				"AccessKeySecret":  client.SecretKey,
+				"Product":          "ascm",
+				"Action":           "RemoveRoleFromUser",
+				"Version":          "2019-05-10",
+				"ProductName":      "ascm",
+				"LoginName":        d.Id(),
+				"RoleId":           fmt.Sprint(roleid),
+				"SecurityToken":    client.Config.SecurityToken,
+				"SignatureVersion": "1.0",
+				"SignatureMethod":  "HMAC-SHA1",
 			}
 
 			request.Method = "POST"

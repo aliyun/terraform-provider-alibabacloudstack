@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -53,14 +54,17 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingCreate(d *schema.ResourceD
 				request.SetHTTPSInsecure(client.Config.Insecure)
 			}
 			request.QueryParams = map[string]string{
-				"RegionId":        client.RegionId,
-				"AccessKeySecret": client.SecretKey,
-				"Product":         "Ascm",
-				"Action":          "AddRoleToUserGroup",
-				"Version":         "2019-05-10",
-				"ProductName":     "ascm",
-				"userGroupId":     strconv.Itoa(userGroupId),
-				"RoleId":          fmt.Sprint(roleids[i]),
+				"RegionId":         client.RegionId,
+				"AccessKeySecret":  client.SecretKey,
+				"Product":          "Ascm",
+				"Action":           "AddRoleToUserGroup",
+				"Version":          "2019-05-10",
+				"ProductName":      "ascm",
+				"userGroupId":      strconv.Itoa(userGroupId),
+				"RoleId":           fmt.Sprint(roleids[i]),
+				"SecurityToken":    client.Config.SecurityToken,
+				"SignatureVersion": "1.0",
+				"SignatureMethod":  "HMAC-SHA1",
 			}
 			request.Method = "POST"
 			request.Product = "Ascm"
@@ -81,14 +85,14 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingCreate(d *schema.ResourceD
 			log.Printf("response of raw AddRoleToUserGroup Role(%d) is : %s", roleids[i], raw)
 
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user_role_binding", "AddRoleToUserGroup", raw)
+				return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_usergroup_role_binding", "AddRoleToUserGroup", raw)
 			}
 
 			addDebug("AddRoleToUserGroup", raw, requestInfo, request)
 
 			bresponse, _ := raw.(*responses.CommonResponse)
 			if bresponse.GetHttpStatus() != 200 {
-				return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user_role_binding", "AddRoleToUserGroup", AlibabacloudStackSdkGoERROR)
+				return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_usergroup_role_binding", "AddRoleToUserGroup", AlibabacloudStackSdkGoERROR)
 			}
 			addDebug("AddRoleToUserGroup", raw, requestInfo, bresponse.GetHttpContentString())
 			log.Printf("response of queryparams AddRoleToUserGroup is : %s", request.QueryParams)
@@ -98,7 +102,7 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingCreate(d *schema.ResourceD
 
 	d.SetId(strconv.Itoa(userGroupId))
 
-	return resourceAlibabacloudStackAscmUserGroupRoleBindingRead(d, meta)
+	return resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d, meta)
 }
 
 func resourceAlibabacloudStackAscmUserGroupRoleBindingRead(d *schema.ResourceData, meta interface{}) error {
@@ -124,7 +128,65 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingRead(d *schema.ResourceDat
 }
 
 func resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackAscmUserGroupRoleBindingCreate(d, meta)
+	var roleIdList []string
+
+	if v, ok := d.GetOk("role_ids"); ok {
+		roleids := expandStringList(v.(*schema.Set).List())
+
+		for _, roleid := range roleids {
+			roleIdList = append(roleIdList, roleid)
+		}
+	}
+	user_group_id := d.Get("user_group_id").(string)
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	var requestInfo *ecs.Client
+	request := requests.NewCommonRequest()
+	if client.Config.Insecure {
+		request.SetHTTPSInsecure(client.Config.Insecure)
+	}
+
+	request.Headers["x-ascm-product-name"] = "ascm"
+	request.Headers["x-ascm-product-version"] = "2019-05-10"
+
+	QueryParams := map[string]interface{}{
+		"userGroupId":      user_group_id,
+		"roleIdList":       roleIdList,
+		"SecurityToken":    client.Config.SecurityToken,
+		"SignatureVersion": "1.0",
+		"SignatureMethod":  "HMAC-SHA1",
+	}
+
+	request.Method = "POST"
+	request.Product = "Ascm"
+	request.Version = "2019-05-10"
+	request.ServiceCode = "ascm"
+	request.Domain = client.Domain
+	requeststring, err := json.Marshal(QueryParams)
+
+	if strings.ToLower(client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.Headers["Content-Type"] = requests.Json
+	request.SetContent(requeststring)
+	request.PathPattern = "/roa/ascm/auth/user/resetRolesForUserGroup"
+	request.ApiName = "ResetRolesForUserGroup"
+	request.RegionId = client.RegionId
+	request.Headers["RegionId"] = client.RegionId
+
+	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.ProcessCommonRequest(request)
+	})
+
+	log.Printf("response of raw ResetRolesForUserGroup is : %s", raw)
+
+	if err != nil {
+		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user", "ResetRolesForUserGroup", raw)
+	}
+
+	addDebug("ResetRolesForUserGroup", raw, requestInfo, request)
+	return resourceAlibabacloudStackAscmUserGroupRoleBindingRead(d, meta)
 
 }
 
@@ -164,14 +226,17 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingDelete(d *schema.ResourceD
 				request.SetHTTPSInsecure(client.Config.Insecure)
 			}
 			request.QueryParams = map[string]string{
-				"RegionId":        client.RegionId,
-				"AccessKeySecret": client.SecretKey,
-				"Product":         "ascm",
-				"Action":          "RemoveRoleFromUserGroup",
-				"Version":         "2019-05-10",
-				"ProductName":     "ascm",
-				"userGroupId":     d.Id(),
-				"RoleId":          fmt.Sprint(roleid),
+				"RegionId":         client.RegionId,
+				"AccessKeySecret":  client.SecretKey,
+				"Product":          "ascm",
+				"Action":           "RemoveRoleFromUserGroup",
+				"Version":          "2019-05-10",
+				"ProductName":      "ascm",
+				"userGroupId":      d.Id(),
+				"RoleId":           fmt.Sprint(roleid),
+				"SecurityToken":    client.Config.SecurityToken,
+				"SignatureVersion": "1.0",
+				"SignatureMethod":  "HMAC-SHA1",
 			}
 
 			request.Method = "POST"
