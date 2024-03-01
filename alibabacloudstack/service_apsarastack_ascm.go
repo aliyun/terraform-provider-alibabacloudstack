@@ -550,20 +550,26 @@ func (s *AscmService) DescribeAscmUserGroup(id string) (response *UserGroup, err
 	}
 	if id == "" {
 		request.QueryParams = map[string]string{
-			"RegionId":        s.client.RegionId,
-			"AccessKeySecret": s.client.SecretKey,
-			"Product":         "ascm",
-			"Action":          "ListUserGroups",
-			"Version":         "2019-05-10",
+			"RegionId":         s.client.RegionId,
+			"AccessKeySecret":  s.client.SecretKey,
+			"Product":          "ascm",
+			"Action":           "ListUserGroups",
+			"Version":          "2019-05-10",
+			"SecurityToken":    s.client.Config.SecurityToken,
+			"SignatureVersion": "1.0",
+			"SignatureMethod":  "HMAC-SHA1",
 		}
 	} else {
 		request.QueryParams = map[string]string{
-			"RegionId":        s.client.RegionId,
-			"AccessKeySecret": s.client.SecretKey,
-			"Product":         "ascm",
-			"Action":          "ListUserGroups",
-			"Version":         "2019-05-10",
-			"userGroupName":   id,
+			"RegionId":         s.client.RegionId,
+			"AccessKeySecret":  s.client.SecretKey,
+			"Product":          "ascm",
+			"Action":           "ListUserGroups",
+			"Version":          "2019-05-10",
+			"userGroupName":    id,
+			"SecurityToken":    s.client.Config.SecurityToken,
+			"SignatureVersion": "1.0",
+			"SignatureMethod":  "HMAC-SHA1",
 		}
 	}
 
@@ -613,12 +619,15 @@ func (s *AscmService) DescribeAscmUserGroupRoleBinding(id string) (response *Use
 		request.SetHTTPSInsecure(s.client.Config.Insecure)
 	}
 	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
-		"Product":         "ascm",
-		"Action":          "ListUserGroups",
-		"Version":         "2019-05-10",
-		"pageSize":        "1000",
+		"RegionId":         s.client.RegionId,
+		"AccessKeySecret":  s.client.SecretKey,
+		"Product":          "ascm",
+		"Action":           "ListUserGroups",
+		"Version":          "2019-05-10",
+		"pageSize":         "1000",
+		"SecurityToken":    s.client.Config.SecurityToken,
+		"SignatureVersion": "1.0",
+		"SignatureMethod":  "HMAC-SHA1",
 	}
 	request.Method = "POST"
 	request.Product = "Ascm"
@@ -1073,15 +1082,18 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 		request.SetHTTPSInsecure(s.client.Config.Insecure)
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"RegionId":        s.client.RegionId,
-		"Product":         "ascm",
-		"Action":          "ListUsersInUserGroup",
-		"Version":         "2019-05-10",
-		"userGroupId":     id,
+		"AccessKeySecret":  s.client.SecretKey,
+		"AccessKeyId":      s.client.AccessKey,
+		"Department":       s.client.Department,
+		"ResourceGroup":    s.client.ResourceGroup,
+		"RegionId":         s.client.RegionId,
+		"Product":          "ascm",
+		"Action":           "ListUsersInUserGroup",
+		"Version":          "2019-05-10",
+		"userGroupId":      id,
+		"SecurityToken":    s.client.Config.SecurityToken,
+		"SignatureVersion": "1.0",
+		"SignatureMethod":  "HMAC-SHA1",
 	}
 	request.Method = "POST"
 	request.Product = "Ascm"

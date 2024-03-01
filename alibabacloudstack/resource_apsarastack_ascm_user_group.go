@@ -74,9 +74,12 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 
 	QueryParams := map[string]interface{}{
-		"groupName":      groupName,
-		"organizationId": organizationId,
-		"roleIdList":     loginNamesList,
+		"groupName":        groupName,
+		"organizationId":   organizationId,
+		"roleIdList":       loginNamesList,
+		"SecurityToken":    client.Config.SecurityToken,
+		"SignatureVersion": "1.0",
+		"SignatureMethod":  "HMAC-SHA1",
 	}
 
 	request.Method = "POST"
@@ -178,13 +181,16 @@ func resourceAlibabacloudStackAscmUserGroupDelete(d *schema.ResourceData, meta i
 			request.SetHTTPSInsecure(client.Config.Insecure)
 		}
 		request.QueryParams = map[string]string{
-			"RegionId":        client.RegionId,
-			"AccessKeySecret": client.SecretKey,
-			"Product":         "ascm",
-			"Action":          "DeleteUserGroup",
-			"Version":         "2019-05-10",
-			"ProductName":     "ascm",
-			"userGroupId":     strconv.Itoa(check.Data[0].Id),
+			"RegionId":         client.RegionId,
+			"AccessKeySecret":  client.SecretKey,
+			"Product":          "ascm",
+			"Action":           "DeleteUserGroup",
+			"Version":          "2019-05-10",
+			"ProductName":      "ascm",
+			"userGroupId":      strconv.Itoa(check.Data[0].Id),
+			"SecurityToken":    client.Config.SecurityToken,
+			"SignatureVersion": "1.0",
+			"SignatureMethod":  "HMAC-SHA1",
 		}
 
 		request.Method = "POST"
