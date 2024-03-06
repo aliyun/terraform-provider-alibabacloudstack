@@ -131,13 +131,13 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d *schema.ResourceD
 	var roleIdList []string
 
 	if v, ok := d.GetOk("role_ids"); ok {
-		roleids := expandStringList(v.(*schema.Set).List())
+		roleids := expandIntList(v.(*schema.Set).List())
 
 		for _, roleid := range roleids {
-			roleIdList = append(roleIdList, roleid)
+			roleIdList = append(roleIdList, strconv.Itoa(roleid))
 		}
 	}
-	user_group_id := d.Get("user_group_id").(string)
+	user_group_id := d.Get("user_group_id").(int)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *ecs.Client
 	request := requests.NewCommonRequest()
@@ -149,7 +149,7 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d *schema.ResourceD
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 
 	QueryParams := map[string]interface{}{
-		"userGroupId":      user_group_id,
+		"userGroupId":      strconv.Itoa(user_group_id),
 		"roleIdList":       roleIdList,
 		"SecurityToken":    client.Config.SecurityToken,
 		"SignatureVersion": "1.0",
@@ -161,7 +161,7 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d *schema.ResourceD
 	request.Version = "2019-05-10"
 	request.ServiceCode = "ascm"
 	request.Domain = client.Domain
-	requeststring, err := json.Marshal(QueryParams)
+	requeststring, _ := json.Marshal(QueryParams)
 
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
