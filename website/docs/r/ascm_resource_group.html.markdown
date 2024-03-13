@@ -9,6 +9,10 @@ description: |-
 
 # alibabacloudstack\_ascm_resource_group
 
+-> **NOTE:**  If you need to create different resources in different resource sets in a template, you need to refer to the method in [Mult ResourceGroup](ascm_resource_group_mult.html.markdown).
+
+
+
 ## Example Usage
 
 ```
