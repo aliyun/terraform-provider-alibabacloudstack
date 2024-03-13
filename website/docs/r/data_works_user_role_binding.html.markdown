@@ -3,7 +3,8 @@ subcategory: "Data Works"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_data_works_user_role_binding"
 sidebar_current: "docs-alibabacloudstack-resource-data-works-user-role-binding"
-description: |- Provides a AlibabacloudStack Data Works UserRoleBinding resource.
+description: |- 
+  Provides a AlibabacloudStack Data Works UserRoleBinding resource.
 ---
 
 # alibabacloudstack\_data\_works\_connection

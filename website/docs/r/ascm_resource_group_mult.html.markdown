@@ -4,7 +4,7 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_resource_group_mult"
 sidebar_current: "docs-alibabacloudstack-resource-resource_group_mult"
 description: |-
-Create a new resource set and also create all subsequent resources under this resource set
+  Create a new resource set and also create all subsequent resources under this resource set
 ---
 
 # alibabacloudstack\ascm_resource_group
