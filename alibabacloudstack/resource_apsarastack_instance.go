@@ -135,6 +135,10 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 			},
+			"system_disk_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"data_disks": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -344,7 +348,7 @@ func resourceAlibabacloudStackInstanceCreate(d *schema.ResourceData, meta interf
 		}
 	}
 	if d.Get("enable_ipv6").(bool) && d.Get("ipv6_address_count").(int) > 0 {
-		ipv6s, err := AssignIpv6AddressesFunc(d.Id(), d.Get("ipv6_address_count").(int), meta)
+		ipv6s, err := AssignIpv6AddressesFunc(d.Id(), d.Get("ipv6_address_count").(int), d.Get("ipv6_address_list").([]string), meta)
 		if err != nil {
 			return WrapError(err)
 		} else {
@@ -381,6 +385,7 @@ func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interfac
 	d.Set("system_disk_size", disk.Size)
 	d.Set("system_disk_name", disk.DiskName)
 	d.Set("system_disk_description", disk.Description)
+	d.Set("system_disk_id", disk.DiskId)
 	d.Set("storage_set_id", disk.StorageSetId)
 	d.Set("instance_name", instance.InstanceName)
 	d.Set("description", instance.Description)
@@ -1333,7 +1338,7 @@ func modifyInstanceNetworkSpec(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func AssignIpv6AddressesFunc(id string, ipv6_addresses_count int, meta interface{}) ([]string, error) {
+func AssignIpv6AddressesFunc(id string, ipv6_addresses_count int, ipv6_addresses []string, meta interface{}) ([]string, error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client: client}
 	var ipv6s []string
@@ -1345,6 +1350,7 @@ func AssignIpv6AddressesFunc(id string, ipv6_addresses_count int, meta interface
 	}
 	request.NetworkInterfaceId = instance.NetworkInterfaces.NetworkInterface[0].NetworkInterfaceId
 	request.Ipv6AddressCount = requests.NewInteger(ipv6_addresses_count)
+	request.Ipv6Address = &ipv6_addresses
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
