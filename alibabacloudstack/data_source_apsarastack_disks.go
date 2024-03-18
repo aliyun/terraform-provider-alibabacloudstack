@@ -1,11 +1,14 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"log"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -148,28 +151,45 @@ func dataSourceAlibabacloudStackDisks() *schema.Resource {
 func dataSourceAlibabacloudStackDisksRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := ecs.CreateDescribeDisksRequest()
+	request := requests.NewCommonRequest()
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
 		request.Scheme = "http"
 	}
 	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-	if v, ok := d.GetOk("ids"); ok && len(v.([]interface{})) > 0 {
-		request.DiskIds = convertListToJsonString(v.([]interface{}))
+	request.Method = "POST"
+	request.Product = "Ecs"
+	request.Version = "2014-05-26"
+
+	request.ApiName = "DescribeDisks"
+	request.Headers = map[string]string{"RegionId": client.RegionId, "Content-Type": requests.Json}
+	PageNumber := 1
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": client.SecretKey,
+		"Product":         "ecs",
+		"Department":      client.Department,
+		"ResourceGroup":   client.ResourceGroup,
+		"RegionId":        client.RegionId,
+		"Action":          "DescribeDisks",
+		"Version":         "2014-05-26",
+		"ResourceGroupId": client.ResourceGroup,
+		"PageSize":        "50",
+		"PageNumber":      strconv.Itoa(PageNumber),
 	}
+	if v, ok := d.GetOk("ids"); ok && len(v.([]interface{})) > 0 {
+		request.QueryParams["DiskIds"] = convertListToJsonString(v.([]interface{}))
+	}
+	DiskType := ""
 	if v, ok := d.GetOk("type"); ok && v.(string) != "" {
-		request.DiskType = v.(string)
-		request.QueryParams["Type"] = request.DiskType
+		DiskType = v.(string)
+		request.QueryParams["DiskType"] = DiskType
 	}
 	if v, ok := d.GetOk("category"); ok && v.(string) != "" {
-		request.Category = v.(string)
+		request.QueryParams["DiskCategory"] = v.(string)
 	}
-	log.Printf("Disktype25 %v", request.DiskType)
 	if v, ok := d.GetOk("instance_id"); ok && v.(string) != "" {
-		request.InstanceId = v.(string)
+		request.QueryParams["InstanceId"] = v.(string)
 	}
 	if v, ok := d.GetOk("tags"); ok {
 		var tags []ecs.DescribeDisksTag
@@ -180,48 +200,55 @@ func dataSourceAlibabacloudStackDisksRead(d *schema.ResourceData, meta interface
 				Value: value.(string),
 			})
 		}
-		request.Tag = &tags
+		tags_json, _ := json.Marshal(tags)
+		request.QueryParams["Tag"] = string(tags_json)
 	}
 
-	var allDisks []ecs.Disk
-	request.PageSize = requests.NewInteger(PageSizeLarge)
-	request.PageNumber = requests.NewInteger(1)
+	var allDisks []interface{}
+	resp := make(map[string]interface{})
 	for {
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.DescribeDisks(request)
+			return ecsClient.ProcessCommonRequest(request)
 		})
 		if err != nil {
 			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_disks", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*ecs.DescribeDisksResponse)
+		addDebug(request.GetActionName(), raw, request, request.QueryParams)
+		response, _ := raw.(*responses.CommonResponse)
+		err = json.Unmarshal(response.GetHttpContentBytes(), &resp)
+		if err != nil {
+			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_disks", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		}
+		Disks := resp["Disks"].(map[string]interface{})["Disk"].([]interface{})
 		log.Printf("ecsDescribeDisk25 %v", response)
-		if response == nil || len(response.Disks.Disk) < 1 {
+		if response == nil || len(Disks) < 1 {
+			break
+		}
+		for _, disk := range Disks {
+			allDisks = append(allDisks, disk)
+
+		}
+
+		if len(Disks) < PageNumber*50 {
 			break
 		}
 
-		allDisks = append(allDisks, response.Disks.Disk...)
-
-		if len(response.Disks.Disk) < PageSizeLarge {
-			break
-		}
-
-		page, err := getNextpageNumber(request.PageNumber)
+		PageNumber = PageNumber + 1
 		if err != nil {
 			return WrapError(err)
 		}
-		request.PageNumber = page
+		request.QueryParams["PageNumber"] = strconv.Itoa(PageNumber)
 	}
 
-	var filteredDisksTemp []ecs.Disk
+	var filteredDisksTemp []interface{}
 
 	nameRegex, ok := d.GetOk("name_regex")
 
-	if request.DiskType == "system" || request.DiskType == "data" {
+	if DiskType == "system" || DiskType == "data" {
 		log.Printf("entered ")
 		for _, disk := range allDisks {
 
-			if disk.Type == request.DiskType {
+			if disk.(map[string]interface{})["Type"].(string) == DiskType {
 				filteredDisksTemp = append(filteredDisksTemp, disk)
 			}
 
@@ -235,7 +262,7 @@ func dataSourceAlibabacloudStackDisksRead(d *schema.ResourceData, meta interface
 			r = regexp.MustCompile(nameRegex.(string))
 		}
 		for _, disk := range allDisks {
-			if r != nil && !r.MatchString(disk.DiskName) {
+			if r != nil && !r.MatchString(disk.(map[string]interface{})["DiskName"].(string)) {
 				continue
 			}
 			filteredDisksTemp = append(filteredDisksTemp, disk)
@@ -246,35 +273,49 @@ func dataSourceAlibabacloudStackDisksRead(d *schema.ResourceData, meta interface
 	return disksDescriptionAttributes(d, filteredDisksTemp, meta)
 }
 
-func disksDescriptionAttributes(d *schema.ResourceData, disks []ecs.Disk, meta interface{}) error {
+func disksDescriptionAttributes(d *schema.ResourceData, disks []interface{}, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	var ids []string
 	var s []map[string]interface{}
-	for _, disk := range disks {
-		mapping := map[string]interface{}{
-			"id":                disk.DiskId,
-			"name":              disk.DiskName,
-			"description":       disk.Description,
-			"region_id":         disk.RegionId,
-			"availability_zone": disk.ZoneId,
-			"status":            disk.Status,
-			"type":              disk.Type,
-			"category":          disk.Category,
-			"size":              disk.Size,
-			"image_id":          disk.ImageId,
-			"snapshot_id":       disk.SourceSnapshotId,
-			"instance_id":       disk.InstanceId,
-			"creation_time":     disk.CreationTime,
-			"attached_time":     disk.AttachedTime,
-			"detached_time":     disk.DetachedTime,
-			"expiration_time":   disk.ExpiredTime,
-			"storage_set_id":    disk.StorageSetId,
-			"kms_key_id":        disk.KMSKeyId,
-			"tags":              ecsService.tagsToMap(disk.Tags.Tag),
-		}
+	for _, diskdata := range disks {
+		disk := diskdata.(map[string]interface{})
+		var tag []ecs.Tag
+		tags := disk["Tags"].(map[string]interface{})
+		if len(tags["Tag"].([]interface{})) > 0 {
+			for _, v := range tags["Tag"].([]interface{}) {
+				if v != nil {
+					v = v.(map[string]interface{})
 
-		ids = append(ids, disk.DiskId)
+					tag = append(tag, ecs.Tag{
+						TagKey:   v.(map[string]interface{})["TagKey"].(string),
+						TagValue: v.(map[string]interface{})["TagValue"].(string),
+					})
+				}
+			}
+		}
+		mapping := map[string]interface{}{
+			"id":                disk["DiskId"].(string),
+			"name":              disk["DiskName"].(string),
+			"description":       disk["Description"].(string),
+			"region_id":         disk["RegionId"].(string),
+			"availability_zone": disk["ZoneId"].(string),
+			"status":            disk["Status"].(string),
+			"type":              disk["Type"].(string),
+			"category":          disk["Category"].(string),
+			"size":              disk["Size"].(float64),
+			"image_id":          disk["ImageId"].(string),
+			"snapshot_id":       disk["SourceSnapshotId"].(string),
+			"instance_id":       disk["InstanceId"].(string),
+			"creation_time":     disk["CreationTime"].(string),
+			"attached_time":     disk["AttachedTime"].(string),
+			"detached_time":     disk["DetachedTime"].(string),
+			"expiration_time":   disk["ExpiredTime"].(string),
+			"storage_set_id":    disk["StorageSetId"].(string),
+			"kms_key_id":        disk["KMSKeyId"].(string),
+			"tags":              ecsService.tagsToMap(tag),
+		}
+		ids = append(ids, disk["DiskId"].(string))
 		s = append(s, mapping)
 	}
 

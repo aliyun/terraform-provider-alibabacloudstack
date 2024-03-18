@@ -14,14 +14,20 @@ Provides an ECS snapshot resource.
 ## Example Usage
 
 ```
+data "alibabacloudstack_disks" "system_disk" {
+	instance_id = "i-dw906gn8yjmrrzb46dmu"
+	type 		= "system"
+}
+
 resource "alibabacloudstack_snapshot" "snapshot" {
-  disk_id     = "${alibabacloudstack_disk_attachment.instance-attachment.disk_id}"
+  disk_id     = data.alibabacloudstack_disks.system_disk.ids[0]
   name        = "test-snapshot"
   description = "this snapshot is created for testing"
   tags = {
     version = "1.2"
   }
 }
+
 ```
 
 ## Argument Reference
