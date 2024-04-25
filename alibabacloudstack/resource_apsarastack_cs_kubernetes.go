@@ -1068,8 +1068,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		request.Scheme = "http"
 	} // Set request scheme. Default: http
 	request.ApiName = "CreateCluster"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
+	request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-content-type": "application/json"}
 
 	var err error
 	err = nil
@@ -1215,8 +1214,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 				req.Scheme = "http"
 			} // Set request scheme. Default: http
 			req.ApiName = "RemoveClusterNodes"
-			req.Headers = map[string]string{"RegionId": csService.client.RegionId}
-			req.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
+			req.Headers = map[string]string{"RegionId": csService.client.RegionId, "x-acs-content-type": "application/json"}
 			if err := invoker.Run(func() error {
 				var err error
 				raw, err = csService.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
@@ -1271,8 +1269,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 				request.Scheme = "http"
 			} // Set request scheme. Default: http
 			request.ApiName = "ScaleClusterNodePool"
-			request.Headers = map[string]string{"RegionId": client.RegionId}
-			request.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
+			request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-content-type": "application/json"}
 			//var err error
 			err = nil
 			if err = invoker.Run(func() error {
@@ -1332,7 +1329,7 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	d.Set("version", object.CurrentVersion)
 	d.Set("delete_protection", object.DeletionProtection)
 	d.Set("version", object.InitVersion)
-	var sc, smaster, sworker []map[string]interface{}
+	var smaster, sworker []map[string]interface{}
 	//var MasterNodes, WorkerNodes map[string]interface{}
 	for _, k := range clusternode.Nodes {
 		if k.InstanceRole == "Master" {
@@ -1351,18 +1348,7 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 			sworker = append(sworker, WorkerNodes)
 		}
 	}
-	MasterApi := strings.Replace(object.MasterUrl, "\\", "", -1)
-	urlMap := make(map[string]interface{})
-	err = json.Unmarshal([]byte(MasterApi), &urlMap)
-	intranetApi, ok := urlMap["intranet_api_server_endpoint"]
-	if !ok {
-		intranetApi = ""
-	}
-	Connections := map[string]interface{}{
-		"api_server_intranet": intranetApi,
-	}
-	sc = append(sc, Connections)
-	d.Set("connections", sc)
+
 	d.Set("master_nodes", smaster)
 	d.Set("worker_nodes", sworker)
 	if err := d.Set("tags", flattenTagsConfig(object.Tags)); err != nil {
@@ -1402,8 +1388,7 @@ func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta in
 		request.Scheme = "http"
 	} // Set request scheme. Default: http
 	request.ApiName = "DeleteCluster"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
+	request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-content-type": "application/json"}
 	var response interface{}
 	err := resource.Retry(30*time.Minute, func() *resource.RetryError {
 		if err := invoker.Run(func() error {
@@ -1485,10 +1470,10 @@ func updateKubernetesClusterTag(d *schema.ResourceData, meta interface{}) error 
 	} // Set request scheme. Default: http
 	request.ApiName = "ModifyClusterTags"
 	request.Headers = map[string]string{
-		"RegionId":                    client.RegionId,
-		"Authorization":               "AuthorizationString",
-		"Content-Type":                "application/json",
-		"x-acs-asapi-gateway-version": "3.0",
+		"RegionId":           client.RegionId,
+		"Authorization":      "AuthorizationString",
+		"Content-Type":       "application/json",
+		"x-acs-content-type": "application/json",
 	}
 	var err error
 	if err = invoker.Run(func() error {

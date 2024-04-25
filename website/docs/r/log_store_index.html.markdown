@@ -15,8 +15,13 @@ You can use this function by enabling the index and field statistics. [Refer to 
 ## Example Usage
 
 Basic Usage
-
+To invoke this resource, you need to set the provider parameter: sls_openapi_endpoint
 ```
+provider "alibabacloudstack" {
+  sls_openapi_endpoint = "var.sls_openapi_endpoint"
+  ...
+}
+
 resource "alibabacloudstack_log_project" "example" {
   name        = "tf-log"
   description = "created by terraform"

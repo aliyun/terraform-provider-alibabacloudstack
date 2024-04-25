@@ -16,7 +16,13 @@ and each project can create multiple Logstores. [Refer to details](https://help.
 
 Basic Usage
 
+To invoke this resource, you need to set the provider parameter: sls_openapi_endpoint
 ```
+provider "alibabacloudstack" {
+  sls_openapi_endpoint = "var.sls_openapi_endpoint"
+  ...
+}
+
 resource "alibabacloudstack_log_project" "example" {
   name        = "tf-log"
   description = "created by terraform"
@@ -33,41 +39,32 @@ resource "alibabacloudstack_log_store" "example" {
 ```
 Encrypt Usage
 ```
+provider "alibabacloudstack" {
+  sls_openapi_endpoint = "var.sls_openapi_endpoint"
+  ...
+}
+
 resource "alibabacloudstack_log_project" "example" {
   name        = "tf-log"
   description = "created by terraform"
 }
 
 resource "alibabacloudstack_log_store" "example" {
-  project               = alibabacloudstack_log_project.example.name
-  name                  = "tf-log-store"
-  shard_count           = 3
-  auto_split            = true
-  max_split_shard_count = 60
-  append_meta           = true
-<<<<<<< HEAD
-  encryption            = true
+    project                 = alibabacloudstack_log_project.example.name
+    name                    = "tf-log-store"
+    retention_period        = "30"
+    shard_count             = 3
+    enable_web_tracking     = false
+    auto_split              = true
+    max_split_shard_count   = "64"
+    append_meta             = true
+    encryption              = true
+    encrypt_type            = "aes_gcm"
+    arn                     = "acs:ram::0000000000000080:role/ascm-role-00-0-0000"
+    cmk_key_id              = "your_cmk_key_id"
 }
 ```
 
-## Module Support
-
-You can use the existing [sls module](https://registry.terraform.io/modules/terraform-alicloud-modules/sls/alicloud) 
-to create SLS project, store and store index one-click, like ECS instances.
-=======
-  encrypt_conf {
-    enable              = true
-    encrypt_type        = "default"
-    user_cmk_info {
-      cmk_key_id        = "your_cmk_key_id"
-      arn               = "your_role_arn"
-      region_id         = "you_cmk_region_id"
-    }
-  }
-}
-```
-
->>>>>>> 153c5e75 (add 314 r doc)
 
 ## Argument Reference
 
@@ -81,28 +78,10 @@ The following arguments are supported:
 * `max_split_shard_count` - (Optional) The maximum number of shards for automatic split, which is in the range of 1 to 64. You must specify this parameter when autoSplit is true.
 * `append_meta` - (Optional) Determines whether to append log meta automatically. The meta includes log receive time and client IP address. Default to `true`.
 * `enable_web_tracking` - (Optional) Determines whether to enable Web Tracking. Default `false`.
-<<<<<<< HEAD
-* `encryption` (ForceNew, Optional, Available in 1.124.0+) Determines whether to automatically encryption,Default to `false`, only supported at creation time.
-=======
-* `encrypt_conf` (ForceNew, Optional, Available in 1.124.0+) Encrypted storage of data, providing data static protection capability, only supported at creation time.
-  * `enable` (Optional) enable encryption. Default `false`
-  * `encrypt_type` (Optional) Supported encryption type, only supports `default(AES)`,` m4`
-  * `user_cmk_info` (Optional) User bring your own key (BYOK) encryption [Refer to details](https://www.alibabacloud.com/help/zh/doc-detail/187853.htm), the format is as follows:
-    
-    ```
-    {
-      "cmk_key_id": "your_cmk_key_id",
-      "arn":        "your_role_arn",
-      "region_id":  "you_cmk_region_id"
-    }
-    ```
-#### Block user_cmk_info
-The user_cmk_info mapping supports the following:
-
-* `cmk_key_id` (Required) User master key id.
-* `arn` (Required) role arn.
-* `region_id` (Required) Region id where the  user master key id is located.
->>>>>>> 153c5e75 (add 314 r doc)
+* `encryption`(Optional) enable encryption. Default `false`
+* `encrypt_type` (Optional) Supported encryption type, only supports `default(sm4_gcm)`,` aes_gcm`
+* `cmk_key_id` (Optional) User master key id.
+* `arn`   (Optional) role arn.
 
 ## Attributes Reference
 
@@ -117,11 +96,7 @@ The following attributes are exported:
 * `max_split_shard_count` - The maximum number of shards for automatic split.
 * `append_meta` - Determines whether to append log meta automatically.
 * `enable_web_tracking` - Determines whether to enable Web Tracking.
-<<<<<<< HEAD
-* `encryption` - Determines whether to automatically encryption.
-=======
 * `encrypt_conf` - Encryption configuration of logstore.
->>>>>>> 153c5e75 (add 314 r doc)
 
 ### Timeouts
 
@@ -136,9 +111,5 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 Log store can be imported using the id, e.g.
 
 ```
-<<<<<<< HEAD
-$ terraform import alicloud_log_store.example tf-log:tf-log-store
-=======
 $ terraform import alibabacloudstack_log_store.example tf-log:tf-log-store
->>>>>>> 153c5e75 (add 314 r doc)
 ```

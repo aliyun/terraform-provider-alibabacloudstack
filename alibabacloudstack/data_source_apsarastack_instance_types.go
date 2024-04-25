@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"sort"
 	"strconv"
@@ -38,6 +39,12 @@ func dataSourceAlibabacloudStackInstanceTypes() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
+			},
+			"cpu_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"kp", "ft", "hg", "intel"}, false),
 			},
 			"memory_size": {
 				Type:     schema.TypeFloat,
@@ -216,6 +223,21 @@ func dataSourceAlibabacloudStackInstanceTypesRead(d *schema.ResourceData, meta i
 			if _, ok := mapInstanceTypes[types.InstanceTypeId]; !ok {
 				continue
 			}
+			var ct string
+			for _, cpu_type_string := range []string{"hg", "kp", "ft"} {
+				if strings.Contains(types.InstanceTypeId, fmt.Sprintf("-%s-", cpu_type_string)) {
+					ct = cpu_type_string
+				}
+			}
+			if ct == "" {
+				ct = "intel"
+			}
+			log.Printf("[DEBUG] cpu_type: %s, intance_type: %s", ct, types.InstanceTypeId)
+			if cpu_type, ok := d.GetOk("cpu_type"); ok {
+				if cpu_type.(string) != ct {
+					continue
+				}
+			}
 
 			if cpu > 0 && types.CpuCoreCount != cpu {
 				continue
@@ -270,6 +292,7 @@ func instanceTypesDescriptionAttributes(d *schema.ResourceData, types []instance
 	var ids []string
 	var s []map[string]interface{}
 	for _, t := range types {
+
 		mapping := map[string]interface{}{
 			"id":             t.InstanceType.InstanceTypeId,
 			"cpu_core_count": t.InstanceType.CpuCoreCount,

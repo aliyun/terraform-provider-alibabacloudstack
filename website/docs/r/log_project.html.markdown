@@ -15,8 +15,13 @@ You can manage all the logs, and the related log sources of an application by us
 ## Example Usage
 
 Basic Usage
-
+To invoke this resource, you need to set the provider parameter: sls_openapi_endpoint
 ```
+provider "alibabacloudstack" {
+  sls_openapi_endpoint = "var.sls_openapi_endpoint"
+  ...
+}
+
 resource "alibabacloudstack_log_project" "example" {
   name        = "tf-log"
   description = "created by terraform"

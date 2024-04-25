@@ -66,7 +66,8 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 	request.ClusterId = d.Get("cs_cluster_id").(string)
 	request.Headers["x-ascm-product-name"] = "Edas"
 	request.Headers["x-acs-organizationid"] = client.Department
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
 	if v, ok := d.GetOk("namespace_id"); ok {
 		request.NamespaceId = v.(string)
 	}
@@ -92,7 +93,8 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 	req.ClusterId = response.Data
 	req.Headers["x-ascm-product-name"] = "Edas"
 	req.Headers["x-acs-organizationid"] = client.Department
-	req.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
 	req.RegionId = client.RegionId
 	wait := incrementalWait(1*time.Second, 2*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {

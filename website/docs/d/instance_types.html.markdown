@@ -35,6 +35,8 @@ The following arguments are supported:
 
 * `availability_zone` - (Optional) The zone where instance types are supported.
 * `cpu_core_count` - (Optional) Filter the results to a specific number of cpu cores.
+* `cpu_type` - (Optional) Filter the results to a specific cpu type. Optional Values: `intel`, `hg`, `kp`, `ft`.
+
 * `memory_size` - (Optional) Filter the results to a specific memory size in GB.
 * `gpu_amount` - (Optional) The GPU amount of an instance type.
 * `gpu_spec` - (Optional) The GPU spec of an instance type.

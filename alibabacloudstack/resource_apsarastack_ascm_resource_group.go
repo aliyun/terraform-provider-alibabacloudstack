@@ -80,17 +80,16 @@ func resourceAlibabacloudStackAscmResourceGroupCreate(d *schema.ResourceData, me
 		}
 		request.ApiName = "CreateResourceGroup"
 		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId}
+		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-content-type": "application/json", "Content-Type": "application/json"}
 
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
-		log.Printf(" response of raw CreateResourceGroup : %s", raw)
-
+		log.Printf("response of raw CreateResourceGroup : %s", raw)
+		addDebug("CreateResourceGroup", raw, request, request.QueryParams)
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_resource_group", "CreateResourceGroup", raw)
 		}
-		addDebug("CreateResourceGroup", raw, requestInfo, request)
 
 		bresponse, _ := raw.(*responses.CommonResponse)
 		if bresponse.GetHttpStatus() != 200 {
@@ -162,7 +161,7 @@ func resourceAlibabacloudStackAscmResourceGroupUpdate(d *schema.ResourceData, me
 	request.SetHTTPSInsecure(true)
 	request.ApiName = "UpdateResourceGroup"
 	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-content-type": "application/json", "Content-Type": "application/json"}
 
 	if attributeUpdate {
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
@@ -246,7 +245,7 @@ func resourceAlibabacloudStackAscmResourceGroupDelete(d *schema.ResourceData, me
 			request.Scheme = "http"
 		}
 		request.ApiName = "RemoveResourceGroup"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
+		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-content-type": "application/json", "Content-Type": "application/json"}
 		request.RegionId = client.RegionId
 		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
