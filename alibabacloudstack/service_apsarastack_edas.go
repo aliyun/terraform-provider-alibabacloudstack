@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -455,10 +456,14 @@ func (e *EdasService) QueryK8sAppPackageType(appId string) (string, error) {
 	request := edas.CreateGetApplicationRequest()
 	request.RegionId = e.client.RegionId
 	request.AppId = appId
+	request.Headers["x-ascm-product-name"] = "Edas"
+	request.Headers["x-acs-organizationid"] = e.client.Department
+	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	log.Printf("-------------------------------------------- %v", request.Headers)
 	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.GetApplication(request)
 	})
-
+	addDebug(request.GetActionName(), raw, request, request.RoaRequest)
 	if err != nil {
 		return "", WrapError(err)
 	}

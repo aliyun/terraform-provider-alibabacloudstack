@@ -17,7 +17,7 @@ Basic Usage
 
 ```
 resource "alibabacloudstack_vpc" "vpc" {
-  name       = "${var.name}"
+  vpc_name       = "${var.vpc_name}"
   cidr_block = "${var.cidr_block}"
   enable_ipv6    = true
 }
@@ -26,7 +26,7 @@ resource "alibabacloudstack_vswitch" "vsw" {
   vpc_id            = "${alibabacloudstack_vpc.vpc.id}"
   cidr_block        = "${var.cidr_block}"
   availability_zone = "${var.availability_zone}"
-  ipv6_cidr_block   = "${var.ipv6_cidr_block}"
+  ipv6_cidr_block   = "${alibabacloudstack_vpc.vpc.ipv6_cidr_block}"
 }
 ```
 

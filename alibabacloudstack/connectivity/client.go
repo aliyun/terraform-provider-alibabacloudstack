@@ -1333,9 +1333,16 @@ func (client *AlibabacloudStackClient) WithEdasClient(do func(*edas.Client) (int
 		if endpoint != "" {
 			endpoints.AddEndpointMapping(client.Config.RegionId, string(EDASCode), endpoint)
 		}
-		edasconn, err := edas.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig().WithTimeout(time.Duration(60)*time.Second), client.Config.getAuthCredential(true))
+		// edasconn, err := edas.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig().WithTimeout(time.Duration(60)*time.Second), client.Config.getAuthCredential(true))
+		var edasconn *edas.Client
+		var err error
+		if client.Config.OrganizationAccessKey != "" && client.Config.OrganizationSecretKey != "" {
+			edasconn, err = edas.NewClientWithAccessKey(client.Config.RegionId, client.Config.OrganizationAccessKey, client.Config.OrganizationSecretKey)
+		} else {
+			edasconn, err = edas.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
+		}
 		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the ALIKAFKA client: %#v", err)
+			return nil, fmt.Errorf("unable to initialize the Edas client: %#v", err)
 		}
 		edasconn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Millisecond)
 		edasconn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Millisecond)

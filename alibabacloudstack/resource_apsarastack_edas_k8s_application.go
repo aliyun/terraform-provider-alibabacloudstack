@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -94,6 +95,23 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"intranet_slb_id": {
+				Optional: true,
+				Type:     schema.TypeString,
+			},
+			"intranet_slb_protocol": {
+				Optional:     true,
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP", "HTTPS"}, false),
+			},
+			"intranet_slb_port": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"intranet_target_port": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
 			"envs": {
 				Type: schema.TypeMap,
 				Elem: &schema.Schema{
@@ -161,7 +179,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 			"package_version": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  strconv.FormatInt(time.Now().Unix(), 10),
+				Computed: true,
+				//Default:  strconv.FormatInt(time.Now().Unix(), 10),
 			},
 			"jdk": {
 				Type:     schema.TypeString,
@@ -180,6 +199,42 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Optional: true,
 			},
 			"limit_m_cpu": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"update_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"BatchUpdate", "GrayBatchUpdate"}, false),
+			},
+			"update_batch": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"update_release_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"auto", "manual"}, false),
+			},
+			"update_batch_wait_time": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"update_gray": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"traffic_control_protocol": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "http",
+			},
+			"traffic_control_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "percent",
+			},
+			"traffic_control_value": {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
@@ -270,21 +325,36 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 		request.CommandArgs = commands
 	}
 
-	if v, ok := d.GetOk("internet_slb_id"); ok {
-		request.InternetSlbId = v.(string)
-	}
+	// if v, ok := d.GetOk("internet_slb_protocol"); ok {
+	// 	request.InternetSlbProtocol = v.(string)
+	// }
 
-	if v, ok := d.GetOk("internet_slb_protocol"); ok {
-		request.InternetSlbProtocol = v.(string)
-	}
+	// if v, ok := d.GetOk("internet_slb_port"); ok {
+	// 	request.InternetSlbPort = requests.NewInteger(v.(int))
+	// }
 
-	if v, ok := d.GetOk("internet_slb_port"); ok {
-		request.InternetSlbPort = requests.NewInteger(v.(int))
-	}
+	// if v, ok := d.GetOk("internet_target_port"); ok {
+	// 	request.InternetTargetPort = requests.NewInteger(v.(int))
+	// }
 
-	if v, ok := d.GetOk("internet_target_port"); ok {
-		request.InternetTargetPort = requests.NewInteger(v.(int))
-	}
+	// if v, ok := d.GetOk("internet_slb_id"); ok {
+	// 	request.InternetSlbId = v.(string)
+	// }
+
+	// if v, ok := d.GetOk("intranet_slb_protocol"); ok {
+	// 	request.IntranetSlbProtocol = v.(string)
+	// }
+
+	// if v, ok := d.GetOk("intranet_slb_port"); ok {
+	// 	request.IntranetSlbPort = requests.NewInteger(v.(int))
+	// }
+
+	// if v, ok := d.GetOk("intranet_target_port"); ok {
+	// 	request.IntranetTargetPort = requests.NewInteger(v.(int))
+	// }
+	// if v, ok := d.GetOk("intranet_slb_id"); ok {
+	// 	request.IntranetSlbId = v.(string)
+	// }
 
 	if v, ok := d.GetOk("envs"); ok {
 		envs, err := edasService.GetK8sEnvs(v.(map[string]interface{}))
@@ -344,11 +414,10 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.InsertK8sApplication(request)
 	})
-
+	addDebug("InsertK8sApplication", raw, request, request.RoaRequest)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_k8s_application", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
 	response, _ := raw.(*edas.InsertK8sApplicationResponse)
 	appId = response.ApplicationInfo.AppId
@@ -364,7 +433,10 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 			return WrapErrorf(err, IdMsg, d.Id())
 		}
 	}
-
+	bind_slb_err := K8sBindSlb(d, meta)
+	if bind_slb_err != nil {
+		return WrapError(bind_slb_err)
+	}
 	return resourceAlibabacloudStackEdasK8sApplicationRead(d, meta)
 }
 
@@ -403,20 +475,17 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 		if len(v.PackageVersion) > 0 {
 			d.Set("package_version", v.PackageVersion)
 		}
-		if len(v.MemoryLimit) > 0 {
-			d.Set("limit_mem", v.MemoryLimit)
+		limit_mem, err := strconv.Atoi(v.MemoryLimit)
+		if err != nil {
+			d.Set("limit_mem", limit_mem)
 		}
-		if len(v.MemoryRequest) > 0 {
-			d.Set("requests_mem", v.MemoryRequest)
+		requests_mem, err := strconv.Atoi(v.MemoryRequest)
+		if err != nil {
+			d.Set("requests_mem", requests_mem)
 		}
-
-		if len(v.CpuRequest) > 0 {
-			cpu, err := strconv.Atoi(v.CpuRequest)
-
-			if err != nil {
-				return WrapError(err)
-			}
-			d.Set("requests_m_cpu", cpu*1000)
+		requests_m_cpu, err := strconv.Atoi(v.CpuRequest)
+		if err != nil {
+			d.Set("requests_m_cpu", requests_m_cpu*1000)
 		}
 
 		for _, c := range v.Components.ComponentsItem {
@@ -597,14 +666,33 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 	}
 
 	if len(partialKeys) > 0 {
+		partialKeys = append(partialKeys, "update_type")
+		update_type := d.Get("update_type").(string)
+		update_batch := d.Get("update_batch").(int)
+		if update_batch < 2 {
+			return WrapError(Error("`update_batch` must be greater than 2"))
+		}
+		update_release_type := d.Get("update_release_type").(string)
+		gray_update_strategy := ""
+		if v, ok := d.GetOk("update_gray"); ok {
+			update_gray := v.(int)
+			gray_update_strategy = fmt.Sprintf(",\"grayUpdate\":{\"gray\":%d}", update_gray)
+		}
+		if update_release_type == "auto" {
+			update_batch_wait_time := d.Get("update_batch_wait_time").(int)
+			request.UpdateStrategy = fmt.Sprintf("{\"type\":\"%s\",\"batchUpdate\":{\"batch\":%d,\"releaseType\":\"%s\",\"batchWaitTime\":%d}%s}", update_type, update_batch, update_release_type, update_batch_wait_time, gray_update_strategy)
+		} else {
+			request.UpdateStrategy = fmt.Sprintf("{\"type\":\"%s\",\"batchUpdate\":{\"batch\":%d,\"releaseType\":\"%s\"}%s}", update_type, update_batch, update_release_type, gray_update_strategy)
+		}
+		log.Printf("====================================== %s", request.Headers)
 		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 			return edasClient.DeployK8sApplication(request)
 		})
+		addDebug(request.GetActionName(), raw, request.RoaRequest, request)
+
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
-		addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-
 		response, _ := raw.(*edas.DeployK8sApplicationResponse)
 		changeOrderId := response.ChangeOrderId
 		if response.Code != 200 {
@@ -612,7 +700,7 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 		}
 
 		if len(changeOrderId) > 0 {
-			stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
+			stateConf := BuildStateConf([]string{"0", "1", "9"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return WrapErrorf(err, IdMsg, d.Id())
 			}
@@ -666,4 +754,86 @@ func resourceAlibabacloudStackEdasK8sApplicationDelete(d *schema.ResourceData, m
 		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
 	return nil
+}
+
+func K8sBindSlb(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	edasService := EdasService{client}
+	bind_intranet_slb := false
+	intranet_request := edas.CreateBindK8sSlbRequest()
+	intranet_request.RegionId = client.RegionId
+	intranet_request.ClusterId = d.Get("cluster_id").(string)
+	intranet_request.AppId = d.Id()
+	intranet_request.Type = "intranet"
+	intranet_request.Headers["x-ascm-product-name"] = "Edas"
+	intranet_request.Headers["x-acs-organizationid"] = client.Department
+	intranet_request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	if v, ok := d.GetOk("intranet_slb_id"); ok {
+		intranet_request.SlbId = v.(string)
+		bind_intranet_slb = true
+	} else {
+		if v, ok := d.GetOk("intranet_slb_protocol"); ok {
+			bind_intranet_slb = true
+			intranet_request.SlbProtocol = v.(string)
+			intranet_request.Port = fmt.Sprintf("%d", d.Get("intranet_slb_port").(int))
+			intranet_request.TargetPort = fmt.Sprintf("%d", d.Get("intranet_target_port").(int))
+		}
+	}
+	if bind_intranet_slb {
+		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
+			return edasClient.BindK8sSlb(intranet_request)
+		})
+		addDebug("BindK8sSlb: intranet", raw, intranet_request, intranet_request.RoaRequest)
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_k8s_application", "BindK8sSlb", AlibabacloudStackSdkGoERROR)
+		}
+		response, _ := raw.(*edas.BindK8sSlbResponse)
+		if response.Code != 200 {
+			return WrapError(fmt.Errorf("BindK8sSlb Failed , response: %#v", response))
+		}
+		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(response.ChangeOrderId, []string{"3", "6", "10"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return WrapError(fmt.Errorf("BindK8sSlb Failed , response: %#v", response))
+		}
+	}
+	time.Sleep(time.Duration(20) * time.Second)
+	bind_internet_slb := false
+	internet_request := edas.CreateBindK8sSlbRequest()
+	internet_request.RegionId = client.RegionId
+	internet_request.ClusterId = d.Get("cluster_id").(string)
+	internet_request.AppId = d.Id()
+	internet_request.Type = "internet"
+	internet_request.Headers["x-ascm-product-name"] = "Edas"
+	internet_request.Headers["x-acs-organizationid"] = client.Department
+	internet_request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	if v, ok := d.GetOk("internet_slb_id"); ok {
+		internet_request.SlbId = v.(string)
+		bind_internet_slb = true
+	} else {
+		if v, ok := d.GetOk("internet_slb_protocol"); ok {
+			bind_internet_slb = true
+			internet_request.SlbProtocol = v.(string)
+			internet_request.Port = fmt.Sprintf("%d", d.Get("internet_slb_port").(int))
+			internet_request.TargetPort = fmt.Sprintf("%d", d.Get("internet_target_port").(int))
+		}
+	}
+	if bind_internet_slb {
+		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
+			return edasClient.BindK8sSlb(internet_request)
+		})
+		addDebug("BindK8sSlb: internet", raw, internet_request, internet_request.RoaRequest)
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_k8s_application", "BindK8sSlb", AlibabacloudStackSdkGoERROR)
+		}
+		response, _ := raw.(*edas.BindK8sSlbResponse)
+		if response.Code != 200 {
+			return WrapError(fmt.Errorf("BindK8sSlb Failed , response: %#v", response))
+		}
+		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(response.ChangeOrderId, []string{"3", "6", "10"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return WrapError(fmt.Errorf("BindK8sSlb Failed , response: %#v", response))
+		}
+	}
+	return nil
+
 }

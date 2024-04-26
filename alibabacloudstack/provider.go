@@ -1416,7 +1416,10 @@ func getResourceCredentials(config *connectivity.Config) (string, string, error)
 		request.SetHTTPSInsecure(config.Insecure)
 	}
 	request.TransToAcsRequest()
+	log.Printf("[DEBUG] %s %s %s start !!!!!!!!!!!!", request.GetActionName(), request.GetProduct(), request.GetVersion())
 	err = ascmClient.DoAction(request, &resp)
+	log.Printf("[DEBUG] %s %s %s end !!!!!!!!!!!!", request.GetActionName(), request.GetProduct(), request.GetVersion())
+	addDebug(request.GetActionName(), resp, request, request.QueryParams)
 	if err != nil {
 		return "", "", err
 	}
@@ -1430,6 +1433,9 @@ func getResourceCredentials(config *connectivity.Config) (string, string, error)
 	deptId = 0
 	resGrpId = 0
 	if len(response.Data) == 0 || response.Code != "200" {
+		if response.Message != "" {
+			return "", "", fmt.Errorf("unable to initialize the ascm client: %s", response.Message)
+		}
 		if len(response.Data) == 0 {
 			return "", "", fmt.Errorf("resource group ID and organization not found for resource set %s", config.ResourceSetName)
 		}

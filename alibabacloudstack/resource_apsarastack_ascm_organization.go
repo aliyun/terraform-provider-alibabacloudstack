@@ -114,7 +114,7 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 		return resource.RetryableError(err)
 	})
 
-	d.SetId(check.Data[0].Name + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
+	d.SetId(fmt.Sprint(check.Data[0].ID))
 
 	return resourceAlibabacloudStackAscmOrganizationUpdate(d, meta)
 
@@ -182,7 +182,7 @@ func resourceAlibabacloudStackAscmOrganizationUpdate(d *schema.ResourceData, met
 
 	}
 
-	d.SetId(name + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
+	d.SetId(fmt.Sprint(check.Data[0].ID))
 
 	return resourceAlibabacloudStackAscmOrganizationRead(d, meta)
 

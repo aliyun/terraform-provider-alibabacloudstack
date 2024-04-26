@@ -1,9 +1,11 @@
 package alibabacloudstack
 
 import (
+	"log"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"time"
 
 	"strings"
 
@@ -62,9 +64,12 @@ func rresourceAlibabacloudStackEdasClusterCreate(d *schema.ResourceData, meta in
 	request.ClusterName = d.Get("cluster_name").(string)
 	request.ClusterType = requests.NewInteger(d.Get("cluster_type").(int))
 	request.NetworkMode = requests.NewInteger(d.Get("network_mode").(int))
+	request.OversoldFactor = requests.NewInteger(1)
+	request.IaasProvider = "ALIYUN"
 	request.Headers["x-ascm-product-name"] = "Edas"
 	request.Headers["x-acs-organizationid"] = client.Department
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
 
 	if v, ok := d.GetOk("vpc_id"); !ok {
 		if d.Get("network_mode") == 2 {
@@ -73,7 +78,6 @@ func rresourceAlibabacloudStackEdasClusterCreate(d *schema.ResourceData, meta in
 	} else {
 		request.VpcId = v.(string)
 	}
-
 	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.InsertCluster(request)
 	})
@@ -81,6 +85,7 @@ func rresourceAlibabacloudStackEdasClusterCreate(d *schema.ResourceData, meta in
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
+	log.Printf("request domainaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: %s", request.Domain)
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
 	response, _ := raw.(*edas.InsertClusterResponse)
@@ -104,7 +109,8 @@ func resourceAlibabacloudStackEdasClusterRead(d *schema.ResourceData, meta inter
 	request.ClusterId = clusterId
 	request.Headers["x-ascm-product-name"] = "Edas"
 	request.Headers["x-acs-organizationid"] = client.Department
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
 
 	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.GetCluster(request)
@@ -141,7 +147,8 @@ func resourceAlibabacloudStackEdasClusterDelete(d *schema.ResourceData, meta int
 	request.ClusterId = clusterId
 	request.Headers["x-ascm-product-name"] = "Edas"
 	request.Headers["x-acs-organizationid"] = client.Department
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
 
 	wait := incrementalWait(1*time.Second, 2*time.Second)
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
