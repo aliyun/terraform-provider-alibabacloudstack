@@ -3,13 +3,14 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"regexp"
-	"strings"
 )
 
 func dataSourceAlibabacloudStackDnsDomains() *schema.Resource {
@@ -120,7 +121,7 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 	request.Method = "POST"
 	request.Product = "CloudDns"
 	request.Domain = client.Domain
-	request.Version = "2022-06-24"
+	request.Version = "2021-06-24"
 	name := d.Get("domain_name").(string)
 	request.PageNumber = requests.NewInteger(2)
 	request.PageSize = requests.NewInteger(PageSizeLarge)
@@ -137,7 +138,7 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 		"Product":           "CloudDns",
 		"RegionId":          client.RegionId,
 		"Action":            "DescribeGlobalZones",
-		"Version":           "2022-06-24",
+		"Version":           "2021-06-24",
 		"PageNumber":        fmt.Sprint(1),
 		"PageSize":          fmt.Sprint(PageSizeLarge),
 		"Name":              name,

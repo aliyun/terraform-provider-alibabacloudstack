@@ -1,12 +1,17 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
+	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -73,49 +78,74 @@ func resourceAlibabacloudStackDbsBackupPlanCreate(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "CreateBackupPlan"
-	conn, err := client.NewDbsClient()
-	if err != nil {
-		return WrapError(err)
+	request := requests.NewCommonRequest()
+	request.ApiName = action
+	request.Version = "2019-03-06"
+	request.Method = "POST"
+	request.Product = "dbs"
+	request.RegionId = client.RegionId
+	request.Domain = client.Domain
+	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+	request.Headers["x-acs-regionid"] = client.RegionId
+	request.Headers["x-acs-resourcegroupid"] = client.ResourceGroup
+	request.Headers["x-acs-organizationid"] = client.Department
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-type"] = "application/json"
+	if strings.ToLower(client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
 	}
-	request := map[string]interface{}{
-		"Region":   client.RegionId,
-		"Period":   "Year",
-		"UsedTime": 1,
+	request.QueryParams = map[string]string{
+		"RegionId":       client.RegionId,
+		"Product":        "dbs",
+		"Version":        "2019-03-06",
+		"Action":         action,
+		"OrganizationId": client.Department,
+		"Period":         "Year",
+		"UsedTime":       "1",
+		"ClientToken":    buildClientToken("CreateBackupPlan"),
 	}
 	if v, ok := d.GetOk("backup_method"); ok {
-		request["BackupMethod"] = v.(string)
+		request.QueryParams["BackupMethod"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("database_type"); ok {
-		request["DatabaseType"] = v.(string)
+		request.QueryParams["DatabaseType"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("instance_class"); ok {
-		request["InstanceClass"] = v.(string)
+		request.QueryParams["InstanceClass"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("database_region"); ok {
-		request["DatabaseRegion"] = v.(string)
+		request.QueryParams["DatabaseRegion"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("storage_region"); ok {
-		request["StorageRegion"] = v.(string)
+		request.QueryParams["StorageRegion"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("instance_type"); ok {
-		request["InstanceType"] = v.(string)
+		request.QueryParams["InstanceType"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("from_app"); ok {
-		request["FromApp"] = v.(string)
+		request.QueryParams["FromApp"] = v.(string)
 	}
-	request["product"] = "dbs"
-	request["Product"] = "dbs"
-	request["ClientToken"] = buildClientToken("CreateBackupPlan")
-	request["RegionId"] = client.RegionId
 	wait := incrementalWait(3*time.Second, 3*time.Second)
+	request.Domain = client.Config.AscmEndpoint
+	var err error
+	var dbsClient *sts.Client
+	if client.Config.SecurityToken == "" {
+		dbsClient, err = sts.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
+	} else {
+		dbsClient, err = sts.NewClientWithStsToken(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)
+	}
+	dbsClient.Domain = client.Config.AscmEndpoint
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-03-06"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		raw, err := dbsClient.ProcessCommonRequest(request)
+		addDebug(action, raw, request, request.QueryParams)
 		if err != nil {
 			if NeedRetry(err) {
 				wait()
@@ -123,9 +153,12 @@ func resourceAlibabacloudStackDbsBackupPlanCreate(d *schema.ResourceData, meta i
 			}
 			return resource.NonRetryableError(err)
 		}
+		err = json.Unmarshal(raw.GetHttpContentBytes(), &response)
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
 		return nil
 	})
-	addDebug(action, response, request)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dbs_backup_plan", action, AlibabacloudStackSdkGoERROR)
 	}

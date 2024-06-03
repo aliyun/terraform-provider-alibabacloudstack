@@ -21,16 +21,15 @@ type RdsService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
-//
-//       _______________                      _______________                       _______________
-//       |              | ______param______\  |              |  _____request_____\  |              |
-//       |   Business   |                     |    Service   |                      |    SDK/API   |
-//       |              | __________________  |              |  __________________  |              |
-//       |______________| \    (obj, err)     |______________|  \ (status, cont)    |______________|
-//                           |                                    |
-//                           |A. {instance, nil}                  |a. {200, content}
-//                           |B. {nil, error}                     |b. {200, nil}
-//                      					  |c. {4xx, nil}
+//	_______________                      _______________                       _______________
+//	|              | ______param______\  |              |  _____request_____\  |              |
+//	|   Business   |                     |    Service   |                      |    SDK/API   |
+//	|              | __________________  |              |  __________________  |              |
+//	|______________| \    (obj, err)     |______________|  \ (status, cont)    |______________|
+//	                    |                                    |
+//	                    |A. {instance, nil}                  |a. {200, content}
+//	                    |B. {nil, error}                     |b. {200, nil}
+//	               					  |c. {4xx, nil}
 //
 // The API return 200 for resource not found.
 // When getInstance is empty, then throw InstanceNotfound error.
@@ -482,6 +481,7 @@ func (s *RdsService) DescribeDBConnection(id string) (*rds.DBInstanceNetInfo, er
 
 	return info, WrapErrorf(Error(GetNotFoundMessage("DBConnection", id)), NotFoundMsg, ProviderERROR)
 }
+
 func (s *RdsService) DescribeDBReadWriteSplittingConnection(id string) (*rds.DBInstanceNetInfo, error) {
 	ds := &rds.DBInstanceNetInfo{}
 	object, err := s.DescribeDBInstanceNetInfo(id)

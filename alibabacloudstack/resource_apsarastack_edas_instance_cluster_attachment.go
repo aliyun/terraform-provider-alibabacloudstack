@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -119,7 +120,7 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentCreate(d *schema.Reso
 	var cnt int
 	ImportSuccessFlag := false
 	for {
-		if cnt >= 10 {
+		if cnt >= 5 {
 			break
 		}
 		requestList := edas.CreateListClusterMembersRequest()
@@ -131,7 +132,7 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentCreate(d *schema.Reso
 		rawList, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 			return edasClient.ListClusterMembers(requestList)
 		})
-
+		addDebug(requestList.GetActionName(), rawList, requestList.RoaRequest, requestList)
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_List_attachment", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
@@ -143,7 +144,15 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentCreate(d *schema.Reso
 		instanceIdstr := strs[1]
 		responseList := rawList.(*edas.ListClusterMembersResponse)
 		for _, member := range responseList.ClusterMemberPage.ClusterMemberList.ClusterMember {
+			log.Printf("===================================  instance status: %d ecsId : %s", member.Status, member.EcsId)
 			if strings.Contains(instanceIdstr, member.EcsId) {
+				if member.Status == 1 {
+					ImportSuccessFlag = true
+					break
+				}
+				if member.Status == 7 {
+					return Error("Instance:`%s` Import Timeout! ", member.EcsId)
+				}
 				if member.EcuId != "" {
 					ImportSuccessFlag = true
 					break
@@ -207,7 +216,7 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentRead(d *schema.Resour
 	return nil
 }
 
-//有问题 单个实例删除失败会影响整个过程
+// 有问题 单个实例删除失败会影响整个过程
 func resourceAlibabacloudStackEdasInstanceClusterAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}

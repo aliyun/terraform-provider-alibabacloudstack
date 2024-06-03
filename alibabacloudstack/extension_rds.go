@@ -31,4 +31,6 @@ type KVStoreEngineVersion string
 const (
 	KVStore2Dot8 = KVStoreEngineVersion("2.8")
 	KVStore4Dot0 = KVStoreEngineVersion("4.0")
+	KVStore5Dot0 = KVStoreEngineVersion("5.0")
+	KVStore6Dot0 = KVStoreEngineVersion("6.0")
 )

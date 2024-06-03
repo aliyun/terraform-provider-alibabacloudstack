@@ -77,7 +77,7 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
   scaling_group_id  = alibabacloudstack_ess_scaling_group.default.id
   image_id          = data.alibabacloudstack_images.default.images[0].id
   instance_type     = data.alibabacloudstack_instance_types.default.instance_types[0].id
-  security_group_id = alibabacloudstack_security_group.default.id
+  security_group_ids = [alibabacloudstack_security_group.default.id]
   force_delete      = true
   active            = true
 }
@@ -93,8 +93,7 @@ The following arguments are supported:
 * `instance_types` - (Optional) Resource types of an ECS instance.
 * `instance_name` - (Optional) Name of an ECS instance. Default to "ESS-Instance".
 * `is_outdated` - (Optional) Whether to use outdated instance type. Default to false.
-* `security_group_id` - (Optional) ID of the security group used to create new instance. It is conflict with `security_group_ids`.
-* `security_group_ids` - (Optional) List IDs of the security group used to create new instances. It is conflict with `security_group_id`.
+* `security_group_ids` - (Required) List IDs of the security group used to create new instances.
 * `scaling_configuration_name` - (Optional) Name shown for the scheduled task. which must contain 2-64 characters (English or Chinese), starting with numbers, English letters or Chinese characters, and can contain number, underscores `_`, hypens `-`, and decimal point `.`. If this parameter value is not specified, the default value is ScalingConfigurationId.
 * `internet_max_bandwidth_in` - (Optional) Maximum incoming bandwidth from the public network, measured in Mbps (Mega bit per second). The value range is [1,200].
 * `internet_max_bandwidth_out` - (Optional) Maximum outgoing bandwidth from the public network, measured in Mbps (Mega bit per second). The value range for PayByBandwidth is [0,100].

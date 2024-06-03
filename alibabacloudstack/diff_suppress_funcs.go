@@ -1,11 +1,12 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func vpcTypeResourceDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
@@ -264,6 +265,22 @@ func PostPaidAndRenewDiffSuppressFunc(k, old, new string, d *schema.ResourceData
 		return false
 	}
 	return true
+}
+
+func ArchitectureTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	if strings.ToLower(d.Get("series").(string)) == "enterprise" && new == "rwsplit" {
+		return false
+	} else {
+		return true
+	}
+}
+
+func NodeTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	if strings.ToLower(d.Get("series").(string)) == "enterprise" && new == "readone" {
+		return false
+	} else {
+		return true
+	}
 }
 
 func routerInterfaceAcceptsideDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {

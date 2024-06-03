@@ -1,10 +1,13 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"time"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -59,26 +62,45 @@ func resourceAlibabacloudStackQuickBiWorkspaceCreate(d *schema.ResourceData, met
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "CreateWorkSpace"
-	request := make(map[string]interface{})
-	conn, err := client.NewQuickbiClient()
-	if err != nil {
-		return WrapError(err)
+	request := requests.NewCommonRequest()
+	request.Method = "POST"
+	request.Product = "quickbi-public"
+	request.Domain = client.Domain
+	request.Version = "2022-03-01"
+	request.ApiName = "CreateWorkSpace"
+	request.RegionId = client.RegionId
+	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.QueryParams = map[string]string{
+		"RegionId": client.RegionId,
+		"Product":  "quickbi-public",
+		"Version":  "2022-03-01",
+		"Action":   action,
 	}
-
 	WorkspaceName = d.Get("workspace_name").(string)
 	WorkspaceDesc = d.Get("workspace_desc").(string)
 	UseComment = d.Get("use_comment").(bool)
 	AllowShare = d.Get("allow_share").(bool)
 	AllowPublish = d.Get("allow_publish").(bool)
 
-	request["WorkspaceName"] = WorkspaceName
-	request["WorkspaceDesc"] = WorkspaceDesc
-	request["UseComment"] = UseComment
-	request["AllowShare"] = AllowShare
-	request["AllowPublish"] = AllowPublish
+	request.QueryParams["WorkspaceName"] = WorkspaceName
+	request.QueryParams["WorkspaceDesc"] = WorkspaceDesc
+	request.QueryParams["UseComment"] = fmt.Sprintf("%t", UseComment)
+	request.QueryParams["AllowShare"] = fmt.Sprintf("%t", AllowShare)
+	request.QueryParams["AllowPublish"] = fmt.Sprintf("%t", AllowPublish)
+	endpoint := fmt.Sprintf("quickbi.%s.aliyuncs.com", client.Config.RegionId)
+	request.Domain = endpoint
+	var err error
+	var popClient *sts.Client
+	if client.Config.SecurityToken == "" {
+		popClient, err = sts.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
+	} else {
+		popClient, err = sts.NewClientWithStsToken(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)
+	}
+	popClient.Domain = endpoint
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2022-03-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		raw, err := popClient.ProcessCommonRequest(request)
+		addDebug(action, raw, request, request.QueryParams)
 		if err != nil {
 			if NeedRetry(err) {
 				wait()
@@ -86,6 +108,7 @@ func resourceAlibabacloudStackQuickBiWorkspaceCreate(d *schema.ResourceData, met
 			}
 			return resource.NonRetryableError(err)
 		}
+		err = json.Unmarshal(raw.GetHttpContentBytes(), &response)
 		return nil
 	})
 

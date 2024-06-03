@@ -79,10 +79,15 @@ The following arguments are supported:
 * `web_container` - (Optional, ForceNew) The Tomcat version that the deployment package depends on. Applicable to Spring Cloud and Dubbo applications deployed through WAR packages. Image does not support this parameter.
 * `edas_container_version` - (Optional) EDAS-Container version that the deployed package depends on. Image does not support this parameter.
 
-* `internet_target_port` - (Optional, ForceNew) The private SLB back-end port, is also the service port of the application, ranging from 1 to 65535.
+* `internet_target_port` - (Optional, ForceNew) The public SLB back-end port, is also the service port of the application, ranging from 1 to 65535.
 * `internet_slb_port` - (Optional, ForceNew) The public network SLB front-end port, range 1~65535.
 * `internet_slb_protocol` - (Optional, ForceNew) The public network SLB protocol supports TCP, HTTP and HTTPS protocols.
 * `internet_slb_id` - (Optional, ForceNew) Public network SLB ID. If not configured, EDAS will automatically purchase a new SLB for the user.
+
+* `intranet_target_port` - (Optional, ForceNew) The private SLB back-end port, is also the service port of the application, ranging from 1 to 65535.
+* `intranet_slb_port` - (Optional, ForceNew) The private network SLB front-end port, range 1~65535.
+* `intranet_slb_protocol` - (Optional, ForceNew) The private network SLB protocol supports TCP, HTTP and HTTPS protocols.
+* `intranet_slb_id` - (Optional, ForceNew) private network SLB ID. If not configured, EDAS will automatically purchase a new SLB for the user.
 
 * `limit_cpu` - (Optional) During application operation, the CPU quota of the application instance, unit: number of cores.
 * `limit_mem` - (Optional) The memory limit of the application instance during application operation, unit: M.
@@ -112,6 +117,11 @@ The following attributes are exported:
 * `replicas` - Number of application instances.
 * `package_type` -  Application package type. Optional parameter values include: FatJar, WAR and Image.
 * `image_url` - Mirror address. When the package_type is set to 'Image', this parameter item is available.
+* `update_type` - Deployment type. You can set this parameter when using batch deployment or grayscale deployment. Optional Values: `BatchUpdate` and `GrayBatchUpdate`.
+* `update_batch` - Number of deployment batches.When using batch deployment, you need to set the batch number of deployments.
+* `update_release_type` - Release type of batch deployment. Optional Values: `auto` and `manual`.
+* `update_batch_wait_time` - Automatic release time for batch deployment. When the update_release_type is set to `auto`, You need to set an automatic release time.
+* `update_gray` - Number of batches for grayscale deployment.
 
 ## Import
 

@@ -1,11 +1,16 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -87,6 +92,10 @@ func resourceAlibabacloudStackDtsSynchronizationInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"dts_job_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -95,63 +104,86 @@ func resourceAlibabacloudStackDtsSynchronizationInstanceCreate(d *schema.Resourc
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "CreateDtsInstance"
-	request := make(map[string]interface{})
-	conn, err := client.NewDtsClient()
-	if err != nil {
-		return WrapError(err)
+	request := requests.NewCommonRequest()
+	request.ApiName = action
+	request.Version = "2020-01-01"
+	request.Method = "POST"
+	request.Product = "Dts"
+	request.RegionId = client.RegionId
+	request.Domain = client.Domain
+	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
+	request.Headers["x-acs-regionid"] = client.RegionId
+	request.Headers["x-acs-resourcegroupid"] = client.ResourceGroup
+	request.Headers["x-acs-organizationid"] = client.Department
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-type"] = "application/json"
+	if strings.ToLower(client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
 	}
-
-	request["AutoPay"] = false
-	request["AutoStart"] = true
-	request["InstanceClass"] = "small"
-	if v, ok := d.GetOk("instance_class"); ok {
-		request["InstanceClass"] = v
+	request.QueryParams = map[string]string{
+		"Product":        "Dts",
+		"Version":        "2020-01-01",
+		"Action":         "CreateDtsInstance",
+		"AutoPay":        "false",
+		"AutoStart":      "true",
+		"InstanceClass":  "small",
+		"RegionId":       client.RegionId,
+		"product":        "Dts",
+		"OrganizationId": client.Department,
+		"Type":           "SYNC",
 	}
 	if v, ok := d.GetOk("compute_unit"); ok {
-		request["ComputeUnit"] = v
+		request.QueryParams["ComputeUnit"] = v.(string)
 	}
 	if v, ok := d.GetOk("database_count"); ok {
-		request["DatabaseCount"] = v
+		request.QueryParams["DatabaseCount"] = strconv.Itoa(v.(int))
 	}
 	if v, ok := d.GetOk("destination_endpoint_engine_name"); ok {
-		request["DestinationEndpointEngineName"] = v
+		request.QueryParams["DestinationEndpointEngineName"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("destination_endpoint_region"); ok {
-		request["DestinationRegion"] = v
+		request.QueryParams["DestinationRegion"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("payment_type"); ok {
-		request["PayType"] = convertDtsSyncPaymentTypeRequest(v.(string))
+		request.QueryParams["PayType"] = v.(string)
 	}
 	if v, ok := d.GetOk("payment_duration_unit"); ok {
-		request["Period"] = v
+		request.QueryParams["Period"] = v.(string)
 	}
 	if v, ok := d.GetOk("quantity"); ok {
-		request["Quantity"] = v
+		request.QueryParams["Quantity"] = strconv.Itoa(v.(int))
 	}
-	request["RegionId"] = client.RegionId
-	request["product"] = "Dts"
-	request["OrganizationId"] = client.Department
-
 	if v, ok := d.GetOk("source_endpoint_engine_name"); ok {
-		request["SourceEndpointEngineName"] = v
+		request.QueryParams["SourceEndpointEngineName"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("source_endpoint_region"); ok {
-		request["SourceRegion"] = v
+		request.QueryParams["SourceRegion"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("sync_architecture"); ok {
-		request["SyncArchitecture"] = v
+		request.QueryParams["SyncArchitecture"] = v.(string)
 	}
-	request["Type"] = "SYNC"
 	if v, ok := d.GetOk("payment_duration"); ok {
-		request["UsedTime"] = v
+		request.QueryParams["UsedTime"] = strconv.Itoa(v.(int))
 	}
 	wait := incrementalWait(3*time.Second, 3*time.Second)
+	request.Domain = client.Config.AscmEndpoint
+	var err error
+	var dtsClient *sts.Client
+	if client.Config.SecurityToken == "" {
+		dtsClient, err = sts.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
+	} else {
+		dtsClient, err = sts.NewClientWithStsToken(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)
+	}
+	dtsClient.Domain = client.Config.AscmEndpoint
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-01-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		raw, err := dtsClient.ProcessCommonRequest(request)
+		addDebug(action, raw, request, request.QueryParams)
 		if err != nil {
 			if NeedRetry(err) {
 				wait()
@@ -159,13 +191,15 @@ func resourceAlibabacloudStackDtsSynchronizationInstanceCreate(d *schema.Resourc
 			}
 			return resource.NonRetryableError(err)
 		}
+		err = json.Unmarshal(raw.GetHttpContentBytes(), &response)
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
 		return nil
 	})
-	addDebug(action, response, request)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dts_synchronization_instance", action, AlibabacloudStackSdkGoERROR)
 	}
-
 	d.SetId(fmt.Sprint(response["InstanceId"]))
 
 	return resourceAlibabacloudStackDtsSynchronizationInstanceRead(d, meta)
@@ -184,6 +218,7 @@ func resourceAlibabacloudStackDtsSynchronizationInstanceRead(d *schema.ResourceD
 	}
 	d.Set("instance_class", object["SynchronizationJobClass"])
 	d.Set("payment_type", convertDtsSyncPaymentTypeResponse(object["PayType"]))
+	d.Set("dts_job_id", object["SynchronizationJobId"])
 	return nil
 }
 func resourceAlibabacloudStackDtsSynchronizationInstanceUpdate(d *schema.ResourceData, meta interface{}) error {

@@ -7,6 +7,9 @@ import (
 	"time"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -53,37 +56,43 @@ func resourceAlibabacloudStackMaxcomputeCu() *schema.Resource {
 
 func resourceAlibabacloudStackMaxcomputeCuCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var response map[string]interface{}
 	action := "CreateUpdateOdpsCu"
 	product := "ascm"
-	request := make(map[string]interface{})
-	conn, err := client.NewAscmClient()
-	if err != nil {
-		return WrapError(err)
+	response := make(map[string]interface{})
+	request := requests.NewCommonRequest()
+	request.Method = "POST"
+	request.Product = product
+	request.Domain = client.Domain
+	request.Version = "2019-05-10"
+	request.ApiName = action
+	request.RegionId = client.RegionId
+	request.QueryParams = map[string]string{
+		"CuName":          d.Get("cu_name").(string),
+		"CuNum":           fmt.Sprintf("%v", d.Get("cu_num").(int)),
+		"ClusterName":     d.Get("cluster_name").(string),
+		"Department":      fmt.Sprintf("%v", client.Department),
+		"OrganizationId":  fmt.Sprintf("%v", client.Department),
+		"RegionId":        client.RegionId,
+		"ResourceGroupId": fmt.Sprintf("%v", client.ResourceGroup),
+		"RegionName":      client.RegionId,
+		"Share":           "0",
+		"Product":         product,
 	}
-	request["CuName"] = d.Get("cu_name")
-	request["CuNum"] = d.Get("cu_num")
-	request["ClusterName"] = d.Get("cluster_name")
-	request["Department"] = client.Department
-	request["OrganizationId"] = client.Department
-	request["ResourceGroupId"] = client.ResourceGroup
-	request["RegionId"] = client.RegionId
-	request["RegionName"] = client.RegionId
-	request["Share"] = "0"
-	request["Product"] = product
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, request)
-		return nil
+	request.Headers = map[string]string{
+		"RegionId":           client.RegionId,
+		"x-acs-content-type": "application/json",
+		"Content-Type":       "application/json",
+	}
+
+	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, _ := raw.(*responses.CommonResponse)
+	addDebug(action, raw, request)
+	if bresponse.GetHttpStatus() != 200 {
+		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_maxcompute_cu", "CreateUpdateOdpsCu", AlibabacloudStackSdkGoERROR)
+	}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_maxcompute_cu", action, AlibabacloudStackSdkGoERROR)
 	}
@@ -91,7 +100,7 @@ func resourceAlibabacloudStackMaxcomputeCuCreate(d *schema.ResourceData, meta in
 		return WrapError(Error("CreateUpdateOdpsCu failed for " + response["asapiErrorMessage"].(string)))
 	}
 
-	d.Set("cu_name", request["CuName"])
+	d.Set("cu_name", d.Get("cu_name").(string))
 
 	return resourceAlibabacloudStackMaxcomputeCuRead(d, meta)
 }
@@ -151,7 +160,7 @@ func resourceAlibabacloudStackMaxcomputeCuDelete(d *schema.ResourceData, meta in
 
 	wait := incrementalWait(3*time.Second, 10*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		response, err = conn.DoRequestWithOrg(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
 		if err != nil {
 			if IsExpectedErrors(err, []string{"500"}) || NeedRetry(err) {
 				wait()

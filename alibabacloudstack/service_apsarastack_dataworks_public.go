@@ -250,10 +250,10 @@ func (s *DataworksPublicService) DescribeDataWorksUserRoleBinding(id string) (ob
 		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
 	}
 	v, err := jsonpath.Get("$.ProjectRoleList", response)
-	i := v.([]interface{})
-	if err != nil {
+	if v == nil || err != nil {
 		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.ProjectRoleList", response)
 	}
+	i := v.([]interface{})
 
 	if len(i) > 0 {
 		object = i[0].(map[string]interface{})

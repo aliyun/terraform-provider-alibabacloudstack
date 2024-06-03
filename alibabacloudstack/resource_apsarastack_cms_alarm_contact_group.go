@@ -34,7 +34,7 @@ func resourceAlibabacloudstackCmsAlarmContactGroup() *schema.Resource {
 			},
 			"describe": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 			"enable_subscribed": {
 				Type:     schema.TypeBool,

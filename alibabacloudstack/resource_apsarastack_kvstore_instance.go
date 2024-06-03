@@ -2,9 +2,12 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"strings"
 	"time"
 
+	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
 	"github.com/denverdino/aliyungo/common"
@@ -32,9 +35,9 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(20 * time.Minute),
+			Create: schema.DefaultTimeout(40 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
-			Delete: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(40 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -69,7 +72,7 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Optional: true,
-				Default:  KVStore2Dot8,
+				Default:  KVStore5Dot0,
 			},
 			"availability_zone": {
 				Type:     schema.TypeString,
@@ -82,6 +85,12 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
 				Optional:     true,
 				Default:      PostPaid,
+			},
+			"series": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"community", "enterprise"}, false),
 			},
 			"period": {
 				Type:             schema.TypeInt,
@@ -169,68 +178,192 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"node_type": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateFunc:     validation.StringInSlice([]string{"MASTER_SLAVE", "readone"}, false),
+				DiffSuppressFunc: NodeTypeDiffSuppressFunc,
+			},
+			"architecture_type": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateFunc:     validation.StringInSlice([]string{"cluster", "rwsplit", "standard"}, false),
+				DiffSuppressFunc: ArchitectureTypeDiffSuppressFunc,
+			},
 		},
 	}
 }
 
 func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	// vpcService := VpcService{client}
+	// kvstoreService := KvstoreService{client}
+	// request := r_kvstore.CreateCreateInstanceRequest()
+	// request.RegionId = client.RegionId
+	// request.Headers = map[string]string{"RegionId": client.RegionId}
+	// request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	// if v, ok := d.GetOk("instance_name"); ok && v.(string) != "" {
+	// 	request.InstanceName = v.(string)
+	// }
+
+	// if v, ok := d.GetOk("cpu_type"); ok && v.(string) != "" {
+	// 	request.NodeType = v.(string)
+	// }
+	// //if v, ok := d.GetOk("architecture_type"); ok && v.(string) != "" {
+	// //	request.type = v.(string)
+	// //}
+	// if v, ok := d.GetOk("instance_type"); ok && v.(string) != "" {
+	// 	request.InstanceType = v.(string)
+	// }
+	// if v, ok := d.GetOk("engine_version"); ok && v.(string) != "" {
+	// 	request.EngineVersion = v.(string)
+	// }
+	// if v, ok := d.GetOk("instance_class"); ok && v.(string) != "" {
+	// 	request.InstanceClass = v.(string)
+	// }
+	// if v, ok := d.GetOk("instance_charge_type"); ok && v.(string) != "" {
+	// 	request.ChargeType = v.(string)
+	// }
+	// if v, ok := d.GetOk("password"); ok {
+	// 	request.Password = v.(string)
+	// }
+	// if request.Password == "" {
+	// 	if v := d.Get("kms_encrypted_password").(string); v != "" {
+	// 		kmsService := KmsService{client}
+	// 		decryptResp, err := kmsService.Decrypt(v, d.Get("kms_encryption_context").(map[string]interface{}))
+	// 		if err != nil {
+	// 			return WrapError(err)
+	// 		}
+	// 		request.Password = decryptResp.Plaintext
+	// 	}
+	// }
+	// if v, ok := d.GetOk("backup_id"); ok {
+	// 	request.BackupId = v.(string)
+	// }
+	// if request.ChargeType == "PrePaid" {
+	// 	request.Period = strconv.Itoa(d.Get("period").(int))
+	// }
+
+	// if zone, ok := d.GetOk("availability_zone"); ok && Trim(zone.(string)) != "" {
+	// 	request.ZoneId = Trim(zone.(string))
+	// }
+	// request.NetworkType = strings.ToUpper(string(Classic))
+	// if vswitchId, ok := d.GetOk("vswitch_id"); ok && vswitchId.(string) != "" {
+	// 	request.VSwitchId = vswitchId.(string)
+	// 	request.NetworkType = strings.ToUpper(string(Vpc))
+	// 	request.PrivateIpAddress = Trim(d.Get("private_ip").(string))
+
+	// 	// check vswitchId in zone
+	// 	object, err := vpcService.DescribeVSwitch(vswitchId.(string))
+	// 	if err != nil {
+	// 		return WrapError(err)
+	// 	}
+
+	// 	if request.ZoneId == "" {
+	// 		request.ZoneId = object.ZoneId
+	// 	}
+
+	// 	request.VpcId = object.VpcId
+	// }
+	// err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+	// 	raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
+	// 		return rkvClient.CreateInstance(request)
+	// 	})
+	// 	if err != nil {
+	// 		if IsExpectedErrors(err, OperationDeniedDBStatus) {
+	// 			return resource.RetryableError(err)
+	// 		}
+	// 		return resource.NonRetryableError(err)
+	// 	}
+	// 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	// 	response, _ := raw.(*r_kvstore.CreateInstanceResponse)
+	// 	d.SetId(response.InstanceId)
+	// 	return nil
+	// })
+
+	// if err != nil {
+	// 	return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_kvstore_instance", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+	// }
+	// // wait instance status change from Creating to Normal
+	// stateConf := BuildStateConfByTimes([]string{"Creating"}, []string{"Normal"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, kvstoreService.RdsKvstoreInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}), 200)
+	// if _, err := stateConf.WaitForState(); err != nil {
+	// 	return WrapError(err)
+	// }
 	vpcService := VpcService{client}
 	kvstoreService := KvstoreService{client}
-	request := r_kvstore.CreateCreateInstanceRequest()
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-	if v, ok := d.GetOk("instance_name"); ok && v.(string) != "" {
-		request.InstanceName = v.(string)
+	var response map[string]interface{}
+	action := "CreateInstance"
+	request := make(map[string]interface{})
+	conn, err := client.NewDataworkspublicClient()
+	if err != nil {
+		return WrapError(err)
+	}
+	request["Product"] = "R-kvstore"
+	request["product"] = "R-kvstore"
+	request["ResourceGroup"] = client.ResourceGroup
+	request["OrganizationId"] = client.Department
+	request["RegionId"] = client.RegionId
+	request["ClientToken"] = buildClientToken("CreateInstance")
+	if v, ok := d.GetOk("instance_name"); ok {
+		request["InstanceName"] = v.(string)
+	}
+	if v, ok := d.GetOk("cpu_type"); ok {
+		request["CpuType"] = v.(string)
+	}
+	if v, ok := d.GetOk("node_type"); ok {
+		request["NodeType"] = v.(string)
+	}
+	if v, ok := d.GetOk("architecture_type"); ok {
+		request["ArchitectureType"] = v.(string)
+	}
+	if v, ok := d.GetOk("instance_type"); ok {
+		request["InstanceType"] = v.(string)
 	}
 
-	if v, ok := d.GetOk("cpu_type"); ok && v.(string) != "" {
-		request.NodeType = v.(string)
+	if v, ok := d.GetOk("engine_version"); ok {
+		request["EngineVersion"] = v.(string)
 	}
-	//if v, ok := d.GetOk("architecture_type"); ok && v.(string) != "" {
-	//	request.type = v.(string)
-	//}
-	if v, ok := d.GetOk("instance_type"); ok && v.(string) != "" {
-		request.InstanceType = v.(string)
+
+	if v, ok := d.GetOk("instance_class"); ok {
+		request["InstanceClass"] = v.(string)
 	}
-	if v, ok := d.GetOk("engine_version"); ok && v.(string) != "" {
-		request.EngineVersion = v.(string)
-	}
-	if v, ok := d.GetOk("instance_class"); ok && v.(string) != "" {
-		request.InstanceClass = v.(string)
-	}
-	if v, ok := d.GetOk("instance_charge_type"); ok && v.(string) != "" {
-		request.ChargeType = v.(string)
+
+	if v, ok := d.GetOk("instance_charge_type"); ok {
+		request["ChargeType"] = v.(string)
 	}
 	if v, ok := d.GetOk("password"); ok {
-		request.Password = v.(string)
+		request["Password"] = v.(string)
 	}
-	if request.Password == "" {
+
+	if request["Password"] == "" {
 		if v := d.Get("kms_encrypted_password").(string); v != "" {
 			kmsService := KmsService{client}
 			decryptResp, err := kmsService.Decrypt(v, d.Get("kms_encryption_context").(map[string]interface{}))
 			if err != nil {
 				return WrapError(err)
 			}
-			request.Password = decryptResp.Plaintext
+			request["Password"] = decryptResp.Plaintext
 		}
 	}
 	if v, ok := d.GetOk("backup_id"); ok {
-		request.BackupId = v.(string)
+		request["BackupId"] = v.(string)
 	}
-	if request.ChargeType == "PrePaid" {
-		request.Period = strconv.Itoa(d.Get("period").(int))
+
+	if request["ChargeType"] == PrePaid {
+		request["Period"] = strconv.Itoa(d.Get("period").(int))
 	}
 
 	if zone, ok := d.GetOk("availability_zone"); ok && Trim(zone.(string)) != "" {
-		request.ZoneId = Trim(zone.(string))
+		request["ZoneId"] = Trim(zone.(string))
 	}
-	request.NetworkType = strings.ToUpper(string(Classic))
+	log.Printf("begin describe vswitchs")
+	request["NetworkType"] = strings.ToUpper(string(Classic))
 	if vswitchId, ok := d.GetOk("vswitch_id"); ok && vswitchId.(string) != "" {
-		request.VSwitchId = vswitchId.(string)
-		request.NetworkType = strings.ToUpper(string(Vpc))
-		request.PrivateIpAddress = Trim(d.Get("private_ip").(string))
+		request["VSwitchId"] = vswitchId.(string)
+		request["NetworkType"] = strings.ToUpper(string(Vpc))
+		request["PrivateIpAddress"] = Trim(d.Get("private_ip").(string))
 
 		// check vswitchId in zone
 		object, err := vpcService.DescribeVSwitch(vswitchId.(string))
@@ -238,36 +371,34 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 			return WrapError(err)
 		}
 
-		if request.ZoneId == "" {
-			request.ZoneId = object.ZoneId
+		if request["ZoneId"] == "" {
+			request["ZoneId"] = object.ZoneId
 		}
 
-		request.VpcId = object.VpcId
+		request["VpcId"] = object.VpcId
 	}
-	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
-			return rkvClient.CreateInstance(request)
-		})
-		if err != nil {
-			if IsExpectedErrors(err, OperationDeniedDBStatus) {
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*r_kvstore.CreateInstanceResponse)
-		d.SetId(response.InstanceId)
-		return nil
-	})
-
+	log.Printf("begin create kvstroe instances !!")
+	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2015-01-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+	log.Printf(" create kvstroe instances Finished !! response: %v", response)
+	addDebug(action, response, request, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_kvstore_instance", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		err = WrapErrorf(err, " create kvstroe instances Failed !!", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
+	if !response["asapiSuccess"].(bool) {
+		err = Error("create kvstroe instances Failed !!")
+		return WrapErrorf(err, " create kvstroe instances Failed !!", action, AlibabacloudStackSdkGoERROR)
+	}
+
+	d.SetId(fmt.Sprint(response["InstanceId"]))
+	log.Printf("begin describe kvstroe instances !!")
 	// wait instance status change from Creating to Normal
 	stateConf := BuildStateConfByTimes([]string{"Creating"}, []string{"Normal"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, kvstoreService.RdsKvstoreInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}), 200)
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapError(err)
 	}
+
+	log.Printf("begin update kvstroe instances !!")
 
 	return resourceAlibabacloudStackKVStoreInstanceUpdate(d, meta)
 }

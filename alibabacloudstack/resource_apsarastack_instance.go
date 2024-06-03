@@ -286,7 +286,8 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"tags": tagsSchema(),
+			"tags":             tagsSchema(),
+			"system_disk_tags": tagsSchema(),
 		},
 	}
 }
@@ -510,6 +511,21 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 
 	if !d.IsNewResource() {
 		err := setTags(client, TagResourceInstance, d)
+		if err != nil {
+			return WrapError(err)
+		}
+	}
+	if d.HasChange("system_disk_tags") {
+		oraw, nraw := d.GetChange("system_disk_tags")
+		diskid := d.Get("system_disk_id").(string)
+		if diskid == "" {
+			disk, err := ecsService.DescribeInstanceSystemDisk(d.Id(), client.ResourceGroup)
+			if err != nil {
+				return WrapError(err)
+			}
+			diskid = disk.DiskId
+		}
+		err := updateTags(client, []string{diskid}, "disk", oraw, nraw)
 		if err != nil {
 			return WrapError(err)
 		}

@@ -64,6 +64,7 @@ func resourceAlibabacloudStackDataWorksProjectCreate(d *schema.ResourceData, met
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-01-17"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		addDebug(action, response, request)
 		if err != nil {
 			if NeedRetry(err) {
 				wait()
@@ -73,7 +74,6 @@ func resourceAlibabacloudStackDataWorksProjectCreate(d *schema.ResourceData, met
 		}
 		return nil
 	})
-	addDebug(action, response, request)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_data_works_project", action, AlibabacloudStackSdkGoERROR)
 	}

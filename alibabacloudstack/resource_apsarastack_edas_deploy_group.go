@@ -33,6 +33,11 @@ func resourceAlibabacloudStackEdasDeployGroup() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"init_package_version_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -49,6 +54,9 @@ func resourceAlibabacloudStackEdasDeployGroupCreate(d *schema.ResourceData, meta
 	request.RegionId = regionId
 	request.AppId = appId
 	request.GroupName = groupName
+	if v, ok := d.GetOk("init_package_version_id"); ok && v.(string) != "" {
+		request.InitPackageVersionId = v.(string)
+	}
 	request.Headers["x-ascm-product-name"] = "Edas"
 	request.Headers["x-acs-organizationid"] = client.Department
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"

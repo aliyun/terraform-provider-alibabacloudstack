@@ -2,12 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
 	"log"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/PaesslerAG/jsonpath"
+	util "github.com/alibabacloud-go/tea-utils/service"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
@@ -1847,6 +1848,7 @@ func (s *VpcService) ListTagResources(id string, resourceType string) (object in
 		wait := incrementalWait(3*time.Second, 5*time.Second)
 		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 			response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+			log.Printf("Response of Vpc ListTagResources: %v", response)
 			if err != nil {
 				if NeedRetry(err) {
 					wait()

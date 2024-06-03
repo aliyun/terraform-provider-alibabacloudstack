@@ -333,6 +333,19 @@ func resourceAlibabacloudStackLogStoreUpdate(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackLogStoreDelete(d *schema.ResourceData, meta interface{}) error {
-
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	name := d.Get("name").(string)
+	project := d.Get("project").(string)
+	var requestInfo *sls.Client
+	raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+		return nil, slsClient.DeleteLogStore(project, name)
+	})
+	addDebug("DeleteLogStore", raw, requestInfo, map[string]interface{}{
+		"project":  project,
+		"logstore": name,
+	})
+	if err != nil {
+		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "DeleteLogStore", AlibabacloudStackLogGoSdkERROR)
+	}
 	return nil
 }

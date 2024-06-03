@@ -71,7 +71,7 @@ Terraform will autogenerate a default name is `ECS-Instance`.
 * `internet_max_bandwidth_out` - (Optional) Maximum outgoing bandwidth to the public network, measured in Mbps (Mega bit per second). Value range:  [0, 100]. Default to 0 Mbps.
 * `host_name` - (Optional) Host name of the ECS, which is a string of at least two characters. “hostname” cannot start or end with “.” or “-“. In addition, two or more consecutive “.” or “-“ symbols are not allowed. On Windows, the host name can contain a maximum of 15 characters, which can be a combination of uppercase/lowercase letters, numerals, and “-“. The host name cannot contain dots (“.”) or contain only numeric characters. When it is changed, the instance will reboot to make the change take effect.
 On other OSs such as Linux, the host name can contain a maximum of 30 characters, which can be segments separated by dots (“.”), where each segment can contain uppercase/lowercase letters, numerals, or “_“. When it is changed, the instance will reboot to make the change take effect.
-* `password` - (Optional, Sensitive) Password to an instance is a string of 8 to 30 characters. It must contain uppercase/lowercase letters and numerals, but cannot contain special symbols. When it is changed, the instance will reboot to make the change take effect./if you want to use random password See [Random Password](random_password.html.markdown).
+* `password` - (Optional, Sensitive) Password to an instance is a string of 8 to 30 characters. It must contain uppercase/lowercase letters and numerals, but cannot contain special symbols. When it is changed, the instance will reboot to make the change take effect./if you want to use random password See[Random Password](random_password.html.markdown).
 * `kms_encrypted_password` - (Optional) An KMS encrypts password used to an instance. If the `password` is filled in, this field will be ignored. When it is changed, the instance will reboot to make the change take effect.
 * `kms_encryption_context` - (Optional) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating an instance with `kms_encrypted_password`. See [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm). It is valid when `kms_encrypted_password` is set. When it is changed, the instance will reboot to make the change take effect.
 
@@ -113,6 +113,9 @@ On other OSs such as Linux, the host name can contain a maximum of 30 characters
 * `enable_ipv6` - (Optional, ForceNew) Specifies whether to enable the IPv6 block. Valid values: `false` (Default): disables IPv6 blocks. `true`: enables IPv6 blocks. 
 * `ipv6_cidr_block` - (Optional) The ipv6 cidr block of VPC.
 * `ipv6_address_count` - (Optional) The count of ipv6_address requested for allocation. If `enable_ipv6` is true. `ipv6_address_count` must be greater than 0.
+* `system_disk_tags` - (Optional) A additional mapping of tags to assign to the system_disk. 
+    - Key: It can be up to 64 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It cannot be a null string.
+    - Value: It can be up to 128 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It can be a null string.
 
 ### Timeouts
 
