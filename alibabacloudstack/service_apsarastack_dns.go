@@ -3,15 +3,16 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"reflect"
-	"strings"
-	"time"
 )
 
 type DnsService struct {
@@ -265,7 +266,7 @@ func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err err
 	request.Method = "POST"          // Set request method
 	request.Product = "CloudDns"     // Specify product
 	request.Domain = s.client.Domain // Location Service will not be enabled if the host is specified. For example, service with a Certification type-Bearer Token should be specified
-	request.Version = "2022-06-24"   // Specify product version
+	request.Version = "2021-06-24"   // Specify product version
 	request.PageNumber = requests.NewInteger(2)
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	if strings.ToLower(s.client.Config.Protocol) == "https" {
@@ -281,7 +282,7 @@ func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err err
 		"Product":         "CloudDns",
 		"RegionId":        s.client.RegionId,
 		"Action":          "DescribeGlobalZones",
-		"Version":         "2022-06-24",
+		"Version":         "2021-06-24",
 		//"Id":              did[1],
 		"Name":              did[0],
 		"Forwardedregionid": s.client.RegionId,

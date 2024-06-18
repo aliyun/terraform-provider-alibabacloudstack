@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+	"regexp"
+	"strings"
+
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
-	"log"
-	"regexp"
-	"strings"
 
 	"time"
 
@@ -197,6 +198,8 @@ func (s *EcsService) DescribeInstanceAttribute(id string) (instance ecs.Describe
 
 	return *response, nil
 }
+
+// func (s *EcsService) AssignIpv6Addresses() {}
 
 func (s *EcsService) DescribeInstanceSystemDisk(id, rg string) (disk ecs.Disk, err error) {
 	request := ecs.CreateDescribeDisksRequest()
@@ -1928,6 +1931,187 @@ func (s *EcsService) SetResourceTagsNew(d *schema.ResourceData, resourceType str
 			if err != nil {
 				return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 			}
+		}
+	}
+	return nil
+}
+
+func (s *EcsService) SetSystemDiskTags(d *schema.ResourceData) error {
+	resourceType := "disk"
+	diskid := d.Get("system_disk_id").(string)
+	if diskid == "" {
+		disk, err := s.DescribeInstanceSystemDisk(d.Id(), s.client.ResourceGroup)
+		if err != nil {
+			return WrapError(err)
+		}
+		diskid = disk.DiskId
+	}
+	conn, err := s.client.NewEcsClient()
+	if err != nil {
+		return WrapError(err)
+	}
+	instance_tags := d.Get("tags").(map[string]interface{})
+	tags := d.Get("system_disk_tags").(map[string]interface{})
+	removed := make([]string, 0)
+	for key, value := range instance_tags {
+		old, ok := tags[key]
+		if !ok || old != value {
+			// Delete it!
+			removed = append(removed, key)
+		}
+	}
+	action := "UnTagResources"
+	request := map[string]interface{}{
+		"RegionId":     s.client.RegionId,
+		"ResourceType": resourceType,
+		"ResourceId.1": diskid,
+	}
+	for i, key := range removed {
+		request[fmt.Sprintf("TagKey.%d", i+1)] = key
+	}
+	wait := incrementalWait(2*time.Second, 1*time.Second)
+	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+		request["Product"] = "ascm"
+		request["OrganizationId"] = s.client.Department
+		response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		if err != nil {
+			if IsThrottling(err) {
+				wait()
+				return resource.RetryableError(err)
+
+			}
+			return resource.NonRetryableError(err)
+		}
+		addDebug(action, response, request, request)
+		return nil
+	})
+	if err != nil {
+		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+	}
+	add_request := map[string]interface{}{
+		"RegionId":     s.client.RegionId,
+		"ResourceType": resourceType,
+		"ResourceId.1": diskid,
+	}
+	count := 1
+	for key, value := range tags {
+		add_request[fmt.Sprintf("Tag.%d.Key", count)] = key
+		add_request[fmt.Sprintf("Tag.%d.Value", count)] = value
+		count++
+	}
+	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+		add_request["Product"] = "ascm"
+		add_request["OrganizationId"] = s.client.Department
+		response, err := conn.DoRequest(StringPointer("TagResources"), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, add_request, &util.RuntimeOptions{})
+		if err != nil {
+			if IsThrottling(err) {
+				wait()
+				return resource.RetryableError(err)
+
+			}
+			return resource.NonRetryableError(err)
+		}
+		addDebug(action, response, add_request, add_request)
+		return nil
+	})
+	return err
+}
+
+func (s *EcsService) UpdateSystemDiskTags(d *schema.ResourceData) error {
+	resourceType := "disk"
+	diskid := d.Get("system_disk_id").(string)
+	if diskid == "" {
+		disk, err := s.DescribeInstanceSystemDisk(d.Id(), s.client.ResourceGroup)
+		if err != nil {
+			return WrapError(err)
+		}
+		diskid = disk.DiskId
+	}
+	oraw, nraw := d.GetChange("system_disk_tags")
+	removedTags := oraw.(map[string]interface{})
+	added := nraw.(map[string]interface{})
+	// Build the list of what to remove
+	removed := make([]string, 0)
+	for key, value := range removedTags {
+		old, ok := added[key]
+		if !ok || old != value {
+			// Delete it!
+			removed = append(removed, key)
+		}
+	}
+	conn, err := s.client.NewEcsClient()
+	if err != nil {
+		return WrapError(err)
+	}
+
+	removedTagKeys := make([]string, 0)
+	for _, v := range removed {
+		if !ignoredTags(v, "") {
+			removedTagKeys = append(removedTagKeys, v)
+		}
+	}
+	if len(removedTagKeys) > 0 {
+		action := "UnTagResources"
+		request := map[string]interface{}{
+			"RegionId":     s.client.RegionId,
+			"ResourceType": resourceType,
+			"ResourceId.1": diskid,
+		}
+		for i, key := range removedTagKeys {
+			request[fmt.Sprintf("TagKey.%d", i+1)] = key
+		}
+		wait := incrementalWait(2*time.Second, 1*time.Second)
+		err := resource.Retry(10*time.Minute, func() *resource.RetryError {
+			request["Product"] = "ascm"
+			request["OrganizationId"] = s.client.Department
+			response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+			if err != nil {
+				if IsThrottling(err) {
+					wait()
+					return resource.RetryableError(err)
+
+				}
+				return resource.NonRetryableError(err)
+			}
+			addDebug(action, response, request)
+			return nil
+		})
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		}
+	}
+	if len(added) > 0 {
+		action := "TagResources"
+		request := map[string]interface{}{
+			"RegionId":     s.client.RegionId,
+			"ResourceType": resourceType,
+			"ResourceId.1": diskid,
+		}
+		count := 1
+		for key, value := range added {
+			request[fmt.Sprintf("Tag.%d.Key", count)] = key
+			request[fmt.Sprintf("Tag.%d.Value", count)] = value
+			count++
+		}
+
+		wait := incrementalWait(2*time.Second, 1*time.Second)
+		err := resource.Retry(10*time.Minute, func() *resource.RetryError {
+			request["Product"] = "ascm"
+			request["OrganizationId"] = s.client.Department
+			response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+			if err != nil {
+				if IsThrottling(err) {
+					wait()
+					return resource.RetryableError(err)
+
+				}
+				return resource.NonRetryableError(err)
+			}
+			addDebug(action, response, request)
+			return nil
+		})
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 		}
 	}
 	return nil

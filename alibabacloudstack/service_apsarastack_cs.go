@@ -19,10 +19,7 @@ import (
 type CsService struct {
 	client *connectivity.AlibabacloudStackClient
 }
-type KubernetesClusterDetail struct {
-	cs.KubernetesClusterDetail
-	MasterUrl string
-}
+
 const (
 	COMPONENT_AUTO_SCALER      = "cluster-autoscaler"
 	COMPONENT_DEFAULT_VRESION  = "v1.0.0"
@@ -43,9 +40,9 @@ const (
 	UpgradeClusterTimeout = 30 * time.Minute
 )
 
-func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail, err error) {
+func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDetail, err error) {
 	invoker := NewInvoker()
-	cluster := &KubernetesClusterDetail{}
+	cluster := &cs.KubernetesClusterDetail{}
 	cluster.ClusterId = ""
 	var requestInfo *cs.Client
 	var response interface{}
@@ -103,7 +100,7 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail
 	//	return cluster, nil
 	//}
 
-	cluster = &KubernetesClusterDetail{}
+	cluster = &cs.KubernetesClusterDetail{}
 	for _, k := range Cdetails.Clusters {
 		if k.ClusterID == id {
 			cluster.Tags = k.Tags
@@ -125,7 +122,6 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail
 			cluster.PrivateZone = k.PrivateZone
 			cluster.Profile = k.Profile
 			cluster.VSwitchIds = k.VswitchID
-			cluster.MasterUrl = k.MasterURL
 			//cluster.Updated=k.Updated
 			//cluster.Created= k.Created.
 			break
@@ -197,17 +193,15 @@ func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
 		req.SetHTTPSInsecure(s.client.Config.Insecure)
 	}
 	req.QueryParams = map[string]string{
-		"RegionId":         s.client.RegionId,
-		"AccessKeySecret":  s.client.SecretKey,
-		"Product":          "CS",
-		"Department":       s.client.Department,
-		"ResourceGroup":    s.client.ResourceGroup,
-		"Action":           "DescribeClusterNodePools",
-		"AccountInfo":      "123456",
-		"Version":          "2015-12-15",
-		"SignatureVersion": "1.0",
-		"ProductName":      "cs",
-		"ClusterId":        id,
+		"RegionId":        s.client.RegionId,
+		"AccessKeySecret": s.client.SecretKey,
+		"Product":         "CS",
+		"Department":      s.client.Department,
+		"ResourceGroup":   s.client.ResourceGroup,
+		"Action":          "DescribeClusterNodePools",
+		"Version":         "2015-12-15",
+		"ProductName":     "cs",
+		"ClusterId":       id,
 	}
 	req.Method = "POST"        // Set request method
 	req.Product = "CS"         // Specify product
@@ -226,6 +220,7 @@ func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
 		return ecsClient.ProcessCommonRequest(req)
 	})
 	//return err
+	addDebug("DescribeClusterNodePools", raw, req, req.QueryParams)
 	if err != nil {
 		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", raw)
 	}

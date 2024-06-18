@@ -120,7 +120,7 @@ func resourceAlibabacloudStackEdasInstanceApplicationAttachmentRead(d *schema.Re
 	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.QueryApplicationStatus(request)
 	})
-
+	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_instance_application_attachment", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}

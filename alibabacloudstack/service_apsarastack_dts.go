@@ -195,9 +195,12 @@ func (s *DtsService) ListTagResources(id string, resourceType string) (object in
 	}
 	action := "ListTagResources"
 	request := map[string]interface{}{
-		"RegionId":     s.client.RegionId,
-		"ResourceType": resourceType,
-		"ResourceId.1": id,
+		"RegionId":        s.client.RegionId,
+		"ResourceType":    resourceType,
+		"ResourceId.1":    id,
+		"Product":         "Dts",
+		"OrganizationId":  s.client.Department,
+		"ResourceGroupId": s.client.ResourceGroup,
 	}
 	tags := make([]interface{}, 0)
 	var response map[string]interface{}

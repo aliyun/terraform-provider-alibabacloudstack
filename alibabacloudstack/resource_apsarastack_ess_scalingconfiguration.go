@@ -66,9 +66,10 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"security_group_id": {
-				Type:     schema.TypeString,
+			"security_group_ids": {
+				Type:     schema.TypeList,
 				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"deployment_set_id": {
 				Type:     schema.TypeString,
@@ -339,17 +340,19 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 		request.InstanceTypes = &types
 	}
 
-	hasChangeSecurityGroupId := d.HasChange("security_group_id")
+	hasChangeSecurityGroupId := d.HasChange("security_group_ids")
 	if hasChangeSecurityGroupId || d.Get("override").(bool) {
-		securityGroupId := d.Get("security_group_id").(string)
-		if securityGroupId == "" {
-			return fmt.Errorf("securityGroupId must be assigned")
+		securityGroupIds := d.Get("security_group_ids").([]interface{})
+		if len(securityGroupIds) <= 0 {
+			return fmt.Errorf("securityGroupIds must be assigned")
 
 		}
-
-		if securityGroupId != "" {
-			request.SecurityGroupId = securityGroupId
+		sgs := make([]string, 0, len(securityGroupIds))
+		for _, sg := range securityGroupIds {
+			sgs = append(sgs, sg.(string))
 		}
+
+		request.SecurityGroupIds = &sgs
 	}
 
 	if d.HasChange("scaling_configuration_name") {
@@ -568,8 +571,8 @@ func resourceAlibabacloudStackEssScalingConfigurationRead(d *schema.ResourceData
 	d.Set("instance_name", object.InstanceName)
 	d.Set("override", d.Get("override").(bool))
 	d.Set("host_name", object.HostName)
-	if sg, ok := d.GetOk("security_group_id"); ok && sg.(string) != "" {
-		d.Set("security_group_id", object.SecurityGroupId)
+	if sg, ok := d.GetOk("security_group_ids"); ok && len(sg.([]interface{})) >= 0 {
+		d.Set("security_group_ids", object.SecurityGroupIds.SecurityGroupId)
 	}
 
 	if instanceType, ok := d.GetOk("instance_type"); ok && instanceType.(string) != "" {
@@ -703,17 +706,18 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 	}
 	request.ScalingGroupId = d.Get("scaling_group_id").(string)
 	request.ImageId = d.Get("image_id").(string)
-	request.SecurityGroupId = d.Get("security_group_id").(string)
+	security_group_ids := d.Get("security_group_ids").([]interface{})
+	// securityGroupId := d.Get("security_group_id").(string)
 
-	securityGroupId := d.Get("security_group_id").(string)
-
-	if securityGroupId == "" {
-		return nil, WrapError(Error("security_group_id must be assigned"))
+	if len(security_group_ids) <= 0 {
+		return nil, WrapError(Error("security_group_ids must be assigned"))
+	}
+	sgs := make([]string, 0, len(security_group_ids))
+	for _, v := range security_group_ids {
+		sgs = append(sgs, v.(string))
 	}
 
-	if securityGroupId != "" {
-		request.SecurityGroupId = securityGroupId
-	}
+	request.SecurityGroupIds = &sgs
 	request.DeploymentSetId = d.Get("deployment_set_id").(string)
 	request.InstanceName = d.Get("instance_name").(string)
 

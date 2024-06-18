@@ -183,10 +183,9 @@ func resourceAlibabacloudStackNatGatewayRead(d *schema.ResourceData, meta interf
 		d.Set("bandwidth_packages", bindWidthPackages)
 	}
 	listTagResourcesObject, err := vpcService.ListTagResources(d.Id(), "NATGATEWAY")
-	if err != nil {
-		return WrapError(err)
+	if err == nil {
+		d.Set("tags", tagsToMap(listTagResourcesObject))
 	}
-	d.Set("tags", tagsToMap(listTagResourcesObject))
 
 	return nil
 }

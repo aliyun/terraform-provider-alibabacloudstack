@@ -228,19 +228,19 @@ func resourceAlibabacloudStackEssScalingGroupUpdate(d *schema.ResourceData, meta
 	//d.SetPartial("removal_policies")
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	if d.HasChange("loadbalancer_ids") {
-		if err != nil {
-			return WrapError(err)
-		}
-		//d.SetPartial("loadbalancer_ids")
-	}
+	// if d.HasChange("loadbalancer_ids") {
+	// 	if err != nil {
+	// 		return WrapError(err)
+	// 	}
+	// 	//d.SetPartial("loadbalancer_ids")
+	// }
 
-	if d.HasChange("db_instance_ids") {
-		if err != nil {
-			return WrapError(err)
-		}
-		//d.SetPartial("db_instance_ids")
-	}
+	// if d.HasChange("db_instance_ids") {
+	// 	if err != nil {
+	// 		return WrapError(err)
+	// 	}
+	// 	//d.SetPartial("db_instance_ids")
+	// }
 	d.Partial(false)
 	return resourceAlibabacloudStackEssScalingGroupRead(d, meta)
 }

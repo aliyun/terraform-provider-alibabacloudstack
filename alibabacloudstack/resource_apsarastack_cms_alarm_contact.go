@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -58,39 +59,51 @@ func resourceAlibabacloudstackCmsAlarmContact() *schema.Resource {
 func resourceAlibabacloudstackCmsAlarmContactCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := cms.CreatePutContactRequest()
+	request := requests.NewCommonRequest()
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
 		request.Scheme = "http"
 	}
+	request.ApiName = "PutContact"
+	request.Method = "POST"
+	request.Product = "Cms"
+	request.Domain = client.Domain
+	request.Version = "2019-01-01"
 	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Cms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-	request.ContactName = d.Get("alarm_contact_name").(string)
+	request.Headers = map[string]string{"RegionId": client.RegionId, "Content-Type": "application/json; charset=UTF-8"}
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": client.SecretKey,
+		"Product":         "Cms",
+		"Action":          "PutContact",
+		"Version":         "2019-01-01",
+		"Department":      client.Department,
+		"ResourceGroup":   client.ResourceGroup,
+		"ContactName":     d.Get("alarm_contact_name").(string),
+		"Describe":        d.Get("describe").(string),
+	}
 	if v, ok := d.GetOk("channels_aliim"); ok {
-		request.ChannelsAliIM = v.(string)
+		request.QueryParams["Channels.AliIM "] = v.(string)
 	}
 
 	if v, ok := d.GetOk("channels_ding_web_hook"); ok {
-		request.ChannelsDingWebHook = v.(string)
+		request.QueryParams["Channels.DingWebHook"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("channels_mail"); ok {
-		request.ChannelsMail = v.(string)
+		request.QueryParams["ChannelsMail"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("channels_sms"); ok {
-		request.ChannelsSMS = v.(string)
+		request.QueryParams["Channels.SMS"] = v.(string)
 	}
 
-	request.Describe = d.Get("describe").(string)
 	if v, ok := d.GetOk("lang"); ok {
-		request.Lang = v.(string)
+		request.QueryParams["Lang"] = v.(string)
 	}
 
 	raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
-		return cmsClient.PutContact(request)
+		return cmsClient.ProcessCommonRequest(request)
 	})
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cms_alarm_contact", request.GetActionName(), AlibabacloudStackSdkGoERROR)
@@ -101,7 +114,7 @@ func resourceAlibabacloudstackCmsAlarmContactCreate(d *schema.ResourceData, meta
 	if response.Code != "200" {
 		return WrapError(Error("PutContact failed for " + response.Message))
 	}
-	d.SetId(fmt.Sprintf("%v", request.ContactName))
+	d.SetId(fmt.Sprintf("%v", d.Get("alarm_contact_name").(string)))
 
 	return resourceAlibabacloudstackCmsAlarmContactRead(d, meta)
 }

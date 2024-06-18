@@ -140,10 +140,10 @@ func resourceAlibabacloudStackSwitchRead(d *schema.ResourceData, meta interface{
 	d.Set("ipv6_cidr_block", vswitch.Ipv6CidrBlock)
 	d.Set("name", vswitch.VSwitchName)
 	listTagResourcesObject, err := vpcService.ListTagResources(d.Id(), "VSWITCH")
-	if err != nil {
-		return WrapError(err)
+	if err == nil {
+		d.Set("tags", tagsToMap(listTagResourcesObject))
 	}
-	d.Set("tags", tagsToMap(listTagResourcesObject))
+	// d.Set("tags", tagsToMap(listTagResourcesObject))
 	d.Set("description", vswitch.Description)
 	return nil
 }
