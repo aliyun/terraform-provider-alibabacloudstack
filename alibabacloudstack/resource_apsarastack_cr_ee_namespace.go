@@ -1,8 +1,12 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -50,33 +54,46 @@ func resourceAlibabacloudStackCrEENamespaceCreate(d *schema.ResourceData, meta i
 	namespace := d.Get("name").(string)
 	autoCreate := d.Get("auto_create").(bool)
 	visibility := d.Get("default_visibility").(string)
-
-	response := &cr_ee.CreateNamespaceResponse{}
-	request := cr_ee.CreateCreateNamespaceRequest()
+	// request := cr_ee.CreateCreateNamespaceRequest()
+	request := requests.NewCommonRequest()
 	request.RegionId = crService.client.RegionId
-
+	request.Product = "cr-ee"
+	request.Method = "POST"
+	request.Domain = client.Domain
+	request.Version = "2018-12-01"
+	request.ApiName = "CreateNamespace"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "cr-ee", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
-	request.InstanceId = instanceId
-	request.NamespaceName = namespace
-	request.AutoCreateRepo = requests.NewBoolean(autoCreate)
-	request.DefaultRepoType = visibility
-	resource := crService.GenResourceId(instanceId, namespace)
-	action := request.GetActionName()
-	raw, err := crService.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
-		return creeClient.CreateNamespace(request)
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": client.SecretKey,
+		"Product":         "cr-ee",
+		"Department":      client.Department,
+		"ResourceGroup":   client.ResourceGroup,
+		"Action":          "CreateNamespace",
+		"Version":         "2018-12-01",
+		"InstanceId":      instanceId,
+		"NamespaceName":   namespace,
+		"AutoCreateRepo":  fmt.Sprintf("%t", autoCreate),
+		"DefaultRepoType": visibility,
+	}
+	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.ProcessCommonRequest(request)
 	})
+	// raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+	// 	return ecsClient.DescribeInstanceAutoRenewAttribute(request)
+	// })
+	response := make(map[string]interface{})
+	addDebug(request.GetActionName(), raw, request, request.QueryParams)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
-	}
-	addDebug(action, raw, request.RpcRequest, request)
-
-	response, _ = raw.(*cr_ee.CreateNamespaceResponse)
-	if !response.CreateNamespaceIsSuccess {
-		return crService.wrapCrServiceError(resource, action, response.Code)
+		return WrapErrorf(err, DefaultErrorMsg, request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
 
+	err = json.Unmarshal(raw.(*responses.CommonResponse).GetHttpContentBytes(), &response)
+	if err != nil {
+		return WrapError(err)
+	}
+	if !response["asapiSuccess"].(bool) {
+		return fmt.Errorf("create ee namespace failed, %s", response["asapiErrorMessage"].(string))
+	}
 	d.SetId(crService.GenResourceId(instanceId, namespace))
 
 	return resourceAlibabacloudStackCrEENamespaceRead(d, meta)
@@ -86,55 +103,100 @@ func resourceAlibabacloudStackCrEENamespaceRead(d *schema.ResourceData, meta int
 	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
-	resp, err := crService.DescribeCrEENamespace(d.Id())
+	strRet := crService.ParseResourceId(d.Id())
+	instanceId := strRet[0]
+	namespaceName := strRet[1]
+	request := requests.NewCommonRequest()
+	request.RegionId = client.RegionId
+	request.Product = "cr-ee"
+	request.Method = "POST"
+	request.Domain = client.Domain
+	request.Version = "2018-12-01"
+	request.ApiName = "ListNamespace"
+	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": client.SecretKey,
+		"Product":         "cr-ee",
+		"Department":      client.Department,
+		"ResourceGroup":   client.ResourceGroup,
+		"Action":          "ListNamespace",
+		"Version":         "2018-12-01",
+		"InstanceId":      instanceId,
+		"NamespaceName":   namespaceName,
+	}
+	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.ProcessCommonRequest(request)
+	})
+	response := make(map[string]interface{})
+	addDebug(request.GetActionName(), raw, request, request.QueryParams)
 	if err != nil {
-		if NotFoundError(err) {
-			d.SetId("")
-			return nil
-		}
-		return WrapError(err)
+		return WrapErrorf(err, DefaultErrorMsg, request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
 
-	d.Set("instance_id", resp.InstanceId)
-	d.Set("name", resp.NamespaceName)
-	d.Set("auto_create", resp.AutoCreateRepo)
-	d.Set("default_visibility", resp.DefaultRepoType)
+	err = json.Unmarshal(raw.(*responses.CommonResponse).GetHttpContentBytes(), &response)
+	if err != nil {
+		return WrapError(err)
+	}
+	if !response["asapiSuccess"].(bool) {
+		return fmt.Errorf("read ee namespace failed, %s", response["asapiErrorMessage"].(string))
+	}
+	namespaceList := response["Namespaces"].([]interface{})
+	if len(namespaceList) == 0 {
+		return WrapError(fmt.Errorf("namespace %s not found", namespaceName))
+	}
+	item := namespaceList[0].(map[string]interface{})
+	d.Set("instance_id", item["InstanceId"].(string))
+	d.Set("name", item["NamespaceName"].(string))
+	d.Set("auto_create", item["AutoCreateRepo"].(bool))
+	d.Set("default_visibility", item["DefaultRepoType"].(string))
 
 	return nil
 }
 
 func resourceAlibabacloudStackCrEENamespaceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	crService := &CrService{client}
 	instanceId := d.Get("instance_id").(string)
 	namespace := d.Get("name").(string)
 	if d.HasChanges("auto_create", "default_visibility") {
 		autoCreate := d.Get("auto_create").(bool)
 		visibility := d.Get("default_visibility").(string)
-		response := &cr_ee.UpdateNamespaceResponse{}
-		request := cr_ee.CreateUpdateNamespaceRequest()
+		request := requests.NewCommonRequest()
+		request.RegionId = client.RegionId
+		request.Product = "cr-ee"
+		request.Method = "POST"
+		request.Domain = client.Domain
+		request.Version = "2018-12-01"
+		request.ApiName = "UpdateNamespace"
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "cr", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
-		request.RegionId = crService.client.RegionId
-		request.InstanceId = instanceId
-		request.NamespaceName = namespace
-		request.AutoCreateRepo = requests.NewBoolean(autoCreate)
-		request.DefaultRepoType = visibility
-		resource := crService.GenResourceId(instanceId, namespace)
-		action := request.GetActionName()
-		raw, err := crService.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
-			return creeClient.UpdateNamespace(request)
+		request.QueryParams = map[string]string{
+			"AccessKeySecret": client.SecretKey,
+			"Product":         "cr-ee",
+			"Department":      client.Department,
+			"ResourceGroup":   client.ResourceGroup,
+			"Action":          "UpdateNamespace",
+			"Version":         "2018-12-01",
+			"InstanceId":      instanceId,
+			"NamespaceName":   namespace,
+			"AutoCreateRepo":  fmt.Sprintf("%t", autoCreate),
+			"DefaultRepoType": visibility,
+		}
+		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			return ecsClient.ProcessCommonRequest(request)
 		})
+		response := make(map[string]interface{})
+		addDebug(request.GetActionName(), raw, request, request.QueryParams)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+			return WrapErrorf(err, DefaultErrorMsg, request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
-		addDebug(action, raw, request.RpcRequest, request)
 
-		response, _ = raw.(*cr_ee.UpdateNamespaceResponse)
-		if !response.UpdateNamespaceIsSuccess {
-			return crService.wrapCrServiceError(resource, action, response.Code)
+		err = json.Unmarshal(raw.(*responses.CommonResponse).GetHttpContentBytes(), &response)
+		if err != nil {
+			return WrapError(err)
 		}
+		if !response["asapiSuccess"].(bool) {
+			return fmt.Errorf("update ee namespace failed, %s", response["asapiErrorMessage"].(string))
+		}
+
 	}
 
 	return resourceAlibabacloudStackCrEENamespaceRead(d, meta)
@@ -143,16 +205,43 @@ func resourceAlibabacloudStackCrEENamespaceUpdate(d *schema.ResourceData, meta i
 func resourceAlibabacloudStackCrEENamespaceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
-	instanceId := d.Get("instance_id").(string)
-	namespace := d.Get("name").(string)
-	_, err := crService.DeleteCrEENamespace(instanceId, namespace)
+	strRet := crService.ParseResourceId(d.Id())
+	instanceId := strRet[0]
+	namespaceName := strRet[1]
+	request := requests.NewCommonRequest()
+	request.RegionId = client.RegionId
+	request.Product = "cr-ee"
+	request.Method = "POST"
+	request.Domain = client.Domain
+	request.Version = "2018-12-01"
+	request.ApiName = "DeleteNamespace"
+	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": client.SecretKey,
+		"Product":         "cr-ee",
+		"Department":      client.Department,
+		"ResourceGroup":   client.ResourceGroup,
+		"Action":          "DeleteNamespace",
+		"Version":         "2018-12-01",
+		"InstanceId":      instanceId,
+		"NamespaceName":   namespaceName,
+	}
+	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		return ecsClient.ProcessCommonRequest(request)
+	})
+	response := make(map[string]interface{})
+	addDebug(request.GetActionName(), raw, request, request.QueryParams)
 	if err != nil {
-		if NotFoundError(err) {
-			return nil
-		} else {
-			return WrapError(err)
-		}
+		return WrapErrorf(err, DefaultErrorMsg, request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
 
-	return WrapError(crService.WaitForCrEENamespace(instanceId, namespace, Deleted, DefaultTimeout))
+	err = json.Unmarshal(raw.(*responses.CommonResponse).GetHttpContentBytes(), &response)
+	if err != nil {
+		return WrapError(err)
+	}
+	if !response["asapiSuccess"].(bool) {
+		return fmt.Errorf("delete ee namespace failed, %s", response["asapiErrorMessage"].(string))
+	}
+
+	return nil
 }

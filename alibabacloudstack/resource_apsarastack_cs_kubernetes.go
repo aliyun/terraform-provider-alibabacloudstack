@@ -1136,7 +1136,11 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 		}
 	}
 	if nodepoolid == "" {
-		return WrapErrorf(fmt.Errorf("can not found default node_pool"), "DescribeClusterNodePools", nodepool.Nodepools)
+		if len(nodepool.Nodepools) == 1 && nodepool.Nodepools[0].NodepoolInfo.Name == "default-nodepool" {
+			nodepoolid = nodepool.Nodepools[0].NodepoolInfo.NodepoolID
+		} else {
+			return WrapErrorf(fmt.Errorf("can not found default node_pool"), "DescribeClusterNodePools", nodepool.Nodepools)
+		}
 	}
 	d.Set("nodepool_id", nodepoolid)
 	if d.HasChange("num_of_nodes") && !d.IsNewResource() {
