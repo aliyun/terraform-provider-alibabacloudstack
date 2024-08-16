@@ -9,6 +9,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/adb"
@@ -617,7 +618,7 @@ func (s *AdbService) DescribeAutoRenewAttribute(id string) (object map[string]in
 		"RegionId":     s.client.RegionId,
 		"DBClusterIds": id,
 	}
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	runtime.SetIgnoreSSL(s.client.Config.Insecure)
 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-03-15"), StringPointer("AK"), nil, request, &runtime)
@@ -654,7 +655,7 @@ func (s *AdbService) DescribeDBClusterAccessWhiteList(id string) (object map[str
 	}
 	request["Product"] = "adb"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	runtime.SetIgnoreSSL(s.client.Config.Insecure)
 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-03-15"), StringPointer("AK"), nil, request, &runtime)
@@ -714,7 +715,7 @@ func (s *AdbService) SetResourceTags(d *schema.ResourceData, resourceType string
 			for i, key := range removedTagKeys {
 				request[fmt.Sprintf("TagKey.%d", i+1)] = key
 			}
-			runtime := util.RuntimeOptions{}
+			runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 			runtime.SetIgnoreSSL(s.client.Config.Insecure)
 			wait := incrementalWait(2*time.Second, 1*time.Second)
 			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
@@ -749,7 +750,7 @@ func (s *AdbService) SetResourceTags(d *schema.ResourceData, resourceType string
 			}
 
 			wait := incrementalWait(2*time.Second, 1*time.Second)
-			runtime := util.RuntimeOptions{}
+			runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 			runtime.SetIgnoreSSL(s.client.Config.Insecure)
 			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-03-15"), StringPointer("AK"), nil, request, &runtime)
@@ -786,7 +787,7 @@ func (s *AdbService) DescribeAdbDbCluster(id string) (object map[string]interfac
 	}
 	request["Product"] = "adb"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	runtime.SetIgnoreSSL(s.client.Config.Insecure)
 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-03-15"), StringPointer("AK"), nil, request, &runtime)
@@ -827,7 +828,7 @@ func (s *AdbService) DescribeDBClusters(id string) (object map[string]interface{
 	}
 	request["Product"] = "adb"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	runtime.SetIgnoreSSL(s.client.Config.Insecure)
 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-03-15"), StringPointer("AK"), nil, request, &runtime)

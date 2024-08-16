@@ -8,6 +8,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/hbase"
@@ -148,7 +149,7 @@ func (s *HBaseService) DescribeHBaseInstance(id string) (object map[string]inter
 	request["Product"] = "HBase"
 	request["OrganizationId"] = s.client.Department
 
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -177,7 +178,7 @@ func (s *HBaseService) DescribeHBaseInstance(id string) (object map[string]inter
 	return object, nil
 }
 
-//pop has limit, support next.
+// pop has limit, support next.
 func (s *HBaseService) DescribeIpWhitelist(id string) (instance hbase.DescribeIpWhitelistResponse, err error) {
 	request := hbase.CreateDescribeIpWhitelistRequest()
 	request.RegionId = s.client.RegionId

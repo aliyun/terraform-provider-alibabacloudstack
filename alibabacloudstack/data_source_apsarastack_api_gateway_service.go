@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -52,7 +53,7 @@ func dataSourceAlibabacloudStackApigatewayServiceRead(d *schema.ResourceData, me
 	}
 	request["Product"] = "CloudAPI"
 	request["OrganizationId"] = client.Department
-	response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-07-14"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+	response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-07-14"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
 
 	addDebug("OpenApiGatewayService", response, request)
 	if err != nil {

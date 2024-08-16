@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
 
@@ -27,7 +28,7 @@ func (s *Dms_enterpriseService) DescribeDmsEnterpriseInstance(id string) (object
 		"Host":     parts[0],
 		"Port":     parts[1],
 	}
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	request["Product"] = "dms-enterprise"
 	request["OrganizationId"] = s.client.Department
@@ -60,7 +61,7 @@ func (s *Dms_enterpriseService) DescribeDmsEnterpriseUser(id string) (object map
 		"RegionId": s.client.RegionId,
 		"Uid":      id,
 	}
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	request["Product"] = "dms-enterprise"
 	request["OrganizationId"] = s.client.Department

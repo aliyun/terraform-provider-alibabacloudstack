@@ -2,9 +2,11 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"time"
+
+	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
@@ -97,7 +99,7 @@ func resourceAlibabacloudStackApigatewayVpcAccessCreate(d *schema.ResourceData, 
 		return WrapError(err)
 	}
 	request["ClientToken"] = buildClientToken("SetVpcAccess")
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {

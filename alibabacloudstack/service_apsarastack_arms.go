@@ -6,6 +6,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -27,7 +28,7 @@ func (s *ArmsService) DescribeArmsAlertContact(id string) (object map[string]int
 	}
 	request["Product"] = "ARMS"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -74,7 +75,7 @@ func (s *ArmsService) DescribeArmsAlertContactGroup(id string) (object map[strin
 	}
 	request["Product"] = "ARMS"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -120,7 +121,7 @@ func (s *ArmsService) DescribeArmsDispatchRule(id string) (object map[string]int
 	}
 	request["Product"] = "ARMS"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -167,7 +168,7 @@ func (s *ArmsService) DescribeArmsPrometheusAlertRule(id string) (object map[str
 	request["Product"] = "ARMS"
 	request["OrganizationId"] = s.client.Department
 	idExist := false
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {

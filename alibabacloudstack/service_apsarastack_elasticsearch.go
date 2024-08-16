@@ -8,6 +8,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
@@ -37,7 +38,7 @@ func (s *ElasticsearchService) DescribeElasticsearchInstance(id string) (object 
 	request["product"] = "elasticsearch"
 	request["OrganizationId"] = s.client.Department
 	request["ResourceId"] = s.client.ResourceGroup
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, request, &runtime)
 	addDebug(action, response, nil)
@@ -178,7 +179,7 @@ func (s *ElasticsearchService) TriggerNetwork(d *schema.ResourceData, content ma
 	request["product"] = "elasticsearch"
 	request["OrganizationId"] = s.client.Department
 	request["ResourceId"] = s.client.ResourceGroup
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, request, &runtime)
 	addDebug(action, response, content)
@@ -213,7 +214,7 @@ func (s *ElasticsearchService) ModifyWhiteIps(d *schema.ResourceData, content ma
 	request["product"] = "elasticsearch"
 	request["OrganizationId"] = s.client.Department
 	request["ResourceId"] = s.client.ResourceGroup
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	// retry
 	wait := incrementalWait(3*time.Second, 5*time.Second)
@@ -324,7 +325,7 @@ func updateDescription(d *schema.ResourceData, meta interface{}) error {
 	// request["product"] = "elasticsearch"
 	// request["OrganizationId"] = client.Department
 	// request["ResourceId"] = client.ResourceGroup
-	// runtime := util.RuntimeOptions{}
+	// runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	// runtime.SetAutoretry(true)
 	// //response, err = elasticsearchClient.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, request, &runtime)
 	// err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -513,7 +514,7 @@ func updateInstanceChargeType(d *schema.ResourceData, meta interface{}) error {
 	content["RegionId"] = client.RegionId
 	content["OrganizationId"] = client.Department
 	content["ResourceId"] = client.ResourceGroup
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	response, err = elasticsearchClient.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, content, &runtime)
 	time.Sleep(10 * time.Second)
@@ -543,7 +544,7 @@ func renewInstance(d *schema.ResourceData, meta interface{}) error {
 		content["duration"] = d.Get("period").(int)
 		content["pricingCycle"] = string(Month)
 	}
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	response, err = elasticsearchClient.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, content, &runtime)
 	time.Sleep(10 * time.Second)
@@ -572,7 +573,7 @@ func updateDataNodeAmount(d *schema.ResourceData, meta interface{}) error {
 	content["OrganizationId"] = client.Department
 	content["ResourceId"] = client.ResourceGroup
 	content["nodeAmount"] = d.Get("data_node_amount").(int)
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	// retry
 	wait := incrementalWait(3*time.Second, 5*time.Second)
@@ -626,7 +627,7 @@ func updateDataNodeSpec(d *schema.ResourceData, meta interface{}) error {
 	content["product"] = "elasticsearch"
 	content["OrganizationId"] = client.Department
 	content["ResourceId"] = client.ResourceGroup
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	// retry
 	wait := incrementalWait(3*time.Second, 5*time.Second)
@@ -686,7 +687,7 @@ func updateMasterNode(d *schema.ResourceData, meta interface{}) error {
 	content["product"] = "elasticsearch"
 	content["OrganizationId"] = client.Department
 	content["ResourceId"] = client.ResourceGroup
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	// retry
 	wait := incrementalWait(3*time.Second, 5*time.Second)
@@ -752,7 +753,7 @@ func updatePassword(d *schema.ResourceData, meta interface{}) error {
 	content["product"] = "elasticsearch"
 	content["OrganizationId"] = client.Department
 	content["ResourceId"] = client.ResourceGroup
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	// retry
 	wait := incrementalWait(3*time.Second, 5*time.Second)
@@ -833,7 +834,7 @@ func updateClientNode(d *schema.ResourceData, meta interface{}) error {
 	content["product"] = "elasticsearch"
 	content["OrganizationId"] = client.Department
 	content["ResourceId"] = client.ResourceGroup
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 
 	// retry
@@ -883,7 +884,7 @@ func openHttps(d *schema.ResourceData, meta interface{}) error {
 	content["product"] = "elasticsearch"
 	content["OrganizationId"] = client.Department
 	content["ResourceId"] = client.ResourceGroup
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 
 	// retry
@@ -932,7 +933,7 @@ func closeHttps(d *schema.ResourceData, meta interface{}) error {
 	content["product"] = "elasticsearch"
 	content["OrganizationId"] = client.Department
 	content["ResourceId"] = client.ResourceGroup
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	// retry
 	wait := incrementalWait(3*time.Second, 5*time.Second)

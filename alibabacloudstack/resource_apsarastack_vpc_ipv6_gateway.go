@@ -7,6 +7,7 @@ import (
 	"time"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -77,7 +78,7 @@ func resourceAlibabacloudStackVpcIpv6GatewayCreate(d *schema.ResourceData, meta 
 		request["Spec"] = v
 	}
 	request["VpcId"] = d.Get("vpc_id")
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
@@ -152,7 +153,7 @@ func resourceAlibabacloudStackVpcIpv6GatewayUpdate(d *schema.ResourceData, meta 
 		if err != nil {
 			return WrapError(err)
 		}
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
@@ -207,7 +208,7 @@ func resourceAlibabacloudStackVpcIpv6GatewayUpdate(d *schema.ResourceData, meta 
 		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
 			modifyIpv6GatewayAttributeReq["Product"] = "Vpc"
 			modifyIpv6GatewayAttributeReq["OrganizationId"] = client.Department
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, modifyIpv6GatewayAttributeReq, &util.RuntimeOptions{})
+			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, modifyIpv6GatewayAttributeReq, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
 			if err != nil {
 				if NeedRetry(err) {
 					wait()
@@ -249,7 +250,7 @@ func resourceAlibabacloudStackVpcIpv6GatewayDelete(d *schema.ResourceData, meta 
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		request["Product"] = "Vpc"
 		request["OrganizationId"] = client.Department
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
 		if err != nil {
 			if NeedRetry(err) {
 				wait()

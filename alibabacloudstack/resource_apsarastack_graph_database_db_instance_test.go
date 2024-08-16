@@ -9,6 +9,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -49,7 +50,7 @@ func testSweepGraphDatabaseDbInstance(region string) error {
 		log.Printf("[ERROR] %s get an error: %#v", action, err)
 	}
 	for {
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -95,7 +96,7 @@ func testSweepGraphDatabaseDbInstance(region string) error {
 			deleteRequest := map[string]interface{}{
 				"DBInstanceId": item["DBInstanceId"],
 			}
-			_, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-03"), StringPointer("AK"), nil, deleteRequest, &util.RuntimeOptions{})
+			_, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-03"), StringPointer("AK"), nil, deleteRequest, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
 			if err != nil {
 				log.Printf("[ERROR] Failed to delete Graph Database DbInstance (%s): %s", item["DBInstanceDescription"].(string), err)
 			}

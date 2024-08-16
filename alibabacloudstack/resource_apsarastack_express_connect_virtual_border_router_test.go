@@ -9,6 +9,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -51,7 +52,7 @@ func testSweepExpressConnectVirtualBorderRouters(region string) error {
 	var response interface{}
 	for {
 		action := "DescribeVirtualBorderRouters"
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(1*time.Minute, func() *resource.RetryError {
@@ -98,7 +99,7 @@ func testSweepExpressConnectVirtualBorderRouters(region string) error {
 				"Product":        "Vpc",
 				"OrganizationId": client.Department,
 			}
-			runtime := util.RuntimeOptions{}
+			runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 			runtime.SetAutoretry(true)
 			wait := incrementalWait(3*time.Second, 3*time.Second)
 			err = resource.Retry(1*time.Minute, func() *resource.RetryError {

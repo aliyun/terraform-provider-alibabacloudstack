@@ -2,14 +2,16 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"log"
 	"strings"
 	"testing"
+
+	"github.com/PaesslerAG/jsonpath"
+	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func init() {
@@ -43,7 +45,7 @@ func testSweepNasFileSystem(region string) error {
 	}
 	ids := make([]string, 0)
 	for {
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &runtime)
 		if err != nil {
@@ -78,7 +80,7 @@ func testSweepNasFileSystem(region string) error {
 						"MountTargetDomain": domainInfo["MountTargetDomain"],
 					}
 					action := "DeleteMountTarget"
-					runtime := util.RuntimeOptions{}
+					runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 					runtime.SetAutoretry(true)
 					response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &runtime)
 					if err != nil {
@@ -99,7 +101,7 @@ func testSweepNasFileSystem(region string) error {
 			"FileSystemId": filesystemId,
 		}
 		action := "DeleteFileSystem"
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &runtime)
 		if err != nil {

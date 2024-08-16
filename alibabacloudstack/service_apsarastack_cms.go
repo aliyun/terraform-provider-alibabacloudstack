@@ -252,3 +252,87 @@ func (s *CmsService) DescribeCmsAlarmContactGroup(id string) (object cms.Contact
 	err = WrapErrorf(Error(GetNotFoundMessage("CmsAlarmContactGroup", id)), NotFoundMsg, ProviderERROR)
 	return
 }
+
+func (s *CmsService) DescribeCmsMetricRuleTemplateList() (templates []cms.Template, err error) {
+	request := cms.CreateDescribeMetricRuleTemplateListRequest()
+	request.RegionId = s.client.RegionId
+	request.Headers = map[string]string{"RegionId": s.client.RegionId}
+	PageNumber := 1
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": s.client.SecretKey,
+		"Product":         "cms",
+		"Department":      s.client.Department,
+		"ResourceGroup":   s.client.ResourceGroup,
+		"IsDefault":       "false",
+		"History":         "ture",
+		"PageNumber":      fmt.Sprintf("%d", PageNumber),
+		"PageSize":        "20",
+	}
+	for {
+		raw, err := s.client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
+			return cmsClient.DescribeMetricRuleTemplateList(request)
+		})
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		if err != nil {
+			return templates, WrapErrorf(err, DefaultErrorMsg, "DescribeMetricRuleTemplateList", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		}
+		response, _ := raw.(*cms.DescribeMetricRuleTemplateListResponse)
+		if response.Code != 200 {
+			err = Error("DescribeMetricRuleTemplateList failed for " + response.Message)
+			return templates, err
+		} else {
+			templates = append(templates, response.Templates.Template...)
+		}
+		if len(templates) < int(response.Total) {
+			PageNumber++
+			request.QueryParams["PageNumber"] = fmt.Sprintf("%d", PageNumber)
+		} else {
+			break
+		}
+	}
+	return templates, nil
+}
+
+func (s *CmsService) DescribeCmsMetricRuleTemplateDetail(id string) (object cms.Template, err error) {
+	templates, err := s.DescribeCmsMetricRuleTemplateList()
+	if err != nil {
+		return object, WrapErrorf(err, DefaultErrorMsg, id, "DescribeCmsMetricRuleTemplateList", AlibabacloudStackSdkGoERROR)
+	}
+	for _, template := range templates {
+		if fmt.Sprintf("%d", template.TemplateId) == id {
+			return template, nil
+		}
+	}
+	return object, WrapErrorf(Error(GetNotFoundMessage("CmsMetricRuleTemplate", id)), NotFoundMsg, AlibabacloudStackSdkGoERROR)
+}
+
+func (s *CmsService) DescribeMetricRuleTemplateAttribute(id string) (object *cms.DescribeMetricRuleTemplateAttributeResponse, err error) {
+	request := cms.CreateDescribeMetricRuleTemplateAttributeRequest()
+	request.RegionId = s.client.RegionId
+	request.Headers = map[string]string{"RegionId": s.client.RegionId}
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": s.client.SecretKey,
+		"Product":         "cms",
+		"Department":      s.client.Department,
+		"ResourceGroup":   s.client.ResourceGroup,
+	}
+	request.TemplateId = id
+	raw, err := s.client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
+		return cmsClient.DescribeMetricRuleTemplateAttribute(request)
+	})
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	if err != nil {
+		if IsExpectedErrors(err, []string{"TemplateNotExists", "ResourceNotFound"}) {
+			err = WrapErrorf(Error(GetNotFoundMessage("DescribeMetricRuleTemplateAttribute", id)), NotFoundMsg, ProviderERROR)
+			return object, err
+		}
+		err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return object, err
+	}
+	bresponse, _ := raw.(*cms.DescribeMetricRuleTemplateAttributeResponse)
+	if bresponse.Code == 200 {
+		return bresponse, nil
+	} else {
+		return nil, WrapErrorf(Error(GetNotFoundMessage("DescribeMetricRuleTemplateAttribute", id)), NotFoundMsg, ProviderERROR)
+	}
+}

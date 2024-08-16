@@ -6,6 +6,7 @@ import (
 	"time"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -122,7 +123,7 @@ func resourceAlibabacloudStackCsbProjectCreate(d *schema.ResourceData, meta inte
 	request["product"] = "CSB"
 	request["OrganizationId"] = client.Department
 
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-11-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-11-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
 
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_csb_project", action, AlibabacloudStackSdkGoERROR)
@@ -189,7 +190,7 @@ func resourceAlibabacloudStackCsbProjectUpdate(d *schema.ResourceData, meta inte
 			return WrapError(err)
 		}
 
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-11-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-11-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
 		addDebug(action, response, request)
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
@@ -218,7 +219,7 @@ func resourceAlibabacloudStackCsbProjectDelete(d *schema.ResourceData, meta inte
 	request["Product"] = "CSB"
 	request["OrganizationId"] = client.Department
 
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-11-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-11-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
 
 	addDebug(action, response, request)
 	if err != nil {

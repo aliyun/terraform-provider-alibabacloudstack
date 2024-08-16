@@ -9,6 +9,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
@@ -1058,7 +1059,7 @@ func (s *VpcService) DescribeNetworkAcl(id string) (object map[string]interface{
 	}
 	request["Product"] = "Vpc"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -1406,7 +1407,7 @@ func (s *VpcService) DescribeVSwitchWithTeadsl(id string) (object map[string]int
 	}
 	request["Product"] = "Vpc"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &runtime)
 	if err != nil {
@@ -1478,7 +1479,7 @@ func (s *VpcService) DeleteAclResources(id string) (object map[string]interface{
 		return nil, WrapError(err)
 	}
 	request["ClientToken"] = buildClientToken("UnassociateNetworkAcl")
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
@@ -1523,7 +1524,7 @@ func (s *VpcService) DescribeVpcIpv6EgressRule(id string) (object map[string]int
 	}
 	idExist := false
 	for {
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -1598,7 +1599,7 @@ func (s *VpcService) DescribeVpcIpv6Gateway(id string) (object map[string]interf
 		"RegionId":      s.client.RegionId,
 		"Ipv6GatewayId": id,
 	}
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -1660,7 +1661,7 @@ func (s *VpcService) DescribeVpcIpv6InternetBandwidth(id string) (object map[str
 		"RegionId":                s.client.RegionId,
 		"Ipv6InternetBandwidthId": id,
 	}
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -1714,7 +1715,7 @@ func (s *VpcService) setInstanceSecondaryCidrBlocks(d *schema.ResourceData) erro
 				request["SecondaryCidrBlock"] = item
 				request["Product"] = "Vpc"
 				request["OrganizationId"] = s.client.Department
-				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
 				if err != nil {
 					return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 				}
@@ -1732,7 +1733,7 @@ func (s *VpcService) setInstanceSecondaryCidrBlocks(d *schema.ResourceData) erro
 				request["SecondaryCidrBlock"] = item
 				request["Product"] = "Vpc"
 				request["OrganizationId"] = s.client.Department
-				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
 				if err != nil {
 					return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 				}
@@ -1773,7 +1774,7 @@ func (s *VpcService) SetResourceTags(d *schema.ResourceData, resourceType string
 			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 				request["Product"] = "Vpc"
 				request["OrganizationId"] = s.client.Department
-				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
 				if err != nil {
 					if IsThrottling(err) {
 						wait()
@@ -1807,7 +1808,7 @@ func (s *VpcService) SetResourceTags(d *schema.ResourceData, resourceType string
 			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 				request["Product"] = "Vpc"
 				request["OrganizationId"] = s.client.Department
-				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
 				if err != nil {
 					if IsThrottling(err) {
 						wait()
@@ -1847,7 +1848,7 @@ func (s *VpcService) ListTagResources(id string, resourceType string) (object in
 	for {
 		wait := incrementalWait(3*time.Second, 5*time.Second)
 		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+			response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
 			log.Printf("Response of Vpc ListTagResources: %v", response)
 			if err != nil {
 				if NeedRetry(err) {
@@ -1897,7 +1898,7 @@ func (s *VpcService) DescribeExpressConnectPhysicalConnection(id string) (object
 		"Value": []string{id},
 	})
 	request["Filter"] = filterMapList
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -1966,7 +1967,7 @@ func (s *VpcService) DescribeExpressConnectVirtualBorderRouter(id string) (objec
 	}
 	idExist := false
 	for {
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(5*time.Minute, func() *resource.RetryError {

@@ -10,6 +10,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 
@@ -1882,7 +1883,7 @@ func (s *EcsService) SetResourceTagsNew(d *schema.ResourceData, resourceType str
 			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 				request["Product"] = "ascm"
 				request["OrganizationId"] = s.client.Department
-				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
 				if err != nil {
 					if IsThrottling(err) {
 						wait()
@@ -1916,7 +1917,7 @@ func (s *EcsService) SetResourceTagsNew(d *schema.ResourceData, resourceType str
 			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 				request["Product"] = "ascm"
 				request["OrganizationId"] = s.client.Department
-				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
 				if err != nil {
 					if IsThrottling(err) {
 						wait()
@@ -1973,7 +1974,7 @@ func (s *EcsService) SetSystemDiskTags(d *schema.ResourceData) error {
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
 		request["Product"] = "ascm"
 		request["OrganizationId"] = s.client.Department
-		response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+		response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
 		if err != nil {
 			if IsThrottling(err) {
 				wait()
@@ -2002,7 +2003,7 @@ func (s *EcsService) SetSystemDiskTags(d *schema.ResourceData) error {
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
 		add_request["Product"] = "ascm"
 		add_request["OrganizationId"] = s.client.Department
-		response, err := conn.DoRequest(StringPointer("TagResources"), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, add_request, &util.RuntimeOptions{})
+		response, err := conn.DoRequest(StringPointer("TagResources"), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, add_request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
 		if err != nil {
 			if IsThrottling(err) {
 				wait()
@@ -2064,7 +2065,7 @@ func (s *EcsService) UpdateSystemDiskTags(d *schema.ResourceData) error {
 		err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 			request["Product"] = "ascm"
 			request["OrganizationId"] = s.client.Department
-			response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+			response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
 			if err != nil {
 				if IsThrottling(err) {
 					wait()
@@ -2098,7 +2099,7 @@ func (s *EcsService) UpdateSystemDiskTags(d *schema.ResourceData) error {
 		err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 			request["Product"] = "ascm"
 			request["OrganizationId"] = s.client.Department
-			response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{})
+			response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
 			if err != nil {
 				if IsThrottling(err) {
 					wait()
@@ -2222,7 +2223,7 @@ func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub.EcsDes
 	}
 	request.PageNumber = requests.NewInteger(1)
 	request.PageSize = requests.NewInteger(20)
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	//response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &runtime)
 	raw, err := s.client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
@@ -2288,7 +2289,7 @@ func (s *EcsService) DescribeEcsCommand(id string) (result *datahub.EcsDescribeE
 	}
 	request.PageNumber = requests.NewInteger(1)
 	request.PageSize = requests.NewInteger(20)
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	//response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &runtime)
 	raw, err := s.client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
@@ -2333,7 +2334,7 @@ func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub.EcsDescri
 	//	"RegionId":      s.client.RegionId,
 	//	"HpcClusterIds": string(ids),
 	//}
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	ClientToken := buildClientToken("DescribeHpcClusters")
 	request := requests.NewCommonRequest()
@@ -2407,7 +2408,7 @@ func (s *EcsService) DescribeEcsDeploymentSet(id string) (object map[string]inte
 		"Department":       s.client.Department,
 		"OrganizationId":   s.client.Department,
 	}
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {

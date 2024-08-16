@@ -2,13 +2,15 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"strings"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
-	"strings"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -104,7 +106,7 @@ func dataSourceAlibabacloudStackEcsEbsStorageSetsRead(d *schema.ResourceData, me
 	}
 	request.PageNumber = requests.NewInteger(1)
 	request.PageSize = requests.NewInteger(20)
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	raw, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
 		return EcsClient.ProcessCommonRequest(request)

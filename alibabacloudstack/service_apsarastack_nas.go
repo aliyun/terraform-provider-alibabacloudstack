@@ -5,6 +5,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -26,7 +27,7 @@ func (s *NasService) DescribeNasFileSystem(id string) (object map[string]interfa
 	}
 	request["Product"] = "Nas"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &runtime)
 	if err != nil {
@@ -68,7 +69,7 @@ func (s *NasService) DescribeNasMountTarget(id string) (object map[string]interf
 	}
 	request["Product"] = "Nas"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &runtime)
 	if err != nil {
@@ -114,7 +115,7 @@ func (s *NasService) DescribeNasAccessGroup(id string) (object map[string]interf
 	}
 	request["Product"] = "Nas"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &runtime)
 	if err != nil {
@@ -156,7 +157,7 @@ func (s *NasService) DescribeNasAccessRule(id string) (object map[string]interfa
 	}
 	request["Product"] = "Nas"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &runtime)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -127,7 +128,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionCreate(d *schema.R
 		request["Type"] = v
 	}
 	request["ClientToken"] = buildClientToken("CreatePhysicalConnection")
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
@@ -246,7 +247,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 	if update {
 		action := "ModifyPhysicalConnectionAttribute"
 		request["ClientToken"] = buildClientToken("ModifyPhysicalConnectionAttribute")
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
@@ -282,7 +283,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 				request["RegionId"] = client.RegionId
 				action := "CancelPhysicalConnection"
 				request["ClientToken"] = buildClientToken("CancelPhysicalConnection")
-				runtime := util.RuntimeOptions{}
+				runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 				runtime.SetAutoretry(true)
 				wait := incrementalWait(3*time.Second, 3*time.Second)
 				err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
@@ -310,7 +311,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 				request["RegionId"] = client.RegionId
 				action := "EnablePhysicalConnection"
 				request["ClientToken"] = buildClientToken("EnablePhysicalConnection")
-				runtime := util.RuntimeOptions{}
+				runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 				runtime.SetAutoretry(true)
 				wait := incrementalWait(3*time.Second, 3*time.Second)
 				err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
@@ -338,7 +339,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 				request["RegionId"] = client.RegionId
 				action := "TerminatePhysicalConnection"
 				request["ClientToken"] = buildClientToken("TerminatePhysicalConnection")
-				runtime := util.RuntimeOptions{}
+				runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 				runtime.SetAutoretry(true)
 				wait := incrementalWait(3*time.Second, 3*time.Second)
 				err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
@@ -378,7 +379,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionDelete(d *schema.R
 		request["RegionId"] = client.RegionId
 		action := "CancelPhysicalConnection"
 		request["ClientToken"] = buildClientToken("CancelPhysicalConnection")
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
@@ -410,7 +411,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionDelete(d *schema.R
 
 	request["RegionId"] = client.RegionId
 	request["ClientToken"] = buildClientToken("DeletePhysicalConnection")
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {

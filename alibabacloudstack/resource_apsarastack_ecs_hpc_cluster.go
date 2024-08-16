@@ -3,13 +3,15 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"log"
 	"strings"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -51,7 +53,7 @@ func resourceAlibabacloudStackEcsHpcClusterCreate(d *schema.ResourceData, meta i
 	}
 	Name := d.Get("name").(string)
 	//RegionId := client.RegionId
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	ClientToken := buildClientToken("CreateHpcCluster")
 	request := requests.NewCommonRequest()
@@ -145,7 +147,7 @@ func resourceAlibabacloudStackEcsHpcClusterUpdate(d *schema.ResourceData, meta i
 	HpcClusterId := d.Id()
 	if update {
 		action := "ModifyHpcClusterAttribute"
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		ClientToken := buildClientToken("ModifyHpcClusterAttribute")
 		if strings.ToLower(client.Config.Protocol) == "https" {
@@ -190,7 +192,7 @@ func resourceAlibabacloudStackEcsHpcClusterDelete(d *schema.ResourceData, meta i
 
 	request := requests.NewCommonRequest()
 	HpcClusterId := d.Id()
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	ClientToken := buildClientToken("DeleteHpcCluster")
 	if strings.ToLower(client.Config.Protocol) == "https" {

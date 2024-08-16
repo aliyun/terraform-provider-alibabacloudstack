@@ -6,6 +6,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -24,7 +25,7 @@ func (s *QuickbiPublicService) DescribeQuickBiUser(id string) (object map[string
 	request := map[string]interface{}{
 		"UserId": id,
 	}
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -63,7 +64,7 @@ func (s *QuickbiPublicService) QueryUserInfoByUserId(id string) (object map[stri
 	request := map[string]interface{}{
 		"UserId": id,
 	}
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -102,7 +103,7 @@ func (s *QuickbiPublicService) DescribeQuickBiUserGroup(id string) (object map[s
 	//request := map[string]interface{}{
 	//	"UserGroupIds": id,
 	//}
-	//runtime := util.RuntimeOptions{}
+	//runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	//runtime.SetAutoretry(true)
 	//wait := incrementalWait(3*time.Second, 3*time.Second)
 	//err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -141,7 +142,7 @@ func (s *QuickbiPublicService) DescribeQuickBiWorkspace(id string) (object map[s
 	//request := map[string]interface{}{
 	//	"UserId": id,
 	//}
-	//runtime := util.RuntimeOptions{}
+	//runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	//runtime.SetAutoretry(true)
 	//wait := incrementalWait(3*time.Second, 3*time.Second)
 	//err = resource.Retry(5*time.Minute, func() *resource.RetryError {

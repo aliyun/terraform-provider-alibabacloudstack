@@ -6,6 +6,7 @@ import (
 	"time"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -169,7 +170,7 @@ func resourceAlibabacloudStackNetworkAclCreate(d *schema.ResourceData, meta inte
 	request["RegionId"] = client.RegionId
 	request["VpcId"] = d.Get("vpc_id")
 	request["ClientToken"] = buildClientToken("CreateNetworkAcl")
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
@@ -306,7 +307,7 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 			return WrapError(err)
 		}
 		request["ClientToken"] = buildClientToken("ModifyNetworkAclAttributes")
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
@@ -380,7 +381,7 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 			return WrapError(err)
 		}
 		request["ClientToken"] = buildClientToken("UpdateNetworkAclEntries")
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		wait := incrementalWait(3*time.Second, 5*time.Second)
 		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
@@ -437,7 +438,7 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 				return WrapError(err)
 			}
 			request["ClientToken"] = buildClientToken("AssociateNetworkAcl")
-			runtime := util.RuntimeOptions{}
+			runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 			runtime.SetAutoretry(true)
 			wait := incrementalWait(3*time.Second, 3*time.Second)
 			err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
@@ -484,7 +485,7 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 				return WrapError(err)
 			}
 			request["ClientToken"] = buildClientToken("UnassociateNetworkAcl")
-			runtime := util.RuntimeOptions{}
+			runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 			runtime.SetAutoretry(true)
 			wait := incrementalWait(3*time.Second, 3*time.Second)
 			err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
@@ -535,7 +536,7 @@ func resourceAlibabacloudStackNetworkAclDelete(d *schema.ResourceData, meta inte
 
 	request["RegionId"] = client.RegionId
 	request["ClientToken"] = buildClientToken("DeleteNetworkAcl")
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {

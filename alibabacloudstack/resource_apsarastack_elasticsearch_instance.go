@@ -7,6 +7,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/denverdino/aliyungo/common"
@@ -251,7 +252,7 @@ func resourceAlibabacloudStackElasticsearchCreate(d *schema.ResourceData, meta i
 	errorCodeList := []string{"TokenPreviousRequestProcessError"}
 	conn, err := elasticsearchService.client.NewElasticsearchClient()
 
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, requestBody, &runtime)
@@ -520,7 +521,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		content["product"] = "elasticsearch"
 		content["OrganizationId"] = client.Department
 		content["ResourceId"] = client.ResourceGroup
-		runtime := util.RuntimeOptions{}
+		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		// retry
 		wait := incrementalWait(3*time.Second, 5*time.Second)
@@ -644,7 +645,7 @@ func resourceAlibabacloudStackElasticsearchDelete(d *schema.ResourceData, meta i
 	request["product"] = "elasticsearch"
 	request["OrganizationId"] = client.Department
 	request["ResourceId"] = client.ResourceGroup
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 	// retry
 	wait := incrementalWait(3*time.Second, 5*time.Second)

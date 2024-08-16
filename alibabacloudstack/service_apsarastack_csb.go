@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
 
@@ -25,7 +26,7 @@ func (s *CsbService) DescribeCsbProjectDetail(id string) (object map[string]inte
 	}
 	request["Product"] = "CSB"
 	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{}
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 	runtime.SetAutoretry(true)
 
 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-11-18"), StringPointer("AK"), nil, request, &runtime)
