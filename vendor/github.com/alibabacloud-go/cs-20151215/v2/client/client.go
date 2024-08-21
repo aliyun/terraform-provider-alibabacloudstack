@@ -9215,7 +9215,7 @@ func (client *Client) GetEndpoint(productId *string, regionId *string, endpointR
 }
 
 func (client *Client) ListTagResources(request *ListTagResourcesRequest) (_result *ListTagResourcesResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &ListTagResourcesResponse{}
 	_body, _err := client.ListTagResourcesWithOptions(request, headers, runtime)
@@ -9276,7 +9276,7 @@ func (client *Client) ListTagResourcesWithOptions(tmpReq *ListTagResourcesReques
 }
 
 func (client *Client) UntagResources(request *UntagResourcesRequest) (_result *UntagResourcesResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &UntagResourcesResponse{}
 	_body, _err := client.UntagResourcesWithOptions(request, headers, runtime)
@@ -9323,7 +9323,7 @@ func (client *Client) UntagResourcesWithOptions(request *UntagResourcesRequest, 
 }
 
 func (client *Client) ModifyCluster(ClusterId *string, request *ModifyClusterRequest) (_result *ModifyClusterResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &ModifyClusterResponse{}
 	_body, _err := client.ModifyClusterWithOptions(ClusterId, request, headers, runtime)
@@ -9386,7 +9386,7 @@ func (client *Client) ModifyClusterWithOptions(ClusterId *string, request *Modif
 }
 
 func (client *Client) DescribeClusterAttachScripts(ClusterId *string, request *DescribeClusterAttachScriptsRequest) (_result *DescribeClusterAttachScriptsResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterAttachScriptsResponse{}
 	_body, _err := client.DescribeClusterAttachScriptsWithOptions(ClusterId, request, headers, runtime)
@@ -9441,7 +9441,7 @@ func (client *Client) DescribeClusterAttachScriptsWithOptions(ClusterId *string,
 }
 
 func (client *Client) RemoveClusterNodes(ClusterId *string, request *RemoveClusterNodesRequest) (_result *RemoveClusterNodesResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &RemoveClusterNodesResponse{}
 	_body, _err := client.RemoveClusterNodesWithOptions(ClusterId, request, headers, runtime)
@@ -9484,7 +9484,7 @@ func (client *Client) RemoveClusterNodesWithOptions(ClusterId *string, request *
 }
 
 func (client *Client) DescribeKubernetesVersionMetadata(request *DescribeKubernetesVersionMetadataRequest) (_result *DescribeKubernetesVersionMetadataResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeKubernetesVersionMetadataResponse{}
 	_body, _err := client.DescribeKubernetesVersionMetadataWithOptions(request, headers, runtime)
@@ -9531,7 +9531,7 @@ func (client *Client) DescribeKubernetesVersionMetadataWithOptions(request *Desc
 }
 
 func (client *Client) DescribeClusterLogs(ClusterId *string) (_result *DescribeClusterLogsResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterLogsResponse{}
 	_body, _err := client.DescribeClusterLogsWithOptions(ClusterId, headers, runtime)
@@ -9556,7 +9556,7 @@ func (client *Client) DescribeClusterLogsWithOptions(ClusterId *string, headers 
 }
 
 func (client *Client) CreateKubernetesTrigger(request *CreateKubernetesTriggerRequest) (_result *CreateKubernetesTriggerResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &CreateKubernetesTriggerResponse{}
 	_body, _err := client.CreateKubernetesTriggerWithOptions(request, headers, runtime)
@@ -9603,7 +9603,7 @@ func (client *Client) CreateKubernetesTriggerWithOptions(request *CreateKubernet
 }
 
 func (client *Client) GrantPermissions(uid *string, request *GrantPermissionsRequest) (_result *GrantPermissionsResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &GrantPermissionsResponse{}
 	_body, _err := client.GrantPermissionsWithOptions(uid, request, headers, runtime)
@@ -9633,7 +9633,7 @@ func (client *Client) GrantPermissionsWithOptions(uid *string, request *GrantPer
 }
 
 func (client *Client) DescribeClusterDetail(ClusterId *string) (_result *DescribeClusterDetailResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterDetailResponse{}
 	_body, _err := client.DescribeClusterDetailWithOptions(ClusterId, headers, runtime)
@@ -9658,7 +9658,7 @@ func (client *Client) DescribeClusterDetailWithOptions(ClusterId *string, header
 }
 
 func (client *Client) PauseComponentUpgrade(clusterid *string, componentid *string) (_result *PauseComponentUpgradeResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &PauseComponentUpgradeResponse{}
 	_body, _err := client.PauseComponentUpgradeWithOptions(clusterid, componentid, headers, runtime)
@@ -9683,7 +9683,7 @@ func (client *Client) PauseComponentUpgradeWithOptions(clusterid *string, compon
 }
 
 func (client *Client) DescribeClusters(request *DescribeClustersRequest) (_result *DescribeClustersResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClustersResponse{}
 	_body, _err := client.DescribeClustersWithOptions(request, headers, runtime)
@@ -9722,7 +9722,7 @@ func (client *Client) DescribeClustersWithOptions(request *DescribeClustersReque
 }
 
 func (client *Client) DescribeUserPermission(uid *string) (_result *DescribeUserPermissionResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeUserPermissionResponse{}
 	_body, _err := client.DescribeUserPermissionWithOptions(uid, headers, runtime)
@@ -9747,7 +9747,7 @@ func (client *Client) DescribeUserPermissionWithOptions(uid *string, headers map
 }
 
 func (client *Client) ModifyClusterNodePool(ClusterId *string, NodepoolId *string, request *ModifyClusterNodePoolRequest) (_result *ModifyClusterNodePoolResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &ModifyClusterNodePoolResponse{}
 	_body, _err := client.ModifyClusterNodePoolWithOptions(ClusterId, NodepoolId, request, headers, runtime)
@@ -9806,7 +9806,7 @@ func (client *Client) ModifyClusterNodePoolWithOptions(ClusterId *string, Nodepo
 }
 
 func (client *Client) ResumeUpgradeCluster(ClusterId *string) (_result *ResumeUpgradeClusterResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &ResumeUpgradeClusterResponse{}
 	_body, _err := client.ResumeUpgradeClusterWithOptions(ClusterId, headers, runtime)
@@ -9831,7 +9831,7 @@ func (client *Client) ResumeUpgradeClusterWithOptions(ClusterId *string, headers
 }
 
 func (client *Client) OpenAckService(request *OpenAckServiceRequest) (_result *OpenAckServiceResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &OpenAckServiceResponse{}
 	_body, _err := client.OpenAckServiceWithOptions(request, headers, runtime)
@@ -9866,7 +9866,7 @@ func (client *Client) OpenAckServiceWithOptions(request *OpenAckServiceRequest, 
 }
 
 func (client *Client) ScaleClusterNodePool(ClusterId *string, NodepoolId *string, request *ScaleClusterNodePoolRequest) (_result *ScaleClusterNodePoolResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &ScaleClusterNodePoolResponse{}
 	_body, _err := client.ScaleClusterNodePoolWithOptions(ClusterId, NodepoolId, request, headers, runtime)
@@ -9901,7 +9901,7 @@ func (client *Client) ScaleClusterNodePoolWithOptions(ClusterId *string, Nodepoo
 }
 
 func (client *Client) DescribeClusterNodePoolDetail(ClusterId *string, NodepoolId *string) (_result *DescribeClusterNodePoolDetailResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterNodePoolDetailResponse{}
 	_body, _err := client.DescribeClusterNodePoolDetailWithOptions(ClusterId, NodepoolId, headers, runtime)
@@ -9926,7 +9926,7 @@ func (client *Client) DescribeClusterNodePoolDetailWithOptions(ClusterId *string
 }
 
 func (client *Client) CreateClusterNodePool(ClusterId *string, request *CreateClusterNodePoolRequest) (_result *CreateClusterNodePoolResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &CreateClusterNodePoolResponse{}
 	_body, _err := client.CreateClusterNodePoolWithOptions(ClusterId, request, headers, runtime)
@@ -9985,7 +9985,7 @@ func (client *Client) CreateClusterNodePoolWithOptions(ClusterId *string, reques
 }
 
 func (client *Client) DescribeClusterUserKubeconfig(ClusterId *string, request *DescribeClusterUserKubeconfigRequest) (_result *DescribeClusterUserKubeconfigResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterUserKubeconfigResponse{}
 	_body, _err := client.DescribeClusterUserKubeconfigWithOptions(ClusterId, request, headers, runtime)
@@ -10024,7 +10024,7 @@ func (client *Client) DescribeClusterUserKubeconfigWithOptions(ClusterId *string
 }
 
 func (client *Client) ScaleCluster(ClusterId *string, request *ScaleClusterRequest) (_result *ScaleClusterResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &ScaleClusterResponse{}
 	_body, _err := client.ScaleClusterWithOptions(ClusterId, request, headers, runtime)
@@ -10131,7 +10131,7 @@ func (client *Client) ScaleClusterWithOptions(ClusterId *string, request *ScaleC
 }
 
 func (client *Client) DescribeClusterAddonUpgradeStatus(ClusterId *string, ComponentId *string) (_result *DescribeClusterAddonUpgradeStatusResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterAddonUpgradeStatusResponse{}
 	_body, _err := client.DescribeClusterAddonUpgradeStatusWithOptions(ClusterId, ComponentId, headers, runtime)
@@ -10156,7 +10156,7 @@ func (client *Client) DescribeClusterAddonUpgradeStatusWithOptions(ClusterId *st
 }
 
 func (client *Client) DescribeAddons(request *DescribeAddonsRequest) (_result *DescribeAddonsResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeAddonsResponse{}
 	_body, _err := client.DescribeAddonsWithOptions(request, headers, runtime)
@@ -10195,7 +10195,7 @@ func (client *Client) DescribeAddonsWithOptions(request *DescribeAddonsRequest, 
 }
 
 func (client *Client) CreateAutoscalingConfig(ClusterId *string, request *CreateAutoscalingConfigRequest) (_result *CreateAutoscalingConfigResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &CreateAutoscalingConfigResponse{}
 	_body, _err := client.CreateAutoscalingConfigWithOptions(ClusterId, request, headers, runtime)
@@ -10246,7 +10246,7 @@ func (client *Client) CreateAutoscalingConfigWithOptions(ClusterId *string, requ
 }
 
 func (client *Client) CreateCluster(request *CreateClusterRequest) (_result *CreateClusterResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &CreateClusterResponse{}
 	_body, _err := client.CreateClusterWithOptions(request, headers, runtime)
@@ -10565,7 +10565,7 @@ func (client *Client) CreateClusterWithOptions(request *CreateClusterRequest, he
 }
 
 func (client *Client) UpgradeCluster(ClusterId *string, request *UpgradeClusterRequest) (_result *UpgradeClusterResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &UpgradeClusterResponse{}
 	_body, _err := client.UpgradeClusterWithOptions(ClusterId, request, headers, runtime)
@@ -10608,7 +10608,7 @@ func (client *Client) UpgradeClusterWithOptions(ClusterId *string, request *Upgr
 }
 
 func (client *Client) CancelWorkflow(workflowName *string, request *CancelWorkflowRequest) (_result *CancelWorkflowResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &CancelWorkflowResponse{}
 	_body, _err := client.CancelWorkflowWithOptions(workflowName, request, headers, runtime)
@@ -10643,7 +10643,7 @@ func (client *Client) CancelWorkflowWithOptions(workflowName *string, request *C
 }
 
 func (client *Client) AttachInstances(ClusterId *string, request *AttachInstancesRequest) (_result *AttachInstancesResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &AttachInstancesResponse{}
 	_body, _err := client.AttachInstancesWithOptions(ClusterId, request, headers, runtime)
@@ -10726,7 +10726,7 @@ func (client *Client) AttachInstancesWithOptions(ClusterId *string, request *Att
 }
 
 func (client *Client) DescribeTemplates(request *DescribeTemplatesRequest) (_result *DescribeTemplatesResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeTemplatesResponse{}
 	_body, _err := client.DescribeTemplatesWithOptions(request, headers, runtime)
@@ -10769,7 +10769,7 @@ func (client *Client) DescribeTemplatesWithOptions(request *DescribeTemplatesReq
 }
 
 func (client *Client) PauseClusterUpgrade(ClusterId *string) (_result *PauseClusterUpgradeResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &PauseClusterUpgradeResponse{}
 	_body, _err := client.PauseClusterUpgradeWithOptions(ClusterId, headers, runtime)
@@ -10794,7 +10794,7 @@ func (client *Client) PauseClusterUpgradeWithOptions(ClusterId *string, headers 
 }
 
 func (client *Client) DeleteTemplate(TemplateId *string) (_result *DeleteTemplateResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DeleteTemplateResponse{}
 	_body, _err := client.DeleteTemplateWithOptions(TemplateId, headers, runtime)
@@ -10819,7 +10819,7 @@ func (client *Client) DeleteTemplateWithOptions(TemplateId *string, headers map[
 }
 
 func (client *Client) DescribeTemplateAttribute(TemplateId *string, request *DescribeTemplateAttributeRequest) (_result *DescribeTemplateAttributeResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeTemplateAttributeResponse{}
 	_body, _err := client.DescribeTemplateAttributeWithOptions(TemplateId, request, headers, runtime)
@@ -10854,7 +10854,7 @@ func (client *Client) DescribeTemplateAttributeWithOptions(TemplateId *string, r
 }
 
 func (client *Client) CreateTemplate(request *CreateTemplateRequest) (_result *CreateTemplateResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &CreateTemplateResponse{}
 	_body, _err := client.CreateTemplateWithOptions(request, headers, runtime)
@@ -10905,7 +10905,7 @@ func (client *Client) CreateTemplateWithOptions(request *CreateTemplateRequest, 
 }
 
 func (client *Client) DescribeClusterNodes(ClusterId *string, request *DescribeClusterNodesRequest) (_result *DescribeClusterNodesResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterNodesResponse{}
 	_body, _err := client.DescribeClusterNodesWithOptions(ClusterId, request, headers, runtime)
@@ -10956,7 +10956,7 @@ func (client *Client) DescribeClusterNodesWithOptions(ClusterId *string, request
 }
 
 func (client *Client) DeleteCluster(ClusterId *string, request *DeleteClusterRequest) (_result *DeleteClusterResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DeleteClusterResponse{}
 	_body, _err := client.DeleteClusterWithOptions(ClusterId, request, headers, runtime)
@@ -11005,7 +11005,7 @@ func (client *Client) DeleteClusterWithOptions(ClusterId *string, tmpReq *Delete
 }
 
 func (client *Client) CancelComponentUpgrade(clusterId *string, componentId *string) (_result *CancelComponentUpgradeResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &CancelComponentUpgradeResponse{}
 	_body, _err := client.CancelComponentUpgradeWithOptions(clusterId, componentId, headers, runtime)
@@ -11030,7 +11030,7 @@ func (client *Client) CancelComponentUpgradeWithOptions(clusterId *string, compo
 }
 
 func (client *Client) MigrateCluster(clusterId *string) (_result *MigrateClusterResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &MigrateClusterResponse{}
 	_body, _err := client.MigrateClusterWithOptions(clusterId, headers, runtime)
@@ -11055,7 +11055,7 @@ func (client *Client) MigrateClusterWithOptions(clusterId *string, headers map[s
 }
 
 func (client *Client) DescribeClusterAddonsVersion(ClusterId *string) (_result *DescribeClusterAddonsVersionResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterAddonsVersionResponse{}
 	_body, _err := client.DescribeClusterAddonsVersionWithOptions(ClusterId, headers, runtime)
@@ -11080,7 +11080,7 @@ func (client *Client) DescribeClusterAddonsVersionWithOptions(ClusterId *string,
 }
 
 func (client *Client) DescribeExternalAgent(ClusterId *string, request *DescribeExternalAgentRequest) (_result *DescribeExternalAgentResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeExternalAgentResponse{}
 	_body, _err := client.DescribeExternalAgentWithOptions(ClusterId, request, headers, runtime)
@@ -11115,7 +11115,7 @@ func (client *Client) DescribeExternalAgentWithOptions(ClusterId *string, reques
 }
 
 func (client *Client) UnInstallClusterAddons(ClusterId *string, request *UnInstallClusterAddonsRequest) (_result *UnInstallClusterAddonsResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &UnInstallClusterAddonsResponse{}
 	_body, _err := client.UnInstallClusterAddonsWithOptions(ClusterId, request, headers, runtime)
@@ -11145,7 +11145,7 @@ func (client *Client) UnInstallClusterAddonsWithOptions(ClusterId *string, reque
 }
 
 func (client *Client) ResumeComponentUpgrade(clusterid *string, componentid *string) (_result *ResumeComponentUpgradeResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &ResumeComponentUpgradeResponse{}
 	_body, _err := client.ResumeComponentUpgradeWithOptions(clusterid, componentid, headers, runtime)
@@ -11170,7 +11170,7 @@ func (client *Client) ResumeComponentUpgradeWithOptions(clusterid *string, compo
 }
 
 func (client *Client) DescribeClustersV1(request *DescribeClustersV1Request) (_result *DescribeClustersV1Response, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClustersV1Response{}
 	_body, _err := client.DescribeClustersV1WithOptions(request, headers, runtime)
@@ -11217,7 +11217,7 @@ func (client *Client) DescribeClustersV1WithOptions(request *DescribeClustersV1R
 }
 
 func (client *Client) ModifyClusterConfiguration(ClusterId *string, request *ModifyClusterConfigurationRequest) (_result *ModifyClusterConfigurationResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &ModifyClusterConfigurationResponse{}
 	_body, _err := client.ModifyClusterConfigurationWithOptions(ClusterId, request, headers, runtime)
@@ -11252,7 +11252,7 @@ func (client *Client) ModifyClusterConfigurationWithOptions(ClusterId *string, r
 }
 
 func (client *Client) DescribeTaskInfo(taskId *string) (_result *DescribeTaskInfoResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeTaskInfoResponse{}
 	_body, _err := client.DescribeTaskInfoWithOptions(taskId, headers, runtime)
@@ -11277,7 +11277,7 @@ func (client *Client) DescribeTaskInfoWithOptions(taskId *string, headers map[st
 }
 
 func (client *Client) DescirbeWorkflow(workflowName *string) (_result *DescirbeWorkflowResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescirbeWorkflowResponse{}
 	_body, _err := client.DescirbeWorkflowWithOptions(workflowName, headers, runtime)
@@ -11302,7 +11302,7 @@ func (client *Client) DescirbeWorkflowWithOptions(workflowName *string, headers 
 }
 
 func (client *Client) CancelClusterUpgrade(ClusterId *string) (_result *CancelClusterUpgradeResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &CancelClusterUpgradeResponse{}
 	_body, _err := client.CancelClusterUpgradeWithOptions(ClusterId, headers, runtime)
@@ -11327,7 +11327,7 @@ func (client *Client) CancelClusterUpgradeWithOptions(ClusterId *string, headers
 }
 
 func (client *Client) RemoveWorkflow(workflowName *string) (_result *RemoveWorkflowResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &RemoveWorkflowResponse{}
 	_body, _err := client.RemoveWorkflowWithOptions(workflowName, headers, runtime)
@@ -11352,7 +11352,7 @@ func (client *Client) RemoveWorkflowWithOptions(workflowName *string, headers ma
 }
 
 func (client *Client) UpdateTemplate(TemplateId *string, request *UpdateTemplateRequest) (_result *UpdateTemplateResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &UpdateTemplateResponse{}
 	_body, _err := client.UpdateTemplateWithOptions(TemplateId, request, headers, runtime)
@@ -11403,7 +11403,7 @@ func (client *Client) UpdateTemplateWithOptions(TemplateId *string, request *Upd
 }
 
 func (client *Client) UpgradeClusterAddons(ClusterId *string, request *UpgradeClusterAddonsRequest) (_result *UpgradeClusterAddonsResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &UpgradeClusterAddonsResponse{}
 	_body, _err := client.UpgradeClusterAddonsWithOptions(ClusterId, request, headers, runtime)
@@ -11433,7 +11433,7 @@ func (client *Client) UpgradeClusterAddonsWithOptions(ClusterId *string, request
 }
 
 func (client *Client) DescribeClusterNamespaces(ClusterId *string) (_result *DescribeClusterNamespacesResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterNamespacesResponse{}
 	_body, _err := client.DescribeClusterNamespacesWithOptions(ClusterId, headers, runtime)
@@ -11458,7 +11458,7 @@ func (client *Client) DescribeClusterNamespacesWithOptions(ClusterId *string, he
 }
 
 func (client *Client) DeleteKubernetesTrigger(Id *string) (_result *DeleteKubernetesTriggerResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DeleteKubernetesTriggerResponse{}
 	_body, _err := client.DeleteKubernetesTriggerWithOptions(Id, headers, runtime)
@@ -11483,7 +11483,7 @@ func (client *Client) DeleteKubernetesTriggerWithOptions(Id *string, headers map
 }
 
 func (client *Client) DescribeUserQuota() (_result *DescribeUserQuotaResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeUserQuotaResponse{}
 	_body, _err := client.DescribeUserQuotaWithOptions(headers, runtime)
@@ -11508,7 +11508,7 @@ func (client *Client) DescribeUserQuotaWithOptions(headers map[string]*string, r
 }
 
 func (client *Client) DeleteClusterNodepool(ClusterId *string, NodepoolId *string) (_result *DeleteClusterNodepoolResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DeleteClusterNodepoolResponse{}
 	_body, _err := client.DeleteClusterNodepoolWithOptions(ClusterId, NodepoolId, headers, runtime)
@@ -11533,7 +11533,7 @@ func (client *Client) DeleteClusterNodepoolWithOptions(ClusterId *string, Nodepo
 }
 
 func (client *Client) DescribeClusterAddonsUpgradeStatus(ClusterId *string, request *DescribeClusterAddonsUpgradeStatusRequest) (_result *DescribeClusterAddonsUpgradeStatusResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterAddonsUpgradeStatusResponse{}
 	_body, _err := client.DescribeClusterAddonsUpgradeStatusWithOptions(ClusterId, request, headers, runtime)
@@ -11574,7 +11574,7 @@ func (client *Client) DescribeClusterAddonsUpgradeStatusWithOptions(ClusterId *s
 }
 
 func (client *Client) DescribeWorkflows() (_result *DescribeWorkflowsResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeWorkflowsResponse{}
 	_body, _err := client.DescribeWorkflowsWithOptions(headers, runtime)
@@ -11599,7 +11599,7 @@ func (client *Client) DescribeWorkflowsWithOptions(headers map[string]*string, r
 }
 
 func (client *Client) InstallClusterAddons(ClusterId *string, request *InstallClusterAddonsRequest) (_result *InstallClusterAddonsResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &InstallClusterAddonsResponse{}
 	_body, _err := client.InstallClusterAddonsWithOptions(ClusterId, request, headers, runtime)
@@ -11629,7 +11629,7 @@ func (client *Client) InstallClusterAddonsWithOptions(ClusterId *string, request
 }
 
 func (client *Client) DescribeClusterNodePools(ClusterId *string) (_result *DescribeClusterNodePoolsResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterNodePoolsResponse{}
 	_body, _err := client.DescribeClusterNodePoolsWithOptions(ClusterId, headers, runtime)
@@ -11654,7 +11654,7 @@ func (client *Client) DescribeClusterNodePoolsWithOptions(ClusterId *string, hea
 }
 
 func (client *Client) DescribeClusterV2UserKubeconfig(ClusterId *string, request *DescribeClusterV2UserKubeconfigRequest) (_result *DescribeClusterV2UserKubeconfigResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterV2UserKubeconfigResponse{}
 	_body, _err := client.DescribeClusterV2UserKubeconfigWithOptions(ClusterId, request, headers, runtime)
@@ -11689,7 +11689,7 @@ func (client *Client) DescribeClusterV2UserKubeconfigWithOptions(ClusterId *stri
 }
 
 func (client *Client) StartWorkflow(request *StartWorkflowRequest) (_result *StartWorkflowResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &StartWorkflowResponse{}
 	_body, _err := client.StartWorkflowWithOptions(request, headers, runtime)
@@ -11796,7 +11796,7 @@ func (client *Client) StartWorkflowWithOptions(request *StartWorkflowRequest, he
 }
 
 func (client *Client) ScaleOutCluster(ClusterId *string, request *ScaleOutClusterRequest) (_result *ScaleOutClusterResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &ScaleOutClusterResponse{}
 	_body, _err := client.ScaleOutClusterWithOptions(ClusterId, request, headers, runtime)
@@ -11911,7 +11911,7 @@ func (client *Client) ScaleOutClusterWithOptions(ClusterId *string, request *Sca
 }
 
 func (client *Client) DescribeEvents(request *DescribeEventsRequest) (_result *DescribeEventsResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeEventsResponse{}
 	_body, _err := client.DescribeEventsWithOptions(request, headers, runtime)
@@ -11958,7 +11958,7 @@ func (client *Client) DescribeEventsWithOptions(request *DescribeEventsRequest, 
 }
 
 func (client *Client) UpdateK8sClusterUserConfigExpire(ClusterId *string) (_result *UpdateK8sClusterUserConfigExpireResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &UpdateK8sClusterUserConfigExpireResponse{}
 	_body, _err := client.UpdateK8sClusterUserConfigExpireWithOptions(ClusterId, headers, runtime)
@@ -11983,7 +11983,7 @@ func (client *Client) UpdateK8sClusterUserConfigExpireWithOptions(ClusterId *str
 }
 
 func (client *Client) TagResources(request *TagResourcesRequest) (_result *TagResourcesResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &TagResourcesResponse{}
 	_body, _err := client.TagResourcesWithOptions(request, headers, runtime)
@@ -12030,7 +12030,7 @@ func (client *Client) TagResourcesWithOptions(request *TagResourcesRequest, head
 }
 
 func (client *Client) ModifyClusterTags(ClusterId *string, request *ModifyClusterTagsRequest) (_result *ModifyClusterTagsResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &ModifyClusterTagsResponse{}
 	_body, _err := client.ModifyClusterTagsWithOptions(ClusterId, request, headers, runtime)
@@ -12060,7 +12060,7 @@ func (client *Client) ModifyClusterTagsWithOptions(ClusterId *string, request *M
 }
 
 func (client *Client) GetKubernetesTrigger(ClusterId *string, request *GetKubernetesTriggerRequest) (_result *GetKubernetesTriggerResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &GetKubernetesTriggerResponse{}
 	_body, _err := client.GetKubernetesTriggerWithOptions(ClusterId, request, headers, runtime)
@@ -12107,7 +12107,7 @@ func (client *Client) GetKubernetesTriggerWithOptions(ClusterId *string, request
 }
 
 func (client *Client) GetUpgradeStatus(ClusterId *string) (_result *GetUpgradeStatusResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &GetUpgradeStatusResponse{}
 	_body, _err := client.GetUpgradeStatusWithOptions(ClusterId, headers, runtime)
@@ -12132,7 +12132,7 @@ func (client *Client) GetUpgradeStatusWithOptions(ClusterId *string, headers map
 }
 
 func (client *Client) DescribeClusterResources(ClusterId *string) (_result *DescribeClusterResourcesResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DescribeClusterResourcesResponse{}
 	_body, _err := client.DescribeClusterResourcesWithOptions(ClusterId, headers, runtime)
@@ -12157,7 +12157,7 @@ func (client *Client) DescribeClusterResourcesWithOptions(ClusterId *string, hea
 }
 
 func (client *Client) DeleteClusterNodes(ClusterId *string, request *DeleteClusterNodesRequest) (_result *DeleteClusterNodesResponse, _err error) {
-	runtime := &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime := &util.RuntimeOptions{}
 	headers := make(map[string]*string)
 	_result = &DeleteClusterNodesResponse{}
 	_body, _err := client.DeleteClusterNodesWithOptions(ClusterId, request, headers, runtime)
