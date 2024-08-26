@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -9,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -146,6 +148,10 @@ func resourceAlibabacloudCmsMetricRuleTemplate() *schema.Resource {
 			},
 			"description": {
 				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"enable": {
+				Type:     schema.TypeBool,
 				Optional: true,
 			},
 			"enable_end_time": {
@@ -362,7 +368,8 @@ func resourceAlibabacloudCmsMetricRuleTemplateUpdate(d *schema.ResourceData, met
 			"Product":         "cms",
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
-			"TemplateIds":     fmt.Sprintf("[%s]", d.Id()),
+			"TemplateId":      "[]",
+			"TemplateIds":     d.Id(),
 			"ResourceGroupId": client.ResourceGroup,
 			"GroupId":         client.ResourceGroup,
 			"Overwrite":       fmt.Sprintf("%t", d.Get("overwrite").(bool)),
@@ -380,7 +387,7 @@ func resourceAlibabacloudCmsMetricRuleTemplateUpdate(d *schema.ResourceData, met
 			request.QueryParams["NotifyLevel"] = v.(string)
 		}
 		if v, ok := d.GetOk("silence_time"); ok {
-			request.QueryParams["SilenceTime"] = v.(string)
+			request.QueryParams["SilenceTime"] = fmt.Sprint(v)
 
 		}
 		if v, ok := d.GetOk("webhook"); ok {
@@ -393,12 +400,17 @@ func resourceAlibabacloudCmsMetricRuleTemplateUpdate(d *schema.ResourceData, met
 		if err != nil {
 			return WrapErrorf(err, DataDefaultErrorMsg, "ApplyMetricRuleTemplate", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
-		response, _ := raw.(*cms.ApplyMetricRuleTemplateResponse)
-		if response.Code != 200 {
-			return WrapError(fmt.Errorf("%s", response.Message))
+		bresponse, _ := raw.(*responses.CommonResponse)
+		resource := make(map[string]interface{})
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resource)
+		if err != nil {
+			return WrapErrorf(err, DataDefaultErrorMsg, "ApplyMetricRuleTemplate", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		}
+		if resource["Code"].(float64) != 200 {
+			return WrapError(fmt.Errorf("ApplyMetricRuleTemplate Error: %v", resource))
 		}
 		d.Set("group_id", client.ResourceGroup)
-		d.SetPartial("group_id")
+		// d.SetPartial("group_id")
 	}
 	update = false
 	modifyMetricRuleTemplateReq := cms.CreateModifyMetricRuleTemplateRequest()
@@ -481,14 +493,14 @@ func resourceAlibabacloudCmsMetricRuleTemplateUpdate(d *schema.ResourceData, met
 		if err != nil {
 			return WrapErrorf(err, DataDefaultErrorMsg, "ApplyMetricRuleTemplate", modifyMetricRuleTemplateReq.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
-		response, _ := raw.(*cms.ApplyMetricRuleTemplateResponse)
+		response, _ := raw.(*cms.ModifyMetricRuleTemplateResponse)
 		if response.Code != 200 {
 			return WrapError(fmt.Errorf("%s", response.Message))
 		}
-		d.SetPartial("rest_version")
-		d.SetPartial("alert_templates")
-		d.SetPartial("description")
-		d.SetPartial("metric_rule_template_name")
+		// d.SetPartial("rest_version")
+		// d.SetPartial("alert_templates")
+		// d.SetPartial("description")
+		// d.SetPartial("metric_rule_template_name")
 	}
 	d.Partial(false)
 	return resourceAlibabacloudCmsMetricRuleTemplateRead(d, meta)

@@ -1,12 +1,14 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -125,69 +127,72 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterCreate(d *schema.
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "CreateVirtualBorderRouter"
-	request := map[string]interface{}{
+	request := requests.NewCommonRequest()
+	request.Method = "POST"
+	request.Product = "Vpc"
+	request.ApiName = action
+	request.Version = "2016-04-28"
+	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.QueryParams = map[string]string{
 		"RegionId":       client.RegionId,
 		"Product":        "Vpc",
 		"OrganizationId": client.Department,
 	}
-	conn, err := client.NewVpcClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	if v, ok := d.GetOk("bandwidth"); ok {
-		request["Bandwidth"] = v
+		request.QueryParams["Bandwidth"] = v.(string)
 	}
 	if v, ok := d.GetOk("circuit_code"); ok {
-		request["CircuitCode"] = v
+		request.QueryParams["CircuitCode"] = v.(string)
 	}
 	if v, ok := d.GetOk("description"); ok {
-		request["Description"] = v
+		request.QueryParams["Description"] = v.(string)
 	}
 	if v, ok := d.GetOkExists("enable_ipv6"); ok {
-		request["EnableIpv6"] = v
+		request.QueryParams["EnableIpv6"] = v.(string)
 	}
-	request["LocalGatewayIp"] = d.Get("local_gateway_ip")
+	request.QueryParams["LocalGatewayIp"] = d.Get("local_gateway_ip").(string)
 	if v, ok := d.GetOk("local_ipv6_gateway_ip"); ok {
-		request["LocalIpv6GatewayIp"] = v
+		request.QueryParams["LocalIpv6GatewayIp"] = v.(string)
 	}
-	request["PeerGatewayIp"] = d.Get("peer_gateway_ip")
+	request.QueryParams["PeerGatewayIp"] = d.Get("peer_gateway_ip").(string)
 	if v, ok := d.GetOk("peer_ipv6_gateway_ip"); ok {
-		request["PeerIpv6GatewayIp"] = v
+		request.QueryParams["PeerIpv6GatewayIp"] = v.(string)
 	}
 	if v, ok := d.GetOk("peering_ipv6_subnet_mask"); ok {
-		request["PeeringIpv6SubnetMask"] = v
+		request.QueryParams["PeeringIpv6SubnetMask"] = v.(string)
 	}
-	request["PeeringSubnetMask"] = d.Get("peering_subnet_mask")
-	request["PhysicalConnectionId"] = d.Get("physical_connection_id")
-	request["RegionId"] = client.RegionId
+	request.QueryParams["PeeringSubnetMask"] = d.Get("peering_subnet_mask").(string)
+	request.QueryParams["PhysicalConnectionId"] = d.Get("physical_connection_id").(string)
+	request.QueryParams["RegionId"] = client.RegionId
 	if v, ok := d.GetOk("vbr_owner_id"); ok {
-		request["VbrOwnerId"] = v
+		request.QueryParams["VbrOwnerId"] = v.(string)
 	}
 	if v, ok := d.GetOk("virtual_border_router_name"); ok {
-		request["Name"] = v
+		request.QueryParams["Name"] = v.(string)
 	}
-	request["VlanId"] = d.Get("vlan_id")
-	request["ClientToken"] = buildClientToken("CreateVirtualBorderRouter")
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &runtime)
+	request.QueryParams["VlanId"] = fmt.Sprintf("%d", d.Get("vlan_id").(int))
+	err := resource.Retry(3*time.Minute, func() *resource.RetryError {
+		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
+			return vpcClient.ProcessCommonRequest(request)
+		})
 		if err != nil {
-			if NeedRetry(err) || IsExpectedErrors(err, []string{"TaskConflict"}) {
-				wait()
-				return resource.RetryableError(err)
-			}
 			return resource.NonRetryableError(err)
 		}
+		addDebug(request.GetActionName(), raw, request, request.QueryParams)
+		bresponse, _ := raw.(*responses.CommonResponse)
+		if bresponse.GetHttpStatus() != 200 {
+			return resource.RetryableError(fmt.Errorf("CreateVirtualBorderRouter Failed!!! %s", err))
+		}
+		err = json.Unmarshal([]byte(bresponse.GetHttpContentString()), &response)
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+		d.SetId(fmt.Sprint(response["VbrId"]))
 		return nil
 	})
-	addDebug(action, response, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_express_connect_virtual_border_router", action, AlibabacloudStackSdkGoERROR)
+		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_express_connect_virtual_border_router", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
-
-	d.SetId(fmt.Sprint(response["VbrId"]))
 
 	return resourceAlibabacloudStackExpressConnectVirtualBorderRouterUpdate(d, meta)
 }
@@ -233,15 +238,11 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterRead(d *schema.Re
 func resourceAlibabacloudStackExpressConnectVirtualBorderRouterUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-	conn, err := client.NewVpcClient()
-	if err != nil {
-		return WrapError(err)
-	}
-	var response map[string]interface{}
 	d.Partial(true)
 
 	update := false
-	request := map[string]interface{}{
+	request := requests.NewCommonRequest()
+	request.QueryParams = map[string]string{
 		"VbrId":          d.Id(),
 		"RegionId":       client.RegionId,
 		"Product":        "Vpc",
@@ -250,121 +251,124 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterUpdate(d *schema.
 	if !d.IsNewResource() && d.HasChange("circuit_code") {
 		update = true
 		if v, ok := d.GetOk("circuit_code"); ok {
-			request["CircuitCode"] = v
+			request.QueryParams["CircuitCode"] = v.(string)
 		}
 	}
 	if !d.IsNewResource() && d.HasChange("description") {
 		update = true
 		if v, ok := d.GetOk("description"); ok {
-			request["Description"] = v
+			request.QueryParams["Description"] = v.(string)
 		}
 	}
 	if d.HasChange("detect_multiplier") {
 		update = true
 		if v, ok := d.GetOk("detect_multiplier"); ok {
-			request["DetectMultiplier"] = v
+			request.QueryParams["DetectMultiplier"] = fmt.Sprint(v)
 		} else if v, ok := d.GetOk("min_rx_interval"); ok && fmt.Sprint(v) != "" {
 			if v, ok := d.GetOk("min_tx_interval"); ok && fmt.Sprint(v) != "" {
 				return WrapError(fmt.Errorf("attribute '%s' is required when '%s' is %v and '%s' is %v ", "detect_multiplier", "min_rx_interval", d.Get("min_rx_interval"), "min_tx_interval", d.Get("min_tx_interval")))
 			}
 		}
-		request["MinRxInterval"] = d.Get("min_rx_interval")
-		request["MinTxInterval"] = d.Get("min_tx_interval")
+		request.QueryParams["MinRxInterval"] = fmt.Sprint(d.Get("min_rx_interval"))
+		request.QueryParams["MinTxInterval"] = fmt.Sprint(d.Get("min_tx_interval"))
 	}
 	if !d.IsNewResource() && d.HasChange("enable_ipv6") {
 		update = true
 		if v, ok := d.GetOkExists("enable_ipv6"); ok {
-			request["EnableIpv6"] = v
+			request.QueryParams["EnableIpv6"] = v.(string)
 		}
 	}
 	if !d.IsNewResource() && d.HasChange("local_gateway_ip") {
 		update = true
-		request["LocalGatewayIp"] = d.Get("local_gateway_ip")
+		request.QueryParams["LocalGatewayIp"] = d.Get("local_gateway_ip").(string)
 	}
 	if !d.IsNewResource() && d.HasChange("local_ipv6_gateway_ip") {
 		update = true
 		if v, ok := d.GetOk("local_ipv6_gateway_ip"); ok {
-			request["LocalIpv6GatewayIp"] = v
+			request.QueryParams["LocalIpv6GatewayIp"] = v.(string)
 		}
 	}
 	if d.HasChange("min_rx_interval") {
 		update = true
 		if v, ok := d.GetOk("min_rx_interval"); ok {
-			request["MinRxInterval"] = v
+			request.QueryParams["MinRxInterval"] = fmt.Sprint(v)
 		} else if v, ok := d.GetOk("detect_multiplier"); ok && fmt.Sprint(v) != "" {
 			if v, ok := d.GetOk("min_tx_interval"); ok && fmt.Sprint(v) != "" {
 				return WrapError(fmt.Errorf("attribute '%s' is required when '%s' is %v and '%s' is %v ", "min_rx_interval", "detect_multiplier", d.Get("detect_multiplier"), "min_tx_interval", d.Get("min_tx_interval")))
 			}
 		}
-		request["DetectMultiplier"] = d.Get("detect_multiplier")
-		request["MinTxInterval"] = d.Get("min_tx_interval")
+		request.QueryParams["DetectMultiplier"] = fmt.Sprint(d.Get("detect_multiplier"))
+		request.QueryParams["MinTxInterval"] = fmt.Sprint(d.Get("min_tx_interval"))
 	}
 	if d.HasChange("min_tx_interval") {
 		update = true
 		if v, ok := d.GetOk("min_tx_interval"); ok {
-			request["MinTxInterval"] = v
+			request.QueryParams["MinTxInterval"] = fmt.Sprint(v)
 		} else if v, ok := d.GetOk("detect_multiplier"); ok && fmt.Sprint(v) != "" {
 			if v, ok := d.GetOk("min_rx_interval"); ok && fmt.Sprint(v) != "" {
 				return WrapError(fmt.Errorf("attribute '%s' is required when '%s' is %v and '%s' is %v ", "min_tx_interval", "detect_multiplier", d.Get("detect_multiplier"), "min_rx_interval", d.Get("min_rx_interval")))
 			}
 		}
-		request["DetectMultiplier"] = d.Get("detect_multiplier")
-		request["MinRxInterval"] = d.Get("min_rx_interval")
+		request.QueryParams["DetectMultiplier"] = fmt.Sprint(d.Get("detect_multiplier"))
+		request.QueryParams["MinRxInterval"] = fmt.Sprint(d.Get("min_rx_interval"))
 	}
 	if !d.IsNewResource() && d.HasChange("peer_gateway_ip") {
 		update = true
-		request["PeerGatewayIp"] = d.Get("peer_gateway_ip")
+		request.QueryParams["PeerGatewayIp"] = d.Get("peer_gateway_ip").(string)
 	}
 	if !d.IsNewResource() && d.HasChange("peer_ipv6_gateway_ip") {
 		update = true
 		if v, ok := d.GetOk("peer_ipv6_gateway_ip"); ok {
-			request["PeerIpv6GatewayIp"] = v
+			request.QueryParams["PeerIpv6GatewayIp"] = v.(string)
 		}
 	}
 	if !d.IsNewResource() && d.HasChange("peering_ipv6_subnet_mask") {
 		update = true
 		if v, ok := d.GetOk("peering_ipv6_subnet_mask"); ok {
-			request["PeeringIpv6SubnetMask"] = v
+			request.QueryParams["PeeringIpv6SubnetMask"] = v.(string)
 		}
 	}
 	if !d.IsNewResource() && d.HasChange("peering_subnet_mask") {
 		update = true
-		request["PeeringSubnetMask"] = d.Get("peering_subnet_mask")
+		request.QueryParams["PeeringSubnetMask"] = d.Get("peering_subnet_mask").(string)
 	}
 	if !d.IsNewResource() && d.HasChange("virtual_border_router_name") {
 		update = true
 		if v, ok := d.GetOk("virtual_border_router_name"); ok {
-			request["Name"] = v
+			request.QueryParams["Name"] = v.(string)
 		}
 	}
 	if !d.IsNewResource() && d.HasChange("vlan_id") {
 		update = true
-		request["VlanId"] = d.Get("vlan_id")
+		request.QueryParams["VlanId"] = fmt.Sprint(d.Get("vlan_id"))
 	}
 	if update {
 		if v, ok := d.GetOk("associated_physical_connections"); ok {
-			request["AssociatedPhysicalConnections"] = v
+			request.QueryParams["AssociatedPhysicalConnections"] = v.(string)
 		}
 		if v, ok := d.GetOk("bandwidth"); ok {
-			request["Bandwidth"] = v
+			request.QueryParams["Bandwidth"] = v.(string)
 		}
 		action := "ModifyVirtualBorderRouterAttribute"
-		request["ClientToken"] = buildClientToken("ModifyVirtualBorderRouterAttribute")
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &runtime)
+		request.Method = "POST"
+		request.ApiName = action
+		request.Product = "Vpc"
+		request.Version = "2016-04-28"
+		request.Headers = map[string]string{"RegionId": client.RegionId}
+		err := resource.Retry(3*time.Minute, func() *resource.RetryError {
+			raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
+				return vpcClient.ProcessCommonRequest(request)
+			})
 			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
 				return resource.NonRetryableError(err)
+			}
+			addDebug(request.GetActionName(), raw, request, request.QueryParams)
+			bresponse, _ := raw.(*responses.CommonResponse)
+			if bresponse.GetHttpStatus() != 200 {
+				return resource.RetryableError(fmt.Errorf("CreateVirtualBorderRouter Failed!!! %s", err))
 			}
 			return nil
 		})
-		addDebug(action, response, request)
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 		}
@@ -377,32 +381,34 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterUpdate(d *schema.
 		target := d.Get("status").(string)
 		if object["Status"].(string) != target {
 			if target == "active" {
-				request := map[string]interface{}{
+				rqs := requests.NewCommonRequest()
+				rqs.QueryParams = map[string]string{
 					"VbrId":          d.Id(),
 					"RegionId":       client.RegionId,
 					"Product":        "Vpc",
 					"OrganizationId": client.Department,
 				}
-				action := "RecoverVirtualBorderRouter"
-
-				request["ClientToken"] = buildClientToken("RecoverVirtualBorderRouter")
-				runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-				runtime.SetAutoretry(true)
-				wait := incrementalWait(3*time.Second, 3*time.Second)
-				err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-					response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &runtime)
+				rqs.Method = requests.POST
+				rqs.Product = "Vpc"
+				rqs.Version = "2016-04-28"
+				rqs.ApiName = "RecoverVirtualBorderRouter"
+				rqs.Headers = map[string]string{"RegionId": client.RegionId}
+				err := resource.Retry(3*time.Minute, func() *resource.RetryError {
+					raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
+						return vpcClient.ProcessCommonRequest(rqs)
+					})
 					if err != nil {
-						if NeedRetry(err) {
-							wait()
-							return resource.RetryableError(err)
-						}
 						return resource.NonRetryableError(err)
+					}
+					addDebug(rqs.GetActionName(), raw, rqs, rqs.QueryParams)
+					bresponse, _ := raw.(*responses.CommonResponse)
+					if bresponse.GetHttpStatus() != 200 {
+						return resource.RetryableError(fmt.Errorf("CreateVirtualBorderRouter Failed!!! %s", err))
 					}
 					return nil
 				})
-				addDebug(action, response, request)
 				if err != nil {
-					return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+					return WrapErrorf(err, DefaultErrorMsg, d.Id(), rqs.GetActionName(), AlibabacloudStackSdkGoERROR)
 				}
 				stateConf := BuildStateConf([]string{}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, vpcService.ExpressConnectVirtualBorderRouterStateRefreshFunc(d.Id(), []string{}))
 				if _, err := stateConf.WaitForState(); err != nil {
@@ -410,31 +416,34 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterUpdate(d *schema.
 				}
 			}
 			if target == "terminated" {
-				request := map[string]interface{}{
+				rqs := requests.NewCommonRequest()
+				rqs.QueryParams = map[string]string{
 					"VbrId":          d.Id(),
 					"RegionId":       client.RegionId,
 					"Product":        "Vpc",
 					"OrganizationId": client.Department,
 				}
-				action := "TerminateVirtualBorderRouter"
-				request["ClientToken"] = buildClientToken("TerminateVirtualBorderRouter")
-				runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-				runtime.SetAutoretry(true)
-				wait := incrementalWait(3*time.Second, 3*time.Second)
-				err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-					response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &runtime)
+				rqs.Method = requests.POST
+				rqs.Product = "Vpc"
+				rqs.Version = "2016-04-28"
+				rqs.ApiName = "TerminateVirtualBorderRouter"
+				rqs.Headers = map[string]string{"RegionId": client.RegionId}
+				err := resource.Retry(3*time.Minute, func() *resource.RetryError {
+					raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
+						return vpcClient.ProcessCommonRequest(rqs)
+					})
 					if err != nil {
-						if NeedRetry(err) {
-							wait()
-							return resource.RetryableError(err)
-						}
 						return resource.NonRetryableError(err)
+					}
+					addDebug(rqs.GetActionName(), raw, rqs, rqs.QueryParams)
+					bresponse, _ := raw.(*responses.CommonResponse)
+					if bresponse.GetHttpStatus() != 200 {
+						return resource.RetryableError(fmt.Errorf("CreateVirtualBorderRouter Failed!!! %s", err))
 					}
 					return nil
 				})
-				addDebug(action, response, request)
 				if err != nil {
-					return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+					return WrapErrorf(err, DefaultErrorMsg, d.Id(), rqs.GetActionName(), AlibabacloudStackSdkGoERROR)
 				}
 				stateConf := BuildStateConf([]string{}, []string{"terminated"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, vpcService.ExpressConnectVirtualBorderRouterStateRefreshFunc(d.Id(), []string{}))
 				if _, err := stateConf.WaitForState(); err != nil {
@@ -449,24 +458,23 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterUpdate(d *schema.
 func resourceAlibabacloudStackExpressConnectVirtualBorderRouterDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "DeleteVirtualBorderRouter"
-	var response map[string]interface{}
-	conn, err := client.NewVpcClient()
-	if err != nil {
-		return WrapError(err)
-	}
-	request := map[string]interface{}{
+	request := requests.NewCommonRequest()
+	request.QueryParams = map[string]string{
 		"VbrId":          d.Id(),
 		"RegionId":       client.RegionId,
 		"Product":        "Vpc",
 		"OrganizationId": client.Department,
 	}
-
-	request["ClientToken"] = buildClientToken("DeleteVirtualBorderRouter")
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
+	request.Method = requests.POST
+	request.Product = "Vpc"
+	request.Version = "2016-04-28"
+	request.ApiName = action
+	request.Headers = map[string]string{"RegionId": client.RegionId}
 	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &runtime)
+	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
+			return vpcClient.ProcessCommonRequest(request)
+		})
 		if err != nil {
 			if NeedRetry(err) || IsExpectedErrors(err, []string{"DependencyViolation.BgpGroup"}) {
 				wait()
@@ -474,9 +482,13 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterDelete(d *schema.
 			}
 			return resource.NonRetryableError(err)
 		}
+		addDebug(request.GetActionName(), raw, request, request.QueryParams)
+		bresponse, _ := raw.(*responses.CommonResponse)
+		if bresponse.GetHttpStatus() != 200 {
+			return resource.RetryableError(fmt.Errorf("CreateVirtualBorderRouter Failed!!! %s", err))
+		}
 		return nil
 	})
-	addDebug(action, response, request)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 	}
