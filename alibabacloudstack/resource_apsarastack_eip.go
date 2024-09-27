@@ -40,6 +40,7 @@ func resourceAlibabacloudStackEip() *schema.Resource {
 			},
 			"ip_address": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
 			"status": {
@@ -55,7 +56,7 @@ func resourceAlibabacloudStackEipCreate(d *schema.ResourceData, meta interface{}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 
-	request := vpc.CreateAllocateEipAddressRequest()
+	request := vpc.CreateAllocateEipAddressProRequest()
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -67,15 +68,17 @@ func resourceAlibabacloudStackEipCreate(d *schema.ResourceData, meta interface{}
 	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.Bandwidth = strconv.Itoa(d.Get("bandwidth").(int))
 	request.ClientToken = buildClientToken(request.GetActionName())
-
+	if v, ok := d.GetOk("ip_address"); ok && v != "" {
+		request.IpAddress = v.(string)
+	}
 	raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
-		return vpcClient.AllocateEipAddress(request)
+		return vpcClient.AllocateEipAddressPro(request)
 	})
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_eip", request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*vpc.AllocateEipAddressResponse)
+	response, _ := raw.(*vpc.AllocateEipAddressProResponse)
 	d.SetId(response.AllocationId)
 	err = vpcService.WaitForEip(d.Id(), Available, DefaultTimeoutMedium)
 	if err != nil {

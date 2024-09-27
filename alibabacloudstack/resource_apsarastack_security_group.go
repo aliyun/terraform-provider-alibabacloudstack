@@ -41,6 +41,13 @@ func resourceAlibabacloudStackSecurityGroup() *schema.Resource {
 				ForceNew: true,
 			},
 
+			"type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"enterprise", "normal"}, false),
+				Default:      "normal",
+			},
 			"inner_access_policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -58,7 +65,12 @@ func resourceAlibabacloudStackSecurityGroupCreate(d *schema.ResourceData, meta i
 	request := ecs.CreateCreateSecurityGroupRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{
+		"AccessKeySecret": client.SecretKey,
+		"Product":         "ecs",
+		"Department":      client.Department,
+		"ResourceGroup":   client.ResourceGroup,
+	}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -75,6 +87,7 @@ func resourceAlibabacloudStackSecurityGroupCreate(d *schema.ResourceData, meta i
 	if v := d.Get("vpc_id").(string); v != "" {
 		request.VpcId = v
 	}
+	request.SecurityGroupType = d.Get("type").(string)
 	request.ClientToken = buildClientToken(request.GetActionName())
 
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {

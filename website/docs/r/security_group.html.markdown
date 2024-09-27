@@ -43,7 +43,7 @@ The following arguments are supported:
 * `name` - (Optional) The name of the security group. Defaults to null.
 * `description` - (Optional, Forces new resource) The security group description. Defaults to null.
 * `vpc_id` - (Optional, ForceNew) The VPC ID.	
-
+* `type` - (Optional, ForceNew) The type of the security group. Valid values: `normal`, `enterprise`. Default value is `normal`.
 * `inner_access_policy` - (Optional) Whether to allow both machines to access each other on all ports in the same security group. Valid values: ["Accept", "Drop"]
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 
