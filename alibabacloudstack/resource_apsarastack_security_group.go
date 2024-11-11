@@ -127,23 +127,30 @@ func resourceAlibabacloudStackSecurityGroupRead(d *schema.ResourceData, meta int
 	} else {
 		request.Scheme = "http"
 	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.Headers = map[string]string{
+		"RegionId":              client.RegionId,
+		"x-acs-request-version": "v1",
+	}
 	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.SecurityGroupId = d.Id()
-
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.DescribeSecurityGroups(request)
-	})
-	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+	retry := 0
+	getTags := false
+	for retry <= 10 && !getTags {
+		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			return ecsClient.DescribeSecurityGroups(request)
+		})
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		}
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		response, _ := raw.(*ecs.DescribeSecurityGroupsResponse)
+		if len(response.SecurityGroups.SecurityGroup) >= 1 {
+			d.Set("tags", ecsService.tagsToMap(response.SecurityGroups.SecurityGroup[0].Tags.Tag))
+			getTags = true
+		}
+		time.Sleep(10000)
+		retry++
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*ecs.DescribeSecurityGroupsResponse)
-	if len(response.SecurityGroups.SecurityGroup) < 1 {
-		return WrapErrorf(Error(GetNotFoundMessage("SecurityGroup", d.Id())), NotFoundMsg, ProviderERROR)
-	}
-	d.Set("tags", ecsService.tagsToMap(response.SecurityGroups.SecurityGroup[0].Tags.Tag))
-
 	return nil
 }
 
