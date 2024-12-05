@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -30,10 +32,10 @@ func testAccCheckMongoDBInstanceDestroy(s *terraform.State) error {
 		}
 		_, err := ddsService.DescribeMongoDBInstance(rs.Primary.ID)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		return err
 	}
@@ -43,7 +45,7 @@ func testAccCheckMongoDBInstanceDestroy(s *terraform.State) error {
 func testSweepMongoDBInstances(region string) error {
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
@@ -62,7 +64,7 @@ func testSweepMongoDBInstances(region string) error {
 			return ddsClient.DescribeDBInstances(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "testSweepMongoDBInstances", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "testSweepMongoDBInstances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		response, _ := raw.(*dds.DescribeDBInstancesResponse)
 		addDebug(request.GetActionName(), response)
@@ -77,7 +79,7 @@ func testSweepMongoDBInstances(region string) error {
 		}
 
 		if page, err := getNextpageNumber(request.PageNumber); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		} else {
 			request.PageNumber = page
 		}
@@ -132,7 +134,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithRegions(t, false, connectivity.MongoDBClassicNoSupportedRegions)
+
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -285,7 +287,7 @@ func TestAccAlibabacloudStackMongoDBInstance_Version4(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithRegions(t, false, connectivity.MongoDBClassicNoSupportedRegions)
+
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -439,7 +441,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithRegions(t, true, connectivity.MongoDBMultiAzSupportedRegions)
+
 			testAccPreCheckWithNoDefaultVpc(t)
 		},
 		IDRefreshName: resourceId,
@@ -630,9 +632,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
 }
 
 const testMongoDBInstance_classic_base = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" { 
 }
 resource "alibabacloudstack_mongodb_instance" "default" {
@@ -643,9 +643,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_classic_ssl_action = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -658,9 +656,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_classic_ssl_action_update = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -673,9 +669,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_classic_base4 = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -687,9 +681,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_classic_tags = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -706,9 +698,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_classic_name = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -722,9 +712,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_classic_configure = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -738,9 +726,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_classic_account_password = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -758,9 +744,7 @@ const testMongoDBInstance_classic_tde = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
   engine_version      = "4.0"
@@ -773,9 +757,7 @@ const testMongoDBInstance_classic_security_ip_list = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
   engine_version      = "3.4"
@@ -791,9 +773,7 @@ const testMongoDBInstance_classic_security_group_id = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_security_groups" "default" {
 }
 resource "alibabacloudstack_mongodb_instance" "default" {
@@ -811,9 +791,7 @@ const testMongoDBInstance_classic_backup = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
   engine_version      = "3.4"
@@ -831,9 +809,7 @@ const testMongoDBInstance_classic_maintain_time = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
   engine_version      = "3.4"
@@ -853,9 +829,7 @@ const testMongoDBInstance_classic_together = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 resource "alibabacloudstack_mongodb_instance" "default" {
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
   engine_version      = "3.4"
@@ -873,9 +847,7 @@ const testMongoDBInstance_vpc_base = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 variable "name" {
   default = "tf-testAccMongoDBInstance_vpc"
 }
@@ -902,9 +874,7 @@ const testMongoDBInstance_vpc_name = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 variable "name" {
   default = "tf-testAccMongoDBInstance_vpc"
 }
@@ -932,9 +902,7 @@ const testMongoDBInstance_vpc_configure = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 variable "name" {
   default = "tf-testAccMongoDBInstance_vpc"
 }
@@ -962,9 +930,7 @@ const testMongoDBInstance_vpc_account_password = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 variable "name" {
   default = "tf-testAccMongoDBInstance_vpc"
 }
@@ -993,9 +959,7 @@ const testMongoDBInstance_vpc_security_ip_list = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 variable "name" {
   default = "tf-testAccMongoDBInstance_vpc"
 }
@@ -1025,9 +989,7 @@ const testMongoDBInstance_vpc_backup = `
 data "alibabacloudstack_zones" "default" {
   
 }
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 variable "name" {
   default = "tf-testAccMongoDBInstance_vpc"
 }
@@ -1056,9 +1018,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_vpc_together = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -1090,9 +1050,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multiAZ_base = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
   multi                       = true
@@ -1121,9 +1079,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multiAZ_name = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
   multi                       = true
@@ -1153,9 +1109,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multiAZ_configure = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
   multi                       = true
@@ -1185,9 +1139,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multiAZ_account_password = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
 
 }
@@ -1217,9 +1169,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multiAZ_security_ip_list = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   
   multi                       = true
@@ -1251,9 +1201,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multiAZ_backup = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
   multi                       = true
@@ -1287,9 +1235,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multiAZ_together = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
   multi                       = true
@@ -1323,9 +1269,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multi_instance_base = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
 }
@@ -1352,9 +1296,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multi_instance_name = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
 }
@@ -1382,9 +1324,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multi_instance_configure = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
 }
@@ -1412,9 +1352,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multi_instance_account_password = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
 }
@@ -1443,9 +1381,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multi_instance_security_ip_list = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
 }
@@ -1475,9 +1411,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multi_instance_backup = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
 }
@@ -1509,9 +1443,7 @@ resource "alibabacloudstack_mongodb_instance" "default" {
 }`
 
 const testMongoDBInstance_multi_instance_together = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
 }

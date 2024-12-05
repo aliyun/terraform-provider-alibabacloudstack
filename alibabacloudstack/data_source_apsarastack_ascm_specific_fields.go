@@ -2,14 +2,13 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
-	"strings"
 )
 
 func dataSourceAlibabacloudStackSpecificFields() *schema.Resource {
@@ -29,11 +28,9 @@ func dataSourceAlibabacloudStackSpecificFields() *schema.Resource {
 				Required: true,
 			},
 			"resource_type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ValidateFunc: validation.StringInSlice([]string{"OSS", "ADB", "DRDS", "SLB",
-					"NAT", "MAXCOMPUTE", "POSTGRESQL",
-					"ECS", "RDS", "IPSIX", "REDIS", "MONGODB", "HITSDB"}, false),
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"OSS", "ADB", "DRDS", "SLB", "NAT", "MAXCOMPUTE", "POSTGRESQL", "ECS", "RDS", "IPSIX", "REDIS", "MONGODB", "HITSDB"}, false),
 			},
 			"label": {
 				Type:     schema.TypeBool,
@@ -50,29 +47,15 @@ func dataSourceAlibabacloudStackSpecificFields() *schema.Resource {
 			},
 		},
 	}
-
 }
 
 func dataSourceAlibabacloudStackSpecificFieldsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.ApiName = "GroupCommonSpec"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GroupCommonSpec", "")
 	resourceType := d.Get("resource_type").(string)
 	groupFiled := d.Get("group_filed").(string)
-	request.QueryParams = map[string]string{  "Product": "ascm", "RegionId": client.RegionId, "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Action": "GroupCommonSpec", "Version": "2019-05-10", "resourceType": resourceType, "groupFiled": groupFiled}
+	request.QueryParams["resourceType"] = resourceType
+	request.QueryParams["groupFiled"] = groupFiled
 	response := SpecificField{}
 
 	for {
@@ -81,15 +64,18 @@ func dataSourceAlibabacloudStackSpecificFieldsRead(d *schema.ResourceData, meta 
 		})
 		log.Printf(" response of raw GroupCommonSpec : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_specific_fields", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_specific_fields", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Code == 200 || len(response.Data) < 1 {
 			break
@@ -101,7 +87,7 @@ func dataSourceAlibabacloudStackSpecificFieldsRead(d *schema.ResourceData, meta 
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("specific_fields", response.Data); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

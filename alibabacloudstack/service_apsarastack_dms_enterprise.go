@@ -2,9 +2,8 @@ package alibabacloudstack
 
 import (
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type Dms_enterpriseService struct {
@@ -13,67 +12,51 @@ type Dms_enterpriseService struct {
 
 func (s *Dms_enterpriseService) DescribeDmsEnterpriseInstance(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewDmsenterpriseClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "GetInstance"
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		err = WrapError(err)
+		err = errmsgs.WrapError(err)
 		return
 	}
 	request := map[string]interface{}{
-		"RegionId": s.client.RegionId,
 		"Host":     parts[0],
 		"Port":     parts[1],
+		"PageSize": PageSizeLarge,
+		"PageNumber": 1,
 	}
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	request["Product"] = "dms-enterprise"
-	request["OrganizationId"] = s.client.Department
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2018-11-01"), StringPointer("AK"), nil, request, &runtime)
+	response, err = s.client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", "GetInstance", "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InstanceNoEnoughNumber"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("DmsEnterpriseInstance", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InstanceNoEnoughNumber"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DmsEnterpriseInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
 		return object, err
 	}
-	addDebug(action, response, request)
 	v, err := jsonpath.Get("$.Instance", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.Instance", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Instance", response)
 	}
 	object = v.(map[string]interface{})
 	return object, nil
 }
 
+func (s *Dms_enterpriseService) DoDms_EnterpriseGetuserRequest(id string) (object map[string]interface{}, err error) {
+	return s.DescribeDmsEnterpriseUser(id)
+}
+
 func (s *Dms_enterpriseService) DescribeDmsEnterpriseUser(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewDmsenterpriseClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "GetUser"
 	request := map[string]interface{}{
-		"RegionId": s.client.RegionId,
 		"Uid":      id,
+		"PageSize": PageSizeLarge,
+		"PageNumber": 1,
 	}
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	request["Product"] = "dms-enterprise"
-	request["OrganizationId"] = s.client.Department
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2018-11-01"), StringPointer("AK"), nil, request, &runtime)
+	response, err = s.client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", "GetUser", "", nil, request)
 	if err != nil {
-		err = WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
-		return
+		return object, err
 	}
-	addDebug(action, response, request)
 	v, err := jsonpath.Get("$.User", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.User", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.User", response)
 	}
 	object = v.(map[string]interface{})
 	return object, nil

@@ -5,9 +5,8 @@ import (
 	"regexp"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -64,10 +63,9 @@ func dataSourceAlibabacloudStackMaxcomputeClusters() *schema.Resource {
 }
 
 func dataSourceAlibabacloudStackMaxcomputeClustersRead(d *schema.ResourceData, meta interface{}) error {
-
 	objects, err := DescribeMaxcomputeProject(meta)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	var r *regexp.Regexp
 	if rt, ok := d.GetOk("name_regex"); ok && rt.(string) != "" {
@@ -88,15 +86,14 @@ func dataSourceAlibabacloudStackMaxcomputeClustersRead(d *schema.ResourceData, m
 		}
 		t = append(t, cluster)
 		ids = append(ids, cluster["cluster"].(string))
-
 	}
 	d.SetId(dataResourceIdHash(ids))
 
 	if err := d.Set("clusters", t); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), t)
@@ -107,49 +104,36 @@ func dataSourceAlibabacloudStackMaxcomputeClustersRead(d *schema.ResourceData, m
 func DescribeMaxcomputeProject(meta interface{}) ([]interface{}, error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
-	conn, err := client.NewAscmClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-
-	action := "ListOdpsClusters"
 
 	roleId, err := client.RoleIds()
 	if err != nil {
-		err = WrapErrorf(Error(GetNotFoundMessage("ASCM User", "defaultRoleId")), NotFoundMsg, ProviderERROR)
+		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		return nil, err
 	}
 
 	request := map[string]interface{}{
-		"RegionName":      client.RegionId,
-		"Region":          client.RegionId,
-		"RegionId":        client.RegionId,
-		"Product":         "ascm",
-		"OrganizationId":  client.Department,
-		"ResourceGroupId": client.ResourceGroup,
 		"CurrentRoleId":   roleId,
 	}
 
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &runtime)
-	if err != nil {
-		err = WrapErrorf(err, DefaultErrorMsg, "ListOdpsClusters", action, AlibabacloudStackSdkGoERROR)
-		return nil, err
-	}
-	addDebug(action, response, request)
+	response, err = client.DoTeaRequest("POST", "ASCM", "2019-05-10", "ListOdpsClusters", "", nil, request)
 
-	if IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
-		err = WrapErrorf(Error(GetNotFoundMessage("Maxcompute Cluster", "ListOdpsClusters")), NotFoundMsg, ProviderERROR)
+	if err != nil {
+		if errmsgs.IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Maxcompute Cluster", "ListOdpsClusters")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+		}
 		return nil, err
 	}
 	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		err = Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
+		err = errmsgs.Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
 		return nil, err
 	}
 	v, err := jsonpath.Get("$", response)
 	if err != nil {
-		return nil, WrapErrorf(err, FailedGetAttributeMsg, "ListOdpsClusters", "$", response)
+		errmsg := ""
+		if response != nil {
+			errmsg = errmsgs.GetAsapiErrorMessage(response)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "ListOdpsClusters", "$", response, errmsg)
 	}
 	return v.(map[string]interface{})["data"].([]interface{}), nil
 }

@@ -3,14 +3,14 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"log"
+	"regexp"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
-	"regexp"
-	"strings"
 )
 
 func dataSourceAlibabacloudStackAscmRoles() *schema.Resource {
@@ -27,12 +27,6 @@ func dataSourceAlibabacloudStackAscmRoles() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			// 后续未消费参数
-// 			"names": {
-// 				Type:     schema.TypeList,
-// 				Computed: true,
-// 				Elem:     &schema.Schema{Type: schema.TypeString},
-// 			},
 			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -47,7 +41,6 @@ func dataSourceAlibabacloudStackAscmRoles() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"roles": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -116,29 +109,11 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	id := d.Get("id").(int)
 	roleType := d.Get("role_type").(string)
-	request := requests.NewCommonRequest()
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.ApiName = "ListRoles"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Product":         "ascm",
-		"RegionId":        client.RegionId,
-		"Action":          "ListRoles",
-		"Version":         "2019-05-10",
-		"pageSize":        "100000",
-		//"roleType":        roleType,
-	}
+
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "")
+	request.QueryParams["pageSize"] = "100000"
+	//request.QueryParams["roleType"] = roleType
+
 	response := AscmRoles{}
 
 	for {
@@ -147,15 +122,18 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 		})
 		log.Printf(" response of raw ListRoles : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_roles", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_roles", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.AsapiErrorCode == "" || len(response.Data) < 1 {
 			break
@@ -215,7 +193,7 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 	}
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("roles", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

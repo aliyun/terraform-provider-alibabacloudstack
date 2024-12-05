@@ -11,6 +11,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -41,7 +42,7 @@ func testSweepKVStoreInstances(region string) error {
 		"testAcc",
 	}
 
-	var insts []r_kvstore.KVStoreInstance
+	var insts []r_kvstore.KVStoreInstanceInDescribeInstances
 	req := r_kvstore.CreateDescribeInstancesRequest()
 	req.RegionId = client.RegionId
 	req.PageSize = requests.NewInteger(PageSizeLarge)
@@ -370,7 +371,7 @@ func testAccCheckKVStoreInstanceDestroy(s *terraform.State) error {
 
 		_, err := kvstoreService.DescribeKVstoreInstance(rs.Primary.ID)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
 			return err
@@ -382,9 +383,7 @@ func testAccCheckKVStoreInstanceDestroy(s *terraform.State) error {
 
 func testAccKVStoreInstance_classic(instanceType, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	
 variable "name" {
     default = "tf-testAccCheckAlibabacloudStackRKVInstancesDataSource4"
@@ -625,9 +624,7 @@ func testAccKVStoreInstance_classicUpdateAll(instanceType, instanceClass, engine
 func testAccKVStoreInstance_vpc(common, instanceClass, instanceType, engineVersion string) string {
 	return fmt.Sprintf(`
 	%s
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	variable "creation" {
 		default = "KVStore"
 	}
@@ -838,9 +835,7 @@ func testAccKVStoreInstance_vpcUpdateAll(common, instanceClass, instanceType, en
 func testAccKVStoreInstance_vpcmulti(common, instanceClass, instanceType, engineVersion string) string {
 	return fmt.Sprintf(`
 	%s
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	variable "creation" {
 		default = "KVStore"
 	}
@@ -864,9 +859,7 @@ cpu_type = "intel"
 
 func testAccKVStoreInstance_classicmulti(instanceType, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	variable "name" {
 		default = "tf-testAccKVStoreInstance_classic"
 	}

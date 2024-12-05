@@ -2,59 +2,40 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type ArmsService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
+func (s *ArmsService) DoArmsSearchalertcontactRequest(id string) (object map[string]interface{}, err error) {
+	return s.DescribeArmsAlertContact(id)
+}
+
 func (s *ArmsService) DescribeArmsAlertContact(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewArmsClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "SearchAlertContact"
 	request := map[string]interface{}{
-		"RegionId":   s.client.RegionId,
 		"ContactIds": convertListToJsonString([]interface{}{id}),
 	}
-	request["Product"] = "ARMS"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-08-08"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	request["PageSize"] = PageSizeLarge
+	request["PageNumber"] = 1
+	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "SearchAlertContact", "", nil, request)
 	if err != nil {
-		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+		return object, err
 	}
 	v, err := jsonpath.Get("$.PageBean.Contacts", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.PageBean.Contacts", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.PageBean.Contacts", response)
 	}
 	if len(v.([]interface{})) < 1 {
-		return object, WrapErrorf(Error(GetNotFoundMessage("ARMS", id)), NotFoundWithResponse, response)
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ARMS", id)), errmsgs.NotFoundWithResponse, response)
 	} else {
 		if fmt.Sprint(v.([]interface{})[0].(map[string]interface{})["ContactId"]) != id {
-			return object, WrapErrorf(Error(GetNotFoundMessage("ARMS", id)), NotFoundWithResponse, response)
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ARMS", id)), errmsgs.NotFoundWithResponse, response)
 		}
 	}
 	object = v.([]interface{})[0].(map[string]interface{})
@@ -63,45 +44,25 @@ func (s *ArmsService) DescribeArmsAlertContact(id string) (object map[string]int
 
 func (s *ArmsService) DescribeArmsAlertContactGroup(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewArmsClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "SearchAlertContactGroup"
 	request := map[string]interface{}{
-		"RegionId":        s.client.RegionId,
 		"ContactGroupIds": convertListToJsonString([]interface{}{id}),
-		"IsDetail":        "true",
+		"IsDetail":       "true",
 	}
-	request["Product"] = "ARMS"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-08-08"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	request["PageSize"] = PageSizeLarge
+	request["PageNumber"] = 1
+	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "SearchAlertContactGroup", "", nil, request)
 	if err != nil {
-		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+		return object, err
 	}
 	v, err := jsonpath.Get("$.ContactGroups", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.ContactGroups", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.ContactGroups", response)
 	}
 	if len(v.([]interface{})) < 1 {
-		return object, WrapErrorf(Error(GetNotFoundMessage("ARMS", id)), NotFoundWithResponse, response)
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ARMS", id)), errmsgs.NotFoundWithResponse, response)
 	} else {
 		if fmt.Sprint(v.([]interface{})[0].(map[string]interface{})["ContactGroupId"]) != id {
-			return object, WrapErrorf(Error(GetNotFoundMessage("ARMS", id)), NotFoundWithResponse, response)
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ARMS", id)), errmsgs.NotFoundWithResponse, response)
 		}
 	}
 	object = v.([]interface{})[0].(map[string]interface{})
@@ -110,89 +71,49 @@ func (s *ArmsService) DescribeArmsAlertContactGroup(id string) (object map[strin
 
 func (s *ArmsService) DescribeArmsDispatchRule(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewArmsClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "DescribeDispatchRule"
 	request := map[string]interface{}{
-		"RegionId": s.client.RegionId,
 		"Id":       id,
 	}
-	request["Product"] = "ARMS"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-08-08"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	request["PageSize"] = PageSizeLarge
+	request["PageNumber"] = 1
+	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "DescribeDispatchRule", "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"50003"}) {
-			return object, WrapErrorf(Error(GetNotFoundMessage("ARMS", id)), NotFoundWithResponse, response)
+		if errmsgs.IsExpectedErrors(err, []string{"50003"}) {
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ARMS", id)), errmsgs.NotFoundWithResponse, response)
 		}
-		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+		return object, err
 	}
 	v, err := jsonpath.Get("$.DispatchRule", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.DispatchRule", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.DispatchRule", response)
 	}
 	return v.(map[string]interface{}), nil
 }
 
 func (s *ArmsService) DescribeArmsPrometheusAlertRule(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewArmsClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "ListPrometheusAlertRules"
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		err = WrapError(err)
+		err = errmsgs.WrapError(err)
 		return
 	}
 	request := map[string]interface{}{
-		"RegionId":  s.client.RegionId,
 		"ClusterId": parts[0],
 	}
-	request["Product"] = "ARMS"
-	request["OrganizationId"] = s.client.Department
-	idExist := false
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-08-08"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	request["PageSize"] = PageSizeLarge
+	request["PageNumber"] = 1
+	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "ListPrometheusAlertRules", "", nil, request)
 	if err != nil {
-		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+		return object, err
 	}
 	v, err := jsonpath.Get("$.PrometheusAlertRules", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.PrometheusAlertRules", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.PrometheusAlertRules", response)
 	}
 	if len(v.([]interface{})) < 1 {
-		return object, WrapErrorf(Error(GetNotFoundMessage("ARMS", id)), NotFoundWithResponse, response)
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ARMS", id)), errmsgs.NotFoundWithResponse, response)
 	}
+	var idExist bool
 	for _, v := range v.([]interface{}) {
 		if fmt.Sprint(v.(map[string]interface{})["AlertId"]) == parts[1] {
 			idExist = true
@@ -200,7 +121,7 @@ func (s *ArmsService) DescribeArmsPrometheusAlertRule(id string) (object map[str
 		}
 	}
 	if !idExist {
-		return object, WrapErrorf(Error(GetNotFoundMessage("ARMS", id)), NotFoundWithResponse, response)
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ARMS", id)), errmsgs.NotFoundWithResponse, response)
 	}
 	return object, nil
 }

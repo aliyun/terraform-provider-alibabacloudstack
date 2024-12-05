@@ -4,137 +4,103 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/adb"
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAdbAccount_update_forSuper(t *testing.T) {
-	var v *adb.DBAccount
-	rand := acctest.RandIntRange(10000, 999999)
-	name := fmt.Sprintf("tf-testAccadbaccount-%d", rand)
-	var basicMap = map[string]string{
-		// 已有 实例 使用给定 id 测试
-		//"db_cluster_id":    "am-3rqb9q5nk034py521",
-		"db_cluster_id":    CHECKSET,
-		"account_name":     "tftestsuper",
-		"account_password": "inputYourCodeHere",
-	}
+func TestAccAlibabacloudStackAdbAccount0(t *testing.T) {
+	var v map[string]interface{}
+
 	resourceId := "alibabacloudstack_adb_account.default"
-	ra := resourceAttrInit(resourceId, basicMap)
-	serviceFunc := func() interface{} {
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccAdbAccountCheckmap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &AdbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeAdbAccount")
+	}, "DoAdbDescribeaccountsRequest")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAdbAccountConfigDependence)
+
+	rand := acctest.RandIntRange(10000, 99999)
+	name := fmt.Sprintf("tf-testacc%sadbaccount%d", defaultRegionToTest, rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccAdbAccountBasicdependence)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+
 			testAccPreCheck(t)
 		},
-
-		// module name
 		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
 
-		Providers:    testAccProviders,
 		CheckDestroy: rac.checkResourceDestroy(),
+
 		Steps: []resource.TestStep{
+
 			{
 				Config: testAccConfig(map[string]interface{}{
-					// 已有 实例 使用给定 id 测试
-					//"db_cluster_id":    "am-3rqb9q5nk034py521",
-					"db_cluster_id":    "${alibabacloudstack_adb_db_cluster.cluster.id}",
-					"account_name":     "tftestsuper",
-					"account_password": "inputYourCodeHere",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"account_password"},
-			},
-			// 专有云 没有该接口 ModifyAccountDescription
-			//{
-			//	Config: testAccConfig(map[string]interface{}{
-			//		"account_description": "from terraform super",
-			//	}),
-			//	Check: resource.ComposeTestCheckFunc(
-			//		testAccCheck(map[string]string{
-			//			"account_description": "from terraform super",
-			//		}),
-			//	),
-			//},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"account_password": "inputYourCodeHere",
+
+					"db_cluster_id": "am-bp1j43v9c35ef2cvf",
+
+					"account_type": "Normal",
+
+					"account_name": "nametest123",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"account_password": "inputYourCodeHere",
+
+						"db_cluster_id": "am-bp1j43v9c35ef2cvf",
+
+						"account_type": "Normal",
+
+						"account_name": "nametest123",
 					}),
 				),
 			},
+
 			{
 				Config: testAccConfig(map[string]interface{}{
-					//"account_description": "tf test super",
-					"account_password": "inputYourCodeHere",
+
+					"db_cluster_id": "am-bp1j43v9c35ef2cvf",
+
+					"account_type": "Normal",
+
+					"account_name": "nametest123",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						//"account_description": "tf test super",
-						"account_password": "inputYourCodeHere",
+
+						"db_cluster_id": "am-bp1j43v9c35ef2cvf",
+
+						"account_type": "Normal",
+
+						"account_name": "nametest123",
 					}),
 				),
 			},
 		},
 	})
-
 }
 
-func resourceAdbAccountConfigDependence(name string) string {
-	return fmt.Sprintf(`
-	%s
-	variable "creation" {
-		default = "ADB"
-	}
+var AlibabacloudTestAccAdbAccountCheckmap = map[string]string{
 
-	variable "name" {
-		default = "%s"
-	}
+	"account_description": CHECKSET,
 
-	resource "alibabacloudstack_adb_db_cluster" "cluster" {
-		db_cluster_category = "Basic"
-		db_cluster_class = "C8"
-		vswitch_id     = "${alibabacloudstack_vswitch.default.id}"
-		description             = "${var.name}"
-		db_node_storage = "200"
-	    db_cluster_version = "3.0"
-	    db_node_count = "2"
-		mode					= "reserver"
-		cluster_type =        "AnalyticdbOnPanguSSD"
-		cpu_type =            "intel"
-	}`, AdbCommonTestCase, name)
+	"status": CHECKSET,
+
+	"db_cluster_id": CHECKSET,
+
+	"account_type": CHECKSET,
+
+	"account_name": CHECKSET,
 }
 
-// 已有 实例创建测试使用
-/*func resourceAdbAccountConfigDependence(name string) string {
+func AlibabacloudTestAccAdbAccountBasicdependence(name string) string {
 	return fmt.Sprintf(`
+variable "name" {
+    default = "%s"
+}
 
-	variable "creation" {
-		default = "ADB"
-	}
 
-	variable "name" {
-		default = "%s"
-	}
 
-	`, name)
-}*/
+`, name)
+}

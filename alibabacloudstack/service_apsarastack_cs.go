@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -40,65 +39,46 @@ const (
 	UpgradeClusterTimeout = 30 * time.Minute
 )
 
+func (s *CsService) DoCsDescribeclusterdetailRequest(id string) (cl *cs.KubernetesClusterDetail, err error) {
+	return s.DescribeCsKubernetes(id)
+}
+
 func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDetail, err error) {
 	invoker := NewInvoker()
 	cluster := &cs.KubernetesClusterDetail{}
 	cluster.ClusterId = ""
-	var requestInfo *cs.Client
-	var response interface{}
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Product":         "CS",
-		//"Department":       s.client.Department,
-		//"ResourceGroup":    s.client.ResourceGroup,
-		"Action": "DescribeClustersV1",
-		//"AccountInfo":      "123456",
-		"Version":          "2015-12-15",
-		"SignatureVersion": "1.0",
-		"ProductName":      "cs",
-	}
-	request.Method = "POST" // Set request method
-	request.Product = "Cs"  // Specify product
-	// request.Domain =       // Location Service will not be enabled if the host is specified. For example, service with a Certification type-Bearer Token should be specified
-	request.Version = "2015-12-15" // Specify product version
-	request.ServiceCode = "cs"
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	} // Set request scheme. Default: http
-	request.ApiName = "DescribeClustersV1"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	if err := invoker.Run(func() error {
-		raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+
+	request := s.client.NewCommonRequest("POST", "CS", "2015-12-15", "DescribeClustersV1", "")
+	request.QueryParams["SignatureVersion"] = "1.0"
+	request.QueryParams["ProductName"] = "cs"
+
+	var raw interface{}
+	err = invoker.Run(func() error {
+		raw, err = s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
-		response = raw
 		return err
-	}); err != nil {
-		if IsExpectedErrors(err, []string{"ErrorClusterNotFound"}) {
-			return cluster, WrapErrorf(err, NotFoundMsg, DenverdinoAlibabacloudStackgo)
+	})
+	clusterdetails, ok := raw.(*responses.CommonResponse)
+		if err != nil {
+				if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNotFound"}) {
+			return cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.DenverdinoAlibabacloudStackgo)
 		}
-		return cluster, WrapErrorf(err, DefaultErrorMsg, id, "DescribeKubernetesCluster", DenverdinoAlibabacloudStackgo)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(clusterdetails.BaseResponse)
+			}
+			return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.DenverdinoAlibabacloudStackgo, errmsg)
+
 	}
 
 	if debugOn() {
 		requestMap := make(map[string]interface{})
 		requestMap["ClusterId"] = id
-		addDebug("DescribeKubernetesCluster", response, requestInfo, requestMap)
+		addDebug("DescribeKubernetesCluster", clusterdetails, request, requestMap)
 	}
 	Cdetails := ClustersV1{}
-	clusterdetails, _ := response.(*responses.CommonResponse)
 	_ = json.Unmarshal(clusterdetails.GetHttpContentBytes(), &Cdetails)
-
-	//if len(Cdetails) < 1 {
-	//	return cluster, nil
-	//}
 
 	cluster = &cs.KubernetesClusterDetail{}
 	for _, k := range Cdetails.Clusters {
@@ -117,223 +97,159 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDet
 			cluster.Size = int64(k.Size)
 			cluster.IngressLoadbalancerId = k.ExternalLoadbalancerID
 			cluster.InitVersion = k.InitVersion
-			//cluster.MetaData = string(k.MetaData)
 			cluster.NetworkMode = k.NetworkMode
 			cluster.PrivateZone = k.PrivateZone
 			cluster.Profile = k.Profile
 			cluster.VSwitchIds = k.VswitchID
-			//cluster.Updated=k.Updated
-			//cluster.Created= k.Created.
 			break
 		}
 	}
 	if cluster.ClusterId != id {
-		return cluster, WrapErrorf(Error(GetNotFoundMessage("CsKubernetes", id)), NotFoundMsg, ProviderERROR)
+		return cluster, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("CsKubernetes", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 
 	return cluster, nil
 }
+
 func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePools, err error) {
 	invoker := NewInvoker()
-	//var requestInfo *cs.Client
-	var response interface{}
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":         s.client.RegionId,
-		
-		"Product":          "CS",
-		"Department":       s.client.Department,
-		"ResourceGroup":    s.client.ResourceGroup,
-		"Action":           "DescribeClusterNodes",
-		"Version":          "2015-12-15",
+	request := s.client.NewCommonRequest("POST", "CS", "2015-12-15", "DescribeClusterNodes", "")
+	mergeMaps(request.QueryParams, map[string]string{
 		"SignatureVersion": "1.0",
 		"ProductName":      "cs",
 		"nodepool_id":      nodepoolid,
 		"ClusterId":        id,
-	}
-	request.Method = "POST" // Set request method
-	request.Product = "Cs"  // Specify product
-	// request.Domain =       // Location Service will not be enabled if the host is specified. For example, service with a Certification type-Bearer Token should be specified
-	request.Version = "2015-12-15" // Specify product version
-	request.ServiceCode = "cs"
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	} // Set request scheme. Default: http
-	request.ApiName = "DescribeClusterNodes"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	var clusternodepools *NodePools
-	if err := invoker.Run(func() error {
-		raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+	})
+
+	var raw interface{}
+	err = invoker.Run(func() error {
+		raw, err = s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
-		response = raw
 		return err
-	}); err != nil {
-		if IsExpectedErrors(err, []string{"ErrorClusterNodePoolNotFound"}) {
-			return nil, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+	})
+	clusternodepooldetails, ok := raw.(*responses.CommonResponse)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNodePoolNotFound"}) {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return nil, WrapErrorf(err, DefaultErrorMsg, id, "DescribeClusterNodes", AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(clusternodepooldetails.BaseResponse)
+		}		
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	clusternodepooldetails, _ := response.(*responses.CommonResponse)
+
 	if !clusternodepooldetails.IsSuccess() {
-		return nil, WrapErrorf(err, DefaultErrorMsg, id, "DescribeClusterNodes", AlibabacloudStackSdkGoERROR)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "DescribeClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
+	var clusternodepools *NodePools
 	_ = json.Unmarshal(clusternodepooldetails.GetHttpContentBytes(), &clusternodepools)
 	return clusternodepools, nil
 }
-func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
-	//invoker := NewInvoker()
-	req := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		req.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	req.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Product":         "CS",
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Action":          "DescribeClusterNodePools",
-		"Version":         "2015-12-15",
-		"ProductName":     "cs",
-		"ClusterId":       id,
-	}
-	req.Method = "POST"        // Set request method
-	req.Product = "CS"         // Specify product
-	req.Version = "2015-12-15" // Specify product version
-	req.ServiceCode = "cs"
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		req.Scheme = "https"
-	} else {
-		req.Scheme = "http"
-	} // Set request scheme. Default: http
-	req.ApiName = "DescribeClusterNodePools"
-	req.Headers = map[string]string{"RegionId": s.client.RegionId}
 
-	//if err = invoker.Run(func() error {
+func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
+	req := s.client.NewCommonRequest("POST", "CS", "2015-12-15", "DescribeClusterNodePools", "")
+	req.QueryParams["ProductName"] = "cs"
+	req.QueryParams["ClusterId"] = id
+
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(req)
 	})
-	//return err
-	addDebug("DescribeClusterNodePools", raw, req, req.QueryParams)
+	nodePool, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", raw)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(nodePool.BaseResponse)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", raw, errmsg)
 	}
 	var node *NodePool
-	nodePool, _ := raw.(*responses.CommonResponse)
+	
 	if nodePool.IsSuccess() == false {
-		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", nodePool.GetHttpContentString())
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", nodePool.GetHttpContentString())
 	}
-	ok := json.Unmarshal(nodePool.GetHttpContentBytes(), &node)
-	if ok != nil {
-		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "ParseKubernetesClusterResponse", raw)
+	err = json.Unmarshal(nodePool.GetHttpContentBytes(), &node)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "ParseKubernetesClusterResponse", raw)
 	}
-	//d.SetId(clusterresponse.ClusterID)
-	//var nodepoolid string
-	//for _,k:=range node.Nodepools{
-	//	nodepoolid=k.NodepoolInfo.NodepoolID
-	//}
-
 	return node, nil
 }
+
 func (s *CsService) CsKubernetesInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeCsKubernetes(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 		for _, failState := range failStates {
 			if object.State == failState {
-				return object, object.State, WrapError(Error(FailedToReachTargetStatus, object.State))
+				return object, object.State, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.State))
 			}
 		}
 		return object, object.State, nil
 	}
 }
+
 func (s *CsService) CsKubernetesNodePoolStateRefreshFunc(id, clusterid string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeCsKubernetesNodePool(id, clusterid)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if string(object.Status.State) == failState {
-				return object, string(object.Status.State), WrapError(Error(FailedToReachTargetStatus, string(object.Status.State)))
+				return object, string(object.Status.State), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, string(object.Status.State)))
 			}
 		}
 		return object, string(object.Status.State), nil
 	}
 }
-func (s *CsService) DescribeCsKubernetesNodePool(id, clusterid string) (*NodePoolAlone, error) {
-	req := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		req.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	req.QueryParams = map[string]string{
-		"RegionId":         s.client.RegionId,
-		
-		"Product":          "CS",
-		"Department":       s.client.Department,
-		"ResourceGroup":    s.client.ResourceGroup,
-		"Action":           "DescribeClusterNodePoolDetail",
-		"AccountInfo":      "123456",
-		"Version":          "2015-12-15",
-		"SignatureVersion": "1.0",
-		"ProductName":      "cs",
-		"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\"}",
 
-			"ClusterId", clusterid,
-			"NodepoolId", id,
-		),
-	}
-	req.Method = "POST"        // Set request method
-	req.Product = "CS"         // Specify product
-	req.Version = "2015-12-15" // Specify product version
-	req.ServiceCode = "cs"
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		req.Scheme = "https"
-	} else {
-		req.Scheme = "http"
-	} // Set request scheme. Default: http
-	req.ApiName = "DescribeClusterNodePoolDetail"
-	req.Headers = map[string]string{"RegionId": s.client.RegionId}
-	req.Headers = map[string]string{"x-acs-asapi-gateway-version": "3.0"}
-	//if err = invoker.Run(func() error {
+func (s *CsService) DescribeCsKubernetesNodePool(id, clusterid string) (*NodePoolAlone, error) {
+	req := s.client.NewCommonRequest("sPOST", "CS", "2015-12-15", "DescribeClusterNodePoolDetail", "")
+	req.QueryParams["AccountInfo"] = "123456"
+	req.QueryParams["SignatureVersion"] = "1.0"
+	req.QueryParams["ProductName"] = "cs"
+	req.QueryParams["X-acs-body"] = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\"}", "ClusterId", clusterid, "NodepoolId", id)
+
+	req.Headers["x-acs-asapi-gateway-version"] = "3.0"
+
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(req)
 	})
-	//return err
+	nodePool, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"<QuerySeter> no row found"}) {
-			return nil, WrapErrorf(err, NotFoundMsg, DenverdinoAlibabacloudStackgo)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(nodePool.BaseResponse)
 		}
-		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_nodepool", "DescribeNodePool", raw)
+		if errmsgs.IsExpectedErrors(err, []string{"<QuerySeter> no row found"}) {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.DenverdinoAlibabacloudStackgo)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_nodepool", "DescribeNodePool", raw, errmsg)
 	}
 	var node *NodePoolAlone
-	nodePool, _ := raw.(*responses.CommonResponse)
+	
 	if nodePool.IsSuccess() == false {
-		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", nodePool.GetHttpContentString())
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", nodePool.GetHttpContentString())
 	}
-	ok := json.Unmarshal(nodePool.GetHttpContentBytes(), &node)
-	if ok != nil {
-		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cs_nodepool", "ParsenodepoolResponse", raw)
+	err = json.Unmarshal(nodePool.GetHttpContentBytes(), &node)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_nodepool", "ParsenodepoolResponse", raw)
 	}
 	return node, nil
 }
+
 func (s *CsService) UpgradeCluster(clusterId string, args *cs.UpgradeClusterArgs) error {
 	invoker := NewInvoker()
 	err := invoker.Run(func() error {
@@ -347,7 +263,7 @@ func (s *CsService) UpgradeCluster(clusterId string, args *cs.UpgradeClusterArgs
 	})
 
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	state, upgradeError := s.WaitForUpgradeCluster(clusterId, "Upgrade")
@@ -366,14 +282,14 @@ func (s *CsService) UpgradeCluster(clusterId string, args *cs.UpgradeClusterArgs
 		return nil
 	})
 	if err != nil {
-		return WrapError(upgradeError)
+		return errmsgs.WrapError(upgradeError)
 	}
 
 	if state, err := s.WaitForUpgradeCluster(clusterId, "CancelUpgrade"); err != nil || state != cs.Task_Status_Success {
 		log.Printf("[WARN] %s ACK Cluster cancel upgrade error: %#v", clusterId, err)
 	}
 
-	return WrapError(upgradeError)
+	return errmsgs.WrapError(upgradeError)
 }
 
 func (s *CsService) WaitForUpgradeCluster(clusterId string, action string) (string, error) {
@@ -406,7 +322,7 @@ func (s *CsService) WaitForUpgradeCluster(clusterId string, action string) (stri
 		return cs.Task_Status_Success, nil
 	}
 
-	return cs.Task_Status_Failed, WrapError(err)
+	return cs.Task_Status_Failed, errmsgs.WrapError(err)
 }
 
 type Cluster struct {
@@ -555,6 +471,7 @@ type Cluster struct {
 	VswitchID   string `json:"vswitch_id"`
 	ZoneID      string `json:"zone_id"`
 }
+
 type NodePools struct {
 	Nodes []struct {
 		CreationTime       time.Time `json:"creation_time"`
@@ -583,9 +500,11 @@ type NodePools struct {
 		PageSize   int `json:"page_size"`
 	} `json:"page"`
 }
+
 type NodePool struct {
 	Nodepools []NodePoolAlone `json:"nodepools"`
 }
+
 type NodePoolAlone struct {
 	TeeConfig struct {
 		TeeEnable bool   `json:"tee_enable"`
@@ -653,6 +572,7 @@ type NodePoolAlone struct {
 		HealthyNodes  int    `json:"healthy_nodes"`
 	} `json:"status"`
 }
+
 type ClustersV1 struct {
 	Redirect        bool   `json:"redirect"`
 	EagleEyeTraceID string `json:"eagleEyeTraceId"`
@@ -686,94 +606,34 @@ type ClustersV1 struct {
 		ClusterID              string   `json:"cluster_id"`
 		Department             int      `json:"Department"`
 		ExternalLoadbalancerID string   `json:"external_loadbalancer_id"`
-		//MetaData struct {
-		//	Addons []struct {
-		//		//Config      string      `json:"config"`
-		//		Description string      `json:"description"`
-		//		Disabled    bool        `json:"disabled"`
-		//		Name        string      `json:"name"`
-		//		Properties  interface{} `json:"properties"`
-		//		Required    string      `json:"required"`
-		//		Value       string      `json:"value"`
-		//		Version     string      `json:"version"`
-		//	} `json:"Addons"`
-		//	AuditProjectName string `json:"AuditProjectName"`
-		//	Capabilities     struct {
-		//		AnyAZ                   bool   `json:"AnyAZ"`
-		//		CSI                     bool   `json:"CSI"`
-		//		CPUPolicy               bool   `json:"CpuPolicy"`
-		//		DeploymentSet           bool   `json:"DeploymentSet"`
-		//		DisableEncryption       bool   `json:"DisableEncryption"`
-		//		EncryptionKMSKeyID      string `json:"EncryptionKMSKeyId"`
-		//		EnterpriseSecurityGroup bool   `json:"EnterpriseSecurityGroup"`
-		//		HpcCluster              bool   `json:"HpcCluster"`
-		//		IntelSGX1               bool   `json:"IntelSGX1"`
-		//		Network                 string `json:"Network"`
-		//		NodeCIDRMask            string `json:"NodeCIDRMask"`
-		//		NodeNameMode            bool   `json:"NodeNameMode"`
-		//		NodePortRange           bool   `json:"NodePortRange"`
-		//		ProxyMode               string `json:"ProxyMode"`
-		//		PublicSLB               bool   `json:"PublicSLB"`
-		//		SLSProjectName          bool   `json:"SLSProjectName"`
-		//		SandboxRuntime          bool   `json:"SandboxRuntime"`
-		//		SnapshotPolicy          bool   `json:"SnapshotPolicy"`
-		//		Taint                   bool   `json:"Taint"`
-		//		TerwayEniip             bool   `json:"TerwayEniip"`
-		//		UserData                bool   `json:"UserData"`
-		//	} `json:"Capabilities"`
-		//	CloudMonitorVersion       string      `json:"CloudMonitorVersion"`
-		//	ClusterDomain             string      `json:"ClusterDomain"`
-		//	DockerVersion             string      `json:"DockerVersion"`
-		//	EtcdVersion               string      `json:"EtcdVersion"`
-		//	HasSandboxRuntime         bool        `json:"HasSandboxRuntime"`
-		//	KubernetesVersion         string      `json:"KubernetesVersion"`
-		//	MultiAZ                   bool        `json:"MultiAZ"`
-		//	NameMode                  string      `json:"NameMode"`
-		//	NextVersion               string      `json:"NextVersion"`
-		//	OSType                    string      `json:"OSType"`
-		//	Platform                  string      `json:"Platform"`
-		//	PodVswitchID              string      `json:"PodVswitchId"`
-		//	Provider                  string      `json:"Provider"`
-		//	ResourceGroupID           string      `json:"ResourceGroupId"`
-		//	Runtime                   string      `json:"Runtime"`
-		//	RuntimeVersion            string      `json:"RuntimeVersion"`
-		//	SubClass                  string      `json:"SubClass"`
-		//	SupportPlatforms          []string    `json:"SupportPlatforms"`
-		//	TemplateVersion           string      `json:"TemplateVersion"`
-		//	VersionSpec               interface{} `json:"VersionSpec"`
-		//	VpcCidr                   string      `json:"VpcCidr"`
-		//	CorednsVersion            string      `json:"corednsVersion"`
-		//	DedicatedKubeProxyVersion string      `json:"dedicated-kube-proxyVersion"`
-		//} `json:"meta_data"`
-		VswitchID          string    `json:"vswitch_id"`
-		SwarmMode          bool      `json:"swarm_mode"`
-		RMRegionID         string    `json:"RMRegionId"`
-		State              string    `json:"state"`
-		ResourceGroup      int       `json:"ResourceGroup"`
-		InitVersion        string    `json:"init_version"`
-		NodeStatus         string    `json:"node_status"`
-		NeedUpdateAgent    bool      `json:"need_update_agent"`
-		Created            time.Time `json:"created"`
-		DeletionProtection bool      `json:"deletion_protection"`
-		SubnetCidr         string    `json:"subnet_cidr"`
-		Profile            string    `json:"profile"`
-		RegionID           string    `json:"region_id"`
-		MasterURL          string    `json:"master_url"`
-		CurrentVersion     string    `json:"current_version"`
-		NAMING_FAILED      string    `json:"-"`
-		VswitchCidr        string    `json:"vswitch_cidr"`
-		GwBridge           string    `json:"gw_bridge"`
-		ClusterHealthy     string    `json:"cluster_healthy"`
-		ClusterSpec        string    `json:"cluster_spec"`
-		Size               int       `json:"size"`
-		DataDiskSize       int       `json:"data_disk_size"`
-		Port               int       `json:"port"`
-		EnabledMigration   bool      `json:"enabled_migration"`
-		Name               string    `json:"name"`
-		DepartmentName     string    `json:"DepartmentName"`
-		Updated            time.Time `json:"updated"`
-		InstanceType       string    `json:"instance_type"`
-		WorkerRAMRoleName  string    `json:"worker_ram_role_name"`
-		ResourceGroupName  string    `json:"ResourceGroupName"`
+		VswitchID              string   `json:"vswitch_id"`
+		SwarmMode              bool     `json:"swarm_mode"`
+		RMRegionID             string   `json:"RMRegionId"`
+		State                  string   `json:"state"`
+		ResourceGroup          int      `json:"ResourceGroup"`
+		InitVersion            string   `json:"init_version"`
+		NodeStatus             string   `json:"node_status"`
+		NeedUpdateAgent        bool     `json:"need_update_agent"`
+		Created                time.Time `json:"created"`
+		DeletionProtection     bool     `json:"deletion_protection"`
+		SubnetCidr             string   `json:"subnet_cidr"`
+		Profile                string   `json:"profile"`
+		RegionID               string   `json:"region_id"`
+		MasterURL              string   `json:"master_url"`
+		CurrentVersion         string   `json:"current_version"`
+		NAMING_FAILED          string   `json:"-"`
+		VswitchCidr            string   `json:"vswitch_cidr"`
+		ClusterHealthy         string   `json:"cluster_healthy"`
+		ClusterSpec            string   `json:"cluster_spec"`
+		Size                   int      `json:"size"`
+		DataDiskSize           int      `json:"data_disk_size"`
+		Port                   int      `json:"port"`
+		EnabledMigration       bool     `json:"enabled_migration"`
+		Name                   string   `json:"name"`
+		DepartmentName         string   `json:"DepartmentName"`
+		Updated                time.Time `json:"updated"`
+		InstanceType           string    `json:"instance_type"`
+		WorkerRAMRoleName      string    `json:"worker_ram_role_name"`
+		ResourceGroupName      string    `json:"ResourceGroupName"`
 	} `json:"clusters"`
 }

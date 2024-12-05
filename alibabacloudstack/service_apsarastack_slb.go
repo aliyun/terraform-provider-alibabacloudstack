@@ -15,6 +15,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -31,186 +32,151 @@ const max_num_per_time = 50
 const tags_max_num_per_time = 5
 const tags_max_page_size = 50
 
-func (s *SlbService) BuildSlbCommonRequest() (*requests.CommonRequest, error) {
-	// Get product code from the built request
-	slbReq := slb.CreateCreateLoadBalancerRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		slbReq.Scheme = "https"
-	} else {
-		slbReq.Scheme = "http"
-	}
-	slbReq.Headers = map[string]string{"RegionId": s.client.RegionId}
-	slbReq.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-	req, err := s.client.NewCommonRequest(slbReq.GetProduct(), slbReq.GetLocationServiceCode(), s.client.Config.Protocol, connectivity.ApiVersion20140515)
-	if err != nil {
-		err = WrapError(err)
-	}
-	req.RegionId = s.client.RegionId
-	return req, err
+func (s *SlbService) DoSlbDescribeloadbalancerattributeRequest(id string) (*slb.DescribeLoadBalancerAttributeResponse, error) {
+    return s.DescribeSlb(id)
 }
-
 func (s *SlbService) DescribeSlb(id string) (*slb.DescribeLoadBalancerAttributeResponse, error) {
 	response := &slb.DescribeLoadBalancerAttributeResponse{}
 	request := slb.CreateDescribeLoadBalancerAttributeRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeLoadBalancerAttribute(request)
 	})
+	bresponse, ok := raw.(*slb.DescribeLoadBalancerAttributeResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("Slb", id)), NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Slb", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		} else {
-			err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		return response, err
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest)
-	response, _ = raw.(*slb.DescribeLoadBalancerAttributeResponse)
-	if response.LoadBalancerId == "" {
-		err = WrapErrorf(Error(GetNotFoundMessage("Slb", id)), NotFoundMsg, ProviderERROR)
+	if bresponse.LoadBalancerId == "" {
+		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Slb", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
-	return response, err
+	return bresponse, err
 }
 
 func (s *SlbService) DescribeSlbRule(id string) (*slb.DescribeRuleAttributeResponse, error) {
 	response := &slb.DescribeRuleAttributeResponse{}
 	request := slb.CreateDescribeRuleAttributeRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.RuleId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeRuleAttribute(request)
 	})
+	bresponse, ok := raw.(*slb.DescribeRuleAttributeResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidRuleId.NotFound"}) {
-			return response, WrapErrorf(Error(GetNotFoundMessage("SlbRule", id)), NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidRuleId.NotFound"}) {
+			return response, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbRule", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_rule", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*slb.DescribeRuleAttributeResponse)
-	return response, nil
+	return bresponse, nil
 }
 
+func (s *SlbService) DoSlbDescribevservergroupattributeRequest(id string) (*slb.DescribeVServerGroupAttributeResponse, error) {
+    return s.DescribeSlbServerGroup(id)
+}
 func (s *SlbService) DescribeSlbServerGroup(id string) (*slb.DescribeVServerGroupAttributeResponse, error) {
 	response := &slb.DescribeVServerGroupAttributeResponse{}
 	request := slb.CreateDescribeVServerGroupAttributeRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.VServerGroupId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeVServerGroupAttribute(request)
 	})
+	bresponse, ok := raw.(*slb.DescribeVServerGroupAttributeResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"The specified VServerGroupId does not exist", "InvalidParameter"}) {
-			return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"The specified VServerGroupId does not exist", "InvalidParameter"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_server_group", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*slb.DescribeVServerGroupAttributeResponse)
-	if response.VServerGroupId == "" {
-		return response, WrapErrorf(Error(GetNotFoundMessage("SlbServerGroup", id)), NotFoundMsg, ProviderERROR)
+	if bresponse.VServerGroupId == "" {
+		return response, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbServerGroup", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
-	return response, err
+	return bresponse, err
 }
 
 func (s *SlbService) DescribeSlbMasterSlaveServerGroup(id string) (*slb.DescribeMasterSlaveServerGroupAttributeResponse, error) {
 	response := &slb.DescribeMasterSlaveServerGroupAttributeResponse{}
 	request := slb.CreateDescribeMasterSlaveServerGroupAttributeRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.MasterSlaveServerGroupId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeMasterSlaveServerGroupAttribute(request)
 	})
+	bresponse, ok := raw.(*slb.DescribeMasterSlaveServerGroupAttributeResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"The specified MasterSlaveGroupId does not exist", "InvalidParameter"}) {
-			return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"The specified MasterSlaveGroupId does not exist", "InvalidParameter"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return response, WrapErrorf(err, DefaultDebugMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.DefaultDebugMsg, "alibabacloudstack_slb_master_slave_server_group", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*slb.DescribeMasterSlaveServerGroupAttributeResponse)
-	if response.MasterSlaveServerGroupId == "" {
-		return response, WrapErrorf(Error(GetNotFoundMessage("SlbMasterSlaveServerGroup", id)), NotFoundMsg, ProviderERROR)
+	if bresponse.MasterSlaveServerGroupId == "" {
+		return response, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbMasterSlaveServerGroup", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
-	return response, err
+	return bresponse, err
 }
 
 func (s *SlbService) DescribeSlbBackendServer(id string) (*slb.DescribeLoadBalancerAttributeResponse, error) {
 	response := &slb.DescribeLoadBalancerAttributeResponse{}
 	request := slb.CreateDescribeLoadBalancerAttributeRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeLoadBalancerAttribute(request)
 	})
+	bresponse, ok := raw.(*slb.DescribeLoadBalancerAttributeResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("SlbBackendServers", id)), NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbBackendServers", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		} else {
-			err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_backend_server", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		return response, err
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*slb.DescribeLoadBalancerAttributeResponse)
-	if response.LoadBalancerId == "" {
-		err = WrapErrorf(Error(GetNotFoundMessage("SlbBackendServers", id)), NotFoundMsg, ProviderERROR)
+	if bresponse.LoadBalancerId == "" {
+		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbBackendServers", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
-	return response, err
+	return bresponse, err
 }
 
 func (s *SlbService) DescribeSlbListener(id string) (listener map[string]interface{}, err error) {
 	parts, err := ParseSlbListenerId(id)
 	if err != nil {
-		return nil, WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 	protocol := parts[1]
-	request, err := s.BuildSlbCommonRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
-	if err != nil {
-		err = WrapError(err)
-		return
-	}
-	request.ApiName = fmt.Sprintf("DescribeLoadBalancer%sListenerAttribute", strings.ToUpper(string(protocol)))
+	apiName := fmt.Sprintf("DescribeLoadBalancer%sListenerAttribute", strings.ToUpper(string(protocol)))
+	request := s.client.NewCommonRequest("GET", "slb", "2014-05-15", apiName, "")
 	request.QueryParams["LoadBalancerId"] = parts[0]
 	port, _ := strconv.Atoi(parts[2])
 	request.QueryParams["ListenerPort"] = string(requests.NewInteger(port))
@@ -219,56 +185,60 @@ func (s *SlbService) DescribeSlbListener(id string) (listener map[string]interfa
 			return slbClient.ProcessCommonRequest(request)
 		})
 
+		response, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{"The specified resource does not exist"}) {
-				return resource.NonRetryableError(WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR))
-			} else if IsExpectedErrors(err, SlbIsBusy) {
-				return resource.RetryableError(WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR))
+			if errmsgs.IsExpectedErrors(err, []string{"The specified resource does not exist"}) {
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR))
+			} else if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy) {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
 			}
-			return resource.NonRetryableError(WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR))
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request, request.QueryParams)
-		response, _ := raw.(*responses.CommonResponse)
 		if err = json.Unmarshal(response.GetHttpContentBytes(), &listener); err != nil {
-			return resource.NonRetryableError(WrapError(err))
+			return resource.NonRetryableError(errmsgs.WrapError(err))
 		}
 		if port, ok := listener["ListenerPort"]; ok && port.(float64) > 0 {
 			return nil
 		} else {
-			return resource.RetryableError(WrapErrorf(Error(GetNotFoundMessage("SlbListener", id)), NotFoundMsg, ProviderERROR))
+			return resource.RetryableError(errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbListener", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR))
 		}
 	})
 
 	return
 }
 
+func (s *SlbService) DoSlbDescribeaccesscontrollistattributeRequest(id string) (*slb.DescribeAccessControlListAttributeResponse, error) {
+    return s.DescribeSlbAcl(id)
+}
 func (s *SlbService) DescribeSlbAcl(id string) (*slb.DescribeAccessControlListAttributeResponse, error) {
 	response := &slb.DescribeAccessControlListAttributeResponse{}
 	request := slb.CreateDescribeAccessControlListAttributeRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.AclId = id
 
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeAccessControlListAttribute(request)
 	})
+	bresponse, ok := raw.(*slb.DescribeAccessControlListAttributeResponse)
 	if err != nil {
 		if err != nil {
-			if IsExpectedErrors(err, []string{"AclNotExist"}) {
-				return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+			if errmsgs.IsExpectedErrors(err, []string{"AclNotExist"}) {
+				return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_acl", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*slb.DescribeAccessControlListAttributeResponse)
-	return response, nil
+	return bresponse, nil
 }
 
 func (s *SlbService) WaitForSlbAcl(id string, status Status, timeout int) error {
@@ -276,12 +246,12 @@ func (s *SlbService) WaitForSlbAcl(id string, status Status, timeout int) error 
 	for {
 		object, err := s.DescribeSlbAcl(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		} else {
 			return nil
@@ -289,7 +259,7 @@ func (s *SlbService) WaitForSlbAcl(id string, status Status, timeout int) error 
 
 		time.Sleep(DefaultIntervalShort * time.Second)
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.AclId, id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.AclId, id, errmsgs.ProviderERROR)
 		}
 	}
 }
@@ -300,19 +270,19 @@ func (s *SlbService) WaitForSlb(id string, status Status, timeout int) error {
 		object, err := s.DescribeSlb(id)
 
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		} else if strings.ToLower(object.LoadBalancerStatus) == strings.ToLower(string(status)) {
 			//TODO
 			break
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.LoadBalancerStatus, status, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.LoadBalancerStatus, status, errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
@@ -323,13 +293,13 @@ func (s *SlbService) WaitForSlbListener(id string, status Status, timeout int) e
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
 		object, err := s.DescribeSlbListener(id)
-		if err != nil && !IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
-			if NotFoundError(err) {
+		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"InvalidLoadBalancerId.NotFound"}) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		gotStatus := ""
@@ -341,7 +311,7 @@ func (s *SlbService) WaitForSlbListener(id string, status Status, timeout int) e
 			break
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, gotStatus, status, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, gotStatus, status, errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
@@ -354,12 +324,12 @@ func (s *SlbService) WaitForSlbRule(id string, status Status, timeout int) error
 		_, err := s.DescribeSlbRule(id)
 
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if status != Deleted {
@@ -367,7 +337,7 @@ func (s *SlbService) WaitForSlbRule(id string, status Status, timeout int) error
 		}
 
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, "", id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, "", id, errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
@@ -379,19 +349,19 @@ func (s *SlbService) WaitForSlbServerGroup(id string, status Status, timeout int
 	for {
 		object, err := s.DescribeSlbServerGroup(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if object.VServerGroupId == id {
 			break
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.VServerGroupId, id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.VServerGroupId, id, errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
@@ -403,19 +373,19 @@ func (s *SlbService) WaitForSlbMasterSlaveServerGroup(id string, status Status, 
 	for {
 		object, err := s.DescribeSlbMasterSlaveServerGroup(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if object.MasterSlaveServerGroupId == id && status != Deleted {
 			break
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.MasterSlaveServerGroupId, id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.MasterSlaveServerGroupId, id, errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
@@ -428,13 +398,13 @@ func (s *SlbService) WaitSlbAttribute(id string, instanceSet *schema.Set, timeou
 RETRY:
 	object, err := s.DescribeSlb(id)
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if time.Now().After(deadline) {
-		return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, Null, id, ProviderERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, Null, id, errmsgs.ProviderERROR)
 	}
 	servers := object.BackendServers.BackendServer
 	if len(servers) > 0 {
@@ -449,26 +419,24 @@ RETRY:
 
 func (s *SlbService) slbRemoveAccessControlListEntryPerTime(list []interface{}, id string) error {
 	request := slb.CreateRemoveAccessControlListEntryRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.AclId = id
 	b, err := json.Marshal(list)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	request.AclEntrys = string(b)
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.RemoveAccessControlListEntry(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if !IsExpectedErrors(err, []string{"AclEntryEmpty"}) {
-			return WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if !errmsgs.IsExpectedErrors(err, []string{"AclEntryEmpty"}) {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_remove_access_control_list_entry", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
@@ -502,25 +470,23 @@ func (s *SlbService) SlbRemoveAccessControlListEntry(list []interface{}, aclId s
 
 func (s *SlbService) slbAddAccessControlListEntryPerTime(list []interface{}, id string) error {
 	request := slb.CreateAddAccessControlListEntryRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.AclId = id
 	b, err := json.Marshal(list)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	request.AclEntrys = string(b)
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.AddAccessControlListEntry(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_add_access_control_list_entry", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	return nil
@@ -582,28 +548,29 @@ func (s *SlbService) flattenSlbRelatedListenerMappings(list []slb.RelatedListene
 	return result
 }
 
+func (s *SlbService) DoSlbDescribecacertificatesRequest(id string) (*slb.CACertificate, error) {
+    return s.DescribeSlbCACertificate(id)
+}
 func (s *SlbService) DescribeSlbCACertificate(id string) (*slb.CACertificate, error) {
 	certificate := &slb.CACertificate{}
 	request := slb.CreateDescribeCACertificatesRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.CACertificateId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeCACertificates(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return certificate, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return certificate, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_ca_certificate", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ := raw.(*slb.DescribeCACertificatesResponse)
 	if len(response.CACertificates.CACertificate) < 1 {
-		return certificate, WrapErrorf(Error(GetNotFoundMessage("SlbCACertificate", id)), NotFoundMsg, ProviderERROR)
+		return certificate, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbCACertificate", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	return &response.CACertificates.CACertificate[0], nil
 }
@@ -613,46 +580,46 @@ func (s *SlbService) WaitForSlbCACertificate(id string, status Status, timeout i
 	for {
 		object, err := s.DescribeSlbCACertificate(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		} else {
 			break
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.CACertificateId, id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.CACertificateId, id, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
 }
 
+func (s *SlbService) DoSlbDescribeservercertificateRequest(id string) (*slb.ServerCertificate, error) {
+    return s.DescribeSlbServerCertificate(id)
+}
 func (s *SlbService) DescribeSlbServerCertificate(id string) (*slb.ServerCertificate, error) {
 	certificate := &slb.ServerCertificate{}
 	request := slb.CreateDescribeServerCertificatesRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.ServerCertificateId = id
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeServerCertificates(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return certificate, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return certificate, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_server_certificate", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ := raw.(*slb.DescribeServerCertificatesResponse)
 	if len(response.ServerCertificates.ServerCertificate) < 1 || response.ServerCertificates.ServerCertificate[0].ServerCertificateId != id {
-		return certificate, WrapErrorf(Error(GetNotFoundMessage("SlbServerCertificate", id)), NotFoundMsg, ProviderERROR)
+		return certificate, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SlbServerCertificate", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 
 	return &response.ServerCertificates.ServerCertificate[0], nil
@@ -663,12 +630,12 @@ func (s *SlbService) WaitForSlbServerCertificate(id string, status Status, timeo
 	for {
 		object, err := s.DescribeSlbServerCertificate(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if object.ServerCertificateId == id {
@@ -676,7 +643,7 @@ func (s *SlbService) WaitForSlbServerCertificate(id string, status Status, timeo
 		}
 
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.ServerCertificateId, id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ServerCertificateId, id, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
@@ -698,16 +665,13 @@ func toSlbTagsString(tags []Tag) string {
 	return string(b)
 }
 
+func (s *SlbService) DoSlbDescribedomainextensionattributeRequest(domainExtensionId string) (*slb.DescribeDomainExtensionAttributeResponse, error) {
+    return s.DescribeDomainExtensionAttribute(domainExtensionId)
+}
 func (s *SlbService) DescribeDomainExtensionAttribute(domainExtensionId string) (*slb.DescribeDomainExtensionAttributeResponse, error) {
 	response := &slb.DescribeDomainExtensionAttributeResponse{}
 	request := slb.CreateDescribeDomainExtensionAttributeRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DomainExtensionId = domainExtensionId
 	var raw interface{}
 	var err error
@@ -716,7 +680,7 @@ func (s *SlbService) DescribeDomainExtensionAttribute(domainExtensionId string) 
 			return slbClient.DescribeDomainExtensionAttribute(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{AlibabacloudStackGoClientFailure, "ServiceUnavailable", Throttling}) {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.AlibabacloudStackGoClientFailure, "ServiceUnavailable", errmsgs.Throttling}) {
 				time.Sleep(10 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -725,17 +689,22 @@ func (s *SlbService) DescribeDomainExtensionAttribute(domainExtensionId string) 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
+	bresponse, ok := raw.(*slb.DescribeDomainExtensionAttributeResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidParameter.DomainExtensionId", "InvalidParameter"}) {
-			return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidParameter.DomainExtensionId", "InvalidParameter"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, domainExtensionId, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_domain_extension", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	response, _ = raw.(*slb.DescribeDomainExtensionAttributeResponse)
-	if response.DomainExtensionId != domainExtensionId {
-		return response, WrapErrorf(Error(GetNotFoundMessage("SLBDomainExtension", domainExtensionId)), NotFoundMsg, ProviderERROR)
+	
+	if bresponse.DomainExtensionId != domainExtensionId {
+		return response, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SLBDomainExtension", domainExtensionId)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
-	return response, nil
+	return bresponse, nil
 }
 
 func (s *SlbService) WaitForSlbDomainExtension(id string, status Status, timeout int) error {
@@ -744,16 +713,16 @@ func (s *SlbService) WaitForSlbDomainExtension(id string, status Status, timeout
 	for {
 		_, err := s.DescribeDomainExtensionAttribute(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, Null, string(status), ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, Null, string(status), errmsgs.ProviderERROR)
 		}
 	}
 }
@@ -770,14 +739,8 @@ func (s *SlbService) setInstanceTags(d *schema.ResourceData, resourceType TagRes
 			tagKey = append(tagKey, v.TagKey)
 		}
 		request := slb.CreateRemoveTagsRequest()
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+		s.client.InitRpcRequest(*request.RpcRequest)
 		request.LoadBalancerId = d.Id()
-		if strings.ToLower(s.client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
 		bytes, _ := json.Marshal(remove)
 		s2 := string(bytes)
 		request.Tags = fmt.Sprint(s2)
@@ -788,32 +751,30 @@ func (s *SlbService) setInstanceTags(d *schema.ResourceData, resourceType TagRes
 			raw, err := s.client.WithSlbClient(func(client *slb.Client) (interface{}, error) {
 				return client.RemoveTags(request)
 			})
+			bresponse, ok := raw.(*responses.CommonResponse)
 			if err != nil {
-				if IsThrottling(err) {
+				if errmsgs.IsThrottling(err) {
 					wait()
 					return resource.RetryableError(err)
-
 				}
-				return resource.NonRetryableError(err)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_remove_tags", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			return nil
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return err
 		}
 	}
 
 	if len(create) > 0 {
 		request := slb.CreateAddTagsRequest()
+		s.client.InitRpcRequest(*request.RpcRequest)
 		request.LoadBalancerId = d.Id()
-		if strings.ToLower(s.client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 		bytes, _ := json.Marshal(create)
 		s2 := string(bytes)
 		request.Tags = fmt.Sprint(s2)
@@ -824,19 +785,23 @@ func (s *SlbService) setInstanceTags(d *schema.ResourceData, resourceType TagRes
 			raw, err := s.client.WithSlbClient(func(client *slb.Client) (interface{}, error) {
 				return client.AddTags(request)
 			})
+			bresponse, ok := raw.(*responses.CommonResponse)
 			if err != nil {
-				if IsThrottling(err) {
+				if errmsgs.IsThrottling(err) {
 					wait()
 					return resource.RetryableError(err)
-
 				}
-				return resource.NonRetryableError(err)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_add_tags", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			return nil
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return err
 		}
 	}
 
@@ -900,14 +865,7 @@ func (s *SlbService) tagsFromMap(m map[string]interface{}) []slb.TagSet {
 
 func (s *SlbService) DescribeTags(resourceId string, resourceTags map[string]interface{}, resourceType TagResourceType) (tags []slb.TagSet, err error) {
 	request := slb.CreateDescribeTagsRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = resourceId
 	if resourceTags != nil && len(resourceTags) > 0 {
 		var reqTags []slb.TagSet
@@ -925,22 +883,23 @@ func (s *SlbService) DescribeTags(resourceId string, resourceTags map[string]int
 		raw, err := s.client.WithSlbClient(func(Client *slb.Client) (interface{}, error) {
 			return Client.DescribeTags(request)
 		})
+		bresponse, ok := raw.(*slb.DescribeTagsResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{Throttling}) {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
 				time.Sleep(2 * time.Second)
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_describe_tags", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*slb.DescribeTagsResponse)
-		tags = response.TagSets.TagSet
+		tags = bresponse.TagSets.TagSet
 		return nil
 	})
 	if err != nil {
-		err = WrapErrorf(err, DefaultErrorMsg, resourceId, request.GetActionName(), AlibabacloudStackSdkGoERROR)
-		return
+		return nil, err
 	}
-
-	return
+	return tags, nil
 }

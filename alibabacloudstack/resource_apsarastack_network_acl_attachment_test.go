@@ -12,6 +12,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -58,7 +59,7 @@ func testSweepNetworkAclAttachment(region string) error {
 		}
 
 		if page, err := getNextpageNumber(request.PageNumber); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		} else {
 			request.PageNumber = page
 		}
@@ -156,17 +157,17 @@ func testAccCheckNetworkAclAttachmentExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
-			return WrapError(Error("Not found: %s", n))
+			return errmsgs.WrapError(errmsgs.Error("Not found: %s", n))
 		}
 		if rs.Primary.ID == "" {
-			return WrapError(Error("No Network Acl Attachment ID is set"))
+			return errmsgs.WrapError(errmsgs.Error("No Network Acl Attachment ID is set"))
 		}
 		client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
 		vpcService := VpcService{client}
 
 		parts, err := ParseResourceId(rs.Primary.ID, 2)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		networkAclId := parts[0]
 
@@ -183,7 +184,7 @@ func testAccCheckNetworkAclAttachmentExists(n string) resource.TestCheckFunc {
 		}
 		err = vpcService.DescribeNetworkAclAttachment(networkAclId, resources)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		return nil
 	}
@@ -200,16 +201,16 @@ func testAccCheckNetworkAclAttachmentDestroy(s *terraform.State) error {
 
 		parts, err := ParseResourceId(rs.Primary.ID, 2)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		networkAclId := parts[0]
 
 		object, err := vpcService.DescribeNetworkAcl(networkAclId)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		vpcResource := []vpc.Resource{}
 		resources, _ := object["Resources"].(map[string]interface{})["Resource"].([]interface{})
@@ -223,10 +224,10 @@ func testAccCheckNetworkAclAttachmentDestroy(s *terraform.State) error {
 		}
 		err = vpcService.WaitForNetworkAclAttachment(networkAclId, vpcResource, Deleted, DefaultTimeout)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 	return nil

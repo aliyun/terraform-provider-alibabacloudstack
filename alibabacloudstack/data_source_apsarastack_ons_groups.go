@@ -2,13 +2,14 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"log"
 	"regexp"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -84,26 +85,11 @@ func dataSourceAlibabacloudStackOnsGroupsRead(d *schema.ResourceData, meta inter
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	namespaceid := d.Get("instance_id").(string)
 
-	request := requests.NewCommonRequest()
-	request.Method = "POST"
-	request.Product = "Ons-inner"
-	request.Version = "2018-02-05"
-	request.Scheme = "http"
-	request.RegionId = client.RegionId
-	request.ApiName = "ConsoleGroupList"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		"Product":         "Ons-inner",
-		"RegionId":        client.RegionId,
-		"Action":          "ConsoleGroupList",
-		"Version":         "2018-02-05",
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"OnsRegionId":     client.RegionId,
-		"PreventCache":    "",
-		"InstanceId":      namespaceid,
-	}
+	request := client.NewCommonRequest("POST", "Ons-inner", "2018-02-05", "ConsoleGroupList", "")
+	request.QueryParams["InstanceId"] = namespaceid
+	request.QueryParams["OnsRegionId"] = client.RegionId
+	request.QueryParams["PreventCache"] = ""
+
 	response := OnsGroup{}
 
 	for {
@@ -112,14 +98,19 @@ func dataSourceAlibabacloudStackOnsGroupsRead(d *schema.ResourceData, meta inter
 		})
 		log.Printf(" response of raw ConsoleGroupList : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_ons_groups", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ons_groups", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		bresponse, _ := raw.(*responses.CommonResponse)
+
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Code == 200 || len(response.Data) < 1 {
 			break
@@ -136,13 +127,13 @@ func dataSourceAlibabacloudStackOnsGroupsRead(d *schema.ResourceData, meta inter
 			continue
 		}
 		mapping := map[string]interface{}{
-			"id":                 ons.ID,
-			"remark":             ons.Remark,
-			"instance_id":        ons.NamespaceID,
-			"group_id":           ons.GroupID,
-			"owner":              ons.Owner,
-			"independent_naming": ons.IndependentNaming,
-			"create_time":        ons.CreateTime,
+			"id":                  ons.ID,
+			"remark":              ons.Remark,
+			"instance_id":         ons.NamespaceID,
+			"group_id":            ons.GroupID,
+			"owner":               ons.Owner,
+			"independent_naming":  ons.IndependentNaming,
+			"create_time":         ons.CreateTime,
 		}
 		ids = append(ids, string(rune(ons.ID)))
 		s = append(s, mapping)
@@ -150,12 +141,11 @@ func dataSourceAlibabacloudStackOnsGroupsRead(d *schema.ResourceData, meta inter
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("groups", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		_ = writeToFile(output.(string), s)
 	}
 	return nil
-
 }

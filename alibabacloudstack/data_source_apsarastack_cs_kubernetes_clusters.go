@@ -3,19 +3,18 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"io/ioutil"
+	"log"
+	"regexp"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/denverdino/aliyungo/cs"
-	"github.com/go-yaml/yaml"
-	"io/ioutil"
-	"log"
-	"strings"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"regexp"
 )
 
 func dataSourceAlibabacloudStackCSKubernetesClusters() *schema.Resource {
@@ -122,18 +121,10 @@ func dataSourceAlibabacloudStackCSKubernetesClusters() *schema.Resource {
 								Type: schema.TypeInt,
 							},
 						},
-// 						"key_name": {
-// 							Type:     schema.TypeString,
-// 							Computed: true,
-// 						},
 						"pod_cidr": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-// 						"service_cidr": {
-// 							Type:     schema.TypeString,
-// 							Computed: true,
-// 						},
 						"cluster_network_type": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -182,55 +173,6 @@ func dataSourceAlibabacloudStackCSKubernetesClusters() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-// 后续未消费使用的属性
-// 						"worker_data_disk_size": {
-// 							Type:     schema.TypeString,
-// 							Computed: true,
-// 						},
-// 						"worker_data_disk_category": {
-// 							Type:     schema.TypeString,
-// 							Computed: true,
-// 						},
-// 						"master_instance_charge_type": {
-// 							Type:     schema.TypeString,
-// 							Computed: true,
-// 						},
-// 						"master_period_unit": {
-// 							Type:     schema.TypeString,
-// 							Computed: true,
-// 						},
-// 						"master_period": {
-// 							Type:     schema.TypeInt,
-// 							Computed: true,
-// 						},
-// 						"master_auto_renew": {
-// 							Type:     schema.TypeBool,
-// 							Computed: true,
-// 						},
-// 						"master_auto_renew_period": {
-// 							Type:     schema.TypeInt,
-// 							Computed: true,
-// 						},
-// 						"worker_instance_charge_type": {
-// 							Type:     schema.TypeString,
-// 							Computed: true,
-// 						},
-// 						"worker_period_unit": {
-// 							Type:     schema.TypeString,
-// 							Computed: true,
-// 						},
-// 						"worker_period": {
-// 							Type:     schema.TypeInt,
-// 							Computed: true,
-// 						},
-// 						"worker_auto_renew": {
-// 							Type:     schema.TypeBool,
-// 							Computed: true,
-// 						},
-// 						"worker_auto_renew_period": {
-// 							Type:     schema.TypeInt,
-// 							Computed: true,
-// 						},
 						"master_nodes": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -305,46 +247,28 @@ func dataSourceAlibabacloudStackCSKubernetesClusters() *schema.Resource {
 func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "GET"
-	request.Product = "Cs"
-	request.Version = "2015-12-15"
-
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-
-	request.ServiceCode = "cs"
-	request.ApiName = "DescribeClustersV1"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{  "Product": "Cs", "RegionId": client.RegionId, "Action": "DescribeClustersV1", "Version": cs.CSAPIVersion, "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-	request.RegionId = client.RegionId
+	request := client.NewCommonRequest("GET", "Cs", "2015-12-15", "DescribeClustersV1", "")
 	Cresponse := ClustersV1{}
 	Clusterresponse := ClustersV1{}
 
 	raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 		return csClient.ProcessCommonRequest(request)
 	})
+	response, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_cs_kubernetes_clusters", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes_clusters", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	resp, _ := raw.(*responses.CommonResponse)
 	request.TransToAcsRequest()
-	log.Printf("clusterResponse1 %v", resp)
-	log.Printf("clusterResponse2 %v", resp.GetHttpContentBytes())
-	err = json.Unmarshal(resp.GetHttpContentBytes(), &Clusterresponse)
+	log.Printf("clusterResponse1 %v", response)
+	log.Printf("clusterResponse2 %v", response.GetHttpContentBytes())
+	err = json.Unmarshal(response.GetHttpContentBytes(), &Clusterresponse)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
-	//var nullc ClustersV1
-	//if Clusterresponsenullc{
-	//	return WrapErrorf(err,"Response is nil")
-	//}
 
 	var r *regexp.Regexp
 	if nameRegex, ok := d.GetOk("name_regex"); ok && nameRegex.(string) != "" {
@@ -385,17 +309,8 @@ func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData,
 			"security_group_id": kc.SecurityGroupID,
 			"availability_zone": kc.ZoneID,
 			"state":             kc.State,
-			//"master_instance_types":       []string{kc.Parameters.MasterInstanceType},
-			//"nat_gateway_id":              kc.Parameters.NatGatewayID,
-			"vswitch_ids": []string{kc.VswitchID},
-			//"master_disk_category":        kc.MasterSystemDiskCategory,
 			"cluster_network_type": kc.NetworkMode,
 			"pod_cidr":             kc.SubnetCidr,
-			//"worker_data_disk_size":       kc.Parameters.WorkerDataDiskSize,
-			//"worker_disk_category":        kc.Parameters.WorkerDataDiskCategory,
-			//"worker_instance_types":       []string{kc.Parameters.WorkerInstanceType},
-			//"worker_instance_charge_type": kc.Parameters.WorkerInstanceChargeType,
-			//"node_cidr_mask":              kc.MetaData.Capabilities.NodeCIDRMask,
 		}
 
 		ids = append(ids, kc.ClusterID)
@@ -405,13 +320,13 @@ func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData,
 	}
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("clusters", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if file, ok := d.GetOk("kube_config"); ok && file.(string) != "" {
@@ -419,45 +334,26 @@ func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData,
 
 		for i, k := range clusterids {
 			log.Printf("IDS %v", clusterids)
-			request.Method = "POST"
-			request.Product = "Cs"
-			request.Version = "2015-12-15"
+			request := client.NewCommonRequest("POST", "Cs", "2015-12-15", "DescribeClusterUserKubeconfig", "")
+			request.QueryParams["ClusterId"] = k
+			request.QueryParams["PrivateIpAddress"] = "false"
 
-			if strings.ToLower(client.Config.Protocol) == "https" {
-				request.Scheme = "https"
-			} else {
-				request.Scheme = "http"
-			}
-			request.ServiceCode = "cs"
-			request.ApiName = "DescribeClusterUserKubeconfig"
-			request.Headers = map[string]string{"RegionId": client.RegionId, "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-			request.RegionId = client.RegionId
-			request.QueryParams = map[string]string{
-				
-				
-				"Product":          "Cs",
-				"RegionId":         client.RegionId,
-				"Action":           "DescribeClustersV1",
-				"Version":          cs.CSAPIVersion,
-				"Department":       client.Department,
-				"ResourceGroup":    client.ResourceGroup,
-				"PrivateIpAddress": "false",
-				"ClusterId":        k,
-			}
-			log.Printf("request body %v", request)
 			raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 				return csClient.ProcessCommonRequest(request)
 			})
+			response, ok := raw.(*responses.CommonResponse)
 			if err != nil {
-				return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_cs_kubernetes_clusters", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes_clusters", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			resp, _ := raw.(*responses.CommonResponse)
-			//request.TransToAcsRequest()
 			var conf KubeConfig
 			var kubeconf Config
-			err = json.Unmarshal(resp.GetHttpContentBytes(), &conf)
+			err = json.Unmarshal(response.GetHttpContentBytes(), &conf)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			err = yaml.Unmarshal([]byte(conf.Config), &kubeconf)
 			if err != nil {
@@ -466,9 +362,7 @@ func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData,
 			yamls, err := yaml.Marshal(kubeconf)
 			filename := fmt.Sprint(file, i, ".yaml")
 			err = ioutil.WriteFile(filename, yamls, 0777)
-			//// handle this error
 			if err != nil {
-				// print it out
 				fmt.Println(err)
 			}
 

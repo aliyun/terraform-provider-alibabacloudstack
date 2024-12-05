@@ -2,11 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -21,7 +23,7 @@ func testAccCheckEIPAssociationDestroy(s *terraform.State) error {
 		}
 
 		if rs.Primary.ID == "" {
-			return WrapError(Error("No EIP Association ID is set"))
+			return errmsgs.WrapError(errmsgs.Error("No EIP Association ID is set"))
 		}
 
 		// Try to find the EIP
@@ -29,10 +31,10 @@ func testAccCheckEIPAssociationDestroy(s *terraform.State) error {
 
 		// Verify the error is what we want
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 
@@ -150,9 +152,6 @@ func testAccEIPAssociationConfigBaisc(rand int) string {
 %s
 
 %s
-provider "alibabacloudstack" {
-	assume_role {}
-}
 variable "name" {
 	default = "tf-testAccEipAssociation%d"
 }
@@ -207,9 +206,6 @@ func testAccEIPAssociationConfigMulti(rand int) string {
 %s
 
 %s
-provider "alibabacloudstack" {
-	assume_role {}
-}
 variable "name" {
 	default = "tf-testAccEipAssociation%d"
 }
@@ -267,9 +263,6 @@ resource "alibabacloudstack_eip_association" "default" {
 func testAccEIPAssociationConfigEni(rand int) string {
 	return fmt.Sprintf(`
 %s
-provider "alibabacloudstack" {
-	assume_role {}
-}
 variable "name" {
   default = "tf-testAccEipAssociation%d"
 }

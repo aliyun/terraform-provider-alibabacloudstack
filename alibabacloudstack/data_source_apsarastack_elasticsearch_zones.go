@@ -6,6 +6,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/elasticsearch"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -15,9 +16,9 @@ func dataSourceAlibabacloudStackElaticsearchZones() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"multi": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
 			},
 			"output_file": {
 				Type:     schema.TypeString,
@@ -55,20 +56,23 @@ func dataSourceAlibabacloudStackElaticsearchZonesRead(d *schema.ResourceData, me
 	var zoneIds []string
 
 	request := elasticsearch.CreateGetRegionConfigurationRequest()
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-	request.QueryParams = map[string]string{ "Product": "elasticsearch", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRoaRequest(*request.RoaRequest)
 
 	raw, err := client.WithElasticsearchClient(func(elasticsearchClient *elasticsearch.Client) (interface{}, error) {
 		return elasticsearchClient.GetRegionConfiguration(request)
 	})
 
-	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_elasticsearch_zones", request.GetActionName(), AlibabacloudStackSdkGoERROR)
-	}
+	response, ok := raw.(*elasticsearch.GetRegionConfigurationResponse)
 	addDebug(request.GetActionName(), raw, request.GetActionName(), request)
-	zones, _ := raw.(*elasticsearch.GetRegionConfigurationResponse)
-	for _, zoneID := range zones.Result.Zones {
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_elasticsearch_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	for _, zoneID := range response.Result.Zones {
 		if multi && strings.Contains(zoneID, MULTI_IZ_SYMBOL) {
 			zoneIds = append(zoneIds, zoneID)
 			continue
@@ -99,10 +103,10 @@ func dataSourceAlibabacloudStackElaticsearchZonesRead(d *schema.ResourceData, me
 	}
 	d.SetId(dataResourceIdHash(zoneIds))
 	if err := d.Set("zones", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", zoneIds); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

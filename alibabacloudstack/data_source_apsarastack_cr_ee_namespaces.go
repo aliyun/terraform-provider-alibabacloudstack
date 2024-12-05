@@ -6,65 +6,66 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudStackCrEENamespaces() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackCrEENamespacesRead,
+		Read:	dataSourceAlibabacloudStackCrEENamespacesRead,
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:		schema.TypeString,
+				ForceNew:	true,
+				Required:	true,
 			},
 			"name_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringIsValidRegExp,
+				Type:		schema.TypeString,
+				Optional:	true,
+				ValidateFunc:	validation.StringIsValidRegExp,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:		schema.TypeString,
+				Optional:	true,
 			},
 
 			// Computed values
 			"ids": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:		schema.TypeList,
+				Optional:	true,
+				Computed:	true,
+				Elem:		&schema.Schema{Type: schema.TypeString},
 			},
 			"names": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:		schema.TypeList,
+				Computed:	true,
+				Elem:		&schema.Schema{Type: schema.TypeString},
 			},
 			"namespaces": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:		schema.TypeList,
+				Computed:	true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"instance_id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"auto_create": {
-							Type:     schema.TypeBool,
-							Computed: true,
+							Type:		schema.TypeBool,
+							Computed:	true,
 						},
 						"default_visibility": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 					},
 				},
@@ -84,7 +85,7 @@ func dataSourceAlibabacloudStackCrEENamespacesRead(d *schema.ResourceData, meta 
 	for {
 		resp, err := crService.ListCrEENamespaces(instanceId, pageNo, pageSize)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		namespaces = append(namespaces, resp.Namespaces...)
 		if len(resp.Namespaces) < pageSize {
@@ -126,9 +127,9 @@ func dataSourceAlibabacloudStackCrEENamespacesRead(d *schema.ResourceData, meta 
 	})
 
 	var (
-		ids           []string
-		names         []string
-		namespaceMaps []map[string]interface{}
+		ids		[]string
+		names		[]string
+		namespaceMaps	[]map[string]interface{}
 	)
 
 	for _, namespace := range namespaces {
@@ -146,13 +147,13 @@ func dataSourceAlibabacloudStackCrEENamespacesRead(d *schema.ResourceData, meta 
 
 	d.SetId(dataResourceIdHash(names))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("namespaces", namespaceMaps); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok {

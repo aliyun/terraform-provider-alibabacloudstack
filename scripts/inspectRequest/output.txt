@@ -1,0 +1,198 @@
+文件: resource_apsarastack_kvstore_instance.go
+  方法: ModifyInstanceSpec
+    参数: EffectiveTime 缺失
+
+文件: resource_apsarastack_ascm_user_group_resource_set_binding.go
+  方法: AddResourceSetToUserGroup
+    参数: ascmRoleId 缺失
+
+文件: resource_apsarastack_db_instance.go
+  方法: CreateDBInstance
+    参数: Encryption 缺失
+
+文件: service_apsarastack_elasticsearch.go
+  方法: DescribeInstance
+    参数: OrganizationId 缺失
+    参数: product 缺失
+    参数: ClientToken 缺失
+
+文件: service_apsarastack_maxcompute.go
+  方法: ListCalcEnginesForAscm
+    参数: ResourceGroupId 缺失
+    参数: OrganizationId 缺失
+    参数: CurrentRoleId 缺失
+
+文件: data_source_apsarastack_kvstore_instances.go
+  方法: DescribeInstances
+    参数: Tag 缺失
+
+文件: resource_apsarastack_drds_instance.go
+  方法: CreateDrdsInstance
+    参数: ClientToken 缺失
+    参数: ResourceGroupId 缺失
+
+文件: resource_apsarastack_edas_k8s_application.go
+  方法: InsertK8sApplication
+    参数: NasId 缺失
+    参数: RequestsmCpu 缺失
+    参数: LocalVolume 缺失
+    参数: LimitmCpu 缺失
+    参数: LogicalRegionId 缺失
+    参数: MountDescs 缺失
+    参数: Namespace 缺失
+
+文件: resource_apsarastack_ascm_quota.go
+  方法: DeleteQuota
+    参数: RegionName  缺失
+
+文件: resource_apsarastack_datahub_topic.go
+  方法: CreateTopic
+    参数: AcceptLanguage 缺失
+    参数: Forwardedregionid 缺失
+
+文件: service_apsarastack_ascm.go
+  方法: ListRAMServiceRoles
+    参数: roleType 缺失
+    参数: id 缺失
+  方法: ListRAMPolicies
+    参数: RamPolicyId 缺失
+  方法: GetQuota
+    参数: regionName  缺失
+  方法: GetPasswordPolicy
+    参数: id 缺失
+
+文件: service_apsarastack_ots.go
+  方法: GetInstance
+    参数: apiName 缺失
+    参数: version 缺失
+
+文件: data_source_apsarastack_edas_clusters.go
+  方法: ListCluster
+    参数: LogicalRegionId 缺失
+
+文件: resource_apsarastack_cr_namespace.go
+  方法: CreateNamespace
+    参数: NamespaceName 缺失
+    参数: Arch 缺失
+    参数: HaApsaraStack 缺失
+  方法: UpdateNamespace
+    参数: Method 缺失
+    参数: Accept-Language 缺失
+    参数: Format 缺失
+
+文件: service_apsarastack_cs.go
+  方法: DescribeClusterNodes
+    参数: nodepool_id 缺失
+
+文件: resource_apsarastack_db_backup_policy.go
+  方法: ModifyBackupPolicy
+    参数: ArchiveBackupKeepCount 缺失
+    参数: ArchiveBackupKeepPolicy 缺失
+    参数: ArchiveBackupRetentionPeriod 缺失
+
+文件: service_apsarastack_datahub.go
+  方法: GetSubscriptionOffset
+    参数: Format 缺失
+
+文件: service_apsarastack_dns.go
+  方法: DescribeGlobalZones
+    参数: Forwardedregionid 缺失
+
+文件: resource_apsarastack_cms_alarm_contact_group.go
+  方法: PutContactGroup
+    参数: EnableSubscribed 缺失
+  方法: PutContactGroup
+    参数: EnableSubscribed 缺失
+
+文件: service_apsarastack_adb.go
+  方法: DescribeTaskInfo
+    参数: DBClusterId 缺失
+
+文件: data_source_apsarastack_dns_domains.go
+  方法: DescribeGlobalZones
+    参数: Forwardedregionid 缺失
+
+文件: resource_apsarastack_ascm_password_policy.go
+  方法: ResetPasswordPolicy
+    参数: id 缺失
+
+文件: data_source_apsarastack_ons_topics.go
+  方法: ConsoleTopicList
+    参数: namespaceId 缺失
+
+文件: resource_apsarastack_dns_record.go
+  方法: DeleteGlobalZoneRecord
+    参数: ZoneId 缺失
+
+文件: data_source_apsarastack_slbs.go
+  方法: DescribeLoadBalancers
+    参数: PageNumber 缺失
+    参数: PageSize 缺失
+
+文件: resource_apsarastack_edas_slb_attachment.go
+  方法: BindSlb
+    参数: VServerGroupId 缺失
+
+文件: service_apsarastack_edas.go
+  方法: ListCluster
+    参数: ResourceGroupId 缺失
+    参数: LogicalRegionId 缺失
+
+文件: resource_apsarastack_ascm_resource_group.go
+  方法: RemoveResourceGroup
+    参数: resourceGroupName 缺失
+
+文件: resource_apsarastack_cms_alarm_contact.go
+  方法: PutContact
+    参数: Lang 缺失
+  方法: PutContact
+    参数: Lang 缺失
+
+文件: resource_apsarastack_edas_application.go
+  方法: InsertApplication
+    参数: ComponentIds 缺失
+    参数: HealthCheckUrl 缺失
+    参数: PackageType 缺失
+  方法: UpdateApplicationBaseInfo
+    参数: Desc 缺失
+
+文件: resource_apsarastack_ons_instance.go
+  方法: ConsoleInstanceUpdate
+    参数: IndependentNaming 缺失
+    参数: Cluster 缺失
+
+文件: service_apsarastack_rds.go
+  方法: ModifyBackupPolicy
+    参数: ArchiveBackupKeepCount 缺失
+    参数: ArchiveBackupKeepPolicy 缺失
+    参数: ArchiveBackupRetentionPeriod 缺失
+
+文件: data_source_apsarastack_ascm_ram_service_roles.go
+  方法: ListRAMServiceRoles
+    参数: roleType 缺失
+
+文件: resource_apsarastack_ascm_resource_group_user_attachment.go
+  方法: UnbindAscmUserAndResourceGroup
+    参数: resourceGroupId 缺失
+
+文件: resource_apsarastack_dns_domain.go
+  方法: UpdateGlobalZoneRemark
+    参数: Name 缺失
+
+文件: resource_apsarastack_elasticsearch_on_k8s_instance.go
+  方法: createInstance
+    参数: ClientToken 缺失
+    参数: OrganizationId 缺失
+
+文件: resource_apsarastack_maxcompute_project.go
+  方法: CreateCalcEngineForAscm
+    参数: ClusterName 缺失
+    参数: TaskPk 缺失
+    参数: OdpsName 缺失
+    参数: CurrentRoleId 缺失
+    参数: KmsRegion 缺失
+    参数: ClusterItem 缺失
+    参数: ExternalTable 缺失
+    参数: ResourceGroupId 缺失
+    参数: OrganizationId 缺失
+

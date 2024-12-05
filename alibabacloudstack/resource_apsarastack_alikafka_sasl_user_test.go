@@ -9,6 +9,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alikafka"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -26,7 +27,7 @@ func init() {
 func testSweepAlikafkaSaslUser(region string) error {
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return WrapErrorf(err, "error getting alibabacloudstack client.")
+		return errmsgs.WrapErrorf(err, "error getting alibabacloudstack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
@@ -72,7 +73,7 @@ func testSweepAlikafkaSaslUser(region string) error {
 
 		saslUserListResp, _ := raw.(*alikafka.DescribeSaslUsersResponse)
 		//saslUsers := saslUserListResp.SaslUserList.SaslUserVO
-		saslUsers := saslUserListResp.SaslUserList
+		saslUsers := saslUserListResp.SaslUserList.SaslUserVO
 		for _, saslUser := range saslUsers {
 			name := saslUser.Username
 			skip := true
@@ -128,7 +129,6 @@ func TestAccAlibabacloudStackAlikafkaSaslUser_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckWithAlikafkaAclEnable(t)
-			testAccPreCheckWithRegions(t, true, connectivity.AlikafkaSupportedRegions)
 			testAccPreCheck(t)
 		},
 		// module name
@@ -213,7 +213,7 @@ func TestAccAlibabacloudStackAlikafkaSaslUser_multi(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckWithAlikafkaAclEnable(t)
-			testAccPreCheckWithRegions(t, true, connectivity.AlikafkaSupportedRegions)
+
 			testAccPreCheck(t)
 		},
 		// module name
@@ -239,7 +239,6 @@ func TestAccAlibabacloudStackAlikafkaSaslUser_multi(t *testing.T) {
 	})
 
 }
-
 */
 func resourceAlikafkaSaslUserConfigDependence(name string) string {
 	return fmt.Sprintf(`

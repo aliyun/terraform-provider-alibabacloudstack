@@ -7,6 +7,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -51,14 +52,7 @@ func resourceAlibabacloudStackEipAssociationCreate(d *schema.ResourceData, meta 
 	vpcService := VpcService{client}
 
 	request := vpc.CreateAssociateEipAddressRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.AllocationId = Trim(d.Get("allocation_id").(string))
 	request.InstanceId = Trim(d.Get("instance_id").(string))
 	request.InstanceType = EcsInstance
@@ -77,20 +71,29 @@ func resourceAlibabacloudStackEipAssociationCreate(d *schema.ResourceData, meta 
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.AssociateEipAddress(request)
 		})
+		var response *vpc.AssociateEipAddressResponse
+		var ok bool
 		if err != nil {
-			if IsExpectedErrors(err, []string{"TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict"}) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			if raw != nil {
+				response, ok = raw.(*vpc.AssociateEipAddressResponse)
+			}
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_eip_association", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	}); err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_eip_association", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	if err := vpcService.WaitForEip(request.AllocationId, InUse, 60); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	// There is at least 30 seconds delay for ecs instance
 	if request.InstanceType == EcsInstance {
@@ -109,11 +112,11 @@ func resourceAlibabacloudStackEipAssociationRead(d *schema.ResourceData, meta in
 
 	object, err := vpcService.DescribeEipAssociation(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("instance_id", object.InstanceId)
 	d.Set("allocation_id", object.AllocationId)
@@ -127,22 +130,12 @@ func resourceAlibabacloudStackEipAssociationDelete(d *schema.ResourceData, meta 
 	vpcService := VpcService{client}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	allocationId, instanceId := parts[0], parts[1]
-	if err != nil {
-		return WrapError(err)
-	}
 
 	request := vpc.CreateUnassociateEipAddressRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.AllocationId = allocationId
 	request.InstanceId = instanceId
 	request.Force = requests.NewBoolean(d.Get("force").(bool))
@@ -162,18 +155,27 @@ func resourceAlibabacloudStackEipAssociationDelete(d *schema.ResourceData, meta 
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.UnassociateEipAddress(request)
 		})
+		var response *vpc.UnassociateEipAddressResponse
+		var ok bool
 		if err != nil {
-			if IsExpectedErrors(err, []string{"IncorrectInstanceStatus", "IncorrectHaVipStatus", "TaskConflict",
+			if errmsgs.IsExpectedErrors(err, []string{"IncorrectInstanceStatus", "IncorrectHaVipStatus", "TaskConflict",
 				"InvalidIpStatus.HasBeenUsedBySnatTable", "InvalidIpStatus.HasBeenUsedByForwardEntry", "InvalidStatus.SnatOrDnat"}) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			if raw != nil {
+				response, ok = raw.(*vpc.UnassociateEipAddressResponse)
+			}
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
-	return WrapError(vpcService.WaitForEipAssociation(d.Id(), Available, DefaultTimeoutMedium))
+	return errmsgs.WrapError(vpcService.WaitForEipAssociation(d.Id(), Available, DefaultTimeoutMedium))
 }

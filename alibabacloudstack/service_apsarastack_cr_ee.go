@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"errors"
 	"strings"
 	"time"
@@ -12,11 +13,7 @@ import (
 func (c *CrService) ListCrEEInstances(pageNo int, pageSize int) (*cr_ee.ListInstanceResponse, error) {
 	response := &cr_ee.ListInstanceResponse{}
 	request := cr_ee.CreateListInstanceRequest()
-	request.RegionId = c.client.RegionId
-	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr"}
-	request.QueryParams["Department"] = c.client.Department
-	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
+	c.client.InitRpcRequest(*request.RpcRequest)
 	request.PageNo = requests.NewInteger(pageNo)
 	request.PageSize = requests.NewInteger(pageSize)
 	action := request.GetActionName()
@@ -24,26 +21,25 @@ func (c *CrService) ListCrEEInstances(pageNo int, pageSize int) (*cr_ee.ListInst
 	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.ListInstance(request)
 	})
+	response, ok := raw.(*cr_ee.ListInstanceResponse)
 	if err != nil {
-		return response, WrapErrorf(err, DataDefaultErrorMsg, "ListInstance", action, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "ListInstance", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.ListInstanceResponse)
 	if !response.ListInstanceIsSuccess {
-		return response, WrapErrorf(errors.New(response.Code), DataDefaultErrorMsg, "ListInstance", action, AlibabacloudStackSdkGoERROR)
+		return response, errmsgs.WrapErrorf(errors.New(response.Code), errmsgs.DataDefaultErrorMsg, "ListInstance", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return response, nil
 }
 
 func (c *CrService) DescribeCrEEInstance(instanceId string) (*cr_ee.GetInstanceResponse, error) {
-	response := &cr_ee.GetInstanceResponse{}
 	request := cr_ee.CreateGetInstanceRequest()
-	request.RegionId = c.client.RegionId
-	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr"}
-	request.QueryParams["Department"] = c.client.Department
-	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
+	c.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	resource := instanceId
 	action := request.GetActionName()
@@ -51,15 +47,19 @@ func (c *CrService) DescribeCrEEInstance(instanceId string) (*cr_ee.GetInstanceR
 	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.GetInstance(request)
 	})
+	response, ok := raw.(*cr_ee.GetInstanceResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"INSTANCE_NOT_EXIST"}) {
-			return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"INSTANCE_NOT_EXIST"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.GetInstanceResponse)
 	if !response.GetInstanceIsSuccess {
 		return response, c.wrapCrServiceError(resource, action, response.Code)
 	}
@@ -69,11 +69,7 @@ func (c *CrService) DescribeCrEEInstance(instanceId string) (*cr_ee.GetInstanceR
 func (c *CrService) GetCrEEInstanceUsage(instanceId string) (*cr_ee.GetInstanceUsageResponse, error) {
 	response := &cr_ee.GetInstanceUsageResponse{}
 	request := cr_ee.CreateGetInstanceUsageRequest()
-	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr"}
-	request.QueryParams["Department"] = c.client.Department
-	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
-	request.RegionId = c.client.RegionId
+	c.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	resource := instanceId
 	action := request.GetActionName()
@@ -81,15 +77,19 @@ func (c *CrService) GetCrEEInstanceUsage(instanceId string) (*cr_ee.GetInstanceU
 	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.GetInstanceUsage(request)
 	})
+	response, ok := raw.(*cr_ee.GetInstanceUsageResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"INSTANCE_NOT_EXIST"}) {
-			return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"INSTANCE_NOT_EXIST"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.GetInstanceUsageResponse)
 	if !response.GetInstanceUsageIsSuccess {
 		return response, c.wrapCrServiceError(resource, action, response.Code)
 	}
@@ -99,11 +99,7 @@ func (c *CrService) GetCrEEInstanceUsage(instanceId string) (*cr_ee.GetInstanceU
 func (c *CrService) ListCrEEInstanceEndpoint(instanceId string) (*cr_ee.ListInstanceEndpointResponse, error) {
 	response := &cr_ee.ListInstanceEndpointResponse{}
 	request := cr_ee.CreateListInstanceEndpointRequest()
-	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr"}
-	request.QueryParams["Department"] = c.client.Department
-	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
-	request.RegionId = c.client.RegionId
+	c.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	resource := instanceId
 	action := request.GetActionName()
@@ -111,11 +107,16 @@ func (c *CrService) ListCrEEInstanceEndpoint(instanceId string) (*cr_ee.ListInst
 	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.ListInstanceEndpoint(request)
 	})
-	if err != nil {
-		if IsExpectedErrors(err, []string{"INSTANCE_NOT_EXIST"}) {
-			return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+	response, ok := raw.(*cr_ee.ListInstanceEndpointResponse)
+	if err != nil{
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"INSTANCE_NOT_EXIST"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
@@ -129,11 +130,7 @@ func (c *CrService) ListCrEEInstanceEndpoint(instanceId string) (*cr_ee.ListInst
 func (c *CrService) ListCrEENamespaces(instanceId string, pageNo int, pageSize int) (*cr_ee.ListNamespaceResponse, error) {
 	response := &cr_ee.ListNamespaceResponse{}
 	request := cr_ee.CreateListNamespaceRequest()
-	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr"}
-	request.QueryParams["Department"] = c.client.Department
-	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
-	request.RegionId = c.client.RegionId
+	c.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	request.PageNo = requests.NewInteger(pageNo)
 	request.PageSize = requests.NewInteger(pageSize)
@@ -143,14 +140,18 @@ func (c *CrService) ListCrEENamespaces(instanceId string, pageNo int, pageSize i
 	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.ListNamespace(request)
 	})
+	response, ok := raw.(*cr_ee.ListNamespaceResponse)
 	if err != nil {
-		return response, WrapErrorf(err, DataDefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.ListNamespaceResponse)
 	if !response.ListNamespaceIsSuccess {
-		return response, WrapErrorf(errors.New(response.Code), DataDefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		return response, errmsgs.WrapErrorf(errors.New(response.Code), errmsgs.DataDefaultErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return response, nil
 }
@@ -161,11 +162,7 @@ func (c *CrService) DescribeCrEENamespace(id string) (*cr_ee.GetNamespaceRespons
 	namespaceName := strRet[1]
 	response := &cr_ee.GetNamespaceResponse{}
 	request := cr_ee.CreateGetNamespaceRequest()
-	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr"}
-	request.QueryParams["Department"] = c.client.Department
-	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
-	request.RegionId = c.client.RegionId
+	c.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	request.NamespaceName = namespaceName
 	resource := c.GenResourceId(instanceId, namespaceName)
@@ -174,15 +171,19 @@ func (c *CrService) DescribeCrEENamespace(id string) (*cr_ee.GetNamespaceRespons
 	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.GetNamespace(request)
 	})
+	response, ok := raw.(*cr_ee.GetNamespaceResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"NAMESPACE_NOT_EXIST"}) {
-			return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"NAMESPACE_NOT_EXIST"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.GetNamespaceResponse)
 	if !response.GetNamespaceIsSuccess {
 		return response, c.wrapCrServiceError(resource, action, response.Code)
 	}
@@ -192,11 +193,7 @@ func (c *CrService) DescribeCrEENamespace(id string) (*cr_ee.GetNamespaceRespons
 func (c *CrService) DeleteCrEENamespace(instanceId string, namespaceName string) (*cr_ee.DeleteNamespaceResponse, error) {
 	response := &cr_ee.DeleteNamespaceResponse{}
 	request := cr_ee.CreateDeleteNamespaceRequest()
-	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr"}
-	request.QueryParams["Department"] = c.client.Department
-	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
-	request.RegionId = c.client.RegionId
+	c.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	request.NamespaceName = namespaceName
 	resource := c.GenResourceId(instanceId, namespaceName)
@@ -205,11 +202,16 @@ func (c *CrService) DeleteCrEENamespace(instanceId string, namespaceName string)
 	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.DeleteNamespace(request)
 	})
+	response, ok := raw.(*cr_ee.DeleteNamespaceResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"NAMESPACE_NOT_EXIST"}) {
-			return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"NAMESPACE_NOT_EXIST"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
@@ -227,12 +229,12 @@ func (c *CrService) WaitForCrEENamespace(instanceId string, namespaceName string
 	for {
 		resp, err := c.DescribeCrEENamespace(c.GenResourceId(instanceId, namespaceName))
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 
@@ -240,7 +242,7 @@ func (c *CrService) WaitForCrEENamespace(instanceId string, namespaceName string
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, resource, GetFunc(1), timeout, resp.NamespaceName, namespaceName, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, resource, GetFunc(1), timeout, resp.NamespaceName, namespaceName, errmsgs.ProviderERROR)
 		}
 		time.Sleep(3 * time.Second)
 	}
@@ -249,11 +251,7 @@ func (c *CrService) WaitForCrEENamespace(instanceId string, namespaceName string
 func (c *CrService) ListCrEERepos(instanceId string, namespace string, pageNo int, pageSize int) (*cr_ee.ListRepositoryResponse, error) {
 	response := &cr_ee.ListRepositoryResponse{}
 	request := cr_ee.CreateListRepositoryRequest()
-	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr"}
-	request.QueryParams["Department"] = c.client.Department
-	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
-	request.RegionId = c.client.RegionId
+	c.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	request.RepoNamespaceName = namespace
 	request.RepoStatus = "ALL"
@@ -265,14 +263,19 @@ func (c *CrService) ListCrEERepos(instanceId string, namespace string, pageNo in
 	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.ListRepository(request)
 	})
+	response, ok := raw.(*cr_ee.ListRepositoryResponse)
 	if err != nil {
-		return response, WrapErrorf(err, DataDefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
 	response, _ = raw.(*cr_ee.ListRepositoryResponse)
 	if !response.ListRepositoryIsSuccess {
-		return response, WrapErrorf(errors.New(response.Code), DataDefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		return response, errmsgs.WrapErrorf(errors.New(response.Code), errmsgs.DataDefaultErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return response, nil
 }
@@ -284,11 +287,7 @@ func (c *CrService) DescribeCrEERepo(id string) (*cr_ee.GetRepositoryResponse, e
 	repo := strRet[2]
 	response := &cr_ee.GetRepositoryResponse{}
 	request := cr_ee.CreateGetRepositoryRequest()
-	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr"}
-	request.QueryParams["Department"] = c.client.Department
-	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
-	request.RegionId = c.client.RegionId
+	c.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	request.RepoNamespaceName = namespace
 	request.RepoName = repo
@@ -298,11 +297,16 @@ func (c *CrService) DescribeCrEERepo(id string) (*cr_ee.GetRepositoryResponse, e
 	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.GetRepository(request)
 	})
+	response, ok := raw.(*cr_ee.GetRepositoryResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"REPO_NOT_EXIST"}) {
-			return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"REPO_NOT_EXIST"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
@@ -317,11 +321,7 @@ func (c *CrService) DescribeCrEERepo(id string) (*cr_ee.GetRepositoryResponse, e
 func (c *CrService) DeleteCrEERepo(instanceId, namespace, repo, repoId string) (*cr_ee.DeleteRepositoryResponse, error) {
 	response := &cr_ee.DeleteRepositoryResponse{}
 	request := cr_ee.CreateDeleteRepositoryRequest()
-	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr"}
-	request.QueryParams["Department"] = c.client.Department
-	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
-	request.RegionId = c.client.RegionId
+	c.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	request.RepoId = repoId
 	resource := c.GenResourceId(instanceId, namespace, repo)
@@ -330,15 +330,19 @@ func (c *CrService) DeleteCrEERepo(instanceId, namespace, repo, repoId string) (
 	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.DeleteRepository(request)
 	})
+	response, ok := raw.(*cr_ee.DeleteRepositoryResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"REPO_NOT_EXIST"}) {
-			return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"REPO_NOT_EXIST"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.DeleteRepositoryResponse)
 	if !response.DeleteRepositoryIsSuccess {
 		return response, c.wrapCrServiceError(resource, action, response.Code)
 	}
@@ -352,19 +356,19 @@ func (c *CrService) WaitForCrEERepo(instanceId string, namespace string, repo st
 	for {
 		resp, err := c.DescribeCrEERepo(c.GenResourceId(instanceId, namespace, repo))
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if resp.RepoName == repo && status != Deleted {
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, resource, GetFunc(1), timeout, resp.RepoName, repo, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, resource, GetFunc(1), timeout, resp.RepoName, repo, errmsgs.ProviderERROR)
 		}
 		time.Sleep(3 * time.Second)
 	}
@@ -373,11 +377,7 @@ func (c *CrService) WaitForCrEERepo(instanceId string, namespace string, repo st
 func (c *CrService) ListCrEERepoTags(instanceId string, repoId string, pageNo int, pageSize int) (*cr_ee.ListRepoTagResponse, error) {
 	response := &cr_ee.ListRepoTagResponse{}
 	request := cr_ee.CreateListRepoTagRequest()
-	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr"}
-	request.QueryParams["Department"] = c.client.Department
-	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
-	request.RegionId = c.client.RegionId
+	c.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	request.RepoId = repoId
 	request.PageNo = requests.NewInteger(pageNo)
@@ -388,14 +388,18 @@ func (c *CrService) ListCrEERepoTags(instanceId string, repoId string, pageNo in
 	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.ListRepoTag(request)
 	})
+	response, ok := raw.(*cr_ee.ListRepoTagResponse)
 	if err != nil {
-		return response, WrapErrorf(err, DataDefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok  {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.ListRepoTagResponse)
 	if !response.ListRepoTagIsSuccess {
-		return response, WrapErrorf(errors.New(response.Code), DataDefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		return response, errmsgs.WrapErrorf(errors.New(response.Code), errmsgs.DataDefaultErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return response, nil
 }
@@ -410,11 +414,7 @@ func (c *CrService) DescribeCrEESyncRule(id string) (*cr_ee.SyncRulesItem, error
 	for {
 		response := &cr_ee.ListRepoSyncRuleResponse{}
 		request := cr_ee.CreateListRepoSyncRuleRequest()
-		request.Headers = map[string]string{"RegionId": c.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "cr"}
-		request.QueryParams["Department"] = c.client.Department
-		request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
-		request.RegionId = c.client.RegionId
+		c.client.InitRpcRequest(*request.RpcRequest)
 		request.InstanceId = instanceId
 		request.NamespaceName = namespace
 		request.PageNo = requests.NewInteger(pageNo)
@@ -422,12 +422,16 @@ func (c *CrService) DescribeCrEESyncRule(id string) (*cr_ee.SyncRulesItem, error
 		raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 			return creeClient.ListRepoSyncRule(request)
 		})
+		response, ok := raw.(*cr_ee.ListRepoSyncRuleResponse)
 		if err != nil {
-			return nil, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-		response, _ = raw.(*cr_ee.ListRepoSyncRuleResponse)
 		if !response.ListRepoSyncRuleIsSuccess {
 			return nil, c.wrapCrServiceError(id, request.GetActionName(), response.Code)
 		}
@@ -439,7 +443,7 @@ func (c *CrService) DescribeCrEESyncRule(id string) (*cr_ee.SyncRulesItem, error
 		}
 
 		if len(response.SyncRules) < PageSizeLarge {
-			return nil, WrapErrorf(errors.New("sync rule not found"), NotFoundMsg, AlibabacloudStackSdkGoERROR)
+			return nil, errmsgs.WrapErrorf(errors.New("sync rule not found"), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
 		pageNo++
@@ -449,9 +453,9 @@ func (c *CrService) DescribeCrEESyncRule(id string) (*cr_ee.SyncRulesItem, error
 func (c *CrService) wrapCrServiceError(resource string, action string, code string) error {
 	switch code {
 	case "INSTANCE_NOT_EXIST", "NAMESPACE_NOT_EXIST", "REPO_NOT_EXIST":
-		return WrapErrorf(errors.New(code), NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(errors.New(code), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 	default:
-		return WrapErrorf(errors.New(code), DefaultErrorMsg, resource, action, AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(errors.New(code), errmsgs.DefaultErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 }
 

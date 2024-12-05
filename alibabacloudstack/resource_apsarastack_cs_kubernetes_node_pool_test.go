@@ -143,7 +143,6 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_autoScaling(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, true, connectivity.ManagedKubernetesSupportedRegions)
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -253,8 +252,6 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_PrePaid(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, true, connectivity.ManagedKubernetesSupportedRegions)
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -348,7 +345,6 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_Spot(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, true, connectivity.ManagedKubernetesSupportedRegions)
 		},
 		// module name
 		IDRefreshName: resourceId,

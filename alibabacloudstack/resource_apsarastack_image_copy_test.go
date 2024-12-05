@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
@@ -115,7 +117,7 @@ func testAccCheckImageExistsWithProviders(n string, image *ecs.Image, providers 
 
 			resp, err := ecsService.DescribeImageById(rs.Primary.ID)
 			if err != nil {
-				if NotFoundError(err) {
+				if errmsgs.NotFoundError(err) {
 					continue
 				}
 				return err
@@ -154,7 +156,7 @@ func testAccCheckImageDestroyWithProvider(s *terraform.State, provider *schema.P
 
 		resp, err := ecsService.DescribeImageById(rs.Primary.ID)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
 			return err
@@ -172,14 +174,6 @@ func resourceImageCopyBasicConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
 	default = "%s"
-}
-provider "alibabacloudstack" {
-  alias = "sh"
-  region = "cn-shanghai"
-}
-provider "alibabacloudstack" {
-  alias = "hz"
-  region = "cn-hangzhou"
 }
 data "alibabacloudstack_instance_types" "default" {
     provider = "alibabacloudstack.hz"

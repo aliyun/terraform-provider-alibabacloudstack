@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -12,6 +11,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -79,39 +79,40 @@ func resourceAlibabacloudStackEssScalingGroup() *schema.Resource {
 }
 
 func resourceAlibabacloudStackEssScalingGroupCreate(d *schema.ResourceData, meta interface{}) error {
-
 	request, err := buildAlibabacloudStackEssScalingGroupArgs(d, meta)
-
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
+	client.InitRpcRequest(*request.RpcRequest)
 	essService := EssService{client}
 	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithEssClient(func(essClient *ess.Client) (interface{}, error) {
 			return essClient.CreateScalingGroup(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{Throttling, "IncorrectLoadBalancerHealthCheck", "IncorrectLoadBalancerStatus"}) {
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*ess.CreateScalingGroupResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling, "IncorrectLoadBalancerHealthCheck", "IncorrectLoadBalancerStatus"}) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ess_scalinggroup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		response, _ := raw.(*ess.CreateScalingGroupResponse)
 		d.SetId(response.ScalingGroupId)
 		return nil
 	}); err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ess_scalinggroup", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	if err := essService.WaitForEssScalingGroup(d.Id(), Inactive, DefaultTimeout); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	return resourceAlibabacloudStackEssScalingGroupUpdate(d, meta)
@@ -125,11 +126,11 @@ func resourceAlibabacloudStackEssScalingGroupRead(d *schema.ResourceData, meta i
 
 	object, err := essService.DescribeEssScalingGroup(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("min_size", object.MinSize)
@@ -171,18 +172,9 @@ func resourceAlibabacloudStackEssScalingGroupRead(d *schema.ResourceData, meta i
 }
 
 func resourceAlibabacloudStackEssScalingGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := ess.CreateModifyScalingGroupRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+	client.InitRpcRequest(*request.RpcRequest)
 	request.ScalingGroupId = d.Id()
 
 	d.Partial(true)
@@ -218,29 +210,17 @@ func resourceAlibabacloudStackEssScalingGroupUpdate(d *schema.ResourceData, meta
 		return essClient.ModifyScalingGroup(request)
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if raw != nil {
+			response, ok := raw.(*ess.ModifyScalingGroupResponse)
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	//d.SetPartial("scaling_group_name")
-	//d.SetPartial("min_size")
-	//d.SetPartial("max_size")
-	//d.SetPartial("default_cooldown")
-	//d.SetPartial("vswitch_ids")
-	//d.SetPartial("removal_policies")
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	// if d.HasChange("loadbalancer_ids") {
-	// 	if err != nil {
-	// 		return WrapError(err)
-	// 	}
-	// 	//d.SetPartial("loadbalancer_ids")
-	// }
-
-	// if d.HasChange("db_instance_ids") {
-	// 	if err != nil {
-	// 		return WrapError(err)
-	// 	}
-	// 	//d.SetPartial("db_instance_ids")
-	// }
 	d.Partial(false)
 	return resourceAlibabacloudStackEssScalingGroupRead(d, meta)
 }
@@ -250,15 +230,7 @@ func resourceAlibabacloudStackEssScalingGroupDelete(d *schema.ResourceData, meta
 	essService := EssService{client}
 
 	request := ess.CreateDeleteScalingGroupRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+	client.InitRpcRequest(*request.RpcRequest)
 	request.ScalingGroupId = d.Id()
 	request.ForceDelete = requests.NewBoolean(true)
 
@@ -267,29 +239,29 @@ func resourceAlibabacloudStackEssScalingGroupDelete(d *schema.ResourceData, meta
 	})
 
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidScalingGroupId.NotFound"}) {
+		errmsg := ""
+		if raw != nil {
+			response, ok := raw.(*ess.DeleteScalingGroupResponse)
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+		}
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidScalingGroupId.NotFound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	return WrapError(essService.WaitForEssScalingGroup(d.Id(), Deleted, DefaultTimeout))
+	return errmsgs.WrapError(essService.WaitForEssScalingGroup(d.Id(), Deleted, DefaultTimeout))
 }
 
 func buildAlibabacloudStackEssScalingGroupArgs(d *schema.ResourceData, meta interface{}) (*ess.CreateScalingGroupRequest, error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
-	request := ess.CreateCreateScalingGroupRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
+	request := ess.CreateCreateScalingGroupRequest()
+	client.InitRpcRequest(*request.RpcRequest)
 	request.MinSize = requests.NewInteger(d.Get("min_size").(int))
 	request.MaxSize = requests.NewInteger(d.Get("max_size").(int))
 	request.DefaultCooldown = requests.NewInteger(d.Get("default_cooldown").(int))
@@ -310,7 +282,7 @@ func buildAlibabacloudStackEssScalingGroupArgs(d *schema.ResourceData, meta inte
 	if lbs, ok := d.GetOk("loadbalancer_ids"); ok {
 		for _, lb := range lbs.(*schema.Set).List() {
 			if err := slbService.WaitForSlb(lb.(string), Active, DefaultTimeout); err != nil {
-				return nil, WrapError(err)
+				return nil, errmsgs.WrapError(err)
 			}
 		}
 		request.LoadBalancerIds = convertListToJsonString(lbs.(*schema.Set).List())

@@ -11,6 +11,7 @@ import (
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -50,7 +51,7 @@ func testSweepCmsMetricRuleTemplate(region string) error {
 		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-01-01"), StringPointer("AK"), nil, request, &runtime)
 			if err != nil {
-				if NeedRetry(err) {
+				if errmsgs.NeedRetry(err) {
 					wait()
 					return resource.RetryableError(err)
 				}
@@ -453,7 +454,7 @@ variable "name" {
 // 		}
 // 	}
 // 	notFoundResponseMock := func(errorCode string) (map[string]interface{}, error) {
-// 		return nil, GetNotFoundErrorFromString(GetNotFoundMessage("alibabacloudstack_cms_metric_rule_template", errorCode))
+// 		return nil, Geterrmsgs.NotFoundErrorFromString(GetNotFoundMessage("alibabacloudstack_cms_metric_rule_template", errorCode))
 // 	}
 // 	successResponseMock := func(operationMockResponse map[string]interface{}) (map[string]interface{}, error) {
 // 		if len(operationMockResponse) > 0 {

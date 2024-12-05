@@ -2,14 +2,15 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"log"
+	"regexp"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"regexp"
 )
 
 func dataSourceAlibabacloudStackOnsTopics() *schema.Resource {
@@ -33,28 +34,11 @@ func dataSourceAlibabacloudStackOnsTopics() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			// Computed values
 			"names": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-// 后续没有消费使用
-// 			"topic": {
-// 				Type:     schema.TypeString,
-// 				Computed: true,
-// 				Optional: true,
-// 			},
-// 			"remark": {
-// 				Type:     schema.TypeString,
-// 				Computed: true,
-// 				Optional: true,
-// 			},
-// 			"message_type": {
-// 				Type:     schema.TypeInt,
-// 				Computed: true,
-// 				Optional: true,
-// 			},
 			"topics": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -111,26 +95,11 @@ func dataSourceAlibabacloudStackOnsTopicsRead(d *schema.ResourceData, meta inter
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	namespaceid := d.Get("instance_id").(string)
 
-	request := requests.NewCommonRequest()
-	request.Method = "POST"
-	request.Product = "Ons-inner"
-	request.Version = "2018-02-05"
-	request.Scheme = "http"
-	request.RegionId = client.RegionId
-	request.ApiName = "ConsoleTopicList"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		"Product":         "Ons-inner",
-		"RegionId":        client.RegionId,
-		"Action":          "ConsoleTopicList",
-		"Version":         "2018-02-05",
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"OnsRegionId":     client.RegionId,
-		"PreventCache":    "",
-		"namespaceId":     namespaceid,
-	}
+	request := client.NewCommonRequest("POST", "Ons-inner", "2018-02-05", "ConsoleTopicList", "")
+	request.QueryParams["namespaceId"] = namespaceid
+	request.QueryParams["OnsRegionId"] = client.RegionId
+	request.QueryParams["PreventCache"] = ""
+
 	response := Topic{}
 
 	for {
@@ -139,14 +108,18 @@ func dataSourceAlibabacloudStackOnsTopicsRead(d *schema.ResourceData, meta inter
 		})
 		log.Printf(" response of raw ConsoleTopicList : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_ons_topics", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ons_topics", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		bresponse, _ := raw.(*responses.CommonResponse)
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Code == 200 || len(response.Data) < 1 {
 			break
@@ -180,7 +153,7 @@ func dataSourceAlibabacloudStackOnsTopicsRead(d *schema.ResourceData, meta inter
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("topics", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

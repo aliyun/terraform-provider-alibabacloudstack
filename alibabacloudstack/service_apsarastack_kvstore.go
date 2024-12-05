@@ -12,6 +12,7 @@ import (
 
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type KvstoreService struct {
@@ -20,50 +21,57 @@ type KvstoreService struct {
 
 var KVstoreInstanceStatusCatcher = Catcher{"OperationDenied.KVstoreInstanceStatus", 60, 5}
 
+func (s *KvstoreService) DoR_KvstoreDescribeinstanceattributeRequest(id string) (*r_kvstore.DBInstanceAttribute, error) {
+    return s.DescribeKVstoreInstance(id)
+}
 func (s *KvstoreService) DescribeKVstoreInstance(id string) (*r_kvstore.DBInstanceAttribute, error) {
 	instance := &r_kvstore.DBInstanceAttribute{}
 	request := r_kvstore.CreateDescribeInstanceAttributeRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = id
 	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 		return rkvClient.DescribeInstanceAttribute(request)
 	})
+	bresponse, ok := raw.(*r_kvstore.DescribeInstanceAttributeResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
-			return instance, WrapErrorf(Error(GetNotFoundMessage("KVstoreInstance", id)), NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
+			return instance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KVstoreInstance", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return instance, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return instance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*r_kvstore.DescribeInstanceAttributeResponse)
-	if len(response.Instances.DBInstanceAttribute) <= 0 {
-		return instance, WrapErrorf(Error(GetNotFoundMessage("KVstoreInstance", id)), NotFoundMsg, AlibabacloudStackSdkGoERROR)
+	if len(bresponse.Instances.DBInstanceAttribute) <= 0 {
+		return instance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KVstoreInstance", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	return &response.Instances.DBInstanceAttribute[0], nil
+	return &bresponse.Instances.DBInstanceAttribute[0], nil
 }
 
 func (s *KvstoreService) DescribeKVstoreBackupPolicy(id string) (*r_kvstore.DescribeBackupPolicyResponse, error) {
 	response := &r_kvstore.DescribeBackupPolicyResponse{}
 	request := r_kvstore.CreateDescribeBackupPolicyRequest()
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = id
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 		return rkvClient.DescribeBackupPolicy(request)
 	})
+	bresponse, ok := raw.(*r_kvstore.DescribeBackupPolicyResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
-			return response, WrapErrorf(Error(GetNotFoundMessage("KVstoreBackupPolicy", id)), NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
+			return response, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KVstoreBackupPolicy", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*r_kvstore.DescribeBackupPolicyResponse)
-	return response, nil
+	return bresponse, nil
 }
 
 func (s *KvstoreService) WaitForKVstoreInstance(id string, status Status, timeout int) error {
@@ -71,19 +79,19 @@ func (s *KvstoreService) WaitForKVstoreInstance(id string, status Status, timeou
 	for {
 		object, err := s.DescribeKVstoreInstance(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if object.InstanceStatus == string(status) {
 			break
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.InstanceStatus, status, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.InstanceStatus, status, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
@@ -93,16 +101,16 @@ func (s *KvstoreService) RdsKvstoreInstanceStateRefreshFunc(id string, failState
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeKVstoreInstance(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if object.InstanceStatus == failState {
-				return object, object.InstanceStatus, WrapError(Error(FailedToReachTargetStatus, object.InstanceStatus))
+				return object, object.InstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.InstanceStatus))
 			}
 		}
 		return object, object.InstanceStatus, nil
@@ -113,14 +121,14 @@ func (s *KvstoreService) WaitForKVstoreInstanceVpcAuthMode(id string, status str
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
 		object, err := s.DescribeKVstoreInstance(id)
-		if err != nil && !NotFoundError(err) {
+		if err != nil && !errmsgs.NotFoundError(err) {
 			return err
 		}
 		if object.VpcAuthMode == string(status) {
 			break
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.VpcAuthMode, status, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.VpcAuthMode, status, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
@@ -129,41 +137,46 @@ func (s *KvstoreService) WaitForKVstoreInstanceVpcAuthMode(id string, status str
 func (s *KvstoreService) DescribeParameters(id string) (*r_kvstore.DescribeParametersResponse, error) {
 	response := &r_kvstore.DescribeParametersResponse{}
 	request := r_kvstore.CreateDescribeParametersRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 
 	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 		return rkvClient.DescribeParameters(request)
 	})
+	bresponse, ok := raw.(*r_kvstore.DescribeParametersResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return response, WrapErrorf(Error(GetNotFoundMessage("Parameters", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return response, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Parameters", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*r_kvstore.DescribeParametersResponse)
-	return response, nil
+	return bresponse, nil
 }
 
 func (s *KvstoreService) ModifyInstanceConfig(id string, config string) error {
 	request := r_kvstore.CreateModifyInstanceConfigRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = id
 	request.Config = config
 
 	if err := s.WaitForKVstoreInstance(id, Normal, DefaultLongTimeout); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 		return rkvClient.ModifyInstanceConfig(request)
 	})
+	bresponse, ok := raw.(*r_kvstore.ModifyInstanceConfigResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	return nil
@@ -182,34 +195,40 @@ func (s *KvstoreService) setInstanceTags(d *schema.ResourceData) error {
 				tagKey = append(tagKey, v.Key)
 			}
 			request := r_kvstore.CreateUntagResourcesRequest()
+			s.client.InitRpcRequest(*request.RpcRequest)
 			request.ResourceId = &[]string{d.Id()}
-			request.Headers = map[string]string{"RegionId": s.client.RegionId}
-			request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 			request.ResourceType = strings.ToUpper(string(TagResourceInstance))
 			request.TagKey = &tagKey
-			request.RegionId = s.client.RegionId
 			raw, err := s.client.WithRkvClient(func(client *r_kvstore.Client) (interface{}, error) {
 				return client.UntagResources(request)
 			})
+			bresponse, ok := raw.(*r_kvstore.UntagResourcesResponse)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		}
 
 		if len(create) > 0 {
 			request := r_kvstore.CreateTagResourcesRequest()
+			s.client.InitRpcRequest(*request.RpcRequest)
 			request.ResourceId = &[]string{d.Id()}
-			request.Headers = map[string]string{"RegionId": s.client.RegionId}
-			request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 			request.Tag = &create
 			request.ResourceType = strings.ToUpper(string(TagResourceInstance))
-			request.RegionId = s.client.RegionId
 			raw, err := s.client.WithRkvClient(func(client *r_kvstore.Client) (interface{}, error) {
 				return client.TagResources(request)
 			})
+			bresponse, ok := raw.(*r_kvstore.TagResourcesResponse)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		}
@@ -277,22 +296,23 @@ func (s *KvstoreService) diffTags(oldTags, newTags []r_kvstore.TagResourcesTag) 
 
 func (s *KvstoreService) DescribeTags(resourceId string, resourceType TagResourceType) (tags []r_kvstore.TagResource, err error) {
 	request := r_kvstore.CreateListTagResourcesRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.ResourceType = strings.ToUpper(string(resourceType))
 	request.ResourceId = &[]string{resourceId}
 	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 		return rkvClient.ListTagResources(request)
 	})
+	bresponse, ok := raw.(*r_kvstore.ListTagResourcesResponse)
 	if err != nil {
-		err = WrapErrorf(err, DefaultErrorMsg, resourceId, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resourceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*r_kvstore.ListTagResourcesResponse)
-
-	return response.TagResources.TagResource, nil
+	return bresponse.TagResources.TagResource, nil
 }
 
 func (s *KvstoreService) WaitForKVstoreAccount(id string, status Status, timeout int) error {
@@ -300,60 +320,63 @@ func (s *KvstoreService) WaitForKVstoreAccount(id string, status Status, timeout
 	for {
 		object, err := s.DescribeKVstoreAccount(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if object != nil && object.AccountStatus == string(status) {
 			break
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.AccountStatus, status, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.AccountStatus, status, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
 }
 
+func (s *KvstoreService) DoR_KvstoreDescribeaccountsRequest(id string) (*r_kvstore.Account, error) {
+    return s.DescribeKVstoreAccount(id)
+}
 func (s *KvstoreService) DescribeKVstoreAccount(id string) (*r_kvstore.Account, error) {
 	ds := &r_kvstore.Account{}
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return ds, WrapError(err)
+		return ds, errmsgs.WrapError(err)
 	}
 	request := r_kvstore.CreateDescribeAccountsRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = parts[0]
 	request.AccountName = parts[1]
 	invoker := NewInvoker()
 	invoker.AddCatcher(KVstoreInstanceStatusCatcher)
-	var response *r_kvstore.DescribeAccountsResponse
-	if err := invoker.Run(func() error {
-		raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
+	var raw interface{}
+	err = invoker.Run(func() error {
+		raw, err = s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 			return rkvClient.DescribeAccounts(request)
 		})
-		if err != nil {
-			return err
-		}
 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-		response, _ = raw.(*r_kvstore.DescribeAccountsResponse)
-		return nil
-	}); err != nil {
-		if IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
-			return ds, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		return err
+	})
+	response, ok := raw.(*r_kvstore.DescribeAccountsResponse)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
+			return ds, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return ds, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return ds, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	if len(response.Accounts.Account) < 1 {
-		return ds, WrapErrorf(Error(GetNotFoundMessage("KVstoreAccount", id)), NotFoundMsg, ProviderERROR)
+		return ds, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KVstoreAccount", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	return &response.Accounts.Account[0], nil
 }
@@ -361,71 +384,77 @@ func (s *KvstoreService) DescribeKVstoreAccount(id string) (*r_kvstore.Account, 
 func (s *KvstoreService) DescribeKVstoreSecurityGroupId(id string) (*r_kvstore.DescribeSecurityGroupConfigurationResponse, error) {
 	response := &r_kvstore.DescribeSecurityGroupConfigurationResponse{}
 	request := r_kvstore.CreateDescribeSecurityGroupConfigurationRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = id
 	if err := s.WaitForKVstoreInstance(id, Normal, DefaultLongTimeout); err != nil {
-		return response, WrapError(err)
+		return response, errmsgs.WrapError(err)
 	}
 	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 		return rkvClient.DescribeSecurityGroupConfiguration(request)
 	})
+	bresponse, ok := raw.(*r_kvstore.DescribeSecurityGroupConfigurationResponse)
 	if err != nil {
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*r_kvstore.DescribeSecurityGroupConfigurationResponse)
-
-	return response, nil
+	return bresponse, nil
 }
 
 func (s *KvstoreService) DescribeDBInstanceNetInfo(id string) (*r_kvstore.NetInfoItemsInDescribeDBInstanceNetInfo, error) {
 	response := &r_kvstore.DescribeDBInstanceNetInfoResponse{}
 	request := r_kvstore.CreateDescribeDBInstanceNetInfoRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = id
 	if err := s.WaitForKVstoreInstance(id, Normal, DefaultLongTimeout); err != nil {
-		return &response.NetInfoItems, WrapError(err)
+		return &response.NetInfoItems, errmsgs.WrapError(err)
 	}
 	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 		return rkvClient.DescribeDBInstanceNetInfo(request)
 	})
+	bresponse, ok := raw.(*r_kvstore.DescribeDBInstanceNetInfoResponse)
 	if err != nil {
-		return &response.NetInfoItems, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return &response.NetInfoItems, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*r_kvstore.DescribeDBInstanceNetInfoResponse)
+	return &bresponse.NetInfoItems, nil
+}
 
-	return &response.NetInfoItems, nil
+func (s *KvstoreService) DoR_KvstoreDescribedbinstancenetinfoRequest(id string) (object []r_kvstore.InstanceNetInfo, err error) {
+    return s.DescribeKvstoreConnection(id)
 }
 func (s *KvstoreService) DescribeKvstoreConnection(id string) (object []r_kvstore.InstanceNetInfo, err error) {
 	request := r_kvstore.CreateDescribeDBInstanceNetInfoRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = id
 
 	raw, err := s.client.WithRkvClient(func(r_kvstoreClient *r_kvstore.Client) (interface{}, error) {
 		return r_kvstoreClient.DescribeDBInstanceNetInfo(request)
 	})
+	bresponse, ok := raw.(*r_kvstore.DescribeDBInstanceNetInfoResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("KvstoreConnection", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidInstanceId.NotFound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KvstoreConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*r_kvstore.DescribeDBInstanceNetInfoResponse)
-
-	if len(response.NetInfoItems.InstanceNetInfo) < 1 {
-		err = WrapErrorf(Error(GetNotFoundMessage("KvstoreConnection", id)), NotFoundMsg, ProviderERROR, response.RequestId)
+	if len(bresponse.NetInfoItems.InstanceNetInfo) < 1 {
+		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KvstoreConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, bresponse.RequestId)
 		return
 	}
-	return response.NetInfoItems.InstanceNetInfo, nil
+	return bresponse.NetInfoItems.InstanceNetInfo, nil
 }

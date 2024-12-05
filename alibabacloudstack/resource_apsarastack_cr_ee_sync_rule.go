@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -102,14 +103,11 @@ func resourceAlibabacloudStackCrEESyncRuleCreate(d *schema.ResourceData, meta in
 		targetRepoName = v.(string)
 	}
 	if (repoName != "" && targetRepoName == "") || (repoName == "" && targetRepoName != "") {
-		return WrapError(Error(DefaultErrorMsg, syncRuleName, "create", "[Params repo_name or target_repo_name is empty]"))
+		return errmsgs.WrapError(errmsgs.Error(errmsgs.DefaultErrorMsg, syncRuleName, "create", "[Params repo_name or target_repo_name is empty]"))
 	}
 
-	response := &cr_ee.CreateRepoSyncRuleResponse{}
 	request := cr_ee.CreateCreateRepoSyncRuleRequest()
-	request.RegionId = crService.client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 
 	request.SyncRuleName = syncRuleName
 	request.InstanceId = instanceId
@@ -130,17 +128,21 @@ func resourceAlibabacloudStackCrEESyncRuleCreate(d *schema.ResourceData, meta in
 	raw, err := crService.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.CreateRepoSyncRule(request)
 	})
+	bresponse, ok := raw.(*cr_ee.CreateRepoSyncRuleResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cr_ee_sync_rule", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_ee_sync_rule", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.CreateRepoSyncRuleResponse)
-	if !response.CreateRepoSyncRuleIsSuccess {
-		return crService.wrapCrServiceError("alibabacloudstack_cr_ee_sync_rule", request.GetActionName(), response.Code)
+	if !bresponse.CreateRepoSyncRuleIsSuccess {
+		return crService.wrapCrServiceError("alibabacloudstack_cr_ee_sync_rule", request.GetActionName(), bresponse.Code)
 	}
 
-	d.SetId(crService.GenResourceId(instanceId, namespaceName, response.SyncRuleId))
+	d.SetId(crService.GenResourceId(instanceId, namespaceName, bresponse.SyncRuleId))
 
 	return resourceAlibabacloudStackCrEESyncRuleRead(d, meta)
 }
@@ -151,11 +153,11 @@ func resourceAlibabacloudStackCrEESyncRuleRead(d *schema.ResourceData, meta inte
 	crService := &CrService{client}
 	resp, err := crService.DescribeCrEESyncRule(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("name", resp.SyncRuleName)
@@ -181,28 +183,30 @@ func resourceAlibabacloudStackCrEESyncRuleDelete(d *schema.ResourceData, meta in
 	syncRuleId := d.Get("rule_id").(string)
 	syncDirection := d.Get("sync_direction").(string)
 	if syncDirection != "FROM" {
-		return WrapError(Error(DefaultErrorMsg, d.Id(), "delete", "[Please delete sync rule in the source instance]"))
+		return errmsgs.WrapError(errmsgs.Error(errmsgs.DefaultErrorMsg, d.Id(), "delete", "[Please delete sync rule in the source instance]"))
 	}
 
-	response := &cr_ee.DeleteRepoSyncRuleResponse{}
 	request := cr_ee.CreateDeleteRepoSyncRuleRequest()
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "cr", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 
-	request.RegionId = crService.client.RegionId
 	request.InstanceId = instanceId
 	request.SyncRuleId = syncRuleId
+
 	raw, err := crService.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.DeleteRepoSyncRule(request)
 	})
+	bresponse, ok := raw.(*cr_ee.DeleteRepoSyncRuleResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.DeleteRepoSyncRuleResponse)
-	if !response.DeleteRepoSyncRuleIsSuccess {
-		return crService.wrapCrServiceError(d.Id(), request.GetActionName(), response.Code)
+	if !bresponse.DeleteRepoSyncRuleIsSuccess {
+		return crService.wrapCrServiceError(d.Id(), request.GetActionName(), bresponse.Code)
 	}
 
 	return nil

@@ -1,10 +1,12 @@
 package alibabacloudstack
 
 import (
+	"testing"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"testing"
 )
 
 func TestAccAlibabacloudStackAscm_OrganizationBasic(t *testing.T) {
@@ -50,13 +52,13 @@ func testAccCheckAscm_E_OrganizationDestroy(s *terraform.State) error { //destro
 		}
 		ascm, err := ascmService.DescribeAscmOrganization(rs.Primary.ID)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if ascm.RequestID != "" {
-			return WrapError(Error("organization still exist"))
+			return errmsgs.WrapError(errmsgs.Error("organization still exist"))
 		}
 	}
 

@@ -10,6 +10,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -94,15 +95,15 @@ func resourceAlibabacloudStackEssVserverGroupsRead(d *schema.ResourceData, meta 
 	essService := EssService{client}
 	object, err := essService.DescribeEssScalingGroup(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	err = d.Set("scaling_group_id", object.ScalingGroupId)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	err = d.Set("vserver_groups", essService.flattenVserverGroupList(object.VServerGroups.VServerGroup))
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	return nil
 }
@@ -112,7 +113,7 @@ func resourceAlibabacloudStackEssVserverGroupsUpdate(d *schema.ResourceData, met
 	essService := EssService{client}
 	object, err := essService.DescribeEssScalingGroup(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Partial(true)
 	vserverGroupsMapFromScalingGroup := vserverGroupMapFromScalingGroup(object.VServerGroups.VServerGroup)
@@ -125,15 +126,12 @@ func resourceAlibabacloudStackEssVserverGroupsUpdate(d *schema.ResourceData, met
 	}
 	err = detachVserverGroups(d, client, detachMap, force)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
-	//d.SetPartial("vserver_groups")
-
 	err = attachVserverGroups(d, client, attachMap, force)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
-	//d.SetPartial("vserver_groups")
 	d.Partial(false)
 	return resourceAlibabacloudStackEssVserverGroupsRead(d, meta)
 }
@@ -149,7 +147,7 @@ func resourceAlibabacloudStackEssVserverGroupsDelete(d *schema.ResourceData, met
 	}
 	err := detachVserverGroups(d, client, detachMap, force)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	return nil
 }
@@ -228,10 +226,10 @@ func attachVserverGroups(d *schema.ResourceData, client *connectivity.Alibabaclo
 		vserverGroupListMap := buildEssVserverGroupListMap(attachMap)
 		attachScalingGroupVserverGroups := make([]ess.AttachVServerGroupsVServerGroup, 0)
 		for k, v := range vserverGroupListMap {
-			vserverAttributes := make([]ess.AttachVServerGroupsVServerGroupAttribute, 0)
+			vserverAttributes := make([]ess.AttachVServerGroupsVServerGroupVServerGroupAttribute, 0)
 			for _, e := range v {
 				attrs := strings.Split(e, "_")
-				vserverAttribute := ess.AttachVServerGroupsVServerGroupAttribute{
+				vserverAttribute := ess.AttachVServerGroupsVServerGroupVServerGroupAttribute{
 					VServerGroupId: attrs[1],
 					Port:           attrs[2],
 					Weight:         attrs[3],
@@ -239,20 +237,13 @@ func attachVserverGroups(d *schema.ResourceData, client *connectivity.Alibabaclo
 				vserverAttributes = append(vserverAttributes, vserverAttribute)
 			}
 			vserverGroup := ess.AttachVServerGroupsVServerGroup{
-				LoadBalancerId:        k,
-				VServerGroupAttribute: &vserverAttributes,
+				LoadBalancerId:          k,
+				VServerGroupAttribute:   &vserverAttributes,
 			}
 			attachScalingGroupVserverGroups = append(attachScalingGroupVserverGroups, vserverGroup)
 		}
 		request := ess.CreateAttachVServerGroupsRequest()
-		request.RegionId = client.RegionId
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 		request.ScalingGroupId = d.Id()
 		request.ForceAttach = requests.NewBoolean(force)
 		request.VServerGroup = &attachScalingGroupVserverGroups
@@ -260,7 +251,12 @@ func attachVserverGroups(d *schema.ResourceData, client *connectivity.Alibabaclo
 			return essClient.AttachVServerGroups(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			response, ok := raw.(*ess.AttachVServerGroupsResponse)
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
@@ -272,31 +268,23 @@ func detachVserverGroups(d *schema.ResourceData, client *connectivity.Alibabaclo
 		vserverGroupListMap := buildEssVserverGroupListMap(detachMap)
 		detachScalingGroupVserverGroups := make([]ess.DetachVServerGroupsVServerGroup, 0)
 		for k, v := range vserverGroupListMap {
-			vserverAttributes := make([]ess.DetachVServerGroupsVServerGroupAttribute, 0)
+			vserverAttributes := make([]ess.DetachVServerGroupsVServerGroupVServerGroupAttribute, 0)
 			for _, e := range v {
 				attrs := strings.Split(e, "_")
-				vserverAttribute := ess.DetachVServerGroupsVServerGroupAttribute{
+				vserverAttribute := ess.DetachVServerGroupsVServerGroupVServerGroupAttribute{
 					VServerGroupId: attrs[1],
 					Port:           attrs[2],
 				}
 				vserverAttributes = append(vserverAttributes, vserverAttribute)
 			}
 			vserverGroup := ess.DetachVServerGroupsVServerGroup{
-				LoadBalancerId:        k,
-				VServerGroupAttribute: &vserverAttributes,
+				LoadBalancerId:          k,
+				VServerGroupAttribute:   &vserverAttributes,
 			}
 			detachScalingGroupVserverGroups = append(detachScalingGroupVserverGroups, vserverGroup)
 		}
 		request := ess.CreateDetachVServerGroupsRequest()
-		request.RegionId = client.RegionId
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+		client.InitRpcRequest(*request.RpcRequest)
 		request.ScalingGroupId = d.Id()
 		request.ForceDetach = requests.NewBoolean(force)
 		request.VServerGroup = &detachScalingGroupVserverGroups
@@ -304,7 +292,12 @@ func detachVserverGroups(d *schema.ResourceData, client *connectivity.Alibabaclo
 			return essClient.DetachVServerGroups(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			response, ok := raw.(*ess.DetachVServerGroupsResponse)
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}

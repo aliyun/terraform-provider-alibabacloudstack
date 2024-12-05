@@ -4,9 +4,8 @@ import (
 	"fmt"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -51,32 +50,22 @@ func dataSourceAlibabacloudStackTsdbZones() *schema.Resource {
 func dataSourceAlibabacloudStackTsdbZonesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	action := "DescribeZones"
 	request := make(map[string]interface{})
-	request["RegionId"] = client.RegionId
 	request["Product"] = "hitsdb"
-	var objects []map[string]interface{}
-	var response map[string]interface{}
-	conn, err := client.NewHitsdbClient()
+	response, err := client.DoTeaRequest("POST", "hitsdb", "2017-06-01", "DescribeZones", "", nil, request)
 	if err != nil {
-		return WrapError(err)
+		return err
 	}
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-01"), StringPointer("AK"), nil, request, &runtime)
-	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_tsdb_zones", action, AlibabacloudStackSdkGoERROR)
-	}
-	addDebug(action, response, request)
 
 	resp, err := jsonpath.Get("$.ZoneList.ZoneModel", response)
 	if err != nil {
-		return WrapErrorf(err, FailedGetAttributeMsg, action, "$.ZoneList.ZoneModel", response)
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "DescribeZones", "$.ZoneList.ZoneModel", response)
 	}
 	result, _ := resp.([]interface{})
-	for _, v := range result {
+	objects := make([]map[string]interface{}, len(result))
+	for i, v := range result {
 		item := v.(map[string]interface{})
-		objects = append(objects, item)
+		objects[i] = item
 	}
 	ids := make([]string, 0)
 	s := make([]map[string]interface{}, 0)
@@ -92,11 +81,11 @@ func dataSourceAlibabacloudStackTsdbZonesRead(d *schema.ResourceData, meta inter
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("zones", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

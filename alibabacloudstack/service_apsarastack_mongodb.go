@@ -14,6 +14,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type MongoDBService struct {
@@ -22,25 +23,27 @@ type MongoDBService struct {
 
 func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInstance, err error) {
 	request := dds.CreateDescribeDBInstanceAttributeRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 		return client.DescribeDBInstanceAttribute(request)
 	})
-	response, _ := raw.(*dds.DescribeDBInstanceAttributeResponse)
+	bresponse, ok := raw.(*dds.DescribeDBInstanceAttributeResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return instance, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return instance, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return instance, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return instance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	if response == nil || len(response.DBInstances.DBInstance) == 0 {
-		return instance, WrapErrorf(Error(GetNotFoundMessage("MongoDB Instance", id)), NotFoundMsg, AlibabacloudStackSdkGoERROR)
+	if bresponse == nil || len(bresponse.DBInstances.DBInstance) == 0 {
+		return instance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("MongoDB Instance", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	return response.DBInstances.DBInstance[0], nil
+	return bresponse.DBInstances.DBInstance[0], nil
 }
 
 // WaitForInstance waits for instance to given statusid
@@ -50,12 +53,12 @@ func (s *MongoDBService) WaitForMongoDBInstance(instanceId string, status Status
 	for {
 		instance, err := s.DescribeMongoDBInstance(instanceId)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 
@@ -72,7 +75,7 @@ func (s *MongoDBService) WaitForMongoDBInstance(instanceId string, status Status
 		}
 
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, instanceId, GetFunc(1), timeout, instance.DBInstanceStatus, string(status), ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, instance.DBInstanceStatus, string(status), errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
@@ -82,16 +85,16 @@ func (s *MongoDBService) RdsMongodbDBInstanceStateRefreshFunc(id string, failSta
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeMongoDBInstance(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if object.DBInstanceStatus == failState {
-				return object, object.DBInstanceStatus, WrapError(Error(FailedToReachTargetStatus, object.DBInstanceStatus))
+				return object, object.DBInstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.DBInstanceStatus))
 			}
 		}
 		return object, object.DBInstanceStatus, nil
@@ -100,24 +103,25 @@ func (s *MongoDBService) RdsMongodbDBInstanceStateRefreshFunc(id string, failSta
 
 func (s *MongoDBService) DescribeMongoDBSecurityIps(instanceId string) (ips []string, err error) {
 	request := dds.CreateDescribeSecurityIpsRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = instanceId
 
 	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 		return client.DescribeSecurityIps(request)
 	})
+	bresponse, ok := raw.(*dds.DescribeSecurityIpsResponse)
 	if err != nil {
-		return ips, WrapErrorf(err, DefaultErrorMsg, instanceId, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return ips, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	response, _ := raw.(*dds.DescribeSecurityIpsResponse)
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	var ipstr, separator string
 	ipsMap := make(map[string]string)
-	for _, ip := range response.SecurityIpGroups.SecurityIpGroup {
+	for _, ip := range bresponse.SecurityIpGroups.SecurityIpGroup {
 		if ip.SecurityIpGroupAttribute == "hidden" {
 			continue
 		}
@@ -141,24 +145,26 @@ func (s *MongoDBService) DescribeMongoDBSecurityIps(instanceId string) (ips []st
 
 func (s *MongoDBService) ModifyMongoDBSecurityIps(instanceId, ips string) error {
 	request := dds.CreateModifySecurityIpsRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = instanceId
 	request.SecurityIps = ips
 
 	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 		return client.ModifySecurityIps(request)
 	})
+	bresponse, ok := raw.(*dds.ModifySecurityIpsResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, instanceId, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	if err := s.WaitForMongoDBInstance(instanceId, Running, DefaultTimeoutMedium); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	return nil
 }
@@ -166,19 +172,21 @@ func (s *MongoDBService) ModifyMongoDBSecurityIps(instanceId, ips string) error 
 func (s *MongoDBService) DescribeMongoDBSecurityGroupId(id string) (*dds.DescribeSecurityGroupConfigurationResponse, error) {
 	response := &dds.DescribeSecurityGroupConfigurationResponse{}
 	request := dds.CreateDescribeSecurityGroupConfigurationRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 	if err := s.WaitForMongoDBInstance(id, Running, DefaultTimeoutMedium); err != nil {
-		return response, WrapError(err)
+		return response, errmsgs.WrapError(err)
 	}
-	raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-		return ddsClient.DescribeSecurityGroupConfiguration(request)
+	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+		return client.DescribeSecurityGroupConfiguration(request)
 	})
+	bresponse, ok := raw.(*dds.DescribeSecurityGroupConfigurationResponse)
 	if err != nil {
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ = raw.(*dds.DescribeSecurityGroupConfigurationResponse)
@@ -192,7 +200,7 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 
 	err := server.WaitForMongoDBInstance(instanceID, Running, DefaultLongTimeout)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	//create node
@@ -204,10 +212,7 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 			node := item.(map[string]interface{})
 
 			request := dds.CreateCreateNodeRequest()
-			request.RegionId = server.client.RegionId
-			request.Headers = map[string]string{"RegionId": server.client.RegionId}
-			request.QueryParams = map[string]string{ "Product": "dds", "Department": server.client.Department, "ResourceGroup": server.client.ResourceGroup}
-
+			server.client.InitRpcRequest(*request.RpcRequest)
 			request.DBInstanceId = instanceID
 			request.NodeClass = node["node_class"].(string)
 			request.NodeType = string(nodeType)
@@ -217,22 +222,27 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 				request.NodeStorage = requests.NewInteger(node["node_storage"].(int))
 			}
 
-			raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-				return ddsClient.CreateNode(request)
+			raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+				return client.CreateNode(request)
 			})
+			bresponse, ok := raw.(*dds.CreateNodeResponse)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, instanceID, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceID, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 			err = server.WaitForMongoDBInstance(instanceID, Updating, DefaultLongTimeout)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 
 			err = server.WaitForMongoDBInstance(instanceID, Running, DefaultLongTimeout)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 	} else if len(stateList) > len(diffList) {
@@ -243,31 +253,33 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 			node := item.(map[string]interface{})
 
 			request := dds.CreateDeleteNodeRequest()
-			request.RegionId = server.client.RegionId
-			request.Headers = map[string]string{"RegionId": server.client.RegionId}
-			request.QueryParams = map[string]string{ "Product": "dds", "Department": server.client.Department, "ResourceGroup": server.client.ResourceGroup}
-
+			server.client.InitRpcRequest(*request.RpcRequest)
 			request.DBInstanceId = instanceID
 			request.NodeId = node["node_id"].(string)
 			request.ClientToken = buildClientToken(request.GetActionName())
 
-			raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-				return ddsClient.DeleteNode(request)
+			raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+				return client.DeleteNode(request)
 			})
+			bresponse, ok := raw.(*dds.DeleteNodeResponse)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, instanceID, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceID, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 			err = server.WaitForMongoDBInstance(instanceID, Running, DefaultLongTimeout)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 	}
 
-	//motify node
+	//modify node
 	for key := 0; key < len(stateList); key++ {
 		state := stateList[key].(map[string]interface{})
 		diff := diffList[key].(map[string]interface{})
@@ -275,10 +287,7 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 		if state["node_class"] != diff["node_class"] ||
 			state["node_storage"] != diff["node_storage"] {
 			request := dds.CreateModifyNodeSpecRequest()
-			request.RegionId = server.client.RegionId
-			request.Headers = map[string]string{"RegionId": server.client.RegionId}
-			request.QueryParams = map[string]string{ "Product": "dds", "Department": server.client.Department, "ResourceGroup": server.client.ResourceGroup}
-
+			server.client.InitRpcRequest(*request.RpcRequest)
 			request.DBInstanceId = instanceID
 			request.NodeClass = diff["node_class"].(string)
 			request.ClientToken = buildClientToken(request.GetActionName())
@@ -288,20 +297,25 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 			}
 			request.NodeId = state["node_id"].(string)
 
-			raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-				return ddsClient.ModifyNodeSpec(request)
+			raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+				return client.ModifyNodeSpec(request)
 			})
+			bresponse, ok := raw.(*dds.ModifyNodeSpecResponse)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, instanceID, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceID, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			err = server.WaitForMongoDBInstance(instanceID, Updating, DefaultLongTimeout)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			err = server.WaitForMongoDBInstance(instanceID, Running, DefaultLongTimeout)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 	}
@@ -311,16 +325,18 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 func (s *MongoDBService) DescribeMongoDBBackupPolicy(id string) (*dds.DescribeBackupPolicyResponse, error) {
 	response := &dds.DescribeBackupPolicyResponse{}
 	request := dds.CreateDescribeBackupPolicyRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-		return ddsClient.DescribeBackupPolicy(request)
+	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+		return client.DescribeBackupPolicy(request)
 	})
+	bresponse, ok := raw.(*dds.DescribeBackupPolicyResponse)
 	if err != nil {
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ = raw.(*dds.DescribeBackupPolicyResponse)
@@ -331,20 +347,22 @@ func (s *MongoDBService) DescribeMongoDBTDEInfo(id string) (*dds.DescribeDBInsta
 
 	response := &dds.DescribeDBInstanceTDEInfoResponse{}
 	request := dds.CreateDescribeDBInstanceTDEInfoRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 	statErr := s.WaitForMongoDBInstance(id, Running, DefaultLongTimeout)
 	if statErr != nil {
-		return response, WrapError(statErr)
+		return response, errmsgs.WrapError(statErr)
 	}
-	raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-		return ddsClient.DescribeDBInstanceTDEInfo(request)
+	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+		return client.DescribeDBInstanceTDEInfo(request)
 	})
+	bresponse, ok := raw.(*dds.DescribeDBInstanceTDEInfoResponse)
 	if err != nil {
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ = raw.(*dds.DescribeDBInstanceTDEInfoResponse)
@@ -358,7 +376,7 @@ func (s *MongoDBService) DescribeDBInstanceSSL(id string) (*dds.DescribeDBInstan
 	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 		instance, err := s.DescribeMongoDBInstance(id)
 		if err != nil {
-			if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
 				return resource.NonRetryableError(err)
 			}
 			return resource.RetryableError(err)
@@ -370,19 +388,21 @@ func (s *MongoDBService) DescribeDBInstanceSSL(id string) (*dds.DescribeDBInstan
 		return nil
 	})
 	if err != nil {
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return response, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-		return ddsClient.DescribeDBInstanceSSL(request)
+	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+		return client.DescribeDBInstanceSSL(request)
 	})
+	bresponse, ok := raw.(*dds.DescribeDBInstanceSSLResponse)
 	if err != nil {
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ = raw.(*dds.DescribeDBInstanceSSLResponse)
@@ -391,47 +411,51 @@ func (s *MongoDBService) DescribeDBInstanceSSL(id string) (*dds.DescribeDBInstan
 
 func (s *MongoDBService) MotifyMongoDBBackupPolicy(d *schema.ResourceData) error {
 	if err := s.WaitForMongoDBInstance(d.Id(), Running, DefaultTimeoutMedium); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	periodList := expandStringList(d.Get("backup_period").(*schema.Set).List())
 	backupPeriod := fmt.Sprintf("%s", strings.Join(periodList[:], COMMA_SEPARATED))
 	backupTime := d.Get("backup_time").(string)
 
 	request := dds.CreateModifyBackupPolicyRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
 	request.PreferredBackupPeriod = backupPeriod
 	request.PreferredBackupTime = backupTime
-	raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-		return ddsClient.ModifyBackupPolicy(request)
+	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+		return client.ModifyBackupPolicy(request)
 	})
+	bresponse, ok := raw.(*dds.ModifyBackupPolicyResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err := s.WaitForMongoDBInstance(d.Id(), Running, DefaultTimeoutMedium); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	return nil
 }
 
 func (s *MongoDBService) ResetAccountPassword(d *schema.ResourceData, password string) error {
 	request := dds.CreateResetAccountPasswordRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
 	request.AccountName = "root"
 	request.AccountPassword = password
-	raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-		return ddsClient.ResetAccountPassword(request)
+	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+		return client.ResetAccountPassword(request)
 	})
+	bresponse, ok := raw.(*dds.ResetAccountPasswordResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	return err
@@ -450,36 +474,40 @@ func (s *MongoDBService) setInstanceTags(d *schema.ResourceData) error {
 			tagKey = append(tagKey, v.Key)
 		}
 		request := dds.CreateUntagResourcesRequest()
+		s.client.InitRpcRequest(*request.RpcRequest)
 		request.ResourceId = &[]string{d.Id()}
 		request.ResourceType = "INSTANCE"
 		request.TagKey = &tagKey
-		request.RegionId = s.client.RegionId
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
-		raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-			return ddsClient.UntagResources(request)
+		raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+			return client.UntagResources(request)
 		})
+		bresponse, ok := raw.(*dds.UntagResourcesResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
 	if len(create) > 0 {
 		request := dds.CreateTagResourcesRequest()
+		s.client.InitRpcRequest(*request.RpcRequest)
 		request.ResourceId = &[]string{d.Id()}
 		request.Tag = &create
 		request.ResourceType = "INSTANCE"
-		request.RegionId = s.client.RegionId
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
-		raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-			return ddsClient.TagResources(request)
+		raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+			return client.TagResources(request)
 		})
+		bresponse, ok := raw.(*dds.TagResourcesResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}

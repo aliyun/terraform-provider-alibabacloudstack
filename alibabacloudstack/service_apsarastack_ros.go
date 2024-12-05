@@ -2,12 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -16,33 +14,28 @@ type RosService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
+func (s *RosService) DoRosGettemplateRequest(id string) (object map[string]interface{}, err error) {
+	return s.DescribeRosTemplate(id)
+}
+
 func (s *RosService) DescribeRosChangeSet(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewRosClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "GetChangeSet"
 	request := map[string]interface{}{
-		"RegionId":     s.client.RegionId,
 		"ChangeSetId":  id,
 		"ShowTemplate": true,
 	}
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &runtime)
+	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetChangeSet", "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ChangeSetNotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("RosChangeSet", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"ChangeSetNotFound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RosChangeSet", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
 		return object, err
 	}
-	addDebug(action, response, request)
+	addDebug("GetChangeSet", response, request)
 	v, err := jsonpath.Get("$", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$", response)
 	}
 	object = v.(map[string]interface{})
 	return object, nil
@@ -52,16 +45,16 @@ func (s *RosService) RosChangeSetStateRefreshFunc(id string, failStates []string
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeRosChangeSet(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if object["Status"].(string) == failState {
-				return object, object["Status"].(string), WrapError(Error(FailedToReachTargetStatus, object["Status"].(string)))
+				return object, object["Status"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["Status"].(string)))
 			}
 		}
 		return object, object["Status"].(string), nil
@@ -70,34 +63,21 @@ func (s *RosService) RosChangeSetStateRefreshFunc(id string, failStates []string
 
 func (s *RosService) DescribeRosStack(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewRosClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "GetStack"
 	request := map[string]interface{}{
-		"RegionId": s.client.RegionId,
-		"StackId":  id,
+		"StackId": id,
 	}
-	request["Product"] = "ROS"
-	request["product"] = "ROS"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
 	request["ClientToken"] = buildClientToken("GetStack")
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &runtime)
+	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetStack", "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"StackNotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("RosStack", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"StackNotFound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RosStack", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
 		return object, err
 	}
-	addDebug(action, response, request)
 	v, err := jsonpath.Get("$", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$", response)
 	}
 	object = v.(map[string]interface{})
 	return object, nil
@@ -107,16 +87,16 @@ func (s *RosService) RosStackStateRefreshFunc(id string, failStates []string) re
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeRosStack(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if object["Status"].(string) == failState {
-				return object, object["Status"].(string), WrapError(Error(FailedToReachTargetStatus, object["Status"].(string)))
+				return object, object["Status"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["Status"].(string)))
 			}
 		}
 		return object, object["Status"].(string), nil
@@ -125,79 +105,44 @@ func (s *RosService) RosStackStateRefreshFunc(id string, failStates []string) re
 
 func (s *RosService) GetStackPolicy(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewRosClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "GetStackPolicy"
 	request := map[string]interface{}{
-		"RegionId": s.client.RegionId,
-		"StackId":  id,
+		"StackId": id,
 	}
-	request["Product"] = "ROS"
-	request["product"] = "ROS"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &runtime)
+	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetStackPolicy", "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"StackNotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("RosStack", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"StackNotFound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RosStack", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
 		return object, err
 	}
-	addDebug(action, response, request)
 	v, err := jsonpath.Get("$", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$", response)
 	}
 	object = v.(map[string]interface{})
 	return object, nil
 }
 
 func (s *RosService) ListTagResources(id string, resourceType string) (object interface{}, err error) {
-	conn, err := s.client.NewRosClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "ListTagResources"
+	var response map[string]interface{}
 	request := map[string]interface{}{
-		"RegionId":     s.client.RegionId,
 		"ResourceType": resourceType,
 		"ResourceId.1": id,
 	}
-	request["Product"] = "ROS"
-	request["product"] = "ROS"
-	request["OrganizationId"] = s.client.Department
 	tags := make([]interface{}, 0)
-	var response map[string]interface{}
 
 	for {
-		wait := incrementalWait(3*time.Second, 5*time.Second)
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
-			if err != nil {
-				if IsExpectedErrors(err, []string{Throttling}) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			addDebug(action, response, request)
-			v, err := jsonpath.Get("$.TagResources", response)
-			if err != nil {
-				return resource.NonRetryableError(WrapErrorf(err, FailedGetAttributeMsg, id, "$.TagResources.TagResource", response))
-			}
-			if v != nil {
-				tags = append(tags, v.([]interface{})...)
-			}
-			return nil
-		})
+		response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "ListTagResources", "", nil, request)
 		if err != nil {
-			err = WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
-			return
+			return tags, err
+		}
+		v, err := jsonpath.Get("$.TagResources", response)
+		if err != nil {
+			return tags, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.TagResources.TagResource", response)
+		}
+		if v != nil {
+			tags = append(tags, v.([]interface{})...)
 		}
 		if response["NextToken"] == nil {
 			break
@@ -209,14 +154,8 @@ func (s *RosService) ListTagResources(id string, resourceType string) (object in
 }
 
 func (s *RosService) SetResourceTags(d *schema.ResourceData, resourceType string) error {
-
 	if d.HasChange("tags") {
 		added, removed := parsingTags(d)
-		conn, err := s.client.NewRosClient()
-		if err != nil {
-			return WrapError(err)
-		}
-
 		removedTagKeys := make([]string, 0)
 		for _, v := range removed {
 			if !ignoredTags(v, "") {
@@ -224,46 +163,23 @@ func (s *RosService) SetResourceTags(d *schema.ResourceData, resourceType string
 			}
 		}
 		if len(removedTagKeys) > 0 {
-			action := "UntagResources"
 			request := map[string]interface{}{
-				"RegionId":     s.client.RegionId,
 				"ResourceType": resourceType,
 				"ResourceId.1": d.Id(),
 			}
-			request["Product"] = "ROS"
-			request["product"] = "ROS"
-			request["OrganizationId"] = s.client.Department
 			for i, key := range removedTagKeys {
 				request[fmt.Sprintf("TagKey.%d", i+1)] = key
 			}
-			wait := incrementalWait(2*time.Second, 1*time.Second)
-			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
-				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
-				if err != nil {
-					if IsThrottling(err) {
-						wait()
-						return resource.RetryableError(err)
-
-					}
-					return resource.NonRetryableError(err)
-				}
-				addDebug(action, response, request)
-				return nil
-			})
+			_, err := s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "UntagResources", "", nil, request)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+				return err
 			}
 		}
 		if len(added) > 0 {
-			action := "TagResources"
 			request := map[string]interface{}{
-				"RegionId":     s.client.RegionId,
 				"ResourceType": string(resourceType),
 				"ResourceId.1": d.Id(),
 			}
-			request["Product"] = "ROS"
-			request["product"] = "ROS"
-			request["OrganizationId"] = s.client.Department
 			count := 1
 			for key, value := range added {
 				request[fmt.Sprintf("Tag.%d.Key", count)] = key
@@ -271,58 +187,33 @@ func (s *RosService) SetResourceTags(d *schema.ResourceData, resourceType string
 				count++
 			}
 
-			wait := incrementalWait(2*time.Second, 1*time.Second)
-			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
-				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
-				if err != nil {
-					if IsThrottling(err) {
-						wait()
-						return resource.RetryableError(err)
-
-					}
-					return resource.NonRetryableError(err)
-				}
-				addDebug(action, response, request)
-				return nil
-			})
+			_, err := s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "TagResources", "", nil, request)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+				return err
 			}
 		}
-
+		//d.SetPartial("tags")
 	}
 	return nil
 }
 
 func (s *RosService) DescribeRosStackGroup(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewRosClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "GetStackGroup"
 	request := map[string]interface{}{
-		"RegionId":       s.client.RegionId,
 		"StackGroupName": id,
 	}
-	request["Product"] = "ROS"
-	request["product"] = "ROS"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &runtime)
+	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetStackGroup", "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"StackGroupNotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("RosStackGroup", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"StackGroupNotFound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RosStackGroup", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
 		return object, err
 	}
-	addDebug(action, response, request)
+	addDebug("GetStackGroup", response, request)
 	v, err := jsonpath.Get("$.StackGroup", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.StackGroup", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.StackGroup", response)
 	}
 	object = v.(map[string]interface{})
 	return object, nil
@@ -332,16 +223,16 @@ func (s *RosService) RosStackGroupStateRefreshFunc(id string, failStates []strin
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeRosStackGroup(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if object["Status"].(string) == failState {
-				return object, object["Status"].(string), WrapError(Error(FailedToReachTargetStatus, object["Status"].(string)))
+				return object, object["Status"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["Status"].(string)))
 			}
 		}
 		return object, object["Status"].(string), nil
@@ -350,33 +241,21 @@ func (s *RosService) RosStackGroupStateRefreshFunc(id string, failStates []strin
 
 func (s *RosService) DescribeRosTemplate(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewRosClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "GetTemplate"
 	request := map[string]interface{}{
-		"RegionId":   s.client.RegionId,
 		"TemplateId": id,
 	}
-	request["Product"] = "ROS"
-	request["product"] = "ROS"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &runtime)
+	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetTemplate", "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ChangeSetNotFound", "StackNotFound", "TemplateNotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("RosTemplate", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"ChangeSetNotFound", "StackNotFound", "TemplateNotFound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RosTemplate", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
 		return object, err
 	}
-	addDebug(action, response, request)
+	addDebug("GetTemplate", response, request)
 	v, err := jsonpath.Get("$", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$", response)
 	}
 	object = v.(map[string]interface{})
 	return object, nil

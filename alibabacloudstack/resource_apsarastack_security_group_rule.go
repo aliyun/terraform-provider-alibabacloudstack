@@ -9,8 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -121,7 +123,7 @@ func resourceAlibabacloudStackSecurityGroupRuleCreate(d *schema.ResourceData, me
 	ptl := d.Get("ip_protocol").(string)
 	port := d.Get("port_range").(string)
 	if port == "" {
-		return WrapError(fmt.Errorf("'port_range': required field is not set or invalid."))
+		return errmsgs.WrapError(fmt.Errorf("'port_range': required field is not set or invalid."))
 	}
 	nicType := d.Get("nic_type").(string)
 	policy := d.Get("policy").(string)
@@ -129,12 +131,12 @@ func resourceAlibabacloudStackSecurityGroupRuleCreate(d *schema.ResourceData, me
 
 	if _, ok := d.GetOk("cidr_ip"); !ok {
 		if _, ok := d.GetOk("source_security_group_id"); !ok {
-			return WrapError(fmt.Errorf("Either 'cidr_ip' or 'source_security_group_id' must be specified."))
+			return errmsgs.WrapError(fmt.Errorf("Either 'cidr_ip' or 'source_security_group_id' must be specified."))
 		}
 	}
 	request, err := buildAlibabacloudStackSGRuleRequest(d, meta)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
@@ -150,17 +152,30 @@ func resourceAlibabacloudStackSecurityGroupRuleCreate(d *schema.ResourceData, me
 	}
 	if direction == string(DirectionIngress) {
 		request.ApiName = "AuthorizeSecurityGroup"
-		_, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_security_group_rule", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
 	} else {
 		request.ApiName = "AuthorizeSecurityGroupEgress"
-		_, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
-	}
-	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_security_group_rule", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		bresponse, ok := raw.(*responses.CommonResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_security_group_rule", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
 	}
 
 	d.SetId(sgId + ":" + direction + ":" + ptl + ":" + port + ":" + nicType + ":" + cidr_ip + ":" + policy + ":" + strconv.Itoa(priority))
@@ -183,7 +198,7 @@ func resourceAlibabacloudStackSecurityGroupRuleRead(d *schema.ResourceData, meta
 	} else {
 		prior, err := strconv.Atoi(strPriority)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		priority = prior
 	}
@@ -192,11 +207,11 @@ func resourceAlibabacloudStackSecurityGroupRuleRead(d *schema.ResourceData, meta
 
 	object, err := ecsService.DescribeSecurityGroupRule(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			//return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("type", object.Direction)
@@ -206,7 +221,7 @@ func resourceAlibabacloudStackSecurityGroupRuleRead(d *schema.ResourceData, meta
 	d.Set("port_range", object.PortRange)
 	d.Set("description", object.Description)
 	if pri, err := strconv.Atoi(object.Priority); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	} else {
 		d.Set("priority", pri)
 	}
@@ -237,14 +252,14 @@ func resourceAlibabacloudStackSecurityGroupRuleUpdate(d *schema.ResourceData, me
 	} else {
 		prior, err := strconv.Atoi(strPriority)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		priority = prior
 	}
 
 	request, err := buildAlibabacloudStackSGRuleRequest(d, meta)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
@@ -256,25 +271,33 @@ func resourceAlibabacloudStackSecurityGroupRuleUpdate(d *schema.ResourceData, me
 
 	if direction == string(DirectionIngress) {
 		request.ApiName = "ModifySecurityGroupRule"
-		_, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
+		addDebug(request.GetActionName(), raw, request.Headers, request)
+		bresponse, ok := raw.(*responses.CommonResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
 	} else {
 		request.ApiName = "ModifySecurityGroupEgressRule"
-		_, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
+		addDebug(request.GetActionName(), raw, request.Headers, request)
+		bresponse, ok := raw.(*responses.CommonResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
 	}
-
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-
-	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
-	}
-
-	addDebug(request.GetActionName(), raw, request.Headers, request)
 	return resourceAlibabacloudStackSecurityGroupRuleRead(d, meta)
 }
 
@@ -283,24 +306,37 @@ func deleteSecurityGroupRule(d *schema.ResourceData, meta interface{}) error {
 	ruleType := d.Get("type").(string)
 	request, err := buildAlibabacloudStackSGRuleRequest(d, meta)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if ruleType == string(DirectionIngress) {
 		request.ApiName = "RevokeSecurityGroup"
-		_, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
 	} else {
 		request.ApiName = "RevokeSecurityGroupEgress"
-		_, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
 	}
 
-	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
-	}
 	return nil
 }
 
@@ -315,7 +351,7 @@ func resourceAlibabacloudStackSecurityGroupRuleDelete(d *schema.ResourceData, me
 	} else {
 		prior, err := strconv.Atoi(strPriority)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		priority = prior
 	}
@@ -323,7 +359,7 @@ func resourceAlibabacloudStackSecurityGroupRuleDelete(d *schema.ResourceData, me
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		err := deleteSecurityGroupRule(d, meta)
 		if err != nil {
-			if NotFoundError(err) || IsExpectedErrors(err, []string{"InvalidSecurityGroupId.NotFound"}) {
+			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidSecurityGroupId.NotFound"}) {
 				return nil
 			}
 			return resource.RetryableError(err)
@@ -331,7 +367,7 @@ func resourceAlibabacloudStackSecurityGroupRuleDelete(d *schema.ResourceData, me
 		return nil
 	})
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	return nil
 }
@@ -340,19 +376,7 @@ func buildAlibabacloudStackSGRuleRequest(d *schema.ResourceData, meta interface{
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	// Get product code from the built request
-	ruleReq := ecs.CreateModifySecurityGroupRuleRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		ruleReq.Scheme = "https"
-	} else {
-		ruleReq.Scheme = "http"
-	}
-
-	request, err := client.NewCommonRequest(ruleReq.GetProduct(), ruleReq.GetLocationServiceCode(), client.Config.Protocol, connectivity.ApiVersion20140526)
-	if err != nil {
-		return request, WrapError(err)
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request := client.NewCommonRequest("GET", "Ecs", "2014-05-26", "", "")
 
 	direction := d.Get("type").(string)
 
@@ -417,7 +441,7 @@ func buildAlibabacloudStackSGRuleRequest(d *schema.ResourceData, meta interface{
 
 	group, err := ecsService.DescribeSecurityGroup(sgId)
 	if err != nil {
-		return nil, WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 
 	if v, ok := d.GetOk("nic_type"); ok {

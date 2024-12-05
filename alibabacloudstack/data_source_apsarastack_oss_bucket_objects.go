@@ -1,14 +1,17 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"log"
 	"regexp"
 	"time"
 
 	"net/http"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -125,19 +128,20 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 			requestInfo = &bucket.Client
 			return bucket.ListObjects(options...)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_oss_bucket_object", "ListObjects", AlibabacloudStackOssGoSdk)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket_object", "ListObjects", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
+		var response *oss.ListObjectsResult
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if debugOn() {
 			addDebug("ListObjects", raw, requestInfo, map[string]interface{}{"options": options})
 		}
-		response, _ := raw.(oss.ListObjectsResult)
-
 		if response.Objects == nil || len(response.Objects) < 1 {
-			break
-		}
-
-		if len(response.Objects) < 1 {
 			break
 		}
 
@@ -186,8 +190,13 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 			requestInfo = &bucket.Client
 			return bucket.GetObjectDetailedMeta(object.Key)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			log.Printf("[ERROR] Unable to get metadata for the object %s: %v", object.Key, err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			log.Printf("[ERROR] Unable to get metadata for the object %s: %v: %s", object.Key, err, errmsg)
 		} else {
 			objectHeader, _ := raw.(http.Header)
 			mapping["content_type"] = objectHeader.Get("Content-Type")
@@ -208,7 +217,11 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 			return bucket.GetObjectACL(object.Key)
 		})
 		if err != nil {
-			log.Printf("[ERROR] Unable to get ACL for the object %s: %v", object.Key, err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			log.Printf("[ERROR] Unable to get ACL for the object %s: %v: %s", object.Key, err, errmsg)
 		} else {
 			objectACL, _ := raw.(oss.GetObjectACLResult)
 			mapping["acl"] = objectACL.ACL
@@ -223,7 +236,7 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("objects", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	// create a json file in current directory and write data source to it.
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

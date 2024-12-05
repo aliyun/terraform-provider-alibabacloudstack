@@ -2,14 +2,16 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"reflect"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"log"
 	"time"
@@ -116,22 +118,22 @@ func (rc *resourceCheck) checkResourceExists() resource.TestCheckFunc {
 		var err error
 		rs, ok := s.RootModule().Resources[rc.resourceId]
 		if !ok {
-			return WrapError(fmt.Errorf("can't find resource by id: %s", rc.resourceId))
+			return errmsgs.WrapError(fmt.Errorf("can't find resource by id: %s", rc.resourceId))
 
 		}
 		outValue, err := rc.callDescribeMethod(rs)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		errorValue := outValue[1]
 		if !errorValue.IsNil() {
-			return WrapError(fmt.Errorf("Checking resource %s %s exists error:%s ", rc.resourceId, rs.Primary.ID, errorValue.Interface().(error).Error()))
+			return errmsgs.WrapError(fmt.Errorf("Checking resource %s %s exists error:%s ", rc.resourceId, rs.Primary.ID, errorValue.Interface().(error).Error()))
 		}
 		if reflect.TypeOf(rc.resourceObject).Elem().String() == outValue[0].Type().String() {
 			reflect.ValueOf(rc.resourceObject).Elem().Set(outValue[0])
 			return nil
 		} else {
-			return WrapError(fmt.Errorf("The response object type expected *%s, got %s ", outValue[0].Type().String(), reflect.TypeOf(rc.resourceObject).String()))
+			return errmsgs.WrapError(fmt.Errorf("The response object type expected *%s, got %s ", outValue[0].Type().String(), reflect.TypeOf(rc.resourceObject).String()))
 		}
 	}
 }
@@ -149,7 +151,7 @@ func (rc *resourceCheck) checkResourceDestroy() resource.TestCheckFunc {
 		}
 
 		if resourceType == "" {
-			return WrapError(Error("The resourceId %s is not correct and it should prefix with alibabacloudstack_", rc.resourceId))
+			return errmsgs.WrapError(errmsgs.Error("The resourceId %s is not correct and it should prefix with alibabacloudstack_", rc.resourceId))
 		}
 
 		for _, rs := range s.RootModule().Resources {
@@ -161,13 +163,13 @@ func (rc *resourceCheck) checkResourceDestroy() resource.TestCheckFunc {
 			if !errorValue.IsNil() {
 				err = errorValue.Interface().(error)
 				if err != nil {
-					if NotFoundError(err) {
+					if errmsgs.NotFoundError(err) {
 						continue
 					}
-					return WrapError(err)
+					return errmsgs.WrapError(err)
 				}
 			} else {
-				return WrapError(Error("the resource %s %s was not destroyed ! ", rc.resourceId, rs.Primary.ID))
+				return errmsgs.WrapError(errmsgs.Error("the resource %s %s was not destroyed ! ", rc.resourceId, rs.Primary.ID))
 			}
 		}
 		return nil
@@ -178,20 +180,20 @@ func (rc *resourceCheck) checkResourceDestroy() resource.TestCheckFunc {
 func (rc *resourceCheck) callDescribeMethod(rs *terraform.ResourceState) ([]reflect.Value, error) {
 	var err error
 	if rs.Primary.ID == "" {
-		return nil, WrapError(fmt.Errorf("resource ID is not set"))
+		return nil, errmsgs.WrapError(fmt.Errorf("resource ID is not set"))
 	}
 	serviceP := rc.serviceFunc()
 	if rc.describeMethod == "" {
 		rc.describeMethod, err = getResourceDescribeMethod(rc.resourceId)
 		if err != nil {
-			return nil, WrapError(err)
+			return nil, errmsgs.WrapError(err)
 		}
 	}
 	value := reflect.ValueOf(serviceP)
 	typeName := value.Type().String()
 	value = value.MethodByName(rc.describeMethod)
 	if !value.IsValid() {
-		return nil, WrapError(Error("The service type %s does not have method %s", typeName, rc.describeMethod))
+		return nil, errmsgs.WrapError(errmsgs.Error("The service type %s does not have method %s", typeName, rc.describeMethod))
 	}
 	inValue := []reflect.Value{reflect.ValueOf(rs.Primary.ID)}
 	return value.Call(inValue), nil
@@ -200,12 +202,12 @@ func (rc *resourceCheck) callDescribeMethod(rs *terraform.ResourceState) ([]refl
 func getResourceDescribeMethod(resourceId string) (string, error) {
 	start := strings.Index(resourceId, "alibabacloudstack_")
 	if start < 0 {
-		return "", WrapError(fmt.Errorf("the parameter \"name\" don't contain string \"alibabacloudstack_\""))
+		return "", errmsgs.WrapError(fmt.Errorf("the parameter \"name\" don't contain string \"alibabacloudstack_\""))
 	}
 	start += len("alibabacloudstack_")
 	end := strings.Index(resourceId[start:], ".") + start
 	if end < 0 {
-		return "", WrapError(fmt.Errorf("the parameter \"name\" don't contain string \".\""))
+		return "", errmsgs.WrapError(fmt.Errorf("the parameter \"name\" don't contain string \".\""))
 	}
 	strs := strings.Split(resourceId[start:end], "_")
 	describeName := "Describe"
@@ -220,7 +222,7 @@ func (rac *resourceAttrCheck) resourceAttrMapCheck() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		err := rac.resourceCheck.checkResourceExists()(s)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		return rac.resourceAttr.resourceAttrMapCheck()(s)
 	}
@@ -231,7 +233,7 @@ func (rac *resourceAttrCheck) resourceAttrMapCheckWithCallback(callback func()) 
 	return func(s *terraform.State) error {
 		err := rac.resourceCheck.checkResourceExists()(s)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		return rac.resourceAttr.resourceAttrMapCheckWithCallback(callback)(s)
 	}
@@ -281,14 +283,14 @@ func (ra *resourceAttr) resourceAttrMapCheck() resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[ra.resourceId]
 		if !ok {
-			return WrapError(fmt.Errorf("can't find resource by id: %s", ra.resourceId))
+			return errmsgs.WrapError(fmt.Errorf("can't find resource by id: %s", ra.resourceId))
 		}
 		if rs.Primary.ID == "" {
-			return WrapError(fmt.Errorf("resource ID is not set"))
+			return errmsgs.WrapError(fmt.Errorf("resource ID is not set"))
 		}
 
 		if ra.checkMap == nil || len(ra.checkMap) == 0 {
-			return WrapError(fmt.Errorf("the parameter \"checkMap\" is nil or empty"))
+			return errmsgs.WrapError(fmt.Errorf("the parameter \"checkMap\" is nil or empty"))
 		}
 
 		var errorStrSlice []string
@@ -317,7 +319,7 @@ func (ra *resourceAttr) resourceAttrMapCheck() resource.TestCheckFunc {
 		if len(errorStrSlice) == 1 {
 			return nil
 		}
-		return WrapError(fmt.Errorf(strings.Join(errorStrSlice, "\n")))
+		return errmsgs.WrapError(fmt.Errorf(strings.Join(errorStrSlice, "\n")))
 	}
 }
 
@@ -586,8 +588,8 @@ func (conf *dataSourceTestAccConfig) buildDataSourceSteps(t *testing.T, info *da
 func (s *VpcService) needSweepVpc(vpcId, vswitchId string) (bool, error) {
 	if vpcId == "" && vswitchId != "" {
 		object, err := s.DescribeVSwitch(vswitchId)
-		if err != nil && !NotFoundError(err) {
-			return false, WrapError(err)
+		if err != nil && !errmsgs.NotFoundError(err) {
+			return false, errmsgs.WrapError(err)
 		}
 		name := strings.ToLower(object.VSwitchName)
 		if strings.HasPrefix(name, "tf-testacc") || strings.HasPrefix(name, "tf_testacc") {
@@ -599,10 +601,10 @@ func (s *VpcService) needSweepVpc(vpcId, vswitchId string) (bool, error) {
 	if vpcId != "" {
 		object, err := s.DescribeVpc(vpcId)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				return false, nil
 			}
-			return false, WrapError(err)
+			return false, errmsgs.WrapError(err)
 		}
 		name := strings.ToLower(object.VpcName)
 		if strings.HasPrefix(name, "tf-testacc") || strings.HasPrefix(name, "tf_testacc") {
@@ -625,7 +627,7 @@ func (s *VpcService) sweepVpc(id string) error {
 		return vpcClient.DeleteVpc(request)
 	})
 
-	return WrapError(err)
+	return errmsgs.WrapError(err)
 }
 
 func (s *VpcService) sweepVSwitch(id string) error {
@@ -635,7 +637,7 @@ func (s *VpcService) sweepVSwitch(id string) error {
 	log.Printf("[DEBUG] Deleting Vswitch %s ...", id)
 	request := vpc.CreateDeleteVSwitchRequest()
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "vpc", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "vpc", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	if strings.ToLower(s.client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -648,7 +650,7 @@ func (s *VpcService) sweepVSwitch(id string) error {
 	if err == nil {
 		time.Sleep(1 * time.Second)
 	}
-	return WrapError(err)
+	return errmsgs.WrapError(err)
 }
 
 func (s *VpcService) sweepNatGateway(id string) error {
@@ -671,7 +673,7 @@ func (s *VpcService) sweepNatGateway(id string) error {
 	if err == nil {
 		time.Sleep(1 * time.Second)
 	}
-	return WrapError(err)
+	return errmsgs.WrapError(err)
 }
 
 func (s *EcsService) sweepSecurityGroup(id string) error {
@@ -692,7 +694,7 @@ func (s *EcsService) sweepSecurityGroup(id string) error {
 	if err == nil {
 		time.Sleep(1 * time.Second)
 	}
-	return WrapError(err)
+	return errmsgs.WrapError(err)
 }
 
 func (s *SlbService) sweepSlb(id string) error {
@@ -703,7 +705,7 @@ func (s *SlbService) sweepSlb(id string) error {
 	request := slb.CreateSetLoadBalancerDeleteProtectionRequest()
 
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.LoadBalancerId = id
 	request.DeleteProtection = "off"
 	_, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
@@ -716,7 +718,7 @@ func (s *SlbService) sweepSlb(id string) error {
 	delRequest := slb.CreateDeleteLoadBalancerRequest()
 
 	delRequest.Headers = map[string]string{"RegionId": s.client.RegionId}
-	delRequest.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	delRequest.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	delRequest.LoadBalancerId = id
 	_, err = s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DeleteLoadBalancer(delRequest)
@@ -724,7 +726,7 @@ func (s *SlbService) sweepSlb(id string) error {
 	if err == nil {
 		time.Sleep(1 * time.Second)
 	}
-	return WrapError(err)
+	return errmsgs.WrapError(err)
 }
 
 const DataAlibabacloudstackVswitchZones = `
@@ -1290,4 +1292,196 @@ resource "alibabacloudstack_slb_master_slave_server_group" "default" {
       server_type = "Slave"
   }
 }
+`
+
+const DataZoneCommonTestCase = `
+
+data "alibabacloudstack_zones" default {
+  available_resource_creation = "VSwitch"
+}
+
+`
+
+const VpcCommonTestCase = `
+
+resource "alibabacloudstack_vpc" "default" {
+  vpc_name = "${var.name}_vpc"
+  cidr_block = "10.1.0.0/21"
+}
+`
+
+const VSwichCommonTestCase = DataZoneCommonTestCase + VpcCommonTestCase + `
+
+resource "alibabacloudstack_vswitch" "default" {
+  name = "${var.name}_vsw"
+  vpc_id = "${alibabacloudstack_vpc.default.id}"
+  cidr_block = "10.1.1.0/24"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+}
+
+`
+
+const DBClusterCommonTestCase = VSwichCommonTestCase + `
+
+resource "alibabacloudstack_adb_db_cluster" "cluster" {
+  db_cluster_version  = "3.0"
+  db_cluster_category = "Cluster"
+  db_node_class       = "C8"
+  db_node_count       = 2
+  db_node_storage     = 200
+  pay_type            = "PostPaid"
+  vswitch_id          = alibabacloudstack_vswitch.default.id
+  description         = "${var.name}_am"
+}
+
+`
+
+const EipCommonTestCase = `
+
+resource "alibabacloudstack_eip" "example" {
+  bandwidth            = "10"
+}
+
+`
+
+const SecurityGroupCommonTestCase = VSwichCommonTestCase + `
+
+resource "alibabacloudstack_security_group" "group" {
+  name   = "${var.name}_sg"
+  vpc_id = "${alibabacloudstack_vpc.vpc.id}"
+}
+
+`
+
+const ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + `
+
+resource "alibabacloudstack_instance" "instance" {
+  image_id             = "ubuntu_18_04_64_20G_alibase_20190624.vhd"
+  instance_type        = "ecs.n4.large"
+  system_disk_category = "cloud_efficiency"
+  system_disk_size     = 40
+  system_disk_name     = "test_sys_disk"
+  security_groups      = [alibabacloudstack_security_group.group.id]
+  instance_name        = "${var.name}_ecs"
+  vswitch_id           = alibabacloudstack_vswitch.default.id
+  availability_zone    = data.alibabacloudstack_zones.default.zones.0.id
+  is_outdated          = false
+}
+
+`
+
+const CbwpCommonTestCase = `
+
+resource "alibabacloudstack_common_bandwidth_package" "foo" {
+  bandwidth            = "200"
+  name                 = "${var.name}_cbwp"
+  description          = "test-common-bandwidth-package"
+}
+
+`
+
+const VrtCommonTestCase = `
+
+data "alibabacloudstack_express_connect_physical_connections" "nameRegex" {
+	
+}
+
+resource "alibabacloudstack_express_connect_virtual_border_router" "example" {
+  local_gateway_ip           = "10.0.0.1"
+  peer_gateway_ip            = "10.0.0.2"
+  peering_subnet_mask        = "255.255.255.252"
+  physical_connection_id     = data.alibabacloudstack_express_connect_physical_connections.nameRegex.connections.0.id
+  virtual_border_router_name = "${var.name}_vrt"
+  vlan_id                    = 1
+  min_rx_interval            = 1000
+  min_tx_interval            = 1000
+  detect_multiplier          = 10
+}
+
+`
+
+const PcCommonTestCase = `
+
+resource "alibabacloudstack_express_connect_physical_connection" "domestic" {
+  device_name              = "express_connect_foo"
+  access_point_id          = "ap-cn-hangzhou-yh-B"
+  line_operator            = "CT"
+  peer_location            = "${var.name}_pc"
+  physical_connection_name = "${var.name}_pc"
+  type                     = "VPC"
+  description              = "my domestic connection"
+  port_type                = "1000Base-LX"
+  bandwidth                = 100
+}
+
+`
+
+const FtbCommonTestCase = VSwichCommonTestCase + `
+
+resource "alibabacloudstack_nat_gateway" "default" {
+  vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
+  name   = "${var.name}"
+}                                        
+
+`
+
+const DiskCommonTestCase = DataZoneCommonTestCase + `
+
+resource "alibabacloudstack_disk" "disk" { 
+  availability_zone = data.alibabacloudstack_zones.default.zones.0.id
+  name              = "New-disk"
+  description       = "ECS-Disk"
+  category          = "cloud_efficiency"
+  size              = "30"
+}
+
+`
+
+const DBInstanceCommonTestCase = `
+
+resource "alibabacloudstack_db_instance" "default" {
+  engine               = "MySQL"
+  engine_version       = "5.6"
+  instance_type        = "rds.mysql.s2.large"
+  instance_storage     = "30"
+  storage_type     = "local_ssd"
+  instance_name        = "testacctf-mysql"
+  tde_status=false
+  enable_ssl=false
+}
+
+`
+
+const KVRInstanceCommonTestCase = `
+
+resource "alibabacloudstack_kvstore_instance" "default" {
+  instance_class = "redis.master.small.default"
+  instance_name  = "testacctf-redis"
+  private_ip     = "172.16.0.10"
+  security_ips   = ["10.0.0.1"]
+  instance_type  = "Redis"
+  cpu_type       = "intel"
+  architecture_type = "standard"
+}
+
+`
+
+const SlbCommonTestCase = VSwichCommonTestCase + `
+
+resource "alibabacloudstack_slb" "default" {
+  name          = "${var.name}_slb"
+  vswitch_id    = "${alibabacloudstack_vswitch.default.id}"
+  specification = "slb.s2.small"
+}
+
+`
+
+const KeyCommonTestCase = `
+
+resource "alibabacloudstack_kms_key" "key" {
+  description             = "Hello KMS"
+  pending_window_in_days  = "7"
+  key_state               = "Enabled"
+}
+
 `

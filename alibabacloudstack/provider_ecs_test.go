@@ -2,9 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -14,7 +15,7 @@ func TestAccAlibabacloudStackProviderEcs(t *testing.T) {
 	var v ecs.Instance
 
 	resourceId := "alibabacloudstack_instance.default"
-	ra := resourceAttrInit(resourceId, testAccInstanceCheckMap)
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccEcsInstanceCheckmap)
 	serviceFunc := func() interface{} {
 		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
@@ -25,7 +26,7 @@ func TestAccAlibabacloudStackProviderEcs(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testAcc%sEcsInstanceConfigVpc%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, func(name string) string {
-		return providerCommon + resourceInstanceVpcConfigDependence(name)
+		return providerCommon + AlibabacloudTestAccVpcVswitchBasicdependence(name)
 	})
 
 	resource.Test(t, resource.TestCase{

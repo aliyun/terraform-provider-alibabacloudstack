@@ -2,15 +2,14 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"log"
 	"regexp"
-	"strings"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -113,22 +112,7 @@ func dataSourceAlibabacloudStackGpdbInstances() *schema.Resource {
 
 func dataSourceAlibabacloudStackGpdbInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "POST"
-	request.Product = "gpdb"
-	request.Version = "2016-05-03"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.ApiName = "DescribeDBInstances"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{  "Product": "gpdb", "RegionId": client.RegionId, "Action": "DescribeDBInstances", "Version": "2016-05-03"}
+	request := client.NewCommonRequest("POST", "gpdb", "2016-05-03", "DescribeDBInstances", "")
 	response := GpdbInstance{}
 
 	for {
@@ -136,21 +120,23 @@ func dataSourceAlibabacloudStackGpdbInstancesRead(d *schema.ResourceData, meta i
 			return ecsClient.ProcessCommonRequest(request)
 		})
 		log.Printf("request reponse %v", raw)
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_gpdb_instances", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_gpdb_instances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		log.Printf("unmarshalled response %v", response)
 		if bresponse.IsSuccess() == true {
 			break
 		}
-
 	}
 
 	var r *regexp.Regexp
@@ -183,13 +169,13 @@ func dataSourceAlibabacloudStackGpdbInstancesRead(d *schema.ResourceData, meta i
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("instances", instances); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), instances)

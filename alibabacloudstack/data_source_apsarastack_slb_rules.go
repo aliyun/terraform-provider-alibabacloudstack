@@ -2,11 +2,11 @@ package alibabacloudstack
 
 import (
 	"regexp"
-	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -84,14 +84,7 @@ func dataSourceAlibabacloudStackSlbRulesRead(d *schema.ResourceData, meta interf
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := slb.CreateDescribeRulesRequest()
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = d.Get("load_balancer_id").(string)
 	request.ListenerPort = requests.NewInteger(d.Get("frontend_port").(int))
 
@@ -105,11 +98,16 @@ func dataSourceAlibabacloudStackSlbRulesRead(d *schema.ResourceData, meta interf
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeRules(request)
 	})
+	response, ok := raw.(*slb.DescribeRulesResponse)
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_slb_rules", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_rules", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*slb.DescribeRulesResponse)
+
 	var filteredRulesTemp []slb.Rule
 	nameRegex, ok := d.GetOk("name_regex")
 	if (ok && nameRegex.(string) != "") || (len(idsMap) > 0) {
@@ -143,10 +141,10 @@ func slbRulesDescriptionAttributes(d *schema.ResourceData, rules []slb.Rule) err
 
 	for _, rule := range rules {
 		mapping := map[string]interface{}{
-			"id":              rule.RuleId,
-			"name":            rule.RuleName,
-			"domain":          rule.Domain,
-			"url":             rule.Url,
+			"id":             rule.RuleId,
+			"name":           rule.RuleName,
+			"domain":         rule.Domain,
+			"url":            rule.Url,
 			"server_group_id": rule.VServerGroupId,
 		}
 
@@ -157,13 +155,13 @@ func slbRulesDescriptionAttributes(d *schema.ResourceData, rules []slb.Rule) err
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("slb_rules", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	// create a json file in current directory and write data source to it.

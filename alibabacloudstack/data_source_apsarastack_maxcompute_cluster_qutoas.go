@@ -4,9 +4,8 @@ import (
 	"fmt"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -50,52 +49,39 @@ func dataSourceAlibabacloudStackMaxcomputeClusterQutaos() *schema.Resource {
 func dataSourceAlibabacloudStackMaxcomputeClusterQutaosRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
-	conn, err := client.NewAscmClient()
-	if err != nil {
-		return WrapError(err)
-	}
-
-	action := "GetOdpsQuota"
 
 	cluster := d.Get("cluster").(string)
 
 	roleId, err := client.RoleIds()
 	if err != nil {
-		err = WrapErrorf(Error(GetNotFoundMessage("ASCM User", "defaultRoleId")), NotFoundMsg, ProviderERROR)
 		return err
 	}
 
 	request := map[string]interface{}{
-		"RegionName":      client.RegionId,
-		"Region":          client.RegionId,
-		"RegionId":        client.RegionId,
 		"Product":         "ascm",
-		"OrganizationId":  client.Department,
-		"ResourceGroupId": client.ResourceGroup,
 		"CurrentRoleId":   roleId,
 		"Cluster":         cluster,
 	}
 
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &runtime)
+	response, err = client.DoTeaRequest("POST", "ASCM", "2019-05-10", "GetOdpsQuota", "", nil, request)
 	if err != nil {
-		err = WrapErrorf(err, DefaultErrorMsg, cluster, action, AlibabacloudStackSdkGoERROR)
-		return err
-	}
-	addDebug(action, response, request)
-
-	if IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
-		err = WrapErrorf(Error(GetNotFoundMessage("Maxcompute Cluster", cluster)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Maxcompute Cluster", cluster)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+		}
 		return err
 	}
 	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		err = Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
+		err = errmsgs.Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
 		return err
 	}
 	v, err := jsonpath.Get("$", response)
 	if err != nil {
-		return WrapErrorf(err, FailedGetAttributeMsg, cluster, "$", response)
+		errmsg := ""
+		if response != nil {
+			errmsg = errmsgs.GetAsapiErrorMessage(response)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, cluster, "$", response, errmsg)
+		return err
 	}
 	object := v.(map[string]interface{})["data"].(map[string]interface{})
 

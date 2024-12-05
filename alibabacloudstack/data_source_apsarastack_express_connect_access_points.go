@@ -3,13 +3,10 @@ package alibabacloudstack
 import (
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -99,18 +96,15 @@ func dataSourceAlibabacloudStackExpressConnectAccessPointsRead(d *schema.Resourc
 
 	action := "DescribeAccessPoints"
 	request := map[string]interface{}{
-		"RegionId":       client.RegionId,
-		"Product":        "Vpc",
-		"OrganizationId": client.Department,
+		"PageSize": PageSizeLarge,
+		"PageNumber": 1,
 	}
-	request["PageSize"] = PageSizeLarge
-	request["PageNumber"] = 1
 	var objects []map[string]interface{}
 	var accessPointNameRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		accessPointNameRegex = r
 	}
@@ -125,33 +119,15 @@ func dataSourceAlibabacloudStackExpressConnectAccessPointsRead(d *schema.Resourc
 		}
 	}
 	status, statusOk := d.GetOk("status")
-	var response map[string]interface{}
-	conn, err := client.NewVpcClient()
-	if err != nil {
-		return WrapError(err)
-	}
+
 	for {
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &runtime)
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-		addDebug(action, response, request)
+		response, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, request)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alicloud_express_connect_access_points", action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
 		resp, err := jsonpath.Get("$.AccessPointSet.AccessPointType", response)
 		if err != nil {
-			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.AccessPointSet.AccessPointType", response)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.AccessPointSet.AccessPointType", response)
 		}
 		result, _ := resp.([]interface{})
 		for _, v := range result {
@@ -197,15 +173,15 @@ func dataSourceAlibabacloudStackExpressConnectAccessPointsRead(d *schema.Resourc
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("points", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

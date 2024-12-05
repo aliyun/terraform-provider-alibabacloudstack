@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -41,9 +43,16 @@ func resourceAlibabacloudStackSlbRule() *schema.Resource {
 			},
 
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'rule_name' instead.",
+			},
+
+			"rule_name": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
 			},
 
 			"listener_sync": {
@@ -94,9 +103,8 @@ func resourceAlibabacloudStackSlbRule() *schema.Resource {
 				DiffSuppressFunc: slbRuleListenerSyncDiffSuppressFunc,
 			},
 			"health_check_http_code": {
-				Type: schema.TypeString,
-				ValidateFunc: validateAllowedSplitStringValue([]string{
-					string(HTTP_2XX), string(HTTP_3XX), string(HTTP_4XX), string(HTTP_5XX)}, ","),
+				Type:             schema.TypeString,
+				ValidateFunc:     validateAllowedSplitStringValue([]string{string(HTTP_2XX), string(HTTP_3XX), string(HTTP_4XX), string(HTTP_5XX)}, ","),
 				Optional:         true,
 				Default:          HTTP_2XX,
 				DiffSuppressFunc: slbRuleHealthCheckDiffSuppressFunc,
@@ -122,10 +130,8 @@ func resourceAlibabacloudStackSlbRule() *schema.Resource {
 				DiffSuppressFunc: slbRuleHealthCheckDiffSuppressFunc,
 			},
 			"health_check_connect_port": {
-				Type: schema.TypeInt,
-				ValidateFunc: validation.Any(
-					validation.IntBetween(1, 65535),
-					validation.IntInSlice([]int{-520})),
+				Type:             schema.TypeInt,
+				ValidateFunc:     validation.Any(validation.IntBetween(1, 65535), validation.IntInSlice([]int{-520})),
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: slbRuleHealthCheckDiffSuppressFunc,
@@ -161,10 +167,8 @@ func resourceAlibabacloudStackSlbRule() *schema.Resource {
 			},
 			//http & https
 			"sticky_session_type": {
-				Type: schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(InsertStickySessionType),
-					string(ServerStickySessionType)}, false),
+				Type:             schema.TypeString,
+				ValidateFunc:     validation.StringInSlice([]string{string(InsertStickySessionType), string(ServerStickySessionType)}, false),
 				Optional:         true,
 				DiffSuppressFunc: slbRuleStickySessionTypeDiffSuppressFunc,
 			},
@@ -178,11 +182,15 @@ func resourceAlibabacloudStackSlbRule() *schema.Resource {
 }
 
 func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slb_id := d.Get("load_balancer_id").(string)
 	port := d.Get("frontend_port").(int)
-	name := strings.Trim(d.Get("name").(string), " ")
+	name := ""
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "rule_name", "name"); err == nil && v.(string) != ""{
+		name = v.(string)
+	} else {
+		return err
+	}
 	group_id := strings.Trim(d.Get("server_group_id").(string), " ")
 
 	var domain, url, rule string
@@ -194,7 +202,7 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 	}
 
 	if domain == "" && url == "" {
-		return WrapError(Error("At least one 'domain' or 'url' must be set."))
+		return errmsgs.WrapError(errmsgs.Error("At least one 'domain' or 'url' must be set."))
 	} else if domain == "" {
 		rule = fmt.Sprintf("[{'RuleName':'%s','Url':'%s','VServerGroupId':'%s'}]", name, url, group_id)
 	} else if url == "" {
@@ -204,17 +212,11 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 	}
 
 	request := slb.CreateCreateRulesRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = slb_id
 	request.ListenerPort = requests.NewInteger(port)
 	request.RuleList = rule
+
 	var raw interface{}
 	var err error
 	if err = resource.Retry(3*time.Minute, func() *resource.RetryError {
@@ -222,7 +224,7 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 			return slbClient.CreateRules(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{"BackendServer.configuring", "OperationFailed.ListenerStatusNotSupport"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"BackendServer.configuring", "OperationFailed.ListenerStatusNotSupport"}) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -230,7 +232,14 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	}); err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_slb_rule", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if raw != nil {
+			response, ok := raw.(*slb.CreateRulesResponse)
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_rule", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	response, _ := raw.(*slb.CreateRulesResponse)
@@ -246,17 +255,17 @@ func resourceAlibabacloudStackSlbRuleRead(d *schema.ResourceData, meta interface
 	object, err := slbService.DescribeSlbRule(d.Id())
 
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
-	d.Set("name", object.RuleName)
+	connectivity.SetResourceData(d, object.RuleName, "rule_name", "name")
 	d.Set("load_balancer_id", object.LoadBalancerId)
 	if port, err := strconv.Atoi(object.ListenerPort); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	} else {
 		d.Set("frontend_port", port)
 	}
@@ -286,39 +295,39 @@ func resourceAlibabacloudStackSlbRuleUpdate(d *schema.ResourceData, meta interfa
 	update := false
 	fullUpdate := false
 	request := slb.CreateSetRuleRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.RuleId = d.Id()
+
 	if listenerSync, ok := d.GetOk("listener_sync"); ok && listenerSync == string(OffFlag) {
 		if stickySession := d.Get("sticky_session"); stickySession == string(OnFlag) {
 			if _, ok := d.GetOk("sticky_session_type"); !ok {
-				return WrapError(Error(`'sticky_session_type': required field is not set when the sticky_session is 'on'.`))
+				return errmsgs.WrapError(errmsgs.Error(`'sticky_session_type': required field is not set when the sticky_session is 'on'.`))
 			}
 		}
 		if stickySessionType := d.Get("sticky_session_type"); stickySessionType == string(InsertStickySessionType) {
 			if _, ok := d.GetOk("cookie_timeout"); !ok {
-				return WrapError(Error(`'cookie_timeout': required field is not set when the sticky_session_type is 'insert'.`))
+				return errmsgs.WrapError(errmsgs.Error(`'cookie_timeout': required field is not set when the sticky_session_type is 'insert'.`))
 			}
 		}
 		if stickySessionType := d.Get("sticky_session_type"); stickySessionType == string(ServerStickySessionType) {
 			if _, ok := d.GetOk("cookie"); !ok {
-				return WrapError(Error(`'cookie': required field is not set when the sticky_session_type is 'server'.`))
+				return errmsgs.WrapError(errmsgs.Error(`'cookie': required field is not set when the sticky_session_type is 'server'.`))
 			}
 		}
 	}
+
 	if d.HasChange("server_group_id") {
 		request.VServerGroupId = d.Get("server_group_id").(string)
 		update = true
 	}
 
-	if d.HasChange("name") {
-		request.RuleName = d.Get("name").(string)
-		update = true
+	if d.HasChange("rule_name") || d.HasChange("name") {
+		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "rule_name", "name"); err == nil {
+			request.RuleName = v.(string)
+			update = true
+		} else {
+			return err
+		}
 	}
 
 	fullUpdate = d.HasChange("listener_sync") || d.HasChange("scheduler") || d.HasChange("cookie") || d.HasChange("cookie_timeout") || d.HasChange("health_check") || d.HasChange("health_check_http_code") ||
@@ -355,16 +364,21 @@ func resourceAlibabacloudStackSlbRuleUpdate(d *schema.ResourceData, meta interfa
 				}
 			}
 		}
-
 	}
+
 	if update || fullUpdate {
-		client := meta.(*connectivity.AlibabacloudStackClient)
-		request.RegionId = client.RegionId
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 			return slbClient.SetRule(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*slb.SetRuleResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
@@ -380,35 +394,36 @@ func resourceAlibabacloudStackSlbRuleDelete(d *schema.ResourceData, meta interfa
 		lbId := d.Get("load_balancer_id").(string)
 		lbInstance, err := slbService.DescribeSlb(lbId)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				return nil
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if lbInstance.DeleteProtection == "on" {
-			return WrapError(fmt.Errorf("Current rule's SLB Instance %s has enabled DeleteProtection. Please set delete_protection_validation to false to delete the rule.", lbId))
+			return errmsgs.WrapError(fmt.Errorf("Current rule's SLB Instance %s has enabled DeleteProtection. Please set delete_protection_validation to false to delete the rule.", lbId))
 		}
 	}
 
 	request := slb.CreateDeleteRulesRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.RuleIds = fmt.Sprintf("['%s']", d.Id())
 
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 			return slbClient.DeleteRules(request)
 		})
+		response, ok := raw.(*slb.DeleteRulesResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{"OperationFailed.ListenerStatusNotSupport"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"OperationFailed.ListenerStatusNotSupport"}) {
 				return resource.RetryableError(err)
 			}
+			errmsg := ""
+			if raw != nil {
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_rule", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			return resource.NonRetryableError(err)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
@@ -416,11 +431,10 @@ func resourceAlibabacloudStackSlbRuleDelete(d *schema.ResourceData, meta interfa
 	})
 
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidRuleId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidRuleId.NotFound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, "")
 	}
-	return WrapError(slbService.WaitForSlbRule(d.Id(), Deleted, DefaultTimeoutMedium))
-
+	return errmsgs.WrapError(slbService.WaitForSlbRule(d.Id(), Deleted, DefaultTimeoutMedium))
 }

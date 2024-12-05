@@ -7,6 +7,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cloudapi"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -74,38 +75,31 @@ func dataSourceAlibabacloudStackApiGatewayApps() *schema.Resource {
 		},
 	}
 }
+
 func dataSourceAlibabacloudStackApigatewayAppsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cloudApiService := CloudApiService{client}
 
 	request := cloudapi.CreateDescribeAppAttributesRequest()
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	request.PageNumber = requests.NewInteger(1)
-	request.Headers = map[string]string{
-		"RegionId": client.RegionId,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"RegionId":        client.RegionId,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          "DescribeAppAttributes",
-		"Version":         "2016-07-14",
-	}
+
 	var apps []cloudapi.AppAttribute
 
 	for {
 		raw, err := client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 			return cloudApiClient.DescribeAppAttributes(request)
 		})
+		response, ok := raw.(*cloudapi.DescribeAppAttributesResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_api_gateway_apps", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_api_gateway_apps", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*cloudapi.DescribeAppAttributesResponse)
 
 		apps = append(apps, response.Apps.AppAttribute...)
 
@@ -115,7 +109,7 @@ func dataSourceAlibabacloudStackApigatewayAppsRead(d *schema.ResourceData, meta 
 
 		page, err := getNextpageNumber(request.PageNumber)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.PageNumber = page
 	}
@@ -126,7 +120,7 @@ func dataSourceAlibabacloudStackApigatewayAppsRead(d *schema.ResourceData, meta 
 	if ok && nameRegex.(string) != "" {
 		r, err := regexp.Compile(nameRegex.(string))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		gatewayAppNameRegex = r
 	}
@@ -154,7 +148,7 @@ func dataSourceAlibabacloudStackApigatewayAppsRead(d *schema.ResourceData, meta 
 		if value, ok := d.GetOk("tags"); ok {
 			tags, err := cloudApiService.DescribeTags(strconv.FormatInt(app.AppId, 10), value.(map[string]interface{}), TagResourceApp)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			if len(tags) < 1 {
 				continue
@@ -174,29 +168,21 @@ func apigatewayAppsDecriptionAttributes(d *schema.ResourceData, apps []cloudapi.
 	var names []string
 	for _, app := range apps {
 		request := cloudapi.CreateDescribeAppSecurityRequest()
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{
-			"RegionId": client.RegionId,
-		}
-		request.QueryParams = map[string]string{
-			
-			
-			"Product":         "CloudAPI",
-			"RegionId":        client.RegionId,
-			"Department":      client.Department,
-			"ResourceGroup":   client.ResourceGroup,
-			"Action":          "DescribeAppSecurity",
-			"Version":         "2016-07-14",
-		}
+		client.InitRpcRequest(*request.RpcRequest)
 		request.AppId = requests.NewInteger64(app.AppId)
+
 		raw, err := client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 			return cloudApiClient.DescribeAppSecurity(request)
 		})
+		response, ok := raw.(*cloudapi.DescribeAppSecurityResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_api_gateway_apps", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_api_gateway_apps", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*cloudapi.DescribeAppSecurityResponse)
 
 		mapping := map[string]interface{}{
 			"id":            app.AppId,
@@ -213,13 +199,13 @@ func apigatewayAppsDecriptionAttributes(d *schema.ResourceData, apps []cloudapi.
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("apps", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	// create a json file in current directory and write data source to it.
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

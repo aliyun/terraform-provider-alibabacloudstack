@@ -22,52 +22,52 @@ func dataResourceIdHash(ids []string) string {
 func outputInstancesSchema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"instance_id": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 		"instance_name": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 		"description": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 		"image_id": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 		"region_id": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 		"availability_zone": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 		"instance_type": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 		"vswitch_id": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 		"public_ip": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 		"private_ip": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 		"key_name": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 		"status": {
-			Type:     schema.TypeString,
-			Computed: true,
+			Type:		schema.TypeString,
+			Computed:	true,
 		},
 	}
 }

@@ -1,0 +1,245 @@
+1. ApiName: GetUserInfo,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/connectivity/client.go 
+Request缺失情况:
+参数名：SecurityToken  参数类型： 
+参数名：SignatureVersion  参数类型： 
+2. ApiName: ListRAMPoliciesForUser,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/data_source_apsarastack_ascm_ram_policies_for_user.go 
+Request缺失情况:
+参数名：LoginName  参数类型： 
+3. ApiName: ListRAMServiceRoles,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/data_source_apsarastack_ascm_ram_service_roles.go 
+Request缺失情况:
+参数名：roleType  参数类型： 
+4. ApiName: DescribeGlobalZones,Version: 2022-06-24,Product: CloudDns,FileName: terraform-provider-apsarastack/alibabacloudstack/data_source_apsarastack_dns_domains.go 
+Request缺失情况:
+参数名：Forwardedregionid  参数类型： 
+参数名：SignatureVersion  参数类型： 
+5. ApiName: ConsoleTopicList,Version: 2018-02-05,Product: Ons-inner,FileName: terraform-provider-apsarastack/alibabacloudstack/data_source_apsarastack_ons_topics.go 
+Request缺失情况:
+参数名：namespaceId  参数类型： 
+6. ApiName: DoOpenApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/data_source_apsarastack_oss_buckets.go 
+Request缺失情况:
+参数名：SignatureVersion  参数类型： 
+参数名：AccountInfo  参数类型： 
+7. ApiName: AddLoginPolicy,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_logon_policy.go 
+Request缺失情况:
+参数名：SignatureVersion  参数类型： 
+参数名：AccountInfo  参数类型： 
+8. ApiName: ModifyLoginPolicy,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_logon_policy.go 
+Request缺失情况:
+参数名：Name  参数类型： 
+参数名：Rule  参数类型： 
+参数名：Description  参数类型： 
+9. ApiName: RemoveLoginPolicyByName,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_logon_policy.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+参数名：SignatureVersion  参数类型： 
+参数名：Name  参数类型： 
+10. ApiName: CreateOrganization,Version: 2019-05-10,Product: Ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_organization.go 
+Request缺失情况:
+参数名：ParentId  参数类型： 
+11. ApiName: ResetPasswordPolicy,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_password_policy.go 
+Request缺失情况:
+参数名：id  参数类型： 
+12. ApiName: DeleteQuota,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_quota.go 
+Request缺失情况:
+参数名：QuotaTypeId  参数类型： 
+参数名：RegionName   参数类型： 
+参数名：QuotaType  参数类型： 
+13. ApiName: RemoveResourceGroup,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_resource_group.go 
+Request缺失情况:
+参数名：resourceGroupName  参数类型： 
+14. ApiName: UnbindAscmUserAndResourceGroup,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_resource_group_user_attachment.go 
+Request缺失情况:
+参数名：resourceGroupId  参数类型： 
+15. ApiName: AddResourceSetToUserGroup,Version: 2019-05-10,Product: Ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_user_group_resource_set_binding.go 
+Request缺失情况:
+参数名：ascmRoleId  参数类型： 
+16. ApiName: AddRoleToUserGroup,Version: 2019-05-10,Product: Ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_user_group_role_binding.go 
+Request缺失情况:
+参数名：RoleId  参数类型： 
+17. ApiName: RemoveRoleFromUserGroup,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_user_group_role_binding.go 
+Request缺失情况:
+参数名：RoleId  参数类型： 
+18. ApiName: AddRoleToUser,Version: 2019-05-10,Product: Ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_user_role_binding.go 
+Request缺失情况:
+参数名：LoginName  参数类型： 
+参数名：RoleId  参数类型： 
+19. ApiName: RemoveRoleFromUser,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ascm_user_role_binding.go 
+Request缺失情况:
+参数名：LoginName  参数类型： 
+参数名：RoleId  参数类型： 
+20. ApiName: CreateNamespace,Version: 2016-06-07,Product: cr,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cr_namespace.go 
+Request缺失情况:
+参数名：HaApsaraStack  参数类型： 
+参数名：SignatureVersion  参数类型： 
+参数名：Language  参数类型： 
+参数名：X-acs-body  参数类型： 
+参数名：NamespaceName  参数类型： 
+参数名：Arch  参数类型： 
+21. ApiName: UpdateNamespace,Version: 2016-06-07,Product: cr,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cr_namespace.go 
+Request缺失情况:
+参数名：X-acs-body  参数类型： 
+参数名：Format  参数类型： 
+参数名：Method  参数类型： 
+参数名：SignatureVersion  参数类型： 
+参数名：Accept-Language  参数类型： 
+22. ApiName: CreateRepo,Version: 2016-06-07,Product: cr,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cr_repo.go 
+Request缺失情况:
+参数名：X-acs-body  参数类型： 
+23. ApiName: UpdateRepo,Version: 2016-06-07,Product: cr,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cr_repo.go 
+Request缺失情况:
+参数名：X-acs-body  参数类型： 
+24. ApiName: ScaleClusterNodePool,Version: 2015-12-15,Product: CS,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cs_kubernetes.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+参数名：SignatureVersion  参数类型： 
+参数名：X-acs-body  参数类型： 
+25. ApiName: DeleteCluster,Version: 2015-12-15,Product: Cs,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cs_kubernetes.go 
+Request缺失情况:
+参数名：SignatureVersion  参数类型： 
+参数名：X-acs-body  参数类型： 
+26. ApiName: ModifyClusterTags,Version: 2015-12-15,Product: CS,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cs_kubernetes.go 
+Request缺失情况:
+参数名：X-acs-body  参数类型： 
+参数名：SignatureVersion  参数类型： 
+27. ApiName: ModifyClusterNodePool,Version: 2015-12-15,Product: CS,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cs_kubernetes_node_pool.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+参数名：SignatureVersion  参数类型： 
+参数名：X-acs-body  参数类型： 
+28. ApiName: CreateTopic,Version: 2019-11-20,Product: datahub,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_datahub_topic.go 
+Request缺失情况:
+参数名：Forwardedregionid  参数类型： 
+参数名：SignatureVersion  参数类型： 
+参数名：AcceptLanguage  参数类型： 
+29. ApiName: CreateDBInstance,Version: 2014-08-15,Product: Rds,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_db_instance.go 
+Request缺失情况:
+参数名：Encryption  参数类型： 
+30. ApiName: UpdateGlobalZoneRemark,Version: 2021-06-24,Product: CloudDns,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_dns_domain.go 
+Request缺失情况:
+参数名：Name  参数类型： 
+31. ApiName: DeleteGlobalZoneRecord,Version: 2021-06-24,Product: CloudDns,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_dns_record.go 
+Request缺失情况:
+参数名：ZoneId  参数类型： 
+32. ApiName: createInstance,Version: 2017-06-13,Product: elasticsearch-k8s,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_elasticsearch_on_k8s_instance.go 
+Request缺失情况:
+参数名：X-acs-body  参数类型： 
+参数名：ClientToken  参数类型： 
+参数名：OrganizationId  参数类型： 
+33. ApiName: DoApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_image_export.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+34. ApiName: CreateCalcEngineForAscm,Version: 2019-01-17,Product: dataworks-private-cloud,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_maxcompute_project.go 
+Request缺失情况:
+参数名：KmsRegion  参数类型： 
+参数名：ResourceGroupId  参数类型： 
+参数名：ClusterItem  参数类型： 
+参数名：ClusterName  参数类型： 
+参数名：ExternalTable  参数类型： 
+参数名：OdpsName  参数类型： 
+参数名：OrganizationId  参数类型： 
+参数名：TaskPk  参数类型： 
+参数名：CurrentRoleId  参数类型： 
+35. ApiName: ConsoleInstanceUpdate,Version: 2018-02-05,Product: Ons-inner,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_ons_instance.go 
+Request缺失情况:
+参数名：Cluster  参数类型： 
+参数名：IndependentNaming  参数类型： 
+36. ApiName: DoOpenApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_oss_bucket.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+参数名：SignatureVersion  参数类型： 
+37. ApiName: DoOpenApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_oss_bucket.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+参数名：SignatureVersion  参数类型： 
+38. ApiName: DoOpenApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_oss_bucket_kms.go 
+Request缺失情况:
+参数名：SignatureVersion  参数类型： 
+参数名：AccountInfo  参数类型： 
+39. ApiName: DoOpenApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_oss_bucket_kms.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+参数名：SignatureVersion  参数类型： 
+40. ApiName: DoOpenApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_oss_bucket_kms.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+参数名：SignatureVersion  参数类型： 
+41. ApiName: DoOpenApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_oss_bucket_quota.go 
+Request缺失情况:
+参数名：SignatureVersion  参数类型： 
+参数名：AccountInfo  参数类型： 
+42. ApiName: DoOpenApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_oss_bucket_quota.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+参数名：SignatureVersion  参数类型： 
+43. ApiName: DoOpenApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_oss_bucket_quota.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+参数名：SignatureVersion  参数类型： 
+44. ApiName: ListLoginPolicies,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_ascm.go 
+Request缺失情况:
+参数名：Name  参数类型： 
+45. ApiName: ListRAMServiceRoles,Version: 2019-05-10,Product: Ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_ascm.go 
+Request缺失情况:
+参数名：id  参数类型： 
+参数名：roleType  参数类型： 
+46. ApiName: ListRAMPolicies,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_ascm.go 
+Request缺失情况:
+参数名：RamPolicyId  参数类型： 
+47. ApiName: GetQuota,Version: 2019-05-10,Product: Ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_ascm.go 
+Request缺失情况:
+参数名：regionName   参数类型： 
+48. ApiName: GetPasswordPolicy,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_ascm.go 
+Request缺失情况:
+参数名：id  参数类型： 
+49. ApiName: BindBucketPolicy,Version: 2019-05-10,Product: ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_bucket_vpc.go 
+Request缺失情况:
+参数名：VLan  参数类型： 
+参数名：VpcId  参数类型： 
+参数名：SignatureVersion  参数类型： 
+参数名：BucketName  参数类型： 
+参数名：VpcName  参数类型： 
+50. ApiName: UnBindBucketPolicy,Version: 2019-05-10,Product: Ascm,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_bucket_vpc.go 
+Request缺失情况:
+参数名：SignatureVersion  参数类型： 
+参数名：BucketName  参数类型： 
+51. ApiName: DescribeClustersV1,Version: 2015-12-15,Product: Cs,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_cs.go 
+Request缺失情况:
+参数名：SignatureVersion  参数类型： 
+52. ApiName: DescribeClusterNodes,Version: 2015-12-15,Product: Cs,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_cs.go 
+Request缺失情况:
+参数名：nodepool_id  参数类型： 
+参数名：SignatureVersion  参数类型： 
+53. ApiName: GetSubscriptionOffset,Version: 2019-11-20,Product: datahub,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_datahub.go 
+Request缺失情况:
+参数名：Format  参数类型： 
+参数名：SignatureVersion  参数类型： 
+参数名：SignatureMethod  参数类型： 
+54. ApiName: DescribeGlobalZones,Version: 2022-06-24,Product: CloudDns,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_dns.go 
+Request缺失情况:
+参数名：Forwardedregionid  参数类型： 
+参数名：SignatureVersion  参数类型： 
+55. ApiName: DescribeInstance,Version: 2017-06-13,Product: elasticsearch-k8s,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_elasticsearch.go 
+Request缺失情况:
+参数名：product  参数类型： 
+参数名：ClientToken  参数类型： 
+参数名：OrganizationId  参数类型： 
+56. ApiName: ListCalcEnginesForAscm,Version: 2019-01-17,Product: dataworks-private-cloud,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_maxcompute.go 
+Request缺失情况:
+参数名：ResourceGroupId  参数类型： 
+参数名：OrganizationId  参数类型： 
+参数名：CurrentRoleId  参数类型： 
+57. ApiName: ConsoleTopicList,Version: 2018-02-05,Product: Ons-inner,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_ons.go 
+Request缺失情况:
+参数名：topic  参数类型： 
+58. ApiName: DoOpenApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_oss.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+参数名：SignatureVersion  参数类型： 
+59. ApiName: DoApi,Version: 2018-12-12,Product: OneRouter,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_oss.go 
+Request缺失情况:
+参数名：AccountInfo  参数类型： 
+60. ApiName: GetInstance,Version: 2016-06-20,Product: Ots,FileName: terraform-provider-apsarastack/alibabacloudstack/service_apsarastack_ots.go 
+Request缺失情况:
+参数名：apiName  参数类型： 
+参数名：version  参数类型： 
+总计检查136个api,其中有60个api存在参数问题,有60个api缺少入参,有0个api缺少出参,有0个api同时缺少入参和出参

@@ -143,7 +143,6 @@ func TestAccAlibabacloudStackOtsInstance_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, false, connectivity.OtsCapacityNoSupportedRegions)
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -235,156 +234,156 @@ func TestAccAlibabacloudStackOtsInstance_basic(t *testing.T) {
 }
 
 /*
-func TestAccAlibabacloudStackOtsInstanceHighPerformance(t *testing.T) {
-	var v ots.InstanceInfo
+	func TestAccAlibabacloudStackOtsInstanceHighPerformance(t *testing.T) {
+		var v ots.InstanceInfo
 
-	resourceId := "alibabacloudstack_ots_instance.default"
-	ra := resourceAttrInit(resourceId, otsInstanceBasicMap)
+		resourceId := "alibabacloudstack_ots_instance.default"
+		ra := resourceAttrInit(resourceId, otsInstanceBasicMap)
 
-	serviceFunc := func() interface{} {
-		return &OtsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+		serviceFunc := func() interface{} {
+			return &OtsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		}
+		rc := resourceCheckInit(resourceId, &v, serviceFunc)
 
-	rac := resourceAttrCheckInit(rc, ra)
+		rac := resourceAttrCheckInit(rc, ra)
 
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(10000, 99999)
-	name := fmt.Sprintf("tf-testAcc%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceConfigDependence)
+		testAccCheck := rac.resourceAttrMapUpdateSet()
+		rand := acctest.RandIntRange(10000, 99999)
+		name := fmt.Sprintf("tf-testAcc%d", rand)
+		testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, false, connectivity.OtsHighPerformanceNoSupportedRegions)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":          name,
-					"description":   name,
-					"instance_type": "HighPerformance",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
+		resource.Test(t, resource.TestCase{
+			PreCheck: func() {
+				testAccPreCheck(t)
+
+			},
+			// module name
+			IDRefreshName: resourceId,
+			Providers:     testAccProviders,
+			CheckDestroy:  rac.checkResourceDestroy(),
+			Steps: []resource.TestStep{
+				{
+					Config: testAccConfig(map[string]interface{}{
 						"name":          name,
 						"description":   name,
 						"instance_type": "HighPerformance",
 					}),
-				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"accessed_by": "Vpc",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheck(map[string]string{
+							"name":          name,
+							"description":   name,
+							"instance_type": "HighPerformance",
+						}),
+					),
+				},
+				{
+					ResourceName:      resourceId,
+					ImportState:       true,
+					ImportStateVerify: true,
+				},
+				{
+					Config: testAccConfig(map[string]interface{}{
 						"accessed_by": "Vpc",
 					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance test",
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheck(map[string]string{
+							"accessed_by": "Vpc",
+						}),
+					),
+				},
+				{
+					Config: testAccConfig(map[string]interface{}{
+						"tags": map[string]string{
+							"Created": "TF",
+							"For":     "acceptance test",
+						},
 					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-						"Updated": "TF",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "3",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance test",
-						"tags.Updated": "TF",
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheck(map[string]string{
+							"tags.%":       "2",
+							"tags.Created": "TF",
+							"tags.For":     "acceptance test",
+						}),
+					),
+				},
+				{
+					Config: testAccConfig(map[string]interface{}{
+						"tags": map[string]string{
+							"Created": "TF",
+							"For":     "acceptance test",
+							"Updated": "TF",
+						},
 					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"accessed_by": REMOVEKEY,
-					"tags":        REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"accessed_by":  "Any",
-						"tags.%":       "0",
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
-						"tags.Updated": REMOVEKEY,
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheck(map[string]string{
+							"tags.%":       "3",
+							"tags.Created": "TF",
+							"tags.For":     "acceptance test",
+							"tags.Updated": "TF",
+						}),
+					),
+				},
+				{
+					Config: testAccConfig(map[string]interface{}{
+						"accessed_by": REMOVEKEY,
+						"tags":        REMOVEKEY,
 					}),
-				),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheck(map[string]string{
+							"accessed_by":  "Any",
+							"tags.%":       "0",
+							"tags.Created": REMOVEKEY,
+							"tags.For":     REMOVEKEY,
+							"tags.Updated": REMOVEKEY,
+						}),
+					),
+				},
 			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackOtsInstance_multi(t *testing.T) {
-	var v ots.InstanceInfo
-
-	resourceId := "alibabacloudstack_ots_instance.default.4"
-	ra := resourceAttrInit(resourceId, otsInstanceBasicMap)
-
-	serviceFunc := func() interface{} {
-		return &OtsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		})
 	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 
-	rac := resourceAttrCheckInit(rc, ra)
+	func TestAccAlibabacloudStackOtsInstance_multi(t *testing.T) {
+		var v ots.InstanceInfo
 
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(10000, 99999)
-	name := fmt.Sprintf("tf-testAcc%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceConfigDependence)
+		resourceId := "alibabacloudstack_ots_instance.default.4"
+		ra := resourceAttrInit(resourceId, otsInstanceBasicMap)
 
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, false, connectivity.OtsCapacityNoSupportedRegions)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":          name + "${count.index}",
-					"description":   name + "${count.index}",
-					"instance_type": "Capacity",
-					"count":         "5",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
+		serviceFunc := func() interface{} {
+			return &OtsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		}
+		rc := resourceCheckInit(resourceId, &v, serviceFunc)
+
+		rac := resourceAttrCheckInit(rc, ra)
+
+		testAccCheck := rac.resourceAttrMapUpdateSet()
+		rand := acctest.RandIntRange(10000, 99999)
+		name := fmt.Sprintf("tf-testAcc%d", rand)
+		testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceConfigDependence)
+
+		resource.Test(t, resource.TestCase{
+			PreCheck: func() {
+				testAccPreCheck(t)
+
 			},
-		},
-	})
-}
+			// module name
+			IDRefreshName: resourceId,
+			Providers:     testAccProviders,
+			CheckDestroy:  rac.checkResourceDestroy(),
+			Steps: []resource.TestStep{
+				{
+					Config: testAccConfig(map[string]interface{}{
+						"name":          name + "${count.index}",
+						"description":   name + "${count.index}",
+						"instance_type": "Capacity",
+						"count":         "5",
+					}),
+					Check: resource.ComposeTestCheckFunc(
+						testAccCheck(nil),
+					),
+				},
+			},
+		})
+	}
 */
 func resourceOtsInstanceConfigDependence(name string) string {
 	return ""

@@ -6,14 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	"strings"
-
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -72,16 +67,11 @@ func resourceAlibabacloudStackMaxcomputeUser() *schema.Resource {
 	}
 }
 
-func resourceAlibabacloudStackMaxcomputeUserCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackMaxcomputeUserCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "CreateOdpsUser"
-	product := "ascm"
 	request := make(map[string]interface{})
-	conn, err := client.NewAscmClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	request["UserName"] = d.Get("user_name")
 	if v, ok := d.GetOk("organization_id"); ok {
 		request["OrganizationId"] = v
@@ -90,27 +80,13 @@ func resourceAlibabacloudStackMaxcomputeUserCreate(d *schema.ResourceData, meta 
 	}
 	request["Description"] = d.Get("description")
 
-	request["RegionId"] = client.RegionId
-	request["RegionName"] = client.RegionId
-	request["Product"] = product
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequestWithOrg(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, request)
-		return nil
-	})
+	response, err = client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, request)
+	
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_maxcompute_project", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		return WrapError(Error("CreateUpdateOdpsUser failed for "))
+		return errmsgs.WrapError(errmsgs.Error("CreateUpdateOdpsUser failed for "))
 	}
 
 	return resourceAlibabacloudStackMaxcomputeUserRead(d, meta)
@@ -121,12 +97,12 @@ func resourceAlibabacloudStackMaxcomputeUserRead(d *schema.ResourceData, meta in
 	maxcomputeService := MaxcomputeService{client}
 	object, err := maxcomputeService.DescribeMaxcomputeUser(d.Get("user_name").(string))
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_maxcompute_project_user maxcomputeService.DescribeMaxcomputeUser Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.SetId(strconv.Itoa(object.Data[0].ID))
@@ -139,6 +115,7 @@ func resourceAlibabacloudStackMaxcomputeUserRead(d *schema.ResourceData, meta in
 	d.Set("description", object.Data[0].Description)
 	return nil
 }
+
 func resourceAlibabacloudStackMaxcomputeUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
@@ -157,40 +134,21 @@ func resourceAlibabacloudStackMaxcomputeUserUpdate(d *schema.ResourceData, meta 
 	}
 	if update {
 		var requestInfo *ecs.Client
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
 		roleId, err := client.RoleIds()
 		if err != nil {
-			err = WrapErrorf(Error(GetNotFoundMessage("ASCM User", "defaultRoleId")), NotFoundMsg, ProviderERROR)
-			return WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
 		OrganizationId := ""
 		if v, ok := d.GetOk("organization_id"); ok {
 			OrganizationId = strconv.Itoa(v.(int))
 		} else {
 			OrganizationId = client.Department
 		}
-		request.ApiName = "UpdateOdpsUser"
-		request.Headers = map[string]string{
-			"RegionId":              client.RegionId,
-			"x-acs-roleid":          strconv.Itoa(roleId),
-			"x-acs-resourcegroupid": client.ResourceGroup,
-			"x-acs-regionid":        client.RegionId,
-			"x-acs-organizationid":  client.Department,
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":         client.RegionId,
+
+		commonRequest := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateOdpsUser", "")
+		mergeMaps(commonRequest.QueryParams, map[string]string{
 			"Id":               d.Get("id").(string),
 			"UserId":           d.Get("user_id").(string),
 			"UserName":         d.Get("user_name").(string),
@@ -198,66 +156,45 @@ func resourceAlibabacloudStackMaxcomputeUserUpdate(d *schema.ResourceData, meta 
 			"OrganizationId":   OrganizationId,
 			"OrganizationName": d.Get("organization_name").(string),
 			"Description":      d.Get("description").(string),
-			"Product":          "ascm",
-			"ResourceGroupId":  client.ResourceGroup,
-			"action":           "UpdateOdpsUser",
-			"Version":          "2019-05-10",
-		}
+		})
+		commonRequest.Headers["x-acs-roleid"] =strconv.Itoa(roleId)
+
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+			return ecsClient.ProcessCommonRequest(commonRequest)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{"Error OdpsUser Not Found"}) {
-				return WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+			if errmsgs.IsExpectedErrors(err, []string{"Error OdpsUser Not Found"}) {
+				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			return WrapErrorf(err, DefaultErrorMsg, d.Get("user_name").(string), "UpdateOdpsUser", AlibabacloudStackSdkGoERROR)
-
+			errmsg := ""
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Get("user_name").(string), "UpdateOdpsUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug("UpdateOdpsUser", raw, requestInfo, request)
+		addDebug("UpdateOdpsUser", raw, requestInfo, commonRequest)
 	}
 	return resourceAlibabacloudStackMaxcomputeUserRead(d, meta)
 }
 
 func resourceAlibabacloudStackMaxcomputeUserDelete(d *schema.ResourceData, meta interface{}) error {
-	//ASCM不支持删除
+	// ASCM does not support deletion
 	return nil
+
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "DeleteOdpsCu"
-	var response map[string]interface{}
-	conn, err := client.NewOdpsClient()
-	if err != nil {
-		return WrapError(err)
-	}
-	request := map[string]interface{}{
-		"CuId":        d.Id(),
-		"CuName":      d.Get("cu_name"),
-		"ClusterName": d.Get("cluster_name"),
-		"Product":     "ascm",
-		"RegionId":    client.RegionId,
-		"RegionName":  client.RegionId,
-	}
+	request := make(map[string]interface{})
+	request["CuId"] = d.Id()
+	request["CuName"] = d.Get("cu_name")
+	request["ClusterName"] = d.Get("cluster_name")
 
-	wait := incrementalWait(3*time.Second, 10*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if IsExpectedErrors(err, []string{"500"}) || NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, request)
-		return nil
-	})
+	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, request)
+	
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
-	if IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
+	if errmsgs.IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
 		return nil
 	}
 	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		return WrapError(Error("DeleteOdpsCu failed for " + response["Message"].(string)))
+		return errmsgs.WrapError(errmsgs.Error("DeleteOdpsCu failed for " + response["Message"].(string)))
 	}
 	return nil
 }

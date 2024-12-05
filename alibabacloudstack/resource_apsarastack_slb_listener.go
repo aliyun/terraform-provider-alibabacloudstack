@@ -10,8 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -42,7 +44,6 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 			},
-
 			"backend_port": {
 				Type:         schema.TypeInt,
 				ValidateFunc: validation.IntBetween(1, 65535),
@@ -55,13 +56,10 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 			},
-
 			"bandwidth": {
-				Type: schema.TypeInt,
-				ValidateFunc: validation.Any(
-					validation.IntBetween(1, 5000),
-					validation.IntInSlice([]int{-1})),
-				Required: true,
+				Type:         schema.TypeInt,
+				ValidateFunc: validation.Any(validation.IntBetween(1, 5000), validation.IntInSlice([]int{-1})),
+				Required:     true,
 			},
 			"scheduler": {
 				Type:         schema.TypeString,
@@ -94,38 +92,30 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: slbAclDiffSuppressFunc,
 			},
-			//http & https
 			"sticky_session": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"on", "off"}, false),
-				Required:     true,
-
+				Type:             schema.TypeString,
+				ValidateFunc:     validation.StringInSlice([]string{"on", "off"}, false),
+				Required:         true,
 				DiffSuppressFunc: httpHttpsDiffSuppressFunc,
 			},
-			//http & https
 			"sticky_session_type": {
-				Type: schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(InsertStickySessionType),
-					string(ServerStickySessionType)}, false),
+				Type:             schema.TypeString,
+				ValidateFunc:     validation.StringInSlice([]string{string(InsertStickySessionType), string(ServerStickySessionType)}, false),
 				Optional:         true,
 				DiffSuppressFunc: stickySessionTypeDiffSuppressFunc,
 			},
-			//http & https
 			"cookie_timeout": {
 				Type:             schema.TypeInt,
 				ValidateFunc:     validation.IntBetween(1, 86400),
 				Optional:         true,
 				DiffSuppressFunc: cookieTimeoutDiffSuppressFunc,
 			},
-			//http & https
 			"cookie": {
 				Type:             schema.TypeString,
 				ValidateFunc:     validation.StringLenBetween(1, 200),
 				Optional:         true,
 				DiffSuppressFunc: cookieDiffSuppressFunc,
 			},
-			//tcp & udp
 			"persistence_timeout": {
 				Type:             schema.TypeInt,
 				ValidateFunc:     validation.IntBetween(1, 3600),
@@ -133,39 +123,31 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Default:          0,
 				DiffSuppressFunc: tcpUdpDiffSuppressFunc,
 			},
-			//http & https
 			"health_check": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"on", "off"}, false),
-				Required:     true,
-
+				Type:             schema.TypeString,
+				ValidateFunc:     validation.StringInSlice([]string{"on", "off"}, false),
+				Required:         true,
 				DiffSuppressFunc: httpHttpsDiffSuppressFunc,
 			},
-			//http & https
 			"health_check_method": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{"head", "get"}, false),
 				Optional:     true,
 				Computed:     true,
 			},
-			//tcp
 			"health_check_type": {
-				Type: schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(TCPHealthCheckType),
-					string(HTTPHealthCheckType)}, false),
+				Type:             schema.TypeString,
+				ValidateFunc:     validation.StringInSlice([]string{string(TCPHealthCheckType), string(HTTPHealthCheckType)}, false),
 				Optional:         true,
 				Default:          TCPHealthCheckType,
 				DiffSuppressFunc: healthCheckTypeDiffSuppressFunc,
 			},
-			//http & https & tcp
 			"health_check_domain": {
 				Type:             schema.TypeString,
 				ValidateFunc:     validation.StringDoesNotMatch(regexp.MustCompile(`^\$_ip$`), "value '$_ip' has been deprecated, and empty string will replace it"),
 				Optional:         true,
 				DiffSuppressFunc: httpHttpsTcpDiffSuppressFunc,
 			},
-			//http & https & tcp
 			"health_check_uri": {
 				Type:             schema.TypeString,
 				ValidateFunc:     validation.StringLenBetween(1, 80),
@@ -174,10 +156,8 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				DiffSuppressFunc: httpHttpsTcpDiffSuppressFunc,
 			},
 			"health_check_connect_port": {
-				Type: schema.TypeInt,
-				ValidateFunc: validation.Any(
-					validation.IntBetween(1, 65535),
-					validation.IntInSlice([]int{-520})),
+				Type:             schema.TypeInt,
+				ValidateFunc:     validation.Any(validation.IntBetween(1, 65535), validation.IntInSlice([]int{-520})),
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: healthCheckDiffSuppressFunc,
@@ -196,7 +176,6 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Default:          3,
 				DiffSuppressFunc: healthCheckDiffSuppressFunc,
 			},
-
 			"health_check_timeout": {
 				Type:             schema.TypeInt,
 				ValidateFunc:     validation.IntBetween(1, 300),
@@ -211,16 +190,13 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Default:          2,
 				DiffSuppressFunc: healthCheckDiffSuppressFunc,
 			},
-			//http & https & tcp
 			"health_check_http_code": {
-				Type: schema.TypeString,
-				ValidateFunc: validateAllowedSplitStringValue([]string{
-					string(HTTP_2XX), string(HTTP_3XX), string(HTTP_4XX), string(HTTP_5XX)}, ","),
+				Type:             schema.TypeString,
+				ValidateFunc:     validateAllowedSplitStringValue([]string{string(HTTP_2XX), string(HTTP_3XX), string(HTTP_4XX), string(HTTP_5XX)}, ","),
 				Optional:         true,
 				Default:          HTTP_2XX,
 				DiffSuppressFunc: httpHttpsTcpDiffSuppressFunc,
 			},
-			//https
 			"ssl_certificate_id": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -238,8 +214,6 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: sslCertificateIdDiffSuppressFunc,
 			},
-
-			//http, https
 			"gzip": {
 				Type:             schema.TypeBool,
 				Optional:         true,
@@ -275,7 +249,6 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				},
 				MaxItems: 1,
 			},
-			//tcp
 			"established_timeout": {
 				Type:             schema.TypeInt,
 				ValidateFunc:     validation.IntBetween(10, 900),
@@ -283,7 +256,6 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Default:          900,
 				DiffSuppressFunc: establishedTimeoutDiffSuppressFunc,
 			},
-			//https
 			"enable_http2": {
 				Type:             schema.TypeString,
 				ValidateFunc:     validation.StringInSlice([]string{"on", "off"}, false),
@@ -291,8 +263,6 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Default:          OnFlag,
 				DiffSuppressFunc: httpsDiffSuppressFunc,
 			},
-
-			//https
 			"tls_cipher_policy": {
 				Type:             schema.TypeString,
 				Default:          "tls_cipher_policy_1_0",
@@ -325,7 +295,6 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 }
 
 func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 	httpForward := false
@@ -336,39 +305,30 @@ func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta int
 		httpForward = true
 	}
 	request, err := buildListenerCommonArgs(d, meta)
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
+
 	request.ApiName = fmt.Sprintf("CreateLoadBalancer%sListener", strings.ToUpper(protocol))
 
 	if Protocol(protocol) == Http || Protocol(protocol) == Https {
 		if httpForward {
 			reqHttp, err := buildHttpForwardArgs(d, request)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			request = reqHttp
 		} else {
 			reqHttp, err := buildHttpListenerArgs(d, request)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			request = reqHttp
-		}
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
 		}
 		if Protocol(protocol) == Https {
 			scId := d.Get("server_certificate_id").(string)
 			if scId == "" {
-				return WrapError(Error(`'server_certificate_id': required field is not set when the protocol is 'https'.`))
+				return errmsgs.WrapError(errmsgs.Error(`'server_certificate_id': required field is not set when the protocol is 'https'.`))
 			}
 			request.QueryParams["ServerCertificateId"] = scId
 		}
@@ -377,24 +337,24 @@ func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta int
 		return slbClient.ProcessCommonRequest(request)
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if raw != nil {
+			response, ok := raw.(*responses.CommonResponse)
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request, request.QueryParams)
 	d.SetId(lb_id + ":" + protocol + ":" + strconv.Itoa(frontend))
 
 	if err := slbService.WaitForSlbListener(d.Id(), Stopped, DefaultTimeout); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	startLoadBalancerListenerRequest := slb.CreateStartLoadBalancerListenerRequest()
-	startLoadBalancerListenerRequest.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		startLoadBalancerListenerRequest.Scheme = "https"
-	} else {
-		startLoadBalancerListenerRequest.Scheme = "http"
-	}
-	startLoadBalancerListenerRequest.Headers = map[string]string{"RegionId": client.RegionId}
-	startLoadBalancerListenerRequest.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*startLoadBalancerListenerRequest.RpcRequest)
 	startLoadBalancerListenerRequest.LoadBalancerId = lb_id
 	startLoadBalancerListenerRequest.ListenerPort = requests.NewInteger(frontend)
 	startLoadBalancerListenerRequest.ListenerProtocol = protocol
@@ -404,21 +364,28 @@ func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta int
 			return slbClient.StartLoadBalancerListener(startLoadBalancerListenerRequest)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{"ServiceIsConfiguring"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"ServiceIsConfiguring"}) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*responses.CommonResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listener", startLoadBalancerListenerRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(startLoadBalancerListenerRequest.GetActionName(), raw, startLoadBalancerListenerRequest.RpcRequest, startLoadBalancerListenerRequest)
 		return nil
 	})
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_slb_listener", startLoadBalancerListenerRequest.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_slb_listener", startLoadBalancerListenerRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	if err = slbService.WaitForSlbListener(d.Id(), Running, DefaultTimeout); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if httpForward {
 		return resourceAlibabacloudStackSlbListenerRead(d, meta)
@@ -433,11 +400,11 @@ func resourceAlibabacloudStackSlbListenerRead(d *schema.ResourceData, meta inter
 
 	lb_id, protocol, port, err := parseListenerId(d, meta)
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("protocol", protocol)
@@ -447,14 +414,14 @@ func resourceAlibabacloudStackSlbListenerRead(d *schema.ResourceData, meta inter
 	return resource.Retry(5*time.Minute, func() *resource.RetryError {
 		object, err := slbService.DescribeSlbListener(d.Id())
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				d.SetId("")
 				return nil
 			}
-			if IsExpectedErrors(err, SlbIsBusy) {
-				return resource.RetryableError(WrapError(err))
+			if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy) {
+				return resource.RetryableError(errmsgs.WrapError(err))
 			}
-			return resource.NonRetryableError(WrapError(err))
+			return resource.NonRetryableError(errmsgs.WrapError(err))
 		}
 
 		if port, ok := object["ListenerPort"]; ok && port.(float64) > 0 {
@@ -476,7 +443,7 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 	protocol := Protocol(d.Get("protocol").(string))
 	commonRequest, err := buildListenerCommonArgs(d, meta)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	commonRequest.ApiName = fmt.Sprintf("SetLoadBalancer%sListenerAttribute", strings.ToUpper(string(protocol)))
 
@@ -533,7 +500,7 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 
 	httpArgs, err := buildHttpListenerArgs(d, commonRequest)
 	if (protocol == Https || protocol == Http) && err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	// http https
 	if d.HasChange("sticky_session") {
@@ -658,7 +625,7 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 			scId = d.Get("ssl_certificate_id").(string)
 		}
 		if scId == "" {
-			return WrapError(Error("'server_certificate_id': required field is not set when the protocol is 'https'."))
+			return errmsgs.WrapError(errmsgs.Error("'server_certificate_id': required field is not set when the protocol is 'https'."))
 		}
 
 		httpsArgs.QueryParams["ServerCertificateId"] = scId
@@ -676,12 +643,12 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 			slbService := SlbService{client}
 			object, err := slbService.DescribeSlb(d.Get("load_balancer_id").(string))
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			spec := object.LoadBalancerSpec
 			if spec == "" {
 				if !d.IsNewResource() || string("tls_cipher_policy_1_0") != d.Get("tls_cipher_policy").(string) {
-					return WrapError(Error("Currently the param \"tls_cipher_policy\" can not be updated when load balancer instance is \"Shared-Performance\"."))
+					return errmsgs.WrapError(errmsgs.Error("Currently the param \"tls_cipher_policy\" can not be updated when load balancer instance is \"Shared-Performance\"."))
 				}
 			} else {
 				httpsArgs.QueryParams["TLSCipherPolicy"] = d.Get("tls_cipher_policy").(string)
@@ -710,7 +677,14 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 			return slbClient.ProcessCommonRequest(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*responses.CommonResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request, request.QueryParams)
 	}
@@ -726,67 +700,61 @@ func resourceAlibabacloudStackSlbListenerDelete(d *schema.ResourceData, meta int
 
 	lbId, protocol, port, err := parseListenerId(d, meta)
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if d.Get("delete_protection_validation").(bool) {
 		lbInstance, err := slbService.DescribeSlb(lbId)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				return nil
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if lbInstance.DeleteProtection == "on" {
-			return WrapError(fmt.Errorf("Current listener's SLB Instance %s has enabled DeleteProtection. Please set delete_protection_validation to false to delete the listener resource.", lbId))
+			return errmsgs.WrapError(fmt.Errorf("Current listener's SLB Instance %s has enabled DeleteProtection. Please set delete_protection_validation to false to delete the listener resource.", lbId))
 		}
 	}
 	request := slb.CreateDeleteLoadBalancerListenerRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = lbId
 	request.ListenerPort = requests.NewInteger(port)
 	request.ListenerProtocol = protocol
+
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 			return slbClient.DeleteLoadBalancerListener(request)
 		})
 
 		if err != nil {
-			if IsExpectedErrors(err, SlbIsBusy) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.SlbIsBusy) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*responses.CommonResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	return WrapError(slbService.WaitForSlbListener(d.Id(), Deleted, DefaultTimeoutMedium))
+	return errmsgs.WrapError(slbService.WaitForSlbListener(d.Id(), Deleted, DefaultTimeoutMedium))
 }
 
 func buildListenerCommonArgs(d *schema.ResourceData, meta interface{}) (*requests.CommonRequest, error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	slbService := SlbService{client}
 
-	request, err := slbService.BuildSlbCommonRequest()
-	if err != nil {
-		return request, WrapError(err)
-	}
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request := client.NewCommonRequest("GET", "slb", "2014-05-15", "", "")
 
 	request.QueryParams["LoadBalancerId"] = d.Get("load_balancer_id").(string)
 	request.QueryParams["ListenerPort"] = string(requests.NewInteger(d.Get("frontend_port").(int)))
@@ -822,8 +790,8 @@ func buildListenerCommonArgs(d *schema.ResourceData, meta interface{}) (*request
 	}
 
 	return request, nil
-
 }
+
 func buildHttpListenerArgs(d *schema.ResourceData, req *requests.CommonRequest) (*requests.CommonRequest, error) {
 	stickySession := d.Get("sticky_session").(string)
 	healthCheck := d.Get("health_check").(string)
@@ -832,21 +800,21 @@ func buildHttpListenerArgs(d *schema.ResourceData, req *requests.CommonRequest) 
 	if stickySession == string(OnFlag) {
 		sessionType, ok := d.GetOk("sticky_session_type")
 		if !ok || sessionType.(string) == "" {
-			return req, WrapError(Error("'sticky_session_type': required field is not set when the StickySession is %s.", OnFlag))
+			return req, errmsgs.WrapError(errmsgs.Error("'sticky_session_type': required field is not set when the StickySession is %s.", OnFlag))
 		} else {
 			req.QueryParams["StickySessionType"] = sessionType.(string)
 
 		}
 		if sessionType.(string) == string(InsertStickySessionType) {
 			if timeout, ok := d.GetOk("cookie_timeout"); !ok || timeout == 0 {
-				return req, WrapError(Error("'cookie_timeout': required field is not set when the StickySession is %s and StickySessionType is %s.",
+				return req, errmsgs.WrapError(errmsgs.Error("'cookie_timeout': required field is not set when the StickySession is %s and StickySessionType is %s.",
 					OnFlag, InsertStickySessionType))
 			} else {
 				req.QueryParams["CookieTimeout"] = string(requests.NewInteger(timeout.(int)))
 			}
 		} else {
 			if cookie, ok := d.GetOk("cookie"); !ok || cookie.(string) == "" {
-				return req, WrapError(fmt.Errorf("'cookie': required field is not set when the StickySession is %s and StickySessionType is %s.",
+				return req, errmsgs.WrapError(fmt.Errorf("'cookie': required field is not set when the StickySession is %s and StickySessionType is %s.",
 					OnFlag, ServerStickySessionType))
 			} else {
 				req.QueryParams["Cookie"] = cookie.(string)
@@ -900,7 +868,7 @@ func parseListenerId(d *schema.ResourceData, meta interface{}) (string, string, 
 
 	parts, err := ParseSlbListenerId(d.Id())
 	if err != nil {
-		return "", "", 0, WrapError(err)
+		return "", "", 0, errmsgs.WrapError(err)
 	}
 	protocol := ""
 	port := 0
@@ -914,11 +882,11 @@ func parseListenerId(d *schema.ResourceData, meta interface{}) (string, string, 
 		port, err = strconv.Atoi(parts[1])
 	}
 	if err != nil {
-		return "", "", 0, WrapError(err)
+		return "", "", 0, errmsgs.WrapError(err)
 	}
 	loadBalancer, err := slbService.DescribeSlb(parts[0])
 	if err != nil {
-		return "", "", 0, WrapError(err)
+		return "", "", 0, errmsgs.WrapError(err)
 	}
 	if protocol != "" {
 		for _, portAndProtocol := range loadBalancer.ListenerPortsAndProtocol.ListenerPortAndProtocol {
@@ -928,7 +896,7 @@ func parseListenerId(d *schema.ResourceData, meta interface{}) (string, string, 
 		}
 	} else {
 		if len(loadBalancer.ListenerPortsAndProtocol.ListenerPortAndProtocol) > 1 {
-			return "", "", 0, WrapError(Error("More than one listener was with with the same id: %s, please specify protocol.", d.Id()))
+			return "", "", 0, errmsgs.WrapError(errmsgs.Error("More than one listener was with with the same id: %s, please specify protocol.", d.Id()))
 		}
 		for _, portAndProtocol := range loadBalancer.ListenerPortsAndProtocol.ListenerPortAndProtocol {
 			if portAndProtocol.ListenerPort == port {
@@ -936,7 +904,7 @@ func parseListenerId(d *schema.ResourceData, meta interface{}) (string, string, 
 			}
 		}
 	}
-	return "", "", 0, GetNotFoundErrorFromString(GetNotFoundMessage("Listener", d.Id()))
+	return "", "", 0, errmsgs.GetNotFoundErrorFromString(errmsgs.GetNotFoundMessage("Listener", d.Id()))
 }
 
 func readListener(d *schema.ResourceData, listener map[string]interface{}) {

@@ -5,10 +5,8 @@ import (
 	"log"
 	"time"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -67,11 +65,11 @@ func resourceAlibabacloudStackOosExecution() *schema.Resource {
 				Computed: true,
 			},
 			"parameters": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      "{}",
-				ValidateFunc: validation.StringIsJSON,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				Default:          "{}",
+				ValidateFunc:     validation.StringIsJSON,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					equal, _ := compareJsonTemplateAreEquivalent(old, new)
 					return equal
@@ -137,10 +135,7 @@ func resourceAlibabacloudStackOosExecutionCreate(d *schema.ResourceData, meta in
 	var response map[string]interface{}
 	action := "StartExecution"
 	request := make(map[string]interface{})
-	conn, err := client.NewOosClient()
-	if err != nil {
-		return WrapError(err)
-	}
+
 	if v, ok := d.GetOk("description"); ok {
 		request["Description"] = v
 	}
@@ -161,7 +156,6 @@ func resourceAlibabacloudStackOosExecutionCreate(d *schema.ResourceData, meta in
 		request["ParentExecutionId"] = v
 	}
 
-	request["RegionId"] = client.RegionId
 	if v, ok := d.GetOk("safety_check"); ok {
 		request["SafetyCheck"] = v
 	}
@@ -175,45 +169,31 @@ func resourceAlibabacloudStackOosExecutionCreate(d *schema.ResourceData, meta in
 		request["TemplateVersion"] = v
 	}
 
-	request["Product"] = "Oos"
-	request["OrganizationId"] = client.Department
-
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-06-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, request)
-		return nil
-	})
+	response, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oos_execution", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	responseExecution := response["Execution"].(map[string]interface{})
 	d.SetId(fmt.Sprint(responseExecution["ExecutionId"]))
 	stateConf := BuildStateConf([]string{}, []string{"Success"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, oosService.OosExecutionStateRefreshFunc(d.Id(), []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return resourceAlibabacloudStackOosExecutionRead(d, meta)
 }
+
 func resourceAlibabacloudStackOosExecutionRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	oosService := OosService{client}
 	object, err := oosService.DescribeOosExecution(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_oos_execution oosService.DescribeOosExecution Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("counters", object["Counters"])
 	d.Set("create_date", object["CreateDate"])
@@ -234,36 +214,16 @@ func resourceAlibabacloudStackOosExecutionRead(d *schema.ResourceData, meta inte
 	d.Set("update_date", object["UpdateDate"])
 	return nil
 }
+
 func resourceAlibabacloudStackOosExecutionDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "DeleteExecutions"
-	var response map[string]interface{}
-	conn, err := client.NewOosClient()
-	if err != nil {
-		return WrapError(err)
-	}
-	request := map[string]interface{}{
-		"ExecutionIds": convertListToJsonString(convertListStringToListInterface([]string{d.Id()})),
-	}
+	request := make(map[string]interface{})
+	request["ExecutionIds"] = convertListToJsonString(convertListStringToListInterface([]string{d.Id()}))
 
-	request["RegionId"] = client.RegionId
-	request["Product"] = "Oos"
-	request["OrganizationId"] = client.Department
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-06-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, request)
-		return nil
-	})
+	_, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	return nil
 }

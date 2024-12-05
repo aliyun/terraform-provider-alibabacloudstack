@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"strings"
 	"time"
@@ -10,6 +9,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 )
@@ -18,53 +18,35 @@ type DatahubService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
+func (s *DatahubService) DoDatahubGetkafkagroupRequest(id string) (*datahub.GetProjectResult, error) { 
+	return s.DescribeDatahubProject(id)
+}
+
 func (s *DatahubService) DescribeDatahubProject(id string) (*datahub.GetProjectResult, error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
 	resp := &datahub.GetProjectResult{}
 
-	request.Method = "GET"
-	request.Product = "datahub"
-	request.Version = "2019-11-20"
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "GetProject"
-	request.Headers = map[string]string{
-		"RegionId":              s.client.RegionId,
-		"x-acs-resourcegroupid": s.client.ResourceGroup,
-		"x-acs-regionid":        s.client.RegionId,
-		"x-acs-organizationid":  s.client.Department,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "datahub",
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"RegionId":        s.client.RegionId,
-		"Action":          "GetProject",
-		"Version":         "2019-11-20",
-		"ProjectName":     id,
-	}
+	request := s.client.NewCommonRequest("GET", "datahub", "2019-11-20", "GetProject", "")
+	request.QueryParams["ProjectName"] = id
 
 	raw, err := s.client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
 		return dataHubClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		if isDatahubNotExistError(err) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackDatahubSdkGo)
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackDatahubSdkGo)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "GetProject", AlibabacloudStackDatahubSdkGo)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetProject", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
-	addDebug("GetProject", raw, requestInfo, request)
+	addDebug("GetProject", raw, nil, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return nil, WrapErrorf(Error(GetNotFoundMessage("DatahubProject", id)), NotFoundMsg, ProviderERROR)
+		return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DatahubProject", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 
 	return resp, nil
@@ -76,89 +58,69 @@ func (s *DatahubService) WaitForDatahubProject(id string, status Status, timeout
 	for {
 		object, err := s.DescribeDatahubProject(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 
 		if time.Now().After(deadline) {
 			objstringfy, err := convertArrayObjectToJsonString(object)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, objstringfy, id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, objstringfy, id, errmsgs.ProviderERROR)
 		}
 
 	}
 }
 
+func (s *DatahubService) DoDatahubGetsubscriptionoffsetRequest(id string) (*datahub.GetSubscriptionResult, error) {
+    return s.DescribeDatahubSubscription(id)
+}
 func (s *DatahubService) DescribeDatahubSubscription(id string) (*datahub.GetSubscriptionResult, error) {
 	subscription := &datahub.GetSubscriptionResult{}
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
 	parts, err := ParseResourceId(id, 3)
 	if err != nil {
-		return subscription, WrapError(err)
+		return subscription, errmsgs.WrapError(err)
 	}
 	projectName, topicName, subId := parts[0], parts[1], parts[2]
 
-	request.Method = "GET"
-	request.Product = "datahub"
-	request.Version = "2019-11-20"
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "GetSubscriptionOffset"
-	request.Headers = map[string]string{
-		"RegionId":              s.client.RegionId,
-		"x-acs-resourcegroupid": s.client.ResourceGroup,
-		"x-acs-regionid":        s.client.RegionId,
-		"x-acs-organizationid":  s.client.Department,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":          "datahub",
-		"Department":       s.client.Department,
-		"ResourceGroup":    s.client.ResourceGroup,
-		"RegionId":         s.client.RegionId,
-		"Action":           "GetSubscriptionOffset",
-		"Version":          "2019-11-20",
-		"ProjectName":      projectName,
-		"TopicName":        topicName,
-		"SubscriptionId":   subId,
-		"SignatureMethod":  "HMAC-SHA256",
-		"Format":           "JSON",
-		"SignatureVersion": "2.1",
-	}
+	request := s.client.NewCommonRequest("GET", "datahub", "2019-11-20", "GetSubscriptionOffset", "")
+	request.QueryParams["ProjectName"] = projectName
+	request.QueryParams["TopicName"] = topicName
+	request.QueryParams["SubscriptionId"] = subId
+	request.QueryParams["SignatureMethod"] = "HMAC-SHA256"
+	request.QueryParams["Format"] = "JSON"
+	request.QueryParams["SignatureVersion"] = "2.1"
 
 	raw, err := s.client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
 		return dataHubClient.ProcessCommonRequest(request)
 	})
-
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		if isDatahubNotExistError(err) {
-			return subscription, WrapErrorf(err, NotFoundMsg, AlibabacloudStackDatahubSdkGo)
+			return subscription, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackDatahubSdkGo)
 		}
-		return subscription, WrapErrorf(err, DefaultErrorMsg, id, "GetSubscription", AlibabacloudStackDatahubSdkGo)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return subscription, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetSubscription", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
 	if debugOn() {
 		requestMap := make(map[string]string)
 		requestMap["ProjectName"] = projectName
 		requestMap["TopicName"] = topicName
 		requestMap["SubId"] = subId
-		addDebug("GetProject", raw, requestInfo, requestMap)
+		addDebug("GetProject", raw, nil, requestMap)
 	}
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), subscription)
 	if err != nil {
-		return nil, WrapErrorf(Error(GetNotFoundMessage("DatahubProject", id)), NotFoundMsg, ProviderERROR)
+		return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DatahubProject", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	return subscription, nil
 }
@@ -167,87 +129,68 @@ func (s *DatahubService) WaitForDatahubSubscription(id string, status Status, ti
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	parts, err := ParseResourceId(id, 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	topicName, subId := parts[1], parts[2]
 	//for {
 	object, err := s.DescribeDatahubSubscription(id)
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			if status == Deleted {
 				return nil
 			}
 		} else {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 	if object.TopicName == topicName && object.SubId == subId && status != Deleted {
 		return nil
 	}
 	if time.Now().After(deadline) {
-		return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.TopicName+":"+object.SubId, parts[1]+":"+parts[2], ProviderERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.TopicName+":"+object.SubId, parts[1]+":"+parts[2], errmsgs.ProviderERROR)
 	}
 
 	return nil
 }
 
+func (s *DatahubService) DoDatahubGettopicRequest(id string) (*GetTopicResult, error) {
+    return s.DescribeDatahubTopic(id)
+}
 func (s *DatahubService) DescribeDatahubTopic(id string) (*GetTopicResult, error) {
 	topic := &GetTopicResult{}
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return topic, WrapError(err)
+		return topic, errmsgs.WrapError(err)
 	}
 	projectName, topicName := parts[0], parts[1]
-	request.Method = "GET"
-	request.Product = "datahub"
-	request.Version = "2019-11-20"
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "GetTopic"
-	request.Headers = map[string]string{
-		"RegionId":              s.client.RegionId,
-		"x-acs-resourcegroupid": s.client.ResourceGroup,
-		"x-acs-regionid":        s.client.RegionId,
-		"x-acs-organizationid":  s.client.Department,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "datahub",
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"RegionId":        s.client.RegionId,
-		"Action":          "GetTopic",
-		"Version":         "2019-11-20",
-		"ProjectName":     projectName,
-		"TopicName":       topicName,
-	}
+
+	request := s.client.NewCommonRequest("GET", "datahub", "2019-11-20", "GetTopic", "")
+	request.QueryParams["ProjectName"] = projectName
+	request.QueryParams["TopicName"] = topicName
 
 	raw, err := s.client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
 		return dataHubClient.ProcessCommonRequest(request)
 	})
-
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		if isDatahubNotExistError(err) {
-			return topic, WrapErrorf(err, NotFoundMsg, AlibabacloudStackDatahubSdkGo)
+			return topic, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackDatahubSdkGo)
 		}
-		return topic, WrapErrorf(err, DefaultErrorMsg, id, "GetTopic", AlibabacloudStackDatahubSdkGo)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return topic, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetTopic", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
 	if debugOn() {
 		requestMap := make(map[string]string)
 		requestMap["ProjectName"] = projectName
 		requestMap["TopicName"] = topicName
-		addDebug("GetTopic", raw, requestInfo, requestMap)
+		addDebug("GetTopic", raw, nil, requestMap)
 	}
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), topic)
 	if err != nil {
-		return nil, WrapErrorf(Error(GetNotFoundMessage("DatahubProject", id)), NotFoundMsg, ProviderERROR)
+		return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DatahubProject", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	return topic, nil
 }
@@ -256,25 +199,25 @@ func (s *DatahubService) WaitForDatahubTopic(id string, status Status, timeout i
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	projectName, topicName := parts[0], parts[1]
 	for {
 		object, err := s.DescribeDatahubTopic(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if object.ProjectName == projectName && object.TopicName == topicName && status != Deleted {
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.ProjectName+":"+object.TopicName, id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ProjectName+":"+object.TopicName, id, errmsgs.ProviderERROR)
 		}
 
 	}
@@ -312,7 +255,7 @@ const (
 )
 
 func isDatahubNotExistError(err error) bool {
-	return IsExpectedErrors(err, []string{datahub.NoSuchProject, datahub.NoSuchTopic, datahub.NoSuchShard, datahub.NoSuchSubscription, DoesNotExist})
+	return errmsgs.IsExpectedErrors(err, []string{datahub.NoSuchProject, datahub.NoSuchTopic, datahub.NoSuchShard, datahub.NoSuchSubscription, DoesNotExist})
 }
 
 func isTerraformTestingDatahubObject(name string) bool {

@@ -5,14 +5,11 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -113,55 +110,36 @@ func resourceAlibabacloudStackDataWorksRemind() *schema.Resource {
 var RemindUnit string
 var RemindType string
 
-func resourceAlibabacloudStackDataWorksRemindCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackDataWorksRemindCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var response map[string]interface{}
 	action := "CreateRemind"
-	conn, err := client.NewDataworkspublicClient()
-	if err != nil {
-		return WrapError(err)
-	}
-
 	request := buildRemindArgs(d)
-	request["RegionId"] = client.RegionId
-	request["Product"] = "dataworks-public"
-	request["product"] = "dataworks-public"
-	request["OrganizationId"] = client.Department
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+
+	response, err := client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_data_works_remind", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	d.SetId(fmt.Sprint(response["Data"]))
 
 	return resourceAlibabacloudStackDataWorksRemindRead(d, meta)
 }
+
 func resourceAlibabacloudStackDataWorksRemindRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	dataworksPublicService := DataworksPublicService{client}
 	object, err := dataworksPublicService.DescribeDataWorksRemind(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_data_works_remind dataworksPublicService.DescribeDataWorksRemind Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
-	}
-	if err != nil {
-		return WrapError(err)
+		errmsg := ""
+		if object != nil {
+			errmsg = errmsgs.GetAsapiErrorMessage(object)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_data_works_remind", "DescribeDataWorksRemind", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	for key, value := range object {
@@ -201,10 +179,9 @@ func resourceAlibabacloudStackDataWorksRemindRead(d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := make(map[string]interface{})
-	var response map[string]interface{}
 
 	request["RemindId"] = d.Id()
 
@@ -255,62 +232,24 @@ func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta
 	}
 
 	action := "UpdateRemind"
-	request["RegionId"] = client.RegionId
-	request["Product"] = "dataworks-public"
-	request["product"] = "dataworks-public"
-	request["OrganizationId"] = client.Department
-	conn, err := client.NewDataworkspublicClient()
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
 	if err != nil {
-		return WrapError(err)
-	}
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
-	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	return resourceAlibabacloudStackDataWorksRemindRead(d, meta)
 }
 
-func resourceAlibabacloudStackDataWorksRemindDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackDataWorksRemindDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	action := "DeleteRemind"
-	var response map[string]interface{}
-	conn, err := client.NewDataworkspublicClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	request := map[string]interface{}{
 		"RemindId": d.Id(),
 		"RegionId": "default",
 	}
-
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	return nil
 }

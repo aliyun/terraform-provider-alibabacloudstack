@@ -10,6 +10,7 @@ import (
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -25,14 +26,11 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 				ForceNew: true,
 			},
 			"engine": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(KVStoreMemcache),
-					string(KVStoreRedis),
-				}, false),
-				Default: string(KVStoreRedis),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{string(KVStoreMemcache), string(KVStoreRedis)}, false),
+				Default:      string(KVStoreRedis),
 			},
 			"engine_version": {
 				Type:     schema.TypeString,
@@ -130,35 +128,38 @@ func removeRepByMap(slc []string) []string {
 func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := r_kvstore.CreateSelectCommRequest()
-	request.RegionId = client.RegionId
-	request.ResourceType = "REDIS"
-	request.Status = "Available"
+	request := r_kvstore.CreateDescribeInstancesRequest()
+	client.InitRpcRequest(*request.RpcRequest)
 	instanceChargeType := d.Get("instance_charge_type").(string)
-	var response = &r_kvstore.DescribeCommSelectResponse{}
+	var response *r_kvstore.DescribeInstancesResponse
 	err := resource.Retry(time.Minute*5, func() *resource.RetryError {
 		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
-			return rkvClient.DescribeCommSelect(request)
+			return rkvClient.DescribeInstances(request)
 		})
+		response, ok := raw.(*r_kvstore.DescribeInstancesResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{Throttling}) {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
 				time.Sleep(time.Duration(5) * time.Second)
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_kvstore_instance_classes", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response = raw.(*r_kvstore.DescribeCommSelectResponse)
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_kvstore_instance_classes", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	var instanceClasses []string
 	var ids []string
 
-	Datas2 := response.Data
+	Datas2 := response.Instances.KVStoreInstance
 	for _, Data := range Datas2 {
 		instanceClasses = append(instanceClasses, Data.InstanceClass)
 	}
@@ -172,7 +173,7 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 		bssopenapiService := BssopenapiService{client}
 		priceList, err := getKVStoreInstanceClassPrice(bssopenapiService, instanceChargeType, instanceClasses)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_kvstore_instance_classes", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		for i, instanceClass := range instanceClasses {
 			classPrice := map[string]interface{}{
@@ -189,7 +190,7 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 
 		err = d.Set("classes", instanceClassPrices)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		instanceClasses = instanceClasses[:0]
@@ -200,13 +201,13 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 
 	err = d.Set("instance_classes", instanceClasses)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok {
 		err = writeToFile(output.(string), instanceClassPrices)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 	return nil
@@ -217,7 +218,7 @@ func getKVStoreInstanceClassPrice(bssopenapiService BssopenapiService, instanceC
 	var modules interface{}
 	moduleCode := "InstanceClass"
 	var payAsYouGo []bssopenapi.GetPayAsYouGoPriceModuleList
-	var subsciption []bssopenapi.GetSubscriptionPriceModuleList
+	var subscription []bssopenapi.GetSubscriptionPriceModuleList
 	for _, instanceClass := range instanceClasses {
 		config := fmt.Sprintf("InstanceClass:%s,Region:%s", instanceClass, client.Region)
 		if instanceChargeType == string(PostPaid) {
@@ -227,19 +228,36 @@ func getKVStoreInstanceClassPrice(bssopenapiService BssopenapiService, instanceC
 				PriceType:  "Hour",
 			})
 		} else {
-			subsciption = append(subsciption, bssopenapi.GetSubscriptionPriceModuleList{
+			subscription = append(subscription, bssopenapi.GetSubscriptionPriceModuleList{
 				ModuleCode: moduleCode,
 				Config:     config,
 			})
-
 		}
 	}
 
 	if len(payAsYouGo) != 0 {
 		modules = payAsYouGo
 	} else {
-		modules = subsciption
+		modules = subscription
+	}
+	raw, err := client.WithBssopenapiClient(func(client *bssopenapi.Client) (interface{}, error) {
+		return client.GetPayAsYouGoPrice(&bssopenapi.GetPayAsYouGoPriceRequest{
+			ProductCode: "redisa",
+			ModuleList:  modules.(*[]bssopenapi.GetPayAsYouGoPriceModuleList),
+		})
+	})
+	response, ok := raw.(*bssopenapi.GetPayAsYouGoPriceResponse)
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_kvstore_instance_classes", "GetPayAsYouGoPrice", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	return bssopenapiService.GetInstanceTypePrice("redisa", "", modules)
+	prices := make([]float64, len(instanceClasses))
+	for i, module := range response.Data.ModuleDetails.ModuleDetail {
+		prices[i] = module.OriginalCost
+	}
+	return prices, nil
 }

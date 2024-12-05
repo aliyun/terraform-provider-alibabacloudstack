@@ -2,8 +2,8 @@ package alibabacloudstack
 
 import (
 	"log"
-	"strings"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -22,6 +22,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -84,38 +85,36 @@ func setVolumeTags(client *connectivity.AlibabacloudStackClient, resourceType Ta
 	ecsService := EcsService{client}
 	if d.HasChange("volume_tags") {
 		request := ecs.CreateDescribeDisksRequest()
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 		request.InstanceId = d.Id()
 		var response *ecs.DescribeDisksResponse
+		var ok bool
 		wait := incrementalWait(1*time.Second, 1*time.Second)
 		err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 			raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 				return ecsClient.DescribeDisks(request)
 			})
+			response, ok = raw.(*ecs.DescribeDisksResponse)
 			if err != nil {
-				if IsThrottling(err) {
+				if errmsgs.IsThrottling(err) {
 					wait()
 					return resource.RetryableError(err)
-
 				}
-				return resource.NonRetryableError(err)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_disk", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-			response, _ = raw.(*ecs.DescribeDisksResponse)
 			return nil
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
 		if len(response.Disks.Disk) == 0 {
-			return WrapError(Error("no specified system disk"))
+			return errmsgs.WrapError(errmsgs.Error("no specified system disk"))
 		}
 
 		var ids []string
@@ -149,16 +148,9 @@ func updateTags(client *connectivity.AlibabacloudStackClient, ids []string, reso
 	// Set tags
 	if len(remove) > 0 {
 		request := ecs.CreateUntagResourcesRequest()
+		client.InitRpcRequest(*request.RpcRequest)
 		request.ResourceType = string(resourceType)
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
 		request.ResourceId = &ids
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
 		var tagsKey []string
 		for _, t := range remove {
 			tagsKey = append(tagsKey, t.Key)
@@ -170,34 +162,32 @@ func updateTags(client *connectivity.AlibabacloudStackClient, ids []string, reso
 			raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 				return ecsClient.UntagResources(request)
 			})
+			bresponse, ok := raw.(*responses.CommonResponse)
 			if err != nil {
-				if IsThrottling(err) {
+				if errmsgs.IsThrottling(err) {
 					wait()
 					return resource.RetryableError(err)
-
 				}
-				return resource.NonRetryableError(err)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, ids, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			return nil
 		})
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, ids, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, ids, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
 
 	if len(create) > 0 {
 		request := ecs.CreateTagResourcesRequest()
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
+		client.InitRpcRequest(*request.RpcRequest)
 		request.ResourceType = string(resourceType)
 		request.ResourceId = &ids
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 		var tags []ecs.TagResourcesTag
 		for _, t := range create {
@@ -213,20 +203,24 @@ func updateTags(client *connectivity.AlibabacloudStackClient, ids []string, reso
 			raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 				return ecsClient.TagResources(request)
 			})
+			bresponse, ok := raw.(*responses.CommonResponse)
 			if err != nil {
-				if IsThrottling(err) {
+				if errmsgs.IsThrottling(err) {
 					wait()
 					return resource.RetryableError(err)
-
 				}
-				return resource.NonRetryableError(err)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, ids, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			return nil
 		})
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, ids, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, ids, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
 
@@ -241,6 +235,7 @@ func updateCdnTags(client *connectivity.AlibabacloudStackClient, ids []string, r
 	// Set tags
 	if len(remove) > 0 {
 		request := cdn.CreateUntagResourcesRequest()
+		client.InitRpcRequest(*request.RpcRequest)
 		request.ResourceType = string(resourceType)
 		request.ResourceId = &ids
 
@@ -250,17 +245,23 @@ func updateCdnTags(client *connectivity.AlibabacloudStackClient, ids []string, r
 		}
 		request.TagKey = &tagsKey
 
-		raw, err := client.WithCdnClient_new(func(cdnClient *cdn.Client) (interface{}, error) {
+		raw, err := client.WithCdnClient(func(cdnClient *cdn.Client) (interface{}, error) {
 			return cdnClient.UntagResources(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, ids, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, ids, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
 	if len(create) > 0 {
 		request := cdn.CreateTagResourcesRequest()
+		client.InitRpcRequest(*request.RpcRequest)
 		request.ResourceType = string(resourceType)
 		request.ResourceId = &ids
 
@@ -273,11 +274,16 @@ func updateCdnTags(client *connectivity.AlibabacloudStackClient, ids []string, r
 		}
 		request.Tag = &tags
 
-		raw, err := client.WithCdnClient_new(func(cdnClient *cdn.Client) (interface{}, error) {
+		raw, err := client.WithCdnClient(func(cdnClient *cdn.Client) (interface{}, error) {
 			return cdnClient.TagResources(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, ids, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, ids, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}

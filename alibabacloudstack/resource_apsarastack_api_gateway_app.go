@@ -10,6 +10,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cloudapi"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -42,41 +43,36 @@ func resourceAlibabacloudStackApigatewayAppCreate(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := cloudapi.CreateCreateAppRequest()
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
 	request.AppName = d.Get("name").(string)
 	if v, exist := d.GetOk("description"); exist {
 		request.Description = v.(string)
 	}
 	request.Description = d.Get("description").(string)
-	request.Headers = map[string]string{
-		"RegionId": client.RegionId,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"RegionId":        client.RegionId,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          "CreateApp",
-		"Version":         "2016-07-14",
-	}
+	request.QueryParams["Product"] = "CloudAPI"
+	request.QueryParams["Action"] = "CreateApp"
+	request.QueryParams["Version"] = "2016-07-14"
+
 	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 			return cloudApiClient.CreateApp(request)
 		})
+		bresponse, ok := raw.(*cloudapi.CreateAppResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{"RepeatedCommit"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"RepeatedCommit"}) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_apigateway_app", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*cloudapi.CreateAppResponse)
-		d.SetId(strconv.FormatInt(response.AppId, 10))
+		d.SetId(strconv.FormatInt(bresponse.AppId, 10))
 		return nil
 	}); err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_apigateway_app", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	return resourceAlibabacloudStackApigatewayAppUpdate(d, meta)
 }
@@ -89,7 +85,7 @@ func resourceAlibabacloudStackApigatewayAppRead(d *schema.ResourceData, meta int
 	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		tags, err := cloudApiService.DescribeTags(d.Id(), nil, TagResourceApp)
 		if err != nil {
-			if IsExpectedErrors(err, []string{"NotFoundResourceId"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"NotFoundResourceId"}) {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -98,13 +94,13 @@ func resourceAlibabacloudStackApigatewayAppRead(d *schema.ResourceData, meta int
 		d.Set("tags", cloudApiService.tagsToMap(tags))
 		return nil
 	}); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := resource.Retry(3*time.Second, func() *resource.RetryError {
 		object, err := cloudApiService.DescribeApiGatewayApp(d.Id())
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -114,7 +110,7 @@ func resourceAlibabacloudStackApigatewayAppRead(d *schema.ResourceData, meta int
 		d.Set("description", object.Description)
 		return nil
 	}); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	return nil
 }
@@ -123,7 +119,7 @@ func resourceAlibabacloudStackApigatewayAppUpdate(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cloudApiService := CloudApiService{client}
 	if err := cloudApiService.setInstanceTags(d, TagResourceApp); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if d.IsNewResource() {
 		d.Partial(false)
@@ -131,30 +127,26 @@ func resourceAlibabacloudStackApigatewayAppUpdate(d *schema.ResourceData, meta i
 	}
 	if d.HasChange("name") || d.HasChange("description") {
 		request := cloudapi.CreateModifyAppRequest()
-		request.RegionId = client.RegionId
+		client.InitRpcRequest(*request.RpcRequest)
 		request.AppId = requests.Integer(d.Id())
 		request.AppName = d.Get("name").(string)
 		if v, exist := d.GetOk("description"); exist {
 			request.Description = v.(string)
 		}
-		request.Headers = map[string]string{
-			"RegionId": client.RegionId,
-		}
-		request.QueryParams = map[string]string{
-			
-			
-			"Product":         "CloudAPI",
-			"RegionId":        client.RegionId,
-			"Department":      client.Department,
-			"ResourceGroup":   client.ResourceGroup,
-			"Action":          "ModifyApp",
-			"Version":         "2016-07-14",
-		}
+		request.QueryParams["Product"] = "CloudAPI"
+		request.QueryParams["Action"] = "ModifyApp"
+		request.QueryParams["Version"] = "2016-07-14"
+
 		raw, err := client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 			return cloudApiClient.ModifyApp(request)
 		})
+		bresponse, ok := raw.(*cloudapi.ModifyAppResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
@@ -167,30 +159,26 @@ func resourceAlibabacloudStackApigatewayAppDelete(d *schema.ResourceData, meta i
 	cloudApiService := CloudApiService{client}
 
 	request := cloudapi.CreateDeleteAppRequest()
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
 	request.AppId = requests.Integer(d.Id())
-	request.Headers = map[string]string{
-		"RegionId": client.RegionId,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"RegionId":        client.RegionId,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          "DeleteApp",
-		"Version":         "2016-07-14",
-	}
+	request.QueryParams["Product"] = "CloudAPI"
+	request.QueryParams["Action"] = "DeleteApp"
+	request.QueryParams["Version"] = "2016-07-14"
+
 	raw, err := client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 		return cloudApiClient.DeleteApp(request)
 	})
+	bresponse, ok := raw.(*cloudapi.DeleteAppResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"NotFoundApp"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApp"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	return WrapError(cloudApiService.WaitForApiGatewayApp(d.Id(), Deleted, DefaultTimeout))
+	return errmsgs.WrapError(cloudApiService.WaitForApiGatewayApp(d.Id(), Deleted, DefaultTimeout))
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alikafka"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -65,34 +66,31 @@ func resourceAlibabacloudStackAlikafkaSaslUser() *schema.Resource {
 }
 
 func resourceAlibabacloudStackAlikafkaSaslUserCreate(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
 
 	instanceId := d.Get("instance_id").(string)
-	regionId := client.RegionId
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 	usertype := d.Get("type").(string)
 	kmsPassword := d.Get("kms_encrypted_password").(string)
 
 	if password == "" && kmsPassword == "" {
-		return WrapError(Error("One of the 'password' and 'kms_encrypted_password' should be set."))
+		return errmsgs.WrapError(errmsgs.Error("One of the 'password' and 'kms_encrypted_password' should be set."))
 	}
 
 	request := alikafka.CreateCreateSaslUserRequest()
+	client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
-	request.RegionId = regionId
 	request.Username = username
 	request.Type = usertype
-	request.Domain = client.Config.AlikafkaOpenAPIEndpoint
 	if password != "" {
 		request.Password = password
 	} else {
 		kmsService := KmsService{client}
 		decryptResp, err := kmsService.Decrypt2(kmsPassword, d.Get("kms_encryption_context").(map[string]interface{}))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.Password = decryptResp
 	}
@@ -101,19 +99,24 @@ func resourceAlibabacloudStackAlikafkaSaslUserCreate(d *schema.ResourceData, met
 		raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 			return alikafkaClient.CreateSaslUser(request)
 		})
+		bresponse, ok := raw.(*alikafka.CreateSaslUserResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
 				time.Sleep(2 * time.Second)
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "AlibabacloudStack_alikafka_sasl_user", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "AlibabacloudStack_alikafka_sasl_user", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	// Server may have cache, sleep a while.
@@ -123,22 +126,21 @@ func resourceAlibabacloudStackAlikafkaSaslUserCreate(d *schema.ResourceData, met
 }
 
 func resourceAlibabacloudStackAlikafkaSaslUserRead(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
 
 	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	object, err := alikafkaService.DescribeAlikafkaSaslUser(d.Id())
 	if err != nil {
 		// Handle exceptions
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("instance_id", parts[0])
@@ -150,31 +152,28 @@ func resourceAlibabacloudStackAlikafkaSaslUserRead(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackAlikafkaSaslUserUpdate(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
 
 	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	instanceId := parts[0]
 	username := parts[1]
 	usertype := parts[2]
 
 	if d.HasChange("password") || d.HasChange("kms_encrypted_password") {
-
 		request := alikafka.CreateCreateSaslUserRequest()
+		client.InitRpcRequest(*request.RpcRequest)
 		request.InstanceId = instanceId
-		request.RegionId = client.RegionId
 		request.Username = username
-		request.Domain = client.Config.AlikafkaOpenAPIEndpoint
 		request.Type = usertype
 		password := d.Get("password").(string)
 		kmsPassword := d.Get("kms_encrypted_password").(string)
 
 		if password == "" && kmsPassword == "" {
-			return WrapError(Error("One of the 'password' and 'kms_encrypted_password' should be set."))
+			return errmsgs.WrapError(errmsgs.Error("One of the 'password' and 'kms_encrypted_password' should be set."))
 		}
 
 		if password != "" {
@@ -183,7 +182,7 @@ func resourceAlibabacloudStackAlikafkaSaslUserUpdate(d *schema.ResourceData, met
 			kmsService := KmsService{client}
 			decryptResp, err := kmsService.Decrypt2(kmsPassword, d.Get("kms_encryption_context").(map[string]interface{}))
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			request.Password = decryptResp
 		}
@@ -192,19 +191,24 @@ func resourceAlibabacloudStackAlikafkaSaslUserUpdate(d *schema.ResourceData, met
 			raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 				return alikafkaClient.CreateSaslUser(request)
 			})
+			bresponse, ok := raw.(*alikafka.CreateSaslUserResponse)
 			if err != nil {
-				if IsExpectedErrors(err, []string{ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
 					time.Sleep(2 * time.Second)
 					return resource.RetryableError(err)
 				}
-				return resource.NonRetryableError(err)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "AlibabacloudStack_alikafka_sasl_user", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			return nil
 		})
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "AlibabacloudStack_alikafka_sasl_user", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return err
 		}
 
 		// Server may have cache, sleep a while.
@@ -214,42 +218,45 @@ func resourceAlibabacloudStackAlikafkaSaslUserUpdate(d *schema.ResourceData, met
 }
 
 func resourceAlibabacloudStackAlikafkaSaslUserDelete(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
 
 	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	instanceId := parts[0]
 	username := parts[1]
 	usertype := parts[2]
 
 	request := alikafka.CreateDeleteSaslUserRequest()
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	request.Username = username
 	request.Type = usertype
-	request.Domain = client.Config.AlikafkaOpenAPIEndpoint
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 			return alikafkaClient.DeleteSaslUser(request)
 		})
+		bresponse, ok := raw.(*alikafka.DeleteSaslUserResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
 				time.Sleep(10 * time.Second)
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
-	return WrapError(alikafkaService.WaitForAlikafkaSaslUser(d.Id(), Deleted, DefaultTimeoutMedium))
+	return errmsgs.WrapError(alikafkaService.WaitForAlikafkaSaslUser(d.Id(), Deleted, DefaultTimeoutMedium))
 }

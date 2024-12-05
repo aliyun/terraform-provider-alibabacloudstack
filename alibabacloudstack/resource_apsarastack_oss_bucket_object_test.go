@@ -14,6 +14,7 @@ import (
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -228,7 +229,7 @@ func testAccCheckOssBucketObjectDestroyWithProvider(s *terraform.State, provider
 		// Try to find the resource
 		exist, err := bucket.IsObjectExist(rs.Primary.ID)
 		if err != nil {
-			if IsExpectedErrors(err, []string{"NoSuchBucket"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"NoSuchBucket"}) {
 				return nil
 			}
 			return fmt.Errorf("IsObjectExist got an error: %#v", err)

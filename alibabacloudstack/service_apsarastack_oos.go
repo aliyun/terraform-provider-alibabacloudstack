@@ -2,79 +2,66 @@ package alibabacloudstack
 
 import (
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 type OosService struct {
 	client *connectivity.AlibabacloudStackClient
 }
+func (s *OosService) DoOosGettemplateRequest(id string) (object map[string]interface{}, err error) {
+    return s.DescribeOosTemplate(id)
+}
 
 func (s *OosService) DescribeOosTemplate(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewOosClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "GetTemplate"
 	request := map[string]interface{}{
-		"RegionId":     s.client.RegionId,
 		"TemplateName": id,
 	}
-	request["Product"] = "Oos"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-06-01"), StringPointer("AK"), nil, request, &runtime)
+	request["PageSize"] = 1
+	request["PageNumber"] = 1
+	response, err = s.client.DoTeaRequest("POST", "Oos", "2019-06-01", "GetTemplate", "", nil, request)
+	addDebug("GetTemplate", response, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"EntityNotExists.Template"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("OosTemplate", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"EntityNotExists.Template"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OosTemplate", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return object, err
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
 		return object, err
 	}
-	addDebug(action, response, request)
 	v, err := jsonpath.Get("$.Template", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.Template", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Template", response)
 	}
 	object = v.(map[string]interface{})
 	return object, nil
 }
 
+func (s *OosService) DoOosListexecutionsRequest(id string) (object map[string]interface{}, err error) {
+    return s.DescribeOosExecution(id)
+}
 func (s *OosService) DescribeOosExecution(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewOosClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "ListExecutions"
 	request := map[string]interface{}{
-		"RegionId":    s.client.RegionId,
 		"ExecutionId": id,
 	}
-	request["Product"] = "Oos"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-06-01"), StringPointer("AK"), nil, request, &runtime)
+	request["PageSize"] = 1
+	request["PageNumber"] = 1
+	response, err = s.client.DoTeaRequest("POST", "Oos", "2019-06-01", "ListExecutions", "", nil, request)
+	addDebug("ListExecutions", response, request)
 	if err != nil {
-		err = WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
 		return
 	}
-	addDebug(action, response, request)
 	v, err := jsonpath.Get("$.Executions", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.Executions", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Executions", response)
 	}
 	if len(v.([]interface{})) < 1 {
-		return object, WrapErrorf(Error(GetNotFoundMessage("OOS", id)), NotFoundWithResponse, response)
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OOS", id)), errmsgs.NotFoundWithResponse, response)
 	} else {
 		if v.([]interface{})[0].(map[string]interface{})["ExecutionId"].(string) != id {
-			return object, WrapErrorf(Error(GetNotFoundMessage("OOS", id)), NotFoundWithResponse, response)
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OOS", id)), errmsgs.NotFoundWithResponse, response)
 		}
 	}
 	object = v.([]interface{})[0].(map[string]interface{})
@@ -85,16 +72,16 @@ func (s *OosService) OosExecutionStateRefreshFunc(id string, failStates []string
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeOosExecution(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if object["Status"].(string) == failState {
-				return object, object["Status"].(string), WrapError(Error(FailedToReachTargetStatus, object["Status"].(string)))
+				return object, object["Status"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["Status"].(string)))
 			}
 		}
 		return object, object["Status"].(string), nil

@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
 	"strings"
 	"testing"
@@ -68,7 +69,7 @@ func testSweepElasticsearch(region string) error {
 		})
 
 		if err != nil {
-			log.Printf("[ERROR] %s", WrapError(fmt.Errorf("Error listing Elasticsearch instances: %s", err)))
+			log.Printf("[ERROR] %s", errmsgs.WrapError(fmt.Errorf("Error listing Elasticsearch instances: %s", err)))
 			break
 		}
 

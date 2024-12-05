@@ -1,9 +1,8 @@
 package alibabacloudstack
 
 import (
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"fmt"
@@ -29,40 +28,30 @@ func dataSourceAlibabacloudStackApiGatewayService() *schema.Resource {
 		},
 	}
 }
+
 func dataSourceAlibabacloudStackApigatewayServiceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := make(map[string]interface{})
 	if v, ok := d.GetOk("enable"); !ok || v.(string) != "On" {
 		d.SetId("ApiGatewayServicHasNotBeenOpened")
 		d.Set("status", "")
-
 		return nil
 	}
 	if v, ok := d.GetOk("enable"); ok {
 		request["status"] = v
 	}
 
-	action := "OpenApiGatewayService"
-	request["RegionId"] = client.RegionId
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
-
-	conn, err := meta.(*connectivity.AlibabacloudStackClient).NewTeaCommonClient(connectivity.OpenApiGatewayService)
-	if err != nil {
-		return WrapError(err)
-	}
-	request["Product"] = "CloudAPI"
-	request["OrganizationId"] = client.Department
-	response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-07-14"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-
+	response, err := client.DoTeaRequest("POST", "CloudAPI", "2016-07-14", "OpenApiGatewayService", "", nil, request)
 	addDebug("OpenApiGatewayService", response, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ORDER.OPEND"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"ORDER.OPEND"}) {
 			d.SetId("ApiGatewayServicHasBeenOpened")
 			d.Set("status", "Opened")
 			return nil
 		}
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_api_gateway_service", "OpenApiGatewayService", AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	d.SetId(fmt.Sprintf("%v", response["OrderId"]))

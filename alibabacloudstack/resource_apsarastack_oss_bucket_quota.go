@@ -3,14 +3,13 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"strings"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -43,41 +42,18 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 	bucketName := d.Get("bucket").(string)
 	det, err := ossService.DescribeOssBucket(bucketName)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", AlibabacloudStackOssGoSdk)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 	quota := d.Get("quota").(int)
 
 	if det.BucketInfo.Name == bucketName {
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			
-			"Product":          "OneRouter",
-			"Department":       client.Department,
-			"ResourceGroup":    client.ResourceGroup,
-			"RegionId":         client.RegionId,
-			"Action":           "DoOpenApi",
-			"AccountInfo":      "123456",
-			"Version":          "2018-12-12",
-			"SignatureVersion": "1.0",
-			"OpenApiAction":    "SetBucketStorageCapacity",
-			"ProductName":      "oss",
-			"Params":           fmt.Sprintf("{\"%s\":\"%s\",\"%s\":%d}", "BucketName", bucketName, "StorageCapacity", quota),
-			"Content":          fmt.Sprintf("%s%d%s", "<BucketUserQos><StorageCapacity>", quota, "</StorageCapacity></BucketUserQos>"),
-		}
-		request.Method = "POST"        // Set request method
-		request.Product = "OneRouter"  // Specify product
-		request.Version = "2018-12-12" // Specify product version
-		request.ServiceCode = "OneRouter"
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		} // Set request scheme. Default: http
-		request.ApiName = "DoOpenApi"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
+		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+		request.QueryParams["AccountInfo"] = "123456"
+		request.QueryParams["SignatureVersion"] = "1.0"
+		request.QueryParams["OpenApiAction"] = "SetBucketStorageCapacity"
+		request.QueryParams["ProductName"] = "oss"
+		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":%d}", "BucketName", bucketName, "StorageCapacity", quota)
+		request.QueryParams["Content"] = fmt.Sprintf("%s%d%s", "<BucketUserQos><StorageCapacity>", quota, "</StorageCapacity></BucketUserQos>")
 
 		raw, err := client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
 			return ossClient.ProcessCommonRequest(request)
@@ -85,97 +61,85 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 		log.Printf("Response of SetBucketStorageCapacity: %s", raw)
 		log.Printf("Bresponse ossbucket before error")
 		if err != nil {
-			if ossNotFoundError(err) {
-				return WrapErrorf(err, NotFoundMsg, AlibabacloudStackOssGoSdk)
+			errmsg := ""
+			if bresponse, ok := raw.(*responses.CommonResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			return WrapErrorf(err, DefaultErrorMsg, bucketName, "SetBucketStorageCapacity", AlibabacloudStackOssGoSdk)
+			if ossNotFoundError(err) {
+				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "SetBucketStorageCapacity", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
 		log.Printf("Bresponse ossbucket after error")
 		addDebug("SetBucketStorageCapacity", raw, requestInfo, request)
 		log.Printf("Bresponse ossbucket check")
-		bresponse, _ := raw.(*responses.CommonResponse)
+		bresponse, ok := raw.(*responses.CommonResponse)
 		log.Printf("Bresponse ossbucket %s", bresponse)
 
-		if bresponse.GetHttpStatus() != 200 {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oss_bucket", "SetBucketStorageCapacity", AlibabacloudStackOssGoSdk)
+		if !ok || bresponse.GetHttpStatus() != 200 {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", "SetBucketStorageCapacity", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
-		//logging:= make(map[string]interface{})
 		log.Printf("Enter for logging")
 	}
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", AlibabacloudStackOssGoSdk)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-	// Assign the bucket name as the resource ID
 	d.SetId(bucketName)
 
 	return resourceAlibabacloudStackOssBucketKmsRead(d, meta)
 }
 
 func resourceAlibabacloudStackOssBucketQuotaRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	var requestInfo *oss.Client
 	bucketName := d.Get("bucket").(string)
 	det, err := ossService.DescribeOssBucket(bucketName)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", AlibabacloudStackOssGoSdk)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 	if det.BucketInfo.Name == bucketName {
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			
-			"Product":          "OneRouter",
-			"Department":       client.Department,
-			"ResourceGroup":    client.ResourceGroup,
-			"RegionId":         client.RegionId,
-			"Action":           "DoOpenApi",
-			"AccountInfo":      "123456",
-			"Version":          "2018-12-12",
-			"SignatureVersion": "1.0",
-			"OpenApiAction":    "GetBucketStorageCapacity",
-			"ProductName":      "oss",
-			"Params":           fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", bucketName),
-		}
-		request.Method = "GET"         // Set request method
-		request.Product = "OneRouter"  // Specify product
-		request.Version = "2018-12-12" // Specify product version
-		request.ServiceCode = "OneRouter"
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		} // Set request scheme. Default: http
-		request.ApiName = "DoOpenApi"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
+		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
+		request.QueryParams["AccountInfo"] = "123456"
+		request.QueryParams["SignatureVersion"] = "1.0"
+		request.QueryParams["OpenApiAction"] = "GetBucketStorageCapacity"
+		request.QueryParams["ProductName"] = "oss"
+		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", bucketName)
 
 		raw, err := client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
 			return ossClient.ProcessCommonRequest(request)
 		})
 		log.Printf("Response of GetBucketStorageCapacity: %s", raw)
 		if err != nil {
-			if ossNotFoundError(err) {
-				return WrapErrorf(err, NotFoundMsg, AlibabacloudStackOssGoSdk)
+			errmsg := ""
+			if bresponse, ok := raw.(*responses.CommonResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			return WrapErrorf(err, DefaultErrorMsg, bucketName, "GetBucketStorageCapacity", AlibabacloudStackOssGoSdk)
+			if ossNotFoundError(err) {
+				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "GetBucketStorageCapacity", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
 		addDebug("GetBucketStorageCapacity", raw, requestInfo, request)
 		log.Printf("Bresponse ossbucket check")
-		bresponse, _ := raw.(*responses.CommonResponse)
+		bresponse, ok := raw.(*responses.CommonResponse)
 		log.Printf("Bresponse ossbucket %s", bresponse)
 
-		if bresponse.GetHttpStatus() != 200 {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oss_bucket", "GetBucketStorageCapacity", AlibabacloudStackOssGoSdk)
+		if !ok || bresponse.GetHttpStatus() != 200 {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", "GetBucketStorageCapacity", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
-		//logging:= make(map[string]interface{})
 		log.Printf("Enter for logging")
-		//d.Set("SSEAlgorithm",bresponse.GetHttpContentString())
 	}
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", AlibabacloudStackOssGoSdk)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
 	return nil
@@ -188,41 +152,17 @@ func resourceAlibabacloudStackOssBucketQuotaDelete(d *schema.ResourceData, meta 
 	bucketName := d.Get("bucket").(string)
 	det, err := ossService.DescribeOssBucket(bucketName)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", AlibabacloudStackOssGoSdk)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-	//quota := d.Get("quota").(int)
 
 	if det.BucketInfo.Name == bucketName {
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			
-			"Product":          "OneRouter",
-			"Department":       client.Department,
-			"ResourceGroup":    client.ResourceGroup,
-			"RegionId":         client.RegionId,
-			"Action":           "DoOpenApi",
-			"AccountInfo":      "123456",
-			"Version":          "2018-12-12",
-			"SignatureVersion": "1.0",
-			"OpenApiAction":    "SetBucketStorageCapacity",
-			"ProductName":      "oss",
-			"Params":           fmt.Sprintf("{\"%s\":\"%s\",\"%s\":%d}", "BucketName", bucketName, "StorageCapacity", -1),
-			"Content":          fmt.Sprintf("%s%d%s", "<BucketUserQos><StorageCapacity>", -1, "</StorageCapacity></BucketUserQos>"),
-		}
-		request.Method = "POST"        // Set request method
-		request.Product = "OneRouter"  // Specify product
-		request.Version = "2018-12-12" // Specify product version
-		request.ServiceCode = "OneRouter"
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		} // Set request scheme. Default: http
-		request.ApiName = "DoOpenApi"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
+		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+		request.QueryParams["AccountInfo"] = "123456"
+		request.QueryParams["SignatureVersion"] = "1.0"
+		request.QueryParams["OpenApiAction"] = "SetBucketStorageCapacity"
+		request.QueryParams["ProductName"] = "oss"
+		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":%d}", "BucketName", bucketName, "StorageCapacity", -1)
+		request.QueryParams["Content"] = fmt.Sprintf("%s%d%s", "<BucketUserQos><StorageCapacity>", -1, "</StorageCapacity></BucketUserQos>")
 
 		raw, err := client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
 			return ossClient.ProcessCommonRequest(request)
@@ -230,27 +170,33 @@ func resourceAlibabacloudStackOssBucketQuotaDelete(d *schema.ResourceData, meta 
 		log.Printf("Response of SetBucketStorageCapacity: %s", raw)
 		log.Printf("Bresponse ossbucket before error")
 		if err != nil {
-			if ossNotFoundError(err) {
-				return WrapErrorf(err, NotFoundMsg, AlibabacloudStackOssGoSdk)
+			errmsg := ""
+			if bresponse, ok := raw.(*responses.CommonResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			return WrapErrorf(err, DefaultErrorMsg, bucketName, "SetBucketStorageCapacity", AlibabacloudStackOssGoSdk)
+			if ossNotFoundError(err) {
+				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "SetBucketStorageCapacity", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
 		log.Printf("Bresponse ossbucket after error")
 		addDebug("SetBucketStorageCapacity", raw, requestInfo, request)
 		log.Printf("Bresponse ossbucket check")
-		bresponse, _ := raw.(*responses.CommonResponse)
+		bresponse, ok := raw.(*responses.CommonResponse)
 		log.Printf("Bresponse ossbucket %s", bresponse)
 
-		if bresponse.GetHttpStatus() != 200 {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oss_bucket", "SetBucketStorageCapacity", AlibabacloudStackOssGoSdk)
+		if !ok || bresponse.GetHttpStatus() != 200 {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", "SetBucketStorageCapacity", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
-		//logging:= make(map[string]interface{})
 		log.Printf("Enter for logging")
 	}
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", AlibabacloudStackOssGoSdk)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-	// Assign the bucket name as the resource ID
 	d.SetId(bucketName)
 
 	return resourceAlibabacloudStackOssBucketKmsRead(d, meta)

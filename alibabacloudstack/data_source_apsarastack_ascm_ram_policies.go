@@ -2,15 +2,15 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"log"
+	"regexp"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
-	"regexp"
-	"strings"
-	"time"
 )
 
 func dataSourceAlibabacloudStackAscmRamPolicies() *schema.Resource {
@@ -30,12 +30,6 @@ func dataSourceAlibabacloudStackAscmRamPolicies() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			//未消费参数
-// 			"names": {
-// 				Type:     schema.TypeList,
-// 				Computed: true,
-// 				Elem:     &schema.Schema{Type: schema.TypeString},
-// 			},
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -83,29 +77,10 @@ func dataSourceAlibabacloudStackAscmRamPolicies() *schema.Resource {
 
 func dataSourceAlibabacloudStackAscmRamPoliciesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := requests.NewCommonRequest()
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.ApiName = "ListRamPolicies"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Product":         "ascm",
-		"RegionId":        client.RegionId,
-		"Action":          "ListRamPolicies",
-		"Version":         "2019-05-10",
-		"pageSize":        "1000",
-		//"policyName":name,
-	}
+	request := client.NewCommonRequest("GET", "ascm", "2019-05-10", "ListRamPolicies", "")
+	request.QueryParams["pageSize"] = "1000"
+	//request.QueryParams["policyName"]= name
+
 	response := RamPolicies{}
 
 	for {
@@ -114,15 +89,18 @@ func dataSourceAlibabacloudStackAscmRamPoliciesRead(d *schema.ResourceData, meta
 		})
 		log.Printf(" response of raw ListRamPolicies : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_ram_policies", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policies", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Code == "200" || len(response.Data) < 1 {
 			break
@@ -154,7 +132,7 @@ func dataSourceAlibabacloudStackAscmRamPoliciesRead(d *schema.ResourceData, meta
 	}
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("policies", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

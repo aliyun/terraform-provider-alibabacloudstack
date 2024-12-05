@@ -1,0 +1,4 @@
+../../alibabacloudstack/resource_apsarastack_arms_prometheus_alert_rule.go prometheus_alert_rule_id
+../../alibabacloudstack/resource_apsarastack_ess_scalingconfiguration.go security_group_ids
+../../alibabacloudstack/resource_apsarastack_hbase_instance.go vpc_id
+../../alibabacloudstack/resource_apsarastack_slb_domain_extension.go id

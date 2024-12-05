@@ -6,13 +6,11 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -29,8 +27,8 @@ func resourceAlibabacloudStackOnsTopic() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
 			},
 			"topic": {
 				Type:         schema.TypeString,
@@ -62,52 +60,44 @@ func resourceAlibabacloudStackOnsTopicCreate(d *schema.ResourceData, meta interf
 	instanceId := d.Get("instance_id").(string)
 	remark := d.Get("remark").(string)
 	topic := d.Get("topic").(string)
-	request := requests.NewCommonRequest()
-	request.QueryParams = map[string]string{
-		"RegionId":        client.RegionId,
-		
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Product":         "Ons-inner",
-		"Action":          "ConsoleTopicCreate",
-		"Version":         "2018-02-05",
-		"ProductName":     "Ons-inner",
-		"PreventCache":    "",
-		"OrderType":       ordertype,
-		"Topic":           topic,
-		"Remark":          remark,
-		"OnsRegionId":     client.RegionId,
-		"InstanceId":      instanceId,
-	}
-	request.Method = "POST"
-	request.Product = "Ons-inner"
-	request.Version = "2018-02-05"
+
+	request := client.NewCommonRequest("POST", "Ons-inner", "2018-02-05", "ConsoleTopicCreate", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"ProductName": "Ons-inner",
+		"PreventCache": "",
+		"OrderType": ordertype,
+		"Topic": topic,
+		"Remark": remark,
+		"OnsRegionId": client.RegionId,
+		"InstanceId": instanceId,
+	})
 	request.ServiceCode = "Ons-inner"
 	request.Domain = client.Domain
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ConsoleTopicCreate"
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
+
 	response := TopicStruct{}
 
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_ons_topic", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ons_topic", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	bresponse, _ := raw.(*responses.CommonResponse)
-	if bresponse.IsSuccess() != true {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_ons_topic", "ConsoleTopicCreate", AlibabacloudStackSdkGoERROR)
+	if !bresponse.IsSuccess() {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(errors.New(bresponse.GetHttpContentString()), errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ons_topic", "ConsoleTopicCreate", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-	if response.Success != true {
-		return WrapErrorf(errors.New(response.Message), DefaultErrorMsg, "alibabacloudstack_ascm_ons_topic", "ConsoleTopicCreate", AlibabacloudStackSdkGoERROR)
+	if !response.Success {
+		return errmsgs.WrapErrorf(errors.New(response.Message), errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ons_topic", "ConsoleTopicCreate", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	d.SetId(topic + COLON_SEPARATED + instanceId)
 
@@ -122,11 +112,11 @@ func resourceAlibabacloudStackOnsTopicRead(d *schema.ResourceData, meta interfac
 	object, err := onsService.DescribeOnsTopic(d.Id())
 	if err != nil {
 		// Handle exceptions
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("instance_id", object.Data[0].NamespaceID)
@@ -150,46 +140,32 @@ func resourceAlibabacloudStackOnsTopicDelete(d *schema.ResourceData, meta interf
 	parts, err := ParseResourceId(d.Id(), 2)
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "IsTopicExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsTopicExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	addDebug("IsTopicExist", check, requestInfo, map[string]string{"Topic": d.Id()})
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 
-		request := requests.NewCommonRequest()
-		request.QueryParams = map[string]string{
-			"RegionId":        client.RegionId,
-			
-			"Department":      client.Department,
-			"ResourceGroup":   client.ResourceGroup,
-			"Product":         "Ons-inner",
-			"Action":          "ConsoleTopicDelete",
-			"Version":         "2018-02-05",
-			"ProductName":     "Ons-inner",
-			"PreventCache":    "",
-			"Topic":           parts[0],
-			"OnsRegionId":     client.RegionId,
-			"InstanceId":      parts[1],
-		}
-
-		request.Method = "POST"
-		request.Product = "Ons-inner"
-		request.Version = "2018-02-05"
+		request := client.NewCommonRequest("POST", "Ons-inner", "2018-02-05", "ConsoleTopicDelete", "")
+		mergeMaps(request.QueryParams, map[string]string{
+			"ProductName": "Ons-inner",
+			"PreventCache": "",
+			"Topic": parts[0],
+			"OnsRegionId": client.RegionId,
+			"InstanceId": parts[1],
+		})
 		request.ServiceCode = "Ons-inner"
 		request.Domain = client.Domain
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "ConsoleTopicDelete"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.RegionId = client.RegionId
 
-		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return resource.RetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ons_topic", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		check, err = onsService.DescribeOnsTopic(d.Id())
 
@@ -199,7 +175,7 @@ func resourceAlibabacloudStackOnsTopicDelete(d *schema.ResourceData, meta interf
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_ons_topic", "ConsoleTopicDelete", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ons_topic", "ConsoleTopicDelete", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil
 }

@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -73,14 +73,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionCreate(d *schema.Res
 	rdsService := RdsService{client}
 
 	request := rds.CreateAllocateReadWriteSplittingConnectionRequest()
-	request.RegionId = string(client.Region)
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = Trim(d.Get("instance_id").(string))
 	request.MaxDelayTime = strconv.Itoa(d.Get("max_delay_time").(int))
 
@@ -98,7 +91,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionCreate(d *schema.Res
 
 	if weight, ok := d.GetOk("weight"); ok && weight != nil && len(weight.(map[string]interface{})) > 0 {
 		if serial, err := json.Marshal(weight); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		} else {
 			request.Weight = string(serial)
 		}
@@ -109,15 +102,19 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionCreate(d *schema.Res
 			return rdsClient.AllocateReadWriteSplittingConnection(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, DBReadInstanceNotReadyStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.DBReadInstanceNotReadyStatus) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if response, ok := raw.(*rds.AllocateReadWriteSplittingConnectionResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	}); err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	d.SetId(request.DBInstanceId)
@@ -125,7 +122,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionCreate(d *schema.Res
 	// wait read write splitting connection ready after creation
 	// for it may take up to 10 hours to create a readonly instance
 	if err := rdsService.WaitForDBReadWriteSplitting(request.DBInstanceId, "", 60*60*10); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	return resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate(d, meta)
@@ -139,12 +136,12 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionRead(d *schema.Resou
 
 	err := rdsService.WaitForDBReadWriteSplitting(d.Id(), "", DefaultLongTimeout)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	object, err := rdsService.DescribeDBReadWriteSplittingConnection(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("instance_id", d.Id())
@@ -184,14 +181,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate(d *schema.Res
 	rdsService := RdsService{client}
 
 	request := rds.CreateModifyReadWriteSplittingConnectionRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
 
 	update := false
@@ -224,7 +214,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate(d *schema.Res
 	if update {
 		// wait instance running before modifying
 		if err := rdsService.WaitForDBInstance(request.DBInstanceId, Running, 60*60); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		if err := resource.Retry(30*time.Minute, func() *resource.RetryError {
@@ -232,20 +222,24 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate(d *schema.Res
 				return rdsClient.ModifyReadWriteSplittingConnection(request)
 			})
 			if err != nil {
-				if IsExpectedErrors(err, OperationDeniedDBStatus) || IsExpectedErrors(err, DBReadInstanceNotReadyStatus) {
+				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) || errmsgs.IsExpectedErrors(err, errmsgs.DBReadInstanceNotReadyStatus) {
 					return resource.RetryableError(err)
 				}
-				return resource.NonRetryableError(err)
+				errmsg := ""
+				if response, ok := raw.(*rds.ModifyReadWriteSplittingConnectionResponse); ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			return nil
 		}); err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return err
 		}
 
 		// wait instance running after modifying
 		if err := rdsService.WaitForDBInstance(request.DBInstanceId, Running, DefaultTimeoutMedium); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 
@@ -255,36 +249,33 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate(d *schema.Res
 func resourceAlibabacloudStackDBReadWriteSplittingConnectionDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
+
 	request := rds.CreateReleaseReadWriteSplittingConnectionRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
 
 	if err := resource.Retry(30*time.Minute, func() *resource.RetryError {
-
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.ReleaseReadWriteSplittingConnection(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
 				return resource.RetryableError(err)
 			}
-			if NotFoundError(err) || IsExpectedErrors(err, []string{"InvalidRwSplitNetType.NotFound"}) {
+			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidRwSplitNetType.NotFound"}) {
 				return nil
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if response, ok := raw.(*rds.ReleaseReadWriteSplittingConnectionResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	}); err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
-	return WrapError(rdsService.WaitForDBReadWriteSplitting(d.Id(), Deleted, DefaultLongTimeout))
+	return errmsgs.WrapError(rdsService.WaitForDBReadWriteSplitting(d.Id(), Deleted, DefaultLongTimeout))
 }

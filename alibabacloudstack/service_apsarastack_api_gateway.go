@@ -12,104 +12,86 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cloudapi"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type CloudApiService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
+func (s *CloudApiService) DoCloudapiDescribeapigroupRequest(id string) (*cloudapi.DescribeApiGroupResponse, error) {
+	return s.DescribeApiGatewayGroup(id)
+}
+
 func (s *CloudApiService) DescribeApiGatewayGroup(id string) (*cloudapi.DescribeApiGroupResponse, error) {
-	apiGroup := &cloudapi.DescribeApiGroupResponse{}
 	request := cloudapi.CreateDescribeApiGroupRequest()
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.GroupId = id
-	request.Headers = map[string]string{
-		"RegionId":              s.client.RegionId,
-		"x-acs-resourcegroupid": s.client.ResourceGroup,
-		"x-acs-regionid":        s.client.RegionId,
-		"x-acs-organizationid":  s.client.Department,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"RegionId":        s.client.RegionId,
-		"Action":          "DescribeApiGroup",
-		"Version":         "2016-07-14",
-	}
 
 	raw, err := s.client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 		return cloudApiClient.DescribeApiGroup(request)
 	})
+	bresponse, ok := raw.(*cloudapi.DescribeApiGroupResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"NotFoundApiGroup"}) {
-			return apiGroup, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return apiGroup, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApiGroup"}) {
+			return bresponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return bresponse, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	apiGroup, _ = raw.(*cloudapi.DescribeApiGroupResponse)
-	if apiGroup.GroupId == "" {
-		return apiGroup, WrapErrorf(Error(GetNotFoundMessage("ApiGatewayGroup", id)), NotFoundMsg, ProviderERROR)
+	if bresponse.GroupId == "" {
+		return bresponse, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ApiGatewayGroup", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
-	return apiGroup, nil
+	return bresponse, nil
 }
+
 func (s *CloudApiService) WaitForApiGatewayGroup(id string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
 		object, err := s.DescribeApiGatewayGroup(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if string(object.GroupId) == id && status != Deleted {
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, string(object.GroupId), id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, string(object.GroupId), id, errmsgs.ProviderERROR)
 		}
 	}
 }
 
 func (s *CloudApiService) DescribeApiGatewayApp(id string) (*cloudapi.DescribeAppResponse, error) {
-	app := &cloudapi.DescribeAppResponse{}
 	request := cloudapi.CreateDescribeAppRequest()
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.AppId = requests.Integer(id)
-	request.Headers = map[string]string{
-		"RegionId": s.client.RegionId,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"RegionId":        s.client.RegionId,
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Action":          "DescribeApp",
-		"Version":         "2016-07-14",
-	}
 
 	raw, err := s.client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 		return cloudApiClient.DescribeApp(request)
 	})
+	bresponse, ok := raw.(*cloudapi.DescribeAppResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"NotFoundApp"}) {
-			return app, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return app, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApp"}) {
+			return bresponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return bresponse, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	app, _ = raw.(*cloudapi.DescribeAppResponse)
-	return app, nil
+	return bresponse, nil
 }
 
 func (s *CloudApiService) WaitForApiGatewayApp(id string, status Status, timeout int) error {
@@ -117,63 +99,52 @@ func (s *CloudApiService) WaitForApiGatewayApp(id string, status Status, timeout
 	for {
 		object, err := s.DescribeApiGatewayApp(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if fmt.Sprint(object.AppId) == id && status != Deleted {
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, fmt.Sprint(object.AppId), id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, fmt.Sprint(object.AppId), id, errmsgs.ProviderERROR)
 		}
 	}
 }
 
 func (s *CloudApiService) DescribeApiGatewayApi(id string) (*cloudapi.DescribeApiResponse, error) {
-
-	api := &cloudapi.DescribeApiResponse{}
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return api, WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 	request := cloudapi.CreateDescribeApiRequest()
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.ApiId = parts[1]
 	request.GroupId = parts[0]
-	request.Headers = map[string]string{
-		"RegionId": s.client.RegionId,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"RegionId":        s.client.RegionId,
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Action":          "DescribeApi",
-		"Version":         "2016-07-14",
-	}
 
 	raw, err := s.client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 		return cloudApiClient.DescribeApi(request)
 	})
+	bresponse, ok := raw.(*cloudapi.DescribeApiResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi"}) {
-			return api, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return api, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi"}) {
+			return bresponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return bresponse, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	api, _ = raw.(*cloudapi.DescribeApiResponse)
-	if api.ApiId == "" {
-		return api, WrapErrorf(Error(GetNotFoundMessage("ApiGatewayApi", id)), NotFoundMsg, ProviderERROR)
+	if bresponse.ApiId == "" {
+		return bresponse, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ApiGatewayApi", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
-	return api, nil
+	return bresponse, nil
 }
 
 func (s *CloudApiService) WaitForApiGatewayApi(id string, status Status, timeout int) error {
@@ -181,19 +152,19 @@ func (s *CloudApiService) WaitForApiGatewayApi(id string, status Status, timeout
 	for {
 		object, err := s.DescribeApiGatewayApi(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		respId := fmt.Sprintf("%s%s%s", object.GroupId, COLON_SEPARATED, object.ApiId)
 		if respId == id && status != Deleted {
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, respId, id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, respId, id, errmsgs.ProviderERROR)
 		}
 	}
 }
@@ -201,27 +172,14 @@ func (s *CloudApiService) WaitForApiGatewayApi(id string, status Status, timeout
 func (s *CloudApiService) DescribeApiGatewayAppAttachment(id string) (*cloudapi.AuthorizedApp, error) {
 	app := &cloudapi.AuthorizedApp{}
 	request := cloudapi.CreateDescribeAuthorizedAppsRequest()
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	parts, err := ParseResourceId(id, 4)
 	if err != nil {
-		return app, WrapError(err)
+		return app, errmsgs.WrapError(err)
 	}
 	request.GroupId = parts[0]
 	request.ApiId = parts[1]
 	request.StageName = parts[3]
-	request.Headers = map[string]string{
-		"RegionId": s.client.RegionId,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"RegionId":        s.client.RegionId,
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Action":          "DescribeAuthorizedApps",
-		"Version":         "2016-07-14",
-	}
 	appId, _ := strconv.ParseInt(parts[2], 10, 64)
 
 	var allApps []cloudapi.AuthorizedApp
@@ -230,16 +188,19 @@ func (s *CloudApiService) DescribeApiGatewayAppAttachment(id string) (*cloudapi.
 		raw, err := s.client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 			return cloudApiClient.DescribeAuthorizedApps(request)
 		})
+		bresponse, ok := raw.(*cloudapi.DescribeAuthorizedAppsResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi"}) {
-				return app, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			return app, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			if errmsgs.IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi"}) {
+				return app, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+			return app, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*cloudapi.DescribeAuthorizedAppsResponse)
-
-		allApps = append(allApps, response.AuthorizedApps.AuthorizedApp...)
+		allApps = append(allApps, bresponse.AuthorizedApps.AuthorizedApp...)
 
 		if len(allApps) < PageSizeLarge {
 			break
@@ -247,7 +208,7 @@ func (s *CloudApiService) DescribeApiGatewayAppAttachment(id string) (*cloudapi.
 
 		page, err := getNextpageNumber(request.PageNumber)
 		if err != nil {
-			return app, WrapError(err)
+			return app, errmsgs.WrapError(err)
 		}
 		request.PageNumber = page
 	}
@@ -260,7 +221,7 @@ func (s *CloudApiService) DescribeApiGatewayAppAttachment(id string) (*cloudapi.
 	}
 
 	if len(filteredAppsTemp) < 1 {
-		return app, WrapErrorf(Error(GetNotFoundMessage("ApigatewayAppAttachment", id)), NotFoundMsg, ProviderERROR)
+		return app, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ApigatewayAppAttachment", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	app = &filteredAppsTemp[0]
 	return app, nil
@@ -269,23 +230,10 @@ func (s *CloudApiService) DescribeApiGatewayAppAttachment(id string) (*cloudapi.
 func (s *CloudApiService) DescribeApiGatewayVpcAccess(id string) (*cloudapi.VpcAccessAttribute, error) {
 	vpc := &cloudapi.VpcAccessAttribute{}
 	request := cloudapi.CreateDescribeVpcAccessesRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{
-		"RegionId": s.client.RegionId,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"RegionId":        s.client.RegionId,
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Action":          "DescribeVpcAccesses",
-		"Version":         "2016-07-14",
-	}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	parts, err := ParseResourceId(id, 4)
 	if err != nil {
-		return vpc, WrapError(err)
+		return vpc, errmsgs.WrapError(err)
 	}
 	var allVpcs []cloudapi.VpcAccessAttribute
 
@@ -293,20 +241,23 @@ func (s *CloudApiService) DescribeApiGatewayVpcAccess(id string) (*cloudapi.VpcA
 		raw, err := s.client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 			return cloudApiClient.DescribeVpcAccesses(request)
 		})
+		bresponse, ok := raw.(*cloudapi.DescribeVpcAccessesResponse)
 		if err != nil {
-			return vpc, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return vpc, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*cloudapi.DescribeVpcAccessesResponse)
-
-		allVpcs = append(allVpcs, response.VpcAccessAttributes.VpcAccessAttribute...)
+		allVpcs = append(allVpcs, bresponse.VpcAccessAttributes.VpcAccessAttribute...)
 
 		if len(allVpcs) < PageSizeLarge {
 			break
 		}
 
 		if page, err := getNextpageNumber(request.PageNumber); err != nil {
-			return vpc, WrapError(err)
+			return vpc, errmsgs.WrapError(err)
 		} else {
 			request.PageNumber = page
 		}
@@ -321,7 +272,7 @@ func (s *CloudApiService) DescribeApiGatewayVpcAccess(id string) (*cloudapi.VpcA
 	}
 
 	if len(filteredVpcsTemp) < 1 {
-		return vpc, WrapErrorf(Error(GetNotFoundMessage("ApiGatewayVpcAccess", id)), NotFoundMsg, ProviderERROR)
+		return vpc, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ApiGatewayVpcAccess", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	return &filteredVpcsTemp[0], nil
 }
@@ -330,98 +281,81 @@ func (s *CloudApiService) WaitForApiGatewayAppAttachment(id string, status Statu
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	parts, err := ParseResourceId(id, 4)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	appIds := parts[2]
 	for {
 		object, err := s.DescribeApiGatewayAppAttachment(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if strconv.FormatInt(object.AppId, 10) == appIds && status != Deleted {
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, strconv.FormatInt(object.AppId, 10), appIds, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, strconv.FormatInt(object.AppId, 10), appIds, errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
 }
 
 func (s *CloudApiService) DescribeDeployedApi(id string, stageName string) (*cloudapi.DescribeDeployedApiResponse, error) {
-	api := &cloudapi.DescribeDeployedApiResponse{}
 	request := cloudapi.CreateDescribeDeployedApiRequest()
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return api, WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 	request.ApiId = parts[1]
 	request.GroupId = parts[0]
 	request.StageName = stageName
-	request.Headers = map[string]string{
-		"RegionId": s.client.RegionId,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"RegionId":        s.client.RegionId,
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Action":          "DescribeDeployedApi",
-		"Version":         "2016-07-14",
-	}
 
 	raw, err := s.client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 		return cloudApiClient.DescribeDeployedApi(request)
 	})
+	bresponse, ok := raw.(*cloudapi.DescribeDeployedApiResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi", "NotFoundStage"}) {
-			return api, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return api, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi", "NotFoundStage"}) {
+			return bresponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return bresponse, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	api, _ = raw.(*cloudapi.DescribeDeployedApiResponse)
-	return api, nil
+	return bresponse, nil
 }
 
 func (s *CloudApiService) DeployedApi(id string, stageName string) (err error) {
 	request := cloudapi.CreateDeployApiRequest()
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	request.ApiId = parts[1]
 	request.GroupId = parts[0]
 	request.StageName = stageName
 	request.Description = DeployCommonDescription
-	request.Headers = map[string]string{
-		"RegionId": s.client.RegionId,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"RegionId":        s.client.RegionId,
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Action":          "DeployApi",
-		"Version":         "2016-07-14",
-	}
+
 	raw, err := s.client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 		return cloudApiClient.DeployApi(request)
 	})
+	bresponse, ok := raw.(*cloudapi.DeployApiResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	return
@@ -429,37 +363,28 @@ func (s *CloudApiService) DeployedApi(id string, stageName string) (err error) {
 
 func (s *CloudApiService) AbolishApi(id string, stageName string) (err error) {
 	request := cloudapi.CreateAbolishApiRequest()
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	request.ApiId = parts[1]
 	request.GroupId = parts[0]
 	request.StageName = stageName
-	request.Headers = map[string]string{
-		"RegionId": s.client.RegionId,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"RegionId":        s.client.RegionId,
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Action":          "AbolishApi",
-		"Version":         "2016-07-14",
-	}
 
 	raw, err := s.client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 		return cloudApiClient.AbolishApi(request)
 	})
-
+	bresponse, ok := raw.(*cloudapi.AbolishApiResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi", "NotFoundStage"}) {
-			return WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"NotFoundApiGroup", "NotFoundApi", "NotFoundStage"}) {
+			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	return
@@ -467,22 +392,10 @@ func (s *CloudApiService) AbolishApi(id string, stageName string) (err error) {
 
 func (s *CloudApiService) DescribeTags(resourceId string, resourceTags map[string]interface{}, resourceType TagResourceType) (tags []cloudapi.TagResource, err error) {
 	request := cloudapi.CreateListTagResourcesRequest()
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.ResourceType = string(resourceType)
 	request.ResourceId = &[]string{resourceId}
-	request.Headers = map[string]string{
-		"RegionId": s.client.RegionId,
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudAPI",
-		"RegionId":        s.client.RegionId,
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Action":          "ListTagResources",
-		"Version":         "2016-07-14",
-	}
+
 	if resourceTags != nil && len(resourceTags) > 0 {
 		var reqTags []cloudapi.ListTagResourcesTag
 		for key, value := range resourceTags {
@@ -493,17 +406,22 @@ func (s *CloudApiService) DescribeTags(resourceId string, resourceTags map[strin
 		}
 		request.Tag = &reqTags
 	}
+
 	raw, err := s.client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {
 		return cloudApiClient.ListTagResources(request)
 	})
+	bresponse, ok := raw.(*cloudapi.ListTagResourcesResponse)
 	if err != nil {
-		err = WrapErrorf(err, DefaultErrorMsg, resourceId, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resourceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*cloudapi.ListTagResourcesResponse)
-
-	return response.TagResources.TagResource, nil
+	tags = bresponse.TagResources.TagResource
+	return
 }
 
 func (s *CloudApiService) setInstanceTags(d *schema.ResourceData, resourceType TagResourceType) error {
@@ -518,60 +436,47 @@ func (s *CloudApiService) setInstanceTags(d *schema.ResourceData, resourceType T
 			tagKey = append(tagKey, v.Key)
 		}
 		request := cloudapi.CreateUntagResourcesRequest()
+		s.client.InitRpcRequest(*request.RpcRequest)
 		request.ResourceId = &[]string{d.Id()}
 		request.ResourceType = string(resourceType)
 		request.TagKey = &tagKey
-		request.RegionId = s.client.RegionId
-		request.Headers = map[string]string{
-			"RegionId": s.client.RegionId,
-		}
-		request.QueryParams = map[string]string{
-			
-			
-			"Product":         "CloudAPI",
-			"RegionId":        s.client.RegionId,
-			"Department":      s.client.Department,
-			"ResourceGroup":   s.client.ResourceGroup,
-			"Action":          "UntagResources",
-			"Version":         "2016-07-14",
-		}
+
 		raw, err := s.client.WithCloudApiClient(func(client *cloudapi.Client) (interface{}, error) {
 			return client.UntagResources(request)
 		})
+		bresponse, ok := raw.(*cloudapi.UntagResourcesResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
 	if len(create) > 0 {
 		request := cloudapi.CreateTagResourcesRequest()
+		s.client.InitRpcRequest(*request.RpcRequest)
 		request.ResourceId = &[]string{d.Id()}
 		request.Tag = &create
 		request.ResourceType = string(resourceType)
-		request.RegionId = s.client.RegionId
-		request.Headers = map[string]string{
-			"RegionId": s.client.RegionId,
-		}
-		request.QueryParams = map[string]string{
-			
-			
-			"Product":         "CloudAPI",
-			"RegionId":        s.client.RegionId,
-			"Department":      s.client.Department,
-			"ResourceGroup":   s.client.ResourceGroup,
-			"Action":          "TagResources",
-			"Version":         "2016-07-14",
-		}
+
 		raw, err := s.client.WithCloudApiClient(func(client *cloudapi.Client) (interface{}, error) {
 			return client.TagResources(request)
 		})
+		bresponse, ok := raw.(*cloudapi.TagResourcesResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
+	//d.SetPartial("tags")
 
 	return nil
 }

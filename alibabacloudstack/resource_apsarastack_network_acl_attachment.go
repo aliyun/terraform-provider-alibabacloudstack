@@ -5,6 +5,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -56,7 +57,7 @@ func resourceAlibabacloudStackNetworkAclAttachmentRead(d *schema.ResourceData, m
 	vpcService := VpcService{client}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	networkAclId := parts[0]
 	vpcResource := []vpc.Resource{}
@@ -70,11 +71,11 @@ func resourceAlibabacloudStackNetworkAclAttachmentRead(d *schema.ResourceData, m
 	}
 	err = vpcService.DescribeNetworkAclAttachment(networkAclId, vpcResource)
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("network_acl_id", networkAclId)
 	d.Set("resources", vpcResource)
@@ -87,7 +88,7 @@ func resourceAlibabacloudStackNetworkAclAttachmentUpdate(d *schema.ResourceData,
 
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	networkAclId := parts[0]
 	if d.HasChange("resources") {
@@ -99,9 +100,7 @@ func resourceAlibabacloudStackNetworkAclAttachmentUpdate(d *schema.ResourceData,
 
 		if len(remove) > 0 {
 			request := vpc.CreateUnassociateNetworkAclRequest()
-			request.Headers["x-ascm-product-name"] = "Vpc"
-			request.Headers["x-acs-organizationId"] = client.Department
-			request.RegionId = client.RegionId
+			client.InitRpcRequest(*request.RpcRequest)
 			request.NetworkAclId = networkAclId
 			request.ClientToken = buildClientToken(request.GetActionName())
 			var resources []vpc.UnassociateNetworkAclResource
@@ -128,20 +127,23 @@ func resourceAlibabacloudStackNetworkAclAttachmentUpdate(d *schema.ResourceData,
 			raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 				return vpcClient.UnassociateNetworkAcl(request)
 			})
+			bresponse, ok := raw.(*vpc.UnassociateNetworkAclResponse)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			if err := vpcService.WaitForNetworkAclAttachment(request.NetworkAclId, vpcResource, Available, Timeout5Minute); err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 
 		if len(create) > 0 {
 			request := vpc.CreateAssociateNetworkAclRequest()
-			request.Headers["x-ascm-product-name"] = "Vpc"
-			request.Headers["x-acs-organizationId"] = client.Department
-			request.RegionId = client.RegionId
+			client.InitRpcRequest(*request.RpcRequest)
 			request.NetworkAclId = networkAclId
 			request.ClientToken = buildClientToken(request.GetActionName())
 			var resources []vpc.AssociateNetworkAclResource
@@ -168,12 +170,17 @@ func resourceAlibabacloudStackNetworkAclAttachmentUpdate(d *schema.ResourceData,
 			raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 				return vpcClient.AssociateNetworkAcl(request)
 			})
+			bresponse, ok := raw.(*vpc.AssociateNetworkAclResponse)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			if err := vpcService.WaitForNetworkAclAttachment(request.NetworkAclId, vpcResource, Available, Timeout5Minute); err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		//d.SetPartial("resources")
@@ -188,7 +195,7 @@ func resourceAlibabacloudStackNetworkAclAttachmentDelete(d *schema.ResourceData,
 
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	networkAclId := parts[0]
 
@@ -196,9 +203,7 @@ func resourceAlibabacloudStackNetworkAclAttachmentDelete(d *schema.ResourceData,
 	object, err := vpcService.DescribeNetworkAcl(networkAclId)
 	vpcResource := []vpc.Resource{}
 	request := vpc.CreateUnassociateNetworkAclRequest()
-	request.Headers["x-ascm-product-name"] = "Vpc"
-	request.Headers["x-acs-organizationId"] = client.Department
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
 	request.NetworkAclId = networkAclId
 	request.ClientToken = buildClientToken(request.GetActionName())
 	res, _ := object["Resources"].(map[string]interface{})["Resource"].([]interface{})
@@ -218,17 +223,21 @@ func resourceAlibabacloudStackNetworkAclAttachmentDelete(d *schema.ResourceData,
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.UnassociateNetworkAcl(request)
 		})
+		bresponse, ok := raw.(*vpc.UnassociateNetworkAclResponse)
 		//Waiting for unassociate the network acl
 		if err != nil {
-			if IsExpectedErrors(err, []string{"TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict"}) {
 				return resource.RetryableError(err)
 			}
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return resource.NonRetryableError(err)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
-	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
-	}
 	return vpcService.WaitForNetworkAclAttachment(networkAclId, vpcResource, Deleted, Timeout5Minute)
 }

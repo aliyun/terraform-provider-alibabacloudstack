@@ -4,12 +4,9 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -62,58 +59,41 @@ func resourceAlibabacloudStackQuickBiUser() *schema.Resource {
 	}
 }
 
-func resourceAlibabacloudStackQuickBiUserCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackQuickBiUserCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "AddUser"
 	request := make(map[string]interface{})
-	conn, err := client.NewQuickbiClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	if v, ok := d.GetOk("account_id"); ok {
 		request["AccountId"] = v
 	}
-	request["Proudut"] = "quickbi-user"
 	request["AccountName"] = d.Get("account_name")
 	request["AdminUser"] = d.Get("admin_user")
 	request["AuthAdminUser"] = d.Get("auth_admin_user")
 	request["NickName"] = d.Get("nick_name")
 	request["UserType"] = convertQuickBiUserUserTypeRequest(d.Get("user_type").(string))
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2022-03-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		addDebug(action, response, request)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
 
-	addDebug(action, response, request)
+	response, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_quick_bi_user", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	responseResult := response["Result"].(map[string]interface{})
 	d.SetId(fmt.Sprint(responseResult["UserId"]))
 
 	return resourceAlibabacloudStackQuickBiUserRead(d, meta)
 }
+
 func resourceAlibabacloudStackQuickBiUserRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	quickbiPublicService := QuickbiPublicService{client}
 	object, err := quickbiPublicService.DescribeQuickBiUser(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_quick_bi_user quickbiPublicService.DescribeQuickBiUser Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("account_id", object["AccountId"])
@@ -124,9 +104,9 @@ func resourceAlibabacloudStackQuickBiUserRead(d *schema.ResourceData, meta inter
 	d.Set("user_type", convertQuickBiUserUserTypeResponse(formatInt(object["UserType"])))
 	return nil
 }
-func resourceAlibabacloudStackQuickBiUserUpdate(d *schema.ResourceData, meta interface{}) error {
+
+func resourceAlibabacloudStackQuickBiUserUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var response map[string]interface{}
 	update := false
 	request := map[string]interface{}{
 		"UserId": d.Id(),
@@ -147,62 +127,31 @@ func resourceAlibabacloudStackQuickBiUserUpdate(d *schema.ResourceData, meta int
 	request["UserType"] = convertQuickBiUserUserTypeRequest(d.Get("user_type").(string))
 	if update {
 		action := "UpdateUser"
-		conn, err := client.NewQuickbiClient()
+		_, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, request)
 		if err != nil {
-			return WrapError(err)
-		}
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2022-03-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-		addDebug(action, response, request)
-		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
 	}
 	return resourceAlibabacloudStackQuickBiUserRead(d, meta)
 }
-func resourceAlibabacloudStackQuickBiUserDelete(d *schema.ResourceData, meta interface{}) error {
+
+func resourceAlibabacloudStackQuickBiUserDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "DeleteUser"
-	var response map[string]interface{}
-	conn, err := client.NewQuickbiClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	request := map[string]interface{}{
 		"UserId": d.Id(),
 	}
 
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2022-03-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	_, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	return nil
 }
+
 func convertQuickBiUserUserTypeRequest(source interface{}) interface{} {
 	switch source {
 	case "Analyst":
@@ -214,6 +163,7 @@ func convertQuickBiUserUserTypeRequest(source interface{}) interface{} {
 	}
 	return 0
 }
+
 func convertQuickBiUserUserTypeResponse(source interface{}) interface{} {
 	switch source {
 	case 3:

@@ -2,10 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -46,6 +46,7 @@ func resourceAlibabacloudStackAscmRamRole() *schema.Resource {
 		},
 	}
 }
+
 func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *ecs.Client
@@ -56,41 +57,17 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 	organizationvisibility := d.Get("organization_visibility").(string)
 	check, err := ascmService.DescribeAscmRamRole(name)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "role alreadyExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "role alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if len(check.Data) == 0 {
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":               client.RegionId,
-			
-			"Department":             client.Department,
-			"ResourceGroup":          client.ResourceGroup,
-			"Product":                "ascm",
-			"Action":                 "CreateRole",
-			"Version":                "2019-05-10",
-			"ProductName":            "ascm",
-			"roleName":               name,
-			"description":            description,
-			"roleRange":              rolerange,
-			"roleType":               "ROLETYPE_RAM",
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateRole", "")
+		mergeMaps(request.QueryParams, map[string]string{
+			"roleName":            name,
+			"description":         description,
+			"roleRange":           rolerange,
+			"roleType":            "ROLETYPE_RAM",
 			"organizationVisibility": organizationvisibility,
-		}
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		request.Domain = client.Domain
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "CreateRole"
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId}
+		})
 
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
@@ -98,13 +75,30 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 		log.Printf(" rsponse of CreateRole : %s", raw)
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "CreateRole", raw)
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*responses.CommonResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", "CreateRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug("CreateRole", raw, requestInfo, request)
 
-		bresponse, _ := raw.(*responses.CommonResponse)
+		bresponse, ok := raw.(*responses.CommonResponse)
+		if !ok {
+			return fmt.Errorf("failed to cast response to CommonResponse")
+		}
 		if bresponse.GetHttpStatus() != 200 {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_ram_role", "CreateRole", AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*responses.CommonResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", "CreateRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug("CreateRole", raw, requestInfo, bresponse.GetHttpContentString())
 	}
@@ -112,7 +106,7 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 		check, err = ascmService.DescribeAscmRamRole(name)
 		if err != nil {
-			if IsThrottling(err) {
+			if errmsgs.IsThrottling(err) {
 				wait()
 				return resource.RetryableError(err)
 			}
@@ -121,11 +115,10 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "DescribeAscmRamRole", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DescribeAscmRamRole", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	d.SetId(name + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
 	return resourceAlibabacloudStackAscmRamRoleUpdate(d, meta)
-
 }
 
 func resourceAlibabacloudStackAscmRamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -139,11 +132,11 @@ func resourceAlibabacloudStackAscmRamRoleRead(d *schema.ResourceData, meta inter
 	object, err := ascmService.DescribeAscmRamRole(d.Id())
 	did := strings.Split(d.Id(), COLON_SEPARATED)
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if strings.Contains(object.Data[0].OrganizationVisibility, "organizationVisibility.") {
 		object.Data[0].OrganizationVisibility = strings.TrimPrefix(object.Data[0].OrganizationVisibility, "organizationVisibility.")
@@ -156,7 +149,6 @@ func resourceAlibabacloudStackAscmRamRoleRead(d *schema.ResourceData, meta inter
 }
 
 func resourceAlibabacloudStackAscmRamRoleDelete(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	var requestInfo *ecs.Client
@@ -164,44 +156,25 @@ func resourceAlibabacloudStackAscmRamRoleDelete(d *schema.ResourceData, meta int
 	did := strings.Split(d.Id(), COLON_SEPARATED)
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "IsRamRoleExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsRamRoleExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	addDebug("IsRamRoleExist", check, requestInfo, map[string]string{"roleName": did[0]})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRole", "")
+		request.QueryParams["roleName"] = did[0]
 
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":        client.RegionId,
-			
-			"Product":         "ascm",
-			"Action":          "RemoveRole",
-			"Version":         "2019-05-10",
-			"ProductName":     "ascm",
-			"roleName":        did[0],
-		}
-
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		request.Domain = client.Domain
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "RemoveRole"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.RegionId = client.RegionId
-
-		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
 		})
 		if err != nil {
-			return resource.RetryableError(err)
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*responses.CommonResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_role", "RemoveRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		_, err = ascmService.DescribeAscmRamRole(d.Id())
 
@@ -211,7 +184,7 @@ func resourceAlibabacloudStackAscmRamRoleDelete(d *schema.ResourceData, meta int
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "RemoveRole", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "RemoveRole", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil
 }

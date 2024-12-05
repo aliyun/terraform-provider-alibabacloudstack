@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -70,37 +69,10 @@ func resourceAlibabacloudStackEcsCommand() *schema.Resource {
 
 func resourceAlibabacloudStackEcsCommandCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	//var response map[string]interface{}
 	action := "CreateCommand"
 	response := &datahub.EcsCreate{}
 
-	//var err error
-	//config := client.Config
-	//
-	//log.Printf(" config.StsEndpoint : %s", config.StsEndpoint)
-	//log.Printf(" before get config.RamRoleArn : %s", config.RamRoleArn)
-	//
-	//if config.RamRoleArn == "" {
-	//	config.RamRoleArn = os.Getenv("ALIBABACLOUDSTACK_ASSUME_ROLE_ARN")
-	//}
-	//
-	//log.Printf(" after get config.RamRoleArn : %s", config.RamRoleArn)
-	//if config.RamRoleArn != "" {
-	//	log.Printf("begin getAssumeRoleAK ")
-	//	config.AccessKey, config.SecretKey, config.SecurityToken, err = getAssumeRoleAK(config)
-	//	if err != nil {
-	//		log.Printf(" rsponse of raw ListLoginPolicies : %s", err)
-	//		return err
-	//	}
-	//}
-
-	//request := make(map[string]interface{})
-	//conn, err := client.NewEcsClient()
-	//if err != nil {
-	//	return WrapError(err)
-	//}
 	CommandContent := d.Get("command_content").(string)
-
 	var Description string
 	if v, ok := d.GetOk("description"); ok {
 		Description = fmt.Sprint(v.(string))
@@ -119,32 +91,9 @@ func resourceAlibabacloudStackEcsCommandCreate(d *schema.ResourceData, meta inte
 	if v, ok := d.GetOk("working_dir"); ok {
 		WorkingDir = fmt.Sprint(v.(string))
 	}
-	request := requests.NewCommonRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Method = "POST"
-	request.Product = "Ecs"
-	request.Domain = client.Domain
-	request.Version = "2014-05-26"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = action
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "Ecs",
-		"RegionId":        client.RegionId,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          action,
-		"Version":         "2014-05-26",
+
+	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", "CreateCommand", "")
+	mergeMaps(request.QueryParams, map[string]string{
 		"Name":            name,
 		"CommandContent":  CommandContent,
 		"Description":     Description,
@@ -152,7 +101,7 @@ func resourceAlibabacloudStackEcsCommandCreate(d *schema.ResourceData, meta inte
 		"Timeout":         Timeout,
 		"WorkingDir":      WorkingDir,
 		"Type":            Type,
-	}
+	})
 
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
@@ -160,38 +109,41 @@ func resourceAlibabacloudStackEcsCommandCreate(d *schema.ResourceData, meta inte
 			return EcsClient.ProcessCommonRequest(request)
 		})
 		if err != nil {
-			if NeedRetry(err) {
+			if errmsgs.NeedRetry(err) {
 				wait()
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			bresponse, ok := raw.(*responses.CommonResponse)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ecs_command", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(action, raw, request)
 		bresponse := raw.(*responses.CommonResponse)
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), response)
-
-		//var response *ecs.CreateCommandResponse
-		//response, _ := raw.(*ecs.CreateCommandResponse)
 		d.SetId(fmt.Sprint(response.CommandId))
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ecs_command", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	return resourceAlibabacloudStackEcsCommandRead(d, meta)
 }
+
 func resourceAlibabacloudStackEcsCommandRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	object, err := ecsService.DescribeEcsCommand(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_ecs_command ecsService.DescribeEcsCommand Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("command_content", object.Commands.Command[0].CommandContent)
@@ -203,68 +155,39 @@ func resourceAlibabacloudStackEcsCommandRead(d *schema.ResourceData, meta interf
 	d.Set("working_dir", object.Commands.Command[0].WorkingDir)
 	return nil
 }
+
 func resourceAlibabacloudStackEcsCommandDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "DeleteCommand"
-	//var response map[string]interface{}
-	//conn, err := client.NewEcsClient()
-	//if err != nil {
-	//	return WrapError(err)
-	//}
-	//request := map[string]interface{}{
-	//	"CommandId": d.Id(),
-	//}
-	request := requests.NewCommonRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Method = "POST"
-	request.Product = "Ecs"
-	request.Domain = client.Domain
-	request.Version = "2014-05-26"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = action
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "Ecs",
-		"RegionId":        client.RegionId,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          action,
-		"Version":         "2014-05-26",
-		"CommandId":       d.Id(),
-	}
 
-	//request["RegionId"] = client.RegionId
+	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", "DeleteCommand", "")
+	request.QueryParams["CommandId"] = d.Id()
+
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		//response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		response, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
 			return EcsClient.ProcessCommonRequest(request)
 		})
 		if err != nil {
-			if NeedRetry(err) {
+			if errmsgs.NeedRetry(err) {
 				wait()
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			bresponse, ok := raw.(*responses.CommonResponse)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		addDebug(action, response, request)
+		addDebug(action, raw, request)
 		return nil
 	})
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidCmdId.NotFound", "InvalidRegionId.NotFound", "Operation.Forbidden"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidCmdId.NotFound", "InvalidRegionId.NotFound", "Operation.Forbidden"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	return nil
 }

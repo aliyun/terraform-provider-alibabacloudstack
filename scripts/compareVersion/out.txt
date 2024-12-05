@@ -1,0 +1,287 @@
+terraform 兼容情况:
+v1.0.11
+Previous HEAD position was 56bfbd4f60 version: Prepare for v1.9.3 release
+HEAD is now at a02b302f57 Release v1.0.11
+无风险RPC: GetSchema
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+
+v1.1.9
+Previous HEAD position was a02b302f57 Release v1.0.11
+HEAD is now at 8a78182f4c Release v1.1.9
+无风险RPC: GetSchema
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+
+v1.2.9
+Previous HEAD position was 8a78182f4c Release v1.1.9
+HEAD is now at 2bed243125 Release v1.2.9
+无风险RPC: GetSchema
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+
+v1.3.10
+Previous HEAD position was 2bed243125 Release v1.2.9
+HEAD is now at 2ec92b3942 Backport CRT release configuration from v1.4
+无风险RPC: GetSchema
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+
+v1.4.7
+Previous HEAD position was 2ec92b3942 Backport CRT release configuration from v1.4
+HEAD is now at 36f426c674 version: Prepare for 1.4.7 release
+无风险RPC: GetSchema
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+
+v1.5.7
+Previous HEAD position was 36f426c674 version: Prepare for 1.4.7 release
+HEAD is now at ee58ac1851 version: Prepare for 1.5.7 release
+无风险RPC: GetSchema
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+
+v1.6.6
+Previous HEAD position was ee58ac1851 version: Prepare for 1.5.7 release
+HEAD is now at eba3240dae version: Prepare for 1.6.6 release
+无风险RPC: GetMetadata
+无风险RPC: GetSchema
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+
+v1.7.5
+Previous HEAD position was eba3240dae version: Prepare for 1.6.6 release
+HEAD is now at 06a0a8c066 version: prepare for 1.7.5 release
+无风险RPC: GetMetadata
+无风险RPC: GetSchema
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+
+v1.8.5
+Previous HEAD position was 06a0a8c066 version: prepare for 1.7.5 release
+HEAD is now at 8f2d640b71 Update CHANGELOG.md
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+未实现RPC: MoveResourceState
+未实现RPC: GetFunctions
+未实现RPC: CallFunction
+
+风险RPC: GetMetadata
+缺失出餐:
+Functions
+
+风险RPC: GetSchema
+缺失出餐:
+Functions
+
+v1.9.3
+Previous HEAD position was 8f2d640b71 Update CHANGELOG.md
+HEAD is now at 56bfbd4f60 version: Prepare for v1.9.3 release
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: ApplyResourceChange
+无风险RPC: Stop
+
+未实现RPC: MoveResourceState
+未实现RPC: GetFunctions
+未实现RPC: CallFunction
+
+风险RPC: GetMetadata
+缺失出餐:
+Functions
+
+风险RPC: GetSchema
+缺失出餐:
+Functions
+
+风险RPC: Configure
+缺失入参:
+ClientCapabilities
+
+风险RPC: ReadResource
+缺失入参:
+ClientCapabilities
+缺失出餐:
+Deferred
+
+风险RPC: PlanResourceChange
+缺失入参:
+ClientCapabilities
+缺失出餐:
+Deferred
+
+风险RPC: ImportResourceState
+缺失入参:
+ClientCapabilities
+缺失出餐:
+Deferred
+
+风险RPC: ReadDataSource
+缺失入参:
+ClientCapabilities
+缺失出餐:
+Deferred
+
+opentofu 兼容情况:
+v1.6.3
+Previous HEAD position was b1834a2910 Added what's new docs for 1.8 (#1865)
+HEAD is now at 7df1a351d8 1.6.3-version-file (#1782)
+无风险RPC: GetSchema
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+
+v1.7.3
+Previous HEAD position was 7df1a351d8 1.6.3-version-file (#1782)
+HEAD is now at b5e7400cb9 Updating the VERSION file to 1.7.3. (#1783)
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+未实现RPC: MoveResourceState
+未实现RPC: GetFunctions
+未实现RPC: CallFunction
+
+风险RPC: GetMetadata
+缺失出餐:
+Functions
+
+风险RPC: GetSchema
+缺失出餐:
+Functions
+
+v1.8.0
+Previous HEAD position was b5e7400cb9 Updating the VERSION file to 1.7.3. (#1783)
+HEAD is now at b1834a2910 Added what's new docs for 1.8 (#1865)
+无风险RPC: PrepareProviderConfig
+无风险RPC: ValidateResourceTypeConfig
+无风险RPC: ValidateDataSourceConfig
+无风险RPC: UpgradeResourceState
+无风险RPC: Configure
+无风险RPC: ReadResource
+无风险RPC: PlanResourceChange
+无风险RPC: ApplyResourceChange
+无风险RPC: ImportResourceState
+无风险RPC: ReadDataSource
+无风险RPC: Stop
+
+未实现RPC: MoveResourceState
+未实现RPC: GetFunctions
+未实现RPC: CallFunction
+
+风险RPC: GetMetadata
+缺失出餐:
+Functions
+
+风险RPC: GetSchema
+缺失出餐:
+Functions

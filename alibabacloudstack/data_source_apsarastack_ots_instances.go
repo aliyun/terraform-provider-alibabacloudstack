@@ -4,6 +4,7 @@ import (
 	"regexp"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -102,7 +103,7 @@ func dataSourceAlibabacloudStackOtsInstancesRead(d *schema.ResourceData, meta in
 
 	allInstanceNames, err := otsService.ListOtsInstance(PageSizeLarge, 1)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ots_instances", "ListOtsInstance", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ots_instances", "ListOtsInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	idsMap := make(map[string]bool)
@@ -140,7 +141,7 @@ func dataSourceAlibabacloudStackOtsInstancesRead(d *schema.ResourceData, meta in
 	for _, instanceName := range filteredInstanceNames {
 		instanceInfo, err := otsService.DescribeOtsInstance(instanceName)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ots_instances", "DescribeOtsInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		allInstances = append(allInstances, instanceInfo)
 	}
@@ -190,15 +191,15 @@ func otsInstancesDecriptionAttributes(d *schema.ResourceData, instances []Instan
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("instances", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	// create a json file in current directory and write data source to it.

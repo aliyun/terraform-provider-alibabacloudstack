@@ -5,9 +5,8 @@ import (
 	"regexp"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -187,7 +186,6 @@ func dataSourceAlibabacloudStackOosTemplatesRead(d *schema.ResourceData, meta in
 	if v, ok := d.GetOkExists("has_trigger"); ok {
 		request["HasTrigger"] = v
 	}
-	request["RegionId"] = client.RegionId
 	if v, ok := d.GetOk("share_type"); ok {
 		request["ShareType"] = v
 	}
@@ -200,7 +198,7 @@ func dataSourceAlibabacloudStackOosTemplatesRead(d *schema.ResourceData, meta in
 	if v, ok := d.GetOk("tags"); ok {
 		respJson, err := convertMaptoJsonString(v.(map[string]interface{}))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request["Tags"] = respJson
 	}
@@ -219,7 +217,7 @@ func dataSourceAlibabacloudStackOosTemplatesRead(d *schema.ResourceData, meta in
 	if v, ok := d.GetOk("name_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		templateNameRegex = r
 	}
@@ -233,23 +231,16 @@ func dataSourceAlibabacloudStackOosTemplatesRead(d *schema.ResourceData, meta in
 			idsMap[vv.(string)] = vv.(string)
 		}
 	}
-	var response map[string]interface{}
-	conn, err := client.NewOosClient()
-	if err != nil {
-		return WrapError(err)
-	}
+
 	for {
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-06-01"), StringPointer("AK"), nil, request, &runtime)
+		response, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, request)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_oos_templates", action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
-		addDebug(action, response, request)
 
 		resp, err := jsonpath.Get("$.Templates", response)
 		if err != nil {
-			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Templates", response)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.Templates", response)
 		}
 		result, _ := resp.([]interface{})
 		for _, v := range result {
@@ -272,6 +263,7 @@ func dataSourceAlibabacloudStackOosTemplatesRead(d *schema.ResourceData, meta in
 			break
 		}
 	}
+
 	ids := make([]string, 0)
 	names := make([]interface{}, 0)
 	s := make([]map[string]interface{}, 0)
@@ -300,15 +292,15 @@ func dataSourceAlibabacloudStackOosTemplatesRead(d *schema.ResourceData, meta in
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("templates", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"strings"
 	"time"
+	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -10,6 +11,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/gpdb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -37,8 +39,18 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 			"instance_class": {
 				Type:     schema.TypeString,
 				Required: true,
+				Deprecated:   "Field 'instance_class' is deprecated and will be removed in a future release. Please use 'db_instance_class' instead.",
+			},
+			"db_instance_class": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"instance_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Deprecated:   "Field 'instance_id' is deprecated and will be removed in a future release. Please use 'instance_id' instead.",
+			},
+			"db_instance_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -53,6 +65,11 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 			"instance_network_type": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Deprecated:   "Field 'instance_network_type' is deprecated and will be removed in a future release. Please use 'network_type' instead.",
+			},
+			"network_type": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"instance_group_count": {
 				Type:     schema.TypeString,
@@ -64,8 +81,22 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Computed:     true,
+				Deprecated:   "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use 'payment_type' instead.",
+			},
+			"payment_type": {
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
+				Optional:     true,
+				ForceNew:     true,
+				Computed:     true,
 			},
 			"description": {
+				Type:         schema.TypeString,
+				ValidateFunc: validation.StringLenBetween(2, 256),
+				Optional:     true,
+				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use 'db_instance_description' instead.",
+			},
+			"db_instance_description": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 				Optional:     true,
@@ -87,8 +118,22 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 				ForceNew: true,
 				Optional: true,
 				Computed: true,
+				Deprecated:   "Field 'instance_inner_port' is deprecated and will be removed in a future release. Please use 'port' instead.",
+			},
+			"port": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+				Computed: true,
 			},
 			"instance_vpc_id": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+				Computed: true,
+				Deprecated:   "Field 'instance_vpc_id' is deprecated and will be removed in a future release. Please use 'vpc_id' instead.",
+			},
+			"vpc_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Optional: true,
@@ -125,34 +170,34 @@ func resourceAlibabacloudStackGpdbInstanceRead(d *schema.ResourceData, meta inte
 
 	instance, err := gpdbService.DescribeGpdbInstance(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
-	d.Set("instance_id", instance.DBInstanceId)
+	connectivity.SetResourceData(d, instance.DBInstanceId, "db_instance_id", "instance_id")
 	d.Set("region_id", instance.RegionId)
 	d.Set("availability_zone", instance.ZoneId)
 	d.Set("engine", instance.Engine)
 	d.Set("engine_version", instance.EngineVersion)
 	d.Set("status", instance.DBInstanceStatus)
-	d.Set("description", instance.DBInstanceDescription)
-	d.Set("instance_class", instance.DBInstanceClass)
+	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "description")
+	connectivity.SetResourceData(d, instance.DBInstanceClass, "db_instance_class", "instance_class")
+	connectivity.SetResourceData(d, instance.InstanceNetworkType, "network_type", "instance_network_type")
 	d.Set("instance_group_count", instance.DBInstanceGroupCount)
-	d.Set("instance_network_type", instance.InstanceNetworkType)
 	security_ips, err := gpdbService.DescribeGpdbSecurityIps(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("security_ip_list", security_ips)
 	//d.Set("create_time", instance.CreationTime)
-	d.Set("instance_charge_type", instance.PayType)
+	connectivity.SetResourceData(d, instance.PayType, "payment_type", "instance_charge_type")
 	d.Set("tags", gpdbService.tagsToMap(instance.Tags.Tag))
 	d.Set("instance_inner_connection", instance.ConnectionString)
-	d.Set("instance_inner_port", instance.Port)
-	d.Set("instance_vpc_id", instance.VpcId)
+	connectivity.SetResourceData(d, instance.Port, "port", "instance_inner_port")
+	connectivity.SetResourceData(d, instance.VpcId, "vpc_id", "instance_vpc_id")
 	return nil
 }
 
@@ -161,18 +206,9 @@ func resourceAlibabacloudStackGpdbInstanceCreate(d *schema.ResourceData, meta in
 	gpdbService := GpdbService{client}
 
 	request, err := buildGpdbCreateRequest(d, meta)
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	var raw interface{}
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -180,7 +216,7 @@ func resourceAlibabacloudStackGpdbInstanceCreate(d *schema.ResourceData, meta in
 			return client.CreateDBInstance(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{"SYSTEM.CONCURRENT_OPERATE"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"SYSTEM.CONCURRENT_OPERATE"}) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -188,16 +224,20 @@ func resourceAlibabacloudStackGpdbInstanceCreate(d *schema.ResourceData, meta in
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
-	response, _ := raw.(*gpdb.CreateDBInstanceResponse)
+	response, ok := raw.(*gpdb.CreateDBInstanceResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_gpdb_instance", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_gpdb_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	d.SetId(response.DBInstanceId)
 
 	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Minute, gpdbService.GpdbInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return resourceAlibabacloudStackGpdbInstanceUpdate(d, meta)
 }
@@ -210,21 +250,28 @@ func resourceAlibabacloudStackGpdbInstanceUpdate(d *schema.ResourceData, meta in
 	d.Partial(true)
 
 	// Update Instance Description
-	if d.HasChange("description") {
+	if d.HasChange("db_instance_description") || d.HasChange("description"){
 		request := gpdb.CreateModifyDBInstanceDescriptionRequest()
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
-		request.DBInstanceDescription = d.Get("description").(string)
+		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "description"); err == nil {
+			request.DBInstanceDescription = v.(string)
+		} else {
+			return err
+		}
 		raw, err := client.WithGpdbClient(func(gpdbClient *gpdb.Client) (interface{}, error) {
 			return gpdbClient.ModifyDBInstanceDescription(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			response, ok := raw.(*gpdb.ModifyDBInstanceDescriptionResponse)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("description")
+		//d.SetPartial("db_instance_description")
 	}
 
 	// Update Security Ips
@@ -236,13 +283,13 @@ func resourceAlibabacloudStackGpdbInstanceUpdate(d *schema.ResourceData, meta in
 			ipStr = LOCAL_HOST_IP
 		}
 		if err := gpdbService.ModifyGpdbSecurityIps(d.Id(), ipStr); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		//d.SetPartial("security_ip_list")
 	}
 
 	if err := gpdbService.setInstanceTags(d); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	// Finish Update
@@ -255,9 +302,7 @@ func resourceAlibabacloudStackGpdbInstanceDelete(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := gpdb.CreateDeleteDBInstanceRequest()
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
 
 	err := resource.Retry(10*5*time.Minute, func() *resource.RetryError {
@@ -266,19 +311,26 @@ func resourceAlibabacloudStackGpdbInstanceDelete(d *schema.ResourceData, meta in
 		})
 
 		if err != nil {
-			if IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus"}) {
 				return resource.RetryableError(err)
 			}
+			response, ok := raw.(*gpdb.DeleteDBInstanceResponse)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
 			return resource.NonRetryableError(err)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	// because DeleteDBInstance is called synchronously, there is no wait or describe here.
 	return nil
@@ -287,14 +339,24 @@ func resourceAlibabacloudStackGpdbInstanceDelete(d *schema.ResourceData, meta in
 func buildGpdbCreateRequest(d *schema.ResourceData, meta interface{}) (*gpdb.CreateDBInstanceRequest, error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := gpdb.CreateCreateDBInstanceRequest()
-	request.RegionId = string(client.Region)
-	request.Headers = map[string]string{"RegionId": client.RegionId, "ZoneId": Trim(d.Get("availability_zone").(string)), "EngineVersion": Trim(d.Get("engine").(string))}
-	request.QueryParams = map[string]string{ "Product": "gpdb", "ZoneId": Trim(d.Get("availability_zone").(string)), "EngineVersion": Trim(d.Get("engine").(string)), "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.ZoneId = Trim(d.Get("availability_zone").(string))
-	request.PayType = d.Get("instance_charge_type").(string)
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "payment_type", "instance_charge_type"); err == nil {
+		request.PayType = v.(string)
+	} else {
+		return nil, err
+	}
 	request.VSwitchId = Trim(d.Get("vswitch_id").(string))
-	request.DBInstanceDescription = d.Get("description").(string)
-	request.DBInstanceClass = Trim(d.Get("instance_class").(string))
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "description"); err == nil {
+		request.DBInstanceDescription = v.(string)
+	} else {
+		return nil, err
+	}
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_class", "instance_class"); err == nil {
+		request.DBInstanceClass = Trim(v.(string))
+	} else {
+		return nil, err
+	}
 	request.DBInstanceGroupCount = Trim(d.Get("instance_group_count").(string))
 	request.Engine = Trim(d.Get("engine").(string))
 	request.EngineVersion = Trim(d.Get("engine_version").(string))
@@ -306,7 +368,7 @@ func buildGpdbCreateRequest(d *schema.ResourceData, meta interface{}) (*gpdb.Cre
 		vpcService := VpcService{client}
 		object, err := vpcService.DescribeVSwitch(request.VSwitchId)
 		if err != nil {
-			return nil, WrapError(err)
+			return nil, errmsgs.WrapError(err)
 		}
 
 		if request.ZoneId == "" {
@@ -314,10 +376,10 @@ func buildGpdbCreateRequest(d *schema.ResourceData, meta interface{}) (*gpdb.Cre
 		} else if strings.Contains(request.ZoneId, MULTI_IZ_SYMBOL) {
 			zoneStr := strings.Split(strings.SplitAfter(request.ZoneId, "(")[1], ")")[0]
 			if !strings.Contains(zoneStr, string([]byte(object.ZoneId)[len(object.ZoneId)-1])) {
-				return nil, WrapError(Error("The specified vswitch %s isn't in the multi zone %s.", object.VSwitchId, request.ZoneId))
+				return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the multi zone %s.", object.VSwitchId, request.ZoneId))
 			}
 		} else if request.ZoneId != object.ZoneId {
-			return nil, WrapError(Error("The specified vswitch %s isn't in the zone %s.", object.VSwitchId, request.ZoneId))
+			return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the zone %s.", object.VSwitchId, request.ZoneId))
 		}
 
 		request.VPCId = object.VpcId

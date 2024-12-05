@@ -3,16 +3,14 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strconv"
-	"strings"
-
 	"time"
 )
 
@@ -66,53 +64,34 @@ func resourceAlibabacloudStackAscmPasswordPolicy() *schema.Resource {
 
 func resourceAlibabacloudStackAscmPasswordPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *ecs.Client
 	value123 := strconv.Itoa(d.Get("minimum_password_length").(int))
 
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = client.Domain
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "SetPasswordPolicy"
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		"RegionId":              client.RegionId,
-		
-		"Department":            client.Department,
-		"ResourceGroup":         client.ResourceGroup,
-		"Product":               "ascm",
-		"Action":                "SetPasswordPolicy",
-		"Version":               "2019-05-10",
-		"ProductName":           "ascm",
-		"minimumPasswordLength": value123,
-	}
+	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "SetPasswordPolicy", "")
+	request.QueryParams["minimumPasswordLength"] = value123
+
 	var response = PasswordPolicy{}
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
 
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_password_policy", "", raw)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_password_policy", "", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	addDebug("SetPasswordPolicy", raw, requestInfo, request)
-
-	bresponse, _ := raw.(*responses.CommonResponse)
+	addDebug("SetPasswordPolicy", raw, request)
 	if bresponse.GetHttpStatus() != 200 {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_password_policy", "", AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if bresponse != nil {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_password_policy", "", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("SetPasswordPolicy", raw, requestInfo, bresponse.GetHttpContentString())
+	addDebug("SetPasswordPolicy", raw, request, bresponse.GetHttpContentString())
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 
 	d.SetId(fmt.Sprint(response.Data.ID))
@@ -126,11 +105,11 @@ func resourceAlibabacloudStackAscmPasswordPolicyRead(d *schema.ResourceData, met
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmPasswordPolicy(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("hard_expiry", object.Data.HardExpiry)
 	d.Set("require_numbers", object.Data.RequireNumbers)
@@ -152,47 +131,27 @@ func resourceAlibabacloudStackAscmPasswordPolicyUpdate(d *schema.ResourceData, m
 func resourceAlibabacloudStackAscmPasswordPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
-	var requestInfo *ecs.Client
 	check, err := ascmService.DescribeAscmPasswordPolicy(d.Id())
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "IsResourceGroupExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsResourceGroupExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	addDebug("IsResourceGroupExist", check, requestInfo, map[string]string{"resourceGroupName": d.Id()})
+	addDebug("IsResourceGroupExist", check, map[string]string{"resourceGroupName": d.Id()})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":        client.RegionId,
-			
-			"Product":         "ascm",
-			"Action":          "ResetPasswordPolicy",
-			"Version":         "2019-05-10",
-			"ProductName":     "ascm",
-			"id":              d.Id(),
-		}
+		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ResetPasswordPolicy", "")
+		request.QueryParams["id"] = d.Id()
 
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "ResetPasswordPolicy"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.RegionId = client.RegionId
-
-		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return resource.RetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "ResetPasswordPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		_, err = ascmService.DescribeAscmPasswordPolicy(d.Id())
 
@@ -202,7 +161,7 @@ func resourceAlibabacloudStackAscmPasswordPolicyDelete(d *schema.ResourceData, m
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "ResetPasswordPolicy", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "ResetPasswordPolicy", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil
 }

@@ -2,10 +2,10 @@ package alibabacloudstack
 
 import (
 	"sort"
-	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -65,23 +65,14 @@ func dataSourceAlibabacloudStackInstanceTypeFamiliesRead(d *schema.ResourceData,
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	request := ecs.CreateDescribeInstanceTypeFamiliesRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-	request.QueryParams["Department"] = client.Department
-	request.QueryParams["ResourceGroup"] = client.ResourceGroup
+	client.InitRpcRequest(*request.RpcRequest)
 	if v, ok := d.GetOk("generation"); ok {
 		request.Generation = v.(string)
 	}
 
 	zones, err := ecsService.DescribeZones(d)
 	if err != nil {
-		return WrapErrorf(err, "DescribeZones", "alibabacloudstack_instance_type_families", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultDebugMsg, "alibabacloudstack_instance_type_families", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	families := make(map[string]map[string]string)
 	for _, zone := range zones {
@@ -97,12 +88,16 @@ func dataSourceAlibabacloudStackInstanceTypeFamiliesRead(d *schema.ResourceData,
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.DescribeInstanceTypeFamilies(request)
 	})
+	response, ok := raw.(*ecs.DescribeInstanceTypeFamiliesResponse)
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_instance_type_families", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_instance_type_families", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	var instanceTypeFamilies []ecs.InstanceTypeFamily
-	response, _ := raw.(*ecs.DescribeInstanceTypeFamiliesResponse)
 	if response != nil {
 		for _, family := range response.InstanceTypeFamilies.InstanceTypeFamily {
 			if _, ok := families[family.InstanceTypeFamilyId]; !ok {
@@ -136,10 +131,10 @@ func instanceTypeFamiliesDescriptionAttributes(d *schema.ResourceData, typeFamil
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("families", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	// create a json file in current directory and write data source to it.

@@ -51,9 +51,6 @@ func TestAccAlibabacloudStackDBBackupPolicy_pgdb(t *testing.T) {
 
 func resourceDBBackupPolicyPostgreSQLConfigDependence(name string) string {
 	return fmt.Sprintf(`
-provider "alibabacloudstack" {
-	assume_role {}
-}
 variable "name" {
   default = "%s"
 }

@@ -1,14 +1,13 @@
 package alibabacloudstack
 
 import (
-	"strconv"
-	"strings"
-
 	"regexp"
+	"strconv"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -191,24 +190,21 @@ func dataSourceAlibabacloudStackSlbListenersRead(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := slb.CreateDescribeLoadBalancerAttributeRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = d.Get("load_balancer_id").(string)
 
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeLoadBalancerAttribute(request)
 	})
+	response, ok := raw.(*slb.DescribeLoadBalancerAttributeResponse)
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_slb_listeners", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listeners", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*slb.DescribeLoadBalancerAttributeResponse)
 	var filteredListenersTemp []slb.ListenerPortAndProtocol
 	port := -1
 	if v, ok := d.GetOk("frontend_port"); ok && v.(int) != 0 {
@@ -260,23 +256,21 @@ func slbListenersDescriptionAttributes(d *schema.ResourceData, listeners []slb.L
 		switch Protocol(listener.ListenerProtocol) {
 		case Http:
 			request := slb.CreateDescribeLoadBalancerHTTPListenerAttributeRequest()
-			request.Headers = map[string]string{"RegionId": client.RegionId}
-			if strings.ToLower(client.Config.Protocol) == "https" {
-				request.Scheme = "https"
-			} else {
-				request.Scheme = "http"
-			}
-			request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			client.InitRpcRequest(*request.RpcRequest)
 			request.LoadBalancerId = loadBalancerId
 			request.ListenerPort = requests.NewInteger(listener.ListenerPort)
 			raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 				return slbClient.DescribeLoadBalancerHTTPListenerAttribute(request)
 			})
+			response, ok := raw.(*slb.DescribeLoadBalancerHTTPListenerAttributeResponse)
 			if err != nil {
-				return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_slb_listeners", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listeners", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-			response, _ := raw.(*slb.DescribeLoadBalancerHTTPListenerAttributeResponse)
 			mapping["backend_port"] = response.BackendServerPort
 			mapping["status"] = response.Status
 			mapping["bandwidth"] = response.Bandwidth
@@ -302,23 +296,21 @@ func slbListenersDescriptionAttributes(d *schema.ResourceData, listeners []slb.L
 			mapping["x_forwarded_for_slb_proto"] = response.XForwardedForProto
 		case Https:
 			request := slb.CreateDescribeLoadBalancerHTTPSListenerAttributeRequest()
-			request.Headers = map[string]string{"RegionId": client.RegionId}
-			request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			client.InitRpcRequest(*request.RpcRequest)
 			request.LoadBalancerId = loadBalancerId
-			if strings.ToLower(client.Config.Protocol) == "https" {
-				request.Scheme = "https"
-			} else {
-				request.Scheme = "http"
-			}
 			request.ListenerPort = requests.NewInteger(listener.ListenerPort)
 			raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 				return slbClient.DescribeLoadBalancerHTTPSListenerAttribute(request)
 			})
+			response, ok := raw.(*slb.DescribeLoadBalancerHTTPSListenerAttributeResponse)
 			if err != nil {
-				return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_slb_listeners", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listeners", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-			response, _ := raw.(*slb.DescribeLoadBalancerHTTPSListenerAttributeResponse)
 			mapping["backend_port"] = response.BackendServerPort
 			mapping["status"] = response.Status
 			mapping["security_status"] = response.SecurityStatus
@@ -346,23 +338,21 @@ func slbListenersDescriptionAttributes(d *schema.ResourceData, listeners []slb.L
 			mapping["x_forwarded_for_slb_proto"] = response.XForwardedForProto
 		case Tcp:
 			request := slb.CreateDescribeLoadBalancerTCPListenerAttributeRequest()
-			request.Headers = map[string]string{"RegionId": client.RegionId}
-			if strings.ToLower(client.Config.Protocol) == "https" {
-				request.Scheme = "https"
-			} else {
-				request.Scheme = "http"
-			}
-			request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			client.InitRpcRequest(*request.RpcRequest)
 			request.LoadBalancerId = loadBalancerId
 			request.ListenerPort = requests.NewInteger(listener.ListenerPort)
 			raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 				return slbClient.DescribeLoadBalancerTCPListenerAttribute(request)
 			})
+			response, ok := raw.(*slb.DescribeLoadBalancerTCPListenerAttributeResponse)
 			if err != nil {
-				return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_slb_listeners", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listeners", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-			response, _ := raw.(*slb.DescribeLoadBalancerTCPListenerAttributeResponse)
 			mapping["backend_port"] = response.BackendServerPort
 			mapping["status"] = response.Status
 			mapping["bandwidth"] = response.Bandwidth
@@ -383,23 +373,21 @@ func slbListenersDescriptionAttributes(d *schema.ResourceData, listeners []slb.L
 			mapping["health_check_http_code"] = response.HealthCheckHttpCode
 		case Udp:
 			request := slb.CreateDescribeLoadBalancerUDPListenerAttributeRequest()
-			request.Headers = map[string]string{"RegionId": client.RegionId}
-			if strings.ToLower(client.Config.Protocol) == "https" {
-				request.Scheme = "https"
-			} else {
-				request.Scheme = "http"
-			}
-			request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			client.InitRpcRequest(*request.RpcRequest)
 			request.LoadBalancerId = loadBalancerId
 			request.ListenerPort = requests.NewInteger(listener.ListenerPort)
 			raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 				return slbClient.DescribeLoadBalancerUDPListenerAttribute(request)
 			})
+			response, ok := raw.(*slb.DescribeLoadBalancerUDPListenerAttributeResponse)
 			if err != nil {
-				return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_slb_listeners", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_listeners", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-			response, _ := raw.(*slb.DescribeLoadBalancerUDPListenerAttributeResponse)
 			mapping["backend_port"] = response.BackendServerPort
 			mapping["status"] = response.Status
 			mapping["bandwidth"] = response.Bandwidth
@@ -421,7 +409,7 @@ func slbListenersDescriptionAttributes(d *schema.ResourceData, listeners []slb.L
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("slb_listeners", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	// create a json file in current directory and write data source to it.

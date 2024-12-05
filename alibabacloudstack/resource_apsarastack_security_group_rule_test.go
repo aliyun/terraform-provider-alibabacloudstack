@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -22,7 +23,7 @@ func TestAccAlibabacloudStackSecurityGroupRuleBasic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithRegions(t, true, connectivity.EcsClassicSupportedRegions)
+
 		},
 
 		// module name
@@ -94,7 +95,7 @@ func TestAccAlibabacloudStackSecurityGroupEgressRule(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithRegions(t, true, connectivity.EcsClassicSupportedRegions)
+
 		},
 
 		// module name
@@ -136,7 +137,7 @@ func TestAccAlibabacloudStackSecurityGroupRuleMulti(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithRegions(t, true, connectivity.EcsClassicSupportedRegions)
+
 		},
 
 		// module name
@@ -332,8 +333,8 @@ func testAccCheckSecurityGroupRuleDestroy(s *terraform.State) error {
 		_, err := ecsService.DescribeSecurityGroupRule(rs.Primary.ID)
 
 		// Verify the error is what we want
-		if err != nil && !NotFoundError(err) {
-			return WrapError(err)
+		if err != nil && !errmsgs.NotFoundError(err) {
+			return errmsgs.WrapError(err)
 		}
 	}
 

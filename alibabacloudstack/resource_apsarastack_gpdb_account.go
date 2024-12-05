@@ -8,10 +8,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -60,63 +58,45 @@ func resourceAlibabacloudStackGpdbAccount() *schema.Resource {
 
 func resourceAlibabacloudStackGpdbAccountCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var response map[string]interface{}
 	action := "CreateAccount"
 	request := make(map[string]interface{})
-	conn, err := client.NewGpdbClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	if v, ok := d.GetOk("account_description"); ok {
 		request["AccountDescription"] = v
 	}
-	request["Product"] = "gpdb"
-	request["OrganizationId"] = client.Department
-	request["RegionId"] = client.RegionId
 	request["AccountName"] = d.Get("account_name")
 	request["DBInstanceId"] = d.Get("db_instance_id")
 	request["AccountPassword"] = d.Get("account_password")
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-05-03"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+
+	_, err := client.DoTeaRequest("POST", "gpdb", "2016-05-03", action, "", nil, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_gpdb_account", action, AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_gpdb_account", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	d.SetId(fmt.Sprint(request["DBInstanceId"], ":", request["AccountName"]))
 	gpdbService := GpdbService{client}
 	stateConf := BuildStateConf([]string{}, []string{"1"}, d.Timeout(schema.TimeoutCreate), 60*time.Second, gpdbService.GpdbAccountStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return resourceAlibabacloudStackGpdbAccountRead(d, meta)
 }
+
 func resourceAlibabacloudStackGpdbAccountRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	gpdbService := GpdbService{client}
 	object, err := gpdbService.DescribeGpdbAccount(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_gpdb_account gpdbService.DescribeGpdbAccount Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("account_name", parts[1])
 	d.Set("db_instance_id", parts[0])
@@ -124,16 +104,16 @@ func resourceAlibabacloudStackGpdbAccountRead(d *schema.ResourceData, meta inter
 	d.Set("status", convertGpdbAccountStatusResponse(object["AccountStatus"]))
 	return nil
 }
+
 func resourceAlibabacloudStackGpdbAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var response map[string]interface{}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	request := map[string]interface{}{
-		"AccountName":  parts[1],
+		"AccountName": parts[1],
 		"DBInstanceId": parts[0],
 	}
 
@@ -147,38 +127,20 @@ func resourceAlibabacloudStackGpdbAccountUpdate(d *schema.ResourceData, meta int
 
 	if update {
 		action := "ResetAccountPassword"
-		request["Product"] = "gpdb"
-		request["OrganizationId"] = client.Department
-		request["RegionId"] = client.RegionId
-		conn, err := client.NewGpdbClient()
+		_, err = client.DoTeaRequest("POST", "gpdb", "2016-05-03", action, "", nil, request)
 		if err != nil {
-			return WrapError(err)
-		}
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-05-03"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-		addDebug(action, response, request)
-		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
 
 	return resourceAlibabacloudStackGpdbAccountRead(d, meta)
 }
+
 func resourceAlibabacloudStackGpdbAccountDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[WARN] Cannot destroy resourcealibabacloudstackGpdbAccount. Terraform will remove this resource from the state file, however resources may remain.")
 	return nil
 }
+
 func convertGpdbAccountStatusResponse(source interface{}) interface{} {
 	switch source {
 	case "Creating":

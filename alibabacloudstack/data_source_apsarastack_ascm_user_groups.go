@@ -3,12 +3,10 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"strings"
-
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"regexp"
 )
@@ -75,7 +73,6 @@ func dataSourceAlibabacloudStackAscmUserGroups() *schema.Resource {
 							Computed: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
-
 						"role_ids": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -90,56 +87,34 @@ func dataSourceAlibabacloudStackAscmUserGroups() *schema.Resource {
 
 func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "GET"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
+	request := client.NewCommonRequest("GET", "ascm", "2019-05-10", "ListUserGroups", "")
 	userGroupName := d.Get("name_regex").(string)
+	request.QueryParams["userGroupName"] = userGroupName
 
-	request.RegionId = client.RegionId
-	request.ApiName = "ListUserGroups"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
 	response := UserGroup{}
-	request.QueryParams = map[string]string{
-		
-		
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Product":         "ascm",
-		"RegionId":        client.RegionId,
-		"Action":          "ListUserGroups",
-		"Version":         "2019-05-10",
-		"userGroupName":   userGroupName,
-	}
-
 	for {
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_users", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_users", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		addDebug("ListUserGroups", raw, request)
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Code == "200" || len(response.Data) < 1 {
 			break
 		}
-
 	}
 
 	var reg *regexp.Regexp
@@ -164,13 +139,12 @@ func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta 
 		}
 
 		mapping := map[string]interface{}{
-			"id":              fmt.Sprint(group.Id),
-			"group_name":      group.GroupName,
+			"id":             fmt.Sprint(group.Id),
+			"group_name":     group.GroupName,
 			"organization_id": group.Organization.Id,
-			"user_group_id":   group.AugId,
-
-			"role_ids": roleids,
-			"users":    users,
+			"user_group_id":  group.AugId,
+			"role_ids":       roleids,
+			"users":          users,
 		}
 
 		ids = append(ids, fmt.Sprint(group.Id))
@@ -179,10 +153,10 @@ func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta 
 	d.SetId(dataResourceIdHash(ids))
 
 	if err := d.Set("groups", groups); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("role_ids", roleids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), groups)

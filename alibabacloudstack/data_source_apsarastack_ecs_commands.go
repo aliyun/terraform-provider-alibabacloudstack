@@ -5,9 +5,8 @@ import (
 	"regexp"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -120,12 +119,10 @@ func dataSourceAlibabacloudStackEcsCommands() *schema.Resource {
 func dataSourceAlibabacloudStackEcsCommandsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	action := "DescribeCommands"
 	request := make(map[string]interface{})
-	request["Product"] = "Ecs"
-	request["OrganizationId"] = client.Department
-	request["RegionId"] = client.RegionId
-	request["Action"] = action
+	request["PageSize"] = PageSizeLarge
+	request["PageNumber"] = 1
+
 	if v, ok := d.GetOk("content_encoding"); ok {
 		request["ContentEncoding"] = v
 	}
@@ -141,14 +138,13 @@ func dataSourceAlibabacloudStackEcsCommandsRead(d *schema.ResourceData, meta int
 	if v, ok := d.GetOk("type"); ok {
 		request["Type"] = v
 	}
-	request["PageSize"] = PageSizeLarge
-	request["PageNumber"] = 1
+
 	var objects []map[string]interface{}
 	var nameRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		nameRegex = r
 	}
@@ -162,23 +158,17 @@ func dataSourceAlibabacloudStackEcsCommandsRead(d *schema.ResourceData, meta int
 			idsMap[vv.(string)] = vv.(string)
 		}
 	}
-	var response map[string]interface{}
-	conn, err := client.NewEcsClient()
-	if err != nil {
-		return WrapError(err)
-	}
+
 	for {
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2014-05-26"), StringPointer("AK"), nil, request, &runtime)
+		response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", "DescribeCommands", "", nil, request)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ecs_commands", action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
-		addDebug(action, response, request)
+		addDebug("DescribeCommands", response, request)
 
 		resp, err := jsonpath.Get("$.Commands.Command", response)
 		if err != nil {
-			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Commands.Command", response)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "DescribeCommands", "$.Commands.Command", response)
 		}
 		result, _ := resp.([]interface{})
 		for _, v := range result {
@@ -200,21 +190,22 @@ func dataSourceAlibabacloudStackEcsCommandsRead(d *schema.ResourceData, meta int
 		}
 		request["PageNumber"] = request["PageNumber"].(int) + 1
 	}
+
 	ids := make([]string, 0)
 	names := make([]interface{}, 0)
 	s := make([]map[string]interface{}, 0)
 	for _, object := range objects {
 		mapping := map[string]interface{}{
-			"command_content":  object["CommandContent"],
-			"id":               fmt.Sprint(object["CommandId"]),
-			"command_id":       fmt.Sprint(object["CommandId"]),
-			"description":      object["Description"],
+			"command_content": object["CommandContent"],
+			"id":              fmt.Sprint(object["CommandId"]),
+			"command_id":      fmt.Sprint(object["CommandId"]),
+			"description":     object["Description"],
 			"enable_parameter": object["EnableParameter"],
-			"name":             object["Name"],
-			"parameter_names":  object["ParameterNames"].(map[string]interface{})["ParameterName"],
-			"timeout":          object["Timeout"],
-			"type":             object["Type"],
-			"working_dir":      object["WorkingDir"],
+			"name":            object["Name"],
+			"parameter_names": object["ParameterNames"].(map[string]interface{})["ParameterName"],
+			"timeout":         object["Timeout"],
+			"type":            object["Type"],
+			"working_dir":     object["WorkingDir"],
 		}
 		ids = append(ids, fmt.Sprint(object["CommandId"]))
 		names = append(names, object["Name"])
@@ -223,15 +214,15 @@ func dataSourceAlibabacloudStackEcsCommandsRead(d *schema.ResourceData, meta int
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("commands", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

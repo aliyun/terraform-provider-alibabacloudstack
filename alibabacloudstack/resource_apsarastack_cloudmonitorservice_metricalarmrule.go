@@ -1,0 +1,561 @@
+package alibabacloudstack
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"strings"
+	"time"
+	"reflect"
+
+	"strconv"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+)
+
+func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceAlibabacloudStackCmsAlarmCreate,
+		Read:   resourceAlibabacloudStackCmsAlarmRead,
+		Update: resourceAlibabacloudStackCmsAlarmUpdate,
+		Delete: resourceAlibabacloudStackCmsAlarmDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+		Schema: map[string]*schema.Schema{
+			"rule_name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+				Deprecated: "Field 'name' is deprecated and will be removed in a future release. Please use 'rule_name' instead.",
+			},
+			"namespace": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"project": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				Deprecated: "Field 'project' is deprecated and will be removed in a future release. Please use 'namespace' instead.",
+			},
+			"metric_name": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"metric": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				Deprecated: "Field 'metric' is deprecated and will be removed in a future release. Please use 'metric_name' instead.",
+			},
+			"dimensions": {
+				Type:     schema.TypeMap,
+				Required: true,
+				ForceNew: true,
+				Elem:     schema.TypeString,
+			},
+			"period": {
+				Type:     schema.TypeInt,
+				Optional: true,
+			},
+			"escalations_critical": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"statistics": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      Average,
+							ValidateFunc: validation.StringInSlice([]string{Average, Minimum, Maximum, ErrorCodeMaximum, Value}, false),
+						},
+						"comparison_operator": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  Equal,
+							ValidateFunc: validation.StringInSlice([]string{
+								MoreThan, MoreThanOrEqual, LessThan, LessThanOrEqual, NotEqual,
+							}, false),
+						},
+						"threshold": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"times": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  3,
+						},
+					},
+				},
+				DiffSuppressFunc: cmsClientCriticalSuppressFunc,
+				MaxItems:         1,
+			},
+			"escalations_warn": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"statistics": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      Average,
+							ValidateFunc: validation.StringInSlice([]string{Average, Minimum, Maximum, ErrorCodeMaximum, Value}, false),
+						},
+						"comparison_operator": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  Equal,
+							ValidateFunc: validation.StringInSlice([]string{
+								MoreThan, MoreThanOrEqual, LessThan, LessThanOrEqual, NotEqual,
+							}, false),
+						},
+						"threshold": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"times": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  3,
+						},
+					},
+				},
+				DiffSuppressFunc: cmsClientWarnSuppressFunc,
+				MaxItems:         1,
+			},
+			"escalations_info": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"statistics": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      Average,
+							ValidateFunc: validation.StringInSlice([]string{Average, Minimum, Maximum, ErrorCodeMaximum, Value}, false),
+						},
+						"comparison_operator": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  Equal,
+							ValidateFunc: validation.StringInSlice([]string{
+								MoreThan, MoreThanOrEqual, LessThan, LessThanOrEqual, NotEqual,
+							}, false),
+						},
+						"threshold": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"times": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  3,
+						},
+					},
+				},
+				DiffSuppressFunc: cmsClientInfoSuppressFunc,
+				MaxItems:         1,
+			},
+			"contact_groups": {
+				Type:     schema.TypeList,
+				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"effective_interval": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "00:00-23:59",
+			},
+			"silence_time": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      86400,
+				ValidateFunc: validation.IntBetween(300, 86400),
+			},
+			"enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"webhook": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
+	}
+}
+
+func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	cmsService := CmsService{client}
+	d.Partial(true)
+
+	request := cms.CreatePutResourceMetricRuleRequest()
+	client.InitRpcRequest(*request.RpcRequest)
+	d.SetId(resource.UniqueId() + ":" + request.RuleName)
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "rule_name", "name"); err == nil {
+		request.RuleName = v.(string)
+	} else {
+		return err
+	}
+	parts, err := ParseResourceId(d.Id(), 2)
+	request.RuleId = parts[0]
+
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "namespace", "project"); err == nil {
+		request.Namespace = v.(string)
+	} else {
+		return err
+	}
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "metric_name", "metric"); err == nil {
+		request.MetricName = v.(string)
+	} else {
+		return err
+	}
+	request.Period = strconv.Itoa(d.Get("period").(int))
+
+	request.ContactGroups = strings.Join(expandStringList(d.Get("contact_groups").([]interface{})), ",")
+	if v, ok := d.GetOk("escalations_critical"); ok && len(v.([]interface{})) != 0 {
+		for _, val := range v.([]interface{}) {
+			val := val.(map[string]interface{})
+			request.EscalationsCriticalStatistics = val["statistics"].(string)
+			request.EscalationsCriticalComparisonOperator = convertOperator(val["comparison_operator"].(string))
+			request.EscalationsCriticalThreshold = val["threshold"].(string)
+			request.EscalationsCriticalTimes = requests.NewInteger(val["times"].(int))
+		}
+	}
+	// Warn
+	if v, ok := d.GetOk("escalations_warn"); ok && len(v.([]interface{})) != 0 {
+		for _, val := range v.([]interface{}) {
+			val := val.(map[string]interface{})
+			request.EscalationsWarnStatistics = val["statistics"].(string)
+			request.EscalationsWarnComparisonOperator = convertOperator(val["comparison_operator"].(string))
+			request.EscalationsWarnThreshold = val["threshold"].(string)
+			request.EscalationsWarnTimes = requests.NewInteger(val["times"].(int))
+		}
+	}
+	// Info
+	if v, ok := d.GetOk("escalations_info"); ok && len(v.([]interface{})) != 0 {
+		for _, val := range v.([]interface{}) {
+			val := val.(map[string]interface{})
+			request.EscalationsInfoStatistics = val["statistics"].(string)
+			request.EscalationsInfoComparisonOperator = convertOperator(val["comparison_operator"].(string))
+			request.EscalationsInfoThreshold = val["threshold"].(string)
+			request.EscalationsInfoTimes = requests.NewInteger(val["times"].(int))
+		}
+	}
+
+	if v, ok := d.GetOk("effective_interval"); ok && v.(string) != "" {
+		request.EffectiveInterval = v.(string)
+	} else {
+		start, startOk := d.GetOk("start_time")
+		end, endOk := d.GetOk("end_time")
+		if startOk && endOk && end.(int) > 0 {
+			// The EffectiveInterval valid value between 00:00 and 23:59
+			request.EffectiveInterval = fmt.Sprintf("%d:00-%d:59", start.(int), end.(int)-1)
+		}
+	}
+	request.SilenceTime = requests.NewInteger(d.Get("silence_time").(int))
+
+	var instanceId string
+	var dimList []map[string]string
+	if dimensions, ok := d.GetOk("dimensions"); ok {
+		for k, v := range dimensions.(map[string]interface{}) {
+			values := strings.Split(v.(string), COMMA_SEPARATED)
+			if len(values) > 0 {
+				instanceId = values[0]
+				for _, vv := range values {
+					dimList = append(dimList, map[string]string{k: Trim(vv)})
+				}
+			} else {
+				dimList = append(dimList, map[string]string{k: Trim(v.(string))})
+			}
+		}
+	}
+	if len(dimList) > 0 {
+		if bytes, err := json.Marshal(dimList); err != nil {
+			return fmt.Errorf("marshaling dimensions to json string got an error: %#v", err)
+		} else {
+			request.Resources = string(bytes[:])
+		}
+	}
+
+	nrequest := client.NewCommonRequest("POST", "cms", "2019-01-01", "PutResourceMetricRule", "")
+	mergeMaps(nrequest.QueryParams, map[string]string{
+		"RuleName":                       request.RuleName,
+		"RuleId":                         request.RuleId,
+		"Namespace":                      request.Namespace,
+		"MetricName":                     request.MetricName,
+		"Period":                         request.Period,
+		"EffectiveInterval":              request.EffectiveInterval,
+		"ContactGroups":                  request.ContactGroups,
+		"InstanceID":                     instanceId,
+		"Resources":                      request.Resources,
+		"Escalations.Critical.Threshold": request.EscalationsCriticalThreshold,
+		"Escalations.Critical.ComparisonOperator": request.EscalationsCriticalComparisonOperator,
+		"Escalations.Critical.Statistics":         request.EscalationsCriticalStatistics,
+		"Escalations.Critical.Times":              fmt.Sprint(request.EscalationsCriticalTimes),
+		"Escalations.Warn.Threshold":              request.EscalationsWarnThreshold,
+		"Escalations.Warn.ComparisonOperator":     request.EscalationsWarnComparisonOperator,
+		"Escalations.Warn.Statistics":             request.EscalationsWarnStatistics,
+		"Escalations.Warn.Times":                  fmt.Sprint(request.EscalationsWarnTimes),
+		"Escalations.Info.Threshold":              request.EscalationsInfoThreshold,
+		"Escalations.Info.ComparisonOperator":     request.EscalationsCriticalComparisonOperator,
+		"Escalations.Info.Statistics":             request.EscalationsInfoStatistics,
+		"Escalations.Info.Times":                  fmt.Sprint(request.EscalationsInfoTimes),
+		"SilenceTime":                             fmt.Sprint(request.SilenceTime),
+		"Format":                                  "JSON",
+		"SignatureVersion":                        "1.0",
+	})
+
+	raw, err := client.WithEcsClient(func(cmsClient *ecs.Client) (interface{}, error) {
+		return cmsClient.ProcessCommonRequest(nrequest)
+	})
+	response, ok := raw.(*responses.CommonResponse)
+	log.Printf("testing cms %v", raw)
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(false), "status", "enabled"); err == nil && v.(bool) {
+		request := cms.CreateEnableMetricRulesRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+		request.RuleId = &[]string{d.Id()}
+
+		wait := incrementalWait(1*time.Second, 2*time.Second)
+		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+			raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
+				return cmsClient.EnableMetricRules(request)
+			})
+			response, ok := raw.(*responses.CommonResponse)
+			if err != nil {
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			}
+			return nil
+		})
+		if err != nil {
+			return fmt.Errorf("Enabling alarm got an error: %#v", err)
+		}
+	} else if err != nil {
+		return err 
+	} else {
+		request := cms.CreateDisableMetricRulesRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+		request.RuleId = &[]string{d.Id()}
+
+		wait := incrementalWait(1*time.Second, 2*time.Second)
+		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+			raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
+				return cmsClient.DisableMetricRules(request)
+			})
+			response, ok := raw.(*responses.CommonResponse)
+			if err != nil {
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			}
+			return nil
+		})
+		if err != nil {
+			return fmt.Errorf("Disabling alarm got an error: %#v", err)
+		}
+	}
+	if err := cmsService.WaitForCmsAlarm(d.Id(), d.Get("enabled").(bool), 102); err != nil {
+		return err
+	}
+
+	d.Partial(false)
+
+	return resourceAlibabacloudStackCmsAlarmUpdate(d, meta)
+}
+
+func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interface{}) error {
+	waitSecondsIfWithTest(1)
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	cmsService := CmsService{client}
+
+	alarm, err := cmsService.DescribeCmsAlarm(d.Id())
+
+	if err != nil {
+		if errmsgs.NotFoundError(err) {
+			d.SetId("")
+			return nil
+		}
+		return err
+	}
+
+	connectivity.SetResourceData(d, alarm.RuleName, "rule_name", "name")
+	connectivity.SetResourceData(d, alarm.Namespace, "namespace", "project")
+	connectivity.SetResourceData(d, alarm.MetricName, "metric_name", "metric")
+	if period, err := strconv.Atoi(alarm.Period); err != nil {
+		return errmsgs.WrapError(err)
+	} else {
+		d.Set("period", period)
+	}
+
+	escalationsCritical := make([]map[string]interface{}, 1)
+	if alarm.Escalations.Critical.Times != 0 {
+		mapping := map[string]interface{}{
+			"statistics":          alarm.Escalations.Critical.Statistics,
+			"comparison_operator": convertOperator(alarm.Escalations.Critical.ComparisonOperator),
+			"threshold":           alarm.Escalations.Critical.Threshold,
+			"times":               alarm.Escalations.Critical.Times,
+		}
+		escalationsCritical[0] = mapping
+		d.Set("escalations_critical", escalationsCritical)
+	}
+
+	escalationsWarn := make([]map[string]interface{}, 1)
+	if alarm.Escalations.Warn.Times != "" {
+		if count, err := strconv.Atoi(alarm.Escalations.Warn.Times); err != nil {
+			return errmsgs.WrapError(err)
+		} else {
+			mappingWarn := map[string]interface{}{
+				"statistics":          alarm.Escalations.Warn.Statistics,
+				"comparison_operator": convertOperator(alarm.Escalations.Warn.ComparisonOperator),
+				"threshold":           alarm.Escalations.Warn.Threshold,
+				"times":               count,
+			}
+			escalationsWarn[0] = mappingWarn
+			d.Set("escalations_warn", escalationsWarn)
+		}
+	}
+
+	escalationsInfo := make([]map[string]interface{}, 1)
+	if alarm.Escalations.Info.Times != 0 {
+		mappingInfo := map[string]interface{}{
+			"statistics":          alarm.Escalations.Info.Statistics,
+			"comparison_operator": convertOperator(alarm.Escalations.Info.ComparisonOperator),
+			"threshold":           alarm.Escalations.Info.Threshold,
+			"times":               alarm.Escalations.Info.Times,
+		}
+		escalationsInfo[0] = mappingInfo
+		d.Set("escalations_info", escalationsInfo)
+	}
+
+	d.Set("effective_interval", alarm.EffectiveInterval)
+	d.Set("silence_time", alarm.SilenceTime)
+	d.Set("status", alarm.AlertState)
+	connectivity.SetResourceData(d, alarm.EnableState, "status", "enabled")
+	d.Set("contact_groups", strings.Split(alarm.ContactGroups, ","))
+
+	var dims map[string]interface{}
+	if alarm.Dimensions != "" {
+		if err := json.Unmarshal([]byte(alarm.Dimensions), &dims); err != nil {
+			return fmt.Errorf("Unmarshaling Dimensions got an error: %#v.", err)
+		}
+	}
+	d.Set("dimensions", dims)
+
+	return nil
+}
+
+func resourceAlibabacloudStackCmsAlarmUpdate(d *schema.ResourceData, meta interface{}) error {
+	return resourceAlibabacloudStackCmsAlarmRead(d, meta)
+}
+
+func resourceAlibabacloudStackCmsAlarmDelete(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	cmsService := CmsService{client}
+	parts, err := ParseResourceId(d.Id(), 2)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	request := cms.CreateDeleteMetricRulesRequest()
+	client.InitRpcRequest(*request.RpcRequest)
+	request.Id = &[]string{parts[0]}
+
+	wait := incrementalWait(1*time.Second, 2*time.Second)
+	return resource.Retry(10*time.Minute, func() *resource.RetryError {
+		raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
+			return cmsClient.DeleteMetricRules(request)
+		})
+		response, ok := raw.(*responses.CommonResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+		}
+
+		_, err = cmsService.DescribeCmsAlarm(d.Id())
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				return nil
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, ""))
+		}
+
+		return resource.RetryableError(fmt.Errorf("Deleting alarm rule got an error: %#v", err))
+	})
+}
+
+func convertOperator(operator string) string {
+	switch operator {
+	case MoreThan:
+		return "GreaterThanThreshold"
+	case MoreThanOrEqual:
+		return "GreaterThanOrEqualToThreshold"
+	case LessThan:
+		return "LessThanThreshold"
+	case LessThanOrEqual:
+		return "LessThanOrEqualToThreshold"
+	case NotEqual:
+		return "NotEqualToThreshold"
+	case Equal:
+		return "GreaterThanThreshold"
+	case "GreaterThanThreshold":
+		return MoreThan
+	case "GreaterThanOrEqualToThreshold":
+		return MoreThanOrEqual
+	case "LessThanThreshold":
+		return LessThan
+	case "LessThanOrEqualToThreshold":
+		return LessThanOrEqual
+	case "NotEqualToThreshold":
+		return NotEqual
+	default:
+		return ""
+	}
+}

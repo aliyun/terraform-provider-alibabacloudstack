@@ -11,13 +11,14 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceAlibabacloudStackEdasCluster() *schema.Resource {
 	return &schema.Resource{
-		Create: rresourceAlibabacloudStackEdasClusterCreate,
+		Create: resourceAlibabacloudStackEdasClusterCreate,
 		Read:   resourceAlibabacloudStackEdasClusterRead,
 		Delete: resourceAlibabacloudStackEdasClusterDelete,
 		Importer: &schema.ResourceImporter{
@@ -55,25 +56,24 @@ func resourceAlibabacloudStackEdasCluster() *schema.Resource {
 	}
 }
 
-func rresourceAlibabacloudStackEdasClusterCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackEdasClusterCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
 
 	request := edas.CreateInsertClusterRequest()
-	request.RegionId = client.RegionId
+	client.InitRoaRequest(*request.RoaRequest)
 	request.ClusterName = d.Get("cluster_name").(string)
 	request.ClusterType = requests.NewInteger(d.Get("cluster_type").(int))
 	request.NetworkMode = requests.NewInteger(d.Get("network_mode").(int))
 	request.OversoldFactor = requests.NewInteger(1)
 	request.IaasProvider = "ALIYUN"
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = client.Department
+
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
 
 	if v, ok := d.GetOk("vpc_id"); !ok {
 		if d.Get("network_mode") == 2 {
-			return WrapError(Error("vpcId is required for vpc network mode"))
+			return errmsgs.WrapError(errmsgs.Error("vpcId is required for vpc network mode"))
 		}
 	} else {
 		request.VpcId = v.(string)
@@ -82,17 +82,21 @@ func rresourceAlibabacloudStackEdasClusterCreate(d *schema.ResourceData, meta in
 		return edasClient.InsertCluster(request)
 	})
 
+	bresponse, ok := raw.(*edas.InsertClusterResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	log.Printf("request domainaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: %s", request.Domain)
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
-	response, _ := raw.(*edas.InsertClusterResponse)
-	if response.Code != 200 {
-		return WrapError(Error("create cluster failed for " + response.Message))
+	if bresponse.Code != 200 {
+		return errmsgs.WrapError(errmsgs.Error("create cluster failed for " + bresponse.Message))
 	}
-	d.SetId(response.Cluster.ClusterId)
+	d.SetId(bresponse.Cluster.ClusterId)
 
 	return resourceAlibabacloudStackEdasClusterRead(d, meta)
 }
@@ -102,13 +106,11 @@ func resourceAlibabacloudStackEdasClusterRead(d *schema.ResourceData, meta inter
 	edasService := EdasService{client}
 
 	clusterId := d.Id()
-	regionId := client.RegionId
 
 	request := edas.CreateGetClusterRequest()
-	request.RegionId = regionId
+	client.InitRoaRequest(*request.RoaRequest)
 	request.ClusterId = clusterId
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = client.Department
+
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
 
@@ -116,21 +118,25 @@ func resourceAlibabacloudStackEdasClusterRead(d *schema.ResourceData, meta inter
 		return edasClient.GetCluster(request)
 	})
 
+	bresponse, ok := raw.(*edas.GetClusterResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
-	response, _ := raw.(*edas.GetClusterResponse)
-	if response.Code != 200 {
-		return WrapError(Error("create cluster failed for " + response.Message))
+	if bresponse.Code != 200 {
+		return errmsgs.WrapError(errmsgs.Error("create cluster failed for " + bresponse.Message))
 	}
 
-	d.Set("cluster_name", response.Cluster.ClusterName)
-	d.Set("cluster_type", response.Cluster.ClusterType)
-	d.Set("network_mode", response.Cluster.NetworkMode)
-	//d.Set("region_id", response.Cluster.RegionId)
-	d.Set("vpc_id", response.Cluster.VpcId)
+	d.Set("cluster_name", bresponse.Cluster.ClusterName)
+	d.Set("cluster_type", bresponse.Cluster.ClusterType)
+	d.Set("network_mode", bresponse.Cluster.NetworkMode)
+	//d.Set("region_id", bresponse.Cluster.RegionId)
+	d.Set("vpc_id", bresponse.Cluster.VpcId)
 
 	return nil
 }
@@ -140,13 +146,11 @@ func resourceAlibabacloudStackEdasClusterDelete(d *schema.ResourceData, meta int
 	edasService := EdasService{client}
 
 	clusterId := d.Id()
-	regionId := client.RegionId
 
 	request := edas.CreateDeleteClusterRequest()
-	request.RegionId = regionId
+	client.InitRoaRequest(*request.RoaRequest)
 	request.ClusterId = clusterId
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = client.Department
+
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
 
@@ -155,26 +159,31 @@ func resourceAlibabacloudStackEdasClusterDelete(d *schema.ResourceData, meta int
 		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 			return edasClient.DeleteCluster(request)
 		})
-		response, _ := raw.(*edas.DeleteClusterResponse)
+
+		bresponse, ok := raw.(*edas.DeleteClusterResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{ThrottlingUser}) {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
 				wait()
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		if response.Code != 200 {
-			if strings.Contains(response.Message, "there are still instances in it") {
-				return resource.RetryableError(Error("delete cluster failed for " + response.Message))
+		if bresponse.Code != 200 {
+			if strings.Contains(bresponse.Message, "there are still instances in it") {
+				return resource.RetryableError(errmsgs.Error("delete cluster failed for " + bresponse.Message))
 			}
-			return resource.NonRetryableError(Error("delete cluster failed for " + response.Message))
+			return resource.NonRetryableError(errmsgs.Error("delete cluster failed for " + bresponse.Message))
 		}
 
 		addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	return nil

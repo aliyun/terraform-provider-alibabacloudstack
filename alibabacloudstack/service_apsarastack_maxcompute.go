@@ -3,19 +3,12 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-
-	"github.com/PaesslerAG/jsonpath"
-
 	"strconv"
 	"strings"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type MaxcomputeService struct {
@@ -24,176 +17,111 @@ type MaxcomputeService struct {
 
 func (s *MaxcomputeService) DescribeMaxcomputeProject(name string) (object *MaxComputeProject, err error) {
 	client := s.client
-	var requestInfo *ecs.Client
-
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
 
 	roleId, err := client.RoleIds()
 	if err != nil {
-		err = WrapErrorf(Error(GetNotFoundMessage("ASCM User", "defaultRoleId")), NotFoundMsg, ProviderERROR)
+		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		return nil, err
 	}
 
-	request.QueryParams = map[string]string{
-		"Action":          "ListCalcEnginesForAscm",
-		"ResourceGroupId": client.ResourceGroup,
-		"Product":         "dataworks-private-cloud",
-		"CalcEngineType":  "ODPS", // 固定值
-		"OrganizationId":  client.Department,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"RegionId":        client.RegionId,
-		"CurrentRoleId":   strconv.Itoa(roleId),
-	}
+	request := make(map[string]interface{})
+	request["ResourceGroupId"] = client.ResourceGroup
+	request["CalcEngineType"] = "ODPS" // 固定值
+	request["OrganizationId"] = client.Department
+	request["Department"] = client.Department
+	request["ResourceGroup"] = client.ResourceGroup
+	request["CurrentRoleId"] = strconv.Itoa(roleId)
 
 	if strings.Trim(name, " ") != "" {
-		request.QueryParams["Name"] = name
+		request["Name"] = name
 	}
 
-	request.Method = "POST"
-	request.Product = "dataworks-private-cloud"
-	request.Version = "2019-01-17"
-	request.ServiceCode = "dataworks-private-cloud"
-	request.Domain = client.Domain
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListCalcEnginesForAscm"
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	log.Printf("response of raw create maxcomputecluster is : %s", raw)
-
+	response, err := client.DoTeaRequest("POST", "dataworks-private-cloud", "2019-01-17", "ListCalcEnginesForAscm", "", nil, request)
+	addDebug("ListCalcEnginesForAscm", response, request)
 	if err != nil {
-		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_maxcompute_project", "List", raw)
+		return nil, err
 	}
 
-	addDebug("MaxcomputeProjectCreate", raw, requestInfo, request)
-
-	bresponse, _ := raw.(*responses.CommonResponse)
-	if bresponse.GetHttpStatus() != 200 {
-		return nil, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_maxcompute_project", "List", AlibabacloudStackSdkGoERROR)
+	resp := &MaxComputeProject{}
+	body, ok := response["Body"].(string)
+	if !ok {
+		return resp, errmsgs.WrapError(err)
 	}
-
-	var resp = &MaxComputeProject{}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
+	err = json.Unmarshal([]byte(body), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if resp.TotalCount < 1 || resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 	return resp, nil
 }
 
 func (s *MaxcomputeService) DescribeMaxcomputeCu(name string) (object map[string]interface{}, err error) {
-	var response map[string]interface{}
-	conn, err := s.client.NewAscmClient()
+	request := make(map[string]interface{})
+	request["RegionName"] = s.client.RegionId
+	request["Product"] = "ascm"
+	request["OrganizationId"] = s.client.Department
+	request["ResourceGroupId"] = s.client.ResourceGroup
+	request["Department"] = s.client.Department
+
+	response, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "ListOdpsCus", "", nil, request)
+	addDebug("ListOdpsCus", response, request)
 	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "ListOdpsCus"
-	request := map[string]interface{}{
-		"RegionName": s.client.RegionId,
-		//"Type":            "cuName",
-		//"CuName":          name,
-		"Product":         "ascm",
-		"OrganizationId":  s.client.Department,
-		"ResourceGroupId": s.client.ResourceGroup,
-		"Department":      s.client.Department,
-	}
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequestWithOrg(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &runtime)
-	if err != nil {
-		err = WrapErrorf(err, DefaultErrorMsg, name, action, AlibabacloudStackSdkGoERROR)
+		err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, name, "ListOdpsCus", errmsgs.AlibabacloudStackSdkGoERROR)
 		return
 	}
-	addDebug(action, response, request)
-	if IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
-		err = WrapErrorf(Error(GetNotFoundMessage("MaxcomputeProject", name)), NotFoundMsg, ProviderERROR)
+
+	if errmsgs.IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
+		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("MaxcomputeProject", name)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		return object, err
 	}
 	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		err = Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
+		err = errmsgs.Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
 		return object, err
 	}
+
 	v, err := jsonpath.Get("$", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, name, "$", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, name, "$", response)
 	}
 	object = v.(map[string]interface{})
 	return object, nil
 }
 
 func (s *MaxcomputeService) DescribeMaxcomputeUser(name string) (response *OdpsUser, err error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-
 	roleId, err := s.client.RoleIds()
 	if err != nil {
-		err = WrapErrorf(Error(GetNotFoundMessage("ASCM User", "defaultRoleId")), NotFoundMsg, ProviderERROR)
+		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		return nil, err
 	}
 
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "GetOdpsUserList"
-	request.Headers = map[string]string{
-		"RegionId":              s.client.RegionId,
-		"x-acs-roleid":          strconv.Itoa(roleId),
-		"x-acs-resourcegroupid": s.client.ResourceGroup,
-		"x-acs-regionid":        s.client.RegionId,
-		"x-acs-organizationid":  s.client.Department,
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		"UserName":        name,
-		"Product":         "ascm",
-		"OrganizationId":  s.client.Department,
-		"ResourceGroupId": s.client.ResourceGroup,
-	}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
+	request := make(map[string]interface{})
+	request["UserName"] = name
+	request["x-acs-roleid"] = strconv.Itoa(roleId)
+
+	responseData, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "GetOdpsUserList", "", nil, request)
+	addDebug("GetOdpsUserList", responseData, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"Error OdpsUser Not Found"}) {
-			return nil, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"Error OdpsUser Not Found"}) {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return nil, WrapErrorf(err, DefaultErrorMsg, name, "GetOdpsUserList", AlibabacloudStackSdkGoERROR)
-
+		return nil, err
 	}
-	addDebug("GetOdpsUserList", raw, requestInfo, request)
 
-	var resp = &OdpsUser{}
-
-	bresponse, _ := raw.(*responses.CommonResponse)
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
+	resp := &OdpsUser{}
+	body, ok := responseData["Body"].(string)
+	if !ok {
+		return resp, errmsgs.WrapError(err)
+	}
+	err = json.Unmarshal([]byte(body), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 	return resp, nil
 }

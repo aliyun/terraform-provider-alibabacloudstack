@@ -2,11 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"testing"
 )
 
 func TestAccAlibabacloudStackAscm_UserGroup_User_Basic(t *testing.T) {
@@ -53,13 +55,13 @@ func testAccCheckAscmUserGroupUserDestroy(s *terraform.State) error {
 		}
 		ascm, err := ascmService.DescribeAscmUsergroupUser(rs.Primary.ID)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if ascm.Message != "" {
-			return WrapError(Error("user  still exist"))
+			return errmsgs.WrapError(errmsgs.Error("user  still exist"))
 		}
 	}
 

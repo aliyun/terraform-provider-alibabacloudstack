@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 /*import (
+    "github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"fmt"
 	"os"
 	"strings"
@@ -50,7 +51,7 @@ func testSweepCrEENamespace(region string) error {
 
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return WrapError(fmt.Errorf("error getting AlibabacloudStack client: %s", err))
+		return errmsgs.WrapError(fmt.Errorf("error getting AlibabacloudStack client: %s", err))
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
@@ -61,7 +62,7 @@ func testSweepCrEENamespace(region string) error {
 	for {
 		resp, err := crService.ListCrEENamespaces(testaccCrEEInstanceId, pageNo, pageSize)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		namespaces = append(namespaces, resp.Namespaces...)
 		if len(resp.Namespaces) < pageSize {

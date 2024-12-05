@@ -12,12 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/endpoints"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -46,6 +44,13 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", os.Getenv("ALIBABACLOUDSTACK_REGION")),
 				Description: descriptions["region"],
 			},
+			"region_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", os.Getenv("ALIBABACLOUDSTACK_REGION")),
+				Description: descriptions["region_id"],
+				Deprecated:  "Use parameter region replace it.",
+			},
 			"role_arn": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -69,6 +74,7 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Default:     true,
 				Description: descriptions["skip_region_validation"],
+				Deprecated:  "always skip to valiate region in apsarastack",
 			},
 			"profile": {
 				Type:        schema.TypeString,
@@ -145,17 +151,37 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_PROXY", nil),
 				Description: descriptions["proxy"],
 			},
+			"force_use_asapi": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: descriptions["force_use_asapi"],
+			},
+			"is_center_region": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: descriptions["is_center_region"],
+			},
+			"popgw_domain": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_POPGW_DOMAIN", nil),
+				Description: descriptions["popgw_domain"],
+			},
 			"domain": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_DOMAIN", nil),
 				Description: descriptions["domain"],
+				Deprecated:  "ASAPI will no longer provide external services by default on apsarastack v3.18.1",
 			},
 			"ossservice_domain": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_OSSSERVICE_DOMAIN", nil),
 				Description: descriptions["ossservice_domain"],
+				Deprecated:  "Use schema endpoints replace ossservice_domain.",
 			},
 			"kafkaopenapi_domain": {
 				Type:        schema.TypeString,
@@ -180,18 +206,21 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SLS_OPENAPI_ENDPOINT", nil),
 				Description: descriptions["sls_openapi_endpoint"],
+				Deprecated:  "Use schema endpoints replace sls_openapi_endpoint.",
 			},
 			"sts_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_STS_ENDPOINT", os.Getenv("ALIBABACLOUDSTACK_STS_ENDPOINT")),
 				Description: descriptions["sts_endpoint"],
+				Deprecated:  "Use schema endpoints replace sts_endpoint.",
 			},
 			"quickbi_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_QUICKBI_ENDPOINT", nil),
 				Description: descriptions["quickbi_endpoint"],
+				Deprecated:  "Use schema endpoints replace quickbi_endpoint.",
 			},
 			"department": {
 				Type:        schema.TypeString,
@@ -216,12 +245,14 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_DATAWORKS_PUBLIC_ENDPOINT", nil),
 				Description: descriptions["dataworkspublic_endpoint"],
+				Deprecated:  "Use schema endpoints replace dataworkspublic.",
 			},
 			"dbs_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_DBS_ENDPOINT", nil),
 				Description: descriptions["dbs_endpoint"],
+				Deprecated:  "Use schema endpoints replace dbs_endpoint.",
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -329,7 +360,6 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_ots_tables":                             dataSourceAlibabacloudStackOtsTables(),
 			"alibabacloudstack_ots_instances":                          dataSourceAlibabacloudStackOtsInstances(),
 			"alibabacloudstack_ots_instance_attachments":               dataSourceAlibabacloudStackOtsInstanceAttachments(),
-			"alibabacloudstack_ots_instance_attachment":               dataSourceAlibabacloudStackOtsInstanceAttachments(),
 			"alibabacloudstack_ots_service":                            dataSourceAlibabacloudStackOtsService(),
 			"alibabacloudstack_quick_bi_users":                         dataSourceAlibabacloudStackQuickBiUsers(),
 			"alibabacloudstack_router_interfaces":                      dataSourceAlibabacloudStackRouterInterfaces(),
@@ -379,7 +409,7 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_ess_scaling_configuration": resourceAlibabacloudStackEssScalingConfiguration(),
 			"alibabacloudstack_adb_account":               resourceAlibabacloudStackAdbAccount(),
 			"alibabacloudstack_adb_backup_policy":         resourceAlibabacloudStackAdbBackupPolicy(),
-			"alibabacloudstack_adb_cluster":                           resourceAlibabacloudStackAdbDbCluster(),
+			//"alibabacloudstack_adb_cluster":                           resourceAlibabacloudStackAdbDbCluster(),
 			"alibabacloudstack_adb_connection":                        resourceAlibabacloudStackAdbConnection(),
 			"alibabacloudstack_adb_db_cluster":                        resourceAlibabacloudStackAdbDbCluster(),
 			"alibabacloudstack_alikafka_sasl_acl":                     resourceAlibabacloudStackAlikafkaSaslAcl(),
@@ -598,19 +628,31 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	accessKey := getProviderConfig(d.Get("access_key").(string), "access_key_id")
 	secretKey := getProviderConfig(d.Get("secret_key").(string), "access_key_secret")
 	region := getProviderConfig(d.Get("region").(string), "region_id")
-	if region == "" {
-		region = DEFAULT_REGION
-	}
+	region = strings.TrimSpace(region)
 
 	ecsRoleName := getProviderConfig(d.Get("ecs_role_name").(string), "ram_role_name")
+
+	var eagleeye connectivity.EagleEye
+	if os.Getenv("TF_EAGLEEYE_TRACEID") != "" && os.Getenv("TF_EAGLEEYE_TRACEID") != "" {
+		eagleeye = connectivity.EagleEye{
+			TraceId: os.Getenv("TF_EAGLEEYE_TRACEID"),
+			RpcId:   os.Getenv("TF_EAGLEEYE_TRACEID"),
+		}
+	} else {
+		eagleeye = connectivity.EagleEye{
+			TraceId: connectivity.GenerateTraceId(),
+			RpcId:   connectivity.DefaultRpcId,
+		}
+	}
+
+	log.Printf("Eagleeye's trace id is: %s", eagleeye.GetTraceId())
 
 	config := &connectivity.Config{
 		AccessKey:            strings.TrimSpace(accessKey),
 		SecretKey:            strings.TrimSpace(secretKey),
 		EcsRoleName:          strings.TrimSpace(ecsRoleName),
-		Region:               connectivity.Region(strings.TrimSpace(region)),
-		RegionId:             strings.TrimSpace(region),
-		SkipRegionValidation: d.Get("skip_region_validation").(bool),
+		Region:               connectivity.Region(region),
+		RegionId:             region,
 		ConfigurationSource:  d.Get("configuration_source").(string),
 		Protocol:             d.Get("protocol").(string),
 		ClientReadTimeout:    d.Get("client_read_timeout").(int),
@@ -622,6 +664,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		ResourceSetName:      d.Get("resource_group_set_name").(string),
 		SourceIp:             strings.TrimSpace(d.Get("source_ip").(string)),
 		SecureTransport:      strings.TrimSpace(d.Get("secure_transport").(string)),
+		Endpoints:            make(map[connectivity.ServiceCode]string),
+		Eagleeye:             eagleeye,
 	}
 	if v, ok := d.GetOk("security_transport"); config.SecureTransport == "" && ok && v.(string) != "" {
 		config.SecureTransport = v.(string)
@@ -669,118 +713,76 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	if err := config.MakeConfigByEcsRoleName(); err != nil {
+		log.Printf("[ERROR] Assume role failed: %s", err)
 		return nil, err
 	}
 	ossServicedomain := d.Get("ossservice_domain").(string)
 	if ossServicedomain != "" {
-		config.OssServerEndpoint = ossServicedomain
+		config.Endpoints[connectivity.OssDataCode] = ossServicedomain
 	}
+
 	domain := d.Get("domain").(string)
 	if domain != "" {
-		config.EcsEndpoint = domain
-		config.VpcEndpoint = domain
-		config.SlbEndpoint = domain
-		config.OssEndpoint = domain
-		config.AscmEndpoint = domain
-		config.RdsEndpoint = domain
-		config.OnsEndpoint = domain
-		config.KmsEndpoint = domain
-		config.LogEndpoint = domain
-		config.CrEndpoint = domain
-		config.EssEndpoint = domain
-		config.DnsEndpoint = domain
-		config.KVStoreEndpoint = domain
-		config.GpdbEndpoint = domain
-		config.DdsEndpoint = domain
-		config.CsEndpoint = domain
-		config.CmsEndpoint = domain
-		config.HitsdbEndpoint = domain
-		config.MaxComputeEndpoint = domain
-		config.OtsEndpoint = domain
-		config.DatahubEndpoint = domain
-		config.EdasEndpoint = domain
-		config.AdbEndpoint = domain
-		config.RosEndpoint = domain
-		config.DtsEndpoint = domain
-		config.AlikafkaEndpoint = domain
-		config.NasEndpoint = domain
-		config.ApigatewayEndpoint = domain
-		config.DmsEnterpriseEndpoint = domain
-		config.HBaseEndpoint = domain
-		config.DrdsEndpoint = domain
-		config.QuickbiEndpoint = domain
-		config.ElasticsearchEndpoint = domain
-		config.DataworkspublicEndpoint = domain
-		config.DbsEndpoint = domain
-		config.OosEndpoint = domain
-		config.ArmsEndpoint = domain
-		config.CloudfwEndpoint = domain
-		config.CsbEndpoint = domain
-		config.GdbEndpoint = domain
-	} else {
+		// 没有生成popgw地址的，继续使用asapi
+		var setEndpointIfEmpty = func(endpoint string, domain string) string {
+			if endpoint == "" {
+				return domain
+			}
+			return endpoint
+		}
+		for popcode := range connectivity.PopEndpoints {
+			if popcode == connectivity.OssDataCode {
+				// oss的数据网关不做配置
+				continue
+			}
+			config.Endpoints[popcode] = setEndpointIfEmpty(config.Endpoints[popcode], domain)
+		}
+	}
+	if v, ok := d.GetOk("popgw_domain"); !d.Get("force_use_asapi").(bool) && ok && v.(string) != "" {
+		popgw_domain := v.(string)
+		log.Printf("Generator Popgw Endpoint: %s", popgw_domain)
+		// 使用各云产品的endpoint的规则生成popgw地址
+		is_center_region := d.Get("is_center_region").(bool)
+		for popcode := range connectivity.PopEndpoints {
+			endpoint := connectivity.GeneratorEndpoint(popcode, region, popgw_domain, is_center_region)
+			if endpoint != "" {
+				config.Endpoints[popcode] = endpoint
+			}
+		}
+	}
+	if endpoints, ok := d.GetOk("endpoints"); ok {
 
-		endpointsSet := d.Get("endpoints").(*schema.Set)
+		endpointsSet := endpoints.(*schema.Set)
 
 		for _, endpointsSetI := range endpointsSet.List() {
 			endpoints := endpointsSetI.(map[string]interface{})
-			config.EcsEndpoint = strings.TrimSpace(endpoints["ecs"].(string))
-			config.VpcEndpoint = strings.TrimSpace(endpoints["vpc"].(string))
-			config.AscmEndpoint = strings.TrimSpace(endpoints["ascm"].(string))
-			config.RdsEndpoint = strings.TrimSpace(endpoints["rds"].(string))
-			config.OssEndpoint = strings.TrimSpace(endpoints["oss"].(string))
-			config.OnsEndpoint = strings.TrimSpace(endpoints["ons"].(string))
-			config.KmsEndpoint = strings.TrimSpace(endpoints["kms"].(string))
-			config.LogEndpoint = strings.TrimSpace(endpoints["log"].(string))
-			config.SlbEndpoint = strings.TrimSpace(endpoints["slb"].(string))
-			config.CrEndpoint = strings.TrimSpace(endpoints["cr"].(string))
-			config.EssEndpoint = strings.TrimSpace(endpoints["ess"].(string))
-			config.DnsEndpoint = strings.TrimSpace(endpoints["dns"].(string))
-			config.KVStoreEndpoint = strings.TrimSpace(endpoints["kvstore"].(string))
-			config.GpdbEndpoint = strings.TrimSpace(endpoints["gpdb"].(string))
-			config.DdsEndpoint = strings.TrimSpace(endpoints["dds"].(string))
-			config.CsEndpoint = strings.TrimSpace(endpoints["cs"].(string))
-			config.CmsEndpoint = strings.TrimSpace(endpoints["cms"].(string))
-			config.OtsEndpoint = strings.TrimSpace(endpoints["ots"].(string))
-			config.DatahubEndpoint = strings.TrimSpace(endpoints["datahub"].(string))
-			config.AdbEndpoint = strings.TrimSpace(endpoints["adb"].(string))
-			config.StsEndpoint = strings.TrimSpace(endpoints["sts"].(string))
-			config.RosEndpoint = strings.TrimSpace(endpoints["ros"].(string))
-			config.DtsEndpoint = strings.TrimSpace(endpoints["dts"].(string))
-			config.AlikafkaEndpoint = strings.TrimSpace(endpoints["alikafka"].(string))
-			config.NasEndpoint = strings.TrimSpace(endpoints["nas"].(string))
-			config.ApigatewayEndpoint = strings.TrimSpace(endpoints["apigateway"].(string))
-			config.DmsEnterpriseEndpoint = strings.TrimSpace(endpoints["dms_enterprise"].(string))
-			config.HBaseEndpoint = strings.TrimSpace(endpoints["hbase"].(string))
-			config.DrdsEndpoint = strings.TrimSpace(endpoints["drds"].(string))
-			config.QuickbiEndpoint = strings.TrimSpace(endpoints["quickbi"].(string))
-			config.CsbEndpoint = strings.TrimSpace(endpoints["csb"].(string))
-			config.GdbEndpoint = strings.TrimSpace(endpoints["gdb"].(string))
-			config.DataworkspublicEndpoint = strings.TrimSpace(endpoints["dataworkspublic"].(string))
-			config.DbsEndpoint = strings.TrimSpace(endpoints["dbs"].(string))
-			config.OosEndpoint = strings.TrimSpace(endpoints["oos"].(string))
-			config.ArmsEndpoint = strings.TrimSpace(endpoints["arms"].(string))
-			config.CloudfwEndpoint = strings.TrimSpace(endpoints["cloudfw"].(string))
+			for popcode := range connectivity.PopEndpoints {
+				endpoint := strings.TrimSpace(endpoints[strings.ToLower(string(popcode))].(string))
+				if endpoint != "" {
+					config.Endpoints[popcode] = endpoint
+				}
+			}
 		}
 	}
 	DbsEndpoint := d.Get("dbs_endpoint").(string)
 	if DbsEndpoint != "" {
-		config.DbsEndpoint = DbsEndpoint
+		config.Endpoints[connectivity.DDSCode] = DbsEndpoint
 	}
 	DataworkspublicEndpoint := d.Get("dataworkspublic").(string)
 	if DataworkspublicEndpoint != "" {
-		config.DataworkspublicEndpoint = DataworkspublicEndpoint
+		config.Endpoints[connectivity.DataworkspublicCode] = DataworkspublicEndpoint
 	}
 	QuickbiEndpoint := d.Get("quickbi_endpoint").(string)
 	if QuickbiEndpoint != "" {
-		config.QuickbiEndpoint = QuickbiEndpoint
+		config.Endpoints[connectivity.QuickbiCode] = QuickbiEndpoint
 	}
 	kafkaOpenApidomain := d.Get("kafkaopenapi_domain").(string)
 	if kafkaOpenApidomain != "" {
-		config.AlikafkaOpenAPIEndpoint = kafkaOpenApidomain
+		config.Endpoints[connectivity.ALIKAFKACode] = kafkaOpenApidomain
 	}
 	StsEndpoint := d.Get("sts_endpoint").(string)
 	if StsEndpoint != "" {
-		config.StsEndpoint = StsEndpoint
+		config.Endpoints[connectivity.STSCode] = StsEndpoint
 	}
 	organizationAccessKey := d.Get("organization_accesskey").(string)
 	if organizationAccessKey != "" {
@@ -792,29 +794,28 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 	slsOpenAPIEndpoint := d.Get("sls_openapi_endpoint").(string)
 	if slsOpenAPIEndpoint != "" {
-		config.SLSOpenAPIEndpoint = slsOpenAPIEndpoint
+		config.Endpoints[connectivity.SlSDataCode] = slsOpenAPIEndpoint
 	}
 	if strings.ToLower(config.Protocol) == "https" {
 		config.Protocol = "HTTPS"
 	} else {
 		config.Protocol = "HTTP"
 	}
-
-	config.ResourceSetName = d.Get("resource_group_set_name").(string)
-	if config.Department == "" || config.ResourceGroup == "" {
-		dept, rg, err := getResourceCredentials(config)
-		if err != nil {
-			return nil, err
-		}
-		config.Department = dept
-		config.ResourceGroup = rg
-	}
-
 	if config.RamRoleArn != "" {
 		config.AccessKey, config.SecretKey, config.SecurityToken, err = getAssumeRoleAK(config)
 		if err != nil {
 			return nil, err
 		}
+	}
+	config.ResourceSetName = d.Get("resource_group_set_name").(string)
+	if config.Department == "" || config.ResourceGroup == "" {
+		dept, _, rgid, err := getResourceCredentials(config)
+		if err != nil {
+			return nil, err
+		}
+		config.Department = dept
+		config.ResourceGroup = fmt.Sprintf("%d", rgid)
+		config.ResourceGroupId = rgid
 	}
 
 	if ots_instance_name, ok := d.GetOk("ots_instance_name"); ok && ots_instance_name.(string) != "" {
@@ -858,353 +859,32 @@ func init() {
 	}
 }
 func endpointsSchema() *schema.Schema {
+	schemas := make(map[string]*schema.Schema)
+	for popcode := range connectivity.PopEndpoints {
+		popcodeStr := strings.ToLower(string(popcode))
+		schemas[popcodeStr] = &schema.Schema{
+			Type:        schema.TypeString,
+			Optional:    true,
+			Default:     "",
+			Description: descriptions[popcodeStr+"_endpoint"],
+		}
+	}
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Optional: true,
 		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"cbn": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["cbn_endpoint"],
-				},
-
-				"ecs": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["ecs_endpoint"],
-				},
-				"sts": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["sts_endpoint"],
-				},
-				"ascm": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["ascm_endpoint"],
-				},
-				"rds": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["rds_endpoint"],
-				},
-				"slb": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["slb_endpoint"],
-				},
-				"vpc": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["vpc_endpoint"],
-				},
-				"cen": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["cen_endpoint"],
-				},
-				"ess": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["ess_endpoint"],
-				},
-				"oss": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["oss_endpoint"],
-				},
-				"ons": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["ons_endpoint"],
-				},
-				"alikafka": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["alikafka_endpoint"],
-				},
-				"dns": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["dns_endpoint"],
-				},
-				"ram": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["ram_endpoint"],
-				},
-				"cs": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["cs_endpoint"],
-				},
-				"cr": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["cr_endpoint"],
-				},
-				"cdn": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["cdn_endpoint"],
-				},
-
-				"kms": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["kms_endpoint"],
-				},
-
-				"ots": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["ots_endpoint"],
-				},
-
-				"cms": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["cms_endpoint"],
-				},
-
-				"pvtz": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["pvtz_endpoint"],
-				},
-				// log service is sls service
-				"log": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["log_endpoint"],
-				},
-				"drds": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["drds_endpoint"],
-				},
-				"dds": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["dds_endpoint"],
-				},
-				"polardb": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["polardb_endpoint"],
-				},
-				"gpdb": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["gpdb_endpoint"],
-				},
-				"kvstore": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["kvstore_endpoint"],
-				},
-				"fc": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["fc_endpoint"],
-				},
-				"apigateway": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["apigateway_endpoint"],
-				},
-				"datahub": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["datahub_endpoint"],
-				},
-				"mns": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["mns_endpoint"],
-				},
-				"location": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["location_endpoint"],
-				},
-				"elasticsearch": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["elasticsearch_endpoint"],
-				},
-				"nas": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["nas_endpoint"],
-				},
-				"actiontrail": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["actiontrail_endpoint"],
-				},
-				"cas": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["cas_endpoint"],
-				},
-				"bssopenapi": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["bssopenapi_endpoint"],
-				},
-				"ddoscoo": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["ddoscoo_endpoint"],
-				},
-				"ddosbgp": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["ddosbgp_endpoint"],
-				},
-				"emr": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["emr_endpoint"],
-				},
-				"market": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["market_endpoint"],
-				},
-				"adb": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["adb_endpoint"],
-				},
-				"maxcompute": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["maxcompute_endpoint"],
-				},
-				"dms_enterprise": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["dms_enterprise_endpoint"],
-				},
-				"quickbi": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					Default:     "",
-					Description: descriptions["quickbi_endpoint"],
-				},
-				"dataworkspublic": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_DATAWORKS_PUBLIC_ENDPOINT", nil),
-					Description: descriptions["dataworkspublic_endpoint"],
-				},
-				"dbs_endpoint": {
-					Type:        schema.TypeString,
-					Optional:    true,
-					DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_DBS_ENDPOINT", nil),
-					Description: descriptions["dbs_endpoint"],
-				},
-			},
+			Schema: schemas,
 		},
-		Set: endpointsToHash,
+		Set: func(v interface{}) int {
+			var buf bytes.Buffer
+			m := v.(map[string]interface{})
+			for popcode := range connectivity.PopEndpoints {
+				popcodeStr := strings.ToLower(string(popcode))
+				buf.WriteString(fmt.Sprintf("%s-", m[popcodeStr].(string)))
+			}
+			return hashcode.String(buf.String())
+		},
 	}
-}
-func endpointsToHash(v interface{}) int {
-	var buf bytes.Buffer
-	m := v.(map[string]interface{})
-	buf.WriteString(fmt.Sprintf("%s-", m["ascm"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["ecs"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["rds"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["slb"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["vpc"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["cen"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["ess"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["oss"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["ons"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["alikafka"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["dns"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["ram"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["cs"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["cdn"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["kms"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["ots"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["cms"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["pvtz"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["ascm"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["log"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["drds"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["dds"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["gpdb"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["kvstore"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["polardb"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["fc"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["apigateway"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["datahub"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["mns"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["location"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["elasticsearch"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["nas"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["actiontrail"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["cas"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["bssopenapi"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["ddoscoo"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["ddosbgp"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["emr"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["market"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["adb"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["cbn"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["maxcompute"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["dms_enterprise"].(string)))
-	buf.WriteString(fmt.Sprintf("%s-", m["quickbi"].(string)))
-
-	return hashcode.String(buf.String())
 }
 
 func getConfigFromProfile(d *schema.ResourceData, ProfileKey string) (interface{}, error) {
@@ -1217,7 +897,7 @@ func getConfigFromProfile(d *schema.ResourceData, ProfileKey string) (interface{
 		// Set CredsFilename, expanding home directory
 		profilePath, err := homedir.Expand(d.Get("shared_credentials_file").(string))
 		if err != nil {
-			return nil, WrapError(err)
+			return nil, errmsgs.WrapError(err)
 		}
 		if profilePath == "" {
 			profilePath = fmt.Sprintf("%s/.alibabacloudstack/config.json", os.Getenv("HOME"))
@@ -1230,12 +910,12 @@ func getConfigFromProfile(d *schema.ResourceData, ProfileKey string) (interface{
 		if !os.IsNotExist(err) {
 			data, err := ioutil.ReadFile(profilePath)
 			if err != nil {
-				return nil, WrapError(err)
+				return nil, errmsgs.WrapError(err)
 			}
 			config := map[string]interface{}{}
 			err = json.Unmarshal(data, &config)
 			if err != nil {
-				return nil, WrapError(err)
+				return nil, errmsgs.WrapError(err)
 			}
 			for _, v := range config["profiles"].([]interface{}) {
 				if current == v.(map[string]interface{})["name"] {
@@ -1323,7 +1003,8 @@ func getAssumeRoleAK(config *connectivity.Config) (string, string, string, error
 	request.Scheme = "https"
 	request.SetHTTPSInsecure(config.Insecure)
 
-	request.Domain = config.StsEndpoint
+	request.Domain = config.Endpoints[connectivity.STSCode]
+	log.Printf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ StsEndpoint:%s", config.Endpoints[connectivity.STSCode])
 	request.QueryParams["Region"] = config.RegionId
 	request.Headers["x-ascm-product-name"] = "Sts"
 	request.Headers["x-acs-organizationId"] = config.Department
@@ -1340,7 +1021,7 @@ func getAssumeRoleAK(config *connectivity.Config) (string, string, string, error
 		return "", "", "", err
 	}
 
-	client.Domain = config.StsEndpoint
+	client.Domain = config.Endpoints[connectivity.STSCode]
 	client.AppendUserAgent(connectivity.Terraform, connectivity.TerraformVersion)
 	client.AppendUserAgent(connectivity.Provider, connectivity.ProviderVersion)
 	client.AppendUserAgent(connectivity.Module, config.ConfigurationSource)
@@ -1358,94 +1039,69 @@ func getAssumeRoleAK(config *connectivity.Config) (string, string, string, error
 	return response.Credentials.AccessKeyId, response.Credentials.AccessKeySecret, response.Credentials.SecurityToken, nil
 }
 
-func getResourceCredentials(config *connectivity.Config) (string, string, error) {
-	endpoint := config.AscmEndpoint
-	if endpoint == "" {
-		return "", "", fmt.Errorf("unable to initialize the ascm client: endpoint or domain is not provided for ascm service")
-	}
-	if endpoint != "" {
-		endpoints.AddEndpointMapping(config.RegionId, string(connectivity.ASCMCode), endpoint)
-	}
-	ascmClient, err := sdk.NewClientWithAccessKey(config.RegionId, config.AccessKey, config.SecretKey)
-	if err != nil {
-		return "", "", fmt.Errorf("unable to initialize the ascm client: %#v", err)
-	}
-
-	ascmClient.AppendUserAgent(connectivity.Terraform, connectivity.TerraformVersion)
-	ascmClient.AppendUserAgent(connectivity.Provider, connectivity.ProviderVersion)
-	ascmClient.AppendUserAgent(connectivity.Module, config.ConfigurationSource)
-	ascmClient.SetHTTPSInsecure(config.Insecure)
-	ascmClient.Domain = endpoint
-	if config.Proxy != "" {
-		ascmClient.SetHttpProxy(config.Proxy)
-	}
-	if config.ResourceSetName == "" {
-		return "", "", fmt.Errorf("errror while fetching resource group details, resource group set name can not be empty")
+func getResourceCredentials(config *connectivity.Config) (string, string, int, error) {
+	endpoint := config.Endpoints[connectivity.ASCMCode]
+	var client *sts.Client
+	var err error
+	if config.SecurityToken == "" {
+		client, err = sts.NewClientWithAccessKey(config.RegionId, config.AccessKey, config.SecretKey)
+	} else {
+		client, err = sts.NewClientWithStsToken(config.RegionId, config.AccessKey, config.SecretKey, config.SecurityToken)
 	}
 	request := requests.NewCommonRequest()
 	if config.Insecure {
 		request.SetHTTPSInsecure(config.Insecure)
 	}
+	client.Domain = endpoint
+	if config.Proxy != "" {
+		client.SetHttpProxy(config.Proxy)
+	}
 	request.RegionId = config.RegionId
-	request.Method = "GET"         // Set request method
-	request.Product = "ascm"       // Specify product
-	request.Domain = endpoint      // Location Service will not be enabled if the host is specified. For example, service with a Certification type-Bearer Token should be specified
-	request.Version = "2019-05-10" // Specify product version
-	// Set request scheme. Default: http
 	if strings.ToLower(config.Protocol) == "https" {
-		log.Printf("PROTOCOL SET TO HTTPS")
 		request.Scheme = "https"
 	} else {
-		log.Printf("PROTOCOL SET TO HTTP")
 		request.Scheme = "http"
 	}
-	if config.Insecure {
-		ascmClient.SetHTTPSInsecure(config.Insecure)
-	}
+	request.Domain = endpoint
+	request.Version = "2019-05-10"
+	request.Method = "POST"
+	request.Product = "ascm"
 	request.ApiName = "ListResourceGroup"
+	if !strings.HasPrefix(client.Domain, "internal.asapi.") && !strings.HasPrefix(client.Domain, "public.asapi.") {
+		request.PathPattern = "/ascm/auth/resource_group/list_resource_group"
+	}
 	request.QueryParams = map[string]string{
-		"Product":           "ascm",
-		"Department":        config.Department,
-		"ResourceGroup":     config.ResourceGroup,
-		"RegionId":          config.RegionId,
-		"Action":            "ListResourceGroup",
-		"Version":           "2019-05-10",
-		"SignatureVersion":  "1.0",
 		"resourceGroupName": config.ResourceSetName,
+		"pageNumber":        "1",
+		"pageSize":          "10",
 	}
-	resp := responses.BaseResponse{}
-	if config.Insecure {
-		request.SetHTTPSInsecure(config.Insecure)
-	}
-	request.TransToAcsRequest()
-	log.Printf("[DEBUG] %s %s %s start !!!!!!!!!!!!", request.GetActionName(), request.GetProduct(), request.GetVersion())
-	err = ascmClient.DoAction(request, &resp)
-	log.Printf("[DEBUG] %s %s %s end !!!!!!!!!!!!", request.GetActionName(), request.GetProduct(), request.GetVersion())
-	addDebug(request.GetActionName(), resp, request, request.QueryParams)
+	request.Headers["Content-Type"] = "application/json"
+	request.Headers["x-ascm-product-name"] = "ascm"
+	resp, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), resp, request.QueryParams, request)
 	if err != nil {
-		return "", "", err
+		return "", "", 0, err
 	}
 	response := &ResourceGroup{}
 	err = json.Unmarshal(resp.GetHttpContentBytes(), response)
 	if err != nil {
-		return "", "", err
+		return "", "", 0, err
 	}
+
 	var deptId int   // Organization ID
 	var resGrpId int //ID of resource set
+	var resGrp string
 	deptId = 0
-	resGrpId = 0
 	if len(response.Data) == 0 || response.Code != "200" {
-		if response.Message != "" {
-			return "", "", fmt.Errorf("unable to initialize the ascm client: %s", response.Message)
-		}
 		if len(response.Data) == 0 {
-			return "", "", fmt.Errorf("resource group ID and organization not found for resource set %s", config.ResourceSetName)
+			return "", "", 0, fmt.Errorf("resource group ID and organization not found for resource set %s", config.ResourceSetName)
 		}
-		return "", "", fmt.Errorf("unable to initialize the ascm client: department or resource_group is not provided")
+		return "", "", 0, fmt.Errorf("unable to initialize the ascm client: department or resource_group is not provided")
 	} else {
 		for _, j := range response.Data {
 			if j.ResourceGroupName == config.ResourceSetName {
 				deptId = j.OrganizationID
+				resGrp = j.RsID
 				resGrpId = j.ID
 				break
 			}
@@ -1453,9 +1109,9 @@ func getResourceCredentials(config *connectivity.Config) (string, string, error)
 	}
 
 	//log.Printf("[INFO] Get Resource Group Details Succssfull for Resource set: %s : Department: %s, ResourceGroupId: %s", config.ResourceSetName, fmt.Sprint(response.Data[0].OrganizationID), fmt.Sprint(response.Data[0].ID))
-	log.Printf("[INFO] Get Resource Group Details Succssfull for Resource set: %s : Department: %s, ResourceGroupId: %s", config.ResourceSetName, fmt.Sprint(deptId), fmt.Sprint(resGrpId))
+	log.Printf("[INFO] Get Resource Group Details Succssfull for Resource set: %s : Department: %d, ResourceGroup: %s, ResourceGroupId: %d", config.ResourceSetName, deptId, resGrp, resGrpId)
 	//return fmt.Sprint(response.Data[0].OrganizationID), fmt.Sprint(response.Data[0].ID), err
-	return fmt.Sprint(deptId), fmt.Sprint(resGrpId), err
+	return fmt.Sprint(deptId), resGrp, resGrpId, err
 
 }
 

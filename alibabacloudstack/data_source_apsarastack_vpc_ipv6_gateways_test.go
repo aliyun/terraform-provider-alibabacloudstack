@@ -4,15 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
 func TestAccAlibabacloudStackVpcIpv6GatewaysDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_vpc_ipv6_gateways.default"
 	rand := acctest.RandIntRange(1000000, 9999999)
-	checkoutSupportedRegions(t, true, connectivity.VpcIpv6GatewaySupportRegions)
 	name := fmt.Sprintf("tf-testacc-vpcipv6gateway-%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceVpcIpv6GatewaysDependence)
 

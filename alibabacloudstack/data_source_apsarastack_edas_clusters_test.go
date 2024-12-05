@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
@@ -76,11 +75,7 @@ func TestAccAlibabacloudStackEdasClustersDataSource(t *testing.T) {
 		fakeMapFunc:  fakeEdasClustersMapFunc,
 	}
 
-	preCheck := func() {
-		testAccPreCheckWithRegions(t, true, connectivity.EdasSupportedRegions)
-	}
-
-	edasApplicationCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, idsConf, allConf)
+	edasApplicationCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
 func dataSourceEdasClustersConfigDependence(name string) string {

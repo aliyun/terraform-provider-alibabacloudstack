@@ -2,12 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -15,48 +13,34 @@ type GdbService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
+func (s *GdbService) DoGdbDescribedbinstanceaccesswhitelistRequest(id string) (object map[string]interface{}, err error) {
+	return s.DescribeGraphDatabaseDbInstance(id)
+}
+
 func (s *GdbService) DescribeGraphDatabaseDbInstance(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewGdbClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "DescribeDBInstanceAttribute"
 	request := map[string]interface{}{
 		"DBInstanceId": id,
 	}
-	request["Product"] = "gdb"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-03"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	request["PageSize"] = 1
+	request["PageNumber"] = 1
+	response, err = s.client.DoTeaRequest("POST", "gdb", "2019-09-03", "DescribeDBInstanceAttribute", "", nil, request)
+	addDebug("DescribeDBInstanceAttribute", response, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstance.NotFound", "InvalidDBInstanceId.NotFound"}) {
-			return object, WrapErrorf(Error(GetNotFoundMessage("GraphDatabase:DbInstance", id)), NotFoundMsg, ProviderERROR, fmt.Sprint(response["RequestId"]))
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstance.NotFound", "InvalidDBInstanceId.NotFound"}) {
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GraphDatabase:DbInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
-		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+		return object, err
 	}
 	v, err := jsonpath.Get("$.Items.DBInstance", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.Items.DBInstance", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Items.DBInstance", response)
 	}
 	if len(v.([]interface{})) < 1 {
-		return object, WrapErrorf(Error(GetNotFoundMessage("GraphDatabase", id)), NotFoundWithResponse, response)
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GraphDatabase", id)), errmsgs.NotFoundWithResponse, response)
 	} else {
 		if fmt.Sprint(v.([]interface{})[0].(map[string]interface{})["DBInstanceId"]) != id {
-			return object, WrapErrorf(Error(GetNotFoundMessage("GraphDatabase", id)), NotFoundWithResponse, response)
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GraphDatabase", id)), errmsgs.NotFoundWithResponse, response)
 		}
 	}
 	object = v.([]interface{})[0].(map[string]interface{})
@@ -72,40 +56,22 @@ func (s *GdbService) DescribeGraphDatabaseDbInstance(id string) (object map[stri
 
 func (s *GdbService) GetDBInstanceAccessWhiteList(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewGdbClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "DescribeDBInstanceAccessWhiteList"
 	request := map[string]interface{}{
 		"DBInstanceId": id,
 	}
-	request["Product"] = "gdb"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-03"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	request["PageSize"] = 1
+	request["PageNumber"] = 1
+	response, err = s.client.DoTeaRequest("POST", "gdb", "2019-09-03", "DescribeDBInstanceAccessWhiteList", "", nil, request)
+	addDebug("DescribeDBInstanceAccessWhiteList", response, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstance.NotFound", "InvalidDBInstanceId.NotFound"}) {
-			return object, WrapErrorf(Error(GetNotFoundMessage("GraphDatabase:DbInstance", id)), NotFoundMsg, ProviderERROR, fmt.Sprint(response["RequestId"]))
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstance.NotFound", "InvalidDBInstanceId.NotFound"}) {
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GraphDatabase:DbInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
-		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+		return object, err
 	}
 	v, err := jsonpath.Get("$.Items", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.Items", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Items", response)
 	}
 	object = v.(map[string]interface{})
 	return object, nil
@@ -115,16 +81,16 @@ func (s *GdbService) GraphDatabaseDbInstanceStateRefreshFunc(id string, failStat
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeGraphDatabaseDbInstance(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if fmt.Sprint(object["DBInstanceStatus"]) == failState {
-				return object, fmt.Sprint(object["DBInstanceStatus"]), WrapError(Error(FailedToReachTargetStatus, fmt.Sprint(object["DBInstanceStatus"])))
+				return object, fmt.Sprint(object["DBInstanceStatus"]), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(object["DBInstanceStatus"])))
 			}
 		}
 		return object, fmt.Sprint(object["DBInstanceStatus"]), nil
@@ -133,46 +99,27 @@ func (s *GdbService) GraphDatabaseDbInstanceStateRefreshFunc(id string, failStat
 
 func (s *GdbService) DescribeDBInstanceAttribute(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewGdbClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "DescribeDBInstanceAttribute"
 	request := map[string]interface{}{
 		"DBInstanceId": id,
 	}
-	request["Product"] = "gdb"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-03"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	request["PageSize"] = 1
+	request["PageNumber"] = 1
+	response, err = s.client.DoTeaRequest("POST", "gdb", "2019-09-03", "DescribeDBInstanceAttribute", "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstance.NotFound"}) {
-			return object, WrapErrorf(Error(GetNotFoundMessage("GraphDatabase:DbInstance", id)), NotFoundMsg, ProviderERROR, fmt.Sprint(response["RequestId"]))
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstance.NotFound"}) {
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GraphDatabase:DbInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
-		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+		return object, err
 	}
 	v, err := jsonpath.Get("$.Items.DBInstance", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.Items.DBInstance", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Items.DBInstance", response)
 	}
 	if len(v.([]interface{})) < 1 {
-		return object, WrapErrorf(Error(GetNotFoundMessage("GraphDatabase", id)), NotFoundWithResponse, response)
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GraphDatabase", id)), errmsgs.NotFoundWithResponse, response)
 	} else {
 		if fmt.Sprint(v.([]interface{})[0].(map[string]interface{})["DBInstanceId"]) != id {
-			return object, WrapErrorf(Error(GetNotFoundMessage("GraphDatabase", id)), NotFoundWithResponse, response)
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GraphDatabase", id)), errmsgs.NotFoundWithResponse, response)
 		}
 	}
 	object = v.([]interface{})[0].(map[string]interface{})

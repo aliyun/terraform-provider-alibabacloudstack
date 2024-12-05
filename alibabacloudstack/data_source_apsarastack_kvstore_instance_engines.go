@@ -6,6 +6,7 @@ import (
 
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -21,14 +22,11 @@ func dataSourceAlibabacloudStackKVStoreInstanceEngines() *schema.Resource {
 				ForceNew: true,
 			},
 			"engine": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(KVStoreMemcache),
-					string(KVStoreRedis),
-				}, false),
-				Default: string(KVStoreRedis),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{string(KVStoreMemcache), string(KVStoreRedis)}, false),
+				Default:      string(KVStoreRedis),
 			},
 			"engine_version": {
 				Type:     schema.TypeString,
@@ -75,31 +73,33 @@ func dataSourceAlibabacloudStackKVStoreInstanceEnginesRead(d *schema.ResourceDat
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := r_kvstore.CreateDescribeAvailableResourceRequest()
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.ZoneId = d.Get("zone_id").(string)
 	instanceChargeType := d.Get("instance_charge_type").(string)
 	request.InstanceChargeType = instanceChargeType
 	request.Engine = d.Get("engine").(string)
-	var response = &r_kvstore.DescribeAvailableResourceResponse{}
+	var response *r_kvstore.DescribeAvailableResourceResponse
 	err := resource.Retry(time.Minute*5, func() *resource.RetryError {
 		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 			return rkvClient.DescribeAvailableResource(request)
 		})
+		response, ok := raw.(*r_kvstore.DescribeAvailableResourceResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{Throttling}) {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
 				time.Sleep(time.Duration(5) * time.Second)
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_kvstore_instance_engines", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response = raw.(*r_kvstore.DescribeAvailableResourceResponse)
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_kvstore_instance_engines", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	var infos []map[string]interface{}
@@ -151,12 +151,12 @@ func dataSourceAlibabacloudStackKVStoreInstanceEnginesRead(d *schema.ResourceDat
 	d.SetId(dataResourceIdHash(ids))
 	err = d.Set("instance_engines", infos)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok {
 		err = writeToFile(output.(string), infos)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 	return nil

@@ -4,14 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -240,30 +237,11 @@ func resourceAlibabacloudStackDtsSynchronizationJobCreate(d *schema.ResourceData
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "ConfigureDtsJob"
-	request := requests.NewCommonRequest()
-	request.ApiName = action
-	request.Version = "2020-01-01"
-	request.Method = "POST"
-	request.Product = "Dts"
-	request.RegionId = client.RegionId
-	request.Domain = client.Domain
+	request := client.NewCommonRequest("POST", "Dts", "2020-01-01", action, "")
 	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
-	request.Headers["x-acs-regionid"] = client.RegionId
-	request.Headers["x-acs-resourcegroupid"] = client.ResourceGroup
-	request.Headers["x-acs-organizationid"] = client.Department
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-type"] = "application/json"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":                        client.RegionId,
-		"Product":                         "Dts",
-		"Version":                         "2020-01-01",
-		"Action":                          "ConfigureDtsJob",
-		"OrganizationId":                  client.Department,
+	mergeMaps(request.QueryParams, map[string]string{
 		"DbList":                          d.Get("db_list").(string),
 		"DtsJobName":                      d.Get("dts_job_name").(string),
 		"DataInitialization":              fmt.Sprintf("%t", d.Get("data_initialization").(bool)),
@@ -273,7 +251,7 @@ func resourceAlibabacloudStackDtsSynchronizationJobCreate(d *schema.ResourceData
 		"DestinationEndpointInstanceType": d.Get("destination_endpoint_instance_type").(string),
 		"SourceEndpointInstanceType":      d.Get("source_endpoint_instance_type").(string),
 		"JobType":                         "SYNC",
-	}
+	})
 	if v, ok := d.GetOk("dts_job_id"); ok {
 		request.QueryParams["DtsJobId"] = v.(string)
 	}
@@ -366,7 +344,7 @@ func resourceAlibabacloudStackDtsSynchronizationJobCreate(d *schema.ResourceData
 		request.QueryParams["SourceEndpointUserName"] = v.(string)
 	}
 	wait := incrementalWait(3*time.Second, 3*time.Second)
-	request.Domain = client.Config.AscmEndpoint
+	request.Domain = client.Config.Endpoints[connectivity.DTSCode]
 	var err error
 	var dtsClient *sts.Client
 	if client.Config.SecurityToken == "" {
@@ -374,15 +352,20 @@ func resourceAlibabacloudStackDtsSynchronizationJobCreate(d *schema.ResourceData
 	} else {
 		dtsClient, err = sts.NewClientWithStsToken(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)
 	}
-	dtsClient.Domain = client.Config.AscmEndpoint
+	dtsClient.Domain = client.Config.Endpoints[connectivity.DTSCode]
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		raw, err := dtsClient.ProcessCommonRequest(request)
 		addDebug(action, raw, request, request.QueryParams)
 		if err != nil {
-			if NeedRetry(err) {
+			if errmsgs.NeedRetry(err) {
 				wait()
 				return resource.RetryableError(err)
 			}
+			errmsg := ""
+			if raw != nil {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(raw.BaseResponse)
+			}
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dts_synchronization_job", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			return resource.NonRetryableError(err)
 		}
 		err = json.Unmarshal(raw.GetHttpContentBytes(), &response)
@@ -392,7 +375,7 @@ func resourceAlibabacloudStackDtsSynchronizationJobCreate(d *schema.ResourceData
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dts_synchronization_job", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	d.SetId(fmt.Sprint(response["DtsJobId"]))
@@ -400,22 +383,23 @@ func resourceAlibabacloudStackDtsSynchronizationJobCreate(d *schema.ResourceData
 	dtsService := DtsService{client}
 	stateConf := BuildStateConf([]string{}, []string{"Synchronizing"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, dtsService.DtsSynchronizationJobStateRefreshFunc(d.Id(), []string{"InitializeFailed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return resourceAlibabacloudStackDtsSynchronizationJobUpdate(d, meta)
 }
+
 func resourceAlibabacloudStackDtsSynchronizationJobRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	dtsService := DtsService{client}
 	object, err := dtsService.DescribeDtsSynchronizationJob(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_dts_synchronization_job dtsService.DescribeDtsSynchronizationJob Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	migrationModeObj := object["MigrationMode"].(map[string]interface{})
 	destinationEndpointObj := object["DestinationEndpoint"].(map[string]interface{})
@@ -452,6 +436,7 @@ func resourceAlibabacloudStackDtsSynchronizationJobRead(d *schema.ResourceData, 
 
 	return nil
 }
+
 func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	d.Partial(true)
@@ -462,33 +447,16 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 	} else {
 		dtsClient, err = sts.NewClientWithStsToken(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)
 	}
-	dtsClient.Domain = client.Config.AscmEndpoint
+	dtsClient.Domain = client.Config.Endpoints[connectivity.DTSCode]
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
-	request := requests.NewCommonRequest()
-	request.Version = "2020-01-01"
-	request.Method = "POST"
-	request.Product = "Dts"
-	request.RegionId = client.RegionId
-	request.Domain = client.Domain
+	request := client.NewCommonRequest("POST", "Dts", "2020-01-01", "", "")
 	request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
-	request.Headers["x-acs-regionid"] = client.RegionId
-	request.Headers["x-acs-resourcegroupid"] = client.ResourceGroup
-	request.Headers["x-acs-organizationid"] = client.Department
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-type"] = "application/json"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":       client.RegionId,
-		"product":        "Dts",
-		"OrganizationId": client.Department,
-		"DtsJobId":       d.Id(),
-	}
+	request.QueryParams["DtsJobId"] = d.Id()
+
 	update := false
 	if !d.IsNewResource() && d.HasChange("dts_job_name") {
 		update = true
@@ -505,10 +473,16 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 			raw, err := dtsClient.ProcessCommonRequest(request)
 			addDebug(action, raw, request, request.QueryParams)
 			if err != nil {
-				if NeedRetry(err) {
+				if errmsgs.NeedRetry(err) {
 					wait()
 					return resource.RetryableError(err)
 				}
+				errmsg := ""
+				if raw != nil {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(raw.BaseResponse)
+				}
+				err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dts_synchronization_job", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
 				return resource.NonRetryableError(err)
 			}
 			err = json.Unmarshal(raw.GetHttpContentBytes(), &response)
@@ -518,38 +492,18 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 			return nil
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dts_synchronization_job", action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
 		if fmt.Sprint(response["Success"]) == "false" {
-			return WrapError(fmt.Errorf("%s failed, response: %v", action, response))
+			return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
 		}
 		// d.SetPartial("dts_job_name")
 	}
-	modifyDtsJobPasswordReq := requests.NewCommonRequest()
-	modifyDtsJobPasswordReq.Version = "2020-01-01"
-	modifyDtsJobPasswordReq.Method = "POST"
-	modifyDtsJobPasswordReq.Product = "Dts"
-	modifyDtsJobPasswordReq.RegionId = client.RegionId
-	modifyDtsJobPasswordReq.Domain = client.Domain
+	modifyDtsJobPasswordReq := client.NewCommonRequest("POST", "Dts", "2020-01-01", "", "")
 	modifyDtsJobPasswordReq.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
-	modifyDtsJobPasswordReq.Headers["x-acs-regionid"] = client.RegionId
-	modifyDtsJobPasswordReq.Headers["x-acs-resourcegroupid"] = client.ResourceGroup
-	modifyDtsJobPasswordReq.Headers["x-acs-organizationid"] = client.Department
 	modifyDtsJobPasswordReq.Headers["x-acs-content-type"] = "application/json"
 	modifyDtsJobPasswordReq.Headers["Content-type"] = "application/json"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		modifyDtsJobPasswordReq.Scheme = "https"
-	} else {
-		modifyDtsJobPasswordReq.Scheme = "http"
-	}
-	modifyDtsJobPasswordReq.QueryParams = map[string]string{
-		"DtsJobId":       d.Id(),
-		"RegionId":       client.RegionId,
-		"Product":        "Dts",
-		"Version":        "2020-01-01",
-		"OrganizationId": client.Department,
-		"ResourceId":     client.ResourceGroup,
-	}
+	modifyDtsJobPasswordReq.QueryParams["DtsJobId"] = d.Id()
 	if !d.IsNewResource() && d.HasChange("source_endpoint_password") {
 
 		modifyDtsJobPasswordReq.QueryParams["Endpoint"] = "src"
@@ -570,10 +524,16 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 			raw, err := dtsClient.ProcessCommonRequest(modifyDtsJobPasswordReq)
 			addDebug(action, raw, modifyDtsJobPasswordReq, modifyDtsJobPasswordReq.QueryParams)
 			if err != nil {
-				if NeedRetry(err) {
+				if errmsgs.NeedRetry(err) {
 					wait()
 					return resource.RetryableError(err)
 				}
+				errmsg := ""
+				if raw != nil {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(raw.BaseResponse)
+				}
+				err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dts_synchronization_job", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
 				return resource.NonRetryableError(err)
 			}
 			err = json.Unmarshal(raw.GetHttpContentBytes(), &response)
@@ -583,10 +543,10 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 			return nil
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dts_synchronization_job", action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
 		if fmt.Sprint(response["Success"]) == "false" {
-			return WrapError(fmt.Errorf("%s failed, response: %v", action, response))
+			return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
 		}
 		// d.SetPartial("source_endpoint_password")
 		// d.SetPartial("source_endpoint_user_name")
@@ -594,13 +554,13 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 		target := d.Get("status").(string)
 		err = resourceAlibabacloudStackDtsSynchronizationJobStatusFlow(d, meta, target)
 		if err != nil {
-			return WrapError(Error(FailedToReachTargetStatus, d.Get("status")))
+			return errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, d.Get("status")))
 		}
 	}
 
 	if !d.IsNewResource() && d.HasChange("destination_endpoint_password") {
 
-		modifyDtsJobPasswordReq.QueryParams["Endpoint"] = "src"
+		modifyDtsJobPasswordReq.QueryParams["Endpoint"] = "dst"
 		if v, ok := d.GetOk("destination_endpoint_password"); ok {
 			modifyDtsJobPasswordReq.QueryParams["Password"] = v.(string)
 		}
@@ -618,10 +578,16 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 			raw, err := dtsClient.ProcessCommonRequest(modifyDtsJobPasswordReq)
 			addDebug(action, raw, modifyDtsJobPasswordReq, modifyDtsJobPasswordReq.QueryParams)
 			if err != nil {
-				if NeedRetry(err) {
+				if errmsgs.NeedRetry(err) {
 					wait()
 					return resource.RetryableError(err)
 				}
+				errmsg := ""
+				if raw != nil {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(raw.BaseResponse)
+				}
+				err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dts_synchronization_job", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
 				return resource.NonRetryableError(err)
 			}
 			err = json.Unmarshal(raw.GetHttpContentBytes(), &response)
@@ -631,10 +597,10 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 			return nil
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dts_synchronization_job", action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
 		if fmt.Sprint(response["Success"]) == "false" {
-			return WrapError(fmt.Errorf("%s failed, response: %v", action, response))
+			return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
 		}
 		// d.SetPartial("source_endpoint_password")
 		// d.SetPartial("source_endpoint_user_name")
@@ -642,37 +608,17 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 		target := d.Get("status").(string)
 		err = resourceAlibabacloudStackDtsSynchronizationJobStatusFlow(d, meta, target)
 		if err != nil {
-			return WrapError(Error(FailedToReachTargetStatus, d.Get("status")))
+			return errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, d.Get("status")))
 		}
 	}
 
 	update = false
-	transferInstanceClassReq := requests.NewCommonRequest()
-	transferInstanceClassReq.Version = "2020-01-01"
-	transferInstanceClassReq.Method = "POST"
-	transferInstanceClassReq.Product = "Dts"
-	transferInstanceClassReq.RegionId = client.RegionId
-	transferInstanceClassReq.Domain = client.Domain
+	transferInstanceClassReq := client.NewCommonRequest("POST", "Dts", "2020-01-01", "", "")
 	transferInstanceClassReq.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
-	transferInstanceClassReq.Headers["x-acs-regionid"] = client.RegionId
-	transferInstanceClassReq.Headers["x-acs-resourcegroupid"] = client.ResourceGroup
-	transferInstanceClassReq.Headers["x-acs-organizationid"] = client.Department
 	transferInstanceClassReq.Headers["x-acs-content-type"] = "application/json"
 	transferInstanceClassReq.Headers["Content-type"] = "application/json"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		transferInstanceClassReq.Scheme = "https"
-	} else {
-		transferInstanceClassReq.Scheme = "http"
-	}
-	transferInstanceClassReq.QueryParams = map[string]string{
-		"DtsJobId":       d.Id(),
-		"RegionId":       client.RegionId,
-		"Product":        "Dts",
-		"Version":        "2020-01-01",
-		"OrganizationId": client.Department,
-		"ResourceId":     client.ResourceGroup,
-		"OrderType":      "UPGRADE",
-	}
+	transferInstanceClassReq.QueryParams["DtsJobId"] = d.Id()
+	transferInstanceClassReq.QueryParams["OrderType"] = "UPGRADE"
 	if !d.IsNewResource() && d.HasChange("instance_class") {
 		if v, ok := d.GetOk("instance_class"); ok {
 			transferInstanceClassReq.QueryParams["InstanceClass"] = v.(string)
@@ -690,10 +636,15 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 			raw, err := dtsClient.ProcessCommonRequest(transferInstanceClassReq)
 			addDebug(action, raw, transferInstanceClassReq, transferInstanceClassReq.QueryParams)
 			if err != nil {
-				if NeedRetry(err) {
+				if errmsgs.NeedRetry(err) {
 					wait()
 					return resource.RetryableError(err)
 				}
+				errmsg := ""
+				if raw != nil {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(raw.BaseResponse)
+				}
+				err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dts_synchronization_job", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 				return resource.NonRetryableError(err)
 			}
 			err = json.Unmarshal(raw.GetHttpContentBytes(), &response)
@@ -703,10 +654,10 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 			return nil
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dts_synchronization_job", action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
 		if fmt.Sprint(response["Success"]) == "false" {
-			return WrapError(fmt.Errorf("%s failed, response: %v", action, response))
+			return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
 		}
 	}
 
@@ -714,21 +665,17 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 		target := d.Get("status").(string)
 		err := resourceAlibabacloudStackDtsSynchronizationJobStatusFlow(d, meta, target)
 		if err != nil {
-			return WrapError(Error(FailedToReachTargetStatus, d.Get("status")))
+			return errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, d.Get("status")))
 		}
 	}
 
 	d.Partial(false)
 	return resourceAlibabacloudStackDtsSynchronizationJobRead(d, meta)
 }
+
 func resourceAlibabacloudStackDtsSynchronizationJobDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "ResetDtsJob"
-	var response map[string]interface{}
-	conn, err := client.NewDtsClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	request := map[string]interface{}{
 		"DtsJobId": d.Id(),
 	}
@@ -736,27 +683,12 @@ func resourceAlibabacloudStackDtsSynchronizationJobDelete(d *schema.ResourceData
 	if v, ok := d.GetOk("dts_instance_id"); ok {
 		request["DtsInstanceId"] = v
 	}
-	request["RegionId"] = client.RegionId
-	request["product"] = "Dts"
-	request["OrganizationId"] = client.Department
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-01-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	_, err := client.DoTeaRequest("POST", "Dts", "2020-01-01", action, "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"Forbidden.InstanceNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.InstanceNotFound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	return nil
 }
@@ -767,7 +699,7 @@ func resourceAlibabacloudStackDtsSynchronizationJobStatusFlow(d *schema.Resource
 	dtsService := DtsService{client}
 	object, err := dtsService.DescribeDtsSynchronizationJob(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if object["Status"].(string) != target {
 		var err error
@@ -777,49 +709,33 @@ func resourceAlibabacloudStackDtsSynchronizationJobStatusFlow(d *schema.Resource
 		} else {
 			dtsClient, err = sts.NewClientWithStsToken(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)
 		}
-		dtsClient.Domain = client.Config.AscmEndpoint
+		dtsClient.Domain = client.Config.Endpoints[connectivity.DTSCode]
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if target == "Synchronizing" || target == "Suspending" {
 			action := "StartDtsJob"
-			request := requests.NewCommonRequest()
-			request.Version = "2020-01-01"
-			request.Method = "POST"
-			request.Product = "Dts"
-			request.RegionId = client.RegionId
-			request.Domain = client.Domain
-			request.ApiName = action
+			request := client.NewCommonRequest("POST", "Dts", "2020-01-01", action, "")
 			request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
-			request.Headers["x-acs-regionid"] = client.RegionId
-			request.Headers["x-acs-resourcegroupid"] = client.ResourceGroup
-			request.Headers["x-acs-organizationid"] = client.Department
 			request.Headers["x-acs-content-type"] = "application/json"
 			request.Headers["Content-type"] = "application/json"
-			if strings.ToLower(client.Config.Protocol) == "https" {
-				request.Scheme = "https"
-			} else {
-				request.Scheme = "http"
-			}
-			request.QueryParams = map[string]string{
-				"DtsJobId":       d.Id(),
-				"RegionId":       client.RegionId,
-				"Product":        "Dts",
-				"Version":        "2020-01-01",
-				"Action":         action,
-				"OrganizationId": client.Department,
-				"ResourceId":     client.ResourceGroup,
-			}
+			request.QueryParams["DtsJobId"] = d.Id()
 			wait := incrementalWait(3*time.Second, 3*time.Second)
 			response := make(map[string]interface{})
 			err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 				raw, err := dtsClient.ProcessCommonRequest(request)
 				addDebug(action, raw, request, request.QueryParams)
 				if err != nil {
-					if NeedRetry(err) {
+					if errmsgs.NeedRetry(err) {
 						wait()
 						return resource.RetryableError(err)
 					}
+					errmsg := ""
+					if raw != nil {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(raw.BaseResponse)
+					}
+					err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dts_subscription_job", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
 					return resource.NonRetryableError(err)
 				}
 				err = json.Unmarshal(raw.GetHttpContentBytes(), &response)
@@ -829,55 +745,39 @@ func resourceAlibabacloudStackDtsSynchronizationJobStatusFlow(d *schema.Resource
 				return nil
 			})
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dts_subscription_job", action, AlibabacloudStackSdkGoERROR)
+				return err
 			}
 			if fmt.Sprint(response["Success"]) == "false" {
-				return WrapError(fmt.Errorf("%s failed, response: %v", action, response))
+				return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
 			}
 			stateConf := BuildStateConf([]string{}, []string{"Synchronizing"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, dtsService.DtsSynchronizationJobStateRefreshFunc(d.Id(), []string{"InitializeFailed"}))
 			if _, err := stateConf.WaitForState(); err != nil {
-				return WrapErrorf(err, IdMsg, d.Id())
+				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
 		}
 		if target == "Suspending" {
 			action := "SuspendDtsJob"
-			request := requests.NewCommonRequest()
-			request.Version = "2020-01-01"
-			request.Method = "POST"
-			request.Product = "Dts"
-			request.RegionId = client.RegionId
-			request.Domain = client.Domain
-			request.ApiName = action
+			request := client.NewCommonRequest("POST", "Dts", "2020-01-01", action, "")
 			request.Headers["x-acs-caller-sdk-source"] = "Terraform" // 必填，调用来源说明
-			request.Headers["x-acs-regionid"] = client.RegionId
-			request.Headers["x-acs-resourcegroupid"] = client.ResourceGroup
-			request.Headers["x-acs-organizationid"] = client.Department
 			request.Headers["x-acs-content-type"] = "application/json"
 			request.Headers["Content-type"] = "application/json"
-			if strings.ToLower(client.Config.Protocol) == "https" {
-				request.Scheme = "https"
-			} else {
-				request.Scheme = "http"
-			}
-			request.QueryParams = map[string]string{
-				"DtsJobId":       d.Id(),
-				"RegionId":       client.RegionId,
-				"Product":        "Dts",
-				"Version":        "2020-01-01",
-				"Action":         action,
-				"OrganizationId": client.Department,
-				"ResourceId":     client.ResourceGroup,
-			}
+			request.QueryParams["DtsJobId"] = d.Id()
 			wait := incrementalWait(3*time.Second, 3*time.Second)
 			response := make(map[string]interface{})
 			err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 				raw, err := dtsClient.ProcessCommonRequest(request)
 				addDebug(action, raw, request, request.QueryParams)
 				if err != nil {
-					if NeedRetry(err) {
+					if errmsgs.NeedRetry(err) {
 						wait()
 						return resource.RetryableError(err)
 					}
+					errmsg := ""
+					if raw != nil {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(raw.BaseResponse)
+					}
+					err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dts_subscription_job", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
 					return resource.NonRetryableError(err)
 				}
 				err = json.Unmarshal(raw.GetHttpContentBytes(), &response)
@@ -887,14 +787,14 @@ func resourceAlibabacloudStackDtsSynchronizationJobStatusFlow(d *schema.Resource
 				return nil
 			})
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dts_subscription_job", action, AlibabacloudStackSdkGoERROR)
+				return err
 			}
 			if fmt.Sprint(response["Success"]) == "false" {
-				return WrapError(fmt.Errorf("%s failed, response: %v", action, response))
+				return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
 			}
 			stateConf := BuildStateConf([]string{}, []string{"Suspending"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, dtsService.DtsSynchronizationJobStateRefreshFunc(d.Id(), []string{}))
 			if _, err := stateConf.WaitForState(); err != nil {
-				return WrapErrorf(err, IdMsg, d.Id())
+				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
 		}
 		// d.SetPartial("status")

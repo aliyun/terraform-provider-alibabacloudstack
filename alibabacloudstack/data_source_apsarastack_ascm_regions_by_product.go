@@ -2,13 +2,12 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
-	"strings"
 )
 
 func dataSourceAlibabacloudStackRegionsByProduct() *schema.Resource {
@@ -57,22 +56,7 @@ func dataSourceAlibabacloudStackRegionsByProduct() *schema.Resource {
 
 func dataSourceAlibabacloudStackRegionsByProductRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "GET"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.ApiName = "GetRegionsByProduct"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{  "Product": "ascm", "RegionId": client.RegionId, "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Action": "GetRegionsByProduct", "Version": "2019-05-10"}
+	request := client.NewCommonRequest("GET", "ascm", "2019-05-10", "GetRegionsByProduct", "")
 	response := RegionsByProduct{}
 
 	for {
@@ -81,15 +65,18 @@ func dataSourceAlibabacloudStackRegionsByProductRead(d *schema.ResourceData, met
 		})
 		log.Printf(" response of raw GetRegionsByProduct : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_regions_by_product", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_regions_by_product", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Code == 200 || len(response.Body.RegionList) < 1 {
 			break
@@ -110,7 +97,7 @@ func dataSourceAlibabacloudStackRegionsByProductRead(d *schema.ResourceData, met
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("region_list", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

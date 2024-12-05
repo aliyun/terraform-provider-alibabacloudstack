@@ -1,8 +1,9 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackGpdbInstancesDataSource(t *testing.T) {
@@ -26,9 +27,7 @@ func TestAccAlibabacloudStackGpdbInstancesDataSource(t *testing.T) {
 }
 
 const testAccCheckAlibabacloudStackGpdbInstancesDataSource = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 		data "alibabacloudstack_zones" "default" {
 
        }

@@ -2,16 +2,15 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
 	"regexp"
 	"strconv"
-	"strings"
 )
 
 func dataSourceAlibabacloudStackDnsRecords() *schema.Resource {
@@ -91,29 +90,9 @@ func dataSourceAlibabacloudStackDnsRecords() *schema.Resource {
 func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ZoneId := d.Get("zone_id").(string)
-	request := requests.NewCommonRequest()
 
-	request.Domain = client.Domain
-	request.Method = "POST"
-	request.Product = "CloudDns"
-	request.Version = "2021-06-24"
-	request.ServiceCode = "CloudDns"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "DescribeGlobalZoneRecords"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"RegionId":        client.RegionId,
-		"Product":         "CloudDns",
-		"Action":          "DescribeGlobalZoneRecords",
-		"Version":         "2021-06-24",
-		"ZoneId":          ZoneId,
-	}
+	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZoneRecords", "")
+	request.QueryParams["ZoneId"] = ZoneId
 
 	response := DnsRecord{}
 
@@ -123,21 +102,24 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 		})
 		log.Printf(" response of raw ObtainGlobalAuthRecordList : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_dns_records", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dns_records", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Data != nil {
 			break
 		}
-
 	}
+
 	var r *regexp.Regexp
 	if nameRegex, ok := d.GetOk("name"); ok && nameRegex.(string) != "" {
 		r = regexp.MustCompile(nameRegex.(string))
@@ -155,8 +137,7 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 			"name":      record.Name,
 			"type":      record.Type,
 			"remark":    record.Remark,
-			//"rr_set":      record.RDatas,
-			"ttl": record.TTL,
+			"ttl":       record.TTL,
 		}
 		ids = append(ids, strconv.Itoa(record.Id))
 		s = append(s, mapping)
@@ -164,10 +145,10 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("records", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	// create a json file in current directory and write data source to it.
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

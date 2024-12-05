@@ -2,10 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"strconv"
@@ -34,51 +34,34 @@ func resourceAlibabacloudStackAscmRamPolicyForRole() *schema.Resource {
 
 func resourceAlibabacloudStackAscmRamPolicyForRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *ecs.Client
 	ram_id := d.Get("ram_policy_id").(string)
 	roleid := d.Get("role_id").(int)
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        client.RegionId,
-		
-		"Product":         "Ascm",
-		"Action":          "AddRAMPolicyToRole",
-		"Version":         "2019-05-10",
-		"ProductName":     "ascm",
-		"RamPolicyId":     ram_id,
-		"RoleId":          fmt.Sprint(roleid),
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = client.Domain
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "AddRAMPolicyToRole"
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
+
+	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddRAMPolicyToRole", "")
+	request.QueryParams["RamPolicyId"] = ram_id
+	request.QueryParams["RoleId"] = fmt.Sprint(roleid)
 
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_ram_policy_for_role", "AddRAMPolicyToRole", raw)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policy_for_role", "AddRAMPolicyToRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	addDebug("AddRAMPolicyToRole", raw, requestInfo, request)
-
-	bresponse, _ := raw.(*responses.CommonResponse)
+	addDebug("AddRAMPolicyToRole", raw, request)
 	if bresponse.GetHttpStatus() != 200 {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_ram_policy_for_role", "AddRAMPolicyToRole", AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ram_policy_for_role", "AddRAMPolicyToRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("AddRAMPolicyToRole", raw, requestInfo, bresponse.GetHttpContentString())
+	addDebug("AddRAMPolicyToRole", raw, request, bresponse.GetHttpContentString())
 
 	d.SetId(ram_id + COLON_SEPARATED + fmt.Sprint(roleid))
 
@@ -93,11 +76,11 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleRead(d *schema.ResourceData, m
 	did := strings.Split(d.Id(), COLON_SEPARATED)
 
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("ram_policy_id", did[0])
 	role_id, _ := strconv.Atoi(did[1])
@@ -108,58 +91,35 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleRead(d *schema.ResourceData, m
 
 func resourceAlibabacloudStackAscmRamPolicyForRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 	return resourceAlibabacloudStackAscmRamPolicyForRoleCreate(d, meta)
-
 }
 
 func resourceAlibabacloudStackAscmRamPolicyForRoleDelete(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
-	var requestInfo *ecs.Client
 	did := strings.Split(d.Id(), COLON_SEPARATED)
 
 	check, err := ascmService.DescribeAscmRamPolicyForRole(d.Id())
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "IsBindingExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsBindingExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	addDebug("IsBindingExist", check, requestInfo, map[string]string{"ramPolicyId": did[0]})
+	addDebug("IsBindingExist", check, map[string]string{"ramPolicyId": did[0]})
+
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RemoveRAMPolicyFromRole", "")
+		request.QueryParams["ramPolicyId"] = did[0]
+		request.QueryParams["roleId"] = did[1]
 
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":        client.RegionId,
-			
-			"Product":         "ascm",
-			"Action":          "RemoveRAMPolicyFromRole",
-			"Version":         "2019-05-10",
-			"ProductName":     "ascm",
-			"ramPolicyId":     did[0],
-			"roleId":          did[1],
-		}
-
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		request.Domain = client.Domain
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "RemoveRAMPolicyFromRole"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.RegionId = client.RegionId
-
-		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return resource.RetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "RemoveRAMPolicyFromRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		check, err = ascmService.DescribeAscmRamPolicyForRole(d.Id())
 
@@ -169,7 +129,7 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleDelete(d *schema.ResourceData,
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "RemoveRAMPolicyFromRole", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "RemoveRAMPolicyFromRole", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil
 }

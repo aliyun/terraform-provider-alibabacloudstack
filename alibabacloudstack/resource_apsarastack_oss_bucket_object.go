@@ -11,6 +11,7 @@ import (
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/go-homedir"
 )
@@ -86,17 +87,15 @@ func resourceAlibabacloudStackOssBucketObject() *schema.Resource {
 			},
 
 			"server_side_encryption": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(ServerSideEncryptionKMS), string(ServerSideEncryptionAes256),
-				}, false),
-				Default: ServerSideEncryptionAes256,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{string(ServerSideEncryptionKMS), string(ServerSideEncryptionAes256)}, false),
+				Default:      ServerSideEncryptionAes256,
 			},
 
 			"kms_key_id": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return ServerSideEncryptionKMS != d.Get("server_side_encryption").(string)
 				},
@@ -118,7 +117,8 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 		return ossClient.Bucket(d.Get("bucket").(string))
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_oss_bucket_object", "Bucket", AlibabacloudStackOssGoSdk)
+		errmsg := ""
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket_object", "Bucket", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
 	addDebug("Bucket", raw, requestInfo, map[string]string{"bucketName": d.Get("bucket").(string)})
 	bucket, _ := raw.(*oss.Bucket)
@@ -129,7 +129,7 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 		source := v.(string)
 		path, err := homedir.Expand(source)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		filePath = path
@@ -137,7 +137,7 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 		content := v.(string)
 		body = bytes.NewReader([]byte(content))
 	} else {
-		return WrapError(Error("[ERROR] Must specify \"source\" or \"content\" field"))
+		return errmsgs.WrapError(errmsgs.Error("[ERROR] Must specify \"source\" or \"content\" field"))
 	}
 
 	key := d.Get("key").(string)
@@ -152,7 +152,7 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 	}
 
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if filePath != "" {
 		err = bucket.PutObjectFromFile(key, filePath, options...)
@@ -163,7 +163,7 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 	}
 
 	if err != nil {
-		return WrapError(Error("Error putting object in Oss bucket (%#v): %s", bucket, err))
+		return errmsgs.WrapError(errmsgs.Error("Error putting object in Oss bucket (%#v): %s", bucket, err))
 	}
 
 	d.SetId(key)
@@ -179,22 +179,23 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 		return ossClient.Bucket(d.Get("bucket").(string))
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "Bucket", AlibabacloudStackOssGoSdk)
+		errmsg := ""
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "Bucket", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
 	addDebug("Bucket", raw, requestInfo, map[string]string{"bucketName": d.Get("bucket").(string)})
 	bucket, _ := raw.(*oss.Bucket)
 	options, err := buildObjectHeaderOptions(d)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	object, err := bucket.GetObjectDetailedMeta(d.Get("key").(string), options...)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"404 Not Found"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"404 Not Found"}) {
 			d.SetId("")
-			return WrapError(Error("To get the Object: %#v but it is not exist in the specified bucket %s.", d.Get("key").(string), d.Get("bucket").(string)))
+			return errmsgs.WrapError(errmsgs.Error("To get the Object: %#v but it is not exist in the specified bucket %s.", d.Get("key").(string), d.Get("bucket").(string)))
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "GetObjectDetailedMeta", AlibabacloudStackOssGoSdk)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "GetObjectDetailedMeta", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 	addDebug("GetObjectDetailedMeta", object, requestInfo, map[string]interface{}{
 		"objectKey": d.Get("key").(string),
@@ -220,20 +221,21 @@ func resourceAlibabacloudStackOssBucketObjectDelete(d *schema.ResourceData, meta
 		return ossClient.Bucket(d.Get("bucket").(string))
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "Bucket", AlibabacloudStackOssGoSdk)
+		errmsg := ""
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "Bucket", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
 	addDebug("Bucket", raw, requestInfo, map[string]string{"bucketName": d.Get("bucket").(string)})
 	bucket, _ := raw.(*oss.Bucket)
 
 	err = bucket.DeleteObject(d.Id())
 	if err != nil {
-		if IsExpectedErrors(err, []string{"No Content", "Not Found"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"No Content", "Not Found"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "DeleteObject", AlibabacloudStackOssGoSdk)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteObject", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
-	return WrapError(ossService.WaitForOssBucketObject(bucket, d.Id(), Deleted, DefaultTimeoutMedium))
+	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucket, d.Id(), Deleted, DefaultTimeoutMedium))
 
 }
 

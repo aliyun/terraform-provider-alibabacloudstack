@@ -32,7 +32,7 @@ func testSweepKmsSecret(region string) error {
 
 	req := kms.CreateListSecretsRequest()
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.QueryParams["Department"] = client.Department
 	req.QueryParams["ResourceGroup"] = client.ResourceGroup
 
@@ -49,7 +49,7 @@ func testSweepKmsSecret(region string) error {
 			req := kms.CreateDeleteSecretRequest()
 			req.SecretName = v.SecretName
 			req.Headers = map[string]string{"RegionId": client.RegionId}
-			req.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			req.ForceDeleteWithoutRecovery = "true"
 			raw, err = client.WithKmsClient(func(kmsclient *kms.Client) (interface{}, error) {
 				return kmsclient.DeleteSecret(req)
@@ -92,7 +92,7 @@ func TestAccAlibabacloudStackKmsSecret_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, false, connectivity.KmsSkippedRegions)
+
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -223,7 +223,7 @@ func TestAccAlibabacloudStackKmsSecret_WithKey(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, false, connectivity.KmsSkippedRegions)
+
 		},
 		// module name
 		IDRefreshName: resourceId,

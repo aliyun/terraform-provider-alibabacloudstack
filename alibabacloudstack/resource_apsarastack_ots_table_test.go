@@ -7,6 +7,7 @@ import (
 
 	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -32,7 +33,6 @@ func TestAccAlibabacloudStackOtsTable_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, false, connectivity.OtsCapacityNoSupportedRegions)
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -132,7 +132,7 @@ func TestAccAlibabacloudStackOtsTable_basic(t *testing.T) {
 //	resource.Test(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
-//			testAccPreCheckWithRegions(t, false, connectivity.OtsHighPerformanceNoSupportedRegions)
+
 //		},
 //		// module name
 //		IDRefreshName: resourceId,
@@ -232,34 +232,34 @@ func TestAccAlibabacloudStackOtsTable_basic(t *testing.T) {
 //	resource.Test(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
-//			testAccPreCheckWithRegions(t, false, connectivity.OtsCapacityNoSupportedRegions)
-//		},
-//		// module name
-//		IDRefreshName: resourceId,
-//		Providers:     testAccProviders,
-//		CheckDestroy:  rac.checkResourceDestroy(),
-//		Steps: []resource.TestStep{
-//			{
-//				Config: testAccConfig(map[string]interface{}{
-//					"instance_name": "${alibabacloudstack_ots_instance.default.name}",
-//					"table_name":    "${var.name}${count.index}",
-//					"primary_key": []map[string]interface{}{
-//						{
-//							"name": "pk1",
-//							"type": "Integer",
-//						},
-//					},
-//					"time_to_live": "-1",
-//					"max_version":  "1",
-//					"count":        "5",
-//				}),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheck(nil),
-//				),
+
 //			},
-//		},
-//	})
-//}
+//			// module name
+//			IDRefreshName: resourceId,
+//			Providers:     testAccProviders,
+//			CheckDestroy:  rac.checkResourceDestroy(),
+//			Steps: []resource.TestStep{
+//				{
+//					Config: testAccConfig(map[string]interface{}{
+//						"instance_name": "${alibabacloudstack_ots_instance.default.name}",
+//						"table_name":    "${var.name}${count.index}",
+//						"primary_key": []map[string]interface{}{
+//							{
+//								"name": "pk1",
+//								"type": "Integer",
+//							},
+//						},
+//						"time_to_live": "-1",
+//						"max_version":  "1",
+//						"count":        "5",
+//					}),
+//					Check: resource.ComposeTestCheckFunc(
+//						testAccCheck(nil),
+//					),
+//				},
+//			},
+//		})
+//	}
 func resourceOtsTableConfigDependence(name string) string {
 	return fmt.Sprintf(`
 	variable "name" {
@@ -340,7 +340,7 @@ func testAccCheckOtsTableDestroy(s *terraform.State) error {
 		otsService := OtsService{client}
 
 		if _, err := otsService.DescribeOtsTable(rs.Primary.ID); err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
 			return err

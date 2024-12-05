@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -27,10 +27,10 @@ func resourceAlibabacloudStackAscmUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-// 			"telephone_number": {
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 			},
+			"telephone_number": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"display_name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -75,7 +75,6 @@ func resourceAlibabacloudStackAscmUser() *schema.Resource {
 
 func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *ecs.Client
 	ascmService := AscmService{client}
 	lname := d.Get("login_name").(string)
 	dname := d.Get("display_name").(string)
@@ -84,82 +83,48 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 	mobnationcode := d.Get("mobile_nation_code").(string)
 	organizationid := d.Get("organization_id").(string)
 	loginpolicyid := d.Get("login_policy_id").(int)
-	//rids := d.Get("role_ids").([]interface{})
-	//var rid string
-	//var rids []string
-	//if v, ok := d.GetOk("role_ids"); ok {
-	//	rids = expandStringList(v.(*schema.List).List())
-	//	for i, k := range rids {
-	//		if i != 0 {
-	//			rid = fmt.Sprintf("%s\",\"%s", rid, k)
-	//		} else {
-	//			rid = k
-	//		}
-	//	}
-	//}
-
-	//if len(d.Get("role_ids").(*schema.Set).List()) > 0 {
-	//	rid = strings.Join(expandStringList(d.Get("role_ids").(*schema.Set).List())[:], "\"" + COMMA_SEPARATED + "\"")
-	//}
 
 	check, err := ascmService.DescribeAscmDeletedUser(lname)
 	if check.Data != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_resource_group", "\"Login Name already exist in Historical Users, try with a different name.\"", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_resource_group", "\"Login Name already exist in Historical Users, try with a different name.\"", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if check.Data == nil {
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":         client.RegionId,
-			
-			"Product":          "Ascm",
-			"Action":           "AddUser",
-			"Version":          "2019-05-10",
-			"ProductName":      "ascm",
+		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddUser", "")
+		mergeMaps(request.QueryParams, map[string]string{
 			"LoginName":        lname,
 			"DisplayName":      dname,
 			"CellphoneNum":     cellnum,
 			"MobileNationCode": mobnationcode,
 			"Email":            email,
 			"OrganizationId":   organizationid,
-			//"loginPolicyId":    fmt.Sprint(loginpolicyid),
-			"LoginPolicyId": fmt.Sprint(loginpolicyid),
-			//"LoginName":         dname,
-			//"userEmail":        email,
-			//"roleIdList": "[2,4]",
-		}
-		request.Method = "POST"
-		request.Product = "Ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		request.Domain = client.Domain
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "AddUser"
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-content-type": "application/json", "Content-Type": "application/json"}
+			"LoginPolicyId":    fmt.Sprint(loginpolicyid),
+		})
+		request.Headers["x-acs-content-type"] = "application/json"
+		request.Headers["Content-Type"] = "application/json"
 
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
 		log.Printf("response of raw AddUser is : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user", "AddUser", raw)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "AddUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
-		addDebug("AddUser", raw, requestInfo, request)
-
-		bresponse, _ := raw.(*responses.CommonResponse)
+		addDebug("AddUser", raw, request)
 		if bresponse.GetHttpStatus() != 200 {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user", "AddUser", AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "AddUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug("AddUser", raw, requestInfo, bresponse.GetHttpContentString())
+		addDebug("AddUser", raw, request, bresponse.GetHttpContentString())
 	}
 
 	d.SetId(lname)
@@ -173,7 +138,6 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lname := d.Get("login_name").(string)
 	organizationid := d.Get("organization_id").(string)
@@ -206,20 +170,8 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 		loginpolicyid = d.Get("login_policy_id").(int)
 	}
 
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-
-	request.QueryParams = map[string]string{
-		"RegionId":         client.RegionId,
-		
-		"Product":          "ascm",
-		"Department":       client.Department,
-		"ResourceGroup":    client.ResourceGroup,
-		"Action":           "ModifyUserInformation",
-		"Version":          "2019-05-10",
-		"ProductName":      "ascm",
+	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ModifyUserInformation", "")
+	mergeMaps(request.QueryParams, map[string]string{
 		"loginName":        lname,
 		"display_name":     dname,
 		"cellphone_num":    cellnum,
@@ -228,69 +180,47 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 		"organization_id":  organizationid,
 		"loginPolicyId":    fmt.Sprint(loginpolicyid),
 		"policyId":         fmt.Sprint(loginpolicyid),
-	}
-	request.Domain = client.Domain
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ModifyUserInformation"
-	request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-content-type": "application/json", "Content-Type": "application/json"}
+	})
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
+
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
 	addDebug("ModifyUserInformation", raw, request, request.QueryParams)
 
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user", "ModifyUserInformationRequestFailed", raw)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "ModifyUserInformationRequestFailed", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	bresponse, _ := raw.(*responses.CommonResponse)
 	if !bresponse.IsSuccess() {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user", "ModifyUserInformationFailed", raw)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "ModifyUserInformationFailed", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), bresponse)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if len(d.Get("role_ids").(*schema.Set).List()) > 0 {
-		client := meta.(*connectivity.AlibabacloudStackClient)
-		var requestInfo *ecs.Client
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
+		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ResetRolesForUserByLoginName", "/roa/ascm/auth/user/ResetRolesForUserByLoginName")
 
-		request.Headers["x-ascm-product-name"] = "ascm"
 		request.Headers["x-ascm-product-version"] = "2019-05-10"
+		request.Headers["Content-Type"] = requests.Json
 
-		QueryParams := map[string]interface{}{
+		queryParams := map[string]interface{}{
 			"loginName":  lname,
 			"roleIdList": roleIdList,
 		}
 
-		request.Method = "POST"
-		request.Product = "Ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		request.Domain = client.Domain
-		requeststring, err := json.Marshal(QueryParams)
-
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.Headers["Content-Type"] = requests.Json
+		requeststring, err := json.Marshal(queryParams)
 		request.SetContent(requeststring)
-		request.PathPattern = "/roa/ascm/auth/user/ResetRolesForUserByLoginName"
-		request.ApiName = "ResetRolesForUserByLoginName"
-		request.RegionId = client.RegionId
-		request.Headers["RegionId"] = client.RegionId
 
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
@@ -298,14 +228,18 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 
 		log.Printf("response of raw ResetRolesForUserByLoginName is : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user", "ResetRolesForUserByLoginName", raw)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "ResetRolesForUserByLoginName", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
-		addDebug("ResetRolesForUserByLoginName", raw, requestInfo, request)
+		addDebug("ResetRolesForUserByLoginName", raw, request)
 	}
 	return resourceAlibabacloudStackAscmUserRead(d, meta)
-
 }
 
 func resourceAlibabacloudStackAscmUserRead(d *schema.ResourceData, meta interface{}) error {
@@ -315,11 +249,11 @@ func resourceAlibabacloudStackAscmUserRead(d *schema.ResourceData, meta interfac
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmUser(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if len(object.Data) == 0 {
 		d.SetId("")
@@ -349,50 +283,32 @@ func resourceAlibabacloudStackAscmUserRead(d *schema.ResourceData, meta interfac
 }
 
 func resourceAlibabacloudStackAscmUserDelete(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	var requestInfo *ecs.Client
 	check, err := ascmService.DescribeAscmUser(d.Id())
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "IsUserExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsUserExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	addDebug("IsUserExist", check, requestInfo, map[string]string{"loginName": d.Id()})
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RemoveUserByLoginName", "")
+		request.QueryParams["loginName"] = d.Id()
 
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":        client.RegionId,
-			
-			"Product":         "ascm",
-			"Action":          "RemoveUserByLoginName",
-			"Version":         "2019-05-10",
-			"ProductName":     "ascm",
-			"loginName":       d.Id(),
-		}
+		request.Headers["x-acs-content-type"] = "application/json"
+		request.Headers["Content-Type"] = "application/json"
 
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		request.Domain = client.Domain
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "RemoveUserByLoginName"
-		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-content-type": "application/json", "Content-Type": "application/json"}
-		request.RegionId = client.RegionId
-
-		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
 		})
+
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return resource.RetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "RemoveUserByLoginName", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		check, err = ascmService.DescribeAscmUser(d.Id())
 

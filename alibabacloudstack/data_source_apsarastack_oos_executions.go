@@ -4,9 +4,8 @@ import (
 	"fmt"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -226,9 +225,6 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 	if v, ok := d.GetOk("ram_role"); ok {
 		request["RamRole"] = v
 	}
-	request["RegionId"] = client.RegionId
-	request["Product"] = "Oos"
-	request["OrganizationId"] = client.Department
 
 	if v, ok := d.GetOk("sort_field"); ok {
 		request["SortField"] = v
@@ -248,7 +244,7 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 	if v, ok := d.GetOk("tags"); ok {
 		respJson, err := convertMaptoJsonString(v.(map[string]interface{}))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request["Tags"] = respJson
 	}
@@ -256,6 +252,7 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 		request["TemplateName"] = v
 	}
 	request["MaxResults"] = PageSizeLarge
+
 	var objects []map[string]interface{}
 
 	idsMap := make(map[string]string)
@@ -267,23 +264,21 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 			idsMap[vv.(string)] = vv.(string)
 		}
 	}
-	var response map[string]interface{}
-	conn, err := client.NewOosClient()
-	if err != nil {
-		return WrapError(err)
-	}
+
 	for {
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-06-01"), StringPointer("AK"), nil, request, &runtime)
+		response, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, request)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_oos_executions", action, AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if response != nil {
+				errmsg = errmsgs.GetAsapiErrorMessage(response)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oos_executions", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(action, response, request)
 
 		resp, err := jsonpath.Get("$.Executions", response)
 		if err != nil {
-			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Executions", response)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.Executions", response)
 		}
 		result, _ := resp.([]interface{})
 		for _, v := range result {
@@ -301,6 +296,7 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 			break
 		}
 	}
+
 	ids := make([]string, 0)
 	s := make([]map[string]interface{}, 0)
 	for _, object := range objects {
@@ -335,11 +331,11 @@ func dataSourceAlibabacloudStackOosExecutionsRead(d *schema.ResourceData, meta i
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("executions", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

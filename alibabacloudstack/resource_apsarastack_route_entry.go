@@ -1,13 +1,13 @@
 package alibabacloudstack
 
 import (
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -23,10 +23,10 @@ func resourceAlibabacloudStackRouteEntry() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"router_id": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Computed:   true,
-				Deprecated: "Attribute router_id has been deprecated and suggest removing it from your template.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Deprecated:  "Attribute router_id has been deprecated and suggest removing it from your template.",
 			},
 			"route_table_id": {
 				Type:     schema.TypeString,
@@ -70,17 +70,10 @@ func resourceAlibabacloudStackRouteEntryCreate(d *schema.ResourceData, meta inte
 	table, err := vpcService.QueryRouteTableById(rtId)
 
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	request := vpc.CreateCreateRouteEntryRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.RouteTableId = rtId
 	request.DestinationCidrBlock = cidr
 	request.NextHopType = nt
@@ -96,31 +89,35 @@ func resourceAlibabacloudStackRouteEntryCreate(d *schema.ResourceData, meta inte
 			return vpcClient.CreateRouteEntry(&args)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{"TaskConflict", "IncorrectRouteEntryStatus", Throttling, "IncorrectVpcStatus"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict", "IncorrectRouteEntryStatus", errmsgs.Throttling, "IncorrectVpcStatus"}) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if response, ok := raw.(*vpc.CreateRouteEntryResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_route_entry", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 	if err != nil {
-		if IsExpectedErrors(err, []string{"RouterEntryConflict.Duplicated"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"RouterEntryConflict.Duplicated"}) {
 			en, err := vpcService.DescribeRouteEntry(rtId + ":" + table.VRouterId + ":" + cidr + ":" + nt + ":" + ni)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
-			return WrapError(Error("The route entry %s has already existed. "+
+			return errmsgs.WrapError(errmsgs.Error("The route entry %s has already existed. "+
 				"Please import it using ID '%s:%s:%s:%s:%s' or specify a new 'destination_cidrblock' and try again.",
 				en.DestinationCidrBlock, en.RouteTableId, table.VRouterId, en.DestinationCidrBlock, en.NextHopType, ni))
 		}
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_route_entry", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_route_entry", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	d.SetId(rtId + ":" + table.VRouterId + ":" + cidr + ":" + nt + ":" + ni)
 
 	if err := vpcService.WaitForRouteEntry(d.Id(), Available, DefaultTimeout); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	return resourceAlibabacloudStackRouteEntryRead(d, meta)
 }
@@ -131,15 +128,15 @@ func resourceAlibabacloudStackRouteEntryRead(d *schema.ResourceData, meta interf
 	vpcService := VpcService{client}
 	parts, err := ParseResourceId(d.Id(), 5)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	object, err := vpcService.DescribeRouteEntry(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("router_id", parts[1])
@@ -154,22 +151,15 @@ func resourceAlibabacloudStackRouteEntryRead(d *schema.ResourceData, meta interf
 func resourceAlibabacloudStackRouteEntryDelete(d *schema.ResourceData, meta interface{}) error {
 	request, err := buildAlibabacloudStackRouteEntryDeleteArgs(d, meta)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	vpcService := VpcService{client}
 	parts, err := ParseResourceId(d.Id(), 5)
 	rtId := parts[0]
 	if err := vpcService.WaitForAllRouteEntriesAvailable(rtId, DefaultTimeout); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	retryTimes := 7
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
@@ -177,38 +167,33 @@ func resourceAlibabacloudStackRouteEntryDelete(d *schema.ResourceData, meta inte
 			return vpcClient.DeleteRouteEntry(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{"IncorrectVpcStatus", "TaskConflict", "IncorrectRouteEntryStatus", "Forbbiden", "UnknownError"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"IncorrectVpcStatus", "TaskConflict", "IncorrectRouteEntryStatus", "Forbbiden", "UnknownError"}) {
 				time.Sleep(time.Duration(retryTimes) * time.Second)
 				retryTimes += 7
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if response, ok := raw.(*vpc.DeleteRouteEntryResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_route_entry", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidRouteEntry.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidRouteEntry.NotFound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	return WrapError(vpcService.WaitForRouteEntry(d.Id(), Deleted, DefaultTimeout))
+	return errmsgs.WrapError(vpcService.WaitForRouteEntry(d.Id(), Deleted, DefaultTimeout))
 }
 
 func buildAlibabacloudStackRouteEntryDeleteArgs(d *schema.ResourceData, meta interface{}) (*vpc.DeleteRouteEntryRequest, error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := vpc.CreateDeleteRouteEntryRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+	client.InitRpcRequest(*request.RpcRequest)
 	request.RouteTableId = d.Get("route_table_id").(string)
 	request.DestinationCidrBlock = d.Get("destination_cidrblock").(string)
 

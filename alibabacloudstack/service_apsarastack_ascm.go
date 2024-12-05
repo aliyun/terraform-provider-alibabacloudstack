@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type AscmService struct {
@@ -17,277 +17,166 @@ type AscmService struct {
 }
 
 func (s *AscmService) DescribeAscmLogonPolicy(id string) (response *LoginPolicy, err error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListLoginPolicies"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		"Product":         "ascm",
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"RegionId":        s.client.RegionId,
-		"Action":          "ListLoginPolicies",
-		"Version":         "2019-05-10",
-		"Name":            id,
-	}
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListLoginPolicies", "")
+	request.QueryParams["name"] = id
 	var resp = &LoginPolicy{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorLoginPolicyNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListLoginPolicy", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorLoginPolicyNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListLoginPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("LoginPolicy", response, requestInfo, request)
+	addDebug("LoginPolicy", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 	return resp, nil
 }
+
 func (s *AscmService) DescribeAscmResourceGroup(id string) (response *ResourceGroup, err error) {
-	var requestInfo *ecs.Client
 	did := strings.Split(id, COLON_SEPARATED)
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListResourceGroup", "")
+	request.QueryParams["resourceGroupName"] = did[0]
 
-	request := requests.NewCommonRequest()
-
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":          s.client.RegionId,
-		
-		"Product":           "ascm",
-		"Action":            "ListResourceGroup",
-		"Version":           "2019-05-10",
-		"resourceGroupName": did[0],
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListResourceGroup"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
 	var resp = &ResourceGroup{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorResourceGroupNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, did[0], "ListResourceGroup", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorResourceGroupNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "ListResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListResourceGroup", response, requestInfo, request)
+	addDebug("ListResourceGroup", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 	return resp, nil
 }
+
 func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRole, err error) {
-	var requestInfo *ecs.Client
 	did := strings.Split(id, COLON_SEPARATED)
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRoles", "")
+	request.QueryParams["roleName"] = did[0]
+	request.QueryParams["roleType"] = "ROLETYPE_ASCM"
 
-	request := requests.NewCommonRequest()
-
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Product":         "ascm",
-		"Action":          "ListRoles",
-		"Version":         "2019-05-10",
-		"roleName":        did[0],
-		"roleType":        "ROLETYPE_ASCM",
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListRoles"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
 	var resp = &AscmCustomRole{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorRoleNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListRoles", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorRoleNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListRoles", response, requestInfo, request)
+	addDebug("ListRoles", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if resp.AsapiErrorCode == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
+
 func (s *AscmService) DescribeAscmRamRole(id string) (response *AscmRoles, err error) {
-	var requestInfo *ecs.Client
 	did := strings.Split(id, COLON_SEPARATED)
-
-	request := requests.NewCommonRequest()
-
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Product":         "ascm",
-		"Action":          "ListRoles",
-		"Version":         "2019-05-10",
-		"roleName":        did[0],
-		"roleType":        "ROLETYPE_RAM",
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListRoles"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRoles", "")
+	request.QueryParams["roleName"] = did[0]
+	request.QueryParams["roleType"] = "ROLETYPE_RAM"
 	var resp = &AscmRoles{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorRamRoleNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListRoles", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorRamRoleNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListRoles", response, requestInfo, request)
+	addDebug("ListRoles", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if resp.AsapiErrorCode == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
 
 func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, err error) {
-	var requestInfo *ecs.Client
-
-	request := requests.NewCommonRequest()
-
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Product":         "ascm",
-		"id":              id,
-		"Action":          "GetRAMServiceRole",
-		"Version":         "2019-05-10",
-		"roleType":        "ROLETYPE_RAM",
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListRAMServiceRoles"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRAMServiceRoles", "")
+	request.QueryParams["id"] = id
+	request.QueryParams["roleType"] = "ROLETYPE_RAM"
 	var resp = &RamRole{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorRamServiceRoleNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListRAMServiceRoles", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorRamServiceRoleNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMServiceRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListRAMServiceRoles", response, requestInfo, request)
+	addDebug("ListRAMServiceRoles", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
@@ -306,175 +195,100 @@ type BindResourceAndUsers struct {
 }
 
 func (s *AscmService) DescribeAscmResourceGroupUserAttachment(id string) (response *AscmResourceGroupUser, err error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
-
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Product":         "ascm",
-		"Action":          "ListAscmUsersInsideResourceGroup",
-		"Version":         "2019-05-10",
-		"resourceGroupId": id,
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListAscmUsersInsideResourceGroup"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListAscmUsersInsideResourceGroup", "")
+	request.QueryParams["resourceGroupId"] = id
 	var resp = &AscmResourceGroupUser{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorListAscmUsersInsideResourceGroupNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListAscmUsersInsideResourceGroup", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorListAscmUsersInsideResourceGroupNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListAscmUsersInsideResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListAscmUsersInsideResourceGroup", response, requestInfo, request)
+	addDebug("ListAscmUsersInsideResourceGroup", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if resp.ResourceGroupID != 0 {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
 
 func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *ListResourceGroup, err error) {
-	var requestInfo *ecs.Client
 	did := strings.Split(id, COLON_SEPARATED)
-
-	request := requests.NewCommonRequest()
-
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListResourceGroup", "")
 	if id == "" {
-		request.QueryParams = map[string]string{
-			"RegionId":        s.client.RegionId,
-			
-			"Product":         "ascm",
-			"Action":          "ListResourceGroup",
-			"Version":         "2019-05-10",
-			"pageSize":        "1000",
-		}
+		request.QueryParams["pageSize"] = "1000"
 	} else {
-		request.QueryParams = map[string]string{
-			"RegionId":          s.client.RegionId,
-			
-			"Product":           "ascm",
-			"Action":            "ListResourceGroup",
-			"Version":           "2019-05-10",
-			"resourceGroupName": did[0],
-		}
+		request.QueryParams["resourceGroupName"] = did[0]
 	}
-
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListResourceGroup"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
 	var resp = &ListResourceGroup{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorResourceGroupNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, did[0], "ListResourceGroup", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorResourceGroupNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "ListResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListResourceGroup", response, requestInfo, request)
+	addDebug("ListResourceGroup", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 	return resp, nil
 }
 
 func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (response *ListResourceGroup, err error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
-
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Product":         "ascm",
-		"Action":          "ListResourceGroup",
-		"Version":         "2019-05-10",
-		"pageSize":        "1000",
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListResourceGroup"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListResourceGroup", "")
+	request.QueryParams["pageSize"] = "1000"
 	var resp = &ListResourceGroup{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorListResourceGroupNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListResourceGroup", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorListResourceGroupNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListResourceGroup", response, requestInfo, request)
+	addDebug("ListResourceGroup", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code != "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	var rgname string
@@ -490,179 +304,98 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (respon
 }
 
 func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Product":         "ascm",
-		"Action":          "ListUsers",
-		"Version":         "2019-05-10",
-		"loginName":       id,
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListUsers"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUsers", "")
+	request.QueryParams["loginName"] = id
 	var resp = &User{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListUsers", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListUsers", response, requestInfo, request)
+	addDebug("ListUsers", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
 
 func (s *AscmService) DescribeAscmUserGroup(id string) (response *UserGroup, err error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUserGroups", "")
+	if id != "" {
+		request.QueryParams["userGroupName"] = id
 	}
-	if id == "" {
-		request.QueryParams = map[string]string{
-			"RegionId":         s.client.RegionId,
-			
-			"Product":          "ascm",
-			"Action":           "ListUserGroups",
-			"Version":          "2019-05-10",
-			"SecurityToken":    s.client.Config.SecurityToken,
-			"SignatureVersion": "1.0",
-			"SignatureMethod":  "HMAC-SHA1",
-		}
-	} else {
-		request.QueryParams = map[string]string{
-			"RegionId":         s.client.RegionId,
-			
-			"Product":          "ascm",
-			"Action":           "ListUserGroups",
-			"Version":          "2019-05-10",
-			"userGroupName":    id,
-			"SecurityToken":    s.client.Config.SecurityToken,
-			"SignatureVersion": "1.0",
-			"SignatureMethod":  "HMAC-SHA1",
-		}
-	}
-
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListUserGroups"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
 	var resp = &UserGroup{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorUserGroupNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListUserGroups", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserGroupNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUserGroups", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListUserGroups", response, requestInfo, request)
+	addDebug("ListUserGroups", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code != "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
 
 func (s *AscmService) DescribeAscmUserGroupRoleBinding(id string) (response *UserGroup, err error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Product":         "ascm",
-		"Action":          "ListUserGroups",
-		"Version":         "2019-05-10",
-		"pageSize":        "1000",
-		"SecurityToken":    s.client.Config.SecurityToken,
-		"SignatureVersion": "1.0",
-		"SignatureMethod":  "HMAC-SHA1",
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListUserGroups"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUserGroups", "")
+	request.QueryParams["pageSize"] = "1000"
 	var resp = &UserGroup{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorUserGroupNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListUserGroups", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserGroupNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUserGroups", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListUserGroups", response, requestInfo, request)
+	addDebug("ListUserGroups", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code != "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 	var gname string
 	for i := range resp.Data {
@@ -677,280 +410,168 @@ func (s *AscmService) DescribeAscmUserGroupRoleBinding(id string) (response *Use
 }
 
 func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, err error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Product":         "ascm",
-		"Action":          "ListUsers",
-		"Version":         "2019-05-10",
-		"loginName":       id,
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListUsers"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUsers", "")
+	request.QueryParams["loginName"] = id
 	var resp = &User{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListUsers", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListUsers", response, requestInfo, request)
+	addDebug("ListUsers", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
+
 func (s *AscmService) DescribeAscmDeletedUser(id string) (response *DeletedUser, err error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Product":         "ascm",
-		"Action":          "ListDeletedUsers",
-		"Version":         "2019-05-10",
-		"loginName":       id,
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListDeletedUsers"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListDeletedUsers", "")
+	request.QueryParams["loginName"] = id
 	var resp = &DeletedUser{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListDeletedUsers", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListDeletedUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListDeletedUsers", response, requestInfo, request)
+	addDebug("ListDeletedUsers", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 	if resp.Data != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
 
 func (s *AscmService) DescribeAscmOrganization(id string) (response *Organization, err error) {
-	var requestInfo *ecs.Client
 	did := strings.Split(id, COLON_SEPARATED)
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Product":         "ascm",
-		"Action":          "GetOrganizationList",
-		"Version":         "2019-05-10",
-		"name":            did[0],
-	}
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "GetOrganizationList"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "GetOrganizationList", "")
+	request.QueryParams["name"] = did[0]
 	var resp = &Organization{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorOrganizationNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "GetOrganization", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorOrganizationNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("GetOrganization", response, requestInfo, request)
+	addDebug("GetOrganization", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
+
 func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, err error) {
-	var requestInfo *ecs.Client
 	did := strings.Split(id, COLON_SEPARATED)
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Product":         "ascm",
-		"Action":          "ListRAMPolicies",
-		"Version":         "2019-05-10",
-		"policyName":      did[0],
-	}
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListRAMPolicies"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRAMPolicies", "")
+	request.QueryParams["policyName"] = did[0]
 	var resp = &RamPolicies{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorRamPolicyNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListRAMPolicies", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorRamPolicyNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListRAMPolicies", response, requestInfo, request)
+	addDebug("ListRAMPolicies", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
+
 func (s *AscmService) DescribeAscmRamPolicyForRole(id string) (response *RamPolicies, err error) {
-	var requestInfo *ecs.Client
 	did := strings.Split(id, COLON_SEPARATED)
-
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Product":         "ascm",
-		"Action":          "ListRAMPolicies",
-		"Version":         "2019-05-10",
-		"RamPolicyId":     did[0],
-		//"roleId":     did[1],
-	}
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListRAMPolicies"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRAMPolicies", "")
+	request.QueryParams["RamPolicyId"] = did[0]
 	var resp = &RamPolicies{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorRamPolicyNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListRAMPolicies", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorRamPolicyNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListRAMPolicies", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListRAMPolicies", response, requestInfo, request)
+	addDebug("ListRAMPolicies", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
+
 func (s *AscmService) DescribeAscmQuota(id string) (response *AscmQuota, err error) {
-	var requestInfo *ecs.Client
 	did := strings.Split(id, COLON_SEPARATED)
 	var targetType string
 	if did[0] == "RDS" {
@@ -962,237 +583,139 @@ func (s *AscmService) DescribeAscmQuota(id string) (response *AscmQuota, err err
 	} else {
 		targetType = ""
 	}
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		"regionName ":     s.client.RegionId,
-		
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Product":         "ascm",
-		"Action":          "GetQuota",
-		"Version":         "2019-05-10",
-		"productName":     did[0],
-		"quotaType":       did[1],
-		"quotaTypeId":     did[2],
-		"targetType":      targetType,
-	}
-	request.Method = "GET"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.ApiName = "GetQuota"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("GET", "Ascm", "2019-05-10", "GetQuota", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"productName":  did[0],
+		"quotaType":    did[1],
+		"quotaTypeId":  did[2],
+		"targetType":   targetType,
+		"regionName":   s.client.RegionId,
+	})
 	var resp = &AscmQuota{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
-
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorQuotaNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, did[0], "GetQuota", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorQuotaNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, did[0], "GetQuota", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("GetQuota", response, requestInfo, request)
+	addDebug("GetQuota", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 	if resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
 
 func (s *AscmService) DescribeAscmPasswordPolicy(id string) (response *PasswordPolicy, err error) {
-	var requestInfo *ecs.Client
-	//	did := strings.Split(id, COLON_SEPARATED)
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Product":         "ascm",
-		"Action":          "GetPasswordPolicy",
-		"Version":         "2019-05-10",
-		"id":              id,
-	}
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "GetPasswordPolicy"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
-	request.Domain = s.client.Domain
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "GetPasswordPolicy", "")
+	request.QueryParams["id"] = id
 	var resp = &PasswordPolicy{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorOrganizationNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "GetPasswordPolicy", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorOrganizationNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetPasswordPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("GetPasswordPolicy", response, requestInfo, request)
+	addDebug("GetPasswordPolicy", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
 
 func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		
-		
-		"Department":       s.client.Department,
-		"ResourceGroup":    s.client.ResourceGroup,
-		"RegionId":         s.client.RegionId,
-		"Product":          "ascm",
-		"Action":           "ListUsersInUserGroup",
-		"Version":          "2019-05-10",
-		"userGroupId":      id,
-		"SecurityToken":    s.client.Config.SecurityToken,
-		"SignatureVersion": "1.0",
-		"SignatureMethod":  "HMAC-SHA1",
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ListUsersInUserGroup"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUsersInUserGroup", "")
+	request.QueryParams["userGroupId"] = id
 	var resp = &User{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "ListUsersInUserGroup", AlibabacloudStackSdkGoERROR)
-
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUsersInUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListUsersInUserGroup", response, requestInfo, request)
+	addDebug("ListUsersInUserGroup", response, request, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
 }
 
 func (s *AscmService) ExportInitPasswordByLoginName(loginname string) (initPassword string, err error) {
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
 	var loginnamelist []string
 	loginnamelist = append(loginnamelist, loginname)
 	QueryParams := map[string]interface{}{
-		
-		
-		"Department":       s.client.Department,
-		"ResourceGroup":    s.client.ResourceGroup,
-		"RegionId":         s.client.RegionId,
-		"Product":          "ascm",
-		"Action":           "ExportInitPasswordByLoginNameList",
-		"Version":          "2019-05-10",
 		"SecurityToken":    s.client.Config.SecurityToken,
 		"SignatureVersion": "1.0",
 		"SignatureMethod":  "HMAC-SHA1",
 		"LoginNameList":    loginnamelist,
 	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = s.client.Domain
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ExportInitPasswordByLoginNameList", "/roa/ascm/auth/user/exportInitPasswordByLoginNameList")
 	requeststring, jsonerr := json.Marshal(QueryParams)
 	log.Printf("=========================  ExportInitPasswordByLoginNameList jsonerr:%v", jsonerr)
 	request.SetContent(requeststring)
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "ExportInitPasswordByLoginNameList"
-	request.Headers = map[string]string{
-		"RegionId":               s.client.RegionId,
-		"x-ascm-product-name":    "ascm",
-		"x-ascm-product-version": "2019-05-10",
-	}
-	request.RegionId = s.client.RegionId
 	request.SetContentType("application/json")
-	request.PathPattern = "/roa/ascm/auth/user/exportInitPasswordByLoginNameList"
-	log.Printf("ExportInitPasswordByLoginNameList loginname:%v", loginname)
+	var response InitPasswordListResponse
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
 		log.Printf("ExportInitPasswordByLoginNameList err:%v", err)
-		return initPassword, WrapErrorf(err, DefaultErrorMsg, "", "ExportInitPasswordByLoginNameList", AlibabacloudStackSdkGoERROR)
+		return initPassword, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ExportInitPasswordByLoginNameList", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	bresponse, _ := raw.(*responses.CommonResponse)
 	addDebug("ExportInitPasswordByLoginNameList", bresponse, request, loginname)
-	var response InitPasswordListResponse
 	e := json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	log.Printf("ExportInitPasswordByLoginNameList response:%v", response)
 	if e != nil {
 		log.Printf("ExportInitPasswordByLoginNameList err:%v", e)
-		return initPassword, WrapErrorf(e, DefaultErrorMsg, "", "ExportInitPasswordByLoginNameList", AlibabacloudStackSdkGoERROR)
+		return initPassword, errmsgs.WrapErrorf(e, errmsgs.DefaultErrorMsg, "", "ExportInitPasswordByLoginNameList", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if len(response.Data) > 0 {
 		initPassword = response.Data[0].Password

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -85,13 +86,13 @@ func testAccCheckAlicloudOssBucketKmsDestroy(s *terraform.State) error {
 		}
 		bucket, err := ossService.DescribeOssBucket(rs.Primary.ID)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if bucket.BucketInfo.Name != "" {
-			return WrapError(Error("bucket still exist"))
+			return errmsgs.WrapError(errmsgs.Error("bucket still exist"))
 		}
 	}
 

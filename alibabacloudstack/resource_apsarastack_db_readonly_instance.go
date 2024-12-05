@@ -4,12 +4,14 @@ import (
 	"log"
 	"strings"
 	"time"
+	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -38,8 +40,13 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 			},
 
 			"master_db_instance_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				Deprecated:   "Field 'master_db_instance_id' is deprecated and will be removed in a future release. Please use 'master_instance_id' instead.",
+			},
+			"master_instance_id": {
+				Type:         schema.TypeString,
+				Required:     true,
 			},
 
 			"instance_name": {
@@ -47,16 +54,33 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 				Computed:     true,
+				Deprecated:   "Field 'instance_name' is deprecated and will be removed in a future release. Please use 'db_instance_description' instead.",
+			},
+			"db_instance_description": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(2, 256),
+				Computed:     true,
 			},
 
 			"instance_type": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				Deprecated:   "Field 'instance_type' is deprecated and will be removed in a future release. Please use 'db_instance_class' instead.",
+			},
+			"db_instance_class": {
+				Type:         schema.TypeString,
+				Required:     true,
 			},
 
 			"instance_storage": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				Deprecated:   "Field 'instance_storage' is deprecated and will be removed in a future release. Please use 'db_instance_storage' instead.",
+			},
+			"db_instance_storage": {
+				Type:         schema.TypeInt,
+				Required:     true,
 			},
 
 			"zone_id": {
@@ -78,34 +102,6 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_essd", "cloud_essd2", "cloud_essd3", "cloud_pperf", "cloud_sperf"}, false),
 			},
 
-// 			"storage_type": {
-// 				Type:         schema.TypeString,
-// 				ForceNew:     true,
-// 				Optional:     true,
-// 				ValidateFunc: validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
-// 			},
-
-// 			"monitoring_period": {
-// 				Type:         schema.TypeInt,
-// 				ValidateFunc: validation.IntInSlice([]int{5, 60, 300}),
-// 				Optional:     true,
-// 				Computed:     true,
-// 			},
-
-// 			"security_ips": {
-// 				Type:     schema.TypeSet,
-// 				Elem:     &schema.Schema{Type: schema.TypeString},
-// 				Computed: true,
-// 				Optional: true,
-// 			},
-
-// 			"security_ip_mode": {
-// 				Type:         schema.TypeString,
-// 				ValidateFunc: validation.StringInSlice([]string{NormalMode, SafetyMode}, false),
-// 				Optional:     true,
-// 				Default:      NormalMode,
-// 			},
-
 			"parameters": {
 				Type: schema.TypeSet,
 				Elem: &schema.Resource{
@@ -125,52 +121,6 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 				Computed: true,
 			},
 
-// 			"instance_charge_type": {
-// 				Type:         schema.TypeString,
-// 				ValidateFunc: validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
-// 				Optional:     true,
-// 				Default:      Postpaid,
-// 			},
-
-// 			"period": {
-// 				Type:             schema.TypeInt,
-// 				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
-// 				Optional:         true,
-// 				Default:          1,
-// 				DiffSuppressFunc: PostPaidDiffSuppressFunc,
-// 			},
-
-// 			"auto_renew": {
-// 				Type:             schema.TypeBool,
-// 				Optional:         true,
-// 				Default:          false,
-// 				DiffSuppressFunc: PostPaidDiffSuppressFunc,
-// 			},
-
-// 			"auto_renew_period": {
-// 				Type:             schema.TypeInt,
-// 				ValidateFunc:     validation.IntBetween(1, 12),
-// 				Optional:         true,
-// 				Default:          1,
-// 				DiffSuppressFunc: PostPaidAndRenewDiffSuppressFunc,
-// 			},
-
-// 			"force_restart": {
-// 				Type:     schema.TypeBool,
-// 				Optional: true,
-// 				Default:  false,
-// 			},
-
-// 			"maintain_time": {
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 				Computed: true,
-// 			},
-// 			"role_arn": {
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 				Computed: true,
-// 			},
 			"engine": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -195,29 +145,34 @@ func resourceAlibabacloudStackDBReadonlyInstanceCreate(d *schema.ResourceData, m
 
 	request, err := buildDBReadonlyCreateRequest(d, meta)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	log.Print("wait for instance to be ready")
 
 	if err := rdsService.WaitForDBInstance(request.DBInstanceId, Running, DefaultTimeout); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	log.Print("instance is ready")
 	raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.CreateReadOnlyDBInstance(request)
 	})
 
+	bresponse, ok := raw.(*rds.CreateReadOnlyDBInstanceResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	resp, _ := raw.(*rds.CreateReadOnlyDBInstanceResponse)
+	resp := bresponse
 	d.SetId(resp.DBInstanceId)
 
 	// wait instance status change from Creating to running
 	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 5*time.Minute, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return resourceAlibabacloudStackDBReadonlyInstanceUpdate(d, meta)
@@ -230,12 +185,12 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 
 	if d.HasChange("parameters") {
 		if err := rdsService.ModifyParameters(d, "parameters"); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 
 	if err := rdsService.setInstanceTags(d); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if d.IsNewResource() {
@@ -243,27 +198,33 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 		return resourceAlibabacloudStackDBInstanceRead(d, meta)
 	}
 
-	if d.HasChange("instance_name") {
+	if d.HasChange("db_instance_description") || d.HasChange("instance_name") {
 		request := rds.CreateModifyDBInstanceDescriptionRequest()
-		request.RegionId = client.RegionId
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
-		request.DBInstanceDescription = d.Get("instance_name").(string)
+		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "instance_name"); err == nil {
+			request.DBInstanceDescription = v.(string)
+		} else {
+			return err
+		}
 
 		err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 			raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 				return rdsClient.ModifyDBInstanceDescription(request)
 			})
 			if err != nil {
-				if IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState"}) {
+				if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState"}) {
 					return resource.RetryableError(err)
 				}
+				errmsg := ""
+				if raw != nil {
+					response, ok := raw.(*rds.ModifyDBInstanceDescriptionResponse)
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+					}
+				}
+				err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
 				return resource.NonRetryableError(err)
 			}
 
@@ -274,22 +235,14 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 		})
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return err
 		}
 
 	}
 
 	update := false
 	request := rds.CreateModifyDBInstanceSpecRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
 	request.PayType = string(Postpaid)
 
@@ -297,13 +250,21 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 		request.DBInstanceStorageType = d.Get("db_instance_storage_type").(string)
 		update = true
 	}
-	if d.HasChange("instance_type") {
-		request.DBInstanceClass = d.Get("instance_type").(string)
+	if d.HasChange("db_instance_class") || d.HasChange("instance_type") {
+		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_class", "instance_type"); err == nil {
+			request.DBInstanceClass = v.(string)
+		} else {
+			return err
+		}
 		update = true
 	}
 
-	if d.HasChange("instance_storage") {
-		request.DBInstanceStorage = requests.NewInteger(d.Get("instance_storage").(int))
+	if d.HasChange("db_instance_storage") || d.HasChange("instance_storage") {
+		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(0), "db_instance_storage", "instance_storage"); err == nil {
+			request.DBInstanceStorage = requests.NewInteger(v.(int))
+		} else {
+			return err
+		}
 		update = true
 	}
 
@@ -312,7 +273,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 		stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Minute, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 		_, err := stateConf.WaitForState()
 		if err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 
 		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -320,9 +281,18 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 				return rdsClient.ModifyDBInstanceSpec(request)
 			})
 			if err != nil {
-				if IsExpectedErrors(err, []string{"InvalidOrderTask.NotSupport", "OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState"}) {
+				if errmsgs.IsExpectedErrors(err, []string{"InvalidOrderTask.NotSupport", "OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState"}) {
 					return resource.RetryableError(err)
 				}
+				errmsg := ""
+				if raw != nil {
+					response, ok := raw.(*rds.ModifyDBInstanceSpecResponse)
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+					}
+				}
+				err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
 				return resource.NonRetryableError(err)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
@@ -333,13 +303,13 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 		})
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return err
 		}
 
 		// wait instance status is running after modifying
 		_, err = stateConf.WaitForState()
 		if err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
 
@@ -354,23 +324,23 @@ func resourceAlibabacloudStackDBReadonlyInstanceRead(d *schema.ResourceData, met
 
 	instance, err := rdsService.DescribeDBInstance(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("engine", instance.Engine)
-	d.Set("master_db_instance_id", instance.MasterInstanceId)
+	connectivity.SetResourceData(d, instance.MasterInstanceId, "master_instance_id", "master_db_instance_id")
 	d.Set("engine_version", instance.EngineVersion)
-	d.Set("instance_type", instance.DBInstanceClass)
+	connectivity.SetResourceData(d, instance.DBInstanceClass, "db_instance_class", "instance_type")
 	d.Set("port", instance.Port)
-	d.Set("instance_storage", instance.DBInstanceStorage)
+	connectivity.SetResourceData(d, instance.DBInstanceStorage, "db_instance_storage", "instance_storage")
 	d.Set("zone_id", instance.ZoneId)
 	d.Set("vswitch_id", instance.VSwitchId)
 	d.Set("connection_string", instance.ConnectionString)
-	d.Set("instance_name", instance.DBInstanceDescription)
+	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "instance_name")
 	d.Set("db_instance_storage_type", instance.DBInstanceStorageType)
 
 	if err = rdsService.RefreshParameters(d, "parameters"); err != nil {
@@ -379,7 +349,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceRead(d *schema.ResourceData, met
 
 	tags, err := rdsService.describeTags(d)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if len(tags) > 0 {
 		d.Set("tags", rdsService.tagsToMap(tags))
@@ -394,24 +364,17 @@ func resourceAlibabacloudStackDBReadonlyInstanceDelete(d *schema.ResourceData, m
 
 	instance, err := rdsService.DescribeDBInstance(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if PayType(instance.PayType) == Prepaid {
-		return WrapError(Error("At present, 'Prepaid' instance cannot be deleted and must wait it to be expired and release it automatically."))
+		return errmsgs.WrapError(errmsgs.Error("At present, 'Prepaid' instance cannot be deleted and must wait it to be expired and release it automatically."))
 	}
 
 	request := rds.CreateDeleteDBInstanceRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
 
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -421,9 +384,18 @@ func resourceAlibabacloudStackDBReadonlyInstanceDelete(d *schema.ResourceData, m
 		})
 
 		if err != nil {
-			if IsExpectedErrors(err, []string{"RwSplitNetType.Exist", "OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"RwSplitNetType.Exist", "OperationDenied.DBInstanceStatus", "OperationDenied.MasterDBInstanceState"}) {
 				return resource.RetryableError(err)
 			}
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*rds.DeleteDBInstanceResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
 			return resource.NonRetryableError(err)
 		}
 
@@ -433,10 +405,10 @@ func resourceAlibabacloudStackDBReadonlyInstanceDelete(d *schema.ResourceData, m
 	})
 
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	waitSecondsIfWithTest(600)
 	return nil
@@ -446,19 +418,28 @@ func buildDBReadonlyCreateRequest(d *schema.ResourceData, meta interface{}) (*rd
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	request := rds.CreateCreateReadOnlyDBInstanceRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
+	client.InitRpcRequest(*request.RpcRequest)
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "master_instance_id", "master_db_instance_id"); err == nil {
+		request.DBInstanceId = Trim(v.(string))
 	} else {
-		request.Scheme = "http"
+		return nil, err
 	}
-	request.RegionId = string(client.Region)
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-	request.DBInstanceId = Trim(d.Get("master_db_instance_id").(string))
 	request.EngineVersion = Trim(d.Get("engine_version").(string))
-	request.DBInstanceStorage = requests.NewInteger(d.Get("instance_storage").(int))
-	request.DBInstanceClass = Trim(d.Get("instance_type").(string))
-	request.DBInstanceDescription = d.Get("instance_name").(string)
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(0), "db_instance_storage", "instance_storage"); err == nil {
+		request.DBInstanceStorage = requests.NewInteger(v.(int))
+	} else {
+		return nil, err
+	}
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_class", "instance_type"); err == nil {
+		request.DBInstanceClass = Trim(v.(string))
+	} else {
+		return nil, err
+	}
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "instance_name"); err == nil {
+		request.DBInstanceDescription = v.(string)
+	} else {
+		return nil, err
+	}
 	request.DBInstanceStorageType = d.Get("db_instance_storage_type").(string)
 
 	if zone, ok := d.GetOk("zone_id"); ok && Trim(zone.(string)) != "" {
@@ -476,7 +457,7 @@ func buildDBReadonlyCreateRequest(d *schema.ResourceData, meta interface{}) (*rd
 		// check vswitchId in zone
 		vsw, err := vpcService.DescribeVSwitch(vswitchId)
 		if err != nil {
-			return nil, WrapError(err)
+			return nil, errmsgs.WrapError(err)
 		}
 
 		if request.ZoneId == "" {
@@ -484,10 +465,10 @@ func buildDBReadonlyCreateRequest(d *schema.ResourceData, meta interface{}) (*rd
 		} else if strings.Contains(request.ZoneId, MULTI_IZ_SYMBOL) {
 			zonestr := strings.Split(strings.SplitAfter(request.ZoneId, "(")[1], ")")[0]
 			if !strings.Contains(zonestr, string([]byte(vsw.ZoneId)[len(vsw.ZoneId)-1])) {
-				return nil, WrapError(Error("The specified vswitch %s isn't in the multi zone %s.", vsw.VSwitchId, request.ZoneId))
+				return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the multi zone %s.", vsw.VSwitchId, request.ZoneId))
 			}
 		} else if request.ZoneId != vsw.ZoneId {
-			return nil, WrapError(Error("The specified vswitch %s isn't in the multi zone %s.", vsw.VSwitchId, request.ZoneId))
+			return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the multi zone %s.", vsw.VSwitchId, request.ZoneId))
 		}
 
 		request.VPCId = vsw.VpcId

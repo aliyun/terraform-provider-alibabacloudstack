@@ -2,13 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -134,33 +131,14 @@ func dataSourceAlibabacloudStackEhpcJobTemplatesRead(d *schema.ResourceData, met
 			idsMap[vv.(string)] = vv.(string)
 		}
 	}
-	var response map[string]interface{}
-	conn, err := client.NewEcsClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	for {
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("GET"), StringPointer("2018-04-12"), StringPointer("AK"), request, nil, &runtime)
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-		addDebug(action, response, request)
+		response, err := client.DoTeaRequest("GET", "ECS", "2018-04-12", action, "", nil, request)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ehpc_job_templates", action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
 		resp, err := jsonpath.Get("$.Templates.JobTemplates", response)
 		if err != nil {
-			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Templates.JobTemplates", response)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.Templates.JobTemplates", response)
 		}
 		result, _ := resp.([]interface{})
 		for _, v := range result {
@@ -207,11 +185,11 @@ func dataSourceAlibabacloudStackEhpcJobTemplatesRead(d *schema.ResourceData, met
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("templates", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

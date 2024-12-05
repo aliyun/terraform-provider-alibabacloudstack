@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -26,6 +28,12 @@ func resourceAlibabacloudStackDBAccountPrivilege() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Required:     true,
+				Deprecated:   "Field 'instance_id' is deprecated and will be removed in a future release. Please use 'data_base_instance_id' instead.",
+			},
+			"data_base_instance_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Required: true,
@@ -57,13 +65,16 @@ func resourceAlibabacloudStackDBAccountPrivilege() *schema.Resource {
 func resourceAlibabacloudStackDBAccountPrivilegeCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
-	instanceId := d.Get("instance_id").(string)
+	instanceId, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "data_base_instance_id", "instance_id")
+	if err != nil {
+		return err
+	}
 	account := d.Get("account_name").(string)
 	privilege := d.Get("privilege").(string)
 	dbList := d.Get("db_names").(*schema.Set).List()
 	// wait instance running before granting
-	if err := rdsService.WaitForDBInstance(instanceId, Running, DefaultLongTimeout); err != nil {
-		return WrapError(err)
+	if err := rdsService.WaitForDBInstance(instanceId.(string), Running, DefaultLongTimeout); err != nil {
+		return errmsgs.WrapError(err)
 	}
 	d.SetId(fmt.Sprintf("%s%s%s%s%s", instanceId, COLON_SEPARATED, account, COLON_SEPARATED, privilege))
 
@@ -71,14 +82,14 @@ func resourceAlibabacloudStackDBAccountPrivilegeCreate(d *schema.ResourceData, m
 		for _, db := range dbList {
 			if err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 				if err := rdsService.GrantAccountPrivilege(d.Id(), db.(string)); err != nil {
-					if IsExpectedErrors(err, OperationDeniedDBStatus) {
+					if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
 						return resource.RetryableError(err)
 					}
 					return resource.NonRetryableError(err)
 				}
 				return nil
 			}); err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 	}
@@ -92,18 +103,18 @@ func resourceAlibabacloudStackDBAccountPrivilegeRead(d *schema.ResourceData, met
 	rsdService := RdsService{client}
 	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	object, err := rsdService.DescribeDBAccountPrivilege(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
-	d.Set("instance_id", object.DBInstanceId)
+	connectivity.SetResourceData(d, object.DBInstanceId, "data_base_instance_id", "instance_id")
 	d.Set("account_name", object.AccountName)
 	d.Set("privilege", parts[2])
 	var names []string
@@ -116,29 +127,33 @@ func resourceAlibabacloudStackDBAccountPrivilegeRead(d *schema.ResourceData, met
 	if len(names) < 1 && strings.HasPrefix(object.DBInstanceId, "pgm-") {
 
 		request := rds.CreateDescribeDatabasesRequest()
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = object.DBInstanceId
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
+
 		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 			raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 				return rdsClient.DescribeDatabases(request)
 			})
 			if err != nil {
-				if IsExpectedErrors(err, []string{"InternalError", "OperationDenied.DBInstanceStatus"}) {
-					return resource.RetryableError(WrapErrorf(err, DefaultErrorMsg, object.DBInstanceId, request.GetActionName(), AlibabacloudStackSdkGoERROR))
+				if errmsgs.IsExpectedErrors(err, []string{"InternalError", "OperationDenied.DBInstanceStatus"}) {
+					return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, object.DBInstanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
 				}
-				return resource.NonRetryableError(WrapErrorf(err, DefaultErrorMsg, object.DBInstanceId, request.GetActionName(), AlibabacloudStackSdkGoERROR))
+				errmsg := ""
+				if raw != nil {
+					response, ok := raw.(*rds.DescribeDatabasesResponse)
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+					}
+				}
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, object.DBInstanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-			response, _ := raw.(*rds.DescribeDatabasesResponse)
+			response, ok := raw.(*rds.DescribeDatabasesResponse)
+			if !ok {
+				return resource.NonRetryableError(fmt.Errorf("failed to cast response to DescribeDatabasesResponse"))
+			}
 			for _, db := range response.Databases.Database {
 				for _, account := range db.Accounts.AccountPrivilegeInfo {
 					if account.Account == object.AccountName && (account.AccountPrivilege == parts[2] || account.AccountPrivilege == "ALL") {
@@ -149,7 +164,7 @@ func resourceAlibabacloudStackDBAccountPrivilegeRead(d *schema.ResourceData, met
 			return nil
 		})
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 
@@ -174,15 +189,15 @@ func resourceAlibabacloudStackDBAccountPrivilegeUpdate(d *schema.ResourceData, m
 
 		if len(remove) > 0 {
 			if strings.HasPrefix(d.Id(), "pgm-") {
-				return WrapError(fmt.Errorf("At present, the PostgreSql database does not support revoking the current privilege."))
+				return errmsgs.WrapError(fmt.Errorf("At present, the PostgreSql database does not support revoking the current privilege."))
 			}
 			// wait instance running before revoking
 			if err := rdsService.WaitForDBInstance(parts[0], Running, DefaultTimeoutMedium); err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			for _, db := range remove {
 				if err := rdsService.RevokeAccountPrivilege(d.Id(), db.(string)); err != nil {
-					return WrapError(err)
+					return errmsgs.WrapError(err)
 				}
 			}
 		}
@@ -190,11 +205,11 @@ func resourceAlibabacloudStackDBAccountPrivilegeUpdate(d *schema.ResourceData, m
 		if len(add) > 0 {
 			// wait instance running before granting
 			if err := rdsService.WaitForDBInstance(parts[0], Running, DefaultTimeoutMedium); err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			for _, db := range add {
 				if err := rdsService.GrantAccountPrivilege(d.Id(), db.(string)); err != nil {
-					return WrapError(err)
+					return errmsgs.WrapError(err)
 				}
 			}
 		}
@@ -210,14 +225,14 @@ func resourceAlibabacloudStackDBAccountPrivilegeDelete(d *schema.ResourceData, m
 	rdsService := RdsService{client}
 	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	object, err := rdsService.DescribeDBAccountPrivilege(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if strings.HasPrefix(d.Id(), "pgm-") {
 		return nil
@@ -229,7 +244,7 @@ func resourceAlibabacloudStackDBAccountPrivilegeDelete(d *schema.ResourceData, m
 			if pri.AccountPrivilege == parts[2] {
 				dbName = pri.DBName
 				if err := rdsService.RevokeAccountPrivilege(d.Id(), pri.DBName); err != nil {
-					return WrapError(err)
+					return errmsgs.WrapError(err)
 				}
 			}
 		}

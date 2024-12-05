@@ -5,6 +5,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/drds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -14,14 +15,14 @@ func dataSourceAlibabacloudStackDRDSInstances() *schema.Resource {
 		Read: dataSourceAlibabacloudStackDRDSInstancesRead,
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
+				Type:        schema.TypeString,
+				Optional:    true,
 				ValidateFunc: validation.StringIsValidRegExp,
-				Deprecated:   "Field 'name_regex' is deprecated and will be removed in a future release. Please use 'description_regex' instead.",
+				Deprecated:  "Field 'name_regex' is deprecated and will be removed in a future release. Please use 'description_regex' instead.",
 			},
 			"description_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
+				Type:        schema.TypeString,
+				Optional:    true,
 				ValidateFunc: validation.StringIsValidRegExp,
 			},
 			"output_file": {
@@ -84,10 +85,12 @@ func dataSourceAlibabacloudStackDRDSInstances() *schema.Resource {
 		},
 	}
 }
+
 func dataSourceAlibabacloudStackDRDSInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := drds.CreateDescribeDrdsInstancesRequest()
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
+
 	var dbi []drds.Instance
 	var regexString *regexp.Regexp
 	nameRegex, nameRegexGot := d.GetOk("name_regex")
@@ -112,16 +115,18 @@ func dataSourceAlibabacloudStackDRDSInstancesRead(d *schema.ResourceData, meta i
 		}
 	}
 
-	request.Headers["x-ascm-product-name"] = "Drds"
-	request.Headers["x-acs-organizationId"] = client.Department
 	raw, err := client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
 		return drdsClient.DescribeDrdsInstances(request)
 	})
+	response, ok := raw.(*drds.DescribeDrdsInstancesResponse)
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_drds_instances", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_instances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*drds.DescribeDrdsInstancesResponse)
 
 	for _, item := range response.Instances.Instance {
 		if regexString != nil {
@@ -140,20 +145,21 @@ func dataSourceAlibabacloudStackDRDSInstancesRead(d *schema.ResourceData, meta i
 	}
 	return drdsInstancesDescription(d, dbi)
 }
+
 func drdsInstancesDescription(d *schema.ResourceData, dbi []drds.Instance) error {
 	var ids []string
 	var descriptions []string
 	var s []map[string]interface{}
 	for _, item := range dbi {
 		mapping := map[string]interface{}{
-			"id":           item.DrdsInstanceId,
-			"description":  item.Description,
-			"type":         item.Type,
-			"create_time":  item.CreateTime,
-			"status":       item.Status,
-			"network_type": item.NetworkType,
-			"zone_id":      item.ZoneId,
-			"version":      item.Version,
+			"id":            item.DrdsInstanceId,
+			"description":   item.Description,
+			"type":          item.Type,
+			"create_time":   item.CreateTime,
+			"status":        item.Status,
+			"network_type":  item.NetworkType,
+			"zone_id":       item.ZoneId,
+			"version":       item.Version,
 		}
 		ids = append(ids, item.DrdsInstanceId)
 		descriptions = append(descriptions, item.Description)
@@ -161,13 +167,13 @@ func drdsInstancesDescription(d *schema.ResourceData, dbi []drds.Instance) error
 	}
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("instances", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("descriptions", descriptions); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	// create a json file in current directory and write data source to it
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

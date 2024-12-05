@@ -86,9 +86,7 @@ func resourceSlbRuleBasicDependence(name string) string {
 %s
 
 %s
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 variable "name" {
   default = "%s"
 }

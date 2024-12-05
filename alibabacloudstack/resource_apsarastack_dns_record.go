@@ -3,15 +3,11 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"strings"
-	"time"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -68,9 +64,8 @@ func resourceAlibabacloudStackDnsRecord() *schema.Resource {
 	}
 }
 
-func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	//var requestInfo *ecs.Client
 	request := make(map[string]interface{})
 	ZoneId := d.Get("zone_id").(int)
 	LbaStrategy := d.Get("lba_strategy").(string)
@@ -82,43 +77,22 @@ func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta inter
 		rrsets = expandStringList(v.(*schema.Set).List())
 		for i, key := range rrsets {
 			request[fmt.Sprintf("RDatas.%d.Value", i+1)] = key
-
 		}
 	}
-	var response map[string]interface{}
 
 	action := "AddGlobalZoneRecord"
-	request["Product"] = "CloudDns"
-	request["product"] = "CloudDns"
-	request["OrganizationId"] = client.Department
-	request["RegionId"] = client.RegionId
-
 	request["Type"] = Type
 	request["Ttl"] = TTL
 	request["ZoneId"] = ZoneId
 	request["LbaStrategy"] = LbaStrategy
 	request["Name"] = Name
-	conn, err := client.NewCloudApiClient()
-	if err != nil {
-		return WrapError(err)
-	}
-	request["ClientToken"] = buildClientToken("AddGlobalZoneRecord")
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequesttowpoint1(StringPointer(action), nil, StringPointer("POST"), StringPointer("2021-06-24"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
+	request["ClientToken"] = buildClientToken(action)
 
-	addDebug("AddGlobalZoneRecord", response, request)
+	_, err = client.DoTeaRequest("POST", "CloudDns", "2021-06-24", action, "", nil, request)
+	if err != nil {
+		return err
+	}
+
 	d.SetId(fmt.Sprint(ZoneId))
 
 	return resourceAlibabacloudStackDnsRecordRead(d, meta)
@@ -131,11 +105,11 @@ func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interfa
 	dnsService := &DnsService{client: client}
 	object, err := dnsService.DescribeDnsRecord(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("ttl", object.Data[0].TTL)
 	d.Set("record_id", object.Data[0].Id)
@@ -147,6 +121,7 @@ func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interfa
 
 	return nil
 }
+
 func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	dnsService := DnsService{client}
@@ -156,7 +131,7 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 	LbaStrategy := d.Get("lba_strategy").(string)
 	check, err := dnsService.DescribeDnsRecord(d.Id())
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "IsRecordExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsRecordExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	attributeUpdate := false
 
@@ -167,37 +142,15 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 			desc = v.(string)
 		}
 		check.Data[0].Remark = desc
-		request := requests.NewCommonRequest()
-		request.Method = "POST"
-		request.Product = "CloudDns"
-		request.Domain = client.Domain
-		request.Version = "2021-06-24"
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "UpdateGlobalZoneRecordRemark"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.RegionId = client.RegionId
-
-		request.QueryParams = map[string]string{
-			
-			
-			"Product":         "CloudDns",
-			"RegionId":        client.RegionId,
-			"Action":          "UpdateGlobalZoneRecordRemark",
-			"Version":         "2021-06-24",
-			"Id":              fmt.Sprint(ID),
-			"Remark":          desc,
-		}
+		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "UpdateGlobalZoneRecordRemark", "")
+		request.QueryParams["Id"] = fmt.Sprint(ID)
+		request.QueryParams["Remark"] = desc
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
 		log.Printf(" response of raw UpdateGlobalZoneRecordRemark : %s", raw)
-
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_dns_record", "UpdateGlobalZoneRecordRemark", raw)
+			return err
 		}
 		addDebug(request.GetActionName(), raw, request)
 	} else {
@@ -235,16 +188,6 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		check.Data[0].TTL = Ttl
 	}
 
-	//var rrset string
-
-	//if v, ok := d.GetOk("rr_set"); ok {
-	//	rrsets = expandStringList(v.(*schema.Set).List())
-	//	for i, key := range rrsets {
-	//		request[fmt.Sprintf("RDatas.%d.Value", i+1)] = key
-	//
-	//	}
-	//}
-
 	if d.HasChange("rr_set") {
 		attributeUpdate = true
 	}
@@ -256,14 +199,9 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 			rrsets = expandStringList(v.(*schema.Set).List())
 			for i, key := range rrsets {
 				request[fmt.Sprintf("RDatas.%d.Value", i+1)] = key
-
 			}
 		}
 		action := "UpdateGlobalZoneRecord"
-		request["Product"] = "CloudDns"
-		request["product"] = "CloudDns"
-		request["OrganizationId"] = client.Department
-		request["RegionId"] = client.RegionId
 		request["Type"] = Type
 		request["Ttl"] = Ttl
 		request["Id"] = ID
@@ -271,29 +209,12 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		request["LbaStrategy"] = LbaStrategy
 		request["Name"] = Name
 		request["Remark"] = check.Data[0].Remark
-		conn, err := client.NewCloudApiClient()
+		request["ClientToken"] = buildClientToken(action)
+
+		_, err := client.DoTeaRequest("POST", "CloudDns", "2021-06-24", action, "", nil, request)
 		if err != nil {
-			return WrapError(err)
+			return err
 		}
-		var response map[string]interface{}
-		request["ClientToken"] = buildClientToken("UpdateGlobalZoneRecord")
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-			response, err = conn.DoRequesttowpoint1(StringPointer(action), nil, StringPointer("POST"), StringPointer("2021-06-24"), StringPointer("AK"), nil, request, &runtime)
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-
-		addDebug("UpdateGlobalZoneRecord", response, request)
-
 	}
 
 	return resourceAlibabacloudStackDnsRecordRead(d, meta)
@@ -303,40 +224,28 @@ func resourceAlibabacloudStackDnsRecordDelete(d *schema.ResourceData, meta inter
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ID := d.Get("record_id").(int)
 	ZoneId := d.Get("zone_id").(int)
-	request := requests.NewCommonRequest()
-	request.Method = "POST"
-	request.Product = "CloudDns"
-	request.Domain = client.Domain
-	request.Version = "2021-06-24"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "DeleteGlobalZoneRecord"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudDns",
-		"RegionId":        client.RegionId,
-		"Action":          "DeleteGlobalZoneRecord",
-		"Version":         "2021-06-24",
-		"Id":              fmt.Sprint(ID),
-		"ZoneId":          fmt.Sprint(ZoneId),
-	}
+
+	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DeleteGlobalZoneRecord", "")
+	request.QueryParams["Id"] = fmt.Sprint(ID)
+	request.QueryParams["ZoneId"] = fmt.Sprint(ZoneId)
 	raw, err := client.WithEcsClient(func(dnsClient *ecs.Client) (interface{}, error) {
 		return dnsClient.ProcessCommonRequest(request)
 	})
 	addDebug(request.GetActionName(), raw)
 
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"DomainRecordNotBelongToUser"}) {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		if errmsgs.IsExpectedErrors(err, []string{"DomainRecordNotBelongToUser"}) {
 			return nil
 		}
-		if IsExpectedErrors(err, []string{"RecordForbidden.DNSChange", "InternalError"}) {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"RecordForbidden.DNSChange", "InternalError"}) {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	return nil
 }

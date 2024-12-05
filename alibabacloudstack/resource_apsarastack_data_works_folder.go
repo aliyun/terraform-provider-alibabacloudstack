@@ -5,12 +5,9 @@ import (
 	"log"
 	"path"
 	"strings"
-	"time"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -51,10 +48,6 @@ func resourceAlibabacloudStackDataWorksFolderCreate(d *schema.ResourceData, meta
 	var response map[string]interface{}
 	action := "CreateFolder"
 	request := make(map[string]interface{})
-	conn, err := client.NewDataworkspublicClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	folderPath := ConvertDataWorksFrontEndFolderPathToBackEndFolderPath(d.Get("folder_path").(string))
 	request["FolderPath"] = folderPath
 	if v, ok := d.GetOk("project_id"); ok {
@@ -63,62 +56,48 @@ func resourceAlibabacloudStackDataWorksFolderCreate(d *schema.ResourceData, meta
 	if v, ok := d.GetOk("project_identifier"); ok {
 		request["ProjectIdentifier"] = v
 	}
-	request["RegionId"] = client.RegionId
-	request["Product"] = "dataworks-public"
-	request["product"] = "dataworks-public"
-	request["OrganizationId"] = client.Department
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	request["PageSize"] = 1
+	request["PageNumber"] = 1
+	response, err := client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_data_works_folder", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
-
 	d.SetId(fmt.Sprint(response["Data"], ":", request["ProjectId"]))
 
 	return resourceAlibabacloudStackDataWorksFolderRead(d, meta)
 }
+
 func resourceAlibabacloudStackDataWorksFolderRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	dataworksPublicService := DataworksPublicService{client}
 	object, err := dataworksPublicService.DescribeDataWorksFolder(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_data_works_folder dataworksPublicService.DescribeDataWorksFolder Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("folder_id", parts[0])
 	d.Set("project_id", parts[1])
 	d.Set("folder_path", object["FolderPath"].(string))
 	return nil
 }
+
 func resourceAlibabacloudStackDataWorksFolderUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var response map[string]interface{}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	request := map[string]interface{}{
-		"FolderId":  parts[0],
-		"ProjectId": parts[1],
+		"FolderId":   parts[0],
+		"ProjectId":  parts[1],
 	}
 	if d.HasChange("folder_path") {
 		folderPath := ConvertDataWorksFrontEndFolderPathToBackEndFolderPath(d.Get("folder_path").(string))
@@ -129,72 +108,35 @@ func resourceAlibabacloudStackDataWorksFolderUpdate(d *schema.ResourceData, meta
 	if v, ok := d.GetOk("project_identifier"); ok {
 		request["ProjectIdentifier"] = v
 	}
-	request["RegionId"] = client.RegionId
-	request["Product"] = "dataworks-public"
-	request["product"] = "dataworks-public"
-	request["OrganizationId"] = client.Department
+	request["PageSize"] = 1
+	request["PageNumber"] = 1
 	action := "UpdateFolder"
-	conn, err := client.NewDataworkspublicClient()
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
 	if err != nil {
-		return WrapError(err)
-	}
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
-	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	return resourceAlibabacloudStackDataWorksFolderRead(d, meta)
 }
+
 func resourceAlibabacloudStackDataWorksFolderDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	action := "DeleteFolder"
-	var response map[string]interface{}
-	conn, err := client.NewDataworkspublicClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	request := map[string]interface{}{
-		"FolderId":  parts[0],
-		"ProjectId": parts[1],
+		"FolderId":   parts[0],
+		"ProjectId":  parts[1],
 	}
-
 	if v, ok := d.GetOk("project_identifier"); ok {
 		request["ProjectIdentifier"] = v
 	}
-	request["RegionId"] = client.RegionId
-	request["Product"] = "dataworks-public"
-	request["product"] = "dataworks-public"
-	request["OrganizationId"] = client.Department
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2020-05-18"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	request["PageSize"] = 1
+	request["PageNumber"] = 1
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	return nil
 }

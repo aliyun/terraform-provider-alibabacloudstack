@@ -2,10 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -51,6 +51,7 @@ func resourceAlibabacloudStackAscmRole() *schema.Resource {
 		},
 	}
 }
+
 func resourceAlibabacloudStackAscmRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *ecs.Client
@@ -72,54 +73,38 @@ func resourceAlibabacloudStackAscmRoleCreate(d *schema.ResourceData, meta interf
 	}
 	check, err := ascmService.DescribeAscmCustomRole(name)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_custom_role", "role alreadyExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_custom_role", "role alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	organizationvisibility := d.Get("organization_visibility").(string)
 	if len(check.Data) == 0 {
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":               client.RegionId,
-			
-			"Product":                "ascm",
-			"Action":                 "CreateRole",
-			"Version":                "2019-05-10",
-			"ProductName":            "ascm",
-			"roleName":               name,
-			"description":            description,
-			"roleRange":              roleRange,
-			"organizationVisibility": organizationvisibility,
-			//"privileges":             fmt.Sprintf("[\"%s\"]", priv),
-			"params": fmt.Sprintf("{\"privileges\":%s}", priv),
-		}
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		request.Domain = client.Domain
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "CreateRole"
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateRole", "")
+		mergeMaps(request.QueryParams, map[string]string{
+			"roleName":                name,
+			"description":             description,
+			"roleRange":               roleRange,
+			"organizationVisibility":  organizationvisibility,
+			"params":                  fmt.Sprintf("{\"privileges\":%s}", priv),
+		})
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_custom_role", "CreateRole", raw)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_custom_role", "CreateRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug("CreateRole", raw, requestInfo, request)
 
-		bresponse, _ := raw.(*responses.CommonResponse)
 		if bresponse.GetHttpStatus() != 200 {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_custom_role", "CreateRole", AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_custom_role", "CreateRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug("CreateRole", raw, requestInfo, bresponse.GetHttpContentString())
 	}
@@ -132,7 +117,6 @@ func resourceAlibabacloudStackAscmRoleCreate(d *schema.ResourceData, meta interf
 	})
 	d.SetId(name + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
 	return resourceAlibabacloudStackAscmRoleUpdate(d, meta)
-
 }
 
 func resourceAlibabacloudStackAscmRoleUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -146,11 +130,11 @@ func resourceAlibabacloudStackAscmRoleRead(d *schema.ResourceData, meta interfac
 	object, err := ascmService.DescribeAscmCustomRole(d.Id())
 	did := strings.Split(d.Id(), COLON_SEPARATED)
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	log.Printf("Privileges for did[0]:%v", object.Data[0].Privileges)
 	d.Set("role_name", did[0])
@@ -161,7 +145,6 @@ func resourceAlibabacloudStackAscmRoleRead(d *schema.ResourceData, meta interfac
 }
 
 func resourceAlibabacloudStackAscmRoleDelete(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	var requestInfo *ecs.Client
@@ -169,44 +152,23 @@ func resourceAlibabacloudStackAscmRoleDelete(d *schema.ResourceData, meta interf
 	did := strings.Split(d.Id(), COLON_SEPARATED)
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "IsRoleExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsRoleExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	addDebug("IsCustomRoleExist", check, requestInfo, map[string]string{"roleName": did[0]})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRole", "")
+		request.QueryParams["roleName"] = did[0]
 
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":        client.RegionId,
-			
-			"Product":         "ascm",
-			"Action":          "RemoveRole",
-			"Version":         "2019-05-10",
-			"ProductName":     "ascm",
-			"roleName":        did[0],
-		}
-
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		request.Domain = client.Domain
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "RemoveRole"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.RegionId = client.RegionId
-
-		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return resource.RetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_custom_role", "RemoveRole", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		_, err = ascmService.DescribeAscmCustomRole(d.Id())
 

@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -35,9 +35,9 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 				Computed: true,
 			},
 			"role_in_ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:       schema.TypeSet,
+				Optional:   true,
+				Elem:       &schema.Schema{Type: schema.TypeString},
 				Deprecated: "Attribute role_in_ids has been deprecated and replaced with role_ids.",
 			},
 			"role_ids": {
@@ -65,7 +65,7 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 			loginNamesList = append(loginNamesList, loginName)
 		}
 	}
-	
+
 	if v, ok := d.GetOk("role_ids"); ok {
 		loginNames := expandStringList(v.(*schema.Set).List())
 
@@ -74,42 +74,22 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 		}
 	}
 
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateUserGroup", "/roa/ascm/auth/user/createUserGroup")
 
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-
-	request.Headers["x-ascm-product-name"] = "ascm"
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 
 	QueryParams := map[string]interface{}{
-		"groupName":        groupName,
-		"organizationId":   organizationId,
-		"roleIdList":       loginNamesList,
-		"SecurityToken":    client.Config.SecurityToken,
-		"SignatureVersion": "1.0",
-		"SignatureMethod":  "HMAC-SHA1",
+		"groupName":      groupName,
+		"organizationId": organizationId,
+		"roleIdList":     loginNamesList,
 	}
 
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = client.Domain
 	requeststring, err := json.Marshal(QueryParams)
-
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_user_group", "CreateUserGroup", "json format failed")
 	}
-	request.Headers["Content-Type"] = requests.Json
 	request.SetContent(requeststring)
-	request.PathPattern = "/roa/ascm/auth/user/createUserGroup"
-	request.ApiName = "CreateUserGroup"
-	request.RegionId = client.RegionId
-	request.Headers["RegionId"] = client.RegionId
+	request.Headers["Content-Type"] = requests.Json
 
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
@@ -118,7 +98,12 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 	log.Printf("response of raw CreateUserGroup is : %s", raw)
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user_group", "CreateUserGroup", raw)
+		errmsg := ""
+		bresponse, ok := raw.(*responses.CommonResponse)
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group", "CreateUserGroup", errmsg)
 	}
 
 	addDebug("CreateUserGroup", raw, requestInfo, request)
@@ -126,7 +111,12 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 	bresponse, _ := raw.(*responses.CommonResponse)
 
 	if bresponse.GetHttpStatus() != 200 {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user_group", "CreateUserGroup", AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		bresponse, ok := raw.(*responses.CommonResponse)
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group", "CreateUserGroup", errmsg)
 	}
 	addDebug("CreateUserGroup", raw, requestInfo, bresponse.GetHttpContentString())
 
@@ -136,7 +126,6 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 }
 
 func resourceAlibabacloudStackAscmUserGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-
 	return resourceAlibabacloudStackAscmUserGroupRead(d, meta)
 }
 
@@ -147,11 +136,11 @@ func resourceAlibabacloudStackAscmUserGroupRead(d *schema.ResourceData, meta int
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmUserGroup(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if len(object.Data) == 0 {
 		d.SetId("")
@@ -174,54 +163,29 @@ func resourceAlibabacloudStackAscmUserGroupRead(d *schema.ResourceData, meta int
 }
 
 func resourceAlibabacloudStackAscmUserGroupDelete(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	var requestInfo *ecs.Client
 
 	check, err := ascmService.DescribeAscmUserGroup(d.Id())
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "IsUserGroupExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsUserGroupExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	addDebug("IsUserGroupExist", check, requestInfo, map[string]string{"groupName": d.Id()})
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":         client.RegionId,
-			
-			"Product":          "ascm",
-			"Action":           "DeleteUserGroup",
-			"Version":          "2019-05-10",
-			"ProductName":      "ascm",
-			"userGroupId":      strconv.Itoa(check.Data[0].Id),
-			"SecurityToken":    client.Config.SecurityToken,
-			"SignatureVersion": "1.0",
-			"SignatureMethod":  "HMAC-SHA1",
-		}
-
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		request.Domain = client.Domain
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "DeleteUserGroup"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.RegionId = client.RegionId
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DeleteUserGroup", "")
+		request.QueryParams["userGroupId"] = strconv.Itoa(check.Data[0].Id)
 
 		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
 		})
 		if err != nil {
-			return resource.RetryableError(err)
+			errmsg := ""
+			bresponse, ok := raw.(*responses.CommonResponse)
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group", "DeleteUserGroup", errmsg))
 		}
 		check, err = ascmService.DescribeAscmUserGroup(d.Id())
 

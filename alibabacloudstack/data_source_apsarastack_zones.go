@@ -9,8 +9,6 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/hbase"
 
-	"github.com/denverdino/aliyungo/common"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/gpdb"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
@@ -20,12 +18,11 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/elasticsearch"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/polardb"
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
-	"github.com/aliyun/fc-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -109,7 +106,7 @@ func dataSourceAlibabacloudStackZones() *schema.Resource {
 				ForceNew: true,
 				Default:  PostPaid,
 				// %q must contain a valid InstanceChargeType, expected common.PrePaid, common.PostPaid
-				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
+				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
 			},
 			"network_type": {
 				Type:         schema.TypeString,
@@ -203,40 +200,34 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeRds)) {
 		request := rds.CreateDescribeRegionsRequest()
-		request.RegionId = client.RegionId
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-		//if instanceChargeType == string(PostPaid) {
-		//	request.InstanceChargeType = string(Postpaid)
-		//} else {
-		//	request.InstanceChargeType = string(Prepaid)
-		//}
-		var response = &rds.DescribeRegionsResponse{}
-		err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-			raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
+		client.InitRpcRequest(*request.RpcRequest)
+		var raw interface{}
+		var err error
+		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+			raw, err = client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 				return rdsClient.DescribeRegions(request)
 			})
 			if err != nil {
-				if IsExpectedErrors(err, []string{Throttling}) {
+				if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
 					time.Sleep(time.Duration(5) * time.Second)
 					return resource.RetryableError(err)
 				}
 				return resource.NonRetryableError(err)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-			response = raw.(*rds.DescribeRegionsResponse)
+			
 			return nil
 		})
+		response, ok := raw.(*rds.DescribeRegionsResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_zones", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		if len(response.Regions.RDSRegion) <= 0 {
-			return WrapError(fmt.Errorf("[ERROR] There is no available zone for RDS."))
+			return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available zone for RDS."))
 		}
 		for _, r := range response.Regions.RDSRegion {
 			if multi && strings.Contains(r.ZoneId, MULTI_IZ_SYMBOL) && r.RegionId == string(client.Region) {
@@ -246,45 +237,23 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 			rdsZones[r.ZoneId] = r.RegionId
 		}
 	}
-	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypePolarDB)) {
-		request := polardb.CreateDescribeRegionsRequest()
-		request.RegionId = client.RegionId
-		raw, err := client.WithPolarDBClient(func(polarDBClient *polardb.Client) (interface{}, error) {
-			return polarDBClient.DescribeRegions(request)
-		})
-		if err != nil {
-			return WrapError(fmt.Errorf("[ERROR] DescribeRegions got an error: %#v", err))
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		regions, _ := raw.(*polardb.DescribeRegionsResponse)
-		if len(regions.Regions.Region) <= 0 {
-			return WrapError(fmt.Errorf("[ERROR] There is no available region for PolarDB."))
-		}
-		for _, r := range regions.Regions.Region {
-			for _, zone := range r.Zones.Zone {
-				if multi && strings.Contains(zone.ZoneId, MULTI_IZ_SYMBOL) && r.RegionId == string(client.Region) {
-					zoneIds = append(zoneIds, zone.ZoneId)
-					continue
-				}
-				polarDBZones[zone.ZoneId] = r.RegionId
-			}
-		}
-	}
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeRkv)) {
 		request := r_kvstore.CreateDescribeRegionsRequest()
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 			return rkvClient.DescribeRegions(request)
 		})
+		regions, ok := raw.(*r_kvstore.DescribeRegionsResponse)
 		if err != nil {
-			return WrapError(fmt.Errorf("[ERROR] DescribeAvailableResource got an error: %#v", err))
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(regions.BaseResponse)
+			}
+			return errmsgs.WrapError(fmt.Errorf("[ERROR] DescribeAvailableResource got an error: %#v  %s", err, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		regions, _ := raw.(*r_kvstore.DescribeRegionsResponse)
 		if len(regions.RegionIds.KVStoreRegion) <= 0 {
-			return WrapError(fmt.Errorf("[ERROR] There is no available region for KVStore"))
+			return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available region for KVStore"))
 		}
 		for _, r := range regions.RegionIds.KVStoreRegion {
 			if len(regions.RegionIds.KVStoreRegion) > 0 {
@@ -305,18 +274,21 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	}
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeMongoDB)) {
 		request := dds.CreateDescribeRegionsRequest()
-		request.RegionId = client.RegionId
-		request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
 			return ddsClient.DescribeRegions(request)
 		})
+		regions, ok := raw.(*dds.DescribeRegionsResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_zones", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(regions.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		regions, _ := raw.(*dds.DescribeRegionsResponse)
 		if len(regions.Regions.DdsRegion) <= 0 {
-			return WrapError(fmt.Errorf("[ERROR] There is no available region for MongoDB."))
+			return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available region for MongoDB."))
 		}
 		for _, r := range regions.Regions.DdsRegion {
 			for _, zonid := range r.Zones.Zone {
@@ -330,17 +302,21 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	}
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeHBase)) {
 		request := hbase.CreateDescribeRegionsRequest()
-		request.RegionId = client.RegionId
+		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithHbaseClient(func(hbaseClient *hbase.Client) (interface{}, error) {
 			return hbaseClient.DescribeRegions(request)
 		})
+		regions, ok := raw.(*hbase.DescribeRegionsResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_zones", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(regions.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		regions, _ := raw.(*hbase.DescribeRegionsResponse)
 		if len(regions.Regions.Region) <= 0 {
-			return WrapError(fmt.Errorf("[ERROR] There is no available region for HBase."))
+			return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available region for HBase."))
 		}
 		for _, r := range regions.Regions.Region {
 			for _, zonid := range r.Zones.Zone {
@@ -354,19 +330,21 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	}
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeAdb)) {
 		request := adb.CreateDescribeRegionsRequest()
-		request.RegionId = client.RegionId
-		request.Headers["x-ascm-product-name"] = "adb"
-		request.Headers["x-acs-organizationId"] = client.Department
+		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithAdbClient(func(adbClient *adb.Client) (interface{}, error) {
 			return adbClient.DescribeRegions(request)
 		})
+		regions, ok := raw.(*adb.DescribeRegionsResponse)
 		if err != nil {
-			return WrapError(fmt.Errorf("[ERROR] DescribeRegions got an error: %#v", err))
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(regions.BaseResponse)
+			}
+			return errmsgs.WrapError(fmt.Errorf("[ERROR] DescribeRegions got an error: %#v. %s", err, errmsg))
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		regions, _ := raw.(*adb.DescribeRegionsResponse)
 		if len(regions.Regions.Region) <= 0 {
-			return WrapError(fmt.Errorf("[ERROR] There is no available region for adb."))
+			return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available region for adb."))
 		}
 		for _, r := range regions.Regions.Region {
 			for _, zone := range r.Zones.Zone {
@@ -380,18 +358,21 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	}
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeGpdb)) {
 		request := gpdb.CreateDescribeRegionsRequest()
-		request.RegionId = client.RegionId
-		request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithGpdbClient(func(gpdbClient *gpdb.Client) (interface{}, error) {
 			return gpdbClient.DescribeRegions(request)
 		})
+		response, ok := raw.(*gpdb.DescribeRegionsResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_zones", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*gpdb.DescribeRegionsResponse)
 		if len(response.Regions.Region) <= 0 {
-			return WrapError(fmt.Errorf("[ERROR] There is no available region for gpdb."))
+			return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available region for gpdb."))
 		}
 		for _, r := range response.Regions.Region {
 			for _, zoneId := range r.Zones.Zone {
@@ -406,16 +387,19 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	elasticsearchZones := make(map[string]string)
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeElasticsearch)) {
 		request := elasticsearch.CreateGetRegionConfigurationRequest()
-		request.RegionId = client.RegionId
+		client.InitRoaRequest(*request.RoaRequest)
 		raw, err := client.WithElasticsearchClient(func(elasticsearchClient *elasticsearch.Client) (interface{}, error) {
 			return elasticsearchClient.GetRegionConfiguration(request)
 		})
-
+		zones, ok := raw.(*elasticsearch.GetRegionConfigurationResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_zones", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(zones.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.GetActionName(), request)
-		zones, _ := raw.(*elasticsearch.GetRegionConfigurationResponse)
 		for _, zoneID := range zones.Result.Zones {
 			if multi && strings.Contains(zoneID, MULTI_IZ_SYMBOL) {
 				zoneIds = append(zoneIds, zoneID)
@@ -431,44 +415,23 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 		return zoneIdsDescriptionAttributes(d, zoneIds)
 	}
 
-	// Retrieving available zones for VPC-FC
-	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeFC)) {
-		var clientInfo *fc.Client
-		raw, err := client.WithFcClient(func(fcClient *fc.Client) (interface{}, error) {
-			clientInfo = fcClient
-			return fcClient.GetAccountSettings(fc.NewGetAccountSettingsInput())
-		})
-		if err != nil {
-			return fmt.Errorf("[API ERROR] FC GetAccountSettings: %#v", err)
-		}
-		addDebug("GetAccountSettings", raw, clientInfo)
-		out, _ := raw.(*fc.GetAccountSettingsOutput)
-		if out != nil && len(out.AvailableAZs) > 0 {
-			sort.Strings(out.AvailableAZs)
-			return zoneIdsDescriptionAttributes(d, out.AvailableAZs)
-		}
-	}
-
 	//Retrieving available zones for SLB
 	slaveZones := make(map[string][]string)
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeSlb)) {
 		request := slb.CreateDescribeZonesRequest()
-		request.RegionId = client.RegionId
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 			return slbClient.DescribeZones(request)
 		})
+		response, ok := raw.(*slb.DescribeZonesResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_zones", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*slb.DescribeZonesResponse)
 		for _, resource := range response.Zones.Zone {
 			slaveIds := slaveZones[resource.ZoneId]
 			if len(slaveIds) > 0 {
@@ -485,14 +448,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	}
 
 	req := ecs.CreateDescribeZonesRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		req.Scheme = "https"
-	} else {
-		req.Scheme = "http"
-	}
-	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-	req.RegionId = client.RegionId
+	client.InitRpcRequest(*req.RpcRequest)
 	req.InstanceChargeType = instanceChargeType
 	if v, ok := d.GetOk("spot_strategy"); ok && v.(string) != "" {
 		req.SpotStrategy = v.(string)
@@ -501,11 +457,15 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.DescribeZones(req)
 	})
+	resp, ok := raw.(*ecs.DescribeZonesResponse)
 	if err != nil {
-		return fmt.Errorf("DescribeZones got an error: %#v", err)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(resp.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_zones", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(req.GetActionName(), raw, req.RpcRequest, req)
-	resp, _ := raw.(*ecs.DescribeZonesResponse)
 	if resp == nil || len(resp.Zones.Zone) < 1 {
 		return fmt.Errorf("There are no availability zones in the region: %#v.", client.Region)
 	}
@@ -644,11 +604,11 @@ func zoneIdsDescriptionAttributes(d *schema.ResourceData, zones []string) error 
 
 	d.SetId(dataResourceIdHash(zones))
 	if err := d.Set("zones", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("ids", zoneIds); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	// create a json file in current directory and write data source to it.
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/adb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -78,7 +79,7 @@ func resourceAlibabacloudStackAdbAccountCreate(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	adbService := AdbService{client}
 	request := adb.CreateCreateAccountRequest()
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
 	request.DBClusterId = d.Get("db_cluster_id").(string)
 	request.AccountName = d.Get("account_name").(string)
 
@@ -86,7 +87,7 @@ func resourceAlibabacloudStackAdbAccountCreate(d *schema.ResourceData, meta inte
 	kmsPassword := d.Get("kms_encrypted_password").(string)
 
 	if password == "" && kmsPassword == "" {
-		return WrapError(Error("One of the 'password' and 'kms_encrypted_password' should be set."))
+		return errmsgs.WrapError(errmsgs.Error("One of the 'password' and 'kms_encrypted_password' should be set."))
 	}
 
 	if password != "" {
@@ -95,40 +96,44 @@ func resourceAlibabacloudStackAdbAccountCreate(d *schema.ResourceData, meta inte
 		kmsService := KmsService{client}
 		decryptResp, err := kmsService.Decrypt(kmsPassword, d.Get("kms_encryption_context").(map[string]interface{}))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.AccountPassword = decryptResp.Plaintext
 	}
 
-	// Description will not be set when account type is normal and it is a API bug
 	if v, ok := d.GetOk("account_description"); ok && v.(string) != "" {
 		request.AccountDescription = v.(string)
 	}
-	request.Headers["x-ascm-product-name"] = "adb"
-	request.Headers["x-acs-organizationid"] = client.Department
+
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithAdbClient(func(adbClient *adb.Client) (interface{}, error) {
 			return adbClient.CreateAccount(request)
 		})
+		response, ok := raw.(*adb.CreateAccountResponse)
 		if err != nil {
-			if IsExpectedErrors(err, OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_adb_account", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			return resource.NonRetryableError(err)
+
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
-
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_adb_account", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	d.SetId(fmt.Sprintf("%s%s%s", request.DBClusterId, COLON_SEPARATED, request.AccountName))
 
 	if err := adbService.WaitForAdbAccount(d.Id(), Available, DefaultTimeoutMedium); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	return resourceAlibabacloudStackAdbAccountRead(d, meta)
@@ -139,16 +144,16 @@ func resourceAlibabacloudStackAdbAccountRead(d *schema.ResourceData, meta interf
 	adbService := AdbService{client}
 	object, err := adbService.DescribeAdbAccount(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("db_cluster_id", parts[0])
@@ -167,42 +172,19 @@ func resourceAlibabacloudStackAdbAccountUpdate(d *schema.ResourceData, meta inte
 	instanceId := parts[0]
 	accountName := parts[1]
 
-	// 专有云 没有该接口 ModifyAccountDescription
-	/*if d.HasChange("account_description") {
-		if err := adbService.WaitForAdbAccount(d.Id(), Available, DefaultTimeoutMedium); err != nil {
-			return WrapError(err)
-		}
-		request := adb.CreateModifyAccountDescriptionRequest()
-		request.RegionId = client.RegionId
-		request.DBClusterId = instanceId
-		request.AccountName = accountName
-		request.AccountDescription = d.Get("account_description").(string)
-
-		raw, err := client.WithAdbClient(func(adbClient *adb.Client) (interface{}, error) {
-			return adbClient.ModifyAccountDescription(request)
-		})
-		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-
-	}*/
-
 	if d.HasChange("account_password") || d.HasChange("kms_encrypted_password") {
 		if err := adbService.WaitForAdbAccount(d.Id(), Available, DefaultTimeoutMedium); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request := adb.CreateResetAccountPasswordRequest()
-		request.RegionId = client.RegionId
+		client.InitRpcRequest(*request.RpcRequest)
 		request.DBClusterId = instanceId
 		request.AccountName = accountName
-		request.Headers["x-ascm-product-name"] = "adb"
-		request.Headers["x-acs-organizationid"] = client.Department
 
 		password := d.Get("account_password").(string)
 		kmsPassword := d.Get("kms_encrypted_password").(string)
 		if password == "" && kmsPassword == "" {
-			return WrapError(Error("One of the 'password' and 'kms_encrypted_password' should be set."))
+			return errmsgs.WrapError(errmsgs.Error("One of the 'password' and 'kms_encrypted_password' should be set."))
 		}
 
 		if password != "" {
@@ -211,7 +193,7 @@ func resourceAlibabacloudStackAdbAccountUpdate(d *schema.ResourceData, meta inte
 			kmsService := KmsService{meta.(*connectivity.AlibabacloudStackClient)}
 			decryptResp, err := kmsService.Decrypt(kmsPassword, d.Get("kms_encryption_context").(map[string]interface{}))
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			request.AccountPassword = decryptResp.Plaintext
 		}
@@ -220,10 +202,16 @@ func resourceAlibabacloudStackAdbAccountUpdate(d *schema.ResourceData, meta inte
 			return adbClient.ResetAccountPassword(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*adb.ResetAccountPasswordResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("account_password")
 	}
 
 	d.Partial(false)
@@ -235,23 +223,28 @@ func resourceAlibabacloudStackAdbAccountDelete(d *schema.ResourceData, meta inte
 	adbService := AdbService{client}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	request := adb.CreateDeleteAccountRequest()
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
 	request.DBClusterId = parts[0]
 	request.AccountName = parts[1]
-	request.Headers["x-ascm-product-name"] = "adb"
-	request.Headers["x-acs-organizationId"] = client.Department
 
 	raw, err := client.WithAdbClient(func(adbClient *adb.Client) (interface{}, error) {
 		return adbClient.DeleteAccount(request)
 	})
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidAccountName.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidAccountName.NotFound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if raw != nil {
+			response, ok := raw.(*adb.DeleteAccountResponse)
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 

@@ -4,102 +4,95 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/adb"
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAdbConnectionConfig(t *testing.T) {
-	var v *adb.Address
-	rand := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	name := fmt.Sprintf("tf-testAccAdbConnection%s", rand)
-	var basicMap = map[string]string{
-		// 已有 实例 使用给定 id 测试
-		//"db_cluster_id":    "am-3rq9uva152cn34drs",
-		"db_cluster_id":     CHECKSET,
-		"connection_string": CHECKSET,
-		"ip_address":        CHECKSET,
-		"port":              CHECKSET,
-	}
+func TestAccAlibabacloudStackAdbConnection0(t *testing.T) {
+	var v map[string]interface{}
+
 	resourceId := "alibabacloudstack_adb_connection.default"
-	ra := resourceAttrInit(resourceId, basicMap)
-	serviceFunc := func() interface{} {
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccAdbConnectionCheckmap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &AdbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeAdbConnection")
+	}, "DoAdbDescribedbclusternetinfoRequest")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAdbConnectionConfigDependence)
+
+	rand := acctest.RandIntRange(10000, 99999)
+	name := fmt.Sprintf("tf-testacc%sadbconnection%d", defaultRegionToTest, rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccAdbConnectionBasicdependence)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+
 			testAccPreCheck(t)
 		},
-
-		// module name
 		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
 
-		Providers:    testAccProviders,
 		CheckDestroy: rac.checkResourceDestroy(),
+
 		Steps: []resource.TestStep{
+
 			{
 				Config: testAccConfig(map[string]interface{}{
-					// 已有 实例 使用给定 id 测试
-					//"db_cluster_id":    "am-3rq9uva152cn34drs",
-					"db_cluster_id":     "${alibabacloudstack_adb_db_cluster.cluster.id}",
-					"connection_prefix": fmt.Sprintf("tf-testacc%s", rand),
+
+					"db_cluster_id": "am-bp1j43v9c35ef2cvf",
+
+					"connection_string_prefix": "am-bp1j43v9c35ef2cvf80808",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+
+						"db_cluster_id": "am-bp1j43v9c35ef2cvf",
+
+						"connection_string_prefix": "am-bp1j43v9c35ef2cvf80808",
+					}),
 				),
 			},
+
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				Config: testAccConfig(map[string]interface{}{
+
+					"connection_string_prefix": "am-bp1j43v9c35ef2cvf80808",
+
+					"connection_string": "am-bp1j43v9c35ef2cvf907780.ads.aliyuncs.com",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"connection_string_prefix": "am-bp1j43v9c35ef2cvf80808",
+
+						"connection_string": "am-bp1j43v9c35ef2cvf907780.ads.aliyuncs.com",
+					}),
+				),
 			},
 		},
 	})
 }
 
-func resourceAdbConnectionConfigDependence(name string) string {
-	return fmt.Sprintf(`
-	%s
-	variable "creation" {
-		default = "ADB"
-	}
+var AlibabacloudTestAccAdbConnectionCheckmap = map[string]string{
 
-	variable "name" {
-		default = "%s"
-	}
+	"port": CHECKSET,
 
-	resource "alibabacloudstack_adb_db_cluster" "cluster" {
-	db_cluster_category = "Basic"
-	db_cluster_class = "C8"
-	db_node_storage = "200"
-	db_cluster_version = "3.0"
-	db_node_count = "2"
-	mode					= "reserver"
-	vswitch_id              = "${alibabacloudstack_vswitch.default.id}"
-	description             = "${var.name}"
-	cluster_type =        "analyticdb"
-	cpu_type =            "intel"
-		
-	}`, AdbCommonTestCase, name)
+	"db_cluster_id": CHECKSET,
+
+	"connection_string": CHECKSET,
+
+	"ip_address": CHECKSET,
+
+	"connection_string_prefix": CHECKSET,
 }
 
-// 已有 实例创建测试使用
-/*func resourceAdbConnectionConfigDependence(name string) string {
+func AlibabacloudTestAccAdbConnectionBasicdependence(name string) string {
 	return fmt.Sprintf(`
+variable "name" {
+    default = "%s"
+}
 
-	variable "creation" {
-		default = "ADB"
-	}
 
-	variable "name" {
-		default = "%s"
-	}
 
-	`, name)
-}*/
+`, name)
+}

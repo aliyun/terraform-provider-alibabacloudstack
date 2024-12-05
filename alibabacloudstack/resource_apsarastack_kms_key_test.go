@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"strings"
 	"testing"
 	"time"
@@ -34,7 +35,7 @@ func testSweepKmsKey(region string) error {
 
 	req := kms.CreateListKeysRequest()
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.QueryParams["Department"] = client.Department
 	req.QueryParams["ResourceGroup"] = client.ResourceGroup
 
@@ -42,7 +43,7 @@ func testSweepKmsKey(region string) error {
 		return kmsclient.ListKeys(req)
 	})
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "kms_keys", req.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "kms_keys", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	keys := raw.(*kms.ListKeysResponse)
 	swept := false
@@ -51,20 +52,20 @@ func testSweepKmsKey(region string) error {
 		kmsService := &KmsService{client: client}
 		key, err := kmsService.DescribeKmsKey(v.KeyId)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if strings.Contains(err.Error(), "Provider ERROR") {
 					continue
 				}
 				return nil
 			}
 
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		for _, description := range prefixes {
 			if strings.HasPrefix(strings.ToLower(key.Description), strings.ToLower(description)) {
 				req := kms.CreateScheduleKeyDeletionRequest()
 				req.Headers = map[string]string{"RegionId": client.RegionId}
-				req.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+				req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 				req.QueryParams["Department"] = client.Department
 				req.QueryParams["ResourceGroup"] = client.ResourceGroup
 
@@ -75,7 +76,7 @@ func testSweepKmsKey(region string) error {
 				})
 				swept = true
 				if err != nil {
-					return WrapErrorf(err, DataDefaultErrorMsg, v.KeyId, req.GetActionName(), AlibabacloudStackSdkGoERROR)
+					return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, v.KeyId, req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 				}
 				break
 			}

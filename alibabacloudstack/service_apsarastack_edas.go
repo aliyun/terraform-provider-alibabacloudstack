@@ -9,9 +9,9 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -56,47 +56,53 @@ type Prober struct {
 
 func (e *EdasService) GetChangeOrderStatus(id string) (info *edas.ChangeOrderInfo, err error) {
 	request := edas.CreateGetChangeOrderInfoRequest()
-	request.RegionId = e.client.RegionId
+	e.client.InitRoaRequest(*request.RoaRequest)
 	request.ChangeOrderId = id
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = e.client.Department
+
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.GetChangeOrderInfo(request)
 	})
 
+	rsp, ok := raw.(*edas.GetChangeOrderInfoResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"OperationDenied.InvalidDBClusterIdNotFound", "OperationDenied.InvalidDBClusterNameNotFound"}) {
-			return info, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(rsp.BaseResponse)
 		}
-		return info, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.InvalidDBClusterIdNotFound", "OperationDenied.InvalidDBClusterNameNotFound"}) {
+			return info, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return info, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	rsp := raw.(*edas.GetChangeOrderInfoResponse)
+	
 	return &rsp.ChangeOrderInfo, nil
-
 }
 
 func (e *EdasService) GetDeployGroup(appId, groupId string) (groupInfo *edas.DeployGroup, err error) {
 	request := edas.CreateListDeployGroupRequest()
-	request.RegionId = e.client.RegionId
+	e.client.InitRoaRequest(*request.RoaRequest)
 	request.AppId = appId
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = e.client.Department
+
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.ListDeployGroup(request)
 	})
 
+	rsp, ok:= raw.(*edas.ListDeployGroupResponse)
 	if err != nil {
-		return groupInfo, WrapErrorf(err, DefaultErrorMsg, appId, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(rsp.BaseResponse)
+		}
+		return groupInfo, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, appId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	rsp := raw.(*edas.ListDeployGroupResponse)
 	if rsp.Code != 200 {
-		return groupInfo, Error("get deploy group failed for " + rsp.Message)
+		return groupInfo, errmsgs.Error("get deploy group failed for " + rsp.Message)
 	}
 	for _, group := range rsp.DeployGroupList.DeployGroup {
 		if group.GroupId == groupId {
@@ -110,16 +116,16 @@ func (e *EdasService) EdasChangeOrderStatusRefreshFunc(id string, failStates []s
 	return func() (interface{}, string, error) {
 		object, err := e.GetChangeOrderStatus(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if strconv.Itoa(object.Status) == failState {
-				return object, strconv.Itoa(object.Status), WrapError(Error(FailedToReachTargetStatus, strconv.Itoa(object.Status)))
+				return object, strconv.Itoa(object.Status), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, strconv.Itoa(object.Status)))
 			}
 		}
 
@@ -129,23 +135,27 @@ func (e *EdasService) EdasChangeOrderStatusRefreshFunc(id string, failStates []s
 
 func (e *EdasService) SyncResource(resourceType string) error {
 	request := edas.CreateSynchronizeResourceRequest()
-	request.RegionId = e.client.RegionId
+	e.client.InitRoaRequest(*request.RoaRequest)
 	request.Type = resourceType
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = e.client.Department
+
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.SynchronizeResource(request)
 	})
 
+	rsp, ok := raw.(*edas.SynchronizeResourceResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "sync resource", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(rsp.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "sync resource", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	rsp := raw.(*edas.SynchronizeResourceResponse)
+	
 	if rsp.Code != 200 || !rsp.Success {
-		return WrapError(Error("sync resource failed for " + rsp.Message))
+		return errmsgs.WrapError(errmsgs.Error("sync resource failed for " + rsp.Message))
 	}
 
 	return nil
@@ -153,7 +163,7 @@ func (e *EdasService) SyncResource(resourceType string) error {
 
 func (e *EdasService) CheckEcsStatus(instanceIds string, count int) error {
 	request := ecs.CreateDescribeInstancesRequest()
-	request.RegionId = e.client.RegionId
+	e.client.InitRpcRequest(*request.RpcRequest)
 	request.Status = "Running"
 	request.PageSize = requests.NewInteger(100)
 	request.InstanceIds = instanceIds
@@ -162,18 +172,22 @@ func (e *EdasService) CheckEcsStatus(instanceIds string, count int) error {
 		return ecsClient.DescribeInstances(request)
 	})
 
+	rsp, ok := raw.(*ecs.DescribeInstancesResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"OperationDenied.InvalidDBClusterIdNotFound", "OperationDenied.InvalidDBClusterNameNotFound"}) {
-			return WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(rsp.BaseResponse)
 		}
-		return WrapErrorf(err, DefaultErrorMsg, instanceIds, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.InvalidDBClusterIdNotFound", "OperationDenied.InvalidDBClusterNameNotFound"}) {
+			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceIds, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	rsp := raw.(*ecs.DescribeInstancesResponse)
 
 	if len(rsp.Instances.Instance) != count {
-		return WrapErrorf(Error("not enough instances"), DefaultErrorMsg, instanceIds, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(errmsgs.Error("not enough instances"), errmsgs.DefaultErrorMsg, instanceIds, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	return nil
@@ -182,22 +196,26 @@ func (e *EdasService) CheckEcsStatus(instanceIds string, count int) error {
 func (e *EdasService) GetLastPackgeVersion(appId, groupId string) (string, error) {
 	var versionId string
 	request := edas.CreateQueryApplicationStatusRequest()
+	e.client.InitRoaRequest(*request.RoaRequest)
 	request.AppId = appId
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = e.client.Department
+
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	request.RegionId = e.client.RegionId
 	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.QueryApplicationStatus(request)
 	})
+	response, ok := raw.(*edas.QueryApplicationStatusResponse)
 	if err != nil {
-		return "", WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_application_package_version", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_application_package_version", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	response, _ := raw.(*edas.QueryApplicationStatusResponse)
+	
 
 	if response.Code != 200 {
-		return "", WrapError(Error("QueryApplicationStatus failed for " + response.Message))
+		return "", errmsgs.WrapError(errmsgs.Error("QueryApplicationStatus failed for " + response.Message))
 	}
 
 	for _, group := range response.AppInfo.GroupList.Group {
@@ -207,22 +225,26 @@ func (e *EdasService) GetLastPackgeVersion(appId, groupId string) (string, error
 	}
 
 	rq := edas.CreateListHistoryDeployVersionRequest()
+	e.client.InitRoaRequest(*rq.RoaRequest)
 	rq.AppId = appId
-	rq.Headers["x-ascm-product-name"] = "Edas"
-	rq.Headers["x-acs-organizationid"] = e.client.Department
+
 	rq.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	rq.RegionId = e.client.RegionId
 	raw, err = e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.ListHistoryDeployVersion(rq)
 	})
+	rsp, ok := raw.(*edas.ListHistoryDeployVersionResponse)
 	if err != nil {
-		return "", WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_application_package_version_list", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(rsp.BaseResponse)
+		}
+		return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_application_package_version_list", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	rsp, _ := raw.(*edas.ListHistoryDeployVersionResponse)
+	
 
 	if rsp.Code != 200 {
-		return "", WrapError(Error("QueryApplicationStatus failed for " + response.Message))
+		return "", errmsgs.WrapError(errmsgs.Error("QueryApplicationStatus failed for " + response.Message))
 	}
 
 	for _, version := range rsp.PackageVersionList.PackageVersion {
@@ -236,26 +258,28 @@ func (e *EdasService) GetLastPackgeVersion(appId, groupId string) (string, error
 
 func (e *EdasService) DescribeEdasApplication(appId string) (*edas.Applcation, error) {
 	application := &edas.Applcation{}
-	regionId := e.client.RegionId
 
 	request := edas.CreateGetApplicationRequest()
-	request.RegionId = regionId
+	e.client.InitRoaRequest(*request.RoaRequest)
 	request.AppId = appId
 
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = e.client.Department
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.GetApplication(request)
 	})
+	response, ok := raw.(*edas.GetApplicationResponse)
 	if err != nil {
-		return application, WrapError(err)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return application, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_application", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
-	response, _ := raw.(*edas.GetApplicationResponse)
+	
 	if response.Code != 200 {
-		return application, WrapError(Error("get application error :" + response.Message))
+		return application, errmsgs.WrapError(errmsgs.Error("get application error :" + response.Message))
 	}
 
 	v := response.Applcation
@@ -265,27 +289,29 @@ func (e *EdasService) DescribeEdasApplication(appId string) (*edas.Applcation, e
 
 func (e *EdasService) DescribeEdasGetCluster(clusterId string) (*edas.Cluster, error) {
 	cluster := &edas.Cluster{}
-	regionId := e.client.RegionId
 
 	request := edas.CreateGetClusterRequest()
-	request.RegionId = regionId
+	e.client.InitRoaRequest(*request.RoaRequest)
 	request.ClusterId = clusterId
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = e.client.Department
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 
+	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.GetCluster(request)
 	})
 
+	response, ok := raw.(*edas.GetClusterResponse)
 	if err != nil {
-		return cluster, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
-	response, _ := raw.(*edas.GetClusterResponse)
+	
 	if response.Code != 200 {
-		return cluster, WrapError(Error("create cluster failed for " + response.Message))
+		return cluster, errmsgs.WrapError(errmsgs.Error("create cluster failed for " + response.Message))
 	}
 
 	v := response.Cluster
@@ -297,32 +323,35 @@ func (e *EdasService) DescribeEdasListCluster(clusterId string) (*edas.Cluster, 
 	cluster := &edas.Cluster{}
 
 	request := edas.CreateListClusterRequest()
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = e.client.Department
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	e.client.InitRoaRequest(*request.RoaRequest)
 	request.RegionId = e.client.RegionId
 	request.ResourceGroupId = e.client.ResourceGroup
 	request.LogicalRegionId = e.client.RegionId
 
+	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.ListCluster(request)
 	})
 
+	response, ok := raw.(*edas.ListClusterResponse)
 	if err != nil {
-		return cluster, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
-	response, _ := raw.(*edas.ListClusterResponse)
+	
 	if response.Code != 200 {
-		return cluster, WrapError(Error("create cluster failed for " + response.Message))
+		return cluster, errmsgs.WrapError(errmsgs.Error("create cluster failed for " + response.Message))
 	}
 
 	v := edas.Cluster{}
 	for _, onecluster := range response.ClusterList.Cluster {
 		if onecluster.ClusterId == clusterId {
 			if onecluster.CsClusterStatus == "running" {
-				//return resource.RetryableError(Error("cluster is importing"))
 				v = onecluster
 			}
 		}
@@ -333,28 +362,31 @@ func (e *EdasService) DescribeEdasListCluster(clusterId string) (*edas.Cluster, 
 
 func (e *EdasService) DescribeEdasDeployGroup(id string) (*edas.DeployGroup, error) {
 	group := &edas.DeployGroup{}
-	regionId := e.client.RegionId
 
 	strs := strings.Split(id, ":")
 
 	request := edas.CreateListDeployGroupRequest()
-	request.RegionId = regionId
+	e.client.InitRoaRequest(*request.RoaRequest)
 	request.AppId = strs[0]
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = e.client.Department
+
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.ListDeployGroup(request)
 	})
 
+	response, ok := raw.(*edas.ListDeployGroupResponse)
 	if err != nil {
-		return group, WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_deploy_group", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return group, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_deploy_group", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
-	response, _ := raw.(*edas.ListDeployGroupResponse)
+	
 	if response.Code != 200 {
-		return group, WrapError(Error("create cluster failed for " + response.Message))
+		return group, errmsgs.WrapError(errmsgs.Error("create cluster failed for " + response.Message))
 	}
 
 	for _, v := range response.DeployGroupList.DeployGroup {
@@ -371,7 +403,7 @@ func (e *EdasService) DescribeEdasInstanceClusterAttachment(id string) (*edas.Cl
 	v := strings.Split(id, ":")
 	o, err := e.DescribeEdasGetCluster(v[0])
 	if err != nil {
-		return cluster, WrapError(err)
+		return cluster, errmsgs.WrapError(err)
 	}
 
 	return o, nil
@@ -382,7 +414,7 @@ func (e *EdasService) DescribeEdasApplicationDeployment(id string) (*edas.Applca
 	v := strings.Split(id, ":")
 	o, err := e.DescribeEdasApplication(v[0])
 	if err != nil {
-		return application, WrapError(err)
+		return application, errmsgs.WrapError(err)
 	}
 
 	return o, nil
@@ -393,7 +425,7 @@ func (e *EdasService) DescribeEdasApplicationScale(id string) (*edas.Applcation,
 	v := strings.Split(id, ":")
 	o, err := e.DescribeEdasApplication(v[0])
 	if err != nil {
-		return application, WrapError(err)
+		return application, errmsgs.WrapError(err)
 	}
 
 	return o, nil
@@ -404,7 +436,7 @@ func (e *EdasService) DescribeEdasSlbAttachment(id string) (*edas.Applcation, er
 	v := strings.Split(id, ":")
 	o, err := e.DescribeEdasApplication(v[0])
 	if err != nil {
-		return application, WrapError(err)
+		return application, errmsgs.WrapError(err)
 	}
 
 	return o, nil
@@ -421,7 +453,7 @@ func (e *EdasService) GetK8sCommandArgs(args []interface{}) (string, error) {
 	}
 	b, err := json.Marshal(aString)
 	if err != nil {
-		return "", WrapError(err)
+		return "", errmsgs.WrapError(err)
 	}
 	return string(b), nil
 }
@@ -429,7 +461,7 @@ func (e *EdasService) GetK8sCommandArgs(args []interface{}) (string, error) {
 func (e *EdasService) GetK8sCommandArgsForDeploy(args []interface{}) (string, error) {
 	b, err := json.Marshal(args)
 	if err != nil {
-		return "", WrapError(err)
+		return "", errmsgs.WrapError(err)
 	}
 	return string(b), nil
 }
@@ -447,62 +479,69 @@ func (e *EdasService) GetK8sEnvs(envs map[string]interface{}) (string, error) {
 
 	b, err := json.Marshal(k8sEnvs)
 	if err != nil {
-		return "", WrapError(err)
+		return "", errmsgs.WrapError(err)
 	}
 	return string(b), nil
 }
 
 func (e *EdasService) QueryK8sAppPackageType(appId string) (string, error) {
 	request := edas.CreateGetApplicationRequest()
-	request.RegionId = e.client.RegionId
+	e.client.InitRoaRequest(*request.RoaRequest)
 	request.AppId = appId
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = e.client.Department
+
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	log.Printf("-------------------------------------------- %v", request.Headers)
 	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.GetApplication(request)
 	})
 	addDebug(request.GetActionName(), raw, request, request.RoaRequest)
+	response, ok := raw.(*edas.GetApplicationResponse)
 	if err != nil {
-		return "", WrapError(err)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_k8s_app_package_type", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	response, _ := raw.(*edas.GetApplicationResponse)
+	
 	if response.Code != 200 {
-		return "", WrapError(Error("get application for appId:" + appId + " failed:" + response.Message))
+		return "", errmsgs.WrapError(errmsgs.Error("get application for appId:" + appId + " failed:" + response.Message))
 	}
 	if len(response.Applcation.ApplicationType) > 0 {
 		return response.Applcation.ApplicationType, nil
 	}
-	return "", WrapError(Error("not package type for appId:" + appId))
+	return "", errmsgs.WrapError(errmsgs.Error("not package type for appId:" + appId))
 }
 
 func (e *EdasService) DescribeEdasK8sCluster(clusterId string) (*edas.Cluster, error) {
 	cluster := &edas.Cluster{}
-	regionId := e.client.RegionId
 
 	request := edas.CreateGetClusterRequest()
-	request.RegionId = regionId
+	e.client.InitRoaRequest(*request.RoaRequest)
 	request.ClusterId = clusterId
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = e.client.Department
+
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.GetCluster(request)
 	})
 
+	response, ok := raw.(*edas.GetClusterResponse)
 	if err != nil {
-		return cluster, WrapErrorf(err, DefaultErrorMsg, clusterId, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, clusterId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
-	response, _ := raw.(*edas.GetClusterResponse)
+	
 	if response.Code != 200 {
 		if strings.Contains(response.Message, "does not exist") {
-			return cluster, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+			return cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return cluster, WrapError(Error("create k8s cluster failed for " + response.Message))
+		return cluster, errmsgs.WrapError(errmsgs.Error("create k8s cluster failed for " + response.Message))
 	}
 
 	v := response.Cluster
@@ -511,35 +550,19 @@ func (e *EdasService) DescribeEdasK8sCluster(clusterId string) (*edas.Cluster, e
 }
 
 func (e *EdasService) DescribeEdasK8sApplication(appId string) (*edas.Applcation, error) {
-	//application := &edas.Applcation{}
-	regionId := e.client.RegionId
 
 	request := edas.CreateGetK8sApplicationRequest()
-	request.RegionId = regionId
+	e.client.InitRoaRequest(*request.RoaRequest)
 	request.AppId = appId
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = e.client.Department
+
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	raw, _ := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
 		return edasClient.GetK8sApplication(request)
 	})
 
-	//raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-	//	return edasClient.GetK8sApplication(request)
-	//})
-	//if err != nil {
-	//	return application, WrapError(err)
-	//}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
 	response, _ := raw.(*edas.GetK8sApplicationResponse)
-	//if response.Code != 200 {
-	//	if strings.Contains(response.Message, "does not exist") {
-	//		return application, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
-	//	}
-	//	return application, WrapError(Error("get k8s application error :" + response.Message))
-	//}
-
 	v := response.Applcation
 
 	return &v, nil

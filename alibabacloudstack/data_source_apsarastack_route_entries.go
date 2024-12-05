@@ -4,13 +4,13 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strings"
 )
 
 func dataSourceAlibabacloudStackRouteEntries() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackRouteEntriesRead,
+		Read:   dataSourceAlibabacloudStackRouteEntriesRead,
 		Schema: map[string]*schema.Schema{
 			"route_table_id": {
 				Type:     schema.TypeString,
@@ -68,37 +68,38 @@ func dataSourceAlibabacloudStackRouteEntries() *schema.Resource {
 		},
 	}
 }
+
 func dataSourceAlibabacloudStackRouteEntriesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := vpc.CreateDescribeRouteTablesRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-	request.PageSize = requests.NewInteger(PageSizeLarge)
-
-	request.PageNumber = requests.NewInteger(1)
+	client.InitRpcRequest(*request.RpcRequest)
 	request.RouteTableId = d.Get("route_table_id").(string)
+	request.PageSize = requests.NewInteger(PageSizeLarge)
+	request.PageNumber = requests.NewInteger(1)
 
 	var allRouteEntries []vpc.RouteEntry
 	invoker := NewInvoker()
 	for {
 		var raw interface{}
-		if err := invoker.Run(func() error {
-			response, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
+		var err error
+		err = invoker.Run(func() error {
+			raw, err = client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 				return vpcClient.DescribeRouteTables(request)
 			})
-			raw = response
 			return err
-		}); err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_route_entries", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		})
+		response, ok := raw.(*vpc.DescribeRouteTablesResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			} else {
+				errmsg = "Invalid response type"
+			}
+
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_route_entries", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*vpc.DescribeRouteTablesResponse)
 		if len(response.RouteTables.RouteTable) < 1 {
 			break
 		}
@@ -121,7 +122,7 @@ func dataSourceAlibabacloudStackRouteEntriesRead(d *schema.ResourceData, meta in
 		}
 
 		if page, err := getNextpageNumber(request.PageNumber); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		} else {
 			request.PageNumber = page
 		}
@@ -148,12 +149,11 @@ func RouteEntriesDecriptionAttributes(d *schema.ResourceData, entries []vpc.Rout
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("entries", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)
 	}
 	return nil
-
 }

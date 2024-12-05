@@ -4,15 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -22,145 +19,132 @@ type KmsService struct {
 
 func (s *KmsService) DescribeKmsKey(id string) (object kms.KeyMetadata, err error) {
 	request := kms.CreateDescribeKeyRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.KeyId = id
 
 	raw, err := s.client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.DescribeKey(request)
 	})
+	bresponse, ok := raw.(*kms.DescribeKeyResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"Forbidden.AliasNotFound", "Forbidden.KeyNotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("KmsKey", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.AliasNotFound", "Forbidden.KeyNotFound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KmsKey", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*kms.DescribeKeyResponse)
-	if response.KeyMetadata.KeyState == "PendingDeletion" {
+	if bresponse.KeyMetadata.KeyState == "PendingDeletion" {
 		log.Printf("[WARN] Removing KmsKey  %s because it's already gone", id)
-		return response.KeyMetadata, WrapErrorf(Error(GetNotFoundMessage("KmsKey", id)), NotFoundMsg, ProviderERROR)
+		return bresponse.KeyMetadata, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KmsKey", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
-	return response.KeyMetadata, nil
+	return bresponse.KeyMetadata, nil
 }
 
 func (s *KmsService) Decrypt(ciphertextBlob string, encryptionContext map[string]interface{}) (*kms.DecryptResponse, error) {
 	context, err := json.Marshal(encryptionContext)
 	if err != nil {
-		return nil, WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 	request := kms.CreateDecryptRequest()
-	request.RegionId = s.client.RegionId
-
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.CiphertextBlob = ciphertextBlob
 	request.EncryptionContext = string(context[:])
+
 	raw, err := s.client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.Decrypt(request)
 	})
+	bresponse, ok := raw.(*kms.DecryptResponse)
 	if err != nil {
-		return nil, WrapErrorf(err, DefaultErrorMsg, context, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, context, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	response, _ := raw.(*kms.DecryptResponse)
-	return response, err
+	return bresponse, err
 }
+
 func (s *KmsService) Decrypt2(ciphertextBlob string, encryptionContext map[string]interface{}) (plaintext string, err error) {
 	context, err := json.Marshal(encryptionContext)
 	if err != nil {
-		return plaintext, WrapError(err)
+		return plaintext, errmsgs.WrapError(err)
+	}
+
+	request := map[string]interface{}{
+		"CiphertextBlob":   ciphertextBlob,
+		"EncryptionContext": string(context[:]),
+		"Product":          "Kms",
+		"OrganizationId":   s.client.Department,
 	}
 
 	var response map[string]interface{}
-	conn, err := s.client.NewKmsClient()
+	response, err = s.client.DoTeaRequest("POST", "Kms", "2016-01-20", "Decrypt", "", nil, request)
 	if err != nil {
-		return plaintext, WrapError(err)
-	}
-	action := "Decrypt"
-	request := map[string]interface{}{
-		"RegionId":          s.client.RegionId,
-		"CiphertextBlob":    ciphertextBlob,
-		"EncryptionContext": string(context[:]),
-	}
-	request["Product"] = "Kms"
-	request["OrganizationId"] = s.client.Department
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-01-20"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
-	if err != nil {
-		return plaintext, WrapErrorf(err, DefaultErrorMsg, context, action, AlibabacloudStackSdkGoERROR)
+		return plaintext, err
 	}
 	v, err := jsonpath.Get("$.Plaintext", response)
 	if err != nil {
-		return plaintext, WrapErrorf(err, FailedGetAttributeMsg, context, "$.Plaintext", response)
+		return plaintext, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, context, "$.Plaintext", response)
 	}
 
 	return fmt.Sprint(v), err
 }
+
 func (s *KmsService) DescribeKmsSecret(id string) (object kms.DescribeSecretResponse, err error) {
 	request := kms.CreateDescribeSecretRequest()
-	request.RegionId = s.client.RegionId
-
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.SecretName = id
 	request.FetchTags = "true"
 
 	raw, err := s.client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.DescribeSecret(request)
 	})
+	bresponse, ok := raw.(*kms.DescribeSecretResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"Forbidden.ResourceNotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("KmsSecret", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.errmsgs.ResourceNotfound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KmsSecret", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*kms.DescribeSecretResponse)
-	return *response, nil
+	return *bresponse, nil
 }
 
 func (s *KmsService) GetSecretValue(id string) (object kms.GetSecretValueResponse, err error) {
 	request := kms.CreateGetSecretValueRequest()
-	request.RegionId = s.client.RegionId
-
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.SecretName = id
 
 	raw, err := s.client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.GetSecretValue(request)
 	})
+	bresponse, ok := raw.(*kms.GetSecretValueResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"Forbidden.ResourceNotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("kmssecret", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.errmsgs.ResourceNotfound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("kmssecret", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*kms.GetSecretValueResponse)
-	return *response, nil
+	return *bresponse, nil
 }
 
 func (s *KmsService) setResourceTags(d *schema.ResourceData, resourceType string) error {
@@ -178,11 +162,7 @@ func (s *KmsService) setResourceTags(d *schema.ResourceData, resourceType string
 	}
 	if len(removed) > 0 {
 		request := kms.CreateUntagResourceRequest()
-		request.RegionId = s.client.RegionId
-
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "kms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+		s.client.InitRpcRequest(*request.RpcRequest)
 		if resourceType == "key" {
 			request.KeyId = d.Id()
 		}
@@ -191,24 +171,25 @@ func (s *KmsService) setResourceTags(d *schema.ResourceData, resourceType string
 		}
 		remove, err := json.Marshal(removed)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.TagKeys = string(remove)
 		raw, err := s.client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 			return kmsClient.UntagResource(request)
 		})
 		addDebug(request.GetActionName(), raw)
+		bresponse, ok := raw.(*kms.UntagResourceResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
 	if len(added) > 0 {
 		request := kms.CreateTagResourceRequest()
-		request.RegionId = s.client.RegionId
-
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "kms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+		s.client.InitRpcRequest(*request.RpcRequest)
 		if resourceType == "key" {
 			request.KeyId = d.Id()
 		}
@@ -217,15 +198,20 @@ func (s *KmsService) setResourceTags(d *schema.ResourceData, resourceType string
 		}
 		add, err := json.Marshal(added)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.Tags = string(add)
 		raw, err := s.client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 			return kmsClient.TagResource(request)
 		})
 		addDebug(request.GetActionName(), raw)
+		bresponse, ok := raw.(*kms.TagResourceResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
 	return nil
@@ -233,52 +219,52 @@ func (s *KmsService) setResourceTags(d *schema.ResourceData, resourceType string
 
 func (s *KmsService) DescribeKmsAlias(id string) (object kms.KeyMetadata, err error) {
 	request := kms.CreateDescribeKeyRequest()
-	request.RegionId = s.client.RegionId
-
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.KeyId = id
 
 	raw, err := s.client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.DescribeKey(request)
 	})
+	bresponse, ok := raw.(*kms.DescribeKeyResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"Forbidden.AliasNotFound", "Forbidden.KeyNotFound"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("KmsAlias", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.AliasNotFound", "Forbidden.KeyNotFound"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("KmsAlias", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*kms.DescribeKeyResponse)
-	return response.KeyMetadata, nil
+	return bresponse.KeyMetadata, nil
 }
 
 func (s *KmsService) DescribeKmsKeyVersion(id string) (object kms.DescribeKeyVersionResponse, err error) {
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		err = WrapError(err)
+		err = errmsgs.WrapError(err)
 		return
 	}
 	request := kms.CreateDescribeKeyVersionRequest()
-	request.RegionId = s.client.RegionId
-
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.KeyId = parts[0]
 	request.KeyVersionId = parts[1]
 
 	raw, err := s.client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.DescribeKeyVersion(request)
 	})
+	bresponse, ok := raw.(*kms.DescribeKeyVersionResponse)
 	if err != nil {
-		err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*kms.DescribeKeyVersionResponse)
-	return *response, nil
+	return *bresponse, nil
 }

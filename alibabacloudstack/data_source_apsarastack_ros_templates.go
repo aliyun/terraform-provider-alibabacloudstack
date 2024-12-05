@@ -6,9 +6,8 @@ import (
 	"regexp"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -140,7 +139,7 @@ func dataSourceAlibabacloudStackRosTemplatesRead(d *schema.ResourceData, meta in
 	if v, ok := d.GetOk("name_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		templateNameRegex = r
 	}
@@ -154,23 +153,16 @@ func dataSourceAlibabacloudStackRosTemplatesRead(d *schema.ResourceData, meta in
 			idsMap[vv.(string)] = vv.(string)
 		}
 	}
-	var response map[string]interface{}
-	conn, err := client.NewRosClient()
-	if err != nil {
-		return WrapError(err)
-	}
+
 	for {
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &runtime)
+		response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, request)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ros_templates", action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
-		addDebug(action, response, request)
 
 		resp, err := jsonpath.Get("$.Templates", response)
 		if err != nil {
-			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Templates", response)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.Templates", response)
 		}
 		result, _ := resp.([]interface{})
 		for _, v := range result {
@@ -215,7 +207,7 @@ func dataSourceAlibabacloudStackRosTemplatesRead(d *schema.ResourceData, meta in
 		id := fmt.Sprint(object["TemplateId"])
 		getResp, err := rosService.DescribeRosTemplate(id)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		mapping["change_set_id"] = getResp["ChangeSetId"]
 		mapping["stack_group_name"] = getResp["StackGroupName"]
@@ -223,13 +215,13 @@ func dataSourceAlibabacloudStackRosTemplatesRead(d *schema.ResourceData, meta in
 
 		b, err := json.Marshal(getResp["TemplateBody"])
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		mapping["template_body"] = string(b)
 
 		getResp1, err := rosService.ListTagResources(id, "template")
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		mapping["tags"] = tagsToMap(getResp1)
 
@@ -240,15 +232,15 @@ func dataSourceAlibabacloudStackRosTemplatesRead(d *schema.ResourceData, meta in
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("templates", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

@@ -2,13 +2,15 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"log"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -27,10 +29,10 @@ func testAccCheckRepoDestroy(s *terraform.State) error {
 		_, err := crService.DescribeCrRepo(rs.Primary.ID)
 
 		if err == nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 
@@ -53,7 +55,6 @@ func TestAccAlibabacloudStackCRRepo_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, false, connectivity.CRNoSupportedRegions)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -129,7 +130,6 @@ func TestAccAlibabacloudStackCRRepo_Multi(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, false, connectivity.CRNoSupportedRegions)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -153,9 +153,6 @@ func TestAccAlibabacloudStackCRRepo_Multi(t *testing.T) {
 
 func resourceCRRepoConfigDependence(name string) string {
 	return fmt.Sprintf(`
-provider "alibabacloudstack" {
-	assume_role {}
-}
 variable "name" {
 	default = "%s"
 }

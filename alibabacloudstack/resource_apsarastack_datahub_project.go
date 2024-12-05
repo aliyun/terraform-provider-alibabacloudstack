@@ -1,17 +1,19 @@
 package alibabacloudstack
 
 import (
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -46,11 +48,11 @@ func resourceAlibabacloudStackDatahubProject() *schema.Resource {
 				},
 			},
 			"create_time": {
-				Type:     schema.TypeString, //uint64 value from sdk
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"last_modify_time": {
-				Type:     schema.TypeString, //uint64 value from sdk
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -59,39 +61,23 @@ func resourceAlibabacloudStackDatahubProject() *schema.Resource {
 
 func resourceAlibabacloudStackDatahubProjectCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	//var dataService DatahubService = DatahubService{client: client}
 	projectName := d.Get("name").(string)
 	projectComment := d.Get("comment").(string)
-	request := requests.NewCommonRequest()
-	request.Method = "GET"
-	request.Product = "datahub"
-	request.Domain = client.Domain
-	request.Version = "2019-11-20"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "CreateProject"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "datahub",
-		"RegionId":        client.RegionId,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          "CreateProject",
-		"Version":         "2019-11-20",
-		"ProjectName":     projectName,
-		"Comment":         projectComment,
-	}
+
+	request := client.NewCommonRequest("GET", "datahub", "2019-11-20", "CreateProject", "")
+	request.QueryParams["ProjectName"] = projectName
+	request.QueryParams["Comment"] = projectComment
 
 	raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
 		return dataHubClient.ProcessCommonRequest(request)
 	})
+	response, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_datahub_project", request.GetActionName(), AlibabacloudStackDatahubSdkGo)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_project", request.GetActionName(), errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
 	if debugOn() {
 		requestMap := make(map[string]string)
@@ -104,16 +90,18 @@ func resourceAlibabacloudStackDatahubProjectCreate(d *schema.ResourceData, meta 
 	return resourceAlibabacloudStackDatahubProjectRead(d, meta)
 }
 
+
+
 func resourceAlibabacloudStackDatahubProjectRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	datahubService := DatahubService{client}
 	object, err := datahubService.DescribeDatahubProject(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.SetId(strings.ToLower(d.Id()))
@@ -139,8 +127,13 @@ func resourceAlibabacloudStackDatahubProjectUpdate(d *schema.ResourceData, meta 
 				requestInfo = dataHubClient.(*datahub.DataHub)
 				return dataHubClient.UpdateProject(projectName, projectComment)
 			})
+			response, ok := raw.(*datahub.UpdateProjectResponse)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), "UpdateProject", AlibabacloudStackDatahubSdkGo)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateProject", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 			}
 			if debugOn() {
 				requestMap := make(map[string]string)
@@ -159,40 +152,25 @@ func resourceAlibabacloudStackDatahubProjectDelete(d *schema.ResourceData, meta 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	datahubService := DatahubService{client}
 	projectName := d.Id()
-	request := requests.NewCommonRequest()
-	request.Method = "GET"
-	request.Product = "datahub"
-	request.Domain = client.Domain
-	request.Version = "2019-11-20"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "DeleteProject"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "datahub",
-		"RegionId":        client.RegionId,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          "DeleteProject",
-		"Version":         "2019-11-20",
-		"ProjectName":     projectName,
-	}
+
+	request := client.NewCommonRequest("GET", "datahub", "2019-11-20", "DeleteProject", "")
+	request.QueryParams["ProjectName"] = projectName
 
 	var requestInfo *datahub.DataHub
 	err := resource.Retry(3*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
 			return dataHubClient.ProcessCommonRequest(request)
 		})
+		response, ok := raw.(*responses.CommonResponse)
 		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
 			if isRetryableDatahubError(err) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteProject", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg))
 		}
 		if debugOn() {
 			requestMap := make(map[string]string)
@@ -205,7 +183,7 @@ func resourceAlibabacloudStackDatahubProjectDelete(d *schema.ResourceData, meta 
 		if isDatahubNotExistError(err) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "DeleteProject", AlibabacloudStackDatahubSdkGo)
+		return err
 	}
-	return WrapError(datahubService.WaitForDatahubProject(d.Id(), Deleted, DefaultTimeout))
+	return errmsgs.WrapError(datahubService.WaitForDatahubProject(d.Id(), Deleted, DefaultTimeout))
 }

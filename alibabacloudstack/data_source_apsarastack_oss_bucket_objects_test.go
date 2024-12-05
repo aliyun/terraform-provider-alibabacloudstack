@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
@@ -168,11 +167,7 @@ func TestAccAlibabacloudStackOssBucketObjectsDataSource_versioning(t *testing.T)
 		fakeMapFunc:  fakeOssBucketObjectsMapFunc,
 	}
 
-	preCheck := func() {
-		testAccPreCheckWithRegions(t, true, connectivity.OssVersioningSupportedRegions)
-	}
-
-	ossBucketObjectsCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, bucketNameConf, keyRegexConf, keyPrefixConf, allConf)
+	ossBucketObjectsCheckInfo.dataSourceTestCheck(t, rand, bucketNameConf, keyRegexConf, keyPrefixConf, allConf)
 }
 
 func dataSourceOssBucketObjectsConfigDependence(name string) string {

@@ -5,6 +5,7 @@ import (
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -42,12 +43,13 @@ func resourceAlibabacloudStackLogtailAttachmentCreate(d *schema.ResourceData, me
 	config_name := d.Get("logtail_config_name").(string)
 	group_name := d.Get("machine_group_name").(string)
 	var requestInfo *sls.Client
-	raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+	raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 		requestInfo = slsClient
 		return nil, slsClient.ApplyConfigToMachineGroup(project, config_name, group_name)
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_logtail_attachment", "ApplyConfigToMachineGroup", AlibabacloudStackLogGoSdkERROR)
+		errmsg := ""
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_logtail_attachment", "ApplyConfigToMachineGroup", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
 	if debugOn() {
 		addDebug("ApplyConfigToMachineGroup", raw, requestInfo, map[string]string{
@@ -66,15 +68,15 @@ func resourceAlibabacloudStackLogtailAttachmentRead(d *schema.ResourceData, meta
 	logService := LogService{client}
 	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	object, err := logService.DescribeLogtailAttachment(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("project", parts[0])
@@ -89,15 +91,16 @@ func resourceAlibabacloudStackLogtailAttachmentDelete(d *schema.ResourceData, me
 	logService := LogService{client}
 	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	var requestInfo *sls.Client
-	raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+	raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 		requestInfo = slsClient
 		return nil, slsClient.RemoveConfigFromMachineGroup(parts[0], parts[1], parts[2])
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "RemoveConfigFromMachineGroup", AlibabacloudStackLogGoSdkERROR)
+		errmsg := ""
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "RemoveConfigFromMachineGroup", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
 	if debugOn() {
 		addDebug("RemoveConfigFromMachineGroup", raw, requestInfo, map[string]string{
@@ -106,6 +109,5 @@ func resourceAlibabacloudStackLogtailAttachmentDelete(d *schema.ResourceData, me
 			"groupName": parts[2],
 		})
 	}
-	return WrapError(logService.WaitForLogtailAttachment(d.Id(), Deleted, DefaultTimeout))
-
+	return errmsgs.WrapError(logService.WaitForLogtailAttachment(d.Id(), Deleted, DefaultTimeout))
 }

@@ -2,8 +2,9 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/elasticsearch"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -65,7 +66,7 @@ func init() {
 //		})
 //
 //		if err != nil {
-//			log.Printf("[ERROR] %s", WrapError(fmt.Errorf("Error listing Elasticsearch instances: %s", err)))
+//			log.Printf("[ERROR] %s", errmsgs.WrapError(fmt.Errorf("Error listing Elasticsearch instances: %s", err)))
 //			break
 //		}
 //

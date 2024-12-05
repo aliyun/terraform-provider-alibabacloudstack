@@ -2,13 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -110,33 +107,21 @@ func dataSourceAlibabacloudStackQuickBiUsersRead(d *schema.ResourceData, meta in
 			idsMap[vv.(string)] = vv.(string)
 		}
 	}
-	var response map[string]interface{}
-	conn, err := client.NewQuickbiClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	for {
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("GET"), StringPointer("2022-03-01"), StringPointer("AK"), request, nil, &runtime)
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-		addDebug(action, response, request)
+		response, err := client.DoTeaRequest("GET", "QuickBI", "2022-03-01", action, "", nil, request)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_quick_bi_users", action, AlibabacloudStackSdkGoERROR)
+			return err
+		}
+		if err != nil {
+			errmsg := ""
+			if response != nil {
+				errmsg = errmsgs.GetAsapiErrorMessage(response)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_quick_bi_users", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		resp, err := jsonpath.Get("$.Result.Data", response)
 		if err != nil {
-			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Result.Data", response)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.Result.Data", response)
 		}
 		result, _ := resp.([]interface{})
 		for _, v := range result {
@@ -175,7 +160,7 @@ func dataSourceAlibabacloudStackQuickBiUsersRead(d *schema.ResourceData, meta in
 		quickbiPublicService := QuickbiPublicService{client}
 		getResp, err := quickbiPublicService.DescribeQuickBiUser(id)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_quick_bi_users", "DescribeQuickBiUser", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		mapping["email"] = getResp["Email"]
 		mapping["phone"] = getResp["Phone"]
@@ -184,11 +169,11 @@ func dataSourceAlibabacloudStackQuickBiUsersRead(d *schema.ResourceData, meta in
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("users", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

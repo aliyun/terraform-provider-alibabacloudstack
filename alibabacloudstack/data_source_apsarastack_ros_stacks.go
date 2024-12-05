@@ -6,9 +6,8 @@ import (
 	"regexp"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -170,7 +169,6 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 	if v, ok := d.GetOk("parent_stack_id"); ok {
 		request["ParentStackId"] = v
 	}
-	request["RegionId"] = client.RegionId
 	if v, ok := d.GetOkExists("show_nested_stack"); ok {
 		request["ShowNestedStack"] = v
 	}
@@ -189,12 +187,13 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
+
 	var objects []map[string]interface{}
 	var stackNameRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		stackNameRegex = r
 	}
@@ -209,23 +208,16 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 		}
 	}
 	status, statusOk := d.GetOk("status")
-	var response map[string]interface{}
-	conn, err := client.NewRosClient()
-	if err != nil {
-		return WrapError(err)
-	}
+
 	for {
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &runtime)
+		response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, request)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ros_stacks", action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
-		addDebug(action, response, request)
 
 		resp, err := jsonpath.Get("$.Stacks", response)
 		if err != nil {
-			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Stacks", response)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.Stacks", response)
 		}
 		result, _ := resp.([]interface{})
 		for _, v := range result {
@@ -247,6 +239,7 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 		}
 		request["PageNumber"] = request["PageNumber"].(int) + 1
 	}
+
 	ids := make([]string, 0)
 	names := make([]string, 0)
 	s := make([]map[string]interface{}, 0)
@@ -271,10 +264,11 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 
 		rosService := RosService{client}
 		id := fmt.Sprint(object["StackId"])
-		getResp, err := rosService.DescribeRosStack(id)
+		raw, err := rosService.DescribeRosStack(id)
 		if err != nil {
-			return WrapError(err)
+			return err
 		}
+		getResp := raw
 		if statusOk && status != "" && status != getResp["Status"].(string) {
 			continue
 		}
@@ -298,18 +292,19 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 		mapping["root_stack_id"] = getResp["RootStackId"]
 		mapping["status"] = getResp["Status"]
 		mapping["template_description"] = getResp["TemplateDescription"]
-		getResp1, err := rosService.GetStackPolicy(id)
+		raw, err = rosService.GetStackPolicy(id)
 		if err != nil {
-			return WrapError(err)
+			return err
 		}
+		getResp1 := raw
 		b, err := json.Marshal(getResp1["StackPolicyBody"])
 		mapping["stack_policy_body"] = string(b)
 
-		getResp2, err := rosService.ListTagResources(id, "stack")
+		tags, err := rosService.ListTagResources(id, "stack")
 		if err != nil {
-			return WrapError(err)
+			return err
 		}
-		mapping["tags"] = tagsToMap(getResp2)
+		mapping["tags"] = tagsToMap(tags)
 
 		ids = append(ids, fmt.Sprint(object["StackId"]))
 		names = append(names, object["StackName"].(string))
@@ -318,15 +313,15 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return err
 	}
 
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return err
 	}
 
 	if err := d.Set("stacks", s); err != nil {
-		return WrapError(err)
+		return err
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

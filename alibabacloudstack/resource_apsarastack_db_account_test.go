@@ -96,9 +96,6 @@ func TestAccAlibabacloudStackDBAccountUpdate(t *testing.T) {
 func resourceDBAccountConfigDependence(name string) string {
 	return fmt.Sprintf(`
 	%s
-provider "alibabacloudstack" {
-	assume_role {}
-}
 	variable "creation" {
 		default = "Rds"
 	}

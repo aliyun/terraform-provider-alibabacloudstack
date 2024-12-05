@@ -1,13 +1,14 @@
 package alibabacloudstack
 
 import (
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"strings"
 	"time"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -41,35 +42,20 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 	name := d.Get("name").(string)
-	request := requests.NewCommonRequest()
-	request.Method = "POST"
-	request.Product = "SLS"
-	request.Domain = client.Domain
-	request.Version = "2020-03-31"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "CreateProject"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "SLS",
-		"RegionId":        client.RegionId,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          "CreateProject",
-		"Version":         "2020-03-31",
-		"projectName":     name,
-		"Description":     d.Get("description").(string),
-	}
+	request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "CreateProject", "")
+	request.QueryParams["projectName"] = name
+	request.QueryParams["Description"] = d.Get("description").(string)
+
 	raw, err := client.WithEcsClient(func(alidnsClient *ecs.Client) (interface{}, error) {
 		return alidnsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.BaseResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_log_project", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_log_project", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug("LogProject", raw)
 
@@ -81,7 +67,7 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 		if object.ProjectName != "" {
 			return nil
 		}
-		return resource.RetryableError(Error("Failed to describe log project"))
+		return resource.RetryableError(errmsgs.Error("Failed to describe log project"))
 	})
 	d.SetId(name)
 	return resourceAlibabacloudStackLogProjectRead(d, meta)
@@ -93,11 +79,11 @@ func resourceAlibabacloudStackLogProjectRead(d *schema.ResourceData, meta interf
 	logService := LogService{client}
 	object, err := logService.DescribeLogProject(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("name", object.ProjectName)
 	d.Set("description", object.Description)
@@ -111,38 +97,20 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 
 	name := d.Id()
 	if d.HasChange("description") {
-		request := requests.NewCommonRequest()
-		request.Method = "POST"
-		request.Product = "SLS"
-		request.Domain = client.Domain
-		request.Version = "2020-03-31"
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "UpdateProject"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{
-			
-			
-			"Product":         "SLS",
-			"RegionId":        client.RegionId,
-			"Department":      client.Department,
-			"ResourceGroup":   client.ResourceGroup,
-			"Action":          "UpdateProject",
-			"Version":         "2020-03-31",
-			"organizationId":  client.Department,
-			"resourceGroupId": client.ResourceGroup,
-			"ProjectName":     name,
-			"description":     d.Get("description").(string),
-		}
+		request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "UpdateProject", "")
+		request.QueryParams["ProjectName"] = name
+		request.QueryParams["description"] = d.Get("description").(string)
 
 		raw, err := client.WithEcsClient(func(slsClient *ecs.Client) (interface{}, error) {
 			return slsClient.ProcessCommonRequest(request)
 		})
+		bresponse, ok := raw.(*responses.BaseResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), "UpdateProject", AlibabacloudStackLogGoSdkERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateProject", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
 		addDebug("UpdateProject", raw, requestInfo, request)
 	}
@@ -154,51 +122,33 @@ func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta inte
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *sls.Client
 	name := d.Get("name").(string)
-	request := requests.NewCommonRequest()
-	request.Method = "POST"
-	request.Product = "SLS"
-	request.Domain = client.Domain
-	request.Version = "2020-03-31"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "DeleteProject"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "SLS",
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"RegionId":        client.RegionId,
-		"organizationId":  client.Department,
-		"resourceGroupId": client.ResourceGroup,
-		"Action":          "DeleteProject",
-		"Version":         "2020-03-31",
-		"ProjectName":     name,
-	}
+	request := client.NewCommonRequest("POST", "SLS", "2020-03-31", "DeleteProject", "")
+	request.QueryParams["ProjectName"] = name
+
 	err := resource.Retry(3*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithEcsClient(func(slsClient *ecs.Client) (interface{}, error) {
 			return slsClient.ProcessCommonRequest(request)
 		})
+		bresponse, ok := raw.(*responses.BaseResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{LogClientTimeout, "RequestTimeout"}) {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout, "RequestTimeout"}) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteProject", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg))
 		}
 		addDebug("DeleteProject", raw, requestInfo, request)
 		return nil
 	})
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ProjectNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "DeleteProject", AlibabacloudStackLogGoSdkERROR)
+		return err
 	}
 
 	return nil
-
 }

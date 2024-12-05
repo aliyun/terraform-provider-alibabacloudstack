@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
@@ -83,10 +81,7 @@ func TestAccAlibabacloudStackOtsTablesDataSource_basic(t *testing.T) {
 		fakeMapFunc:  fakeOtsTablesMapFunc,
 	}
 
-	preCheck := func() {
-		testAccPreCheckWithRegions(t, false, connectivity.OtsCapacityNoSupportedRegions)
-	}
-	otsTablesCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, instanceNameConf, idsConf, nameRegexConf, allConf)
+	otsTablesCheckInfo.dataSourceTestCheck(t, rand, instanceNameConf, idsConf, nameRegexConf, allConf)
 }
 
 func dataSourceOtsTablesConfigDependence(name string) string {

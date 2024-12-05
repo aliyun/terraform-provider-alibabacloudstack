@@ -12,10 +12,11 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type instanceTypeWithOriginalPrice struct {
-	InstanceType  ecs.InstanceType
+	InstanceType ecs.InstanceType
 	OriginalPrice float64
 }
 
@@ -57,23 +58,16 @@ func dataSourceAlibabacloudStackInstanceTypes() *schema.Resource {
 				ForceNew: true,
 			},
 			"kubernetes_node_role": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(KubernetesNodeMaster),
-					string(KubernetesNodeWorker),
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{string(KubernetesNodeMaster), string(KubernetesNodeWorker)}, false),
 			},
 			"sorted_by": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"CPU",
-					"Memory",
-					"Price",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"CPU", "Memory", "Price"}, false),
 			},
 			"output_file": {
 				Type:     schema.TypeString,
@@ -198,25 +192,23 @@ func dataSourceAlibabacloudStackInstanceTypesRead(d *schema.ResourceData, meta i
 	family := strings.TrimSpace(d.Get("instance_type_family").(string))
 
 	req := ecs.CreateDescribeInstanceTypesRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		req.Scheme = "https"
-	} else {
-		req.Scheme = "http"
-	}
-	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*req.RpcRequest)
 	req.InstanceTypeFamily = family
 
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.DescribeInstanceTypes(req)
 	})
+	resp, ok := raw.(*ecs.DescribeInstanceTypesResponse)
 	if err != nil {
-		return err
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(resp.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_instance_types", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	var instanceTypes []instanceTypeWithOriginalPrice
-	resp, _ := raw.(*ecs.DescribeInstanceTypesResponse)
-	if resp != nil {
 
+	if resp != nil {
 		eniAmount := d.Get("eni_amount").(int)
 		k8sNode := strings.TrimSpace(d.Get("kubernetes_node_role").(string))
 		for _, types := range resp.InstanceTypes.InstanceType {
@@ -294,11 +286,11 @@ func instanceTypesDescriptionAttributes(d *schema.ResourceData, types []instance
 	for _, t := range types {
 
 		mapping := map[string]interface{}{
-			"id":             t.InstanceType.InstanceTypeId,
+			"id":            t.InstanceType.InstanceTypeId,
 			"cpu_core_count": t.InstanceType.CpuCoreCount,
-			"memory_size":    t.InstanceType.MemorySize,
-			"family":         t.InstanceType.InstanceTypeFamily,
-			"eni_amount":     t.InstanceType.EniQuantity,
+			"memory_size":   t.InstanceType.MemorySize,
+			"family":        t.InstanceType.InstanceTypeFamily,
+			"eni_amount":    t.InstanceType.EniQuantity,
 		}
 		if sortedBy == "Price" {
 			mapping["price"] = fmt.Sprintf("%.4f", t.OriginalPrice)
@@ -308,7 +300,7 @@ func instanceTypesDescriptionAttributes(d *schema.ResourceData, types []instance
 		mapping["availability_zones"] = zoneIds
 
 		brust := []map[string]interface{}{{
-			"initial_credit":  strconv.Itoa(t.InstanceType.InitialCredit),
+			"initial_credit": strconv.Itoa(t.InstanceType.InitialCredit),
 			"baseline_credit": strconv.Itoa(t.InstanceType.BaselineCredit),
 		}}
 		mapping["burstable_instance"] = brust

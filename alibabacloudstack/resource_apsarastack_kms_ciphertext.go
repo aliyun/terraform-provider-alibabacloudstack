@@ -6,6 +6,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -55,18 +56,16 @@ func resourceAlibabacloudStackKmsCiphertextCreate(d *schema.ResourceData, meta i
 	d.SetId(strconv.FormatInt(time.Now().Unix(), 16))
 
 	request := kms.CreateEncryptRequest()
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 
 	request.Plaintext = d.Get("plaintext").(string)
 	request.KeyId = d.Get("key_id").(string)
-	request.RegionId = client.RegionId
 
 	if context := d.Get("encryption_context"); context != nil {
 		cm := context.(map[string]interface{})
 		contextJson, err := convertMaptoJsonString(cm)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_kms_ciphertext", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_kms_ciphertext", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		request.EncryptionContext = string(contextJson)
 	}
@@ -75,7 +74,11 @@ func resourceAlibabacloudStackKmsCiphertextCreate(d *schema.ResourceData, meta i
 		return kmsClient.Encrypt(request)
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_kms_ciphertext", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if response, ok := raw.(*kms.EncryptResponse); ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_kms_ciphertext", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ := raw.(*kms.EncryptResponse)

@@ -9,13 +9,13 @@ import (
 
 func dataSourceAlibabacloudStackAccount() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackAccountRead,
+		Read:	dataSourceAlibabacloudStackAccountRead,
 
 		Schema: map[string]*schema.Schema{
 			// Computed values
 			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:		schema.TypeString,
+				Computed:	true,
 			},
 		},
 	}

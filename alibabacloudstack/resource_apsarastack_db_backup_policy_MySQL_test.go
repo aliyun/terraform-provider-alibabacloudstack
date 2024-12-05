@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -24,16 +26,16 @@ func testAccCheckDBBackupPolicyDestroy(s *terraform.State) error {
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.DBInstanceId = rs.Primary.ID
 		_, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.DescribeBackupPolicy(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 	return nil
@@ -81,9 +83,6 @@ func TestAccAlibabacloudStackDBBackupPolicy_mysql(t *testing.T) {
 
 func resourceDBBackupPolicyMysqlConfigDependence(name string) string {
 	return fmt.Sprintf(`
-provider "alibabacloudstack" {
-	assume_role {}
-}
 variable "name" {
   default = "%s"
 }

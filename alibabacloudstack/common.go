@@ -5,8 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/fc-go-sdk"
-	"github.com/google/uuid"
 	"io/ioutil"
 	"log"
 	"math"
@@ -19,7 +17,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aliyun/fc-go-sdk"
+	"github.com/google/uuid"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -348,7 +351,7 @@ func addDebug(action, content interface{}, requestInfo ...interface{}) {
 		}
 
 		//fmt.Printf(DefaultDebugMsg, action, content, trace)
-		log.Printf(DefaultDebugMsg, action, content, trace)
+		log.Printf(errmsgs.DefaultDebugMsg, action, content, trace)
 	}
 }
 
@@ -386,17 +389,8 @@ func getNextpageNumber(number requests.Integer) (requests.Integer, error) {
 }
 
 func incrementalWait(firstDuration time.Duration, increaseDuration time.Duration) func() {
-	retryCount := 1
-	return func() {
-		var waitTime time.Duration
-		if retryCount == 1 {
-			waitTime = firstDuration
-		} else if retryCount > 1 {
-			waitTime += increaseDuration
-		}
-		time.Sleep(waitTime)
-		retryCount++
-	}
+	//	迁移动作太大，使用重定向
+	return connectivity.IncrementalWait(firstDuration, increaseDuration)
 }
 
 func GetFunc(level int) string {
@@ -412,7 +406,7 @@ func ParseResourceId(id string, length int) (parts []string, err error) {
 	parts = strings.Split(id, ":")
 
 	if len(parts) != length {
-		err = WrapError(fmt.Errorf("Invalid Resource Id %s. Expected parts' length %d, got %d", id, length, len(parts)))
+		err = errmsgs.WrapError(fmt.Errorf("Invalid Resource Id %s. Expected parts' length %d, got %d", id, length, len(parts)))
 	}
 	return parts, err
 }
@@ -476,9 +470,9 @@ type Catcher struct {
 	RetryWaitSeconds int
 }
 
-var ClientErrorCatcher = Catcher{AlibabacloudStackGoClientFailure, 10, 5}
+var ClientErrorCatcher = Catcher{errmsgs.AlibabacloudStackGoClientFailure, 10, 5}
 var ServiceBusyCatcher = Catcher{"ServiceUnavailable", 10, 5}
-var ThrottlingCatcher = Catcher{Throttling, 50, 2}
+var ThrottlingCatcher = Catcher{errmsgs.Throttling, 50, 2}
 
 func NewInvoker() Invoker {
 	i := Invoker{}
@@ -600,7 +594,7 @@ func (a *Invoker) Run(f func() error) error {
 	}
 
 	for _, catcher := range a.catchers {
-		if IsExpectedErrors(err, []string{catcher.Reason}) {
+		if errmsgs.IsExpectedErrors(err, []string{catcher.Reason}) {
 			catcher.RetryCount--
 
 			if catcher.RetryCount <= 0 {
@@ -634,7 +628,7 @@ func GetCenChildInstanceType(id string) (c string, e error) {
 func ParseSlbListenerId(id string) (parts []string, err error) {
 	parts = strings.Split(id, ":")
 	if len(parts) != 2 && len(parts) != 3 {
-		err = WrapError(fmt.Errorf("Invalid alibabacloudstack_slb_listener Id %s. Expected Id format is <slb id>:<protocol>:< frontend>.", id))
+		err = errmsgs.WrapError(fmt.Errorf("Invalid alibabacloudstack_slb_listener Id %s. Expected Id format is <slb id>:<protocol>:< frontend>.", id))
 	}
 	return parts, err
 }
@@ -675,7 +669,7 @@ func computePeriodByUnit(createTime, endTime interface{}, currentPeriod int, per
 		createTimeStr = createTime.(string)
 		endTimeStr = endTime.(string)
 	default:
-		return 0, WrapError(fmt.Errorf("Unsupported time type: %#v", value))
+		return 0, errmsgs.WrapError(fmt.Errorf("Unsupported time type: %#v", value))
 	}
 	// currently, there is time value does not format as standard RFC3339
 	UnStandardRFC3339 := "2006-01-02T15:04Z07:00"
@@ -684,7 +678,7 @@ func computePeriodByUnit(createTime, endTime interface{}, currentPeriod int, per
 		log.Printf("Parase the CreateTime %#v failed and error is: %#v.", createTime, err)
 		create, err = time.Parse(UnStandardRFC3339, createTimeStr)
 		if err != nil {
-			return 0, WrapError(err)
+			return 0, errmsgs.WrapError(err)
 		}
 	}
 	end, err := time.Parse(time.RFC3339, endTimeStr)
@@ -692,7 +686,7 @@ func computePeriodByUnit(createTime, endTime interface{}, currentPeriod int, per
 		log.Printf("Parase the EndTime %#v failed and error is: %#v.", endTime, err)
 		end, err = time.Parse(UnStandardRFC3339, endTimeStr)
 		if err != nil {
-			return 0, WrapError(err)
+			return 0, errmsgs.WrapError(err)
 		}
 	}
 	var period int
@@ -717,7 +711,7 @@ func computePeriodByUnit(createTime, endTime interface{}, currentPeriod int, per
 	if currentPeriod > 0 && currentPeriod != period {
 		period = currentPeriod
 	}
-	return period, WrapError(err)
+	return period, errmsgs.WrapError(err)
 }
 
 func terraformToAPI(field string) string {
@@ -840,5 +834,14 @@ func convertMapFloat64ToJsonString(m map[string]interface{}) (string, error) {
 		return "", err
 	} else {
 		return string(result), nil
+	}
+}
+
+// 合并两个 map，并在遇到相同键时覆盖第一个 map 的值
+func mergeMaps(map1, map2 map[string]string) {
+
+	// 将第二个 map 的所有键值对复制到 mergedMap，覆盖已存在的键
+	for key, value := range map2 {
+		map1[key] = value
 	}
 }

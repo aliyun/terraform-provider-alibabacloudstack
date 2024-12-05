@@ -2,15 +2,15 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
 	"regexp"
-	"strings"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudstackCmsProjectMeta() *schema.Resource {
@@ -34,8 +34,20 @@ func dataSourceAlibabacloudstackCmsProjectMeta() *schema.Resource {
 							Computed: true,
 						},
 						"labels": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeList,
 							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"value": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
 						},
 						"namespace": {
 							Type:     schema.TypeString,
@@ -52,46 +64,29 @@ func dataSourceAlibabacloudstackCmsProjectMeta() *schema.Resource {
 func dataSourceAlibabacloudstackCmsProjectMetaRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-01-01"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.ApiName = "DescribeProjectMeta"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "Cms",
-		"RegionId":        client.RegionId,
-		"Action":          "DescribeProjectMeta",
-		"Version":         "2019-01-01",
-	}
+	request := client.NewCommonRequest("POST", "Cms", "2019-01-01", "DescribeProjectMeta", "")
+
 	response := Data{}
 
 	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+		log.Printf(" request of DescribeProjectMeta : %v", request)
+		raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
+			return cmsClient.ProcessCommonRequest(request)
 		})
-		log.Printf(" response of raw DescribeProjectMeta : %s", raw)
+		log.Printf(" response of raw DescribeProjectMeta : %v", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_instance_families", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_instance_families", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Success == true || len(response.Resources.Resource) < 1 {
 			break
@@ -111,14 +106,24 @@ func dataSourceAlibabacloudstackCmsProjectMetaRead(d *schema.ResourceData, meta 
 		mapping := map[string]interface{}{
 			"description": rg.Description,
 			"namespace":   rg.Namespace,
-			"labels":      rg.Labels,
+		}
+		if len(rg.Labels) > 0 {
+			labels := make([]map[string]string, 0)
+			for _, label := range rg.Labels {
+				label_map := map[string]string{
+					"name":  label.Name,
+					"value": label.Value,
+				}
+				labels = append(labels, label_map)
+			}
+			mapping["labels"] = labels
 		}
 		s = append(s, mapping)
 	}
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("resources", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
@@ -135,8 +140,11 @@ type Data struct {
 	Resources  struct {
 		Resource []struct {
 			Description string `json:"Description"`
-			Labels      string `json:"Labels"`
-			Namespace   string `json:"Namespace"`
+			Labels      []struct {
+				Name  string `json:"name"`
+				Value string `json:"value"`
+			} `json:"Labels"`
+			Namespace string `json:"Namespace"`
 		} `json:"Resource"`
 	} `json:"Resources"`
 	Code    int  `json:"Code"`

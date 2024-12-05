@@ -10,6 +10,7 @@ import (
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -68,7 +69,7 @@ func resourceAlibabacloudStackLogtailConfigCreate(d *schema.ResourceData, meta i
 	var inputConfigInputDetail = make(map[string]interface{})
 	data := d.Get("input_detail").(string)
 	if jsonErr := json.Unmarshal([]byte(data), &inputConfigInputDetail); jsonErr != nil {
-		return WrapError(jsonErr)
+		return errmsgs.WrapError(jsonErr)
 	}
 	var requestInfo *sls.Client
 	logconfig := &sls.LogConfig{
@@ -80,18 +81,19 @@ func resourceAlibabacloudStackLogtailConfigCreate(d *schema.ResourceData, meta i
 			LogStoreName: d.Get("logstore").(string),
 		},
 	}
-	raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+	raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 		requestInfo = slsClient
 		sls.AddNecessaryInputConfigField(inputConfigInputDetail)
 		covertInput, covertErr := assertInputDetailType(inputConfigInputDetail, logconfig)
 		if covertErr != nil {
-			return nil, WrapError(covertErr)
+			return nil, covertErr
 		}
 		logconfig.InputDetail = covertInput
 		return nil, slsClient.CreateConfig(d.Get("project").(string), logconfig)
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_logtail_config", "CreateConfig", AlibabacloudStackLogGoSdkERROR)
+		errmsg := ""
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_logtail_config", "CreateConfig", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 	}
 	if debugOn() {
 		addDebug("CreateConfig", raw, requestInfo, map[string]interface{}{
@@ -110,11 +112,11 @@ func resourceAlibabacloudStackLogtailConfigRead(d *schema.ResourceData, meta int
 	split := strings.Split(d.Id(), COLON_SEPARATED)
 	config, err := logService.DescribeLogtailConfig(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	// Because the server will return redundant parameters, we filter here
@@ -131,7 +133,7 @@ func resourceAlibabacloudStackLogtailConfigRead(d *schema.ResourceData, meta int
 	}
 	nMapJson, err := json.Marshal(nMap)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("input_detail", string(nMapJson))
 	d.Set("project", split[0])
@@ -145,7 +147,7 @@ func resourceAlibabacloudStackLogtailConfigRead(d *schema.ResourceData, meta int
 func resourceAlibabacloudStackLogtailConfiglUpdate(d *schema.ResourceData, meta interface{}) error {
 	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	update := false
@@ -161,12 +163,12 @@ func resourceAlibabacloudStackLogtailConfiglUpdate(d *schema.ResourceData, meta 
 		data := d.Get("input_detail").(string)
 		conver_err := json.Unmarshal([]byte(data), &inputConfigInputDetail)
 		if conver_err != nil {
-			return WrapError(conver_err)
+			return errmsgs.WrapError(conver_err)
 		}
 		sls.AddNecessaryInputConfigField(inputConfigInputDetail)
 		covertInput, covertErr := assertInputDetailType(inputConfigInputDetail, logconfig)
 		if covertErr != nil {
-			return WrapError(covertErr)
+			return errmsgs.WrapError(covertErr)
 		}
 		logconfig.InputDetail = covertInput
 
@@ -182,12 +184,13 @@ func resourceAlibabacloudStackLogtailConfiglUpdate(d *schema.ResourceData, meta 
 				LogStoreName: d.Get("logstore").(string),
 			},
 		}
-		raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.UpdateConfig(parts[0], params)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), "UpdateConfig", AlibabacloudStackLogGoSdkERROR)
+			errmsg := ""
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateConfig", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
 		if debugOn() {
 			addDebug("UpdateConfig", raw, requestInfo, map[string]interface{}{
@@ -204,20 +207,21 @@ func resourceAlibabacloudStackLogtailConfigDelete(d *schema.ResourceData, meta i
 	logService := LogService{client}
 	parts, err := ParseResourceId(d.Id(), 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	var requestInfo *sls.Client
 	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.DeleteConfig(parts[0], parts[2])
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteConfig", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg))
 		}
 		if debugOn() {
 			addDebug("DeleteConfig", raw, requestInfo, map[string]string{
@@ -228,49 +232,49 @@ func resourceAlibabacloudStackLogtailConfigDelete(d *schema.ResourceData, meta i
 		return nil
 	})
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ProjectNotExist", "LogStoreNotExist", "ConfigNotExist"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist", "LogStoreNotExist", "ConfigNotExist"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "DeleteConfig", AlibabacloudStackLogGoSdkERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteConfig", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
-	return WrapError(logService.WaitForLogtailConfig(d.Id(), Deleted, DefaultTimeout))
+	return errmsgs.WrapError(logService.WaitForLogtailConfig(d.Id(), Deleted, DefaultTimeout))
 }
 
 // This function is used to assert and convert the type to sls.LogConfig
 func assertInputDetailType(inputConfigInputDetail map[string]interface{}, logconfig *sls.LogConfig) (sls.InputDetailInterface, error) {
 	if inputConfigInputDetail["logType"] == "json_log" {
 		JSONConfigInputDetail, ok := sls.ConvertToJSONConfigInputDetail(inputConfigInputDetail)
-		if ok != true {
-			return nil, WrapError(Error("covert to JSONConfigInputDetail false "))
+		if !ok {
+			return nil, errmsgs.WrapError(errmsgs.Error("covert to JSONConfigInputDetail false "))
 		}
 		logconfig.InputDetail = JSONConfigInputDetail
 	}
 	if inputConfigInputDetail["logType"] == "apsara_log" {
 		ApsaraLogConfigInputDetail, ok := sls.ConvertToApsaraLogConfigInputDetail(inputConfigInputDetail)
-		if ok != true {
-			return nil, WrapError(Error("covert to JSONConfigInputDetail false "))
+		if !ok {
+			return nil, errmsgs.WrapError(errmsgs.Error("covert to JSONConfigInputDetail false "))
 		}
 		logconfig.InputDetail = ApsaraLogConfigInputDetail
 	}
 
 	if inputConfigInputDetail["logType"] == "common_reg_log" {
 		RegexConfigInputDetail, ok := sls.ConvertToRegexConfigInputDetail(inputConfigInputDetail)
-		if ok != true {
-			return nil, WrapError(Error("covert to JSONConfigInputDetail false "))
+		if !ok {
+			return nil, errmsgs.WrapError(errmsgs.Error("covert to JSONConfigInputDetail false "))
 		}
 		logconfig.InputDetail = RegexConfigInputDetail
 	}
 	if inputConfigInputDetail["logType"] == "delimiter_log" {
 		DelimiterConfigInputDetail, ok := sls.ConvertToDelimiterConfigInputDetail(inputConfigInputDetail)
-		if ok != true {
-			return nil, WrapError(Error("covert to JSONConfigInputDetail false "))
+		if !ok {
+			return nil, errmsgs.WrapError(errmsgs.Error("covert to JSONConfigInputDetail false "))
 		}
 		logconfig.InputDetail = DelimiterConfigInputDetail
 	}
 	if logconfig.InputType == "plugin" {
 		PluginLogConfigInputDetail, ok := sls.ConvertToPluginLogConfigInputDetail(inputConfigInputDetail)
-		if ok != true {
-			return nil, WrapError(Error("covert to JSONConfigInputDetail false "))
+		if !ok {
+			return nil, errmsgs.WrapError(errmsgs.Error("covert to JSONConfigInputDetail false "))
 		}
 		logconfig.InputDetail = PluginLogConfigInputDetail
 	}

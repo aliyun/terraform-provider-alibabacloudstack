@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
 	"testing"
 
@@ -450,12 +451,12 @@ func testAccCheckEssScalingGroupDestroy(s *terraform.State) error {
 		}
 
 		if _, err := essService.DescribeEssScalingGroup(rs.Primary.ID); err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-		return WrapError(fmt.Errorf("Scaling group %s still exists.", rs.Primary.ID))
+		return errmsgs.WrapError(fmt.Errorf("Scaling group %s still exists.", rs.Primary.ID))
 	}
 
 	return nil

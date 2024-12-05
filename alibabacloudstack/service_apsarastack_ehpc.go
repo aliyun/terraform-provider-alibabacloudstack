@@ -2,13 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type EhpcService struct {
@@ -17,41 +14,22 @@ type EhpcService struct {
 
 func (s *EhpcService) DescribeEhpcJobTemplate(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewEcsClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "ListJobTemplates"
 	request := map[string]interface{}{
 		"PageSize":   PageSizeLarge,
 		"PageNumber": 1,
 	}
 	idExist := false
 	for {
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("GET"), StringPointer("2018-04-12"), StringPointer("AK"), request, nil, &runtime)
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-		addDebug(action, response, request)
+		response, err = s.client.DoTeaRequest("GET", "EHPC", "2018-04-12", "ListJobTemplates", "", nil, request)
 		if err != nil {
-			return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+			return object, err
 		}
 		v, err := jsonpath.Get("$.Templates.JobTemplates", response)
 		if err != nil {
-			return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.Templates.JobTemplates", response)
+			return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Templates.JobTemplates", response)
 		}
 		if len(v.([]interface{})) < 1 {
-			return object, WrapErrorf(Error(GetNotFoundMessage("Ehpc", id)), NotFoundWithResponse, response)
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Ehpc", id)), errmsgs.NotFoundWithResponse, response)
 		}
 		for _, v := range v.([]interface{}) {
 			if fmt.Sprint(v.(map[string]interface{})["Id"]) == id {
@@ -65,7 +43,7 @@ func (s *EhpcService) DescribeEhpcJobTemplate(id string) (object map[string]inte
 		request["PageNumber"] = request["PageNumber"].(int) + 1
 	}
 	if !idExist {
-		return object, WrapErrorf(Error(GetNotFoundMessage("Ehpc", id)), NotFoundWithResponse, response)
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Ehpc", id)), errmsgs.NotFoundWithResponse, response)
 	}
 	return
 }

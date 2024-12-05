@@ -6,6 +6,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -43,9 +44,9 @@ func resourceAlibabacloudStackKmsSecret() *schema.Resource {
 				Computed: true,
 			},
 			"recovery_window_in_days": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  30,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      30,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("force_delete_without_recovery").(bool)
 				},
@@ -87,9 +88,7 @@ func resourceAlibabacloudStackKmsSecretCreate(d *schema.ResourceData, meta inter
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := kms.CreateCreateSecretRequest()
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 
 	if v, ok := d.GetOk("description"); ok {
 		request.Description = v.(string)
@@ -112,7 +111,7 @@ func resourceAlibabacloudStackKmsSecretCreate(d *schema.ResourceData, meta inter
 		}
 		tags, err := json.Marshal(addTags)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.Tags = string(tags)
 	}
@@ -121,7 +120,11 @@ func resourceAlibabacloudStackKmsSecretCreate(d *schema.ResourceData, meta inter
 		return kmsClient.CreateSecret(request)
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_kms_secret", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if response, ok := raw.(*kms.CreateSecretResponse); ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_kms_secret", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw)
 	response, _ := raw.(*kms.CreateSecretResponse)
@@ -129,17 +132,18 @@ func resourceAlibabacloudStackKmsSecretCreate(d *schema.ResourceData, meta inter
 
 	return resourceAlibabacloudStackKmsSecretRead(d, meta)
 }
+
 func resourceAlibabacloudStackKmsSecretRead(d *schema.ResourceData, meta interface{}) error {
 	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kmsService := KmsService{client}
 	object, err := kmsService.DescribeKmsSecret(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("secret_name", d.Id())
@@ -156,7 +160,7 @@ func resourceAlibabacloudStackKmsSecretRead(d *schema.ResourceData, meta interfa
 
 	getSecretValueObject, err := kmsService.GetSecretValue(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("secret_data", getSecretValueObject.SecretData)
 	d.Set("secret_data_type", getSecretValueObject.SecretDataType)
@@ -164,6 +168,7 @@ func resourceAlibabacloudStackKmsSecretRead(d *schema.ResourceData, meta interfa
 	d.Set("version_stages", getSecretValueObject.VersionStages.VersionStage)
 	return nil
 }
+
 func resourceAlibabacloudStackKmsSecretUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kmsService := KmsService{client}
@@ -171,14 +176,13 @@ func resourceAlibabacloudStackKmsSecretUpdate(d *schema.ResourceData, meta inter
 
 	if d.HasChange("tags") {
 		if err := kmsService.setResourceTags(d, "secret"); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		//d.SetPartial("tags")
 	}
 	if d.HasChange("description") {
 		request := kms.CreateUpdateSecretRequest()
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 
 		request.SecretName = d.Id()
 		request.Description = d.Get("description").(string)
@@ -187,14 +191,17 @@ func resourceAlibabacloudStackKmsSecretUpdate(d *schema.ResourceData, meta inter
 		})
 		addDebug(request.GetActionName(), raw)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if response, ok := raw.(*kms.UpdateSecretResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		//d.SetPartial("description")
 	}
 	update := false
 	request := kms.CreatePutSecretValueRequest()
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 
 	request.SecretName = d.Id()
 	if d.HasChange("secret_data") {
@@ -219,7 +226,11 @@ func resourceAlibabacloudStackKmsSecretUpdate(d *schema.ResourceData, meta inter
 		})
 		addDebug(request.GetActionName(), raw)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if response, ok := raw.(*kms.PutSecretValueResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		//d.SetPartial("secret_data")
 		//d.SetPartial("version_id")
@@ -229,11 +240,11 @@ func resourceAlibabacloudStackKmsSecretUpdate(d *schema.ResourceData, meta inter
 	d.Partial(false)
 	return resourceAlibabacloudStackKmsSecretRead(d, meta)
 }
+
 func resourceAlibabacloudStackKmsSecretDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := kms.CreateDeleteSecretRequest()
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 
 	request.SecretName = d.Id()
 	if v, ok := d.GetOkExists("force_delete_without_recovery"); ok {
@@ -247,10 +258,14 @@ func resourceAlibabacloudStackKmsSecretDelete(d *schema.ResourceData, meta inter
 	})
 	addDebug(request.GetActionName(), raw)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"Forbidden.ResourceNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.errmsgs.ResourceNotfound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if response, ok := raw.(*kms.DeleteSecretResponse); ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	return nil
 }

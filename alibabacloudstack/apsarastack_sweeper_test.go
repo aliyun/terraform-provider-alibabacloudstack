@@ -16,7 +16,7 @@ func TestMain(m *testing.M) {
 
 // functions for a given region
 func sharedClientForRegion(region string) (interface{}, error) {
-	var accessKey, secretKey, proxy, domain, ossEndpoint, essEndpoint, slbEndpoint, crEndpoint, vpcEndpoint, rdsEndpoint, ecsEndpoint, KVStoreEndpoint, rgsName, rgid, dept string
+	var accessKey, secretKey, proxy, domain, ossEndpoint, essEndpoint, slbEndpoint, crEndpoint, vpcEndpoint, rdsEndpoint, ecsEndpoint, kvStoreEndpoint, rgsName, rgid, dept string
 	var insecure bool
 	if accessKey = os.Getenv("ALIBABACLOUDSTACK_ACCESS_KEY"); accessKey == "" {
 		return nil, fmt.Errorf("empty ALIBABACLOUDSTACK_ACCESS_KEY")
@@ -54,8 +54,8 @@ func sharedClientForRegion(region string) (interface{}, error) {
 	if crEndpoint = os.Getenv("CR_ENDPOINT"); crEndpoint == "" {
 		crEndpoint = domain
 	}
-	if KVStoreEndpoint = os.Getenv("KVSTORE_ENDPOINT"); KVStoreEndpoint == "" {
-		KVStoreEndpoint = domain
+	if kvStoreEndpoint = os.Getenv("KVSTORE_ENDPOINT"); kvStoreEndpoint == "" {
+		kvStoreEndpoint = domain
 	}
 	if rgid = os.Getenv("ALIBABACLOUDSTACK_RESOURCE_GROUP"); rgid == "" {
 		//return nil, fmt.Errorf("empty ALIBABACLOUDSTACK_DOMAIN")
@@ -68,21 +68,25 @@ func sharedClientForRegion(region string) (interface{}, error) {
 	}
 
 	conf := connectivity.Config{
-		Region:          connectivity.Region(region),
-		RegionId:        region,
-		AccessKey:       accessKey,
-		SecretKey:       secretKey,
-		Proxy:           proxy,
-		Insecure:        insecure,
-		Domain:          domain,
-		Protocol:        "HTTP",
-		OssEndpoint:     ossEndpoint,
-		EssEndpoint:     essEndpoint,
-		RdsEndpoint:     rdsEndpoint,
-		EcsEndpoint:     ecsEndpoint,
-		VpcEndpoint:     vpcEndpoint,
-		CrEndpoint:      crEndpoint,
-		SlbEndpoint:     slbEndpoint,
+		Region:    connectivity.Region(region),
+		RegionId:  region,
+		AccessKey: accessKey,
+		SecretKey: secretKey,
+		Proxy:     proxy,
+		Insecure:  insecure,
+		Domain:    domain,
+		Protocol:  "HTTP",
+		Endpoints: map[connectivity.ServiceCode]string{
+			connectivity.EcsCode:     ecsEndpoint,
+			connectivity.VPCCode:     vpcEndpoint,
+			connectivity.RDSCode:     rdsEndpoint,
+			connectivity.ESSCode:     essEndpoint,
+			connectivity.KVSTORECode: kvStoreEndpoint,
+			connectivity.OSSCode:     ossEndpoint,
+			connectivity.CRCode:      crEndpoint,
+			connectivity.SLBCode:     slbEndpoint,
+		},
+
 		ResourceGroup:   rgid,
 		Department:      dept,
 		ResourceSetName: rgsName,

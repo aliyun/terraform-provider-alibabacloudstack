@@ -5,9 +5,8 @@ import (
 	"fmt"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -71,18 +70,13 @@ func dataSourceAlibabacloudStackMaxcomputeCus() *schema.Resource {
 
 func dataSourceAlibabacloudStackMaxcomputeCusRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var response map[string]interface{}
-	conn, err := client.NewAscmClient()
-	if err != nil {
-		return WrapError(err)
-	}
 
 	if d.Get("name_regex").(string) != "" && d.Get("cluster_name").(string) != "" {
-		err = Error("Only one filter condition can be set")
+		err := errmsgs.Error("Only one filter condition can be set")
 		return err
 	}
 	if d.Get("name_regex").(string) == "" && d.Get("cluster_name").(string) == "" {
-		err = Error("At least one filter condition needs to be set.")
+		err := errmsgs.Error("At least one filter condition needs to be set.")
 		return err
 	}
 
@@ -108,26 +102,23 @@ func dataSourceAlibabacloudStackMaxcomputeCusRead(d *schema.ResourceData, meta i
 		filter_query = d.Get("cluster_name").(string)
 	}
 
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-05-10"), StringPointer("AK"), nil, request, &runtime)
+	response, err := client.DoTeaRequest("POST", "ASCM", "2019-05-10", action, "", nil, request)
+
 	if err != nil {
-		err = WrapErrorf(err, DefaultErrorMsg, filter_query, action, AlibabacloudStackSdkGoERROR)
 		return err
 	}
-	addDebug(action, response, request)
 
-	if IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
-		err = WrapErrorf(Error(GetNotFoundMessage("MaxcomputeProject", filter_query)), NotFoundMsg, ProviderERROR)
+	if errmsgs.IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
+		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("MaxcomputeProject", filter_query)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		return err
 	}
 	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		err = Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
+		err = errmsgs.Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
 		return err
 	}
 	v, err := jsonpath.Get("$", response)
 	if err != nil {
-		return WrapErrorf(err, FailedGetAttributeMsg, filter_query, "$", response)
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, filter_query, "$", response)
 	}
 	objects := v.(map[string]interface{})["data"].([]interface{})
 
@@ -137,7 +128,7 @@ func dataSourceAlibabacloudStackMaxcomputeCusRead(d *schema.ResourceData, meta i
 		cu_raw := object.(map[string]interface{})
 		max_cu, err := cu_raw["max_cu"].(json.Number).Float64()
 		if err != nil {
-			return WrapError(Error("illegal max_cu value"))
+			return errmsgs.WrapError(errmsgs.Error("illegal max_cu value"))
 		}
 		cu := map[string]interface{}{
 			"id":           cu_raw["id"].(string),
@@ -152,10 +143,10 @@ func dataSourceAlibabacloudStackMaxcomputeCusRead(d *schema.ResourceData, meta i
 	d.SetId(dataResourceIdHash(ids))
 
 	if err := d.Set("cus", t); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), t)

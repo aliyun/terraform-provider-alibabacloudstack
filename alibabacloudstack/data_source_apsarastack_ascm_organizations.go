@@ -3,14 +3,14 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"log"
+	"regexp"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
-	"regexp"
-	"strings"
 )
 
 func dataSourceAlibabacloudStackAscmOrganizations() *schema.Resource {
@@ -30,12 +30,6 @@ func dataSourceAlibabacloudStackAscmOrganizations() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			// 未消费变量
-// 			"names": {
-// 				Type:     schema.TypeList,
-// 				Computed: true,
-// 				Elem:     &schema.Schema{Type: schema.TypeString},
-// 			},
 			"parent_id": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -44,7 +38,6 @@ func dataSourceAlibabacloudStackAscmOrganizations() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
 			"organizations": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -87,18 +80,7 @@ func dataSourceAlibabacloudStackAscmOrganizations() *schema.Resource {
 
 func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := requests.NewCommonRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "GET"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
+
 	var parentId string
 	if v, ok := d.GetOk("parent_id"); ok {
 		parentId = fmt.Sprint(v.(int))
@@ -106,17 +88,9 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 		parentId = client.Department
 	}
 
-	request.RegionId = client.RegionId
-	request.ApiName = "GetOrganizationList"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "ascm",
-		"RegionId":        client.RegionId,
-		"Action":          "GetOrganizationList",
-		"Version":         "2019-05-10",
-		"id":              parentId}
+	request := client.NewCommonRequest("GET", "ascm", "2019-05-10", "GetOrganizationList", "")
+	request.QueryParams["id"] = parentId
+
 	response := Organization{}
 
 	for {
@@ -125,15 +99,18 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 		})
 		log.Printf(" rsponse of raw MeteringWebQuery : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_organizations", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organizations", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Code == "200" || len(response.Data) < 1 {
 			break
@@ -167,7 +144,7 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("organizations", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

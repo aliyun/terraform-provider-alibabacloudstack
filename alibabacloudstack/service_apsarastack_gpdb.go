@@ -8,8 +8,6 @@ import (
 	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -17,6 +15,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/gpdb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type GpdbService struct {
@@ -27,73 +26,50 @@ func (s *GpdbService) GpdbAccountStateRefreshFunc(id string, failStates []string
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeGpdbAccount(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if fmt.Sprint(object["AccountStatus"]) == failState {
-				return object, fmt.Sprint(object["AccountStatus"]), WrapError(Error(FailedToReachTargetStatus, fmt.Sprint(object["AccountStatus"])))
+				return object, fmt.Sprint(object["AccountStatus"]), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(object["AccountStatus"])))
 			}
 		}
 		return object, fmt.Sprint(object["AccountStatus"]), nil
 	}
 }
+
 func (s *GpdbService) DescribeGpdbAccount(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewGpdbClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
-	action := "DescribeAccounts"
+	request := make(map[string]interface{})
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		err = WrapError(err)
+		err = errmsgs.WrapError(err)
 		return
 	}
-	request := map[string]interface{}{
-		"AccountName":  parts[1],
-		"DBInstanceId": parts[0],
-	}
-	request["Product"] = "gpdb"
-	request["OrganizationId"] = s.client.Department
-	request["RegionId"] = s.client.RegionId
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-05-03"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-
-			if NeedRetry(err) {
-
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	request["AccountName"] = parts[1]
+	request["DBInstanceId"] = parts[0]
+	request["PageSize"] = PageSizeLarge
+	request["PageNumber"] = 1
+	response, err = s.client.DoTeaRequest("POST", "gpdb", "2016-05-03", "DescribeAccounts", "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return object, WrapErrorf(Error(GetNotFoundMessage("GPDB:Account", id)), NotFoundMsg, ProviderERROR, fmt.Sprint(response["RequestId"]))
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GPDB:Account", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
 		}
-		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+		return object, err	
 	}
 	v, err := jsonpath.Get("$.Accounts.DBInstanceAccount", response)
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.Accounts.DBInstanceAccount", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Accounts.DBInstanceAccount", response)
 	}
 	if len(v.([]interface{})) < 1 {
-		return object, WrapErrorf(Error(GetNotFoundMessage("GPDB", id)), NotFoundWithResponse, response)
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GPDB", id)), errmsgs.NotFoundWithResponse, response)
 	} else {
 		if fmt.Sprint(v.([]interface{})[0].(map[string]interface{})["AccountName"]) != parts[1] {
-			return object, WrapErrorf(Error(GetNotFoundMessage("GPDB", id)), NotFoundWithResponse, response)
+			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GPDB", id)), errmsgs.NotFoundWithResponse, response)
 		}
 	}
 	object = v.([]interface{})[0].(map[string]interface{})
@@ -102,28 +78,29 @@ func (s *GpdbService) DescribeGpdbAccount(id string) (object map[string]interfac
 
 func (s *GpdbService) DescribeGpdbInstance(id string) (instanceAttribute gpdb.DBInstanceAttribute, err error) {
 	request := gpdb.CreateDescribeDBInstanceAttributeRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "gpdb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 	raw, err := s.client.WithGpdbClient(func(client *gpdb.Client) (interface{}, error) {
 		return client.DescribeDBInstanceAttribute(request)
 	})
 
-	response, _ := raw.(*gpdb.DescribeDBInstanceAttributeResponse)
+	response, ok := raw.(*gpdb.DescribeDBInstanceAttributeResponse)
 	if err != nil {
-		// convert error code
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			err = WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			err = errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		} else {
-			err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		return
 	}
 
 	addDebug(request.GetActionName(), response, request.RpcRequest, request)
 	if len(response.Items.DBInstanceAttribute) == 0 {
-		return instanceAttribute, WrapErrorf(Error(GetNotFoundMessage("Gpdb Instance", id)), NotFoundMsg, ProviderERROR)
+		return instanceAttribute, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Gpdb Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 
 	return response.Items.DBInstanceAttribute[0], nil
@@ -131,23 +108,25 @@ func (s *GpdbService) DescribeGpdbInstance(id string) (instanceAttribute gpdb.DB
 
 func (s *GpdbService) DescribeGpdbSecurityIps(id string) (ips []string, err error) {
 	request := gpdb.CreateDescribeDBInstanceIPArrayListRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "gpdb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 
 	raw, err := s.client.WithGpdbClient(func(client *gpdb.Client) (interface{}, error) {
 		return client.DescribeDBInstanceIPArrayList(request)
 	})
+	response, ok := raw.(*gpdb.DescribeDBInstanceIPArrayListResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			err = WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			err = errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		} else {
-			err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		return
 	}
-	response, _ := raw.(*gpdb.DescribeDBInstanceIPArrayListResponse)
 	addDebug(request.GetActionName(), response, request.RpcRequest, request)
 	var ipstr, separator string
 	ipsMap := make(map[string]string)
@@ -173,18 +152,20 @@ func (s *GpdbService) DescribeGpdbSecurityIps(id string) (ips []string, err erro
 
 func (s *GpdbService) ModifyGpdbSecurityIps(id, ips string) error {
 	request := gpdb.CreateModifySecurityIpsRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "gpdb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 	request.SecurityIPList = ips
 	raw, err := s.client.WithGpdbClient(func(client *gpdb.Client) (interface{}, error) {
 		return client.ModifySecurityIps(request)
 	})
+	response, ok := raw.(*gpdb.ModifySecurityIpsResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	response := raw.(*gpdb.ModifySecurityIpsResponse)
 	addDebug(request.GetActionName(), response, request.RpcRequest, request)
 
 	return nil
@@ -194,26 +175,28 @@ func (s *GpdbService) DescribeGpdbConnection(id string) (*gpdb.DBInstanceNetInfo
 	info := &gpdb.DBInstanceNetInfo{}
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return info, WrapError(err)
+		return info, errmsgs.WrapError(err)
 	}
 
 	// Describe DB Instance Net Info
 	request := gpdb.CreateDescribeDBInstanceNetInfoRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "gpdb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = parts[0]
 	raw, err := s.client.WithGpdbClient(func(gpdbClient *gpdb.Client) (interface{}, error) {
 		return gpdbClient.DescribeDBInstanceNetInfo(request)
 	})
+	response, ok := raw.(*gpdb.DescribeDBInstanceNetInfoResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return info, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		return info, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return info, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return info, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*gpdb.DescribeDBInstanceNetInfoResponse)
+	addDebug(request.GetActionName(), response, request.RpcRequest, request)
 	if response.DBInstanceNetInfos.DBInstanceNetInfo != nil {
 		for _, o := range response.DBInstanceNetInfos.DBInstanceNetInfo {
 			if strings.HasPrefix(o.ConnectionString, parts[1]) {
@@ -222,23 +205,23 @@ func (s *GpdbService) DescribeGpdbConnection(id string) (*gpdb.DBInstanceNetInfo
 		}
 	}
 
-	return info, WrapErrorf(Error(GetNotFoundMessage("GpdbConnection", id)), NotFoundMsg, ProviderERROR)
+	return info, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GpdbConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
 func (s *GpdbService) GpdbInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeGpdbInstance(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if object.DBInstanceStatus == failState {
-				return object, object.DBInstanceStatus, WrapError(Error(FailedToReachTargetStatus, object.DBInstanceStatus))
+				return object, object.DBInstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.DBInstanceStatus))
 			}
 		}
 		return object, object.DBInstanceStatus, nil
@@ -250,19 +233,19 @@ func (s *GpdbService) WaitForGpdbConnection(id string, status Status, timeout in
 	for {
 		object, err := s.DescribeGpdbConnection(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if object.ConnectionString != "" && status != Deleted {
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.ConnectionString, id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ConnectionString, id, errmsgs.ProviderERROR)
 		}
 	}
 }
@@ -279,36 +262,42 @@ func (s *GpdbService) setInstanceTags(d *schema.ResourceData) error {
 			tagKey = append(tagKey, v.Key)
 		}
 		request := gpdb.CreateUntagResourcesRequest()
+		s.client.InitRpcRequest(*request.RpcRequest)
+		request.TagKey = &tagKey
 		request.ResourceId = &[]string{d.Id()}
 		request.ResourceType = string(TagResourceInstance)
-		request.TagKey = &tagKey
-		request.RegionId = s.client.RegionId
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "gpdb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 		raw, err := s.client.WithGpdbClient(func(client *gpdb.Client) (interface{}, error) {
 			return client.UntagResources(request)
 		})
+		response, ok := raw.(*gpdb.UntagResourcesResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		addDebug(request.GetActionName(), response, request.RpcRequest, request)
 	}
 
 	if len(create) > 0 {
 		request := gpdb.CreateTagResourcesRequest()
+		s.client.InitRpcRequest(*request.RpcRequest)
 		request.ResourceId = &[]string{d.Id()}
 		request.Tag = &create
 		request.ResourceType = string(TagResourceInstance)
-		request.RegionId = s.client.RegionId
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "gpdb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 		raw, err := s.client.WithGpdbClient(func(client *gpdb.Client) (interface{}, error) {
 			return client.TagResources(request)
 		})
+		response, ok := raw.(*gpdb.TagResourcesResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		addDebug(request.GetActionName(), response, request.RpcRequest, request)
 	}
 
 	//d.SetPartial("tags")

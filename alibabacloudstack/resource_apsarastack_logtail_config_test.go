@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -31,11 +33,11 @@ func testSweepLogConfigs(region string) error {
 		"tf_testAcc",
 	}
 
-	raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+	raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 		return slsClient.ListProject()
 	})
 	if err != nil {
-		log.Printf("[ERROR] Error retrieving Log Projects: %s", WrapError(err))
+		log.Printf("[ERROR] Error retrieving Log Projects: %s", errmsgs.WrapError(err))
 	}
 	names, _ := raw.([]string)
 
@@ -44,16 +46,16 @@ func testSweepLogConfigs(region string) error {
 		skip := true
 		for _, prefix := range prefixes {
 			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				cfNameList, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+				cfNameList, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 					cfNames, _, cfErr := slsClient.ListConfig(name, 0, 100)
 					return cfNames, cfErr
 				})
 				if err != nil {
-					log.Printf("[ERROR] Error retrieving Log config: %s", WrapError(err))
+					log.Printf("[ERROR] Error retrieving Log config: %s", errmsgs.WrapError(err))
 				}
 				for _, cfName := range cfNameList.([]string) {
 					log.Printf("[INFO] Deleting Log config: %s", cfName)
-					_, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+					_, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 						return nil, slsClient.DeleteConfig(name, cfName)
 					})
 					if err != nil {
@@ -69,7 +71,7 @@ func testSweepLogConfigs(region string) error {
 			continue
 		}
 		log.Printf("[INFO] Deleting Log Project: %s", name)
-		_, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+		_, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 			return nil, slsClient.DeleteProject(name)
 		})
 		if err != nil {

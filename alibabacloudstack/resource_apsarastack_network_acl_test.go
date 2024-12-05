@@ -12,6 +12,7 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -43,7 +44,7 @@ func testSweepNetworkAcl(region string) error {
 	var response map[string]interface{}
 	conn, err := client.NewVpcClient()
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	networkAclIds := make([]string, 0)
 	for {
@@ -56,7 +57,7 @@ func testSweepNetworkAcl(region string) error {
 		}
 		resp, err := jsonpath.Get("$.NetworkAcls.NetworkAcl", response)
 		if err != nil {
-			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.NetworkAcls.NetworkAcl", response)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.NetworkAcls.NetworkAcl", response)
 		}
 		result, _ := resp.([]interface{})
 		for _, v := range result {
@@ -112,7 +113,7 @@ func testSweepNetworkAcl(region string) error {
 			err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 				response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &runtime)
 				if err != nil {
-					if NeedRetry(err) {
+					if errmsgs.NeedRetry(err) {
 						wait()
 						return resource.RetryableError(err)
 					}
@@ -139,7 +140,7 @@ func testSweepNetworkAcl(region string) error {
 		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
 			if err != nil {
-				if NeedRetry(err) {
+				if errmsgs.NeedRetry(err) {
 					wait()
 					return resource.RetryableError(err)
 				}

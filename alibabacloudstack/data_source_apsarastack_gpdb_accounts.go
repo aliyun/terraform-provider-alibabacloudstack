@@ -3,13 +3,10 @@ package alibabacloudstack
 import (
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -88,16 +85,13 @@ func dataSourceAlibabacloudStackGpdbAccountsRead(d *schema.ResourceData, meta in
 
 	action := "DescribeAccounts"
 	request := make(map[string]interface{})
-	request["Product"] = "gpdb"
-	request["OrganizationId"] = client.Department
-	request["RegionId"] = client.RegionId
 	request["DBInstanceId"] = d.Get("db_instance_id")
 	var objects []map[string]interface{}
 	var accountNameRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		accountNameRegex = r
 	}
@@ -112,35 +106,17 @@ func dataSourceAlibabacloudStackGpdbAccountsRead(d *schema.ResourceData, meta in
 		}
 	}
 	status, statusOk := d.GetOk("status")
-	var response map[string]interface{}
-	conn, err := client.NewGpdbClient()
+
+	response, err := client.DoTeaRequest("POST", "gpdb", "2016-05-03", action, "", nil, request)
 	if err != nil {
-		return WrapError(err)
+		return err
 	}
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-05-03"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-
-			if NeedRetry(err) {
-
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_gpdb_accounts", action, AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_gpdb_accounts", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	resp, err := jsonpath.Get("$.Accounts.DBInstanceAccount", response)
 	if err != nil {
-		return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Accounts.DBInstanceAccount", response)
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.Accounts.DBInstanceAccount", response)
 	}
 	result, _ := resp.([]interface{})
 	for _, v := range result {
@@ -176,15 +152,15 @@ func dataSourceAlibabacloudStackGpdbAccountsRead(d *schema.ResourceData, meta in
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("accounts", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

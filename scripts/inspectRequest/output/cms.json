@@ -1,0 +1,64 @@
+"terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cms_alarm_contact.go": [
+    {
+      "fileName": "terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cms_alarm_contact.go",
+      "name": "PutContact",
+      "product": "Cms",
+      "version": "2019-01-01",
+      "requests": [
+        {
+          "name": "Lang",
+          "type": "string",
+          "realname": "Lang"
+        }
+      ],
+      "responses": null,
+      "Type": "high"
+    },
+    {
+      "fileName": "terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cms_alarm_contact.go",
+      "name": "PutContact",
+      "product": "Cms",
+      "version": "2019-01-01",
+      "requests": [
+        {
+          "name": "Lang",
+          "type": "string",
+          "realname": "Lang"
+        }
+      ],
+      "responses": null,
+      "Type": "high"
+    }
+  ],
+  "terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cms_alarm_contact_group.go": [
+    {
+      "fileName": "terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cms_alarm_contact_group.go",
+      "name": "PutContactGroup",
+      "product": "Cms",
+      "version": "2019-01-01",
+      "requests": [
+        {
+          "name": "EnableSubscribed",
+          "type": "requests.Boolean",
+          "realname": "EnableSubscribed"
+        }
+      ],
+      "responses": null,
+      "Type": "high"
+    },
+    {
+      "fileName": "terraform-provider-apsarastack/alibabacloudstack/resource_apsarastack_cms_alarm_contact_group.go",
+      "name": "PutContactGroup",
+      "product": "Cms",
+      "version": "2019-01-01",
+      "requests": [
+        {
+          "name": "EnableSubscribed",
+          "type": "requests.Boolean",
+          "realname": "EnableSubscribed"
+        }
+      ],
+      "responses": null,
+      "Type": "high"
+    }
+  ],

@@ -7,6 +7,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/elasticsearch"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -17,8 +18,8 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"description_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
+				Type:        schema.TypeString,
+				Optional:    true,
 				ValidateFunc: validation.StringIsValidRegExp,
 			},
 			"ids": {
@@ -28,13 +29,9 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Computed: true,
 			},
 			"version": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"5.5.3_with_X-Pack",
-					"6.3.2_with_X-Pack",
-					"6.7.0_with_X-Pack",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"5.5.3_with_X-Pack", "6.3.2_with_X-Pack", "6.7.0_with_X-Pack"}, false),
 			},
 			"tags": tagsSchema(),
 			"output_file": {
@@ -115,26 +112,24 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := elasticsearch.CreateListInstanceRequest()
-	request.RegionId = client.RegionId
+	client.InitRoaRequest(*request.RoaRequest)
 	request.EsVersion = d.Get("version").(string)
 	request.Size = requests.NewInteger(PageSizeLarge)
 	request.Page = requests.NewInteger(1)
-	request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-	request.QueryParams = map[string]string{ "Product": "elasticsearch", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	if v, ok := d.GetOk("tags"); ok {
 		var reqTags []map[string]string
 
 		for k, v := range v.(map[string]interface{}) {
 			reqTags = append(reqTags, map[string]string{
-				"tagKey":   k,
+				"tagKey": k,
 				"tagValue": v.(string),
 			})
 		}
 
 		reqTagsStr, err := json.Marshal(reqTags)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.Tags = string(reqTagsStr)
 	}
@@ -145,11 +140,15 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 		raw, err := client.WithElasticsearchClient(func(elasticsearchClient *elasticsearch.Client) (interface{}, error) {
 			return elasticsearchClient.ListInstance(request)
 		})
+		response, ok := raw.(*elasticsearch.ListInstanceResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_elasticsearch_instances", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_elasticsearch_instances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-		response, _ := raw.(*elasticsearch.ListInstanceResponse)
 		if len(response.Result) < 1 {
 			break
 		}
@@ -164,7 +163,7 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 
 		page, err := getNextpageNumber(request.Page)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.Page = page
 	}
@@ -175,7 +174,7 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 	if v, ok := d.GetOk("description_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		descriptionRegex = r
 	}
@@ -203,7 +202,7 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 		filteredInstances = append(filteredInstances, instance)
 	}
 
-	return WrapError(extractInstance(d, filteredInstances))
+	return errmsgs.WrapError(extractInstance(d, filteredInstances))
 }
 
 func extractInstance(d *schema.ResourceData, instances []elasticsearch.Instance) error {
@@ -213,19 +212,19 @@ func extractInstance(d *schema.ResourceData, instances []elasticsearch.Instance)
 
 	for _, item := range instances {
 		mapping := map[string]interface{}{
-			"id":                   item.InstanceId,
-			"description":          item.Description,
-			"instance_charge_type": getChargeType(item.PaymentType),
-			"data_node_amount":     item.NodeAmount,
-			"data_node_spec":       item.NodeSpec.Spec,
-			"data_node_disk_size":  item.NodeSpec.Disk,
-			"data_node_disk_type":  item.NodeSpec.DiskType,
-			"status":               item.Status,
-			"version":              item.EsVersion,
-			"created_at":           item.CreatedAt,
-			"updated_at":           item.UpdatedAt,
-			"vswitch_id":           item.NetworkConfig.VswitchId,
-			"tags":                 elasticsearchTagsToMap(item.Tags),
+			"id":                    item.InstanceId,
+			"description":           item.Description,
+			"instance_charge_type":  getChargeType(item.PaymentType),
+			"data_node_amount":      item.NodeAmount,
+			"data_node_spec":        item.NodeSpec.Spec,
+			"data_node_disk_size":   item.NodeSpec.Disk,
+			"data_node_disk_type":   item.NodeSpec.DiskType,
+			"status":                item.Status,
+			"version":               item.EsVersion,
+			"created_at":            item.CreatedAt,
+			"updated_at":            item.UpdatedAt,
+			"vswitch_id":            item.NetworkConfig.VswitchId,
+			"tags":                  elasticsearchTagsToMap(item.Tags),
 		}
 
 		ids = append(ids, item.InstanceId)
@@ -235,15 +234,15 @@ func extractInstance(d *schema.ResourceData, instances []elasticsearch.Instance)
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("instances", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("descriptions", descriptions); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	// create a json file in current directory and write data source to it

@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"testing"
 
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -72,7 +71,7 @@ func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithGroupId(t *testing.
 func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithNic_Type(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithRegions(t, true, connectivity.EcsClassicSupportedRegions)
+			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{

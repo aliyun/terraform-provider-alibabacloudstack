@@ -8,6 +8,7 @@ import (
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -66,12 +67,12 @@ func resourceAlibabacloudStackLogMachineGroupCreate(d *schema.ResourceData, meta
 	}
 	var requestInfo *sls.Client
 	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.CreateMachineGroup(d.Get("project").(string), params)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -85,7 +86,7 @@ func resourceAlibabacloudStackLogMachineGroupCreate(d *schema.ResourceData, meta
 		}
 		return nil
 	}); err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_log_machine_group", "CreateMachineGroup", AlibabacloudStackLogGoSdkERROR)
+		return err
 	}
 
 	d.SetId(fmt.Sprintf("%s%s%s", d.Get("project").(string), COLON_SEPARATED, d.Get("name").(string)))
@@ -99,15 +100,15 @@ func resourceAlibabacloudStackLogMachineGroupRead(d *schema.ResourceData, meta i
 	logService := LogService{client}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	object, err := logService.DescribeLogMachineGroup(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("project", parts[0])
@@ -123,7 +124,7 @@ func resourceAlibabacloudStackLogMachineGroupUpdate(d *schema.ResourceData, meta
 	if d.HasChange("identify_type") || d.HasChange("identify_list") || d.HasChange("topic") {
 		parts, err := ParseResourceId(d.Id(), 2)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		client := meta.(*connectivity.AlibabacloudStackClient)
@@ -137,12 +138,12 @@ func resourceAlibabacloudStackLogMachineGroupUpdate(d *schema.ResourceData, meta
 			},
 		}
 		if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-			raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+			raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 				requestInfo = slsClient
 				return nil, slsClient.UpdateMachineGroup(parts[0], params)
 			})
 			if err != nil {
-				if IsExpectedErrors(err, []string{LogClientTimeout}) {
+				if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
 					time.Sleep(5 * time.Second)
 					return resource.RetryableError(err)
 				}
@@ -156,7 +157,7 @@ func resourceAlibabacloudStackLogMachineGroupUpdate(d *schema.ResourceData, meta
 			}
 			return nil
 		}); err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), "UpdateMachineGroup", AlibabacloudStackLogGoSdkERROR)
+			return err
 		}
 	}
 
@@ -168,16 +169,16 @@ func resourceAlibabacloudStackLogMachineGroupDelete(d *schema.ResourceData, meta
 	logService := LogService{client}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	var requestInfo *sls.Client
 	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithLogClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.DeleteMachineGroup(parts[0], parts[1])
 		})
 		if err != nil {
-			if IsExpectedErrors(err, []string{LogClientTimeout}) {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
 				time.Sleep(5 * time.Second)
 				return resource.RetryableError(err)
 			}
@@ -192,7 +193,7 @@ func resourceAlibabacloudStackLogMachineGroupDelete(d *schema.ResourceData, meta
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_log_store", "ListShards", AlibabacloudStackLogGoSdkERROR)
+		return err
 	}
-	return WrapError(logService.WaitForLogMachineGroup(d.Id(), Deleted, DefaultTimeout))
+	return errmsgs.WrapError(logService.WaitForLogMachineGroup(d.Id(), Deleted, DefaultTimeout))
 }

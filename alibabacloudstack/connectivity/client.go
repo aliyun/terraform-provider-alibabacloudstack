@@ -3,20 +3,20 @@ package connectivity
 import (
 	"encoding/json"
 	"log"
+	"reflect"
 
-	roaCS "github.com/alibabacloud-go/cs-20151215/v2/client"
-	openapi "github.com/alibabacloud-go/darabonba-openapi/client"
+	roaCS "github.com/alibabacloud-go/cs-20151215/v5/client"
+	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
 	rpc "github.com/alibabacloud-go/tea-rpc/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/endpoints"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/adb"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alikafka"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/bssopenapi"
-	cdn_new "github.com/aliyun/alibaba-cloud-sdk-go/services/cdn"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/cdn"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cloudapi"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr"
@@ -28,7 +28,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/gpdb"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/hbase"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/location"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/maxcompute"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ots"
@@ -47,12 +46,15 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ram"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
-	"github.com/denverdino/aliyungo/cdn"
 
 	"sync"
 
 	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	util "github.com/alibabacloud-go/tea-utils/service"
+	
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"fmt"
 	"net/http"
@@ -74,6 +76,7 @@ type AlibabacloudStackClient struct {
 	SecretKey                    string
 	Department                   string
 	ResourceGroup                string
+	ResourceGroupId              int
 	Config                       *Config
 	teaSdkConfig                 rpc.Config
 	accountId                    string
@@ -85,8 +88,7 @@ type AlibabacloudStackClient struct {
 	slbconn                      *slb.Client
 	csconn                       *cs.Client
 	polarDBconn                  *polardb.Client
-	cdnconn                      *cdn.CdnClient
-	cdnconn_new                  *cdn_new.Client
+	cdnconn                      *cdn.Client
 	kmsconn                      *kms.Client
 	bssopenapiconn               *bssopenapi.Client
 	rdsconn                      *rds.Client
@@ -116,6 +118,7 @@ type AlibabacloudStackClient struct {
 	tablestoreconnByInstanceName map[string]*tablestore.TableStoreClient
 	dhconn                       datahub.DataHubApi
 	cloudapiconn                 *cloudapi.Client
+	Eagleeye                     EagleEye
 }
 
 const (
@@ -133,13 +136,13 @@ const Provider = "Terraform-Provider"
 
 const Module = "Terraform-Module"
 
-var providerVersion = "1.0.8"
+var providerVersion = "1.0.32"
 var terraformVersion = strings.TrimSuffix(schema.Provider{}.TerraformVersion, "-dev")
 
 type ApiVersion string
 
 // The main version number that is being run at the moment.
-var ProviderVersion = "1.0.8"
+var ProviderVersion = providerVersion
 var TerraformVersion = strings.TrimSuffix(schema.Provider{}.TerraformVersion, "-dev")
 var goSdkMutex = sync.RWMutex{} // The Go SDK is not thread-safe
 var loadSdkfromRemoteMutex = sync.Mutex{}
@@ -149,12 +152,6 @@ var loadSdkEndpointMutex = sync.Mutex{}
 func (c *Config) Client() (*AlibabacloudStackClient, error) {
 	// Get the auth and region. This can fail if keys/regions were not
 	// specified and we're attempting to use the environment.
-	if !c.SkipRegionValidation {
-		err := c.loadAndValidate()
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	teaSdkConfig, err := c.getTeaDslSdkConfig(true)
 	if err != nil {
@@ -170,384 +167,202 @@ func (c *Config) Client() (*AlibabacloudStackClient, error) {
 		SecretKey:                    c.SecretKey,
 		Department:                   c.Department,
 		ResourceGroup:                c.ResourceGroup,
+		ResourceGroupId:              c.ResourceGroupId,
 		Domain:                       c.Domain,
 		OtsInstanceName:              c.OtsInstanceName,
 		tablestoreconnByInstanceName: make(map[string]*tablestore.TableStoreClient),
+		Eagleeye:                     c.Eagleeye,
 	}, nil
 }
 
-func (client *AlibabacloudStackClient) WithEcsClient(do func(*ecs.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the ECS client if necessary
-	if client.ecsconn == nil {
-		endpoint := client.Config.EcsEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the ecs client: endpoint or domain is not provided for ecs service")
-		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(ECSCode), endpoint)
-		}
-		if strings.HasPrefix(endpoint, "http") {
-			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
-		}
-		ecsconn, err := ecs.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig().WithTimeout(time.Duration(60)*time.Second), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the ECS client: %#v", err)
-		}
+func (client *AlibabacloudStackClient) NewTeaSDkClient(productCode string, endpoint string) (*rpc.Client, error) {
+	if endpoint == "" {
+		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
+	}
+	sdkConfig := client.teaSdkConfig
+	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
+	conn, err := rpc.NewClient(&sdkConfig)
+	for key, value := range client.defaultHeaders(productCode) {
+		conn.Headers[key] = &value
+	}
+	if err != nil {
+		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
+	}
+	return conn, nil
+}
 
-		ecsconn.Domain = endpoint
-		ecsconn.AppendUserAgent(Terraform, TerraformVersion)
-		ecsconn.AppendUserAgent(Provider, ProviderVersion)
-		ecsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		ecsconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			ecsconn.SetHttpsProxy(client.Config.Proxy)
-			ecsconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.ecsconn = ecsconn
+func (client *AlibabacloudStackClient) WithProductSDKClient(popcode ServiceCode) (*sdk.Client, error) {
+	endpoint := client.Config.Endpoints[popcode]
+	if endpoint == "" {
+		return nil, fmt.Errorf("[ERROR] unable to initialize the %s client: endpoint or domain is not provided", string(popcode))
+	}
+	if strings.HasPrefix(endpoint, "http") {
+		endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
+	}
+	conn, err := sdk.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
+	if err != nil {
+		return nil, fmt.Errorf("unable to initialize the %s client: %#v", popcode, err)
 	}
 
+	conn.Domain = endpoint
+	conn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Hour)
+	conn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Hour)
+	conn.SourceIp = client.Config.SourceIp
+	conn.SecureTransport = client.Config.SecureTransport
+	conn.AppendUserAgent(Terraform, TerraformVersion)
+	conn.AppendUserAgent(Provider, ProviderVersion)
+	conn.AppendUserAgent(Module, client.Config.ConfigurationSource)
+	conn.SetHTTPSInsecure(client.Config.Insecure)
+	if client.Config.Proxy != "" {
+		conn.SetHttpsProxy(client.Config.Proxy)
+		conn.SetHttpProxy(client.Config.Proxy)
+	}
+	return conn, nil
+}
+
+func (client *AlibabacloudStackClient) WithEcsClient(do func(*ecs.Client) (interface{}, error)) (interface{}, error) {
+	if client.ecsconn == nil {
+		conn, error := client.WithProductSDKClient(EcsCode)
+		if error != nil {
+			return nil, error
+		}
+		client.ecsconn = &ecs.Client{
+			Client: *conn,
+		}
+	}
 	return do(client.ecsconn)
 }
 
-func (client *AlibabacloudStackClient) WithPolarDBClient(do func(*polardb.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the PolarDB client if necessary
-	if client.polarDBconn == nil {
-		endpoint := client.Config.PolarDBEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the polardb client: endpoint or domain is not provided for polardb service")
-		}
-		polarDBconn, err := polardb.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the PolarDB client: %#v", err)
-
-		}
-		polarDBconn.Domain = endpoint
-		polarDBconn.AppendUserAgent(Terraform, TerraformVersion)
-		polarDBconn.AppendUserAgent(Provider, ProviderVersion)
-		polarDBconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		polarDBconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			polarDBconn.SetHttpProxy(client.Config.Proxy)
-			polarDBconn.SetHTTPSInsecure(client.Config.Insecure)
-		}
-
-		client.polarDBconn = polarDBconn
-	}
-
-	return do(client.polarDBconn)
-}
 func (client *AlibabacloudStackClient) WithElasticsearchClient(do func(*elasticsearch.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the Elasticsearch client if necessary
 	if client.elasticsearchconn == nil {
-		endpoint := client.Config.ElasticsearchEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the ElasticSearch client: endpoint or domain is not provided for ElasticSearch service")
+		conn, error := client.WithProductSDKClient(ELASTICSEARCHCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(ELASTICSEARCHCode), endpoint)
+		client.elasticsearchconn = &elasticsearch.Client{
+			Client: *conn,
 		}
-		elasticsearchconn, err := elasticsearch.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the Elasticsearch client: %#v", err)
-		}
-
-		elasticsearchconn.AppendUserAgent(Terraform, TerraformVersion)
-		elasticsearchconn.AppendUserAgent(Provider, ProviderVersion)
-		elasticsearchconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		elasticsearchconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			elasticsearchconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.elasticsearchconn = elasticsearchconn
 	}
 
 	return do(client.elasticsearchconn)
 }
 
 func (client *AlibabacloudStackClient) WithCloudApiClient(do func(*cloudapi.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the Cloud API client if necessary
 	if client.cloudapiconn == nil {
-		endpoint := client.Config.ApigatewayEndpoint
-		if endpoint == "" {
-			endpoint = loadEndpoint(client.RegionId, CLOUDAPICode)
+		conn, error := client.WithProductSDKClient(CLOUDAPICode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.RegionId, "CLOUDAPI", endpoint)
+		client.cloudapiconn = &cloudapi.Client{
+			Client: *conn,
 		}
-		cloudapiconn, err := cloudapi.NewClientWithOptions(client.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the CloudAPI client: %#v", err)
-		}
-		cloudapiconn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Hour)
-		cloudapiconn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Hour)
-		cloudapiconn.SourceIp = client.Config.SourceIp
-		cloudapiconn.SecureTransport = client.Config.SecureTransport
-		cloudapiconn.AppendUserAgent(Terraform, terraformVersion)
-		cloudapiconn.AppendUserAgent(Provider, providerVersion)
-		cloudapiconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		client.cloudapiconn = cloudapiconn
 	}
-
 	return do(client.cloudapiconn)
 }
 
 func (client *AlibabacloudStackClient) WithEssClient(do func(*ess.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the ESS client if necessary
 	if client.essconn == nil {
-		endpoint := client.Config.EssEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the ess client: endpoint or domain is not provided for ess service")
+		conn, error := client.WithProductSDKClient(ESSCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(ESSCode), endpoint)
+		client.essconn = &ess.Client{
+			Client: *conn,
 		}
-		if strings.HasPrefix(endpoint, "http") {
-			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
-		}
-		essconn, err := ess.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the ESS client: %#v", err)
-		}
-		essconn.Domain = endpoint
-		essconn.AppendUserAgent(Terraform, TerraformVersion)
-		essconn.AppendUserAgent(Provider, ProviderVersion)
-		essconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		essconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			essconn.SetHttpsProxy(client.Config.Proxy)
-			essconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.essconn = essconn
 	}
-
 	return do(client.essconn)
 }
 
 func (client *AlibabacloudStackClient) WithRkvClient(do func(*r_kvstore.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the RKV client if necessary
 	if client.rkvconn == nil {
-		endpoint := client.Config.KVStoreEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the kvstore client: endpoint or domain is not provided for logpop service")
+		conn, error := client.WithProductSDKClient(KVSTORECode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, fmt.Sprintf("R-%s", string(KVSTORECode)), endpoint)
+		client.rkvconn = &r_kvstore.Client{
+			Client: *conn,
 		}
-		if strings.HasPrefix(endpoint, "http") {
-			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
-		}
-		rkvconn, err := r_kvstore.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the RKV client: %#v", err)
-		}
-		rkvconn.Domain = endpoint
-		rkvconn.AppendUserAgent(Terraform, TerraformVersion)
-		rkvconn.AppendUserAgent(Provider, ProviderVersion)
-		rkvconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		rkvconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			rkvconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.rkvconn = rkvconn
 	}
 
 	return do(client.rkvconn)
 }
 
 func (client *AlibabacloudStackClient) WithGpdbClient(do func(*gpdb.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the GPDB client if necessary
 	if client.gpdbconn == nil {
-		endpoint := client.Config.GpdbEndpoint
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(GPDBCode), endpoint)
+		conn, error := client.WithProductSDKClient(GPDBCode)
+		if error != nil {
+			return nil, error
 		}
-		gpdbconn, err := gpdb.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the GPDB client: %#v", err)
+		client.gpdbconn = &gpdb.Client{
+			Client: *conn,
 		}
-
-		gpdbconn.Domain = endpoint
-		gpdbconn.AppendUserAgent(Terraform, TerraformVersion)
-		gpdbconn.AppendUserAgent(Provider, ProviderVersion)
-		gpdbconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		gpdbconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			gpdbconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.gpdbconn = gpdbconn
 	}
 
 	return do(client.gpdbconn)
 }
 func (client *AlibabacloudStackClient) WithAdbClient(do func(*adb.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the adb client if necessary
 	if client.adbconn == nil {
-		endpoint := client.Config.AdbEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the  client: endpoint or domain is not provided for  service")
+		conn, error := client.WithProductSDKClient(ADBCode)
+		if error != nil {
+			return nil, error
 		}
-		adbconn, err := adb.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the adb client: %#v", err)
-
+		client.adbconn = &adb.Client{
+			Client: *conn,
 		}
-		adbconn.Domain = endpoint
-		adbconn.AppendUserAgent(Terraform, TerraformVersion)
-		adbconn.AppendUserAgent(Provider, ProviderVersion)
-		adbconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		adbconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			adbconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.adbconn = adbconn
 	}
 
 	return do(client.adbconn)
 }
 func (client *AlibabacloudStackClient) WithHbaseClient(do func(*hbase.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the HBase client if necessary
 	if client.hbaseconn == nil {
-		endpoint := client.Config.HBaseEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the  client: endpoint or domain is not provided for  service")
+		conn, error := client.WithProductSDKClient(HBASECode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(HBASECode), endpoint)
+		client.hbaseconn = &hbase.Client{
+			Client: *conn,
 		}
-		hbaseconn, err := hbase.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the hbase client: %#v", err)
-		}
-
-		hbaseconn.AppendUserAgent(Terraform, TerraformVersion)
-		hbaseconn.AppendUserAgent(Provider, ProviderVersion)
-		hbaseconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		hbaseconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			hbaseconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.hbaseconn = hbaseconn
 	}
 
 	return do(client.hbaseconn)
 }
-func (client *AlibabacloudStackClient) WithFcClient(do func(*fc.Client) (interface{}, error)) (interface{}, error) {
-	goSdkMutex.Lock()
-	defer goSdkMutex.Unlock()
 
-	// Initialize the FC client if necessary
-	if client.fcconn == nil {
-		endpoint := client.Config.FcEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the  client: endpoint or domain is not provided for  service")
-		}
-		if strings.HasPrefix(endpoint, "http") {
-			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
-		}
-		accountId, err := client.AccountId()
-		if err != nil {
-			return nil, err
-		}
-
-		config := client.getSdkConfig()
-		clientOptions := []fc.ClientOption{fc.WithSecurityToken(client.Config.SecurityToken), fc.WithTransport(config.HttpTransport),
-			fc.WithTimeout(30), fc.WithRetryCount(DefaultClientRetryCountSmall)}
-		fcconn, err := fc.NewClient(fmt.Sprintf("https://%s.%s", accountId, endpoint), string(ApiVersion20160815), client.Config.AccessKey, client.Config.SecretKey, clientOptions...)
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the FC client: %#v", err)
-		}
-
-		fcconn.Config.UserAgent = client.getUserAgent()
-		fcconn.Config.SecurityToken = client.Config.SecurityToken
-		client.fcconn = fcconn
-	}
-
-	return do(client.fcconn)
-}
 func (client *AlibabacloudStackClient) WithVpcClient(do func(*vpc.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the VPC client if necessary
 	if client.vpcconn == nil {
-		endpoint := client.Config.VpcEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the vpc client: endpoint or domain is not provided for vpc service")
+		conn, error := client.WithProductSDKClient(VPCCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(VPCCode), endpoint)
+		client.vpcconn = &vpc.Client{
+			Client: *conn,
 		}
-		if strings.HasPrefix(endpoint, "http") {
-			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
-		}
-		vpcconn, err := vpc.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the VPC client: %#v", err)
-		}
-		vpcconn.Domain = endpoint
-		vpcconn.AppendUserAgent(Terraform, TerraformVersion)
-		vpcconn.AppendUserAgent(Provider, ProviderVersion)
-		vpcconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		vpcconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			vpcconn.SetHttpsProxy(client.Config.Proxy)
-			vpcconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.vpcconn = vpcconn
 	}
 
 	return do(client.vpcconn)
 }
 
 func (client *AlibabacloudStackClient) WithSlbClient(do func(*slb.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the SLB client if necessary
 	if client.slbconn == nil {
-		endpoint := client.Config.SlbEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the slb client: endpoint or domain is not provided for slb service")
+		conn, error := client.WithProductSDKClient(SLBCode)
+		if error != nil {
+			return nil, error
 		}
-
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(SLBCode), endpoint)
+		client.slbconn = &slb.Client{
+			Client: *conn,
 		}
-		slbconn, err := slb.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the SLB client: %#v", err)
-		}
-		slbconn.Domain = endpoint
-		slbconn.AppendUserAgent(Terraform, TerraformVersion)
-		slbconn.AppendUserAgent(Provider, ProviderVersion)
-		slbconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		slbconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			slbconn.SetHttpsProxy(client.Config.Proxy)
-			slbconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.slbconn = slbconn
 	}
 
 	return do(client.slbconn)
 }
 func (client *AlibabacloudStackClient) WithDdsClient(do func(*dds.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the DDS client if necessary
 	if client.ddsconn == nil {
-		endpoint := client.Config.DdsEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the  client: endpoint or domain is not provided for  service")
+		conn, error := client.WithProductSDKClient(DDSCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(DDSCode), endpoint)
+		client.ddsconn = &dds.Client{
+			Client: *conn,
 		}
-		ddsconn, err := dds.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the DDS client: %#v", err)
-		}
-		ddsconn.Domain = endpoint
-		ddsconn.AppendUserAgent(Terraform, TerraformVersion)
-		ddsconn.AppendUserAgent(Provider, ProviderVersion)
-		ddsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		ddsconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			ddsconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.ddsconn = ddsconn
 	}
 
 	return do(client.ddsconn)
@@ -556,12 +371,9 @@ func (client *AlibabacloudStackClient) WithDdsClient(do func(*dds.Client) (inter
 func (client *AlibabacloudStackClient) WithOssNewClient(do func(*ecs.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the ECS client if necessary
 	if client.ecsconn == nil {
-		endpoint := client.Config.OssEndpoint
+		endpoint := client.Config.Endpoints[OSSCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("unable to initialize the oss client: endpoint or domain is not provided for ecs service")
-		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(ECSCode), endpoint)
 		}
 		if strings.HasPrefix(endpoint, "http") {
 			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
@@ -584,102 +396,6 @@ func (client *AlibabacloudStackClient) WithOssNewClient(do func(*ecs.Client) (in
 	}
 
 	return do(client.ecsconn)
-}
-
-func (client *AlibabacloudStackClient) describeEndpointForService(serviceCode string) (*location.Endpoint, error) {
-	args := location.CreateDescribeEndpointsRequest()
-	args.ServiceCode = serviceCode
-	args.Id = client.Config.RegionId
-	args.Domain = client.Config.LocationEndpoint
-
-	if args.Domain == "" {
-		args.Domain = "location-readonly.aliyuncs.com"
-	}
-
-	locationClient, err := location.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-	if err != nil {
-		return nil, fmt.Errorf("Unable to initialize the location client: %#v", err)
-
-	}
-	locationClient.AppendUserAgent(Terraform, TerraformVersion)
-	locationClient.AppendUserAgent(Provider, ProviderVersion)
-	locationClient.AppendUserAgent(Module, client.Config.ConfigurationSource)
-	locationClient.SetHTTPSInsecure(client.Config.Insecure)
-	if client.Config.Proxy != "" {
-		locationClient.SetHttpProxy(client.Config.Proxy)
-		locationClient.SetHttpsProxy(client.Config.Proxy)
-	}
-	endpointsResponse, err := locationClient.DescribeEndpoints(args)
-	if err != nil {
-		return nil, fmt.Errorf("Describe %s endpoint using region: %#v got an error: %#v.", serviceCode, client.RegionId, err)
-	}
-	if endpointsResponse != nil && len(endpointsResponse.Endpoints.Endpoint) > 0 {
-		for _, e := range endpointsResponse.Endpoints.Endpoint {
-			if e.Type == "openAPI" {
-				return &e, nil
-			}
-		}
-	}
-	return nil, fmt.Errorf("There is no any available endpoint for %s in region %s.", serviceCode, client.RegionId)
-}
-
-func (client *AlibabacloudStackClient) NewCommonRequest(product, serviceCode, schema string, apiVersion ApiVersion) (*requests.CommonRequest, error) {
-	request := requests.NewCommonRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-
-	var endpoint string
-	if strings.ToUpper(product) == "SLB" {
-		endpoint = client.Config.SlbEndpoint
-	}
-	if strings.ToUpper(product) == "ECS" {
-		endpoint = client.Config.EcsEndpoint
-	}
-	if strings.ToUpper(product) == "ASCM" {
-		endpoint = client.Config.AscmEndpoint
-	}
-
-	if endpoint == "" {
-		endpointItem, err := client.describeEndpointForService(serviceCode)
-		if err != nil {
-			return nil, fmt.Errorf("describeEndpointForService got an error: %#v.", err)
-		}
-		if endpointItem != nil {
-			endpoint = endpointItem.Endpoint
-		}
-	}
-	// Use product code to find product domain
-	if endpoint != "" {
-		request.Domain = endpoint
-	} else {
-		// When getting endpoint failed by location, using custom endpoint instead
-		request.Domain = fmt.Sprintf("%s.%s.aliyuncs.com", strings.ToLower(serviceCode), client.RegionId)
-	}
-	request.Version = string(apiVersion)
-	request.RegionId = client.RegionId
-	request.Product = product
-
-	if strings.ToUpper(product) == "SLB" {
-		request.QueryParams = map[string]string{"Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Version": string(apiVersion)}
-	}
-	if strings.ToUpper(product) == "ECS" {
-		request.QueryParams = map[string]string{"Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Version": string(apiVersion)}
-	}
-	if strings.ToUpper(product) == "ASCM" {
-		request.QueryParams = map[string]string{"Product": "ascm", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Version": string(apiVersion)}
-	}
-
-	request.AppendUserAgent(Terraform, TerraformVersion)
-	request.AppendUserAgent(Provider, ProviderVersion)
-	request.AppendUserAgent(Module, client.Config.ConfigurationSource)
-	request.SetHTTPSInsecure(client.Config.Insecure)
-	return request, nil
 }
 
 func (client *AlibabacloudStackClient) getSdkConfig() *sdk.Config {
@@ -782,38 +498,22 @@ func (client *AlibabacloudStackClient) skipProxy(endpoint string) (bool, error) 
 func (client *AlibabacloudStackClient) WithKmsClient(do func(*kms.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the KMS client if necessary
 	if client.kmsconn == nil {
-
-		endpoint := client.Config.KmsEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the kms client: endpoint or domain is not provided for KMS service")
+		conn, error := client.WithProductSDKClient(KmsCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(KMSCode), endpoint)
+		client.kmsconn = &kms.Client{
+			Client: *conn,
 		}
-		kmsconn, err := kms.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the kms client: %#v", err)
-		}
-		kmsconn.AppendUserAgent(Terraform, TerraformVersion)
-		kmsconn.Domain = endpoint
-		kmsconn.AppendUserAgent(Provider, ProviderVersion)
-		kmsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		kmsconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			kmsconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.kmsconn = kmsconn
 	}
 	return do(client.kmsconn)
 }
+
 func (client *AlibabacloudStackClient) GetCallerInfo() (*responses.BaseResponse, error) {
 
-	endpoint := client.Config.AscmEndpoint
+	endpoint := client.Config.Endpoints[ASCMCode]
 	if endpoint == "" {
 		return nil, fmt.Errorf("unable to initialize the ascm client: endpoint or domain is not provided for ascm service")
-	}
-	if endpoint != "" {
-		endpoints.AddEndpointMapping(client.Config.RegionId, string(ASCMCode), endpoint)
 	}
 	ascmClient, err := sdk.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
 	if err != nil {
@@ -846,13 +546,14 @@ func (client *AlibabacloudStackClient) GetCallerInfo() (*responses.BaseResponse,
 	request.Version = "2019-05-10" // Specify product version
 	request.ApiName = "GetUserInfo"
 	request.QueryParams = map[string]string{
-		"SecurityToken":    client.Config.SecurityToken,
-		"Product":          "ascm",
-		"Department":       client.Config.Department,
-		"ResourceGroup":    client.Config.ResourceGroup,
-		"RegionId":         client.RegionId,
-		"Action":           "GetAllNavigationInfo",
-		"Version":          "2019-05-10",
+// 		"AccessKeySecret":  client.Config.SecretKey,
+// 		"SecurityToken":    client.Config.SecurityToken,
+// 		"Product":          "ascm",
+// 		"Department":       client.Config.Department,
+// 		"ResourceGroup":    client.Config.ResourceGroup,
+// 		"RegionId":         client.RegionId,
+// 		"Action":           "GetAllNavigationInfo",
+// 		"Version":          "2019-05-10",
 		"SignatureVersion": "1.0",
 	}
 	resp := responses.BaseResponse{}
@@ -909,52 +610,20 @@ type RoleId struct {
 func (client *AlibabacloudStackClient) WithBssopenapiClient(do func(*bssopenapi.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the bssopenapi client if necessary
 	if client.bssopenapiconn == nil {
-		endpoint := client.Config.BssOpenApiEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the bss client: endpoint or domain is not provided for bss service")
+		conn, error := client.WithProductSDKClient(BssDataCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(BSSOPENAPICode), endpoint)
+		client.bssopenapiconn = &bssopenapi.Client{
+			Client: *conn,
 		}
-
-		bssopenapiconn, err := bssopenapi.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the BSSOPENAPI client: %#v", err)
-		}
-		bssopenapiconn.AppendUserAgent(Terraform, TerraformVersion)
-		bssopenapiconn.AppendUserAgent(Provider, ProviderVersion)
-		bssopenapiconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		bssopenapiconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			bssopenapiconn.SetHttpsProxy(client.Config.Proxy)
-		}
-		client.bssopenapiconn = bssopenapiconn
 	}
 
 	return do(client.bssopenapiconn)
 }
 
 func (client *AlibabacloudStackClient) NewNasClient() (*rpc.Client, error) {
-	productCode := "nas"
-	endpoint := client.Config.NasEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("nas", client.Config.Endpoints[NasCode])
 }
 
 func (client *AlibabacloudStackClient) WithOssClientPutObject(do func(*oss.Client) (interface{}, error)) (interface{}, error) {
@@ -964,25 +633,9 @@ func (client *AlibabacloudStackClient) WithOssClientPutObject(do func(*oss.Clien
 	// Initialize the OSS client if necessary
 	if client.ossconn == nil {
 		schma := "http"
-		endpoint := client.Config.OssServerEndpoint
+		endpoint := client.Config.Endpoints[OssDataCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("unable to initialize the oss client: endpoint or domain is not provided for OSS service")
-		}
-		if endpoint == "" {
-			endpointItem, _ := client.describeEndpointForService(strings.ToLower(string(OSSCode)))
-			if endpointItem != nil {
-				if len(endpointItem.Protocols.Protocols) > 0 {
-					// HTTP or HTTPS
-					schma = strings.ToLower(endpointItem.Protocols.Protocols[0])
-					for _, p := range endpointItem.Protocols.Protocols {
-						if strings.ToLower(p) == "http" {
-							schma = strings.ToLower(p)
-							break
-						}
-					}
-				}
-				endpoint = endpointItem.Endpoint
-			}
 		}
 		if !strings.HasPrefix(endpoint, "http") {
 			endpoint = fmt.Sprintf("%s://%s", schma, endpoint)
@@ -1014,25 +667,9 @@ func (client *AlibabacloudStackClient) WithOssClient(do func(*oss.Client) (inter
 	// Initialize the OSS client if necessary
 	if client.ossconn == nil {
 		schma := "http"
-		endpoint := client.Config.OssEndpoint
+		endpoint := client.Config.Endpoints[OSSCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("unable to initialize the oss client: endpoint or domain is not provided for OSS service")
-		}
-		if endpoint == "" {
-			endpointItem, _ := client.describeEndpointForService(strings.ToLower(string(OSSCode)))
-			if endpointItem != nil {
-				if len(endpointItem.Protocols.Protocols) > 0 {
-					// HTTP or HTTPS
-					schma = strings.ToLower(endpointItem.Protocols.Protocols[0])
-					for _, p := range endpointItem.Protocols.Protocols {
-						if strings.ToLower(p) == "http" {
-							schma = strings.ToLower(p)
-							break
-						}
-					}
-				}
-				endpoint = endpointItem.Endpoint
-			}
 		}
 		if !strings.HasPrefix(endpoint, "http") {
 			endpoint = fmt.Sprintf("%s://%s", schma, endpoint)
@@ -1060,94 +697,49 @@ func (client *AlibabacloudStackClient) WithOssClient(do func(*oss.Client) (inter
 func (client *AlibabacloudStackClient) WithRamClient(do func(*ram.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the RAM client if necessary
 	if client.ramconn == nil {
-		endpoint := client.Config.RamEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the ram client: endpoint or domain is not provided for ram operation")
+		conn, error := client.WithProductSDKClient(RAMCode)
+		if error != nil {
+			return nil, error
 		}
-		if strings.HasPrefix(endpoint, "http") {
-			endpoint = fmt.Sprintf("https://%s", strings.TrimPrefix(endpoint, "http://"))
+		client.ramconn = &ram.Client{
+			Client: *conn,
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(RAMCode), endpoint)
-		}
-
-		ramconn, err := ram.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the RAM client: %#v", err)
-		}
-		ramconn.AppendUserAgent(Terraform, TerraformVersion)
-		ramconn.AppendUserAgent(Provider, ProviderVersion)
-		ramconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		ramconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			ramconn.SetHttpsProxy(client.Config.Proxy)
-		}
-		client.ramconn = ramconn
 	}
 
 	return do(client.ramconn)
 }
 
 func (client *AlibabacloudStackClient) WithRdsClient(do func(*rds.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the RDS client if necessary
 	if client.rdsconn == nil {
-		endpoint := client.Config.RdsEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the rds client: endpoint or domain is not provided for RDS service")
+		conn, error := client.WithProductSDKClient(RDSCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(RDSCode), endpoint)
+		client.rdsconn = &rds.Client{
+			Client: *conn,
 		}
-		rdsconn, err := rds.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the RDS client: %#v", err)
-		}
-		rdsconn.Domain = endpoint
-		rdsconn.AppendUserAgent(Terraform, TerraformVersion)
-		rdsconn.AppendUserAgent(Provider, ProviderVersion)
-		rdsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		rdsconn.SetHTTPSInsecure(client.Config.Insecure)
-
-		if client.Config.Proxy != "" {
-			rdsconn.SetHttpProxy(client.Config.Proxy)
-		}
-
-		client.rdsconn = rdsconn
 	}
 
 	return do(client.rdsconn)
 }
 
-func (client *AlibabacloudStackClient) WithCdnClient_new(do func(*cdn_new.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the CDN client if necessary
-	if client.cdnconn_new == nil {
-		endpoint := client.Config.CdnEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the CDN client: endpoint or domain is not provided for CDN service")
+func (client *AlibabacloudStackClient) WithCdnClient(do func(*cdn.Client) (interface{}, error)) (interface{}, error) {
+	if client.cdnconn == nil {
+		conn, error := client.WithProductSDKClient(CDNCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(CDNCode), endpoint)
+		client.cdnconn = &cdn.Client{
+			Client: *conn,
 		}
-		cdnconn, err := cdn_new.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the CDN client: %#v", err)
-		}
-
-		cdnconn.AppendUserAgent(Terraform, TerraformVersion)
-		cdnconn.AppendUserAgent(Provider, ProviderVersion)
-		cdnconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		cdnconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			cdnconn.SetHttpsProxy(client.Config.Proxy)
-		}
-		client.cdnconn_new = cdnconn
 	}
 
-	return do(client.cdnconn_new)
+	return do(client.cdnconn)
 }
 func (client *AlibabacloudStackClient) getUserAgent() string {
 	return fmt.Sprintf("%s/%s %s/%s %s/%s", Terraform, TerraformVersion, Provider, ProviderVersion, Module, client.Config.ConfigurationSource)
 }
+
 func (client *AlibabacloudStackClient) WithCsClient(do func(*cs.Client) (interface{}, error)) (interface{}, error) {
 	goSdkMutex.Lock()
 	defer goSdkMutex.Unlock()
@@ -1156,7 +748,7 @@ func (client *AlibabacloudStackClient) WithCsClient(do func(*cs.Client) (interfa
 	if client.csconn == nil {
 		csconn := cs.NewClientForAussumeRole(client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)
 		csconn.SetUserAgent(client.getUserAgent())
-		endpoint := client.Config.CsEndpoint
+		endpoint := client.Config.Endpoints[CONTAINCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("unable to initialize the cs client: endpoint or domain is not provided for cs service")
 		}
@@ -1208,46 +800,13 @@ func (client *AlibabacloudStackClient) WithOssBucketByName(bucketName string, do
 	})
 }
 
-func (client *AlibabacloudStackClient) WithOnsClient(do func(*ons.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the ons client if necessary
-	if client.onsconn == nil {
-		endpoint := client.Config.OnsEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the ons client: endpoint or domain is not provided for ons service")
-		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(ONSCode), endpoint)
-		}
-		if strings.HasPrefix(endpoint, "http") {
-			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
-		}
-		onsconn, err := ons.NewClientWithAccessKey(client.RegionId, client.AccessKey, client.SecretKey)
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the ONS client: %#v", err)
-		}
-
-		onsconn.AppendUserAgent(Terraform, TerraformVersion)
-		onsconn.AppendUserAgent(Provider, ProviderVersion)
-		onsconn.Domain = endpoint
-
-		onsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		onsconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			onsconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.onsconn = onsconn
-	}
-
-	return do(client.onsconn)
-}
-
-func (client *AlibabacloudStackClient) WithLogClient(do func(*sls.Client) (interface{}, error)) (interface{}, error) {
+func (client *AlibabacloudStackClient) WithSlsClient(do func(*sls.Client) (interface{}, error)) (interface{}, error) {
 	goSdkMutex.Lock()
 	defer goSdkMutex.Unlock()
 
 	// Initialize the LOG client if necessary
 	if client.logconn == nil {
-		endpoint := client.Config.LogEndpoint
+		endpoint := client.Config.Endpoints[SLSCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("unable to initialize the log client: endpoint or domain is not provided for log service")
 		}
@@ -1262,7 +821,7 @@ func (client *AlibabacloudStackClient) WithLogClient(do func(*sls.Client) (inter
 			// AccessKeySecret: client.Config.OrganizationSecretKey,
 			AccessKeyID:     client.Config.AccessKey,
 			AccessKeySecret: client.Config.SecretKey,
-			Endpoint:        client.Config.SLSOpenAPIEndpoint,
+			Endpoint:        client.Config.Endpoints[SLSCode],
 			SecurityToken:   client.Config.SecurityToken,
 			UserAgent:       client.getUserAgent(),
 		}
@@ -1270,53 +829,29 @@ func (client *AlibabacloudStackClient) WithLogClient(do func(*sls.Client) (inter
 
 	return do(client.logconn)
 }
-func (client *AlibabacloudStackClient) WithLogPopClient(do func(*slsPop.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the HBase client if necessary
+func (client *AlibabacloudStackClient) WithSlsPopClient(do func(*slsPop.Client) (interface{}, error)) (interface{}, error) {
 	if client.logpopconn == nil {
-		endpoint := client.Config.LogEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the lopgpop client: endpoint or domain is not provided for logpop service")
+		conn, error := client.WithProductSDKClient(SLSCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoint = fmt.Sprintf("%s."+endpoint, client.Config.RegionId)
+		client.logpopconn = &slsPop.Client{
+			Client: *conn,
 		}
-		logpopconn, err := slsPop.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the sls client: %#v", err)
-		}
-
-		logpopconn.AppendUserAgent(Terraform, TerraformVersion)
-		logpopconn.AppendUserAgent(Provider, ProviderVersion)
-		logpopconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		client.logpopconn = logpopconn
 	}
 
 	return do(client.logpopconn)
 }
 
 func (client *AlibabacloudStackClient) WithAlikafkaClient(do func(*alikafka.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the alikafka client if necessary
 	if client.alikafkaconn == nil {
-		endpoint := client.Config.AlikafkaEndpoint
-		if endpoint == "" {
-			endpoint = loadEndpoint(client.Config.RegionId, ALIKAFKACode)
+		conn, error := client.WithProductSDKClient(ALIKAFKACode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(ALIKAFKACode), endpoint)
+		client.alikafkaconn = &alikafka.Client{
+			Client: *conn,
 		}
-		alikafkaconn, err := alikafka.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the ALIKAFKA client: %#v", err)
-		}
-		alikafkaconn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Millisecond)
-		alikafkaconn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Millisecond)
-		alikafkaconn.SourceIp = client.Config.SourceIp
-		alikafkaconn.SecureTransport = client.Config.SecureTransport
-		alikafkaconn.AppendUserAgent(Terraform, terraformVersion)
-		alikafkaconn.AppendUserAgent(Provider, providerVersion)
-		alikafkaconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		client.alikafkaconn = alikafkaconn
 	}
 
 	return do(client.alikafkaconn)
@@ -1325,12 +860,9 @@ func (client *AlibabacloudStackClient) WithAlikafkaClient(do func(*alikafka.Clie
 func (client *AlibabacloudStackClient) WithEdasClient(do func(*edas.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the edas client if necessary
 	if client.edasconn == nil {
-		endpoint := client.Config.EdasEndpoint
+		endpoint := client.Config.Endpoints[EDASCode]
 		if endpoint == "" {
-			endpoint = loadEndpoint(client.Config.RegionId, EDASCode)
-		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(EDASCode), endpoint)
+			return nil, fmt.Errorf("unable to initialize the Edas client: endpoint or domain is not provided for Edas service")
 		}
 		// edasconn, err := edas.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig().WithTimeout(time.Duration(60)*time.Second), client.Config.getAuthCredential(true))
 		var edasconn *edas.Client
@@ -1347,6 +879,7 @@ func (client *AlibabacloudStackClient) WithEdasClient(do func(*edas.Client) (int
 		edasconn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Millisecond)
 		edasconn.SourceIp = client.Config.SourceIp
 		edasconn.SecureTransport = client.Config.SecureTransport
+		edasconn.Domain = endpoint
 		edasconn.AppendUserAgent(Terraform, terraformVersion)
 		edasconn.AppendUserAgent(Provider, providerVersion)
 		edasconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
@@ -1361,26 +894,14 @@ func (client *AlibabacloudStackClient) WithEdasClient(do func(*edas.Client) (int
 }
 
 func (client *AlibabacloudStackClient) WithCrEEClient(do func(*cr_ee.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the CR EE client if necessary
 	if client.creeconn == nil {
-		endpoint := client.Config.CrEndpoint
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the CRee client: endpoint or domain is not provided for CR service")
+		conn, error := client.WithProductSDKClient(CRCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(CRCode), endpoint)
+		client.creeconn = &cr_ee.Client{
+			Client: *conn,
 		}
-		creeconn, err := cr_ee.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the CR EE client: %#v", err)
-		}
-		creeconn.AppendUserAgent(Terraform, TerraformVersion)
-		creeconn.AppendUserAgent(Provider, ProviderVersion)
-		creeconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		if client.Config.Proxy != "" {
-			creeconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.creeconn = creeconn
 	}
 
 	return do(client.creeconn)
@@ -1389,51 +910,26 @@ func (client *AlibabacloudStackClient) WithCrEEClient(do func(*cr_ee.Client) (in
 func (client *AlibabacloudStackClient) WithCrClient(do func(*cr.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the CR client if necessary
 	if client.crconn == nil {
-		endpoint := client.Config.CrEndpoint
-
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(CRCode), endpoint)
+		conn, error := client.WithProductSDKClient(CRCode)
+		if error != nil {
+			return nil, error
 		}
-
-		if strings.HasPrefix(endpoint, "http") {
-			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
+		client.crconn = &cr.Client{
+			Client: *conn,
 		}
-		crconn, err := cr.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the CR client: %#v", err)
-		}
-		crconn.Domain = endpoint
-		if client.Config.Proxy != "" {
-			crconn.SetHttpProxy(client.Config.Proxy)
-		}
-		crconn.AppendUserAgent(Terraform, TerraformVersion)
-		crconn.AppendUserAgent(Provider, ProviderVersion)
-		crconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		client.crconn = crconn
 	}
 
 	return do(client.crconn)
 }
 func (client *AlibabacloudStackClient) WithDnsClient(do func(*alidns.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the DNS client if necessary
 	if client.dnsconn == nil {
-		endpoint := client.Config.DnsEndpoint
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(DNSCode), endpoint)
+		conn, error := client.WithProductSDKClient(DnsCode)
+		if error != nil {
+			return nil, error
 		}
-
-		dnsconn, err := alidns.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the DNS client: %#v", err)
+		client.dnsconn = &alidns.Client{
+			Client: *conn,
 		}
-		dnsconn.AppendUserAgent(Terraform, TerraformVersion)
-		dnsconn.AppendUserAgent(Provider, ProviderVersion)
-		dnsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		dnsconn.Domain = endpoint
-		if client.Config.Proxy != "" {
-			dnsconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.dnsconn = dnsconn
 	}
 
 	return do(client.dnsconn)
@@ -1441,244 +937,43 @@ func (client *AlibabacloudStackClient) WithDnsClient(do func(*alidns.Client) (in
 func (client *AlibabacloudStackClient) WithCmsClient(do func(*cms.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the CMS client if necessary
 	if client.cmsconn == nil {
-		endpoint := client.Config.CmsEndpoint
-		if endpoint == "" {
-			endpoint = loadEndpoint(client.Config.RegionId, CMSCode)
+		conn, error := client.WithProductSDKClient(CMSCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(CMSCode), endpoint)
-		}
-		cmsconn, err := cms.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the CMS client: %#v", err)
-		}
-		cmsconn.Domain = endpoint
-		cmsconn.AppendUserAgent(Terraform, TerraformVersion)
-		cmsconn.AppendUserAgent(Provider, ProviderVersion)
-		cmsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		client.cmsconn = cmsconn
-		if client.Config.Proxy != "" {
-			cmsconn.SetHttpProxy(client.Config.Proxy)
+		client.cmsconn = &cms.Client{
+			Client: *conn,
 		}
 	}
 
 	return do(client.cmsconn)
 }
-func (client *AlibabacloudStackClient) WithMaxComputeClient(do func(*maxcompute.Client) (interface{}, error)) (interface{}, error) {
-	goSdkMutex.Lock()
-	defer goSdkMutex.Unlock()
-
-	// Initialize the MaxCompute client if necessary
-	if client.maxcomputeconn == nil {
-		endpoint := client.Config.MaxComputeEndpoint
-		if endpoint == "" {
-			endpoint = loadEndpoint(client.Config.RegionId, MAXCOMPUTECode)
-		}
-		if strings.HasPrefix(endpoint, "http") {
-			endpoint = fmt.Sprintf("https://%s", strings.TrimPrefix(endpoint, "http://"))
-		}
-		if endpoint == "" {
-			endpoint = "maxcompute.aliyuncs.com"
-		}
-
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(MAXCOMPUTECode), endpoint)
-		}
-		maxcomputeconn, err := maxcompute.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(false))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the MaxCompute client: %#v", err)
-		}
-
-		maxcomputeconn.AppendUserAgent(Terraform, TerraformVersion)
-		maxcomputeconn.AppendUserAgent(Provider, ProviderVersion)
-		maxcomputeconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		client.maxcomputeconn = maxcomputeconn
-	}
-
-	return do(client.maxcomputeconn)
-}
 
 func (client *AlibabacloudStackClient) NewHitsdbClient() (*rpc.Client, error) {
-	productCode := "hitsdb"
-	endpoint := client.Config.HitsdbEndpoint
-	if endpoint == "" {
-		if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-			if err := client.loadEndpoint(productCode); err != nil {
-				return nil, err
-			}
-		}
-		if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-			endpoint = v.(string)
-		}
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("hitsdb", client.Config.Endpoints[HitsdbCode])
 }
 
 func (client *AlibabacloudStackClient) NewOdpsClient() (*rpc.Client, error) {
-	productCode := "odps"
-	endpoint := client.Config.MaxComputeEndpoint
-	if endpoint == "" {
-		if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-			if err := client.loadEndpoint(productCode); err != nil {
-				return nil, err
-			}
-		}
-		if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-			endpoint = v.(string)
-		}
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("odps", client.Config.Endpoints[ASCMCode])
 }
 func (client *AlibabacloudStackClient) NewKmsClient() (*rpc.Client, error) {
-	productCode := "kms"
-	endpoint := client.Config.KmsEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			endpoint = "kms.cn-beijing.aliyuncs.com"
-			client.Config.Endpoints[productCode] = endpoint
-			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the central endpoint %s instead.", productCode, err, endpoint)
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("kms", client.Config.Endpoints[KmsCode])
 }
 
 func (client *AlibabacloudStackClient) NewAscmClient() (*rpc.Client, error) {
-	productCode := "ascm"
-	endpoint := client.Config.AscmEndpoint
-	if endpoint == "" {
-		if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-			if err := client.loadEndpoint(productCode); err != nil {
-				endpoint = fmt.Sprintf("eds-user.%s.aliyuncs.com", client.Config.RegionId)
-				client.Config.Endpoints[productCode] = endpoint
-				log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
-			}
-		}
-		if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-			endpoint = v.(string)
-		}
-		if endpoint == "" {
-			return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-		}
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("ascm", client.Config.Endpoints[ASCMCode])
 }
 func (client *AlibabacloudStackClient) NewCloudApiClient() (*rpc.Client, error) {
-	productCode := "apigateway"
-	endpoint := client.Config.ApigatewayEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(60000)
-
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-
-	return conn, nil
+	//sdkConfig.SetEndpoint(endpoint).SetReadTimeout(60000)
+	return client.NewTeaSDkClient("apigateway", client.Config.Endpoints[CLOUDAPICode])
 }
+
 func (client *AlibabacloudStackClient) NewAdsClient() (*rpc.Client, error) {
-	productCode := "ads"
-	endpoint := client.Config.AdbEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("ads", client.Config.Endpoints[ADBCode])
 }
 
 func (client *AlibabacloudStackClient) NewCmsClient() (*rpc.Client, error) {
-	productCode := "cms"
-	endpoint := client.Config.CmsEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
-}
-
-func (client *AlibabacloudStackClient) NewTeaCommonClient(endpoint string) (*rpc.Client, error) {
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the tea client: %#v", err)
-	}
-
-	return conn, nil
+	return client.NewTeaSDkClient("cms", client.Config.Endpoints[CMSCode])
 }
 
 func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string, do func(*tablestore.TableStoreClient) (interface{}, error)) (interface{}, error) {
@@ -1688,17 +983,10 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 	// Initialize the TABLESTORE client if necessary
 	tableStoreClient, ok := client.tablestoreconnByInstanceName[instanceName]
 	if !ok {
-		// endpoint := client.Config.OtsEndpoint
-		// if endpoint == "" {
-		// 	endpoint = loadEndpoint(client.RegionId, OTSCode)
-		// }
-		// if endpoint == "" {
-		// 	endpoint = fmt.Sprintf("%s.%s.ots-internal.aliyuncs.com", instanceName, client.RegionId)
-		// }
-		// if !strings.HasPrefix(endpoint, "https") && !strings.HasPrefix(endpoint, "http") {
-		// 	endpoint = fmt.Sprintf("https://%s", endpoint)
-		// }
-		endpoint := fmt.Sprintf("http://%s.%s.ots-internal.aliyuncs.com", instanceName, client.RegionId)
+		endpoint := client.Config.Endpoints[OTSCode]
+		if endpoint == "" {
+			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
+		}
 		// if !strings.HasPrefix(endpoint, "https") && !strings.HasPrefix(endpoint, "http") {
 		// 	endpoint = fmt.Sprintf("https://%s", endpoint)
 		// }
@@ -1712,26 +1000,13 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 func (client *AlibabacloudStackClient) WithOtsClient(do func(*ots.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the OTS client if necessary
 	if client.otsconn == nil {
-		endpoint := client.Config.OtsEndpoint
-		if endpoint == "" {
-			endpoint = loadEndpoint(client.Config.RegionId, OTSCode)
+		conn, error := client.WithProductSDKClient(OTSCode)
+		if error != nil {
+			return nil, error
 		}
-		if endpoint != "" {
-			endpoints.AddEndpointMapping(client.Config.RegionId, string(OTSCode), endpoint)
+		client.otsconn = &ots.Client{
+			Client: *conn,
 		}
-		otsconn, err := ots.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the OTS client: %#v", err)
-		}
-
-		otsconn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Millisecond)
-		otsconn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Millisecond)
-		otsconn.SourceIp = client.Config.SourceIp
-		otsconn.SecureTransport = client.Config.SecureTransport
-		otsconn.AppendUserAgent(Terraform, terraformVersion)
-		otsconn.AppendUserAgent(Provider, providerVersion)
-		otsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		client.otsconn = otsconn
 	}
 
 	return do(client.otsconn)
@@ -1742,16 +1017,9 @@ func (client *AlibabacloudStackClient) WithDataHubClient(do func(api datahub.Dat
 
 	// Initialize the DataHub client if necessary
 	if client.dhconn == nil {
-		endpoint := client.Config.DatahubEndpoint
+		endpoint := client.Config.Endpoints[DatahubCode]
 		if endpoint == "" {
-			endpoint = loadEndpoint(client.RegionId, DATAHUBCode)
-		}
-		if endpoint == "" {
-			if client.RegionId == string(APSouthEast1) {
-				endpoint = "dh-singapore.aliyuncs.com"
-			} else {
-				endpoint = fmt.Sprintf("dh-%s.aliyuncs.com", client.RegionId)
-			}
+			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
 		}
 		if !strings.HasPrefix(endpoint, "http") {
 			endpoint = fmt.Sprintf("https://%s", endpoint)
@@ -1768,128 +1036,27 @@ func (client *AlibabacloudStackClient) WithDataHubClient(do func(api datahub.Dat
 	return do(client.dhconn)
 }
 func (client *AlibabacloudStackClient) NewVpcClient() (*rpc.Client, error) {
-	productCode := "vpc"
-	endpoint := client.Config.VpcEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-
-	return conn, nil
+	return client.NewTeaSDkClient("vpc", client.Config.Endpoints[VPCCode])
 }
 func (client *AlibabacloudStackClient) NewEcsClient() (*rpc.Client, error) {
-	productCode := "ecs"
-	endpoint := client.Config.EcsEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(60000)
-
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-
-	return conn, nil
+	//sdkConfig.SetEndpoint(endpoint).SetReadTimeout(60000)
+	return client.NewTeaSDkClient("ecs", client.Config.Endpoints[EcsCode])
 }
 func (client *AlibabacloudStackClient) NewElasticsearchClient() (*rpc.Client, error) {
-	productCode := "elasticsearch"
-	endpoint := client.Config.ElasticsearchEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] misssing the product %s endpoint.", productCode)
-	}
-	roaSdkConfig := client.teaSdkConfig
-	roaSdkConfig.SetEndpoint(endpoint)
-
-	conn, err := rpc.NewClient(&roaSdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, err
+	return client.NewTeaSDkClient("elasticsearch", client.Config.Endpoints[ELASTICSEARCHCode])
 }
 
 func (client *AlibabacloudStackClient) NewRosClient() (*rpc.Client, error) {
-	productCode := "ros"
-	endpoint := client.Config.RosEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("ros", client.Config.Endpoints[RosCode])
 }
 
 func (client *AlibabacloudStackClient) NewRdsClient() (*rpc.Client, error) {
-	productCode := "rds"
-	endpoint := ""
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("rds", client.Config.Endpoints[RDSCode])
 }
 
 func (client *AlibabacloudStackClient) NewRoaCsClient() (*roaCS.Client, error) {
 	productCode := "ros"
-	endpoint := client.Config.CsEndpoint
+	endpoint := client.Config.Endpoints[RosCode]
 	if endpoint == "" {
 		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
 	}
@@ -1904,6 +1071,10 @@ func (client *AlibabacloudStackClient) NewRoaCsClient() (*roaCS.Client, error) {
 		ReadTimeout:     tea.Int(client.Config.ClientReadTimeout),
 		ConnectTimeout:  tea.Int(client.Config.ClientConnectTimeout),
 	})
+	roaCSConn.Headers = map[string]*string{
+		"x-acs-organizationid":  &client.Config.Department,
+		"x-acs-resourcegroupid": &client.Config.ResourceGroup,
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -1912,357 +1083,232 @@ func (client *AlibabacloudStackClient) NewRoaCsClient() (*roaCS.Client, error) {
 }
 
 func (client *AlibabacloudStackClient) NewDtsClient() (*rpc.Client, error) {
-	productCode := "dts"
-	endpoint := client.Config.DtsEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			endpoint = fmt.Sprintf("dts.%s.aliyuncs.com", client.Config.RegionId)
-			client.Config.Endpoints[productCode] = endpoint
-			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("dts", client.Config.Endpoints[DTSCode])
 }
 
 func (client *AlibabacloudStackClient) NewDmsenterpriseClient() (*rpc.Client, error) {
-	productCode := "dmsenterprise"
-	endpoint := client.Config.DmsEnterpriseEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			endpoint = "dms-enterprise.aliyuncs.com"
-			client.Config.Endpoints[productCode] = endpoint
-			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the central endpoint %s instead.", productCode, err, endpoint)
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("dmsenterprise", client.Config.Endpoints[DmsEnterpriseCode])
 }
 
 func (client *AlibabacloudStackClient) NewHbaseClient() (*rpc.Client, error) {
-	productCode := "hbase"
-	endpoint := ""
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("hbase", client.Config.Endpoints[HBASECode])
 }
 
 func (client *AlibabacloudStackClient) WithDrdsClient(do func(*drds.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the DRDS client if necessary
 	if client.drdsconn == nil {
-		endpoint := client.Config.DrdsEndpoint
-		if endpoint == "" {
-			if endpoint == "" {
-				endpoint = fmt.Sprintf("%s.drds.aliyuncs.com", client.Config.RegionId)
-			}
+		conn, error := client.WithProductSDKClient(DRDSCode)
+		if error != nil {
+			return nil, error
 		}
-
-		drdsconn, err := drds.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the DRDS client: %#v", err)
-
+		client.drdsconn = &drds.Client{
+			Client: *conn,
 		}
-		drdsconn.Domain = endpoint
-		drdsconn.AppendUserAgent(Terraform, TerraformVersion)
-		drdsconn.AppendUserAgent(Provider, ProviderVersion)
-		drdsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		drdsconn.SetHTTPSInsecure(client.Config.Insecure)
-
-		drdsconn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Millisecond)
-		drdsconn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Millisecond)
-		drdsconn.SourceIp = client.Config.SourceIp
-		drdsconn.SecureTransport = client.Config.SecureTransport
-
-		if client.Config.Proxy != "" {
-			drdsconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.drdsconn = drdsconn
 	}
 
 	return do(client.drdsconn)
 }
 func (client *AlibabacloudStackClient) NewGpdbClient() (*rpc.Client, error) {
-	productCode := "gpdb"
-	endpoint := client.Config.GpdbEndpoint
-
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-
-	return conn, nil
+	return client.NewTeaSDkClient("gpdb", client.Config.Endpoints[GPDBCode])
 }
 
 func (client *AlibabacloudStackClient) NewQuickbiClient() (*rpc.Client, error) {
-	productCode := "quickbi"
-	endpoint := client.Config.QuickbiEndpoint
-	//endpoint := "quickbi-public.inter.env202.shuguang.com"
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			endpoint = fmt.Sprintf("quickbi.%s.aliyuncs.com", client.Config.RegionId)
-			client.Config.Endpoints[productCode] = endpoint
-			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("quickbi", client.Config.Endpoints[QuickbiCode])
 }
 func (client *AlibabacloudStackClient) NewCsbClient() (*rpc.Client, error) {
-	productCode := "csb"
-	endpoint := client.Config.CsbEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			endpoint = fmt.Sprintf("csb.%s.aliyuncs.com", client.Config.RegionId)
-			client.Config.Endpoints[productCode] = endpoint
-			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("csb", client.Config.Endpoints[CSBCode])
 }
 func (client *AlibabacloudStackClient) NewGdbClient() (*rpc.Client, error) {
-	productCode := "gdb"
-	endpoint := client.Config.GdbEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			endpoint = fmt.Sprintf("gdb.%s.aliyuncs.com", client.Config.RegionId)
-			client.Config.Endpoints[productCode] = endpoint
-			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("gdb", client.Config.Endpoints[GDBCode])
 }
+
 func (client *AlibabacloudStackClient) NewDataworkspublicClient() (*rpc.Client, error) {
-	productCode := "dataworkspublic"
-	endpoint := client.Config.DataworkspublicEndpoint
-	//endpoint := "dataworks-public.cloud.ste3.com"
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			endpoint = fmt.Sprintf("dataworks.%s.aliyuncs.com", client.Config.RegionId)
-			client.Config.Endpoints[productCode] = endpoint
-			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("dataworkspublic", client.Config.Endpoints[DataworkspublicCode])
 }
 
 func (client *AlibabacloudStackClient) NewDataworksPrivateClient() (*rpc.Client, error) {
-	productCode := "dataworks-private-cloud"
-	endpoint := client.Config.DataworkspublicEndpoint
-	//endpoint := "dataworks.inter.env66.shuguang.com"
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			endpoint = fmt.Sprintf("dataworks.%s.aliyuncs.com", client.Config.RegionId)
-			client.Config.Endpoints[productCode] = endpoint
-			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
+	endpoint := client.Config.Endpoints[DataworkspublicCode]
 	index := strings.Index(endpoint, ".")
 	privateEndpoint := "dataworks" + endpoint[index:]
-	sdkConfig.SetEndpoint(privateEndpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("dataworks-private-cloud", privateEndpoint)
 }
 
 func (client *AlibabacloudStackClient) NewDbsClient() (*rpc.Client, error) {
-	productCode := "dbs"
-	endpoint := client.Config.DbsEndpoint
-	//endpoint := "dbs.inter.env66.shuguang.com"
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			endpoint = fmt.Sprintf("dbs.%s.aliyuncs.com", client.Config.RegionId)
-			client.Config.Endpoints[productCode] = endpoint
-			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("dbs", client.Config.Endpoints[DDSCode])
 }
 func (client *AlibabacloudStackClient) NewArmsClient() (*rpc.Client, error) {
-	productCode := "arms"
-	endpoint := client.Config.ArmsEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			endpoint = fmt.Sprintf("arms.%s.aliyuncs.com", client.Config.RegionId)
-			client.Config.Endpoints[productCode] = endpoint
-			log.Printf("[ERROR] loading %s endpoint got an error: %#v. Using the endpoint %s instead.", productCode, err, endpoint)
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("arms", client.Config.Endpoints[ARMSCode])
 }
 
 func (client *AlibabacloudStackClient) NewOosClient() (*rpc.Client, error) {
-	productCode := "oos"
-	endpoint := client.Config.OosEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
-	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
-	}
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
-	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
-	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
-	}
-	return conn, nil
+	return client.NewTeaSDkClient("oos", client.Config.Endpoints[OosCode])
 }
 func (client *AlibabacloudStackClient) NewCloudfwClient() (*rpc.Client, error) {
-	productCode := "cloudfw"
-	endpoint := client.Config.CloudfwEndpoint
-	if v, ok := client.Config.Endpoints[productCode]; !ok || v.(string) == "" {
-		if err := client.loadEndpoint(productCode); err != nil {
-			return nil, err
-		}
+	return client.NewTeaSDkClient("cloudfw", client.Config.Endpoints[WafOpenapiCode])
+}
+
+func (client *AlibabacloudStackClient) defaultHeaders(popcode string) map[string]string {
+	return map[string]string{
+		"RegionId":              client.RegionId,  //	ASAPI
+		"x-acs-organizationid":  client.Department,
+		"x-acs-resourcegroupid": client.ResourceGroup,
+		"x-acs-regionid":        client.RegionId,
+		"x-acs-request-version": "v1",
+		"x-acs-asapi-product":   popcode,
+		"x-ascm-product-name":   popcode,
+		"EagleEye-TraceId":      client.Eagleeye.GetTraceId(),
+		"EagleEye-RpcId":        client.Eagleeye.GetRpcId(),
+		//"x-acs-caller-sdk-source": "Terraform"
+		//"x-acs-asapi-gateway-version": "3.0"  这个是指定走ASAPI的v3网关流程，目前在维护的是v4，默认会走v4，指定了走v3。不建议走v3，除非有不兼容的地方必须走
 	}
-	if v, ok := client.Config.Endpoints[productCode]; ok && v.(string) != "" {
-		endpoint = v.(string)
+}
+
+func (client *AlibabacloudStackClient) defaultQueryParams() map[string]string {
+	return map[string]string{
+		"RegionId":       client.RegionId,
+		"Department":     client.Department,
+		"OrganizationId": client.Department,
+		"ResourceGroup":  client.ResourceGroup,
 	}
+}
+
+func (client *AlibabacloudStackClient) NewCommonRequest(method string, popcode string, version string, apiname string, pathpattern string) *requests.CommonRequest {
+	request := requests.NewCommonRequest()
+
+	if client.Config.Insecure {
+		request.SetHTTPSInsecure(client.Config.Insecure)
+	}
+	if strings.ToLower(client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.RegionId = client.RegionId
+	request.Headers = client.defaultHeaders(popcode)
+	request.QueryParams = client.defaultQueryParams()
+	request.Product = popcode
+	request.Version = version
+	request.ApiName = apiname
+	if pathpattern != "" {
+		request.PathPattern = pathpattern
+	}
+
+	return request
+}
+
+func (client *AlibabacloudStackClient) InitRpcRequest(request requests.RpcRequest) {
+	if client.Config.Insecure {
+		request.SetHTTPSInsecure(client.Config.Insecure)
+	}
+	if strings.ToLower(client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.RegionId = client.RegionId
+	request.Headers = client.defaultHeaders(request.GetProduct())
+	request.QueryParams = client.defaultQueryParams()
+}
+
+func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaRequest) {
+	if client.Config.Insecure {
+		request.SetHTTPSInsecure(client.Config.Insecure)
+	}
+	if strings.ToLower(client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.RegionId = client.RegionId
+	request.Headers = client.defaultHeaders(request.GetProduct())
+	request.QueryParams = client.defaultQueryParams()
+}
+
+func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode string, version string, apiname string, pathpattern string, query map[string]interface{}, body map[string]interface{}) (_result map[string]interface{}, _err error){
+	endpoint := client.Config.Endpoints[ServiceCode(strings.ToUpper(popcode))]
 	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
+		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", popcode)
 	}
 	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint)
+	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
 	conn, err := rpc.NewClient(&sdkConfig)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", productCode, err)
+	for key, value := range client.defaultHeaders(popcode) {
+		conn.Headers[key] = &value
 	}
-	return conn, nil
+	if err != nil {
+		return nil, fmt.Errorf("unable to initialize the %s client: %#v", popcode, err)
+	}
+	
+	var protocol string
+	if strings.ToLower(client.Config.Protocol) == "https" {
+		protocol = "https"
+	} else {
+		protocol = "http"
+	}
+	authType := "AK"
+	
+	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	runtime.SetAutoretry(true)
+	
+	var response map[string]interface{}
+	wait := IncrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		response, err = conn.DoRequest(&apiname, &protocol, &method, &version, &authType, query, body, &runtime)
+		if err != nil {
+			errmsg := errmsgs.GetAsapiErrorMessage(response)
+			if errmsg != ""{
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "popcode", apiname, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			}
+			wait()
+			return resource.RetryableError(err)
+		}
+		return nil
+	})
+	return response, nil
+}
+
+func IncrementalWait(firstDuration time.Duration, increaseDuration time.Duration) func() {
+	retryCount := 1
+	return func() {
+		var waitTime time.Duration
+		if retryCount == 1 {
+			waitTime = firstDuration
+		} else if retryCount > 1 {
+			waitTime += increaseDuration
+		}
+		time.Sleep(waitTime)
+		retryCount++
+	}
+}
+
+// getResourceData 从 Terraform 的 ResourceData 中获取多个键的值，并进行比较。
+// 如果所有值相同，则返回该值；如果值不同，则返回错误。
+func GetResourceData(d *schema.ResourceData, valueType reflect.Type, keys ...string) (interface{}, error) {
+	var firstValue interface{}
+
+	for _, key := range keys {
+		value, ok := d.GetOk(key)
+		if !ok {
+			return nil, fmt.Errorf("key %s not found in the schema", key)
+		}
+
+		convertedValue := reflect.ValueOf(value).Convert(valueType).Interface()
+
+		if firstValue == nil {
+			firstValue = convertedValue
+		} else if !reflect.DeepEqual(firstValue, convertedValue) {
+			return nil, fmt.Errorf("values for keys %s are not the same", strings.Join(keys, ", "))
+		}
+	}
+
+	return firstValue, nil
+}
+
+
+func SetResourceData(d *schema.ResourceData, value interface{}, keys ...string) error {
+	for _, key := range keys {
+		if err := d.Set(key, value); err != nil {
+			return errmsgs.WrapError(err)
+		}
+	}
+	return nil
 }

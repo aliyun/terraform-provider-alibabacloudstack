@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -27,7 +29,7 @@ func init() {
 func testSweepEdasApplication(region string) error {
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return WrapErrorf(err, "error getting AlibabacloudStack client.")
+		return errmsgs.WrapErrorf(err, "error getting AlibabacloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
@@ -99,7 +101,7 @@ func testSweepEdasApplication(region string) error {
 				return edasClient.DeleteApplication(deleteApplicationRequest)
 			})
 			if err != nil {
-				if IsExpectedErrors(err, []string{ThrottlingUser}) {
+				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
 					time.Sleep(10 * time.Second)
 					return resource.RetryableError(err)
 				}
@@ -108,7 +110,7 @@ func testSweepEdasApplication(region string) error {
 			addDebug(deleteApplicationRequest.GetActionName(), raw, deleteApplicationRequest.RoaRequest, deleteApplicationRequest)
 			rsp := raw.(*edas.DeleteApplicationResponse)
 			if rsp.Code == 601 && strings.Contains(rsp.Message, "Operation cannot be processed because there are running instances.") {
-				err = Error("Operation cannot be processed because there are running instances.")
+				err = errmsgs.Error("Operation cannot be processed because there are running instances.")
 				return resource.RetryableError(err)
 			}
 			return nil
@@ -138,7 +140,7 @@ func TestAccAlibabacloudStackEdasApplication_basic(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithRegions(t, true, connectivity.EdasSupportedRegions)
+
 			testAccPreCheck(t)
 		},
 
@@ -208,7 +210,7 @@ func TestAccAlibabacloudStackEdasApplication_multi(t *testing.T) {
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithRegions(t, true, connectivity.EdasSupportedRegions)
+
 			testAccPreCheck(t)
 		},
 

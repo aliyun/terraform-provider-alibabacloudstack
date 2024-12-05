@@ -6,10 +6,8 @@ import (
 	"strings"
 	"time"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -153,13 +151,9 @@ func resourceAlibabacloudStackRosStack() *schema.Resource {
 func resourceAlibabacloudStackRosStackCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rosService := RosService{client}
-	var response map[string]interface{}
 	action := "CreateStack"
 	request := make(map[string]interface{})
-	conn, err := client.NewRosClient()
-	if err != nil {
-		return WrapError(err)
-	}
+
 	if v, ok := d.GetOk("create_option"); ok {
 		request["CreateOption"] = v
 	}
@@ -190,10 +184,6 @@ func resourceAlibabacloudStackRosStackCreate(d *schema.ResourceData, meta interf
 		request["RamRoleName"] = v
 	}
 
-	request["RegionId"] = client.RegionId
-	request["Product"] = "ROS"
-	request["product"] = "ROS"
-	request["OrganizationId"] = client.Department
 	request["StackName"] = d.Get("stack_name")
 	if v, ok := d.GetOk("stack_policy_body"); ok {
 		request["StackPolicyBody"] = v
@@ -219,34 +209,31 @@ func resourceAlibabacloudStackRosStackCreate(d *schema.ResourceData, meta interf
 		request["TimeoutInMinutes"] = v
 	}
 
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	request["ClientToken"] = buildClientToken("CreateStack")
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &runtime)
+	response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ros_stack", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
-	addDebug(action, response, request)
 
 	d.SetId(fmt.Sprint(response["StackId"]))
 	stateConf := BuildStateConf([]string{}, []string{"CREATE_COMPLETE"}, d.Timeout(schema.TimeoutCreate), 100*time.Second, rosService.RosStackStateRefreshFunc(d.Id(), []string{"CREATE_FAILED", "CREATE_ROLLBACK_COMPLETE", "CREATE_ROLLBACK_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return resourceAlibabacloudStackRosStackRead(d, meta)
 }
+
 func resourceAlibabacloudStackRosStackRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rosService := RosService{client}
 	object, err := rosService.DescribeRosStack(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_ros_stack rosService.DescribeRosStack Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("deletion_protection", object["DeletionProtection"])
 	d.Set("disable_rollback", object["DisableRollback"])
@@ -266,47 +253,26 @@ func resourceAlibabacloudStackRosStackRead(d *schema.ResourceData, meta interfac
 		}
 	}
 	if err := d.Set("parameters", parameters); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("ram_role_name", object["RamRoleName"])
 	d.Set("stack_name", object["StackName"])
 	d.Set("status", object["Status"])
 	d.Set("timeout_in_minutes", formatInt(object["TimeoutInMinutes"]))
 
-	//listTagResourcesObject, err := rosService.ListTagResources(d.Id(), "stack")
-	//if err != nil {
-	//	return WrapError(err)
-	//}
-	//d.Set("tags", tagsToMap(listTagResourcesObject))
-
-	//getStackPolicyObject, err := rosService.GetStackPolicy(d.Id())
-	//if err != nil {
-	//	return WrapError(err)
-	//}
-	//d.Set("stack_policy_body", getStackPolicyObject["StackPolicyBody"])
 	return nil
 }
 
 func resourceAlibabacloudStackRosStackUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rosService := RosService{client}
-	var response map[string]interface{}
 	d.Partial(true)
 
-	//if d.HasChange("tags") {
-	//	if err := rosService.SetResourceTags(d, "stack"); err != nil {
-	//		return WrapError(err)
-	//	}
-	//	d.SetPartial("tags")
-	//}
 	update := false
 	request := map[string]interface{}{
 		"StackId": d.Id(),
 	}
-	request["RegionId"] = client.RegionId
-	request["Product"] = "ROS"
-	request["product"] = "ROS"
-	request["OrganizationId"] = client.Department
+
 	if !d.IsNewResource() && d.HasChange("disable_rollback") {
 		update = true
 		request["DisableRollback"] = d.Get("disable_rollback")
@@ -358,45 +324,24 @@ func resourceAlibabacloudStackRosStackUpdate(d *schema.ResourceData, meta interf
 		if _, ok := d.GetOkExists("use_previous_parameters"); ok {
 			request["UsePreviousParameters"] = d.Get("use_previous_parameters")
 		}
-		request["RegionId"] = client.RegionId
-		request["Product"] = "ROS"
-		request["product"] = "ROS"
-		request["OrganizationId"] = client.Department
-		action := "UpdateStack"
-		conn, err := client.NewRosClient()
+
+		_, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", "UpdateStack", "", nil, request)
 		if err != nil {
-			return WrapError(err)
-		}
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		request["ClientToken"] = buildClientToken("UpdateStack")
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &runtime)
-		addDebug(action, response, request)
-		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
 		stateConf := BuildStateConf([]string{}, []string{"UPDATE_COMPLETE"}, d.Timeout(schema.TimeoutUpdate), 100*time.Second, rosService.RosStackStateRefreshFunc(d.Id(), []string{"UPDATE_FAILED", "ROLLBACK_FAILED"}))
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-		//d.SetPartial("disable_rollback")
-		//d.SetPartial("parameters")
-		//d.SetPartial("ram_role_name")
-		//d.SetPartial("stack_policy_body")
-		//d.SetPartial("timeout_in_minutes")
 	}
 	d.Partial(false)
 	return resourceAlibabacloudStackRosStackRead(d, meta)
 }
+
 func resourceAlibabacloudStackRosStackDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rosService := RosService{client}
 	action := "DeleteStack"
-	var response map[string]interface{}
-	conn, err := client.NewRosClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	request := map[string]interface{}{
 		"StackId": d.Id(),
 	}
@@ -404,38 +349,23 @@ func resourceAlibabacloudStackRosStackDelete(d *schema.ResourceData, meta interf
 	if v, ok := d.GetOk("ram_role_name"); ok {
 		request["RamRoleName"] = v
 	}
-	request["RegionId"] = client.RegionId
-	request["Product"] = "ROS"
-	request["product"] = "ROS"
-	request["OrganizationId"] = client.Department
 	if v, ok := d.GetOkExists("retain_all_resources"); ok {
 		request["RetainAllResources"] = v
 	}
 	if v, ok := d.GetOk("retain_resources"); ok {
 		request["RetainResources"] = v.(*schema.Set).List()
 	}
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, request)
-		return nil
-	})
+
+	_, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"StackNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"StackNotFound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	stateConf := BuildStateConf([]string{}, []string{"DELETE_COMPLETE"}, d.Timeout(schema.TimeoutDelete), 100*time.Second, rosService.RosStackStateRefreshFunc(d.Id(), []string{"DELETE_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return nil
 }

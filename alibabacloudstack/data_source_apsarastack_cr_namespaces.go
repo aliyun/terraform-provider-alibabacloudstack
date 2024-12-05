@@ -2,14 +2,14 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"log"
 	"regexp"
-	"strings"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -62,47 +62,32 @@ func dataSourceAlibabacloudStackCRNamespaces() *schema.Resource {
 		},
 	}
 }
+
 func dataSourceAlibabacloudStackCRNamespacesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := CrService{client}
-	//invoker := NewInvoker()
-	request := requests.NewCommonRequest()
-	request.Method = "POST"
-	request.Product = "cr"
-	request.Domain = client.Domain
-	request.Version = "2016-06-07"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "GetNamespaceList"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "cr",
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"RegionId":        client.RegionId,
-		"Action":          "GetNamespaceList",
-		"Version":         "2016-06-07",
-	}
+
+	request := client.NewCommonRequest("POST", "cr", "2016-06-07", "GetNamespaceList", "")
+
 	raw, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
 		return crClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	var crResp crListResponse
-	bresponse, _ := raw.(*responses.CommonResponse)
 	log.Printf("response for datasource %v", bresponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &crResp)
-	log.Printf("umarshalled response for datasource %v", crResp)
+	log.Printf("unmarshalled response for datasource %v", crResp)
 
 	addDebug(request.GetActionName(), bresponse)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	var names []string
@@ -122,10 +107,10 @@ func dataSourceAlibabacloudStackCRNamespacesRead(d *schema.ResourceData, meta in
 
 		raw, err := crService.DescribeCrNamespace(ns.Namespace)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		mapping["auto_create"] = raw.Data.Namespace.AutoCreate
 		mapping["default_visibility"] = raw.Data.Namespace.DefaultVisibility
@@ -136,13 +121,13 @@ func dataSourceAlibabacloudStackCRNamespacesRead(d *schema.ResourceData, meta in
 
 	d.SetId(dataResourceIdHash(names))
 	if err := d.Set("namespaces", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	// create a json file in current directory and write data source to it.

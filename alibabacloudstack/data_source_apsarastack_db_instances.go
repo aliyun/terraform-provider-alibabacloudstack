@@ -3,11 +3,11 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"regexp"
-	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -29,30 +29,18 @@ func dataSourceAlibabacloudStackDBInstances() *schema.Resource {
 				Computed: true,
 			},
 			"engine": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(MySQL),
-					string(SQLServer),
-					string(PPAS),
-					string(PostgreSQL),
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{string(MySQL), string(SQLServer), string(PPAS), string(PostgreSQL)}, false),
 			},
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
-				// please follow the link below to see more details on available statusesplease follow the link below to see more details on available statuses
-				// https://help.aliyun.com/document_detail/26315.html
 			},
 			"db_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"Primary",
-					"Readonly",
-					"Guard",
-					"Temp",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Primary", "Readonly", "Guard", "Temp"}, false),
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
@@ -63,12 +51,9 @@ func dataSourceAlibabacloudStackDBInstances() *schema.Resource {
 				Optional: true,
 			},
 			"connection_mode": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"Standard",
-					"Safe",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Standard", "Safe"}, false),
 			},
 			"tags": tagsSchema(),
 			"output_file": {
@@ -191,14 +176,7 @@ func dataSourceAlibabacloudStackDBInstancesRead(d *schema.ResourceData, meta int
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := rds.CreateDescribeDBInstancesRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.Engine = d.Get("engine").(string)
 	request.DBInstanceStatus = d.Get("status").(string)
 	request.DBInstanceType = d.Get("db_type").(string)
@@ -209,7 +187,7 @@ func dataSourceAlibabacloudStackDBInstancesRead(d *schema.ResourceData, meta int
 		tagsMap := v.(map[string]interface{})
 		bs, err := json.Marshal(tagsMap)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.Tags = string(bs)
 	}
@@ -222,7 +200,7 @@ func dataSourceAlibabacloudStackDBInstancesRead(d *schema.ResourceData, meta int
 	if v, ok := d.GetOk("name_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		nameRegex = r
 	}
@@ -239,11 +217,18 @@ func dataSourceAlibabacloudStackDBInstancesRead(d *schema.ResourceData, meta int
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.DescribeDBInstances(request)
 		})
+		response, ok := raw.(*rds.DescribeDBInstancesResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_db_instances", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_db_instances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*rds.DescribeDBInstancesResponse)
+		if !ok {
+			return errmsgs.WrapErrorf(nil, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_db_instances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, "Invalid response type")
+		}
 		if len(response.Items.DBInstance) < 1 {
 			break
 		}
@@ -270,7 +255,7 @@ func dataSourceAlibabacloudStackDBInstancesRead(d *schema.ResourceData, meta int
 
 		page, err := getNextpageNumber(request.PageNumber)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.PageNumber = page
 	}
@@ -292,7 +277,7 @@ func rdsInstancesDescription(d *schema.ResourceData, meta interface{}, dbi []rds
 		}
 		instance, err := rdsService.DescribeDBInstance(item.DBInstanceId)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		mapping := map[string]interface{}{
@@ -328,13 +313,13 @@ func rdsInstancesDescription(d *schema.ResourceData, meta interface{}, dbi []rds
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("instances", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	// create a json file in current directory and write data source to it

@@ -4,13 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
 func TestAccAlibabacloudStackExpressConnectAccessPointsDataSource(t *testing.T) {
-	checkoutSupportedRegions(t, true, connectivity.VbrSupportRegions)
 
 	rand := acctest.RandInt()
 	resourceId := "data.alibabacloudstack_express_connect_access_points.default"

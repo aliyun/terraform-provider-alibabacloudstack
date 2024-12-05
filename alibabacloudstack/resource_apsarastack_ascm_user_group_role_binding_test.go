@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform/helper/acctest"
@@ -56,13 +57,13 @@ func testAccCheckAscm_UserGroupRoleBinding_Destroy(s *terraform.State) error {
 		}
 		ascm, err := ascmService.DescribeAscmUserGroup(rs.Primary.ID)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if ascm.Message != "" {
-			return WrapError(Error("resource  still exist"))
+			return errmsgs.WrapError(errmsgs.Error("resource  still exist"))
 		}
 	}
 

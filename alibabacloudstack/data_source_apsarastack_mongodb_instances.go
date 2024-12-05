@@ -7,6 +7,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -180,9 +181,7 @@ func dataSourceAlibabacloudStackMongoDBInstancesRead(d *schema.ResourceData, met
 	ddsService := MongoDBService{client}
 
 	request := dds.CreateDescribeDBInstancesRequest()
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	request.PageNumber = requests.NewInteger(1)
@@ -228,12 +227,15 @@ func dataSourceAlibabacloudStackMongoDBInstancesRead(d *schema.ResourceData, met
 		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
 			return ddsClient.DescribeDBInstances(request)
 		})
-
+		response, ok := raw.(*dds.DescribeDBInstancesResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_mongodb_instances", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_mongodb_instances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*dds.DescribeDBInstancesResponse)
 		if len(response.DBInstances.DBInstance) < 1 {
 			break
 		}
@@ -262,7 +264,7 @@ func dataSourceAlibabacloudStackMongoDBInstancesRead(d *schema.ResourceData, met
 
 		page, err := getNextpageNumber(request.PageNumber)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.PageNumber = page
 	}
@@ -320,21 +322,21 @@ func dataSourceAlibabacloudStackMongoDBInstancesRead(d *schema.ResourceData, met
 	d.SetId(dataResourceIdHash(ids))
 
 	if err := d.Set("instances", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	// create a json file in current directory and write data source to it
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		err := writeToFile(output.(string), s)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 	return nil

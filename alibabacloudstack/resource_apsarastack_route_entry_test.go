@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
@@ -164,14 +165,14 @@ func testAccCheckRouteEntryDestroy(s *terraform.State) error {
 		}
 		entry, err := vpcService.DescribeRouteEntry(rs.Primary.ID)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		if entry.RouteTableId != "" {
-			return WrapError(Error("Route entry still exist"))
+			return errmsgs.WrapError(errmsgs.Error("Route entry still exist"))
 		}
 	}
 

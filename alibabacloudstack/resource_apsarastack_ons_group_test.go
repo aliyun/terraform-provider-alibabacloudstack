@@ -2,12 +2,14 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"strings"
-	"testing"
 )
 
 func (rc *resourceCheck) checkResourceOnsGroupDestroy() resource.TestCheckFunc {
@@ -22,7 +24,7 @@ func (rc *resourceCheck) checkResourceOnsGroupDestroy() resource.TestCheckFunc {
 		}
 
 		if resourceType == "" {
-			return WrapError(Error("The resourceId %s is not correct and it should prefix with alibabacloudstack_", rc.resourceId))
+			return errmsgs.WrapError(errmsgs.Error("The resourceId %s is not correct and it should prefix with alibabacloudstack_", rc.resourceId))
 		}
 
 		for _, rs := range s.RootModule().Resources {
@@ -34,13 +36,13 @@ func (rc *resourceCheck) checkResourceOnsGroupDestroy() resource.TestCheckFunc {
 			if !errorValue.IsNil() {
 				err = errorValue.Interface().(error)
 				if err != nil {
-					if NotFoundError(err) {
+					if errmsgs.NotFoundError(err) {
 						continue
 					}
-					return WrapError(err)
+					return errmsgs.WrapError(err)
 				}
 			} else {
-				return WrapError(Error("the resource %s %s was not destroyed ! ", rc.resourceId, rs.Primary.ID))
+				return errmsgs.WrapError(errmsgs.Error("the resource %s %s was not destroyed ! ", rc.resourceId, rs.Primary.ID))
 			}
 		}
 		return nil

@@ -2,11 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform/helper/acctest"
-	"testing"
 )
 
 func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding(t *testing.T) {
@@ -53,13 +55,13 @@ func testAccCheckAscmUserGroupResourceSetBindingDestroy(s *terraform.State) erro
 		}
 		ascm, err := ascmService.DescribeAscmUserGroup(rs.Primary.ID)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if ascm.Message != "" {
-			return WrapError(Error("resource  still exist"))
+			return errmsgs.WrapError(errmsgs.Error("resource  still exist"))
 		}
 	}
 

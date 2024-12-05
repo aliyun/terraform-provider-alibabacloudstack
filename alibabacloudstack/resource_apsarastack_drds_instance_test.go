@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -23,10 +24,6 @@ func init() {
 }
 
 func testSweepDRDSInstances(region string) error {
-	if testSweepPreCheckWithRegions(region, true, connectivity.DrdsSupportedRegions) {
-		log.Printf("[INFO] Skipping DRDS Instance unsupported region: %s", region)
-		return nil
-	}
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
@@ -45,7 +42,7 @@ func testSweepDRDSInstances(region string) error {
 		return drdsClient.DescribeDrdsInstances(request)
 	})
 	if err != nil {
-		log.Printf("[ERROR] Error retrieving DRDS Instances: %s", WrapError(err))
+		log.Printf("[ERROR] Error retrieving DRDS Instances: %s", errmsgs.WrapError(err))
 	}
 	response, _ := raw.(*drds.DescribeDrdsInstancesResponse)
 
@@ -70,7 +67,7 @@ func testSweepDRDSInstances(region string) error {
 				return drdsClient.DescribeDrdsInstance(instanceDetailRequest)
 			})
 			if err != nil {
-				log.Printf("[ERROR] Error retrieving DRDS Instance: %s. %s", id, WrapError(err))
+				log.Printf("[ERROR] Error retrieving DRDS Instance: %s. %s", id, errmsgs.WrapError(err))
 			}
 			instanceDetailResponse, _ := raw.(*drds.DescribeDrdsInstanceResponse)
 			for _, vip := range instanceDetailResponse.Data.Vips.Vip {
@@ -122,7 +119,7 @@ func TestAccAlibabacloudStackDRDSInstance_Vpc(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, true, connectivity.DrdsSupportedRegions)
+
 		},
 		// module name
 		IDRefreshName: resourceId,
@@ -194,8 +191,7 @@ func TestAccAlibabacloudStackDRDSInstance_Multi(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, true, connectivity.DrdsSupportedRegions)
-			testAccPreCheckWithRegions(t, false, connectivity.DrdsClassicNoSupportedRegions)
+
 		},
 		// module name
 		IDRefreshName: resourceId,

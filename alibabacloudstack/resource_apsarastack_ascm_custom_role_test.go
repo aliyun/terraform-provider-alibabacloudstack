@@ -1,10 +1,12 @@
 package alibabacloudstack
 
 import (
+	"testing"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"testing"
 )
 
 func TestAccAlibabacloudStackAscm_CustomRoleBasic(t *testing.T) {
@@ -50,13 +52,13 @@ func testAccCheckAscm_CustomRoleDestroy(s *terraform.State) error {
 		}
 		ascm, err := ascmService.DescribeAscmCustomRole(rs.Primary.ID)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if ascm.AsapiErrorCode != "200" {
-			return WrapError(Error("custom role still exist"))
+			return errmsgs.WrapError(errmsgs.Error("custom role still exist"))
 		}
 	}
 

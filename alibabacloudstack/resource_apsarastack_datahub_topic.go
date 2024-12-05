@@ -3,21 +3,18 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackDatahubTopic() *schema.Resource {
@@ -91,11 +88,11 @@ func resourceAlibabacloudStackDatahubTopic() *schema.Resource {
 				},
 			},
 			"create_time": {
-				Type:     schema.TypeString, //converted from UTC(uint64) value
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"last_modify_time": {
-				Type:     schema.TypeString, //converted from UTC(uint64) value
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -123,44 +120,19 @@ func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta in
 	} else if recordType == string(datahub.BLOB) {
 		t.RecordType = datahub.BLOB
 	}
-	// var requestInfo *datahub.DataHub
-	request := requests.NewCommonRequest()
-	request.Method = "POST"
-	request.Product = "datahub"
-	request.Domain = client.Domain
-	request.Version = "2019-11-20"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "CreateTopic"
-	request.Headers = map[string]string{
-		"RegionId":      client.RegionId,
-		"Authorization": "AuthorizationString",
-		//"Content-Type":  "application/json",
-	}
 
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":           "datahub",
-		"RegionId":          client.RegionId,
-		"Department":        client.Department,
-		"ResourceGroup":     client.ResourceGroup,
-		"Action":            "CreateTopic",
-		"Version":           "2019-11-20",
-		"ProjectName":       t.ProjectName,
-		"Lifecycle":         strconv.Itoa(t.LifeCycle),
-		"ShardCount":        strconv.Itoa(t.ShardCount),
-		"TopicName":         t.TopicName,
-		"RecordType":        recordType,
-		"Comment":           t.Comment,
-		"SignatureVersion":  "2.1",
-		"AcceptLanguage":    "zh-CN",
-		"ExpandMode":        "false",
-		"Forwardedregionid": client.RegionId,
-	}
+	request := client.NewCommonRequest("POST", "datahub", "2019-11-20", "CreateTopic", "")
+	request.QueryParams["ProjectName"] = t.ProjectName
+	request.QueryParams["Lifecycle"] = strconv.Itoa(t.LifeCycle)
+	request.QueryParams["ShardCount"] = strconv.Itoa(t.ShardCount)
+	request.QueryParams["TopicName"] = t.TopicName
+	request.QueryParams["RecordType"] = recordType
+	request.QueryParams["Comment"] = t.Comment
+	request.QueryParams["SignatureVersion"] = "2.1"
+	request.QueryParams["AcceptLanguage"] = "zh-CN"
+	request.QueryParams["ExpandMode"] = "false"
+	request.QueryParams["Forwardedregionid"] = client.RegionId
+
 	if t.RecordSchema != nil {
 		var record_schema []map[string]string
 		for _, v := range t.RecordSchema.Fields {
@@ -179,26 +151,30 @@ func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta in
 	raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
 		return dataHubClient.ProcessCommonRequest(request)
 	})
-	addDebug("CreateTopic", raw, request.Content, t)
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_datahub_topic", "CreateTopic")
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_topic", "CreateTopic", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
+	addDebug("CreateTopic", raw, request.Content, t)
 
 	d.SetId(strings.ToLower(fmt.Sprintf("%s%s%s", t.ProjectName, COLON_SEPARATED, t.TopicName)))
 	return resourceAlibabacloudStackDatahubTopicRead(d, meta)
 }
 
 func resourceAlibabacloudStackDatahubTopicRead(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	datahubService := DatahubService{client}
 	object, err := datahubService.DescribeDatahubTopic(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("name", object.TopicName)
@@ -220,106 +196,43 @@ func resourceAlibabacloudStackDatahubTopicRead(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackDatahubTopicUpdate(d *schema.ResourceData, meta interface{}) error {
-	//parts, err := ParseResourceId(d.Id(), 2)
-	//if err != nil {
-	//	return WrapError(err)
-	//}
-	//projectName, topicName := parts[0], parts[1]
-	//
-	//client := meta.(*connectivity.AlibabacloudStackClient)
-	//// Currently, life_cycle can not be modified and it will be fixed in the next future.
-	//if d.HasChange("life_cycle") || d.HasChange("comment") {
-	//	lifeCycle := d.Get("life_cycle").(int)
-	//	topicComment := d.Get("comment").(string)
-	//
-	//	var requestInfo *datahub.DataHub
-	//
-	//	raw, err := client.WithDataHubClient(func(dataHubClient datahub.DataHubApi) (interface{}, error) {
-	//		requestInfo = dataHubClient.(*datahub.DataHub)
-	//		return dataHubClient.UpdateTopic(projectName, topicName, topicComment)
-	//	})
-	//	if err != nil {
-	//		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "UpdateTopic", AlibabacloudStackDatahubSdkGo)
-	//	}
-	//	if debugOn() {
-	//		requestMap := make(map[string]string)
-	//		requestMap["ProjectName"] = projectName
-	//		requestMap["TopicName"] = topicName
-	//		requestMap["LifeCycle"] = strconv.Itoa(lifeCycle)
-	//		requestMap["TopicComment"] = topicComment
-	//		addDebug("UpdateTopic", raw, requestInfo, requestMap)
-	//	}
-	//	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-	//		datahubService := DatahubService{client}
-	//		object, err := datahubService.DescribeDatahubTopic(d.Id())
-	//		if err != nil {
-	//			return resource.NonRetryableError(err)
-	//		}
-	//		if object.Comment != topicComment || object.LifeCycle != lifeCycle {
-	//			return resource.RetryableError(fmt.Errorf("waiting for updating topic %s comment and lifecycle finished timwout. "+
-	//				"current comment is %s and lifecycle is %d", d.Id(), object.Comment, object.LifeCycle))
-	//		}
-	//		return nil
-	//	})
-	//	if err != nil {
-	//		return WrapError(err)
-	//	}
-	//}
-
 	return resourceAlibabacloudStackDatahubTopicRead(d, meta)
 }
 
 func resourceAlibabacloudStackDatahubTopicDelete(d *schema.ResourceData, meta interface{}) error {
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	projectName, topicName := parts[0], parts[1]
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	datahubService := DatahubService{client}
-	var requestInfo *datahub.DataHub
 
-	request := requests.NewCommonRequest()
-	request.Method = "GET"
-	request.Product = "datahub"
-	request.Domain = client.Domain
-	request.Version = "2019-11-20"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "DeleteTopic"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "datahub",
-		"RegionId":        client.RegionId,
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          "DeleteTopic",
-		"Version":         "2019-11-20",
-		"ProjectName":     projectName,
-		"TopicName":       topicName,
-	}
+	request := client.NewCommonRequest("GET", "datahub", "2019-11-20", "DeleteTopic", "")
+	request.QueryParams["ProjectName"] = projectName
+	request.QueryParams["TopicName"] = topicName
 
 	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
 			return dataHubClient.ProcessCommonRequest(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
 			if isRetryableDatahubError(err) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_topic", "DeleteTopic", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg))
 		}
 		if debugOn() {
 			requestMap := make(map[string]string)
 			requestMap["ProjectName"] = projectName
 			requestMap["TopicName"] = topicName
-			addDebug("DeleteTopic", raw, requestInfo, requestMap)
+			addDebug("DeleteTopic", raw, requestMap)
 		}
 		return nil
 	})
@@ -327,7 +240,7 @@ func resourceAlibabacloudStackDatahubTopicDelete(d *schema.ResourceData, meta in
 		if isDatahubNotExistError(err) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "DeleteTopic", AlibabacloudStackDatahubSdkGo)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteTopic", errmsgs.AlibabacloudStackDatahubSdkGo)
 	}
-	return WrapError(datahubService.WaitForDatahubTopic(d.Id(), Deleted, DefaultTimeout))
+	return errmsgs.WrapError(datahubService.WaitForDatahubTopic(d.Id(), Deleted, DefaultTimeout))
 }

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
@@ -87,11 +85,7 @@ func TestAccAlibabacloudStackDRDSInstancesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeDRDSInstancesMapFunc,
 	}
 
-	preCheck := func() {
-		testAccPreCheckWithRegions(t, true, connectivity.DrdsSupportedRegions)
-	}
-
-	drdsInstancesCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, descriptionRegexConf, idsConf, allConf)
+	drdsInstancesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, descriptionRegexConf, idsConf, allConf)
 }
 
 func dataSourceDRDSInstancesConfigDependence(name string) string {

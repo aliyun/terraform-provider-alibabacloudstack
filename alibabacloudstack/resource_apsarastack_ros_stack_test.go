@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
 	"strings"
 	"testing"
@@ -28,7 +29,7 @@ func init() {
 func testSweepRosStack(region string) error {
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return WrapErrorf(err, "Error getting AlibabacloudStack client.")
+		return errmsgs.WrapErrorf(err, "Error getting AlibabacloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
@@ -45,18 +46,18 @@ func testSweepRosStack(region string) error {
 	action := "ListStacks"
 	conn, err := client.NewRosClient()
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	for {
 		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 		runtime.SetAutoretry(true)
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-09-10"), StringPointer("AK"), nil, request, &runtime)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ros_stack", action, AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_ros_stack", action, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		resp, err := jsonpath.Get("$.Stacks", response)
 		if err != nil {
-			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Stacks", response)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.Stacks", response)
 		}
 		sweeped := false
 		result, _ := resp.([]interface{})

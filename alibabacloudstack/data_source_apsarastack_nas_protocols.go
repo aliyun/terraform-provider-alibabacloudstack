@@ -4,10 +4,9 @@ import (
 	"strings"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -18,12 +17,9 @@ func dataSourceAlibabacloudStackNasProtocols() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"Capacity",
-					"Performance",
-				}, false),
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Capacity", "Performance"}, false),
 			},
 			"zone_id": {
 				Type:     schema.TypeString,
@@ -45,27 +41,16 @@ func dataSourceAlibabacloudStackNasProtocols() *schema.Resource {
 
 func dataSourceAlibabacloudStackNasProtocolsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	action := "DescribeZones"
-	var response map[string]interface{}
 	request := make(map[string]interface{})
-	request["RegionId"] = client.RegionId
-	request["Product"] = "Nas"
-	request["OrganizationId"] = client.Department
-	conn, err := client.NewNasClient()
+
+	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeZones", "", nil, request)
 	if err != nil {
-		return WrapError(err)
+		return err
 	}
 
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-26"), StringPointer("AK"), nil, request, &runtime)
-	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_nas_protocols", action, AlibabacloudStackSdkGoERROR)
-	}
-	addDebug(action, response, request)
 	resp, err := jsonpath.Get("$.Zones.Zone", response)
 	if err != nil {
-		return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Zones.Zone", response)
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "DescribeZones", "$.Zones.Zone", response)
 	}
 	var nasProtocol [][]interface{}
 	result, _ := resp.([]interface{})
@@ -102,7 +87,7 @@ func dataSourceAlibabacloudStackNasProtocolsRead(d *schema.ResourceData, meta in
 	}
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("protocols", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	// create a json file in current directory and write data source to it.
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

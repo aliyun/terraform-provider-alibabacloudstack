@@ -2,10 +2,10 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
@@ -100,25 +100,11 @@ func dataSourceAlibabacloudStackOnsInstances() *schema.Resource {
 func dataSourceAlibabacloudStackOnsInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := requests.NewCommonRequest()
-	request.Method = "POST"
-	request.Product = "Ons-inner"
-	request.Version = "2018-02-05"
-	request.Scheme = "http"
-	request.RegionId = client.RegionId
-	request.ApiName = "ConsoleInstanceList"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		"Product":         "Ons-inner",
-		"RegionId":        client.RegionId,
-		"Action":          "ConsoleInstanceList",
-		"Version":         "2018-02-05",
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"OnsRegionId":     client.RegionId,
-		"PreventCache":    "",
-	}
+	request := client.NewCommonRequest("POST", "Ons-inner", "2018-02-05", "ConsoleInstanceList", "")
+	request.Headers["OnsRegionId"] = client.RegionId
+	request.QueryParams["OnsRegionId"] = client.RegionId
+	request.QueryParams["PreventCache"] = ""
+
 	response := OInstance{}
 
 	for {
@@ -127,14 +113,18 @@ func dataSourceAlibabacloudStackOnsInstancesRead(d *schema.ResourceData, meta in
 		})
 		log.Printf(" response of raw ConsoleInstanceList : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_ons_instances", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_ons_instances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		bresponse, _ := raw.(*responses.CommonResponse)
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Code == "200" || len(response.Data) < 1 {
 			break
@@ -153,17 +143,17 @@ func dataSourceAlibabacloudStackOnsInstancesRead(d *schema.ResourceData, meta in
 			continue
 		}
 		mapping := map[string]interface{}{
-			"id":                 item.InstanceID,
-			"instance_id":        item.InstanceID,
-			"instance_status":    item.InstanceStatus,
-			"create_time":        item.CreateTime,
-			"instance_type":      item.InstanceType,
-			"instance_name":      item.InstanceName,
-			"cluster":            item.Cluster,
-			"tps_receive_max":    item.TpsReceiveMax,
-			"tps_send_max":       item.TpsMax,
-			"topic_capacity":     item.TopicCapacity,
-			"independent_naming": item.IndependentNaming,
+			"id":                   item.InstanceID,
+			"instance_id":          item.InstanceID,
+			"instance_status":      item.InstanceStatus,
+			"create_time":          item.CreateTime,
+			"instance_type":        item.InstanceType,
+			"instance_name":        item.InstanceName,
+			"cluster":              item.Cluster,
+			"tps_receive_max":      item.TpsReceiveMax,
+			"tps_send_max":         item.TpsMax,
+			"topic_capacity":       item.TopicCapacity,
+			"independent_naming":   item.IndependentNaming,
 		}
 
 		names = append(names, item.InstanceName)
@@ -174,13 +164,13 @@ func dataSourceAlibabacloudStackOnsInstancesRead(d *schema.ResourceData, meta in
 	d.SetId(dataResourceIdHash(ids))
 
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("instances", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

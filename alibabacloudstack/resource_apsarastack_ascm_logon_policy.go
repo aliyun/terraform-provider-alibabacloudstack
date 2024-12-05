@@ -3,16 +3,16 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"log"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"strings"
-	"time"
 )
 
 func resourceAlibabacloudStackLogonPolicy() *schema.Resource {
@@ -45,32 +45,10 @@ func resourceAlibabacloudStackLogonPolicy() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"ALLOW", "DENY"}, false),
 			},
-// 后续未消费的资源参数
-// 			"time_range": {
-// 				Type:     schema.TypeList,
-// 				Optional: true,
-// 				Elem: &schema.Resource{
-// 					Schema: map[string]*schema.Schema{
-// 						"name": {
-// 							Type:     schema.TypeString,
-// 							Default:  "flannel",
-// 							Optional: true,
-// 						},
-// 						"config": {
-// 							Type:     schema.TypeString,
-// 							Optional: true,
-// 						},
-// 						"disabled": {
-// 							Type:     schema.TypeBool,
-// 							Optional: true,
-// 							Default:  false,
-// 						},
-// 					},
-// 				},
-// 			},
 		},
 	}
 }
+
 func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *ecs.Client
@@ -80,57 +58,40 @@ func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta int
 	rule := d.Get("rule").(string)
 	object, err := ascmService.DescribeAscmLogonPolicy(name)
 	if err != nil {
-
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if len(object.Data) == 0 {
-
-		request := requests.NewCommonRequest()
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":               client.RegionId,
-			
-			"Product":                "ascm",
-			"Department":             client.Department,
-			"ResourceGroup":          client.ResourceGroup,
-			"Action":                 "AddLoginPolicy",
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddLoginPolicy", "")
+		mergeMaps(request.QueryParams, map[string]string{
 			"AccountInfo":            "123456",
-			"Version":                "2019-05-10",
 			"SignatureVersion":       "1.0",
 			"ProductName":            "ascm",
 			"name":                   name,
 			"description":            descr,
 			"rule":                   rule,
 			"organizationVisibility": "organizationVisibility.organization",
-		}
-		request.Domain = client.Domain
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		request.ApiName = "AddLoginPolicy"
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId}
+		})
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
 		log.Printf(" response of raw AddLoginPolicy : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_login_policy", "AddLoginPolicy", raw)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_login_policy", "AddLoginPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug("AddLoginPolicy", raw, requestInfo, request)
 
-		bresponse, _ := raw.(*responses.CommonResponse)
-		if bresponse.GetHttpStatus() != 200 {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_login_policy", "AddLoginPolicy", AlibabacloudStackSdkGoERROR)
+		if !bresponse.IsSuccess() {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_login_policy", "AddLoginPolicy", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug("AddLoginPolicy", raw, requestInfo, bresponse.GetHttpContentString())
 	}
@@ -146,7 +107,7 @@ func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta int
 		return resource.RetryableError(err)
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_login_policy", "Failed to add login Policy", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_login_policy", "Failed to add login Policy", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	d.SetId(object.Data[0].Name)
@@ -157,15 +118,6 @@ func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta int
 func resourceAlibabacloudStackLogonPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
-	request := requests.NewCommonRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
 	var name, rule, desc string
 	if d.HasChange("name") {
 		name = d.Get("name").(string)
@@ -178,63 +130,57 @@ func resourceAlibabacloudStackLogonPolicyUpdate(d *schema.ResourceData, meta int
 	}
 	policyId := fmt.Sprint(d.Get("policy_id").(int))
 
-	request.QueryParams = map[string]string{
-		"RegionId":        client.RegionId,
-		
-		"Product":         "ascm",
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Action":          "ModifyLoginPolicy",
-		"Version":         "2019-05-10",
-		"ProductName":     "ascm",
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ModifyLoginPolicy", "")
+	mergeMaps(request.QueryParams, map[string]string{
 		"id":              policyId,
-		"Name":            name,
-		"Rule":            rule,
-		"Description":     desc,
-	}
-	request.Domain = client.Domain
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.ApiName = "ModifyLoginPolicy"
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
+		"name":            name,
+		"rule":            rule,
+		"description":     desc,
+	})
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_login_policy", "LoginPolicyUpdateRequestFailed", raw)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_login_policy", "LoginPolicyUpdateRequestFailed", raw, errmsg)
 	}
-	bresponse, _ := raw.(*responses.CommonResponse)
 
 	if !bresponse.IsSuccess() {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_login_policy", "LoginPolicyUpdateFailed", raw)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_login_policy", "LoginPolicyUpdateFailed", raw, errmsg)
 	}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), bresponse)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	object, err := ascmService.DescribeAscmLogonPolicy(name)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.SetId(object.Data[0].Name)
 
 	return resourceAlibabacloudStackLogonPolicyRead(d, meta)
 }
+
 func resourceAlibabacloudStackLogonPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmLogonPolicy(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("name", object.Data[0].Name)
@@ -243,6 +189,7 @@ func resourceAlibabacloudStackLogonPolicyRead(d *schema.ResourceData, meta inter
 	d.Set("rule", object.Data[0].Rule)
 	return nil
 }
+
 func resourceAlibabacloudStackLogonPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
@@ -252,51 +199,28 @@ func resourceAlibabacloudStackLogonPolicyDelete(d *schema.ResourceData, meta int
 
 	check, err := ascmService.DescribeAscmLogonPolicy(d.Id())
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "IsLoginPolicyExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsLoginPolicyExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	addDebug("IsLoginPolicyExist", check, requestInfo, map[string]string{"loginpolicyName": d.Id()})
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		request := requests.NewCommonRequest()
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.RegionId = client.RegionId
-		request.QueryParams = map[string]string{
-			"RegionId":         client.RegionId,
-			
-			"Product":          "ascm",
-			"Department":       client.Department,
-			"ResourceGroup":    client.ResourceGroup,
-			"Action":           "RemoveLoginPolicyByName",
-			"AccountInfo":      "123456",
-			"Version":          "2019-05-10",
-			"SignatureVersion": "1.0",
-			"ProductName":      "ascm",
-			"Name":             name,
-		}
-		request.Domain = client.Domain
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "RemoveLoginPolicyByName"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveLoginPolicyByName", "")
+		mergeMaps(request.QueryParams, map[string]string{
+			"AccountInfo":            "123456",
+			"SignatureVersion":       "1.0",
+			"ProductName":            "ascm",
+			"name":                   name,
+		})
+		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
 		})
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return resource.RetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_login_policy", "RemoveLoginPolicyByName", raw, errmsg))
 		}
 
 		_, err = ascmService.DescribeAscmLogonPolicy(d.Id())

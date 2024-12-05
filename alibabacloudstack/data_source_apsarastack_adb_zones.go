@@ -7,7 +7,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/adb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	//"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -57,21 +57,24 @@ func dataSourceAlibabacloudStackAdbZonesRead(d *schema.ResourceData, meta interf
 	var zoneIds []string
 
 	request := adb.CreateDescribeRegionsRequest()
-	request.Headers["x-ascm-product-name"] = "adb"
-	request.Headers["x-acs-organizationId"] = client.Department
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
+
 	raw, err := client.WithAdbClient(func(adbClient *adb.Client) (interface{}, error) {
 		return adbClient.DescribeRegions(request)
 	})
+	response, ok := raw.(*adb.DescribeRegionsResponse)
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_adb_zones", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_adb_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	regions, _ := raw.(*adb.DescribeRegionsResponse)
-	if len(regions.Regions.Region) <= 0 {
-		return WrapError(fmt.Errorf("[ERROR] There is no available region for adb."))
+	if len(response.Regions.Region) <= 0 {
+		return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available region for adb."))
 	}
-	for _, r := range regions.Regions.Region {
+	for _, r := range response.Regions.Region {
 		for _, zone := range r.Zones.Zone {
 			if multi && strings.Contains(zone.ZoneId, MULTI_IZ_SYMBOL) && r.RegionId == string(client.Region) {
 				zoneIds = append(zoneIds, zone.ZoneId)
@@ -105,10 +108,10 @@ func dataSourceAlibabacloudStackAdbZonesRead(d *schema.ResourceData, meta interf
 	}
 	d.SetId(dataResourceIdHash(zoneIds))
 	if err := d.Set("zones", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", zoneIds); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

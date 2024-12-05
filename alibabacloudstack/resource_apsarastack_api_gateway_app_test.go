@@ -24,10 +24,6 @@ func init() {
 }
 
 func testSweepApiGatewayApp(region string) error {
-	if testSweepPreCheckWithRegions(region, false, connectivity.ApiGatewayNoSupportedRegions) {
-		log.Printf("[INFO] Skipping API Gateway unsupported region: %s", region)
-		return nil
-	}
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)

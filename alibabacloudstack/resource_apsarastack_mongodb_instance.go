@@ -5,12 +5,14 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -34,16 +36,16 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Required: true,
-			}, // EngineVersion
+			},
 			"db_instance_class": {
 				Type:     schema.TypeString,
 				Required: true,
-			}, // DBInstanceClass
+			},
 			"db_instance_storage": {
 				Type:         schema.TypeInt,
 				ValidateFunc: validation.IntBetween(10, 2000),
 				Required:     true,
-			}, // DBInstanceStorage
+			},
 			"replication_factor": {
 				Type:         schema.TypeInt,
 				ValidateFunc: validation.IntInSlice([]int{3, 5, 7}),
@@ -56,33 +58,39 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-			}, // Engine
+			},
 			"instance_charge_type": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
 				Optional:     true,
 				Default:      PostPaid,
-			}, //ChargeType
+			},
 			"period": {
 				Type:             schema.TypeInt,
 				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: PostPaidDiffSuppressFunc,
-			}, //Period
+			},
 			"zone_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
-			}, // ZoneId
+			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Optional: true,
 				Computed: true,
-			}, // VSwitchId
+			},
 			"name": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(2, 256),
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'db_instance_description' instead.",
+			},
+			"db_instance_description": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
@@ -92,7 +100,7 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 				Optional: true,
-			}, //SecurityIPList
+			},
 			"security_group_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -102,7 +110,7 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Type:      schema.TypeString,
 				Optional:  true,
 				Sensitive: true,
-			}, //AccountPassword
+			},
 			"kms_encrypted_password": {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -121,9 +129,23 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 				Computed: true,
+				Deprecated: "Field 'backup_period' is deprecated and will be removed in a future release. Please use 'preferred_backup_period' instead.",
+			},
+			"preferred_backup_period": {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				Computed: true,
 			},
 			"backup_time": {
-				Type:         schema.TypeString,
+				Type:     schema.TypeString,
+				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
+				Optional:     true,
+				Computed:     true,
+				Deprecated: "Field 'backup_time' is deprecated and will be removed in a future release. Please use 'preferred_backup_time' instead.",
+			},
+			"preferred_backup_time": {
+				Type:     schema.TypeString,
 				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
 				Optional:     true,
 				Computed:     true,
@@ -134,7 +156,6 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 			},
-			//Computed
 			"retention_period": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -156,7 +177,6 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-
 			"maintain_end_time": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -175,14 +195,16 @@ func buildMongoDBCreateRequest(d *schema.ResourceData, meta interface{}) (*dds.C
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := dds.CreateCreateDBInstanceRequest()
-	request.RegionId = string(client.Region)
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.EngineVersion = Trim(d.Get("engine_version").(string))
 	request.Engine = "MongoDB"
 	request.DBInstanceStorage = requests.NewInteger(d.Get("db_instance_storage").(int))
 	request.DBInstanceClass = Trim(d.Get("db_instance_class").(string))
-	request.DBInstanceDescription = d.Get("name").(string)
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "name"); err == nil {
+		request.DBInstanceDescription = v.(string)
+	} else {
+		return request, err
+	}
 
 	request.AccountPassword = d.Get("account_password").(string)
 	if request.AccountPassword == "" {
@@ -190,7 +212,7 @@ func buildMongoDBCreateRequest(d *schema.ResourceData, meta interface{}) (*dds.C
 			kmsService := KmsService{client}
 			decryptResp, err := kmsService.Decrypt(v, d.Get("kms_encryption_context").(map[string]interface{}))
 			if err != nil {
-				return request, WrapError(err)
+				return request, errmsgs.WrapError(err)
 			}
 			request.AccountPassword = decryptResp.Plaintext
 		}
@@ -210,7 +232,7 @@ func buildMongoDBCreateRequest(d *schema.ResourceData, meta interface{}) (*dds.C
 		vpcService := VpcService{client}
 		vsw, err := vpcService.DescribeVSwitch(vswitchId)
 		if err != nil {
-			return nil, WrapError(err)
+			return nil, errmsgs.WrapError(err)
 		}
 
 		if request.ZoneId == "" {
@@ -218,10 +240,10 @@ func buildMongoDBCreateRequest(d *schema.ResourceData, meta interface{}) (*dds.C
 		} else if strings.Contains(request.ZoneId, MULTI_IZ_SYMBOL) {
 			zonestr := strings.Split(strings.SplitAfter(request.ZoneId, "(")[1], ")")[0]
 			if !strings.Contains(zonestr, string([]byte(vsw.ZoneId)[len(vsw.ZoneId)-1])) {
-				return nil, WrapError(fmt.Errorf("The specified vswitch %s isn't in the multi zone %s.", vsw.VSwitchId, request.ZoneId))
+				return nil, errmsgs.WrapError(fmt.Errorf("The specified vswitch %s isn't in the multi zone %s.", vsw.VSwitchId, request.ZoneId))
 			}
 		} else if request.ZoneId != vsw.ZoneId {
-			return nil, WrapError(fmt.Errorf("The specified vswitch %s isn't in the zone %s.", vsw.VSwitchId, request.ZoneId))
+			return nil, errmsgs.WrapError(fmt.Errorf("The specified vswitch %s isn't in the zone %s.", vsw.VSwitchId, request.ZoneId))
 		}
 		request.VSwitchId = vswitchId
 		request.NetworkType = strings.ToUpper(string(Vpc))
@@ -248,13 +270,8 @@ func resourceAlibabacloudStackMongoDBInstanceCreate(d *schema.ResourceData, meta
 	ddsService := MongoDBService{client}
 
 	request, err := buildMongoDBCreateRequest(d, meta)
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
@@ -262,7 +279,11 @@ func resourceAlibabacloudStackMongoDBInstanceCreate(d *schema.ResourceData, meta
 	})
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err != nil {
-		return WrapError(err)
+		errmsg := ""
+		if bresponse, ok := raw.(*dds.CreateDBInstanceResponse); ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	response, _ := raw.(*dds.CreateDBInstanceResponse)
 
@@ -270,7 +291,7 @@ func resourceAlibabacloudStackMongoDBInstanceCreate(d *schema.ResourceData, meta
 
 	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	return resourceAlibabacloudStackMongoDBInstanceUpdate(d, meta)
@@ -283,38 +304,41 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 
 	instance, err := ddsService.DescribeMongoDBInstance(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	backupPolicy, err := ddsService.DescribeMongoDBBackupPolicy(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
-	d.Set("backup_time", backupPolicy.PreferredBackupTime)
-	d.Set("backup_period", strings.Split(backupPolicy.PreferredBackupPeriod, ","))
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "preferred_backup_time", "backup_time"); err == nil {
+		d.Set("preferred_backup_time", v)
+	} else {
+		return err
+	}
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "preferred_backup_period", "backup_period"); err == nil {
+		d.Set("preferred_backup_period", v)
+	} else {
+		return err
+	}
 	retention_period, _ := strconv.Atoi(backupPolicy.BackupRetentionPeriod)
 	d.Set("retention_period", retention_period)
 
 	ips, err := ddsService.DescribeMongoDBSecurityIps(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("security_ip_list", ips)
 
-	// 混合云不支持
-	//	groupIp, err := ddsService.DescribeMongoDBSecurityGroupId(d.Id())
-	//	if err != nil {
-	//		return WrapError(err)
-	//	}
-	//	if len(groupIp.Items.RdsEcsSecurityGroupRel) > 0 {
-	//		d.Set("security_group_id", groupIp.Items.RdsEcsSecurityGroupRel[0].SecurityGroupId)
-	//	}
-
-	d.Set("name", instance.DBInstanceDescription)
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "name"); err == nil {
+		d.Set("db_instance_description", v)
+	} else {
+		return err
+	}
 	d.Set("engine_version", instance.EngineVersion)
 	d.Set("db_instance_class", instance.DBInstanceClass)
 	d.Set("db_instance_storage", instance.DBInstanceStorage)
@@ -323,7 +347,7 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	if instance.ChargeType == "PrePaid" {
 		period, err := computePeriodByUnit(instance.CreationTime, instance.ExpireTime, d.Get("period").(int), "Month")
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		d.Set("period", period)
 	}
@@ -335,7 +359,7 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 
 	sslAction, err := ddsService.DescribeDBInstanceSSL(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("ssl_status", sslAction.SSLStatus)
 
@@ -344,7 +368,7 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	}
 	tdeInfo, err := ddsService.DescribeMongoDBTDEInfo(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if !(d.Get("tde_status") == "" && tdeInfo.TDEStatus == "disabled") {
 		d.Set("tde_status", tdeInfo.TDEStatus)
@@ -362,46 +386,54 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 
 	if !d.IsNewResource() && (d.HasChange("instance_charge_type") && d.Get("instance_charge_type").(string) == "PrePaid") {
 		prePaidRequest := dds.CreateTransformToPrePaidRequest()
+		client.InitRpcRequest(*prePaidRequest.RpcRequest)
 		prePaidRequest.InstanceId = d.Id()
 		prePaidRequest.AutoPay = requests.NewBoolean(true)
 		prePaidRequest.Period = requests.NewInteger(d.Get("period").(int))
-		prePaidRequest.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+
 		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 			return client.TransformToPrePaid(prePaidRequest)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), prePaidRequest.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if bresponse, ok := raw.(*dds.TransformToPrePaidResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), prePaidRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(prePaidRequest.GetActionName(), raw, prePaidRequest.RpcRequest, prePaidRequest)
 		// wait instance status is running after modifying
 		stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 0, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		//d.SetPartial("instance_charge_type")
 		//d.SetPartial("period")
 	}
 
-	if d.HasChange("backup_time") || d.HasChange("backup_period") {
+	if d.HasChange("preferred_backup_time") || d.HasChange("preferred_backup_period") || d.HasChange("backup_time") || d.HasChange("backup_period"){
 		if err := ddsService.MotifyMongoDBBackupPolicy(d); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-		//d.SetPartial("backup_time")
-		//d.SetPartial("backup_period")
+		//d.SetPartial("preferred_backup_time")
+		//d.SetPartial("preferred_backup_period")
 	}
 
 	if d.HasChange("tde_status") {
 		request := dds.CreateModifyDBInstanceTDERequest()
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
 		request.TDEStatus = d.Get("tde_status").(string)
+
 		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 			return client.ModifyDBInstanceTDE(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if bresponse, ok := raw.(*dds.ModifyDBInstanceTDEResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		//d.SetPartial("tde_status")
@@ -409,10 +441,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 
 	if d.HasChange("maintain_start_time") || d.HasChange("maintain_end_time") {
 		request := dds.CreateModifyDBInstanceMaintainTimeRequest()
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
 		request.MaintainStartTime = d.Get("maintain_start_time").(string)
 		request.MaintainEndTime = d.Get("maintain_end_time").(string)
@@ -421,7 +450,11 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			return client.ModifyDBInstanceMaintainTime(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if bresponse, ok := raw.(*dds.ModifyDBInstanceMaintainTimeResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		//d.SetPartial("maintain_start_time")
@@ -430,10 +463,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 
 	if d.HasChange("security_group_id") {
 		request := dds.CreateModifySecurityGroupConfigurationRequest()
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
 		request.SecurityGroupId = d.Get("security_group_id").(string)
 
@@ -441,14 +471,18 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			return client.ModifySecurityGroupConfiguration(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if bresponse, ok := raw.(*dds.ModifySecurityGroupConfigurationResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		//d.SetPartial("security_group_id")
 	}
 
 	if err := ddsService.setInstanceTags(d); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if d.IsNewResource() {
@@ -456,21 +490,29 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		return resourceAlibabacloudStackMongoDBInstanceRead(d, meta)
 	}
 
-	if d.HasChange("name") {
+	if d.HasChange("db_instance_description") || d.HasChange("name"){
 		request := dds.CreateModifyDBInstanceDescriptionRequest()
+		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
-		request.DBInstanceDescription = d.Get("name").(string)
-		request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "name"); err == nil {
+			request.DBInstanceDescription = v.(string)
+		} else {
+			return err
+		}
 
 		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
 			return ddsClient.ModifyDBInstanceDescription(request)
 		})
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if bresponse, ok := raw.(*dds.ModifyDBInstanceDescriptionResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("name")
+		//d.SetPartial("db_instance_description")
 	}
 
 	if d.HasChange("security_ip_list") {
@@ -482,7 +524,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		}
 
 		if err := ddsService.ModifyMongoDBSecurityIps(d.Id(), ipstr); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		//d.SetPartial("security_ip_list")
 	}
@@ -495,7 +537,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			kmsService := KmsService{meta.(*connectivity.AlibabacloudStackClient)}
 			decryptResp, err := kmsService.Decrypt(kmsPassword, d.Get("kms_encryption_context").(map[string]interface{}))
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			accountPassword = decryptResp.Plaintext
 			//d.SetPartial("kms_encrypted_password")
@@ -504,17 +546,14 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 
 		err := ddsService.ResetAccountPassword(d, accountPassword)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 
 	if d.HasChange("ssl_action") {
 		request := dds.CreateModifyDBInstanceSSLRequest()
+		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
-		request.RegionId = client.RegionId
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
 		request.SSLAction = d.Get("ssl_action").(string)
 
 		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
@@ -522,7 +561,11 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		})
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if bresponse, ok := raw.(*dds.ModifyDBInstanceSSLResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		//d.SetPartial("ssl_action")
@@ -533,17 +576,17 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		d.HasChange("replication_factor") {
 
 		request := dds.CreateModifyDBInstanceSpecRequest()
+		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
 
 		request.DBInstanceClass = d.Get("db_instance_class").(string)
 		request.DBInstanceStorage = strconv.Itoa(d.Get("db_instance_storage").(int))
 		request.ReplicationFactor = strconv.Itoa(d.Get("replication_factor").(int))
-		request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 		// wait instance status is running before modifying
 		stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
@@ -551,11 +594,15 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		})
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if bresponse, ok := raw.(*dds.ModifyDBInstanceSpecResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
@@ -565,7 +612,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 
 		// wait instance status is running after modifying
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 	d.Partial(false)
@@ -577,31 +624,35 @@ func resourceAlibabacloudStackMongoDBInstanceDelete(d *schema.ResourceData, meta
 	ddsService := MongoDBService{client}
 
 	request := dds.CreateDeleteDBInstanceRequest()
+	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
-	request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
 			return ddsClient.DeleteDBInstance(request)
 		})
-
+		bresponse, ok := raw.(*dds.DeleteDBInstanceResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
 				return resource.NonRetryableError(err)
 			}
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+
 			return resource.RetryableError(err)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
-
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
 	}
 	stateConf := BuildStateConf([]string{"Creating", "Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{}))
 	_, err = stateConf.WaitForState()
-	return WrapError(err)
+	return errmsgs.WrapError(err)
 }

@@ -2,9 +2,8 @@ package alibabacloudstack
 
 import (
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type CsbService struct {
@@ -13,37 +12,30 @@ type CsbService struct {
 
 func (s *CsbService) DescribeCsbProjectDetail(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
-	conn, err := s.client.NewDtsClient()
-	if err != nil {
-		return nil, WrapError(err)
-	}
 	parts, err := ParseResourceId(id, 2)
-	action := "GetProject"
+	if err != nil {
+		return nil, err
+	}
 	request := map[string]interface{}{
-		"RegionId":    s.client.RegionId,
 		"CsbId":       parts[0],
 		"ProjectName": parts[1],
 	}
-	request["Product"] = "CSB"
-	request["OrganizationId"] = s.client.Department
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-
-	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-11-18"), StringPointer("AK"), nil, request, &runtime)
-
+	request["PageSize"] = 1
+	request["PageNumber"] = 1
+	response, err = s.client.DoTeaRequest("POST", "CSB", "2017-11-18", "GetProject", "", nil, request)
 	if err != nil {
-		return object, WrapErrorf(err, DefaultErrorMsg, id, action, AlibabacloudStackSdkGoERROR)
+		return object, err
 	}
 
 	v, err := jsonpath.Get("$.Data.ProjectList", response)
 	i := v.([]interface{})
 	if err != nil {
-		return object, WrapErrorf(err, FailedGetAttributeMsg, id, "$.Data.ProjectList", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Data.ProjectList", response)
 	}
 	if len(i) > 0 {
 		object = i[0].(map[string]interface{})
 	} else {
-		return object, WrapErrorf(Error(GetNotFoundMessage("csb", id)), NotFoundWithResponse, response)
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("csb", id)), errmsgs.NotFoundWithResponse, response)
 	}
 	return object, nil
 }

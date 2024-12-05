@@ -7,6 +7,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -118,9 +119,7 @@ func resourceAlibabacloudStackNetworkAclEntries() *schema.Resource {
 }
 
 func resourceAlibabacloudStackNetworkAclEntriesCreate(d *schema.ResourceData, meta interface{}) error {
-
 	d.SetId(d.Get("network_acl_id").(string) + COLON_SEPARATED + resource.UniqueId())
-
 	return resourceAlibabacloudStackNetworkAclEntriesUpdate(d, meta)
 }
 
@@ -130,16 +129,16 @@ func resourceAlibabacloudStackNetworkAclEntriesRead(d *schema.ResourceData, meta
 
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	object, err := vpcService.DescribeNetworkAcl(parts[0])
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	var ingress []map[string]interface{}
@@ -147,13 +146,13 @@ func resourceAlibabacloudStackNetworkAclEntriesRead(d *schema.ResourceData, meta
 		for _, ob := range ingressAclEntryList {
 			if v, ok := ob.(map[string]interface{}); ok {
 				mapping := map[string]interface{}{
-					"description":    v["Description"],
-					"source_cidr_ip": v["SourceCidrIp"],
-					"entry_type":     "custom",
-					"name":           v["NetworkAclEntryName"],
-					"policy":         v["Policy"],
-					"port":           v["Port"],
-					"protocol":       v["Protocol"],
+					"description":     v["Description"],
+					"source_cidr_ip":  v["SourceCidrIp"],
+					"entry_type":      "custom",
+					"name":            v["NetworkAclEntryName"],
+					"policy":          v["Policy"],
+					"port":            v["Port"],
+					"protocol":        v["Protocol"],
 				}
 				ingress = append(ingress, mapping)
 			}
@@ -190,25 +189,25 @@ func resourceAlibabacloudStackNetworkAclEntriesUpdate(d *schema.ResourceData, me
 	vpcService := VpcService{client}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	networkAclId := parts[0]
+
 	request := vpc.CreateUpdateNetworkAclEntriesRequest()
-	request.Headers["x-ascm-product-name"] = "Vpc"
-	request.Headers["x-acs-organizationId"] = client.Department
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
 	request.NetworkAclId = networkAclId
+
 	if d.HasChange("ingress") {
 		ingress := []vpc.UpdateNetworkAclEntriesIngressAclEntries{}
 		for _, e := range d.Get("ingress").([]interface{}) {
 			ingress = append(ingress, vpc.UpdateNetworkAclEntriesIngressAclEntries{
-				Protocol:            e.(map[string]interface{})["protocol"].(string),
-				Port:                e.(map[string]interface{})["port"].(string),
-				SourceCidrIp:        e.(map[string]interface{})["source_cidr_ip"].(string),
-				NetworkAclEntryName: e.(map[string]interface{})["name"].(string),
-				EntryType:           e.(map[string]interface{})["entry_type"].(string),
-				Policy:              e.(map[string]interface{})["policy"].(string),
-				Description:         e.(map[string]interface{})["description"].(string),
+				Protocol:             e.(map[string]interface{})["protocol"].(string),
+				Port:                 e.(map[string]interface{})["port"].(string),
+				SourceCidrIp:         e.(map[string]interface{})["source_cidr_ip"].(string),
+				NetworkAclEntryName:  e.(map[string]interface{})["name"].(string),
+				EntryType:            e.(map[string]interface{})["entry_type"].(string),
+				Policy:               e.(map[string]interface{})["policy"].(string),
+				Description:          e.(map[string]interface{})["description"].(string),
 			})
 		}
 		request.IngressAclEntries = &ingress
@@ -219,38 +218,46 @@ func resourceAlibabacloudStackNetworkAclEntriesUpdate(d *schema.ResourceData, me
 		egress := []vpc.UpdateNetworkAclEntriesEgressAclEntries{}
 		for _, e := range d.Get("egress").([]interface{}) {
 			egress = append(egress, vpc.UpdateNetworkAclEntriesEgressAclEntries{
-				Protocol:            e.(map[string]interface{})["protocol"].(string),
-				Port:                e.(map[string]interface{})["port"].(string),
-				DestinationCidrIp:   e.(map[string]interface{})["destination_cidr_ip"].(string),
-				NetworkAclEntryName: e.(map[string]interface{})["name"].(string),
-				EntryType:           e.(map[string]interface{})["entry_type"].(string),
-				Policy:              e.(map[string]interface{})["policy"].(string),
-				Description:         e.(map[string]interface{})["description"].(string),
+				Protocol:             e.(map[string]interface{})["protocol"].(string),
+				Port:                 e.(map[string]interface{})["port"].(string),
+				DestinationCidrIp:    e.(map[string]interface{})["destination_cidr_ip"].(string),
+				NetworkAclEntryName:  e.(map[string]interface{})["name"].(string),
+				EntryType:            e.(map[string]interface{})["entry_type"].(string),
+				Policy:               e.(map[string]interface{})["policy"].(string),
+				Description:          e.(map[string]interface{})["description"].(string),
 			})
 		}
 		request.EgressAclEntries = &egress
 		request.UpdateEgressAclEntries = requests.NewBoolean(true)
 	}
-	// Check the network acl status.
+
 	if err := vpcService.WaitForNetworkAcl(networkAclId, Available, DefaultTimeout); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
+
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.UpdateNetworkAclEntries(request)
 		})
-		//Waiting for deleting the network acl entries
 		if err != nil {
-			if IsExpectedErrors(err, []string{"TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict"}) {
 				return resource.RetryableError(err)
 			}
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		if err != nil {
+			errmsg := ""
+			if response, ok := raw.(*vpc.UpdateNetworkAclEntriesResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+		}
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
+
 	return vpcService.WaitForNetworkAcl(networkAclId, Available, DefaultTimeout)
 }
 
@@ -259,40 +266,47 @@ func resourceAlibabacloudStackNetworkAclEntriesDelete(d *schema.ResourceData, me
 	vpcService := VpcService{client}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	networkAclId := parts[0]
 
 	request := vpc.CreateUpdateNetworkAclEntriesRequest()
-	request.Headers["x-ascm-product-name"] = "Vpc"
-	request.Headers["x-acs-organizationId"] = client.Department
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
 	request.NetworkAclId = networkAclId
+
 	ingress := []vpc.UpdateNetworkAclEntriesIngressAclEntries{}
 	egress := []vpc.UpdateNetworkAclEntriesEgressAclEntries{}
 	request.IngressAclEntries = &ingress
 	request.EgressAclEntries = &egress
 	request.UpdateIngressAclEntries = requests.NewBoolean(true)
 	request.UpdateEgressAclEntries = requests.NewBoolean(true)
-	// Check the network acl status.
+
 	if err := vpcService.WaitForNetworkAcl(networkAclId, Available, DefaultTimeout); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
+
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.UpdateNetworkAclEntries(request)
 		})
-		//Waiting for deleting the network acl entries
 		if err != nil {
-			if IsExpectedErrors(err, []string{"TaskConflict"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"TaskConflict"}) {
 				return resource.RetryableError(err)
 			}
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		if err != nil {
+			errmsg := ""
+			if response, ok := raw.(*vpc.UpdateNetworkAclEntriesResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+		}
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
+
 	return vpcService.WaitForNetworkAcl(networkAclId, Available, DefaultTimeout)
 }

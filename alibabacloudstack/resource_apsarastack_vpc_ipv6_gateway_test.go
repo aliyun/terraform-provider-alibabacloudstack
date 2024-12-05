@@ -12,6 +12,7 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -26,10 +27,6 @@ func init() {
 }
 
 func testSweepVpcIpv6Gateway(region string) error {
-	if testSweepPreCheckWithRegions(region, true, connectivity.VpcIpv6GatewaySupportRegions) {
-		log.Printf("[INFO] Skipping Vpc Ipv6 Gateway unsupported region: %s", region)
-		return nil
-	}
 
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
@@ -61,7 +58,7 @@ func testSweepVpcIpv6Gateway(region string) error {
 			request["OrganizationId"] = client.Department
 			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &runtime)
 			if err != nil {
-				if NeedRetry(err) {
+				if errmsgs.NeedRetry(err) {
 					wait()
 					return resource.RetryableError(err)
 				}
@@ -116,7 +113,6 @@ func testSweepVpcIpv6Gateway(region string) error {
 
 func TestAccAlibabacloudStackVPCIpv6Gateway_basic0(t *testing.T) {
 	var v map[string]interface{}
-	checkoutSupportedRegions(t, true, connectivity.VpcIpv6GatewaySupportRegions)
 	resourceId := "alibabacloudstack_vpc_ipv6_gateway.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackVPCIpv6GatewayMap0)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
@@ -221,9 +217,7 @@ var AlibabacloudStackVPCIpv6GatewayMap0 = map[string]string{
 
 func AlibabacloudStackVPCIpv6GatewayBasicDependence0(name string) string {
 	return fmt.Sprintf(` 
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 variable "name" {
   default = "%s"
 }

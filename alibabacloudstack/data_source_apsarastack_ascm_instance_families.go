@@ -2,14 +2,13 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
 	"regexp"
-	"strings"
 )
 
 func dataSourceAlibabacloudStackInstanceFamilies() *schema.Resource {
@@ -84,47 +83,26 @@ func dataSourceAlibabacloudStackInstanceFamilies() *schema.Resource {
 func dataSourceAlibabacloudStackInstanceFamiliesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.ApiName = "DescribeSeriesIdFamilies"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Product":         "ascm",
-		"RegionId":        client.RegionId,
-		"Action":          "DescribeSeriesIdFamilies",
-		"Version":         "2019-05-10",
-	}
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DescribeSeriesIdFamilies", "")
 	response := InstanceFamily{}
 
 	for {
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
-		log.Printf(" rsponse of raw DescribeSeriesIdFamilies : %s", raw)
+		log.Printf(" response of raw DescribeSeriesIdFamilies : %s", raw)
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_instance_families", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_instance_families", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Success == true || len(response.Data) < 1 {
 			break
@@ -143,13 +121,13 @@ func dataSourceAlibabacloudStackInstanceFamiliesRead(d *schema.ResourceData, met
 			continue
 		}
 		mapping := map[string]interface{}{
-			"id":                rg.SeriesID,
-			"order_by_id":       rg.OrderBy.ID,
-			"resource_type":     rg.ResourceType,
-			"series_name":       rg.SeriesName,
-			"modifier":          rg.Modifier,
-			"series_name_label": rg.SeriesNameLabel,
-			"is_deleted":        rg.IsDeleted,
+			"id":                  rg.SeriesID,
+			"order_by_id":         rg.OrderBy.ID,
+			"resource_type":       rg.ResourceType,
+			"series_name":         rg.SeriesName,
+			"modifier":            rg.Modifier,
+			"series_name_label":   rg.SeriesNameLabel,
+			"is_deleted":          rg.IsDeleted,
 		}
 		ids = append(ids, rg.SeriesID)
 		s = append(s, mapping)
@@ -157,7 +135,7 @@ func dataSourceAlibabacloudStackInstanceFamiliesRead(d *schema.ResourceData, met
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("families", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

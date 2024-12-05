@@ -6,6 +6,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -20,8 +21,8 @@ func dataSourceAlibabacloudStackSecurityGroupRules() *schema.Resource {
 				Required: true,
 			},
 			"nic_type": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				// must be one of GroupRuleInternet, GroupRuleIntranet
 				ValidateFunc: validation.StringInSlice([]string{"internet", "intranet"}, false),
 			},
@@ -31,8 +32,8 @@ func dataSourceAlibabacloudStackSecurityGroupRules() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"ingress", "egress"}, false),
 			},
 			"ip_protocol": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				// must be one of Tcp, Udp, Icmp, Gre, All
 				ValidateFunc: validation.StringInSlice([]string{
 					string(Tcp),
@@ -123,31 +124,26 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	req := ecs.CreateDescribeSecurityGroupAttributeRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		req.Scheme = "https"
-	} else {
-		req.Scheme = "http"
-	}
-	req.RegionId = client.RegionId
-	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-	req.QueryParams["Department"] = client.Department
-	req.QueryParams["ResourceGroup"] = client.ResourceGroup
+	client.InitRpcRequest(*req.RpcRequest)
 	req.SecurityGroupId = d.Get("group_id").(string)
 	req.NicType = d.Get("nic_type").(string)
 	req.Direction = d.Get("direction").(string)
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.DescribeSecurityGroupAttribute(req)
 	})
-	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "security_group_rules", req.GetActionName(), AlibabacloudStackSdkGoERROR)
-	}
+	response, ok := raw.(*ecs.DescribeSecurityGroupAttributeResponse)
 	addDebug(req.GetActionName(), raw, req.RpcRequest, req)
-	attr, _ := raw.(*ecs.DescribeSecurityGroupAttributeResponse)
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "security_group_rules", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
 	var rules []map[string]interface{}
 
-	if attr != nil {
-		for _, item := range attr.Permissions.Permission {
+	if response != nil {
+		for _, item := range response.Permissions.Permission {
 			if v, ok := d.GetOk("ip_protocol"); ok && strings.ToLower(string(item.IpProtocol)) != v.(string) {
 				continue
 			}
@@ -157,41 +153,41 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 			}
 
 			mapping := map[string]interface{}{
-				"ip_protocol":                strings.ToLower(string(item.IpProtocol)),
-				"port_range":                 item.PortRange,
-				"source_cidr_ip":             item.SourceCidrIp,
-				"source_group_id":            item.SourceGroupId,
-				"source_group_owner_account": item.SourceGroupOwnerAccount,
-				"dest_cidr_ip":               item.DestCidrIp,
-				"dest_group_id":              item.DestGroupId,
-				"dest_group_owner_account":   item.DestGroupOwnerAccount,
-				"policy":                     strings.ToLower(string(item.Policy)),
-				"nic_type":                   item.NicType,
-				"direction":                  item.Direction,
+				"ip_protocol":                  strings.ToLower(string(item.IpProtocol)),
+				"port_range":                   item.PortRange,
+				"source_cidr_ip":               item.SourceCidrIp,
+				"source_group_id":              item.SourceGroupId,
+				"source_group_owner_account":   item.SourceGroupOwnerAccount,
+				"dest_cidr_ip":                 item.DestCidrIp,
+				"dest_group_id":                item.DestGroupId,
+				"dest_group_owner_account":     item.DestGroupOwnerAccount,
+				"policy":                       strings.ToLower(string(item.Policy)),
+				"nic_type":                     item.NicType,
+				"direction":                    item.Direction,
 				//"description":                item.Description,//has been removed for Alibabacloudstack
 			}
 
 			pri, err := strconv.Atoi(item.Priority)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 			mapping["priority"] = pri
 			rules = append(rules, mapping)
 		}
 
-		if err := d.Set("group_name", attr.SecurityGroupName); err != nil {
-			return WrapError(err)
+		if err := d.Set("group_name", response.SecurityGroupName); err != nil {
+			return errmsgs.WrapError(err)
 		}
 
-		if err := d.Set("group_desc", attr.Description); err != nil {
-			return WrapError(err)
+		if err := d.Set("group_desc", response.Description); err != nil {
+			return errmsgs.WrapError(err)
 		}
 	}
 
 	d.SetId(d.Get("group_id").(string))
 
 	if err := d.Set("rules", rules); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

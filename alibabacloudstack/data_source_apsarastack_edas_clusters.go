@@ -5,6 +5,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -33,7 +34,6 @@ func dataSourceAlibabacloudStackEdasClusters() *schema.Resource {
 			"name_regex": {
 				Type:     schema.TypeString,
 				Optional: true,
-				//ValidateFunc: validation.StringIsValidRegExp,
 				ForceNew: true,
 			},
 			"names": {
@@ -111,10 +111,8 @@ func dataSourceAlibabacloudStackEdasClustersRead(d *schema.ResourceData, meta in
 
 	logicalRegionId := d.Get("logical_region_id").(string)
 	request := edas.CreateListClusterRequest()
+	client.InitRoaRequest(*request.RoaRequest)
 	request.LogicalRegionId = logicalRegionId
-	request.RegionId = client.RegionId
-	request.Headers["x-ascm-product-name"] = "Edas"
-	request.Headers["x-acs-organizationid"] = client.Department
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok {
@@ -130,15 +128,18 @@ func dataSourceAlibabacloudStackEdasClustersRead(d *schema.ResourceData, meta in
 		return edasClient.ListCluster(request)
 	})
 
+	response, ok := raw.(*edas.ListClusterResponse)
+	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_edas_clusters", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_clusters", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-
-	response, _ := raw.(*edas.ListClusterResponse)
 	if response.Code != 200 {
-		return WrapError(Error(response.Message))
+		return errmsgs.WrapError(errmsgs.Error(response.Message))
 	}
 
 	var filteredClusters []edas.Cluster
@@ -148,7 +149,7 @@ func dataSourceAlibabacloudStackEdasClustersRead(d *schema.ResourceData, meta in
 		if nameRegex != "" {
 			r, err = regexp.Compile(nameRegex.(string))
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		for _, cluster := range response.ClusterList.Cluster {
@@ -176,19 +177,19 @@ func edasClusterDescriptionAttributes(d *schema.ResourceData, clusters []edas.Cl
 
 	for _, cluster := range clusters {
 		mapping := map[string]interface{}{
-			"cluster_id":   cluster.ClusterId,
-			"cluster_name": cluster.ClusterName,
-			"cluster_type": cluster.ClusterType,
-			"create_time":  cluster.CreateTime,
-			"update_time":  cluster.UpdateTime,
-			"cpu":          cluster.Cpu,
-			"cpu_used":     cluster.CpuUsed,
-			"mem":          cluster.Mem,
-			"mem_used":     cluster.MemUsed,
-			"network_mode": cluster.NetworkMode,
-			"node_num":     cluster.NodeNum,
-			"vpc_id":       cluster.VpcId,
-			"region_id":    cluster.RegionId,
+			"cluster_id":     cluster.ClusterId,
+			"cluster_name":   cluster.ClusterName,
+			"cluster_type":   cluster.ClusterType,
+			"create_time":    cluster.CreateTime,
+			"update_time":    cluster.UpdateTime,
+			"cpu":            cluster.Cpu,
+			"cpu_used":       cluster.CpuUsed,
+			"mem":            cluster.Mem,
+			"mem_used":       cluster.MemUsed,
+			"network_mode":   cluster.NetworkMode,
+			"node_num":       cluster.NodeNum,
+			"vpc_id":         cluster.VpcId,
+			"region_id":      cluster.RegionId,
 		}
 		ids = append(ids, cluster.ClusterId)
 		s = append(s, mapping)
@@ -197,13 +198,13 @@ func edasClusterDescriptionAttributes(d *schema.ResourceData, clusters []edas.Cl
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("clusters", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

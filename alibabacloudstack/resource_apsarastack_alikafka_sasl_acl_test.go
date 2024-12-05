@@ -9,6 +9,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alikafka"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -23,7 +24,7 @@ func init() {
 func testSweepAlikafkaSaslAcl(region string) error {
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return WrapErrorf(err, "error getting AlibabacloudStack client.")
+		return errmsgs.WrapErrorf(err, "error getting AlibabacloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
@@ -71,7 +72,7 @@ func testSweepAlikafkaSaslAcl(region string) error {
 
 		saslUserListResp, _ := saslUserRaw.(*alikafka.DescribeSaslUsersResponse)
 		var usersToDelete []string
-		for _, saslUser := range saslUserListResp.SaslUserList {
+		for _, saslUser := range saslUserListResp.SaslUserList.SaslUserVO {
 			name := saslUser.Username
 			skip := true
 			for _, prefix := range prefixes {
@@ -105,7 +106,7 @@ func testSweepAlikafkaSaslAcl(region string) error {
 			continue
 		}
 		topicListResp, _ := topicRaw.(*alikafka.GetTopicListResponse)
-		topics := topicListResp.TopicList
+		topics := topicListResp.TopicList.TopicVO
 
 		// Query all consumer groups
 		consumerListReq := alikafka.CreateGetConsumerListRequest()
@@ -166,7 +167,7 @@ func deleteAcl(alikafkaService AlikafkaService, instanceId string, username stri
 	}
 	aclListResp, _ := raw.(*alikafka.DescribeAclsResponse)
 
-	for _, kafkaAcl := range aclListResp.KafkaAclList {
+	for _, kafkaAcl := range aclListResp.KafkaAclList.KafkaAclVO {
 
 		if kafkaAcl.Username != username {
 			continue
@@ -209,7 +210,6 @@ func TestAccAlibabacloudStackAlikafkaSaslAcl_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckWithAlikafkaAclEnable(t)
-			testAccPreCheckWithRegions(t, true, connectivity.AlikafkaSupportedRegions)
 			testAccPreCheck(t)
 		},
 		// module name
@@ -312,7 +312,7 @@ func TestAccAlicloudAlikafkaSaslAcl_multi(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckWithAlikafkaAclEnable(t)
-			testAccPreCheckWithRegions(t, true, connectivity.AlikafkaSupportedRegions)
+
 			testAccPreCheck(t)
 		},
 		// module name
@@ -342,7 +342,6 @@ func TestAccAlicloudAlikafkaSaslAcl_multi(t *testing.T) {
 	})
 
 }
-
 */
 func resourceAlikafkaSaslAclConfigDependence(name string) string {
 	return fmt.Sprintf(`

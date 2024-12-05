@@ -1,12 +1,8 @@
 package alibabacloudstack
 
 import (
-	"time"
-
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -47,15 +43,12 @@ var UserGroupDescription string
 var ParentUserGroupId string
 var UserGroupId string
 
-func resourceAlibabacloudStackQuickBiUserGroupCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackQuickBiUserGroupCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "CreateUserGroup"
 	request := make(map[string]interface{})
-	conn, err := client.NewQuickbiClient()
-	if err != nil {
-		return WrapError(err)
-	}
+
 	if v, ok := d.GetOk("user_group_id"); ok {
 		request["UserGroupId"] = v
 	}
@@ -68,23 +61,9 @@ func resourceAlibabacloudStackQuickBiUserGroupCreate(d *schema.ResourceData, met
 	request["UserGroupDescription"] = UserGroupDescription
 	request["ParentUserGroupId"] = ParentUserGroupId
 
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2022-03-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		addDebug(action, response, request)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-
-	addDebug(action, response, request)
+	response, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_quick_bi_user", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	responseResult := response["Result"].(string)
 	UserGroupId = responseResult
@@ -92,8 +71,8 @@ func resourceAlibabacloudStackQuickBiUserGroupCreate(d *schema.ResourceData, met
 
 	return resourceAlibabacloudStackQuickBiUserGroupRead(d, meta)
 }
-func resourceAlibabacloudStackQuickBiUserGroupRead(d *schema.ResourceData, meta interface{}) error {
 
+func resourceAlibabacloudStackQuickBiUserGroupRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("user_group_id", UserGroupId)
 	d.Set("user_group_name", UserGroupName)
 	d.Set("user_group_description", UserGroupDescription)
@@ -101,9 +80,9 @@ func resourceAlibabacloudStackQuickBiUserGroupRead(d *schema.ResourceData, meta 
 
 	return nil
 }
-func resourceAlibabacloudStackQuickBiUserGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+
+func resourceAlibabacloudStackQuickBiUserGroupUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var response map[string]interface{}
 	update := false
 	request := map[string]interface{}{
 		"UserGroupId": d.Id(),
@@ -121,60 +100,33 @@ func resourceAlibabacloudStackQuickBiUserGroupUpdate(d *schema.ResourceData, met
 		UserGroupName = d.Get("user_group_name").(string)
 		UserGroupDescription = d.Get("user_group_description").(string)
 		ParentUserGroupId = d.Get("parent_user_group_id").(string)
-		conn, err := client.NewQuickbiClient()
+
+		request["UserGroupName"] = UserGroupName
+		request["UserGroupDescription"] = UserGroupDescription
+		request["ParentUserGroupId"] = ParentUserGroupId
+
+		_, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, request)
 		if err != nil {
-			return WrapError(err)
-		}
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2022-03-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-		addDebug(action, response, request)
-		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+			return err
 		}
 	}
 
 	return resourceAlibabacloudStackQuickBiUserGroupRead(d, meta)
 }
-func resourceAlibabacloudStackQuickBiUserGroupDelete(d *schema.ResourceData, meta interface{}) error {
+
+func resourceAlibabacloudStackQuickBiUserGroupDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "DeleteUserGroup"
-	var response map[string]interface{}
-	conn, err := client.NewQuickbiClient()
-	if err != nil {
-		return WrapError(err)
-	}
 	request := map[string]interface{}{
 		"UserGroupId": d.Id(),
 	}
 
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2022-03-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	_, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	return nil
 }

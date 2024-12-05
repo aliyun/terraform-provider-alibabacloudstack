@@ -6,15 +6,13 @@ import (
 	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/denverdino/aliyungo/common"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -248,40 +246,22 @@ func resourceAlibabacloudStackElasticsearchCreate(d *schema.ResourceData, meta i
 	var response map[string]interface{}
 
 	// retry
-	wait := incrementalWait(3*time.Second, 5*time.Second)
-	errorCodeList := []string{"TokenPreviousRequestProcessError"}
-	conn, err := elasticsearchService.client.NewElasticsearchClient()
 
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, requestBody, &runtime)
-		if err != nil {
-			if IsExpectedErrors(err, errorCodeList) || NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, nil)
-		return nil
-	})
-
-	addDebug(action, response, nil)
+	response, err = client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", action, "", nil, requestBody)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_elasticsearch_instance", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	resp, err := jsonpath.Get("$.body.Result.instanceId", response)
 	if err != nil {
-		return WrapErrorf(err, FailedGetAttributeMsg, action, "$.body.Result.instanceId", response)
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.body.Result.instanceId", response)
 	}
 	d.SetId(resp.(string))
 
 	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 5*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 5 * time.Second
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return resourceAlibabacloudStackElasticsearchUpdate(d, meta)
@@ -293,11 +273,11 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 
 	object, err := elasticsearchService.DescribeElasticsearchInstance(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("description", object["description"])
@@ -353,7 +333,7 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 	// tags
 	tags, err := elasticsearchService.DescribeElasticsearchTags(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if len(tags) > 0 {
 		d.Set("tags", tags)
@@ -371,10 +351,8 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 
 	if d.HasChange("description") {
 		if err := updateDescription(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("description")
 	}
 
 	if d.HasChange("private_whitelist") {
@@ -383,10 +361,8 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		content["nodeType"] = string(WORKER)
 		content["whiteIpList"] = d.Get("private_whitelist").(*schema.Set).List()
 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("private_whitelist")
 	}
 
 	if d.HasChange("enable_public") {
@@ -395,10 +371,8 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		content["nodeType"] = string(WORKER)
 		content["actionType"] = elasticsearchService.getActionType(d.Get("enable_public").(bool))
 		if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("enable_public")
 	}
 
 	if d.Get("enable_public").(bool) == true && d.HasChange("public_whitelist") {
@@ -407,10 +381,8 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		content["nodeType"] = string(WORKER)
 		content["whiteIpList"] = d.Get("public_whitelist").(*schema.Set).List()
 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("public_whitelist")
 	}
 
 	if d.HasChange("enable_kibana_public_network") || d.IsNewResource() {
@@ -419,10 +391,8 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		content["nodeType"] = string(KIBANA)
 		content["actionType"] = elasticsearchService.getActionType(d.Get("enable_kibana_public_network").(bool))
 		if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("enable_kibana_public_network")
 	}
 
 	if d.Get("enable_kibana_public_network").(bool) == true && d.HasChange("kibana_whitelist") {
@@ -431,10 +401,8 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		content["nodeType"] = string(KIBANA)
 		content["whiteIpList"] = d.Get("kibana_whitelist").(*schema.Set).List()
 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("kibana_whitelist")
 	}
 
 	if d.HasChange("enable_kibana_private_network") {
@@ -443,10 +411,8 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		content["nodeType"] = string(KIBANA)
 		content["actionType"] = elasticsearchService.getActionType(d.Get("enable_kibana_private_network").(bool))
 		if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("enable_kibana_private_network")
 	}
 
 	if d.Get("enable_kibana_private_network").(bool) == true && d.HasChange("kibana_private_whitelist") {
@@ -455,62 +421,43 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		content["nodeType"] = string(KIBANA)
 		content["whiteIpList"] = d.Get("kibana_private_whitelist").(*schema.Set).List()
 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("kibana_private_whitelist")
 	}
 
 	if d.HasChange("tags") {
 		if err := updateInstanceTags(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("tags")
 	}
 
 	if d.HasChange("client_node_spec") || d.HasChange("client_node_amount") {
-
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-
 		if err := updateClientNode(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("client_node_spec")
-		//d.SetPartial("client_node_amount")
 	}
 
 	if d.HasChange("protocol") {
-
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-
 		var https func(*schema.ResourceData, interface{}) error
-
 		if d.Get("protocol") == "HTTPS" {
 			https = openHttps
 		} else if d.Get("protocol") == "HTTP" {
 			https = closeHttps
 		}
-
 		if nil != https {
 			if err := https(d, meta); err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
-
-		//d.SetPartial("protocol")
 	}
+
 	if d.HasChange("setting_config") {
-		conn, err := client.NewElasticsearchClient()
-		if err != nil {
-			return WrapError(err)
-		}
-		var response map[string]interface{}
 		action := "UpdateInstanceSettings"
 		content := map[string]interface{}{
 			"RegionId":    client.RegionId,
@@ -518,36 +465,16 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 		config := d.Get("setting_config").(map[string]interface{})
 		content["esConfig"] = config
-		content["product"] = "elasticsearch"
-		content["OrganizationId"] = client.Department
-		content["ResourceId"] = client.ResourceGroup
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		// retry
-		wait := incrementalWait(3*time.Second, 5*time.Second)
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, content, &runtime)
+		_, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", action, "", nil, content)
 
-			if err != nil {
-				if IsExpectedErrors(err, []string{"ConcurrencyUpdateInstanceConflict", "InstanceStatusNotSupportCurrentAction", "InstanceDuplicateScheduledTask"}) || NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			addDebug(action, response, content)
-			return nil
-		})
-
-		if err != nil && !IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
+			return err
 		}
 		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 5*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 		stateConf.PollInterval = 5 * time.Second
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-		//d.SetPartial("setting_config")
 	}
 
 	if d.IsNewResource() {
@@ -557,72 +484,48 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 
 	if d.HasChange("instance_charge_type") {
 		if err := updateInstanceChargeType(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("instance_charge_type")
-		//d.SetPartial("period")
 	} else if d.Get("instance_charge_type").(string) == string(PrePaid) && d.HasChange("period") {
 		if err := renewInstance(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("period")
 	}
 
 	if d.HasChange("data_node_amount") {
-
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-
 		if err := updateDataNodeAmount(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("data_node_amount")
 	}
 
 	if d.HasChange("data_node_spec") || d.HasChange("data_node_disk_size") || d.HasChange("data_node_disk_type") {
-
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-
 		if err := updateDataNodeSpec(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("data_node_spec")
-		//d.SetPartial("data_node_disk_size")
-		//d.SetPartial("data_node_disk_type")
-		//d.SetPartial("data_node_disk_encrypted")
 	}
 
 	if d.HasChange("master_node_spec") {
-
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-
 		if err := updateMasterNode(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("master_node_spec")
 	}
 
 	if d.HasChange("password") || d.HasChange("kms_encrypted_password") {
-
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-
 		if err := updatePassword(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
-
-		//d.SetPartial("password")
 	}
 
 	d.Partial(false)
@@ -635,50 +538,25 @@ func resourceAlibabacloudStackElasticsearchDelete(d *schema.ResourceData, meta i
 	action := "DeleteInstance"
 
 	if strings.ToLower(d.Get("instance_charge_type").(string)) == strings.ToLower(string(PrePaid)) {
-		return WrapError(Error("At present, 'PrePaid' instance cannot be deleted and must wait it to be expired and release it automatically"))
+		return errmsgs.WrapError(errmsgs.Error("At present, 'PrePaid' instance cannot be deleted and must wait it to be expired and release it automatically"))
 	}
-	var response map[string]interface{}
 	request := map[string]interface{}{
 		"RegionId":    client.RegionId,
 		"clientToken": StringPointer(buildClientToken(action)),
 	}
-	request["product"] = "elasticsearch"
-	request["OrganizationId"] = client.Department
-	request["ResourceId"] = client.ResourceGroup
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
-	// retry
-	wait := incrementalWait(3*time.Second, 5*time.Second)
-	errorCodeList := []string{"InstanceActivating", "TokenPreviousRequestProcessError"}
-	conn, err := client.NewElasticsearchClient()
-
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, request, &runtime)
-
-		if err != nil {
-			if IsExpectedErrors(err, errorCodeList) || NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, nil)
-		return nil
-	})
-
-	addDebug(action, response, nil)
+	_, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", action, "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	stateConf := BuildStateConf([]string{"activating", "inactive", "active"}, []string{}, d.Timeout(schema.TimeoutDelete), 5*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{}))
 	stateConf.PollInterval = 5 * time.Second
 
 	if _, err = stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	// Instance will be completed deleted in 5 minutes, so deleting vswitch is available after the time.
 	time.Sleep(5 * time.Minute)
@@ -694,10 +572,6 @@ func buildElasticsearchCreateRequestBody(d *schema.ResourceData, meta interface{
 	if v, ok := d.GetOk("resource_group_id"); ok && v.(string) != "" {
 		content["resourceGroupId"] = v.(string)
 	}
-	content["Product"] = "elasticsearch"
-	content["product"] = "elasticsearch"
-	content["OrganizationId"] = client.Department
-	content["RegionId"] = client.RegionId
 	content["ClientToken"] = buildClientToken("createInstance")
 	content["paymentType"] = strings.ToLower(d.Get("instance_charge_type").(string))
 	if d.Get("instance_charge_type").(string) == string(PrePaid) {
@@ -721,7 +595,7 @@ func buildElasticsearchCreateRequestBody(d *schema.ResourceData, meta interface{
 	kmsPassword := d.Get("kms_encrypted_password").(string)
 
 	if password == "" && kmsPassword == "" {
-		return nil, WrapError(Error("One of the 'password' and 'kms_encrypted_password' should be set."))
+		return nil, errmsgs.WrapError(errmsgs.Error("One of the 'password' and 'kms_encrypted_password' should be set."))
 	}
 
 	if password != "" {
@@ -730,7 +604,7 @@ func buildElasticsearchCreateRequestBody(d *schema.ResourceData, meta interface{
 		kmsService := KmsService{client}
 		decryptResp, err := kmsService.Decrypt(kmsPassword, d.Get("kms_encryption_context").(map[string]interface{}))
 		if err != nil {
-			return content, WrapError(err)
+			return content, errmsgs.WrapError(err)
 		}
 		content["esAdminPassword"] = decryptResp
 	}
@@ -774,7 +648,7 @@ func buildElasticsearchCreateRequestBody(d *schema.ResourceData, meta interface{
 	vswitchId := d.Get("vswitch_id")
 	vsw, err := vpcService.DescribeVSwitch(vswitchId.(string))
 	if err != nil {
-		return nil, WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 
 	network := make(map[string]interface{})

@@ -5,8 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
@@ -64,10 +62,7 @@ func TestAccAlicloudQuickBIUsersDataSource(t *testing.T) {
 		existMapFunc: existDataAlicloudQuickBIUsersSourceNameMapFunc,
 		fakeMapFunc:  fakeDataAlicloudQuickBIUsersSourceNameMapFunc,
 	}
-	preCheck := func() {
-		testAccPreCheckWithRegions(t, true, connectivity.AlbSupportRegions)
-	}
-	alibabacloudstackQuickBIUserCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, idsConf, keywordConf, allConf)
+	alibabacloudstackQuickBIUserCheckInfo.dataSourceTestCheck(t, rand, idsConf, keywordConf, allConf)
 }
 func testAccCheckAlicloudQuickBIUserDataSourceName(rand int, attrMap map[string]string) string {
 	var pairs []string

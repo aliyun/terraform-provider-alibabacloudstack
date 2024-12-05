@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
 	"strings"
 	"testing"
@@ -23,7 +24,7 @@ func init() {
 func testSweepGpdbInstances(region string) error {
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
@@ -35,7 +36,7 @@ func testSweepGpdbInstances(region string) error {
 	var instances []gpdb.DBInstance
 	request := gpdb.CreateDescribeDBInstancesRequest()
 	request.RegionId = client.RegionId
-	request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	request.PageNumber = requests.NewInteger(1)
 	for {
@@ -43,7 +44,7 @@ func testSweepGpdbInstances(region string) error {
 			return gpdbClient.DescribeDBInstances(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "testSweepGpdbInstances", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "testSweepGpdbInstances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		response, _ := raw.(*gpdb.DescribeDBInstancesResponse)
 		addDebug(request.GetActionName(), response)
@@ -57,7 +58,7 @@ func testSweepGpdbInstances(region string) error {
 			break
 		}
 		if page, err := getNextpageNumber(request.PageNumber); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		} else {
 			request.PageNumber = page
 		}
@@ -89,7 +90,7 @@ func testSweepGpdbInstances(region string) error {
 		// Delete Instance
 		request := gpdb.CreateDeleteDBInstanceRequest()
 		request.DBInstanceId = id
-		request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		raw, err := client.WithGpdbClient(func(gpdbClient *gpdb.Client) (interface{}, error) {
 			return gpdbClient.DeleteDBInstance(request)
 		})
@@ -121,7 +122,7 @@ func TestAccAlibabacloudStackGpdbInstance_classic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, "", resourceGpdbClassicConfigDependence)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:      func() { testAccPreCheckWithRegions(t, false, connectivity.GpdbClassicNoSupportedRegions) },
+
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  nil,

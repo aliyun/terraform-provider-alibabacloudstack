@@ -1,10 +1,10 @@
 package alibabacloudstack
 
 import (
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
-	"strings"
 	"time"
 
 	_ "github.com/alibabacloud-go/tea-utils/service"
@@ -33,6 +33,7 @@ func dataSourceAlibabacloudStackDatahubService() *schema.Resource {
 		},
 	}
 }
+
 func dataSourceAlibabacloudStackDatahubServiceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	if v, ok := d.GetOk("enable"); !ok || v.(string) != "On" {
@@ -41,51 +42,33 @@ func dataSourceAlibabacloudStackDatahubServiceRead(d *schema.ResourceData, meta 
 		return nil
 	}
 	action := "OpenDataHubService"
-	request := requests.NewCommonRequest()
-	request.Method = "GET"
-	request.Product = "datahub"
-	request.Version = "2019-11-20"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-
-	request.RegionId = client.RegionId
-	request.ApiName = "OpenDataHubService"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "datahub",
-		"RegionId":        client.RegionId,
-		"Action":          "OpenDataHubService",
-		"Version":         "2019-11-20",
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-	}
+	request := client.NewCommonRequest("GET", "datahub", "2019-11-20", "OpenDataHubService", "")
 
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
 			return dataHubClient.ProcessCommonRequest(request)
 		})
+		response, ok := raw.(*responses.CommonResponse)
+		addDebug(action, raw, nil)
 		if err != nil {
-			if IsExpectedErrors(err, []string{"QPS Limit Exceeded"}) || NeedRetry(err) {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			if errmsgs.IsExpectedErrors(err, []string{"QPS Limit Exceeded"}) || errmsgs.NeedRetry(err) {
 				return resource.RetryableError(err)
 			}
-			addDebug(action, response, nil)
-			return resource.NonRetryableError(err)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_service", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		addDebug(action, response, nil)
 		return nil
 	})
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ORDER.OPEND"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"ORDER.OPEND"}) {
 			d.SetId("DatahubServiceHasBeenOpened")
 			d.Set("status", "Opened")
 			return nil
 		}
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_datahub_service", action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	d.SetId("DatahubServiceHasBeenOpened")
 	d.Set("status", "Opened")

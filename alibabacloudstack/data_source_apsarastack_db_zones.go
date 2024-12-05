@@ -8,6 +8,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -22,14 +23,6 @@ func dataSourceAlibabacloudStackDBZones() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			// 后续未消费的参数
-			// 			"instance_charge_type": {
-			// 				Type:         schema.TypeString,
-			// 				Optional:     true,
-			// 				ForceNew:     true,
-			// 				Default:      PostPaid,
-			// 				ValidateFunc: validation.StringInSlice([]string{"PrePaid", "PostPaid"}, false),
-			// 			},
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -66,35 +59,35 @@ func dataSourceAlibabacloudStackDBZonesRead(d *schema.ResourceData, meta interfa
 	multi := d.Get("multi").(bool)
 	var zoneIds []string
 	request := rds.CreateDescribeRegionsRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-	var response = &rds.DescribeRegionsResponse{}
+	client.InitRpcRequest(*request.RpcRequest)
+
+	var response *rds.DescribeRegionsResponse
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (i interface{}, err error) {
 			return rdsClient.DescribeRegions(request)
 		})
+		response, ok := raw.(*rds.DescribeRegionsResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{Throttling}) {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
 				time.Sleep(time.Duration(3) * time.Second)
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "Process Common Request failed", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return resource.RetryableError(err)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response = raw.(*rds.DescribeRegionsResponse)
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_db_zones", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return err
 	}
 	if len(response.Regions.RDSRegion) <= 0 {
-		return WrapError(fmt.Errorf("[ERROR] There is no available zone for RDS."))
+		return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available zone for RDS."))
 	}
 	for _, r := range response.Regions.RDSRegion {
 		if multi && strings.Contains(r.ZoneId, MULTI_IZ_SYMBOL) && r.RegionId == string(client.Region) {
@@ -127,16 +120,17 @@ func dataSourceAlibabacloudStackDBZonesRead(d *schema.ResourceData, meta interfa
 	}
 	d.SetId(dataResourceIdHash(zoneIds))
 	if err := d.Set("zones", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", zoneIds); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)
 	}
 	return nil
 }
+
 func splitMultiZoneId(id string) (ids []string) {
 	if !(strings.Contains(id, MULTI_IZ_SYMBOL) || strings.Contains(id, "(")) {
 		return

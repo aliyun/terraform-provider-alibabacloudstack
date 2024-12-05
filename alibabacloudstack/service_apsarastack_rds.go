@@ -12,6 +12,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/denverdino/aliyungo/common"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -39,28 +40,25 @@ var DBInstanceStatusCatcher = Catcher{"OperationDenied.DBInstanceStatus", 60, 5}
 func (s *RdsService) DescribeDBInstance(id string) (*rds.DBInstanceAttribute, error) {
 	instance := &rds.DBInstanceAttribute{}
 	request := rds.CreateDescribeDBInstanceAttributeRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeDBInstanceAttribute(request)
 	})
+	response, ok := raw.(*rds.DescribeDBInstanceAttributeResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return instance, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return instance, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return instance, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return instance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*rds.DescribeDBInstanceAttributeResponse)
 	if len(response.Items.DBInstanceAttribute) < 1 {
-		return instance, WrapErrorf(Error(GetNotFoundMessage("DBInstance", id)), NotFoundMsg, ProviderERROR)
+		return instance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 
 	return &response.Items.DBInstanceAttribute[0], nil
@@ -68,26 +66,23 @@ func (s *RdsService) DescribeDBInstance(id string) (*rds.DBInstanceAttribute, er
 
 func (s *RdsService) DescribeTasks(id string) (task *rds.DescribeTasksResponse, err error) {
 	request := rds.CreateDescribeTasksRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeTasks(request)
 	})
+	response, ok := raw.(*rds.DescribeTasksResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return task, WrapErrorf(err, NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return task, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		}
-		return task, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return task, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*rds.DescribeTasksResponse)
 
 	return response, nil
 }
@@ -95,55 +90,48 @@ func (s *RdsService) DescribeTasks(id string) (task *rds.DescribeTasksResponse, 
 func (s *RdsService) DescribeDBReadonlyInstance(id string) (*rds.DBInstanceAttribute, error) {
 	instance := &rds.DBInstanceAttribute{}
 	request := rds.CreateDescribeDBInstanceAttributeRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeDBInstanceAttribute(request)
 	})
+	response, ok := raw.(*rds.DescribeDBInstanceAttributeResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return instance, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return instance, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return instance, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return instance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*rds.DescribeDBInstanceAttributeResponse)
 	if len(response.Items.DBInstanceAttribute) < 1 {
-		return instance, WrapErrorf(Error(GetNotFoundMessage("DBInstance", id)), NotFoundMsg, ProviderERROR)
+		return instance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 
 	return &response.Items.DBInstanceAttribute[0], nil
 }
 
+func (s *RdsService) DoRdsDescribeaccountsRequest(id string) (*rds.DBInstanceAccount, error) {
+    return s.DescribeDBAccount(id)
+}
 func (s *RdsService) DescribeDBAccount(id string) (*rds.DBInstanceAccount, error) {
 	ds := &rds.DBInstanceAccount{}
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return ds, WrapError(err)
+		return ds, errmsgs.WrapError(err)
 	}
 	request := rds.CreateDescribeAccountsRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = parts[0]
 	request.AccountName = parts[1]
 	invoker := NewInvoker()
 	invoker.AddCatcher(DBInstanceStatusCatcher)
-	var response *rds.DescribeAccountsResponse
-	if err := invoker.Run(func() error {
-		raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
+	var raw interface{}
+	err = invoker.Run(func() error {
+		raw, err = s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.DescribeAccounts(request)
 		})
 		if err != nil {
@@ -151,18 +139,22 @@ func (s *RdsService) DescribeDBAccount(id string) (*rds.DBInstanceAccount, error
 		}
 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-
-		response, _ = raw.(*rds.DescribeAccountsResponse)
 		return nil
-	}); err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return ds, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+	})
+	response, ok := raw.(*rds.DescribeAccountsResponse)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return ds, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return ds, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return ds, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	if len(response.Accounts.DBInstanceAccount) < 1 {
-		return ds, WrapErrorf(Error(GetNotFoundMessage("DBAccount", id)), NotFoundMsg, ProviderERROR)
+		return ds, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBAccount", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	return &response.Accounts.DBInstanceAccount[0], nil
 }
@@ -171,66 +163,56 @@ func (s *RdsService) DescribeDBAccountPrivilege(id string) (*rds.DBInstanceAccou
 	ds := &rds.DBInstanceAccount{}
 	parts, err := ParseResourceId(id, 3)
 	if err != nil {
-		return ds, WrapError(err)
+		return ds, errmsgs.WrapError(err)
 	}
 	request := rds.CreateDescribeAccountsRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = parts[0]
 	request.AccountName = parts[1]
 	invoker := NewInvoker()
 	invoker.AddCatcher(DBInstanceStatusCatcher)
-	var response *rds.DescribeAccountsResponse
-	if err := invoker.Run(func() error {
-		raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
+	var raw interface{}
+	err = invoker.Run(func() error {
+		raw, err = s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.DescribeAccounts(request)
 		})
 		if err != nil {
 			return err
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ = raw.(*rds.DescribeAccountsResponse)
+
 		return nil
-	}); err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return ds, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+	})
+	response, ok := raw.(*rds.DescribeAccountsResponse)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return ds, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return ds, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return ds, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	if len(response.Accounts.DBInstanceAccount) < 1 {
-		return ds, WrapErrorf(Error(GetNotFoundMessage("DBAccountPrivilege", id)), NotFoundMsg, ProviderERROR)
+		return ds, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBAccountPrivilege", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	return &response.Accounts.DBInstanceAccount[0], nil
 }
 
+func (s *RdsService) DoRdsDescribedatabasesRequest(id string) (*rds.Database, error) {
+    return s.DescribeDBDatabase(id)
+}
 func (s *RdsService) DescribeDBDatabase(id string) (*rds.Database, error) {
 	ds := &rds.Database{}
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return ds, WrapError(err)
+		return ds, errmsgs.WrapError(err)
 	}
 	dbName := parts[1]
 	request := rds.CreateDescribeDatabasesRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = parts[0]
 	request.DBName = dbName
 
@@ -238,21 +220,25 @@ func (s *RdsService) DescribeDBDatabase(id string) (*rds.Database, error) {
 		raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.DescribeDatabases(request)
 		})
+		response, ok := raw.(*rds.DescribeDatabasesResponse)
 		if err != nil {
-			if IsExpectedErrors(err, []string{"InternalError", "OperationDenied.DBInstanceStatus"}) {
-				return resource.RetryableError(WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR))
+			if errmsgs.IsExpectedErrors(err, []string{"InternalError", "OperationDenied.DBInstanceStatus"}) {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
 			}
-			if NotFoundError(err) || IsExpectedErrors(err, []string{"InvalidDBName.NotFound"}) {
-				return resource.NonRetryableError(WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR))
+			if errmsgs.NotFoundError(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidDBName.NotFound"}) {
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR))
 			}
-			return resource.NonRetryableError(WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR))
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-		response, _ := raw.(*rds.DescribeDatabasesResponse)
 		if len(response.Databases.Database) < 1 {
-			return resource.NonRetryableError(WrapErrorf(Error(GetNotFoundMessage("DBDatabase", dbName)), NotFoundMsg, ProviderERROR))
+			return resource.NonRetryableError(errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBDatabase", dbName)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR))
 		}
 		ds = &response.Databases.Database[0]
 		return nil
@@ -263,28 +249,24 @@ func (s *RdsService) DescribeDBDatabase(id string) (*rds.Database, error) {
 func (s *RdsService) DescribeParameters(id string) (*rds.DescribeParametersResponse, error) {
 	ds := &rds.DescribeParametersResponse{}
 	request := rds.CreateDescribeParametersRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeParameters(request)
 	})
+	response, ok := raw.(*rds.DescribeParametersResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return ds, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return ds, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return ds, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return ds, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-
-	response, _ := raw.(*rds.DescribeParametersResponse)
 	return response, err
 }
 
@@ -297,7 +279,7 @@ func (s *RdsService) RefreshParameters(d *schema.ResourceData, attribute string)
 	}
 	object, err := s.DescribeParameters(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	var parameters = make(map[string]interface{})
@@ -331,23 +313,16 @@ func (s *RdsService) RefreshParameters(d *schema.ResourceData, attribute string)
 		}
 	}
 	if err := d.Set(attribute, param); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	return nil
 }
 
 func (s *RdsService) ModifyParameters(d *schema.ResourceData, attribute string) error {
 	request := rds.CreateModifyParameterRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
 	request.Forcerestart = requests.NewBoolean(d.Get("force_restart").(bool))
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
 	config := make(map[string]string)
 	allConfig := make(map[string]string)
 	o, n := d.GetChange(attribute)
@@ -363,19 +338,12 @@ func (s *RdsService) ModifyParameters(d *schema.ResourceData, attribute string) 
 		request.Parameters = string(cfg)
 		// wait instance status is Normal before modifying
 		if err := s.WaitForDBInstance(d.Id(), Running, DefaultLongTimeout); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		// Need to check whether some parameter needs restart
 		if !d.Get("force_restart").(bool) {
 			req := rds.CreateDescribeParameterTemplatesRequest()
-			req.RegionId = s.client.RegionId
-			if strings.ToLower(s.client.Config.Protocol) == "https" {
-				req.Scheme = "https"
-			} else {
-				req.Scheme = "http"
-			}
-			req.Headers = map[string]string{"RegionId": s.client.RegionId}
-			req.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+			s.client.InitRpcRequest(*req.RpcRequest)
 			req.DBInstanceId = d.Id()
 			req.Engine = d.Get("engine").(string)
 			req.EngineVersion = d.Get("engine_version").(string)
@@ -384,10 +352,14 @@ func (s *RdsService) ModifyParameters(d *schema.ResourceData, attribute string) 
 			raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 				return rdsClient.DescribeParameterTemplates(req)
 			})
+			response, ok := raw.(*rds.DescribeParameterTemplatesResponse)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			response, _ := raw.(*rds.DescribeParameterTemplatesResponse)
 			for _, para := range response.Parameters.TemplateRecord {
 				if para.ForceRestart == "true" {
 					forceRestartMap[para.ParameterName] = para.ForceRestart
@@ -396,7 +368,7 @@ func (s *RdsService) ModifyParameters(d *schema.ResourceData, attribute string) 
 			if len(forceRestartMap) > 0 {
 				for key, _ := range config {
 					if _, ok := forceRestartMap[key]; ok {
-						return WrapError(fmt.Errorf("Modifying RDS instance's parameter '%s' requires setting 'force_restart = true'.", key))
+						return errmsgs.WrapError(fmt.Errorf("Modifying RDS instance's parameter '%s' requires setting 'force_restart = true'.", key))
 					}
 				}
 			}
@@ -404,8 +376,13 @@ func (s *RdsService) ModifyParameters(d *schema.ResourceData, attribute string) 
 		raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.ModifyParameter(request)
 		})
+		response, ok := raw.(*rds.ModifyParameterResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
@@ -416,7 +393,7 @@ func (s *RdsService) ModifyParameters(d *schema.ResourceData, attribute string) 
 			allConfig[key] = value
 		}
 		if err := s.WaitForDBParameter(d.Id(), DefaultTimeoutMedium, allConfig); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 	//d.SetPartial(attribute)
@@ -424,33 +401,29 @@ func (s *RdsService) ModifyParameters(d *schema.ResourceData, attribute string) 
 }
 
 func (s *RdsService) DescribeDBInstanceNetInfo(id string) ([]rds.DBInstanceNetInfo, error) {
-
 	request := rds.CreateDescribeDBInstanceNetInfoRequest()
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeDBInstanceNetInfo(request)
 	})
 
+	response, ok := raw.(*rds.DescribeDBInstanceNetInfoResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return nil, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return nil, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	response, _ := raw.(*rds.DescribeDBInstanceNetInfoResponse)
 	if len(response.DBInstanceNetInfos.DBInstanceNetInfo) < 1 {
-		return nil, WrapErrorf(Error(GetNotFoundMessage("DBInstanceNetInfo", id)), NotFoundMsg, ProviderERROR)
+		return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBInstanceNetInfo", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 
 	return response.DBInstanceNetInfos.DBInstanceNetInfo, nil
@@ -460,15 +433,15 @@ func (s *RdsService) DescribeDBConnection(id string) (*rds.DBInstanceNetInfo, er
 	info := &rds.DBInstanceNetInfo{}
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return info, WrapError(err)
+		return info, errmsgs.WrapError(err)
 	}
 	object, err := s.DescribeDBInstanceNetInfo(parts[0])
 
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidCurrentConnectionString.NotFound"}) {
-			return info, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidCurrentConnectionString.NotFound"}) {
+			return info, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return info, WrapError(err)
+		return info, errmsgs.WrapError(err)
 	}
 
 	if object != nil {
@@ -479,13 +452,13 @@ func (s *RdsService) DescribeDBConnection(id string) (*rds.DBInstanceNetInfo, er
 		}
 	}
 
-	return info, WrapErrorf(Error(GetNotFoundMessage("DBConnection", id)), NotFoundMsg, ProviderERROR)
+	return info, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
 func (s *RdsService) DescribeDBReadWriteSplittingConnection(id string) (*rds.DBInstanceNetInfo, error) {
 	ds := &rds.DBInstanceNetInfo{}
 	object, err := s.DescribeDBInstanceNetInfo(id)
-	if err != nil && !NotFoundError(err) {
+	if err != nil && !errmsgs.NotFoundError(err) {
 		return ds, err
 	}
 
@@ -504,23 +477,16 @@ func (s *RdsService) DescribeDBReadWriteSplittingConnection(id string) (*rds.DBI
 		}
 	}
 
-	return ds, WrapErrorf(Error(GetNotFoundMessage("ReadWriteSplittingConnection", id)), NotFoundMsg, ProviderERROR)
+	return ds, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ReadWriteSplittingConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
 func (s *RdsService) GrantAccountPrivilege(id, dbName string) error {
 	parts, err := ParseResourceId(id, 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	request := rds.CreateGrantAccountPrivilegeRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = parts[0]
 	request.AccountName = parts[1]
 	request.DBName = dbName
@@ -530,11 +496,16 @@ func (s *RdsService) GrantAccountPrivilege(id, dbName string) error {
 		raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.GrantAccountPrivilege(request)
 		})
+		response, ok := raw.(*rds.GrantAccountPrivilegeResponse)
 		if err != nil {
-			if IsExpectedErrors(err, OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
@@ -543,11 +514,11 @@ func (s *RdsService) GrantAccountPrivilege(id, dbName string) error {
 	})
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	if err := s.WaitForAccountPrivilege(id, dbName, Available, DefaultTimeoutMedium); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	return nil
@@ -556,17 +527,10 @@ func (s *RdsService) GrantAccountPrivilege(id, dbName string) error {
 func (s *RdsService) RevokeAccountPrivilege(id, dbName string) error {
 	parts, err := ParseResourceId(id, 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	request := rds.CreateRevokeAccountPrivilegeRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = parts[0]
 	request.AccountName = parts[1]
 	request.DBName = dbName
@@ -575,11 +539,16 @@ func (s *RdsService) RevokeAccountPrivilege(id, dbName string) error {
 		raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.RevokeAccountPrivilege(request)
 		})
+		response, ok := raw.(*rds.RevokeAccountPrivilegeResponse)
 		if err != nil {
-			if IsExpectedErrors(err, OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
@@ -588,35 +557,32 @@ func (s *RdsService) RevokeAccountPrivilege(id, dbName string) error {
 	})
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	if err := s.WaitForAccountPrivilegeRevoked(id, dbName, DefaultTimeoutMedium); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	return nil
 }
 
 func (s *RdsService) ReleaseDBPublicConnection(instanceId, connection string) error {
-
 	request := rds.CreateReleaseInstancePublicConnectionRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = instanceId
 	request.CurrentConnectionString = connection
 
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.ReleaseInstancePublicConnection(request)
 	})
+	response, ok := raw.(*rds.ReleaseInstancePublicConnectionResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, instanceId, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
@@ -684,9 +650,9 @@ func (s *RdsService) ModifyDBBackupPolicy(d *schema.ResourceData, updateForData,
 		archiveBackupRetentionPeriod = strconv.Itoa(v.(int))
 	}
 
-	archiveBackupKeepCount := "1"
+	archiveBackupKeepCount := 1
 	if v, ok := d.GetOk("archive_backup_keep_count"); ok {
-		archiveBackupKeepCount = strconv.Itoa(v.(int))
+		archiveBackupKeepCount = v.(int)
 	}
 
 	archiveBackupKeepPolicy := "0"
@@ -696,19 +662,12 @@ func (s *RdsService) ModifyDBBackupPolicy(d *schema.ResourceData, updateForData,
 
 	instance, err := s.DescribeDBInstance(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if updateForData {
 		request := rds.CreateModifyBackupPolicyRequest()
-		request.RegionId = s.client.RegionId
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+		s.client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
-		if strings.ToLower(s.client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
 		request.PreferredBackupPeriod = backupPeriod
 		request.PreferredBackupTime = backupTime
 		request.BackupRetentionPeriod = retentionPeriod
@@ -718,37 +677,36 @@ func (s *RdsService) ModifyDBBackupPolicy(d *schema.ResourceData, updateForData,
 			request.LogBackupFrequency = logBackupFrequency
 		}
 		if instance.Engine == "MySQL" && instance.DBInstanceStorageType == "local_ssd" {
+
 			request.ArchiveBackupRetentionPeriod = archiveBackupRetentionPeriod
-			request.ArchiveBackupKeepCount = archiveBackupKeepCount
+			request.ArchiveBackupKeepCount = requests.NewInteger(archiveBackupKeepCount)
 			request.ArchiveBackupKeepPolicy = archiveBackupKeepPolicy
 		}
 		raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.ModifyBackupPolicy(request)
 		})
 
+		response, ok := raw.(*rds.ModifyBackupPolicyResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 		if err := s.WaitForDBInstance(d.Id(), Running, DefaultTimeoutMedium); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 
 	// At present, the sql server database does not support setting logBackupRetentionPeriod
 	if updateForLog && instance.Engine != "SQLServer" {
 		request := rds.CreateModifyBackupPolicyRequest()
-		request.RegionId = s.client.RegionId
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+		s.client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
-		if strings.ToLower(s.client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
 		request.EnableBackupLog = enableBackupLog
 		request.LocalLogRetentionHours = localLogRetentionHours
 		request.LocalLogRetentionSpace = localLogRetentionSpace
@@ -759,79 +717,76 @@ func (s *RdsService) ModifyDBBackupPolicy(d *schema.ResourceData, updateForData,
 		raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.ModifyBackupPolicy(request)
 		})
-
+		response, ok := raw.(*rds.ModifyBackupPolicyResponse)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 		if err := s.WaitForDBInstance(d.Id(), Running, DefaultTimeoutMedium); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 	return nil
 }
 
 func (s *RdsService) ModifyDBSecurityIps(instanceId, ips string) error {
-
 	request := rds.CreateModifySecurityIpsRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = instanceId
 	request.SecurityIps = ips
 
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.ModifySecurityIps(request)
 	})
+	response, ok := raw.(*rds.ModifySecurityIpsResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, instanceId, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	if err := s.WaitForDBInstance(instanceId, Running, DefaultTimeoutMedium); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	return nil
 }
 
 func (s *RdsService) DescribeDBSecurityIps(instanceId string) (ips []rds.DBInstanceIPArray, err error) {
-
 	request := rds.CreateDescribeDBInstanceIPArrayListRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = instanceId
 
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeDBInstanceIPArrayList(request)
 	})
+	resp, ok := raw.(*rds.DescribeDBInstanceIPArrayListResponse)
 	if err != nil {
-		return nil, WrapErrorf(err, DefaultErrorMsg, instanceId, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(resp.BaseResponse)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	resp, _ := raw.(*rds.DescribeDBInstanceIPArrayListResponse)
 	return resp.Items.DBInstanceIPArray, nil
 }
 
 func (s *RdsService) GetSecurityIps(instanceId string) ([]string, error) {
 	object, err := s.DescribeDBSecurityIps(instanceId)
 	if err != nil {
-		return nil, WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 
 	var ips, separator string
@@ -860,25 +815,22 @@ func (s *RdsService) GetSecurityIps(instanceId string) ([]string, error) {
 
 func (s *RdsService) DescribeSecurityGroupConfiguration(id string) ([]string, error) {
 	request := rds.CreateDescribeSecurityGroupConfigurationRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeSecurityGroupConfiguration(request)
 	})
 
+	response, ok := raw.(*rds.DescribeSecurityGroupConfigurationResponse)
 	if err != nil {
-		return nil, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	response, _ := raw.(*rds.DescribeSecurityGroupConfigurationResponse)
 	groupIds := make([]string, 0)
 	for _, v := range response.Items.EcsSecurityGroupRelation {
 		groupIds = append(groupIds, v.SecurityGroupId)
@@ -889,66 +841,54 @@ func (s *RdsService) DescribeSecurityGroupConfiguration(id string) ([]string, er
 func (s *RdsService) DescribeDBInstanceSSL(id string) (*rds.DescribeDBInstanceSSLResponse, error) {
 	response := &rds.DescribeDBInstanceSSLResponse{}
 	request := rds.CreateDescribeDBInstanceSSLRequest()
-	request.RegionId = s.client.RegionId
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeDBInstanceSSL(request)
 	})
+	response, ok := raw.(*rds.DescribeDBInstanceSSLResponse)
 	if err != nil {
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*rds.DescribeDBInstanceSSLResponse)
+
 	return response, nil
 }
 
 func (s *RdsService) DescribeRdsTDEInfo(id string) (*rds.DescribeDBInstanceTDEResponse, error) {
-
 	response := &rds.DescribeDBInstanceTDEResponse{}
 	request := rds.CreateDescribeDBInstanceTDERequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
 	statErr := s.WaitForDBInstance(id, Running, DefaultLongTimeout)
 	if statErr != nil {
-		return response, WrapError(statErr)
+		return response, errmsgs.WrapError(statErr)
 	}
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeDBInstanceTDE(request)
 	})
+	response, ok := raw.(*rds.DescribeDBInstanceTDEResponse)
 	if err != nil {
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*rds.DescribeDBInstanceTDEResponse)
+
 	return response, nil
 }
 
 func (s *RdsService) ModifySecurityGroupConfiguration(id string, groupid string) error {
 	request := rds.CreateModifySecurityGroupConfigurationRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	//openapi required that input "Empty" if groupid is ""
+	// openapi required that input "Empty" if groupid is ""
 	if len(groupid) == 0 {
 		groupid = "Empty"
 	}
@@ -956,8 +896,13 @@ func (s *RdsService) ModifySecurityGroupConfiguration(id string, groupid string)
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.ModifySecurityGroupConfiguration(request)
 	})
+	response, ok := raw.(*rds.ModifySecurityGroupConfigurationResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	return nil
@@ -965,26 +910,23 @@ func (s *RdsService) ModifySecurityGroupConfiguration(id string, groupid string)
 
 // return multiIZ list of current region
 func (s *RdsService) DescribeMultiIZByRegion() (izs []string, err error) {
-
 	request := rds.CreateDescribeRegionsRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeRegions(request)
 	})
+	response, ok := raw.(*rds.DescribeRegionsResponse)
 	if err != nil {
-		return nil, WrapErrorf(err, DefaultErrorMsg, "MultiIZByRegion", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DescribeMultiIZByRegion", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	response, _ := raw.(*rds.DescribeRegionsResponse)
 	regions := response.Regions.RDSRegion
 
 	zoneIds := []string{}
@@ -1000,24 +942,22 @@ func (s *RdsService) DescribeMultiIZByRegion() (izs []string, err error) {
 func (s *RdsService) DescribeBackupPolicy(id string) (*rds.DescribeBackupPolicyResponse, error) {
 	policy := &rds.DescribeBackupPolicyResponse{}
 	request := rds.CreateDescribeBackupPolicyRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-	request.RegionId = s.client.RegionId
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeBackupPolicy(request)
 	})
 
+	response, ok := raw.(*rds.DescribeBackupPolicyResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return policy, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return policy, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return policy, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DescribeMultiIZByRegion", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
@@ -1025,82 +965,72 @@ func (s *RdsService) DescribeBackupPolicy(id string) (*rds.DescribeBackupPolicyR
 }
 
 func (s *RdsService) DescribeDbInstanceMonitor(id string) (monitoringPeriod int, err error) {
-
 	request := rds.CreateDescribeDBInstanceMonitorRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-	request.RegionId = s.client.RegionId
 	raw, err := s.client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
 		return client.DescribeDBInstanceMonitor(request)
 	})
+	response, ok := raw.(*rds.DescribeDBInstanceMonitorResponse)
 	if err != nil {
-		return 0, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return 0, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	response, _ := raw.(*rds.DescribeDBInstanceMonitorResponse)
 	monPeriod, err := strconv.Atoi(response.Period)
 	if err != nil {
-		return 0, WrapError(err)
+		return 0, errmsgs.WrapError(err)
 	}
 	return monPeriod, nil
 }
 
 func (s *RdsService) DescribeSQLCollectorPolicy(id string) (collectorPolicy *rds.DescribeSQLCollectorPolicyResponse, err error) {
 	request := rds.CreateDescribeSQLCollectorPolicyRequest()
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeSQLCollectorPolicy(request)
 	})
+	response, ok := raw.(*rds.DescribeSQLCollectorPolicyResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return collectorPolicy, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return collectorPolicy, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return collectorPolicy, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*rds.DescribeSQLCollectorPolicyResponse)
 
 	return response, nil
 }
 
 func (s *RdsService) DescribeSQLCollectorRetention(id string) (collectorRetention *rds.DescribeSQLCollectorRetentionResponse, err error) {
 	request := rds.CreateDescribeSQLCollectorRetentionRequest()
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 		return rdsClient.DescribeSQLCollectorRetention(request)
 	})
+	response, ok := raw.(*rds.DescribeSQLCollectorRetentionResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return collectorRetention, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return collectorRetention, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return collectorRetention, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*rds.DescribeSQLCollectorRetentionResponse)
 
 	return response, nil
 }
@@ -1111,12 +1041,12 @@ func (s *RdsService) WaitForDBInstance(id string, status Status, timeout int) er
 	for {
 		object, err := s.DescribeDBInstance(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if object != nil && strings.ToLower(object.DBInstanceStatus) == strings.ToLower(string(status)) {
@@ -1124,7 +1054,7 @@ func (s *RdsService) WaitForDBInstance(id string, status Status, timeout int) er
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.DBInstanceStatus, status, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.DBInstanceStatus, status, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
@@ -1134,16 +1064,16 @@ func (s *RdsService) RdsDBInstanceStateRefreshFunc(id string, failStates []strin
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeDBInstance(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if object.DBInstanceStatus == failState {
-				return object, object.DBInstanceStatus, WrapError(Error(FailedToReachTargetStatus, object.DBInstanceStatus))
+				return object, object.DBInstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.DBInstanceStatus))
 			}
 		}
 		return object, object.DBInstanceStatus, nil
@@ -1155,11 +1085,11 @@ func (s *RdsService) RdsTaskStateRefreshFunc(id string, taskAction string) resou
 		object, err := s.DescribeTasks(id)
 		if err != nil {
 
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, t := range object.Items.TaskProgressInfo {
@@ -1181,7 +1111,7 @@ func (s *RdsService) WaitForDBParameter(instanceId string, timeout int, expects 
 	for {
 		object, err := s.DescribeParameters(instanceId)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		var actuals = make(map[string]string)
@@ -1217,7 +1147,7 @@ func (s *RdsService) WaitForDBParameter(instanceId string, timeout int, expects 
 		time.Sleep(DefaultIntervalShort * time.Second)
 
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, instanceId, GetFunc(1), timeout, got_value, expected_value, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, got_value, expected_value, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
@@ -1228,19 +1158,19 @@ func (s *RdsService) WaitForDBConnection(id string, status Status, timeout int) 
 	for {
 		object, err := s.DescribeDBConnection(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if object != nil && object.ConnectionString != "" {
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.ConnectionString, id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ConnectionString, id, errmsgs.ProviderERROR)
 		}
 	}
 }
@@ -1250,12 +1180,12 @@ func (s *RdsService) WaitForDBReadWriteSplitting(id string, status Status, timeo
 	for {
 		object, err := s.DescribeDBReadWriteSplittingConnection(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if err == nil {
@@ -1263,7 +1193,7 @@ func (s *RdsService) WaitForDBReadWriteSplitting(id string, status Status, timeo
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.ConnectionString, id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.ConnectionString, id, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
@@ -1274,12 +1204,12 @@ func (s *RdsService) WaitForAccount(id string, status Status, timeout int) error
 	for {
 		object, err := s.DescribeDBAccount(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		if object != nil {
@@ -1287,27 +1217,20 @@ func (s *RdsService) WaitForAccount(id string, status Status, timeout int) error
 				break
 			} else if object.AccountStatus == "Lock" {
 				request := rds.CreateDeleteAccountRequest()
-				if strings.ToLower(s.client.Config.Protocol) == "https" {
-					request.Scheme = "https"
-				} else {
-					request.Scheme = "http"
-				}
-				request.RegionId = s.client.RegionId
-				request.Headers = map[string]string{"RegionId": s.client.RegionId}
-				request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+				s.client.InitRpcRequest(*request.RpcRequest)
 				request.DBInstanceId = object.DBInstanceId
 				request.AccountName = object.AccountName
 
 				_, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 					return rdsClient.DeleteAccount(request)
 				})
-				if err != nil && !IsExpectedErrors(err, []string{"InvalidAccountName.NotFound"}) {
-					return WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				if err != nil && !errmsgs.IsExpectedErrors(err, []string{"InvalidAccountName.NotFound"}) {
+					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 				}
 			}
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.AccountStatus, status, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.AccountStatus, status, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
@@ -1316,18 +1239,18 @@ func (s *RdsService) WaitForAccount(id string, status Status, timeout int) error
 func (s *RdsService) WaitForAccountPrivilege(id, dbName string, status Status, timeout int) error {
 	parts, err := ParseResourceId(id, 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
 		object, err := s.DescribeDBDatabase(parts[0] + ":" + dbName)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		ready := false
@@ -1347,7 +1270,7 @@ func (s *RdsService) WaitForAccountPrivilege(id, dbName string, status Status, t
 			break
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, "", id, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, "", id, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
@@ -1356,16 +1279,16 @@ func (s *RdsService) WaitForAccountPrivilege(id, dbName string, status Status, t
 func (s *RdsService) WaitForAccountPrivilegeRevoked(id, dbName string, timeout int) error {
 	parts, err := ParseResourceId(id, 3)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
 		object, err := s.DescribeDBDatabase(parts[0] + ":" + dbName)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				return nil
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		exist := false
@@ -1382,7 +1305,7 @@ func (s *RdsService) WaitForAccountPrivilegeRevoked(id, dbName string, timeout i
 			break
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, "", dbName, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, "", dbName, errmsgs.ProviderERROR)
 		}
 
 	}
@@ -1392,25 +1315,25 @@ func (s *RdsService) WaitForAccountPrivilegeRevoked(id, dbName string, timeout i
 func (s *RdsService) WaitForDBDatabase(id string, status Status, timeout int) error {
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
 		object, err := s.DescribeDBDatabase(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
 					return nil
 				}
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if object != nil && object.DBName == parts[1] {
 			break
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.DBName, parts[1], ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.DBName, parts[1], errmsgs.ProviderERROR)
 		}
 	}
 	return nil
@@ -1467,25 +1390,19 @@ func (s *RdsService) setInstanceTags(d *schema.ResourceData) error {
 
 		if len(remove) > 0 {
 			request := rds.CreateUntagResourcesRequest()
+			s.client.InitRpcRequest(*request.RpcRequest)
 			request.ResourceId = &[]string{d.Id()}
-			if strings.ToLower(s.client.Config.Protocol) == "https" {
-				request.Scheme = "https"
-			} else {
-				request.Scheme = "http"
-			}
 			request.ResourceType = "INSTANCE"
 			request.TagKey = &remove
-			request.RegionId = s.client.RegionId
-			request.Headers = map[string]string{"RegionId": s.client.RegionId}
-			request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
-
 			wait := incrementalWait(1*time.Second, 2*time.Second)
-			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
-				raw, err := s.client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
+			var raw interface{}
+			var err error
+			err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+				raw, err = s.client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
 					return client.UntagResources(request)
 				})
 				if err != nil {
-					if IsThrottling(err) {
+					if errmsgs.IsThrottling(err) {
 						wait()
 						return resource.RetryableError(err)
 
@@ -1495,31 +1412,31 @@ func (s *RdsService) setInstanceTags(d *schema.ResourceData) error {
 				addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 				return nil
 			})
+			response, ok := raw.(*rds.UntagResourcesResponse)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 		}
 
 		if len(add) > 0 {
 			request := rds.CreateTagResourcesRequest()
+			s.client.InitRpcRequest(*request.RpcRequest)
 			request.ResourceId = &[]string{d.Id()}
-			if strings.ToLower(s.client.Config.Protocol) == "https" {
-				request.Scheme = "https"
-			} else {
-				request.Scheme = "http"
-			}
 			request.Tag = &add
 			request.ResourceType = "INSTANCE"
-			request.RegionId = s.client.RegionId
-			request.Headers = map[string]string{"RegionId": s.client.RegionId}
-			request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 			wait := incrementalWait(1*time.Second, 2*time.Second)
-			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
-				raw, err := s.client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
+			var raw interface{}
+			var err error
+			err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+				raw, err = s.client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
 					return client.TagResources(request)
 				})
 				if err != nil {
-					if IsThrottling(err) {
+					if errmsgs.IsThrottling(err) {
 						wait()
 						return resource.RetryableError(err)
 
@@ -1529,8 +1446,13 @@ func (s *RdsService) setInstanceTags(d *schema.ResourceData) error {
 				addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 				return nil
 			})
+			response, ok := raw.(*rds.TagResourcesResponse)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 		}
 
@@ -1542,26 +1464,23 @@ func (s *RdsService) setInstanceTags(d *schema.ResourceData) error {
 
 func (s *RdsService) describeTags(d *schema.ResourceData) (tags []Tag, err error) {
 	request := rds.CreateDescribeTagsRequest()
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "rds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	raw, err := s.client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
 		return client.DescribeTags(request)
 	})
+	response, ok := raw.(*rds.DescribeTagsResponse)
 	if err != nil {
 		tmp := make([]Tag, 0)
-		return tmp, WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return tmp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	response, _ := raw.(*rds.DescribeTagsResponse)
 	return s.respToTags(response.Items.TagInfos), nil
 }
 

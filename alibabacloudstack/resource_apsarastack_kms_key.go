@@ -6,6 +6,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -118,9 +119,7 @@ func resourceAlibabacloudStackKmsKeyCreate(d *schema.ResourceData, meta interfac
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := kms.CreateCreateKeyRequest()
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+	client.InitRpcRequest(*request.RpcRequest)
 	if v, ok := d.GetOk("automatic_rotation"); ok {
 		request.EnableAutomaticRotation = requests.NewBoolean(convertAutomaticRotationRequest(v.(string)))
 	}
@@ -142,29 +141,31 @@ func resourceAlibabacloudStackKmsKeyCreate(d *schema.ResourceData, meta interfac
 	raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.CreateKey(request)
 	})
+	bresponse, ok := raw.(*kms.CreateKeyResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_kms_key", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_kms_key", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw)
-	response, _ := raw.(*kms.CreateKeyResponse)
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
-	d.SetId(fmt.Sprintf("%v", response.KeyMetadata.KeyId))
+	d.SetId(fmt.Sprintf("%v", bresponse.KeyMetadata.KeyId))
 
 	return resourceAlibabacloudStackKmsKeyRead(d, meta)
 }
+
 func resourceAlibabacloudStackKmsKeyRead(d *schema.ResourceData, meta interface{}) error {
 	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kmsService := KmsService{client}
 	object, err := kmsService.DescribeKmsKey(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("arn", object.Arn)
@@ -184,6 +185,7 @@ func resourceAlibabacloudStackKmsKeyRead(d *schema.ResourceData, meta interface{
 	d.Set("rotation_interval", object.RotationInterval)
 	return nil
 }
+
 func resourceAlibabacloudStackKmsKeyUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kmsService := KmsService{client}
@@ -191,25 +193,26 @@ func resourceAlibabacloudStackKmsKeyUpdate(d *schema.ResourceData, meta interfac
 
 	if d.HasChange("description") {
 		request := kms.CreateUpdateKeyDescriptionRequest()
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+		client.InitRpcRequest(*request.RpcRequest)
 		request.KeyId = d.Id()
 		request.Description = d.Get("description").(string)
 		raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 			return kmsClient.UpdateKeyDescription(request)
 		})
+		bresponse, ok := raw.(*kms.UpdateKeyDescriptionResponse)
 		addDebug(request.GetActionName(), raw)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		//d.SetPartial("description")
 	}
+
 	update := false
 	request := kms.CreateUpdateRotationPolicyRequest()
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+	client.InitRpcRequest(*request.RpcRequest)
 	request.KeyId = d.Id()
 	if d.HasChange("automatic_rotation") {
 		update = true
@@ -223,17 +226,21 @@ func resourceAlibabacloudStackKmsKeyUpdate(d *schema.ResourceData, meta interfac
 		raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 			return kmsClient.UpdateRotationPolicy(request)
 		})
+		bresponse, ok := raw.(*kms.UpdateRotationPolicyResponse)
 		addDebug(request.GetActionName(), raw)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		//d.SetPartial("automatic_rotation")
-		//d.SetPartial("rotation_interval")
 	}
+
 	if d.HasChange("key_state") || d.HasChange("is_enabled") {
 		object, err := kmsService.DescribeKmsKey(d.Id())
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		var target = ""
 		if k, ok := d.GetOk("key_state"); ok {
@@ -251,47 +258,48 @@ func resourceAlibabacloudStackKmsKeyUpdate(d *schema.ResourceData, meta interfac
 		if object.KeyState != target {
 			if target == "Disabled" {
 				request := kms.CreateDisableKeyRequest()
-				request.Headers = map[string]string{"RegionId": client.RegionId}
-				request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+				client.InitRpcRequest(*request.RpcRequest)
 				request.KeyId = d.Id()
 				raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 					return kmsClient.DisableKey(request)
 				})
+				bresponse, ok := raw.(*kms.DisableKeyResponse)
 				addDebug(request.GetActionName(), raw)
 				if err != nil {
-					return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+					errmsg := ""
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+					}
+					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 				}
-				//d.SetPartial("key_state")
-				//d.SetPartial("is_enabled")
 			}
 			if target == "Enabled" {
 				request := kms.CreateEnableKeyRequest()
-				request.Headers = map[string]string{"RegionId": client.RegionId}
-				request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+				client.InitRpcRequest(*request.RpcRequest)
 				request.KeyId = d.Id()
 				raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 					return kmsClient.EnableKey(request)
 				})
+				bresponse, ok := raw.(*kms.EnableKeyResponse)
 				addDebug(request.GetActionName(), raw)
 				if err != nil {
-					return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+					errmsg := ""
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+					}
+					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 				}
-				//d.SetPartial("key_state")
-				//d.SetPartial("is_enabled")
 			}
 		}
 	}
 	d.Partial(false)
 	return resourceAlibabacloudStackKmsKeyRead(d, meta)
 }
+
 func resourceAlibabacloudStackKmsKeyDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := kms.CreateScheduleKeyDeletionRequest()
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
-
+	client.InitRpcRequest(*request.RpcRequest)
 	request.KeyId = d.Id()
 	if v, ok := d.GetOk("pending_window_in_days"); ok {
 		request.PendingWindowInDays = requests.NewInteger(v.(int))
@@ -303,12 +311,18 @@ func resourceAlibabacloudStackKmsKeyDelete(d *schema.ResourceData, meta interfac
 	raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 		return kmsClient.ScheduleKeyDeletion(request)
 	})
+	bresponse, ok := raw.(*kms.ScheduleKeyDeletionResponse)
 	addDebug(request.GetActionName(), raw)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	return nil
 }
+
 func convertAutomaticRotationRequest(source string) bool {
 	switch source {
 	case "Disabled":

@@ -2,11 +2,12 @@ package alibabacloudstack
 
 import (
 	"log"
-	"strings"
 	"time"
+	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -36,10 +37,10 @@ func resourceAlibabacloudStackImageCopy() *schema.Resource {
 				Required: true,
 			},
 			"name": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Computed:   true,
-				Deprecated: "Attribute 'name' has been deprecated from version 1.69.0. Use `image_name` instead.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Deprecated:  "Attribute 'name' has been deprecated from version 1.69.0. Use `image_name` instead.",
 			},
 			"image_name": {
 				Type:     schema.TypeString,
@@ -53,29 +54,30 @@ func resourceAlibabacloudStackImageCopy() *schema.Resource {
 		},
 	}
 }
+
 func resourceAlibabacloudStackImageCopyCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 
 	request := ecs.CreateCopyImageRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.ImageId = d.Get("source_image_id").(string)
 	request.DestinationRegionId = d.Get("destination_region_id").(string)
-	request.DestinationImageName = d.Get("image_name").(string)
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "image_name", "name"); err == nil {
+		request.DestinationImageName = v.(string)
+	} else {
+		return err
+	}
 	request.DestinationDescription = d.Get("description").(string)
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-
 		return ecsClient.CopyImage(request)
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "apsrastack_image_copy", request.GetActionName(), AlibabacloudStackGoClientFailure)
+		errmsg := ""
+		if response, ok := raw.(*ecs.CopyImageResponse); ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "apsrastack_image_copy", request.GetActionName(), errmsgs.AlibabacloudStackGoClientFailure, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
@@ -84,19 +86,21 @@ func resourceAlibabacloudStackImageCopyCreate(d *schema.ResourceData, meta inter
 	log.Printf("[DEBUG] state %#v", d.Id())
 	stateConf := BuildStateConf([]string{"Creating"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ecsService.ImageStateRefreshFuncforcopy(d.Id(), d.Get("destination_region_id").(string), []string{"CreateFailed", "UnAvailable"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return resourceAlibabacloudStackImageCopyRead(d, meta)
 }
+
 func resourceAlibabacloudStackImageCopyUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	err := ecsService.updateImage(d)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	return resourceAlibabacloudStackImageRead(d, meta)
 }
+
 func resourceAlibabacloudStackImageCopyRead(d *schema.ResourceData, meta interface{}) error {
 	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
@@ -104,30 +108,37 @@ func resourceAlibabacloudStackImageCopyRead(d *schema.ResourceData, meta interfa
 	ecsService := EcsService{client}
 	object, err := ecsService.DescribeImage(d.Id(), d.Get("destination_region_id").(string))
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
-	d.Set("name", object.ImageName)
-	d.Set("image_name", object.ImageName)
+	connectivity.SetResourceData(d, object.ImageName, "image_name", "name")
 	d.Set("description", object.Description)
 
-	return WrapError(err)
+	return errmsgs.WrapError(err)
 }
 
 func resourceAlibabacloudStackImageCopyDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
-	err := ecsService.deleteImageforDest(d, d.Get("destination_region_id").(string))
+	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		request := ecs.CreateDeleteImageRequest()
+		request.ImageId = d.Id()
+		return ecsClient.DeleteImage(request)
+	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if response, ok := raw.(*ecs.DeleteImageResponse); ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	stateConf := BuildStateConf([]string{"Available", "CreateFailed"}, []string{"Deprecated", "UnAvailable"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ecsService.ImageStateRefreshFuncforcopy(d.Id(), d.Get("destination_region_id").(string), []string{"CreateFailed", "UnAvailable"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return resourceAlibabacloudStackImageCopyRead(d, meta)
 }

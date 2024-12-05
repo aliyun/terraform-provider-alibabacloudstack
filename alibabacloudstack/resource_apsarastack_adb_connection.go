@@ -9,6 +9,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/adb"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -63,11 +64,10 @@ func resourceAlibabacloudStackAdbConnectionCreate(d *schema.ResourceData, meta i
 	}
 
 	request := adb.CreateAllocateClusterPublicConnectionRequest()
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
 	request.DBClusterId = dbClusterId
 	request.ConnectionStringPrefix = prefix
-	request.Headers["x-ascm-product-name"] = "adb"
-	request.Headers["x-acs-organizationid"] = client.Department
+
 	var raw interface{}
 	var err error
 	err = resource.Retry(8*time.Minute, func() *resource.RetryError {
@@ -75,10 +75,9 @@ func resourceAlibabacloudStackAdbConnectionCreate(d *schema.ResourceData, meta i
 			return adbClient.AllocateClusterPublicConnection(request)
 		})
 		if err != nil {
-			if IsExpectedErrors(err, OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
 				return resource.RetryableError(err)
 			}
-
 			return resource.NonRetryableError(err)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
@@ -86,17 +85,22 @@ func resourceAlibabacloudStackAdbConnectionCreate(d *schema.ResourceData, meta i
 	})
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_adb_connection", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		response, ok := raw.(*adb.AllocateClusterPublicConnectionResponse)
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_adb_connection", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	d.SetId(fmt.Sprintf("%s%s%s", dbClusterId, COLON_SEPARATED, request.ConnectionStringPrefix))
 
 	if err := adbService.WaitForAdbConnection(d.Id(), Available, DefaultTimeoutMedium); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	// wait instance running after allocating
 	if err := adbService.WaitForCluster(dbClusterId, Running, DefaultTimeoutMedium); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	return resourceAlibabacloudStackAdbConnectionRead(d, meta)
@@ -108,15 +112,15 @@ func resourceAlibabacloudStackAdbConnectionRead(d *schema.ResourceData, meta int
 	object, err := adbService.DescribeAdbConnection(d.Id())
 
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("db_cluster_id", parts[0])
 	d.Set("connection_prefix", parts[1])
@@ -133,19 +137,16 @@ func resourceAlibabacloudStackAdbConnectionDelete(d *schema.ResourceData, meta i
 
 	split := strings.Split(d.Id(), COLON_SEPARATED)
 	request := adb.CreateReleaseClusterPublicConnectionRequest()
-	request.RegionId = client.RegionId
+	client.InitRpcRequest(*request.RpcRequest)
 	request.DBClusterId = split[0]
-	request.Headers["x-ascm-product-name"] = "adb"
-	request.Headers["x-acs-organizationid"] = client.Department
 
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-		var raw interface{}
 		raw, err := client.WithAdbClient(func(adbClient *adb.Client) (interface{}, error) {
 			return adbClient.ReleaseClusterPublicConnection(request)
 		})
 
 		if err != nil {
-			if IsExpectedErrors(err, OperationDeniedDBStatus) {
+			if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
@@ -155,10 +156,11 @@ func resourceAlibabacloudStackAdbConnectionDelete(d *schema.ResourceData, meta i
 	})
 
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
+		errmsg := ""
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBClusterId.NotFound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	return adbService.WaitForAdbConnection(d.Id(), Deleted, DefaultTimeoutMedium)

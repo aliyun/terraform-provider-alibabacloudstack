@@ -3,13 +3,13 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -36,7 +36,7 @@ func resourceAlibabacloudstackRamAccessKey() *schema.Resource {
 			"status": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      Active,
+				Default:      "Active",
 				ValidateFunc: validation.StringInSlice([]string{"Active", "Inactive"}, false),
 			},
 			"secret": {
@@ -63,53 +63,33 @@ func resourceAlibabacloudstackRamAccessKey() *schema.Resource {
 
 func resourceAlibabacloudstackAscmAccessKeyCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *ecs.Client
-	//  userName:=d.Get("user_name")
 
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2015-05-01"
-	request.ServiceCode = "ascm"
-	request.Domain = client.Domain
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "RamCreateAccessKey"
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		"RegionId":        client.RegionId,
-		
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"Product":         "ascm",
-		"Action":          "RamCreateAccessKey",
-		"Version":         "2015-05-01",
-		"ProductName":     "ascm",
-		//"": userName,
-	}
+	request := client.NewCommonRequest("POST", "Ascm", "2015-05-01", "RamCreateAccessKey", "")
+
 	var response = AccessKeyInCreateAccessKey{}
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
 
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_access_key", "", raw)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_access_key", "", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	addDebug("RamCreateAccessKey", raw, requestInfo, request)
+	addDebug("RamCreateAccessKey", raw, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	if bresponse.GetHttpStatus() != 200 {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_access_key", "", AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_access_key", "", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("RamCreateAccessKey", raw, requestInfo, bresponse.GetHttpContentString())
+	addDebug("RamCreateAccessKey", raw, request, bresponse.GetHttpContentString())
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 
 	d.SetId(fmt.Sprint(response.AccessKeyId))
@@ -127,11 +107,11 @@ func resourceAlibabacloudstackAscmAccessKeyRead(d *schema.ResourceData, meta int
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmKeypolicy(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("status", object) //add read data from the struct
 	return nil
@@ -140,47 +120,28 @@ func resourceAlibabacloudstackAscmAccessKeyRead(d *schema.ResourceData, meta int
 func resourceAlibabacloudstackAscmAccessKeyDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
-	var requestInfo *ecs.Client
 	check, err := ascmService.DescribeAscmKeypolicy(d.Id())
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "IsResourceGroupExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsResourceGroupExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	addDebug("IsKeyExist", check, requestInfo, map[string]string{"resourceGroupName": d.Id()})
+	addDebug("IsKeyExist", check, nil, map[string]string{"resourceGroupName": d.Id()})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":        client.RegionId,
-			
-			"Product":         "ascm",
-			"Action":          "RamDeleteAccessKey",
-			"Version":         "2015-05-01",
-			"ProductName":     "ascm",
-			"id":              d.Id(),
-		}
+		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RamDeleteAccessKey", "")
+		request.QueryParams["id"] = d.Id()
 
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "RamDeleteAccessKey"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.RegionId = client.RegionId
-
-		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
 		})
+
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return resource.RetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ram_access_key", "RamDeleteAccessKey", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		_, err = ascmService.DescribeAscmKeypolicy(d.Id())
 
@@ -190,62 +151,40 @@ func resourceAlibabacloudstackAscmAccessKeyDelete(d *schema.ResourceData, meta i
 		return nil
 	})
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ram_access_key", "RamDeleteAccessKey", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ram_access_key", "RamDeleteAccessKey", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil
 
 }
 
 func (s *AscmService) DescribeAscmKeypolicy(id string) (response *AccessKeyInCreateAccessKey, err error) {
-	var requestInfo *ecs.Client
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Department":      s.client.Department,
-		"ResourceGroup":   s.client.ResourceGroup,
-		"Product":         "ascm",
-		"Action":          "RamListAccessKeys",
-		"Version":         "2015-05-01",
-		"id":              id,
-	}
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2015-05-01"
-	request.ServiceCode = "ascm"
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "RamListAccessKeys"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
-	request.Domain = s.client.Domain
+	request := s.client.NewCommonRequest("POST", "Ascm", "2015-05-01", "RamListAccessKeys", "")
+	request.QueryParams["id"] = id
+
 	var value = &AccessKeyInCreateAccessKey{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
 
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorQuotaNotFound"}) {
-			return value, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorQuotaNotFound"}) {
+			return value, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return value, WrapErrorf(err, DefaultErrorMsg, "GetQuota", AlibabacloudStackSdkGoERROR)
-
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return value, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetQuota", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("RamListAccessKeys", response, requestInfo, request)
+	addDebug("RamListAccessKeys", response, nil, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), value)
 	if err != nil {
-		return value, WrapError(err)
+		return value, errmsgs.WrapError(err)
 	}
 	if value.AccessKeyId == "200" {
-		return value, WrapError(err)
+		return value, errmsgs.WrapError(err)
 	}
 
 	return value, nil

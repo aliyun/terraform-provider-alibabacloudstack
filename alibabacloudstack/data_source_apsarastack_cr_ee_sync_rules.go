@@ -7,6 +7,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -163,10 +164,8 @@ func dataSourceAlibabacloudStackCrEESyncRulesRead(d *schema.ResourceData, meta i
 	pageNo, pageSize := 1, 50
 	var syncRules []cr_ee.SyncRulesItem
 	for {
-		response := &cr_ee.ListRepoSyncRuleResponse{}
 		request := cr_ee.CreateListRepoSyncRuleRequest()
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "cr", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 
 		request.RegionId = crService.client.RegionId
 		request.InstanceId = instanceId
@@ -185,17 +184,21 @@ func dataSourceAlibabacloudStackCrEESyncRulesRead(d *schema.ResourceData, meta i
 		raw, err := crService.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 			return creeClient.ListRepoSyncRule(request)
 		})
+		bresponse, ok := raw.(*cr_ee.ListRepoSyncRuleResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_cr_ee_sync_rules", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_ee_sync_rules", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-		response, _ = raw.(*cr_ee.ListRepoSyncRuleResponse)
-		if !response.ListRepoSyncRuleIsSuccess {
-			return crService.wrapCrServiceError("alibabacloudstack_cr_ee_sync_rules", request.GetActionName(), response.Code)
-		}
+		// if !response.ListRepoSyncRuleIsSuccess {
+		// 	return crService.wrapCrServiceError("alibabacloudstack_cr_ee_sync_rules", request.GetActionName(), response.Code)
+		// }
 
-		for _, rule := range response.SyncRules {
+		for _, rule := range bresponse.SyncRules {
 			if nameRegex != nil && !nameRegex.MatchString(rule.SyncRuleName) {
 				continue
 			}
@@ -205,7 +208,7 @@ func dataSourceAlibabacloudStackCrEESyncRulesRead(d *schema.ResourceData, meta i
 			syncRules = append(syncRules, rule)
 		}
 
-		if len(response.SyncRules) < pageSize {
+		if len(bresponse.SyncRules) < pageSize {
 			break
 		}
 
@@ -242,13 +245,13 @@ func dataSourceAlibabacloudStackCrEESyncRulesRead(d *schema.ResourceData, meta i
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("rules", rulesMaps); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

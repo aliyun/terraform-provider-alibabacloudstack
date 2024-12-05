@@ -2,8 +2,9 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -203,9 +204,6 @@ func TestAccAlibabacloudStackDBReadonlyInstance_multi(t *testing.T) {
 func resourceDBReadonlyInstanceConfigDependence(name string) string {
 	return fmt.Sprintf(`
 %s
-provider "alibabacloudstack" {
-	assume_role {}
-}
 	variable "creation" {
 		default = "Rds"
 	}

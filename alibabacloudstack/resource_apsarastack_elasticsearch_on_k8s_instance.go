@@ -7,18 +7,16 @@ import (
 	"strings"
 	"time"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/alibabacloud-go/tea/tea"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/denverdino/aliyungo/common"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -250,72 +248,33 @@ func resourceAlibabacloudStackElasticsearchOnk8sCreate(d *schema.ResourceData, m
 	requestBody, _ := buildElasticsearchOnk8sCreateRequestBody(d, meta)
 	body, _ := json.Marshal(requestBody)
 	bodydata := string(body)
-	// Params := make(map[string]interface{})
-	// Params["Product"] = "elasticsearch-k8s"
-	// Params["Action"] = action
-	// Params["Version"] = "2017-06-13"
-	// Params["X-acs-body"] = bodydata
-	// Params["OrganizationId"] = client.Department
-	// Params["RegionId"] = client.RegionId
-	// Params["ClientToken"] = buildClientToken("createInstance")
 
-	// var response map[string]interface{}
-
-	// // // retry
-	// // wait := incrementalWait(3*time.Second, 5*time.Second)
-	// // errorCodeList := []string{"TokenPreviousRequestProcessError"}
-	// conn, _ := elasticsearchService.client.NewElasticsearchClient()
-
-	// runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	// runtime.SetAutoretry(true)
-
-	// response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, Params, &runtime)
-
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        client.RegionId,
-		
-		
-		"Product":         "elasticsearch-k8s",
-		"Action":          "createInstance",
-		"Version":         "2017-06-13",
-		"X-acs-body":      bodydata,
-		"ClientToken":     buildClientToken("createInstance"),
-		"OrganizationId":  client.Department,
-	}
-	request.Method = "POST"
-	request.Product = "elasticsearch-k8s"
-	request.Version = "2017-06-13"
-	request.Domain = client.Domain
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "createInstance"
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId, "Content-Type": "application/json"}
+	request := client.NewCommonRequest("POST", "elasticsearch-k8s", "2017-06-13", "createInstance", "")
+	request.Headers["Content-Type"] = "application/json"
+	request.QueryParams["X-acs-body"] = bodydata
+	request.QueryParams["ClientToken"] = buildClientToken("createInstance")
 
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
 
-	addDebug(action, raw, request.QueryParams)
-
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_elasticsearch_k8s_instance", action, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_elasticsearch_k8s_instance", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
+
+	addDebug(action, raw, request.QueryParams)
 
 	var resp CreateElasticsearchOnk8sResponse
 
-	response, _ := raw.(*responses.CommonResponse)
-	err = json.Unmarshal(response.GetHttpContentBytes(), &resp)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
 
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "apsarastack_elasticsearch_on_k8s_instance", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_elasticsearch_on_k8s_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	Result := resp.Result
 	log.Printf("############## Result : %s", Result)
@@ -325,7 +284,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sCreate(d *schema.ResourceData, m
 	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 5*time.Minute, elasticsearchService.ElasticsearchOnK8sStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 5 * time.Second
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return resourceAlibabacloudStackElasticsearchOnk8sRead(d, meta)
@@ -337,14 +296,14 @@ func resourceAlibabacloudStackElasticsearchOnk8sRead(d *schema.ResourceData, met
 
 	object, err := elasticsearchService.DescribeElasticsearchOnk8sInstance(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if (object["instanceId"].(string)) != d.Id() {
-		return WrapErrorf(Error(GetNotFoundMessage("ElasticsearchOnK8s Instance", d.Id())), NotFoundWithResponse)
+		return errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ElasticsearchOnK8s Instance", d.Id())), errmsgs.NotFoundWithResponse)
 	}
 
 	d.Set("description", object["description"])
@@ -400,7 +359,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sRead(d *schema.ResourceData, met
 	// tags
 	//tags, err := elasticsearchService.DescribeElasticsearchTags(d.Id())
 	//if err != nil {
-	//	return WrapError(err)
+	//	return errmsgs.WrapError(err)
 	//}
 	//if len(tags) > 0 {
 	//	d.Set("tags", tags)
@@ -409,7 +368,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sRead(d *schema.ResourceData, met
 	return nil
 }
 
-func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	elasticsearchService := ElasticsearchService{client}
 	d.Partial(true)
@@ -418,7 +377,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 
 	if d.HasChange("description") {
 		if err := updateDescription(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("description")
@@ -430,7 +389,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 		content["nodeType"] = string(WORKER)
 		content["whiteIpList"] = d.Get("private_whitelist").(*schema.Set).List()
 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("private_whitelist")
@@ -442,7 +401,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	// 	content["nodeType"] = string(WORKER)
 	// 	content["actionType"] = elasticsearchService.getActionType(d.Get("enable_public").(bool))
 	// 	if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-	// 		return WrapError(err)
+	// 		return errmsgs.WrapError(err)
 	// 	}
 
 	// 	//d.SetPartial("enable_public")
@@ -454,7 +413,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 		content["nodeType"] = string(WORKER)
 		content["whiteIpList"] = d.Get("public_whitelist").(*schema.Set).List()
 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("public_whitelist")
@@ -466,7 +425,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	// 	content["nodeType"] = string(KIBANA)
 	// 	content["actionType"] = elasticsearchService.getActionType(d.Get("enable_kibana_public_network").(bool))
 	// 	if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-	// 		return WrapError(err)
+	// 		return errmsgs.WrapError(err)
 	// 	}
 
 	// 	//d.SetPartial("enable_kibana_public_network")
@@ -478,7 +437,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 		content["nodeType"] = string(KIBANA)
 		content["whiteIpList"] = d.Get("kibana_whitelist").(*schema.Set).List()
 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("kibana_whitelist")
@@ -490,7 +449,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	// 	content["nodeType"] = string(KIBANA)
 	// 	content["actionType"] = elasticsearchService.getActionType(d.Get("enable_kibana_private_network").(bool))
 	// 	if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-	// 		return WrapError(err)
+	// 		return errmsgs.WrapError(err)
 	// 	}
 
 	// 	//d.SetPartial("enable_kibana_private_network")
@@ -502,7 +461,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 		content["nodeType"] = string(KIBANA)
 		content["whiteIpList"] = d.Get("kibana_private_whitelist").(*schema.Set).List()
 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("kibana_private_whitelist")
@@ -510,7 +469,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 
 	if d.HasChange("tags") {
 		if err := updateInstanceTags(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("tags")
@@ -519,11 +478,11 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	if d.HasChange("client_node_spec") || d.HasChange("client_node_amount") {
 
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 
 		if err := updateClientNode(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("client_node_spec")
@@ -533,7 +492,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	// if d.HasChange("protocol") {
 
 	// 	if _, err := stateConf.WaitForState(); err != nil {
-	// 		return WrapErrorf(err, IdMsg, d.Id())
+	// 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	// 	}
 
 	// 	var https func(*schema.ResourceData, interface{}) error
@@ -546,18 +505,13 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 
 	// 	if nil != https {
 	// 		if err := https(d, meta); err != nil {
-	// 			return WrapError(err)
+	// 			return errmsgs.WrapError(err)
 	// 		}
 	// 	}
 
 	// 	//d.SetPartial("protocol")
 	// }
 	if d.HasChange("setting_config") {
-		conn, err := client.NewElasticsearchClient()
-		if err != nil {
-			return WrapError(err)
-		}
-		var response map[string]interface{}
 		action := "UpdateInstanceSettings"
 		content := map[string]interface{}{
 			"RegionId":    client.RegionId,
@@ -565,34 +519,14 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 		}
 		config := d.Get("setting_config").(map[string]interface{})
 		content["esConfig"] = config
-		content["product"] = "elasticsearch-k8s"
-		content["OrganizationId"] = client.Department
-		content["ResourceId"] = client.ResourceGroup
-		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-		runtime.SetAutoretry(true)
-		// retry
-		wait := incrementalWait(3*time.Second, 5*time.Second)
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, content, &runtime)
-
-			if err != nil {
-				if IsExpectedErrors(err, []string{"ConcurrencyUpdateInstanceConflict", "InstanceStatusNotSupportCurrentAction", "InstanceDuplicateScheduledTask"}) || NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			addDebug(action, response, content)
-			return nil
-		})
-
-		if err != nil && !IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		_, err = client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", action, "", nil, content)
+		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
+			return err
 		}
 		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 5*time.Minute, elasticsearchService.ElasticsearchOnK8sStateRefreshFunc(d.Id(), []string{"inactive"}))
 		stateConf.PollInterval = 5 * time.Second
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 		//d.SetPartial("setting_config")
 	}
@@ -604,14 +538,14 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 
 	if d.HasChange("instance_charge_type") {
 		if err := updateInstanceChargeType(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("instance_charge_type")
 		//d.SetPartial("period")
 	} else if d.Get("instance_charge_type").(string) == string(PrePaid) && d.HasChange("period") {
 		if err := renewInstance(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("period")
@@ -620,11 +554,11 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	if d.HasChange("data_node_amount") {
 
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 
 		if err := updateDataNodeAmount(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("data_node_amount")
@@ -633,11 +567,11 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	if d.HasChange("data_node_spec") || d.HasChange("data_node_disk_size") || d.HasChange("data_node_disk_type") {
 
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 
 		if err := updateDataNodeSpec(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("data_node_spec")
@@ -649,11 +583,11 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	if d.HasChange("master_node_spec") {
 
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 
 		if err := updateMasterNode(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("master_node_spec")
@@ -662,11 +596,11 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	if d.HasChange("password") || d.HasChange("kms_encrypted_password") {
 
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 
 		if err := updatePassword(d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		//d.SetPartial("password")
@@ -676,56 +610,34 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 	return nil
 }
 
-func resourceAlibabacloudStackElasticsearchOnk8sDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackElasticsearchOnk8sDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	elasticsearchService := ElasticsearchService{client}
 	action := "DeleteInstance"
 
 	if strings.ToLower(d.Get("instance_charge_type").(string)) == strings.ToLower(string(PrePaid)) {
-		return WrapError(Error("At present, 'PrePaid' instance cannot be deleted and must wait it to be expired and release it automatically"))
+		return errmsgs.WrapError(errmsgs.Error("At present, 'PrePaid' instance cannot be deleted and must wait it to be expired and release it automatically"))
 	}
-	var response map[string]interface{}
 	request := map[string]interface{}{
 		"RegionId":    client.RegionId,
 		"clientToken": StringPointer(buildClientToken(action)),
 	}
-	request["product"] = "elasticsearch-k8s"
-	request["OrganizationId"] = client.Department
-	request["ResourceId"] = client.ResourceGroup
-	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
-	runtime.SetAutoretry(true)
 	// retry
-	wait := incrementalWait(3*time.Second, 5*time.Second)
-	errorCodeList := []string{"InstanceActivating", "TokenPreviousRequestProcessError"}
-	conn, err := client.NewElasticsearchClient()
 
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-06-13"), StringPointer("AK"), nil, request, &runtime)
 
-		if err != nil {
-			if IsExpectedErrors(err, errorCodeList) || NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, nil)
-		return nil
-	})
-
-	addDebug(action, response, nil)
+	_, err = client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", action, "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+		if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
 			return nil
 		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
+		return err
 	}
 
 	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutDelete), 5*time.Minute, elasticsearchService.ElasticsearchOnK8sStateRefreshFunc(d.Id(), []string{}))
 	stateConf.PollInterval = 5 * time.Second
 
 	if _, err = stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	// Instance will be completed deleted in 5 minutes, so deleting vswitch is available after the time.
 	time.Sleep(5 * time.Minute)
@@ -768,7 +680,7 @@ func buildElasticsearchOnk8sCreateRequestBody(d *schema.ResourceData, meta inter
 	kmsPassword := d.Get("kms_encrypted_password").(string)
 
 	if password == "" && kmsPassword == "" {
-		return nil, WrapError(Error("One of the 'password' and 'kms_encrypted_password' should be set."))
+		return nil, errmsgs.WrapError(errmsgs.Error("One of the 'password' and 'kms_encrypted_password' should be set."))
 	}
 
 	if password != "" {
@@ -777,7 +689,7 @@ func buildElasticsearchOnk8sCreateRequestBody(d *schema.ResourceData, meta inter
 		kmsService := KmsService{client}
 		decryptResp, err := kmsService.Decrypt(kmsPassword, d.Get("kms_encryption_context").(map[string]interface{}))
 		if err != nil {
-			return content, WrapError(err)
+			return content, errmsgs.WrapError(err)
 		}
 		content["esAdminPassword"] = decryptResp
 	}
@@ -832,7 +744,7 @@ func buildElasticsearchOnk8sCreateRequestBody(d *schema.ResourceData, meta inter
 	vswitchId := d.Get("vswitch_id")
 	vsw, err := vpcService.DescribeVSwitch(vswitchId.(string))
 	if err != nil {
-		return nil, WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 
 	network := make(map[string]interface{})
@@ -869,16 +781,16 @@ func (s *ElasticsearchService) ElasticsearchOnK8sStateRefreshFunc(id string, fai
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeElasticsearchOnk8sInstance(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if object["status"].(string) == failState {
-				return object, object["status"].(string), WrapError(Error(FailedToReachTargetStatus, object["status"].(string)))
+				return object, object["status"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["status"].(string)))
 			}
 		}
 		log.Printf("DescribeElasticsearchOnk8sInstance result status: %s", object["status"])

@@ -3,15 +3,17 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"reflect"
-	"strings"
-	"time"
 )
 
 type DnsService struct {
@@ -21,58 +23,33 @@ type DnsService struct {
 func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err error) {
 	var requestInfo *ecs.Client
 
-	if err != nil {
-		return response, WrapError(err)
-	}
 	ZoneId := id
-	request := requests.NewCommonRequest()
-	if s.client.Config.Insecure {
-		request.SetHTTPSInsecure(s.client.Config.Insecure)
-	}
-	request.QueryParams = map[string]string{
-		"RegionId":        s.client.RegionId,
-		
-		"Product":         "CloudDns",
-		"Action":          "DescribeGlobalZoneRecords",
-		"Version":         "2021-06-24",
-		"ZoneId":          ZoneId,
-	}
-	request.Method = "POST"
-	request.Product = "CloudDns"
-	request.Version = "2021-06-24"
-	request.ServiceCode = "CloudDns"
-	request.Domain = s.client.Domain
-	request.PageSize = requests.NewInteger(PageSizeLarge)
-	request.PageNumber = requests.NewInteger(2)
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "DescribeGlobalZoneRecords"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.RegionId = s.client.RegionId
+	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZoneRecords", "")
+	request.QueryParams["ZoneId"] = ZoneId
 	var resp = &DnsRecord{}
 	raw, err := s.client.WithEcsClient(func(cmsClient *ecs.Client) (interface{}, error) {
 		return cmsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorRecordNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorRecordNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "DescribeGlobalZoneRecords", AlibabacloudStackSdkGoERROR)
-
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeGlobalZoneRecords", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug("DescribeGlobalZoneRecords", response, requestInfo, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.AsapiSuccess == true {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil
@@ -81,23 +58,23 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 func (s *DnsService) DescribeDnsGroup(id string) (alidns.DomainGroup, error) {
 	var group alidns.DomainGroup
 	request := alidns.CreateDescribeDomainGroupsRequest()
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "alidns"}
-	request.QueryParams["Department"] = s.client.Department
-	request.QueryParams["ResourceGroup"] = s.client.ResourceGroup
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	request.PageNumber = requests.NewInteger(2)
 	for {
 		raw, err := s.client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
 			return dnsClient.DescribeDomainGroups(request)
 		})
+		bresponse, ok := raw.(*alidns.DescribeDomainGroupsResponse)
 		if err != nil {
-			return group, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return group, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*alidns.DescribeDomainGroupsResponse)
-		groups := response.DomainGroups.DomainGroup
+		groups := bresponse.DomainGroups.DomainGroup
 		for _, domainGroup := range groups {
 			if domainGroup.GroupId == id {
 				return domainGroup, nil
@@ -107,66 +84,65 @@ func (s *DnsService) DescribeDnsGroup(id string) (alidns.DomainGroup, error) {
 			break
 		}
 		if page, err := getNextpageNumber(request.PageNumber); err != nil {
-			return group, WrapError(err)
+			return group, errmsgs.WrapError(err)
 		} else {
 			request.PageNumber = page
 		}
 	}
 
-	return group, WrapErrorf(Error(GetNotFoundMessage("DnsGroup", id)), NotFoundMsg, ProviderERROR)
+	return group, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DnsGroup", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
 func (s *DnsService) ListTagResources(id string) (object alidns.ListTagResourcesResponse, err error) {
 	request := alidns.CreateListTagResourcesRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "alidns"}
-	request.QueryParams["Department"] = s.client.Department
-	request.QueryParams["ResourceGroup"] = s.client.ResourceGroup
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.ResourceType = "DOMAIN"
 	request.ResourceId = &[]string{id}
 
 	raw, err := s.client.WithDnsClient(func(alidnsClient *alidns.Client) (interface{}, error) {
 		return alidnsClient.ListTagResources(request)
 	})
+	bresponse, ok := raw.(*alidns.ListTagResourcesResponse)
 	if err != nil {
-		err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*alidns.ListTagResourcesResponse)
-	return *response, nil
+	return *bresponse, nil
 }
+
 func (s *DnsService) DescribeDnsDomainAttachment(id string) (object alidns.DescribeInstanceDomainsResponse, err error) {
 	request := alidns.CreateDescribeInstanceDomainsRequest()
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "alidns"}
-	request.QueryParams["Department"] = s.client.Department
-	request.QueryParams["ResourceGroup"] = s.client.ResourceGroup
-
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = id
 
 	raw, err := s.client.WithDnsClient(func(alidnsClient *alidns.Client) (interface{}, error) {
 		return alidnsClient.DescribeInstanceDomains(request)
 	})
+	bresponse, ok := raw.(*alidns.DescribeInstanceDomainsResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDnsProduct"}) {
-			err = WrapErrorf(Error(GetNotFoundMessage("DnsDomainAttachment", id)), NotFoundMsg, ProviderERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDnsProduct"}) {
+			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DnsDomainAttachment", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 			return
 		}
-		err = WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*alidns.DescribeInstanceDomainsResponse)
 
-	if len(response.InstanceDomains) < 1 {
-		err = WrapErrorf(Error(GetNotFoundMessage("DnsDomainAttachment", id)), NotFoundMsg, ProviderERROR)
+	if len(bresponse.InstanceDomains) < 1 {
+		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DnsDomainAttachment", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		return
 	}
-	return *response, nil
+	return *bresponse, nil
 }
 
 func (s *DnsService) WaitForAlidnsDomainAttachment(id string, expected map[string]interface{}, isDelete bool, timeout int) error {
@@ -174,12 +150,12 @@ func (s *DnsService) WaitForAlidnsDomainAttachment(id string, expected map[strin
 	for {
 		object, err := s.DescribeDnsDomainAttachment(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				if isDelete {
 					return nil
 				}
 			} else {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 		domainNames := make(map[string]interface{}, 0)
@@ -198,11 +174,12 @@ func (s *DnsService) WaitForAlidnsDomainAttachment(id string, expected map[strin
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, "", expected, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, "", expected, errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
 }
+
 func (s *DnsService) SetResourceTags(d *schema.ResourceData, resourceType string) error {
 	oldItems, newItems := d.GetChange("tags")
 	added := make([]alidns.TagResourcesTag, 0)
@@ -218,98 +195,77 @@ func (s *DnsService) SetResourceTags(d *schema.ResourceData, resourceType string
 	}
 	if len(removed) > 0 {
 		request := alidns.CreateUntagResourcesRequest()
-		request.RegionId = s.client.RegionId
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "alidns"}
-		request.QueryParams["Department"] = s.client.Department
-		request.QueryParams["ResourceGroup"] = s.client.ResourceGroup
-
+		s.client.InitRpcRequest(*request.RpcRequest)
 		request.ResourceId = &[]string{d.Id()}
 		request.ResourceType = resourceType
 		request.TagKey = &removed
 		raw, err := s.client.WithDnsClient(func(alidnsClient *alidns.Client) (interface{}, error) {
 			return alidnsClient.UntagResources(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		addDebug(request.GetActionName(), raw)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
 	if len(added) > 0 {
 		request := alidns.CreateTagResourcesRequest()
-		request.RegionId = s.client.RegionId
-		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "alidns"}
-		request.QueryParams["Department"] = s.client.Department
-		request.QueryParams["ResourceGroup"] = s.client.ResourceGroup
-
+		s.client.InitRpcRequest(*request.RpcRequest)
 		request.ResourceId = &[]string{d.Id()}
 		request.ResourceType = resourceType
 		request.Tag = &added
 		raw, err := s.client.WithDnsClient(func(alidnsClient *alidns.Client) (interface{}, error) {
 			return alidnsClient.TagResources(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		addDebug(request.GetActionName(), raw)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
 	return nil
 }
 
 func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err error) {
-	var requestInfo *ecs.Client
 	did := strings.Split(id, COLON_SEPARATED)
-
-	request := requests.NewCommonRequest()
-	request.Method = "POST"          // Set request method
-	request.Product = "CloudDns"     // Specify product
-	request.Domain = s.client.Domain // Location Service will not be enabled if the host is specified. For example, service with a Certification type-Bearer Token should be specified
-	request.Version = "2021-06-24"   // Specify product version
-	request.PageNumber = requests.NewInteger(2)
-	request.PageSize = requests.NewInteger(PageSizeLarge)
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "DescribeGlobalZones"
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "CloudDns",
-		"RegionId":        s.client.RegionId,
-		"Action":          "DescribeGlobalZones",
-		"Version":         "2021-06-24",
-		//"Id":              did[1],
-		"Name":              did[0],
-		"Forwardedregionid": s.client.RegionId,
-		"SignatureVersion":  "2.1",
-		"PageNumber":        fmt.Sprint(1),
-		"PageSize":          fmt.Sprint(PageSizeLarge),
-	}
+	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZones", "")
+	request.QueryParams["Name"] = did[0]
+	request.QueryParams["Forwardedregionid"] = s.client.RegionId
+	request.QueryParams["SignatureVersion"] = "2.1"
+	request.QueryParams["PageNumber"] = fmt.Sprint(1)
+	request.QueryParams["PageSize"] = fmt.Sprint(PageSizeLarge)
 	resp := &DnsDomains{}
 	raw, err := s.client.WithEcsClient(func(cmsClient *ecs.Client) (interface{}, error) {
 		return cmsClient.ProcessCommonRequest(request)
 	})
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ErrorDomainNotFound"}) {
-			return resp, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorDomainNotFound"}) {
+			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return resp, WrapErrorf(err, DefaultErrorMsg, id, "DescribeGlobalZones", AlibabacloudStackSdkGoERROR)
-
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeGlobalZones", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("DescribeGlobalZones", response, requestInfo, request)
+	addDebug("DescribeGlobalZones", response, nil, request)
 
-	bresponse, _ := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.AsapiSuccess == true {
-		return resp, WrapError(err)
+		return resp, errmsgs.WrapError(err)
 	}
 
 	return resp, nil

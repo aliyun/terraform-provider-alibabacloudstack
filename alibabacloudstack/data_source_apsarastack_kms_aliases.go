@@ -6,6 +6,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -63,8 +64,7 @@ func dataSourceApsarStackKmsAliasesRead(d *schema.ResourceData, meta interface{}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := kms.CreateListAliasesRequest()
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	request.PageNumber = requests.NewInteger(1)
@@ -73,7 +73,7 @@ func dataSourceApsarStackKmsAliasesRead(d *schema.ResourceData, meta interface{}
 	if v, ok := d.GetOk("name_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		nameRegex = r
 	}
@@ -87,11 +87,15 @@ func dataSourceApsarStackKmsAliasesRead(d *schema.ResourceData, meta interface{}
 		raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 			return kmsClient.ListAliases(request)
 		})
+		response, ok := raw.(*kms.ListAliasesResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_kms_aliases", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_kms_aliases", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw)
-		response, _ := raw.(*kms.ListAliasesResponse)
 
 		for _, item := range response.Aliases.Alias {
 			if nameRegex != nil {
@@ -112,7 +116,7 @@ func dataSourceApsarStackKmsAliasesRead(d *schema.ResourceData, meta interface{}
 
 		page, err := getNextpageNumber(request.PageNumber)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.PageNumber = page
 	}
@@ -133,13 +137,13 @@ func dataSourceApsarStackKmsAliasesRead(d *schema.ResourceData, meta interface{}
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("aliases", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

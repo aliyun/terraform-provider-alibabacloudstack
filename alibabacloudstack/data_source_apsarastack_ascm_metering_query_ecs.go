@@ -2,19 +2,18 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
 	"regexp"
-	"strings"
 )
 
 func dataSourceAlibabacloudstackAscmMeteringQueryEcs() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudstackAscmMeteringQueryEcsRead,
+		Read:    dataSourceAlibabacloudstackAscmMeteringQueryEcsRead,
 		Schema: map[string]*schema.Schema{
 			"start_time": {
 				Type:     schema.TypeString,
@@ -153,37 +152,12 @@ func dataSourceAlibabacloudstackAscmMeteringQueryEcsRead(d *schema.ResourceData,
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	starttime := d.Get("start_time").(string)
 	endtime := d.Get("end_time").(string)
-	request := requests.NewCommonRequest()
-	request.SetHTTPSInsecure(true)
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "GET"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.ApiName = "MeteringWebQuery"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		"Product":         "ascm",
-		"ProductName":     "ascm",
-		
-		"Department":      client.Department,
-		"resourceGroupId": client.ResourceGroup,
-		"RegionId":        client.RegionId,
-		"ApiName":         "MeteringWebQuery",
-		"Action":          "MeteringWebQuery",
-		"Version":         "2019-05-10",
-		"StartTime":       starttime,
-		"EndTime":         endtime,
-		"productName":     "ECS",
-	}
+
+	request := client.NewCommonRequest("GET", "ascm", "2019-05-10", "MeteringWebQuery", "")
+	request.QueryParams["StartTime"] = starttime
+	request.QueryParams["EndTime"] = endtime
+	request.QueryParams["productName"] = "ECS"
+
 	response := MeteringQueryDataEcs{}
 
 	for {
@@ -192,7 +166,11 @@ func dataSourceAlibabacloudstackAscmMeteringQueryEcsRead(d *schema.ResourceData,
 		})
 		log.Printf(" rsponse of raw MeteringWebQuery : %s", raw)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ascm_metering_query", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if bresponse, ok := raw.(*responses.CommonResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_metering_query", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		bresponse, _ := raw.(*responses.CommonResponse)
 
@@ -241,7 +219,7 @@ func dataSourceAlibabacloudstackAscmMeteringQueryEcsRead(d *schema.ResourceData,
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("data", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {

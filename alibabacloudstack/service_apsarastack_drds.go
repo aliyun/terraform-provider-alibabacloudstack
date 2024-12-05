@@ -5,6 +5,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/drds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -13,26 +14,28 @@ type DrdsService struct {
 }
 
 func (s *DrdsService) DescribeDrdsInstance(id string) (*drds.DescribeDrdsInstanceResponse, error) {
-	response := &drds.DescribeDrdsInstanceResponse{}
 	request := drds.CreateDescribeDrdsInstanceRequest()
-	request.RegionId = s.client.RegionId
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DrdsInstanceId = id
-	request.Headers["x-ascm-product-name"] = "Drds"
-	request.Headers["x-acs-organizationId"] = s.client.Department
 	raw, err := s.client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
 		return drdsClient.DescribeDrdsInstance(request)
 	})
 
+	response, ok := raw.(*drds.DescribeDrdsInstanceResponse)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"InvalidDrdsInstanceId.NotFound"}) {
-			return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
-		return response, WrapErrorf(err, DefaultErrorMsg, id, request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDrdsInstanceId.NotFound"}) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*drds.DescribeDrdsInstanceResponse)
+	
 	if response.Data.Status == "5" {
-		return response, WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+		return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return response, nil
 }
@@ -41,16 +44,16 @@ func (s *DrdsService) DrdsInstanceStateRefreshFunc(id string, failStates []strin
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeDrdsInstance(id)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
 				return nil, "", nil
 			}
-			return nil, "", WrapError(err)
+			return nil, "", errmsgs.WrapError(err)
 		}
 
 		for _, failState := range failStates {
 			if object.Data.Status == failState {
-				return object, object.Data.Status, WrapError(Error(FailedToReachTargetStatus, object.Data.Status))
+				return object, object.Data.Status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Data.Status))
 			}
 		}
 
@@ -65,10 +68,10 @@ func (s *DrdsService) WaitDrdsInstanceConfigEffect(id string, item map[string]st
 		object, err := s.DescribeDrdsInstance(id)
 
 		if err != nil {
-			if NotFoundError(err) {
-				return WrapErrorf(err, NotFoundMsg, AlibabacloudStackSdkGoERROR)
+			if errmsgs.NotFoundError(err) {
+				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		if value, ok := item["description"]; ok {
@@ -81,7 +84,7 @@ func (s *DrdsService) WaitDrdsInstanceConfigEffect(id string, item map[string]st
 			break
 		}
 		if time.Now().After(deadline) {
-			return WrapErrorf(err, WaitTimeoutMsg, id, GetFunc(1), timeout, object.Data, item, ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Data, item, errmsgs.ProviderERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}

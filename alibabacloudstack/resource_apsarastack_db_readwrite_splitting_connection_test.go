@@ -114,9 +114,6 @@ func TestAccAlibabacloudStackDBReadWriteSplittingConnection_update(t *testing.T)
 func resourceDBReadWriteSplittingConfigDependence(prefix string) string {
 	return fmt.Sprintf(`
 	%s
-provider "alibabacloudstack" {
-	assume_role {}
-}
 	variable "creation" {
 		default = "Rds"
 	}

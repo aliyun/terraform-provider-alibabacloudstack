@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
 
 func TestAccAlibabacloudStackCSKubernetesClustersDataSource(t *testing.T) {
@@ -92,10 +90,7 @@ func TestAccAlibabacloudStackCSKubernetesClustersDataSource(t *testing.T) {
 		existMapFunc: existCSKubernetesClustersMapFunc,
 		fakeMapFunc:  fakeCSKubernetesClustersMapFunc,
 	}
-	preCheck := func() {
-		testAccPreCheckWithRegions(t, true, connectivity.KubernetesSupportedRegions)
-	}
-	csKubernetesClustersCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, idsConf, nameRegexConf, allConf)
+	csKubernetesClustersCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
 }
 
 func dataSourceCSKubernetesClustersConfigDependence(name string) string {

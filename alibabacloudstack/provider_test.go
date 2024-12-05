@@ -2,7 +2,9 @@ package alibabacloudstack
 
 import (
 	"fmt"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+
 	//	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	//	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
@@ -208,7 +210,7 @@ func testAccPreCheckWithNoDefaultVpc(t *testing.T) {
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 
-	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.RegionId = string(client.Region)
 	request.PageSize = requests.NewInteger(PageSizeSmall)
 	request.PageNumber = requests.NewInteger(1)
@@ -246,7 +248,7 @@ func testAccPreCheckWithNoDefaultVswitch(t *testing.T) {
 	request.RegionId = string(client.Region)
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 
-	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.PageSize = requests.NewInteger(PageSizeSmall)
 	request.PageNumber = requests.NewInteger(1)
 	request.IsDefault = requests.NewBoolean(true)
@@ -273,72 +275,70 @@ func testAccPreCheckWithEnvVariable(t *testing.T, envVariableName string) {
 	}
 }
 
-func checkoutSupportedRegions(t *testing.T, supported bool, regions []connectivity.Region) {
-	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
-	find := false
-	backupRegion := string(connectivity.APSouthEast1)
-	if region == string(connectivity.APSouthEast1) {
-		backupRegion = string(connectivity.EUCentral1)
-	}
+// func checkoutSupportedRegions(t *testing.T, supported bool, regions []connectivity.Region) {
+// 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+// 	find := false
+// 	backupRegion := string(connectivity.APSouthEast1)
+// 	if region == string(connectivity.APSouthEast1) {
+// 		backupRegion = string(connectivity.EUCentral1)
+// 	}
 
-	checkoutRegion := os.Getenv("CHECKOUT_REGION")
-	if checkoutRegion == "true" {
-		if region == string(connectivity.Hangzhou) {
-			region = string(connectivity.EUCentral1)
-			os.Setenv("ALIBABACLOUDSTACK_REGION", region)
-		}
-	}
-	backupRegionFind := false
-	hangzhouRegionFind := false
-	for _, r := range regions {
-		if region == string(r) {
-			find = true
-			break
-		}
-		if string(r) == backupRegion {
-			backupRegionFind = true
-		}
-		if string(connectivity.Hangzhou) == string(r) {
-			hangzhouRegionFind = true
-		}
-	}
+// 	checkoutRegion := os.Getenv("CHECKOUT_REGION")
+// 	if checkoutRegion == "true" {
+// 		if region == string(connectivity.Hangzhou) {
+// 			region = string(connectivity.EUCentral1)
+// 			os.Setenv("ALIBABACLOUDSTACK_REGION", region)
+// 		}
+// 	}
+// 	backupRegionFind := false
+// 	hangzhouRegionFind := false
+// 	for _, r := range regions {
+// 		if region == string(r) {
+// 			find = true
+// 			break
+// 		}
+// 		if string(r) == backupRegion {
+// 			backupRegionFind = true
+// 		}
+// 		if string(connectivity.Hangzhou) == string(r) {
+// 			hangzhouRegionFind = true
+// 		}
+// 	}
 
-	if (find && !supported) || (!find && supported) {
-		if supported {
-			if backupRegionFind {
-				t.Logf("Skipping unsupported region %s. Supported regions: %s. Using %s as this test region", region, regions, backupRegion)
-				os.Setenv("ALIBABACLOUDSTACK_REGION", backupRegion)
-				defaultRegionToTest = backupRegion
-				return
-			}
-			if hangzhouRegionFind {
-				t.Logf("Skipping unsupported region %s. Supported regions: %s. Using %s as this test region", region, regions, connectivity.Hangzhou)
-				os.Setenv("ALIBABACLOUDSTACK_REGION", string(connectivity.Hangzhou))
-				defaultRegionToTest = string(connectivity.Hangzhou)
-				return
-			}
-			t.Skipf("Skipping unsupported region %s. Supported regions: %s.", region, regions)
-		} else {
-			if !backupRegionFind {
-				t.Logf("Skipping unsupported region %s. Unsupported regions: %s. Using %s as this test region", region, regions, backupRegion)
-				os.Setenv("ALIBABACLOUDSTACK_REGION", backupRegion)
-				defaultRegionToTest = backupRegion
-				return
-			}
-			if !hangzhouRegionFind {
-				t.Logf("Skipping unsupported region %s. Supported regions: %s. Using %s as this test region", region, regions, connectivity.Hangzhou)
-				os.Setenv("ALIBABACLOUDSTACK_REGION", string(connectivity.Hangzhou))
-				defaultRegionToTest = string(connectivity.Hangzhou)
-				return
-			}
-			t.Skipf("Skipping unsupported region %s. Unsupported regions: %s.", region, regions)
-		}
-		t.Skipped()
-	}
-}
+// 	if (find && !supported) || (!find && supported) {
+// 		if supported {
+// 			if backupRegionFind {
+// 				t.Logf("Skipping unsupported region %s. Supported regions: %s. Using %s as this test region", region, regions, backupRegion)
+// 				os.Setenv("ALIBABACLOUDSTACK_REGION", backupRegion)
+// 				defaultRegionToTest = backupRegion
+// 				return
+// 			}
+// 			if hangzhouRegionFind {
+// 				t.Logf("Skipping unsupported region %s. Supported regions: %s. Using %s as this test region", region, regions, connectivity.Hangzhou)
+// 				os.Setenv("ALIBABACLOUDSTACK_REGION", string(connectivity.Hangzhou))
+// 				defaultRegionToTest = string(connectivity.Hangzhou)
+// 				return
+// 			}
+// 			t.Skipf("Skipping unsupported region %s. Supported regions: %s.", region, regions)
+// 		} else {
+// 			if !backupRegionFind {
+// 				t.Logf("Skipping unsupported region %s. Unsupported regions: %s. Using %s as this test region", region, regions, backupRegion)
+// 				os.Setenv("ALIBABACLOUDSTACK_REGION", backupRegion)
+// 				defaultRegionToTest = backupRegion
+// 				return
+// 			}
+// 			if !hangzhouRegionFind {
+// 				t.Logf("Skipping unsupported region %s. Supported regions: %s. Using %s as this test region", region, regions, connectivity.Hangzhou)
+// 				os.Setenv("ALIBABACLOUDSTACK_REGION", string(connectivity.Hangzhou))
+// 				defaultRegionToTest = string(connectivity.Hangzhou)
+// 				return
+// 			}
+// 			t.Skipf("Skipping unsupported region %s. Unsupported regions: %s.", region, regions)
+// 		}
+// 		t.Skipped()
+// 	}
+// }
 
 var providerCommon = `
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 `

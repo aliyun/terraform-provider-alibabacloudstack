@@ -6,82 +6,83 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudStackCrEEInstances() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackCrEEInstancesRead,
+		Read:	dataSourceAlibabacloudStackCrEEInstancesRead,
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringIsValidRegExp,
+				Type:		schema.TypeString,
+				Optional:	true,
+				ValidateFunc:	validation.StringIsValidRegExp,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:		schema.TypeString,
+				Optional:	true,
 			},
 
 			// Computed values
 			"ids": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:		schema.TypeList,
+				Optional:	true,
+				Computed:	true,
+				Elem:		&schema.Schema{Type: schema.TypeString},
 			},
 			"names": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:		schema.TypeList,
+				Computed:	true,
+				Elem:		&schema.Schema{Type: schema.TypeString},
 			},
 			"instances": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:		schema.TypeList,
+				Computed:	true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"region": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"specification": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"namespace_quota": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"namespace_usage": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"repo_quota": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"repo_usage": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"vpc_endpoints": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+							Type:		schema.TypeList,
+							Computed:	true,
+							Elem:		&schema.Schema{Type: schema.TypeString},
 						},
 						"public_endpoints": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+							Type:		schema.TypeList,
+							Computed:	true,
+							Elem:		&schema.Schema{Type: schema.TypeString},
 						},
 					},
 				},
@@ -100,7 +101,7 @@ func dataSourceAlibabacloudStackCrEEInstancesRead(d *schema.ResourceData, meta i
 	for {
 		resp, err := crService.ListCrEEInstances(pageNo, pageSize)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		instances = append(instances, resp.Instances...)
 		if len(resp.Instances) < pageSize {
@@ -142,24 +143,24 @@ func dataSourceAlibabacloudStackCrEEInstancesRead(d *schema.ResourceData, meta i
 	})
 
 	var (
-		ids          []string
-		names        []string
-		instanceMaps []map[string]interface{}
+		ids		[]string
+		names		[]string
+		instanceMaps	[]map[string]interface{}
 	)
 
 	for _, instance := range instances {
 		usageResp, err := crService.GetCrEEInstanceUsage(instance.InstanceId)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		endpointResp, err := crService.ListCrEEInstanceEndpoint(instance.InstanceId)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 
 		var (
-			publicDomains []string
-			vpcDomains    []string
+			publicDomains	[]string
+			vpcDomains	[]string
 		)
 		for _, endpoint := range endpointResp.Endpoints {
 			if !endpoint.Enable {
@@ -195,13 +196,13 @@ func dataSourceAlibabacloudStackCrEEInstancesRead(d *schema.ResourceData, meta i
 
 	d.SetId(dataResourceIdHash(names))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("instances", instanceMaps); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok {

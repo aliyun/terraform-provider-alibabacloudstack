@@ -1,15 +1,14 @@
 package alibabacloudstack
 
 import (
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -44,77 +43,41 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBinding() *schema.Resource
 func resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *ecs.Client
-	//ascmService := AscmService{client}
 
 	resourceSetId := d.Get("resource_set_id").(string)
 	userGroupId := d.Get("user_group_id").(string)
 
-	//var userId string
-	//var userIds []string
-	//if v, ok := d.GetOk("user_ids"); ok {
-	//	userIds = expandStringList(v.(*schema.Set).List())
-	//	for i, k := range userIds {
-	//		if i != 0 {
-	//			userId = fmt.Sprintf("%s\",\"%s", userId, k)
-	//		} else {
-	//			userId = k
-	//		}
-	//	}
-	//}
-	//check, err := ascmService.DescribeAscmUserGroupResourceSetBinding(RgId)
-	//if err != nil {
-	//	return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_organization", "ORG alreadyExist", AlibabacloudStackSdkGoERROR)
-	//}
-	//if len(check.Data) == 0 {
 	ascmRoleId := d.Get("ascm_role_id").(string)
-	request := requests.NewCommonRequest()
-	request.Method = "POST"
-	request.Product = "Ascm"
-	request.Version = "2019-05-10"
-	request.ServiceCode = "ascm"
-	request.Domain = client.Domain
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.ApiName = "AddResourceSetToUserGroup"
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
 
-	request.QueryParams = map[string]string{
-		"RegionId":        client.RegionId,
-		
-		"Product":         "Ascm",
-		"Action":          "AddResourceSetToUserGroup",
-		"Version":         "2019-05-10",
-		"ProductName":     "ascm",
-		"userGroupId":     userGroupId,
-		"resourceSetId":   resourceSetId,
-		"ascmRoleId":      ascmRoleId,
-	}
+	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddResourceSetToUserGroup", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"ProductName":  "ascm",
+		"userGroupId":  userGroupId,
+		"resourceSetId": resourceSetId,
+		"ascmRoleId":   ascmRoleId,
+	})
+
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
 	log.Printf("response of raw AddResourceSetToUserGroup is : %s", raw)
+	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user_group_resource_set_binding", "AddResourceSetToUserGroup", raw)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group_resource_set_binding", "AddResourceSetToUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug("AddResourceSetToUserGroup", raw, requestInfo, request)
-	bresponse, _ := raw.(*responses.CommonResponse)
 	if bresponse.GetHttpStatus() != 200 {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ascm_user_group_resource_set_binding", "AddResourceSetToUserGroup", AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group_resource_set_binding", "AddResourceSetToUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug("AddResourceSetToUserGroup", raw, requestInfo, bresponse.GetHttpContentString())
-	//}
-	//err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-	//	check, err = ascmService.DescribeAscmUserGroupResourceSetBinding(RgId)
-	//	if err != nil {
-	//		return resource.NonRetryableError(err)
-	//	}
-	//	return resource.RetryableError(err)
-	//})
-	//log.Printf("CreateOrganization Test %+v", check)
 	d.SetId(resourceSetId)
 	return resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead(d, meta)
 }
@@ -126,62 +89,44 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead(d *schema.Reso
 	ascmService := &AscmService{client: client}
 	obj, err := ascmService.DescribeAscmUserGroupResourceSetBinding(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("resource_set_id", strconv.Itoa(obj.Data[0].Id))
 
 	return nil
 }
+
 func resourceAlibabacloudStackAscmUserGroupResourceSetBindingDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	var requestInfo *ecs.Client
 	check, err := ascmService.DescribeAscmUserGroupResourceSetBinding(d.Id())
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), "IsBindingExist", AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsBindingExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	addDebug("IsBindingExist", check, requestInfo, map[string]string{"resourceGroupId": d.Id()})
 	userGroupId := d.Get("user_group_id").(string)
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 
-		request := requests.NewCommonRequest()
-		if client.Config.Insecure {
-			request.SetHTTPSInsecure(client.Config.Insecure)
-		}
-		request.QueryParams = map[string]string{
-			"RegionId":        client.RegionId,
-			
-			"Product":         "ascm",
-			"Action":          "RemoveResourceSetFromUserGroup",
-			"Version":         "2019-05-10",
-			"ProductName":     "ascm",
-			"userGroupId":     userGroupId,
-			"resourceSetId":   d.Id(),
-		}
-
-		request.Method = "POST"
-		request.Product = "ascm"
-		request.Version = "2019-05-10"
-		request.ServiceCode = "ascm"
-		request.Domain = client.Domain
-		if strings.ToLower(client.Config.Protocol) == "https" {
-			request.Scheme = "https"
-		} else {
-			request.Scheme = "http"
-		}
-		request.ApiName = "RemoveResourceSetFromUserGroup"
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.RegionId = client.RegionId
+		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RemoveResourceSetFromUserGroup", "")
+		request.QueryParams["ProductName"] = "ascm"
+		request.QueryParams["userGroupId"] = userGroupId
+		request.QueryParams["resourceSetId"] = d.Id()
 
 		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
 		})
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return resource.RetryableError(err)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group_resource_set_binding", "RemoveResourceSetFromUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 
 		addDebug("RemoveResourceSetFromUserGroup", raw, request)

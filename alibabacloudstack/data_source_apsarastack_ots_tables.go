@@ -7,86 +7,87 @@ import (
 
 	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudStackOtsTables() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackOtsTablesRead,
+		Read:	dataSourceAlibabacloudStackOtsTablesRead,
 
 		Schema: map[string]*schema.Schema{
 			"instance_name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:		schema.TypeString,
+				Required:	true,
+				ForceNew:	true,
 			},
 			"ids": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-				ForceNew: true,
-				MinItems: 1,
+				Type:		schema.TypeList,
+				Optional:	true,
+				Elem:		&schema.Schema{Type: schema.TypeString},
+				Computed:	true,
+				ForceNew:	true,
+				MinItems:	1,
 			},
 			"name_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringIsValidRegExp,
+				Type:		schema.TypeString,
+				Optional:	true,
+				ForceNew:	true,
+				ValidateFunc:	validation.StringIsValidRegExp,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:		schema.TypeString,
+				Optional:	true,
 			},
 
 			// Computed values
 			"names": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:		schema.TypeList,
+				Computed:	true,
+				Elem:		&schema.Schema{Type: schema.TypeString},
 			},
 			"tables": {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:		schema.TypeList,
+				Computed:	true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"instance_name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"table_name": {
-							Type:     schema.TypeString,
-							Computed: true,
+							Type:		schema.TypeString,
+							Computed:	true,
 						},
 						"primary_key": {
-							Type:     schema.TypeList,
-							Computed: true,
+							Type:		schema.TypeList,
+							Computed:	true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type:		schema.TypeString,
+										Computed:	true,
 									},
 									"type": {
-										Type:     schema.TypeString,
-										Computed: true,
+										Type:		schema.TypeString,
+										Computed:	true,
 									},
 								},
 							},
 							//MaxItems: ,
 						},
 						"time_to_live": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Type:		schema.TypeInt,
+							Computed:	true,
 						},
 						"max_version": {
-							Type:     schema.TypeInt,
-							Computed: true,
+							Type:		schema.TypeInt,
+							Computed:	true,
 						},
 					},
 				},
@@ -96,11 +97,11 @@ func dataSourceAlibabacloudStackOtsTables() *schema.Resource {
 }
 
 type OtsTableInfo struct {
-	instanceName string
-	tableName    string
-	primaryKey   []*tablestore.PrimaryKeySchema
-	timeToLive   int
-	maxVersion   int
+	instanceName	string
+	tableName	string
+	primaryKey	[]*tablestore.PrimaryKeySchema
+	timeToLive	int
+	maxVersion	int
 }
 
 func dataSourceAlibabacloudStackOtsTablesRead(d *schema.ResourceData, meta interface{}) error {
@@ -110,7 +111,7 @@ func dataSourceAlibabacloudStackOtsTablesRead(d *schema.ResourceData, meta inter
 
 	object, err := otsService.ListOtsTable(instanceName)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	idsMap := make(map[string]bool)
@@ -149,14 +150,14 @@ func dataSourceAlibabacloudStackOtsTablesRead(d *schema.ResourceData, meta inter
 	for _, tableName := range filteredTableNames {
 		object, err := otsService.DescribeOtsTable(fmt.Sprintf("%s%s%s", instanceName, COLON_SEPARATED, tableName))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		allTableInfos = append(allTableInfos, OtsTableInfo{
-			instanceName: instanceName,
-			tableName:    object.TableMeta.TableName,
-			primaryKey:   object.TableMeta.SchemaEntry,
-			timeToLive:   object.TableOption.TimeToAlive,
-			maxVersion:   object.TableOption.MaxVersion,
+			instanceName:	instanceName,
+			tableName:	object.TableMeta.TableName,
+			primaryKey:	object.TableMeta.SchemaEntry,
+			timeToLive:	object.TableOption.TimeToAlive,
+			maxVersion:	object.TableOption.MaxVersion,
 		})
 	}
 
@@ -173,11 +174,11 @@ func otsTablesDescriptionAttributes(d *schema.ResourceData, tableInfos []OtsTabl
 	for _, table := range tableInfos {
 		id := fmt.Sprintf("%s:%s", table.instanceName, table.tableName)
 		mapping := map[string]interface{}{
-			"id":            id,
-			"instance_name": table.instanceName,
-			"table_name":    table.tableName,
-			"time_to_live":  table.timeToLive,
-			"max_version":   table.maxVersion,
+			"id":			id,
+			"instance_name":	table.instanceName,
+			"table_name":		table.tableName,
+			"time_to_live":		table.timeToLive,
+			"max_version":		table.maxVersion,
 		}
 		var primaryKey []map[string]interface{}
 		for _, pk := range table.primaryKey {
@@ -195,15 +196,15 @@ func otsTablesDescriptionAttributes(d *schema.ResourceData, tableInfos []OtsTabl
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("tables", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("names", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	// create a json file in current directory and write data source to it.

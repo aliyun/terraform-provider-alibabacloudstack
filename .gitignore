@@ -29,7 +29,8 @@ website/node_modules
 *.pem
 vars-pipeline*
 develop*
-!vendor/github.com/valyala/**/*.pem
+/vendor/*
+/.settings
 
 website/vendor
 
@@ -41,4 +42,5 @@ website/vendor
 /terraform
 /terraform
 /tf-templates
-/.settings
+/workspace/*
+.vscode

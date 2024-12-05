@@ -28,6 +28,7 @@ type Config struct {
 	RegionId                 string
 	Department               string
 	ResourceGroup            string
+	ResourceGroupId          int
 	SecurityToken            string
 	OtsInstanceName          string
 	AccountId                string
@@ -41,107 +42,14 @@ type Config struct {
 	RamRoleSessionName       string
 	RamRolePolicy            string
 	RamRoleSessionExpiration int
-
-	Endpoints               map[string]interface{}
-	AsApiEndpoint           string
-	EcsEndpoint             string
-	RdsEndpoint             string
-	SlbEndpoint             string
-	VpcEndpoint             string
-	CenEndpoint             string
-	EssEndpoint             string
-	OssEndpoint             string
-	OssServerEndpoint       string
-	OnsEndpoint             string
-	AlikafkaEndpoint        string
-	AlikafkaOpenAPIEndpoint string
+	Endpoints               map[ServiceCode]string
 	OrganizationAccessKey   string
 	OrganizationSecretKey   string
-	SLSOpenAPIEndpoint      string
-	DnsEndpoint             string
-	RamEndpoint             string
-	CsEndpoint              string
-	DtsEndpoint             string
-	CrEndpoint              string
-	CdnEndpoint             string
-	KmsEndpoint             string
-	OtsEndpoint             string
-	CmsEndpoint             string
-	PvtzEndpoint            string
-	AscmEndpoint            string
-	LogEndpoint             string
-	DrdsEndpoint            string
-	DdsEndpoint             string
-	GpdbEndpoint            string
-	KVStoreEndpoint         string
-	PolarDBEndpoint         string
-	FcEndpoint              string
-	ApigatewayEndpoint      string
-	DatahubEndpoint         string
-	MnsEndpoint             string
-	LocationEndpoint        string
-	ElasticsearchEndpoint   string
-	NasEndpoint             string
-	BssOpenApiEndpoint      string
-	DdoscooEndpoint         string
-	DdosbgpEndpoint         string
-	SagEndpoint             string
-	EmrEndpoint             string
-	CasEndpoint             string
-	MarketEndpoint          string
-	HBaseEndpoint           string
-	AdbEndpoint             string
-	StsEndpoint             string
-	MaxComputeEndpoint      string
-
-	HitsdbEndpoint string
-	RosEndpoint    string
-
-	EdasEndpoint            string
-	DataworkspublicEndpoint string
-	DbsEndpoint             string
-	SkipRegionValidation    bool
 	ConfigurationSource     string
-	CbnEndpoint             string
-	DmsEnterpriseEndpoint   string
-	WafOpenapiEndpoint      string
-	ResourcemanagerEndpoint string
-	BssopenapiEndpoint      string
-	AlidnsEndpoint          string
-	CassandraEndpoint       string
-	EciEndpoint             string
-	OosEndpoint             string
-	DcdnEndpoint            string
-	MseEndpoint             string
-	ActiontrailEndpoint     string
 	Insecure                bool
 	Proxy                   string
 	Domain                  string
-	QuickbiEndpoint         string
-	ArmsEndpoint            string
-	CloudfwEndpoint         string
-	CsbEndpoint             string
-	GdbEndpoint             string
-}
-
-func (c *Config) loadAndValidate() error {
-	err := c.validateRegion()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Config) validateRegion() error {
-
-	for _, valid := range ValidRegions {
-		if c.Region == valid {
-			return nil
-		}
-	}
-
-	return fmt.Errorf("Invalid AlibabacloudStack Cloud region: %s", c.RegionId)
+	Eagleeye                EagleEye
 }
 
 func (c *Config) getAuthCredential(stsSupported bool) auth.Credential {

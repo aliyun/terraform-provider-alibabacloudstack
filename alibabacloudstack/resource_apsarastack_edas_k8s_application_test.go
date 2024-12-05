@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
 	"os"
 	"strings"
@@ -25,7 +26,7 @@ func init() {
 func testSweepEdasK8sApplication(region string) error {
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return WrapErrorf(err, "error getting AlibabacloudStack client.")
+		return errmsgs.WrapErrorf(err, "error getting AlibabacloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
@@ -48,7 +49,7 @@ func testSweepEdasK8sApplication(region string) error {
 	listApplicationResponse, _ := raw.(*edas.ListApplicationResponse)
 	if listApplicationResponse.Code != 200 {
 		log.Printf("[ERROR] Failed to retrieve edas k8s application in service list: %s", listApplicationResponse.Message)
-		return WrapError(Error(listApplicationResponse.Message))
+		return errmsgs.WrapError(errmsgs.Error(listApplicationResponse.Message))
 	}
 
 	for _, v := range listApplicationResponse.ApplicationList.Application {
@@ -98,7 +99,7 @@ func testSweepEdasK8sApplication(region string) error {
 				return edasClient.DeleteApplication(deleteApplicationRequest)
 			})
 			if err != nil {
-				if IsExpectedErrors(err, []string{ThrottlingUser}) {
+				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
 					wait()
 					return resource.RetryableError(err)
 				}
@@ -107,13 +108,13 @@ func testSweepEdasK8sApplication(region string) error {
 			addDebug(deleteApplicationRequest.GetActionName(), raw, deleteApplicationRequest.RoaRequest, deleteApplicationRequest)
 			rsp := raw.(*edas.DeleteApplicationResponse)
 			if rsp.Code == 601 && strings.Contains(rsp.Message, "Operation cannot be processed because there are running instances.") {
-				err = Error("Operation cannot be processed because there are running instances.")
+				err = errmsgs.Error("Operation cannot be processed because there are running instances.")
 				return resource.RetryableError(err)
 			}
 			return nil
 		})
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 
@@ -139,7 +140,7 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 	updateImg := fmt.Sprintf("registry-vpc.%s.aliyuncs.com/edas-demo-image/provider:1.0", region)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithRegions(t, true, connectivity.EdasSupportedRegions)
+
 			testAccPreCheck(t)
 		},
 
@@ -290,7 +291,7 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 		updateUrl := "http://edas-bj.oss-cn-beijing.aliyuncs.com/prod/demo/DUBBO_PROVIDER.jar"
 		resource.Test(t, resource.TestCase{
 			PreCheck: func() {
-				testAccPreCheckWithRegions(t, true, connectivity.EdasSupportedRegions)
+
 				testAccPreCheck(t)
 			},
 
@@ -414,7 +415,7 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 		image := fmt.Sprintf("registry-vpc.%s.aliyuncs.com/edas-demo-image/consumer:1.0", region)
 		resource.Test(t, resource.TestCase{
 			PreCheck: func() {
-				testAccPreCheckWithRegions(t, true, connectivity.EdasSupportedRegions)
+
 				testAccPreCheck(t)
 			},
 

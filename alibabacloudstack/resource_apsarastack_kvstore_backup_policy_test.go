@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -269,7 +271,7 @@ func testAccCheckKVStoreBackupPolicyDestroy(s *terraform.State) error {
 		}
 
 		if _, err := kvstoreService.DescribeKVstoreBackupPolicy(rs.Primary.ID); err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
 			return fmt.Errorf("Error Describe DB backup policy: %#v", err)
@@ -288,9 +290,7 @@ var kvStoreMap = map[string]string{
 
 func testAccKVStoreBackupPolicy_classic(instanceType, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	data "alibabacloudstack_zones" "default" {
 	}
 	variable "name" {
@@ -315,9 +315,7 @@ provider "alibabacloudstack" {
 
 func testAccKVStoreBackupPolicy_classicUpdatePeriod(instanceType, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	data "alibabacloudstack_zones" "default" {
 	}
 	variable "name" {
@@ -342,9 +340,7 @@ provider "alibabacloudstack" {
 
 func testAccKVStoreBackupPolicy_classicUpdateTime(instanceType, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	data "alibabacloudstack_zones" "default" {
 	}
 	variable "name" {
@@ -369,9 +365,7 @@ provider "alibabacloudstack" {
 
 func testAccKVStoreBackupPolicy_classicUpdateAll(instanceType, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	data "alibabacloudstack_zones" "default" {
 	}
 	variable "name" {
@@ -397,9 +391,7 @@ provider "alibabacloudstack" {
 func testAccKVStoreBackupPolicy_vpc(common, instanceType, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
 	%s
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	variable "creation" {
 		default = "KVStore"
 	}
@@ -429,9 +421,7 @@ provider "alibabacloudstack" {
 func testAccKVStoreBackupPolicy_vpcUpdatePeriod(common, instanceType, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
 	%s
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	variable "creation" {
 		default = "KVStore"
 	}
@@ -460,9 +450,7 @@ provider "alibabacloudstack" {
 func testAccKVStoreBackupPolicy_vpcUpdateTime(common, instanceType, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
 	%s
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	variable "creation" {
 		default = "KVStore"
 	}
@@ -491,9 +479,7 @@ provider "alibabacloudstack" {
 func testAccKVStoreBackupPolicy_vpcUpdateAll(common, instanceType, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
 	%s
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 	variable "creation" {
 		default = "KVStore"
 	}

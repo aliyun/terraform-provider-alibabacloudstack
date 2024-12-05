@@ -2,15 +2,14 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
 	"regexp"
-	"strings"
 )
 
 func dataSourceAlibabacloudstackRamServiceRoleProducts() *schema.Resource {
@@ -53,29 +52,8 @@ func dataSourceAlibabacloudstackRamServiceRoleProducts() *schema.Resource {
 func dataSourceAlibabacloudstackRamServiceRoleProductsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := requests.NewCommonRequest()
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "POST"
-	request.Product = "ascm"
-	request.Version = "2019-05-10"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = client.RegionId
-	request.ApiName = "ListRAMServiceRoleProducts"
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "ascm",
-		"RegionId":        client.RegionId,
-		"Action":          "ListRAMServiceRoleProducts",
-		"Version":         "2019-05-10",
-	}
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoleProducts", "")
+
 	response := RoleProducts{}
 
 	for {
@@ -84,15 +62,18 @@ func dataSourceAlibabacloudstackRamServiceRoleProductsRead(d *schema.ResourceDat
 		})
 		log.Printf(" response of raw ListRAMServiceRoleProducts : %s", raw)
 
+		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_ram_service_role_products", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ram_service_role_products", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if response.Success == true || len(response.Data) < 1 {
 			break
@@ -115,13 +96,12 @@ func dataSourceAlibabacloudstackRamServiceRoleProductsRead(d *schema.ResourceDat
 			"ascii_name":   rg.ASCIIName,
 			"key":          rg.Key,
 		}
-		//ids = append(re, rg.Description)
 		s = append(s, mapping)
 	}
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("products", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
@@ -136,12 +116,12 @@ type RoleProducts struct {
 		ASCIIName   string `json:"asciiName"`
 		Key         string `json:"key"`
 	} `json:"data"`
-	Message        string `json:"message"`
-	ServerRole     string `json:"serverRole"`
-	AsapiRequestID string `json:"asapiRequestId"`
-	Success        bool   `json:"success"`
-	Domain         string `json:"domain"`
-	PureListData   bool   `json:"pureListData"`
-	API            string `json:"api"`
-	AsapiErrorCode string `json:"asapiErrorCode"`
+	Message         string `json:"message"`
+	ServerRole      string `json:"serverRole"`
+	AsapiRequestID  string `json:"asapiRequestId"`
+	Success         bool   `json:"success"`
+	Domain          string `json:"domain"`
+	PureListData    bool   `json:"pureListData"`
+	API             string `json:"api"`
+	AsapiErrorCode  string `json:"asapiErrorCode"`
 }

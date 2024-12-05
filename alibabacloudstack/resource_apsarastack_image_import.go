@@ -2,11 +2,11 @@ package alibabacloudstack
 
 import (
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -26,14 +26,11 @@ func resourceAlibabacloudStackImageImport() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"architecture": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "x86_64",
-				ValidateFunc: validation.StringInSlice([]string{
-					"x86_64",
-					"i386",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "x86_64",
+				ValidateFunc: validation.StringInSlice([]string{"x86_64", "i386"}, false),
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -44,45 +41,25 @@ func resourceAlibabacloudStackImageImport() *schema.Resource {
 				Optional: true,
 			},
 			"license_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "Auto",
-				ValidateFunc: validation.StringInSlice([]string{
-					"Auto",
-					"Aliyun",
-					"BYOL",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "Auto",
+				ValidateFunc: validation.StringInSlice([]string{"Auto", "Aliyun", "BYOL"}, false),
 			},
 			"platform": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "Ubuntu",
-				ValidateFunc: validation.StringInSlice([]string{
-					"CentOS",
-					"Ubuntu",
-					"SUSE",
-					"OpenSUSE",
-					"Debian",
-					"CoreOS",
-					"Windows Server 2003",
-					"Windows Server 2008",
-					"Windows Server 2012",
-					"Windows 7",
-					"Customized Linux",
-					"Others Linux",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "Ubuntu",
+				ValidateFunc: validation.StringInSlice([]string{"CentOS", "Ubuntu", "SUSE", "OpenSUSE", "Debian", "CoreOS", "Windows Server 2003", "Windows Server 2008", "Windows Server 2012", "Windows 7", "Customized Linux", "Others Linux"}, false),
 			},
 			"os_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "linux",
-				ValidateFunc: validation.StringInSlice([]string{
-					"windows",
-					"linux",
-				}, false),
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "linux",
+				ValidateFunc: validation.StringInSlice([]string{"windows", "linux"}, false),
 			},
 			"disk_device_mapping": {
 				Type:     schema.TypeList,
@@ -97,15 +74,11 @@ func resourceAlibabacloudStackImageImport() *schema.Resource {
 							ForceNew: true,
 						},
 						"format": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-							Computed: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"RAW",
-								"VHD",
-								"qcow2",
-							}, false),
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							Computed:     true,
+							ValidateFunc: validation.StringInSlice([]string{"RAW", "VHD", "qcow2"}, false),
 						},
 						"oss_bucket": {
 							Type:     schema.TypeString,
@@ -129,14 +102,7 @@ func resourceAlibabacloudStackImageImportCreate(d *schema.ResourceData, meta int
 	ecsService := EcsService{client: client}
 
 	request := ecs.CreateImportImageRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	request.Architecture = d.Get("architecture").(string)
 	request.Description = d.Get("description").(string)
 	request.ImageName = d.Get("image_name").(string)
@@ -164,15 +130,19 @@ func resourceAlibabacloudStackImageImportCreate(d *schema.ResourceData, meta int
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ImportImage(request)
 	})
-	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_import_image", request.GetActionName(), AlibabacloudStackSdkGoERROR)
-	}
+	response, ok := raw.(*ecs.ImportImageResponse)
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	resp, _ := raw.(*ecs.ImportImageResponse)
-	d.SetId(resp.ImageId)
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_import_image", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	d.SetId(response.ImageId)
 	stateConf := BuildStateConfByTimes([]string{"Waiting"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ecsService.ImageStateRefreshFunc(d.Id(), []string{"CreateFailed", "UnAvailable"}), 200)
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return resourceAlibabacloudStackImageImportRead(d, meta)
 }
@@ -184,11 +154,11 @@ func resourceAlibabacloudStackImageImportRead(d *schema.ResourceData, meta inter
 
 	object, err := ecsService.DescribeImageById(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
+		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("image_name", object.ImageName)
 	d.Set("description", object.Description)
@@ -205,7 +175,7 @@ func resourceAlibabacloudStackImageImportUpdate(d *schema.ResourceData, meta int
 	ecsService := EcsService{client}
 	err := ecsService.updateImage(d)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	return resourceAlibabacloudStackImageImportRead(d, meta)
 }

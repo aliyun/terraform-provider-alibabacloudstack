@@ -1,10 +1,12 @@
 package alibabacloudstack
 
 import (
+	"testing"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"testing"
 )
 
 func TestAccAlibabacloudStackAscm_RamRoleBasic(t *testing.T) {
@@ -49,13 +51,13 @@ func testAccCheckAscm_RamRoleDestroy(s *terraform.State) error {
 		}
 		ascm, err := ascmService.DescribeAscmRamRole(rs.Primary.ID)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if ascm.AsapiErrorCode != "200" {
-			return WrapError(Error("ram role still exist"))
+			return errmsgs.WrapError(errmsgs.Error("ram role still exist"))
 		}
 	}
 

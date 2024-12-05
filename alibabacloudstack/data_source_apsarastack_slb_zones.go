@@ -2,10 +2,10 @@ package alibabacloudstack
 
 import (
 	"sort"
-	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -59,34 +59,28 @@ func dataSourceAlibabacloudStackSlbZonesRead(d *schema.ResourceData, meta interf
 	slaveZones := make(map[string][]string)
 	localName := make(map[string][]string)
 	request := slb.CreateDescribeZonesRequest()
-	request.RegionId = client.RegionId
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeZones(request)
 	})
+	response, ok := raw.(*slb.DescribeZonesResponse)
 	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_slb_zones", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-
-	response, _ := raw.(*slb.DescribeZonesResponse)
 
 	for _, zone := range response.Zones.Zone {
 		slaveIds := []string{}
 		for _, slavezone := range zone.SlaveZones.SlaveZone {
-
 			slaveIds = append(slaveIds, slavezone.ZoneId)
 			if len(slaveIds) > 0 {
 				sort.Strings(slaveIds)
 			}
-
 		}
 		localName[zone.ZoneId] = []string{zone.LocalName}
 		slaveZones[zone.ZoneId] = slaveIds
@@ -118,10 +112,10 @@ func dataSourceAlibabacloudStackSlbZonesRead(d *schema.ResourceData, meta interf
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("zones", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)

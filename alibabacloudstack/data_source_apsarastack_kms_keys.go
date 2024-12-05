@@ -6,6 +6,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -32,9 +33,9 @@ func dataSourceAlibabacloudStackKmsKeys() *schema.Resource {
 			},
 
 			"status": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
 				// must contain a valid status, expected Enabled, Disabled, PendingDeletion
 				ValidateFunc: validation.StringInSlice([]string{
 					string(EnabledStatus),
@@ -93,9 +94,7 @@ func dataSourceAlibabacloudStackKmsKeysRead(d *schema.ResourceData, meta interfa
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := kms.CreateListKeysRequest()
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok && len(v.([]interface{})) > 0 {
@@ -114,11 +113,15 @@ func dataSourceAlibabacloudStackKmsKeysRead(d *schema.ResourceData, meta interfa
 		raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 			return kmsClient.ListKeys(request)
 		})
-		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_kms_keys", request.GetActionName(), AlibabacloudStackSdkGoERROR)
-		}
+		response, ok := raw.(*kms.ListKeysResponse)
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		response, _ := raw.(*kms.ListKeysResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_kms_keys", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
 		for _, key := range response.Keys.Key {
 			if len(idsMap) > 0 {
 				if _, ok := idsMap[key.KeyId]; ok {
@@ -135,7 +138,7 @@ func dataSourceAlibabacloudStackKmsKeysRead(d *schema.ResourceData, meta interfa
 		}
 		page, err := getNextpageNumber(request.PageNumber)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		request.PageNumber = page
 	}
@@ -149,44 +152,47 @@ func dataSourceAlibabacloudStackKmsKeysRead(d *schema.ResourceData, meta interfa
 	for _, k := range keyIds {
 
 		request := kms.CreateDescribeKeyRequest()
-		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		client.InitRpcRequest(*request.RpcRequest)
 
 		request.KeyId = k
 		raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {
 			return kmsClient.DescribeKey(request)
 		})
-		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, k, request.GetActionName(), AlibabacloudStackSdkGoERROR)
-		}
+		response, ok := raw.(*kms.DescribeKeyResponse)
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		key, _ := raw.(*kms.DescribeKeyResponse)
-		if r != nil && !r.MatchString(key.KeyMetadata.Description) {
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, k, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		if r != nil && !r.MatchString(response.KeyMetadata.Description) {
 			continue
 		}
-		if statusOk && status != "" && status != key.KeyMetadata.KeyState {
+		if statusOk && status != "" && status != response.KeyMetadata.KeyState {
 			continue
 		}
 		mapping := map[string]interface{}{
-			"id":            key.KeyMetadata.KeyId,
-			"arn":           key.KeyMetadata.Arn,
-			"description":   key.KeyMetadata.Description,
-			"status":        key.KeyMetadata.KeyState,
-			"creation_date": key.KeyMetadata.CreationDate,
-			"delete_date":   key.KeyMetadata.DeleteDate,
-			"creator":       key.KeyMetadata.Creator,
+			"id":              response.KeyMetadata.KeyId,
+			"arn":             response.KeyMetadata.Arn,
+			"description":     response.KeyMetadata.Description,
+			"status":          response.KeyMetadata.KeyState,
+			"creation_date":   response.KeyMetadata.CreationDate,
+			"delete_date":     response.KeyMetadata.DeleteDate,
+			"creator":         response.KeyMetadata.Creator,
 		}
 
 		s = append(s, mapping)
-		ids = append(ids, key.KeyMetadata.KeyId)
+		ids = append(ids, response.KeyMetadata.KeyId)
 	}
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("keys", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	// create a json file in current directory and write data source to it.

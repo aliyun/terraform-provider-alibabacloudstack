@@ -3,16 +3,18 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
+	"testing"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"log"
-	"strings"
-	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -26,16 +28,10 @@ func init() {
 
 func testSweepCRNamespace(region string) error {
 	// skip not supported region
-	for _, r := range connectivity.CRNoSupportedRegions {
-		if region == string(r) {
-			log.Printf("[INFO] testSweepCRNamespace skipped not supported region: %s", region)
-			return nil
-		}
-	}
 
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return WrapError(fmt.Errorf("error getting AlibabacloudStack client: %s", err))
+		return errmsgs.WrapError(fmt.Errorf("error getting AlibabacloudStack client: %s", err))
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 
@@ -52,29 +48,19 @@ func testSweepCRNamespace(region string) error {
 	request.Scheme = "http"
 	request.ApiName = "GetNamespaceList"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{
-		
-		
-		"Product":         "cr",
-		"Department":      client.Department,
-		"ResourceGroup":   client.ResourceGroup,
-		"RegionId":        client.RegionId,
-		"Action":          "GetNamespaceList",
-		"Version":         "2016-06-07",
-	}
 	raw, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
 		return crClient.ProcessCommonRequest(request)
 	})
 
 	if err != nil {
-		log.Printf("[ERROR] %s ", WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), AlibabacloudStackSdkGoERROR))
+		log.Printf("[ERROR] %s ", errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
 		return nil
 	}
 	var resp crListResponse
 	bresponse := raw.(*responses.CommonResponse)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
 	if err != nil {
-		log.Printf("[ERROR] %s", WrapError(err))
+		log.Printf("[ERROR] %s", errmsgs.WrapError(err))
 		return nil
 	}
 
@@ -97,8 +83,8 @@ func testSweepCRNamespace(region string) error {
 		request.ApiName = "DeleteNamespace"
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
-			
-			
+			"AccessKeySecret": client.SecretKey,
+			"AccessKeyId":     client.AccessKey,
 			"Product":         "cr",
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
@@ -111,7 +97,7 @@ func testSweepCRNamespace(region string) error {
 			return crClient.ProcessCommonRequest(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		crService := CrService{client}
 		resp1 := crDescribeNamespaceResponse{}
@@ -119,10 +105,10 @@ func testSweepCRNamespace(region string) error {
 		resp := raw.(*responses.CommonResponse)
 		_ = json.Unmarshal(resp.GetHttpContentBytes(), &resp1)
 		if resp1.Code != "NAMESPACE_NOT_EXIST" {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				return nil
 			}
-			return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
 	return nil
@@ -141,10 +127,10 @@ func testAccCheckNamespaceDestroy(s *terraform.State) error {
 		_, err := crService.DescribeCrNamespace(rs.Primary.ID)
 
 		if err == nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 
@@ -167,7 +153,6 @@ func TestAccAlibabacloudStackCRNamespace_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, false, connectivity.CRNoSupportedRegions)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -227,7 +212,6 @@ func TestAccAlibabacloudStackCRNamespace_Multi(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccPreCheckWithRegions(t, false, connectivity.CRNoSupportedRegions)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -250,9 +234,7 @@ func TestAccAlibabacloudStackCRNamespace_Multi(t *testing.T) {
 
 func resourceCRNamespaceConfigDependence(name string) string {
 	return fmt.Sprintf(`
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 `)
 }
 

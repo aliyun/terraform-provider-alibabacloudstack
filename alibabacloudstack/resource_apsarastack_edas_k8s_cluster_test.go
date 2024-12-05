@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
 	"os"
 	"testing"
@@ -27,7 +28,7 @@ func init() {
 func testSweepEdasK8sCluster(region string) error {
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return WrapErrorf(err, "error getting AlibabacloudStack client.")
+		return errmsgs.WrapErrorf(err, "error getting AlibabacloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
@@ -50,7 +51,7 @@ func testSweepEdasK8sCluster(region string) error {
 	listClusterResponse, _ := raw.(*edas.ListClusterResponse)
 	if listClusterResponse.Code != 200 {
 		log.Printf("[ERROR] Failed to retrieve edas cluster in service list: %s", listClusterResponse.Message)
-		return WrapError(Error(listClusterResponse.Message))
+		return errmsgs.WrapError(errmsgs.Error(listClusterResponse.Message))
 	}
 
 	for _, v := range listClusterResponse.ClusterList.Cluster {
@@ -79,7 +80,7 @@ func testSweepEdasK8sCluster(region string) error {
 				return edasClient.DeleteCluster(deleteClusterRq)
 			})
 			if err != nil {
-				if IsExpectedErrors(err, []string{ThrottlingUser}) {
+				if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
 					wait()
 					return resource.RetryableError(err)
 				}
@@ -88,7 +89,7 @@ func testSweepEdasK8sCluster(region string) error {
 			addDebug(deleteClusterRq.GetActionName(), raw, deleteClusterRq.RoaRequest, deleteClusterRq)
 			rsp := raw.(*edas.DeleteClusterResponse)
 			if rsp.Code == 601 && strings.Contains(rsp.Message, "Operation cannot be processed because there are running instances.") {
-				err = Error("Operation cannot be processed because there are running instances.")
+				err = errmsgs.Error("Operation cannot be processed because there are running instances.")
 				return resource.RetryableError(err)
 			}
 			return nil
@@ -117,7 +118,7 @@ func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sClusterConfigDependence)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheckWithRegions(t, true, connectivity.EdasSupportedRegions)
+
 			testAccPreCheck(t)
 		},
 
@@ -178,7 +179,7 @@ func testAccCheckEdasK8sClusterDestroy(s *terraform.State) error {
 		})
 
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
 			return err

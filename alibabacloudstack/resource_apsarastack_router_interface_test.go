@@ -12,6 +12,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -44,7 +45,7 @@ func testSweepRouterInterfaces(region string) error {
 		req.Scheme = "http"
 	}
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.PageSize = requests.NewInteger(PageSizeLarge)
 	req.PageNumber = requests.NewInteger(1)
 	for {
@@ -99,7 +100,7 @@ func testSweepRouterInterfaces(region string) error {
 			req.Scheme = "http"
 		}
 		req.Headers = map[string]string{"RegionId": client.RegionId}
-		req.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		req.RouterInterfaceId = id
 		_, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.DeleteRouterInterface(req)
@@ -147,14 +148,14 @@ func testAccCheckRouterInterfaceDestroy(s *terraform.State) error {
 
 		ri, err := vpcService.DescribeRouterInterface(rs.Primary.ID, client.RegionId)
 		if err != nil {
-			if NotFoundError(err) {
+			if errmsgs.NotFoundError(err) {
 				continue
 			}
 			return err
 		}
 
 		if ri.RouterInterfaceId == rs.Primary.ID {
-			return WrapError(Error("Interface %s still exists.", rs.Primary.ID))
+			return errmsgs.WrapError(errmsgs.Error("Interface %s still exists.", rs.Primary.ID))
 		}
 	}
 	return nil

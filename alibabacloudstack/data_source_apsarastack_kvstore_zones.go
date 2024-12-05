@@ -7,6 +7,7 @@ import (
 
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -17,9 +18,9 @@ func dataSourceAlibabacloudStackKVStoreZones() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"multi": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
 			},
 			"instance_charge_type": {
 				Type:         schema.TypeString,
@@ -62,25 +63,26 @@ func dataSourceAlibabacloudStackKVStoreZoneRead(d *schema.ResourceData, meta int
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	multi := d.Get("multi").(bool)
 	var zoneIds []string
-	//instanceChargeType := d.Get("instance_charge_type").(string)
 
 	request := r_kvstore.CreateDescribeRegionsRequest()
-	request.RegionId = client.RegionId
-	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	client.InitRpcRequest(*request.RpcRequest)
 	//request.InstanceChargeType = instanceChargeType
 	raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 		return rkvClient.DescribeRegions(request)
 	})
-	if err != nil {
-		return WrapErrorf(err, DataDefaultErrorMsg, "alibabacloudstack_kvstore_zones", request.GetActionName(), AlibabacloudStackSdkGoERROR)
-	}
+	response, ok := raw.(*r_kvstore.DescribeRegionsResponse)
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	zones, _ := raw.(*r_kvstore.DescribeRegionsResponse)
-	if len(zones.RegionIds.KVStoreRegion) <= 0 {
-		return WrapError(fmt.Errorf("[ERROR] There is no available zones for KVStore"))
+	if err != nil {
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_kvstore_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	for _, zone := range zones.RegionIds.KVStoreRegion {
+	if len(response.RegionIds.KVStoreRegion) <= 0 {
+		return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available zones for KVStore"))
+	}
+	for _, zone := range response.RegionIds.KVStoreRegion {
 		if multi && strings.Contains(zone.ZoneIds, MULTI_IZ_SYMBOL) {
 			zoneIds = append(zoneIds, zone.ZoneIds)
 			continue
@@ -90,8 +92,8 @@ func dataSourceAlibabacloudStackKVStoreZoneRead(d *schema.ResourceData, meta int
 		}
 	}
 
-	if len(zoneIds) == 0 && len(zones.RegionIds.KVStoreRegion) == 1 {
-		zoneIds = append(zoneIds, zones.RegionIds.KVStoreRegion[0].ZoneIds)
+	if len(zoneIds) == 0 && len(response.RegionIds.KVStoreRegion) == 1 {
+		zoneIds = append(zoneIds, response.RegionIds.KVStoreRegion[0].ZoneIds)
 	}
 
 	if len(zoneIds) > 0 {
@@ -107,7 +109,7 @@ func dataSourceAlibabacloudStackKVStoreZoneRead(d *schema.ResourceData, meta int
 	} else {
 		for _, zoneId := range zoneIds {
 			mapping := map[string]interface{}{
-				"id":             zoneId,
+				"id":            zoneId,
 				"multi_zone_ids": splitMultiZoneId(zoneId),
 			}
 			s = append(s, mapping)
@@ -115,10 +117,10 @@ func dataSourceAlibabacloudStackKVStoreZoneRead(d *schema.ResourceData, meta int
 	}
 	d.SetId(dataResourceIdHash(zoneIds))
 	if err := d.Set("zones", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if err := d.Set("ids", zoneIds); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
 		writeToFile(output.(string), s)
