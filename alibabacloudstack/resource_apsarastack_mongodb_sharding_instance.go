@@ -181,7 +181,7 @@ func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{})
 
 	request.RegionId = string(client.Region)
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.EngineVersion = Trim(d.Get("engine_version").(string))
 	request.Engine = "MongoDB"
 	request.DBInstanceDescription = d.Get("name").(string)
@@ -402,7 +402,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		request := dds.CreateModifyDBInstanceTDERequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.DBInstanceId = d.Id()
 		request.TDEStatus = d.Get("tde_status").(string)
 		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
@@ -419,7 +419,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		request := dds.CreateModifySecurityGroupConfigurationRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 		request.DBInstanceId = d.Id()
 		request.SecurityGroupId = d.Get("security_group_id").(string)
@@ -461,7 +461,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		request := dds.CreateModifyDBInstanceDescriptionRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 		request.DBInstanceId = d.Id()
 		request.DBInstanceDescription = d.Get("name").(string)
@@ -523,7 +523,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceDelete(d *schema.ResourceDa
 	request := dds.CreateDeleteDBInstanceRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = d.Id()
 
 	err := resource.Retry(10*5*time.Minute, func() *resource.RetryError {

@@ -47,7 +47,7 @@ func (s *CmsService) DescribeCmsAlarm(id string) (alarm cms.Alarm, err error) {
 		request.RuleName = parts[1]
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "cms"}
+	request.QueryParams = map[string]string{ "Product": "cms"}
 
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	var response *cms.DescribeMetricRuleListResponse
@@ -121,7 +121,7 @@ func (s *CmsService) ExtractWebhookFromJson(webhookJson string) (string, error) 
 func (s *CmsService) DescribeSiteMonitor(id, keyword string) (siteMonitor cms.SiteMonitor, err error) {
 	listRequest := cms.CreateDescribeSiteMonitorListRequest()
 	listRequest.Headers = map[string]string{"RegionId": s.client.RegionId}
-	listRequest.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "cms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	listRequest.QueryParams = map[string]string{ "Product": "cms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	listRequest.Keyword = keyword
 	listRequest.TaskId = id
@@ -147,7 +147,7 @@ func (s *CmsService) DescribeSiteMonitor(id, keyword string) (siteMonitor cms.Si
 func (s *CmsService) GetIspCities(id string) (ispCities IspCities, err error) {
 	request := cms.CreateDescribeSiteMonitorAttributeRequest()
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "cms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "cms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.TaskId = id
 
@@ -174,7 +174,7 @@ func (s *CmsService) DescribeCmsAlarmContact(id string) (object cms.Contact, err
 	request := cms.CreateDescribeContactListRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "cms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "cms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.ContactName = id
 
@@ -207,7 +207,7 @@ func (s *CmsService) DescribeCmsAlarmContactGroup(id string) (object cms.Contact
 	request := cms.CreateDescribeContactGroupListRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "cms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "cms", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.PageNumber = requests.NewInteger(1)
 	request.PageSize = requests.NewInteger(20)
@@ -259,7 +259,7 @@ func (s *CmsService) DescribeCmsMetricRuleTemplateList() (templates []cms.Templa
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
 	PageNumber := 1
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "cms",
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
@@ -311,7 +311,7 @@ func (s *CmsService) DescribeMetricRuleTemplateAttribute(id string) (object *cms
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "cms",
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,

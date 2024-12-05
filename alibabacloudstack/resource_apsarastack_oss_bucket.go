@@ -47,58 +47,58 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"private", "public-read", "public-read-write"}, false),
 			},
 
-			"cors_rule": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"allowed_headers": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"allowed_methods": {
-							Type:     schema.TypeList,
-							Required: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"allowed_origins": {
-							Type:     schema.TypeList,
-							Required: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"expose_headers": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"max_age_seconds": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-					},
-				},
-				MaxItems: 10,
-			},
+// 			"cors_rule": {
+// 				Type:     schema.TypeList,
+// 				Optional: true,
+// 				Elem: &schema.Resource{
+// 					Schema: map[string]*schema.Schema{
+// 						"allowed_headers": {
+// 							Type:     schema.TypeList,
+// 							Optional: true,
+// 							Elem:     &schema.Schema{Type: schema.TypeString},
+// 						},
+// 						"allowed_methods": {
+// 							Type:     schema.TypeList,
+// 							Required: true,
+// 							Elem:     &schema.Schema{Type: schema.TypeString},
+// 						},
+// 						"allowed_origins": {
+// 							Type:     schema.TypeList,
+// 							Required: true,
+// 							Elem:     &schema.Schema{Type: schema.TypeString},
+// 						},
+// 						"expose_headers": {
+// 							Type:     schema.TypeList,
+// 							Optional: true,
+// 							Elem:     &schema.Schema{Type: schema.TypeString},
+// 						},
+// 						"max_age_seconds": {
+// 							Type:     schema.TypeInt,
+// 							Optional: true,
+// 						},
+// 					},
+// 				},
+// 				MaxItems: 10,
+// 			},
 
-			"website": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"index_document": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-
-						"error_document": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
-				MaxItems: 1,
-			},
+// 			"website": {
+// 				Type:     schema.TypeList,
+// 				Optional: true,
+// 				Elem: &schema.Resource{
+// 					Schema: map[string]*schema.Schema{
+// 						"index_document": {
+// 							Type:     schema.TypeString,
+// 							Required: true,
+// 						},
+// 
+// 						"error_document": {
+// 							Type:     schema.TypeString,
+// 							Optional: true,
+// 						},
+// 					},
+// 				},
+// 				MaxItems: 1,
+// 			},
 
 			"logging": {
 				Type:     schema.TypeList,
@@ -128,100 +128,100 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				},
 			},
 
-			"referer_config": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"allow_empty": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Computed: true,
-						},
-						"referers": {
-							Type:     schema.TypeList,
-							Required: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-					},
-				},
-				MaxItems: 1,
-			},
+// 			"referer_config": {
+// 				Type:     schema.TypeList,
+// 				Optional: true,
+// 				Elem: &schema.Resource{
+// 					Schema: map[string]*schema.Schema{
+// 						"allow_empty": {
+// 							Type:     schema.TypeBool,
+// 							Optional: true,
+// 							Computed: true,
+// 						},
+// 						"referers": {
+// 							Type:     schema.TypeList,
+// 							Required: true,
+// 							Elem:     &schema.Schema{Type: schema.TypeString},
+// 						},
+// 					},
+// 				},
+// 				MaxItems: 1,
+// 			},
 
-			"lifecycle_rule": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Computed:     true,
-							ValidateFunc: validation.StringLenBetween(0, 255),
-						},
-						"prefix": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"enabled": {
-							Type:     schema.TypeBool,
-							Required: true,
-						},
-						"expiration": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Set:      expirationHash,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"date": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										ValidateFunc: validateOssBucketDateTimestamp,
-									},
-									"days": {
-										Type:     schema.TypeInt,
-										Optional: true,
-									},
-								},
-							},
-						},
-						//"transitions": {
-						//	Type:     schema.TypeSet,
-						//	Optional: true,
-						//	Set:      transitionsHash,
-						//	Elem: &schema.Resource{
-						//		Schema: map[string]*schema.Schema{
-						//			"created_before_date": {
-						//				Type:         schema.TypeString,
-						//				Optional:     true,
-						//				ValidateFunc: validateOssBucketDateTimestamp,
-						//			},
-						//			"days": {
-						//				Type:     schema.TypeInt,
-						//				Optional: true,
-						//			},
-						//			"storage_class": {
-						//				Type:     schema.TypeString,
-						//				Default:  oss.StorageStandard,
-						//				Optional: true,
-						//				ValidateFunc: validation.StringInSlice([]string{
-						//					string(oss.StorageStandard),
-						//					string(oss.StorageIA),
-						//					string(oss.StorageArchive),
-						//				}, false),
-						//			},
-						//		},
-						//	},
-						//},
-					},
-				},
-				MaxItems: 1000,
-			},
+// 			"lifecycle_rule": {
+// 				Type:     schema.TypeList,
+// 				Optional: true,
+// 				Elem: &schema.Resource{
+// 					Schema: map[string]*schema.Schema{
+// 						"id": {
+// 							Type:         schema.TypeString,
+// 							Optional:     true,
+// 							Computed:     true,
+// 							ValidateFunc: validation.StringLenBetween(0, 255),
+// 						},
+// 						"prefix": {
+// 							Type:     schema.TypeString,
+// 							Required: true,
+// 						},
+// 						"enabled": {
+// 							Type:     schema.TypeBool,
+// 							Required: true,
+// 						},
+// 						"expiration": {
+// 							Type:     schema.TypeSet,
+// 							Optional: true,
+// 							Set:      expirationHash,
+// 							Elem: &schema.Resource{
+// 								Schema: map[string]*schema.Schema{
+// 									"date": {
+// 										Type:         schema.TypeString,
+// 										Optional:     true,
+// 										ValidateFunc: validateOssBucketDateTimestamp,
+// 									},
+// 									"days": {
+// 										Type:     schema.TypeInt,
+// 										Optional: true,
+// 									},
+// 								},
+// 							},
+// 						},
+// 						//"transitions": {
+// 						//	Type:     schema.TypeSet,
+// 						//	Optional: true,
+// 						//	Set:      transitionsHash,
+// 						//	Elem: &schema.Resource{
+// 						//		Schema: map[string]*schema.Schema{
+// 						//			"created_before_date": {
+// 						//				Type:         schema.TypeString,
+// 						//				Optional:     true,
+// 						//				ValidateFunc: validateOssBucketDateTimestamp,
+// 						//			},
+// 						//			"days": {
+// 						//				Type:     schema.TypeInt,
+// 						//				Optional: true,
+// 						//			},
+// 						//			"storage_class": {
+// 						//				Type:     schema.TypeString,
+// 						//				Default:  oss.StorageStandard,
+// 						//				Optional: true,
+// 						//				ValidateFunc: validation.StringInSlice([]string{
+// 						//					string(oss.StorageStandard),
+// 						//					string(oss.StorageIA),
+// 						//					string(oss.StorageArchive),
+// 						//				}, false),
+// 						//			},
+// 						//		},
+// 						//	},
+// 						//},
+// 					},
+// 				},
+// 				MaxItems: 1000,
+// 			},
 
-			"policy": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+// 			"policy": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 			},
 			"creation_date": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -248,55 +248,55 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"sse_algorithm": {
-				Type:     schema.TypeString,
-				Default:  "",
-				Optional: true,
-				ForceNew: true,
-			},
-			"server_side_encryption_rule": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"sse_algorithm": {
-							Type:     schema.TypeString,
-							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								ServerSideEncryptionAes256,
-								ServerSideEncryptionKMS,
-							}, false),
-						},
-					},
-				},
-				MaxItems: 1,
-			},
+// 			"sse_algorithm": {
+// 				Type:     schema.TypeString,
+// 				Default:  "",
+// 				Optional: true,
+// 				ForceNew: true,
+// 			},
+// 			"server_side_encryption_rule": {
+// 				Type:     schema.TypeList,
+// 				Optional: true,
+// 				Elem: &schema.Resource{
+// 					Schema: map[string]*schema.Schema{
+// 						"sse_algorithm": {
+// 							Type:     schema.TypeString,
+// 							Required: true,
+// 							ValidateFunc: validation.StringInSlice([]string{
+// 								ServerSideEncryptionAes256,
+// 								ServerSideEncryptionKMS,
+// 							}, false),
+// 						},
+// 					},
+// 				},
+// 				MaxItems: 1,
+// 			},
 
-			"tags": tagsSchema(),
+// 			"tags": tagsSchema(),
 
-			"force_destroy": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
+// 			"force_destroy": {
+// 				Type:     schema.TypeBool,
+// 				Optional: true,
+// 				Default:  false,
+// 			},
 
-			"versioning": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"status": {
-							Type:     schema.TypeString,
-							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"Enabled",
-								"Suspended",
-							}, false),
-						},
-					},
-				},
-				MaxItems: 1,
-			},
+// 			"versioning": {
+// 				Type:     schema.TypeList,
+// 				Optional: true,
+// 				Elem: &schema.Resource{
+// 					Schema: map[string]*schema.Schema{
+// 						"status": {
+// 							Type:     schema.TypeString,
+// 							Required: true,
+// 							ValidateFunc: validation.StringInSlice([]string{
+// 								"Enabled",
+// 								"Suspended",
+// 							}, false),
+// 						},
+// 					},
+// 				},
+// 				MaxItems: 1,
+// 			},
 			"vpclist": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -335,7 +335,7 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 		}
 		request.QueryParams = map[string]string{
 
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "OneRouter",
 			"Department":       client.Department,
 			"ResourceGroup":    client.ResourceGroup,
@@ -804,7 +804,7 @@ func resourceAlibabacloudStackOssBucketDelete(d *schema.ResourceData, meta inter
 		}
 		request.QueryParams = map[string]string{
 
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "OneRouter",
 			"Department":       client.Department,
 			"ResourceGroup":    client.ResourceGroup,
@@ -942,7 +942,7 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 			}
 			logrequest.QueryParams = map[string]string{
 
-				"AccessKeySecret":  client.SecretKey,
+				
 				"Product":          "OneRouter",
 				"Department":       client.Department,
 				"ResourceGroup":    client.ResourceGroup,
@@ -1018,7 +1018,7 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 					}
 					logrequest.QueryParams = map[string]string{
 
-						"AccessKeySecret":  client.SecretKey,
+						
 						"Product":          "OneRouter",
 						"Department":       client.Department,
 						"ResourceGroup":    client.ResourceGroup,
@@ -1096,7 +1096,7 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 				}
 				logrequest.QueryParams = map[string]string{
 
-					"AccessKeySecret":  client.SecretKey,
+					
 					"Product":          "OneRouter",
 					"Department":       client.Department,
 					"ResourceGroup":    client.ResourceGroup,
@@ -1155,7 +1155,7 @@ func resourceAlibabacloudStackOssBucketLoggingDescribe(client *connectivity.Alib
 	describelogging := Logging{}
 	logdescribe.QueryParams = map[string]string{
 
-		"AccessKeySecret":   client.SecretKey,
+		
 		"Product":           "OneRouter",
 		"Department":        client.Department,
 		"ResourceGroup":     client.ResourceGroup,

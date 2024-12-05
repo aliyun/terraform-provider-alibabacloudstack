@@ -78,8 +78,20 @@ The following arguments are supported:
 * `description` - (Optional) Description of instance launch template version 1. It can be [2, 256] characters in length. It cannot start with "http://" or "https://". The default value is null.
 * `host_name` - (Optional) Instance host name.It cannot start or end with a period (.) or a hyphen (-) and it cannot have two or more consecutive periods (.) or hyphens (-).For Windows: The host name can be [2, 15] characters in length. It can contain A-Z, a-z, numbers, periods (.), and hyphens (-). It cannot only contain numbers. For other operating systems: The host name can be [2, 64] characters in length. It can be segments separated by periods (.). It can contain A-Z, a-z, numbers, and hyphens (-).
 * `image_id` - (Optional) Image ID.
+* `image_owner_alias` - (Optional) The source of the image. Valid values:
+  * system: public image provided by Alibaba Cloud.
+  * self: custom image that you created.
+  * others: shared image from another Alibaba Cloud account.
+  * marketplace:Alibaba Cloud Marketplace image. If Alibaba Cloud Marketplace images are available, you can use the images without the need to subscribe to the images. Take note of the billing details of Alibaba Cloud Marketplace images.
 * `instance_name` - (Optional) The name of the instance. The name is a string of 2 to 128 characters. It must begin with an English or a Chinese character. It can contain A-Z, a-z, Chinese characters, numbers, periods (.), colons (:), underscores (_), and hyphens (-).
 * `instance_type` - (Optional) Instance type. For more information, call resource_alibabacloudstack_instances to obtain the latest instance type list.
+* `instance_charge_type` - (Optional)Billing methods. Optional values:
+  * PrePaid: Monthly, or annual subscription. Make sure that your registered credit card is invalid or you have insufficient balance in your PayPal account. Otherwise, InvalidPayMethod error may occur.
+  * PostPaid: Pay-As-You-Go.
+  Default value: PostPaid.
+* `internet_charge_type` - The billing method for network usage. Valid values:
+  *  PayByBandwidth: pay-by-bandwidth
+  *  PayByTraffic: pay-by-traffic
 * `auto_release_time` - (Optional) Instance auto release time. The time is presented using the ISO8601 standard and in UTC time. The format is  YYYY-MM-DDTHH:MM:SSZ.
 * `internet_max_bandwidth_in` - (Optional) The maximum inbound bandwidth from the Internet network, measured in Mbit/s. Value range: [1, 200].
 * `internet_max_bandwidth_out` - (Optional) Maximum outbound bandwidth from the Internet, its unit of measurement is Mbit/s. Value range: [0, 100].
@@ -91,6 +103,7 @@ The following arguments are supported:
     - The password logon method for Linux instances is set to forbidden upon initialization.
 * `network_type` - (Optional) Network type of the instance. Value options: Classic | VPC.
 * `ram_role_name` - (Optional) The RAM role name of the instance. You can use the RAM API ListRoles to query instance RAM role names.
+* `resource_group_id` - (Optional) The ID of the resource group to which to assign the instance, Elastic Block Storage (EBS) device, and elastic network interface (ENI).
 * `security_enhancement_strategy` - (Optional) Whether or not to activate the security enhancement feature and install network security software free of charge. Optional values: Active | Deactive.
 * `security_group_id` - (Optional) The security group ID.
 * `spot_price_limit` -(Optional) 	Sets the maximum hourly instance price. Supports up to three decimal places.
@@ -109,6 +122,7 @@ The following arguments are supported:
 * `system_disk_size` - (Optional) Size of the system disk, measured in GB. Value range: [20, 500].
 * `userdata` - (Optional) User data of the instance, which is Base64-encoded. Size of the raw data cannot exceed 16 KB.
 * `vswitch_id` - (Optional) When creating a VPC-Connected instance, you must specify its VSwitch ID.
+* `vpc_id` - (Optional) The ID of the virtual private cloud (VPC).
 * `zone_id` - (Optional) The zone ID of the instance.
 * `network_interfaces` - (Optional) The list of network interfaces created with instance.
     * `name` - (Optional) ENI name.

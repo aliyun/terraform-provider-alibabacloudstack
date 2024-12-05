@@ -253,8 +253,8 @@ func (c *CrService) DescribeCrNamespace(id string) (*crDescribeNamespaceResponse
 	request.ApiName = "GetNamespace"
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": c.client.SecretKey,
-		"AccessKeyId":     c.client.AccessKey,
+		
+		
 		"Product":         "cr",
 		"Department":      c.client.Department,
 		"ResourceGroup":   c.client.ResourceGroup,
@@ -296,8 +296,8 @@ func (c *CrService) DescribeCrRepo(id string) (GetRepoResponse, error) {
 	request.ApiName = "GetRepo"
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": c.client.SecretKey,
-		"AccessKeyId":     c.client.AccessKey,
+		
+		
 		"Product":         "cr",
 		"Department":      c.client.Department,
 		"ResourceGroup":   c.client.ResourceGroup,

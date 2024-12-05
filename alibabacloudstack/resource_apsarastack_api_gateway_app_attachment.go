@@ -64,8 +64,8 @@ func resourceAliyunApigatewayAppAttachmentCreate(d *schema.ResourceData, meta in
 		"RegionId": client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,
@@ -129,8 +129,8 @@ func resourceAliyunApigatewayAppAttachmentDelete(d *schema.ResourceData, meta in
 		"RegionId": client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,

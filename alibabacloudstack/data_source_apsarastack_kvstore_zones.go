@@ -67,7 +67,7 @@ func dataSourceAlibabacloudStackKVStoreZoneRead(d *schema.ResourceData, meta int
 	request := r_kvstore.CreateDescribeRegionsRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	//request.InstanceChargeType = instanceChargeType
 	raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 		return rkvClient.DescribeRegions(request)

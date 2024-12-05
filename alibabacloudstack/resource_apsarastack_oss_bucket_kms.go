@@ -2,15 +2,14 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"log"
-	"strings"
-	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
+	"strings"
+	"time"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -91,7 +90,7 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 			request.SetHTTPSInsecure(client.Config.Insecure)
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "OneRouter",
 			"Department":       client.Department,
 			"ResourceGroup":    client.ResourceGroup,
@@ -165,7 +164,7 @@ func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta inte
 			request.SetHTTPSInsecure(client.Config.Insecure)
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "OneRouter",
 			"Department":       client.Department,
 			"ResourceGroup":    client.ResourceGroup,
@@ -239,7 +238,7 @@ func resourceAlibabacloudStackOssBucketKmsDelete(d *schema.ResourceData, meta in
 		}
 		request.QueryParams = map[string]string{
 
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "OneRouter",
 			"Department":       client.Department,
 			"ResourceGroup":    client.ResourceGroup,

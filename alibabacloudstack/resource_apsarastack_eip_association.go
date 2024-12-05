@@ -1,10 +1,9 @@
 package alibabacloudstack
 
 import (
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"strings"
 	"time"
-
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -59,7 +58,7 @@ func resourceAlibabacloudStackEipAssociationCreate(d *schema.ResourceData, meta 
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.AllocationId = Trim(d.Get("allocation_id").(string))
 	request.InstanceId = Trim(d.Get("instance_id").(string))
 	request.InstanceType = EcsInstance
@@ -143,7 +142,7 @@ func resourceAlibabacloudStackEipAssociationDelete(d *schema.ResourceData, meta 
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.AllocationId = allocationId
 	request.InstanceId = instanceId
 	request.Force = requests.NewBoolean(d.Get("force").(bool))

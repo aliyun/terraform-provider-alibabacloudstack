@@ -32,6 +32,7 @@ The following arguments are supported:
 * `ids` - (Optional) IDs of the SLB domain extensions.
 * `load_balancer_id` - (Required) The ID of the SLB instance.
 * `frontend_port` - (Required) The frontend port used by the HTTPS listener of the SLB instance. Valid values: 1–65535.
+* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 

@@ -102,20 +102,20 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 					string(DiskCloudEfficiency), string(DiskCloudSSD), string(DiskCloudPPERF), string(DiskCloudSPERF)}, false),
 				DiffSuppressFunc: csForceUpdateSuppressFunc,
 			},
-			"worker_data_disk_size": {
-				Type:             schema.TypeInt,
-				Optional:         true,
-				Default:          40,
-				ValidateFunc:     validation.IntBetween(20, 32768),
-				DiffSuppressFunc: workerDataDiskSizeSuppressFunc,
-			},
-			"worker_data_disk_category": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					string(DiskCloudEfficiency), string(DiskCloudSSD), string(DiskCloudPPERF), string(DiskCloudSPERF)}, false),
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
-			},
+			// 			"worker_data_disk_size": {
+			// 				Type:             schema.TypeInt,
+			// 				Optional:         true,
+			// 				Default:          40,
+			// 				ValidateFunc:     validation.IntBetween(20, 32768),
+			// 				DiffSuppressFunc: workerDataDiskSizeSuppressFunc,
+			// 			},
+			// 			"worker_data_disk_category": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 				ValidateFunc: validation.StringInSlice([]string{
+			// 					string(DiskCloudEfficiency), string(DiskCloudSSD), string(DiskCloudPPERF), string(DiskCloudSPERF)}, false),
+			// 				DiffSuppressFunc: csForceUpdateSuppressFunc,
+			// 			},
 			"worker_data_disks": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -145,11 +145,11 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 					},
 				},
 			},
-			"exclude_autoscaler_nodes": {
-				Type:     schema.TypeBool,
-				Default:  false,
-				Optional: true,
-			},
+			// 			"exclude_autoscaler_nodes": {
+			// 				Type:     schema.TypeBool,
+			// 				Default:  false,
+			// 				Optional: true,
+			// 			},
 			//"worker_data_disk": {
 			//	Type:     schema.TypeBool,
 			//	Default:  false,
@@ -193,19 +193,19 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Sensitive:        true,
-				ConflictsWith:    []string{"key_name", "kms_encrypted_password"},
+				ConflictsWith:    []string{"kms_encrypted_password"},
 				DiffSuppressFunc: csForceUpdateSuppressFunc,
 			},
-			"key_name": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				ConflictsWith:    []string{"password", "kms_encrypted_password"},
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
-			},
+			// "key_name": {
+			// 	Type:             schema.TypeString,
+			// 	Optional:         true,
+			// 	ConflictsWith:    []string{"password", "kms_encrypted_password"},
+			// 	DiffSuppressFunc: csForceUpdateSuppressFunc,
+			// },
 			"kms_encrypted_password": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ConflictsWith: []string{"password", "key_name"},
+				ConflictsWith: []string{"password"},
 			},
 			"kms_encryption_context": {
 				Type:     schema.TypeMap,
@@ -215,11 +215,11 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				},
 				Elem: schema.TypeString,
 			},
-			"user_ca": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
-			},
+			// 			"user_ca": {
+			// 				Type:             schema.TypeString,
+			// 				Optional:         true,
+			// 				DiffSuppressFunc: csForceUpdateSuppressFunc,
+			// 			},
 			"enable_ssh": {
 				Type:             schema.TypeBool,
 				Optional:         true,
@@ -236,12 +236,12 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: imageIdSuppressFunc,
 			},
-			"install_cloud_monitor": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:          true,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
-			},
+			// 			"install_cloud_monitor": {
+			// 				Type:             schema.TypeBool,
+			// 				Optional:         true,
+			// 				Default:          true,
+			// 				DiffSuppressFunc: csForceUpdateSuppressFunc,
+			// 			},
 			"version": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -320,39 +320,39 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"connections": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"api_server_internet": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"api_server_intranet": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"master_public_ip": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"service_domain": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
-			},
-			"slb_id": {
-				Type:       schema.TypeString,
-				Computed:   true,
-				Deprecated: "Field 'slb_id' has been deprecated from provider version 1.9.2. New field 'slb_internet' replaces it.",
-			},
-			"slb_internet": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
+			// 			"connections": {
+			// 				Type:     schema.TypeList,
+			// 				Computed: true,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"api_server_internet": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"api_server_intranet": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"master_public_ip": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 						"service_domain": {
+			// 							Type:     schema.TypeString,
+			// 							Computed: true,
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 			"slb_id": {
+			// 				Type:       schema.TypeString,
+			// 				Computed:   true,
+			// 				Deprecated: "Field 'slb_id' has been deprecated from provider version 1.9.2. New field 'slb_internet' replaces it.",
+			// 			},
+			// 			"slb_internet": {
+			// 				Type:     schema.TypeString,
+			// 				Computed: true,
+			// 			},
 			"slb_intranet": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -454,10 +454,10 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			},
 			// remove parameters below
 			// mix vswitch_ids between master and worker is not a good guidance to create cluster
-			"worker_instance_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+			// 			"worker_instance_type": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 			},
 			"master_instance_types": {
 				Type:     schema.TypeList,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -483,7 +483,7 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			"instances": {
 				Type:          schema.TypeSet,
 				Elem:          &schema.Schema{Type: schema.TypeString},
-				ConflictsWith: []string{"worker_instance_types", "worker_vswitch_ids", "worker_data_disk_category", "worker_disk_category"},
+				ConflictsWith: []string{"worker_instance_types", "worker_vswitch_ids", "worker_disk_category"},
 				Optional:      true,
 			},
 			"format_disk": {
@@ -494,35 +494,35 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
-			"vswitch_ids": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type:         schema.TypeString,
-					ValidateFunc: validation.StringMatch(regexp.MustCompile(`^vsw-[a-z0-9]*$`), "should start with 'vsw-'."),
-				},
-				MinItems:         3,
-				MaxItems:         5,
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
-				//Removed:          "Field 'vswitch_ids' has been removed from provider version 1.75.0. New field 'master_vswitch_ids' and 'worker_vswitch_ids' replace it.",
-			},
+			// 			"vswitch_ids": {
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Schema{
+			// 					Type:         schema.TypeString,
+			// 					ValidateFunc: validation.StringMatch(regexp.MustCompile(`^vsw-[a-z0-9]*$`), "should start with 'vsw-'."),
+			// 				},
+			// 				MinItems:         3,
+			// 				MaxItems:         5,
+			// 				DiffSuppressFunc: csForceUpdateSuppressFunc,
+			// 				//Removed:          "Field 'vswitch_ids' has been removed from provider version 1.75.0. New field 'master_vswitch_ids' and 'worker_vswitch_ids' replace it.",
+			// 			},
 			"master_count": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  3,
 			},
 			// single instance type would cause extra troubles
-			"master_instance_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+			// 			"master_instance_type": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 			},
 			// force update is a high risk operation
-			"force_update": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-				//Removed:  "Field 'force_update' has been removed from provider version 1.75.0.",
-			},
+			// 			"force_update": {
+			// 				Type:     schema.TypeBool,
+			// 				Optional: true,
+			// 				Default:  false,
+			// 				//Removed:  "Field 'force_update' has been removed from provider version 1.75.0.",
+			// 			},
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -543,55 +543,55 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				//Removed:  "Field 'nodes' has been removed from provider version 1.9.4. New field 'master_nodes' replaces it.",
+				//Removed:  "Field 'nodes' has been removed from provider. New field 'master_nodes' replaces it.",
 			},
 			// too hard to use this config
-			"log_config": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"type": {
-							Type:         schema.TypeString,
-							ValidateFunc: validation.StringInSlice([]string{KubernetesClusterLoggingTypeSLS}, false),
-							Required:     true,
-						},
-						"project": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
-				DiffSuppressFunc: csForceUpdateSuppressFunc,
-				//Removed:          "Field 'log_config' has been removed from provider version 1.75.0. New field 'addons' replaces it.",
-			},
+			// 			"log_config": {
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				MaxItems: 1,
+			// 				Elem: &schema.Resource{
+			// 					Schema: map[string]*schema.Schema{
+			// 						"type": {
+			// 							Type:         schema.TypeString,
+			// 							ValidateFunc: validation.StringInSlice([]string{KubernetesClusterLoggingTypeSLS}, false),
+			// 							Required:     true,
+			// 						},
+			// 						"project": {
+			// 							Type:     schema.TypeString,
+			// 							Optional: true,
+			// 						},
+			// 					},
+			// 				},
+			// 				DiffSuppressFunc: csForceUpdateSuppressFunc,
+			// 				//Removed:          "Field 'log_config' has been removed from provider version 1.75.0. New field 'addons' replaces it.",
+			// 			},
 			"user_data": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"node_name_mode": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^customized,[a-z0-9]([-a-z0-9\.])*,([5-9]|[1][0-2]),([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`), "Each node name consists of a prefix, an IP substring, and a suffix. For example, if the node IP address is 192.168.0.55, the prefix is aliyun.com, IP substring length is 5, and the suffix is test, the node name will be aliyun.com00055test."),
-			},
+			// 			"node_name_mode": {
+			// 				Type:         schema.TypeString,
+			// 				Optional:     true,
+			// 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^customized,[a-z0-9]([-a-z0-9\.])*,([5-9]|[1][0-2]),([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`), "Each node name consists of a prefix, an IP substring, and a suffix. For example, if the node IP address is 192.168.0.55, the prefix is aliyun.com, IP substring length is 5, and the suffix is test, the node name will be aliyun.com00055test."),
+			// 			},
 			"worker_ram_role_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"service_account_issuer": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"api_audiences": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				ForceNew: true,
-			},
+			// 			"service_account_issuer": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 				ForceNew: true,
+			// 			},
+			// 			"api_audiences": {
+			// 				Type:     schema.TypeList,
+			// 				Optional: true,
+			// 				Elem: &schema.Schema{
+			// 					Type: schema.TypeString,
+			// 				},
+			// 				ForceNew: true,
+			// 			},
 			"nodepool_id": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -829,7 +829,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		if pod == 0 {
 			request.QueryParams = map[string]string{
 				"RegionId":         client.RegionId,
-				"AccessKeySecret":  client.SecretKey,
+				
 				"Product":          "Cs",
 				"Department":       client.Department,
 				"ResourceGroup":    client.ResourceGroup,
@@ -885,7 +885,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		} else {
 			request.QueryParams = map[string]string{
 				"RegionId":         client.RegionId,
-				"AccessKeySecret":  client.SecretKey,
+				
 				"Product":          "Cs",
 				"Department":       client.Department,
 				"ResourceGroup":    client.ResourceGroup,
@@ -944,7 +944,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		if pod == 0 {
 			request.QueryParams = map[string]string{
 				"RegionId":         client.RegionId,
-				"AccessKeySecret":  client.SecretKey,
+				
 				"Product":          "Cs",
 				"Department":       client.Department,
 				"ResourceGroup":    client.ResourceGroup,
@@ -1001,7 +1001,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		} else {
 			request.QueryParams = map[string]string{
 				"RegionId":         client.RegionId,
-				"AccessKeySecret":  client.SecretKey,
+				
 				"Product":          "Cs",
 				"Department":       client.Department,
 				"ResourceGroup":    client.ResourceGroup,
@@ -1190,7 +1190,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 			}
 			req.QueryParams = map[string]string{
 				"RegionId":         csService.client.RegionId,
-				"AccessKeySecret":  csService.client.SecretKey,
+				
 				"Product":          "CS",
 				"Department":       csService.client.Department,
 				"ResourceGroup":    csService.client.ResourceGroup,
@@ -1247,7 +1247,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 			}
 			request.QueryParams = map[string]string{
 				"RegionId":         client.RegionId,
-				"AccessKeySecret":  client.SecretKey,
+				
 				"Product":          "CS",
 				"Department":       client.Department,
 				"ResourceGroup":    client.ResourceGroup,
@@ -1371,7 +1371,7 @@ func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta in
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":         client.RegionId,
-		"AccessKeySecret":  client.SecretKey,
+		
 		"Product":          "CS",
 		"Department":       client.Department,
 		"ResourceGroup":    client.ResourceGroup,
@@ -1449,7 +1449,7 @@ func updateKubernetesClusterTag(d *schema.ResourceData, meta interface{}) error 
 	log.Printf("checking tags %v", tags)
 	request.QueryParams = map[string]string{
 		"RegionId":         client.RegionId,
-		"AccessKeySecret":  client.SecretKey,
+		
 		"Product":          "CS",
 		"Department":       client.Department,
 		"ResourceGroup":    client.ResourceGroup,

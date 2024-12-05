@@ -182,8 +182,8 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		request.RegionId = client.RegionId
 
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "CloudDns",
 			"RegionId":        client.RegionId,
 			"Action":          "UpdateGlobalZoneRecordRemark",
@@ -316,8 +316,8 @@ func resourceAlibabacloudStackDnsRecordDelete(d *schema.ResourceData, meta inter
 	request.ApiName = "DeleteGlobalZoneRecord"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "CloudDns",
 		"RegionId":        client.RegionId,
 		"Action":          "DeleteGlobalZoneRecord",

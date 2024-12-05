@@ -53,6 +53,7 @@ Terraform will autogenerate a name beginning with `tf-lb`.
 * `vswitch_id` - (Required for a VPC SLB, Forces New Resource) The VSwitch ID to launch in. If `address_type` is internet, it will be ignore.
 * `specification` - (Optional)  The specification of the Server Load Balancer instance. Default to empty string indicating it is "Shared-Performance" instance.it is must be specified and it valid values are: `slb.s1.small`, `slb.s2.small`, `slb.s2.medium`,
   `slb.s3.small`, `slb.s3.medium`, `slb.s3.large` and `slb.s4.large`.
+* `tags` - (Optional) A mapping of tags to assign to the resource.
 
 
 ## Attributes Reference

@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack ROS Template resource.
 ---
 
-# alicloud\_ros\_template
+# alibabacloudstack\_ros\_template
 
 Provides a ROS Template resource.
 

@@ -46,8 +46,20 @@ The following arguments are supported:
 * `dimensions` - (Required, ForceNew) Map of the resources associated with the alarm rule, such as "instanceId", "device" and "port". Each key's value is a string and it uses comma to split multiple items. For more information, see [Metrics Reference](https://www.alibabacloud.com/help/doc-detail/28619.htm).
 * `period` - Index query cycle, which must be consistent with that defined for metrics. 
 * `escalations_critical` - (Optional) A configuration of critical alarm (documented below).
+  * `statistics` - Critical level alarm statistics method.. It must be consistent with that defined for metrics. Valid values: ["Average", "Minimum", "Maximum"]. Default to "Average".
+  * `comparison_operator` - Critical level alarm comparison operator. Valid values: ["<=", "<", ">", ">=", "==", "!="]. Default to "==".
+  * `threshold` - Critical level alarm threshold value, which must be a numeric value currently.
+  * `times` - Critical level alarm retry times. Default to 3.
 * `escalations_warn` - (Optional) A configuration of critical warn (documented below).
+  * `statistics` - Critical level alarm statistics method.. It must be consistent with that defined for metrics. Valid values: ["Average", "Minimum", "Maximum"]. Default to "Average".
+  * `comparison_operator` - Critical level alarm comparison operator. Valid values: ["<=", "<", ">", ">=", "==", "!="]. Default to "==".
+  * `threshold` - Critical level alarm threshold value, which must be a numeric value currently.
+  * `times` - Critical level alarm retry times. Default to 3.
 * `escalations_info` - (Optional) A configuration of critical info (documented below).
+  * `statistics` - Critical level alarm statistics method.. It must be consistent with that defined for metrics. Valid values: ["Average", "Minimum", "Maximum"]. Default to "Average".
+  * `comparison_operator` - Critical level alarm comparison operator. Valid values: ["<=", "<", ">", ">=", "==", "!="]. Default to "==".
+  * `threshold` - Critical level alarm threshold value, which must be a numeric value currently.
+  * `times` - Critical level alarm retry times. Default to 3.
 * `contact_groups` - (Required) List contact groups of the alarm rule, which must have been created on the console.
 * `effective_interval` - (Available) The interval of effecting alarm rule. It foramt as "hh:mm-hh:mm", like "0:00-4:00". Default to "00:00-23:59".
 * `silence_time` - Notification silence period in the alarm state, in seconds. Valid value range: [300, 86400]. Default to 86400
@@ -56,33 +68,6 @@ The following arguments are supported:
 * `webhook`- (Optional) The webhook that should be called when the alarm is triggered. Currently, only http protocol is supported. Default is empty string.
 
 -> **NOTE:** Each resource supports the creation of one of the following three levels.
-
-#### Block escalations critical alarm
-
-The escalations_critical supports the following:
-
-* `statistics` - Critical level alarm statistics method.. It must be consistent with that defined for metrics. Valid values: ["Average", "Minimum", "Maximum"]. Default to "Average".
-* `comparison_operator` - Critical level alarm comparison operator. Valid values: ["<=", "<", ">", ">=", "==", "!="]. Default to "==".
-* `threshold` - Critical level alarm threshold value, which must be a numeric value currently.
-* `times` - Critical level alarm retry times. Default to 3.
-
-#### Block escalations warn alarm
-
-The escalations_warn supports the following:
-
-* `statistics` - Critical level alarm statistics method.. It must be consistent with that defined for metrics. Valid values: ["Average", "Minimum", "Maximum"]. Default to "Average".
-* `comparison_operator` - Critical level alarm comparison operator. Valid values: ["<=", "<", ">", ">=", "==", "!="]. Default to "==".
-* `threshold` - Critical level alarm threshold value, which must be a numeric value currently.
-* `times` - Critical level alarm retry times. Default to 3.
-
-#### Block escalations info alarm
-
-The escalations_info supports the following:
-
-* `statistics` - Critical level alarm statistics method.. It must be consistent with that defined for metrics. Valid values: ["Average", "Minimum", "Maximum"]. Default to "Average".
-* `comparison_operator` - Critical level alarm comparison operator. Valid values: ["<=", "<", ">", ">=", "==", "!="]. Default to "==".
-* `threshold` - Critical level alarm threshold value, which must be a numeric value currently.
-* `times` - Critical level alarm retry times. Default to 3.
 
 ## Attributes Reference
 

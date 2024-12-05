@@ -54,7 +54,7 @@ The following attributes are exported in addition to the arguments listed above:
   * `status` - Status of the instance.
   * `engine` - Database engine type. Supported option is `gpdb`.
   * `engine_version` - Database engine version.
-  * `network_type` - Classic network or VPC.
+  * `instance_network_type` - Classic network or VPC.
   * `instance_class` - The group type.
   * `instance_group_count` - The number of groups.
 

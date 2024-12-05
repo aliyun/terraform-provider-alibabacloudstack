@@ -106,8 +106,8 @@ func dataSourceAlibabacloudStackAscmResourceGroupsRead(d *schema.ResourceData, m
 	request.ApiName = "ListResourceGroup"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeyId":       client.AccessKey,
-		"AccessKeySecret":   client.SecretKey,
+		
+		
 		"Product":           "ascm",
 		"RegionId":          client.RegionId,
 		"Action":            "ListResourceGroup",

@@ -25,7 +25,7 @@ func (s *KvstoreService) DescribeKVstoreInstance(id string) (*r_kvstore.DBInstan
 	request := r_kvstore.CreateDescribeInstanceAttributeRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.InstanceId = id
 	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 		return rkvClient.DescribeInstanceAttribute(request)
@@ -51,7 +51,7 @@ func (s *KvstoreService) DescribeKVstoreBackupPolicy(id string) (*r_kvstore.Desc
 	request.RegionId = s.client.RegionId
 	request.InstanceId = id
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 		return rkvClient.DescribeBackupPolicy(request)
 	})
@@ -131,7 +131,7 @@ func (s *KvstoreService) DescribeParameters(id string) (*r_kvstore.DescribeParam
 	request := r_kvstore.CreateDescribeParametersRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.DBInstanceId = id
 
 	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
@@ -152,7 +152,7 @@ func (s *KvstoreService) ModifyInstanceConfig(id string, config string) error {
 	request := r_kvstore.CreateModifyInstanceConfigRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.InstanceId = id
 	request.Config = config
 
@@ -184,7 +184,7 @@ func (s *KvstoreService) setInstanceTags(d *schema.ResourceData) error {
 			request := r_kvstore.CreateUntagResourcesRequest()
 			request.ResourceId = &[]string{d.Id()}
 			request.Headers = map[string]string{"RegionId": s.client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 			request.ResourceType = strings.ToUpper(string(TagResourceInstance))
 			request.TagKey = &tagKey
 			request.RegionId = s.client.RegionId
@@ -201,7 +201,7 @@ func (s *KvstoreService) setInstanceTags(d *schema.ResourceData) error {
 			request := r_kvstore.CreateTagResourcesRequest()
 			request.ResourceId = &[]string{d.Id()}
 			request.Headers = map[string]string{"RegionId": s.client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 			request.Tag = &create
 			request.ResourceType = strings.ToUpper(string(TagResourceInstance))
 			request.RegionId = s.client.RegionId
@@ -279,7 +279,7 @@ func (s *KvstoreService) DescribeTags(resourceId string, resourceType TagResourc
 	request := r_kvstore.CreateListTagResourcesRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.ResourceType = strings.ToUpper(string(resourceType))
 	request.ResourceId = &[]string{resourceId}
 	raw, err := s.client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
@@ -327,7 +327,7 @@ func (s *KvstoreService) DescribeKVstoreAccount(id string) (*r_kvstore.Account, 
 	request := r_kvstore.CreateDescribeAccountsRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.InstanceId = parts[0]
 	request.AccountName = parts[1]
 	invoker := NewInvoker()
@@ -363,7 +363,7 @@ func (s *KvstoreService) DescribeKVstoreSecurityGroupId(id string) (*r_kvstore.D
 	request := r_kvstore.CreateDescribeSecurityGroupConfigurationRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.InstanceId = id
 	if err := s.WaitForKVstoreInstance(id, Normal, DefaultLongTimeout); err != nil {
 		return response, WrapError(err)
@@ -385,7 +385,7 @@ func (s *KvstoreService) DescribeDBInstanceNetInfo(id string) (*r_kvstore.NetInf
 	request := r_kvstore.CreateDescribeDBInstanceNetInfoRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.InstanceId = id
 	if err := s.WaitForKVstoreInstance(id, Normal, DefaultLongTimeout); err != nil {
 		return &response.NetInfoItems, WrapError(err)
@@ -405,7 +405,7 @@ func (s *KvstoreService) DescribeKvstoreConnection(id string) (object []r_kvstor
 	request := r_kvstore.CreateDescribeDBInstanceNetInfoRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.InstanceId = id
 

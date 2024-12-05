@@ -3,8 +3,7 @@ subcategory: "Data Works"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_data_works_user"
 sidebar_current: "docs-alibabacloudstack-resource-data-works-user"
-description: |- 
-  Provides a AlibabacloudStack Data Works User resource.
+description: |- Provides a AlibabacloudStack Data Works User resource.
 ---
 
 # alibabacloudstack\_data\_works\_user

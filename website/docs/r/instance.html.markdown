@@ -62,6 +62,9 @@ The following arguments are supported:
 * `availability_zone` - (Optional) The Zone to start the instance in. It is ignored and will be computed when set `vswitch_id`.
 * `instance_name` - (Optional) The name of the ECS. This instance_name can have a string of 2 to 128 characters, must contain only alphanumeric characters or hyphens, such as "-",".","_", and must not begin or end with a hyphen, and must not begin with http:// or https://. If not specified, 
 Terraform will autogenerate a default name is `ECS-Instance`.
+* `subnet_id` - (Removed since v1.210.0) The ID of the subnet. Conflicts with key `vswitch_id`.
+* `storage_set_id` - (Optional, ForceNew) The ID of the storage set.
+* `storage_set_partition_number` - (Optional, ForceNew) The number of partitions in the storage set
 * `system_disk_category` - (Optional) Valid values are `ephemeral_ssd`, `cloud_efficiency`, `cloud_ssd`, `cloud_essd`, `cloud`. `cloud` only is used to some none I/O optimized instance. Default to `cloud_efficiency`.
 * `system_disk_size` - (Optional) Size of the system disk, measured in GiB. Value range: [20, 500]. The specified value must be equal to or greater than max{20, Imagesize}. Default value: max{40, ImageSize}. ECS instance's system disk can be reset when replacing system disk. When it is changed, the instance will reboot to make the change take effect.
 * `system_disk_name` - (Optional) Name of the system disk. The name must be 2 to 128 characters in length. It must start with a letter and can contain letters, digits, colons (:), underscores (_), and hyphens (-). It cannot start with http:// or https://. If not specified, this parameter is null. Default value: null
@@ -69,6 +72,8 @@ Terraform will autogenerate a default name is `ECS-Instance`.
 * `description` - (Optional) Description of the instance, This description can have a string of 2 to 256 characters, It cannot begin with http:// or https://. Default value is null.
 * `internet_max_bandwidth_in` - (Optional) Maximum incoming bandwidth from the public network, measured in Mbps (Mega bit per second). Value range: [1, 200]. If this value is not specified, then automatically sets it to 200 Mbps.
 * `internet_max_bandwidth_out` - (Optional) Maximum outgoing bandwidth to the public network, measured in Mbps (Mega bit per second). Value range:  [0, 100]. Default to 0 Mbps.
+* `is_outdated` - (Optional) Whether to use outdated instance type. Default to false.
+* `ipv6_address_list` - (Optional, ForceNew) A list of IPv6 address to be assigned to the primary ENI. Support up to 10.
 * `host_name` - (Optional) Host name of the ECS, which is a string of at least two characters. “hostname” cannot start or end with “.” or “-“. In addition, two or more consecutive “.” or “-“ symbols are not allowed. On Windows, the host name can contain a maximum of 15 characters, which can be a combination of uppercase/lowercase letters, numerals, and “-“. The host name cannot contain dots (“.”) or contain only numeric characters. When it is changed, the instance will reboot to make the change take effect.
 On other OSs such as Linux, the host name can contain a maximum of 30 characters, which can be segments separated by dots (“.”), where each segment can contain uppercase/lowercase letters, numerals, or “_“. When it is changed, the instance will reboot to make the change take effect.
 * `password` - (Optional, Sensitive) Password to an instance is a string of 8 to 30 characters. It must contain uppercase/lowercase letters and numerals, but cannot contain special symbols. When it is changed, the instance will reboot to make the change take effect./if you want to use random password See[Random Password](random_password.html.markdown).
@@ -103,28 +108,19 @@ On other OSs such as Linux, the host name can contain a maximum of 30 characters
         - `ephemeral_ssd`: The local SSD disk.
         Default to `cloud_efficiency`.
     * `encrypted` -(Optional, Bool, ForceNew) Encrypted the data in this disk.
-
         Default to false
+    * `kms_key_id` - (Optional) The KMS key ID corresponding to the Nth data disk.
     * `snapshot_id` - (Optional, ForceNew) The snapshot ID used to initialize the data disk. If the size specified by snapshot is greater that the size of the disk, use the size specified by snapshot as the size of the data disk.
     * `description` - (Optional, ForceNew) The description must be 2 to 256 characters in length.
     * `delete_with_instance` - (Optional, ForceNew) Delete this data disk when the instance is destroyed. It only works on cloud, cloud_efficiency, cloud_essd, cloud_ssd disk. If the category of this data disk was ephemeral_ssd, please don't set this param.
-
         Default to true
+* `hpc_cluster_id` - (Optional, ForceNew, Available since v1.144.0) The ID of the Elastic High Performance Computing (E-HPC) cluster to which to assign the instance.
 * `enable_ipv6` - (Optional, ForceNew) Specifies whether to enable the IPv6 block. Valid values: `false` (Default): disables IPv6 blocks. `true`: enables IPv6 blocks. 
 * `ipv6_cidr_block` - (Optional) The ipv6 cidr block of VPC.
 * `ipv6_address_count` - (Optional) The count of ipv6_address requested for allocation. If `enable_ipv6` is true. `ipv6_address_count` must be greater than 0.
 * `system_disk_tags` - (Optional) A additional mapping of tags to assign to the system_disk. 
     - Key: It can be up to 64 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It cannot be a null string.
     - Value: It can be up to 128 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It can be a null string.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 10 mins) Used when creating the instance (until it reaches the initial `Running` status). 
-`Note`: There are extra at most 2 minutes used to retry to aviod some needless API errors and it is not in the timeouts configure.
-* `update` - (Defaults to 10 mins) Used when stopping and starting the instance when necessary during update - e.g. when changing instance type, password, image, vswitch and private IP.
-* `delete` - (Defaults to 20 mins) Used when terminating the instance. `Note`: There are extra at most 5 minutes used to retry to aviod some needless API errors and it is not in the timeouts configure.
 
 ## Attributes Reference
 
@@ -133,4 +129,4 @@ The following attributes are exported:
 * `id` - The instance ID.
 * `status` - The instance status.
 * `private_ip` - The instance private ip.
-
+* `system_disk_id` - The ID of system disk

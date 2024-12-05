@@ -56,7 +56,6 @@ The following attributes are exported in addition to the arguments listed above:
   * `status` - Current status. Possible values: `In_use`, `Available`, `Attaching`, `Detaching`, `Creating` and `ReIniting`.
   * `type` - Disk type. Possible values: `system` and `data`.
   * `category` - Disk category. Possible values: `cloud` (basic cloud disk), `cloud_efficiency` (ultra cloud disk), `ephemeral_ssd` (local SSD cloud disk), `cloud_ssd` (SSD cloud disk), and `cloud_essd` (ESSD cloud disk).
-  * `encrypted` - Indicate whether the disk is encrypted or not. Possible values: `on` and `off`.
   * `size` - Disk size in GiB.
   * `image_id` - ID of the image from which the disk is created. It is null unless the disk is created using an image.
   * `snapshot_id` - Snapshot used to create the disk. It is null if no snapshot is used to create the disk.
@@ -65,6 +64,7 @@ The following attributes are exported in addition to the arguments listed above:
   * `creation_time` - Disk creation time.
   * `attached_time` - Disk attachment time.
   * `detached_time` - Disk detachment time.
+  * `storage_set_id` - The ID of the storage set to which the disk belongs.
   * `expiration_time` - Disk expiration time.
   * `tags` - A map of tags assigned to the disk.
  

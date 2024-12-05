@@ -43,6 +43,7 @@ type Config struct {
 	RamRoleSessionExpiration int
 
 	Endpoints               map[string]interface{}
+	AsApiEndpoint           string
 	EcsEndpoint             string
 	RdsEndpoint             string
 	SlbEndpoint             string

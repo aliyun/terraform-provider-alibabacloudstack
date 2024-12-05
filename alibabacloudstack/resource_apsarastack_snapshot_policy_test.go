@@ -42,7 +42,7 @@ func testSweepSnapshotPolicy(region string) error {
 		req.Scheme = "http"
 	}
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.PageSize = requests.NewInteger(PageSizeLarge)
 	req.PageNumber = requests.NewInteger(1)
 	for {
@@ -87,7 +87,7 @@ func testSweepSnapshotPolicy(region string) error {
 		req := ecs.CreateDeleteAutoSnapshotPolicyRequest()
 		req.RegionId = client.RegionId
 		req.Headers = map[string]string{"RegionId": client.RegionId}
-		req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		if strings.ToLower(client.Config.Protocol) == "https" {
 			req.Scheme = "https"
 		} else {

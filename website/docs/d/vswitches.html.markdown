@@ -63,3 +63,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `description` - Description of the VSwitch.
   * `is_default` - Whether the VSwitch is the default one in the region.
   * `creation_time` - Time of creation.
+  * `available_ip_address_count` - Available ip address count.

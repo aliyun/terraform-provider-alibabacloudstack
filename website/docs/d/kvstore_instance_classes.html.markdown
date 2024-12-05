@@ -7,7 +7,7 @@ description: |-
     Provides a list of KVStore instacne classes info.
 ---
 
-# alibabacloudstack\_kvstore\_instances\_classes
+# alibabacloudstack\_kvstore\_instance\_classes
 
 This data source provides the KVStore instance classes resource available info of Apsara Stack Cloud.
 
@@ -37,6 +37,7 @@ The following arguments are supported:
 
 * `zone_id` - (Required) The Zone to launch the KVStore instance.
 * `instance_charge_type` - (Optional) Filter the results by charge type. Valid values: `PrePaid` and `PostPaid`. Default to `PrePaid`.
+* `sorted_by` - (Optional, ForceNew) Sort mode, valid values: `Price`.
 * `engine` - (Optional) Database type. Options are `Redis`, `Memcache`. Default to `Redis`.
 * `engine_version` - (Optional) Database version required by the user. Value options of Redis can refer to the latest docs [detail info](https://www.alibabacloud.com/help/doc-detail/60873.htm) `EngineVersion`. Value of Memcache should be empty.
 * `architecture` - (Optional) The KVStore instance system architecture required by the user. Valid values: `standard`, `cluster` and `rwsplit`.
@@ -52,5 +53,6 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `instance_classes` - A list of KVStore available instance classes.
 * `classes` - A list of KVStore available instance classes when the `sorted_by` is "Price". include:
+  * `price` - The price of instance type.
   * `instance_class` - KVStore available instance class.
     

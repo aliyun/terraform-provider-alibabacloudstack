@@ -198,7 +198,7 @@ func dataSourceAlibabacloudStackSlbListenersRead(d *schema.ResourceData, meta in
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.LoadBalancerId = d.Get("load_balancer_id").(string)
 
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
@@ -266,7 +266,7 @@ func slbListenersDescriptionAttributes(d *schema.ResourceData, listeners []slb.L
 			} else {
 				request.Scheme = "http"
 			}
-			request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			request.LoadBalancerId = loadBalancerId
 			request.ListenerPort = requests.NewInteger(listener.ListenerPort)
 			raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
@@ -303,7 +303,7 @@ func slbListenersDescriptionAttributes(d *schema.ResourceData, listeners []slb.L
 		case Https:
 			request := slb.CreateDescribeLoadBalancerHTTPSListenerAttributeRequest()
 			request.Headers = map[string]string{"RegionId": client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			request.LoadBalancerId = loadBalancerId
 			if strings.ToLower(client.Config.Protocol) == "https" {
 				request.Scheme = "https"
@@ -352,7 +352,7 @@ func slbListenersDescriptionAttributes(d *schema.ResourceData, listeners []slb.L
 			} else {
 				request.Scheme = "http"
 			}
-			request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			request.LoadBalancerId = loadBalancerId
 			request.ListenerPort = requests.NewInteger(listener.ListenerPort)
 			raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
@@ -389,7 +389,7 @@ func slbListenersDescriptionAttributes(d *schema.ResourceData, listeners []slb.L
 			} else {
 				request.Scheme = "http"
 			}
-			request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			request.LoadBalancerId = loadBalancerId
 			request.ListenerPort = requests.NewInteger(listener.ListenerPort)
 			raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {

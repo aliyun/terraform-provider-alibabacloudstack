@@ -3,9 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
-	"strings"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -13,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"strconv"
+	"strings"
 
 	"time"
 )
@@ -89,7 +88,7 @@ func resourceAlibabacloudStackAscmPasswordPolicyCreate(d *schema.ResourceData, m
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
 		"RegionId":              client.RegionId,
-		"AccessKeySecret":       client.SecretKey,
+		
 		"Department":            client.Department,
 		"ResourceGroup":         client.ResourceGroup,
 		"Product":               "ascm",
@@ -168,7 +167,7 @@ func resourceAlibabacloudStackAscmPasswordPolicyDelete(d *schema.ResourceData, m
 		}
 		request.QueryParams = map[string]string{
 			"RegionId":        client.RegionId,
-			"AccessKeySecret": client.SecretKey,
+			
 			"Product":         "ascm",
 			"Action":          "ResetPasswordPolicy",
 			"Version":         "2019-05-10",

@@ -53,8 +53,10 @@ The following attributes are exported in addition to the arguments listed above:
 * `names` - A list of RDS instance names. 
 * `instances` - A list of RDS instances. Each element contains the following attributes:
   * `id` - The ID of the RDS instance.
+  * `uid` - Alias of `id`.
   * `name` - The name of the RDS instance.
   * `db_type` - `Primary` for primary instance, `Readonly` for read-only instance, `Guard` for disaster recovery instance, and `Temp` for temporary instance.
+  * `charge_type` - The payment type of the resource.
   * `region_id` - Region ID the instance belongs to.
   * `create_time` - Creation time of the instance.
   * `expire_time` - Expiration time. Pay-As-You-Go instances never expire.

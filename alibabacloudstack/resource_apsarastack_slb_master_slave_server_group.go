@@ -85,7 +85,7 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupCreate(d *schema.Resource
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.LoadBalancerId = d.Get("load_balancer_id").(string)
 	if v, ok := d.GetOk("name"); ok {
 		request.MasterSlaveServerGroupName = v.(string)
@@ -172,7 +172,7 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupDelete(d *schema.Resource
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.MasterSlaveServerGroupId = d.Id()
 
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {

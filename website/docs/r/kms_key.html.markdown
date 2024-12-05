@@ -31,9 +31,10 @@ The following arguments are supported:
 * `description` - (Optional) The description of the key as viewed in Alibabacloudstack console.
 * `key_usage` - (Optional, ForceNew) Specifies the usage of CMK. Currently, default to 'ENCRYPT/DECRYPT', indicating that CMK is used for encryption and decryption.
 * `automatic_rotation` - (Optional) Specifies whether to enable automatic key rotation. Default:"Disabled".
-* `key_spec`   - (Optional, ForceNew) The type of the CMK.
+* `is_enabled` - (Optional,Deprecated) Field 'is_enabled' has been deprecated. New field 'key_state' instead.
 * `key_state` - (Optional) The status of CMK. Defaults to Enabled.
 * `origin` - (Optional, ForceNew) The source of the key material for the CMK. Defaults to "Aliyun_KMS".
+* `deletion_window_in_days` - (Optional,Deprecated) Field 'deletion_window_in_days' has been deprecated. New field 'pending_window_in_days' instead.
 * `pending_window_in_days` - (Optional) Duration in days after which the key is deleted after destruction of the resource, must be between 7 and 30 days. Defaults to 30 days.
 * `protection_level` - (Optional, ForceNew) The protection level of the CMK. Defaults to "SOFTWARE".
 * `rotation_interval` - (Optional) The period of automatic key rotation. Unit: seconds. 

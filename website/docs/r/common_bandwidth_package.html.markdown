@@ -31,6 +31,8 @@ The following arguments are supported:
 * `bandwidth` - (Required) The bandwidth of the common bandwidth package, in Mbps.
 * `name` - (Optional) The name of the common bandwidth package.
 * `description` - (Optional) The description of the common bandwidth package instance.
+* `internet_charge_type` - (Optional, ForceNew, Computed) The billing method of the Internet Shared Bandwidth instance. Set the value to 'PayByTraffic', which specifies the pay-by-data-transfer billing method.
+* `ratio` - (Optional, ForceNew, Computed) The percentage of the minimum bandwidth commitment. Set the parameter to 20
 
 ## Attributes Reference
 

@@ -1,11 +1,10 @@
 package alibabacloudstack
 
 import (
-	"strings"
-	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"strings"
+	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -46,8 +45,8 @@ func resourceAlibabacloudStackDnsGroupCreate(d *schema.ResourceData, meta interf
 	request.ApiName = "AddDomainGroup"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "GenesisDns",
 		"RegionId":        client.RegionId,
 		"Action":          "AddDomainGroup",
@@ -71,7 +70,7 @@ func resourceAlibabacloudStackDnsGroupUpdate(d *schema.ResourceData, meta interf
 
 	request := alidns.CreateUpdateDomainGroupRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "GenesisDns"}
+	request.QueryParams = map[string]string{ "Product": "GenesisDns"}
 	request.QueryParams["Department"] = client.Department
 	request.QueryParams["ResourceGroup"] = client.ResourceGroup
 	request.RegionId = client.RegionId
@@ -112,7 +111,7 @@ func resourceAlibabacloudStackDnsGroupDelete(d *schema.ResourceData, meta interf
 
 	request := alidns.CreateDeleteDomainGroupRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "alidns"}
+	request.QueryParams = map[string]string{ "Product": "alidns"}
 	request.QueryParams["Department"] = client.Department
 	request.QueryParams["ResourceGroup"] = client.ResourceGroup
 	request.RegionId = client.RegionId

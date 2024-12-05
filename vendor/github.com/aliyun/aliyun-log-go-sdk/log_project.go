@@ -101,7 +101,7 @@ func (p *LogProject) ListLogStore() ([]string, error) {
 		"x-log-bodyrawsize": "0",
 	}
 
-	uri := fmt.Sprintf("/logstores")
+	uri := fmt.Sprint("/logstores")
 	r, err := request(p, "GET", uri, h, nil)
 	if err != nil {
 		return nil, NewClientError(err)

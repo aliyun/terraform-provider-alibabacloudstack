@@ -10,7 +10,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudStackDBZones() *schema.Resource {
@@ -23,13 +22,14 @@ func dataSourceAlibabacloudStackDBZones() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"instance_charge_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      PostPaid,
-				ValidateFunc: validation.StringInSlice([]string{"PrePaid", "PostPaid"}, false),
-			},
+			// 后续未消费的参数
+			// 			"instance_charge_type": {
+			// 				Type:         schema.TypeString,
+			// 				Optional:     true,
+			// 				ForceNew:     true,
+			// 				Default:      PostPaid,
+			// 				ValidateFunc: validation.StringInSlice([]string{"PrePaid", "PostPaid"}, false),
+			// 			},
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -73,7 +73,7 @@ func dataSourceAlibabacloudStackDBZonesRead(d *schema.ResourceData, meta interfa
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	var response = &rds.DescribeRegionsResponse{}
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (i interface{}, err error) {

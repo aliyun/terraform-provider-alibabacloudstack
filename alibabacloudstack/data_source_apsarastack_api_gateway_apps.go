@@ -20,7 +20,7 @@ func dataSourceAlibabacloudStackApiGatewayApps() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.ValidateRegexp,
+				ValidateFunc: validation.StringIsValidRegExp,
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -86,8 +86,8 @@ func dataSourceAlibabacloudStackApigatewayAppsRead(d *schema.ResourceData, meta 
 		"RegionId": client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,
@@ -179,8 +179,8 @@ func apigatewayAppsDecriptionAttributes(d *schema.ResourceData, apps []cloudapi.
 			"RegionId": client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "CloudAPI",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,

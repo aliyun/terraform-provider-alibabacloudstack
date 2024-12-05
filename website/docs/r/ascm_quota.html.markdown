@@ -40,6 +40,7 @@ The following arguments are supported:
 ### Before creating quota for any service of an organization, create Father Quota first by using parent_id of that organization.
 
 * `product_name` - (Required) The name of the service. Valid values: ECS, OSS, VPC, RDS, SLB, ODPS, GPDB, DDS, R-KVSTORE, and EIP.
+* `region_name`- (Optional) The name of region to apply quota.
 * `quota_type` - (Required) The type of the quota. Valid values: organization and resourceGroup.
 * `quota_type_id` - (Required) The ID of the quota type. Specify an organization ID when the QuotaType parameter is set to organization. Specify a resource set ID when the QuotaType parameter is set to resourceGroup.
 * `cluster_name` - (Optional) The name of the cluster. This reserved parameter is optional and can be left empty.
@@ -95,11 +96,11 @@ AnalyticDB for PostgreSQL (GPDB)
 
 KVStore for Redis (R-KVSTORE)
 
-* `totalMem`: 100, `target_type`: "redis"
+* `total_mem`: 100, `target_type`: "redis"
 
 ApsaraDB for MongoDB (DDS)
 
-* `totalCpu`: 100, `totalMem`: 100, `totalDisk`:100, `target_type`: "mongodb"
+* `total_cpu`: 100, `total_mem`: 100, `total_disk`:100, `target_type`: "mongodb"
 
 ## Attributes Reference
 

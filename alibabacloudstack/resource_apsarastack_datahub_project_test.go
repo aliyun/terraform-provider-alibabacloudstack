@@ -45,8 +45,8 @@ func testSweepDatahubProject(region string) error {
 	request.ApiName = "ListProjects"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "datahub",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
@@ -83,8 +83,8 @@ func testSweepDatahubProject(region string) error {
 		request.ApiName = "ListTopics"
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "datahub",
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
@@ -114,8 +114,8 @@ func testSweepDatahubProject(region string) error {
 			request.ApiName = "ListSubscription"
 			request.Headers = map[string]string{"RegionId": client.RegionId}
 			request.QueryParams = map[string]string{
-				"AccessKeySecret": client.SecretKey,
-				"AccessKeyId":     client.AccessKey,
+				
+				
 				"Product":         "datahub",
 				"Department":      client.Department,
 				"ResourceGroup":   client.ResourceGroup,
@@ -147,8 +147,8 @@ func testSweepDatahubProject(region string) error {
 				request.ApiName = "DeleteSubscription"
 				request.Headers = map[string]string{"RegionId": client.RegionId}
 				request.QueryParams = map[string]string{
-					"AccessKeySecret": client.SecretKey,
-					"AccessKeyId":     client.AccessKey,
+					
+					
 					"Product":         "datahub",
 					"Department":      client.Department,
 					"ResourceGroup":   client.ResourceGroup,
@@ -177,8 +177,8 @@ func testSweepDatahubProject(region string) error {
 			topicrequest.ApiName = "DeleteTopic"
 			topicrequest.Headers = map[string]string{"RegionId": client.RegionId}
 			topicrequest.QueryParams = map[string]string{
-				"AccessKeySecret": client.SecretKey,
-				"AccessKeyId":     client.AccessKey,
+				
+				
 				"Product":         "datahub",
 				"Department":      client.Department,
 				"ResourceGroup":   client.ResourceGroup,
@@ -207,8 +207,8 @@ func testSweepDatahubProject(region string) error {
 		projectrequest.ApiName = "DeleteProject"
 		projectrequest.Headers = map[string]string{"RegionId": client.RegionId}
 		projectrequest.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "datahub",
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,

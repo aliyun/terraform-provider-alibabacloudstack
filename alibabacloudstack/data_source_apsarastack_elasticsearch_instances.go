@@ -19,7 +19,7 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 			"description_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.ValidateRegexp,
+				ValidateFunc: validation.StringIsValidRegExp,
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -120,7 +120,7 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 	request.Size = requests.NewInteger(PageSizeLarge)
 	request.Page = requests.NewInteger(1)
 	request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "elasticsearch", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "elasticsearch", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	if v, ok := d.GetOk("tags"); ok {
 		var reqTags []map[string]string

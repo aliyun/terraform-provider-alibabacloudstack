@@ -209,7 +209,7 @@ func resourceAlibabacloudCmsMetricRuleTemplateCreate(d *schema.ResourceData, met
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "cms",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
@@ -364,7 +364,7 @@ func resourceAlibabacloudCmsMetricRuleTemplateUpdate(d *schema.ResourceData, met
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
+			
 			"Product":         "cms",
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
@@ -417,7 +417,7 @@ func resourceAlibabacloudCmsMetricRuleTemplateUpdate(d *schema.ResourceData, met
 	modifyMetricRuleTemplateReq.RegionId = client.RegionId
 	modifyMetricRuleTemplateReq.Headers = map[string]string{"RegionId": client.RegionId}
 	modifyMetricRuleTemplateReq.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "cms",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
@@ -511,7 +511,7 @@ func resourceAlibabacloudCmsMetricRuleTemplateDelete(d *schema.ResourceData, met
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "cms",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,

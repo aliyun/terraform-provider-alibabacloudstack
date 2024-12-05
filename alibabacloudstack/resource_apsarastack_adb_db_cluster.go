@@ -195,8 +195,8 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			},
 			"instance_inner_connection": {
 				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
+				//ForceNew: true,
+				//Optional: true,
 				Computed: true,
 			},
 			"instance_inner_port": {
@@ -207,8 +207,8 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			},
 			"instance_vpc_id": {
 				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
+				//ForceNew: true,
+				//Optional: true,
 				Computed: true,
 			},
 			"zone_id": {
@@ -334,7 +334,7 @@ func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta in
 	request.ClientToken = buildClientToken("CreateDBCluster")
 	request.Headers["x-ascm-product-name"] = "adb"
 	request.Headers["x-acs-organizationId"] = client.Department
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "adb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "adb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	raw, err := client.WithAdbClient(func(adbClient *adb.Client) (interface{}, error) {
 		return adbClient.CreateDBCluster(request)
 	})
@@ -435,7 +435,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		if err := adbService.SetResourceTags(d, "ALIYUN::ADB::CLUSTER"); err != nil {
 			return WrapError(err)
 		}
-		d.SetPartial("tags")
+
 	}*/
 	if !d.IsNewResource() && d.HasChange("description") {
 		request := map[string]interface{}{
@@ -498,7 +498,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 		}
-		d.SetPartial("maintain_time")
+
 	}*/
 	//专有云 没有 ModifyDBClusterResourceGroup 接口
 	/*if !d.IsNewResource() && d.HasChange("resource_group_id") {
@@ -529,7 +529,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 		}
-		d.SetPartial("resource_group_id")
+
 	}*/
 
 	update := false
@@ -579,8 +579,8 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 		}
-		d.SetPartial("auto_renew_period")
-		d.SetPartial("renewal_status")
+
+
 	}*/
 
 	update = false

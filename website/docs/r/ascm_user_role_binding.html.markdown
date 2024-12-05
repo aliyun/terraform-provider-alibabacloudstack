@@ -25,7 +25,7 @@ output "binder" {
 
 The following arguments are supported:
 
-* `role_id` - (Required) ID of the role which will be used to bind with user.
+* `role_ids` - (Required) ID list of the role which will be used to bind with user.
 * `login_name` - (Required) Name of the User.
 
 ## Attributes Reference
@@ -34,4 +34,4 @@ The following attributes are exported:
 
 * `id` - Name of the User.
 * `login_name` - Name of the User.
-* `role_id` - User Role Id.
+* `role_ids` - User Role Id list.

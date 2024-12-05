@@ -101,7 +101,7 @@ func resourceAlibabacloudStackRouterInterfaceConnectionCreate(d *schema.Resource
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.RouterInterfaceId = interfaceId
 	request.OppositeInterfaceId = oppositeId
 
@@ -160,7 +160,7 @@ func resourceAlibabacloudStackRouterInterfaceConnectionCreate(d *schema.Resource
 			connectRequest.Scheme = "http"
 		}
 		connectRequest.Headers = map[string]string{"RegionId": client.RegionId}
-		connectRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		connectRequest.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 		connectRequest.RouterInterfaceId = interfaceId
 		if err := resource.Retry(2*time.Minute, func() *resource.RetryError {

@@ -48,12 +48,12 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `names` - A list of Access Point names.
 * `points` - A list of Express Connect Access Points. Each element contains the following attributes:
-	* `access_point_id` - The Access Point ID.
-	* `access_point_name` - Access Point Name.
-	* `attached_region_no` - The Access Point Is Located an ID.
-	* `description` - The Access Point Description.
-	* `host_operator` - The Access Point Belongs to the Operator.
-	* `id` - The ID of the Access Point.
-	* `location` - The Location of the Access Point.
-	* `status` - The Physical Connection to Which the Access Point State.
-	* `type` - The Physical Connection to Which the Network Type.
+  * `access_point_id` - The Access Point ID.
+  * `access_point_name` - Access Point Name.
+  * `attached_region_no` - The Access Point Is Located an ID.
+  * `description` - The Access Point Description.
+  * `host_operator` - The Access Point Belongs to the Operator.
+  * `id` - The ID of the Access Point.
+  * `location` - The Location of the Access Point.
+  * `status` - The Physical Connection to Which the Access Point State.
+  * `type` - The Physical Connection to Which the Network Type.

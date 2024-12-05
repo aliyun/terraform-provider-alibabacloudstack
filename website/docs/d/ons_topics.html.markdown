@@ -66,6 +66,8 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `names` - A list of topic names.
 * `topics` - A list of topics. Each element contains the following attributes:
+  * `id` - ID of the topics.
+  * `instance_id` - ID of the intance to which the topic belongs.
   * `topic` - The name of the topic.
   * `owner` - The ID of the topic owner, which is the Apsara Stack Cloud UID.
   * `relation` - The relation ID. 

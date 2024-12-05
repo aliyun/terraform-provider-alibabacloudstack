@@ -26,7 +26,7 @@ func dataSourceAlibabacloudStackCmsMetricRuleTemplates() *schema.Resource {
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.ValidateRegexp,
+				ValidateFunc: validation.StringIsValidRegExp,
 				ForceNew:     true,
 			},
 			"template_id": {
@@ -123,8 +123,8 @@ func dataSourceAlibabacloudStackCmsMetricRuleTemplatesRead(d *schema.ResourceDat
 	request.ApiName = "DescribeMetricRuleTemplateList"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeyId":     client.AccessKey,
-		"AccessKeySecret": client.SecretKey,
+		
+		
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
 		"Product":         "cms",

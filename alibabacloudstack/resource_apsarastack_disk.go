@@ -131,7 +131,7 @@ func resourceAlibabacloudStackDiskCreate(d *schema.ResourceData, meta interface{
 	request.RegionId = client.RegionId
 	request.ZoneId = availabilityZone.ZoneId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	if v, ok := d.GetOk("category"); ok && v.(string) != "" {
 		category := DiskCategory(v.(string))
@@ -242,7 +242,7 @@ func resourceAlibabacloudStackDiskUpdate(d *schema.ResourceData, meta interface{
 	request := ecs.CreateModifyDiskAttributeRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DiskId = d.Id()
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
@@ -308,7 +308,7 @@ func resourceAlibabacloudStackDiskUpdate(d *schema.ResourceData, meta interface{
 		request := ecs.CreateResizeDiskRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.DiskId = d.Id()
 		if strings.ToLower(client.Config.Protocol) == "https" {
 			request.Scheme = "https"
@@ -343,7 +343,7 @@ func resourceAlibabacloudStackDiskDelete(d *schema.ResourceData, meta interface{
 
 	request := ecs.CreateDeleteDiskRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.RegionId = client.RegionId
 	request.DiskId = d.Id()
 	if strings.ToLower(client.Config.Protocol) == "https" {

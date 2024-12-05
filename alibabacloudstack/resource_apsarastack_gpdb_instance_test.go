@@ -35,7 +35,7 @@ func testSweepGpdbInstances(region string) error {
 	var instances []gpdb.DBInstance
 	request := gpdb.CreateDescribeDBInstancesRequest()
 	request.RegionId = client.RegionId
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.PageSize = requests.NewInteger(PageSizeLarge)
 	request.PageNumber = requests.NewInteger(1)
 	for {
@@ -89,7 +89,7 @@ func testSweepGpdbInstances(region string) error {
 		// Delete Instance
 		request := gpdb.CreateDeleteDBInstanceRequest()
 		request.DBInstanceId = id
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		raw, err := client.WithGpdbClient(func(gpdbClient *gpdb.Client) (interface{}, error) {
 			return gpdbClient.DeleteDBInstance(request)
 		})

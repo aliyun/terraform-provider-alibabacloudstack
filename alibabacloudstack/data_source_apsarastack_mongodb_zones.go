@@ -58,7 +58,7 @@ func dataSourceAlibabacloudStackMongoDBZonesRead(d *schema.ResourceData, meta in
 	request := dds.CreateDescribeRegionsRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
 		return ddsClient.DescribeRegions(request)

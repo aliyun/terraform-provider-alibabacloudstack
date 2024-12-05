@@ -84,8 +84,8 @@ func resourceAlibabacloudStackEcsEbsStorageSetsCreate(d *schema.ResourceData, me
 	request.ApiName = action
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":    client.SecretKey,
-		"AccessKeyId":        client.AccessKey,
+		
+		
 		"Product":            "Ecs",
 		"RegionId":           client.RegionId,
 		"Department":         client.Department,
@@ -172,8 +172,8 @@ func resourceAlibabacloudStackEcsEbsStorageSetsDelete(d *schema.ResourceData, me
 	request.ApiName = action
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "Ecs",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,

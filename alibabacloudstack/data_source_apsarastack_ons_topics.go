@@ -39,21 +39,22 @@ func dataSourceAlibabacloudStackOnsTopics() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"topic": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
-			},
-			"remark": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
-			},
-			"message_type": {
-				Type:     schema.TypeInt,
-				Computed: true,
-				Optional: true,
-			},
+// 后续没有消费使用
+// 			"topic": {
+// 				Type:     schema.TypeString,
+// 				Computed: true,
+// 				Optional: true,
+// 			},
+// 			"remark": {
+// 				Type:     schema.TypeString,
+// 				Computed: true,
+// 				Optional: true,
+// 			},
+// 			"message_type": {
+// 				Type:     schema.TypeInt,
+// 				Computed: true,
+// 				Optional: true,
+// 			},
 			"topics": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -118,8 +119,8 @@ func dataSourceAlibabacloudStackOnsTopicsRead(d *schema.ResourceData, meta inter
 	request.RegionId = client.RegionId
 	request.ApiName = "ConsoleTopicList"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeyId": client.AccessKey,
-		"AccessKeySecret": client.SecretKey,
+	request.QueryParams = map[string]string{
+		
 		"Product":         "Ons-inner",
 		"RegionId":        client.RegionId,
 		"Action":          "ConsoleTopicList",

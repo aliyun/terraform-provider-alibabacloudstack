@@ -310,9 +310,7 @@ The following arguments are supported:
   * `category` - The type of the data disks. Valid values:`cloud`, `cloud_efficiency`, `cloud_ssd` and `cloud_essd`.
   * `size` - The size of a data disk, Its valid value range [40~32768] in GB. Default to `40`.
   * `encrypted` - Specifies whether to encrypt data disks. Valid values: true and false. Default to `false`.
-  * `performance_level` - (Optional, Available in 1.120.0+) Worker node data disk performance level, when `category` values `cloud_essd`, the optional values are `PL0`, `PL1`, `PL2` or `PL3`, but the specific performance level is related to the disk capacity. For more information, see [Enhanced SSDs](https://www.alibabacloud.com/help/doc-detail/122389.htm). Default is `PL1`.
-* `security_group_id` - (Optional) The security group id for worker node. 
-* `platform` - (Optional, Available in 1.127.0+) The platform. One of `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`. If you select `Windows` or `WindowsCore`, the `passord` is required.
+* `platform` - (Optional) The platform. One of `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`. If you select `Windows` or `WindowsCore`, the `passord` is required.
 * `image_id` - (Optional) Custom Image support. Must based on CentOS7 or AliyunLinux2.
 * `node_name_mode` - (Optional) Each node name consists of a prefix, an IP substring, and a suffix. For example "customized,aliyun.com,5,test", if the node IP address is 192.168.0.55, the prefix is aliyun.com, IP substring length is 5, and the suffix is test, the node name will be aliyun.com00055test.
 * `user_data` - (Optional) Windows instances support batch and PowerShell scripts. If your script file is larger than 1 KB, we recommend that you upload the script to Object Storage Service (OSS) and pull it through the internal endpoint of your OSS bucket.
@@ -321,26 +319,35 @@ The following arguments are supported:
   * `key` - The label key.
   * `value` - The label value.
 * `taints` - (Optional) A List of Kubernetes taints to assign to the nodes.
-* `management` - (Optional, Available in 1.109.1+) Managed node pool configuration. When using a managed node pool, the node key must use `key_name`. Detailed below.
-* `scaling_policy` - (Optional, Available in 1.127.0+) The scaling mode. Valid values: `release`, `recycle`, default is `release`. Standard mode(release): Create and release ECS instances based on requests.Swift mode(recycle): Create, stop, and restart ECS instances based on needs. New ECS instances are only created when no stopped ECS instance is avalible. This mode further accelerates the scaling process. Apart from ECS instances that use local storage, when an ECS instance is stopped, you are only chatged for storage space.
-* `scaling_config` - (Optional, Available in 1.111.0+) Auto scaling node pool configuration. For more details, see `scaling_config`. With auto-scaling is enabled, the nodes in the node pool will be labeled with `k8s.aliyun.com=true` to prevent system pods such as coredns, metrics-servers from being scheduled to elastic nodes, and to prevent node shrinkage from causing business abnormalities.
-* `instance_charge_type`- (Optional, Available in 1.119.0+) Node payment type. Valid values: `PostPaid`, `PrePaid`, default is `PostPaid`. If value is `PrePaid`, the arguments `period`, `period_unit`, `auto_renew` and `auto_renew_period` are required.
-* `period`- (Optional, Available in 1.119.0+) Node payment period. Its valid value is one of {1, 2, 3, 6, 12, 24, 36, 48, 60}.
-* `period_unit`- (Optional, Available in 1.119.0+) Node payment period unit, valid value: `Month`. Default is `Month`.
-* `auto_renew`- (Optional, Available in 1.119.0+) Enable Node payment auto-renew, default is `false`.
-* `auto_renew_period`- (Optional, Available in 1.119.0+) Node payment auto-renew period, one of `1`, `2`, `3`,`6`, `12`.
-* `install_cloud_monitor`- (Optional, Available in 1.119.0+) Install the cloud monitoring plug-in on the node, and you can view the monitoring information of the instance through the cloud monitoring console. Default is `true`.
-* `unschedulable`- (Optional, Available in 1.119.0+) Set the newly added node as unschedulable. If you want to open the scheduling option, you can open it in the node list of the console. If you are using an auto-scaling node pool, the setting will not take effect. Default is `false`.
-* `resource_group_id` - (Optional, ForceNew, Available in 1.123.1+) The ID of the resource group,by default these cloud resources are automatically assigned to the default resource group.
-* `internet_charge_type` - (Optional, Available in 1.123.1+) The billing method for network usage. Valid values `PayByBandwidth` and `PayByTraffic`. Conflict with `eip_internet_charge_type`, EIP and public network IP can only choose one. 
-* `internet_max_bandwidth_out` - (Optional, Available in 1.123.1+) The maximum outbound bandwidth for the public network. Unit: Mbit/s. Valid values: 0 to 100.
-* `spot_strategy` - (Optional, Available in 1.123.1+) The preemption policy for the pay-as-you-go instance. This parameter takes effect only when `instance_charge_type` is set to `PostPaid`. Valid value `SpotWithPriceLimit`.
-* `spot_price_limit` - (Optional, Available in 1.123.1+) The maximum hourly price of the instance. This parameter takes effect only when `spot_strategy` is set to `SpotWithPriceLimit`. A maximum of three decimal places are allowed.
-  * `instance_type` - (Optional, Available in 1.123.1+) Spot instance type.
-  * `price_limit` - (Optional, Available in 1.123.1+) The maximum hourly price of the spot instance.
-* `instances` - (Optional, Available in 1.127.0+) The instance list. Add existing nodes under the same cluster VPC to the node pool. 
-* `keep_instance_name` - (Optional, Available in 1.127.0+) Add an existing instance to the node pool, whether to keep the original instance name. It is recommended to set to `true`.
-* `format_disk` - (Optional, Available in 1.127.0+) After you select this check box, if data disks have been attached to the specified ECS instances and the file system of the last data disk is uninitialized, the system automatically formats the last data disk to ext4 and mounts the data disk to /var/lib/docker and /var/lib/kubelet. The original data on the disk will be cleared. Make sure that you back up data in advance. If no data disk is mounted on the ECS instance, no new data disk will be purchased. Default is `false`.
+  * `effect` - (Optional) The scheduling policy.
+  * `key` - (Required) The key of a taint.
+  * `value` - (Optional) The value of a taint.
+* `scaling_policy` - (Optional) The scaling mode. Valid values: `release`, `recycle`, default is `release`. Standard mode(release): Create and release ECS instances based on requests.Swift mode(recycle): Create, stop, and restart ECS instances based on needs. New ECS instances are only created when no stopped ECS instance is avalible. This mode further accelerates the scaling process. Apart from ECS instances that use local storage, when an ECS instance is stopped, you are only chatged for storage space.
+* `scaling_config` - (Optional) Auto scaling node pool configuration. With auto-scaling is enabled, the nodes in the node pool will be labeled with `k8s.aliyun.com=true` to prevent system pods such as coredns, metrics-servers from being scheduled to elastic nodes, and to prevent node shrinkage from causing business abnormalities.
+  * `min_size` - (Required) Min number of instances in a auto scaling group, its valid value range [0~1000].
+  * `max_size` - (Required) Max number of instances in a auto scaling group, its valid value range [0~1000]. `max_size` has to be greater than `min_size`.
+  * `type` - (Optional) Instance classification, not required. Vaild value: `cpu`, `gpu`, `gpushare` and `spot`. Default: `cpu`. The actual instance type is determined by `instance_types`.
+  * `is_bond_eip` - (Optional) Whether to bind EIP for an instance. Default: `false`.
+  * `eip_internet_charge_type` - (Optional) EIP billing type. `PayByBandwidth`: Charged at fixed bandwidth. `PayByTraffic`: Billed as used traffic. Default: `PayByBandwidth`. Conflict with `internet_charge_type`, EIP and public network IP can only choose one. 
+  * `eip_bandwidth` - (Optional) Peak EIP bandwidth. Its valid value range [1~500] in Mbps. Default to `5`.
+* `system_disk_performance_level` - (Optional) The performance level (PL) of the system disk that you want to use for the node. This parameter takes effect only for ESSDs. Its valid value is one of {"PL0", "PL1", "PL2", "PL3"}.
+* `instance_charge_type`- (Optional) Node payment type. Valid values: `PostPaid`, `PrePaid`, default is `PostPaid`. If value is `PrePaid`, the arguments `period`, `period_unit`, `auto_renew` and `auto_renew_period` are required.
+* `period`- (Optional) Node payment period. Its valid value is one of {1, 2, 3, 6, 12, 24, 36, 48, 60}.
+* `period_unit`- (Optional) Node payment period unit, valid value: `Month`. Default is `Month`.
+* `auto_renew`- (Optional) Enable Node payment auto-renew, default is `false`.
+* `auto_renew_period`- (Optional) Node payment auto-renew period, one of `1`, `2`, `3`,`6`, `12`.
+* `install_cloud_monitor`- (Optional) Install the cloud monitoring plug-in on the node, and you can view the monitoring information of the instance through the cloud monitoring console. Default is `true`.
+* `unschedulable`- (Optional) Set the newly added node as unschedulable. If you want to open the scheduling option, you can open it in the node list of the console. If you are using an auto-scaling node pool, the setting will not take effect. Default is `false`.
+* `resource_group_id` - (Optional, ForceNew) The ID of the resource group,by default these cloud resources are automatically assigned to the default resource group.
+* `internet_charge_type` - (Optional) The billing method for network usage. Valid values `PayByBandwidth` and `PayByTraffic`. Conflict with `eip_internet_charge_type`, EIP and public network IP can only choose one. 
+* `internet_max_bandwidth_out` - (Optional) The maximum outbound bandwidth for the public network. Unit: Mbit/s. Valid values: 0 to 100.
+* `spot_strategy` - (Optional) The preemption policy for the pay-as-you-go instance. This parameter takes effect only when `instance_charge_type` is set to `PostPaid`. Valid value `SpotWithPriceLimit`.
+* `spot_price_limit` - (Optional) The maximum hourly price of the instance. This parameter takes effect only when `spot_strategy` is set to `SpotWithPriceLimit`. A maximum of three decimal places are allowed.
+  * `instance_type` - (Optional) Spot instance type.
+  * `price_limit` - (Optional) The maximum hourly price of the spot instance.
+* `instances` - (Optional) The instance list. Add existing nodes under the same cluster VPC to the node pool. 
+* `keep_instance_name` - (Optional) Add an existing instance to the node pool, whether to keep the original instance name. It is recommended to set to `true`.
+* `format_disk` - (Optional,) After you select this, if data disks have been attached to the specified ECS instances and the file system of the last data disk is uninitialized, the system automatically formats the last data disk to ext4 and mounts the data disk to /var/lib/docker and /var/lib/kubelet. The original data on the disk will be cleared. Make sure that you back up data in advance. If no data disk is mounted on the ECS instance, no new data disk will be purchased. Default is `false`.
 
 #### tags
 
@@ -353,27 +360,6 @@ tags {
 }
 ```
 
-#### management
-
-The following arguments are supported in the `management` configuration block:
-
-* `auto_repair` - (Optional) Whether automatic repair, Default to `false`.
-* `auto_upgrade`- (Optional) Whether auto upgrade, Default to `false`.
-* `surge` - (Optional) Number of additional nodes. You have to specify one of surge, surge_percentage.
-* `surge_percentage` - (Optional) Proportion of additional nodes. You have to specify one of surge, surge_percentage.
-* `max_unavailable` - (Required) Max number of unavailable nodes. Default to `1`.
-
-#### scaling_config
-
-The following arguments are supported in the `scaling_config` configuration block:
-
-* `min_size` - (Required, Available in 1.111.0+) Min number of instances in a auto scaling group, its valid value range [0~1000].
-* `max_size` - (Required, Available in 1.111.0+) Max number of instances in a auto scaling group, its valid value range [0~1000]. `max_size` has to be greater than `min_size`.
-* `type` - (Optional, Available in 1.111.0+) Instance classification, not required. Vaild value: `cpu`, `gpu`, `gpushare` and `spot`. Default: `cpu`. The actual instance type is determined by `instance_types`.
-* `is_bond_eip` - (Optional, Available in 1.111.0+) Whether to bind EIP for an instance. Default: `false`.
-* `eip_internet_charge_type` - (Optional, Available in 1.111.0+) EIP billing type. `PayByBandwidth`: Charged at fixed bandwidth. `PayByTraffic`: Billed as used traffic. Default: `PayByBandwidth`. Conflict with `internet_charge_type`, EIP and public network IP can only choose one. 
-* `eip_bandwidth` - (Optional, Available in 1.111.0+) Peak EIP bandwidth. Its valid value range [1~500] in Mbps. Default to `5`.
-
 ## Attributes Reference
 
 The following attributes are exported:
@@ -385,19 +371,3 @@ The following attributes are exported:
 * `image_id` - The image used by node pool workers.
 * `security_group_id` - The ID of security group where the current cluster worker node is located.
 * `scaling_group_id` - (Available in 1.105.0+) Id of the Scaling Group.
-
-## Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 90 mins) Used when creating node-pool in the kubernetes cluster (until it reaches the initial `active` status). 
-* `update` - (Defaults to 60 mins) Used when activating the node-pool in the kubernetes cluster when necessary during update.
-* `delete` - (Defaults to 60 mins) Used when deleting node-pool in kubernetes cluster. 
-
-## Import
-
-Cluster nodepool can be imported using the id, e.g. Then complete the nodepool.tf accords to the result of `terraform plan`.
-
-```
-  $ terraform import alibabacloudstack_cs_node_pool.custom_nodepool cluster_id:nodepool_id
-```

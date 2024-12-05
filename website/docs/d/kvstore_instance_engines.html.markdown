@@ -7,7 +7,7 @@ description: |-
     Provides a list of KVStore instacne engines info.
 ---
 
-# alibabacloudstack\_kvstore\_instances\_engines
+# alibabacloudstack\_kvstore\_instance\_engines
 
 This data source provides the KVStore instance engines resource available info of Apsara Stack Cloud.
 

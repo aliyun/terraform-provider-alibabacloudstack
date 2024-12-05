@@ -21,7 +21,7 @@ func dataSourceAlibabacloudStackAdbDbClusters() *schema.Resource {
 			"description_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.ValidateRegexp,
+				ValidateFunc: validation.StringIsValidRegExp,
 				ForceNew:     true,
 			},
 			"descriptions": {

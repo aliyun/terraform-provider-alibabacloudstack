@@ -63,6 +63,9 @@ The following attributes are exported in addition to the arguments listed above:
 * `ids` - A list of group names.
 * `groups` - A list of groups. Each element contains the following attributes:
   * `id` - The name of the group.
+  * `group_id` - The ID of the group.
   * `owner` - The ID of the group owner, which is the Apsara Stack Cloud UID.
+  * `instance_id` - The Id of the Namesapce. 
   * `independent_naming` - Indicates whether namespaces are available.
   * `remark` - Remark of the group.
+  * `create_time` - Create time of the group.

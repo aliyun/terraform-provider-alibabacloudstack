@@ -300,8 +300,8 @@ func resourceAlibabacloudStackHBaseInstanceCreate(d *schema.ResourceData, meta i
 		"RegionId": client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "HBase",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,
@@ -448,8 +448,8 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 				"RegionId": client.RegionId,
 			}
 			request.QueryParams = map[string]string{
-				"AccessKeySecret": client.SecretKey,
-				"AccessKeyId":     client.AccessKey,
+				
+				
 				"Product":         "HBase",
 				"RegionId":        client.RegionId,
 				"Department":      client.Department,
@@ -481,7 +481,6 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			if _, err := stateConf.WaitForState(); err != nil {
 				return WrapErrorf(err, IdMsg, d.Id())
 			}
-			d.SetPartial("pay_type")
 		}
 	}
 
@@ -491,8 +490,8 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			"RegionId": client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "HBase",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -511,7 +510,6 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
-		d.SetPartial("ip_white")
 	}
 
 	if d.HasChange("security_groups") {
@@ -520,8 +518,8 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			"RegionId": client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "HBase",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -548,7 +546,6 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 		if _, err := stateConf.WaitForState(); err != nil {
 			return WrapErrorf(err, IdMsg, d.Id())
 		}
-		d.SetPartial("security_groups")
 	}
 
 	if d.HasChange("maintain_start_time") || d.HasChange("maintain_end_time") {
@@ -557,8 +554,8 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			"RegionId": client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "HBase",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -577,15 +574,12 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		d.SetPartial("maintain_start_time")
-		d.SetPartial("maintain_end_time")
 	}
 
 	if d.HasChange("deletion_protection") {
 		if err := hBaseService.ModifyClusterDeletionProtection(d.Id(), d.Get("deletion_protection").(bool)); err != nil {
 			return WrapError(err)
 		}
-		d.SetPartial("deletion_protection")
 	}
 
 	if err := hBaseService.setInstanceTags(d); err != nil {
@@ -598,8 +592,8 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			"RegionId": client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "HBase",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -618,8 +612,6 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		d.SetPartial("account")
-		d.SetPartial("password")
 	}
 
 	if d.IsNewResource() {
@@ -633,8 +625,8 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			"RegionId": client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "HBase",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -652,7 +644,6 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		d.SetPartial("name")
 	}
 
 	if d.HasChange("core_instance_quantity") {
@@ -661,8 +652,8 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			"RegionId": client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "HBase",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -687,7 +678,6 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			return WrapError(err)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		d.SetPartial("core_instance_quantity")
 	}
 
 	if d.HasChange("master_instance_type") || d.HasChange("core_instance_type") {
@@ -696,8 +686,8 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			"RegionId": client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "HBase",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -733,8 +723,6 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 				return WrapError(err)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-			d.SetPartial("master_instance_type")
-			d.SetPartial("core_instance_type")
 		}
 	}
 
@@ -744,8 +732,8 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			"RegionId": client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "HBase",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -770,7 +758,6 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			return WrapError(err)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		d.SetPartial("core_disk_size")
 	}
 
 	if d.HasChange("cold_storage_size") {
@@ -779,8 +766,8 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			"RegionId": client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "HBase",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -805,7 +792,6 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 			return WrapError(err)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		d.SetPartial("cold_storage_size")
 	}
 
 	d.Partial(false)
@@ -821,8 +807,8 @@ func resourceAlibabacloudStackHBaseInstanceDelete(d *schema.ResourceData, meta i
 		"RegionId": client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "HBase",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,

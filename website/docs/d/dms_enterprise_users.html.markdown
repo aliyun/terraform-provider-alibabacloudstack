@@ -53,4 +53,5 @@ The following attributes are exported in addition to the arguments listed above:
   * `role_names` - The list names of the role that he user plays.
   * `status` - The status of the user.
   * `id` - The Alibaba Cloud unique ID (UID) of the user.
+  * `uid` - Alias of id.
   * `user_id` - The ID of the user.

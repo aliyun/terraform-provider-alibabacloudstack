@@ -251,7 +251,6 @@ func resourceAlibabacloudStackElasticsearchOnk8sCreate(d *schema.ResourceData, m
 	body, _ := json.Marshal(requestBody)
 	bodydata := string(body)
 	// Params := make(map[string]interface{})
-	// Params["AccessKeySecret"] = client.SecretKey
 	// Params["Product"] = "elasticsearch-k8s"
 	// Params["Action"] = action
 	// Params["Version"] = "2017-06-13"
@@ -278,8 +277,8 @@ func resourceAlibabacloudStackElasticsearchOnk8sCreate(d *schema.ResourceData, m
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        client.RegionId,
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "elasticsearch-k8s",
 		"Action":          "createInstance",
 		"Version":         "2017-06-13",

@@ -30,12 +30,14 @@ The following arguments are supported:
 
 * `folder_path` - (Required) Folder Path. The folder path composed with for part: `Business Flow/{Business Flow Name}/[folderDi|folderMaxCompute|folderGeneral|folderJdbc|folderUserDefined]/{Directory Name}`. The first segment of path must be `Business Flow`, and sencond segment of path must be a Business Flow Name within the project. The third part of path must be one of those keywords:`folderDi|folderMaxCompute|folderGeneral|folderJdbc|folderUserDefined`. Then the finial part of folder path can be specified in yourself.
 * `project_id` - (Required, ForceNew) The ID of the project.
+* `project_identifier` - (Optional) The name of the project.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The resource ID of Folder. The value formats as `<folder_id>:<$.ProjectId>`.
+* `folder_id` - The resource ID of Folder.
 
 ## Import
 

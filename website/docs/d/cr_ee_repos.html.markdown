@@ -53,14 +53,10 @@ The following attributes are exported in addition to the arguments listed above:
   * `summary` - The repository general information.
   * `repo_type` - `PUBLIC` or `PRIVATE`, repository's visibility.
   * `tags` - A list of image tags belong to this repository. Each contains several attributes, see `Block Tag`.
-
-### Block Tag
-
-* `tag` - Tag of this image.
-* `image_id` - Id of this image.
-* `digest` - Digest of this image.
-* `status` - Status of this image.
-* `image_size` - Status of this image, in bytes.
-* `image_update` - Last update time of this image, unix time in nanoseconds.
-* `image_create` - Create time of this image, unix time in nanoseconds.
-
+    * `tag` - Tag of this image.
+    * `image_id` - Id of this image.
+    * `digest` - Digest of this image.
+    * `status` - Status of this image.
+    * `image_size` - Status of this image, in bytes.
+    * `image_update` - Last update time of this image, unix time in nanoseconds.
+    * `image_create` - Create time of this image, unix time in nanoseconds.

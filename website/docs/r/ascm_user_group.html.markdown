@@ -34,10 +34,12 @@ The following arguments are supported:
 
 * `group_name` - (Required) group name. 
 * `organization_id` - (Required) User Organization ID.
-* `role_in_ids` - (Optional) ascm role id.
+* `role_in_ids` - (Deprecated). Field 'role_in_ids' has been deprecated. New field 'role_ids' instead.
+* `role_ids` - (Optional) ascm role id.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - Login Name of the user group.
+* `user_group_id` - ID of the user group.

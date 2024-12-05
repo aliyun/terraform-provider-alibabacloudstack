@@ -38,4 +38,4 @@ The following attributes are exported in addition to the arguments listed above:
 * `zones` - A list of availability zones. Each element contains the following attributes:
   * `id` - ID of the zone.
   * `slb_slave_zone_ids` - A list of slb slave zone ids in which the slb master zone.
-   * `local_name` - The name of the secondary zone.
+  * `local_name` - The name of the secondary zone.

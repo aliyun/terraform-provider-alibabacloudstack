@@ -289,7 +289,7 @@ func (s *RosService) SetResourceTags(d *schema.ResourceData, resourceType string
 				return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 			}
 		}
-		d.SetPartial("tags")
+
 	}
 	return nil
 }

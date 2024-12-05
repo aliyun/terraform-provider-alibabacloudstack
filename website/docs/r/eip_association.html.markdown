@@ -85,6 +85,9 @@ The following arguments are supported:
 * `allocation_id` - (Required, ForcesNew) The allocation EIP ID.
 * `instance_id` - (Required, ForcesNew) The ID of the ECS or SLB instance or Nat Gateway.
 * `instance_type` - (Optional, ForceNew) The type of cloud product that the eip instance to bind.
+* `force` - (Optional, ForceNew) When an EIP is bound to a NAT gateway and a DNAT or SNAT entry is added to the NAT gateway, does it force the unbinding of the EIP? Value: 
+  * False (default): does not force the unbinding of the EIP. 
+  * True: Force unbinding of EIP.
 
 
 ## Attributes Reference

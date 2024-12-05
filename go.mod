@@ -27,10 +27,14 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/hashicorp/go-uuid v1.0.1
 	github.com/hashicorp/terraform v0.13.5
+	github.com/hashicorp/terraform-json v0.23.0 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/shopspring/decimal v1.3.1 // indirect
-	golang.org/x/tools v0.1.8-0.20211014194737-fc98fb2abd48 // indirect
+	github.com/zclconf/go-cty v1.15.1 // indirect
+	golang.org/x/text v0.20.0 // indirect
+	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 )

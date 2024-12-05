@@ -33,7 +33,7 @@ func (s *AscmService) DescribeAscmLogonPolicy(id string) (response *LoginPolicy,
 	request.ApiName = "ListLoginPolicies"
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "ascm",
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
@@ -77,7 +77,7 @@ func (s *AscmService) DescribeAscmResourceGroup(id string) (response *ResourceGr
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":          s.client.RegionId,
-		"AccessKeySecret":   s.client.SecretKey,
+		
 		"Product":           "ascm",
 		"Action":            "ListResourceGroup",
 		"Version":           "2019-05-10",
@@ -131,7 +131,7 @@ func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRol
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "ascm",
 		"Action":          "ListRoles",
 		"Version":         "2019-05-10",
@@ -187,7 +187,7 @@ func (s *AscmService) DescribeAscmRamRole(id string) (response *AscmRoles, err e
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
 		"Product":         "ascm",
@@ -245,7 +245,7 @@ func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, 
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
 		"Product":         "ascm",
@@ -314,7 +314,7 @@ func (s *AscmService) DescribeAscmResourceGroupUserAttachment(id string) (respon
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "ascm",
 		"Action":          "ListAscmUsersInsideResourceGroup",
 		"Version":         "2019-05-10",
@@ -371,7 +371,7 @@ func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *Lis
 	if id == "" {
 		request.QueryParams = map[string]string{
 			"RegionId":        s.client.RegionId,
-			"AccessKeySecret": s.client.SecretKey,
+			
 			"Product":         "ascm",
 			"Action":          "ListResourceGroup",
 			"Version":         "2019-05-10",
@@ -380,7 +380,7 @@ func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *Lis
 	} else {
 		request.QueryParams = map[string]string{
 			"RegionId":          s.client.RegionId,
-			"AccessKeySecret":   s.client.SecretKey,
+			
 			"Product":           "ascm",
 			"Action":            "ListResourceGroup",
 			"Version":           "2019-05-10",
@@ -435,7 +435,7 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (respon
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "ascm",
 		"Action":          "ListResourceGroup",
 		"Version":         "2019-05-10",
@@ -497,7 +497,7 @@ func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "ascm",
 		"Action":          "ListUsers",
 		"Version":         "2019-05-10",
@@ -551,7 +551,7 @@ func (s *AscmService) DescribeAscmUserGroup(id string) (response *UserGroup, err
 	if id == "" {
 		request.QueryParams = map[string]string{
 			"RegionId":         s.client.RegionId,
-			"AccessKeySecret":  s.client.SecretKey,
+			
 			"Product":          "ascm",
 			"Action":           "ListUserGroups",
 			"Version":          "2019-05-10",
@@ -562,7 +562,7 @@ func (s *AscmService) DescribeAscmUserGroup(id string) (response *UserGroup, err
 	} else {
 		request.QueryParams = map[string]string{
 			"RegionId":         s.client.RegionId,
-			"AccessKeySecret":  s.client.SecretKey,
+			
 			"Product":          "ascm",
 			"Action":           "ListUserGroups",
 			"Version":          "2019-05-10",
@@ -619,12 +619,12 @@ func (s *AscmService) DescribeAscmUserGroupRoleBinding(id string) (response *Use
 		request.SetHTTPSInsecure(s.client.Config.Insecure)
 	}
 	request.QueryParams = map[string]string{
-		"RegionId":         s.client.RegionId,
-		"AccessKeySecret":  s.client.SecretKey,
-		"Product":          "ascm",
-		"Action":           "ListUserGroups",
-		"Version":          "2019-05-10",
-		"pageSize":         "1000",
+		"RegionId":        s.client.RegionId,
+		
+		"Product":         "ascm",
+		"Action":          "ListUserGroups",
+		"Version":         "2019-05-10",
+		"pageSize":        "1000",
 		"SecurityToken":    s.client.Config.SecurityToken,
 		"SignatureVersion": "1.0",
 		"SignatureMethod":  "HMAC-SHA1",
@@ -684,7 +684,7 @@ func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, er
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "ascm",
 		"Action":          "ListUsers",
 		"Version":         "2019-05-10",
@@ -736,7 +736,7 @@ func (s *AscmService) DescribeAscmDeletedUser(id string) (response *DeletedUser,
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "ascm",
 		"Action":          "ListDeletedUsers",
 		"Version":         "2019-05-10",
@@ -789,7 +789,7 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
 		"Product":         "ascm",
@@ -844,8 +844,8 @@ func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, e
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeyId":     s.client.AccessKey,
-		"AccessKeySecret": s.client.SecretKey,
+		
+		
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
 		"Product":         "ascm",
@@ -901,8 +901,8 @@ func (s *AscmService) DescribeAscmRamPolicyForRole(id string) (response *RamPoli
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeyId":     s.client.AccessKey,
-		"AccessKeySecret": s.client.SecretKey,
+		
+		
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
 		"Product":         "ascm",
@@ -969,7 +969,7 @@ func (s *AscmService) DescribeAscmQuota(id string) (response *AscmQuota, err err
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
 		"regionName ":     s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
 		"Product":         "ascm",
@@ -1028,7 +1028,7 @@ func (s *AscmService) DescribeAscmPasswordPolicy(id string) (response *PasswordP
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
 		"Product":         "ascm",
@@ -1082,8 +1082,8 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 		request.SetHTTPSInsecure(s.client.Config.Insecure)
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":  s.client.SecretKey,
-		"AccessKeyId":      s.client.AccessKey,
+		
+		
 		"Department":       s.client.Department,
 		"ResourceGroup":    s.client.ResourceGroup,
 		"RegionId":         s.client.RegionId,
@@ -1142,8 +1142,8 @@ func (s *AscmService) ExportInitPasswordByLoginName(loginname string) (initPassw
 	var loginnamelist []string
 	loginnamelist = append(loginnamelist, loginname)
 	QueryParams := map[string]interface{}{
-		"AccessKeySecret":  s.client.SecretKey,
-		"AccessKeyId":      s.client.AccessKey,
+		
+		
 		"Department":       s.client.Department,
 		"ResourceGroup":    s.client.ResourceGroup,
 		"RegionId":         s.client.RegionId,

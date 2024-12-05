@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack Cloud kms secret resource.
 ---
 
-# alibabacloudstack\_kms\_key
+# alibabacloudstack\_kms\_secret
 
 This resouce used to create a secret and store its initial version.
 

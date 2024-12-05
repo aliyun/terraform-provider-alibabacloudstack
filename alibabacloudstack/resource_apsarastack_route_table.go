@@ -1,12 +1,11 @@
 package alibabacloudstack
 
 import (
-	"strings"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"strings"
 )
 
 func resourceAlibabacloudStackRouteTable() *schema.Resource {
@@ -53,7 +52,7 @@ func resourceAliyunRouteTableCreate(d *schema.ResourceData, meta interface{}) er
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.VpcId = d.Get("vpc_id").(string)
 	request.RouteTableName = d.Get("name").(string)
@@ -115,7 +114,7 @@ func resourceAliyunRouteTableUpdate(d *schema.ResourceData, meta interface{}) er
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.RouteTableId = d.Id()
 
 	if d.HasChange("description") {
@@ -148,7 +147,7 @@ func resourceAliyunRouteTableDelete(d *schema.ResourceData, meta interface{}) er
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.RouteTableId = d.Id()
 
 	raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {

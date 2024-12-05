@@ -30,11 +30,12 @@ func dataSourceAlibabacloudStackAscmOrganizations() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"names": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
+			// 未消费变量
+// 			"names": {
+// 				Type:     schema.TypeList,
+// 				Computed: true,
+// 				Elem:     &schema.Schema{Type: schema.TypeString},
+// 			},
 			"parent_id": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -109,8 +110,8 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 	request.ApiName = "GetOrganizationList"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeyId":     client.AccessKey,
-		"AccessKeySecret": client.SecretKey,
+		
+		
 		"Product":         "ascm",
 		"RegionId":        client.RegionId,
 		"Action":          "GetOrganizationList",

@@ -58,8 +58,8 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 	request.ApiName = "GetProject"
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "SLS",
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,

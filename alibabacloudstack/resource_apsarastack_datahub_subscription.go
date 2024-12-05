@@ -94,8 +94,8 @@ func resourceAlibabacloudStackDatahubSubscriptionCreate(d *schema.ResourceData, 
 	request.ApiName = "CreateSubscription"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "datahub",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,
@@ -215,8 +215,8 @@ func resourceAlibabacloudStackDatahubSubscriptionDelete(d *schema.ResourceData, 
 	request.ApiName = "DeleteSubscription"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "datahub",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,

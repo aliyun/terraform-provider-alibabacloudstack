@@ -4,11 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -16,6 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func resourceAlibabacloudStackOnsInstance() *schema.Resource {
@@ -65,10 +64,6 @@ func resourceAlibabacloudStackOnsInstance() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"instance_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 
 			"instance_status": {
 				Type:     schema.TypeInt,
@@ -97,7 +92,7 @@ func resourceAlibabacloudStackOnsInstanceCreate(d *schema.ResourceData, meta int
 	request := requests.NewCommonRequest()
 	request.QueryParams = map[string]string{
 		"RegionId":          client.RegionId,
-		"AccessKeySecret":   client.SecretKey,
+		
 		"Department":        client.Department,
 		"ResourceGroup":     client.ResourceGroup,
 		"Product":           "Ons-inner",
@@ -253,7 +248,7 @@ func resourceAlibabacloudStackOnsInstanceUpdate(d *schema.ResourceData, meta int
 	request := requests.NewCommonRequest()
 	request.QueryParams = map[string]string{
 		"RegionId":          client.RegionId,
-		"AccessKeySecret":   client.SecretKey,
+		
 		"Department":        client.Department,
 		"ResourceGroup":     client.ResourceGroup,
 		"Product":           "Ons-inner",
@@ -317,7 +312,7 @@ func resourceAlibabacloudStackOnsInstanceDelete(d *schema.ResourceData, meta int
 		request := requests.NewCommonRequest()
 		request.QueryParams = map[string]string{
 			"RegionId":        client.RegionId,
-			"AccessKeySecret": client.SecretKey,
+			
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
 			"Product":         "Ons-inner",

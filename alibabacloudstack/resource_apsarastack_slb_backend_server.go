@@ -67,7 +67,7 @@ func resourceAlibabacloudStackSlbBackendServersCreate(d *schema.ResourceData, me
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.LoadBalancerId = d.Get("load_balancer_id").(string)
 	if v, ok := d.GetOk("backend_servers"); ok {
 		request.BackendServers = expandBackendServersInfoToString(v.(*schema.Set).List())
@@ -159,7 +159,7 @@ func resourceAlibabacloudStackSlbBackendServersUpdate(d *schema.ResourceData, me
 				request.Scheme = "http"
 			}
 			request.Headers = map[string]string{"RegionId": client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			request.LoadBalancerId = d.Id()
 
 			segs := len(rmservers)/step + 1
@@ -202,7 +202,7 @@ func resourceAlibabacloudStackSlbBackendServersUpdate(d *schema.ResourceData, me
 				request.Scheme = "http"
 			}
 			request.Headers = map[string]string{"RegionId": client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			request.LoadBalancerId = d.Id()
 
 			segs := len(addservers)/step + 1
@@ -253,7 +253,7 @@ func resourceAlibabacloudStackSlbBackendServersUpdate(d *schema.ResourceData, me
 					request.Scheme = "http"
 				}
 				request.Headers = map[string]string{"RegionId": client.RegionId}
-				request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+				request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 				request.LoadBalancerId = d.Id()
 				request.BackendServers = expandBackendServersInfoToString(servers[start:end])
 				raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
@@ -310,7 +310,7 @@ func resourceAlibabacloudStackSlbBackendServersDelete(d *schema.ResourceData, me
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.LoadBalancerId = d.Id()
 
 		segs := len(servers)/step + 1

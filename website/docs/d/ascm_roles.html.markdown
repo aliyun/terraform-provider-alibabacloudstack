@@ -39,6 +39,7 @@ The following arguments are supported:
 
 * `id` - (Optional) It is used to filter results by role ID.
 * `name_regex` - (Optional) A regex string to filter results by role name.
+* `description` - Description about the role.
 * `role_type` - (Optional) It is used to filter results by Role Type. Valid Values - "ROLETYPE_RAM", "ROLETYPE_ASCM".
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 

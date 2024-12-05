@@ -85,7 +85,7 @@ func resourceAlibabacloudstackEssAttachmentUpdate(d *schema.ResourceData, meta i
 				request.Scheme = "http"
 			}
 			request.Headers = map[string]string{"RegionId": client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 			request.ScalingGroupId = d.Id()
 			s := reflect.ValueOf(request).Elem()
@@ -240,7 +240,7 @@ func resourceAlibabacloudstackEssAttachmentDelete(d *schema.ResourceData, meta i
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 		request.ScalingGroupId = d.Id()
 

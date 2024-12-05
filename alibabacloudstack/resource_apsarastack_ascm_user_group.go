@@ -38,6 +38,7 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				Deprecated: "Attribute role_in_ids has been deprecated and replaced with role_ids.",
 			},
 			"role_ids": {
 				Type:     schema.TypeSet,
@@ -64,6 +65,15 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 			loginNamesList = append(loginNamesList, loginName)
 		}
 	}
+	
+	if v, ok := d.GetOk("role_ids"); ok {
+		loginNames := expandStringList(v.(*schema.Set).List())
+
+		for _, loginName := range loginNames {
+			loginNamesList = append(loginNamesList, loginName)
+		}
+	}
+
 
 	request := requests.NewCommonRequest()
 	if client.Config.Insecure {
@@ -182,7 +192,7 @@ func resourceAlibabacloudStackAscmUserGroupDelete(d *schema.ResourceData, meta i
 		}
 		request.QueryParams = map[string]string{
 			"RegionId":         client.RegionId,
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "ascm",
 			"Action":           "DeleteUserGroup",
 			"Version":          "2019-05-10",

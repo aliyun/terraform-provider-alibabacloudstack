@@ -1,10 +1,9 @@
 package alibabacloudstack
 
 import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strings"
 	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -60,7 +59,7 @@ func resourceAlibabacloudStackSnapshotPolicyCreate(d *schema.ResourceData, meta 
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.AutoSnapshotPolicyName = d.Get("name").(string)
 	request.RepeatWeekdays = convertListToJsonString(d.Get("repeat_weekdays").(*schema.Set).List())
 	request.RetentionDays = requests.NewInteger(d.Get("retention_days").(int))
@@ -127,7 +126,7 @@ func resourceAlibabacloudStackSnapshotPolicyUpdate(d *schema.ResourceData, meta 
 	request := ecs.CreateModifyAutoSnapshotPolicyExRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.AutoSnapshotPolicyId = d.Id()
 	if d.HasChange("name") {
 		request.AutoSnapshotPolicyName = d.Get("name").(string)
@@ -168,7 +167,7 @@ func resourceAlibabacloudStackSnapshotPolicyDelete(d *schema.ResourceData, meta 
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.AutoSnapshotPolicyId = d.Id()
 	err := resource.Retry(DefaultTimeout*time.Second, func() *resource.RetryError {
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {

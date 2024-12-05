@@ -56,10 +56,10 @@ func resourceAlibabacloudStackCSKubernetesNodePool() *schema.Resource {
 				Computed:      true,
 				ConflictsWith: []string{"instances"},
 			},
-			"vpc_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
+// 			"vpc_id": {
+// 				Type:     schema.TypeString,
+// 				Computed: true,
+// 			},
 			"vswitch_ids": {
 				Type:     schema.TypeList,
 				Required: true,
@@ -184,34 +184,34 @@ func resourceAlibabacloudStackCSKubernetesNodePool() *schema.Resource {
 							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"all", "cloud", "ephemeral_ssd", "cloud_essd", "cloud_efficiency", "cloud_ssd", "local_disk", "cloud_pperf", "cloud_sperf"}, false),
 						},
-						"snapshot_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"device": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"kms_key_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
+// 						"snapshot_id": {
+// 							Type:     schema.TypeString,
+// 							Optional: true,
+// 						},
+// 						"name": {
+// 							Type:     schema.TypeString,
+// 							Optional: true,
+// 						},
+// 						"device": {
+// 							Type:     schema.TypeString,
+// 							Optional: true,
+// 						},
+// 						"kms_key_id": {
+// 							Type:     schema.TypeString,
+// 							Optional: true,
+// 						},
 						"encrypted": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"auto_snapshot_policy_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"performance_level": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
+// 						"auto_snapshot_policy_id": {
+// 							Type:     schema.TypeString,
+// 							Optional: true,
+// 						},
+// 						"performance_level": {
+// 							Type:     schema.TypeString,
+// 							Optional: true,
+// 						},
 					},
 				},
 			},
@@ -269,38 +269,38 @@ func resourceAlibabacloudStackCSKubernetesNodePool() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"management": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"auto_repair": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"auto_upgrade": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
-						"surge": {
-							Type:         schema.TypeInt,
-							Optional:     true,
-							ValidateFunc: validation.IntBetween(0, 1000),
-						},
-						"surge_percentage": {
-							Type:         schema.TypeInt,
-							Optional:     true,
-							ValidateFunc: validation.IntBetween(0, 100),
-						},
-						"max_unavailable": {
-							Type:     schema.TypeInt,
-							Required: true,
-						},
-					},
-				},
-			},
+// 			"management": {
+// 				Type:     schema.TypeList,
+// 				Optional: true,
+// 				Computed: true,
+// 				MaxItems: 1,
+// 				Elem: &schema.Resource{
+// 					Schema: map[string]*schema.Schema{
+// 						"auto_repair": {
+// 							Type:     schema.TypeBool,
+// 							Optional: true,
+// 						},
+// 						"auto_upgrade": {
+// 							Type:     schema.TypeBool,
+// 							Optional: true,
+// 						},
+// 						"surge": {
+// 							Type:         schema.TypeInt,
+// 							Optional:     true,
+// 							ValidateFunc: validation.IntBetween(0, 1000),
+// 						},
+// 						"surge_percentage": {
+// 							Type:         schema.TypeInt,
+// 							Optional:     true,
+// 							ValidateFunc: validation.IntBetween(0, 100),
+// 						},
+// 						"max_unavailable": {
+// 							Type:     schema.TypeInt,
+// 							Required: true,
+// 						},
+// 					},
+// 				},
+// 			},
 			"scaling_config": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -717,7 +717,7 @@ func resourceAlibabacloudStackCSNodePoolUpdate(d *schema.ResourceData, meta inte
 		argJson, _ := json.Marshal(args)
 		request.QueryParams = map[string]string{
 			"RegionId":         client.RegionId,
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "CS",
 			"Department":       client.Department,
 			"ResourceGroup":    client.ResourceGroup,
@@ -902,7 +902,7 @@ func resourceAlibabacloudStackCSNodePoolDelete(d *schema.ResourceData, meta inte
 	}
 	req.QueryParams = map[string]string{
 		"RegionId":         csService.client.RegionId,
-		"AccessKeySecret":  csService.client.SecretKey,
+		
 		"Product":          "CS",
 		"Department":       csService.client.Department,
 		"ResourceGroup":    csService.client.ResourceGroup,
@@ -1050,7 +1050,7 @@ func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*requests.Comm
 	AutoScalingJson, _ := json.Marshal(AutoScaling)
 	request.QueryParams = map[string]string{
 		"RegionId":         client.RegionId,
-		"AccessKeySecret":  client.SecretKey,
+		
 		"Product":          "CS",
 		"Department":       client.Department,
 		"ResourceGroup":    client.ResourceGroup,
@@ -1394,7 +1394,7 @@ func RemoveNodePoolNodes(d *schema.ResourceData, meta interface{}, clusterid, no
 		}
 		req.QueryParams = map[string]string{
 			"RegionId":         csService.client.RegionId,
-			"AccessKeySecret":  csService.client.SecretKey,
+			
 			"Product":          "CS",
 			"Department":       csService.client.Department,
 			"ResourceGroup":    csService.client.ResourceGroup,
@@ -1460,7 +1460,7 @@ func ScaleClusterNodePool(d *schema.ResourceData, meta interface{}, clusterid, n
 	}
 	req.QueryParams = map[string]string{
 		"RegionId":         csService.client.RegionId,
-		"AccessKeySecret":  csService.client.SecretKey,
+		
 		"Product":          "CS",
 		"Department":       csService.client.Department,
 		"ResourceGroup":    csService.client.ResourceGroup,

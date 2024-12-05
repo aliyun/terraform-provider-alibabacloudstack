@@ -30,8 +30,8 @@ func (s *CloudApiService) DescribeApiGatewayGroup(id string) (*cloudapi.Describe
 		"x-acs-organizationid":  s.client.Department,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
@@ -88,8 +88,8 @@ func (s *CloudApiService) DescribeApiGatewayApp(id string) (*cloudapi.DescribeAp
 		"RegionId": s.client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -149,8 +149,8 @@ func (s *CloudApiService) DescribeApiGatewayApi(id string) (*cloudapi.DescribeAp
 		"RegionId": s.client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -213,8 +213,8 @@ func (s *CloudApiService) DescribeApiGatewayAppAttachment(id string) (*cloudapi.
 		"RegionId": s.client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -274,8 +274,8 @@ func (s *CloudApiService) DescribeApiGatewayVpcAccess(id string) (*cloudapi.VpcA
 		"RegionId": s.client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -369,8 +369,8 @@ func (s *CloudApiService) DescribeDeployedApi(id string, stageName string) (*clo
 		"RegionId": s.client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -408,8 +408,8 @@ func (s *CloudApiService) DeployedApi(id string, stageName string) (err error) {
 		"RegionId": s.client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -441,8 +441,8 @@ func (s *CloudApiService) AbolishApi(id string, stageName string) (err error) {
 		"RegionId": s.client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -474,8 +474,8 @@ func (s *CloudApiService) DescribeTags(resourceId string, resourceTags map[strin
 		"RegionId": s.client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        s.client.RegionId,
 		"Department":      s.client.Department,
@@ -526,8 +526,8 @@ func (s *CloudApiService) setInstanceTags(d *schema.ResourceData, resourceType T
 			"RegionId": s.client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": s.client.SecretKey,
-			"AccessKeyId":     s.client.AccessKey,
+			
+			
 			"Product":         "CloudAPI",
 			"RegionId":        s.client.RegionId,
 			"Department":      s.client.Department,
@@ -554,8 +554,8 @@ func (s *CloudApiService) setInstanceTags(d *schema.ResourceData, resourceType T
 			"RegionId": s.client.RegionId,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": s.client.SecretKey,
-			"AccessKeyId":     s.client.AccessKey,
+			
+			
 			"Product":         "CloudAPI",
 			"RegionId":        s.client.RegionId,
 			"Department":      s.client.Department,
@@ -572,7 +572,6 @@ func (s *CloudApiService) setInstanceTags(d *schema.ResourceData, resourceType T
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	d.SetPartial("tags")
 
 	return nil
 }

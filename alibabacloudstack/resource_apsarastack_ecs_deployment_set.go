@@ -6,7 +6,6 @@ import (
 	"log"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
@@ -16,7 +15,6 @@ import (
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -51,7 +49,7 @@ func resourceAlibabacloudStackEcsDeploymentSet() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Host", "host"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"Host", "Rack", "Switch"}, false),
 			},
 			"on_unable_to_redeploy_failed_instance": {
 				Type:         schema.TypeString,
@@ -62,7 +60,7 @@ func resourceAlibabacloudStackEcsDeploymentSet() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Availability"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"Availability", "LooseDispersion"}, false),
 			},
 			"tags": tagsSchema(),
 		},
@@ -120,8 +118,8 @@ func resourceAlibabacloudStackEcsDeploymentSetCreate(d *schema.ResourceData, met
 	request.ApiName = action
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":                  client.SecretKey,
-		"AccessKeyId":                      client.AccessKey,
+		
+		
 		"Product":                          "Ecs",
 		"RegionId":                         client.RegionId,
 		"Department":                       client.Department,
@@ -131,36 +129,27 @@ func resourceAlibabacloudStackEcsDeploymentSetCreate(d *schema.ResourceData, met
 		"DeploymentSetName":                DeploymentSetName,
 		"Domain":                           "Default",
 		"Description":                      Description,
-		"Granularity":                      "Host",
+		"Granularity":                      d.Get("granularity").(string),
 		"OnUnableToRedeployFailedInstance": OnUnableToRedeployFailedInstance,
 		"Strategy":                         Strategy,
 		"ClientToken":                      ClientToken,
 	}
 	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		raw, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-			return EcsClient.ProcessCommonRequest(request)
-		})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, raw, request)
-		resp := &datahub.EcsDeploymentSetCreateResult{}
-		bresponse := raw.(*responses.CommonResponse)
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
-		d.SetId(fmt.Sprint(resp.DeploymentSetId))
-		return nil
+	raw, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
+		return EcsClient.ProcessCommonRequest(request)
 	})
-
+	addDebug(action, raw, request)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ecs_deployment_set", action, AlibabacloudStackSdkGoERROR)
 	}
+	resp := &datahub.EcsDeploymentSetCreateResult{}
+	bresponse := raw.(*responses.CommonResponse)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
+	if err != nil {
+		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudstack_ecs_deployment_set", action, AlibabacloudStackSdkGoERROR)
+	}
+	d.SetId(fmt.Sprint(resp.DeploymentSetId))
 
 	return resourceAlibabacloudStackEcsDeploymentSetRead(d, meta)
 }
@@ -232,8 +221,8 @@ func resourceAlibabacloudStackEcsDeploymentSetUpdate(d *schema.ResourceData, met
 	request.ApiName = action
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":   client.SecretKey,
-		"AccessKeyId":       client.AccessKey,
+		
+		
 		"Product":           "Ecs",
 		"RegionId":          client.RegionId,
 		"Department":        client.Department,
@@ -246,21 +235,10 @@ func resourceAlibabacloudStackEcsDeploymentSetUpdate(d *schema.ResourceData, met
 	}
 	if update {
 
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-			response, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-				return EcsClient.ProcessCommonRequest(request)
-			})
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			addDebug(action, response, request)
-			return nil
+		response, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
+			return EcsClient.ProcessCommonRequest(request)
 		})
+		addDebug(action, response, request)
 		if err != nil {
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 		}
@@ -284,8 +262,8 @@ func resourceAlibabacloudStackEcsDeploymentSetDelete(d *schema.ResourceData, met
 	request.ApiName = action
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "Ecs",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,
@@ -294,21 +272,10 @@ func resourceAlibabacloudStackEcsDeploymentSetDelete(d *schema.ResourceData, met
 		"Version":         "2014-05-26",
 		"DeploymentSetId": DeploymentSetId,
 	}
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		response, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
-			return EcsClient.ProcessCommonRequest(request)
-		})
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, request)
-		return nil
+	response, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
+		return EcsClient.ProcessCommonRequest(request)
 	})
+	addDebug(action, response, request)
 	if err != nil {
 		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 	}
@@ -325,6 +292,10 @@ func convertEcsDeploymentSetGranularityResponse(source interface{}) interface{} 
 	switch source {
 	case "host":
 		return "Host"
+	case "rack":
+		return "Rack"
+	case "switch":
+		return "Switch"
 	}
 	return source
 }

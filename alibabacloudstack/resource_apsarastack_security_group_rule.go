@@ -352,7 +352,7 @@ func buildAlibabacloudStackSGRuleRequest(d *schema.ResourceData, meta interface{
 		return request, WrapError(err)
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	direction := d.Get("type").(string)
 

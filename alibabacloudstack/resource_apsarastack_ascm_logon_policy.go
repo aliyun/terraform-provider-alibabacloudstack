@@ -3,10 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"strings"
-	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -14,6 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
+	"strings"
+	"time"
 )
 
 func resourceAlibabacloudStackLogonPolicy() *schema.Resource {
@@ -46,28 +45,29 @@ func resourceAlibabacloudStackLogonPolicy() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"ALLOW", "DENY"}, false),
 			},
-			"time_range": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": {
-							Type:     schema.TypeString,
-							Default:  "flannel",
-							Optional: true,
-						},
-						"config": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"disabled": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-						},
-					},
-				},
-			},
+// 后续未消费的资源参数
+// 			"time_range": {
+// 				Type:     schema.TypeList,
+// 				Optional: true,
+// 				Elem: &schema.Resource{
+// 					Schema: map[string]*schema.Schema{
+// 						"name": {
+// 							Type:     schema.TypeString,
+// 							Default:  "flannel",
+// 							Optional: true,
+// 						},
+// 						"config": {
+// 							Type:     schema.TypeString,
+// 							Optional: true,
+// 						},
+// 						"disabled": {
+// 							Type:     schema.TypeBool,
+// 							Optional: true,
+// 							Default:  false,
+// 						},
+// 					},
+// 				},
+// 			},
 		},
 	}
 }
@@ -96,7 +96,7 @@ func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta int
 		}
 		request.QueryParams = map[string]string{
 			"RegionId":               client.RegionId,
-			"AccessKeySecret":        client.SecretKey,
+			
 			"Product":                "ascm",
 			"Department":             client.Department,
 			"ResourceGroup":          client.ResourceGroup,
@@ -180,7 +180,7 @@ func resourceAlibabacloudStackLogonPolicyUpdate(d *schema.ResourceData, meta int
 
 	request.QueryParams = map[string]string{
 		"RegionId":        client.RegionId,
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "ascm",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
@@ -268,7 +268,7 @@ func resourceAlibabacloudStackLogonPolicyDelete(d *schema.ResourceData, meta int
 		request.RegionId = client.RegionId
 		request.QueryParams = map[string]string{
 			"RegionId":         client.RegionId,
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "ascm",
 			"Department":       client.Department,
 			"ResourceGroup":    client.ResourceGroup,

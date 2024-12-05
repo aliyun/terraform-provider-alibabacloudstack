@@ -111,15 +111,26 @@ The following arguments are supported:
 * `zone_id` - (ForceNew) The Zone to launch the DB instance.
 * `encryption_key` - (Optional) Add encryptionkey to the DBInstance.
 * `zone_id_slave1` - (Optional) The zone ID of the secondary instance.
-* `zone_id_slave` - (Optional) The zone ID of the secondary instance.
+* `zone_id_slave2` - (Optional) The zone ID of the secondary instance.
 * `tde_status` - (Optional) Enables the Transparent Data Encryption (TDE) function for an ApsaraDB for RDS instance.
-* `enable_ssl` - (Optional) To enable the SSL encryption of an ApsaraDB RDS instance.
-If it is a multi-zone and `vswitch_id` is specified, the vswitch must in the one of them.
-The multiple zone ID can be retrieved by setting `multi` to "true" in the data source `alibabacloudstack_zones`.
+* `encryption` - (Optional) Enable encryption or not.
+* `enable_ssl` - (Optional) To enable the SSL encryption of an ApsaraDB RDS instance.If it is a multi-zone and `vswitch_id` is specified, the vswitch must in the one of them.The multiple zone ID can be retrieved by setting `multi` to "true" in the data source `alibabacloudstack_zones`.
 * `vswitch_id` - (ForceNew) The virtual switch ID to launch DB instances in one VPC.
 * `security_ips` - (Optional) List of IP addresses allowed to access all databases of an instance. The list contains up to 1,000 IP addresses, separated by commas. Supported formats include 0.0.0.0/0, 10.23.12.24 (IP), and 10.23.12.24/24 (Classless Inter-Domain Routing (CIDR) mode. /24 represents the length of the prefix in an IP address. The range of the prefix length is [1,32]).
+* `role_arn` - (ForceNew, Optional) The Alibaba Cloud Resource Name (ARN) of the RAM role.
+* `period` - (Optional) The duration that you will buy DB instance (in month). It is valid when instance_charge_type is PrePaid. Valid values: [1~9], 12, 24, 36.
+* `security_ip_mode` - (Optional) Valid values are normal, safety, Default to normal. support safety switch to high security access mode.
+* `monitoring_period` - (Optional) The monitoring frequency in seconds. Valid values are 5, 10, 60, 300. Defaults to 300.
+* `maintain_time` - (Optional) Maintainable time period format of the instance: HH:MMZ-HH:MMZ (UTC time)
+* `auto_renew` - (Optional) Whether to renewal a DB instance automatically or not. It is valid when instance_charge_type is PrePaid. Default to false.
+* `auto_renew_period` - (Optional) Auto-renewal period of an instance, in the unit of the month. It is valid when instance_charge_type is PrePaid. Valid value:[1~12], Default to 1.
+* `instance_charge_type` - (Optional) Valid values are Prepaid, Postpaid, Serverless, Default to Postpaid. Currently, the resource only supports PostPaid to PrePaid.
+* `tags` - (Optional) A mapping of tags to assign to the resource.
+    - Key: It can be up to 64 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It cannot be a null string.
+    - Value: It can be up to 128 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It can be a null string.
 * `parameters` - (Optional) Set of parameters needs to be set after DB instance was launched. Available parameters can refer to the latest docs [View database parameter templates](https://www.alibabacloud.com/help/doc-detail/26284.htm) . See [`parameters`](#parameters) below.    
-
+  * `name` - (Required) The parameter name.
+  * `value` - (Required) The parameter value.
 -> **NOTE:** Because of data backup and migration, change DB instance type and storage would cost 15~20 minutes. Please make full preparation before changing them.
 
 ## Attributes Reference
@@ -129,11 +140,3 @@ The following attributes are exported:
 * `id` - The RDS instance ID.
 * `port` - RDS database connection port.
 * `connection_string` - RDS database connection string.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 20 mins) Used when creating the db instance (until it reaches the initial `Running` status). 
-* `update` - (Defaults to 30 mins) Used when updating the db instance (until it reaches the initial `Running` status). 
-* `delete` - (Defaults to 20 mins) Used when terminating the db instance. 

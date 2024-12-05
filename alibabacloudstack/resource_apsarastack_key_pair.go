@@ -95,8 +95,8 @@ func resourceAlibabacloudStackKeyPairCreate(d *schema.ResourceData, meta interfa
 			"Department": client.Department,
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeyId":     client.AccessKey,
-			"AccessKeySecret": client.SecretKey,
+			
+			
 			"SecurityToken":   client.Config.SecurityToken,
 			"Product":         "ecs",
 			"Department":      client.Department,
@@ -123,8 +123,8 @@ func resourceAlibabacloudStackKeyPairCreate(d *schema.ResourceData, meta interfa
 		}
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
-			"AccessKeyId":     client.AccessKey,
-			"AccessKeySecret": client.SecretKey,
+			
+			
 			"SecurityToken":   client.Config.SecurityToken,
 			"Product":         "ecs",
 			"Department":      client.Department,
@@ -193,8 +193,8 @@ func resourceAlibabacloudStackKeyPairDelete(d *schema.ResourceData, meta interfa
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeyId":     client.AccessKey,
-		"AccessKeySecret": client.SecretKey,
+		
+		
 		"SecurityToken":   client.Config.SecurityToken,
 		"Product":         "ecs",
 		"Department":      client.Department,

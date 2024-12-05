@@ -37,6 +37,9 @@ resource "alibabacloudstack_graph_database_db_instance" "example" {
 
 The following arguments are supported:
 
+* `vpc_id` - (Required，ForceNew) The vpc id of the vpc authorization.
+* `vswitch_id` - (Optional, ForceNew) The vswitch id.
+* `zone_id` - (Optional, Computed, ForceNew) The zone ID of the resource.
 * `db_instance_category` - (Required, ForceNew) The category of the db instance. Valid values: `HA`.
 * `db_instance_description` - (Optional) According to the practical example or notes.
 * `db_instance_network_type` - (Required, ForceNew) The network type of the db instance. Valid values: `vpc`.
@@ -46,14 +49,9 @@ The following arguments are supported:
 * `db_version` - (Required, ForceNew) Kernel Version. Valid values: `1.0` or `1.0-OpenCypher`. `1.0`: represented as gremlin, `1.0-OpenCypher`: said opencypher.
 * `payment_type` - (Required, ForceNew) The paymen type of the resource. Valid values: `PayAsYouGo`.
 * `db_instance_ip_array` - (Optional, Computed) IP ADDRESS whitelist for the instance group list. See the following `Block db_instance_ip_array`.
-
-#### Block db_instance_ip_array
-
-The db_instance_ip_array supports the following:
-
-* `db_instance_ip_array_attribute` - (Optional) The default is empty. To distinguish between the different property console does not display a `hidden` label grouping.
-* `db_instance_ip_array_name` - (Optional) IP ADDRESS whitelist group name.
-* `security_ips` - (Optional) IP ADDRESS whitelist addresses in the IP ADDRESS list, and a maximum of 1000 comma-separated format is as follows: `0.0.0.0/0` and `10.23.12.24`(IP) or `10.23.12.24/24`(CIDR mode, CIDR (Classless Inter-Domain Routing)/24 represents the address prefixes in the length of the range [1,32]).
+  * `db_instance_ip_array_attribute` - (Optional) The default is empty. To distinguish between the different property console does not display a `hidden` label grouping.
+  * `db_instance_ip_array_name` - (Optional) IP ADDRESS whitelist group name.
+  * `security_ips` - (Optional) IP ADDRESS whitelist addresses in the IP ADDRESS list, and a maximum of 1000 comma-separated format is as follows: `0.0.0.0/0` and `10.23.12.24`(IP) or `10.23.12.24/24`(CIDR mode, CIDR (Classless Inter-Domain Routing)/24 represents the address prefixes in the length of the range [1,32]).
 
 ## Attributes Reference
 
@@ -61,14 +59,6 @@ The following attributes are exported:
 
 * `id` - The resource ID in terraform of Db Instance.
 * `status` - Instance status. Value range: `Creating`, `Running`, `Deleting`, `Rebooting`, `DBInstanceClassChanging`, `NetAddressCreating` and `NetAddressDeleting`.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 30 mins) Used when create the Db Instance.
-* `delete` - (Defaults to 1 mins) Used when delete the Db Instance.
-* `update` - (Defaults to 60 mins) Used when update the Db Instance.
 
 ## Import
 

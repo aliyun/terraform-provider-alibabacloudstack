@@ -99,7 +99,7 @@ func resourceAlibabacloudStackDRDSInstanceCreate(d *schema.ResourceData, meta in
 		request.PayType = "drdsPre"
 	}
 	request.ResourceGroupId = client.ResourceGroup
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Drds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "Drds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.Headers["x-ascm-product-name"] = "Drds"
 	request.Headers["x-acs-organizationId"] = client.Department
 	raw, err := client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
@@ -140,7 +140,7 @@ func resourceAlibabacloudStackDRDSInstanceUpdate(d *schema.ResourceData, meta in
 		request.RegionId = client.RegionId
 		request.Headers["x-ascm-product-name"] = "Drds"
 		request.Headers["x-acs-organizationId"] = client.Department
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Drds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "Drds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		raw, err := client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
 			return drdsClient.ModifyDrdsInstanceDescription(request)
 		})

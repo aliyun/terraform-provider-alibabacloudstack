@@ -55,7 +55,7 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingCreate(d *schema.ResourceD
 			}
 			request.QueryParams = map[string]string{
 				"RegionId":         client.RegionId,
-				"AccessKeySecret":  client.SecretKey,
+				
 				"Product":          "Ascm",
 				"Action":           "AddRoleToUserGroup",
 				"Version":          "2019-05-10",
@@ -227,7 +227,7 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingDelete(d *schema.ResourceD
 			}
 			request.QueryParams = map[string]string{
 				"RegionId":         client.RegionId,
-				"AccessKeySecret":  client.SecretKey,
+				
 				"Product":          "ascm",
 				"Action":           "RemoveRoleFromUserGroup",
 				"Version":          "2019-05-10",

@@ -46,29 +46,21 @@ The following attributes are exported:
   * `name` - The name of the VPN connection.
   * `local_subnet` - The local subnet of the VPN connection.
   * `remote_subnet` - The remote subnet of the VPN connection.
+  * `effect_immediately` - Indicates whether IPsec-VPN negotiations are initiated immediately.
   * `status` - The status of the VPN connection, valid value:ike_sa_not_established, ike_sa_established, ipsec_sa_not_established, ipsec_sa_established.
-  * `ike_config` - The configurations of phase-one negotiation.
-  * `ipsec_config` - The configurations of phase-two negotiation.
-
-  ### Block ike_config
-
-  The ike_config mapping supports the following:
-
-  * `psk` - Used for authentication between the IPsec VPN gateway and the customer gateway.
-  * `ike_version` - The version of the IKE protocol. 
-  * `ike_mode` - The negotiation mode of IKE phase-one. 
-  * `ike_enc_alg` - The encryption algorithm of phase-one negotiation. 
-  * `ike_auth_alg` - The authentication algorithm of phase-one negotiation. 
-  * `ike_pfs` - The Diffie-Hellman key exchange algorithm used by phase-one negotiation. 
-  * `ike_lifetime` - The SA lifecycle as the result of phase-one negotiation. 
-  * `ike_local_id` - The identification of the VPN gateway.
-  * `ike_remote_id` - The identification of the customer gateway.
-
-  ### Block ipsec_config
-
-  The ipsec_config mapping supports the following:
-
-  * `ipsec_enc_alg` - The encryption algorithm of phase-two negotiation. 
-  * `ipsec_auth_alg` - The authentication algorithm of phase-two negotiation. 
-  * `ipsec_pfs` - The Diffie-Hellman key exchange algorithm used by phase-two negotiation. 
-  * `ipsec_lifetime` - The SA lifecycle as the result of phase-two negotiation. 
+  * `ike_config` - The configurations of phase-one negotiation. The ike_config mapping supports the following:
+    * `psk` - Used for authentication between the IPsec VPN gateway and the customer gateway.
+    * `ike_version` - The version of the IKE protocol. 
+    * `ike_mode` - The negotiation mode of IKE phase-one. 
+    * `ike_enc_alg` - The encryption algorithm of phase-one negotiation. 
+    * `ike_auth_alg` - The authentication algorithm of phase-one negotiation. 
+    * `ike_pfs` - The Diffie-Hellman key exchange algorithm used by phase-one negotiation. 
+    * `ike_lifetime` - The SA lifecycle as the result of phase-one negotiation. 
+    * `ike_local_id` - The identification of the VPN gateway.
+    * `ike_remote_id` - The identification of the customer gateway.
+  * `ipsec_config` - The configurations of phase-two negotiation. The ipsec_config mapping supports the following:
+    * `ipsec_enc_alg` - The encryption algorithm of phase-two negotiation. 
+    * `ipsec_auth_alg` - The authentication algorithm of phase-two negotiation. 
+    * `ipsec_pfs` - The Diffie-Hellman key exchange algorithm used by phase-two negotiation. 
+    * `ipsec_lifetime` - The SA lifecycle as the result of phase-two negotiation. 
+  * `create_time` - The Create time of the VPN connections.

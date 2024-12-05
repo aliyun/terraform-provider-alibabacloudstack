@@ -65,16 +65,12 @@ The following arguments are supported:
 
 * `name` - (Required) Name of the access control list.
 * `ip_version` - (Optional, ForceNew) The IP Version of access control list is the type of its entry (IP addresses or CIDR blocks). It values ipv4/ipv6. Our plugin provides a default ip_version: "ipv4".
-* `entry_list` - (Optional) A list of entry (IP addresses or CIDR blocks) to be added. At most 50 etnry can be supported in one resource. It contains two sub-fields as `Entry Block` follows.
+* `entry_list` - (Optional) A list of entry (IP addresses or CIDR blocks) to be added. At most 50 etnry can be supported in one resource. It contains two sub-fields as `Entry Block` follows.The entry mapping supports the following:
+  * `entry` - (Required) An IP addresses or CIDR blocks.
+  * `comment` - (Optional) the comment of the entry.
 * `tags` - (Optional, Available in v1.66.0+) A mapping of tags to assign to the resource.
 * `resource_group_id` - (Optional, ForceNew, Available in v1.67.0+) Resource group ID.
 
-## Entry Block
-
-The entry mapping supports the following:
-
-* `entry` - (Required) An IP addresses or CIDR blocks.
-* `comment` - (Optional) the comment of the entry.
 
 ## Attributes Reference
 

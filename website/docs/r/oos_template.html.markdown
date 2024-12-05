@@ -1,13 +1,13 @@
 ---
 subcategory: "Operation Orchestration Service (OOS)"
-layout: "alicloud"
-page_title: "Alicloud: alicloud_oos_template"
-sidebar_current: "docs-alicloud-resource-oos-template"
+layout: "alibabacloudstack"
+page_title: "Alicloud: alibabacloudstack_oos_template"
+sidebar_current: "docs-alibabacloudstack-resource-oos-template"
 description: |-
   Provides a OOS Template resource.
 ---
 
-# alicloud\_oos\_template
+# alibabacloudstack\_oos\_template
 
 Provides a OOS Template resource. For information about Alicloud OOS Template and how to use it, see [What is Resource Alicloud OOS Template](https://www.alibabacloud.com/help/doc-detail/120761.htm).
 
@@ -16,7 +16,7 @@ Provides a OOS Template resource. For information about Alicloud OOS Template an
 ## Example Usage
 
 ```terraform
-resource "alicloud_oos_template" "example" {
+resource "alibabacloudstack_oos_template" "example" {
   content       = <<EOF
   {
     "FormatVersion": "OOS-2019-06-01",
@@ -83,5 +83,5 @@ The following attributes are exported:
 OOS Template can be imported using the id or template_name, e.g.
 
 ```
-$ terraform import alicloud_oos_template.example template_name
+$ terraform import alibabacloudstack_oos_template.example template_name
 ```

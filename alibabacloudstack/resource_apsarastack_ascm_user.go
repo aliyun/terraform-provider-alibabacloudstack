@@ -27,10 +27,10 @@ func resourceAlibabacloudStackAscmUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"telephone_number": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+// 			"telephone_number": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 			},
 			"display_name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -113,7 +113,7 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 		}
 		request.QueryParams = map[string]string{
 			"RegionId":         client.RegionId,
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "Ascm",
 			"Action":           "AddUser",
 			"Version":          "2019-05-10",
@@ -213,7 +213,7 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 
 	request.QueryParams = map[string]string{
 		"RegionId":         client.RegionId,
-		"AccessKeySecret":  client.SecretKey,
+		
 		"Product":          "ascm",
 		"Department":       client.Department,
 		"ResourceGroup":    client.ResourceGroup,
@@ -366,7 +366,7 @@ func resourceAlibabacloudStackAscmUserDelete(d *schema.ResourceData, meta interf
 		}
 		request.QueryParams = map[string]string{
 			"RegionId":        client.RegionId,
-			"AccessKeySecret": client.SecretKey,
+			
 			"Product":         "ascm",
 			"Action":          "RemoveUserByLoginName",
 			"Version":         "2019-05-10",

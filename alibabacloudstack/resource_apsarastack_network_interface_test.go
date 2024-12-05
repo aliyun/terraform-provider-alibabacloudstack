@@ -40,7 +40,7 @@ func testAlibabacloudStackNetworkInterface(region string) error {
 		req.Scheme = "http"
 	}
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.PageSize = requests.NewInteger(PageSizeLarge)
 	req.PageNumber = requests.NewInteger(1)
 	var enis []ecs.NetworkInterfaceSet
@@ -104,7 +104,7 @@ func testAlibabacloudStackNetworkInterface(region string) error {
 				req.Scheme = "http"
 			}
 			req.Headers = map[string]string{"RegionId": client.RegionId}
-			req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			req.InstanceId = eni.InstanceId
 			req.NetworkInterfaceId = eni.NetworkInterfaceId
 			_, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
@@ -130,7 +130,7 @@ func testAlibabacloudStackNetworkInterface(region string) error {
 			req.Scheme = "http"
 		}
 		req.Headers = map[string]string{"RegionId": client.RegionId}
-		req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		req.NetworkInterfaceId = eni.NetworkInterfaceId
 		_, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.DeleteNetworkInterface(req)

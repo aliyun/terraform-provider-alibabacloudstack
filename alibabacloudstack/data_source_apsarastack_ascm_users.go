@@ -3,15 +3,17 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"log"
-	"strings"
+
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"regexp"
 )
 
 func dataSourceAlibabacloudStackAscmUsers() *schema.Resource {
@@ -31,11 +33,12 @@ func dataSourceAlibabacloudStackAscmUsers() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"names": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
+			//后续未消费
+// 			"names": {
+// 				Type:     schema.TypeList,
+// 				Computed: true,
+// 				Elem:     &schema.Schema{Type: schema.TypeString},
+// 			},
 			"organization_id": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -96,10 +99,11 @@ func dataSourceAlibabacloudStackAscmUsers() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"acc": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
+						// 后续未消费字段
+// 						"acc": {
+// 							Type:     schema.TypeInt,
+// 							Computed: true,
+// 						},
 						"primary_key": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -133,8 +137,8 @@ func dataSourceAlibabacloudStackAscmUsersRead(d *schema.ResourceData, meta inter
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	response := User{}
 	request.QueryParams = map[string]string{
-		"AccessKeyId":     client.AccessKey,
-		"AccessKeySecret": client.SecretKey,
+		
+		
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
 		"Product":         "ascm",

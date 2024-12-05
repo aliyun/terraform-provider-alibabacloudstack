@@ -39,6 +39,7 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above:
 
 * `ids` - A list of RKV instance IDs.
+* `names` - A list of instance names.
 * `instances` - A list of RKV instances. Its every element contains the following attributes:
   * `id` - The ID of the RKV instance.
   * `name` - The name of the RKV instance.
@@ -54,10 +55,10 @@ The following attributes are exported in addition to the arguments listed above:
   * `vpc_id` - VPC ID the instance belongs to.
   * `vswitch_id` - VSwitch ID the instance belongs to.
   * `private_ip` - Private IP address of the instance.
-  * `username` - The username of the instance.
+  * `user_name` - The username of the instance.
   * `capacity` - Capacity of the applied ApsaraDB for Redis instance. Unit: MB.
   * `bandwidth` - Instance bandwidth limit. Unit: Mbit/s.
   * `connections` - Instance connection quantity limit. Unit: count.
-  * `connections_domain` - Instance connection domain (only Intranet access supported).
+  * `connection_domain` - Instance connection domain (only Intranet access supported).
   * `port` - Connection port of the instance.
   

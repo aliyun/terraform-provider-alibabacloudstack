@@ -33,10 +33,14 @@ The following arguments are supported:
 * `user_name` - (Required, ForceNew) The name of the user that you want to create.
 * `description` - (Required, ForceNew) The description of the user that you want to create.
 * `organization_id` - (Optional) The id of the organization. 
+* `organization_name` - (Optional) The name of the organization. 
 
 ## Attributes Reference
 
-
+* `id` - The ID of the user.
+* `user_id` - Alias of the key `id`.
+* `user_pk` - The PK of the user.
+* `user_type` - The type of the user.
 
 ## Import
 

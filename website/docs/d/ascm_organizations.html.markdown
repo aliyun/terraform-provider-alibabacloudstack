@@ -49,4 +49,5 @@ The following attributes are exported in addition to the arguments listed above:
   * `muser_id` - Id of a Muser.
   * `alias` - alias for the Organization.
   * `parent_id` - Parent id of an Organization.
+  * `internal` - Organization type, is internal or not.
  

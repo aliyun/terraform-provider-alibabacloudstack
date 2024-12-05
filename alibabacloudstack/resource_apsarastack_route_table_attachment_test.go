@@ -50,7 +50,7 @@ func testSweepRouteTableAttachment(region string) error {
 	req.QueryParams["Department"] = client.Department
 	req.QueryParams["ResourceGroup"] = client.ResourceGroup
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.PageSize = requests.NewInteger(PageSizeLarge)
 	req.PageNumber = requests.NewInteger(1)
 	for {
@@ -100,7 +100,7 @@ func testSweepRouteTableAttachment(region string) error {
 				req.Scheme = "http"
 			}
 			req.Headers = map[string]string{"RegionId": client.RegionId}
-			req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			req.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			req.RouteTableId = id
 			req.VSwitchId = vswitch
 			_, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {

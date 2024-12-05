@@ -95,7 +95,7 @@ func dataSourceAlibabacloudStackKmsKeysRead(d *schema.ResourceData, meta interfa
 	request := kms.CreateListKeysRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	idsMap := make(map[string]string)
 	if v, ok := d.GetOk("ids"); ok && len(v.([]interface{})) > 0 {
@@ -150,7 +150,7 @@ func dataSourceAlibabacloudStackKmsKeysRead(d *schema.ResourceData, meta interfa
 
 		request := kms.CreateDescribeKeyRequest()
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 		request.KeyId = k
 		raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {

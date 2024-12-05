@@ -89,7 +89,7 @@ func resourceAlibabacloudStackKmsSecretCreate(d *schema.ResourceData, meta inter
 	request := kms.CreateCreateSecretRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	if v, ok := d.GetOk("description"); ok {
 		request.Description = v.(string)
@@ -178,7 +178,7 @@ func resourceAlibabacloudStackKmsSecretUpdate(d *schema.ResourceData, meta inter
 	if d.HasChange("description") {
 		request := kms.CreateUpdateSecretRequest()
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 		request.SecretName = d.Id()
 		request.Description = d.Get("description").(string)
@@ -194,7 +194,7 @@ func resourceAlibabacloudStackKmsSecretUpdate(d *schema.ResourceData, meta inter
 	update := false
 	request := kms.CreatePutSecretValueRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.SecretName = d.Id()
 	if d.HasChange("secret_data") {
@@ -233,7 +233,7 @@ func resourceAlibabacloudStackKmsSecretDelete(d *schema.ResourceData, meta inter
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := kms.CreateDeleteSecretRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.SecretName = d.Id()
 	if v, ok := d.GetOkExists("force_delete_without_recovery"); ok {

@@ -29,10 +29,10 @@ func resourceAlibabacloudStackCsbProject() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"data2": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+// 			"data2": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 			},
 			"csb_id": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -45,18 +45,18 @@ func resourceAlibabacloudStackCsbProject() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(1, 128),
 			},
-			"project_owner_email": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"project_owner_phone_num": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+// 			"project_owner_email": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 			},
+// 			"project_owner_phone_num": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 			},
+// 			"description": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 			},
 			"gmt_modified": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -77,10 +77,10 @@ func resourceAlibabacloudStackCsbProject() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"src_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+// 			"src_type": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 			},
 			"delete_flag": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -176,8 +176,11 @@ func resourceAlibabacloudStackCsbProjectUpdate(d *schema.ResourceData, meta inte
 			request["ProjectName"] = v
 		}
 	}
-	if v, ok := d.GetOk("data2"); ok {
-		request["Data"] = v
+	if d.HasChange("data") {
+		update = true
+		if v, ok := d.GetOk("data"); ok {
+			request["Data"] = v
+		}
 	}
 	request["RegionId"] = client.RegionId
 	request["Product"] = "CSB"

@@ -158,7 +158,7 @@ func (s *OtsService) ListOtsInstance(pageSize int, pageNum int) ([]string, error
 	req.Headers = map[string]string{"RegionId": s.client.RegionId}
 	req.Domain = s.client.Domain
 
-	req.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "Ots", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	req.QueryParams = map[string]string{ "Product": "Ots", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	var allInstanceNames []string
 
 	for {
@@ -207,13 +207,13 @@ func (s *OtsService) DescribeOtsInstance(id string) (inst InstanceInfo, err erro
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeyId":     s.client.AccessKey,
+		
 		"InstanceName":    id,
 		"RegionId":        s.client.RegionId,
 		"apiName":         "GetInstance",
 		"Action":          "GetInstance",
 		"version":         "2016-06-20",
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "Ots",
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
@@ -254,7 +254,7 @@ func (s *OtsService) DescribeOtsInstanceAttachment(id string) (inst ots.VpcInfo,
 	request.InstanceName = id
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
 
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "Ots", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "Ots", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	raw, err := s.client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
 		return otsClient.ListVpcInfoByInstance(request)
 	})
@@ -303,7 +303,7 @@ func (s *OtsService) ListOtsInstanceVpc(id string) (inst []ots.VpcInfo, err erro
 	request.InstanceName = id
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
 
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "Ots", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "Ots", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	raw, err := s.client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
 		return otsClient.ListVpcInfoByInstance(request)
 	})
@@ -354,7 +354,7 @@ func (s *OtsService) DescribeOtsInstanceTypes() (types []string, err error) {
 	request.Method = requests.GET
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
 
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "Ots", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "Ots", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	raw, err := s.client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
 		return otsClient.ListClusterType(request)
 	})

@@ -39,13 +39,8 @@ The following arguments are supported:
 * `dry_run` - (Optional, ForceNew) Specifies whether to precheck this request only. Valid values: `true` and `false`.
 * `user_cidrs` - (Optional, ForceNew) The user cidrs of the VPC.
 * `enable_ipv6` - (Optional, ForceNew) Specifies whether to enable the IPv6 CIDR block. Valid values: `false` (Default): disables IPv6 CIDR blocks. `true`: enables IPv6 CIDR blocks. If the `enable_ipv6` is `true`, the system will automatically create a free version of an IPv6 gateway for your private network and assign an IPv6 network segment assigned as /56.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 10 mins) Used when creating the vpc (until it reaches the initial `Available` status). 
-* `delete` - (Defaults to 10 mins) Used when terminating the vpc. 
+* `router_table_id` - (Deprecated). Field 'router_table_id' has been deprecated. New field 'route_table_id' instead.
+* `status` - The status of the VPC. Pending: The VPC is being configured. Available: The VPC is available.
 
 ## Attributes Reference
 

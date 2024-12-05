@@ -58,6 +58,7 @@ The following arguments are supported:
                         This field is ignored when enable_ssl is false.
 * `description` - (Optional) The description of the VPN instance.
 * `vswitch_id` - (Optional, ForceNew) The VPN belongs the vswitch_id, the field can't be changed.
+* `tags` - (Optional, Map) The tags of VPN Gateway.
 
 ## Attributes Reference
 

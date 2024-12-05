@@ -96,15 +96,11 @@ The following attributes are exported:
 * `max_split_shard_count` - The maximum number of shards for automatic split.
 * `append_meta` - Determines whether to append log meta automatically.
 * `enable_web_tracking` - Determines whether to enable Web Tracking.
-* `encrypt_conf` - Encryption configuration of logstore.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create`  - (Defaults to 3 mins) Used when Creating LogStore. 
-* `delete`  - (Defaults to 3 mins) Used when Deleting LogStore.
-* `read`    - (Defaults to 2 mins) Used when Reading LogStore.
+* `shards` - The shard attribute.
+  * `id` - The ID of the shard.
+  * `status` - Shard status, only two status of readwrite and readonly.
+  * `begin_key` - The begin value of the shard range(MD5), included in the shard range.
+  * `end_key` - The end value of the shard range(MD5), not included in shard range.
 
 ## Import
 

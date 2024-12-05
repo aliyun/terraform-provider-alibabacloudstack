@@ -32,6 +32,7 @@ The following arguments are supported:
 
 * `cluster_id` - (Required, ForceNew) The ID of the cluster that you want to create the application.
 * `instance_ids` - (Required, ForceNew) The ID of instance. Type: list.
+* `pass_word` - (Required, ForceNew) The login password for the ECS instance in the cluster.
 
 ## Attributes Reference
 

@@ -34,7 +34,7 @@ func resourceAlibabacloudStackKmsAliasCreate(d *schema.ResourceData, meta interf
 
 	request := kms.CreateCreateAliasRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.AliasName = d.Get("alias_name").(string)
 	request.KeyId = d.Get("key_id").(string)
@@ -71,7 +71,7 @@ func resourceAlibabacloudStackKmsAliasUpdate(d *schema.ResourceData, meta interf
 	if d.HasChange("key_id") {
 		request := kms.CreateUpdateAliasRequest()
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 		request.AliasName = d.Id()
 		request.KeyId = d.Get("key_id").(string)
@@ -89,7 +89,7 @@ func resourceAlibabacloudStackKmsAliasDelete(d *schema.ResourceData, meta interf
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := kms.CreateDeleteAliasRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.AliasName = d.Id()
 	raw, err := client.WithKmsClient(func(kmsClient *kms.Client) (interface{}, error) {

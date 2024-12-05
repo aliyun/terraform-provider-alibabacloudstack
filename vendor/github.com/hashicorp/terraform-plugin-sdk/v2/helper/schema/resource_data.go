@@ -28,7 +28,7 @@ type ResourceData struct {
 	meta         map[string]interface{}
 	timeouts     *ResourceTimeout
 	providerMeta cty.Value
-	partialMap  map[string]struct{}
+
 	// Don't set
 	multiReader *MultiLevelFieldReader
 	setWriter   *MapFieldWriter
@@ -579,9 +579,4 @@ func (d *ResourceData) GetProviderMeta(dst interface{}) error {
 		return nil
 	}
 	return gocty.FromCtyValue(d.providerMeta, &dst)
-}
-func (d *ResourceData) SetPartial(k string) {
-	if d.partial {
-		d.partialMap[k] = struct{}{}
-	}
 }

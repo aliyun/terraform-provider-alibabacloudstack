@@ -45,4 +45,4 @@ The following arguments are supported:
 ## Attributes Reference
 
 * `key_name` - The name of the key pair.
-* `fingerprint` The finger print of the key pair.
+* `finger_print` The finger print of the key pair.

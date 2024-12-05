@@ -31,11 +31,12 @@ func dataSourceAlibabacloudStackAscmRamServiceRoles() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"names": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
+			// 后续未消费参数
+// 			"names": {
+// 				Type:     schema.TypeList,
+// 				Computed: true,
+// 				Elem:     &schema.Schema{Type: schema.TypeString},
+// 			},
 			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -102,8 +103,8 @@ func dataSourceAlibabacloudStackAscmRamServiceRolesRead(d *schema.ResourceData, 
 	request.ApiName = "ListRAMServiceRoles"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeyId":     client.AccessKey,
-		"AccessKeySecret": client.SecretKey,
+		
+		
 		"Product":         "ascm",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,

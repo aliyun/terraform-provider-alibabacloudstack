@@ -1,9 +1,8 @@
 package alibabacloudstack
 
 import (
-	"strings"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -98,7 +97,7 @@ func resourceAlibabacloudStackReservedInstanceCreate(d *schema.ResourceData, met
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if v, ok := d.GetOk("instance_type"); ok {
 		request.InstanceType = v.(string)
 	}
@@ -164,7 +163,7 @@ func resourceAlibabacloudStackReservedInstanceUpdate(d *schema.ResourceData, met
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.ReservedInstanceId = d.Id()
 	request.RegionId = client.RegionId
 	if d.HasChange("name") || d.HasChange("description") {

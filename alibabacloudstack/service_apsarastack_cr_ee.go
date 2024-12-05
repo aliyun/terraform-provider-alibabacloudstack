@@ -14,7 +14,7 @@ func (c *CrService) ListCrEEInstances(pageNo int, pageSize int) (*cr_ee.ListInst
 	request := cr_ee.CreateListInstanceRequest()
 	request.RegionId = c.client.RegionId
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+	request.QueryParams = map[string]string{ "Product": "cr"}
 	request.QueryParams["Department"] = c.client.Department
 	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 	request.PageNo = requests.NewInteger(pageNo)
@@ -41,7 +41,7 @@ func (c *CrService) DescribeCrEEInstance(instanceId string) (*cr_ee.GetInstanceR
 	request := cr_ee.CreateGetInstanceRequest()
 	request.RegionId = c.client.RegionId
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+	request.QueryParams = map[string]string{ "Product": "cr"}
 	request.QueryParams["Department"] = c.client.Department
 	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 	request.InstanceId = instanceId
@@ -70,7 +70,7 @@ func (c *CrService) GetCrEEInstanceUsage(instanceId string) (*cr_ee.GetInstanceU
 	response := &cr_ee.GetInstanceUsageResponse{}
 	request := cr_ee.CreateGetInstanceUsageRequest()
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+	request.QueryParams = map[string]string{ "Product": "cr"}
 	request.QueryParams["Department"] = c.client.Department
 	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 	request.RegionId = c.client.RegionId
@@ -100,7 +100,7 @@ func (c *CrService) ListCrEEInstanceEndpoint(instanceId string) (*cr_ee.ListInst
 	response := &cr_ee.ListInstanceEndpointResponse{}
 	request := cr_ee.CreateListInstanceEndpointRequest()
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+	request.QueryParams = map[string]string{ "Product": "cr"}
 	request.QueryParams["Department"] = c.client.Department
 	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 	request.RegionId = c.client.RegionId
@@ -130,7 +130,7 @@ func (c *CrService) ListCrEENamespaces(instanceId string, pageNo int, pageSize i
 	response := &cr_ee.ListNamespaceResponse{}
 	request := cr_ee.CreateListNamespaceRequest()
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+	request.QueryParams = map[string]string{ "Product": "cr"}
 	request.QueryParams["Department"] = c.client.Department
 	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 	request.RegionId = c.client.RegionId
@@ -162,7 +162,7 @@ func (c *CrService) DescribeCrEENamespace(id string) (*cr_ee.GetNamespaceRespons
 	response := &cr_ee.GetNamespaceResponse{}
 	request := cr_ee.CreateGetNamespaceRequest()
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+	request.QueryParams = map[string]string{ "Product": "cr"}
 	request.QueryParams["Department"] = c.client.Department
 	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 	request.RegionId = c.client.RegionId
@@ -193,7 +193,7 @@ func (c *CrService) DeleteCrEENamespace(instanceId string, namespaceName string)
 	response := &cr_ee.DeleteNamespaceResponse{}
 	request := cr_ee.CreateDeleteNamespaceRequest()
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+	request.QueryParams = map[string]string{ "Product": "cr"}
 	request.QueryParams["Department"] = c.client.Department
 	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 	request.RegionId = c.client.RegionId
@@ -250,7 +250,7 @@ func (c *CrService) ListCrEERepos(instanceId string, namespace string, pageNo in
 	response := &cr_ee.ListRepositoryResponse{}
 	request := cr_ee.CreateListRepositoryRequest()
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+	request.QueryParams = map[string]string{ "Product": "cr"}
 	request.QueryParams["Department"] = c.client.Department
 	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 	request.RegionId = c.client.RegionId
@@ -285,7 +285,7 @@ func (c *CrService) DescribeCrEERepo(id string) (*cr_ee.GetRepositoryResponse, e
 	response := &cr_ee.GetRepositoryResponse{}
 	request := cr_ee.CreateGetRepositoryRequest()
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+	request.QueryParams = map[string]string{ "Product": "cr"}
 	request.QueryParams["Department"] = c.client.Department
 	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 	request.RegionId = c.client.RegionId
@@ -318,7 +318,7 @@ func (c *CrService) DeleteCrEERepo(instanceId, namespace, repo, repoId string) (
 	response := &cr_ee.DeleteRepositoryResponse{}
 	request := cr_ee.CreateDeleteRepositoryRequest()
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+	request.QueryParams = map[string]string{ "Product": "cr"}
 	request.QueryParams["Department"] = c.client.Department
 	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 	request.RegionId = c.client.RegionId
@@ -374,7 +374,7 @@ func (c *CrService) ListCrEERepoTags(instanceId string, repoId string, pageNo in
 	response := &cr_ee.ListRepoTagResponse{}
 	request := cr_ee.CreateListRepoTagRequest()
 	request.Headers = map[string]string{"RegionId": c.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+	request.QueryParams = map[string]string{ "Product": "cr"}
 	request.QueryParams["Department"] = c.client.Department
 	request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 	request.RegionId = c.client.RegionId
@@ -411,7 +411,7 @@ func (c *CrService) DescribeCrEESyncRule(id string) (*cr_ee.SyncRulesItem, error
 		response := &cr_ee.ListRepoSyncRuleResponse{}
 		request := cr_ee.CreateListRepoSyncRuleRequest()
 		request.Headers = map[string]string{"RegionId": c.client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": c.client.SecretKey, "Product": "cr"}
+		request.QueryParams = map[string]string{ "Product": "cr"}
 		request.QueryParams["Department"] = c.client.Department
 		request.QueryParams["ResourceGroup"] = c.client.ResourceGroup
 		request.RegionId = c.client.RegionId

@@ -7,7 +7,7 @@ description: |-
   Provides an ECS Reserved Instance resource.
 ---
 
-# alibabacloudstack\_reserved\_instance\_offering
+# alibabacloudstack\_reserved\_instance
 
 Provides an Reserved Instance resource.
 
@@ -36,7 +36,7 @@ The following arguments are supported:
 * `scope` - (Optional, ForceNew) Scope of the RI. Optional values: `Region`: region-level, `Zone`: zone-level. Default is `Region`.
 * `instance_type` - (Optional, ForceNew) Instance type of the RI. For more information, see [Instance type families](https://www.alibabacloud.com/help/doc-detail/25378.html).
 * `instance_amount` - (Optional, ForceNew) Number of instances allocated to an RI (An RI is a coupon that includes one or more allocated instances.).
-* `Period` - (Optional, ForceNew) Term of the RI. Unit: years. Optional values: 1 and 3.
+* `period` - (Optional, ForceNew) Term of the RI. Unit: years. Optional values: 1 and 3.
 * `period_unit` - (Optional, ForceNew) Term unit. Optional value: Year.
 * `resource_group_id` - (Optional, ForceNew) Resource group ID.
 * `description` - (Optional) Description of the RI. 2 to 256 English or Chinese characters. It cannot start with http:// or https://.

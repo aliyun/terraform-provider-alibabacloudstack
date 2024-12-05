@@ -52,6 +52,7 @@ output "vpc_ipv6_address_id_4" {
 
 The following arguments are supported:
 
+* `ids` - (Optional) A list of IPv6 addresses IDs.
 * `associated_instance_id` - (Optional, ForceNew) The ID of the instance that is assigned the IPv6 address.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `status` - (Optional, ForceNew) The status of the IPv6 address. Valid values:`Pending` or `Available`. 
@@ -66,15 +67,15 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `names` - A list of Ipv6 Address names.
 * `addresses` - A list of Vpc Ipv6 Addresses. Each element contains the following attributes:
-	* `associated_instance_id` - The ID of the instance that is assigned the IPv6 address.
-	* `associated_instance_type` - The type of the instance that is assigned the IPv6 address.
-	* `create_time` - The time when the IPv6 address was created.
-	* `id` - The ID of the Ipv6 Address.
-	* `ipv6_address` - The address of the Ipv6 Address.
-	* `ipv6_address_id` - The ID of the IPv6 address.
-	* `ipv6_address_name` - The name of the IPv6 address.
-	* `ipv6_gateway_id` - The ID of the IPv6 gateway to which the IPv6 address belongs.
-	* `network_type` - The type of communication supported by the IPv6 address. Valid values:`Private` or `Public`. `Private`: communication within the private network. `Public`: communication over the public network
-	* `status` - The status of the IPv6 address. Valid values:`Pending` or `Available`.
-	* `vpc_id` - The ID of the VPC to which the IPv6 address belongs.
-	* `vswitch_id` - The ID of the vSwitch to which the IPv6 address belongs.
+  * `associated_instance_id` - The ID of the instance that is assigned the IPv6 address.
+  * `associated_instance_type` - The type of the instance that is assigned the IPv6 address.
+  * `create_time` - The time when the IPv6 address was created.
+  * `id` - The ID of the Ipv6 Address.
+  * `ipv6_address` - The address of the Ipv6 Address.
+  * `ipv6_address_id` - The ID of the IPv6 address.
+  * `ipv6_address_name` - The name of the IPv6 address.
+  * `ipv6_gateway_id` - The ID of the IPv6 gateway to which the IPv6 address belongs.
+  * `network_type` - The type of communication supported by the IPv6 address. Valid values:`Private` or `Public`. `Private`: communication within the private network. `Public`: communication over the public network
+  * `status` - The status of the IPv6 address. Valid values:`Pending` or `Available`.
+  * `vpc_id` - The ID of the VPC to which the IPv6 address belongs.
+  * `vswitch_id` - The ID of the vSwitch to which the IPv6 address belongs.

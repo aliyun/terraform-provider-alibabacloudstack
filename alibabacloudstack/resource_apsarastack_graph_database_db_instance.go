@@ -255,7 +255,6 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate(d *schema.ResourceDa
 		if _, err := stateConf.WaitForState(); err != nil {
 			return WrapErrorf(err, IdMsg, d.Id())
 		}
-		d.SetPartial("db_instance_description")
 	}
 	update = false
 	modifyDBInstanceAccessWhiteListReq := map[string]interface{}{
@@ -336,7 +335,6 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate(d *schema.ResourceDa
 			}
 		}
 
-		d.SetPartial("db_instance_ip_array")
 	}
 
 	modifyDBInstanceSpecReq := map[string]interface{}{
@@ -384,9 +382,6 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate(d *schema.ResourceDa
 		if _, err := stateConf.WaitForState(); err != nil {
 			return WrapErrorf(err, IdMsg, d.Id())
 		}
-		d.SetPartial("db_instance_storage_type")
-		d.SetPartial("db_node_class")
-		d.SetPartial("db_node_storage")
 	}
 	d.Partial(false)
 	return resourceAlibabacloudStackGraphDatabaseDbInstanceRead(d, meta)

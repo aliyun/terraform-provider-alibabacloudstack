@@ -123,7 +123,7 @@ func resourceAlibabacloudStackVpcCreate(d *schema.ResourceData, meta interface{}
 	}
 	request.RegionId = string(client.Region)
 	//request.Headers = map[string]string{"RegionId": client.RegionId}
-	//request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	//request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	err := resource.Retry(3*time.Minute, func() *resource.RetryError {
 		args := *request
@@ -187,7 +187,7 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 	request := vpc.CreateDescribeRouteTablesRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -265,7 +265,7 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 	groupRequest := vpc.CreateMoveResourceGroupRequest()
 	groupRequest.RegionId = client.RegionId
 	groupRequest.Headers = map[string]string{"RegionId": client.RegionId}
-	groupRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	groupRequest.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		groupRequest.Scheme = "https"
 	} else {
@@ -292,7 +292,7 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 	request := vpc.CreateModifyVpcAttributeRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -342,7 +342,7 @@ func resourceAlibabacloudStackVpcDelete(d *schema.ResourceData, meta interface{}
 	request := vpc.CreateDeleteVpcRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -377,7 +377,7 @@ func buildAlibabacloudStackVpcArgs(d *schema.ResourceData, meta interface{}) *vp
 	request := vpc.CreateCreateVpcRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {

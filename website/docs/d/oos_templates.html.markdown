@@ -67,4 +67,12 @@ The following attributes are exported in addition to the arguments listed above:
   * `template_version` - Version of the OOS Template.
   * `updated_by` - The user who updated the template.
   * `updated_date` - The time when the template was updated.
+  * `category` - The category of template.
+  * `created_by` - The creator of the template.
+  * `created_date` - The template whose creation time is less than or equal to the specified time. The format is: YYYY-MM-DDThh:mm::ssZ.
+  * `has_trigger` - Is it triggered successfully.
+  * `share_type` - The sharing type of the template. Valid values: `Private`, `Public`.
+  * `tags` - A mapping of tags to assign to the resource.
+  * `template_format` - The format of the template. Valid values: `JSON`, `YAML`.
+  * `template_type` - The type of OOS Template.
 

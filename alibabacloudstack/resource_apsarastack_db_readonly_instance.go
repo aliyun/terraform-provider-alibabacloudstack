@@ -78,33 +78,33 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_essd", "cloud_essd2", "cloud_essd3", "cloud_pperf", "cloud_sperf"}, false),
 			},
 
-			"storage_type": {
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
-			},
+// 			"storage_type": {
+// 				Type:         schema.TypeString,
+// 				ForceNew:     true,
+// 				Optional:     true,
+// 				ValidateFunc: validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
+// 			},
 
-			"monitoring_period": {
-				Type:         schema.TypeInt,
-				ValidateFunc: validation.IntInSlice([]int{5, 60, 300}),
-				Optional:     true,
-				Computed:     true,
-			},
+// 			"monitoring_period": {
+// 				Type:         schema.TypeInt,
+// 				ValidateFunc: validation.IntInSlice([]int{5, 60, 300}),
+// 				Optional:     true,
+// 				Computed:     true,
+// 			},
 
-			"security_ips": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-				Optional: true,
-			},
+// 			"security_ips": {
+// 				Type:     schema.TypeSet,
+// 				Elem:     &schema.Schema{Type: schema.TypeString},
+// 				Computed: true,
+// 				Optional: true,
+// 			},
 
-			"security_ip_mode": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{NormalMode, SafetyMode}, false),
-				Optional:     true,
-				Default:      NormalMode,
-			},
+// 			"security_ip_mode": {
+// 				Type:         schema.TypeString,
+// 				ValidateFunc: validation.StringInSlice([]string{NormalMode, SafetyMode}, false),
+// 				Optional:     true,
+// 				Default:      NormalMode,
+// 			},
 
 			"parameters": {
 				Type: schema.TypeSet,
@@ -125,52 +125,52 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 				Computed: true,
 			},
 
-			"instance_charge_type": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
-				Optional:     true,
-				Default:      Postpaid,
-			},
+// 			"instance_charge_type": {
+// 				Type:         schema.TypeString,
+// 				ValidateFunc: validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
+// 				Optional:     true,
+// 				Default:      Postpaid,
+// 			},
 
-			"period": {
-				Type:             schema.TypeInt,
-				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
-				Optional:         true,
-				Default:          1,
-				DiffSuppressFunc: PostPaidDiffSuppressFunc,
-			},
+// 			"period": {
+// 				Type:             schema.TypeInt,
+// 				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
+// 				Optional:         true,
+// 				Default:          1,
+// 				DiffSuppressFunc: PostPaidDiffSuppressFunc,
+// 			},
 
-			"auto_renew": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:          false,
-				DiffSuppressFunc: PostPaidDiffSuppressFunc,
-			},
+// 			"auto_renew": {
+// 				Type:             schema.TypeBool,
+// 				Optional:         true,
+// 				Default:          false,
+// 				DiffSuppressFunc: PostPaidDiffSuppressFunc,
+// 			},
 
-			"auto_renew_period": {
-				Type:             schema.TypeInt,
-				ValidateFunc:     validation.IntBetween(1, 12),
-				Optional:         true,
-				Default:          1,
-				DiffSuppressFunc: PostPaidAndRenewDiffSuppressFunc,
-			},
+// 			"auto_renew_period": {
+// 				Type:             schema.TypeInt,
+// 				ValidateFunc:     validation.IntBetween(1, 12),
+// 				Optional:         true,
+// 				Default:          1,
+// 				DiffSuppressFunc: PostPaidAndRenewDiffSuppressFunc,
+// 			},
 
-			"force_restart": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
+// 			"force_restart": {
+// 				Type:     schema.TypeBool,
+// 				Optional: true,
+// 				Default:  false,
+// 			},
 
-			"maintain_time": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"role_arn": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
+// 			"maintain_time": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 				Computed: true,
+// 			},
+// 			"role_arn": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 				Computed: true,
+// 			},
 			"engine": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -252,7 +252,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.DBInstanceId = d.Id()
 		request.DBInstanceDescription = d.Get("instance_name").(string)
 
@@ -289,7 +289,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 	}
 
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = d.Id()
 	request.PayType = string(Postpaid)
 
@@ -411,7 +411,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceDelete(d *schema.ResourceData, m
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = d.Id()
 
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -453,7 +453,7 @@ func buildDBReadonlyCreateRequest(d *schema.ResourceData, meta interface{}) (*rd
 	}
 	request.RegionId = string(client.Region)
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = Trim(d.Get("master_db_instance_id").(string))
 	request.EngineVersion = Trim(d.Get("engine_version").(string))
 	request.DBInstanceStorage = requests.NewInteger(d.Get("instance_storage").(int))

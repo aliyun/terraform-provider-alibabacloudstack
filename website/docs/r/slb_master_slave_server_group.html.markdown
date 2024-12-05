@@ -122,17 +122,12 @@ The following arguments are supported:
 
 * `load_balancer_id` - (Required, ForceNew) The Load Balancer ID which is used to launch a new master slave server group.
 * `name` - (Optional, ForceNew) Name of the master slave server group. 
-* `servers` - (Optional, ForceNew) A list of ECS instances to be added. Only two ECS instances can be supported in one resource. It contains six sub-fields as `Block server` follows.
 * `delete_protection_validation` - (Optional) Checking DeleteProtection of SLB instance before deleting. If true, this resource will not be deleted when its SLB instance enabled DeleteProtection. Default to false.
-
-## Block servers
-
-The servers mapping supports the following:
-
-* `server_ids` - (Required) A list backend server ID (ECS instance ID).
-* `port` - (Required) The port used by the backend server. Valid value range: [1-65535].
-* `weight` - (Optional) Weight of the backend server. Valid value range: [0-100]. Default to 100.
-* `server_type` - (Optional) The server type of the backend server. Valid value Master, Slave.
+* `servers` - (Optional, ForceNew) A list of ECS instances to be added. Only two ECS instances can be supported in one resource. It contains six sub-fields as `Block server` follows.The servers mapping supports the following:
+  * `server_id` - (Required) backend server ID (ECS instance ID).
+  * `port` - (Required) The port used by the backend server. Valid value range: [1-65535].
+  * `weight` - (Optional) Weight of the backend server. Valid value range: [0-100]. Default to 100.
+  * `server_type` - (Optional) The server type of the backend server. Valid value Master, Slave.
 
 ## Attributes Reference
 

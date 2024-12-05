@@ -30,6 +30,10 @@ The following arguments are supported:
 * `role_name` - (Required) Role name. 
 * `organization_visibility` - (Required) organization visibility. Valid Values are - "organizationVisibility.organization", "organizationVisibility.orgAndSubOrgs" and "organizationVisibility.global".
 * `description` - (Optional) Description for the ram role. Note - It should not contain any spaces.
+* `role_range` - (Required) Range of permissions for role management
+  * roleRange.orgAndSubOrgs - Organization and cascading subordinate organizations
+  * roleRange.allOrganizations - All Organizations
+  * roleRange.userGroup - ResourceGroupSet under the Organization
 
 ## Attributes Reference
 

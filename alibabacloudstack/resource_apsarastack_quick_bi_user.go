@@ -74,6 +74,7 @@ func resourceAlibabacloudStackQuickBiUserCreate(d *schema.ResourceData, meta int
 	if v, ok := d.GetOk("account_id"); ok {
 		request["AccountId"] = v
 	}
+	request["Proudut"] = "quickbi-user"
 	request["AccountName"] = d.Get("account_name")
 	request["AdminUser"] = d.Get("admin_user")
 	request["AuthAdminUser"] = d.Get("auth_admin_user")
@@ -82,6 +83,7 @@ func resourceAlibabacloudStackQuickBiUserCreate(d *schema.ResourceData, meta int
 	wait := incrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2022-03-01"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)})
+		addDebug(action, response, request)
 		if err != nil {
 			if NeedRetry(err) {
 				wait()

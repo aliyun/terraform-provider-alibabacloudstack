@@ -7,7 +7,7 @@ description: |-
   Provides a ECS Disk Attachment resource.
 ---
 
-# apsaratack\_disk\_attachment
+# alibabacloudstack\_disk\_attachment
 
 Provides an alibabacloudstack ECS Disk Attachment as a resource, to attach and detach disks from ECS Instances.
 

@@ -64,7 +64,7 @@ func resourceAlibabacloudStackCrEENamespaceCreate(d *schema.ResourceData, meta i
 	request.ApiName = "CreateNamespace"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "cr-ee",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
@@ -115,7 +115,7 @@ func resourceAlibabacloudStackCrEENamespaceRead(d *schema.ResourceData, meta int
 	request.ApiName = "ListNamespace"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "cr-ee",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
@@ -169,7 +169,7 @@ func resourceAlibabacloudStackCrEENamespaceUpdate(d *schema.ResourceData, meta i
 		request.ApiName = "UpdateNamespace"
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
+			
 			"Product":         "cr-ee",
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
@@ -217,7 +217,7 @@ func resourceAlibabacloudStackCrEENamespaceDelete(d *schema.ResourceData, meta i
 	request.ApiName = "DeleteNamespace"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "cr-ee",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,

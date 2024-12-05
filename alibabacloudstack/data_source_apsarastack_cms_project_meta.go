@@ -68,8 +68,8 @@ func dataSourceAlibabacloudstackCmsProjectMetaRead(d *schema.ResourceData, meta 
 	request.ApiName = "DescribeProjectMeta"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeyId":     client.AccessKey,
-		"AccessKeySecret": client.SecretKey,
+		
+		
 		"Product":         "Cms",
 		"RegionId":        client.RegionId,
 		"Action":          "DescribeProjectMeta",

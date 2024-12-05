@@ -32,7 +32,7 @@ func testSweepDnsGroup(region string) error {
 
 	request := alidns.CreateDescribeDomainGroupsRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "alidns"}
+	request.QueryParams = map[string]string{ "Product": "alidns"}
 	request.QueryParams["Department"] = client.Department
 	request.QueryParams["ResourceGroup"] = client.ResourceGroup
 
@@ -68,7 +68,7 @@ func testSweepDnsGroup(region string) error {
 
 	removeRequest := alidns.CreateDeleteDomainGroupRequest()
 	removeRequest.Headers = map[string]string{"RegionId": client.RegionId}
-	removeRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "alidns"}
+	removeRequest.QueryParams = map[string]string{ "Product": "alidns"}
 	removeRequest.QueryParams["Department"] = client.Department
 	removeRequest.QueryParams["ResourceGroup"] = client.ResourceGroup
 

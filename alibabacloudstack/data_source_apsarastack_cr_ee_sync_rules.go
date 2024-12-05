@@ -166,7 +166,7 @@ func dataSourceAlibabacloudStackCrEESyncRulesRead(d *schema.ResourceData, meta i
 		response := &cr_ee.ListRepoSyncRuleResponse{}
 		request := cr_ee.CreateListRepoSyncRuleRequest()
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "cr", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "cr", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 		request.RegionId = crService.client.RegionId
 		request.InstanceId = instanceId

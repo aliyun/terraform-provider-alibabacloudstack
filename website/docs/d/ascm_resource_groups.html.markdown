@@ -43,4 +43,10 @@ The following attributes are exported in addition to the arguments listed above:
   * `id` - ID of the Resource Group.
   * `name` - Name of Resource Group.
   * `organization_id` - Organization ID for Alibabacloudstack Cloud account.
+  * `gmt_created` - Create time of the Resource Groups.
+  * `rs_id` - ID of the Resource Group Set (like rs-xxxxx).
+  * `creator` - ID of the Resource Group creator.
+  * `resource_group_type` - Resource set type. Available values and meanings:
+    * 1: Default resource set.
+    * 0: Non default resource set.
   

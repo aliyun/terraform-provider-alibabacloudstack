@@ -73,7 +73,7 @@ func resourceAlibabacloudStackGpdbConnectionCreate(d *schema.ResourceData, meta 
 	request.Headers["x-ascm-product-name"] = "Gpdb"
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = instanceId
 	request.ConnectionStringPrefix = prefix
 	request.Port = d.Get("port").(string)
@@ -153,7 +153,7 @@ func resourceAlibabacloudStackGpdbConnectionUpdate(d *schema.ResourceData, meta 
 		request := gpdb.CreateModifyDBInstanceConnectionStringRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.DBInstanceId = parts[0]
 		object, err := gpdbService.DescribeGpdbConnection(d.Id())
 		if err != nil {
@@ -198,7 +198,7 @@ func resourceAlibabacloudStackGpdbConnectionDelete(d *schema.ResourceData, meta 
 
 	request := gpdb.CreateReleaseInstancePublicConnectionRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = parts[0]
 
 	gpdbService := GpdbService{client}

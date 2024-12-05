@@ -299,7 +299,6 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 		if err := ecsService.SetResourceTags(d, "ddh"); err != nil {
 			return WrapError(err)
 		}
-		d.SetPartial("tags")
 	}
 	if !d.IsNewResource() && d.HasChange("auto_release_time") {
 		request := map[string]interface{}{
@@ -334,7 +333,6 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 		if _, err := stateConf.WaitForState(); err != nil {
 			return WrapErrorf(err, IdMsg, d.Id())
 		}
-		d.SetPartial("auto_release_time")
 	}
 	if !d.IsNewResource() && d.HasChange("resource_group_id") {
 		request := map[string]interface{}{
@@ -370,7 +368,6 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 		if _, err := stateConf.WaitForState(); err != nil {
 			return WrapErrorf(err, IdMsg, d.Id())
 		}
-		d.SetPartial("resource_group_id")
 	}
 	update := false
 	request := map[string]interface{}{
@@ -413,8 +410,6 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 		if _, err := stateConf.WaitForState(); err != nil {
 			return WrapErrorf(err, IdMsg, d.Id())
 		}
-		d.SetPartial("expired_time")
-		d.SetPartial("sale_cycle")
 	}
 	update = false
 	modifyDedicatedHostsChargeTypeReq := map[string]interface{}{
@@ -462,11 +457,6 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 		if _, err := stateConf.WaitForState(); err != nil {
 			return WrapErrorf(err, IdMsg, d.Id())
 		}
-		d.SetPartial("detail_fee")
-		d.SetPartial("dry_run")
-		d.SetPartial("expired_time")
-		d.SetPartial("payment_type")
-		d.SetPartial("sale_cycle")
 	}
 	update = false
 	modifyDedicatedHostAttributeReq := map[string]interface{}{
@@ -536,13 +526,6 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 		if _, err := stateConf.WaitForState(); err != nil {
 			return WrapErrorf(err, IdMsg, d.Id())
 		}
-		d.SetPartial("action_on_maintenance")
-		d.SetPartial("auto_placement")
-		d.SetPartial("cpu_over_commit_ratio")
-		d.SetPartial("dedicated_host_cluster_id")
-		d.SetPartial("dedicated_host_name")
-		d.SetPartial("description")
-		d.SetPartial("network_attributes")
 	}
 	d.Partial(false)
 	return resourceAlibabacloudStackEcsDedicatedHostRead(d, meta)

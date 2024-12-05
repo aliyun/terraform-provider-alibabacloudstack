@@ -117,7 +117,7 @@ func dataSourceAlibabacloudStackSlbAclsRead(d *schema.ResourceData, meta interfa
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	tags := d.Get("tags").(map[string]interface{})
 	if tags != nil && len(tags) > 0 {
 		KeyPairsTags := make([]slb.DescribeAccessControlListsTag, 0, len(tags))
@@ -196,7 +196,7 @@ func slbAclsDescriptionAttributes(d *schema.ResourceData, acls []slb.Acl, client
 	} else {
 		request.Scheme = "http"
 	}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	for _, item := range acls {
 		request.AclId = item.AclId
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {

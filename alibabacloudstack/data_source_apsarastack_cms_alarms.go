@@ -92,11 +92,12 @@ func dataSourceAlibabacloudstackCmsAlarms() *schema.Resource {
 							Optional: true,
 							Computed: true,
 						},
-						"group_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
+						// 后续未消费的属性
+// 						"group_id": {
+// 							Type:     schema.TypeString,
+// 							Optional: true,
+// 							Computed: true,
+// 						},
 						"enable_state": {
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -197,8 +198,8 @@ func dataSourceAlibabacloudstackCmsAlarmsRead(d *schema.ResourceData, meta inter
 	request.ApiName = "DescribeMetricRuleList"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeyId":     client.AccessKey,
-		"AccessKeySecret": client.SecretKey,
+		
+		
 		"Product":         "Cms",
 		"RegionId":        client.RegionId,
 		"Action":          "DescribeMetricRuleList",

@@ -67,10 +67,17 @@ The following arguments are supported:
 * `security_ips`- (Optional) Set the instance's IP whitelist of the default security group.
 * `vpc_auth_mode`- (Optional) Only meaningful if instance_type is `Redis` and network type is VPC. Valid values are `Close`, `Open`. Defaults to `Open`.  `Close` means the redis instance can be accessed without authentication. `Open` means authentication is required.
 * `parameters` - (Optional) Set of parameters needs to be set after instance was launched. Available parameters can refer to the latest docs [Instance configurations table](https://www.alibabacloud.com/help/doc-detail/61209.htm) .
+  * `name` - Name of the Parameter
+  * `value` - Value of the Parameter
 * `maintain_start_time` - (Optional) The start time of the operation and maintenance time period of the instance, in the format of HH:mmZ (UTC time).
 * `maintain_end_time` - (Optional) The end time of the operation and maintenance time period of the instance, in the format of HH:mmZ (UTC time).
 * `cpu_type` - (Required) The cpu type of the resource.Valid values: `intel`.
 -> **NOTE:** The start time to the end time must be 1 hour. For example, the MaintainStartTime is 01:00Z, then the MaintainEndTime must be 02:00Z.
+
+* `node_type` - (Optional) The node type. Valid values:
+  * MASTER_SLAVE: high availability (master-replica)
+  * STAND_ALONE: standalone
+
 
 ## Attributes Reference
 
@@ -78,15 +85,6 @@ The following attributes are exported:
 
 * `id` - The KVStore instance ID.
 * `connection_domain` - Instance connection domain (only Intranet access supported).
-
-### Timeouts
-
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 20 mins) Used when creating the KVStore instance (until it reaches the initial `Normal` status). 
-* `update` - (Defaults to 30 mins) Used when updating the KVStore instance (until it reaches the initial `Normal` status). 
-* `delete` - (Defaults to 20 mins) Used when terminating the KVStore instance. 
 
 ## Import
 

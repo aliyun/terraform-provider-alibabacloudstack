@@ -3,11 +3,10 @@ subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_vpc_access"
 sidebar_current: "docs-alibabacloudstack-resource-api-gateway-vpc-access"
-description: |- 
-  Provides a Alibabacloudstack Api Gateway vpc authorization Resource.
+description: |- Provides a Alibabacloudstack Api Gateway vpc authorization Resource.
 ---
 
-# alicloud_api_gateway_app
+# alibabacloudstack\_api\_gateway\_vpc\_access
 
 Provides an vpc authorization resource.This authorizes the API gateway to access your VPC instances.
 

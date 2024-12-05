@@ -210,7 +210,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		//if instanceChargeType == string(PostPaid) {
 		//	request.InstanceChargeType = string(Postpaid)
 		//} else {
@@ -274,7 +274,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 		request := r_kvstore.CreateDescribeRegionsRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 			return rkvClient.DescribeRegions(request)
 		})
@@ -306,7 +306,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeMongoDB)) {
 		request := dds.CreateDescribeRegionsRequest()
 		request.RegionId = client.RegionId
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "dds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
 			return ddsClient.DescribeRegions(request)
 		})
@@ -381,7 +381,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeGpdb)) {
 		request := gpdb.CreateDescribeRegionsRequest()
 		request.RegionId = client.RegionId
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "gpdb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		raw, err := client.WithGpdbClient(func(gpdbClient *gpdb.Client) (interface{}, error) {
 			return gpdbClient.DescribeRegions(request)
 		})
@@ -460,7 +460,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 			return slbClient.DescribeZones(request)
 		})
@@ -491,7 +491,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 		req.Scheme = "http"
 	}
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.RegionId = client.RegionId
 	req.InstanceChargeType = instanceChargeType
 	if v, ok := d.GetOk("spot_strategy"); ok && v.(string) != "" {

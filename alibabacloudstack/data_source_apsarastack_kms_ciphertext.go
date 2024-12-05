@@ -50,7 +50,7 @@ func dataSourceAlibabacloudStackKmsCiphertextRead(d *schema.ResourceData, meta i
 
 	request := kms.CreateEncryptRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.Plaintext = d.Get("plaintext").(string)
 	request.KeyId = d.Get("key_id").(string)

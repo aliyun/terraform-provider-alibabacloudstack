@@ -55,8 +55,8 @@ func dataSourceAlibabacloudStackDatahubServiceRead(d *schema.ResourceData, meta 
 	request.ApiName = "OpenDataHubService"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeyId":     client.AccessKey,
-		"AccessKeySecret": client.SecretKey,
+		
+		
 		"Product":         "datahub",
 		"RegionId":        client.RegionId,
 		"Action":          "OpenDataHubService",

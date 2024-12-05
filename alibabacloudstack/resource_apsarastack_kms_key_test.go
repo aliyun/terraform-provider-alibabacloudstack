@@ -34,7 +34,7 @@ func testSweepKmsKey(region string) error {
 
 	req := kms.CreateListKeysRequest()
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.QueryParams["Department"] = client.Department
 	req.QueryParams["ResourceGroup"] = client.ResourceGroup
 
@@ -64,7 +64,7 @@ func testSweepKmsKey(region string) error {
 			if strings.HasPrefix(strings.ToLower(key.Description), strings.ToLower(description)) {
 				req := kms.CreateScheduleKeyDeletionRequest()
 				req.Headers = map[string]string{"RegionId": client.RegionId}
-				req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+				req.QueryParams = map[string]string{ "Product": "kms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 				req.QueryParams["Department"] = client.Department
 				req.QueryParams["ResourceGroup"] = client.ResourceGroup
 

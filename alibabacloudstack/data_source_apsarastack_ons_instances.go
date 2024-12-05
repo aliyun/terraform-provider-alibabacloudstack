@@ -108,8 +108,8 @@ func dataSourceAlibabacloudStackOnsInstancesRead(d *schema.ResourceData, meta in
 	request.RegionId = client.RegionId
 	request.ApiName = "ConsoleInstanceList"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeyId": client.AccessKey,
-		"AccessKeySecret": client.SecretKey,
+	request.QueryParams = map[string]string{
+		
 		"Product":         "Ons-inner",
 		"RegionId":        client.RegionId,
 		"Action":          "ConsoleInstanceList",

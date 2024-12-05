@@ -36,7 +36,7 @@ func dataSourceAlibabacloudStackApiGatewayApis() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.ValidateRegexp,
+				ValidateFunc: validation.StringIsValidRegExp,
 			},
 			"output_file": {
 				Type:     schema.TypeString,
@@ -91,8 +91,8 @@ func dataSourceAlibabacloudStackApigatewayApisRead(d *schema.ResourceData, meta 
 		"RegionId": client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,

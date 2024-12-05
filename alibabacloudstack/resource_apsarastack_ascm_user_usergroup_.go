@@ -2,14 +2,13 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"log"
-	"strings"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"log"
+	"strings"
 	//"encoding/json"
 )
 
@@ -26,7 +25,7 @@ func resourceAlibabacloudStackAscmUserGroupUser() *schema.Resource {
 				ForceNew: true,
 			},
 			"login_names": {
-				Type:     schema.TypeSet,
+				Type: schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},

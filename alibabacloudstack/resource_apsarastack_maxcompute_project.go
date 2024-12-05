@@ -32,21 +32,34 @@ func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
-			"vpc_tunnel_ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-			"cluster": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"external_table": {
-				Type:     schema.TypeBool,
-				ForceNew: true,
-				Optional: true,
-				Default:  false,
-			},
+// TODO：文档和API中均不支持，注意测试
+// 			"vpc_tunnel_ids": {
+// 				Type:     schema.TypeSet,
+// 				Optional: true,
+// 				Elem:     &schema.Schema{Type: schema.TypeString},
+// 			},
+// 			"cluster": {
+// 				Type:     schema.TypeString,
+// 				Required: true,
+// 			},
+// 			"external_table": {
+// 				Type:     schema.TypeBool,
+// 				ForceNew: true,
+// 				Optional: true,
+// 				Default:  false,
+// 			},
+// 			"pk": {
+// 				Type:     schema.TypeString,
+// 				Required: true,
+// 			},
+// 			"quota_id": {
+// 				Type:     schema.TypeString,
+// 				Required: true,
+// 			},
+// 			"disk": {
+// 				Type:     schema.TypeInt,
+// 				Required: true,
+// 			},
 			/*			"enabled_mc_encrypt": {
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -61,26 +74,15 @@ func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},*/
-			"quota_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"disk": {
-				Type:     schema.TypeInt,
-				Required: true,
-			},
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"pk": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"aliyun_account": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+// 后续未使用参数
+// 			"aliyun_account": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 			},
 		},
 	}
 }

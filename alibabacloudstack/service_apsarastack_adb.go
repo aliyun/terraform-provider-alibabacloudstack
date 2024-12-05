@@ -336,7 +336,6 @@ func (s *AdbService) setClusterTags(d *schema.ResourceData) error {
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		}
 
-		d.SetPartial("tags")
 	}
 
 	return nil
@@ -769,7 +768,7 @@ func (s *AdbService) SetResourceTags(d *schema.ResourceData, resourceType string
 				return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabacloudStackSdkGoERROR)
 			}
 		}
-		d.SetPartial("tags")
+
 	}
 	return nil
 }

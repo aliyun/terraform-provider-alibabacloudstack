@@ -142,8 +142,8 @@ func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta in
 	}
 
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":   client.SecretKey,
-		"AccessKeyId":       client.AccessKey,
+		
+		
 		"Product":           "datahub",
 		"RegionId":          client.RegionId,
 		"Department":        client.Department,
@@ -293,8 +293,8 @@ func resourceAlibabacloudStackDatahubTopicDelete(d *schema.ResourceData, meta in
 	request.ApiName = "DeleteTopic"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "datahub",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,

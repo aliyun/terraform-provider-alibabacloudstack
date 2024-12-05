@@ -84,7 +84,7 @@ func resourceAlibabacloudStackDnsDomainAttachmentUpdate(d *schema.ResourceData, 
 		removeNames := strings.Join(remove, ",")
 		request := alidns.CreateUnbindInstanceDomainsRequest()
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "alidns"}
+		request.QueryParams = map[string]string{ "Product": "alidns"}
 		request.QueryParams["Department"] = client.Department
 		request.QueryParams["ResourceGroup"] = client.ResourceGroup
 		request.InstanceId = d.Id()
@@ -101,7 +101,7 @@ func resourceAlibabacloudStackDnsDomainAttachmentUpdate(d *schema.ResourceData, 
 		addNames := strings.Join(add, ",")
 		request := alidns.CreateBindInstanceDomainsRequest()
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "alidns"}
+		request.QueryParams = map[string]string{ "Product": "alidns"}
 		request.QueryParams["Department"] = client.Department
 		request.QueryParams["ResourceGroup"] = client.ResourceGroup
 		request.InstanceId = d.Id()
@@ -132,7 +132,7 @@ func resourceAlibabacloudStackDnsdomainAttachmentDelete(d *schema.ResourceData, 
 
 	request := alidns.CreateUnbindInstanceDomainsRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "alidns"}
+	request.QueryParams = map[string]string{ "Product": "alidns"}
 	request.QueryParams["Department"] = client.Department
 	request.QueryParams["ResourceGroup"] = client.ResourceGroup
 	request.InstanceId = d.Id()

@@ -3,12 +3,11 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"errors"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -66,7 +65,7 @@ func resourceAlibabacloudStackOnsTopicCreate(d *schema.ResourceData, meta interf
 	request := requests.NewCommonRequest()
 	request.QueryParams = map[string]string{
 		"RegionId":        client.RegionId,
-		"AccessKeySecret": client.SecretKey,
+		
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
 		"Product":         "Ons-inner",
@@ -159,7 +158,7 @@ func resourceAlibabacloudStackOnsTopicDelete(d *schema.ResourceData, meta interf
 		request := requests.NewCommonRequest()
 		request.QueryParams = map[string]string{
 			"RegionId":        client.RegionId,
-			"AccessKeySecret": client.SecretKey,
+			
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
 			"Product":         "Ons-inner",

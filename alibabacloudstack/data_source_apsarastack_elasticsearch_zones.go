@@ -57,7 +57,7 @@ func dataSourceAlibabacloudStackElaticsearchZonesRead(d *schema.ResourceData, me
 	request := elasticsearch.CreateGetRegionConfigurationRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "elasticsearch", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "elasticsearch", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	raw, err := client.WithElasticsearchClient(func(elasticsearchClient *elasticsearch.Client) (interface{}, error) {
 		return elasticsearchClient.GetRegionConfiguration(request)

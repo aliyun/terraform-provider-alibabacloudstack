@@ -63,7 +63,7 @@ func resourceAlibabacloudStackAdbAccount() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{string("Super")}, false),
 				Default:      "Super",
 				ForceNew:     true,
-				Removed:      "Field 'account_type' has been removed from provider version 1.81.0.",
+				//Removed:      "Field 'account_type' has been removed from provider version 1.81.0.",
 			},
 
 			"account_description": {
@@ -185,7 +185,7 @@ func resourceAlibabacloudStackAdbAccountUpdate(d *schema.ResourceData, meta inte
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		d.SetPartial("account_description")
+
 	}*/
 
 	if d.HasChange("account_password") || d.HasChange("kms_encrypted_password") {

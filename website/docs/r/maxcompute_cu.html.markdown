@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack maxcompute cu resource.
 ---
 
-# alibabacloudstack\_maxcompute\_project
+# alibabacloudstack\_maxcompute\_cu
 
 The cu is the basic unit of operation in maxcompute. 
 

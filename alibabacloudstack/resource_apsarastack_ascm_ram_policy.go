@@ -2,10 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"log"
-	"strings"
-	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -13,6 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
+	"strings"
+	"time"
 )
 
 func resourceAlibabacloudStackAscmRamPolicy() *schema.Resource {
@@ -64,7 +63,7 @@ func resourceAlibabacloudStackAscmRamPolicyCreate(d *schema.ResourceData, meta i
 		request := requests.NewCommonRequest()
 		request.QueryParams = map[string]string{
 			"RegionId":        client.RegionId,
-			"AccessKeySecret": client.SecretKey,
+			
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
 			"Product":         "ascm",
@@ -195,8 +194,8 @@ func resourceAlibabacloudStackAscmRamPolicyUpdate(d *schema.ResourceData, meta i
 	request := requests.NewCommonRequest()
 	request.QueryParams = map[string]string{
 		"RegionId":          client.RegionId,
-		"AccessKeySecret":   client.SecretKey,
-		"AccessKeyId":       client.AccessKey,
+		
+		
 		"Product":           "ascm",
 		"Department":        client.Department,
 		"ResourceGroup":     client.ResourceGroup,
@@ -258,8 +257,8 @@ func resourceAlibabacloudStackAscmRamPolicyDelete(d *schema.ResourceData, meta i
 		request := requests.NewCommonRequest()
 		request.QueryParams = map[string]string{
 			"RegionId":        client.RegionId,
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
 			"Product":         "ascm",

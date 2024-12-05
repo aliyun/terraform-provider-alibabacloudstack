@@ -94,8 +94,8 @@ func dataSourceAlibabacloudStackEcsEbsStorageSetsRead(d *schema.ResourceData, me
 	request.Headers["x-acs-organizationId"] = client.Department
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"RegionId":        client.RegionId,
 		"Product":         "Ecs",
 		"Version":         "2014-05-26",

@@ -70,31 +70,22 @@ The following arguments are supported:
 * `network_acl_name` - (Optional) The name of the network acl.
 * `description` - (Optional) The description of the network acl instance.
 * `ingress_acl_entries` - (Optional, Computed) List of the ingress entries of the network acl. The order of the ingress entries determines the priority. The details see Block `ingress_acl_entries`.
+  * `description` - (Optional) The description of ingress entries.
+  * `network_acl_entry_name` - (Optional) The entry name of ingress entries. 
+  * `policy` - (Optional) The policy of ingress entries. Valid values `accept` and `drop`.
+  * `port` - (Optional) The port of ingress entries.
+  * `protocol` - (Optional) The protocol of ingress entries. Valid values `icmp`,`gre`,`tcp`,`udp`, and `all`.
+  * `source_cidr_ip` - (Optional) The source cidr ip of ingress entries.
 * `egress_acl_entries` - (Optional, Computed) List of the egress entries of the network acl. The order of the egress entries determines the priority. The details see Block `egress_acl_entries`.
+  * `description` - (Optional) The description of egress entries.
+  * `network_acl_entry_name` - (Optional) The entry name of egress entries. 
+  * `policy` - (Optional) The policy of egress entries. Valid values `accept` and `drop`.
+  * `port` - (Optional) The port of egress entries.
+  * `protocol` - (Optional) The protocol of egress entries. Valid values `icmp`,`gre`,`tcp`,`udp`, and `all`.
+  * `destination_cidr_ip` - (Optional) The destination cidr ip of egress entries.
 * `resources` - (Optional) The associated resources.
-
-### Block ingress_acl_entries
-
-* `description` - (Optional) The description of ingress entries.
-* `network_acl_entry_name` - (Optional) The entry name of ingress entries. 
-* `policy` - (Optional) The policy of ingress entries. Valid values `accept` and `drop`.
-* `port` - (Optional) The port of ingress entries.
-* `protocol` - (Optional) The protocol of ingress entries. Valid values `icmp`,`gre`,`tcp`,`udp`, and `all`.
-* `source_cidr_ip` - (Optional) The source cidr ip of ingress entries.
-
-### Block egress_acl_entries
-
-* `description` - (Optional) The description of egress entries.
-* `network_acl_entry_name` - (Optional) The entry name of egress entries. 
-* `policy` - (Optional) The policy of egress entries. Valid values `accept` and `drop`.
-* `port` - (Optional) The port of egress entries.
-* `protocol` - (Optional) The protocol of egress entries. Valid values `icmp`,`gre`,`tcp`,`udp`, and `all`.
-* `destination_cidr_ip` - (Optional) The destination cidr ip of egress entries.
-
-### Block resources 
-
-* `resource_id` - (Optional) The ID of the associated resource.
-* `resource_type` - (Optional) The type of the associated resource. Valid values `VSwitch`.
+  * `resource_id` - (Optional) The ID of the associated resource.
+  * `resource_type` - (Optional) The type of the associated resource. Valid values `VSwitch`.
 
 ## Attributes Reference
 
@@ -102,15 +93,6 @@ The following attributes are exported:
 
 * `id` - The ID of the network acl instance id.
 * `status` - The status of the network acl.
-
-### Timeouts
-
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 10 mins) Used when creating the Network ACL. (until it reaches the initial `Available` status). 
-* `update` - (Defaults to 10 mins) Used when updating the Network ACL. (until it reaches the initial `Available` status). 
-* `delete` - (Defaults to 10 mins) Used when terminating the Network ACL.
 
 ## Import
 

@@ -94,7 +94,7 @@ func dataSourceAlibabacloudStackSecurityGroupsRead(d *schema.ResourceData, meta 
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.RegionId = client.RegionId
 	request.VpcId = d.Get("vpc_id").(string)
 	request.PageNumber = requests.NewInteger(1)

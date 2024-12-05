@@ -70,8 +70,8 @@ func (s *ElasticsearchService) DescribeElasticsearchOnk8sInstance(id string) (ob
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "elasticsearch-k8s",
 		"product":         "elasticsearch-k8s",
 		"Action":          "DescribeInstance",
@@ -258,7 +258,7 @@ func (s *ElasticsearchService) DescribeElasticsearchTags(id string) (tags map[st
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "elasticsearch", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "elasticsearch", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.ResourceIds = string(resourceIds)
 	request.ResourceType = strings.ToUpper(string(TagResourceInstance))
 	raw, err := s.client.WithElasticsearchClient(func(elasticsearchClient *elasticsearch.Client) (interface{}, error) {
@@ -351,8 +351,8 @@ func updateDescription(d *schema.ResourceData, meta interface{}) error {
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        client.RegionId,
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "elasticsearch-k8s",
 		"product":         "elasticsearch-k8s",
 		"Action":          "UpdateDescription",
@@ -442,7 +442,7 @@ func updateInstanceTags(d *schema.ResourceData, meta interface{}) error {
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "elasticsearch", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "elasticsearch", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.ResourceIds = string(resourceIds)
 		raw, err := client.WithElasticsearchClient(func(elasticsearchClient *elasticsearch.Client) (interface{}, error) {
 			return elasticsearchClient.UntagResources(request)
@@ -475,7 +475,7 @@ func updateInstanceTags(d *schema.ResourceData, meta interface{}) error {
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "elasticsearch", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "elasticsearch", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 		raw, err := client.WithElasticsearchClient(func(elasticsearchClient *elasticsearch.Client) (interface{}, error) {
 			return elasticsearchClient.TagResources(request)
@@ -738,7 +738,7 @@ func updatePassword(d *schema.ResourceData, meta interface{}) error {
 		return WrapError(Error("One of the 'password' and 'kms_encrypted_password' should be set."))
 	}
 	if password != "" {
-		d.SetPartial("password")
+
 		content["esAdminPassword"] = password
 	} else {
 		kmsService := KmsService{meta.(*connectivity.AlibabacloudStackClient)}
@@ -747,8 +747,8 @@ func updatePassword(d *schema.ResourceData, meta interface{}) error {
 			return WrapError(err)
 		}
 		content["esAdminPassword"] = decryptResp
-		d.SetPartial("kms_encrypted_password")
-		d.SetPartial("kms_encryption_context")
+
+
 	}
 	content["product"] = "elasticsearch"
 	content["OrganizationId"] = client.Department

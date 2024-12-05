@@ -243,7 +243,7 @@ func resourceAlibabacloudStackVpnGatewayUpdate(d *schema.ResourceData, meta inte
 		if err := vpcService.SetResourceTags(d, "VpnGateWay"); err != nil {
 			return WrapError(err)
 		}
-		d.SetPartial("tags")
+
 	}
 	d.Partial(true)
 	if d.HasChange("name") {

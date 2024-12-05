@@ -26,7 +26,7 @@ func resourceAlibabacloudStackVpnCustomerGateway() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.SingleIP(),
+				ValidateFunc: validation.IsIPAddress,
 			},
 			"name": {
 				Type:         schema.TypeString,

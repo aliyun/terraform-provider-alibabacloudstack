@@ -188,11 +188,11 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"force_restart": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
+// 			"force_restart": {
+// 				Type:     schema.TypeBool,
+// 				Optional: true,
+// 				Default:  false,
+// 			},
 			"tags": tagsSchema(),
 
 			"maintain_time": {
@@ -263,8 +263,8 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 			req.Scheme = "http"
 		}
 		req.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
 			"Product":         "Rds",
@@ -345,7 +345,7 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 	}
 	ClientToken := fmt.Sprintf("Terraform-AlibabacloudStack-%d-%s", time.Now().Unix(), uuid)
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":       client.SecretKey,
+		
 		"Product":               "rds",
 		"Department":            client.Department,
 		"ResourceGroup":         client.ResourceGroup,
@@ -372,7 +372,7 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		"DBInstanceType":        "Primary",
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	//request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	//request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	log.Printf("request245 %v", request.QueryParams)
 	//log.Printf("request245 %v",request)
 	//raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
@@ -418,7 +418,7 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		if EncryptionKey != "" {
 			tde_req.EncryptionKey = EncryptionKey
 		}
-		tde_req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "RoleARN": arnrole}
+		tde_req.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "RoleARN": arnrole}
 
 		tde_req.TDEStatus = "Enabled"
 		if strings.ToLower(client.Config.Protocol) == "https" {
@@ -444,7 +444,7 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		ssl_req := rds.CreateModifyDBInstanceSSLRequest()
 		ssl_req.RegionId = client.RegionId
 		ssl_req.Headers = map[string]string{"RegionId": client.RegionId}
-		ssl_req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Forwardedregionid": client.RegionId}
+		ssl_req.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Forwardedregionid": client.RegionId}
 		ssl_req.DBInstanceId = d.Id()
 		ssl_req.SSLEnabled = "1"
 		ssl_req.ConnectionString = d.Get("connection_string").(string)
@@ -495,7 +495,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		}
 		prePaidRequest.RegionId = client.RegionId
 		prePaidRequest.Headers = map[string]string{"RegionId": client.RegionId}
-		prePaidRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		prePaidRequest.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		prePaidRequest.DBInstanceId = d.Id()
 		prePaidRequest.PayType = string(payType)
 		prePaidRequest.AutoPay = "true"
@@ -532,7 +532,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		}
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		auto_renew := d.Get("auto_renew").(bool)
 		if auto_renew {
 			request.AutoRenew = "True"
@@ -563,7 +563,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.DBInstanceId = d.Id()
 		request.Period = strconv.Itoa(period)
 
@@ -585,7 +585,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.DBInstanceId = d.Id()
 		request.MaintainTime = d.Get("maintain_time").(string)
 		request.ClientToken = buildClientToken(request.GetActionName())
@@ -609,7 +609,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 	//		request.Scheme = "http"
 	//	}
 	//	request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-	//	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	//	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	//	request.DBInstanceId = d.Id()
 	//	raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 	//		return rdsClient.MigrateSecurityIPMode(request)
@@ -635,7 +635,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.DBInstanceId = d.Id()
 		request.DBInstanceDescription = d.Get("instance_name").(string)
 
@@ -673,7 +673,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = d.Id()
 	request.PayType = d.Get("instance_charge_type").(string)
 
@@ -725,7 +725,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		tde_req := rds.CreateModifyDBInstanceTDERequest()
 		tde_req.RegionId = client.RegionId
 		tde_req.Headers = map[string]string{"RegionId": client.RegionId}
-		tde_req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		tde_req.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		tde_req.DBInstanceId = d.Id()
 		tde_req.TDEStatus = "Enabled"
 		//tde_req.RoleArn=d.Get("role_arn").(string)
@@ -756,7 +756,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 			ssl_req := rds.CreateModifyDBInstanceSSLRequest()
 			ssl_req.RegionId = client.RegionId
 			ssl_req.Headers = map[string]string{"RegionId": client.RegionId}
-			ssl_req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Forwardedregionid": client.RegionId}
+			ssl_req.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Forwardedregionid": client.RegionId}
 			ssl_req.DBInstanceId = d.Id()
 			ssl_req.SSLEnabled = "1"
 			ssl_req.ConnectionString = d.Get("connection_string").(string)
@@ -780,7 +780,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 			ssl_req := rds.CreateModifyDBInstanceSSLRequest()
 			ssl_req.RegionId = client.RegionId
 			ssl_req.Headers = map[string]string{"RegionId": client.RegionId}
-			ssl_req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Forwardedregionid": client.RegionId}
+			ssl_req.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Forwardedregionid": client.RegionId}
 			ssl_req.DBInstanceId = d.Id()
 			ssl_req.SSLEnabled = "0"
 			ssl_req.ConnectionString = d.Get("connection_string").(string)
@@ -867,7 +867,7 @@ func resourceAlibabacloudStackDBInstanceRead(d *schema.ResourceData, meta interf
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.DBInstanceId = d.Id()
 
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
@@ -916,7 +916,7 @@ func resourceAlibabacloudStackDBInstanceDelete(d *schema.ResourceData, meta inte
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": string(client.RegionId)}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = d.Id()
 
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {

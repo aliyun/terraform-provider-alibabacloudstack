@@ -72,7 +72,7 @@ func dataSourceAlibabacloudStackSpecificFieldsRead(d *schema.ResourceData, meta 
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	resourceType := d.Get("resource_type").(string)
 	groupFiled := d.Get("group_filed").(string)
-	request.QueryParams = map[string]string{"AccessKeyId": client.AccessKey, "AccessKeySecret": client.SecretKey, "Product": "ascm", "RegionId": client.RegionId, "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Action": "GroupCommonSpec", "Version": "2019-05-10", "resourceType": resourceType, "groupFiled": groupFiled}
+	request.QueryParams = map[string]string{  "Product": "ascm", "RegionId": client.RegionId, "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Action": "GroupCommonSpec", "Version": "2019-05-10", "resourceType": resourceType, "groupFiled": groupFiled}
 	response := SpecificField{}
 
 	for {

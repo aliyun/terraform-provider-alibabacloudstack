@@ -220,7 +220,20 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Default:          HTTP_2XX,
 				DiffSuppressFunc: httpHttpsTcpDiffSuppressFunc,
 			},
+			//https
+			"ssl_certificate_id": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: sslCertificateIdDiffSuppressFunc,
+				Deprecated:       "Field 'ssl_certificate_id' has been deprecated from 1.59.0 and using 'server_certificate_id' instead.",
+			},
 			"server_certificate_id": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: sslCertificateIdDiffSuppressFunc,
+			},
+			"ca_certificate_id": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				DiffSuppressFunc: sslCertificateIdDiffSuppressFunc,
@@ -270,7 +283,23 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Default:          900,
 				DiffSuppressFunc: establishedTimeoutDiffSuppressFunc,
 			},
+			//https
+			"enable_http2": {
+				Type:             schema.TypeString,
+				ValidateFunc:     validation.StringInSlice([]string{"on", "off"}, false),
+				Optional:         true,
+				Default:          OnFlag,
+				DiffSuppressFunc: httpsDiffSuppressFunc,
+			},
 
+			//https
+			"tls_cipher_policy": {
+				Type:             schema.TypeString,
+				Default:          "tls_cipher_policy_1_0",
+				ValidateFunc:     validation.StringInSlice([]string{"tls_cipher_policy_1_0", "tls_cipher_policy_1_1", "tls_cipher_policy_1_2", "tls_cipher_policy_1_2_strict"}, false),
+				Optional:         true,
+				DiffSuppressFunc: httpsDiffSuppressFunc,
+			},
 			"forward_port": {
 				Type:             schema.TypeInt,
 				ValidateFunc:     validation.IntBetween(1, 65535),
@@ -365,7 +394,7 @@ func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta int
 		startLoadBalancerListenerRequest.Scheme = "http"
 	}
 	startLoadBalancerListenerRequest.Headers = map[string]string{"RegionId": client.RegionId}
-	startLoadBalancerListenerRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	startLoadBalancerListenerRequest.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	startLoadBalancerListenerRequest.LoadBalancerId = lb_id
 	startLoadBalancerListenerRequest.ListenerPort = requests.NewInteger(frontend)
 	startLoadBalancerListenerRequest.ListenerProtocol = protocol
@@ -626,13 +655,45 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 	if protocol == Https {
 		scId := d.Get("server_certificate_id").(string)
 		if scId == "" {
+			scId = d.Get("ssl_certificate_id").(string)
+		}
+		if scId == "" {
 			return WrapError(Error("'server_certificate_id': required field is not set when the protocol is 'https'."))
 		}
 
 		httpsArgs.QueryParams["ServerCertificateId"] = scId
+		if d.HasChange("ssl_certificate_id") || d.HasChange("server_certificate_id") {
+			update = true
+		}
 
+		if d.HasChange("enable_http2") {
+			httpsArgs.QueryParams["EnableHttp2"] = d.Get("enable_http2").(string)
+			update = true
+		}
+
+		if d.HasChange("tls_cipher_policy") {
+			// spec changes check, can not be updated when load balancer instance is "Shared-Performance".
+			slbService := SlbService{client}
+			object, err := slbService.DescribeSlb(d.Get("load_balancer_id").(string))
+			if err != nil {
+				return WrapError(err)
+			}
+			spec := object.LoadBalancerSpec
+			if spec == "" {
+				if !d.IsNewResource() || string("tls_cipher_policy_1_0") != d.Get("tls_cipher_policy").(string) {
+					return WrapError(Error("Currently the param \"tls_cipher_policy\" can not be updated when load balancer instance is \"Shared-Performance\"."))
+				}
+			} else {
+				httpsArgs.QueryParams["TLSCipherPolicy"] = d.Get("tls_cipher_policy").(string)
+				update = true
+			}
+		}
+
+		if d.HasChange("ca_certificate_id") {
+			httpsArgs.QueryParams["CACertificateId"] = d.Get("ca_certificate_id").(string)
+			update = true
+		}
 	}
-
 	if update {
 		var request *requests.CommonRequest
 		switch protocol {
@@ -691,7 +752,7 @@ func resourceAlibabacloudStackSlbListenerDelete(d *schema.ResourceData, meta int
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.LoadBalancerId = lbId
 	request.ListenerPort = requests.NewInteger(port)
 	request.ListenerProtocol = protocol
@@ -725,7 +786,7 @@ func buildListenerCommonArgs(d *schema.ResourceData, meta interface{}) (*request
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.QueryParams["LoadBalancerId"] = d.Get("load_balancer_id").(string)
 	request.QueryParams["ListenerPort"] = string(requests.NewInteger(d.Get("frontend_port").(int)))
@@ -803,9 +864,9 @@ func buildHttpListenerArgs(d *schema.ResourceData, req *requests.CommonRequest) 
 		req.QueryParams["HealthCheckInterval"] = string(requests.NewInteger(d.Get("health_check_interval").(int)))
 		req.QueryParams["HealthCheckHttpCode"] = d.Get("health_check_http_code").(string)
 		if d.Get("protocol").(string) == "http" || d.Get("protocol").(string) == "https" {
-			//if health_check_method, ok := d.GetOk("health_check_method"); ok && health_check_method.(string) != "" {
-			//	req.QueryParams["HealthCheckMethod"] = health_check_method.(string)
-			//}
+			if health_check_method, ok := d.GetOk("health_check_method"); ok && health_check_method.(string) != "" {
+				req.QueryParams["HealthCheckMethod"] = health_check_method.(string)
+			}
 		}
 	}
 
@@ -933,9 +994,9 @@ func readListener(d *schema.ResourceData, listener map[string]interface{}) {
 	if val, ok := listener["HealthCheckDomain"]; ok {
 		d.Set("health_check_domain", val.(string))
 	}
-	//if val, ok := listener["HealthCheckMethod"]; ok {
-	//	d.Set("health_check_method", val.(string))
-	//}
+	if val, ok := listener["HealthCheckMethod"]; ok {
+		d.Set("health_check_method", val.(string))
+	}
 	if val, ok := listener["HealthCheckConnectPort"]; ok {
 		d.Set("health_check_connect_port", val.(float64))
 	}

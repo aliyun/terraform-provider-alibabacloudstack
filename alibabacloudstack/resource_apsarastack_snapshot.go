@@ -1,10 +1,9 @@
 package alibabacloudstack
 
 import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strings"
 	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -56,7 +55,7 @@ func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interf
 	request := ecs.CreateCreateSnapshotRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DiskId = d.Get("disk_id").(string)
 	request.ClientToken = buildClientToken(request.GetActionName())
 	if strings.ToLower(client.Config.Protocol) == "https" {
@@ -136,7 +135,7 @@ func resourceAlibabacloudStackSnapshotDelete(d *schema.ResourceData, meta interf
 	request := ecs.CreateDeleteSnapshotRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.SnapshotId = d.Id()
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"

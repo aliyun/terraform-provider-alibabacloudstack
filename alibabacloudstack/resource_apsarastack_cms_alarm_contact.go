@@ -73,7 +73,7 @@ func resourceAlibabacloudstackCmsAlarmContactCreate(d *schema.ResourceData, meta
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId, "Content-Type": "application/json; charset=UTF-8"}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "Cms",
 		"Action":          "PutContact",
 		"Version":         "2019-01-01",

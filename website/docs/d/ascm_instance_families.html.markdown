@@ -30,6 +30,7 @@ output "instfam" {
 The following arguments are supported:
 
 * `ids` - (Optional) A list of instance family IDs.
+* `name_regex` - (Optional) A regex string to filter results by trail name.
 * `status` - (Optional) Specify Status to filter the resulting instance families by their availability.
 * `resource_type` - (Optional) Filter the results by the specified resource type.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
@@ -40,8 +41,9 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `families` - A list of instance families. Each element contains the following attributes:
     * `id` - ID of the instance families.
+    * `order_by_id` - Sorted ID of the instacne families.
     * `series_name` - Series name for instance families.
     * `modifier` - Modifier name.
-    * `series_name` - Series name for instance families.
+    * `series_name_label` - label of Series name for instance families.
     * `resource_type` - Specified resource type.
     * `is_deleted` - Specify the state in "Y" or "N" form.

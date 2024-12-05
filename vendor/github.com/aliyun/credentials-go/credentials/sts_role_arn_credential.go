@@ -123,8 +123,8 @@ func (r *RAMRoleArnCredential) updateCredential() (err error) {
 		request.QueryParams["Policy"] = r.Policy
 	}
 	request.QueryParams["RoleSessionName"] = r.RoleSessionName
-	request.QueryParams["SignatureMethod"] = "HMAC-SHA1"
-	request.QueryParams["SignatureVersion"] = "1.0"
+	request.QueryParams["SignatureMethod"] = "HMAC-SHA256"
+	request.QueryParams["SignatureVersion"] = "2.1"
 	request.QueryParams["Version"] = "2015-04-01"
 	request.QueryParams["Timestamp"] = utils.GetTimeInFormatISO8601()
 	request.QueryParams["SignatureNonce"] = utils.GetUUID()

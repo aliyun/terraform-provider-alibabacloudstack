@@ -85,33 +85,22 @@ resource "alibabacloudstack_network_acl_entries" "default" {
 The following arguments are supported:
 
 * `network_acl_id` - (Required, ForceNew) The id of the network acl, the field can't be changed.
-* `ingress` - (Optional) List of the ingress entries of the network acl. The order of the ingress entries determines the priority. The details see Block Ingress.
-* `egress` - (Optional) List of the egress entries of the network acl. The order of the egress entries determines the priority. The details see Block Egress.
-
-### Ingress Resources
-
-The resources mapping supports the following:
-
-* `description` - (Optional) The description of the ingress entry.
-* `source_cidr_ip` - (Optional) The source ip of the ingress entry.
-* `entry_type` - (Optional) The entry type of the ingress entry. It must be `custom` or `system`. Default value is `custom`.
-* `name` - (Optional) The name of the ingress entry.
-* `policy` - (Optional) The policy of the ingress entry. It must be `accept` or `drop`.
-* `port` - (Optional) The port of the ingress entry.
-* `protocol` - (Optional) The protocol of the ingress entry.
-
-### Egress Resources
-
-The resources mapping supports the following:
-
-* `description` - (Optional) The description of the egress entry.
-* `destination_cidr_ip` - (Optional) The destination ip of the egress entry.
-* `entry_type` - (Optional) The entry type of the egress entry. It must be `custom` or `system`. Default value is `custom`.
-* `name` - (Optional) The name of the egress entry.
-* `policy` - (Optional) The policy of the egress entry. It must be `accept` or `drop`.
-* `port` - (Optional) The port of the egress entry.
-* `protocol` - (Optional) The protocol of the egress entry.
-
+* `ingress` - (Optional) List of the ingress entries of the network acl. The order of the ingress entries determines the priority. The details see Block Ingress. The resources mapping supports the following:
+  * `description` - (Optional) The description of the ingress entry.
+  * `source_cidr_ip` - (Optional) The source ip of the ingress entry.
+  * `entry_type` - (Optional) The entry type of the ingress entry. It must be `custom` or `system`. Default value is `custom`.
+  * `name` - (Optional) The name of the ingress entry.
+  * `policy` - (Optional) The policy of the ingress entry. It must be `accept` or `drop`.
+  * `port` - (Optional) The port of the ingress entry.
+  * `protocol` - (Optional) The protocol of the ingress entry.
+* `egress` - (Optional) List of the egress entries of the network acl. The order of the egress entries determines the priority. The details see Block Egress. The resources mapping supports the following:
+  * `description` - (Optional) The description of the egress entry.
+  * `destination_cidr_ip` - (Optional) The destination ip of the egress entry.
+  * `entry_type` - (Optional) The entry type of the egress entry. It must be `custom` or `system`. Default value is `custom`.
+  * `name` - (Optional) The name of the egress entry.
+  * `policy` - (Optional) The policy of the egress entry. It must be `accept` or `drop`.
+  * `port` - (Optional) The port of the egress entry.
+  * `protocol` - (Optional) The protocol of the egress entry.
 
 ## Attributes Reference
 

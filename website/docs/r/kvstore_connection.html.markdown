@@ -7,7 +7,7 @@ description: |-
   Operate the public network ip of the specified resource.
 ---
 
-# alicloud\_kvstore\_connection
+# alibabacloudstack\_kvstore\_connection
 
 Operate the public network ip of the specified resource. How to use it, see [What is Resource Alibabacloudstack KVStore Connection](https://www.alibabacloud.com/help/doc-detail/125795.htm).
 

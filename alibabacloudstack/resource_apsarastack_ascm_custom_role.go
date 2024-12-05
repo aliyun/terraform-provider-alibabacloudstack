@@ -2,10 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"log"
-	"strings"
-	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -13,6 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
+	"strings"
+	"time"
 )
 
 func resourceAlibabacloudStackAscmRole() *schema.Resource {
@@ -83,7 +82,7 @@ func resourceAlibabacloudStackAscmRoleCreate(d *schema.ResourceData, meta interf
 		}
 		request.QueryParams = map[string]string{
 			"RegionId":               client.RegionId,
-			"AccessKeySecret":        client.SecretKey,
+			
 			"Product":                "ascm",
 			"Action":                 "CreateRole",
 			"Version":                "2019-05-10",
@@ -181,7 +180,7 @@ func resourceAlibabacloudStackAscmRoleDelete(d *schema.ResourceData, meta interf
 		}
 		request.QueryParams = map[string]string{
 			"RegionId":        client.RegionId,
-			"AccessKeySecret": client.SecretKey,
+			
 			"Product":         "ascm",
 			"Action":          "RemoveRole",
 			"Version":         "2019-05-10",

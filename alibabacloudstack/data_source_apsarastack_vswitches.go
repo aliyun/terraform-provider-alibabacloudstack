@@ -123,7 +123,7 @@ func dataSourceAlibabacloudStackVSwitchesRead(d *schema.ResourceData, meta inter
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	// API DescribeVSwitches has some limitations
 	// If there is no vpc_id, setting PageSizeSmall can avoid ServiceUnavailable Error
 	request.PageSize = requests.NewInteger(PageSizeSmall)
@@ -218,7 +218,7 @@ func VSwitchesDecriptionAttributes(d *schema.ResourceData, vsws []vpc.VSwitch, m
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	for _, vsw := range vsws {
 		mapping := map[string]interface{}{

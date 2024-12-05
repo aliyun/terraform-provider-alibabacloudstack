@@ -92,8 +92,8 @@ func (s *BucketVpcService) BindBucket(vpcId string, vpcName string, vLan string,
 		request.SetHTTPSInsecure(s.client.Config.Insecure)
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":  s.client.SecretKey,
-		"AccessKeyId":      s.client.AccessKey,
+		
+		
 		"Product":          "ascm",
 		"Department":       s.client.Department,
 		"ResourceGroup":    s.client.ResourceGroup,
@@ -105,7 +105,7 @@ func (s *BucketVpcService) BindBucket(vpcId string, vpcName string, vLan string,
 		"VpcName":          vpcName,
 		"VLan":             vLan,
 		"VpcId":            vpcId,
-		// "Params":           fmt.Sprintf("{\"%s\":%s,\"%s\":%s,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",}", "BucketName", bucket, "VpcName", vpcName, "VLan", vLan, "VpcId", vpcId, "AccessKeyId", s.client.AccessKey, "AccessKeySecret", s.client.SecretKey, "RegionId", s.client.RegionId),
+		// "Params":           fmt.Sprintf("{\"%s\":%s,\"%s\":%s,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",}", "BucketName", bucket, "VpcName", vpcName, "VLan", vLan, "VpcId", vpcId, "AccessKeyId", s.client.AccessKey, "RegionId", s.client.RegionId),
 	}
 	request.Method = "POST"        // Set request method
 	request.Product = "ascm"       // Specify product
@@ -149,7 +149,7 @@ func (s *BucketVpcService) UnBindBucket(vpcId string, bucket string) error {
 		request.SetHTTPSInsecure(s.client.Config.Insecure)
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":  s.client.SecretKey,
+		
 		"Product":          "Ascm",
 		"Department":       s.client.Department,
 		"ResourceGroup":    s.client.ResourceGroup,

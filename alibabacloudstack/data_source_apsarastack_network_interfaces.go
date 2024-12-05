@@ -145,7 +145,7 @@ func dataSourceAlibabacloudstackNetworkInterfacesRead(d *schema.ResourceData, me
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.RegionId = client.RegionId
 	if networkInterfaceIds, ok := d.GetOk("ids"); ok {
 		ids := expandStringList(networkInterfaceIds.(*schema.Set).List())

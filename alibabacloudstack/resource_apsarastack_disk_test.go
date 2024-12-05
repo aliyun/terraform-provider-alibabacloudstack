@@ -39,7 +39,7 @@ func testSweepDisks(region string) error {
 	req := ecs.CreateDescribeDisksRequest()
 	req.RegionId = client.RegionId
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.QueryParams["Department"] = client.Department
 	req.QueryParams["ResourceGroup"] = client.ResourceGroup
 	if strings.ToLower(client.Config.Protocol) == "https" {
@@ -90,7 +90,7 @@ func testSweepDisks(region string) error {
 		log.Printf("[INFO] Deleting Disk: %s (%s)", name, id)
 		req := ecs.CreateDeleteDiskRequest()
 		req.Headers = map[string]string{"RegionId": client.RegionId}
-		req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		req.QueryParams["Department"] = client.Department
 		req.QueryParams["ResourceGroup"] = client.ResourceGroup
 		req.DiskId = id

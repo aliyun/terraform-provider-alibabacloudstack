@@ -3,14 +3,13 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
-	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -86,7 +85,7 @@ func resourceAlibabacloudstackAscmAccessKeyCreate(d *schema.ResourceData, meta i
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
 		"RegionId":        client.RegionId,
-		"AccessKeySecret": client.SecretKey,
+		
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
 		"Product":         "ascm",
@@ -156,7 +155,7 @@ func resourceAlibabacloudstackAscmAccessKeyDelete(d *schema.ResourceData, meta i
 		}
 		request.QueryParams = map[string]string{
 			"RegionId":        client.RegionId,
-			"AccessKeySecret": client.SecretKey,
+			
 			"Product":         "ascm",
 			"Action":          "RamDeleteAccessKey",
 			"Version":         "2015-05-01",
@@ -205,7 +204,7 @@ func (s *AscmService) DescribeAscmKeypolicy(id string) (response *AccessKeyInCre
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
 		"Product":         "ascm",

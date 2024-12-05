@@ -61,7 +61,7 @@ func dataSourceAlibabacloudStackDnsGroupsRead(d *schema.ResourceData, meta inter
 
 	request := alidns.CreateDescribeDomainGroupsRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "alidns", "product": "alidns"}
+	request.QueryParams = map[string]string{ "Product": "alidns", "product": "alidns"}
 	request.QueryParams["Department"] = client.Department
 	request.QueryParams["ResourceGroup"] = client.ResourceGroup
 	var allGroups []alidns.DomainGroup

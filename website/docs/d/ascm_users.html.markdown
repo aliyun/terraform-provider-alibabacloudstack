@@ -52,12 +52,14 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above:
 
 * `users` - A list of users. Each element contains the following attributes:
-    * `id` - ID of the user.
-    * `name` - User login name.
-    * `cell_phone_number` - Cellphone Number of a user.
-    * `display_name` - Display name of a user.
-    * `email` - Email ID of a user.
-    * `mobile_nation_code` - Mobile Nation Code of a user, where user belongs to.
-    * `organization_id` - User Organization ID.
-    * `login_policy_id` - User login policy ID.
-     
+  * `id` - ID of the user.
+  * `login_name` - User login name.
+  * `cell_phone_number` - Cellphone Number of a user.
+  * `display_name` - Display name of a user.
+  * `email` - Email ID of a user.
+  * `mobile_nation_code` - Mobile Nation Code of a user, where user belongs to.
+  * `organization_id` - User Organization ID.
+  * `login_policy_id` - User login policy ID.
+  * `role_ids` - A list of the user owned roles.
+  * `default_role_id` - ID of the default role used by the user when logging in
+* `role_ids` - A list of all user owned roles.

@@ -152,6 +152,12 @@ func httpHttpsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool 
 	}
 	return true
 }
+func httpsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	if protocol, ok := d.GetOk("protocol"); ok && Protocol(protocol.(string)) == Https {
+		return false
+	}
+	return true
+}
 func stickySessionTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	httpDiff := httpHttpsDiffSuppressFunc(k, old, new, d)
 	if session, ok := d.GetOk("sticky_session"); !httpDiff && ok && session.(string) == string(OnFlag) {
@@ -260,13 +266,6 @@ func PostPaidDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	return strings.ToLower(d.Get("instance_charge_type").(string)) == "postpaid"
 }
 
-func PostPaidAndRenewDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	if strings.ToLower(d.Get("instance_charge_type").(string)) == "prepaid" && d.Get("auto_renew").(bool) {
-		return false
-	}
-	return true
-}
-
 func ArchitectureTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if strings.ToLower(d.Get("series").(string)) == "enterprise" && new == "rwsplit" {
 		return false
@@ -281,6 +280,13 @@ func NodeTypeDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	} else {
 		return true
 	}
+}
+
+func PostPaidAndRenewDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
+	if strings.ToLower(d.Get("instance_charge_type").(string)) == "prepaid" && d.Get("auto_renew").(bool) {
+		return false
+	}
+	return true
 }
 
 func routerInterfaceAcceptsideDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {

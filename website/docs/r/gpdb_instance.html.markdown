@@ -53,26 +53,28 @@ The following arguments are supported:
 * `engine_version` - (Required, ForceNew) Database version. Value options can refer to the latest docs [CreateDBInstance](https://www.alibabacloud.com/help/doc-detail/86908.htm) `EngineVersion`.
 * `instance_class` - (Required) Instance specification. see [Instance specifications](https://www.alibabacloud.com/help/doc-detail/86942.htm).
 * `instance_group_count` - (Required) The number of groups. Valid values: [2,4,8,16,32]
+* `instance_inner_connection` - (Optional, ForceNew)The endpoint of the cluster.
+* `instance_inner_port` - (Optional, ForceNew)The endpoint's port of the cluster.
+* `instance_vpc_id` - (Optional, ForceNew)The Vpc id.
 * `description` - (Optional) The name of DB instance. It a string of 2 to 256 characters.
 * `instance_charge_type` - (Optional, ForceNew) Valid values are `PrePaid`, `PostPaid`,System default to `PostPaid`.
-* `zone_id` - (Optional, ForceNew) The Zone to launch the DB instance. it supports multiple zone.
+* `availability_zone` - (Optional, ForceNew) The Zone to launch the DB instance. it supports multiple zone.
 If it is a multi-zone and `vswitch_id` is specified, the vswitch must in one of them.
 The multiple zone ID can be retrieved by setting `multi` to "true" in the data source `alibabacloudstack_zones`.
 * `vswitch_id` - (Optional, ForceNew) The virtual switch ID to launch DB instances in one VPC.
 * `security_ip_list` - (Optional) List of IP addresses allowed to access all databases of an instance. The list contains up to 1,000 IP addresses, separated by commas. Supported formats include 0.0.0.0/0, 10.23.12.24 (IP), and 10.23.12.24/24 (Classless Inter-Domain Routing (CIDR) mode. /24 represents the length of the prefix in an IP address. The range of the prefix length is [1,32]).
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 30 mins) Used when creating the DB instance (until it reaches the initial `Running` status). 
-
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The ID of the Instance.
+* `instance_id` - Alias of key `id`.
+* `status` - The status of the instance.
+* `instance_network_type` - Classic network or VPC.
+* `region_id` - Region ID the instance belongs to.
+
 
 ## Import
 

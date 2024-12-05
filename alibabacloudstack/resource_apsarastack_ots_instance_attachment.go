@@ -48,7 +48,7 @@ func resourceAliyunOtsInstanceAttachmentCreate(d *schema.ResourceData, meta inte
 	request.VirtualSwitchId = d.Get("vswitch_id").(string)
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if vsw, err := vpcService.DescribeVSwitch(d.Get("vswitch_id").(string)); err != nil {
 		return WrapError(err)
 	} else {
@@ -101,7 +101,7 @@ func resourceAliyunOtsInstanceAttachmentDelete(d *schema.ResourceData, meta inte
 	request.InstanceVpcName = object.InstanceVpcName
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	raw, err := client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
 		return otsClient.UnbindInstance2Vpc(request)
 	})

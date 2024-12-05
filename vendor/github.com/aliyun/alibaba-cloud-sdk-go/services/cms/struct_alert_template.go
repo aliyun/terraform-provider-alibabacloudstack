@@ -21,7 +21,7 @@ type AlertTemplate struct {
 	Category    string      `json:"Category" xml:"Category"`
 	Namespace   string      `json:"Namespace" xml:"Namespace"`
 	MetricName  string      `json:"MetricName" xml:"MetricName"`
-	Selector    string      `json:"Selector" xml:"Selector"`
+	Selector    interface{} `json:"Selector" xml:"Selector"`
 	Webhook     string      `json:"Webhook" xml:"Webhook"`
 	Escalations Escalations `json:"Escalations" xml:"Escalations"`
 }

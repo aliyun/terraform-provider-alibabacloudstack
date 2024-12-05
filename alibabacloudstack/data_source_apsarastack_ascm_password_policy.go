@@ -136,7 +136,7 @@ func dataSourceAlibabacloudStackAscmPasswordPoliciesRead(d *schema.ResourceData,
 	request.RegionId = client.RegionId
 	request.ApiName = "GetPasswordPolicy"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeyId": client.AccessKey, "AccessKeySecret": client.SecretKey, "Product": "ascm", "RegionId": client.RegionId, "Action": "GetPasswordPolicy", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Version": "2019-05-10"}
+	request.QueryParams = map[string]string{  "Product": "ascm", "RegionId": client.RegionId, "Action": "GetPasswordPolicy", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Version": "2019-05-10"}
 	response := PasswordPolicy{}
 
 	for {

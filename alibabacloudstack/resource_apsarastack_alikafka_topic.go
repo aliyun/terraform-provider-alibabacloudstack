@@ -82,8 +82,8 @@ func resourceAlibabacloudStackAlikafkaTopicCreate(d *schema.ResourceData, meta i
 	request.Topic = topic
 
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "alikafka",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,
@@ -151,12 +151,9 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 		modifyRemarkRequest.RegionId = client.RegionId
 		modifyRemarkRequest.Topic = topic
 		modifyRemarkRequest.Remark = remark
-
-		
-
 		modifyRemarkRequest.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "alikafka",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -200,12 +197,9 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 			modifyPartitionReq.Topic = topic
 			modifyPartitionReq.AddPartitionNum = requests.NewInteger(newPartitionNum - oldPartitionNum)
 
-			
-
-
 			modifyPartitionReq.QueryParams = map[string]string{
-				"AccessKeySecret": client.SecretKey,
-				"AccessKeyId":     client.AccessKey,
+				
+				
 				"Product":         "alikafka",
 				"RegionId":        client.RegionId,
 				"Department":      client.Department,
@@ -286,8 +280,8 @@ func resourceAlibabacloudStackAlikafkaTopicDelete(d *schema.ResourceData, meta i
 	request.RegionId = client.RegionId
 	request.Domain = client.Config.AlikafkaOpenAPIEndpoint
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "alikafka",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,

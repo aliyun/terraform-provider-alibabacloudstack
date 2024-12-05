@@ -28,9 +28,6 @@ resource "alibabacloudstack_maxcompute_project" "example" {
 
 The following arguments are supported:
 * `name` - (Required, ForceNew) It has been deprecated from provider version 1.110.0 and `project_name` instead.
-* `project_name` - (Required, ForceNew, Available in 1.110.0+) The name of the maxcompute project. 
-* `specification_type` - (Required)  The type of resource Specification, only `OdpsStandard` supported currently.
-* `order_type` - (Required) The type of payment, only `PayAsYouGo` supported currently.
 
 ## Attributes Reference
 

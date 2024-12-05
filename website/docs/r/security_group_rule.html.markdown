@@ -25,7 +25,6 @@ resource "alibabacloudstack_vpc" "vpc" {
 }
 
 resource "alibabacloudstack_security_group" "group" {
-  name   = "new-group"
   vpc_id = "${alibabacloudstack_vpc.vpc.id}"
 }
 
@@ -55,6 +54,8 @@ The following arguments are supported:
 * `cidr_ip` - (Optional, ForceNew) The target IP address range. The default value is 0.0.0.0/0 (which means no restriction will be applied). Other supported formats include 10.159.6.18/12. Only IPv4 is supported.
 * `source_security_group_id` - (Optional, ForceNew) The target security group ID within the same region. If this field is specified, the `nic_type` can only select `intranet`.
 * `source_group_owner_account` - (Optional, ForceNew) The Alibaba Cloud user account Id of the target security group when security groups are authorized across accounts.  This parameter is invalid if `cidr_ip` has already been set.
+* `ipv6_cidr_ip` - (Optional, ForceNew, Available since v1.174.0) Source IPv6 CIDR address block that requires access. Supports IP address ranges in CIDR format and IPv6 format. NOTE: This parameter cannot be set at the same time as the cidr_ip parameter.
+* `description` - (Optional) The description of the security group rule. The description can be up to 1 to 512 characters in length. Defaults to null.
 
 -> **NOTE:**  Either the `source_security_group_id` or `cidr_ip` must be set.
 
@@ -64,6 +65,5 @@ The following attributes are exported:
 
 * `id` - The ID of the security group rule
 * `type` - The type of rule, `ingress` or `egress`
-* `name` - The name of the security group
 * `port_range` - The range of port numbers
 * `ip_protocol` - The protocol of the security group rule

@@ -79,7 +79,7 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 		request.ApiName = "CreateOrganization"
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
+			
 			"Product":         "ascm",
 			//"Department":      client.Department,
 			//"ResourceGroup":   client.ResourceGroup,
@@ -146,7 +146,7 @@ func resourceAlibabacloudStackAscmOrganizationUpdate(d *schema.ResourceData, met
 	request := requests.NewCommonRequest()
 	request.QueryParams = map[string]string{
 		"RegionId":        client.RegionId,
-		"AccessKeySecret": client.SecretKey,
+		
 		//"Department":      client.Department,
 		//"ResourceGroup":   client.ResourceGroup,
 		"Product": "Ascm",
@@ -233,7 +233,7 @@ func resourceAlibabacloudStackAscmOrganizationDelete(d *schema.ResourceData, met
 			}
 			request.QueryParams = map[string]string{
 				"RegionId":        client.RegionId,
-				"AccessKeySecret": client.SecretKey,
+				
 				//"Department":      client.Department,
 				//"ResourceGroup":   client.ResourceGroup,
 				"Product":     "ascm",

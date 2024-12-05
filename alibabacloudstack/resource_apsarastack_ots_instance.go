@@ -70,7 +70,7 @@ func resourceAliyunOtsInstanceCreate(d *schema.ResourceData, meta interface{}) e
 	request.ClusterType = convertInstanceType(OtsInstanceType(instanceType))
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	types, err := otsService.DescribeOtsInstanceTypes()
 	if err != nil {
@@ -137,7 +137,7 @@ func resourceAliyunOtsInstanceUpdate(d *schema.ResourceData, meta interface{}) e
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.InstanceName = d.Id()
 		request.Network = convertInstanceAccessedBy(InstanceAccessedByType(d.Get("accessed_by").(string)))
 		raw, err := client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {
@@ -147,7 +147,7 @@ func resourceAliyunOtsInstanceUpdate(d *schema.ResourceData, meta interface{}) e
 			return WrapErrorf(err, DefaultErrorMsg, d.Id(), request.GetActionName(), AlibabacloudStackSdkGoERROR)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		d.SetPartial("accessed_by")
+
 	}
 
 	if d.HasChange("tags") {
@@ -182,7 +182,7 @@ func resourceAliyunOtsInstanceUpdate(d *schema.ResourceData, meta interface{}) e
 			request.RegionId = client.RegionId
 			request.Headers = map[string]string{"RegionId": client.RegionId}
 
-			request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			request.InstanceName = d.Id()
 			var tags []ots.InsertTagsTagInfo
 			for _, t := range create {
@@ -217,7 +217,7 @@ func resourceAliyunOtsInstanceDelete(d *schema.ResourceData, meta interface{}) e
 	//request.Headers["x-ascm-product-name"] = "Ots"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "Ots", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.InstanceName = d.Id()
 	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithOtsClient(func(otsClient *ots.Client) (interface{}, error) {

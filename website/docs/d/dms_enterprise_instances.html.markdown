@@ -41,6 +41,8 @@ The following arguments are supported:
 * `tid` - (Optional) The ID of the tenant in Data Management (DMS) Enterprise.
 * `name_regex` - (Optional) A regex string to filter the results by the DMS Enterprise Instance instance_alias.
 * `instance_alias_regex` - (Optional) A regex string to filter the results by the DMS Enterprise Instance instance_alias.
+* `instance_state` - (Optional) The status of the database instance.
+* `instance_type` - The type of the database instance.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
@@ -49,6 +51,7 @@ The following attributes are exported in addition to the arguments listed above:
 * `ids` - A list of DMS Enterprise IDs (Each of them consists of host:port).
 * `names` - A list of DMS Enterprise names.
 * `instances` - A list of KMS keys. Each element contains the following attributes:
+  * `id` - The id of the DMS enterprise instance and format as `<host>:<port>`.
   * `data_link_name` - The name of the data link for the database instance.
   * `database_password` - The logon password of the database instance.
   * `database_user` - The logon username of the database instance.
@@ -61,6 +64,7 @@ The following attributes are exported in addition to the arguments listed above:
   * `export_timeout` - The timeout period for exporting the database instance.
   * `host` - The endpoint of the database instance.
   * `instance_alias` - The alias of the database instance.
+  * `instance_name` - Alias of the key `instance_alias`.
   * `instance_id` - The ID of the database instance.
   * `instance_source` - The ID of the database instance.
   * `instance_type` - The ID of the database instance.

@@ -40,7 +40,7 @@ func (s *SlbService) BuildSlbCommonRequest() (*requests.CommonRequest, error) {
 		slbReq.Scheme = "http"
 	}
 	slbReq.Headers = map[string]string{"RegionId": s.client.RegionId}
-	slbReq.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	slbReq.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	req, err := s.client.NewCommonRequest(slbReq.GetProduct(), slbReq.GetLocationServiceCode(), s.client.Config.Protocol, connectivity.ApiVersion20140515)
 	if err != nil {
 		err = WrapError(err)
@@ -59,7 +59,7 @@ func (s *SlbService) DescribeSlb(id string) (*slb.DescribeLoadBalancerAttributeR
 	}
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.LoadBalancerId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeLoadBalancerAttribute(request)
@@ -90,7 +90,7 @@ func (s *SlbService) DescribeSlbRule(id string) (*slb.DescribeRuleAttributeRespo
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.RuleId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeRuleAttribute(request)
@@ -116,7 +116,7 @@ func (s *SlbService) DescribeSlbServerGroup(id string) (*slb.DescribeVServerGrou
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.VServerGroupId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeVServerGroupAttribute(request)
@@ -145,7 +145,7 @@ func (s *SlbService) DescribeSlbMasterSlaveServerGroup(id string) (*slb.Describe
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.MasterSlaveServerGroupId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeMasterSlaveServerGroupAttribute(request)
@@ -174,7 +174,7 @@ func (s *SlbService) DescribeSlbBackendServer(id string) (*slb.DescribeLoadBalan
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.LoadBalancerId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeLoadBalancerAttribute(request)
@@ -204,7 +204,7 @@ func (s *SlbService) DescribeSlbListener(id string) (listener map[string]interfa
 	request, err := s.BuildSlbCommonRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	if err != nil {
 		err = WrapError(err)
@@ -252,7 +252,7 @@ func (s *SlbService) DescribeSlbAcl(id string) (*slb.DescribeAccessControlListAt
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.AclId = id
 
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
@@ -456,7 +456,7 @@ func (s *SlbService) slbRemoveAccessControlListEntryPerTime(list []interface{}, 
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.AclId = id
 	b, err := json.Marshal(list)
 	if err != nil {
@@ -509,7 +509,7 @@ func (s *SlbService) slbAddAccessControlListEntryPerTime(list []interface{}, id 
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.AclId = id
 	b, err := json.Marshal(list)
 	if err != nil {
@@ -592,7 +592,7 @@ func (s *SlbService) DescribeSlbCACertificate(id string) (*slb.CACertificate, er
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.CACertificateId = id
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeCACertificates(request)
@@ -641,7 +641,7 @@ func (s *SlbService) DescribeSlbServerCertificate(id string) (*slb.ServerCertifi
 	}
 	request.ServerCertificateId = id
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.DescribeServerCertificates(request)
@@ -707,7 +707,7 @@ func (s *SlbService) DescribeDomainExtensionAttribute(domainExtensionId string) 
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.DomainExtensionId = domainExtensionId
 	var raw interface{}
 	var err error
@@ -771,7 +771,7 @@ func (s *SlbService) setInstanceTags(d *schema.ResourceData, resourceType TagRes
 		}
 		request := slb.CreateRemoveTagsRequest()
 		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 		request.LoadBalancerId = d.Id()
 		if strings.ToLower(s.client.Config.Protocol) == "https" {
 			request.Scheme = "https"
@@ -813,7 +813,7 @@ func (s *SlbService) setInstanceTags(d *schema.ResourceData, resourceType TagRes
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 		bytes, _ := json.Marshal(create)
 		s2 := string(bytes)
 		request.Tags = fmt.Sprint(s2)
@@ -907,7 +907,7 @@ func (s *SlbService) DescribeTags(resourceId string, resourceTags map[string]int
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.LoadBalancerId = resourceId
 	if resourceTags != nil && len(resourceTags) > 0 {
 		var reqTags []slb.TagSet

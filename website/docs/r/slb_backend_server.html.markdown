@@ -86,15 +86,10 @@ resource "alibabacloudstack_slb_backend_server" "default" {
 The following arguments are supported:
 
 * `load_balancer_id` - (Required) ID of the load balancer.
-* `backend_servers` - (Required) A list of instances to added backend server in the SLB. It contains two sub-fields as `Block server` follows.
 * `delete_protection_validation` - (Optional) Checking DeleteProtection of SLB instance before deleting. If true, this resource will not be deleted when its SLB instance enabled DeleteProtection. Default to false.
-
-## Block servers
-
-The servers mapping supports the following:
-
-* `server_id` - (Required) A list backend server ID (ECS instance ID).
-* `weight` - (Optional) Weight of the backend server. Valid value range: [0-100]. 
+* `backend_servers` - (Required) A list of instances to added backend server in the SLB. It contains two sub-fields as `Block server` follows. The servers mapping supports the following:
+  * `server_id` - (Required) A list backend server ID (ECS instance ID).
+  * `weight` - (Optional) Weight of the backend server. Valid value range: [0-100]. 
 
 ## Attributes Reference
 

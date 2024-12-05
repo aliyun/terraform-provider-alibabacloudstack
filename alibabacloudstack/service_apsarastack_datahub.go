@@ -39,8 +39,8 @@ func (s *DatahubService) DescribeDatahubProject(id string) (*datahub.GetProjectR
 		"x-acs-organizationid":  s.client.Department,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "datahub",
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
@@ -122,8 +122,8 @@ func (s *DatahubService) DescribeDatahubSubscription(id string) (*datahub.GetSub
 		"x-acs-organizationid":  s.client.Department,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":  s.client.SecretKey,
-		"AccessKeyId":      s.client.AccessKey,
+		
+		
 		"Product":          "datahub",
 		"Department":       s.client.Department,
 		"ResourceGroup":    s.client.ResourceGroup,
@@ -216,8 +216,8 @@ func (s *DatahubService) DescribeDatahubTopic(id string) (*GetTopicResult, error
 		"x-acs-organizationid":  s.client.Department,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "datahub",
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,

@@ -64,8 +64,8 @@ func resourceAlibabacloudStackApigatewayVpcAccessCreate(d *schema.ResourceData, 
 	//	"RegionId": client.RegionId,
 	//}
 	//request.QueryParams = map[string]string{
-	//	"AccessKeySecret": client.SecretKey,
-	//	"AccessKeyId":     client.AccessKey,
+	//	
+	//	
 	//	"Product":         "CloudAPI",
 	//	"RegionId":        client.RegionId,
 	//	"Department":      client.Department,
@@ -150,8 +150,8 @@ func resourceAlibabacloudStackApigatewayVpcAccessDelete(d *schema.ResourceData, 
 		"RegionId": client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "CloudAPI",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,

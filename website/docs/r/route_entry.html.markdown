@@ -86,6 +86,7 @@ resource "alibabacloudstack_route_entry" "foo" {
 The following arguments are supported:
 
 * `route_table_id` - (Required, ForceNew) The ID of the route table.
+* `router_id` - (Deprecated) This argument has been deprecated. Please use other arguments to launch a custom route entry.
 * `destination_cidrblock` - (ForceNew) The RouteEntry's target network segment.
 * `nexthop_type` - (ForceNew) The next hop type. Available values:
     - `Instance` (Default): Route the traffic destined for the destination CIDR block to an ECS instance in the VPC.
@@ -96,6 +97,7 @@ The following arguments are supported:
     - `NatGateway`: Route the traffic destined for the destination CIDR block to an Nat Gateway.
 
 * `nexthop_id` - (ForceNew) The route entry's next hop. ECS instance ID or VPC router interface ID.
+* `name` - (Optional, ForceNew, Available in 1.55.1+) The name of the route entry. This name can have a string of 2 to 128 characters, must contain only alphanumeric characters or hyphens, such as "-",".","_", and must not begin or end with a hyphen, and must not begin with http:// or https://.
 
 ## Attributes Reference
 

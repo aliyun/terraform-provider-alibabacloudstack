@@ -62,6 +62,7 @@ The following arguments supported:
 * `dts_instance_id` - (Required, ForceNew) Synchronizing instance ID. The ID of `alibabacloudstack_dts_synchronization_instance`.
 * `synchronization_direction` - (Optional, ForceNew) Synchronization direction. Valid values: `Forward`, `Reverse`. Only when the property `sync_architecture` of the `alibabacloudstack_dts_synchronization_instance` was `bidirectional` this parameter should be passed, otherwise this parameter should not be specified.
 * `dts_job_name` - (Optional, Computed) The name of synchronization job.
+* `dts_job_id` - (Optional, ForceNew)The job ID of Synchronization Instance.
 * `instance_class` - (Optional, Computed) The instance class. Valid values: `large`, `medium`, `micro`, `small`, `xlarge`, `xxlarge`. You can only upgrade the configuration, not downgrade the configuration. If you downgrade the instance, you need to [submit a ticket](https://selfservice.console.aliyun.com/ticket/category/dts/today).
 * `checkpoint` - (Optional, Computed, ForceNew) Start time in Unix timestamp format.
 * `data_initialization` - (Required, ForceNew) Whether or not to execute DTS supports schema migration, full data migration, or full-data initialization values include:
@@ -87,7 +88,7 @@ The following arguments supported:
 * `destination_endpoint_region` - (Optional, ForceNew) The region of destination instance.
 * `destination_endpoint_ip` - (Optional, ForceNew) The ip of source endpoint.
 * `destination_endpoint_port` - (Optional, ForceNew) The port of source endpoint.
-* `destination_endpoint_data_base_name` - (Optional, ForceNew) The name of migrate the database.
+* `destination_endpoint_database_name` - (Optional, ForceNew) The name of migrate the database.
 * `destination_endpoint_user_name` - (Optional, ForceNew) The username of database account.
 * `destination_endpoint_password` - (Optional, ForceNew) The password of database account.
 * `destination_endpoint_oracle_sid` - (Optional, ForceNew) The SID of Oracle database.

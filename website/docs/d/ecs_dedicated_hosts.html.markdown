@@ -38,17 +38,12 @@ The following arguments are supported:
 * `dedicated_host_name` - (Optional) The name of ECS Dedicated Host.
 * `dedicated_host_type` - (Optional) The type of the dedicated host.
 * `operation_locks` - (Optional, Available in 1.123.1+) The reason why the dedicated host resource is locked.
+  * `lock_reason` - (Optional, ForceNew) The reason why the dedicated host resource is locked.
 * `resource_group_id` - (Optional) The ID of the resource group to which the ECS Dedicated Host belongs.
 * `status` - (Optional) The status of the ECS Dedicated Host. validate value: `Available`, `Creating`, `PermanentFailure`, `Released`, `UnderAssessment`.
 * `zone_id` - (Optional) The zone ID of the ECS Dedicated Host.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 * `output_file` - (Optional) Save the result to the file.
-
-#### Block operation_locks
-
-The operation_locks supports the following: 
-
-* `lock_reason` - (Optional, ForceNew) The reason why the dedicated host resource is locked.
 
 ## Attributes Reference
 
@@ -67,6 +62,7 @@ The following attributes are exported in addition to the arguments listed above:
   * `dedicated_host_type` - The type of the dedicated host.
   * `description` - The description of the dedicated host.
   * `expired_time` - The expiration time of the subscription dedicated host.
+  * `zone_id` - (Optional) The zone ID of the ECS Dedicated Host.
   * `gpu_spec` - The GPU model.
   * `machine_id` - The machine code of the dedicated host.
   * `payment_type` - The billing method of the dedicated host.
@@ -94,6 +90,5 @@ The following attributes are exported in addition to the arguments listed above:
     * `lock_reason` - The reason why the dedicated host resource is locked.
   * `supported_instance_type_families` - (Available in 1.123.1+) ECS instance type family supported by the dedicated host.
   * `supported_custom_instance_type_families` - (Available in 1.123.1+) A custom instance type family supported by a dedicated host.
-  
-   
+  * `tags` - (Optional) A mapping of tags to assign to the resource.
     

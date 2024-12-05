@@ -53,6 +53,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The resource ID of Synchronization Instance.
+* `dts_job_id` - The job ID of Synchronization Instance.
 * `status` - The status.
 
 ## Import

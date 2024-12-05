@@ -42,7 +42,7 @@ func testSweepInstances(region string) error {
 		req.Scheme = "http"
 	}
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.RegionId = client.RegionId
 	req.PageSize = requests.NewInteger(PageSizeLarge)
 	req.PageNumber = requests.NewInteger(1)
@@ -707,11 +707,6 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_security_group" "default" {
   name   = "${var.name}"
   vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-resource "alibabacloudstack_ecs_ebs_storage_set" "default" {
-  storage_set_name = "testcc"
-  maxpartition_number = "2"
-  zone_id = data.alibabacloudstack_zones.default.zones[0].id
 }
 resource "alibabacloudstack_security_group_rule" "default" {
   type = "ingress"

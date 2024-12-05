@@ -35,7 +35,7 @@ func testSweepCmsSiteMonitor(region string) error {
 
 	request := cms.CreateDescribeSiteMonitorListRequest()
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "cms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "cms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	raw, err := client.WithCmsClient(func(CmsClient *cms.Client) (interface{}, error) {
 		return CmsClient.DescribeSiteMonitorList(request)
 	})
@@ -64,7 +64,7 @@ func testSweepCmsSiteMonitor(region string) error {
 		log.Printf("[INFO] Deleting Cms Site Monitors: %s (%s)", name, id)
 		req := cms.CreateDeleteSiteMonitorsRequest()
 		req.Headers = map[string]string{"RegionId": client.RegionId}
-		req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "cms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		req.QueryParams = map[string]string{ "Product": "cms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		req.TaskIds = id
 		_, err := client.WithCmsClient(func(CmsClient *cms.Client) (interface{}, error) {
 			return CmsClient.DeleteSiteMonitors(req)
@@ -155,7 +155,7 @@ func testAccCheckCmsSiteMonitorDestroy(s *terraform.State) error {
 
 		request := cms.CreateDescribeSiteMonitorListRequest()
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "cms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "cms", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.TaskId = rs.Primary.ID
 
 		raw, err := client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {

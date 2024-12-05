@@ -145,18 +145,13 @@ The following arguments were support:
 * `sync_architecture` - (Optional) The sync architecture. Valid values: `bidirectional`, `oneway`.
 * `synchronization_direction` - (Optional) The synchronization direction. Valid values: `Forward`, `Reverse`. When the topology type of the data synchronization instance is bidirectional, it can be passed in to reverse to start the reverse synchronization link.
 * `status` - (Optional, Computed) The status of the task. Valid values: `Normal`, `Abnormal`. When a task created, it is in this state of `NotStarted`. You can specify this state to `Normal` to start the job, and specify this state of `Abnormal` to stop the job. **Note: We treat the state `Starting` as the state of `Normal`, and consider the two states to be consistent on the user side.**
+* `tags` - (Optional, Map) The tags of Subscription Job.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The resource ID in terraform of Subscription Job.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `update` - (Defaults to 1 mins) Used when update the Subscription Job.
 
 ## Import
 

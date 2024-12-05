@@ -71,8 +71,8 @@ func (client *Client) GetApplicationWithCallback(request *GetApplicationRequest,
 // GetApplicationRequest is the request struct for api GetApplication
 type GetApplicationRequest struct {
 	*requests.RoaRequest
-	AppId string `position:"Query" name:"AppId"`
-	RegionId string  `position:"Query" name:"RegionId"`
+	AppId    string `position:"Query" name:"AppId"`
+	RegionId string `position:"Query" name:"RegionId"`
 }
 
 // GetApplicationResponse is the response struct for api GetApplication

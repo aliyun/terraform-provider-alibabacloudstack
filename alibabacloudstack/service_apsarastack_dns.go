@@ -3,16 +3,15 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
-	"strings"
-	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"reflect"
+	"strings"
+	"time"
 )
 
 type DnsService struct {
@@ -32,7 +31,7 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "CloudDns",
 		"Action":          "DescribeGlobalZoneRecords",
 		"Version":         "2021-06-24",
@@ -83,7 +82,7 @@ func (s *DnsService) DescribeDnsGroup(id string) (alidns.DomainGroup, error) {
 	var group alidns.DomainGroup
 	request := alidns.CreateDescribeDomainGroupsRequest()
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "alidns"}
+	request.QueryParams = map[string]string{ "Product": "alidns"}
 	request.QueryParams["Department"] = s.client.Department
 	request.QueryParams["ResourceGroup"] = s.client.ResourceGroup
 	request.RegionId = s.client.RegionId
@@ -121,7 +120,7 @@ func (s *DnsService) ListTagResources(id string) (object alidns.ListTagResources
 	request := alidns.CreateListTagResourcesRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "alidns"}
+	request.QueryParams = map[string]string{ "Product": "alidns"}
 	request.QueryParams["Department"] = s.client.Department
 	request.QueryParams["ResourceGroup"] = s.client.ResourceGroup
 
@@ -143,7 +142,7 @@ func (s *DnsService) DescribeDnsDomainAttachment(id string) (object alidns.Descr
 	request := alidns.CreateDescribeInstanceDomainsRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "alidns"}
+	request.QueryParams = map[string]string{ "Product": "alidns"}
 	request.QueryParams["Department"] = s.client.Department
 	request.QueryParams["ResourceGroup"] = s.client.ResourceGroup
 
@@ -221,7 +220,7 @@ func (s *DnsService) SetResourceTags(d *schema.ResourceData, resourceType string
 		request := alidns.CreateUntagResourcesRequest()
 		request.RegionId = s.client.RegionId
 		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "alidns"}
+		request.QueryParams = map[string]string{ "Product": "alidns"}
 		request.QueryParams["Department"] = s.client.Department
 		request.QueryParams["ResourceGroup"] = s.client.ResourceGroup
 
@@ -240,7 +239,7 @@ func (s *DnsService) SetResourceTags(d *schema.ResourceData, resourceType string
 		request := alidns.CreateTagResourcesRequest()
 		request.RegionId = s.client.RegionId
 		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "alidns"}
+		request.QueryParams = map[string]string{ "Product": "alidns"}
 		request.QueryParams["Department"] = s.client.Department
 		request.QueryParams["ResourceGroup"] = s.client.ResourceGroup
 
@@ -277,8 +276,8 @@ func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err err
 	request.ApiName = "DescribeGlobalZones"
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
-		"AccessKeyId":     s.client.AccessKey,
+		
+		
 		"Product":         "CloudDns",
 		"RegionId":        s.client.RegionId,
 		"Action":          "DescribeGlobalZones",

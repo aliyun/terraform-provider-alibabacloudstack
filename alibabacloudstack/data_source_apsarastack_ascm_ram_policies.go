@@ -30,11 +30,12 @@ func dataSourceAlibabacloudStackAscmRamPolicies() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"names": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
+			//未消费参数
+// 			"names": {
+// 				Type:     schema.TypeList,
+// 				Computed: true,
+// 				Elem:     &schema.Schema{Type: schema.TypeString},
+// 			},
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -94,8 +95,8 @@ func dataSourceAlibabacloudStackAscmRamPoliciesRead(d *schema.ResourceData, meta
 	request.ApiName = "ListRamPolicies"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeyId":     client.AccessKey,
-		"AccessKeySecret": client.SecretKey,
+		
+		
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
 		"Product":         "ascm",

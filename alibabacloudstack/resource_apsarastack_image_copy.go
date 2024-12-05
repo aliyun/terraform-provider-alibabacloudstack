@@ -65,7 +65,7 @@ func resourceAlibabacloudStackImageCopyCreate(d *schema.ResourceData, meta inter
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.ImageId = d.Get("source_image_id").(string)
 	request.DestinationRegionId = d.Get("destination_region_id").(string)
 	request.DestinationImageName = d.Get("image_name").(string)

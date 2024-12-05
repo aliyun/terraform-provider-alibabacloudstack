@@ -24,7 +24,7 @@ func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInst
 	request := dds.CreateDescribeDBInstanceAttributeRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	request.DBInstanceId = id
 	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 		return client.DescribeDBInstanceAttribute(request)
@@ -102,7 +102,7 @@ func (s *MongoDBService) DescribeMongoDBSecurityIps(instanceId string) (ips []st
 	request := dds.CreateDescribeSecurityIpsRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.DBInstanceId = instanceId
 
@@ -143,7 +143,7 @@ func (s *MongoDBService) ModifyMongoDBSecurityIps(instanceId, ips string) error 
 	request := dds.CreateModifySecurityIpsRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.DBInstanceId = instanceId
 	request.SecurityIps = ips
@@ -168,7 +168,7 @@ func (s *MongoDBService) DescribeMongoDBSecurityGroupId(id string) (*dds.Describ
 	request := dds.CreateDescribeSecurityGroupConfigurationRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.DBInstanceId = id
 	if err := s.WaitForMongoDBInstance(id, Running, DefaultTimeoutMedium); err != nil {
@@ -206,7 +206,7 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 			request := dds.CreateCreateNodeRequest()
 			request.RegionId = server.client.RegionId
 			request.Headers = map[string]string{"RegionId": server.client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": server.client.SecretKey, "Product": "dds", "Department": server.client.Department, "ResourceGroup": server.client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "dds", "Department": server.client.Department, "ResourceGroup": server.client.ResourceGroup}
 
 			request.DBInstanceId = instanceID
 			request.NodeClass = node["node_class"].(string)
@@ -245,7 +245,7 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 			request := dds.CreateDeleteNodeRequest()
 			request.RegionId = server.client.RegionId
 			request.Headers = map[string]string{"RegionId": server.client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": server.client.SecretKey, "Product": "dds", "Department": server.client.Department, "ResourceGroup": server.client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "dds", "Department": server.client.Department, "ResourceGroup": server.client.ResourceGroup}
 
 			request.DBInstanceId = instanceID
 			request.NodeId = node["node_id"].(string)
@@ -277,7 +277,7 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 			request := dds.CreateModifyNodeSpecRequest()
 			request.RegionId = server.client.RegionId
 			request.Headers = map[string]string{"RegionId": server.client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": server.client.SecretKey, "Product": "dds", "Department": server.client.Department, "ResourceGroup": server.client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "dds", "Department": server.client.Department, "ResourceGroup": server.client.ResourceGroup}
 
 			request.DBInstanceId = instanceID
 			request.NodeClass = diff["node_class"].(string)
@@ -313,7 +313,7 @@ func (s *MongoDBService) DescribeMongoDBBackupPolicy(id string) (*dds.DescribeBa
 	request := dds.CreateDescribeBackupPolicyRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.DBInstanceId = id
 	raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
@@ -333,7 +333,7 @@ func (s *MongoDBService) DescribeMongoDBTDEInfo(id string) (*dds.DescribeDBInsta
 	request := dds.CreateDescribeDBInstanceTDEInfoRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.DBInstanceId = id
 	statErr := s.WaitForMongoDBInstance(id, Running, DefaultLongTimeout)
@@ -375,7 +375,7 @@ func (s *MongoDBService) DescribeDBInstanceSSL(id string) (*dds.DescribeDBInstan
 
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.DBInstanceId = id
 	raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
@@ -400,7 +400,7 @@ func (s *MongoDBService) MotifyMongoDBBackupPolicy(d *schema.ResourceData) error
 	request := dds.CreateModifyBackupPolicyRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.DBInstanceId = d.Id()
 	request.PreferredBackupPeriod = backupPeriod
@@ -422,7 +422,7 @@ func (s *MongoDBService) ResetAccountPassword(d *schema.ResourceData, password s
 	request := dds.CreateResetAccountPasswordRequest()
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 	request.DBInstanceId = d.Id()
 	request.AccountName = "root"
@@ -455,7 +455,7 @@ func (s *MongoDBService) setInstanceTags(d *schema.ResourceData) error {
 		request.TagKey = &tagKey
 		request.RegionId = s.client.RegionId
 		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 		raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
 			return ddsClient.UntagResources(request)
@@ -473,7 +473,7 @@ func (s *MongoDBService) setInstanceTags(d *schema.ResourceData) error {
 		request.ResourceType = "INSTANCE"
 		request.RegionId = s.client.RegionId
 		request.Headers = map[string]string{"RegionId": s.client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": s.client.SecretKey, "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "dds", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 
 		raw, err := s.client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
 			return ddsClient.TagResources(request)

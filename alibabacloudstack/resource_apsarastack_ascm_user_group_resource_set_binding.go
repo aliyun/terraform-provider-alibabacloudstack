@@ -1,17 +1,16 @@
 package alibabacloudstack
 
 import (
-	"log"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"log"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func resourceAlibabacloudStackAscmUserGroupResourceSetBinding() *schema.Resource {
@@ -85,7 +84,7 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate(d *schema.Re
 
 	request.QueryParams = map[string]string{
 		"RegionId":        client.RegionId,
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "Ascm",
 		"Action":          "AddResourceSetToUserGroup",
 		"Version":         "2019-05-10",
@@ -155,7 +154,7 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingDelete(d *schema.Re
 		}
 		request.QueryParams = map[string]string{
 			"RegionId":        client.RegionId,
-			"AccessKeySecret": client.SecretKey,
+			
 			"Product":         "ascm",
 			"Action":          "RemoveResourceSetFromUserGroup",
 			"Version":         "2019-05-10",

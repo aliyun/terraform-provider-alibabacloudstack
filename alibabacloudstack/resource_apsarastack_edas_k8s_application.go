@@ -224,20 +224,20 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
-			"traffic_control_protocol": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "http",
-			},
-			"traffic_control_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "percent",
-			},
-			"traffic_control_value": {
-				Type:     schema.TypeInt,
-				Optional: true,
-			},
+// 			"traffic_control_protocol": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 				Default:  "http",
+// 			},
+// 			"traffic_control_type": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 				Default:  "percent",
+// 			},
+// 			"traffic_control_value": {
+// 				Type:     schema.TypeInt,
+// 				Optional: true,
+// 			},
 		},
 	}
 }

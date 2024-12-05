@@ -93,17 +93,12 @@ The following arguments are supported:
 
 * `load_balancer_id` - (Required, ForceNew) The Load Balancer ID which is used to launch a new virtual server group.
 * `name` - (Optional) Name of the virtual server group. Our plugin provides a default name: "tf-server-group".
-* `servers` - A list of ECS instances to be added. At most 20 ECS instances can be supported in one resource. It contains three sub-fields as `Block server` follows.
 * `delete_protection_validation` - (Optional) Checking DeleteProtection of SLB instance before deleting. If true, this resource will not be deleted when its SLB instance enabled DeleteProtection. Default to false.
-
-## Block servers
-
-The servers mapping supports the following:
-
-* `server_ids` - (Required) A list backend server ID (ECS instance ID).
-* `port` - (Required) The port used by the backend server. Valid value range: [1-65535].
-* `weight` - (Optional) Weight of the backend server. Valid value range: [0-100]. Default to 100.
-* `type` - (Optional) Type of the backend server. Valid value ecs, eni. Default to eni.
+* `servers` - A list of ECS instances to be added. At most 20 ECS instances can be supported in one resource. It contains three sub-fields as `Block server` follows. The servers mapping supports the following:
+  * `server_ids` - (Required) A list backend server ID (ECS instance ID).
+  * `port` - (Required) The port used by the backend server. Valid value range: [1-65535].
+  * `weight` - (Optional) Weight of the backend server. Valid value range: [0-100]. Default to 100.
+  * `type` - (Optional) Type of the backend server. Valid value ecs, eni. Default to eni.
 
 ## Attributes Reference
 

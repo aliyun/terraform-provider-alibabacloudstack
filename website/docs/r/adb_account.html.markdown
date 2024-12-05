@@ -61,6 +61,9 @@ resource "alibabacloudstack_adb_account" "account" {
 
 The following arguments are supported:
 
+* `account_type` - (Optional, ForceNew) The type of the database account. Default Value: Super. Valid values:
+  * Normal: standard account. Up to 256 standard accounts can be created for a cluster.
+  * Super: privileged account. Only a single privileged account can be created for a cluster.
 * `db_cluster_id` - (Required, ForceNew) The Id of cluster in which account belongs.
 * `account_name` - (Required, ForceNew) Operation account requiring a uniqueness check. It may consist of lower case letters, numbers, and underlines, and must start with a letter and have no more than 16 characters.
 * `account_password` - (Optional) Operation password. It may consist of letters, digits, or underlines, with a length of 6 to 32 characters. You have to specify one of `account_password` and `kms_encrypted_password` fields.

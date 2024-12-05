@@ -172,14 +172,14 @@ func (r *Request) SetMultiValueFormData(params url.Values) *Request {
 //		resty.R().
 //			SetBody(User{
 //				Username: "jeeva@myjeeva.com",
-//				Password: "inputYourCodeHere",
+//				Password: "welcome2resty",
 //			})
 //
 // Map as a body input, based on content type, it will be marshalled.
 //		resty.R().
 //			SetBody(map[string]interface{}{
 //				"username": "jeeva@myjeeva.com",
-//				"password": "inputYourCodeHere",
+//				"password": "welcome2resty",
 //				"address": &Address{
 //					Address1: "1111 This is my street",
 //					Address2: "Apt 201",
@@ -193,7 +193,7 @@ func (r *Request) SetMultiValueFormData(params url.Values) *Request {
 //		resty.R().
 //			SetBody(`{
 //				"username": "jeeva@getrightcare.com",
-//				"password": "inputYourCodeHere"
+//				"password": "admin"
 //			}`)
 //
 // []byte as a body input. Suitable for raw request such as file upload, serialize & deserialize, etc.
@@ -330,7 +330,7 @@ func (r *Request) SetContentLength(l bool) *Request {
 // For Header example:
 //		Authorization: Basic <base64-encoded-value>
 //
-// To set the header for username "go-resty" and password "inputYourCodeHere"
+// To set the header for username "go-resty" and password "welcome"
 // 		resty.R().SetBasicAuth("go-resty", "welcome")
 //
 // This method overrides the credentials set by method `resty.SetBasicAuth`.

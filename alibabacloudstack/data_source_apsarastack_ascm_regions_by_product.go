@@ -72,7 +72,7 @@ func dataSourceAlibabacloudStackRegionsByProductRead(d *schema.ResourceData, met
 	request.RegionId = client.RegionId
 	request.ApiName = "GetRegionsByProduct"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeyId": client.AccessKey, "AccessKeySecret": client.SecretKey, "Product": "ascm", "RegionId": client.RegionId, "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Action": "GetRegionsByProduct", "Version": "2019-05-10"}
+	request.QueryParams = map[string]string{  "Product": "ascm", "RegionId": client.RegionId, "Department": client.Department, "ResourceGroup": client.ResourceGroup, "Action": "GetRegionsByProduct", "Version": "2019-05-10"}
 	response := RegionsByProduct{}
 
 	for {

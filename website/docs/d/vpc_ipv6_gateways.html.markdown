@@ -67,14 +67,14 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `names` - A list of Ipv6 Gateway names.
 * `gateways` - A list of Vpc Ipv6 Gateways. Each element contains the following attributes:
-	* `business_status` - The status of the IPv6 gateway. Valid values:`Normal`, `FinancialLocked` and `SecurityLocked`. `Normal`: working as expected. `FinancialLocked`: locked due to overdue payments. `SecurityLocked`: locked due to security reasons.
-	* `create_time` - The creation time of the resource.
-	* `description` - The description of the IPv6 gateway.
-	* `expired_time` - The time when the IPv6 gateway expires.
-	* `id` - The ID of the Ipv6 Gateway.
-	* `instance_charge_type` - The metering method of the IPv6 gateway. Valid values: `PayAsYouGo`.
-	* `ipv6_gateway_id` - The first ID of the resource.
-	* `ipv6_gateway_name` - The name of the IPv6 gateway.
-	* `spec` - The specification of the IPv6 gateway. Valid values: `Large`, `Medium` and `Small`. `Small` (default): Free Edition. `Medium`: Enterprise Edition . `Large`: Enhanced Enterprise Edition. The throughput capacity of an IPv6 gateway varies based on the edition. For more information, see [Editions of IPv6 gateways](https://www.alibabacloud.com/help/doc-detail/98926.htm).
-	* `status` - The status of the IPv6 gateway. Valid values: `Available`, `Deleting`, `Pending`.
-	* `vpc_id` - The ID of the virtual private cloud (VPC) to which the IPv6 gateway belongs.
+  * `business_status` - The status of the IPv6 gateway. Valid values:`Normal`, `FinancialLocked` and `SecurityLocked`. `Normal`: working as expected. `FinancialLocked`: locked due to overdue payments. `SecurityLocked`: locked due to security reasons.
+  * `create_time` - The creation time of the resource.
+  * `description` - The description of the IPv6 gateway.
+  * `expired_time` - The time when the IPv6 gateway expires.
+  * `id` - The ID of the Ipv6 Gateway.
+  * `instance_charge_type` - The metering method of the IPv6 gateway. Valid values: `PayAsYouGo`.
+  * `ipv6_gateway_id` - The first ID of the resource.
+  * `ipv6_gateway_name` - The name of the IPv6 gateway.
+  * `spec` - The specification of the IPv6 gateway. Valid values: `Large`, `Medium` and `Small`. `Small` (default): Free Edition. `Medium`: Enterprise Edition . `Large`: Enhanced Enterprise Edition. The throughput capacity of an IPv6 gateway varies based on the edition. For more information, see [Editions of IPv6 gateways](https://www.alibabacloud.com/help/doc-detail/98926.htm).
+  * `status` - The status of the IPv6 gateway. Valid values: `Available`, `Deleting`, `Pending`.
+  * `vpc_id` - The ID of the virtual private cloud (VPC) to which the IPv6 gateway belongs.

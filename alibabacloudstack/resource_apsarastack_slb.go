@@ -76,7 +76,7 @@ func resourceAlibabacloudStackSlbCreate(d *schema.ResourceData, meta interface{}
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.LoadBalancerName = d.Get("name").(string)
 	request.AddressType = strings.ToLower(string(Intranet))
 	request.ClientToken = buildClientToken(request.GetActionName())
@@ -178,7 +178,7 @@ func resourceAlibabacloudStackSlbUpdate(d *schema.ResourceData, meta interface{}
 		}
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.LoadBalancerId = d.Id()
 		request.LoadBalancerSpec = d.Get("specification").(string)
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
@@ -199,7 +199,7 @@ func resourceAlibabacloudStackSlbUpdate(d *schema.ResourceData, meta interface{}
 		}
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.LoadBalancerId = d.Id()
 		request.LoadBalancerName = d.Get("name").(string)
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
@@ -219,7 +219,7 @@ func resourceAlibabacloudStackSlbUpdate(d *schema.ResourceData, meta interface{}
 		modifyLoadBalancerInternetSpecRequest.Scheme = "http"
 	}
 	modifyLoadBalancerInternetSpecRequest.Headers = map[string]string{"RegionId": client.RegionId}
-	modifyLoadBalancerInternetSpecRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	modifyLoadBalancerInternetSpecRequest.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	modifyLoadBalancerInternetSpecRequest.RegionId = client.RegionId
 	modifyLoadBalancerInternetSpecRequest.LoadBalancerId = d.Id()
 	if update {
@@ -241,7 +241,7 @@ func resourceAlibabacloudStackSlbUpdate(d *schema.ResourceData, meta interface{}
 		modifyLoadBalancerPayTypeRequest.Scheme = "http"
 	}
 	modifyLoadBalancerInternetSpecRequest.Headers = map[string]string{"RegionId": client.RegionId}
-	modifyLoadBalancerInternetSpecRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	modifyLoadBalancerInternetSpecRequest.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	modifyLoadBalancerPayTypeRequest.LoadBalancerId = d.Id()
 
 	if update {
@@ -270,7 +270,7 @@ func resourceAlibabacloudStackSlbDelete(d *schema.ResourceData, meta interface{}
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "slb", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.LoadBalancerId = d.Id()
 
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {

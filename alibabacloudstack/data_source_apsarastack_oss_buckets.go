@@ -73,174 +73,174 @@ func dataSourceAlibabacloudStackOssBuckets() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+// 后续未使用的参数
+// 						"cors_rules": {
+// 							Type:     schema.TypeList,
+// 							Computed: true,
+// 							Elem: &schema.Resource{
+// 								Schema: map[string]*schema.Schema{
+// 									"allowed_headers": {
+// 										Type:     schema.TypeList,
+// 										Computed: true,
+// 										Elem:     &schema.Schema{Type: schema.TypeString},
+// 									},
+// 									"allowed_methods": {
+// 										Type:     schema.TypeList,
+// 										Computed: true,
+// 										Elem:     &schema.Schema{Type: schema.TypeString},
+// 									},
+// 									"allowed_origins": {
+// 										Type:     schema.TypeList,
+// 										Computed: true,
+// 										Elem:     &schema.Schema{Type: schema.TypeString},
+// 									},
+// 									"expose_headers": {
+// 										Type:     schema.TypeList,
+// 										Computed: true,
+// 										Elem:     &schema.Schema{Type: schema.TypeString},
+// 									},
+// 									"max_age_seconds": {
+// 										Type:     schema.TypeInt,
+// 										Computed: true,
+// 									},
+// 								},
+// 							},
+// 						},
 
-						"cors_rules": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"allowed_headers": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem:     &schema.Schema{Type: schema.TypeString},
-									},
-									"allowed_methods": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem:     &schema.Schema{Type: schema.TypeString},
-									},
-									"allowed_origins": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem:     &schema.Schema{Type: schema.TypeString},
-									},
-									"expose_headers": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem:     &schema.Schema{Type: schema.TypeString},
-									},
-									"max_age_seconds": {
-										Type:     schema.TypeInt,
-										Computed: true,
-									},
-								},
-							},
-						},
+// 						"website": {
+// 							Type: schema.TypeList,
+// 							//Computed: true,
+// 							Optional: true,
+// 							Elem: &schema.Resource{
+// 								Schema: map[string]*schema.Schema{
+// 									"index_document": {
+// 										Type:     schema.TypeString,
+// 										Computed: true,
+// 									},
+// 
+// 									"error_document": {
+// 										Type:     schema.TypeString,
+// 										Computed: true,
+// 									},
+// 								},
+// 							},
+// 							MaxItems: 1,
+// 						},
 
-						"website": {
-							Type: schema.TypeList,
-							//Computed: true,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"index_document": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
+// 						"logging": {
+// 							Type: schema.TypeList,
+// 							//Computed: true,
+// 							Optional: true,
+// 							Elem: &schema.Resource{
+// 								Schema: map[string]*schema.Schema{
+// 									"target_bucket": {
+// 										Type:     schema.TypeString,
+// 										Computed: true,
+// 									},
+// 									"target_prefix": {
+// 										Type:     schema.TypeString,
+// 										Computed: true,
+// 									},
+// 								},
+// 							},
+// 							MaxItems: 1,
+// 						},
 
-									"error_document": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-							MaxItems: 1,
-						},
+// 						"referer_config": {
+// 							Type: schema.TypeList,
+// 							//Computed: true,
+// 							Optional: true,
+// 							Elem: &schema.Resource{
+// 								Schema: map[string]*schema.Schema{
+// 									"allow_empty": {
+// 										Type:     schema.TypeBool,
+// 										Computed: true,
+// 									},
+// 									"referers": {
+// 										Type:     schema.TypeList,
+// 										Computed: true,
+// 										Elem:     &schema.Schema{Type: schema.TypeString},
+// 									},
+// 								},
+// 							},
+// 							MaxItems: 1,
+// 						},
 
-						"logging": {
-							Type: schema.TypeList,
-							//Computed: true,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"target_bucket": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"target_prefix": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-							MaxItems: 1,
-						},
+// 						"lifecycle_rule": {
+// 							Type:     schema.TypeList,
+// 							Computed: true,
+// 							Elem: &schema.Resource{
+// 								Schema: map[string]*schema.Schema{
+// 									"id": {
+// 										Type:     schema.TypeString,
+// 										Computed: true,
+// 									},
+// 									"prefix": {
+// 										Type:     schema.TypeString,
+// 										Computed: true,
+// 									},
+// 									"enabled": {
+// 										Type:     schema.TypeBool,
+// 										Computed: true,
+// 									},
+// 									"expiration": {
+// 										Type: schema.TypeList,
+// 										//Computed: true,
+// 										Optional: true,
+// 										Elem: &schema.Resource{
+// 											Schema: map[string]*schema.Schema{
+// 												"date": {
+// 													Type:     schema.TypeString,
+// 													Optional: true,
+// 												},
+// 												"days": {
+// 													Type:     schema.TypeInt,
+// 													Optional: true,
+// 												},
+// 											},
+// 										},
+// 										MaxItems: 1,
+// 									},
+// 								},
+// 							},
+// 						},
 
-						"referer_config": {
-							Type: schema.TypeList,
-							//Computed: true,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"allow_empty": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"referers": {
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem:     &schema.Schema{Type: schema.TypeString},
-									},
-								},
-							},
-							MaxItems: 1,
-						},
+// 						"policy": {
+// 							Type:     schema.TypeString,
+// 							Optional: true,
+// 						},
 
-						"lifecycle_rule": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"id": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"prefix": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"enabled": {
-										Type:     schema.TypeBool,
-										Computed: true,
-									},
-									"expiration": {
-										Type: schema.TypeList,
-										//Computed: true,
-										Optional: true,
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"date": {
-													Type:     schema.TypeString,
-													Optional: true,
-												},
-												"days": {
-													Type:     schema.TypeInt,
-													Optional: true,
-												},
-											},
-										},
-										MaxItems: 1,
-									},
-								},
-							},
-						},
+// 						"server_side_encryption_rule": {
+// 							Type: schema.TypeList,
+// 							//Computed: true,
+// 							Optional: true,
+// 							Elem: &schema.Resource{
+// 								Schema: map[string]*schema.Schema{
+// 									"sse_algorithm": {
+// 										Type:     schema.TypeString,
+// 										Computed: true,
+// 									},
+// 								},
+// 							},
+// 							MaxItems: 1,
+// 						},
 
-						"policy": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
+// 						"tags": tagsSchemaComputed(),
 
-						"server_side_encryption_rule": {
-							Type: schema.TypeList,
-							//Computed: true,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"sse_algorithm": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-							MaxItems: 1,
-						},
-
-						"tags": tagsSchemaComputed(),
-
-						"versioning": {
-							Type: schema.TypeList,
-							//Computed: true,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"status": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-								},
-							},
-							MaxItems: 1,
-						},
+// 						"versioning": {
+// 							Type: schema.TypeList,
+// 							//Computed: true,
+// 							Optional: true,
+// 							Elem: &schema.Resource{
+// 								Schema: map[string]*schema.Schema{
+// 									"status": {
+// 										Type:     schema.TypeString,
+// 										Computed: true,
+// 									},
+// 								},
+// 							},
+// 							MaxItems: 1,
+// 						},
 					},
 				},
 			},
@@ -265,7 +265,7 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 		}
 		request.QueryParams = map[string]string{
 
-			"AccessKeySecret": client.SecretKey,
+			
 			"Product":         "OneRouter",
 			//"Department":       client.Department,
 			//"ResourceGroup":    client.ResourceGroup,

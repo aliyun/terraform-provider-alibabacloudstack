@@ -108,3 +108,4 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The scaling rule ID.
+* `ari` - The unique identifier of the scaling rule. 

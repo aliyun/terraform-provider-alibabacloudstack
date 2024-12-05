@@ -42,10 +42,10 @@ The following arguments are supported:
 
 * `ids` - (Optional)  A list of ENI IDs.
 * `name_regex` - (Optional) A regex string to filter results by ENI name.
+* `vpc_id` - (Optional) The VPC ID linked to ENIs.
 * `vswitch_id` - (Optional) The VSwitch ID linked to ENIs.
 * `private_ip` - (Optional) The primary private IP address of the ENI.
 * `security_group_id` - (Optional) The security group ID linked to ENIs.
-* `name` - (Optional) The name of the ENIs.
 * `type` - (Optional) The type of ENIs, Only support for "Primary" or "Secondary".
 * `instance_id` - (Optional) The ECS instance ID that the ENI is attached to.
 * `tags` - (Optional) A map of tags assigned to ENIs.
@@ -55,17 +55,20 @@ The following arguments are supported:
 
 The following attributes are exported in addition to the arguments listed above:
 
+* `names` - A list of ENI names.
 * `interfaces` - A list of ENIs. Each element contains the following attributes:
-    * `id` - ID of the ENI.
-    * `status` - Current status of the ENI.
-    * `vswitch_id` - ID of the VSwitch that the ENI is linked to.
-    * `zone_id` - ID of the availability zone that the ENI belongs to.
-    * `public_ip` - Public IP of the ENI.
-    * `private_ip` - Primary private IP of the ENI.
-    * `private_ips` - A list of secondary private IP address that is assigned to the ENI.
-    * `security_groups` - A list of security group that the ENI belongs to.
-    * `name` - Name of the ENI.
-    * `description` - Description of the ENI.
-    * `instance_id` - ID of the instance that the ENI is attached to.
-    * `creation_time` - Creation time of the ENI.
-    * `tags` - A map of tags assigned to the ENI.
+  * `id` - ID of the ENI.
+  * `status` - Current status of the ENI.
+  * `vpc_id` - ID of the VPC that the ENI belongs to.
+  * `vswitch_id` - ID of the VSwitch that the ENI is linked to.
+  * `zone_id` - ID of the availability zone that the ENI belongs to.
+  * `public_ip` - Public IP of the ENI.
+  * `private_ip` - Primary private IP of the ENI.
+  * `private_ips` - A list of secondary private IP address that is assigned to the ENI.
+  * `mac` - MAC address of the ENI.
+  * `security_groups` - A list of security group that the ENI belongs to.
+  * `name` - Name of the ENI.
+  * `description` - Description of the ENI.
+  * `instance_id` - ID of the instance that the ENI is attached to.
+  * `creation_time` - Creation time of the ENI.
+  * `tags` - A map of tags assigned to the ENI.

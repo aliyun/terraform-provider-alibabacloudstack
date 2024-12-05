@@ -87,12 +87,6 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Optional:     true,
 				Default:      PostPaid,
 			},
-			"series": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"community", "enterprise"}, false),
-			},
 			"period": {
 				Type:             schema.TypeInt,
 				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
@@ -183,7 +177,7 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				ValidateFunc:     validation.StringInSlice([]string{"MASTER_SLAVE", "readone"}, false),
+				ValidateFunc:     validation.StringInSlice([]string{"MASTER_SLAVE", "STAND_ALONE"}, false),
 				DiffSuppressFunc: NodeTypeDiffSuppressFunc,
 			},
 			"architecture_type": {
@@ -192,6 +186,12 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Computed:         true,
 				ValidateFunc:     validation.StringInSlice([]string{"cluster", "rwsplit", "standard"}, false),
 				DiffSuppressFunc: ArchitectureTypeDiffSuppressFunc,
+			},
+			"series": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"community", "enterprise"}, false),
 			},
 		},
 	}
@@ -204,7 +204,7 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	// request := r_kvstore.CreateCreateInstanceRequest()
 	// request.RegionId = client.RegionId
 	// request.Headers = map[string]string{"RegionId": client.RegionId}
-	// request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	// request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	// if v, ok := d.GetOk("instance_name"); ok && v.(string) != "" {
 	// 	request.InstanceName = v.(string)
 	// }
@@ -337,6 +337,9 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	if v, ok := d.GetOk("password"); ok {
 		request["Password"] = v.(string)
 	}
+	if v, ok := d.GetOk("series"); ok {
+		request["Series"] = v.(string)
+	}
 
 	if request["Password"] == "" {
 		if v := d.Get("kms_encrypted_password").(string); v != "" {
@@ -436,7 +439,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 		request := r_kvstore.CreateModifySecurityIpsRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.SecurityIpGroupName = "default"
 		request.InstanceId = d.Id()
 		if len(d.Get("security_ips").(*schema.Set).List()) > 0 {
@@ -471,7 +474,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 				request := r_kvstore.CreateModifyInstanceVpcAuthModeRequest()
 				request.RegionId = client.RegionId
 				request.Headers = map[string]string{"RegionId": client.RegionId}
-				request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+				request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 				request.InstanceId = d.Id()
 				request.VpcAuthMode = d.Get("vpc_auth_mode").(string)
 
@@ -497,7 +500,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 		prePaidRequest := r_kvstore.CreateTransformToPrePaidRequest()
 		prePaidRequest.RegionId = client.RegionId
 		prePaidRequest.Headers = map[string]string{"RegionId": client.RegionId}
-		prePaidRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		prePaidRequest.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		prePaidRequest.InstanceId = d.Id()
 		prePaidRequest.Period = requests.Integer(strconv.Itoa(d.Get("period").(int)))
 
@@ -521,7 +524,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 		request := r_kvstore.CreateModifyInstanceMaintainTimeRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.InstanceId = d.Id()
 		request.MaintainStartTime = d.Get("maintain_start_time").(string)
 		request.MaintainEndTime = d.Get("maintain_end_time").(string)
@@ -551,7 +554,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 		request := r_kvstore.CreateModifyInstanceSpecRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.InstanceId = d.Id()
 		request.InstanceClass = d.Get("instance_class").(string)
 		request.EffectiveTime = "Immediately"
@@ -599,7 +602,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 	request := r_kvstore.CreateModifyInstanceAttributeRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.InstanceId = d.Id()
 	update := false
 	if d.HasChange("instance_name") {
@@ -681,7 +684,7 @@ func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta i
 		request := r_kvstore.CreateDescribeInstanceAutoRenewalAttributeRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.DBInstanceId = d.Id()
 
 		raw, err := client.WithRkvClient(func(client *r_kvstore.Client) (interface{}, error) {
@@ -722,7 +725,7 @@ func resourceAlibabacloudStackKVStoreInstanceDelete(d *schema.ResourceData, meta
 	request := r_kvstore.CreateDeleteInstanceRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.InstanceId = d.Id()
 
 	raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
@@ -753,7 +756,7 @@ func buildKVStoreCreateRequest(d *schema.ResourceData, meta interface{}) (*r_kvs
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.InstanceName = Trim(d.Get("instance_name").(string))
 
 	request.InstanceType = Trim(d.Get("instance_type").(string))

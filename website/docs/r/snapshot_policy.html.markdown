@@ -36,10 +36,8 @@ The following arguments are supported:
 * `time_points` - (Required) The automatic snapshot creation schedule, and the unit of measurement is hour. Value range: [0, 23], which represents from 00:00 to 24:00,  for example 1 indicates 01:00. When you want to schedule multiple automatic snapshot tasks for a disk in a day, you can set the TimePoints to an array.
                                  - A maximum of 24 time points can be selected.
                                  - The format is  an JSON array of ["0", "1", … "23"] and the time points are separated by commas (,).
-  
-* `disk_ids` - (Optional) The IDs of the disks to apply an automatic snapshot policy.
-* `enable_automated_snapshot_policy` - (Optional) To apply an automatic snapshot policy to one or more disks.
-                                 
+* `tags` - (Optional) A mapping of tags to assign to the resource.
+
 ## Attributes Reference
 
 The following attributes are exported:

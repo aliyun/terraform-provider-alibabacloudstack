@@ -40,13 +40,7 @@ The following arguments are supported:
 * `name` - (Optional) The name of the switch. Defaults to null.
 * `description` - (Optional) The switch description. Defaults to null.
 * `ipv6_cidr_block` - (Optional) The ipv6 cidr block of VPC.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 10 mins) Used when creating the vswitch (until it reaches the initial `Available` status). 
-* `delete` - (Defaults to 10 mins) Used when terminating the vswitch. 
+* `tags` - (Optional, Map) The tags of VSwitch.
 
 ## Attributes Reference
 

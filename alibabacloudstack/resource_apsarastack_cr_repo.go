@@ -3,13 +3,12 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"strings"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
+	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -96,8 +95,8 @@ func resourceAlibabacloudStackCRRepoCreate(d *schema.ResourceData, meta interfac
 	request.ApiName = "CreateRepo"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "cr",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
@@ -154,8 +153,8 @@ func resourceAlibabacloudStackCRRepoUpdate(d *schema.ResourceData, meta interfac
 		request.ApiName = "UpdateRepo"
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "cr",
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
@@ -230,8 +229,8 @@ func resourceAlibabacloudStackCRRepoDelete(d *schema.ResourceData, meta interfac
 	request.ApiName = "DeleteRepo"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "cr",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,

@@ -32,8 +32,10 @@ The following arguments are supported:
 * `bucket` - (Optional, ForceNew) The name of the bucket. If omitted, Terraform will assign a random and unique name.
 * `acl` - (Optional) It Can be "private", "public-read" and "public-read-write". Defaults to "private".
 * `logging` - (Optional) The logging object supports the following:
-    - `target_bucket` - (Required) The name of the bucket that will receive the log objects.
-    - `target_prefix` - (Optional) To specify a key prefix for log objects. 
+  * `target_bucket` - (Required) The name of the bucket that will receive the log objects.
+  * `target_prefix` - (Optional) To specify a key prefix for log objects. 
+* `storage_class` - (Optional, ForceNew) Object storage type. Possible values: `Standard`, `IA` and `Archive`.
+* `vpclist` - (Optional) List of accessible VPCs
 
 ## Attributes Reference
 
@@ -46,5 +48,4 @@ The following attributes are exported:
 * `intranet_endpoint` - The intranet access endpoint of the bucket.
 * `location` - The location of the bucket.
 * `owner` - The bucket owner.
-
 

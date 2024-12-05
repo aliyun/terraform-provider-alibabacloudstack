@@ -82,7 +82,7 @@ func resourceAlibabacloudStackCrEERepoCreate(d *schema.ResourceData, meta interf
 	request.ApiName = "CreateRepository"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":   client.SecretKey,
+		
 		"Product":           "cr-ee",
 		"Department":        client.Department,
 		"ResourceGroup":     client.ResourceGroup,
@@ -136,7 +136,7 @@ func resourceAlibabacloudStackCrEERepoRead(d *schema.ResourceData, meta interfac
 	request.ApiName = "ListRepository"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":   client.SecretKey,
+		
 		"Product":           "cr-ee",
 		"Department":        client.Department,
 		"ResourceGroup":     client.ResourceGroup,
@@ -191,7 +191,7 @@ func resourceAlibabacloudStackCrEERepoUpdate(d *schema.ResourceData, meta interf
 		request.ApiName = "UpdateRepository"
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
+			
 			"Product":         "cr-ee",
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
@@ -240,7 +240,7 @@ func resourceAlibabacloudStackCrEERepoDelete(d *schema.ResourceData, meta interf
 	request.ApiName = "DeleteRepository"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "cr-ee",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,

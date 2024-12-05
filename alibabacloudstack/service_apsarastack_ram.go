@@ -533,7 +533,7 @@ func (s *RamService) DescribeRamRoleAttachment(id string) (*ecs.DescribeInstance
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Product":         "ecs", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup,
 	}
 	request.InstanceIds = fmt.Sprintf("[\"%s\"]", parts[1])

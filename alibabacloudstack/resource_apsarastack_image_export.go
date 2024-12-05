@@ -52,7 +52,7 @@ func resourceAlibabacloudStackImageExportCreate(d *schema.ResourceData, meta int
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.ImageId = d.Get("image_id").(string)
 	request.OSSBucket = d.Get("oss_bucket").(string)
 	request.OSSPrefix = d.Get("oss_prefix").(string)
@@ -116,8 +116,8 @@ func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta int
 	}
 	request.QueryParams = map[string]string{
 		"RegionId":        client.RegionId,
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "OneRouter",
 		"Action":          "DoApi",
 		"AppAction":       "DeleteObjects",

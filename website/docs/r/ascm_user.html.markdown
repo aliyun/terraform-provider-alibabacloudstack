@@ -36,12 +36,13 @@ output "org" {
 The following arguments are supported:
 
 * `login_name` - (Required) User login name. 
-* `cell_phone_number` - (Required) Cellphone Number of a user.
+* `cellphone_number` - (Required) Cellphone Number of a user.
 * `display_name` - (Required) Display name of a user.
 * `email` - (Required) Email ID of a user.
 * `mobile_nation_code` - (Required) Mobile Nation Code of a user, where user belongs to.
 * `organization_id` - (Required) User Organization ID.
 * `login_policy_id` - (Optional) User login policy ID.
+* `role_ids` - A list of the user owned roles.
 
 ## Attributes Reference
 
@@ -49,3 +50,4 @@ The following attributes are exported:
 
 * `id` - Login Name of the user.
 * `user_id` - The ID of the user.
+* `init_password` - Init Password of the user.

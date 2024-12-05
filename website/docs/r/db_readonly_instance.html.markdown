@@ -88,7 +88,9 @@ The following arguments are supported:
     cloud_essd3: specifies to use enhanced SSDs (ESSDs).
     
 -> **NOTE:** Because of data backup and migration, change DB instance type and storage would cost 15~20 minutes. Please make full preparation before changing them.
-
+* `parameters` - (Optional) Set of parameters needs to be set after DB instance was launched. Available parameters can refer to the latest docs View database parameter templates.
+  * `name` - (Required) The parameter name.
+  * `value` - (Required) The parameter value.
 ## Attributes Reference
 
 The following attributes are exported:
@@ -97,15 +99,6 @@ The following attributes are exported:
 * `engine` - Database type.
 * `port` - RDS database connection port.
 * `connection_string` - RDS database connection string.
-
-### Timeouts
-
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 60 mins) Used when creating the db instance (until it reaches the initial `Running` status). 
-* `update` - (Defaults to 30 mins) Used when updating the db instance (until it reaches the initial `Running` status). 
-* `delete` - (Defaults to 20 mins) Used when terminating the db instance. 
 
 ## Import
 

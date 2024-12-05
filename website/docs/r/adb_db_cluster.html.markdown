@@ -72,6 +72,8 @@ The following arguments are supported:
 * `db_node_count` - (Optional) The db node count.
 * `db_node_storage` - (Optional) The db node storage.
 * `description` - (Optional, Computed) The description of DBCluster.
+* `executor_count` - The number of nodes. The node resources are used for data computing in elastic mode.
+* `instance_inner_port` - (Optional, ForceNew)The endpoint's port of the cluster.
 * `maintain_time` - (Optional, Computed) The maintenance window of the cluster. Format: hh:mmZ-hh:mmZ.
 * `mode` - (Required) The mode of the cluster. Valid values: `reserver`, `flexible`.
 * `modify_type` - (Optional) The modify type.
@@ -82,11 +84,12 @@ The following arguments are supported:
 * `renewal_status` - (Optional) Valid values are `AutoRenewal`, `Normal`, `NotRenewal`, Default to `NotRenewal`.
 * `resource_group_id` - (Optional, Computed) The ID of the resource group.
 * `security_ips` - (Optional, Computed) List of IP addresses allowed to access all databases of an cluster. The list contains up to 1,000 IP addresses, separated by commas. Supported formats include 0.0.0.0/0, 10.23.12.24 (IP), and 10.23.12.24/24 (Classless Inter-Domain Routing (CIDR) mode. /24 represents the length of the prefix in an IP address. The range of the prefix length is [1,32]).
+* `storage_type` - (Optional) The type of storage media that is used for the instance.
+* `storage_resource` - The specifications of storage resources in elastic mode. The resources are used for data read and write operations. The increase of resources can improve the read and write performance of your cluster. For more information, see [Specifications](https://www.alibabacloud.com/help/en/doc-detail/144851.htm).
 * `vswitch_id` - (Optional, ForceNew) The vswitch id.
 * `zone_id` - (Optional, Computed, ForceNew) The zone ID of the resource.
 * `cluster_type` - (Required) The cluster type of the resource. Valid values: `analyticdb`, `AnalyticdbOnPanguHybrid`.
 * `cpu_type` - (Required) The cpu type of the resource.Valid values: `intel`.
-
 -> **NOTE:** Because of data backup and migration, change DB cluster type and storage would cost 15~30 minutes. Please make full preparation before changing them.
 
 ### Removing alibabacloudstack_adb_cluster from your configuration
@@ -98,16 +101,9 @@ The alibabacloudstack_adb_cluster resource allows you to manage your adb cluster
 The following attributes are exported:
 
 * `id` - The resource ID in terraform of DBCluster.
-* `connection_string` - The endpoint of the cluster.
+* `instance_inner_connection` - The endpoint of the cluster.
+* `instance_vpc_id` - The Vpc id.
 * `status` - The status of the resource.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 50 mins) Used when create the DBCluster.
-* `delete` - (Defaults to 50 mins) Used when delete the DBCluster.
-* `update` - (Defaults to 72 mins) Used when update the DBCluster.
 
 ## Import
 

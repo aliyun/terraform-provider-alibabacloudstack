@@ -166,7 +166,7 @@ func dataSourceAlibabacloudStackDisksRead(d *schema.ResourceData, meta interface
 	request.Headers = map[string]string{"RegionId": client.RegionId, "Content-Type": requests.Json}
 	PageNumber := 1
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "ecs",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,

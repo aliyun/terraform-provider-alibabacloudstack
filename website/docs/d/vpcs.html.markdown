@@ -53,6 +53,7 @@ The following attributes are exported in addition to the arguments listed above:
 * `vpcs` - A list of VPCs. Each element contains the following attributes:
   * `id` - ID of the VPC.
   * `region_id` - ID of the region where the VPC is located.
+  * `resource_group_id` - (Optional) The Id of resource group which VPC belongs.
   * `status` - Status of the VPC.
   * `vpc_name` - Name of the VPC.
   * `vswitch_ids` - List of VSwitch IDs in the specified VPC
@@ -68,5 +69,6 @@ The following attributes are exported in addition to the arguments listed above:
   * `secondary_cidr_blocks` - A list of secondary IPv4 CIDR blocks of the VPC.
   * `user_cidrs` - A list of user CIDRs.
   * `vpc_id` - ID of the VPC.
+  * `available_ip_address_count` - available ip count
 
  

@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack ROS Stack resource.
 ---
 
-# alicloud\_ros\_stack
+# alibabacloudstack\_ros\_stack
 
 Provides a ROS Stack resource.
 
@@ -53,7 +53,9 @@ The following arguments are supported:
 * `ram_role_name` - (Optional) The name of the RAM role. ROS assumes the specified RAM role to create the stack and call API operations by using the credentials of the role.
 * `replacement_option` - (Optional) Specifies whether to enable replacement update after a resource attribute that does not support modification update is changed. Modification update keeps the physical ID of the resource unchanged. However, the resource is deleted and then recreated, and its physical ID is changed if replacement update is enabled.
 * `retain_all_resources` - (Optional) The retain all resources.
-* `parameters` - (Optional) The parameters. If the parameter name and value are not specified, ROS will use the default value specified in the template.
+* `parameters` - (Optional) The parameters. If the parameter name and value are not specified, ROS will use the default value specified in the template. The parameters supports the following: 
+  * `parameter_key` - (Required) The parameter key.
+  * `parameter_value` - (Required) The parameter value.
 * `retain_resources` - (Optional) Specifies whether to retain the resources in the stack.
 * `stack_name` - (Required, ForceNew) The name can be up to 255 characters in length and can contain digits, letters, hyphens (-), and underscores (_). It must start with a digit or letter.
 * `stack_policy_body` - (Optional) The structure that contains the stack policy body. The stack policy body must be 1 to 16,384 bytes in length.
@@ -67,27 +69,12 @@ The following arguments are supported:
 * `use_previous_parameters` - (Optional) Specifies whether to use the values that were passed last time for the parameters that you do not specify in the current request.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 
-#### Block parameters
-
-The parameters supports the following: 
-
-* `parameter_key` - (Required) The parameter key.
-* `parameter_value` - (Required) The parameter value.
-
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The resource ID in terraform of Stack. Value as `stack_id`.
 * `status` - The status of Stack.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 11 mins) Used when create the Stack.
-* `delete` - (Defaults to 6 mins) Used when delete the Stack.
-* `update` - (Defaults to 11 mins) Used when update the Stack.
 
 ## Import
 

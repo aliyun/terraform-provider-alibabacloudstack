@@ -225,8 +225,8 @@ func Provider() *schema.Provider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"alibabacloudstack_account":                                dataSourceAlibabacloudStackAccount(),
-			"alibabacloudstack_adb_clusters":                           dataSourceAlibabacloudStackAdbDbClusters(),
+			"alibabacloudstack_account": dataSourceAlibabacloudStackAccount(),
+			//"alibabacloudstack_adb_clusters":                           dataSourceAlibabacloudStackAdbDbClusters(),
 			"alibabacloudstack_adb_zones":                              dataSourceAlibabacloudStackAdbZones(),
 			"alibabacloudstack_adb_db_clusters":                        dataSourceAlibabacloudStackAdbDbClusters(),
 			"alibabacloudstack_api_gateway_apis":                       dataSourceAlibabacloudStackApiGatewayApis(),
@@ -328,7 +328,8 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_ons_groups":                             dataSourceAlibabacloudStackOnsGroups(),
 			"alibabacloudstack_ots_tables":                             dataSourceAlibabacloudStackOtsTables(),
 			"alibabacloudstack_ots_instances":                          dataSourceAlibabacloudStackOtsInstances(),
-			"alibabacloudstack_ots_instances_attachment":               dataSourceAlibabacloudStackOtsInstanceAttachments(),
+			"alibabacloudstack_ots_instance_attachments":               dataSourceAlibabacloudStackOtsInstanceAttachments(),
+			"alibabacloudstack_ots_instance_attachment":               dataSourceAlibabacloudStackOtsInstanceAttachments(),
 			"alibabacloudstack_ots_service":                            dataSourceAlibabacloudStackOtsService(),
 			"alibabacloudstack_quick_bi_users":                         dataSourceAlibabacloudStackQuickBiUsers(),
 			"alibabacloudstack_router_interfaces":                      dataSourceAlibabacloudStackRouterInterfaces(),
@@ -371,13 +372,13 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_express_connect_physical_connections":   dataSourceAlibabacloudStackExpressConnectPhysicalConnections(),
 			"alibabacloudstack_express_connect_access_points":          dataSourceAlibabacloudStackExpressConnectAccessPoints(),
 			"alibabacloudstack_express_connect_virtual_border_routers": dataSourceAlibabacloudStackExpressConnectVirtualBorderRouters(),
-			"alibabacloudStack_cloud_firewall_control_policies":        dataSourceAlibabacloudStackCloudFirewallControlPolicies(),
+			"alibabacloudstack_cloud_firewall_control_policies":        dataSourceAlibabacloudStackCloudFirewallControlPolicies(),
 			"alibabacloudstack_ecs_ebs_storage_sets":                   dataSourceAlibabacloudStackEcsEbsStorageSets(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"alibabacloudstack_ess_scaling_configuration":             resourceAlibabacloudStackEssScalingConfiguration(),
-			"alibabacloudstack_adb_account":                           resourceAlibabacloudStackAdbAccount(),
-			"alibabacloudstack_adb_backup_policy":                     resourceAlibabacloudStackAdbBackupPolicy(),
+			"alibabacloudstack_ess_scaling_configuration": resourceAlibabacloudStackEssScalingConfiguration(),
+			"alibabacloudstack_adb_account":               resourceAlibabacloudStackAdbAccount(),
+			"alibabacloudstack_adb_backup_policy":         resourceAlibabacloudStackAdbBackupPolicy(),
 			"alibabacloudstack_adb_cluster":                           resourceAlibabacloudStackAdbDbCluster(),
 			"alibabacloudstack_adb_connection":                        resourceAlibabacloudStackAdbConnection(),
 			"alibabacloudstack_adb_db_cluster":                        resourceAlibabacloudStackAdbDbCluster(),
@@ -1403,7 +1404,6 @@ func getResourceCredentials(config *connectivity.Config) (string, string, error)
 	}
 	request.ApiName = "ListResourceGroup"
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":   config.SecretKey,
 		"Product":           "ascm",
 		"Department":        config.Department,
 		"ResourceGroup":     config.ResourceGroup,

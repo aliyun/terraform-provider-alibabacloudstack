@@ -1,11 +1,10 @@
 package alibabacloudstack
 
 import (
-	"strings"
-	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"strings"
+	"time"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -55,8 +54,8 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	request.ApiName = "CreateProject"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "SLS",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,
@@ -125,8 +124,8 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 		request.ApiName = "UpdateProject"
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "SLS",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -168,8 +167,8 @@ func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta inte
 	request.ApiName = "DeleteProject"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "SLS",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,

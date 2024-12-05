@@ -38,9 +38,10 @@ The following arguments are supported:
 * `domain` - (Optional, ForceNew) The deployment domain. Valid values: `Default`.
 * `granularity` - (Optional, ForceNew) The deployment granularity. Valid values: `Host`.
 * `on_unable_to_redeploy_failed_instance` - (Optional) The on unable to redeploy failed instance. Valid values: `CancelMembershipAndStart`, `KeepStopped`.
-  * `CancelMembershipAndStart` - Removes the instances from the deployment set and restarts the instances immediately after the failover is complete.
-  * `KeepStopped`- Keeps the instances in the abnormal state and restarts them after ECS resources are replenished. 
+  * CancelMembershipAndStart - Removes the instances from the deployment set and restarts the instances immediately after the failover is complete.
+  * KeepStopped- Keeps the instances in the abnormal state and restarts them after ECS resources are replenished. 
 * `strategy` - (Optional, ForceNew) The deployment strategy. Valid values: `Availability`.
+* `tags` - (Optional, Map) The tags of Deployment Set.
 
 ## Attributes Reference
 

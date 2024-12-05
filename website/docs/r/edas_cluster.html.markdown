@@ -34,7 +34,7 @@ The following arguments are supported:
 * `cluster_name` - (Required, ForceNew) The name of the cluster that you want to create.
 * `cluster_type` - (Required, ForceNew) The type of the cluster that you want to create. Valid values only: 2: ECS cluster.
 * `network_mode` - (Required, ForceNew) The network type of the cluster that you want to create. Valid values: 1: classic network. 2: VPC.
-* `logical_region_id` - (Optional, ForceNew) The ID of the namespace where you want to create the application. You can call the ListUserDefineRegion operation to query the namespace ID.
+* `region_id` - (Optional, ForceNew) The ID of the namespace where you want to create the application. You can call the ListUserDefineRegion operation to query the namespace ID.
 * `vpc_id` - (Optional, ForceNew) The ID of the Virtual Private Cloud (VPC) for the cluster.
 
 ## Attributes Reference

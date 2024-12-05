@@ -190,7 +190,7 @@ resp, err := resty.R().
 // No need to set content type, if you have client level setting
 resp, err := resty.R().
       SetHeader("Content-Type", "application/json").
-      SetBody(`{"username":"testuser", "password":"inputYourCodeHere"}`).
+      SetBody(`{"username":"testuser", "password":"testpass"}`).
       SetResult(&AuthSuccess{}).    // or SetResult(AuthSuccess{}).
       Post("https://myapp.com/login")
 
@@ -198,20 +198,20 @@ resp, err := resty.R().
 // No need to set content type, if you have client level setting
 resp, err := resty.R().
       SetHeader("Content-Type", "application/json").
-      SetBody([]byte(`{"username":"testuser", "password":"inputYourCodeHere"}`)).
+      SetBody([]byte(`{"username":"testuser", "password":"testpass"}`)).
       SetResult(&AuthSuccess{}).    // or SetResult(AuthSuccess{}).
       Post("https://myapp.com/login")
 
 // POST Struct, default is JSON content type. No need to set one
 resp, err := resty.R().
-      SetBody(User{Username: "testuser", Password: "inputYourCodeHere"}).
+      SetBody(User{Username: "testuser", Password: "testpass"}).
       SetResult(&AuthSuccess{}).    // or SetResult(AuthSuccess{}).
       SetError(&AuthError{}).       // or SetError(AuthError{}).
       Post("https://myapp.com/login")
 
 // POST Map, default is JSON content type. No need to set one
 resp, err := resty.R().
-      SetBody(map[string]interface{}{"username": "testuser", "password": "inputYourCodeHere"}).
+      SetBody(map[string]interface{}{"username": "testuser", "password": "testpass"}).
       SetResult(&AuthSuccess{}).    // or SetResult(AuthSuccess{}).
       SetError(&AuthError{}).       // or SetError(AuthError{}).
       Post("https://myapp.com/login")
@@ -361,7 +361,7 @@ resp, err := resty.R().
 resp, err := resty.R().
       SetFormData(map[string]string{
         "username": "jeeva",
-        "password": "inputYourCodeHere",
+        "password": "mypass",
       }).
       Post("http://myapp.com/login")
 

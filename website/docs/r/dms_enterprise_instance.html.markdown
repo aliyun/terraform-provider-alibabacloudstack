@@ -67,14 +67,12 @@ The following attributes are exported:
 
 * `id` - The id of the DMS enterprise instance and format as `<host>:<port>`.
 * `dba_nick_name` - The instance dba nickname.
-* `state` - It has been deprecated from provider version 1.100.0 and 'status' instead.
+* `state` - (Deprecated)It has been deprecated from provider version 1.100.0 and 'status' instead.
 * `status` - The instance status.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 1 mins) Used when creating the DMS enterprise instance. 
+* `dba_id` - (Optio nal) The dba id of the database instance.
+* `safe_rule_id` - (Optional) The safe rule id of the database instance.
+* `instance_id` - The ID of the database instance.
+* `skip_test` - (Optional) Whether the instance ignores test connectivity. Valid values: true, false.
 
 ## Import
 

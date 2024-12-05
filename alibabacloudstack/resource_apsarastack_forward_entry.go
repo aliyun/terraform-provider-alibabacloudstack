@@ -1,14 +1,13 @@
 package alibabacloudstack
 
 import (
-	"strings"
-	"time"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"strings"
+	"time"
 )
 
 func resourceAlibabacloudStackForwardEntry() *schema.Resource {
@@ -71,7 +70,7 @@ func resourceAlibabacloudStackForwardEntryCreate(d *schema.ResourceData, meta in
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.ForwardTableId = d.Get("forward_table_id").(string)
 	request.ExternalIp = d.Get("external_ip").(string)
 	request.ExternalPort = d.Get("external_port").(string)
@@ -156,7 +155,7 @@ func resourceAlibabacloudStackForwardEntryUpdate(d *schema.ResourceData, meta in
 	request.RegionId = string(client.Region)
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.ForwardEntryId = parts[1]
 	request.ForwardTableId = parts[0]
 
@@ -214,7 +213,7 @@ func resourceAlibabacloudStackForwardEntryDelete(d *schema.ResourceData, meta in
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.ForwardTableId = parts[0]
 	request.ForwardEntryId = parts[1]
 

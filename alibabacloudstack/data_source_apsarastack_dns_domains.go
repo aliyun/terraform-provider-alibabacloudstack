@@ -3,14 +3,13 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"regexp"
-	"strings"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"regexp"
+	"strings"
 )
 
 func dataSourceAlibabacloudStackDnsDomains() *schema.Resource {
@@ -23,32 +22,33 @@ func dataSourceAlibabacloudStackDnsDomains() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"group_name_regex": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
+// 后续未消费使用
+// 			"group_name_regex": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 				ForceNew: true,
+// 			},
 			"ids": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			"ali_domain": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				ForceNew: true,
-			},
-			"instance_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
-			"version_code": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
+// 			"ali_domain": {
+// 				Type:     schema.TypeBool,
+// 				Optional: true,
+// 				ForceNew: true,
+// 			},
+// 			"instance_id": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 				ForceNew: true,
+// 			},
+// 			"version_code": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 				ForceNew: true,
+// 			},
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -58,11 +58,11 @@ func dataSourceAlibabacloudStackDnsDomains() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"resource_group_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
+// 			"resource_group_id": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 				ForceNew: true,
+// 			},
 			// Computed values
 			"domains": {
 				Type:     schema.TypeList,
@@ -77,30 +77,30 @@ func dataSourceAlibabacloudStackDnsDomains() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"ali_domain": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"group_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"group_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"instance_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"version_code": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"puny_code": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
+// 						"ali_domain": {
+// 							Type:     schema.TypeBool,
+// 							Computed: true,
+// 						},
+// 						"group_id": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
+// 						"group_name": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
+// 						"instance_id": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
+// 						"version_code": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
+// 						"puny_code": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
 						"dns_servers": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -108,7 +108,7 @@ func dataSourceAlibabacloudStackDnsDomains() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
-						"tags": tagsSchema(),
+// 						"tags": tagsSchema(),
 					},
 				},
 			},
@@ -133,8 +133,8 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 	request.ApiName = "DescribeGlobalZones"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret":   client.SecretKey,
-		"AccessKeyId":       client.AccessKey,
+		
+		
 		"Product":           "CloudDns",
 		"RegionId":          client.RegionId,
 		"Action":            "DescribeGlobalZones",

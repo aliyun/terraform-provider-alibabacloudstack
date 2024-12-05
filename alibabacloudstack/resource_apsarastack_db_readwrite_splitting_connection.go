@@ -80,7 +80,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionCreate(d *schema.Res
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = Trim(d.Get("instance_id").(string))
 	request.MaxDelayTime = strconv.Itoa(d.Get("max_delay_time").(int))
 
@@ -191,7 +191,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate(d *schema.Res
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = d.Id()
 
 	update := false
@@ -263,7 +263,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionDelete(d *schema.Res
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = d.Id()
 
 	if err := resource.Retry(30*time.Minute, func() *resource.RetryError {

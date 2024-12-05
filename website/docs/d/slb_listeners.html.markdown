@@ -46,6 +46,7 @@ The following attributes are exported in addition to the arguments listed above:
   * `bandwidth` - Peak bandwidth. If the value is set to -1, the listener is not limited by bandwidth.
   * `scheduler` - Algorithm used to distribute traffic. Possible values: `wrr` (weighted round robin), `wlc` (weighted least connection) and `rr` (round robin).
   * `server_group_id` - ID of the linked VServer group.
+  * `server_certificate_id` - ID of the server certificate
   * `master_slave_server_group_id` - ID of the active/standby server group.
   * `persistence_timeout` - Timeout value of the TCP connection in seconds. If the value is 0, the session persistence function is disabled. Only available when the protocol is `tcp`.
   * `established_timeout` - Connection timeout in seconds for the Layer 4 TCP listener. Only available when the protocol is `tcp`.

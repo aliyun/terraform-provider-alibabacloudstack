@@ -200,6 +200,7 @@ The following arguments are supported:
 
 #### Global params
 * `name` - (Optional) The kubernetes cluster's name. It is unique in one Alibabacloudstack account.
+* `cluster_type` - (Optional) Cluster type, Default is "Kubernetes".
 * `version` - (Optional) Desired Kubernetes version. If you do not specify a value, the latest available version at resource creation is used and no upgrades will occur except you set a higher version number. The value must be configured and increased to upgrade the version when desired. Downgrades are not supported by ACK.
 * `password` - (Required, Sensitive) The password of ssh login cluster node. You have to specify one of `password` `key_name` `kms_encrypted_password` fields.
 * `kms_encrypted_password` - (Required) An KMS encrypts password used to a cs kubernetes. You have to specify one of `password` `key_name` `kms_encrypted_password` fields.
@@ -217,7 +218,17 @@ The following arguments are supported:
 * `tags` - (Optional) A mapping of tags to assign to the resource.
     - Key: It can be up to 64 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It cannot be a null string.
     - Value: It can be up to 128 characters in length. It cannot begin with "aliyun", "acs:", "http://", or "https://". It can be a null string.
-    
+* `keep_instance_name` - (Optional) Add an existing instance to the node pool, whether to keep the original instance name. It is recommended to set to `true`.
+* `format_disk` - (Optional,) After you select this, if data disks have been attached to the specified ECS instances and the file system of the last data disk is uninitialized, the system automatically formats the last data disk to ext4 and mounts the data disk to /var/lib/docker and /var/lib/kubelet. The original data on the disk will be cleared. Make sure that you back up data in advance. If no data disk is mounted on the ECS instance, no new data disk will be purchased. Default is `false`.
+* `image_id` - (Optional) Custom Image support. Must based on CentOS7 or AliyunLinux2.
+* `timeout_mins` - (Required) Backend service time-out time; unit: minute，Default is 60.
+* `delete_protection` - Whether the instance should delete protection.
+* `kms_encryption_context` - (Optional, MapString) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating a cs kubernetes with `kms_encrypted_password`. See [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm). It is valid when `kms_encrypted_password` is set.
+* `addons` - (Optional) The addon you want to install in cluster.
+  * `name` - (Optional) Name of the ACK add-on. The name must match one of the names returned by DescribeAddons.
+  * `config` - (Optional) The ACK add-on configurations. For more config information, see [cs_kubernetes_addon_metadata](https://registry.terraform.io/providers/aliyun/alicloud/latest/docs/data-sources/cs_kubernetes_addon_metadata).
+* `cloud_monitor_flags` - (Optional) Whether to install cloud monitoring plugin.
+
 #### Network
 * `pod_cidr` - (Required) [Flannel Specific] The CIDR block for the pod network when using Flannel. 
 * `pod_vswitch_ids` - (Required) [Terway Specific] The vswitches for the pod network when using Terway.Be careful the `pod_vswitch_ids` can not equal to `worker_vswtich_ids` or `master_vswtich_ids` but must be in same availability zones.
@@ -230,14 +241,15 @@ If you want to use `Terway` as CNI network plugin, You need to specify the `pod_
 If you want to use `Flannel` as CNI network plugin, You need to specify the `pod_cidr` field and addons with `flannel`.
 
 #### Master params
+* `master_count` - (Optional) Number of master nodes. Default:3. 
 * `master_disk_category` - (Optional) The system disk category of master node. Its valid value are `cloud_ssd` and `cloud_efficiency`. Default to `cloud_efficiency`.
 * `master_disk_size` - (Optional) The system disk size of master node. Its valid value range [20~500] in GB. Default to 20.
-* `master_vswtich_ids` - (Required) The vswitches used by master, you can specific 3 or 5 vswitches because of the amount of masters. Detailed below.
+* `master_vswitch_ids` - (Required) The vswitches used by master, you can specific 3 or 5 vswitches because of the amount of masters. Detailed below.
 * `master_instance_types` - (Required) The instance type of master node. Specify one type for single AZ Cluster, three types for MultiAZ Cluster.
 * `master_system_disk_performance_level` - (Optional) 
 #### Worker params 
 * `num_of_nodes` - (Required) The worker node number of the kubernetes cluster. Default to 3. It is limited up to 50 and if you want to enlarge it, please apply white list or contact with us.
-* `worker_vswtich_ids` - (Required) The vswitches used by worker, you can specific 1 or more than 1 vswitches.
+* `worker_vswitch_ids` - (Required) The vswitches used by worker, you can specific 1 or more than 1 vswitches.
 * `worker_data_disks` - (Optional) The configurations of the data disks that are mounted to worker nodes. Each configuration includes disk type and disk size.
   * `category` - (Optional) The data disk category of worker node. Its valid value are cloud, cloud_ssd, cloud_essd and cloud_efficiency.
   * `size` - (Optional) The data disk size of worker node. Its valid value range [40~500] in GB.
@@ -255,13 +267,10 @@ If you want to use `Flannel` as CNI network plugin, You need to specify the `pod
 * `client_key` - (Optional) The path of client key, like `~/.kube/client-key.pem`.
 * `cluster_ca_cert` - (Optional) The path of cluster ca certificate, like `~/.kube/cluster-ca-cert.pem`
 * `availability_zone` - (Optional) The Zone where new kubernetes cluster will be located. If it is not be specified, the `vswitch_ids` should be set, its value will be vswitch's zone.
-  
-### Timeouts
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 
-* `create` - (Defaults to 90 mins) Used when creating the kubernetes cluster (until it reaches the initial `running` status). 
-* `update` - (Defaults to 60 mins) Used when activating the kubernetes cluster when necessary during update.
-* `delete` - (Defaults to 60 mins) Used when terminating the kubernetes cluster. 
+#### Removed Params
+* `nodes` - (Removed) The master nodes, use master_nodes to instead it.
+* `node_port_range` - (Removed) The service port range of nodes, valid values: 30000 to 65535. Default to 30000-32767.
 
 ## Attributes Reference
 
@@ -276,7 +285,6 @@ The following attributes are exported:
 * `nat_gateway_id` - The ID of nat gateway used to launch kubernetes cluster.
 * `master_nodes` - List of cluster master nodes. It contains several attributes to `Block Nodes`.
 * `worker_nodes` - List of cluster worker nodes. It contains several attributes to `Block Nodes`.
-* `connections` - Map of kubernetes cluster connection information. It contains several attributes to `Block Connections`.
 * `version` - The Kubernetes server version for the cluster.
 * `worker_ram_role_name` - The RamRole Name attached to worker node.
 * `nodepool_id`- Id of the NodePool
@@ -288,16 +296,4 @@ The following attributes are exported:
   * `id`- Id of the Node.
   * `name`- Name of the Node.
   * `private_ip`- The private IP address of node.
-
-### Block Nodes
-* `id` - ID of the node.
-* `name` - Node name.
-* `private_ip` - The private IP address of node.
-
-
-### Block Connections
-* `api_server_internet` - API Server Internet endpoint.
-* `api_server_intranet` - API Server Intranet endpoint.
-* `master_public_ip` - Master node SSH IP address.
-* `service_domain` - Service Access Domain.
 

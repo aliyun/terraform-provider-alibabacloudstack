@@ -92,7 +92,8 @@ The following arguments are supported:
 * `zone_id` - (Optional, ForceNew) The Zone to launch the HBase instance. If vswitch_id is not empty, this zone_id can be "" or consistent.
 * `engine` - (Optional, ForceNew) Valid values are "hbase/hbaseue/bds". The following types are supported after v1.73.0: `hbaseue` and `bds`. Single hbase instance need to set engine=hbase, core_instance_quantity=1.
 * `engine_version` - (Required, ForceNew) HBase major version. hbase:1.1/2.0, hbaseue:2.0, bds:1.0, unsupport other engine temporarily. Value options can refer to the latest docs [CreateInstance](https://help.aliyun.com/document_detail/144607.html).
-* `master_instance_type`, `core_instance_type` - (Required, ForceNew) Instance specification. See [Instance specifications](https://help.aliyun.com/document_detail/53532.html), or you can call describeInstanceType api.
+* `master_instance_type` - (Required, ForceNew) Instance specification. See [Instance specifications](https://help.aliyun.com/document_detail/53532.html), or you can call describeInstanceType api.
+* `core_instance_type` - (Required, ForceNew) Instance specification. See [Instance specifications](https://help.aliyun.com/document_detail/53532.html), or you can call describeInstanceType api.
 * `core_instance_quantity`- (Optional) Default=2, [1-200]. If core_instance_quantity > 1, this is cluster's instance. If core_instance_quantity = 1, this is a single instance.
 * `core_disk_type`-  (Optional, ForceNew) Valid values are `cloud_ssd`, `cloud_essd_pl1`, `cloud_efficiency`, `local_hdd_pro`, `local_ssd_pro`，``, local_disk size is fixed. When engine=bds, no need to set disk type(or empty string).
 * `core_disk_size` -  (Optional) User-defined HBase instance one core node's storage. Valid when engine=hbase/hbaseue. Bds engine no need core_disk_size, space.Unit: GB. Value range:
@@ -123,17 +124,18 @@ The following attributes are exported:
 
 * `id` - The ID of the HBase.
 * `master_instance_quantity` - Count nodes of the master node.
-* `ui_proxy_conn_addrs` - (Available in 1.105.0+) The Web UI proxy addresses of the cluster.
-* `zk_conn_addrs` - (Available in 1.105.0+) The zookeeper addresses of the cluster.
-* `slb_conn_addrs` - (Available in 1.105.0+) The slb service addresses of the cluster.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 30 mins) Used when creating the HBase instance (until it reaches the initial `ACTIVATION` status).
-* `update` - (Defaults to 30 mins) Used when updating the HBase instance (until it reaches the initial `ACTIVATION` status).
-* `delete` - (Defaults to 30 mins) Used when terminating the HBase instance. 
+* `ui_proxy_conn_addrs` - The Web UI proxy addresses of the cluster.
+  * `net_type` - netowrk type of the address
+  * `conn_addr` - network address
+  * `conn_addr_port` - netowrk port of the address
+* `zk_conn_addrs` - The zookeeper addresses of the cluster.
+  * `net_type` - netowrk type of the address
+  * `conn_addr` - network address
+  * `conn_addr_port` - netowrk port of the address
+* `slb_conn_addrs` - The slb service addresses of the cluster.
+  * `net_type` - netowrk type of the address
+  * `conn_addr` - network address
+  * `conn_addr_port` - netowrk port of the address
 
 ## Import
 

@@ -58,15 +58,23 @@ The following attributes are exported in addition to the arguments listed above:
 * `ids` -  A list of OOS Execution ids.
 * `executions` - A list of OOS Executions. Each element contains the following attributes:
   * `id` - ID of the OOS Executions.
+  * `parent_execution_id` - The id of parent OOS Execution.
+  * `category` - The category of template. Valid: `AlarmTrigger`, `EventTrigger`, `Other` and `TimerTrigger`.
   * `counters` - The counters of OOS Execution.
   * `create_date` - The time when the execution was created.
+  * `end_date` - The time when the execution was ended.
+  * `executed_by` - The user who execute the template.
   * `execution_id` - ID of the OOS Executions.
   * `is_parent` - Whether to include subtasks.
   * `outputs` - The outputs of OOS Executions.
   * `parameters` - The parameters required by the template
+  * `mode` - The mode of OOS Execution. Valid: `Automatic`, `Debug`.
+  * `ram_role` - The role that executes the current template.
   * `start_date` - The time when the template was started.
   * `status_message` - The message of status.
   * `status_reason` - The reason of status.
   * `template_id` - The id of execution template.
+  * `template_name` - The name of execution template.
   * `template_version` - The version of execution template.
   * `update_date` - The time when the template was updated.
+  * `status` - The Status of OOS Execution. Valid: `Cancelled`, `Failed`, `Queued`, `Running`, `Started`, `Success`, `Waiting`.

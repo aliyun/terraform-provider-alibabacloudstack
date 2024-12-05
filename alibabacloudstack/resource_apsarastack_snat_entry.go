@@ -65,7 +65,7 @@ func resourceAlibabacloudStackSnatEntryCreate(d *schema.ResourceData, meta inter
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.SnatTableId = d.Get("snat_table_id").(string)
 	request.SourceVSwitchId = d.Get("source_vswitch_id").(string)
 	request.SnatIp = d.Get("snat_ip").(string)
@@ -150,7 +150,7 @@ func resourceAlibabacloudStackSnatEntryUpdate(d *schema.ResourceData, meta inter
 	} else {
 		request.Scheme = "http"
 	}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.SnatTableId = parts[0]
 	request.SnatEntryId = parts[1]
 	update := false
@@ -193,7 +193,7 @@ func resourceAlibabacloudStackSnatEntryDelete(d *schema.ResourceData, meta inter
 	} else {
 		request.Scheme = "http"
 	}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.SnatTableId = parts[0]
 	request.SnatEntryId = parts[1]
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {

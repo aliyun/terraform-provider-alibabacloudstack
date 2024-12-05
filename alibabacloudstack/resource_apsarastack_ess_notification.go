@@ -51,7 +51,7 @@ func resourceAlibabacloudStackEssNotificationCreate(d *schema.ResourceData, meta
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.ScalingGroupId = d.Get("scaling_group_id").(string)
 	request.NotificationArn = d.Get("notification_arn").(string)
@@ -107,7 +107,7 @@ func resourceAlibabacloudStackEssNotificationUpdate(d *schema.ResourceData, meta
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	parts := strings.SplitN(d.Id(), ":", 2)
 	request.ScalingGroupId = parts[0]
@@ -146,7 +146,7 @@ func resourceAlibabacloudStackEssNotificationDelete(d *schema.ResourceData, meta
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	parts := strings.SplitN(d.Id(), ":", 2)
 

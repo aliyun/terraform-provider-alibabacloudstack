@@ -76,7 +76,7 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 	if d.Get("ipv6_cidr_block").(string) != "" {
 		ipv6_cidr_block = "0"
 	}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ipv6CidrBlock": ipv6_cidr_block, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ipv6CidrBlock": ipv6_cidr_block, "ResourceGroup": client.ResourceGroup}
 
 	request.VpcId = Trim(d.Get("vpc_id").(string))
 	request.ZoneId = d.Get("availability_zone").(string)
@@ -182,7 +182,7 @@ func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interfac
 	} else {
 		request.Scheme = "http"
 	}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Ipv6CidrBlock": d.Get("ipv6_cidr_block").(string), "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Ipv6CidrBlock": d.Get("ipv6_cidr_block").(string), "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	// if ipv6_cidr_block != "" {
 	// 	update = true
@@ -224,7 +224,7 @@ func resourceAlibabacloudStackSwitchDelete(d *schema.ResourceData, meta interfac
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.VSwitchId = d.Id()
 	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {

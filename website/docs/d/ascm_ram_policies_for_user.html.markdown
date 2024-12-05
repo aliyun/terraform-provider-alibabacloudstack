@@ -28,7 +28,7 @@ output "ramPolicy" {
 The following arguments are supported:
 
 * `ids` - (Optional) A list of ram policy IDs.
-* `name_regex` - (Optional) A regex string to filter results by login name of the user.
+* `login_name` - (Required, ForceNew) Login name of the user.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference

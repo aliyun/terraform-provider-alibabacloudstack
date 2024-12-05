@@ -202,7 +202,7 @@ func dataSourceAlibabacloudStackInstancesRead(d *schema.ResourceData, meta inter
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.Status = d.Get("status").(string)
 
 	if v, ok := d.GetOk("ids"); ok && len(v.([]interface{})) > 0 {
@@ -298,7 +298,7 @@ func dataSourceAlibabacloudStackInstancesRead(d *schema.ResourceData, meta inter
 			request.Scheme = "http"
 		}
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.InstanceIds = convertListToJsonString(convertListStringToListInterface(instanceIds[index:IntMin(index+100, len(instanceIds))]))
 		request.RamRoleName = d.Get("ram_role_name").(string)
 		request.PageSize = requests.NewInteger(PageSizeLarge)
@@ -406,7 +406,7 @@ func getInstanceDisksMappings(instanceMap map[string]string, meta interface{}) (
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.PageSize = requests.NewInteger(PageSizeXLarge)
 	request.PageNumber = requests.NewInteger(1)
 	instanceDisks := make(map[string][]map[string]interface{})

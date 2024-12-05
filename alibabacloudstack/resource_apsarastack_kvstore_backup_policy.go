@@ -79,7 +79,7 @@ func resourceAlibabacloudStackKVStoreBackupPolicyUpdate(d *schema.ResourceData, 
 		request := r_kvstore.CreateModifyBackupPolicyRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.InstanceId = d.Id()
 		request.PreferredBackupTime = d.Get("backup_time").(string)
 		periodList := expandStringList(d.Get("backup_period").(*schema.Set).List())
@@ -108,7 +108,7 @@ func resourceAlibabacloudStackKVStoreBackupPolicyDelete(d *schema.ResourceData, 
 	request := r_kvstore.CreateModifyBackupPolicyRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.InstanceId = d.Id()
 
 	request.PreferredBackupTime = "01:00Z-02:00Z"

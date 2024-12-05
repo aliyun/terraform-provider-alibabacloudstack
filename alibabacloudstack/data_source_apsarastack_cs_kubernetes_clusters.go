@@ -122,18 +122,18 @@ func dataSourceAlibabacloudStackCSKubernetesClusters() *schema.Resource {
 								Type: schema.TypeInt,
 							},
 						},
-						"key_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
+// 						"key_name": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
 						"pod_cidr": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"service_cidr": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
+// 						"service_cidr": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
 						"cluster_network_type": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -182,54 +182,55 @@ func dataSourceAlibabacloudStackCSKubernetesClusters() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"worker_data_disk_size": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"worker_data_disk_category": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"master_instance_charge_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"master_period_unit": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"master_period": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"master_auto_renew": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"master_auto_renew_period": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"worker_instance_charge_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"worker_period_unit": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"worker_period": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"worker_auto_renew": {
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-						"worker_auto_renew_period": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
+// 后续未消费使用的属性
+// 						"worker_data_disk_size": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
+// 						"worker_data_disk_category": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
+// 						"master_instance_charge_type": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
+// 						"master_period_unit": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
+// 						"master_period": {
+// 							Type:     schema.TypeInt,
+// 							Computed: true,
+// 						},
+// 						"master_auto_renew": {
+// 							Type:     schema.TypeBool,
+// 							Computed: true,
+// 						},
+// 						"master_auto_renew_period": {
+// 							Type:     schema.TypeInt,
+// 							Computed: true,
+// 						},
+// 						"worker_instance_charge_type": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
+// 						"worker_period_unit": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
+// 						"worker_period": {
+// 							Type:     schema.TypeInt,
+// 							Computed: true,
+// 						},
+// 						"worker_auto_renew": {
+// 							Type:     schema.TypeBool,
+// 							Computed: true,
+// 						},
+// 						"worker_auto_renew_period": {
+// 							Type:     schema.TypeInt,
+// 							Computed: true,
+// 						},
 						"master_nodes": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -321,7 +322,7 @@ func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData,
 	request.ServiceCode = "cs"
 	request.ApiName = "DescribeClustersV1"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeyId": client.AccessKey, "AccessKeySecret": client.SecretKey, "Product": "Cs", "RegionId": client.RegionId, "Action": "DescribeClustersV1", "Version": cs.CSAPIVersion, "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{  "Product": "Cs", "RegionId": client.RegionId, "Action": "DescribeClustersV1", "Version": cs.CSAPIVersion, "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.RegionId = client.RegionId
 	Cresponse := ClustersV1{}
 	Clusterresponse := ClustersV1{}
@@ -432,8 +433,8 @@ func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData,
 			request.Headers = map[string]string{"RegionId": client.RegionId, "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			request.RegionId = client.RegionId
 			request.QueryParams = map[string]string{
-				"AccessKeyId":      client.AccessKey,
-				"AccessKeySecret":  client.SecretKey,
+				
+				
 				"Product":          "Cs",
 				"RegionId":         client.RegionId,
 				"Action":           "DescribeClustersV1",

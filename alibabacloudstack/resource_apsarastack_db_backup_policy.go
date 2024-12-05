@@ -226,7 +226,7 @@ func resourceAlibabacloudStackDBBackupPolicyDelete(d *schema.ResourceData, meta 
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.DBInstanceId = d.Id()
 	request.PreferredBackupPeriod = "Tuesday,Thursday,Saturday"
 	request.BackupRetentionPeriod = "7"

@@ -42,9 +42,7 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   internet_slb_port     = var.internet_slb_port
   internet_slb_protocol = var.internet_slb_protocol
   internet_slb_id       = var.internet_slb_id
-  limit_cpu             = 4
   limit_mem             = 2048
-  requests_cpu          = 0
   requests_mem          = 0
   requests_m_cpu        = 0
   limit_m_cpu           = 4000
@@ -89,9 +87,7 @@ The following arguments are supported:
 * `intranet_slb_protocol` - (Optional, ForceNew) The private network SLB protocol supports TCP, HTTP and HTTPS protocols.
 * `intranet_slb_id` - (Optional, ForceNew) private network SLB ID. If not configured, EDAS will automatically purchase a new SLB for the user.
 
-* `limit_cpu` - (Optional) During application operation, the CPU quota of the application instance, unit: number of cores.
 * `limit_mem` - (Optional) The memory limit of the application instance during application operation, unit: M.
-* `requests_cpu` - (Optional) When the application is created, the CPU quota of the application instance, unit: number of cores. When set to 0, it means unlimited.
 * `requests_mem` - (Optional) When the application is created, the memory limit of the application instance, unit: M. When set to 0, it means unlimited. 
 * `requests_m_cpu` - (Optional) When the application is created, the CPU quota of the application instance, unit: number of millcores, similar to request_cpu
 * `limit_m_cpu` - (Optional)  The CPU quota of the application instance during application operation. Unit: Number of millcores, set to 0 means unlimited, similar to request_cpu.

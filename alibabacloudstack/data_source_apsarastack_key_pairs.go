@@ -96,7 +96,7 @@ func dataSourceAlibabacloudStackKeyPairsRead(d *schema.ResourceData, meta interf
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if fingerPrint, ok := d.GetOk("finger_print"); ok {
 		request.KeyPairFingerPrint = fingerPrint.(string)
 	}
@@ -161,7 +161,7 @@ func dataSourceAlibabacloudStackKeyPairsRead(d *schema.ResourceData, meta interf
 	describeInstancesRequest.PageNumber = requests.NewInteger(1)
 	describeInstancesRequest.PageSize = requests.NewInteger(PageSizeLarge)
 	describeInstancesRequest.Headers = map[string]string{"RegionId": client.RegionId}
-	describeInstancesRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	describeInstancesRequest.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	for {
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {

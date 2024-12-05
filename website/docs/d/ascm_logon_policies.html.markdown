@@ -6,7 +6,7 @@ sidebar_current: "docs-alibabacloudstack-ascm-logon-policies"
 description: |-
   Provides a list of Logon Policies.
 ---
-# alibabacloudstack\_ascm_logon_policy
+# alibabacloudstack\_ascm\_logon\_policies
 
 Provides a list of Logon Policies.
 

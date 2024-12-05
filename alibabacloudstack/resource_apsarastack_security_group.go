@@ -66,7 +66,7 @@ func resourceAlibabacloudStackSecurityGroupCreate(d *schema.ResourceData, meta i
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
+		
 		"Product":         "ecs",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
@@ -131,7 +131,7 @@ func resourceAlibabacloudStackSecurityGroupRead(d *schema.ResourceData, meta int
 		"RegionId":              client.RegionId,
 		"x-acs-request-version": "v1",
 	}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.SecurityGroupId = d.Id()
 	retry := 0
 	getTags := false
@@ -173,7 +173,7 @@ func resourceAlibabacloudStackSecurityGroupUpdate(d *schema.ResourceData, meta i
 		request := ecs.CreateModifySecurityGroupPolicyRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		if strings.ToLower(client.Config.Protocol) == "https" {
 			request.Scheme = "https"
 		} else {
@@ -202,7 +202,7 @@ func resourceAlibabacloudStackSecurityGroupUpdate(d *schema.ResourceData, meta i
 	request := ecs.CreateModifySecurityGroupAttributeRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -241,7 +241,7 @@ func resourceAlibabacloudStackSecurityGroupDelete(d *schema.ResourceData, meta i
 	request := ecs.CreateDeleteSecurityGroupRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.SecurityGroupId = d.Id()
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"

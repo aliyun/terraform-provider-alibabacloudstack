@@ -53,7 +53,7 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 			request.SetHTTPSInsecure(client.Config.Insecure)
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "OneRouter",
 			"Department":       client.Department,
 			"ResourceGroup":    client.ResourceGroup,
@@ -127,7 +127,7 @@ func resourceAlibabacloudStackOssBucketQuotaRead(d *schema.ResourceData, meta in
 			request.SetHTTPSInsecure(client.Config.Insecure)
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "OneRouter",
 			"Department":       client.Department,
 			"ResourceGroup":    client.ResourceGroup,
@@ -198,7 +198,7 @@ func resourceAlibabacloudStackOssBucketQuotaDelete(d *schema.ResourceData, meta 
 			request.SetHTTPSInsecure(client.Config.Insecure)
 		}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret":  client.SecretKey,
+			
 			"Product":          "OneRouter",
 			"Department":       client.Department,
 			"ResourceGroup":    client.ResourceGroup,

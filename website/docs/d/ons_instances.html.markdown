@@ -59,4 +59,9 @@ The following attributes are exported in addition to the arguments listed above:
   * `instance_name` - Name of the instance.
   * `instance_type` - The type of the instance. 
   * `instance_status` - The status of the instance.
-  * `release_time` - The automatic release time of an Enterprise Platinum Edition instance.
+  * `independent_naming` - Indicates whether namespaces are available.
+  * `tps_receive_max` - This attribute is used to set the message receiving transactions per second (TPS) of the topic during a certain period of time.
+  * `tps_send_max` - This attribute is used to set the message sending transactions per second (TPS) of the topic during a certain period of time.
+  * `topic_capacity` - This attribute is used to set the topic capacity.
+  * `cluster` - This attribute is a used to add cluster name.
+  * `create_time` - Create time of the instance.

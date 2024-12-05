@@ -75,7 +75,6 @@ func (s *HBaseService) setInstanceTags(d *schema.ResourceData) error {
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	d.SetPartial("tags")
 	return nil
 }
 

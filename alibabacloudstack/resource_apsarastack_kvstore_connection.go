@@ -59,8 +59,8 @@ func resourceAlibabacloudStackKvstoreConnectionCreate(d *schema.ResourceData, me
 		"RegionId": client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "R-kvstore",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,
@@ -122,8 +122,8 @@ func resourceAlibabacloudStackKvstoreConnectionUpdate(d *schema.ResourceData, me
 		"RegionId": client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "R-kvstore",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,
@@ -159,8 +159,8 @@ func resourceAlibabacloudStackKvstoreConnectionDelete(d *schema.ResourceData, me
 		"RegionId": client.RegionId,
 	}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "R-kvstore",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,

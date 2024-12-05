@@ -71,7 +71,7 @@ func resourceAlibabacloudStackOosExecution() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Default:      "{}",
-				ValidateFunc: validation.ValidateJsonString,
+				ValidateFunc: validation.StringIsJSON,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					equal, _ := compareJsonTemplateAreEquivalent(old, new)
 					return equal

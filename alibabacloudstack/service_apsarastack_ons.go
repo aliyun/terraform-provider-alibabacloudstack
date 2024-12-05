@@ -19,7 +19,7 @@ func (s *OnsService) DescribeOnsInstance(instanceid string) (response *OnsInstan
 	request := requests.NewCommonRequest()
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
 		"Product":         "Ons-inner",
@@ -86,7 +86,7 @@ func (s *OnsService) DescribeOnsTopic(id string) (response *Topic, err error) {
 	request := requests.NewCommonRequest()
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
 		"Product":         "Ons-inner",
@@ -145,7 +145,7 @@ func (s *OnsService) DescribeOnsGroup(id string) (response *OnsGroup, err error)
 	request := requests.NewCommonRequest()
 	request.QueryParams = map[string]string{
 		"RegionId":        s.client.RegionId,
-		"AccessKeySecret": s.client.SecretKey,
+		
 		"Department":      s.client.Department,
 		"ResourceGroup":   s.client.ResourceGroup,
 		"Product":         "Ons-inner",

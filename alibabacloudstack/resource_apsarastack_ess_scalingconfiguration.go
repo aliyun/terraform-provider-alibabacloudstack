@@ -58,10 +58,10 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Optional: true,
 				MaxItems: int(MaxScalingConfigurationInstanceTypes),
 			},
-			"io_optimized": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+// 			"io_optimized": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 			},
 			"is_outdated": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -307,7 +307,7 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.ScalingConfigurationId = d.Id()
 
@@ -489,7 +489,7 @@ func enableEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 					request.Scheme = "http"
 				}
 				request.Headers = map[string]string{"RegionId": client.RegionId}
-				request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+				request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 				request.ScalingGroupId = sgId
 				request.ActiveScalingConfigurationId = activeConfig
@@ -517,7 +517,7 @@ func enableEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 					request.Scheme = "http"
 				}
 				request.Headers = map[string]string{"RegionId": client.RegionId}
-				request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+				request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 				request.ScalingGroupId = sgId
 				raw, err := client.WithEssClient(func(essClient *ess.Client) (interface{}, error) {
@@ -619,7 +619,7 @@ func resourceAlibabacloudStackEssScalingConfigurationDelete(d *schema.ResourceDa
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.ScalingGroupId = object.ScalingGroupId
 
@@ -642,13 +642,13 @@ func resourceAlibabacloudStackEssScalingConfigurationDelete(d *schema.ResourceDa
 				request.Scheme = "http"
 			}
 			request.Headers = map[string]string{"RegionId": client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 			request.ScalingGroupId = object.ScalingGroupId
 			request.ForceDelete = requests.NewBoolean(true)
 			request.RegionId = client.RegionId
 			request.Headers = map[string]string{"RegionId": client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 			raw, err := client.WithEssClient(func(essClient *ess.Client) (interface{}, error) {
 				return essClient.DeleteScalingGroup(request)
@@ -675,7 +675,7 @@ func resourceAlibabacloudStackEssScalingConfigurationDelete(d *schema.ResourceDa
 		deleteScalingConfigurationRequest.Scheme = "http"
 	}
 	deleteScalingConfigurationRequest.Headers = map[string]string{"RegionId": client.RegionId}
-	deleteScalingConfigurationRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	deleteScalingConfigurationRequest.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	rawDeleteScalingConfiguration, err := client.WithEssClient(func(essClient *ess.Client) (interface{}, error) {
 		return essClient.DeleteScalingConfiguration(deleteScalingConfigurationRequest)
@@ -698,7 +698,7 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 	request := ess.CreateCreateScalingConfigurationRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "ZoneId": d.Get("zone_id").(string)}
+	request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup, "ZoneId": d.Get("zone_id").(string)}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -831,7 +831,7 @@ func activeSubstituteScalingConfiguration(d *schema.ResourceData, meta interface
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	request.ScalingGroupId = c.ScalingGroupId
 

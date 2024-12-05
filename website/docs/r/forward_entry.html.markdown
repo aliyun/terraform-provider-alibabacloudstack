@@ -65,6 +65,7 @@ resource "alibabacloudstack_forward_entry" "default" {
 
 The following arguments are supported:
 
+* `name` - (Optional) The name of forward entry.
 * `forward_table_id` - (Required, ForceNew) The value can get from `alibabacloudstack_nat_gateway` Attributes "forward_table_ids".
 * `external_ip` - (Required, ForceNew) The external ip address, the ip must along bandwidth package public ip which `alibabacloudstack_nat_gateway` argument `bandwidth_packages`.
 * `external_port` - (Required) The external port, valid value is 1~65535|any.

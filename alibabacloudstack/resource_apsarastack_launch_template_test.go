@@ -33,7 +33,7 @@ func testAlibabacloudStackLaunchTemplate(region string) error {
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.DescribeLaunchTemplates(request)
 	})
@@ -58,7 +58,7 @@ func testAlibabacloudStackLaunchTemplate(region string) error {
 			templateRequest.Scheme = "http"
 		}
 		templateRequest.Headers = map[string]string{"RegionId": client.RegionId}
-		templateRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		templateRequest.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		templateRequest.LaunchTemplateId = ids[i]
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.DeleteLaunchTemplate(templateRequest)

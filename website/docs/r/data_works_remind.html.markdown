@@ -3,8 +3,7 @@ subcategory: "Data Works"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_data_works_remind"
 sidebar_current: "docs-alibabacloudstack-resource-data-works-remind"
-description: |- 
-  Provides a AlibabacloudStack Data Works Remind resource.
+description: |- Provides a AlibabacloudStack Data Works Remind resource.
 ---
 
 # alibabacloudstack\_data\_works\_remind

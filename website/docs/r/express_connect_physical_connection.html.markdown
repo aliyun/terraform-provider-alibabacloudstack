@@ -19,6 +19,7 @@ Basic Usage
 
 ```terraform
 resource "alibabacloudstack_express_connect_physical_connection" "domestic" {
+  device_name              = "express_connect_foo"
   access_point_id          = "ap-cn-hangzhou-yh-B"
   line_operator            = "CT"
   peer_location            = "example_value"
@@ -35,6 +36,7 @@ resource "alibabacloudstack_express_connect_physical_connection" "domestic" {
 
 The following arguments are supported:
 
+* `device_name` - (Required) The Physical Device Name.
 * `access_point_id` - (Required, ForceNew) The Physical Leased Line Access Point ID.
 * `bandwidth` - (Optional, Computed) On the Bandwidth of the ECC Service and Physical Connection.
 * `circuit_code` - (Optional) Operators for Physical Connection Circuit Provided Coding.
@@ -69,12 +71,6 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The resource ID in terraform of Physical Connection.
-
-### Timeouts
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 2 mins) Used when create the Physical Connection.
 
 ## Import
 

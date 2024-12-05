@@ -69,8 +69,8 @@ func resourceAlibabacloudStackEcsHpcClusterCreate(d *schema.ResourceData, meta i
 	request.ApiName = action
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "Ecs",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,
@@ -162,8 +162,8 @@ func resourceAlibabacloudStackEcsHpcClusterUpdate(d *schema.ResourceData, meta i
 		request.ApiName = action
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
-			"AccessKeySecret": client.SecretKey,
-			"AccessKeyId":     client.AccessKey,
+			
+			
 			"Product":         "Ecs",
 			"RegionId":        client.RegionId,
 			"Department":      client.Department,
@@ -207,8 +207,8 @@ func resourceAlibabacloudStackEcsHpcClusterDelete(d *schema.ResourceData, meta i
 	request.ApiName = action
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		"AccessKeySecret": client.SecretKey,
-		"AccessKeyId":     client.AccessKey,
+		
+		
 		"Product":         "Ecs",
 		"RegionId":        client.RegionId,
 		"Department":      client.Department,

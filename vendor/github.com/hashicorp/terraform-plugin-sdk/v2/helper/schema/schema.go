@@ -204,7 +204,6 @@ type Schema struct {
 	// future. This string is the message shown to the user with instructions on
 	// how to address the deprecation.
 	Deprecated string
-	Removed string
 
 	// ValidateFunc allows individual fields to define arbitrary validation
 	// logic. It is yielded the provided config value as an interface{} that is

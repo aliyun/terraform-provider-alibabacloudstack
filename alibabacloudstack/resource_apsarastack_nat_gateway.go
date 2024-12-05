@@ -104,7 +104,7 @@ func resourceAlibabacloudStackNatGatewayCreate(d *schema.ResourceData, meta inte
 	}
 	request.RegionId = string(client.Region)
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.VpcId = string(d.Get("vpc_id").(string))
 	request.Spec = string(d.Get("specification").(string))
 	request.ClientToken = buildClientToken(request.GetActionName())
@@ -217,7 +217,7 @@ func resourceAlibabacloudStackNatGatewayUpdate(d *schema.ResourceData, meta inte
 	modifyNatGatewayAttributeRequest.RegionId = natGateway.RegionId
 	modifyNatGatewayAttributeRequest.NatGatewayId = natGateway.NatGatewayId
 	modifyNatGatewayAttributeRequest.Headers = map[string]string{"RegionId": client.RegionId}
-	modifyNatGatewayAttributeRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	modifyNatGatewayAttributeRequest.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 
 	if d.HasChange("name") {
 		//d.SetPartial("name")
@@ -267,7 +267,7 @@ func resourceAlibabacloudStackNatGatewayUpdate(d *schema.ResourceData, meta inte
 		}
 		modifyNatGatewaySpecRequest.NatGatewayId = natGateway.NatGatewayId
 		modifyNatGatewaySpecRequest.Headers = map[string]string{"RegionId": client.RegionId}
-		modifyNatGatewaySpecRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		modifyNatGatewaySpecRequest.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		modifyNatGatewaySpecRequest.Spec = d.Get("specification").(string)
 
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
@@ -300,7 +300,7 @@ func resourceAlibabacloudStackNatGatewayDelete(d *schema.ResourceData, meta inte
 		request.Scheme = "http"
 	}
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.NatGatewayId = d.Id()
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		request := vpc.CreateDeleteNatGatewayRequest()
@@ -311,7 +311,7 @@ func resourceAlibabacloudStackNatGatewayDelete(d *schema.ResourceData, meta inte
 		}
 		request.RegionId = string(client.Region)
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.NatGatewayId = d.Id()
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.DeleteNatGateway(request)
@@ -344,7 +344,7 @@ func deleteBandwidthPackages(d *schema.ResourceData, meta interface{}) error {
 	}
 	packRequest.RegionId = string(client.Region)
 	packRequest.Headers = map[string]string{"RegionId": client.RegionId}
-	packRequest.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	packRequest.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	packRequest.NatGatewayId = d.Id()
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
@@ -367,7 +367,7 @@ func deleteBandwidthPackages(d *schema.ResourceData, meta interface{}) error {
 				}
 				request.BandwidthPackageId = pack.BandwidthPackageId
 				request.Headers = map[string]string{"RegionId": client.RegionId}
-				request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+				request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 				raw, e := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 					return vpcClient.DeleteBandwidthPackage(request)
 				})
@@ -434,7 +434,7 @@ func getPackage(packageId string, meta interface{}, d *schema.ResourceData) (pac
 	request.RegionId = client.RegionId
 
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.NatGatewayId = d.Id()
 	request.BandwidthPackageId = packageId
 

@@ -7,7 +7,7 @@ description: |-
     Provides a Metalist owned by an Alibabacloudstack Cloud account.
 ---
 
-# alibabacloudstack\_cms\_project\_metalist
+# alibabacloudstack\_cms\_metric\_metalist
 
 Provides a Metalist of project  owned by an Alibabacloudstack Cloud account.
 

@@ -44,16 +44,17 @@ func dataSourceAlibabacloudStackQuotas() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"region": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
-			},
-			"cluster_name": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
-			},
+			// 后续不消费
+// 			"region": {
+// 				Type:     schema.TypeString,
+// 				Computed: true,
+// 				Optional: true,
+// 			},
+// 			"cluster_name": {
+// 				Type:     schema.TypeString,
+// 				Computed: true,
+// 				Optional: true,
+// 			},
 			"quotas": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -75,10 +76,11 @@ func dataSourceAlibabacloudStackQuotas() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"cluster_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
+						// 后续不消费
+// 						"cluster_name": {
+// 							Type:     schema.TypeString,
+// 							Computed: true,
+// 						},
 						"used_vip_public": {
 							Type:     schema.TypeInt,
 							Computed: true,
@@ -186,7 +188,7 @@ func dataSourceAlibabacloudStackQuotasRead(d *schema.ResourceData, meta interfac
 	quotaTypeId := d.Get("quota_type_id").(string)
 	targetType := d.Get("target_type").(string)
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeyId": client.AccessKey, "AccessKeySecret": client.SecretKey,
+	request.QueryParams = map[string]string{ 
 		"Product":       "ascm",
 		"RegionId":      client.RegionId,
 		"Department":    client.Department,

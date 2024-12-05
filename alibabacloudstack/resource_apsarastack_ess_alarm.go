@@ -123,7 +123,7 @@ func resourceAlibabacloudStackEssAlarmCreate(d *schema.ResourceData, meta interf
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.Domain = client.Domain
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "Ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -214,7 +214,7 @@ func resourceAlibabacloudStackEssAlarmUpdate(d *schema.ResourceData, meta interf
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.Domain = client.Domain
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "Ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {
@@ -330,7 +330,7 @@ func resourceAlibabacloudStackEssAlarmDelete(d *schema.ResourceData, meta interf
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.Domain = client.Domain
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "Ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "Ess", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		request.Scheme = "https"
 	} else {

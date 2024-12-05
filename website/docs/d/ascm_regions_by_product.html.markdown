@@ -27,6 +27,7 @@ output "regions" {
 
 The following arguments are supported:
 
+* `ids` - (Optional) A list of regions IDs.
 * `product_name` - (Required) Filter the results by specified The name of the service.
 * `organization` - (Optional) Filter the results by the specified name of the organization.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).

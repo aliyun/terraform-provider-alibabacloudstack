@@ -1,11 +1,10 @@
 package alibabacloudstack
 
 import (
-	"strings"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"strings"
 )
 
 func resourceAlibabacloudStackImageSharePermission() *schema.Resource {
@@ -44,7 +43,7 @@ func resourceAlibabacloudStackImageSharePermissionCreate(d *schema.ResourceData,
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.ImageId = imageId
 	accountSli := []string{accountId}
 	request.AddAccount = &accountSli
@@ -87,7 +86,7 @@ func resourceAlibabacloudStackImageSharePermissionDelete(d *schema.ResourceData,
 	}
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	parts, err := ParseResourceId(d.Id(), 2)
 	request.ImageId = parts[0]
 	accountSli := []string{parts[1]}

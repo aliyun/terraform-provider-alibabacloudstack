@@ -63,11 +63,11 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `names` - A list of Ipv6 Internet Bandwidth names.
 * `bandwidths` - A list of Vpc Ipv6 Internet Bandwidths. Each element contains the following attributes:
-	* `bandwidth` - The amount of Internet bandwidth resources of the IPv6 address, Unit: `Mbit/s`.
-	* `id` - The ID of the Ipv6 Internet Bandwidth.
-	* `internet_charge_type` - The metering method of the Internet bandwidth resources of the IPv6 gateway.
-	* `ipv6_address_id` - The ID of the IPv6 address.
-	* `ipv6_gateway_id` - The ID of the IPv6 gateway.
-	* `ipv6_internet_bandwidth_id` - The ID of the Ipv6 Internet Bandwidth.
-	* `payment_type` - The payment type of the resource.
-	* `status` -  The status of the resource. Valid values: `Normal`, `FinancialLocked` and `SecurityLocked`.
+  * `bandwidth` - The amount of Internet bandwidth resources of the IPv6 address, Unit: `Mbit/s`.
+  * `id` - The ID of the Ipv6 Internet Bandwidth.
+  * `internet_charge_type` - The metering method of the Internet bandwidth resources of the IPv6 gateway.
+  * `ipv6_address_id` - The ID of the IPv6 address.
+  * `ipv6_gateway_id` - The ID of the IPv6 gateway.
+  * `ipv6_internet_bandwidth_id` - The ID of the Ipv6 Internet Bandwidth.
+  * `payment_type` - The payment type of the resource.
+  * `status` -  The status of the resource. Valid values: `Normal`, `FinancialLocked` and `SecurityLocked`.

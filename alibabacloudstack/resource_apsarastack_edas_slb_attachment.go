@@ -30,7 +30,7 @@ func resourceAlibabacloudStackEdasSlbAttachment() *schema.Resource {
 			},
 			"slb_ip": {
 				Type:         schema.TypeString,
-				ValidateFunc: validation.SingleIP(),
+				ValidateFunc: validation.IsIPAddress,
 				Required:     true,
 				ForceNew:     true,
 			},

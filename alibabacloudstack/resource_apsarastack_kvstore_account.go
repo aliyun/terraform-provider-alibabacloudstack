@@ -80,7 +80,7 @@ func resourceAlibabacloudStackKVStoreAccountCreate(d *schema.ResourceData, meta 
 	request := r_kvstore.CreateCreateAccountRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.InstanceId = d.Get("instance_id").(string)
 	request.AccountName = d.Get("account_name").(string)
 	request.AccountPrivilege = d.Get("account_privilege").(string)
@@ -173,7 +173,7 @@ func resourceAlibabacloudStackKVStoreAccountUpdate(d *schema.ResourceData, meta 
 		request := r_kvstore.CreateModifyAccountDescriptionRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.InstanceId = instanceId
 		request.AccountName = accountName
 		request.AccountDescription = d.Get("description").(string)
@@ -195,7 +195,7 @@ func resourceAlibabacloudStackKVStoreAccountUpdate(d *schema.ResourceData, meta 
 		request := r_kvstore.CreateGrantAccountPrivilegeRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.InstanceId = instanceId
 		request.AccountName = accountName
 		request.AccountPrivilege = d.Get("account_privilege").(string)
@@ -217,7 +217,7 @@ func resourceAlibabacloudStackKVStoreAccountUpdate(d *schema.ResourceData, meta 
 		request := r_kvstore.CreateResetAccountPasswordRequest()
 		request.RegionId = client.RegionId
 		request.Headers = map[string]string{"RegionId": client.RegionId}
-		request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		request.InstanceId = instanceId
 		request.AccountName = accountName
 
@@ -267,7 +267,7 @@ func resourceAlibabacloudStackKVStoreAccountDelete(d *schema.ResourceData, meta 
 	request := r_kvstore.CreateDeleteAccountRequest()
 	request.RegionId = client.RegionId
 	request.Headers = map[string]string{"RegionId": client.RegionId}
-	request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	request.QueryParams = map[string]string{ "Product": "R-kvstore", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	request.InstanceId = parts[0]
 	request.AccountName = parts[1]
 
