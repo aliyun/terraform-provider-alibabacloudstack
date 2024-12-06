@@ -41,11 +41,14 @@ func TestAccAlibabacloudStackVpcVpc0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
+					"vpc_name":    "${var.name}",
+					"cidr_block":  "192.168.0.0/16",
 					"description": "RDK更新",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
+						"vpc_name":    "${var.name}",
+						"cidr_block":  "192.168.0.0/16",
 						"description": "RDK更新",
 					}),
 				),
@@ -103,8 +106,6 @@ var AlibabacloudTestAccVpcVpcCheckmap = map[string]string{
 
 	"route_table_id": CHECKSET,
 
-	"resource_group_id": CHECKSET,
-
 	"secondary_cidr_blocks": CHECKSET,
 
 	"cidr_block": CHECKSET,
@@ -129,19 +130,6 @@ func AlibabacloudTestAccVpcVpcBasicdependence(name string) string {
 variable "name" {
     default = "%s"
 }
-
-
-
-variable "vpc_name" {
-    default = vpc_keqi_test_1
-}
-
-variable "cidr_block" {
-    default = 192.168.0.0/16
-}
-
-
-
 
 `, name)
 }
@@ -1763,4 +1751,3 @@ func TestAccAlibabacloudStackVpcVpc12(t *testing.T) {
 		},
 	})
 }
-
