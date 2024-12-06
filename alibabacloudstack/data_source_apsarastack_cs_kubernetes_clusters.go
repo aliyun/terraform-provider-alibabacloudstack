@@ -8,7 +8,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/denverdino/aliyungo/cs"
-	"github.com/go-yaml/yaml"
+	yaml "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"strings"
