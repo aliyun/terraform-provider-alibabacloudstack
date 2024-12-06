@@ -123,3 +123,37 @@ go2xunit -input $outfile -output $GOPATH/tests.xml
 ## Refer
 
 AlibabacloudStack Cloud Provider [Official Docs](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)
+
+
+## 当前Provider兼容性
+<!-- INSERT TABLE HERE -->
+
+
+:white_check_mark::当前功能被Provider支持
+:x::当前功能在该Provider存在风险
+:no_entry_sign::当前功能在该Provider下不可用
+| Rpc Name  | terraform-v1.0.11  | terraform-v1.1.9  | terraform-v1.2.9  | terraform-v1.3.10  | terraform-v1.4.7  | terraform-v1.5.7  | terraform-v1.6.6  | terraform-v1.7.5  | terraform-v1.8.5  | terraform-v1.9.3  | opentofu-v1.6.3  | opentofu-v1.7.3  | opentofu-v1.8.0 |
+| ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | --- |
+| GetSchema  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :x:  | :white_check_mark:  | :x:  | :x: |
+| PrepareProviderConfig  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| ValidateResourceTypeConfig  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| ValidateDataSourceConfig  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| UpgradeResourceState  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| Configure  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| ReadResource  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| PlanResourceChange  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| ApplyResourceChange  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| ImportResourceState  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| ReadDataSource  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| Stop  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| GetMetadata  |    |    |    |    |    |    | :white_check_mark:  | :white_check_mark:  | :x:  | :x:  |    | :x:  | :x: |
+| MoveResourceState  |    |    |    |    |    |    |    |    | :no_entry_sign:  | :no_entry_sign:  |    | :no_entry_sign:  | :no_entry_sign: |
+| GetFunctions  |    |    |    |    |    |    |    |    | :no_entry_sign:  | :no_entry_sign:  |    | :no_entry_sign:  | :no_entry_sign: |
+| CallFunction  |    |    |    |    |    |    |    |    | :no_entry_sign:  | :no_entry_sign:  |    | :no_entry_sign:  | :no_entry_sign: |
+| GetMetadata  |    |    |    |    |    |    | :white_check_mark:  | :white_check_mark:  | :x:  | :x:  |    | :x:  | :x: |
+| GetSchema  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :x:  | :white_check_mark:  | :x:  | :x: |
+| Configure  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| ReadResource  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| PlanResourceChange  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| ImportResourceState  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
+| ReadDataSource  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
