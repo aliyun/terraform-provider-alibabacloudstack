@@ -42,3 +42,4 @@ website/vendor
 /terraform
 /tf-templates
 /.settings
+/dist
