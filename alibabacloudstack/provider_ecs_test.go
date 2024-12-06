@@ -15,7 +15,7 @@ func TestAccAlibabacloudStackProviderEcs(t *testing.T) {
 	var v ecs.Instance
 
 	resourceId := "alibabacloudstack_instance.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudTestAccEcsInstanceCheckmap)
+	ra := resourceAttrInit(resourceId, testAccInstanceCheckMap)
 	serviceFunc := func() interface{} {
 		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}

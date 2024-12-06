@@ -57,7 +57,7 @@ func TestAccAlibabacloudStackAlibabacloudstackRdsAccountsDataSource(t *testing.T
 			"data_base_instance_id": `"${alibabacloudstack_rds_accounts.default.DataBaseInstanceId}_fake"`}),
 	}
 
-	AlibabacloudstackRdsAccountsCheckInfo.dataSourceTestCheck(t, rand, idsConf, account_nameConf, data_base_instance_idConf, allConf)
+	AlibabacloudstackRdsAccountsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, account_nameConf, data_base_instance_idConf, allConf)
 }
 
 var existAlibabacloudstackRdsAccountsDataMapFunc = func(rand int) map[string]string {

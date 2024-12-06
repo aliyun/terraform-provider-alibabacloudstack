@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackAlibabacloudstackEcsSecurityGroupsDataSource(t *testing.T) {
@@ -96,7 +97,7 @@ func TestAccAlibabacloudStackAlibabacloudstackEcsSecurityGroupsDataSource(t *tes
 			"vpc_id":              `"${alibabacloudstack_ecs_security_groups.default.VpcId}_fake"`}),
 	}
 
-	AlibabacloudstackEcsSecurityGroupsCheckInfo.dataSourceTestCheck(t, rand, idsConf, resource_group_idConf, security_group_idConf, security_group_nameConf, security_group_typeConf, vpc_idConf, allConf)
+	AlibabacloudstackEcsSecurityGroupsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, resource_group_idConf, security_group_idConf, security_group_nameConf, security_group_typeConf, vpc_idConf, allConf)
 }
 
 var existAlibabacloudstackEcsSecurityGroupsDataMapFunc = func(rand int) map[string]string {

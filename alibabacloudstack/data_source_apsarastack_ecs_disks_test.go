@@ -228,7 +228,7 @@ func TestAccAlibabacloudStackAlibabacloudstackEcsDisksDataSource(t *testing.T) {
 			"zone_id":                 `"${alibabacloudstack_ecs_disks.default.ZoneId}_fake"`}),
 	}
 
-	AlibabacloudstackEcsDisksCheckInfo.dataSourceTestCheck(t, rand, idsConf, auto_snapshot_policy_idConf, categoryConf, delete_auto_snapshotConf, delete_with_instanceConf, disk_nameConf, enable_auto_snapshotConf, enable_automated_snapshot_policyConf, encryptedConf, instance_idConf, kms_key_idConf, multi_attachConf, payment_typeConf, portableConf, resource_group_idConf, snapshot_idConf, statusConf, zone_idConf, allConf)
+	AlibabacloudstackEcsDisksDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, auto_snapshot_policy_idConf, categoryConf, delete_auto_snapshotConf, delete_with_instanceConf, disk_nameConf, enable_auto_snapshotConf, enable_automated_snapshot_policyConf, encryptedConf, instance_idConf, kms_key_idConf, multi_attachConf, payment_typeConf, portableConf, resource_group_idConf, snapshot_idConf, statusConf, zone_idConf, allConf)
 }
 
 var existAlibabacloudstackEcsDisksDataMapFunc = func(rand int) map[string]string {
