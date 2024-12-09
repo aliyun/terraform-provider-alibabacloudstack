@@ -277,13 +277,13 @@ func GetTimeErrorFromString(str string) error {
 	}
 }
 
-func GetNotFoundMessage(product, id string) string {
+func GetNotFoundMessage(product string, id string) string {
 	return fmt.Sprintf("The specified %s %s is not found.", product, id)
 }
 func GetNotVPCMessage() string {
 	return fmt.Sprintf("The VSwitchId is not found.")
 }
-func GetTimeoutMessage(product, status string) string {
+func GetTimeoutMessage(product string, status string) string {
 	return fmt.Sprintf("Waitting for %s %s is timeout.", product, status)
 }
 

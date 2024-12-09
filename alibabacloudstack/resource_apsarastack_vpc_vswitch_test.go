@@ -13,7 +13,7 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 
 	var v map[string]interface{}
 
-	resourceId := "alibabacloudstack_vpc_vswitch.default"
+	resourceId := "alibabacloudstack_vpc_vswitch.test_default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -127,17 +127,17 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 
 var AlibabacloudTestAccVpcVswitchCheckmap = map[string]string{
 
-	"description": CHECKSET,
+	"description": "测试111111",
 
-	"cidr_block": CHECKSET,
+	"cidr_block": "192.168.1.0/24",
 
-	"vpc_id": CHECKSET,
+	"vpc_id": "${alibabacloudstack_vpc.default.id}",
 
-	"vswitch_name": CHECKSET,
+	"vswitch_name": "${var.name}",
 
 	"ipv6_cidr_block": CHECKSET,
 
-	"tags": CHECKSET,
+	"tags": "",
 }
 
 func AlibabacloudTestAccVpcVswitchBasicdependence(name string) string {
@@ -1383,4 +1383,3 @@ func TestAccAlibabacloudStackVpcVswitch10(t *testing.T) {
 		},
 	})
 }
-

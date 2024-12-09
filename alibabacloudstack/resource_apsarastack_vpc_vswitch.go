@@ -2,8 +2,8 @@ package alibabacloudstack
 
 import (
 	"log"
-	"time"
 	"reflect"
+	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -27,10 +27,10 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Deprecated:   "Field 'availability_zone' is deprecated and will be removed in a future release. Please use 'zone_id' instead.",
+				Type:       schema.TypeString,
+				Optional:   true,
+				ForceNew:   true,
+				Deprecated: "Field 'availability_zone' is deprecated and will be removed in a future release. Please use 'zone_id' instead.",
 			},
 			"zone_id": {
 				Type:     schema.TypeString,
@@ -54,9 +54,9 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 				Computed: true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'v_switch_name' instead.",
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "Field 'name' is deprecated and will be removed in a future release. Please use 'vswitch_name' instead.",
 			},
 			"vswitch_name": {
 				Type:     schema.TypeString,
@@ -85,7 +85,7 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 	request.VpcId = Trim(d.Get("vpc_id").(string))
 	request.CidrBlock = Trim(d.Get("cidr_block").(string))
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "vswitch_name", "name"); err == nil && v.(string) != ""{
+	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "vswitch_name", "name"); err == nil && v.(string) != "" {
 		request.VSwitchName = v.(string)
 	} else if err != nil {
 		return err
@@ -174,8 +174,8 @@ func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interfac
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VSwitchId = d.Id()
 
-	if d.HasChange("v_switch_name") || d.HasChange("name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "v_switch_name", "name"); err == nil {
+	if d.HasChange("vswitch_name") || d.HasChange("name") {
+		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "vswitch_name", "name"); err == nil {
 			request.VSwitchName = v.(string)
 		} else {
 			return err

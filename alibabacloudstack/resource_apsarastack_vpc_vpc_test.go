@@ -14,6 +14,8 @@ func TestAccAlibabacloudStackVpcVpc0(t *testing.T) {
 
 	var v map[string]interface{}
 
+	// TODO Describe method，v 的类型
+
 	resourceId := "alibabacloudstack_vpc_vpc.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVpcCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
@@ -41,15 +43,26 @@ func TestAccAlibabacloudStackVpcVpc0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"vpc_name":    "${var.name}",
-					"cidr_block":  "192.168.0.0/16",
 					"description": "RDK更新",
+					"vpc_name":    "",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"vpc_name":    "${var.name}",
-						"cidr_block":  "192.168.0.0/16",
+
 						"description": "RDK更新",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"description": "RDK更新1",
+					"vpc_name":    "",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"description": "RDK更新1",
 					}),
 				),
 			},
@@ -101,10 +114,13 @@ func TestAccAlibabacloudStackVpcVpc0(t *testing.T) {
 }
 
 var AlibabacloudTestAccVpcVpcCheckmap = map[string]string{
+	//  TODO  checkmap 和 case的资源对齐
 
 	"description": CHECKSET,
 
 	"route_table_id": CHECKSET,
+
+	"resource_group_id": CHECKSET,
 
 	"secondary_cidr_blocks": CHECKSET,
 
@@ -126,6 +142,9 @@ var AlibabacloudTestAccVpcVpcCheckmap = map[string]string{
 }
 
 func AlibabacloudTestAccVpcVpcBasicdependence(name string) string {
+
+	//  TODO  检查依赖变量
+
 	return fmt.Sprintf(`
 variable "name" {
     default = "%s"

@@ -161,7 +161,7 @@ func (s *VpcService) VpcStateRefreshFunc(id string, failStates []string) resourc
 }
 
 func (s *VpcService) DoVpcDescribevswitchattributesRequest(id string) (v vpc.DescribeVSwitchAttributesResponse, err error) {
-    return s.DescribeVSwitch(id)
+	return s.DescribeVSwitch(id)
 }
 func (s *VpcService) DescribeVSwitch(id string) (v vpc.DescribeVSwitchAttributesResponse, err error) {
 	request := vpc.CreateDescribeVSwitchAttributesRequest()
@@ -396,7 +396,7 @@ func (s *VpcService) DescribeRouteEntry(id string) (*vpc.RouteEntry, error) {
 }
 
 func (s *VpcService) DoVpcDescriberouterinterfaceattributeRequest(id, regionId string) (ri vpc.RouterInterfaceType, err error) {
-    return s.DescribeRouterInterface(id, regionId)
+	return s.DescribeRouterInterface(id, regionId)
 }
 func (s *VpcService) DescribeRouterInterface(id, regionId string) (ri vpc.RouterInterfaceType, err error) {
 	request := vpc.CreateDescribeRouterInterfacesRequest()
@@ -1026,7 +1026,7 @@ func (s *VpcService) WaitForRouteTableAttachment(id string, status Status, timeo
 }
 
 func (s *VpcService) DoVpcDescribenetworkaclattributesRequest(id string) (object map[string]interface{}, err error) {
-    return s.DescribeNetworkAcl(id)
+	return s.DescribeNetworkAcl(id)
 }
 func (s *VpcService) DescribeNetworkAcl(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
