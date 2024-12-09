@@ -27,16 +27,16 @@ func resourceAlibabacloudStackDBAccountPrivilege() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Required:     true,
-				Deprecated:   "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'data_base_instance_id' instead.",
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Required:      true,
+				Deprecated:    "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'data_base_instance_id' instead.",
 				ConflictsWith: []string{"data_base_instance_id"},
 			},
 			"data_base_instance_id": {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Required:      true,
 				ConflictsWith: []string{"instance_id"},
 			},
 
@@ -66,7 +66,7 @@ func resourceAlibabacloudStackDBAccountPrivilege() *schema.Resource {
 func resourceAlibabacloudStackDBAccountPrivilegeCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
-	instanceId := connectivity.GetResourceData(d, "data_base_instance_id", "instance_id").(string)
+	instanceId := connectivity.GetResourceData1(d, "data_base_instance_id", "instance_id").(string)
 	account := d.Get("account_name").(string)
 	privilege := d.Get("privilege").(string)
 	dbList := d.Get("db_names").(*schema.Set).List()
