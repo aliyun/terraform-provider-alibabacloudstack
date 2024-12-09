@@ -510,7 +510,7 @@ func resourceAlibabacloudStackApigatewayApiUpdate(d *schema.ResourceData, meta i
 	if d.HasChanges("api_name","name","description","auth_type") {
 		update = true
 	}
-	request.ApiName = connectivity.GetResourceData1(d, "api_name", "name").(string)
+	request.ApiName = connectivity.GetResourceData(d, "api_name", "name").(string)
 	request.Description = d.Get("description").(string)
 	request.AuthType = d.Get("auth_type").(string)
 
@@ -664,7 +664,7 @@ func buildAlibabacloudStackApiArgs(d *schema.ResourceData, meta interface{}) (*c
 
 	request.GroupId = d.Get("group_id").(string)
 	request.Description = d.Get("description").(string)
-	request.ApiName = connectivity.GetResourceData1(d, "api_name", "name").(string)
+	request.ApiName = connectivity.GetResourceData(d, "api_name", "name").(string)
 	request.AuthType = d.Get("auth_type").(string)
 	if v, exist := d.GetOk("force_nonce_check"); exist {
 		request.ForceNonceCheck = requests.Boolean(strconv.FormatBool(v.(bool)))

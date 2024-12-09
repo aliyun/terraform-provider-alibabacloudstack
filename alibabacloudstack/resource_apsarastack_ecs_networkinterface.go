@@ -200,7 +200,7 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 
 	if !d.IsNewResource() && (d.HasChange("network_interface_name") || d.HasChange("name")) {
-		request.NetworkInterfaceName = connectivity.GetResourceData1(d, "network_interface_name", "name").(string)
+		request.NetworkInterfaceName = connectivity.GetResourceData(d, "network_interface_name", "name").(string)
 		attributeUpdate = true
 	}
 

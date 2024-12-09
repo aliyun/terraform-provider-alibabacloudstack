@@ -66,7 +66,7 @@ func resourceAlibabacloudStackDBAccountPrivilege() *schema.Resource {
 func resourceAlibabacloudStackDBAccountPrivilegeCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
-	instanceId := connectivity.GetResourceData1(d, "data_base_instance_id", "instance_id").(string)
+	instanceId := connectivity.GetResourceData(d, "data_base_instance_id", "instance_id").(string)
 	account := d.Get("account_name").(string)
 	privilege := d.Get("privilege").(string)
 	dbList := d.Get("db_names").(*schema.Set).List()
