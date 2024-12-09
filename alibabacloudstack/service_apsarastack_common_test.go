@@ -1331,7 +1331,7 @@ resource "alibabacloudstack_adb_db_cluster" "cluster" {
   db_node_count       = 2
   db_node_storage     = 200
   pay_type            = "PostPaid"
-  vswitch_id          = alibabacloudstack_vswitch.default.id
+  vswitch_id          = ${alibabacloudstack_vswitch.default.id}
   description         = "${var.name}_am"
 }
 
