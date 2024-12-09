@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -11,7 +12,7 @@ import (
 
 func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 
-	var v map[string]interface{}
+	var v vpc.DescribeVSwitchAttributesResponse
 
 	resourceId := "alibabacloudstack_vpc_vswitch.test_default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
@@ -40,7 +41,7 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"vpc_id": "alibabacloudstack_vpc.default.id",
 
@@ -49,7 +50,7 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"vpc_id": "alibabacloudstack_vpc.default.id",
 
@@ -135,6 +136,8 @@ var AlibabacloudTestAccVpcVswitchCheckmap = map[string]string{
 
 	"vswitch_name": "${var.name}",
 
+	"zone_id": "cn-wulan-env212-amtest212001-a",
+
 	"ipv6_cidr_block": CHECKSET,
 
 	"tags": "",
@@ -154,7 +157,7 @@ variable "name" {
 }
 func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 
-	var v map[string]interface{}
+	var v vpc.DescribeVSwitchAttributesResponse
 
 	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
@@ -183,7 +186,7 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"vpc_id": "alibabacloudstack_vpc.default.id",
 
@@ -192,7 +195,7 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"vpc_id": "alibabacloudstack_vpc.default.id",
 
@@ -269,7 +272,7 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 }
 func TestAccAlibabacloudStackVpcVswitch2(t *testing.T) {
 
-	var v map[string]interface{}
+	var v vpc.DescribeVSwitchAttributesResponse
 
 	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
@@ -356,7 +359,7 @@ func TestAccAlibabacloudStackVpcVswitch2(t *testing.T) {
 }
 func TestAccAlibabacloudStackVpcVswitch3(t *testing.T) {
 
-	var v map[string]interface{}
+	var v vpc.DescribeVSwitchAttributesResponse
 
 	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
@@ -385,7 +388,7 @@ func TestAccAlibabacloudStackVpcVswitch3(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"vpc_id": "${{ref(resource, VPC::VPC::2.0.0.5.pre::default.VpcId)}}",
 
@@ -394,7 +397,7 @@ func TestAccAlibabacloudStackVpcVswitch3(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"vpc_id": "${{ref(resource, VPC::VPC::2.0.0.5.pre::default.VpcId)}}",
 
@@ -457,7 +460,7 @@ func TestAccAlibabacloudStackVpcVswitch3(t *testing.T) {
 }
 func TestAccAlibabacloudStackVpcVswitch4(t *testing.T) {
 
-	var v map[string]interface{}
+	var v vpc.DescribeVSwitchAttributesResponse
 
 	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
@@ -488,7 +491,7 @@ func TestAccAlibabacloudStackVpcVswitch4(t *testing.T) {
 
 					"description": "test",
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"vpc_id": "alibabacloudstack_vpc.default.id",
 
@@ -501,7 +504,7 @@ func TestAccAlibabacloudStackVpcVswitch4(t *testing.T) {
 
 						"description": "test",
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"vpc_id": "alibabacloudstack_vpc.default.id",
 
@@ -576,7 +579,7 @@ func TestAccAlibabacloudStackVpcVswitch4(t *testing.T) {
 }
 func TestAccAlibabacloudStackVpcVswitch5(t *testing.T) {
 
-	var v map[string]interface{}
+	var v vpc.DescribeVSwitchAttributesResponse
 
 	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
@@ -607,7 +610,7 @@ func TestAccAlibabacloudStackVpcVswitch5(t *testing.T) {
 
 					"description": "test",
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"vpc_id": "${{ref(resource, VPC::VPC::2.0.0.5.pre::OeB4be.VpcId)}}",
 
@@ -620,7 +623,7 @@ func TestAccAlibabacloudStackVpcVswitch5(t *testing.T) {
 
 						"description": "test",
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"vpc_id": "${{ref(resource, VPC::VPC::2.0.0.5.pre::OeB4be.VpcId)}}",
 
@@ -695,7 +698,7 @@ func TestAccAlibabacloudStackVpcVswitch5(t *testing.T) {
 }
 func TestAccAlibabacloudStackVpcVswitch6(t *testing.T) {
 
-	var v map[string]interface{}
+	var v vpc.DescribeVSwitchAttributesResponse
 
 	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
@@ -726,7 +729,7 @@ func TestAccAlibabacloudStackVpcVswitch6(t *testing.T) {
 
 					"description": "test",
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"vpc_id": "${{ref(resource, VPC::VPC::2.0.0.5.pre::OeB4be.VpcId)}}",
 
@@ -739,7 +742,7 @@ func TestAccAlibabacloudStackVpcVswitch6(t *testing.T) {
 
 						"description": "test",
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"vpc_id": "${{ref(resource, VPC::VPC::2.0.0.5.pre::OeB4be.VpcId)}}",
 
@@ -814,7 +817,7 @@ func TestAccAlibabacloudStackVpcVswitch6(t *testing.T) {
 }
 func TestAccAlibabacloudStackVpcVswitch7(t *testing.T) {
 
-	var v map[string]interface{}
+	var v vpc.DescribeVSwitchAttributesResponse
 
 	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
@@ -845,7 +848,7 @@ func TestAccAlibabacloudStackVpcVswitch7(t *testing.T) {
 
 					"description": "test",
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"cidr_block": "10.0.10.0/24",
 
@@ -858,7 +861,7 @@ func TestAccAlibabacloudStackVpcVswitch7(t *testing.T) {
 
 						"description": "test",
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"cidr_block": "10.0.10.0/24",
 
@@ -874,7 +877,7 @@ func TestAccAlibabacloudStackVpcVswitch7(t *testing.T) {
 
 					"description": "test",
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"cidr_block": "10.0.10.0/24",
 
@@ -887,7 +890,7 @@ func TestAccAlibabacloudStackVpcVswitch7(t *testing.T) {
 
 						"description": "test",
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"cidr_block": "10.0.10.0/24",
 
@@ -945,7 +948,7 @@ func TestAccAlibabacloudStackVpcVswitch7(t *testing.T) {
 }
 func TestAccAlibabacloudStackVpcVswitch8(t *testing.T) {
 
-	var v map[string]interface{}
+	var v vpc.DescribeVSwitchAttributesResponse
 
 	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
@@ -980,7 +983,7 @@ func TestAccAlibabacloudStackVpcVswitch8(t *testing.T) {
 
 					"vswitch_name": "slb_test_clb_core",
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"description": "${{ref(resource, VPC::VPC::2.0.0.5.pre::1SYZIP.Ipv6CidrBlocks[0].Ipv6Isp)}}",
 				}),
@@ -993,7 +996,7 @@ func TestAccAlibabacloudStackVpcVswitch8(t *testing.T) {
 
 						"vswitch_name": "slb_test_clb_core",
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"description": "${{ref(resource, VPC::VPC::2.0.0.5.pre::1SYZIP.Ipv6CidrBlocks[0].Ipv6Isp)}}",
 					}),
@@ -1039,7 +1042,7 @@ func TestAccAlibabacloudStackVpcVswitch8(t *testing.T) {
 
 					"vswitch_name": "slb_test_clb_core",
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"description": "${{ref(resource, VPC::VPC::2.0.0.5.pre::1SYZIP.Ipv6CidrBlocks[0].Ipv6Isp)}}",
 				}),
@@ -1052,7 +1055,7 @@ func TestAccAlibabacloudStackVpcVswitch8(t *testing.T) {
 
 						"vswitch_name": "slb_test_clb_core",
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"description": "${{ref(resource, VPC::VPC::2.0.0.5.pre::1SYZIP.Ipv6CidrBlocks[0].Ipv6Isp)}}",
 					}),
@@ -1106,7 +1109,7 @@ func TestAccAlibabacloudStackVpcVswitch8(t *testing.T) {
 }
 func TestAccAlibabacloudStackVpcVswitch9(t *testing.T) {
 
-	var v map[string]interface{}
+	var v vpc.DescribeVSwitchAttributesResponse
 
 	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
@@ -1137,7 +1140,7 @@ func TestAccAlibabacloudStackVpcVswitch9(t *testing.T) {
 
 					"description": "test",
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"vpc_id": "${{ref(resource, VPC::VPC::2.0.0.5.pre::OeB4be.VpcId)}}",
 
@@ -1150,7 +1153,7 @@ func TestAccAlibabacloudStackVpcVswitch9(t *testing.T) {
 
 						"description": "test",
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"vpc_id": "${{ref(resource, VPC::VPC::2.0.0.5.pre::OeB4be.VpcId)}}",
 
@@ -1183,7 +1186,7 @@ func TestAccAlibabacloudStackVpcVswitch9(t *testing.T) {
 
 					"description": "test",
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"vpc_id": "${{ref(resource, VPC::VPC::2.0.0.5.pre::OeB4be.VpcId)}}",
 
@@ -1196,7 +1199,7 @@ func TestAccAlibabacloudStackVpcVswitch9(t *testing.T) {
 
 						"description": "test",
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"vpc_id": "${{ref(resource, VPC::VPC::2.0.0.5.pre::OeB4be.VpcId)}}",
 
@@ -1254,7 +1257,7 @@ func TestAccAlibabacloudStackVpcVswitch9(t *testing.T) {
 }
 func TestAccAlibabacloudStackVpcVswitch10(t *testing.T) {
 
-	var v map[string]interface{}
+	var v vpc.DescribeVSwitchAttributesResponse
 
 	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
@@ -1285,7 +1288,7 @@ func TestAccAlibabacloudStackVpcVswitch10(t *testing.T) {
 
 					"description": "test",
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"cidr_block": "10.0.10.0/24",
 
@@ -1298,7 +1301,7 @@ func TestAccAlibabacloudStackVpcVswitch10(t *testing.T) {
 
 						"description": "test",
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"cidr_block": "10.0.10.0/24",
 
@@ -1314,7 +1317,7 @@ func TestAccAlibabacloudStackVpcVswitch10(t *testing.T) {
 
 					"description": "test",
 
-					"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+					"zone_id": "cn-wulan-env212-amtest212001-a",
 
 					"cidr_block": "10.0.10.0/24",
 
@@ -1327,7 +1330,7 @@ func TestAccAlibabacloudStackVpcVswitch10(t *testing.T) {
 
 						"description": "test",
 
-						"zone_id": "data.alibabacloudstack_zones.default.zones.0.id",
+						"zone_id": "cn-wulan-env212-amtest212001-a",
 
 						"cidr_block": "10.0.10.0/24",
 
