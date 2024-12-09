@@ -25,7 +25,7 @@ func dataSourceAlibabacloudStackDRDSInstances() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ValidateFunc: validation.StringIsValidRegExp,
-				ConflictsWith: []string{"description_regex"},
+				ConflictsWith: []string{"name_regex"},
 			},
 			"output_file": {
 				Type:     schema.TypeString,
