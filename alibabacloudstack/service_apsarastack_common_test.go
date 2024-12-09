@@ -1307,7 +1307,7 @@ const VpcCommonTestCase = `
 
 resource "alibabacloudstack_vpc" "default" {
   vpc_name = "${var.name}_vpc"
-  cidr_block = "10.1.0.0/21"
+  cidr_block = "172.16.0.0/24"
 }
 `
 
@@ -1316,7 +1316,7 @@ const VSwichCommonTestCase = DataZoneCommonTestCase + VpcCommonTestCase + `
 resource "alibabacloudstack_vswitch" "default" {
   name = "${var.name}_vsw"
   vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "10.1.1.0/24"
+  cidr_block = "172.16.0.0/24"
   zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
 
