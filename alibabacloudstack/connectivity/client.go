@@ -49,10 +49,10 @@ import (
 
 	"sync"
 
+	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	util "github.com/alibabacloud-go/tea-utils/service"
-	
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
@@ -546,14 +546,14 @@ func (client *AlibabacloudStackClient) GetCallerInfo() (*responses.BaseResponse,
 	request.Version = "2019-05-10" // Specify product version
 	request.ApiName = "GetUserInfo"
 	request.QueryParams = map[string]string{
-// 		"AccessKeySecret":  client.Config.SecretKey,
-// 		"SecurityToken":    client.Config.SecurityToken,
-// 		"Product":          "ascm",
-// 		"Department":       client.Config.Department,
-// 		"ResourceGroup":    client.Config.ResourceGroup,
-// 		"RegionId":         client.RegionId,
-// 		"Action":           "GetAllNavigationInfo",
-// 		"Version":          "2019-05-10",
+		// 		"AccessKeySecret":  client.Config.SecretKey,
+		// 		"SecurityToken":    client.Config.SecurityToken,
+		// 		"Product":          "ascm",
+		// 		"Department":       client.Config.Department,
+		// 		"ResourceGroup":    client.Config.ResourceGroup,
+		// 		"RegionId":         client.RegionId,
+		// 		"Action":           "GetAllNavigationInfo",
+		// 		"Version":          "2019-05-10",
 		"SignatureVersion": "1.0",
 	}
 	resp := responses.BaseResponse{}
@@ -1148,7 +1148,7 @@ func (client *AlibabacloudStackClient) NewCloudfwClient() (*rpc.Client, error) {
 
 func (client *AlibabacloudStackClient) defaultHeaders(popcode string) map[string]string {
 	return map[string]string{
-		"RegionId":              client.RegionId,  //	ASAPI
+		"RegionId":              client.RegionId, //	ASAPI
 		"x-acs-organizationid":  client.Department,
 		"x-acs-resourcegroupid": client.ResourceGroup,
 		"x-acs-regionid":        client.RegionId,
@@ -1223,7 +1223,7 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 	request.QueryParams = client.defaultQueryParams()
 }
 
-func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode string, version string, apiname string, pathpattern string, query map[string]interface{}, body map[string]interface{}) (_result map[string]interface{}, _err error){
+func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode string, version string, apiname string, pathpattern string, query map[string]interface{}, body map[string]interface{}) (_result map[string]interface{}, _err error) {
 	endpoint := client.Config.Endpoints[ServiceCode(strings.ToUpper(popcode))]
 	if endpoint == "" {
 		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", popcode)
@@ -1231,13 +1231,14 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	sdkConfig := client.teaSdkConfig
 	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
 	conn, err := rpc.NewClient(&sdkConfig)
+	conn.Headers = make(map[string]*string)
 	for key, value := range client.defaultHeaders(popcode) {
 		conn.Headers[key] = &value
 	}
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize the %s client: %#v", popcode, err)
 	}
-	
+
 	var protocol string
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		protocol = "https"
@@ -1245,17 +1246,17 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 		protocol = "http"
 	}
 	authType := "AK"
-	
+
 	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
 	runtime.SetAutoretry(true)
-	
+
 	var response map[string]interface{}
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		response, err = conn.DoRequest(&apiname, &protocol, &method, &version, &authType, query, body, &runtime)
 		if err != nil {
 			errmsg := errmsgs.GetAsapiErrorMessage(response)
-			if errmsg != ""{
+			if errmsg != "" {
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "popcode", apiname, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 			wait()
@@ -1302,7 +1303,6 @@ func GetResourceData(d *schema.ResourceData, valueType reflect.Type, keys ...str
 
 	return firstValue, nil
 }
-
 
 func SetResourceData(d *schema.ResourceData, value interface{}, keys ...string) error {
 	for _, key := range keys {

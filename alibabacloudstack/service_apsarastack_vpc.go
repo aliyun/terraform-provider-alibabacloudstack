@@ -163,6 +163,24 @@ func (s *VpcService) VpcStateRefreshFunc(id string, failStates []string) resourc
 func (s *VpcService) DoVpcDescribevswitchattributesRequest(id string) (v vpc.DescribeVSwitchAttributesResponse, err error) {
 	return s.DescribeVSwitch(id)
 }
+
+func (s *VpcService) DoVpcDescribevpcattributesRequest(id string) (v map[string]interface{}, err error) {
+	object, err := s.DescribeVpc(id)
+	result := map[string]interface{}{
+		"cidr_block":            object.CidrBlock,
+		"name":                  object.VpcName,
+		"description":           object.Description,
+		"router_id":             object.VRouterId,
+		"ipv6_cidr_block":       object.Ipv6CidrBlock,
+		"secondary_cidr_blocks": object.SecondaryCidrBlocks.SecondaryCidrBlock,
+		"status":                object.Status,
+		"tags":                  s.tagToMap(object.Tags.Tag),
+		"user_cidrs":            object.UserCidrs.UserCidr,
+		"vpc_name":              object.VpcName,
+	}
+	return result, err
+}
+
 func (s *VpcService) DescribeVSwitch(id string) (v vpc.DescribeVSwitchAttributesResponse, err error) {
 	request := vpc.CreateDescribeVSwitchAttributesRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
