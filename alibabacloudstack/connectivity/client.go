@@ -1304,6 +1304,18 @@ func GetResourceData(d *schema.ResourceData, valueType reflect.Type, keys ...str
 	return firstValue, nil
 }
 
+func GetResourceData1(d *schema.ResourceData, valueType reflect.Type, keys ...string) interface{} {
+	var firstValue interface{}
+
+	for _, key := range keys {
+		value, ok := d.GetOk(key)
+		if ok {
+			return value
+		}
+	}
+	return firstValue
+}
+
 func GetResourceDataOk(d *schema.ResourceData, keys ...string) (interface{}, bool) {
 	var firstValue interface{}
 
