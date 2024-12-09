@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -29,12 +28,14 @@ func resourceAlibabacloudStackSnapshotPolicy() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'auto_snapshot_policy_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'auto_snapshot_policy_name' instead.",
+				ConflictsWith: []string{"auto_snapshot_policy_name"},
 			},
 			"auto_snapshot_policy_name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 			"repeat_weekdays": {
 				Type:     schema.TypeSet,
@@ -60,11 +61,7 @@ func resourceAlibabacloudStackSnapshotPolicyCreate(d *schema.ResourceData, meta 
 
 	request := ecs.CreateCreateAutoSnapshotPolicyRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "auto_snapshot_policy_name", "name"); err == nil {
-		request.AutoSnapshotPolicyName = v.(string)
-	} else {
-		return err
-	}
+	request.AutoSnapshotPolicyName = connectivity.GetResourceData(d, "auto_snapshot_policy_name", "name").(string)
 	request.RepeatWeekdays = convertListToJsonString(d.Get("repeat_weekdays").(*schema.Set).List())
 	request.RetentionDays = requests.NewInteger(d.Get("retention_days").(int))
 	request.TimePoints = convertListToJsonString(d.Get("time_points").(*schema.Set).List())
@@ -135,11 +132,7 @@ func resourceAlibabacloudStackSnapshotPolicyUpdate(d *schema.ResourceData, meta 
 	client.InitRpcRequest(*request.RpcRequest)
 	request.AutoSnapshotPolicyId = d.Id()
 	if d.HasChange("auto_snapshot_policy_name") || d.HasChange("name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "auto_snapshot_policy_name", "name"); err == nil {
-			request.AutoSnapshotPolicyName = v.(string)
-		} else {
-			return err
-		}
+		request.AutoSnapshotPolicyName = connectivity.GetResourceData(d, "auto_snapshot_policy_name", "name").(string)
 	}
 	if d.HasChange("repeat_weekdays") {
 		request.RepeatWeekdays = convertListToJsonString(d.Get("repeat_weekdays").(*schema.Set).List())

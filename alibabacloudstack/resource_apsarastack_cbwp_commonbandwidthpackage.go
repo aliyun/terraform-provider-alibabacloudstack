@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"strconv"
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -35,12 +34,14 @@ func resourceAlibabacloudStackCommonBandwidthPackage() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use 'bandwidth_package_name' instead.",
+				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use new field 'bandwidth_package_name' instead.",
+				ConflictsWith: []string{"bandwidth_package_name"},
 			},
 			"bandwidth_package_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 			"bandwidth": {
 				Type:     schema.TypeInt,
@@ -78,11 +79,7 @@ func resourceAlibabacloudStackCommonBandwidthPackageCreate(d *schema.ResourceDat
 	client.InitRpcRequest(*request.RpcRequest)
 
 	request.Bandwidth = requests.NewInteger(d.Get("bandwidth").(int))
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "bandwidth_package_name", "name"); err == nil && v.(string) != "" {
-		request.Name = v.(string)
-	} else if err != nil {
-		return err
-	}
+	request.Name = connectivity.GetResourceData(d,"bandwidth_package_name", "name").(string)
 	request.Description = d.Get("description").(string)
 	request.InternetChargeType = d.Get("internet_charge_type").(string)
 	request.Ratio = requests.NewInteger(d.Get("ratio").(int))
@@ -160,11 +157,7 @@ func resourceAlibabacloudStackCommonBandwidthPackageUpdate(d *schema.ResourceDat
 	}
 
 	if d.HasChange("name") || d.HasChange("bandwidth_package_name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "bandwidth_package_name", "name"); err == nil {
-			request.Name = v.(string)
-		} else {
-			return err
-		}
+		request.Name = connectivity.GetResourceData(d, "bandwidth_package_name", "name").(string)
 		update = true
 	}
 

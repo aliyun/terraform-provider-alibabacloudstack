@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
@@ -33,12 +32,14 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
-				Deprecated: "Field 'status' is deprecated and will be removed in a future release. Please use 'active' instead.",
+				Deprecated: "Field 'status' is deprecated and will be removed in a future release. Please use new field 'active' instead.",
+				ConflictsWith: []string{"active"},
 			},
 			"active": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
+				ConflictsWith: []string{"status"},
 			},
 			"enable": {
 				Type:     schema.TypeBool,
@@ -168,20 +169,24 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 			"ram_role_name": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Deprecated: "Field 'ram_role_name' is deprecated and will be removed in a future release. Please use 'role_name' instead.",
+				Deprecated: "Field 'ram_role_name' is deprecated and will be removed in a future release. Please use new field 'role_name' instead.",
+				ConflictsWith: []string{"role_name"},
 			},
 			"role_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ConflictsWith: []string{"ram_role_name"},
 			},
 			"key_pair_name": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Deprecated: "Field 'key_pair_name' is deprecated and will be removed in a future release. Please use 'key_name' instead.",
+				Deprecated: "Field 'key_pair_name' is deprecated and will be removed in a future release. Please use new field 'key_name' instead.",
+				ConflictsWith: []string{"key_name"},
 			},
 			"key_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ConflictsWith: []string{"key_pair_name"},
 			},
 			"force_delete": {
 				Type:     schema.TypeBool,
@@ -268,15 +273,13 @@ func resourceAlibabacloudStackEssScalingConfigurationUpdate(d *schema.ResourceDa
 			return errmsgs.WrapError(err)
 		}
 
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(true), "active", "status"); err == nil && v.(bool) {
+		if connectivity.GetResourceData(d, "active", "status").(bool) {
 			if c.LifecycleState == string(Inactive) {
 				err := essService.ActiveEssScalingConfiguration(c.ScalingGroupId, d.Id())
 				if err != nil {
 					return errmsgs.WrapError(err)
 				}
 			}
-		} else if err != nil{
-			return err
 		} else {
 			if c.LifecycleState == string(Active) {
 				_, err := activeSubstituteScalingConfiguration(d, meta)
@@ -370,19 +373,11 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if d.HasChange("role_name") || d.HasChange("ram_role_name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "role_name", "ram_role_name"); err == nil {
-			request.RamRoleName = v.(string)
-		} else {
-			return err
-		}
+		request.RamRoleName = connectivity.GetResourceData(d, "role_name", "ram_role_name").(string)
 	}
 
 	if d.HasChange("key_name") || d.HasChange("key_pair_name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "key_name", "key_pair_name"); err == nil {
-			request.KeyPairName = v.(string)
-		} else {
-			return err
-		}
+		request.KeyPairName = connectivity.GetResourceData(d, "key_name", "key_pair_name").(string)
 	}
 
 	if d.HasChange("instance_name") {
@@ -742,18 +737,14 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 		request.DataDisk = &createDataDisks
 	}
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "role_name", "ram_role_name"); err == nil && v.(string) != "" {
-			request.RamRoleName = v.(string)
-	} else if err != nil {
-		return request, err
+	if v, ok :=  connectivity.GetResourceDataOk(d, "role_name", "ram_role_name"); ok && v.(string) != "" {
+		request.RamRoleName = v.(string)
 	}
-
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "key_name", "key_pair_name"); err == nil && v.(string) != "" {
-			request.KeyPairName = v.(string)
-	} else if err != nil {
-		return request, err
+	
+	if v, ok := connectivity.GetResourceDataOk(d, "key_name", "key_pair_name"); ok && v.(string) != "" {
+		request.KeyPairName = v.(string)
 	}
-
+	
 	if v, ok := d.GetOk("user_data"); ok && v.(string) != "" {
 		_, base64DecodeError := base64.StdEncoding.DecodeString(v.(string))
 		if base64DecodeError == nil {

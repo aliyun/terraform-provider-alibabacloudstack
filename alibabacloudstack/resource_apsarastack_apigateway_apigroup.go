@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cloudapi"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -25,11 +24,13 @@ func resourceAlibabacloudStackApigatewayGroup() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'api_group_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'api_group_name' instead.",
+				ConflictsWith: []string{"api_group_name"},
 			},
 			"api_group_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ConflictsWith: []string{"name"},
 			},
 
 			"description": {
@@ -53,11 +54,7 @@ func resourceAlibabacloudStackApigatewayGroupCreate(d *schema.ResourceData, meta
 
 	request := cloudapi.CreateCreateApiGroupRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "api_group_name", "name"); err == nil && v.(string) != "" {
-		request.GroupName = v.(string)
-	} else {
-		return err
-	}
+	request.GroupName = connectivity.GetResourceData(d, "api_group_name", "name")
 	request.Description = d.Get("description").(string)
 
 	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -115,11 +112,7 @@ func resourceAlibabacloudStackApigatewayGroupUpdate(d *schema.ResourceData, meta
 		request := cloudapi.CreateModifyApiGroupRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.GroupId = d.Id()
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "api_group_name", "name"); err == nil && v.(string) != "" {
-			request.GroupName = v.(string)
-		} else {
-			return err
-		}
+		request.GroupName = connectivity.GetResourceData(d, "api_group_name", "name")
 		request.Description = d.Get("description").(string)
 
 		raw, err := client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {

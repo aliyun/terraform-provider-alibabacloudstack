@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -88,12 +87,14 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'db_instance_description' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
+				ConflictsWith: []string{"db_instance_description"},
 			},
 			"db_instance_description": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
+				ConflictsWith: []string{"name"},
 			},
 			"security_ip_list": {
 				Type:     schema.TypeSet,
@@ -129,26 +130,30 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 				Computed: true,
-				Deprecated: "Field 'backup_period' is deprecated and will be removed in a future release. Please use 'preferred_backup_period' instead.",
+				Deprecated: "Field 'backup_period' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_period' instead.",
+				ConflictsWith: []string{"preferred_backup_period"},
 			},
 			"preferred_backup_period": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 				Computed: true,
+				ConflictsWith: []string{"backup_period"},
 			},
 			"backup_time": {
 				Type:     schema.TypeString,
 				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
 				Optional:     true,
 				Computed:     true,
-				Deprecated: "Field 'backup_time' is deprecated and will be removed in a future release. Please use 'preferred_backup_time' instead.",
+				Deprecated: "Field 'backup_time' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_time' instead.",
+				ConflictsWith: []string{"preferred_backup_time"},
 			},
 			"preferred_backup_time": {
 				Type:     schema.TypeString,
 				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
 				Optional:     true,
 				Computed:     true,
+				ConflictsWith: []string{"backup_time"},
 			},
 			"ssl_action": {
 				Type:         schema.TypeString,
@@ -200,11 +205,7 @@ func buildMongoDBCreateRequest(d *schema.ResourceData, meta interface{}) (*dds.C
 	request.Engine = "MongoDB"
 	request.DBInstanceStorage = requests.NewInteger(d.Get("db_instance_storage").(int))
 	request.DBInstanceClass = Trim(d.Get("db_instance_class").(string))
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "name"); err == nil {
-		request.DBInstanceDescription = v.(string)
-	} else {
-		return request, err
-	}
+	request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "name").(string)
 
 	request.AccountPassword = d.Get("account_password").(string)
 	if request.AccountPassword == "" {
@@ -315,16 +316,8 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "preferred_backup_time", "backup_time"); err == nil {
-		d.Set("preferred_backup_time", v)
-	} else {
-		return err
-	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "preferred_backup_period", "backup_period"); err == nil {
-		d.Set("preferred_backup_period", v)
-	} else {
-		return err
-	}
+	connectivity.SetResourceData(d, backupPolicy.PreferredBackupTime, "preferred_backup_time", "backup_time")
+	connectivity.SetResourceData(d, strings.Split(backupPolicy.PreferredBackupPeriod, ","), "preferred_backup_period", "backup_period")
 	retention_period, _ := strconv.Atoi(backupPolicy.BackupRetentionPeriod)
 	d.Set("retention_period", retention_period)
 
@@ -334,11 +327,7 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	}
 	d.Set("security_ip_list", ips)
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "name"); err == nil {
-		d.Set("db_instance_description", v)
-	} else {
-		return err
-	}
+	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "name")
 	d.Set("engine_version", instance.EngineVersion)
 	d.Set("db_instance_class", instance.DBInstanceClass)
 	d.Set("db_instance_storage", instance.DBInstanceStorage)
@@ -494,11 +483,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		request := dds.CreateModifyDBInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "name"); err == nil {
-			request.DBInstanceDescription = v.(string)
-		} else {
-			return err
-		}
+		request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "name").(string)
 
 		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
 			return ddsClient.ModifyDBInstanceDescription(request)

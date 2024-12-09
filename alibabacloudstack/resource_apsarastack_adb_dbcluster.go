@@ -195,15 +195,17 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			},
 			"instance_inner_connection": {
 				Type: schema.TypeString,
-				Deprecated: "Field 'instance_inner_connection' is deprecated and will be removed in a future release. Please use 'connection_string' instead.",
+				Deprecated: "Field 'instance_inner_connection' is deprecated and will be removed in a future release. Please use new field 'connection_string' instead.",
 				Computed: true,
+				ConflictsWith: []string{"connection_string"},
 			},
 			"instance_inner_port": {
 				Type: schema.TypeString,
-				Deprecated: "Field 'instance_inner_port' is deprecated and will be removed in a future release. Please use 'port' instead.",
+				Deprecated: "Field 'instance_inner_port' is deprecated and will be removed in a future release. Please use new field 'port' instead.",
 				ForceNew: true,
 				Optional: true,
 				Computed: true,
+				ConflictsWith: []string{"port"},
 			},
 			"instance_vpc_id": {
 				Type: schema.TypeString,
@@ -212,12 +214,14 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			"connection_string": {
 				Type:     schema.TypeString,
 				Computed: true,
+				ConflictsWith: []string{"instance_inner_connection"},
 			},
 			"port": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Optional: true,
 				Computed: true,
+				ConflictsWith: []string{"instance_inner_port"},
 			},
 			"zone_id": {
 				Type:     schema.TypeString,
