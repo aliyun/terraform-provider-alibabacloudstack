@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"strconv"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -30,12 +29,14 @@ func resourceAlibabacloudStackEssAlarm() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'alarm_task_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'alarm_task_name' instead.",
+				ConflictsWith: []string{"alarm_task_name"},
 			},
 			"alarm_task_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ConflictsWith: []string{"name"},
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -45,12 +46,14 @@ func resourceAlibabacloudStackEssAlarm() *schema.Resource {
 				Type:         schema.TypeBool,
 				Optional:     true,
 				Default:      true,
-				Deprecated:   "Field 'enable' is deprecated and will be removed in a future release. Please use 'status' instead.",
+				Deprecated:   "Field 'enable' is deprecated and will be removed in a future release. Please use new field 'status' instead.",
+				ConflictsWith: []string{"status"},
 			},
 			"status": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
+				ConflictsWith: []string{"enable"},
 			},
 			"alarm_actions": {
 				Type:     schema.TypeSet,
@@ -120,11 +123,13 @@ func resourceAlibabacloudStackEssAlarm() *schema.Resource {
 			"state": {
 				Type:         schema.TypeString,
 				Computed:     true,
-				Deprecated:   "Field 'state' is deprecated and will be removed in a future release. Please use 'alarm_trigger_state' instead.",
+				Deprecated:   "Field 'state' is deprecated and will be removed in a future release. Please use new field 'alarm_trigger_state' instead.",
+				ConflictsWith: []string{"alarm_trigger_state"},
 			},
 			"alarm_trigger_state": {
 				Type:     schema.TypeString,
 				Computed: true,
+				ConflictsWith: []string{"state"},
 			},
 		},
 	}
@@ -167,10 +172,7 @@ func resourceAlibabacloudStackEssAlarmCreate(d *schema.ResourceData, meta interf
 	d.SetId(response.AlarmTaskId)
 
 	// enable or disable alarm
-	enable, err := connectivity.GetResourceData(d, reflect.TypeOf(true), "status", "enable")
-	if err != nil {
-		return err
-	}
+	enable = connectivity.GetResourceData(d, "status", "enable")
 	if !enable.(bool) {
 		disableAlarmRequest := ess.CreateDisableAlarmRequest()
 		client.InitRpcRequest(*disableAlarmRequest.RpcRequest)
@@ -248,11 +250,7 @@ func resourceAlibabacloudStackEssAlarmUpdate(d *schema.ResourceData, meta interf
 		request.MetricType = metricType.(string)
 	}
 	if d.HasChange("alarm_task_name") || d.HasChange("name")  {
-		if namestr, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "alarm_task_name", "name"); err == nil {
-			request.Name = namestr.(string)
-		} else {
-			return err
-		}
+		request.Name = connectivity.GetResourceData(d, "alarm_task_name", "name")
 	}
 
 	if d.HasChange("description") {
@@ -317,11 +315,8 @@ func resourceAlibabacloudStackEssAlarmUpdate(d *schema.ResourceData, meta interf
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	if d.HasChange("status") {
-		enable, err := connectivity.GetResourceData(d, reflect.TypeOf(true), "status", "enable")
-		if err != nil {
-			return err
-		}
+	if d.HasChange("status") || d.HasChange("enable"){
+		enable := connectivity.GetResourceData(d, "status", "enable")
 		if enable.(bool) {
 			enableAlarmRequest := ess.CreateEnableAlarmRequest()
 			client.InitRpcRequest(*enableAlarmRequest.RpcRequest)
@@ -395,10 +390,8 @@ func resourceAlibabacloudStackEssAlarmDelete(d *schema.ResourceData, meta interf
 func buildAlibabacloudStackEssAlarmArgs(d *schema.ResourceData) (*ess.CreateAlarmRequest, error) {
 	request := ess.CreateCreateAlarmRequest()
 
-	if alarmTaskName, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "alarm_task_name", "name"); err == nil && alarmTaskName.(string) != "" {
-		request.Name = alarmTaskName.(string)
-	} else if err != nil {
-		return request, err
+	if name, ok := connectivity.GetResourceDataOk(d, "alarm_task_name", "name"); ok && name.(string) != "" {
+		request.Name = name.(string)
 	}
 
 	if description, ok := d.GetOk("description"); ok && description.(string) != "" {

@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"strings"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -32,26 +31,30 @@ func resourceAlibabacloudStackKVStoreBackupPolicy() *schema.Resource {
 				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
 				Optional:     true,
 				Default:      "02:00Z-03:00Z",
-				Deprecated:   "Field 'backup_time' is deprecated and will be removed in a future release. Please use 'preferred_backup_time' instead.",
+				Deprecated:   "Field 'backup_time' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_time' instead.",
+				ConflictsWith: []string{"preferred_backup_time"},
 			},
 			"preferred_backup_time": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
 				Optional:     true,
 				Default:      "02:00Z-03:00Z",
+				ConflictsWith: []string{"backup_time"},
 			},
 			"backup_period": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 				Computed: true,
-				Deprecated: "Field 'backup_period' is deprecated and will be removed in a future release. Please use 'preferred_backup_period' instead.",
+				Deprecated: "Field 'backup_period' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_period' instead.",
+				ConflictsWith: []string{"preferred_backup_period"},
 			},
 			"preferred_backup_period": {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 				Computed: true,
+				ConflictsWith: []string{"backup_period"},
 			},
 		},
 	}
@@ -91,17 +94,9 @@ func resourceAlibabacloudStackKVStoreBackupPolicyUpdate(d *schema.ResourceData, 
 		request := r_kvstore.CreateModifyBackupPolicyRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.InstanceId = d.Id()
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "preferred_backup_time", "backup_time"); err == nil {
-			request.PreferredBackupTime = v.(string)
-		} else {
-			return err
-		}
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "preferred_backup_period", "backup_period"); err == nil {
-			periodList := expandStringList(v.(*schema.Set).List())
-			request.PreferredBackupPeriod = strings.Join(periodList, COMMA_SEPARATED)
-		} else {
-			return err
-		}
+		request.PreferredBackupTime = connectivity.GetResourceData(d, "preferred_backup_time", "backup_time")
+		periodList =  expandStringList(connectivity.GetResourceData(d, "preferred_backup_period", "backup_period").(*schema.Set).List())
+		request.PreferredBackupPeriod = strings.Join(periodList, COMMA_SEPARATED)
 
 		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 			return rkvClient.ModifyBackupPolicy(request)

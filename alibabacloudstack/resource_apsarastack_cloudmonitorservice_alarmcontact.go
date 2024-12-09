@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -30,11 +29,13 @@ func resourceAlibabacloudstackCmsAlarmContact() *schema.Resource {
 			"channels_aliim": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Deprecated:   "Field 'channels_aliim' is deprecated and will be removed in a future release. Please use 'channels_ali_im' instead.",
+				Deprecated:   "Field 'channels_aliim' is deprecated and will be removed in a future release. Please use new field 'channels_ali_im' instead.",
+				ConflictsWith: []string{"channels_ali_im"},
 			},
 			"channels_ali_im": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ConflictsWith: []string{"channels_aliim"},
 			},
 			"channels_ding_web_hook": {
 				Type:     schema.TypeString,
@@ -68,10 +69,8 @@ func resourceAlibabacloudstackCmsAlarmContactCreate(d *schema.ResourceData, meta
 	request.Headers["Content-Type"] = "application/json; charset=UTF-8"
 	request.QueryParams["ContactName"] = d.Get("alarm_contact_name").(string)
 	request.QueryParams["Describe"] = d.Get("describe").(string)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "channels_ali_im", "channels_aliim"); err == nil {
-		request.QueryParams["Channels.AliIM"] = v.(string)
-	} else {
-		return err
+	if v, ok := connectivity.GetResourceDataOk(d, "channels_ali_im", "channels_aliim"); ok {
+		request.QueryParams["Channels.AliIM "] = v.(string)
 	}
 	if v, ok := d.GetOk("channels_ding_web_hook"); ok {
 		request.QueryParams["Channels.DingWebHook"] = v.(string)
@@ -140,11 +139,7 @@ func resourceAlibabacloudstackCmsAlarmContactUpdate(d *schema.ResourceData, meta
 	if d.HasChange("channels_ali_im") || d.HasChange("channels_aliim") {
 		update = true
 	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "channels_ali_im", "channels_aliim"); err == nil {
-		request.ChannelsAliIM = v.(string)
-	} else {
-		return err
-	}
+	request.ChannelsAliIM = connectivity.GetResourceData(d, "channels_ali_im", "channels_aliim").(string)
 	if d.HasChange("channels_ding_web_hook") {
 		update = true
 	}

@@ -6,7 +6,6 @@ import (
 	"log"
 	"strings"
 	"time"
-	"reflect"
 
 	"strconv"
 
@@ -34,33 +33,39 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 			"rule_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ConflictsWith: []string{"name"},
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				Deprecated: "Field 'name' is deprecated and will be removed in a future release. Please use 'rule_name' instead.",
+				Deprecated: "Field 'name' is deprecated and will be removed in a future release. Please use new field 'rule_name' instead.",
+				ConflictsWith: []string{"rule_name"},
 			},
 			"namespace": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ConflictsWith: []string{"project"},
 			},
 			"project": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				Deprecated: "Field 'project' is deprecated and will be removed in a future release. Please use 'namespace' instead.",
+				Deprecated: "Field 'project' is deprecated and will be removed in a future release. Please use new field 'namespace' instead.",
+				ConflictsWith: []string{"namespace"},
 			},
 			"metric_name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ConflictsWith: []string{"metric"},
 			},
 			"metric": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				Deprecated: "Field 'metric' is deprecated and will be removed in a future release. Please use 'metric_name' instead.",
+				Deprecated: "Field 'metric' is deprecated and will be removed in a future release. Please use new field 'metric_name' instead.",
+				ConflictsWith: []string{"metric_name"},
 			},
 			"dimensions": {
 				Type:     schema.TypeMap,
@@ -212,24 +217,12 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 	request := cms.CreatePutResourceMetricRuleRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	d.SetId(resource.UniqueId() + ":" + request.RuleName)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "rule_name", "name"); err == nil {
-		request.RuleName = v.(string)
-	} else {
-		return err
-	}
+	request.RuleName = connectivity.GetResourceData("rule_name", "name").(string)
 	parts, err := ParseResourceId(d.Id(), 2)
 	request.RuleId = parts[0]
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "namespace", "project"); err == nil {
-		request.Namespace = v.(string)
-	} else {
-		return err
-	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "metric_name", "metric"); err == nil {
-		request.MetricName = v.(string)
-	} else {
-		return err
-	}
+	request.Namespace = connectivity.GetResourceData(d, "namespace", "project").(string)
+	request.MetricName = connectivity.GetResourceData(d, "metric_name", "metric").(string)
 	request.Period = strconv.Itoa(d.Get("period").(int))
 
 	request.ContactGroups = strings.Join(expandStringList(d.Get("contact_groups").([]interface{})), ",")
@@ -339,7 +332,7 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(false), "status", "enabled"); err == nil && v.(bool) {
+	if connectivity.GetResourceData(d, "status", "enabled").(bool) {
 		request := cms.CreateEnableMetricRulesRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.RuleId = &[]string{d.Id()}

@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"reflect"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
@@ -74,12 +73,14 @@ func resourceAlibabacloudStackReservedInstance() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'reserved_instance_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'reserved_instance_name' instead.",
+				ConflictsWith: []string{"reserved_instance_name"},
 			},
 			"reserved_instance_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -90,7 +91,8 @@ func resourceAlibabacloudStackReservedInstance() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				Deprecated:   "Field 'resource_group_id' is deprecated and will be removed in a future release. Please use 'reserved_instance_id' instead.",
+				Deprecated:   "Field 'resource_group_id' is deprecated and will be removed in a future release. Please use new field 'reserved_instance_id' instead.",
+				ConflictsWith: []string{"reserved_instance_id"},
 			},
 			"reserved_instance_id": {
 				Type:         schema.TypeString,
@@ -98,6 +100,7 @@ func resourceAlibabacloudStackReservedInstance() *schema.Resource {
 				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"resource_group_id"},
 			},
 		},
 	}
@@ -135,18 +138,14 @@ func resourceAlibabacloudStackReservedInstanceCreate(d *schema.ResourceData, met
 	if v, ok := d.GetOk("offering_type"); ok {
 		request.OfferingType = v.(string)
 	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "reserved_instance_name", "name"); err == nil {
+	if v, ok := connectivity.GetResourceDataOk(d, "reserved_instance_name", "name"); ok {
 		request.ReservedInstanceName = v.(string)
-	} else {
-		return err
 	}
 	if v, ok := d.GetOk("description"); ok {
 		request.Description = v.(string)
 	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "reserved_instance_id", "resource_group_id"); err == nil {
+	if v, ok := connectivity.GetResourceDataOk(d, "reserved_instance_id", "resource_group_id"); ok {
 		request.ResourceGroupId = v.(string)
-	} else {
-		return err
 	}
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.PurchaseReservedInstancesOffering(request)
@@ -178,10 +177,8 @@ func resourceAlibabacloudStackReservedInstanceUpdate(d *schema.ResourceData, met
 	client.InitRpcRequest(*request.RpcRequest)
 	request.ReservedInstanceId = d.Id()
 	if d.HasChange("reserved_instance_name") || d.HasChange("description") || d.HasChange("name") || d.HasChange("description") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "reserved_instance_name", "name"); err == nil {
+		if v, ok := connectivity.GetResourceDataOk(d, "reserved_instance_name", "name"); ok {
 			request.ReservedInstanceName = v.(string)
-		} else {
-			return err
 		}
 		if v, ok := d.GetOk("description"); ok {
 			request.Description = v.(string)

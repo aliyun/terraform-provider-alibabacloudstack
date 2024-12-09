@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
-	"reflect"
 
 	"github.com/denverdino/aliyungo/common"
 
@@ -33,13 +32,15 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'launch_template_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'launch_template_name' instead.",
+				ConflictsWith: []string{"launch_template_name"},
 			},
 			"launch_template_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
+				ConflictsWith: []string{"name"},
 			},
 			"description": {
 				Type:         schema.TypeString,
@@ -166,7 +167,7 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 			"userdata": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Deprecated: "Field 'userdata' is deprecated and will be removed in a future release. Please use 'user_data' instead.",
+				Deprecated: "Field 'userdata' is deprecated and will be removed in a future release. Please use new field 'user_data' instead.",
 			},
 			"user_data": {
 				Type:     schema.TypeString,
@@ -264,11 +265,7 @@ func resourceAlibabacloudStackLaunchTemplateCreate(d *schema.ResourceData, meta 
 
 	request := ecs.CreateCreateLaunchTemplateRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "launch_template_name", "name"); err == nil {
-		request.LaunchTemplateName = v.(string)
-	} else {
-		return err
-	}
+	request.LaunchTemplateName = connectivity.GetResourceData(d,  "launch_template_name", "name").(string)
 	request.Description = d.Get("description").(string)
 	request.HostName = d.Get("host_name").(string)
 	request.ImageId = d.Get("image_id").(string)
@@ -294,11 +291,7 @@ func resourceAlibabacloudStackLaunchTemplateCreate(d *schema.ResourceData, meta 
 	request.SystemDiskCategory = d.Get("system_disk_category").(string)
 	request.SystemDiskDescription = d.Get("system_disk_description").(string)
 	request.SystemDiskSize = requests.NewInteger(d.Get("system_disk_size").(int))
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "user_data", "userdata"); err == nil {
-		request.UserData = v.(string)
-	} else {
-		return err
-	}
+	request.UserData = connectivity.GetResourceData(d, "user_data", "userdata").(string)
 	request.VSwitchId = d.Get("vswitch_id").(string)
 	request.VpcId = d.Get("vpc_id").(string)
 	request.ZoneId = d.Get("zone_id").(string)
@@ -561,7 +554,7 @@ func createLaunchTemplateVersion(d *schema.ResourceData, meta interface{}) error
 	request.ImageId = d.Get("image_id").(string)
 	request.ImageOwnerAlias = d.Get("image_owner_alias").(string)
 	request.InstanceChargeType = d.Get("instance_charge_type").(string)
-	request.InstanceName = d.Get("instance_name").(string)
+	request.LaunchTemplateName = connectivity.GetResourceData(d, "launch_template_name", "name").(string)
 	request.InstanceType = d.Get("instance_type").(string)
 	request.AutoReleaseTime = d.Get("auto_release_time").(string)
 	request.InternetChargeType = d.Get("internet_charge_type").(string)
@@ -581,11 +574,7 @@ func createLaunchTemplateVersion(d *schema.ResourceData, meta interface{}) error
 	request.SystemDiskCategory = d.Get("system_disk_category").(string)
 	request.SystemDiskDescription = d.Get("system_disk_description").(string)
 	request.SystemDiskSize = requests.NewInteger(d.Get("system_disk_size").(int))
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "user_data", "userdata"); err == nil {
-		request.UserData = v.(string)
-	} else {
-		return err
-	}
+	request.UserData = connectivity.GetResourceData(d, "user_data", "userdata").(string)
 	request.VSwitchId = d.Get("vswitch_id").(string)
 	request.VpcId = d.Get("vpc_id").(string)
 	request.ZoneId = d.Get("zone_id").(string)
