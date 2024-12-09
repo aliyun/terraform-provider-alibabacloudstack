@@ -27,15 +27,17 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				ForceNew:   true,
-				Deprecated: "Field 'availability_zone' is deprecated and will be removed in a future release. Please use 'zone_id' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use 'zone_id' instead.",
+				ConflictsWith: []string{"zone_id"},
 			},
 			"zone_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"availability_zone"},
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
@@ -54,13 +56,15 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 				Computed: true,
 			},
 			"name": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "Field 'name' is deprecated and will be removed in a future release. Please use 'vswitch_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use 'vswitch_name' instead.",
+				ConflictsWith: []string{"vswitch_name"},
 			},
 			"vswitch_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"name"},
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -77,18 +81,14 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 
 	request := vpc.CreateCreateVSwitchRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "zone_id", "availability_zone"); err == nil {
+	if v, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && v.(string) != "" {
 		request.ZoneId = v.(string)
-	} else {
-		return err
 	}
 	request.VpcId = Trim(d.Get("vpc_id").(string))
 	request.CidrBlock = Trim(d.Get("cidr_block").(string))
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "vswitch_name", "name"); err == nil && v.(string) != "" {
+	if v, ok := connectivity.GetResourceDataOk(d, "vswitch_name", "name"); ok && v.(string) != "" {
 		request.VSwitchName = v.(string)
-	} else if err != nil {
-		return err
 	}
 
 	if v, ok := d.GetOk("description"); ok && v != "" {

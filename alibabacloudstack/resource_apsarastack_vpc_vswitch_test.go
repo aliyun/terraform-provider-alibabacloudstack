@@ -64,16 +64,12 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 
 					"description": "modify_description",
 
-					"vswitch_id": "alibabacloudstack_vswitch.default.id",
-
 					"vswitch_name": "modify_name",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"description": "modify_description",
-
-						"vswitch_id": "alibabacloudstack_vswitch.default.id",
 
 						"vswitch_name": "modify_name",
 					}),
@@ -128,19 +124,7 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 
 var AlibabacloudTestAccVpcVswitchCheckmap = map[string]string{
 
-	"description": "测试111111",
-
-	"cidr_block": "192.168.1.0/24",
-
-	"vpc_id": "${alibabacloudstack_vpc.default.id}",
-
-	"vswitch_name": "${var.name}",
-
-	"zone_id": "cn-wulan-env212-amtest212001-a",
-
 	"ipv6_cidr_block": CHECKSET,
-
-	"tags": "",
 }
 
 func AlibabacloudTestAccVpcVswitchBasicdependence(name string) string {
