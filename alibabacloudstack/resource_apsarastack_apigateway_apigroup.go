@@ -22,14 +22,14 @@ func resourceAlibabacloudStackApigatewayGroup() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'api_group_name' instead.",
+				Type:          schema.TypeString,
+				Required:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'api_group_name' instead.",
 				ConflictsWith: []string{"api_group_name"},
 			},
 			"api_group_name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:          schema.TypeString,
+				Required:      true,
 				ConflictsWith: []string{"name"},
 			},
 
@@ -54,7 +54,7 @@ func resourceAlibabacloudStackApigatewayGroupCreate(d *schema.ResourceData, meta
 
 	request := cloudapi.CreateCreateApiGroupRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	request.GroupName = connectivity.GetResourceData(d, "api_group_name", "name")
+	request.GroupName = connectivity.GetResourceData1(d, "api_group_name", "name")
 	request.Description = d.Get("description").(string)
 
 	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -112,7 +112,7 @@ func resourceAlibabacloudStackApigatewayGroupUpdate(d *schema.ResourceData, meta
 		request := cloudapi.CreateModifyApiGroupRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.GroupId = d.Id()
-		request.GroupName = connectivity.GetResourceData(d, "api_group_name", "name")
+		request.GroupName = connectivity.GetResourceData1(d, "api_group_name", "name")
 		request.Description = d.Get("description").(string)
 
 		raw, err := client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {

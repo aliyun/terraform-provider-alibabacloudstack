@@ -29,16 +29,16 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"status": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-				Deprecated: "Field 'status' is deprecated and will be removed in a future release. Please use new field 'active' instead.",
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'status' is deprecated and will be removed in a future release. Please use new field 'active' instead.",
 				ConflictsWith: []string{"active"},
 			},
 			"active": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"status"},
 			},
 			"enable": {
@@ -167,25 +167,25 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Optional: true,
 			},
 			"ram_role_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Deprecated: "Field 'ram_role_name' is deprecated and will be removed in a future release. Please use new field 'role_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Deprecated:    "Field 'ram_role_name' is deprecated and will be removed in a future release. Please use new field 'role_name' instead.",
 				ConflictsWith: []string{"role_name"},
 			},
 			"role_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:          schema.TypeString,
+				Optional:      true,
 				ConflictsWith: []string{"ram_role_name"},
 			},
 			"key_pair_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Deprecated: "Field 'key_pair_name' is deprecated and will be removed in a future release. Please use new field 'key_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Deprecated:    "Field 'key_pair_name' is deprecated and will be removed in a future release. Please use new field 'key_name' instead.",
 				ConflictsWith: []string{"key_name"},
 			},
 			"key_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:          schema.TypeString,
+				Optional:      true,
 				ConflictsWith: []string{"key_pair_name"},
 			},
 			"force_delete": {
@@ -273,7 +273,7 @@ func resourceAlibabacloudStackEssScalingConfigurationUpdate(d *schema.ResourceDa
 			return errmsgs.WrapError(err)
 		}
 
-		if connectivity.GetResourceData(d, "active", "status").(bool) {
+		if connectivity.GetResourceData1(d, "active", "status").(bool) {
 			if c.LifecycleState == string(Inactive) {
 				err := essService.ActiveEssScalingConfiguration(c.ScalingGroupId, d.Id())
 				if err != nil {
@@ -373,11 +373,11 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 	}
 
 	if d.HasChange("role_name") || d.HasChange("ram_role_name") {
-		request.RamRoleName = connectivity.GetResourceData(d, "role_name", "ram_role_name").(string)
+		request.RamRoleName = connectivity.GetResourceData1(d, "role_name", "ram_role_name").(string)
 	}
 
 	if d.HasChange("key_name") || d.HasChange("key_pair_name") {
-		request.KeyPairName = connectivity.GetResourceData(d, "key_name", "key_pair_name").(string)
+		request.KeyPairName = connectivity.GetResourceData1(d, "key_name", "key_pair_name").(string)
 	}
 
 	if d.HasChange("instance_name") {
@@ -737,14 +737,14 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 		request.DataDisk = &createDataDisks
 	}
 
-	if v, ok :=  connectivity.GetResourceDataOk(d, "role_name", "ram_role_name"); ok && v.(string) != "" {
+	if v, ok := connectivity.GetResourceDataOk(d, "role_name", "ram_role_name"); ok && v.(string) != "" {
 		request.RamRoleName = v.(string)
 	}
-	
+
 	if v, ok := connectivity.GetResourceDataOk(d, "key_name", "key_pair_name"); ok && v.(string) != "" {
 		request.KeyPairName = v.(string)
 	}
-	
+
 	if v, ok := d.GetOk("user_data"); ok && v.(string) != "" {
 		_, base64DecodeError := base64.StdEncoding.DecodeString(v.(string))
 		if base64DecodeError == nil {

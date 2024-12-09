@@ -26,29 +26,29 @@ func resourceAlibabacloudStackDisk() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				Deprecated:   "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
+				Type:          schema.TypeString,
+				Required:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
 				ConflictsWith: []string{"zone_id"},
 			},
 			"zone_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Required:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"availability_zone"},
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'disk_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'disk_name' instead.",
 				ConflictsWith: []string{"disk_name"},
 			},
 			"disk_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 
@@ -120,7 +120,7 @@ func resourceAlibabacloudStackDiskCreate(d *schema.ResourceData, meta interface{
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 
-	availabilityZone, err := ecsService.DescribeZone(connectivity.GetResourceData(d, "zone_id", "availability_zone").(string))
+	availabilityZone, err := ecsService.DescribeZone(connectivity.GetResourceData1(d, "zone_id", "availability_zone").(string))
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -234,7 +234,7 @@ func resourceAlibabacloudStackDiskUpdate(d *schema.ResourceData, meta interface{
 	request.DiskId = d.Id()
 
 	if !d.IsNewResource() && d.HasChange("disk_name") {
-		request.DiskName = connectivity.GetResourceData(d, "disk_name", "name")
+		request.DiskName = connectivity.GetResourceData1(d, "disk_name", "name")
 		update = true
 		//d.SetPartial("disk_name")
 	}

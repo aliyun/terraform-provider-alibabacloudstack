@@ -39,54 +39,54 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 			},
 
 			"master_db_instance_id": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Deprecated:   "Field 'master_db_instance_id' is deprecated and will be removed in a future release. Please use new field 'master_instance_id' instead.",
+				Type:          schema.TypeString,
+				Required:      true,
+				Deprecated:    "Field 'master_db_instance_id' is deprecated and will be removed in a future release. Please use new field 'master_instance_id' instead.",
 				ConflictsWith: []string{"master_instance_id"},
 			},
 			"master_instance_id": {
-				Type:         schema.TypeString,
-				Required:     true,
+				Type:          schema.TypeString,
+				Required:      true,
 				ConflictsWith: []string{"master_db_instance_id"},
 			},
 
 			"instance_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
-				Computed:     true,
-				Deprecated:   "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
+				Computed:      true,
+				Deprecated:    "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
 				ConflictsWith: []string{"db_instance_description"},
 			},
 			"db_instance_description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
-				Computed:     true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
+				Computed:      true,
 				ConflictsWith: []string{"instance_name"},
 			},
 
 			"instance_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Deprecated:   "Field 'instance_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
+				Type:          schema.TypeString,
+				Required:      true,
+				Deprecated:    "Field 'instance_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
 				ConflictsWith: []string{"db_instance_class"},
 			},
 			"db_instance_class": {
-				Type:         schema.TypeString,
-				Required:     true,
+				Type:          schema.TypeString,
+				Required:      true,
 				ConflictsWith: []string{"instance_type"},
 			},
 
 			"instance_storage": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				Deprecated:   "Field 'instance_storage' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage' instead.",
+				Type:          schema.TypeInt,
+				Required:      true,
+				Deprecated:    "Field 'instance_storage' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage' instead.",
 				ConflictsWith: []string{"db_instance_storage"},
 			},
 			"db_instance_storage": {
-				Type:         schema.TypeInt,
-				Required:     true,
+				Type:          schema.TypeInt,
+				Required:      true,
 				ConflictsWith: []string{"instance_storage"},
 			},
 
@@ -209,7 +209,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 		request := rds.CreateModifyDBInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
-		request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
+		request.DBInstanceDescription = connectivity.GetResourceData1(d, "db_instance_description", "instance_name").(string)
 
 		err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 			raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
@@ -254,12 +254,12 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 		update = true
 	}
 	if d.HasChange("db_instance_class") || d.HasChange("instance_type") {
-		request.DBInstanceClass = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
+		request.DBInstanceClass = connectivity.GetResourceData1(d, "db_instance_class", "instance_type").(string)
 		update = true
 	}
 
 	if d.HasChange("db_instance_storage") || d.HasChange("instance_storage") {
-		request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
+		request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData1(d, "db_instance_storage", "instance_storage").(int))
 	}
 
 	if update {
@@ -413,11 +413,11 @@ func buildDBReadonlyCreateRequest(d *schema.ResourceData, meta interface{}) (*rd
 	vpcService := VpcService{client}
 	request := rds.CreateCreateReadOnlyDBInstanceRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	request.DBInstanceId = connectivity.GetResourceData(d, "master_instance_id", "master_db_instance_id").(string)
+	request.DBInstanceId = connectivity.GetResourceData1(d, "master_instance_id", "master_db_instance_id").(string)
 	request.EngineVersion = Trim(d.Get("engine_version").(string))
-	request.DBInstanceStorage = connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int)
-	request.DBInstanceClass = Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string))
-	request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
+	request.DBInstanceStorage = connectivity.GetResourceData1(d, "db_instance_storage", "instance_storage").(int)
+	request.DBInstanceClass = Trim(connectivity.GetResourceData1(d, "db_instance_class", "instance_type").(string))
+	request.DBInstanceDescription = connectivity.GetResourceData1(d, "db_instance_description", "instance_name").(string)
 	request.DBInstanceStorageType = d.Get("db_instance_storage_type").(string)
 
 	if zone, ok := d.GetOk("zone_id"); ok && Trim(zone.(string)) != "" {

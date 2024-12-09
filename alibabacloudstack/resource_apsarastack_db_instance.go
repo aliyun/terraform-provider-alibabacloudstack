@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -280,10 +279,10 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 
 	enginever := Trim(d.Get("engine_version").(string))
 	engine := Trim(d.Get("engine").(string))
-	DBInstanceStorage := connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int)
+	DBInstanceStorage := connectivity.GetResourceData1(d, "db_instance_storage", "instance_storage").(int)
 	DBInstanceClass := Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string))
 	DBInstanceNetType := string(Intranet)
-	DBInstanceDescription := connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
+	DBInstanceDescription := connectivity.GetResourceData1(d, "db_instance_description", "instance_name").(string)
 	if zone, ok := d.GetOk("zone_id"); ok && Trim(zone.(string)) != "" {
 		ZoneId = Trim(zone.(string))
 	}
@@ -306,8 +305,8 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 
 		VPCId = vsw.VpcId
 	}
-	PayType := Trim(connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string))
-	DBInstanceStorageType := connectivity.GetResourceData(d, "db_instance_storage_type", "storage_type").(string)
+	PayType := Trim(connectivity.GetResourceData1(d, "payment_type", "instance_charge_type").(string))
+	DBInstanceStorageType := connectivity.GetResourceData1(d, "db_instance_storage_type", "storage_type").(string)
 	ZoneIdSlave1 = d.Get("zone_id_slave1").(string)
 	ZoneIdSlave2 = d.Get("zone_id_slave2").(string)
 	SecurityIPList := LOCAL_HOST_IP
@@ -454,7 +453,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		return errmsgs.WrapError(err)
 	}
 
-	payType := PayType(connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string))
+	payType := PayType(connectivity.GetResourceData1(d, "payment_type", "instance_charge_type").(string))
 	if !d.IsNewResource() && (d.HasChange("instance_charge_type") || d.HasChange("payment_type")) && payType == Prepaid {
 		prePaidRequest := rds.CreateModifyDBInstancePayTypeRequest()
 		client.InitRpcRequest(*prePaidRequest.RpcRequest)
@@ -539,7 +538,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		
+
 	}
 
 	if d.HasChange("maintain_time") {
@@ -573,7 +572,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		request := rds.CreateModifyDBInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
-		request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
+		request.DBInstanceDescription = connectivity.GetResourceData1(d, "db_instance_description", "instance_name").(string)
 
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.ModifyDBInstanceDescription(request)
@@ -606,15 +605,15 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 	request := rds.CreateModifyDBInstanceSpecRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
-	request.PayType = connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string)
+	request.PayType = connectivity.GetResourceData1(d, "payment_type", "instance_charge_type").(string)
 
 	if d.HasChange("instance_type") || d.HasChange("db_instance_class") {
-		request.DBInstanceClass = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
+		request.DBInstanceClass = connectivity.GetResourceData1(d, "db_instance_class", "instance_type").(string)
 		update = true
 	}
 
 	if d.HasChange("instance_storage") || d.HasChange("db_instance_storage") {
-		request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
+		request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData1(d, "db_instance_storage", "instance_storage").(int))
 		update = true
 	}
 	if update {

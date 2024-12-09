@@ -25,16 +25,16 @@ func resourceAlibabacloudStackNetworkInterface() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "",
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'network_interface_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'network_interface_name' instead.",
 				ConflictsWith: []string{"network_interface_name"},
 			},
 			"network_interface_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "",
 				ConflictsWith: []string{"name"},
 			},
 			"vswitch_id": {
@@ -51,18 +51,18 @@ func resourceAlibabacloudStackNetworkInterface() *schema.Resource {
 			},
 
 			"private_ip": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				Deprecated:   "Field 'private_ip' is deprecated and will be removed in a future release. Please use new field 'primary_ip_address' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'private_ip' is deprecated and will be removed in a future release. Please use new field 'primary_ip_address' instead.",
 				ConflictsWith: []string{"primary_ip_address"},
 			},
 			"primary_ip_address": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"private_ip"},
 			},
 			"private_ips": {
@@ -82,14 +82,14 @@ func resourceAlibabacloudStackNetworkInterface() *schema.Resource {
 				ConflictsWith: []string{"private_ips"},
 			},
 			"mac": {
-				Type:         schema.TypeString,
-				Computed:     true,
-				Deprecated:   "Field 'mac' is deprecated and will be removed in a future release. Please use new field 'mac_address' instead.",
+				Type:          schema.TypeString,
+				Computed:      true,
+				Deprecated:    "Field 'mac' is deprecated and will be removed in a future release. Please use new field 'mac_address' instead.",
 				ConflictsWith: []string{"mac_address"},
 			},
 			"mac_address": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:          schema.TypeString,
+				Computed:      true,
 				ConflictsWith: []string{"mac"},
 			},
 			"description": {
@@ -115,10 +115,10 @@ func resourceNetworkInterfaceCreate(d *schema.ResourceData, meta interface{}) er
 	if primaryIpAddress, ok := connectivity.GetResourceDataOk(d, "primary_ip_address", "private_ip"); ok {
 		request.PrimaryIpAddress = primaryIpAddress.(string)
 	}
-	if name, ok :=connectivity.GetResourceDataOk(d, "network_interface_name", "name"); ok {
+	if name, ok := connectivity.GetResourceDataOk(d, "network_interface_name", "name"); ok {
 		request.NetworkInterfaceName = name.(string)
 	}
-	
+
 	if description, ok := d.GetOk("description"); ok {
 		request.Description = description.(string)
 	}
@@ -199,8 +199,8 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 		attributeUpdate = true
 	}
 
-	if !d.IsNewResource() && (d.HasChange("network_interface_name")||d.HasChange("name")) {
-		request.NetworkInterfaceName = connectivity.GetResourceData(d, "network_interface_name", "name").(string)
+	if !d.IsNewResource() && (d.HasChange("network_interface_name") || d.HasChange("name")) {
+		request.NetworkInterfaceName = connectivity.GetResourceData1(d, "network_interface_name", "name").(string)
 		attributeUpdate = true
 	}
 
