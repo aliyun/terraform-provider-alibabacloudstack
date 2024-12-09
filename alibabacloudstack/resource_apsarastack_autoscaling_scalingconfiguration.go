@@ -263,7 +263,7 @@ func resourceAlibabacloudStackEssScalingConfigurationUpdate(d *schema.ResourceDa
 		d.SetId(strings.Split(d.Id(), COLON_SEPARATED)[1])
 	}
 
-	if d.HasChange("status") || d.HasChange("active") {
+	if d.HasChanges("status", "active") {
 		c, err := essService.DescribeEssScalingConfiguration(d.Id())
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
@@ -372,11 +372,11 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	if d.HasChange("role_name") || d.HasChange("ram_role_name") {
+	if d.HasChanges("role_name", "ram_role_name") {
 		request.RamRoleName = connectivity.GetResourceData(d, "role_name", "ram_role_name").(string)
 	}
 
-	if d.HasChange("key_name") || d.HasChange("key_pair_name") {
+	if d.HasChanges("key_name", "key_pair_name") {
 		request.KeyPairName = connectivity.GetResourceData(d, "key_name", "key_pair_name").(string)
 	}
 

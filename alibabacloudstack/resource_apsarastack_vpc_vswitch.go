@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"log"
-	"reflect"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
@@ -174,12 +173,8 @@ func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interfac
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VSwitchId = d.Id()
 
-	if d.HasChange("vswitch_name") || d.HasChange("name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "vswitch_name", "name"); err == nil {
-			request.VSwitchName = v.(string)
-		} else {
-			return err
-		}
+	if d.HasChanges("vswitch_name", "name") {
+		request.VSwitchName = connectivity.GetResourceData(d, "vswitch_name", "name").(string)
 		update = true
 	}
 

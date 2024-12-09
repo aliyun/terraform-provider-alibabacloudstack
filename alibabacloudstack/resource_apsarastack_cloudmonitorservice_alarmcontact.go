@@ -136,7 +136,7 @@ func resourceAlibabacloudstackCmsAlarmContactUpdate(d *schema.ResourceData, meta
 	request := cms.CreatePutContactRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.ContactName = d.Id()
-	if d.HasChange("channels_ali_im") || d.HasChange("channels_aliim") {
+	if d.HasChanges("channels_ali_im", "channels_aliim") {
 		update = true
 	}
 	request.ChannelsAliIM = connectivity.GetResourceData(d, "channels_ali_im", "channels_aliim").(string)

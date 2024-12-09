@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"reflect"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -29,12 +28,14 @@ func resourceAlibabacloudStackRouteTable() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'route_table_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'route_table_name' instead.",
+				ConflictsWith: []string{"route_table_name"},
 			},
 			"route_table_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
@@ -52,12 +53,7 @@ func resourceAliyunRouteTableCreate(d *schema.ResourceData, meta interface{}) er
 
 	request := vpc.CreateCreateRouteTableRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	request.VpcId = d.Get("vpc_id").(string)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "route_table_name", "name"); err == nil {
-		request.RouteTableName = v.(string)
-	} else {
-		return err
-	}
+	request.VpcId = connectivity.GetResourceData(d, "route_table_name", "name").(string)
 	request.Description = d.Get("description").(string)
 	request.ClientToken = buildClientToken(request.GetActionName())
 
@@ -120,12 +116,8 @@ func resourceAliyunRouteTableUpdate(d *schema.ResourceData, meta interface{}) er
 		request.Description = d.Get("description").(string)
 	}
 
-	if d.HasChange("name") || d.HasChange("route_table_name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "route_table_name", "name"); err == nil {
-			request.RouteTableName = v.(string)
-		} else {
-			return err
-		}
+	if d.HasChanges("name", "route_table_name") {
+		request.RouteTableName = connectivity.GetResourceData(d, "route_table_name", "name").(string)
 	}
 
 	raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {

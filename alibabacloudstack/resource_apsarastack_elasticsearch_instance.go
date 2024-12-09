@@ -431,7 +431,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	if d.HasChange("client_node_spec") || d.HasChange("client_node_amount") {
+	if d.HasChanges("client_node_spec", "client_node_amount") {
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -501,7 +501,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	if d.HasChange("data_node_spec") || d.HasChange("data_node_disk_size") || d.HasChange("data_node_disk_type") {
+	if d.HasChanges("data_node_spec", "data_node_disk_size", "data_node_disk_type") {
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -519,7 +519,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	if d.HasChange("password") || d.HasChange("kms_encrypted_password") {
+	if d.HasChanges("password", "kms_encrypted_password") {
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}

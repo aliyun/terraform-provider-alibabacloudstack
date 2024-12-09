@@ -172,7 +172,7 @@ func resourceAlibabacloudStackEssAlarmCreate(d *schema.ResourceData, meta interf
 	d.SetId(response.AlarmTaskId)
 
 	// enable or disable alarm
-	enable = connectivity.GetResourceData(d, "status", "enable")
+	enable := connectivity.GetResourceData(d, "status", "enable")
 	if !enable.(bool) {
 		disableAlarmRequest := ess.CreateDisableAlarmRequest()
 		client.InitRpcRequest(*disableAlarmRequest.RpcRequest)
@@ -249,8 +249,8 @@ func resourceAlibabacloudStackEssAlarmUpdate(d *schema.ResourceData, meta interf
 	if metricType, ok := d.GetOk("metric_type"); ok && metricType.(string) != "" {
 		request.MetricType = metricType.(string)
 	}
-	if d.HasChange("alarm_task_name") || d.HasChange("name")  {
-		request.Name = connectivity.GetResourceData(d, "alarm_task_name", "name")
+	if d.HasChanges("alarm_task_name","name")  {
+		request.Name = connectivity.GetResourceData(d, "alarm_task_name", "name").(string)
 	}
 
 	if d.HasChange("description") {
@@ -315,7 +315,7 @@ func resourceAlibabacloudStackEssAlarmUpdate(d *schema.ResourceData, meta interf
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	if d.HasChange("status") || d.HasChange("enable"){
+	if d.HasChanges("status", "enable"){
 		enable := connectivity.GetResourceData(d, "status", "enable")
 		if enable.(bool) {
 			enableAlarmRequest := ess.CreateEnableAlarmRequest()

@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -43,12 +42,14 @@ func resourceAlibabacloudStackForwardEntry() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'forward_entry_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'forward_entry_name' instead.",
+				ConflictsWith: []string{"forward_entry_name"},
 			},
 			"forward_entry_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 			"internal_ip": {
 				Type:     schema.TypeString,
@@ -79,10 +80,8 @@ func resourceAlibabacloudStackForwardEntryCreate(d *schema.ResourceData, meta in
 	request.IpProtocol = d.Get("ip_protocol").(string)
 	request.InternalIp = d.Get("internal_ip").(string)
 	request.InternalPort = d.Get("internal_port").(string)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "forward_entry_name", "name"); err == nil {
-		request.ForwardEntryName = v.(string)
-	} else {
-		return err
+	if name, ok := connectivity.GetResourceDataOk(d, "forward_entry_name", "name"); ok {
+		request.ForwardEntryName = name.(string)
 	}
 	var raw interface{}
 	var err error
@@ -181,12 +180,8 @@ func resourceAlibabacloudStackForwardEntryUpdate(d *schema.ResourceData, meta in
 	if d.HasChange("internal_port") {
 		request.InternalPort = d.Get("internal_port").(string)
 	}
-	if d.HasChange("forward_entry_name") || d.HasChange("name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "forward_entry_name", "name"); err == nil {
-			request.ForwardEntryName = v.(string)
-		} else {
-			return err
-		}
+	if d.HasChange("name") {
+		request.ForwardEntryName = connectivity.GetResourceData(d, "forward_entry_name", "name").(string)
 	}
 
 	raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {

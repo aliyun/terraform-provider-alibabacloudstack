@@ -177,7 +177,7 @@ func resourceAliyunOtsTableRead(d *schema.ResourceData, meta interface{}) error 
 }
 
 func resourceAliyunOtsTableUpdate(d *schema.ResourceData, meta interface{}) error {
-	if d.HasChange("time_to_live") || d.HasChange("max_version") || d.HasChange("deviation_cell_version_in_sec") {
+	if d.HasChanges("time_to_live", "max_version", "deviation_cell_version_in_sec") {
 		instanceName, tableName, err := parseId(d, meta)
 		if err != nil {
 			return err

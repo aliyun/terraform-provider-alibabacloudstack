@@ -719,7 +719,7 @@ func (s *EcsService) updateImage(d *schema.ResourceData) error {
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.ImageId = d.Id()
 
-	if d.HasChange("description") || d.HasChange("name") || d.HasChange("image_name") {
+	if d.HasChanges("description","name", "image_name") {
 		if description, ok := d.GetOk("description"); ok {
 			request.Description = description.(string)
 		}

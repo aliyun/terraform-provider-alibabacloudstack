@@ -205,7 +205,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 		return resourceAlibabacloudStackDBInstanceRead(d, meta)
 	}
 
-	if d.HasChange("db_instance_description") || d.HasChange("instance_name") {
+	if d.HasChanges("db_instance_description", "instance_name") {
 		request := rds.CreateModifyDBInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
@@ -253,12 +253,12 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 		request.DBInstanceStorageType = d.Get("db_instance_storage_type").(string)
 		update = true
 	}
-	if d.HasChange("db_instance_class") || d.HasChange("instance_type") {
+	if d.HasChanges("db_instance_class", "instance_type") {
 		request.DBInstanceClass = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
 		update = true
 	}
 
-	if d.HasChange("db_instance_storage") || d.HasChange("instance_storage") {
+	if d.HasChanges("db_instance_storage", "instance_storage") {
 		request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
 	}
 
@@ -415,7 +415,7 @@ func buildDBReadonlyCreateRequest(d *schema.ResourceData, meta interface{}) (*rd
 	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = connectivity.GetResourceData(d, "master_instance_id", "master_db_instance_id").(string)
 	request.EngineVersion = Trim(d.Get("engine_version").(string))
-	request.DBInstanceStorage = connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int)
+	request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
 	request.DBInstanceClass = Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string))
 	request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
 	request.DBInstanceStorageType = d.Get("db_instance_storage_type").(string)

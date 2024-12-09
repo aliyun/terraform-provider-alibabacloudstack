@@ -54,7 +54,7 @@ func resourceAlibabacloudStackApigatewayGroupCreate(d *schema.ResourceData, meta
 
 	request := cloudapi.CreateCreateApiGroupRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	request.GroupName = connectivity.GetResourceData(d, "api_group_name", "name")
+	request.GroupName = connectivity.GetResourceData(d, "api_group_name", "name").(string)
 	request.Description = d.Get("description").(string)
 
 	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -108,11 +108,11 @@ func resourceAlibabacloudStackApigatewayGroupRead(d *schema.ResourceData, meta i
 func resourceAlibabacloudStackApigatewayGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	if d.HasChange("api_group_name") || d.HasChange("description") {
+	if d.HasChanges("api_group_name", "description") {
 		request := cloudapi.CreateModifyApiGroupRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.GroupId = d.Id()
-		request.GroupName = connectivity.GetResourceData(d, "api_group_name", "name")
+		request.GroupName = connectivity.GetResourceData(d, "api_group_name", "name").(string)
 		request.Description = d.Get("description").(string)
 
 		raw, err := client.WithCloudApiClient(func(cloudApiClient *cloudapi.Client) (interface{}, error) {

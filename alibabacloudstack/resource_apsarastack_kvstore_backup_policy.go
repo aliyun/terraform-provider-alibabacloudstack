@@ -87,15 +87,15 @@ func resourceAlibabacloudStackKVStoreBackupPolicyRead(d *schema.ResourceData, me
 }
 
 func resourceAlibabacloudStackKVStoreBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	if d.HasChange("preferred_backup_time") || d.HasChange("preferred_backup_period") || d.HasChange("backup_time") || d.HasChange("backup_period") {
+	if d.HasChanges("preferred_backup_time", "preferred_backup_period", "backup_time", "backup_period") {
 		client := meta.(*connectivity.AlibabacloudStackClient)
 		kvstoreService := KvstoreService{client}
 
 		request := r_kvstore.CreateModifyBackupPolicyRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.InstanceId = d.Id()
-		request.PreferredBackupTime = connectivity.GetResourceData(d, "preferred_backup_time", "backup_time")
-		periodList =  expandStringList(connectivity.GetResourceData(d, "preferred_backup_period", "backup_period").(*schema.Set).List())
+		request.PreferredBackupTime = connectivity.GetResourceData(d, "preferred_backup_time", "backup_time").(string)
+		periodList :=  expandStringList(connectivity.GetResourceData(d, "preferred_backup_period", "backup_period").(*schema.Set).List())
 		request.PreferredBackupPeriod = strings.Join(periodList, COMMA_SEPARATED)
 
 		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {

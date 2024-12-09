@@ -228,7 +228,7 @@ func resourceAlibabacloudStackEdasApplicationUpdate(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
 
-	if d.HasChange("application_name") || d.HasChange("descriotion") {
+	if d.HasChanges("application_name", "descriotion") {
 		request := edas.CreateUpdateApplicationBaseInfoRequest()
 		client.InitRoaRequest(*request.RoaRequest)
 

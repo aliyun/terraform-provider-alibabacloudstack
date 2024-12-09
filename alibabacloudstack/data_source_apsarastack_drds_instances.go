@@ -95,16 +95,9 @@ func dataSourceAlibabacloudStackDRDSInstancesRead(d *schema.ResourceData, meta i
 
 	var dbi []drds.Instance
 	var regexString *regexp.Regexp
-	nameRegex, nameRegexGot := connectivity.GetResourceDataOk("name_regex")
-	descriptionRegex, descriptionRegexGot := d.GetOk("description_regex")
-	if nameRegexGot {
-		if r, err := regexp.Compile(nameRegex.(string)); err == nil {
-			regexString = r
-		}
-	} else if descriptionRegexGot {
-		if r, err := regexp.Compile(descriptionRegex.(string)); err == nil {
-			regexString = r
-		}
+	nameRegex := connectivity.GetResourceData(d, "description_regex", "name_regex").(string)
+	if r, err := regexp.Compile(nameRegex); err == nil {
+		regexString = r
 	}
 
 	idsMap := make(map[string]string)

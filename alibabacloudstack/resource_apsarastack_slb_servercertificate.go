@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -26,11 +25,13 @@ func resourceAlibabacloudStackSlbServerCertificate() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'server_certificate_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'server_certificate_name' instead.",
+				ConflictsWith: []string{"server_certificate_name"},
 			},
 			"server_certificate_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ConflictsWith: []string{"name"},
 			},
 			"server_certificate": {
 				Type:     schema.TypeString,
@@ -52,10 +53,8 @@ func resourceAlibabacloudStackSlbServerCertificateCreate(d *schema.ResourceData,
 	request := slb.CreateUploadServerCertificateRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "server_certificate_name", "name"); err == nil {
-		request.ServerCertificateName = v.(string)
-	} else {
-		return err
+	if val, ok :=  connectivity.GetResourceDataOk(d, "server_certificate_name", "name"); ok && val != "" {
+		request.ServerCertificateName = val.(string)
 	}
 
 	if val, ok := d.GetOk("server_certificate"); ok && val != "" {
@@ -118,16 +117,11 @@ func resourceAlibabacloudStackSlbServerCertificateUpdate(d *schema.ResourceData,
 		d.Partial(false)
 		return resourceAlibabacloudStackSlbServerCertificateRead(d, meta)
 	}
-	if !d.IsNewResource() && d.HasChange("name") {
+	if !d.IsNewResource() && d.HasChanges("name", "server_certificate_name") {
 		request := slb.CreateSetServerCertificateNameRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.ServerCertificateId = d.Id()
-
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "server_certificate_name", "name"); err == nil {
-			request.ServerCertificateName = v.(string)
-		} else {
-			return err
-		}
+		request.ServerCertificateName = connectivity.GetResourceData(d, "server_certificate_name", "name").(string)
 
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 			return slbClient.SetServerCertificateName(request)

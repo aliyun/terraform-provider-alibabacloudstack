@@ -143,7 +143,7 @@ func resourceAlibabacloudStackEssScheduledTaskUpdate(d *schema.ResourceData, met
 		request.LaunchTime = d.Get("launch_time").(string)
 	}
 
-	if d.HasChange("recurrence_type") || d.HasChange("recurrence_value") || d.HasChange("recurrence_end_time") {
+	if d.HasChanges("recurrence_type", "recurrence_value", "recurrence_end_time") {
 		request.RecurrenceType = d.Get("recurrence_type").(string)
 		request.RecurrenceValue = d.Get("recurrence_value").(string)
 		request.RecurrenceEndTime = d.Get("recurrence_end_time").(string)

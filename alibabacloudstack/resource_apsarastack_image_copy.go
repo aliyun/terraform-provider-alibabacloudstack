@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"log"
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -40,12 +39,14 @@ func resourceAlibabacloudStackImageCopy() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Deprecated:  "Attribute 'name' has been deprecated from version 1.69.0. Use `image_name` instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'image_name' instead.",
+				ConflictsWith: []string{"image_name"},
 			},
 			"image_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ConflictsWith: []string{"name"},
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -63,11 +64,7 @@ func resourceAlibabacloudStackImageCopyCreate(d *schema.ResourceData, meta inter
 	client.InitRpcRequest(*request.RpcRequest)
 	request.ImageId = d.Get("source_image_id").(string)
 	request.DestinationRegionId = d.Get("destination_region_id").(string)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "image_name", "name"); err == nil {
-		request.DestinationImageName = v.(string)
-	} else {
-		return err
-	}
+	request.DestinationImageName = connectivity.GetResourceData(d, "image_name", "name").(string)
 	request.DestinationDescription = d.Get("description").(string)
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.CopyImage(request)

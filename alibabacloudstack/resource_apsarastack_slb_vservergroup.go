@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -34,13 +33,15 @@ func resourceAlibabacloudStackSlbServerGroup() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "tf-server-group",
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'v_server_group_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'vserver_group_name' instead.",
+				ConflictsWith: []string{"vserver_group_name"},
 			},
 			"vserver_group_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "tf-server-group",
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 			"servers": {
 				Type:     schema.TypeSet,
@@ -88,10 +89,8 @@ func resourceAlibabacloudStackSlbServerGroupCreate(d *schema.ResourceData, meta 
 	request := slb.CreateCreateVServerGroupRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = d.Get("load_balancer_id").(string)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "vserver_group_name", "name"); err == nil {
+	if v, ok := connectivity.GetResourceDataOk(d, "vserver_group_name", "name"); ok {
 		request.VServerGroupName = v.(string)
-	} else {
-		return err
 	}
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.CreateVServerGroup(request)
@@ -272,15 +271,10 @@ func resourceAlibabacloudStackSlbServerGroupUpdate(d *schema.ResourceData, meta 
 			}
 		}
 	}
-	name := ""
+	name := connectivity.GetResourceData(d, "vserver_group_name", "name").(string)
 	nameUpdate := false
-	if d.HasChange("name") || d.HasChange("vserver_group_name") {
-		v_name, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "vserver_group_name", "name")
-		if err != nil {
-			return err
-		}
+	if d.HasChanges("name","vserver_group_name") {
 		nameUpdate = true
-		name = v_name.(string)
 	}
 	if d.HasChange("servers") {
 		serverUpdate = true

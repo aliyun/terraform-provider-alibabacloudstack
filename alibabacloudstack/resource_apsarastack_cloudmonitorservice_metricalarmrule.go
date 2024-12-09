@@ -217,7 +217,7 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 	request := cms.CreatePutResourceMetricRuleRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	d.SetId(resource.UniqueId() + ":" + request.RuleName)
-	request.RuleName = connectivity.GetResourceData("rule_name", "name").(string)
+	request.RuleName = connectivity.GetResourceData(d, "rule_name", "name").(string)
 	parts, err := ParseResourceId(d.Id(), 2)
 	request.RuleId = parts[0]
 

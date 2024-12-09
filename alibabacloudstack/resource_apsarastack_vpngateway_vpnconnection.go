@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -45,13 +44,15 @@ func resourceAlibabacloudStackVpnConnection() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use 'vpn_connection_name' instead.",
+				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use new field 'vpn_connection_name' instead.",
+				ConflictsWith: []string{"vpn_connection_name"},
 			},
 
 			"vpn_connection_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 
 			"local_subnet": {
@@ -269,12 +270,8 @@ func resourceAlibabacloudStackVpnConnectionUpdate(d *schema.ResourceData, meta i
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VpnConnectionId = d.Id()
 
-	if d.HasChange("name") || d.HasChange("vpn_connection_name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "vpn_connection_name", "name"); err == nil {
-			request.Name = v.(string)
-		} else {
-			return err
-		}
+	if d.HasChanges("name", "vpn_connection_name") {
+		request.Name = connectivity.GetResourceData(d, "vpn_connection_name", "name").(string)
 	}
 
 	request.LocalSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("local_subnet").(*schema.Set).List())
@@ -365,10 +362,8 @@ func buildAlibabacloudStackVpnConnectionArgs(d *schema.ResourceData, meta interf
 	request.LocalSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("local_subnet").(*schema.Set).List())
 	request.RemoteSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("remote_subnet").(*schema.Set).List())
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "vpn_connection_name", "name"); err == nil && v != ""{
+	if v := connectivity.GetResourceData(d, "vpn_connection_name", "name"); v != ""{
 		request.Name = v.(string)
-	} else if err != nil {
-		return nil, err
 	}
 
 	if v, ok := d.GetOk("effect_immediately"); ok {

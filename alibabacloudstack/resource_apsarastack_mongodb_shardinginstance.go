@@ -428,7 +428,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 	ddsService := MongoDBService{client}
 	d.Partial(true)
 
-	if d.HasChange("preferred_backup_time") || d.HasChange("preferred_backup_period") || d.HasChange("backup_time") || d.HasChange("backup_period") {
+	if d.HasChanges("preferred_backup_time", "preferred_backup_period", "backup_time", "backup_period") {
 		if err := ddsService.MotifyMongoDBBackupPolicy(d); err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -503,7 +503,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		//d.SetPartial("mongo_list")
 	}
 
-	if d.HasChange("db_instance_description") || d.HasChange("name"){
+	if d.HasChanges("db_instance_description", "name"){
 		request := dds.CreateModifyDBInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
@@ -527,7 +527,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		//d.SetPartial("db_instance_description")
 	}
 
-	if d.HasChange("account_password") || d.HasChange("kms_encrypted_password") {
+	if d.HasChanges("account_password", "kms_encrypted_password") {
 		var accountPassword string
 		if accountPassword = d.Get("account_password").(string); accountPassword != "" {
 			//d.SetPartial("account_password")

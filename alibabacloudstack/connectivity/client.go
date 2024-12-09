@@ -3,7 +3,6 @@ package connectivity
 import (
 	"encoding/json"
 	"log"
-	"reflect"
 
 	roaCS "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
@@ -1281,31 +1280,7 @@ func IncrementalWait(firstDuration time.Duration, increaseDuration time.Duration
 	}
 }
 
-// getResourceData 从 Terraform 的 ResourceData 中获取多个键的值，并进行比较。
-// 如果所有值相同，则返回该值；如果值不同，则返回错误。
-func GetResourceData(d *schema.ResourceData, valueType reflect.Type, keys ...string) (interface{}, error) {
-	var firstValue interface{}
-
-	for _, key := range keys {
-		value, ok := d.GetOk(key)
-		if !ok {
-			return nil, fmt.Errorf("key %s not found in the schema", key)
-		}
-
-		convertedValue := reflect.ValueOf(value).Convert(valueType).Interface()
-
-		if firstValue == nil {
-			firstValue = convertedValue
-		} else if !reflect.DeepEqual(firstValue, convertedValue) {
-			return nil, fmt.Errorf("values for keys %s are not the same", strings.Join(keys, ", "))
-		}
-	}
-
-	return firstValue, nil
-}
-
-func GetResourceData1(d *schema.ResourceData, valueType reflect.Type, keys ...string) interface{} {
-	var firstValue interface{}
+func GetResourceData(d *schema.ResourceData, keys ...string) interface{} {
 
 	for _, key := range keys {
 		value, ok := d.GetOk(key)
@@ -1313,11 +1288,15 @@ func GetResourceData1(d *schema.ResourceData, valueType reflect.Type, keys ...st
 			return value
 		}
 	}
-	return firstValue
+	
+	if len(keys) > 0 {
+		return d.Get(keys[0])
+	} else {
+		return nil
+	}
 }
 
 func GetResourceDataOk(d *schema.ResourceData, keys ...string) (interface{}, bool) {
-	var firstValue interface{}
 
 	for _, key := range keys {
 		value, ok := d.GetOk(key)
@@ -1325,7 +1304,7 @@ func GetResourceDataOk(d *schema.ResourceData, keys ...string) (interface{}, boo
 			return value, true
 		}
 	}
-	return firstValue, false
+	return nil, false
 }
 
 func SetResourceData(d *schema.ResourceData, value interface{}, keys ...string) error {

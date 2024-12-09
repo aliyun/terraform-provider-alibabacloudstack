@@ -131,7 +131,7 @@ func resourceAlibabacloudStackSnapshotPolicyUpdate(d *schema.ResourceData, meta 
 	request := ecs.CreateModifyAutoSnapshotPolicyExRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.AutoSnapshotPolicyId = d.Id()
-	if d.HasChange("auto_snapshot_policy_name") || d.HasChange("name") {
+	if d.HasChanges("auto_snapshot_policy_name", "name") {
 		request.AutoSnapshotPolicyName = connectivity.GetResourceData(d, "auto_snapshot_policy_name", "name").(string)
 	}
 	if d.HasChange("repeat_weekdays") {

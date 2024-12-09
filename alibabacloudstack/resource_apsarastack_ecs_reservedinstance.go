@@ -176,7 +176,7 @@ func resourceAlibabacloudStackReservedInstanceUpdate(d *schema.ResourceData, met
 	request := ecs.CreateModifyReservedInstanceAttributeRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.ReservedInstanceId = d.Id()
-	if d.HasChange("reserved_instance_name") || d.HasChange("description") || d.HasChange("name") || d.HasChange("description") {
+	if d.HasChanges("reserved_instance_name", "description", "name", "description") {
 		if v, ok := connectivity.GetResourceDataOk(d, "reserved_instance_name", "name"); ok {
 			request.ReservedInstanceName = v.(string)
 		}

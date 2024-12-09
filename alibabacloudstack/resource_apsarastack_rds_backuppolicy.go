@@ -180,14 +180,14 @@ func resourceAlibabacloudStackDBBackupPolicyUpdate(d *schema.ResourceData, meta 
 
 	updateForData := false
 	updateForLog := false
-	if d.HasChange("preferred_backup_period") || d.HasChange("preferred_backup_time") || d.HasChange("backup_retention_period") ||
-		d.HasChange("compress_type") || d.HasChange("log_backup_frequency") || d.HasChange("archive_backup_retention_period") ||
-		d.HasChange("archive_backup_keep_count") || d.HasChange("archive_backup_keep_policy") {
+	if d.HasChanges("preferred_backup_period","preferred_backup_time", "backup_retention_period",
+			"compress_type","log_backup_frequency", "archive_backup_retention_period", 
+			"archive_backup_keep_count", "archive_backup_keep_policy") {
 		updateForData = true
 	}
 
-	if d.HasChange("enable_backup_log") || d.HasChange("log_backup_retention_period") ||
-		d.HasChange("local_log_retention_hours") || d.HasChange("local_log_retention_space") || d.HasChange("high_space_usage_protection") {
+	if d.HasChanges("enable_backup_log", "log_backup_retention_period", "local_log_retention_hours",
+			"local_log_retention_space", "high_space_usage_protection") {
 		updateForLog = true
 	}
 

@@ -507,7 +507,7 @@ func resourceAlibabacloudStackApigatewayApiUpdate(d *schema.ResourceData, meta i
 
 	d.Partial(true)
 
-	if d.HasChange("api_name") || d.HasChange("name") || d.HasChange("description") || d.HasChange("auth_type") {
+	if d.HasChanges("api_name","name","description","auth_type") {
 		update = true
 	}
 	request.ApiName = connectivity.GetResourceData(d, "api_name", "name").(string)
@@ -534,7 +534,7 @@ func resourceAlibabacloudStackApigatewayApiUpdate(d *schema.ResourceData, meta i
 	}
 	request.RequestConfig = paramConfig
 
-	if d.HasChange("service_type") || d.HasChange("http_service_config") || d.HasChange("http_vpc_service_config") || d.HasChange("mock_service_config") {
+	if d.HasChanges("service_type","http_service_config","http_vpc_service_config","mock_service_config") {
 		update = true
 	}
 	serviceConfig, err := serviceConfigToJsonStr(d)
@@ -543,7 +543,7 @@ func resourceAlibabacloudStackApigatewayApiUpdate(d *schema.ResourceData, meta i
 	}
 	request.ServiceConfig = serviceConfig
 
-	if d.HasChange("request_parameters") || d.HasChange("constant_parameters") || d.HasChange("system_parameters") {
+	if d.HasChanges("request_parameters","constant_parameters","system_parameters") {
 		update = true
 	}
 	rps, sps, spm, err := setParameters(d)

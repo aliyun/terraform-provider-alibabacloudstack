@@ -237,7 +237,7 @@ func resourceAlibabacloudStackKmsKeyUpdate(d *schema.ResourceData, meta interfac
 		}
 	}
 
-	if d.HasChange("key_state") || d.HasChange("is_enabled") {
+	if d.HasChanges("key_state", "is_enabled") {
 		object, err := kmsService.DescribeKmsKey(d.Id())
 		if err != nil {
 			return errmsgs.WrapError(err)

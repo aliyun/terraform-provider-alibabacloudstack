@@ -234,7 +234,7 @@ func resourceAlibabacloudStackDiskUpdate(d *schema.ResourceData, meta interface{
 	request.DiskId = d.Id()
 
 	if !d.IsNewResource() && d.HasChange("disk_name") {
-		request.DiskName = connectivity.GetResourceData(d, "disk_name", "name")
+		request.DiskName = connectivity.GetResourceData(d, "disk_name", "name").(string)
 		update = true
 		//d.SetPartial("disk_name")
 	}

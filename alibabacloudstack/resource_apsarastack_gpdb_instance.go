@@ -263,7 +263,7 @@ func resourceAlibabacloudStackGpdbInstanceUpdate(d *schema.ResourceData, meta in
 	d.Partial(true)
 
 	// Update Instance Description
-	if d.HasChange("db_instance_description") || d.HasChange("description"){
+	if d.HasChanges("db_instance_description", "description"){
 		request := gpdb.CreateModifyDBInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()

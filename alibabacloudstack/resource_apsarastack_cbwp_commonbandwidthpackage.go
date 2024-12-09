@@ -156,7 +156,7 @@ func resourceAlibabacloudStackCommonBandwidthPackageUpdate(d *schema.ResourceDat
 		update = true
 	}
 
-	if d.HasChange("name") || d.HasChange("bandwidth_package_name") {
+	if d.HasChanges("name", "bandwidth_package_name") {
 		request.Name = connectivity.GetResourceData(d, "bandwidth_package_name", "name").(string)
 		update = true
 	}

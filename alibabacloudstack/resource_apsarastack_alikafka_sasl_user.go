@@ -163,7 +163,7 @@ func resourceAlibabacloudStackAlikafkaSaslUserUpdate(d *schema.ResourceData, met
 	username := parts[1]
 	usertype := parts[2]
 
-	if d.HasChange("password") || d.HasChange("kms_encrypted_password") {
+	if d.HasChanges("password", "kms_encrypted_password") {
 		request := alikafka.CreateCreateSaslUserRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.InstanceId = instanceId

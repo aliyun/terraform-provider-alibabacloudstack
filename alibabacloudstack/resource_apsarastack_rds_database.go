@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"reflect"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
@@ -27,46 +26,54 @@ func resourceAlibabacloudStackDBDatabase() *schema.Resource {
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
+				ConflictsWith: []string{"instance_id"},
 			},
 			"instance_id": {
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
-				Deprecated:   "Field 'instance_id' is deprecated and will be removed in a future release. Please use 'data_base_instance_id' instead.",
+				Deprecated:   "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'data_base_instance_id' instead.",
+				ConflictsWith: []string{"data_base_instance_id"},
 			},
 
 			"data_base_name": {
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
+				ConflictsWith: []string{"name"},
 			},
 			"name": {
 				Type:         schema.TypeString,
 				ForceNew:     true,
 				Required:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'data_base_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'data_base_name' instead.",
+				ConflictsWith: []string{"data_base_name"},
 			},
 
 			"character_set_name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
+				ConflictsWith: []string{"character_set"},
 			},
 			"character_set": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				Deprecated:   "Field 'character_set' is deprecated and will be removed in a future release. Please use 'character_set_name' instead.",
+				Deprecated:   "Field 'character_set' is deprecated and will be removed in a future release. Please use new field 'character_set_name' instead.",
+				ConflictsWith: []string{"character_set_name"},
 			},
 
 			"data_base_description": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ConflictsWith: []string{"description"},
 			},
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use 'data_base_description' instead.",
+				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use new field 'data_base_description' instead.",
+				ConflictsWith: []string{"data_base_description"},
 			},
 		},
 	}
@@ -77,28 +84,11 @@ func resourceAlibabacloudStackDBDatabaseCreate(d *schema.ResourceData, meta inte
 	request := rds.CreateCreateDatabaseRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "data_base_instance_id", "instance_id"); err == nil {
-		request.DBInstanceId = v.(string)
-	} else {
-		return err
-	}
-
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "data_base_name", "name"); err == nil {
-		request.DBName = v.(string)
-	} else {
-		return err
-	}
-
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "character_set_name", "character_set"); err == nil {
-		request.CharacterSetName = v.(string)
-	} else {
-		return err
-	}
-
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "data_base_description", "description"); err == nil && v.(string) != "" {
+	request.DBInstanceId =connectivity.GetResourceData(d, "data_base_instance_id", "instance_id").(string)
+	request.DBName = connectivity.GetResourceData(d, "data_base_name", "name").(string)
+	request.CharacterSetName = connectivity.GetResourceData(d, "character_set_name", "character_set").(string)
+	if v, ok := connectivity.GetResourceDataOk(d, "data_base_description", "description"); ok && v.(string) != "" {
 		request.DBDescription = v.(string)
-	} else if err != nil {
-		return err
 	}
 
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -154,7 +144,7 @@ func resourceAlibabacloudStackDBDatabaseRead(d *schema.ResourceData, meta interf
 
 func resourceAlibabacloudStackDBDatabaseUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	if (d.HasChange("data_base_description") || d.HasChange("description")) && !d.IsNewResource() {
+	if (d.HasChanges("data_base_description", "description")) && !d.IsNewResource() {
 		parts, err := ParseResourceId(d.Id(), 2)
 		if err != nil {
 			return errmsgs.WrapError(err)
@@ -164,11 +154,7 @@ func resourceAlibabacloudStackDBDatabaseUpdate(d *schema.ResourceData, meta inte
 		request.DBInstanceId = parts[0]
 		request.DBName = parts[1]
 
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "data_base_description", "description"); err == nil {
-			request.DBDescription = v.(string)
-		} else {
-			return err
-		}
+		request.DBDescription = connectivity.GetResourceData(d, "data_base_description", "description").(string)
 
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.ModifyDBDescription(request)

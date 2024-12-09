@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -328,11 +327,11 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		"DBInstanceStorage":     strconv.Itoa(DBInstanceStorage),
 		"DBInstanceClass":       DBInstanceClass,
 		"DBInstanceNetType":     DBInstanceNetType,
-		"DBInstanceDescription": DBInstanceDescription.(string),
+		"DBInstanceDescription": DBInstanceDescription,
 		"InstanceNetworkType":   InstanceNetworkType,
 		"VSwitchId":             VSwitchId,
 		"PayType":               PayType,
-		"DBInstanceStorageType": DBInstanceStorageType.(string),
+		"DBInstanceStorageType": DBInstanceStorageType,
 		"SecurityIPList":        SecurityIPList,
 		"ClientToken":           ClientToken,
 		"ZoneIdSlave1":          ZoneIdSlave1,
@@ -455,7 +454,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 	}
 
 	payType := PayType(connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string))
-	if !d.IsNewResource() && (d.HasChange("instance_charge_type") || d.HasChange("payment_type")) && payType == Prepaid {
+	if !d.IsNewResource() && d.HasChanges("instance_charge_type", "payment_type") && payType == Prepaid {
 		prePaidRequest := rds.CreateModifyDBInstancePayTypeRequest()
 		client.InitRpcRequest(*prePaidRequest.RpcRequest)
 		prePaidRequest.DBInstanceId = d.Id()
@@ -489,7 +488,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		}
 	}
 
-	if payType == Prepaid && (d.HasChange("auto_renew") || d.HasChange("auto_renew_period")) {
+	if payType == Prepaid && d.HasChanges("auto_renew", "auto_renew_period") {
 		request := rds.CreateModifyInstanceAutoRenewalAttributeRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
@@ -569,7 +568,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		return resourceAlibabacloudStackDBInstanceRead(d, meta)
 	}
 
-	if d.HasChange("instance_name") || d.HasChange("db_instance_description") {
+	if d.HasChanges("instance_name", "db_instance_description") {
 		request := rds.CreateModifyDBInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
@@ -608,12 +607,12 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 	request.DBInstanceId = d.Id()
 	request.PayType = connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string)
 
-	if d.HasChange("instance_type") || d.HasChange("db_instance_class") {
+	if d.HasChanges("instance_type", "db_instance_class") {
 		request.DBInstanceClass = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
 		update = true
 	}
 
-	if d.HasChange("instance_storage") || d.HasChange("db_instance_storage") {
+	if d.HasChanges("instance_storage", "db_instance_storage") {
 		request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
 		update = true
 	}

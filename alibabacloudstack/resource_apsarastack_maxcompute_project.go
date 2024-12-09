@@ -170,7 +170,7 @@ func resourceAlibabacloudStackMaxcomputeProjectRead(d *schema.ResourceData, meta
 func resourceAlibabacloudStackMaxcomputeProjectUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	if d.HasChange("cluster") || d.HasChange("disk") {
+	if d.HasChanges("cluster", "disk") {
 		roleId, err := client.RoleIds()
 		if err != nil {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
