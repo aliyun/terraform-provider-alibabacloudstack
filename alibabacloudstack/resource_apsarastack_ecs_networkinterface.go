@@ -26,15 +26,15 @@ func resourceAlibabacloudStackNetworkInterface() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:          schema.TypeString,
-				Optional:      true,
-				Default:       "",
+				Optional:true,
+				Computed:true,
 				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'network_interface_name' instead.",
 				ConflictsWith: []string{"network_interface_name"},
 			},
 			"network_interface_name": {
 				Type:          schema.TypeString,
-				Optional:      true,
-				Default:       "",
+				Optional:true,
+				Computed:true,
 				ConflictsWith: []string{"name"},
 			},
 			"vswitch_id": {
@@ -85,12 +85,10 @@ func resourceAlibabacloudStackNetworkInterface() *schema.Resource {
 				Type:          schema.TypeString,
 				Computed:      true,
 				Deprecated:    "Field 'mac' is deprecated and will be removed in a future release. Please use new field 'mac_address' instead.",
-				ConflictsWith: []string{"mac_address"},
 			},
 			"mac_address": {
 				Type:          schema.TypeString,
 				Computed:      true,
-				ConflictsWith: []string{"mac"},
 			},
 			"description": {
 				Type:     schema.TypeString,

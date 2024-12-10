@@ -43,7 +43,8 @@ func resourceAlibabacloudStackSlbRule() *schema.Resource {
 
 			"name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'rule_name' instead.",
 				ConflictsWith: []string{"rule_name"},
@@ -51,7 +52,8 @@ func resourceAlibabacloudStackSlbRule() *schema.Resource {
 
 			"rule_name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
 				ConflictsWith: []string{"name"},
 			},
@@ -187,6 +189,9 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 	slb_id := d.Get("load_balancer_id").(string)
 	port := d.Get("frontend_port").(int)
 	name := strings.Trim(connectivity.GetResourceData(d, "rule_name", "name").(string), " ")
+	if err := errmsgs.CheckEmpty(name, schema.TypeString, "rule_name", "name"); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	group_id := strings.Trim(d.Get("server_group_id").(string), " ")
 
 	var domain, url, rule string
@@ -319,6 +324,9 @@ func resourceAlibabacloudStackSlbRuleUpdate(d *schema.ResourceData, meta interfa
 
 	if d.HasChanges("rule_name", "name") {
 		request.RuleName = connectivity.GetResourceData(d, "rule_name", "name").(string)
+		if err := errmsgs.CheckEmpty(request.RuleName, schema.TypeString, "rule_name", "name"); err != nil {
+			return errmsgs.WrapError(err)
+		}
 		update = true
 	}
 

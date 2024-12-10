@@ -73,12 +73,14 @@ func resourceAlibabacloudStackReservedInstance() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'reserved_instance_name' instead.",
 				ConflictsWith: []string{"reserved_instance_name"},
 			},
 			"reserved_instance_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},

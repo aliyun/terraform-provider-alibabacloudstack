@@ -32,37 +32,43 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"rule_name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional:true,
+				Computed:true,
 				ConflictsWith: []string{"name"},
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional:true,
+				Computed:true,
 				Deprecated: "Field 'name' is deprecated and will be removed in a future release. Please use new field 'rule_name' instead.",
 				ConflictsWith: []string{"rule_name"},
 			},
 			"namespace": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional:true,
+				Computed:true,
 				ForceNew: true,
 				ConflictsWith: []string{"project"},
 			},
 			"project": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional:true,
+				Computed:true,
 				ForceNew: true,
 				Deprecated: "Field 'project' is deprecated and will be removed in a future release. Please use new field 'namespace' instead.",
 				ConflictsWith: []string{"namespace"},
 			},
 			"metric_name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional:true,
+				Computed:true,
 				ForceNew: true,
 				ConflictsWith: []string{"metric"},
 			},
 			"metric": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional:true,
+				Computed:true,
 				ForceNew: true,
 				Deprecated: "Field 'metric' is deprecated and will be removed in a future release. Please use new field 'metric_name' instead.",
 				ConflictsWith: []string{"metric_name"},
@@ -218,11 +224,20 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 	client.InitRpcRequest(*request.RpcRequest)
 	d.SetId(resource.UniqueId() + ":" + request.RuleName)
 	request.RuleName = connectivity.GetResourceData(d, "rule_name", "name").(string)
+	if err := errmsgs.CheckEmpty(request.RuleName, schema.TypeString, "rule_name", "name"); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	parts, err := ParseResourceId(d.Id(), 2)
 	request.RuleId = parts[0]
 
 	request.Namespace = connectivity.GetResourceData(d, "namespace", "project").(string)
+	if err := errmsgs.CheckEmpty(request.Namespace, schema.TypeString, "namespace", "project"); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	request.MetricName = connectivity.GetResourceData(d, "metric_name", "metric").(string)
+	if err := errmsgs.CheckEmpty(request.MetricName, schema.TypeString, "metric_name", "metric"); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	request.Period = strconv.Itoa(d.Get("period").(int))
 
 	request.ContactGroups = strings.Join(expandStringList(d.Get("contact_groups").([]interface{})), ",")

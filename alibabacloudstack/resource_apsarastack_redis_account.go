@@ -70,12 +70,14 @@ func resourceAlibabacloudStackKVstoreAccount() *schema.Resource {
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use new field 'account_description' instead.",
 				ConflictsWith: []string{"account_description"},
 			},
 			"account_description": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"description"},
 			},

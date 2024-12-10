@@ -36,6 +36,7 @@ func resourceAlibabacloudStackSnapshot() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'snapshot_name' instead.",
@@ -44,6 +45,7 @@ func resourceAlibabacloudStackSnapshot() *schema.Resource {
 			"snapshot_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},

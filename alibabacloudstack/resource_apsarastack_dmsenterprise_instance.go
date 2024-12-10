@@ -185,12 +185,9 @@ func resourceAlibabacloudStackDmsEnterpriseInstanceCreate(d *schema.ResourceData
 	request["EnvType"] = d.Get("env_type")
 	request["ExportTimeout"] = d.Get("export_timeout")
 	request["Host"] = d.Get("host")
-	if v, ok := d.GetOk("instance_name"); ok {
-		request["InstanceAlias"] = v
-	} else if v, ok := d.GetOk("instance_alias"); ok {
-		request["InstanceAlias"] = v
-	} else {
-		return errmsgs.WrapError(errmsgs.Error(`[ERROR] Argument "instance_alias" or "instance_name" must be set one!`))
+	request["InstanceAlias"] = connectivity.GetResourceData(d, "instance_name", "instance_alias").(string)
+	if err := errmsgs.CheckEmpty(request["InstanceAlias"], schema.TypeString, "instance_name", "instance_alias"); err != nil {
+		return errmsgs.WrapError(err)
 	}
 	request["InstanceSource"] = d.Get("instance_source")
 	request["InstanceType"] = d.Get("instance_type")
@@ -251,8 +248,7 @@ func resourceAlibabacloudStackDmsEnterpriseInstanceRead(d *schema.ResourceData, 
 	d.Set("env_type", object["EnvType"])
 	d.Set("export_timeout", formatInt(object["ExportTimeout"]))
 	d.Set("instance_id", object["InstanceId"])
-	d.Set("instance_name", object["InstanceAlias"])
-	d.Set("instance_alias", object["InstanceAlias"])
+	connectivity.SetResourceData(d, object["InstanceAlias"], "instance_name", "instance_alias")
 	d.Set("instance_source", object["InstanceSource"])
 	d.Set("instance_type", object["InstanceType"])
 	d.Set("query_timeout", formatInt(object["QueryTimeout"]))
@@ -302,16 +298,12 @@ func resourceAlibabacloudStackDmsEnterpriseInstanceUpdate(d *schema.ResourceData
 		update = true
 	}
 	request["InstanceId"] = d.Get("instance_id")
-	if !d.IsNewResource() && d.HasChange("instance_name") {
+	if !d.IsNewResource() && d.HasChanges("instance_name", "instance_alias") {
 		update = true
-		request["InstanceAlias"] = d.Get("instance_name")
-	}
-	if !d.IsNewResource() && d.HasChange("instance_alias") {
-		update = true
-		request["InstanceAlias"] = d.Get("instance_alias")
-	}
-	if request["InstanceAlias"] == nil {
-		request["InstanceAlias"] = d.Get("instance_name")
+		request["InstanceAlias"] = connectivity.GetResourceData(d, "instance_name", "instance_alias").(string)
+		if err := errmsgs.CheckEmpty(request["InstanceAlias"], schema.TypeString, "instance_name", "instance_alias"); err != nil {
+			return errmsgs.WrapError(err)
+		}
 	}
 	if !d.IsNewResource() && d.HasChange("instance_source") {
 		update = true

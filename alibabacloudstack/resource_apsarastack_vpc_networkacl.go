@@ -154,9 +154,7 @@ func resourceAlibabacloudStackNetworkAclCreate(d *schema.ResourceData, meta inte
 	if v, ok := d.GetOk("description"); ok {
 		request["Description"] = v
 	}
-	if v, ok := d.GetOk("network_acl_name"); ok {
-		request["NetworkAclName"] = v
-	} else if v, ok := d.GetOk("name"); ok {
+	if v, ok := connectivity.GetResourceDataOk(d, "network_acl_name", "name"); ok {
 		request["NetworkAclName"] = v
 	}
 	request["VpcId"] = d.Get("vpc_id")
@@ -228,8 +226,7 @@ func resourceAlibabacloudStackNetworkAclRead(d *schema.ResourceData, meta interf
 	if err := d.Set("ingress_acl_entries", ingressAclEntry); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	d.Set("network_acl_name", object["NetworkAclName"])
-	d.Set("name", object["NetworkAclName"])
+	connectivity.SetResourceData(d, object["NetworkAclName"], "network_acl_name", "name")
 
 	resourceMap := make([]map[string]interface{}, 0)
 	if resourceMapList, ok := object["Resources"].(map[string]interface{})["Resource"].([]interface{}); ok {
@@ -264,13 +261,9 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 		update = true
 		request["Description"] = d.Get("description")
 	}
-	if !d.IsNewResource() && d.HasChange("network_acl_name") {
+	if !d.IsNewResource() && d.HasChanges("name", "network_acl_name") {
 		update = true
-		request["NetworkAclName"] = d.Get("network_acl_name")
-	}
-	if !d.IsNewResource() && d.HasChange("name") {
-		update = true
-		request["NetworkAclName"] = d.Get("name")
+		request["NetworkAclName"] = connectivity.GetResourceData(d, "network_acl_name", "name").(string)
 	}
 	if update {
 		action := "ModifyNetworkAclAttributes"

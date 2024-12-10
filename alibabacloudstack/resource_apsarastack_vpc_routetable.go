@@ -27,6 +27,7 @@ func resourceAlibabacloudStackRouteTable() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'route_table_name' instead.",
 				ConflictsWith: []string{"route_table_name"},
@@ -34,6 +35,7 @@ func resourceAlibabacloudStackRouteTable() *schema.Resource {
 			"route_table_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},

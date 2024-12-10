@@ -23,13 +23,15 @@ func resourceAlibabacloudStackApigatewayGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:      true,
+				Computed:      true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'api_group_name' instead.",
 				ConflictsWith: []string{"api_group_name"},
 			},
 			"api_group_name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"name"},
 			},
 
@@ -55,6 +57,9 @@ func resourceAlibabacloudStackApigatewayGroupCreate(d *schema.ResourceData, meta
 	request := cloudapi.CreateCreateApiGroupRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.GroupName = connectivity.GetResourceData(d, "api_group_name", "name").(string)
+	if err := errmsgs.CheckEmpty(request.GroupName, schema.TypeString, "api_name", "name"); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	request.Description = d.Get("description").(string)
 
 	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {

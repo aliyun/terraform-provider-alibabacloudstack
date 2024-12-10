@@ -25,12 +25,14 @@ func resourceAlibabacloudStackSlbServerCertificate() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'server_certificate_name' instead.",
 				ConflictsWith: []string{"server_certificate_name"},
 			},
 			"server_certificate_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ConflictsWith: []string{"name"},
 			},
 			"server_certificate": {

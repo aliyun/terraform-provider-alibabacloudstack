@@ -32,14 +32,14 @@ func resourceAlibabacloudStackSlbServerGroup() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "tf-server-group",
+				Computed:true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'vserver_group_name' instead.",
 				ConflictsWith: []string{"vserver_group_name"},
 			},
 			"vserver_group_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "tf-server-group",
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},

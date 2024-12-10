@@ -29,7 +29,8 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:          schema.TypeString,
-				Optional:      true,
+				Optional:true,
+				Computed:true,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringLenBetween(2, 256),
 				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'launch_template_name' instead.",
@@ -37,7 +38,8 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 			},
 			"launch_template_name": {
 				Type:          schema.TypeString,
-				Optional:      true,
+				Optional:true,
+				Computed:true,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringLenBetween(2, 256),
 				ConflictsWith: []string{"name"},
@@ -265,7 +267,7 @@ func resourceAlibabacloudStackLaunchTemplateCreate(d *schema.ResourceData, meta 
 
 	request := ecs.CreateCreateLaunchTemplateRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	request.LaunchTemplateName = connectivity.GetResourceData(d,  "launch_template_name", "name").(string)
+	request.LaunchTemplateName = connectivity.GetResourceData(d, "launch_template_name", "name").(string)
 	request.Description = d.Get("description").(string)
 	request.HostName = d.Get("host_name").(string)
 	request.ImageId = d.Get("image_id").(string)

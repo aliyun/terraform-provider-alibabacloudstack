@@ -33,6 +33,7 @@ func resourceAlibabacloudStackCommonBandwidthPackage() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use new field 'bandwidth_package_name' instead.",
 				ConflictsWith: []string{"bandwidth_package_name"},
@@ -40,6 +41,7 @@ func resourceAlibabacloudStackCommonBandwidthPackage() *schema.Resource {
 			"bandwidth_package_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},

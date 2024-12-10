@@ -33,7 +33,8 @@ func resourceAlibabacloudStackSlbDomainExtension() *schema.Resource {
 			"frontend_port": {
 				Type:         schema.TypeInt,
 				ValidateFunc: validation.IntBetween(1, 65535),
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
 				Deprecated:   "Field 'frontend_port' is deprecated and will be removed in a future release. Please use new field 'listener_port' instead.",
 				ConflictsWith: []string{"listener_port"},
@@ -41,7 +42,8 @@ func resourceAlibabacloudStackSlbDomainExtension() *schema.Resource {
 			"listener_port": {
 				Type:         schema.TypeInt,
 				ValidateFunc: validation.IntBetween(1, 65535),
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
 				ConflictsWith: []string{"frontend_port"},
 			},
@@ -79,6 +81,9 @@ func resourceAlibabacloudStackSlbDomainExtensionCreate(d *schema.ResourceData, m
 	client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = d.Get("load_balancer_id").(string)
 	request.ListenerPort = requests.NewInteger(connectivity.GetResourceData(d, "listener_port", "frontend_port").(int))
+	if err := errmsgs.CheckEmpty(request.ListenerPort, schema.TypeString, "listener_port", "frontend_port"); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	request.Domain = d.Get("domain").(string)
 	request.ServerCertificateId = d.Get("server_certificate_id").(string)
 

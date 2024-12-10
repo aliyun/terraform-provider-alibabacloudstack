@@ -413,9 +413,9 @@ func (s *MongoDBService) MotifyMongoDBBackupPolicy(d *schema.ResourceData) error
 	if err := s.WaitForMongoDBInstance(d.Id(), Running, DefaultTimeoutMedium); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	periodList := expandStringList(d.Get("backup_period").(*schema.Set).List())
+	periodList := expandStringList(connectivity.GetResourceData(d, "preferred_backup_period", "backup_period").(*schema.Set).List())
 	backupPeriod := fmt.Sprintf("%s", strings.Join(periodList[:], COMMA_SEPARATED))
-	backupTime := d.Get("backup_time").(string)
+	backupTime := connectivity.GetResourceData(d, "preferred_backup_time", "backup_time").(string)
 
 	request := dds.CreateModifyBackupPolicyRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)

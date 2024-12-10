@@ -28,13 +28,15 @@ func resourceAlibabacloudStackDBAccount() *schema.Resource {
 			"data_base_instance_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Required: true,
+				Optional:true,
+				Computed:true,
 				ConflictsWith: []string{"instance_id"},
 			},
 			"account_name": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Required: true,
+				Optional:true,
+				Computed:true,
 				ConflictsWith: []string{"name"},
 			},
 
@@ -69,19 +71,22 @@ func resourceAlibabacloudStackDBAccount() *schema.Resource {
 			"account_description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed:     true,
 				ConflictsWith: []string{"description"},
 			},
 			"instance_id": {
 				Type:         schema.TypeString,
 				ForceNew:     true,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				Deprecated:  "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'data_base_instance_id' instead.",
 				ConflictsWith: []string{"data_base_instance_id"},
 			},
 			"name": {
 				Type:         schema.TypeString,
 				ForceNew:     true,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use new field 'account_name' instead.",
 				ConflictsWith: []string{"account_name"},
 			},
@@ -97,6 +102,7 @@ func resourceAlibabacloudStackDBAccount() *schema.Resource {
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				Deprecated:  "Field 'description' is deprecated and will be removed in a future release. Please use new field 'account_description' instead.",
 				ConflictsWith: []string{"account_description"},
 			},
@@ -110,7 +116,13 @@ func resourceAlibabacloudStackDBAccountCreate(d *schema.ResourceData, meta inter
 	request := rds.CreateCreateAccountRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = connectivity.GetResourceData(d, "data_base_instance_id", "instance_id").(string)
+	if err := errmsgs.CheckEmpty(request.DBInstanceId, schema.TypeString, "data_base_instance_id", "instance_id"); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	request.AccountName = connectivity.GetResourceData(d, "account_name", "name").(string)
+	if err := errmsgs.CheckEmpty(request.AccountName, schema.TypeString, "account_name", "name"); err != nil {
+		return errmsgs.WrapError(err)
+	}
 
 	password := d.Get("password").(string)
 	kmsPassword := d.Get("kms_encrypted_password").(string)

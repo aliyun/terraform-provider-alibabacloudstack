@@ -723,13 +723,9 @@ func (s *EcsService) updateImage(d *schema.ResourceData) error {
 		if description, ok := d.GetOk("description"); ok {
 			request.Description = description.(string)
 		}
-		if imageName, ok := d.GetOk("image_name"); ok {
+		if imageName, ok := connectivity.GetResourceDataOk(d, "image_name", "name"); ok {
 			request.ImageName = imageName.(string)
-		} else {
-			if imageName, ok := d.GetOk("name"); ok {
-				request.ImageName = imageName.(string)
-			}
-		}
+		} 
 		raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ModifyImageAttribute(request)
 		})

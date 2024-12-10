@@ -45,14 +45,14 @@ func resourceAlibabacloudStackEssAlarm() *schema.Resource {
 			"enable": {
 				Type:         schema.TypeBool,
 				Optional:     true,
-				Default:      true,
+				Computed:     true,
 				Deprecated:   "Field 'enable' is deprecated and will be removed in a future release. Please use new field 'status' instead.",
 				ConflictsWith: []string{"status"},
 			},
 			"status": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Computed:     true,
 				ConflictsWith: []string{"enable"},
 			},
 			"alarm_actions": {
@@ -124,12 +124,10 @@ func resourceAlibabacloudStackEssAlarm() *schema.Resource {
 				Type:         schema.TypeString,
 				Computed:     true,
 				Deprecated:   "Field 'state' is deprecated and will be removed in a future release. Please use new field 'alarm_trigger_state' instead.",
-				ConflictsWith: []string{"alarm_trigger_state"},
 			},
 			"alarm_trigger_state": {
 				Type:     schema.TypeString,
 				Computed: true,
-				ConflictsWith: []string{"state"},
 			},
 		},
 	}
@@ -172,8 +170,13 @@ func resourceAlibabacloudStackEssAlarmCreate(d *schema.ResourceData, meta interf
 	d.SetId(response.AlarmTaskId)
 
 	// enable or disable alarm
-	enable := connectivity.GetResourceData(d, "status", "enable")
-	if !enable.(bool) {
+	var enable bool
+	if v, ok := connectivity.GetResourceDataOk(d, "status", "enable"); ok {
+		enable = v.(bool)
+	} else {
+		enable = true
+	}
+	if !enable {
 		disableAlarmRequest := ess.CreateDisableAlarmRequest()
 		client.InitRpcRequest(*disableAlarmRequest.RpcRequest)
 		disableAlarmRequest.AlarmTaskId = response.AlarmTaskId
@@ -316,8 +319,13 @@ func resourceAlibabacloudStackEssAlarmUpdate(d *schema.ResourceData, meta interf
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	if d.HasChanges("status", "enable"){
-		enable := connectivity.GetResourceData(d, "status", "enable")
-		if enable.(bool) {
+		var enable bool
+		if v, ok := connectivity.GetResourceDataOk(d, "status", "enable"); ok {
+			enable = v.(bool)
+		} else {
+			enable = true
+		}
+		if enable {
 			enableAlarmRequest := ess.CreateEnableAlarmRequest()
 			client.InitRpcRequest(*enableAlarmRequest.RpcRequest)
 			enableAlarmRequest.AlarmTaskId = d.Id()

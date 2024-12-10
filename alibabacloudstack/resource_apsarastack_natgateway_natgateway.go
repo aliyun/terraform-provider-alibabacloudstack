@@ -34,16 +34,16 @@ func resourceAlibabacloudStackNatGateway() *schema.Resource {
 			"specification": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringInSlice([]string{"Small", "Middle", "Large"}, false),
-				Default:      "Small",
 				Deprecated:   "Field 'specification' is deprecated and will be removed in a future release. Please use new field 'spec' instead.",
 				ConflictsWith: []string{"spec"},
 			},
 			"spec": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringInSlice([]string{"Small", "Middle", "Large"}, false),
-				Default:      "Small",
 				ConflictsWith: []string{"specification"},
 			},
 			"name": {
@@ -119,6 +119,10 @@ func resourceAlibabacloudStackNatGatewayCreate(d *schema.ResourceData, meta inte
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VpcId = string(d.Get("vpc_id").(string))
 	request.Spec = connectivity.GetResourceData(d, "spec", "specification").(string)
+	if request.Spec == "" {
+		// Default must be nil if computed
+		request.Spec = "Small"
+	}
 	request.ClientToken = buildClientToken(request.GetActionName())
 	bandwidthPackages := []vpc.CreateNatGatewayBandwidthPackage{}
 	for _, e := range d.Get("bandwidth_packages").([]interface{}) {
@@ -273,6 +277,10 @@ func resourceAlibabacloudStackNatGatewayUpdate(d *schema.ResourceData, meta inte
 		client.InitRpcRequest(*modifyNatGatewaySpecRequest.RpcRequest)
 		modifyNatGatewaySpecRequest.NatGatewayId = natGateway.NatGatewayId
 		modifyNatGatewaySpecRequest.Spec = connectivity.GetResourceData(d, "spec", "specification").(string)
+		if modifyNatGatewaySpecRequest.Spec == "" {
+			// modifyNatGatewaySpecRequest.Spec
+			modifyNatGatewaySpecRequest.Spec = "Small"
+		}
 
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.ModifyNatGatewaySpec(modifyNatGatewaySpecRequest)

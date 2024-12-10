@@ -169,23 +169,27 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 			"ram_role_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				Deprecated: "Field 'ram_role_name' is deprecated and will be removed in a future release. Please use new field 'role_name' instead.",
 				ConflictsWith: []string{"role_name"},
 			},
 			"role_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ConflictsWith: []string{"ram_role_name"},
 			},
 			"key_pair_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				Deprecated: "Field 'key_pair_name' is deprecated and will be removed in a future release. Please use new field 'key_name' instead.",
 				ConflictsWith: []string{"key_name"},
 			},
 			"key_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				ConflictsWith: []string{"key_pair_name"},
 			},
 			"force_delete": {

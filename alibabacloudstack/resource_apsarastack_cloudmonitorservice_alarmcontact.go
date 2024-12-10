@@ -27,14 +27,16 @@ func resourceAlibabacloudstackCmsAlarmContact() *schema.Resource {
 				ForceNew: true,
 			},
 			"channels_aliim": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Deprecated:   "Field 'channels_aliim' is deprecated and will be removed in a future release. Please use new field 'channels_ali_im' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'channels_aliim' is deprecated and will be removed in a future release. Please use new field 'channels_ali_im' instead.",
 				ConflictsWith: []string{"channels_ali_im"},
 			},
 			"channels_ali_im": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"channels_aliim"},
 			},
 			"channels_ding_web_hook": {

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"regexp"
 	"strings"
+	"reflect"
+	"errors"
 
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
@@ -20,6 +22,7 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/fc-go-sdk"
 	"github.com/denverdino/aliyungo/common"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 const (
@@ -390,6 +393,23 @@ func GetAsapiErrorMessage(raw_data map[string]interface{}) (showMsg string) {
 		}
 	}
 	return showMsg
+}
+
+func CheckEmpty(value interface{}, schemaType schema.ValueType, keys ... string) error{
+	zero := schemaType.Zero()
+
+	empty := false
+	if eq, ok := value.(schema.Equal); ok {
+		empty = !eq.Equal(zero)
+	} else {
+		empty = !reflect.DeepEqual(value, zero)
+	}
+	
+	if ! empty {
+		return nil
+	}
+	errmsg := strings.Join(keys, " or ")
+	return errors.New(errmsg + " can not be empty at the same time")
 }
 
 // A default message of ComplexError's Err. It is format to Resource <resource-id> <operation> Failed!!! <error source>

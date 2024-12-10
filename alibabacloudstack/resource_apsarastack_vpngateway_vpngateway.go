@@ -75,35 +75,35 @@ func resourceAlibabacloudStackVpnGateway() *schema.Resource {
 			"enable_ipsec": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Computed:true,
 				Deprecated: "Field 'enable_ipsec' is deprecated and will be removed in a future release. Please use new field 'ipsec_vpn' instead.",
 				ConflictsWith: []string{"ipsec_vpn"},
 			},
 			"ipsec_vpn": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Computed:true,
 				ConflictsWith: []string{"enable_ipsec"},
 			},
 
 			"enable_ssl": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed:true,
 				Deprecated: "Field 'enable_ssl' is deprecated and will be removed in a future release. Please use new field 'ssl_vpn' instead.",
 				ConflictsWith: []string{"ssl_vpn"},
 			},
 			"ssl_vpn": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Computed:true,
 				ConflictsWith: []string{"enable_ssl"},
 			},
 
 			"ssl_connections": {
 				Type:             schema.TypeInt,
 				Optional:         true,
-				Default:          5,
+				Computed:true,
 				DiffSuppressFunc: vpnSslConnectionsDiffSuppressFunc,
 				Deprecated:       "Field 'ssl_connections' is deprecated and will be removed in a future release. Please use new field 'ssl_max_connections' instead.",
 				ConflictsWith: []string{"ssl_max_connections"},
@@ -111,7 +111,7 @@ func resourceAlibabacloudStackVpnGateway() *schema.Resource {
 			"ssl_max_connections": {
 				Type:             schema.TypeInt,
 				Optional:         true,
-				Default:          5,
+				Computed:true,
 				DiffSuppressFunc: vpnSslConnectionsDiffSuppressFunc,
 				ConflictsWith: []string{"ssl_connections"},
 			},
@@ -179,14 +179,23 @@ func resourceAlibabacloudStackVpnGatewayCreate(d *schema.ResourceData, meta inte
 
 	if v, ok := connectivity.GetResourceDataOk(d, "ipsec_vpn", "enable_ipsec"); ok {
 		request.EnableIpsec = requests.NewBoolean(v.(bool))
+	} else {
+		//Default must be nil if computed
+		request.EnableIpsec = requests.NewBoolean(true)
 	}
 
 	if v, ok := connectivity.GetResourceDataOk(d, "ssl_vpn", "enable_ssl"); ok {
 		request.EnableSsl = requests.NewBoolean(v.(bool))
+	} else {
+		//Default must be nil if computed
+		request.EnableSsl = requests.NewBoolean(false)
 	}
 
 	if v, ok := connectivity.GetResourceDataOk(d, "ssl_max_connections", "ssl_connections"); ok {
 		request.SslConnections = requests.NewInteger(v.(int))
+	}else {
+		//Default must be nil if computed
+		request.SslConnections = requests.NewInteger(5)
 	}
 
 	raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
@@ -318,6 +327,9 @@ func resourceAlibabacloudStackVpnGatewayUpdate(d *schema.ResourceData, meta inte
 
 	if d.HasChanges("enable_ipsec","enable_ssl","ipsec_vpn", "ssl_vpn") {
 		return fmt.Errorf("Now Cann't Support modify ipsec/ssl switch, try to modify on the web console")
+	}
+	if d.HasChanges("ssl_max_connections", "ssl_connections") {
+		return fmt.Errorf("Now Cann't Support modify ssl_max_connections, try to modify on the web console")
 	}
 
 	d.Partial(false)

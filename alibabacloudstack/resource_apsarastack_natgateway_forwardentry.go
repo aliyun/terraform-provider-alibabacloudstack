@@ -42,12 +42,14 @@ func resourceAlibabacloudStackForwardEntry() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'forward_entry_name' instead.",
 				ConflictsWith: []string{"forward_entry_name"},
 			},
 			"forward_entry_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},

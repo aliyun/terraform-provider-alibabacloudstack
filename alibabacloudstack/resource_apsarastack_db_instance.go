@@ -67,7 +67,8 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				Type:          schema.TypeString,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
-				Required:      true,
+				Optional:true,
+				Computed:true,
 				Deprecated:    "Field 'storage_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage_type' instead.",
 				ConflictsWith: []string{"db_instance_storage_type"},
 			},
@@ -75,7 +76,8 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				Type:          schema.TypeString,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
-				Optional:      true,
+				Optional:true,
+				Computed:true,
 				ConflictsWith: []string{"storage_type"},
 			},
 			"encryption_key": {
@@ -90,38 +92,43 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 			},
 			"instance_type": {
 				Type:          schema.TypeString,
-				Required:      true,
+				Optional:true,
+				Computed:true,
 				Deprecated:    "Field 'instance_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
 				ConflictsWith: []string{"db_instance_class"},
 			},
 			"db_instance_class": {
 				Type:          schema.TypeString,
-				Optional:      true,
+				Optional:true,
+				Computed:true,
 				ConflictsWith: []string{"instance_type"},
 			},
 			"instance_storage": {
 				Type:          schema.TypeInt,
-				Required:      true,
+				Optional:true,
+				Computed:true,
 				Deprecated:    "Field 'instance_storage' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage' instead.",
 				ConflictsWith: []string{"db_instance_storage"},
 			},
 			"db_instance_storage": {
 				Type:          schema.TypeInt,
-				Optional:      true,
+				Optional:true,
+				Computed:true,
 				ConflictsWith: []string{"instance_storage"},
 			},
 			"instance_charge_type": {
 				Type:          schema.TypeString,
 				ValidateFunc:  validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
-				Optional:      true,
-				Default:       Postpaid,
+				Optional:true,
+				Computed:true,
 				Deprecated:    "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
 				ConflictsWith: []string{"payment_type"},
 			},
 			"payment_type": {
 				Type:          schema.TypeString,
 				ValidateFunc:  validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
-				Optional:      true,
+				Optional:true,
+				Computed:true,
 				ConflictsWith: []string{"instance_charge_type"},
 			},
 			"period": {
@@ -163,14 +170,16 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 			},
 			"instance_name": {
 				Type:          schema.TypeString,
-				Optional:      true,
+				Optional:true,
+				Computed:true,
 				ValidateFunc:  validation.StringLenBetween(2, 256),
 				Deprecated:    "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
 				ConflictsWith: []string{"db_instance_description"},
 			},
 			"db_instance_description": {
 				Type:          schema.TypeString,
-				Optional:      true,
+				Optional:true,
+				Computed:true,
 				ValidateFunc:  validation.StringLenBetween(2, 256),
 				ConflictsWith: []string{"instance_name"},
 			},
@@ -280,7 +289,13 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 	enginever := Trim(d.Get("engine_version").(string))
 	engine := Trim(d.Get("engine").(string))
 	DBInstanceStorage := connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int)
+	if err := errmsgs.CheckEmpty(DBInstanceStorage, schema.TypeString, "db_instance_storage", "instance_storage"); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	DBInstanceClass := Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string))
+	if err := errmsgs.CheckEmpty(DBInstanceClass, schema.TypeString, "db_instance_class", "instance_type"); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	DBInstanceNetType := string(Intranet)
 	DBInstanceDescription := connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
 	if zone, ok := d.GetOk("zone_id"); ok && Trim(zone.(string)) != "" {
@@ -305,8 +320,14 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 
 		VPCId = vsw.VpcId
 	}
-	PayType := Trim(connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string))
+	payType := string(Postpaid)
+	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok && Trim(v.(string)) != "" {
+		payType = Trim(v.(string))
+	}
 	DBInstanceStorageType := connectivity.GetResourceData(d, "db_instance_storage_type", "storage_type").(string)
+	if err := errmsgs.CheckEmpty(DBInstanceStorageType, schema.TypeString, "db_instance_storage_type", "storage_type"); err != nil {
+		return errmsgs.WrapError(err)
+	}
 	ZoneIdSlave1 = d.Get("zone_id_slave1").(string)
 	ZoneIdSlave2 = d.Get("zone_id_slave2").(string)
 	SecurityIPList := LOCAL_HOST_IP
@@ -330,7 +351,7 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		"DBInstanceDescription": DBInstanceDescription,
 		"InstanceNetworkType":   InstanceNetworkType,
 		"VSwitchId":             VSwitchId,
-		"PayType":               PayType,
+		"PayType":               payType,
 		"DBInstanceStorageType": DBInstanceStorageType,
 		"SecurityIPList":        SecurityIPList,
 		"ClientToken":           ClientToken,
@@ -453,7 +474,10 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		return errmsgs.WrapError(err)
 	}
 
-	payType := PayType(connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string))
+	payType := Postpaid
+	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok && Trim(v.(string)) != "" {
+		payType = PayType(Trim(v.(string)))
+	}
 	if !d.IsNewResource() && d.HasChanges("instance_charge_type", "payment_type") && payType == Prepaid {
 		prePaidRequest := rds.CreateModifyDBInstancePayTypeRequest()
 		client.InitRpcRequest(*prePaidRequest.RpcRequest)
@@ -605,15 +629,25 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 	request := rds.CreateModifyDBInstanceSpecRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
-	request.PayType = connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string)
+	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
+		request.PayType = v.(string)
+	} else {
+		request.PayType = string(Postpaid)
+	}
 
 	if d.HasChanges("instance_type", "db_instance_class") {
 		request.DBInstanceClass = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
+		if err := errmsgs.CheckEmpty(request.DBInstanceClass, schema.TypeString, "db_instance_class", "instance_type"); err != nil {
+			return errmsgs.WrapError(err)
+		}
 		update = true
 	}
 
 	if d.HasChanges("instance_storage", "db_instance_storage") {
 		request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
+		if err := errmsgs.CheckEmpty(request.DBInstanceStorage, schema.TypeString, "db_instance_storage", "instance_storage"); err != nil {
+			return errmsgs.WrapError(err)
+		}
 		update = true
 	}
 	if update {
@@ -746,15 +780,15 @@ func resourceAlibabacloudStackDBInstanceRead(d *schema.ResourceData, meta interf
 	d.Set("security_ip_mode", instance.SecurityIPMode)
 	d.Set("engine", instance.Engine)
 	d.Set("engine_version", instance.EngineVersion)
-	d.Set("db_instance_class", instance.DBInstanceClass)
+	connectivity.SetResourceData(d, instance.DBInstanceClass, "db_instance_class", "instance_type")
 	d.Set("port", instance.Port)
 	connectivity.SetResourceData(d, instance.DBInstanceStorage, "db_instance_storage", "instance_storage")
 	d.Set("zone_id", instance.ZoneId)
-	d.Set("payment_type", instance.PayType)
+	connectivity.SetResourceData(d, instance.PayType, "payment_type", "instance_charge_type")
 	d.Set("period", d.Get("period"))
 	d.Set("vswitch_id", instance.VSwitchId)
 	d.Set("connection_string", instance.ConnectionString)
-	d.Set("db_instance_description", instance.DBInstanceDescription)
+	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "instance_name")
 	d.Set("maintain_time", instance.MaintainTime)
 	connectivity.SetResourceData(d, instance.DBInstanceStorageType, "db_instance_storage_type", "storage_type")
 

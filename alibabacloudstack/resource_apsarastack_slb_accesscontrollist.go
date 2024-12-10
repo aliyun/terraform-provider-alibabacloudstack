@@ -27,30 +27,32 @@ func resourceAlibabacloudStackSlbAcl() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'acl_name' instead.",
 				ConflictsWith: []string{"acl_name"},
 			},
 			"acl_name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 			"ip_version": {
 				Type:         schema.TypeString,
-				Optional:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
-				Default:      "ipv4",
 				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
 				Deprecated:   "Field 'ip_version' is deprecated and will be removed in a future release. Please use new field 'address_ip_version' instead.",
 				ConflictsWith: []string{"address_ip_version"},
 			},
 			"address_ip_version": {
 				Type:         schema.TypeString,
-				Optional:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
-				Default:      "ipv4",
 				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
 				ConflictsWith: []string{"ip_version"},
 			},
@@ -83,7 +85,14 @@ func resourceAlibabacloudStackSlbAclCreate(d *schema.ResourceData, meta interfac
 	request := slb.CreateCreateAccessControlListRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.AclName = strings.TrimSpace(connectivity.GetResourceData(d, "acl_name", "name").(string))
-	request.AddressIPVersion = connectivity.GetResourceData(d, "address_ip_version", "ip_version").(string)
+	if err := errmsgs.CheckEmpty(request.AclName, schema.TypeString, "acl_name", "name"); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	if v, ok := connectivity.GetResourceDataOk(d, "address_ip_version", "ip_version"); ok {
+		request.AddressIPVersion= v.(string)
+	} else {
+		request.AddressIPVersion = "ipv4"
+	}
 
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 		return slbClient.CreateAccessControlList(request)
@@ -144,6 +153,9 @@ func resourceAlibabacloudStackSlbAclUpdate(d *schema.ResourceData, meta interfac
 		client.InitRpcRequest(*request.RpcRequest)
 		request.AclId = d.Id()
 		request.AclName = connectivity.GetResourceData(d, "acl_name", "name").(string)
+		if err := errmsgs.CheckEmpty(request.AclName, schema.TypeString, "acl_name", "name"); err != nil {
+			return errmsgs.WrapError(err)
+		}
 
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
 			return slbClient.SetAccessControlListAttribute(request)

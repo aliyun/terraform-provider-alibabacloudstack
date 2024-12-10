@@ -43,6 +43,7 @@ func resourceAlibabacloudStackVpnConnection() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use new field 'vpn_connection_name' instead.",
 				ConflictsWith: []string{"vpn_connection_name"},
@@ -51,6 +52,7 @@ func resourceAlibabacloudStackVpnConnection() *schema.Resource {
 			"vpn_connection_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},

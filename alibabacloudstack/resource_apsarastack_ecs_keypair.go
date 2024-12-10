@@ -30,7 +30,8 @@ func resourceAlibabacloudStackKeyPair() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"key_name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				Deprecated:   "Field 'key_name' is deprecated and will be removed in a future release. Please use new field 'key_pair_name' instead.",
@@ -38,7 +39,8 @@ func resourceAlibabacloudStackKeyPair() *schema.Resource {
 			},
 			"key_pair_name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"key_name"},
@@ -81,6 +83,9 @@ func resourceAlibabacloudStackKeyPairCreate(d *schema.ResourceData, meta interfa
 
 	var keyName string
 	if v, ok := connectivity.GetResourceDataOk(d, "key_pair_name", "key_name"); ok {
+		if err := errmsgs.CheckEmpty(v, schema.TypeString, "key_pair_name", "key_name"); err != nil {
+			return errmsgs.WrapError(err)
+		}
 		keyName = v.(string)
 	} else if v, ok := d.GetOk("key_name_prefix"); ok {
 		keyName = resource.PrefixedUniqueId(v.(string))

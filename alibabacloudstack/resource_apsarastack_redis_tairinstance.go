@@ -45,12 +45,14 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 			"tair_instance_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"instance_name"},
 			},
 			"instance_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				Deprecated:   "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'tair_instance_name' instead.",
 				ConflictsWith: []string{"tair_instance_name"},
@@ -102,14 +104,14 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
 				Optional:     true,
-				Default:      PostPaid,
+				Computed:true,
 				ConflictsWith: []string{"instance_charge_type"},
 			},
 			"instance_charge_type": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
 				Optional:     true,
-				Default:      PostPaid,
+				Computed:true,
 				Deprecated:   "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
 				ConflictsWith: []string{"payment_type"},
 			},
@@ -252,6 +254,8 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	}
 	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
 		request["ChargeType"] = v.(string)
+	} else {
+		request["ChargeType"] =string(PostPaid)
 	}
 	if v, ok := d.GetOk("password"); ok {
 		request["Password"] = v.(string)
@@ -710,7 +714,11 @@ func buildKVStoreCreateRequest(d *schema.ResourceData, meta interface{}) (*r_kvs
 	request.InstanceType = Trim(d.Get("instance_type").(string))
 	request.EngineVersion = Trim(d.Get("engine_version").(string))
 	request.InstanceClass = Trim(d.Get("instance_class").(string))
-	request.ChargeType = Trim(connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string))
+	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok && Trim(v.(string)) != "" {
+		request.ChargeType = Trim(v.(string))
+	} else {
+		request.ChargeType = string(PostPaid)
+	}
 	request.Password = Trim(d.Get("password").(string))
 
 	if request.Password == "" {
@@ -730,7 +738,7 @@ func buildKVStoreCreateRequest(d *schema.ResourceData, meta interface{}) (*r_kvs
 		request.Period = strconv.Itoa(d.Get("period").(int))
 	}
 
-	if zone, ok := d.GetOk("zone_id"); ok && Trim(zone.(string)) != "" {
+	if zone, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && Trim(zone.(string)) != "" {
 		request.ZoneId = Trim(zone.(string))
 	}
 

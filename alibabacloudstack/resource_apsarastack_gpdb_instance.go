@@ -37,25 +37,27 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 			},
 			"instance_class": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed:true,
+				ForceNew: true,
 				Deprecated:   "Field 'instance_class' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
 				ConflictsWith: []string{"db_instance_class"},
 			},
 			"db_instance_class": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed:true,
+				ForceNew: true,
 				ConflictsWith: []string{"instance_class"},
 			},
 			"instance_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 				Deprecated:   "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'instance_id' instead.",
-				ConflictsWith: []string{"db_instance_id"},
 			},
 			"db_instance_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-				ConflictsWith: []string{"instance_id"},
 			},
 			"region_id": {
 				Type:     schema.TypeString,
@@ -69,12 +71,10 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 				Deprecated:   "Field 'instance_network_type' is deprecated and will be removed in a future release. Please use new field 'network_type' instead.",
-				ConflictsWith: []string{"network_type"},
 			},
 			"network_type": {
 				Type:     schema.TypeString,
 				Computed: true,
-				ConflictsWith: []string{"instance_network_type"},
 			},
 			"instance_group_count": {
 				Type:     schema.TypeString,
@@ -101,6 +101,7 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 				Optional:     true,
+				Computed:true,
 				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
 				ConflictsWith: []string{"db_instance_description"},
 			},
@@ -108,6 +109,7 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 				Optional:     true,
+				Computed:true,
 				ConflictsWith: []string{"description"},
 			},
 			"vswitch_id": {
@@ -125,32 +127,22 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 			"instance_inner_port": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Optional: true,
 				Computed: true,
 				Deprecated:   "Field 'instance_inner_port' is deprecated and will be removed in a future release. Please use new field 'port' instead.",
-				ConflictsWith: []string{"port"},
 			},
 			"port": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Optional: true,
 				Computed: true,
-				ConflictsWith: []string{"instance_inner_port"},
 			},
 			"instance_vpc_id": {
 				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
 				Computed: true,
 				Deprecated:   "Field 'instance_vpc_id' is deprecated and will be removed in a future release. Please use new field 'vpc_id' instead.",
-				ConflictsWith: []string{"vpc_id"},
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
 				Computed: true,
-				ConflictsWith: []string{"instance_vpc_id"},
 			},
 			"security_ip_list": {
 				Type:     schema.TypeSet,
@@ -354,6 +346,9 @@ func buildGpdbCreateRequest(d *schema.ResourceData, meta interface{}) (*gpdb.Cre
 	request.VSwitchId = Trim(d.Get("vswitch_id").(string))
 	request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "description").(string)
 	request.DBInstanceClass = Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_class").(string))
+	if err := errmsgs.CheckEmpty(request.DBInstanceClass, schema.TypeString, "db_instance_class", "instance_class"); err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
 	request.DBInstanceGroupCount = Trim(d.Get("instance_group_count").(string))
 	request.Engine = Trim(d.Get("engine").(string))
 	request.EngineVersion = Trim(d.Get("engine_version").(string))

@@ -33,6 +33,7 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroup() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ForceNew:     true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'master_slave_server_group_name' instead.",
 				ConflictsWith: []string{"master_slave_server_group_name"},
@@ -41,6 +42,7 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroup() *schema.Resource {
 			"master_slave_server_group_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed:true,
 				ForceNew: true,
 				ConflictsWith: []string{"name"},
 			},

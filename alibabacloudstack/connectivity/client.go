@@ -1281,19 +1281,8 @@ func IncrementalWait(firstDuration time.Duration, increaseDuration time.Duration
 }
 
 func GetResourceData(d *schema.ResourceData, keys ...string) interface{} {
-
-	for _, key := range keys {
-		value, ok := d.GetOk(key)
-		if ok {
-			return value
-		}
-	}
-	
-	if len(keys) > 0 {
-		return d.Get(keys[0])
-	} else {
-		return nil
-	}
+	v, _ := GetResourceDataOk(d, keys...)
+	return v
 }
 
 func GetResourceDataOk(d *schema.ResourceData, keys ...string) (interface{}, bool) {
@@ -1304,7 +1293,7 @@ func GetResourceDataOk(d *schema.ResourceData, keys ...string) (interface{}, boo
 			return value, true
 		}
 	}
-	return nil, false
+	return d.GetOk(keys[0])
 }
 
 func SetResourceData(d *schema.ResourceData, value interface{}, keys ...string) error {

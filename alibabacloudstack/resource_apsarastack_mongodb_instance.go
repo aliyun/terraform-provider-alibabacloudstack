@@ -86,6 +86,7 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
 				ConflictsWith: []string{"db_instance_description"},
@@ -93,6 +94,7 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 			"db_instance_description": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 				ConflictsWith: []string{"name"},
 			},
