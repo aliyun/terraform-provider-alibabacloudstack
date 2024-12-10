@@ -1299,6 +1299,7 @@ const DataZoneCommonTestCase = `
 
 data "alibabacloudstack_zones" default {
   available_resource_creation = "VSwitch"
+  enable_details = true
 }
 
 `
