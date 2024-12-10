@@ -14,7 +14,7 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 
 	var v vpc.DescribeVSwitchAttributesResponse
 
-	resourceId := "alibabacloudstack_vpc_vswitch.test_default"
+	resourceId := "alibabacloudstack_vpc_vswitch.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVswitchCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -33,8 +33,7 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-
-		CheckDestroy: rac.checkResourceDestroy(),
+		CheckDestroy:  rac.checkResourceDestroy(),
 
 		Steps: []resource.TestStep{
 
@@ -43,16 +42,27 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 
 					"description": "modify_description",
 
-					"vswitch_name": "modify_name",
+					"vswitch_name": name,
+
+					"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}",
+
+					"vpc_id": "${alibabacloudstack_vpc.default.id}",
+
+					"cidr_block": "172.16.0.0/24",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"description": "modify_description",
 
-						"vswitch_name": "modify_name",
+						"vswitch_name": name,
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 
 			{
@@ -121,8 +131,10 @@ func AlibabacloudTestAccVpcVswitchBasicdependence(name string) string {
 variable "name" {
     default = "%s"
 }
+
 %s
-`, name, VSwichCommonTestCase)
+%s
+`, name, DataZoneCommonTestCase, VpcCommonTestCase)
 }
 func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 
