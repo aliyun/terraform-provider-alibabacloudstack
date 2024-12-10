@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"reflect"
 
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -71,12 +70,16 @@ func resourceAlibabacloudStackKVstoreAccount() *schema.Resource {
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use 'account_description' instead.",
+				Computed:true,
+				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use new field 'account_description' instead.",
+				ConflictsWith: []string{"account_description"},
 			},
 			"account_description": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"description"},
 			},
 		},
 	}
@@ -108,10 +111,8 @@ func resourceAlibabacloudStackKVStoreAccountCreate(d *schema.ResourceData, meta 
 	}
 	request.AccountType = d.Get("account_type").(string)
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "account_description", "description"); err == nil && v.(string) != "" {
+	if v, ok := connectivity.GetResourceDataOk(d, "account_description", "description"); ok && v.(string) != "" {
 		request.AccountDescription = v.(string)
-	} else if err != nil {
-		return err
 	}
 	// wait instance running before modifying
 	if err := kvstoreService.WaitForKVstoreInstance(request.InstanceId, Normal, DefaultTimeoutMedium); err != nil {
@@ -181,7 +182,7 @@ func resourceAlibabacloudStackKVStoreAccountUpdate(d *schema.ResourceData, meta 
 	instanceId := parts[0]
 	accountName := parts[1]
 
-	if d.HasChange("account_description") || d.HasChange("description") {
+	if d.HasChanges("account_description", "description") {
 		if err := kvstoreService.WaitForKVstoreAccount(d.Id(), Available, DefaultTimeoutMedium); err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -189,11 +190,7 @@ func resourceAlibabacloudStackKVStoreAccountUpdate(d *schema.ResourceData, meta 
 		client.InitRpcRequest(*request.RpcRequest)
 		request.InstanceId = instanceId
 		request.AccountName = accountName
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "account_description", "description"); err == nil {
-			request.AccountDescription = v.(string)
-		} else {
-			return err
-		}
+		request.AccountDescription = connectivity.GetResourceData(d, "account_description", "description").(string)
 
 		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 			return rkvClient.ModifyAccountDescription(request)
@@ -237,7 +234,7 @@ func resourceAlibabacloudStackKVStoreAccountUpdate(d *schema.ResourceData, meta 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	if d.HasChange("account_password") || d.HasChange("kms_encrypted_password") {
+	if d.HasChanges("account_password", "kms_encrypted_password") {
 		if err := kvstoreService.WaitForKVstoreAccount(d.Id(), Available, DefaultTimeoutMedium); err != nil {
 			return errmsgs.WrapError(err)
 		}

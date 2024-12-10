@@ -147,6 +147,7 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 				Computed:      true,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringInSlice([]string{"PayAsYouGo", "Subscription"}, false),
+				Deprecated: "Field 'payment_type' is deprecated and will be removed in a future release. Please use new field 'pay_type' instead.",
 				ConflictsWith: []string{"pay_type"},
 			},
 			"pay_type": {
@@ -195,14 +196,12 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			},
 			"instance_inner_connection": {
 				Type: schema.TypeString,
-				Deprecated: "Field 'instance_inner_connection' is deprecated and will be removed in a future release. Please use 'connection_string' instead.",
+				Deprecated: "Field 'instance_inner_connection' is deprecated and will be removed in a future release. Please use new field 'connection_string' instead.",
 				Computed: true,
 			},
 			"instance_inner_port": {
 				Type: schema.TypeString,
-				Deprecated: "Field 'instance_inner_port' is deprecated and will be removed in a future release. Please use 'port' instead.",
-				ForceNew: true,
-				Optional: true,
+				Deprecated: "Field 'instance_inner_port' is deprecated and will be removed in a future release. Please use new field 'port' instead.",
 				Computed: true,
 			},
 			"instance_vpc_id": {
@@ -215,8 +214,6 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			},
 			"port": {
 				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
 				Computed: true,
 			},
 			"zone_id": {
@@ -273,20 +270,8 @@ func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta in
 		request.DBClusterDescription = v.(string)
 	}
 
-	if v, ok := d.GetOk("payment_type"); ok {
+	if v, ok := connectivity.GetResourceDataOk(d, "pay_type", "payment_type"); ok {
 		request.PayType = convertAdbDBClusterPaymentTypeRequest(v.(string))
-		if request.PayType != string(Postpaid) {
-			request.PayType = string(Prepaid)
-			period := d.Get("period").(int)
-			request.UsedTime = strconv.Itoa(period)
-			request.Period = string(Month)
-			if period > 9 {
-				request.UsedTime = strconv.Itoa(period / 12)
-				request.Period = string(Year)
-			}
-		}
-	} else if v, ok := d.GetOk("pay_type"); ok {
-		request.PayType = convertAdbDbClusterDBClusterPayTypeRequest(v.(string))
 		if request.PayType != string(Postpaid) {
 			request.PayType = string(Prepaid)
 			period := d.Get("period").(int)
@@ -381,8 +366,8 @@ func resourceAlibabacloudStackAdbDbClusterRead(d *schema.ResourceData, meta inte
 	//d.Set("elastic_io_resource", formatInt(object["ElasticIOResource"]))
 	d.Set("maintain_time", object["MaintainTime"])
 	d.Set("mode", object["Mode"])
-	d.Set("payment_type", convertAdbDBClusterPaymentTypeResponse(object["PayType"].(string)))
-	d.Set("pay_type", convertAdbDbClusterDBClusterPayTypeResponse(object["PayType"].(string)))
+	paytype :=  convertAdbDBClusterPaymentTypeResponse(object["PayType"].(string))
+	connectivity.SetResourceData(d, paytype, "pay_type", "payment_type")
 	//d.Set("resource_group_id", object["ResourceGroupId"])
 	d.Set("status", object["DBClusterStatus"])
 	//d.Set("tags", tagsToMap(object["Tags"].(map[string]interface{})["Tag"]))

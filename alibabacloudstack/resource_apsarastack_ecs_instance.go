@@ -869,7 +869,7 @@ func modifyInstanceImage(d *schema.ResourceData, meta interface{}, run bool) (bo
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	update := false
-	if d.HasChange("image_id") || d.HasChange("system_disk_size") {
+	if d.HasChanges("image_id", "system_disk_size") {
 		update = true
 		if !run {
 			return update, nil
@@ -990,7 +990,7 @@ func modifyInstanceAttribute(d *schema.ResourceData, meta interface{}) (bool, er
 		reboot = true
 	}
 
-	if d.HasChange("password") || d.HasChange("kms_encrypted_password") {
+	if d.HasChanges("password", "kms_encrypted_password") {
 		if v := d.Get("password").(string); v != "" {
 			//d.SetPartial("password")
 			request.Password = v

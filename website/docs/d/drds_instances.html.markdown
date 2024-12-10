@@ -28,7 +28,7 @@ output "first_db_instance_id" {
 
 The following arguments are supported:
 
-* `name_regex` - (Optional, Deprecated) A regex string to filter results by instance description. It is deprecated since v1.91.0 and will be removed in a future release, please use 'description_regex' instead.
+* `name_regex` - (Optional, Deprecated) A regex string to filter results by instance description. It is deprecated since v1.91.0 and will be removed in a future release, Please use new field 'description_regex' instead.
 * `description_regex` - (Optional) A regex string to filter results by instance description.
 * `ids` - (Optional) A list of DRDS instance IDs.
 * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).

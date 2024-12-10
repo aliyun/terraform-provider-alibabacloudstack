@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 
@@ -28,15 +27,19 @@ func resourceAlibabacloudStackDBAccountPrivilege() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Required:     true,
-				Deprecated:   "Field 'instance_id' is deprecated and will be removed in a future release. Please use 'data_base_instance_id' instead.",
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Optional:true,
+				Computed:true,
+				Deprecated:    "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'data_base_instance_id' instead.",
+				ConflictsWith: []string{"data_base_instance_id"},
 			},
 			"data_base_instance_id": {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Optional:true,
+				Computed:true,
+				ConflictsWith: []string{"instance_id"},
 			},
 
 			"account_name": {
@@ -65,15 +68,15 @@ func resourceAlibabacloudStackDBAccountPrivilege() *schema.Resource {
 func resourceAlibabacloudStackDBAccountPrivilegeCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
-	instanceId, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "data_base_instance_id", "instance_id")
-	if err != nil {
-		return err
+	instanceId := connectivity.GetResourceData(d, "data_base_instance_id", "instance_id").(string)
+	if err := errmsgs.CheckEmpty(instanceId, schema.TypeString, "data_base_instance_id", "instance_id"); err != nil {
+		return errmsgs.WrapError(err)
 	}
 	account := d.Get("account_name").(string)
 	privilege := d.Get("privilege").(string)
 	dbList := d.Get("db_names").(*schema.Set).List()
 	// wait instance running before granting
-	if err := rdsService.WaitForDBInstance(instanceId.(string), Running, DefaultLongTimeout); err != nil {
+	if err := rdsService.WaitForDBInstance(instanceId, Running, DefaultLongTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	d.SetId(fmt.Sprintf("%s%s%s%s%s", instanceId, COLON_SEPARATED, account, COLON_SEPARATED, privilege))

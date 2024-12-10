@@ -44,3 +44,4 @@ website/vendor
 /tf-templates
 /workspace/*
 .vscode
+/dist

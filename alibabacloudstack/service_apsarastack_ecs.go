@@ -719,17 +719,13 @@ func (s *EcsService) updateImage(d *schema.ResourceData) error {
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.ImageId = d.Id()
 
-	if d.HasChange("description") || d.HasChange("name") || d.HasChange("image_name") {
+	if d.HasChanges("description","name", "image_name") {
 		if description, ok := d.GetOk("description"); ok {
 			request.Description = description.(string)
 		}
-		if imageName, ok := d.GetOk("image_name"); ok {
+		if imageName, ok := connectivity.GetResourceDataOk(d, "image_name", "name"); ok {
 			request.ImageName = imageName.(string)
-		} else {
-			if imageName, ok := d.GetOk("name"); ok {
-				request.ImageName = imageName.(string)
-			}
-		}
+		} 
 		raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ModifyImageAttribute(request)
 		})

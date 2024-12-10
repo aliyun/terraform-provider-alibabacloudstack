@@ -1,7 +1,7 @@
 package alibabacloudstack
 
 import (
-	"reflect"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -27,28 +27,34 @@ func resourceAlibabacloudStackSlbAcl() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
-				Required:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'acl_name' instead.",
+				Optional:true,
+				Computed:true,
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'acl_name' instead.",
+				ConflictsWith: []string{"acl_name"},
 			},
 			"acl_name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 			"ip_version": {
 				Type:         schema.TypeString,
-				Optional:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
-				Default:      "ipv4",
 				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
-				Deprecated:   "Field 'ip_version' is deprecated and will be removed in a future release. Please use 'address_ip_version' instead.",
+				Deprecated:   "Field 'ip_version' is deprecated and will be removed in a future release. Please use new field 'address_ip_version' instead.",
+				ConflictsWith: []string{"address_ip_version"},
 			},
 			"address_ip_version": {
 				Type:         schema.TypeString,
-				Optional:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
-				Default:      "ipv4",
 				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
+				ConflictsWith: []string{"ip_version"},
 			},
 			"entry_list": {
 				Type:     schema.TypeSet,
@@ -78,15 +84,14 @@ func resourceAlibabacloudStackSlbAclCreate(d *schema.ResourceData, meta interfac
 
 	request := slb.CreateCreateAccessControlListRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "acl_name", "name"); err == nil {
-		request.AclName = v.(string)
-	} else {
-		return err
+	request.AclName = strings.TrimSpace(connectivity.GetResourceData(d, "acl_name", "name").(string))
+	if err := errmsgs.CheckEmpty(request.AclName, schema.TypeString, "acl_name", "name"); err != nil {
+		return errmsgs.WrapError(err)
 	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "address_ip_version", "ip_version"); err == nil {
-		request.AddressIPVersion = v.(string)
+	if v, ok := connectivity.GetResourceDataOk(d, "address_ip_version", "ip_version"); ok {
+		request.AddressIPVersion= v.(string)
 	} else {
-		return err
+		request.AddressIPVersion = "ipv4"
 	}
 
 	raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
@@ -143,14 +148,13 @@ func resourceAlibabacloudStackSlbAclUpdate(d *schema.ResourceData, meta interfac
 
 	d.Partial(true)
 
-	if !d.IsNewResource() && (d.HasChange("name") || d.HasChange("acl_name")) {
+	if !d.IsNewResource() && d.HasChanges("name", "acl_name") {
 		request := slb.CreateSetAccessControlListAttributeRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.AclId = d.Id()
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "acl_name", "name"); err == nil {
-			request.AclName = v.(string)
-		} else {
-			return err
+		request.AclName = connectivity.GetResourceData(d, "acl_name", "name").(string)
+		if err := errmsgs.CheckEmpty(request.AclName, schema.TypeString, "acl_name", "name"); err != nil {
+			return errmsgs.WrapError(err)
 		}
 
 		raw, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {

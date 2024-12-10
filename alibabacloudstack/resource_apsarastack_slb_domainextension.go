@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -34,15 +33,19 @@ func resourceAlibabacloudStackSlbDomainExtension() *schema.Resource {
 			"frontend_port": {
 				Type:         schema.TypeInt,
 				ValidateFunc: validation.IntBetween(1, 65535),
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
-				Deprecated:   "Field 'frontend_port' is deprecated and will be removed in a future release. Please use 'listener_port' instead.",
+				Deprecated:   "Field 'frontend_port' is deprecated and will be removed in a future release. Please use new field 'listener_port' instead.",
+				ConflictsWith: []string{"listener_port"},
 			},
 			"listener_port": {
 				Type:         schema.TypeInt,
 				ValidateFunc: validation.IntBetween(1, 65535),
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
+				ConflictsWith: []string{"frontend_port"},
 			},
 			"domain": {
 				Type:     schema.TypeString,
@@ -56,7 +59,7 @@ func resourceAlibabacloudStackSlbDomainExtension() *schema.Resource {
 			"id": {
 				Type:         schema.TypeString,
 				Computed:     true,
-				Deprecated:   "Field 'id' is deprecated and will be removed in a future release. Please use 'domain_extension_id' instead.",
+				Deprecated:   "Field 'id' is deprecated and will be removed in a future release. Please use new field 'domain_extension_id' instead.",
 			},
 			"domain_extension_id": {
 				Type:     schema.TypeString,
@@ -77,10 +80,9 @@ func resourceAlibabacloudStackSlbDomainExtensionCreate(d *schema.ResourceData, m
 	request := slb.CreateCreateDomainExtensionRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = d.Get("load_balancer_id").(string)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(0), "listener_port", "frontend_port"); err == nil {
-		request.ListenerPort = requests.NewInteger(v.(int))
-	} else {
-		return err
+	request.ListenerPort = requests.NewInteger(connectivity.GetResourceData(d, "listener_port", "frontend_port").(int))
+	if err := errmsgs.CheckEmpty(request.ListenerPort, schema.TypeString, "listener_port", "frontend_port"); err != nil {
+		return errmsgs.WrapError(err)
 	}
 	request.Domain = d.Get("domain").(string)
 	request.ServerCertificateId = d.Get("server_certificate_id").(string)

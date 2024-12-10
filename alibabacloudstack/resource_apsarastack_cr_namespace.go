@@ -117,7 +117,7 @@ func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta int
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	create := d.Get("auto_create").(bool)
 	visibility := d.Get("default_visibility").(string)
-	if d.HasChange("auto_create") || d.HasChange("default_visibility") {
+	if d.HasChanges("auto_create", "default_visibility") {
 		request := client.NewCommonRequest("POST", "cr", "2016-06-07", "UpdateNamespace", "")
 		request.Headers["x-acs-instanceId"] = d.Id()
 		request.Headers["x-acs-content-type"] = "application/json;charset=UTF-8"

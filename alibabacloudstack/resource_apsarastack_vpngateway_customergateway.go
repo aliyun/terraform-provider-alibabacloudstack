@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -33,13 +32,17 @@ func resourceAlibabacloudStackVpnCustomerGateway() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'customer_gateway_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'customer_gateway_name' instead.",
+				ConflictsWith: []string{"customer_gateway_name"},
 			},
 			"customer_gateway_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 			"description": {
 				Type:         schema.TypeString,
@@ -56,10 +59,8 @@ func resourceAlibabacloudStackVpnCustomerGatewayCreate(d *schema.ResourceData, m
 	request := vpc.CreateCreateCustomerGatewayRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.IpAddress = d.Get("ip_address").(string)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "customer_gateway_name", "name"); err == nil && v.(string) != "" {
-		request.Name = v.(string)
-	} else if err != nil {
-		return err
+	if v := connectivity.GetResourceData(d, "customer_gateway_name", "name").(string); v != "" {
+		request.Name = v
 	}
 
 	if v := d.Get("description").(string); v != "" {
@@ -137,12 +138,8 @@ func resourceAlibabacloudStackVpnCustomerGatewayUpdate(d *schema.ResourceData, m
 	request := vpc.CreateModifyCustomerGatewayAttributeRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.CustomerGatewayId = d.Id()
-	if d.HasChange("customer_gateway_name") || d.HasChange("name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "customer_gateway_name", "name"); err == nil {
-			request.Name = v.(string)
-		} else {
-			return err
-		}
+	if d.HasChanges("customer_gateway_name", "name") {
+		request.Name = connectivity.GetResourceData(d, "customer_gateway_name", "name").(string)
 	}
 
 	if d.HasChange("description") {

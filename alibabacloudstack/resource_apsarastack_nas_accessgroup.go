@@ -37,6 +37,7 @@ func resourceAlibabacloudStackNasAccessGroup() *schema.Resource {
 				Optional:      true,
 				Computed:      true,
 				ForceNew:      true,
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'access_group_name' instead.",
 				ConflictsWith: []string{"access_group_name"},
 			},
 			"access_group_type": {
@@ -53,6 +54,7 @@ func resourceAlibabacloudStackNasAccessGroup() *schema.Resource {
 				Computed:      true,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringInSlice([]string{"Classic", "Vpc"}, false),
+				Deprecated:   "Field 'type' is deprecated and will be removed in a future release. Please use new field 'access_group_type' instead.",
 				ConflictsWith: []string{"access_group_type"},
 			},
 			"description": {
@@ -75,20 +77,13 @@ func resourceAlibabacloudStackNasAccessGroupCreate(d *schema.ResourceData, meta 
 	var response map[string]interface{}
 	action := "CreateAccessGroup"
 	request := make(map[string]interface{})
-	if v, ok := d.GetOk("access_group_name"); ok {
-		request["AccessGroupName"] = v
-	} else if v, ok := d.GetOk("name"); ok {
-		request["AccessGroupName"] = v
-	} else {
-		return errmsgs.WrapError(errmsgs.Error(`[ERROR] Argument "name" or "access_group_name" must be set one!`))
+	request["AccessGroupName"] = connectivity.GetResourceData(d, "access_group_name", "name").(string)
+	if err := errmsgs.CheckEmpty(request["AccessGroupName"], schema.TypeString, "access_group_name", "name"); err != nil {
+		return errmsgs.WrapError(err)
 	}
-
-	if v, ok := d.GetOk("access_group_type"); ok {
-		request["AccessGroupType"] = v
-	} else if v, ok := d.GetOk("type"); ok {
-		request["AccessGroupType"] = v
-	} else {
-		return errmsgs.WrapError(errmsgs.Error(`[ERROR] Argument "type" or "access_group_type" must be set one!`))
+	request["AccessGroupType"] = connectivity.GetResourceData(d, "access_group_type", "type").(string)
+	if err := errmsgs.CheckEmpty(request["AccessGroupType"], schema.TypeString, "access_group_type", "type"); err != nil {
+		return errmsgs.WrapError(err)
 	}
 
 	if v, ok := d.GetOk("description"); ok {
@@ -129,11 +124,9 @@ func resourceAlibabacloudStackNasAccessGroupRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	d.Set("access_group_name", parts[0])
-	d.Set("name", parts[0])
+	connectivity.SetResourceData(d, parts[0] ,"access_group_name", "name")
+	connectivity.SetResourceData(d, object["AccessGroupType"] ,"access_group_type", "name")
 	d.Set("file_system_type", parts[1])
-	d.Set("access_group_type", object["AccessGroupType"])
-	d.Set("type", object["AccessGroupType"])
 	d.Set("description", object["Description"])
 	return nil
 }

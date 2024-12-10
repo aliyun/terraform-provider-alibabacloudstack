@@ -546,7 +546,7 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 		}
 	}
 
-	if d.HasChange("gzip") || d.HasChange("x_forwarded_for") {
+	if d.HasChanges("gzip", "x_forwarded_for") {
 		update = true
 	}
 
@@ -629,7 +629,7 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 		}
 
 		httpsArgs.QueryParams["ServerCertificateId"] = scId
-		if d.HasChange("ssl_certificate_id") || d.HasChange("server_certificate_id") {
+		if d.HasChanges("ssl_certificate_id", "server_certificate_id") {
 			update = true
 		}
 

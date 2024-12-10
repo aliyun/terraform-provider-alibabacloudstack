@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -34,14 +33,18 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroup() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ForceNew:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'master_slave_server_group_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'master_slave_server_group_name' instead.",
+				ConflictsWith: []string{"master_slave_server_group_name"},
 			},
 
 			"master_slave_server_group_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed:true,
 				ForceNew: true,
+				ConflictsWith: []string{"name"},
 			},
 
 			"servers": {
@@ -88,10 +91,8 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupCreate(d *schema.Resource
 	request := slb.CreateCreateMasterSlaveServerGroupRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.LoadBalancerId = d.Get("load_balancer_id").(string)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "master_slave_server_group_name", "name"); err == nil {
+	if v, ok := connectivity.GetResourceDataOk(d, "master_slave_server_group_name", "name"); ok {
 		request.MasterSlaveServerGroupName = v.(string)
-	} else {
-		return err
 	}
 	if v, ok := d.GetOk("servers"); ok {
 		request.MasterSlaveBackendServers = expandMasterSlaveBackendServersToString(v.(*schema.Set).List())

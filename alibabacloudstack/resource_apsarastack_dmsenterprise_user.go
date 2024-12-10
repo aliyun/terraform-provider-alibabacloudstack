@@ -64,7 +64,7 @@ func resourceAlibabacloudStackDmsEnterpriseUser() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
-				Deprecated:    "Field 'nick_name' has been deprecated from version 1.100.0. Use 'user_name' instead.",
+				Deprecated:    "Field 'nick_name' has been deprecated.  Please use new field 'user_name' instead.",
 				ConflictsWith: []string{"user_name"},
 			},
 		},
@@ -89,11 +89,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserCreate(d *schema.ResourceData, me
 	}
 
 	request["Uid"] = d.Get("uid")
-	if v, ok := d.GetOk("user_name"); ok {
-		request["UserNick"] = v
-	} else if v, ok := d.GetOk("nick_name"); ok {
-		request["UserNick"] = v
-	}
+	request["UserNick"] = connectivity.GetResourceData(d, "user_name", "nick_name").(string)
 
 	_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, request)
 	if err != nil {
@@ -122,8 +118,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserRead(d *schema.ResourceData, meta
 	d.Set("mobile", object["Mobile"])
 	d.Set("role_names", object["RoleNameList"].(map[string]interface{})["RoleNames"])
 	d.Set("status", object["State"])
-	d.Set("user_name", object["NickName"])
-	d.Set("nick_name", object["NickName"])
+	connectivity.SetResourceData(d, object["NickName"] ,"user_name", "nick_name")
 	return nil
 }
 
@@ -144,13 +139,9 @@ func resourceAlibabacloudStackDmsEnterpriseUserUpdate(d *schema.ResourceData, me
 		update = true
 		request["RoleNames"] = convertListToCommaSeparate(d.Get("role_names").(*schema.Set).List())
 	}
-	if !d.IsNewResource() && d.HasChange("user_name") {
+	if !d.IsNewResource() && d.HasChanges("user_name","nick_name") {
 		update = true
-		request["UserNick"] = d.Get("user_name")
-	}
-	if !d.IsNewResource() && d.HasChange("nick_name") {
-		update = true
-		request["UserNick"] = d.Get("nick_name")
+		request["UserNick"] = connectivity.GetResourceData(d, "user_name", "nick_name").(string)
 	}
 	if update {
 		if _, ok := d.GetOk("max_execute_count"); ok {

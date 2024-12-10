@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
-	"reflect"
 
 	"github.com/denverdino/aliyungo/common"
 
@@ -29,17 +28,21 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'launch_template_name' instead.",
+				Type:          schema.TypeString,
+				Optional:true,
+				Computed:true,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'launch_template_name' instead.",
+				ConflictsWith: []string{"launch_template_name"},
 			},
 			"launch_template_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
+				Type:          schema.TypeString,
+				Optional:true,
+				Computed:true,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
+				ConflictsWith: []string{"name"},
 			},
 			"description": {
 				Type:         schema.TypeString,
@@ -56,13 +59,13 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 				Optional: true,
 			},
 			"image_owner_alias": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"system", "self", "others", "marketplace", ""}, false),
 			},
 			"instance_charge_type": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
 			},
 			"instance_name": {
@@ -80,8 +83,8 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 				Optional: true,
 			},
 			"internet_charge_type": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"PayByBandwidth", "PayByTraffic"}, false),
 			},
 			"internet_max_bandwidth_in": {
@@ -96,8 +99,8 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 				ValidateFunc: validation.IntBetween(0, 100),
 			},
 			"io_optimized": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"none", "optimized"}, false),
 			},
 			"key_pair_name": {
@@ -106,8 +109,8 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(2, 128),
 			},
 			"network_type": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"classic", "vpc"}, false),
 			},
 			"ram_role_name": {
@@ -131,13 +134,13 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 				Optional: true,
 			},
 			"spot_strategy": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"NoSpot", "SpotAsPriceGo", "SpotWithPriceLimit"}, false),
 			},
 			"system_disk_category": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"all", "cloud", "ephemeral_ssd", "cloud_essd", "cloud_efficiency", "cloud_ssd", "local_disk", "cloud_pperf", "cloud_sperf"}, false),
 			},
 			"system_disk_description": {
@@ -164,9 +167,9 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 				Optional: true,
 			},
 			"userdata": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Deprecated: "Field 'userdata' is deprecated and will be removed in a future release. Please use 'user_data' instead.",
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "Field 'userdata' is deprecated and will be removed in a future release. Please use new field 'user_data' instead.",
 			},
 			"user_data": {
 				Type:     schema.TypeString,
@@ -264,11 +267,7 @@ func resourceAlibabacloudStackLaunchTemplateCreate(d *schema.ResourceData, meta 
 
 	request := ecs.CreateCreateLaunchTemplateRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "launch_template_name", "name"); err == nil {
-		request.LaunchTemplateName = v.(string)
-	} else {
-		return err
-	}
+	request.LaunchTemplateName = connectivity.GetResourceData(d, "launch_template_name", "name").(string)
 	request.Description = d.Get("description").(string)
 	request.HostName = d.Get("host_name").(string)
 	request.ImageId = d.Get("image_id").(string)
@@ -294,11 +293,7 @@ func resourceAlibabacloudStackLaunchTemplateCreate(d *schema.ResourceData, meta 
 	request.SystemDiskCategory = d.Get("system_disk_category").(string)
 	request.SystemDiskDescription = d.Get("system_disk_description").(string)
 	request.SystemDiskSize = requests.NewInteger(d.Get("system_disk_size").(int))
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "user_data", "userdata"); err == nil {
-		request.UserData = v.(string)
-	} else {
-		return err
-	}
+	request.UserData = connectivity.GetResourceData(d, "user_data", "userdata").(string)
 	request.VSwitchId = d.Get("vswitch_id").(string)
 	request.VpcId = d.Get("vpc_id").(string)
 	request.ZoneId = d.Get("zone_id").(string)
@@ -325,12 +320,12 @@ func resourceAlibabacloudStackLaunchTemplateCreate(d *schema.ResourceData, meta 
 		for _, raw := range disksRaw {
 			diskRaw := raw.(map[string]interface{})
 			disk := ecs.CreateLaunchTemplateDataDisk{
-				Size:            fmt.Sprintf("%d", diskRaw["size"].(int)),
-				SnapshotId:      diskRaw["snapshot_id"].(string),
-				Category:        diskRaw["category"].(string),
-				Encrypted:       fmt.Sprintf("%v", diskRaw["encrypted"].(bool)),
-				DiskName:        diskRaw["name"].(string),
-				Description:     diskRaw["description"].(string),
+				Size:               fmt.Sprintf("%d", diskRaw["size"].(int)),
+				SnapshotId:         diskRaw["snapshot_id"].(string),
+				Category:           diskRaw["category"].(string),
+				Encrypted:          fmt.Sprintf("%v", diskRaw["encrypted"].(bool)),
+				DiskName:           diskRaw["name"].(string),
+				Description:        diskRaw["description"].(string),
 				DeleteWithInstance: fmt.Sprintf("%v", diskRaw["delete_with_instance"].(bool)),
 			}
 			disks = append(disks, disk)
@@ -561,7 +556,7 @@ func createLaunchTemplateVersion(d *schema.ResourceData, meta interface{}) error
 	request.ImageId = d.Get("image_id").(string)
 	request.ImageOwnerAlias = d.Get("image_owner_alias").(string)
 	request.InstanceChargeType = d.Get("instance_charge_type").(string)
-	request.InstanceName = d.Get("instance_name").(string)
+	request.LaunchTemplateName = connectivity.GetResourceData(d, "launch_template_name", "name").(string)
 	request.InstanceType = d.Get("instance_type").(string)
 	request.AutoReleaseTime = d.Get("auto_release_time").(string)
 	request.InternetChargeType = d.Get("internet_charge_type").(string)
@@ -581,11 +576,7 @@ func createLaunchTemplateVersion(d *schema.ResourceData, meta interface{}) error
 	request.SystemDiskCategory = d.Get("system_disk_category").(string)
 	request.SystemDiskDescription = d.Get("system_disk_description").(string)
 	request.SystemDiskSize = requests.NewInteger(d.Get("system_disk_size").(int))
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "user_data", "userdata"); err == nil {
-		request.UserData = v.(string)
-	} else {
-		return err
-	}
+	request.UserData = connectivity.GetResourceData(d, "user_data", "userdata").(string)
 	request.VSwitchId = d.Get("vswitch_id").(string)
 	request.VpcId = d.Get("vpc_id").(string)
 	request.ZoneId = d.Get("zone_id").(string)
@@ -612,12 +603,12 @@ func createLaunchTemplateVersion(d *schema.ResourceData, meta interface{}) error
 		for _, raw := range disksRaw {
 			diskRaw := raw.(map[string]interface{})
 			disk := ecs.CreateLaunchTemplateVersionDataDisk{
-				Size:            fmt.Sprintf("%d", diskRaw["size"].(int)),
-				SnapshotId:      diskRaw["snapshot_id"].(string),
-				Category:        diskRaw["category"].(string),
-				Encrypted:       fmt.Sprintf("%v", diskRaw["encrypted"].(bool)),
-				DiskName:        diskRaw["name"].(string),
-				Description:     diskRaw["description"].(string),
+				Size:               fmt.Sprintf("%d", diskRaw["size"].(int)),
+				SnapshotId:         diskRaw["snapshot_id"].(string),
+				Category:           diskRaw["category"].(string),
+				Encrypted:          fmt.Sprintf("%v", diskRaw["encrypted"].(bool)),
+				DiskName:           diskRaw["name"].(string),
+				Description:        diskRaw["description"].(string),
 				DeleteWithInstance: fmt.Sprintf("%v", diskRaw["delete_with_instance"].(bool)),
 			}
 			disks = append(disks, disk)

@@ -125,7 +125,7 @@ func resourceAlibabacloudStackApigatewayAppUpdate(d *schema.ResourceData, meta i
 		d.Partial(false)
 		return resourceAlibabacloudStackApigatewayAppRead(d, meta)
 	}
-	if d.HasChange("name") || d.HasChange("description") {
+	if d.HasChanges("name","description") {
 		request := cloudapi.CreateModifyAppRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.AppId = requests.Integer(d.Id())

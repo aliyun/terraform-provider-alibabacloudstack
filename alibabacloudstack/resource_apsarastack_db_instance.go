@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"reflect"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
@@ -64,17 +64,21 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				ForceNew: false,
 			},
 			"storage_type": {
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
-				Required:     true,
-				Deprecated:   "Field 'storage_type' is deprecated and will be removed in a future release. Please use 'db_instance_storage_type' instead.",
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
+				Optional:true,
+				Computed:true,
+				Deprecated:    "Field 'storage_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage_type' instead.",
+				ConflictsWith: []string{"db_instance_storage_type"},
 			},
 			"db_instance_storage_type": {
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
-				Optional:     true,
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
+				Optional:true,
+				Computed:true,
+				ConflictsWith: []string{"storage_type"},
 			},
 			"encryption_key": {
 				Type:     schema.TypeString,
@@ -87,34 +91,45 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				Default:  false,
 			},
 			"instance_type": {
-				Type:     schema.TypeString,
-				Required: true,
-				Deprecated: "Field 'instance_type' is deprecated and will be removed in a future release. Please use 'db_instance_class' instead.",
+				Type:          schema.TypeString,
+				Optional:true,
+				Computed:true,
+				Deprecated:    "Field 'instance_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
+				ConflictsWith: []string{"db_instance_class"},
 			},
 			"db_instance_class": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:          schema.TypeString,
+				Optional:true,
+				Computed:true,
+				ConflictsWith: []string{"instance_type"},
 			},
 			"instance_storage": {
-				Type:     schema.TypeInt,
-				Required: true,
-				Deprecated: "Field 'instance_storage' is deprecated and will be removed in a future release. Please use 'db_instance_storage' instead.",
+				Type:          schema.TypeInt,
+				Optional:true,
+				Computed:true,
+				Deprecated:    "Field 'instance_storage' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage' instead.",
+				ConflictsWith: []string{"db_instance_storage"},
 			},
 			"db_instance_storage": {
-				Type:     schema.TypeInt,
-				Optional: true,
+				Type:          schema.TypeInt,
+				Optional:true,
+				Computed:true,
+				ConflictsWith: []string{"instance_storage"},
 			},
 			"instance_charge_type": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
-				Optional:     true,
-				Default:      Postpaid,
-				Deprecated:   "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use 'payment_type' instead.",
+				Type:          schema.TypeString,
+				ValidateFunc:  validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
+				Optional:true,
+				Computed:true,
+				Deprecated:    "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
+				ConflictsWith: []string{"payment_type"},
 			},
 			"payment_type": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
-				Optional:     true,
+				Type:          schema.TypeString,
+				ValidateFunc:  validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
+				Optional:true,
+				Computed:true,
+				ConflictsWith: []string{"instance_charge_type"},
 			},
 			"period": {
 				Type:             schema.TypeInt,
@@ -154,15 +169,19 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				Optional: true,
 			},
 			"instance_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
-				Deprecated:   "Field 'instance_name' is deprecated and will be removed in a future release. Please use 'db_instance_description' instead.",
+				Type:          schema.TypeString,
+				Optional:true,
+				Computed:true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
+				Deprecated:    "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
+				ConflictsWith: []string{"db_instance_description"},
 			},
 			"db_instance_description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
+				Type:          schema.TypeString,
+				Optional:true,
+				Computed:true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
+				ConflictsWith: []string{"instance_name"},
 			},
 			"connection_string": {
 				Type:     schema.TypeString,
@@ -269,19 +288,16 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 
 	enginever := Trim(d.Get("engine_version").(string))
 	engine := Trim(d.Get("engine").(string))
-	DBInstanceStorage, err := connectivity.GetResourceData(d, reflect.TypeOf(0), "db_instance_storage", "instance_storage")
-	if err != nil {
-		return err
+	DBInstanceStorage := connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int)
+	if err := errmsgs.CheckEmpty(DBInstanceStorage, schema.TypeString, "db_instance_storage", "instance_storage"); err != nil {
+		return errmsgs.WrapError(err)
 	}
-	DBInstanceClass, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_class", "instance_type")
-	if err != nil {
-		return err
+	DBInstanceClass := Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string))
+	if err := errmsgs.CheckEmpty(DBInstanceClass, schema.TypeString, "db_instance_class", "instance_type"); err != nil {
+		return errmsgs.WrapError(err)
 	}
 	DBInstanceNetType := string(Intranet)
-	DBInstanceDescription, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "instance_name")
-	if err != nil {
-		return err
-	}
+	DBInstanceDescription := connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
 	if zone, ok := d.GetOk("zone_id"); ok && Trim(zone.(string)) != "" {
 		ZoneId = Trim(zone.(string))
 	}
@@ -304,13 +320,13 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 
 		VPCId = vsw.VpcId
 	}
-	PayType, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "payment_type", "instance_charge_type")
-	if err != nil {
-		return err
+	payType := string(Postpaid)
+	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok && Trim(v.(string)) != "" {
+		payType = Trim(v.(string))
 	}
-	DBInstanceStorageType, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_storage_type", "storage_type")
-	if err != nil {
-		return err
+	DBInstanceStorageType := connectivity.GetResourceData(d, "db_instance_storage_type", "storage_type").(string)
+	if err := errmsgs.CheckEmpty(DBInstanceStorageType, schema.TypeString, "db_instance_storage_type", "storage_type"); err != nil {
+		return errmsgs.WrapError(err)
 	}
 	ZoneIdSlave1 = d.Get("zone_id_slave1").(string)
 	ZoneIdSlave2 = d.Get("zone_id_slave2").(string)
@@ -329,14 +345,14 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		"EngineVersion":         enginever,
 		"Engine":                engine,
 		"Encryption":            strconv.FormatBool(encryption),
-		"DBInstanceStorage":     strconv.Itoa(DBInstanceStorage.(int)),
-		"DBInstanceClass":       DBInstanceClass.(string),
+		"DBInstanceStorage":     strconv.Itoa(DBInstanceStorage),
+		"DBInstanceClass":       DBInstanceClass,
 		"DBInstanceNetType":     DBInstanceNetType,
-		"DBInstanceDescription": DBInstanceDescription.(string),
+		"DBInstanceDescription": DBInstanceDescription,
 		"InstanceNetworkType":   InstanceNetworkType,
 		"VSwitchId":             VSwitchId,
-		"PayType":               PayType.(string),
-		"DBInstanceStorageType": DBInstanceStorageType.(string),
+		"PayType":               payType,
+		"DBInstanceStorageType": DBInstanceStorageType,
 		"SecurityIPList":        SecurityIPList,
 		"ClientToken":           ClientToken,
 		"ZoneIdSlave1":          ZoneIdSlave1,
@@ -383,23 +399,26 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 	if tde := d.Get("tde_status"); tde == true {
 		client := meta.(*connectivity.AlibabacloudStackClient)
 		rdsService = RdsService{client}
-		tde_req := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBInstanceTDE", "")
+		tde_req := rds.CreateModifyDBInstanceTDERequest()
+		client.InitRpcRequest(*tde_req.RpcRequest)
 		tde_req.QueryParams["RoleARN"] = arnrole
-		tde_req.QueryParams["DBInstanceId"] = d.Id()
-		tde_req.QueryParams["TDEStatus"] = "Enabled"
+		tde_req.DBInstanceId = d.Id()
 		if EncryptionKey != "" {
-			tde_req.QueryParams["EncryptionKey"] = EncryptionKey
+			tde_req.EncryptionKey = EncryptionKey
 		}
+		tde_req.TDEStatus = "Enabled"
 		tderaw, err := client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
-			return client.ProcessCommonRequest(tde_req)
+			return client.ModifyDBInstanceTDE(tde_req)
 		})
-		response, ok := tderaw.(*responses.CommonResponse)
 		if err != nil {
 			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if tderaw != nil {
+				response, ok := tderaw.(*rds.ModifyDBInstanceTDEResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_db_instance", tde_req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		if err := rdsService.WaitForDBInstance(d.Id(), Running, DefaultTimeoutMedium); err != nil {
@@ -407,24 +426,29 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		}
 
 		log.Print("enabled TDE")
-		addDebug(tde_req.GetActionName(), tderaw, tde_req)
+		addDebug(request.GetActionName(), tderaw, request)
 	}
 	if ssl := d.Get("enable_ssl"); ssl == true {
-		ssl_req := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBInstanceSSL", "")
-		ssl_req.QueryParams["DBInstanceId"] = d.Id()
-		ssl_req.QueryParams["SSLEnabled"] = "1"
-		ssl_req.QueryParams["ConnectionString"] = d.Get("connection_string").(string)
+		ssl_req := rds.CreateModifyDBInstanceSSLRequest()
+		client.InitRpcRequest(*ssl_req.RpcRequest)
+		ssl_req.QueryParams["Forwardedregionid"] = client.RegionId
+		ssl_req.DBInstanceId = d.Id()
+		ssl_req.SSLEnabled = "1"
+		ssl_req.ConnectionString = d.Get("connection_string").(string)
 		sslraw, err := client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
-			return client.ProcessCommonRequest(ssl_req)
+			return client.ModifyDBInstanceSSL(ssl_req)
 		})
-		response, ok := sslraw.(*responses.CommonResponse)
 		if err != nil {
 			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if sslraw != nil {
+				response, ok := sslraw.(*rds.ModifyDBInstanceSSLResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), ssl_req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
+
 		if err := rdsService.WaitForDBInstance(d.Id(), Running, DefaultTimeoutMedium); err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -450,100 +474,117 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		return errmsgs.WrapError(err)
 	}
 
-	payType, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "payment_type", "instance_charge_type")
-	if err != nil {
-		return err
+	payType := Postpaid
+	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok && Trim(v.(string)) != "" {
+		payType = PayType(Trim(v.(string)))
 	}
-	payTypeStr := payType.(string)
-	if !d.IsNewResource() && d.HasChange("instance_charge_type") && payType == Prepaid {
-		prePaidRequest := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBInstancePayType", "")
-		prePaidRequest.QueryParams["DBInstanceId"] = d.Id()
-		prePaidRequest.QueryParams["PayType"] =payTypeStr
-		prePaidRequest.QueryParams["AutoPay"] = "true"
+	if !d.IsNewResource() && d.HasChanges("instance_charge_type", "payment_type") && payType == Prepaid {
+		prePaidRequest := rds.CreateModifyDBInstancePayTypeRequest()
+		client.InitRpcRequest(*prePaidRequest.RpcRequest)
+		prePaidRequest.DBInstanceId = d.Id()
+		prePaidRequest.PayType = string(payType)
+		prePaidRequest.AutoPay = "true"
 		period := d.Get("period").(int)
-		prePaidRequest.QueryParams["UsedTime"] = strconv.Itoa(period)
-		prePaidRequest.QueryParams["Period"] = string(Month)
+		prePaidRequest.UsedTime = requests.Integer(strconv.Itoa(period))
+		prePaidRequest.Period = string(Month)
 		if period > 9 {
-			prePaidRequest.QueryParams["UsedTime"] = strconv.Itoa(period / 12)
-			prePaidRequest.QueryParams["Period"] = string(Year)
+			prePaidRequest.UsedTime = requests.Integer(strconv.Itoa(period / 12))
+			prePaidRequest.Period = string(Year)
 		}
+
 		raw, err := client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
-			return client.ProcessCommonRequest(prePaidRequest)
+			return client.ModifyDBInstancePayType(prePaidRequest)
 		})
-		response, ok := raw.(*responses.CommonResponse)
 		if err != nil {
 			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if raw != nil {
+				response, ok := raw.(*rds.ModifyDBInstancePayTypeResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), prePaidRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
+
 		addDebug(prePaidRequest.GetActionName(), raw, prePaidRequest, prePaidRequest.QueryParams)
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
 
-	if payType == Prepaid && (d.HasChange("auto_renew") || d.HasChange("auto_renew_period")) {
-		request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyInstanceAutoRenewalAttribute", "")
-		request.QueryParams["DBInstanceId"] = d.Id()
+	if payType == Prepaid && d.HasChanges("auto_renew", "auto_renew_period") {
+		request := rds.CreateModifyInstanceAutoRenewalAttributeRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+		request.DBInstanceId = d.Id()
 		auto_renew := d.Get("auto_renew").(bool)
 		if auto_renew {
-			request.QueryParams["AutoRenew"] = "True"
+			request.AutoRenew = "True"
 		} else {
-			request.QueryParams["AutoRenew"] = "False"
+			request.AutoRenew = "False"
 		}
-		request.QueryParams["Duration"] = strconv.Itoa(d.Get("auto_renew_period").(int))
+		request.Duration = strconv.Itoa(d.Get("auto_renew_period").(int))
+
 		raw, err := client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
-			return client.ProcessCommonRequest(request)
+			return client.ModifyInstanceAutoRenewalAttribute(request)
 		})
-		response, ok := raw.(*responses.CommonResponse)
 		if err != nil {
 			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if raw != nil {
+				response, ok := raw.(*rds.ModifyInstanceAutoRenewalAttributeResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
+
 		addDebug(request.GetActionName(), raw, request, request.QueryParams)
 	}
 
 	if d.HasChange("monitoring_period") {
 		period := d.Get("monitoring_period").(int)
-		request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBInstanceMonitor", "")
-		request.QueryParams["DBInstanceId"] = d.Id()
-		request.QueryParams["Period"] = strconv.Itoa(period)
+		request := rds.CreateModifyDBInstanceMonitorRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+		request.DBInstanceId = d.Id()
+		request.Period = strconv.Itoa(period)
+
 		raw, err := client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
-			return client.ProcessCommonRequest(request)
+			return client.ModifyDBInstanceMonitor(request)
 		})
-		response, ok := raw.(*responses.CommonResponse)
 		if err != nil {
 			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if raw != nil {
+				response, ok := raw.(*rds.ModifyDBInstanceMonitorResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		
 	}
 
 	if d.HasChange("maintain_time") {
-		request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBInstanceMaintainTime", "")
-		request.QueryParams["DBInstanceId"] = d.Id()
-		request.QueryParams["MaintainTime"] = d.Get("maintain_time").(string)
-		request.QueryParams["ClientToken"] = buildClientToken(request.GetActionName())
+		request := rds.CreateModifyDBInstanceMaintainTimeRequest()
+		request.DBInstanceId = d.Id()
+		request.MaintainTime = d.Get("maintain_time").(string)
+		request.ClientToken = buildClientToken(request.GetActionName())
+
 		raw, err := client.WithRdsClient(func(client *rds.Client) (interface{}, error) {
-			return client.ProcessCommonRequest(request)
+			return client.ModifyDBInstanceMaintainTime(request)
 		})
-		response, ok := raw.(*responses.CommonResponse)
 		if err != nil {
 			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if raw != nil {
+				response, ok := raw.(*rds.ModifyDBInstanceMaintainTimeResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
 	if d.IsNewResource() {
@@ -551,26 +592,26 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		return resourceAlibabacloudStackDBInstanceRead(d, meta)
 	}
 
-	if d.HasChange("instance_name") || d.HasChange("db_instance_description") {
-		dbInstanceDescription, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "instance_name")
-		if err != nil {
-			return err
-		}
-		request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBInstanceDescription", "")
-		request.QueryParams["DBInstanceId"] = d.Id()
-		request.QueryParams["DBInstanceDescription"] = dbInstanceDescription.(string)
+	if d.HasChanges("instance_name", "db_instance_description") {
+		request := rds.CreateModifyDBInstanceDescriptionRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+		request.DBInstanceId = d.Id()
+		request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
+
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
-			return rdsClient.ProcessCommonRequest(request)
+			return rdsClient.ModifyDBInstanceDescription(request)
 		})
-		response, ok := raw.(*responses.CommonResponse)
 		if err != nil {
 			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if raw != nil {
+				response, ok := raw.(*rds.ModifyDBInstanceDescriptionResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
 	if d.HasChange("security_ips") {
@@ -585,52 +626,61 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 	}
 
 	update := false
-	request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBInstanceSpec", "")
-	request.QueryParams["DBInstanceId"] =d.Id()
-	request.QueryParams["PayType"] = payTypeStr
-	if d.HasChange("instance_type") || d.HasChange("db_instance_class") {
-		dbInstanceClass, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_class", "instance_type")
-		if err != nil {
-			return err
+	request := rds.CreateModifyDBInstanceSpecRequest()
+	client.InitRpcRequest(*request.RpcRequest)
+	request.DBInstanceId = d.Id()
+	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
+		request.PayType = v.(string)
+	} else {
+		request.PayType = string(Postpaid)
+	}
+
+	if d.HasChanges("instance_type", "db_instance_class") {
+		request.DBInstanceClass = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
+		if err := errmsgs.CheckEmpty(request.DBInstanceClass, schema.TypeString, "db_instance_class", "instance_type"); err != nil {
+			return errmsgs.WrapError(err)
 		}
-		request.QueryParams["DBInstanceClass"] = dbInstanceClass.(string)
 		update = true
 	}
-	if d.HasChange("instance_storage") || d.HasChange("db_instance_storage") {
-		dbInstanceStorage, err := connectivity.GetResourceData(d, reflect.TypeOf(0), "db_instance_storage", "instance_storage")
-		if err != nil {
-			return err
+
+	if d.HasChanges("instance_storage", "db_instance_storage") {
+		request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
+		if err := errmsgs.CheckEmpty(request.DBInstanceStorage, schema.TypeString, "db_instance_storage", "instance_storage"); err != nil {
+			return errmsgs.WrapError(err)
 		}
-		request.QueryParams["DBInstanceStorage"] = strconv.Itoa(dbInstanceStorage.(int))
 		update = true
 	}
 	if update {
+		// wait instance status is running before modifying
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 		err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 			raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
-				return rdsClient.ProcessCommonRequest(request)
+				return rdsClient.ModifyDBInstanceSpec(request)
 			})
 			if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"InvalidOrderTask.NotSupport"}) {
-					return resource.RetryableError(err)
+				if errmsgs.IsExpectedErrors(err, []string{"InternalError", "OperationDenied.DBInstanceStatus"}) {
+					return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR))
 				}
 				errmsg := ""
-				response, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				if raw != nil {
+					response, ok := raw.(*rds.ModifyDBInstanceSpecResponse)
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+					}
 				}
-				err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-
-				return resource.NonRetryableError(err)
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
-			addDebug(request.GetActionName(), raw, request, request.QueryParams)
+
+			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 			return nil
 		})
 		if err != nil {
-			return err
+			return errmsgs.WrapError(err)
 		}
+
+		// wait instance status is running after modifying
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -662,8 +712,8 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 	if d.HasChange("enable_ssl") {
 		ssl := d.Get("enable_ssl").(bool)
 		ssl_req := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBInstanceSSL", "")
-		ssl_req.QueryParams["DBInstanceId"]= d.Id()
-		ssl_req.QueryParams["ConnectionString"]= d.Get("connection_string").(string)
+		ssl_req.QueryParams["DBInstanceId"] = d.Id()
+		ssl_req.QueryParams["ConnectionString"] = d.Get("connection_string").(string)
 		if ssl == true {
 			ssl_req.QueryParams["SSLEnabled"] = "1"
 		} else {
@@ -730,17 +780,17 @@ func resourceAlibabacloudStackDBInstanceRead(d *schema.ResourceData, meta interf
 	d.Set("security_ip_mode", instance.SecurityIPMode)
 	d.Set("engine", instance.Engine)
 	d.Set("engine_version", instance.EngineVersion)
-	d.Set("db_instance_class", instance.DBInstanceClass)
+	connectivity.SetResourceData(d, instance.DBInstanceClass, "db_instance_class", "instance_type")
 	d.Set("port", instance.Port)
-	d.Set("db_instance_storage", instance.DBInstanceStorage)
+	connectivity.SetResourceData(d, instance.DBInstanceStorage, "db_instance_storage", "instance_storage")
 	d.Set("zone_id", instance.ZoneId)
-	d.Set("payment_type", instance.PayType)
+	connectivity.SetResourceData(d, instance.PayType, "payment_type", "instance_charge_type")
 	d.Set("period", d.Get("period"))
 	d.Set("vswitch_id", instance.VSwitchId)
 	d.Set("connection_string", instance.ConnectionString)
-	d.Set("db_instance_description", instance.DBInstanceDescription)
+	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "instance_name")
 	d.Set("maintain_time", instance.MaintainTime)
-	d.Set("db_instance_storage_type", instance.DBInstanceStorageType)
+	connectivity.SetResourceData(d, instance.DBInstanceStorageType, "db_instance_storage_type", "storage_type")
 
 	if err = rdsService.RefreshParameters(d, "parameters"); err != nil {
 		return errmsgs.WrapError(err)
