@@ -400,9 +400,9 @@ func CheckEmpty(value interface{}, schemaType schema.ValueType, keys ... string)
 
 	empty := false
 	if eq, ok := value.(schema.Equal); ok {
-		empty = !eq.Equal(zero)
+		empty = eq.Equal(zero)
 	} else {
-		empty = !reflect.DeepEqual(value, zero)
+		empty = reflect.DeepEqual(value, zero)
 	}
 	
 	if ! empty {
