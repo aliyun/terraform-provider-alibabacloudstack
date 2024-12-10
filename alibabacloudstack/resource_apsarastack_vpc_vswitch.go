@@ -29,14 +29,14 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 			"availability_zone": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
+				Computed:      true,
 				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use 'zone_id' instead.",
 				ConflictsWith: []string{"zone_id"},
 			},
 			"zone_id": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ForceNew:      true,
+				Computed:      true,
 				ConflictsWith: []string{"availability_zone"},
 			},
 			"vpc_id": {
@@ -58,12 +58,14 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 			"name": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				Computed:      true,
 				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use 'vswitch_name' instead.",
 				ConflictsWith: []string{"vswitch_name"},
 			},
 			"vswitch_name": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"name"},
 			},
 			"description": {
