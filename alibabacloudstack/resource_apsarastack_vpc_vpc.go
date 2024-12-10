@@ -171,10 +171,6 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	d.Set("cidr_block", object.CidrBlock)
-<<<<<<< HEAD
-	// d.Set("name", object.VpcName)
-=======
->>>>>>> origin/rebase_add_testcase_code
 	d.Set("description", object.Description)
 	d.Set("router_id", object.VRouterId)
 	d.Set("ipv6_cidr_block", object.Ipv6CidrBlock)
@@ -184,12 +180,7 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 		d.Set("tags", vpcService.tagToMap(tag))
 	}
 	d.Set("user_cidrs", object.UserCidrs.UserCidr)
-<<<<<<< HEAD
-	connectivity.SetResourceData(d, object.VpcName, "name", "vpc_name")
-	// d.Set("vpc_name", object.VpcName)
-=======
 	connectivity.SetResourceData(d, object.VpcName ,"vpc_name", "name")
->>>>>>> origin/rebase_add_testcase_code
 
 	request := vpc.CreateDescribeRouteTablesRequest()
 	client.InitRpcRequest(*request.RpcRequest)
