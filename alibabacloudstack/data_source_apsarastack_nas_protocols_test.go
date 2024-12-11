@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlicloudNasProtocolsDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(100000, 999999)
+	rand := getAccTestRandInt(100000, 999999)
 	AllConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlicloudNasDataSource(map[string]string{
 			"type":    `"Performance"`,

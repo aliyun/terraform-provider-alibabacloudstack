@@ -11,7 +11,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -29,7 +29,7 @@ func TestAccAlibabacloudStackImageCopyBasic(t *testing.T) {
 		},
 	}
 	ra := resourceAttrInit(resourceId, testAccCopyImageCheckMap)
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testAccEcsCopyImageConfigBasic%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageCopyBasicConfigDependence)

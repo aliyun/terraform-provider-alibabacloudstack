@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccCheckAlibabacloudStackCloudFirewallControlPoliciesDataSource(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 
 	var existAlibabacloudStackCloudFirewallControlPoliciesDataSourceNameMapFunc = func(rand int) map[string]string {
 		return map[string]string{

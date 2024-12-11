@@ -2,12 +2,12 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/hashicorp/terraform/helper/acctest"
-	"testing"
 )
 
 func TestAccAlibabacloudStackAscm_UserRoleBinding(t *testing.T) {
@@ -17,7 +17,7 @@ func TestAccAlibabacloudStackAscm_UserRoleBinding(t *testing.T) {
 	serviceFunc := func() interface{} {
 		return &AscmService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000, 20000)
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()

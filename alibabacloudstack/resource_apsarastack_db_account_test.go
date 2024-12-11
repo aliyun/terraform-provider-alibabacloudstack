@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -13,7 +13,7 @@ import (
 
 func TestAccAlibabacloudStackDBAccountUpdate(t *testing.T) {
 	var v *rds.DBInstanceAccount
-	rand := acctest.RandIntRange(10000, 999999)
+	rand := getAccTestRandInt(10000, 999999)
 	name := fmt.Sprintf("tf-testAccdbaccount-%d", rand)
 	var basicMap = map[string]string{
 		"instance_id": CHECKSET,

@@ -13,7 +13,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -101,7 +101,7 @@ func testSweepEssGroups(region string) error {
 }
 
 func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
-	rand := acctest.RandIntRange(10000, 999999)
+	rand := getAccTestRandInt(10000, 999999)
 	var v ess.ScalingGroup
 	resourceId := "alibabacloudstack_ess_scaling_group.default"
 
@@ -204,7 +204,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
-	rand := acctest.RandIntRange(10000, 999999)
+	rand := getAccTestRandInt(10000, 999999)
 	var v ess.ScalingGroup
 	resourceId := "alibabacloudstack_ess_scaling_group.default"
 
@@ -301,7 +301,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 	var v ess.ScalingGroup
 	var slb *slb.DescribeLoadBalancerAttributeResponse
-	rand := acctest.RandIntRange(10000, 999999)
+	rand := getAccTestRandInt(10000, 999999)
 	resourceId := "alibabacloudstack_ess_scaling_group.default"
 
 	basicMap := map[string]string{

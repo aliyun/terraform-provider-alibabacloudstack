@@ -5,12 +5,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudstackCmsAlarmContactGroupGroups_basic(t *testing.T) {
 	testAccPreCheckWithAPIIsNotSupport(t)
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackCmsAlarmContactGroupsDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_cms_alarm_contact_group.default.id}"`,

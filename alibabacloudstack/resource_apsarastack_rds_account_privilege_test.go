@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -14,7 +14,7 @@ import (
 func TestAccAlibabacloudStackDBAccountPrivilege_mysql(t *testing.T) {
 
 	var v *rds.DBInstanceAccount
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testacc%sdnsrecordbasic%v.abc", defaultRegionToTest, rand)
 	resourceId := "alibabacloudstack_db_account_privilege.default"
 	var basicMap = map[string]string{
@@ -139,7 +139,7 @@ resource "alibabacloudstack_db_instance" "default" {
 //func TestAccAlibabacloudStackDBAccountPrivilege_PostgreSql(t *testing.T) {
 //
 //	var v *rds.DBInstanceAccount
-//	rand := acctest.RandInt()
+//	rand := getAccTestRandInt(10000,20000)
 //	name := fmt.Sprintf("tf-testacc%sdnsrecordbasic%v.abc", defaultRegionToTest, rand)
 //	resourceId := "alibabacloudstack_db_account_privilege.default"
 //	var basicMap = map[string]string{

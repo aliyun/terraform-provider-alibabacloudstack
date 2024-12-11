@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackExpressConnectVirtualBorderRoutersDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_express_connect_virtual_border_routers.default"
-	rand := acctest.RandIntRange(1, 2999)
+	rand := getAccTestRandInt(1, 2999)
 	name := fmt.Sprintf("tf-testAccExpressConnectVirtualBorderRoutersTest%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceExpressConnectVirtualBorderRoutersDependence)
 
@@ -164,5 +164,5 @@ resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
   min_rx_interval            = 1000
   min_tx_interval            = 1000
   detect_multiplier          = 10
-}`, name, acctest.RandIntRange(1, 2999))
+}`, name, getAccTestRandInt(1, 2999))
 }

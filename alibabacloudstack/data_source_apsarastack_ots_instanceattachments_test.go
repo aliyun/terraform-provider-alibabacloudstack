@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackOtsInstanceAttachmentsDataSourceBasic(t *testing.T) {
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	resourceId := "data.alibabacloudstack_ots_instances_attachment.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,

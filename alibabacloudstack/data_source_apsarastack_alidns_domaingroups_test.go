@@ -3,12 +3,10 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform/helper/acctest"
 )
 
 func TestAccAlibabacloudStackDnsGroupsDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(100000, 999999)
+	rand := getAccTestRandInt(100000, 999999)
 
 	testAccConfig := dataSourceTestAccConfigFunc("data.alibabacloudstack_dns_groups.default", fmt.Sprintf("tf-testacc-%d", rand), dataSourceDnsGroupsConfigDependence)
 

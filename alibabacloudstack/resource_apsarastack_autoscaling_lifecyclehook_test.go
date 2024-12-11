@@ -2,7 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
@@ -13,7 +13,7 @@ import (
 )
 
 func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
-	rand := acctest.RandIntRange(10, 99999)
+	rand := getAccTestRandInt(10, 99999)
 	var v ess.LifecycleHook
 	resourceId := "alibabacloudstack_ess_lifecycle_hook.default"
 	basicMap := map[string]string{

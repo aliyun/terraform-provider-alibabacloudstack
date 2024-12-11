@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackExpressConnectAccessPointsDataSource(t *testing.T) {
 
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	resourceId := "data.alibabacloudstack_express_connect_access_points.default"
 	name := fmt.Sprintf("tf-testacc-expressConnectAccessPoints%v", rand)
 

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
@@ -166,7 +166,7 @@ func TestAccAlibabacloudStackRouterInterfaceBasic(t *testing.T) {
 	resourceId := "alibabacloudstack_router_interface.default"
 	ra := resourceAttrInit(resourceId, testAccRouterInterfaceCheckMap)
 
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -254,7 +254,7 @@ func TestAccAlibabacloudStackRouterInterfaceMulti(t *testing.T) {
 	resourceId := "alibabacloudstack_router_interface.default.2"
 	ra := resourceAttrInit(resourceId, testAccRouterInterfaceCheckMap)
 
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

@@ -11,7 +11,7 @@ import (
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -121,7 +121,7 @@ func TestAccAlibabacloudStackNasFileSystem_basic(t *testing.T) {
 	}, "DescribeNasFileSystem")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testAcc%sAlibabacloudStackNasFileSystem%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackNasFileSystemBasicDependence0)
 	resource.Test(t, resource.TestCase{
@@ -184,7 +184,7 @@ func TestAccAlibabacloudStackNasFileSystemEncrypt(t *testing.T) {
 	}, "DescribeNasFileSystem")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testAcc%sAlibabacloudStackNasFileSystem%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackNasFileSystemBasicDependence1)
 	resource.Test(t, resource.TestCase{

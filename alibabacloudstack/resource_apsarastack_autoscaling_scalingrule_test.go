@@ -2,7 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
@@ -14,7 +14,7 @@ import (
 
 func TestAccAlibabacloudStackEssScalingRule_basic(t *testing.T) {
 	var v ess.ScalingRule
-	rand := acctest.RandIntRange(1000, 999999)
+	rand := getAccTestRandInt(1000, 999999)
 	resourceId := "alibabacloudstack_ess_scaling_rule.default"
 	basicMap := map[string]string{
 		"scaling_group_id": CHECKSET,
@@ -52,7 +52,7 @@ func TestAccAlibabacloudStackEssScalingRule_basic(t *testing.T) {
 
 func TestAccAlibabacloudStackEssScalingRuleMulti(t *testing.T) {
 	var v ess.ScalingRule
-	rand := acctest.RandIntRange(1000, 999999)
+	rand := getAccTestRandInt(1000, 999999)
 	resourceId := "alibabacloudstack_ess_scaling_rule.default.9"
 	basicMap := map[string]string{
 		"scaling_group_id": CHECKSET,

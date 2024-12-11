@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackNasAccessRuleDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(100000, 999999)
+	rand := getAccTestRandInt(100000, 999999)
 	ipConf := dataSourceTestAccConfig{
 		existConfig: providerCommon + testAccCheckAlibabacloudStackAccessRuleDataSourceConfig(rand, map[string]string{
 			"access_group_name": `"${alibabacloudstack_nas_access_group.default.access_group_name}"`,

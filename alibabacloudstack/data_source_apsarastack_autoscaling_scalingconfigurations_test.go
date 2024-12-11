@@ -2,13 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEssScalingconfigurationsDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(0, 500)
+	rand := getAccTestRandInt(0, 500)
 	//scalingGroupIdConf := dataSourceTestAccConfig{
 	//	existConfig: testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand, map[string]string{
 	//		"scaling_group_id": `"${alibabacloudstack_ess_scaling_configuration.default.scaling_group_id}"`,

@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackAdbDbClustersDataSource(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	nameConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(rand, map[string]string{
 			"description_regex": `"${alibabacloudstack_adb_db_cluster.default.description}"`,

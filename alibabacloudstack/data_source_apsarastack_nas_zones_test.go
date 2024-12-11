@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlicloudNasZonesDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(100, 999)
+	rand := getAccTestRandInt(100, 999)
 	regionIdConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlicloudNasZonesDataSourceName(rand, map[string]string{}),
 		fakeConfig:  "",

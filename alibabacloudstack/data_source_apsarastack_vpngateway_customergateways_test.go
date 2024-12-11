@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackVpnCgwsDataSourceBasic(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackVpnCustomerGatewaysConfig(rand, map[string]string{
 			"ids": `[ "${alibabacloudstack_vpn_customer_gateway.default.id}" ]`,

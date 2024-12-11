@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -37,7 +37,7 @@ func TestAccAlibabacloudStackDBReadWriteSplittingConnection_update(t *testing.T)
 	rc_readonly := resourceCheckInitWithDescribeMethod("alibabacloudstack_db_readonly_instance.default", &readonly, func() interface{} {
 		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DescribeDBReadonlyInstance")
-	rand := acctest.RandIntRange(10000, 999999)
+	rand := getAccTestRandInt(10000, 999999)
 
 	rac := resourceAttrCheckInit(rc_connection, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()

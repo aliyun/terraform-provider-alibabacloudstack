@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackVpcIpv6InternetBandwidthsDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_vpc_ipv6_internet_bandwidths.default"
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-vpcipv6internetbandwidth-%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceVpcIpv6InternetBandwidthsDependence)
 
