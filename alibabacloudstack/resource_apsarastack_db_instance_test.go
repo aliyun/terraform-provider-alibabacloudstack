@@ -304,9 +304,7 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 func resourceDBInstanceConfigDependence(name string) string {
 	return fmt.Sprintf(`
 %s
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 variable "name" {
 	default = "%s"
 }
@@ -412,9 +410,7 @@ func TestAccAlibabacloudStackDBInstanceMultiAZ(t *testing.T) {
 func resourceDBInstanceMysqlAZConfigDependence(name string) string {
 	return fmt.Sprintf(`
 %s
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 variable "name" {
 	default = "%s"
 }
@@ -474,9 +470,7 @@ func TestAccAlibabacloudStackDBInstanceClassic(t *testing.T) {
 
 func resourceDBInstanceClassicConfigDependence(name string) string {
 	return fmt.Sprintf(`
-provider "alibabacloudstack" {
-	assume_role {}
-}
+
 variable "name" {
 	default = "%s"
 }

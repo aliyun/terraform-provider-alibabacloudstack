@@ -10,7 +10,6 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -67,8 +66,8 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				Type:          schema.TypeString,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				Deprecated:    "Field 'storage_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage_type' instead.",
 				ConflictsWith: []string{"db_instance_storage_type"},
 			},
@@ -76,8 +75,8 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				Type:          schema.TypeString,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_pperf", "cloud_sperf"}, false),
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"storage_type"},
 			},
 			"encryption_key": {
@@ -92,43 +91,43 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 			},
 			"instance_type": {
 				Type:          schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				Deprecated:    "Field 'instance_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
 				ConflictsWith: []string{"db_instance_class"},
 			},
 			"db_instance_class": {
 				Type:          schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"instance_type"},
 			},
 			"instance_storage": {
 				Type:          schema.TypeInt,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				Deprecated:    "Field 'instance_storage' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage' instead.",
 				ConflictsWith: []string{"db_instance_storage"},
 			},
 			"db_instance_storage": {
 				Type:          schema.TypeInt,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"instance_storage"},
 			},
 			"instance_charge_type": {
 				Type:          schema.TypeString,
 				ValidateFunc:  validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				Deprecated:    "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
 				ConflictsWith: []string{"payment_type"},
 			},
 			"payment_type": {
 				Type:          schema.TypeString,
 				ValidateFunc:  validation.StringInSlice([]string{string(Postpaid), string(Prepaid)}, false),
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"instance_charge_type"},
 			},
 			"period": {
@@ -170,16 +169,16 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 			},
 			"instance_name": {
 				Type:          schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				ValidateFunc:  validation.StringLenBetween(2, 256),
 				Deprecated:    "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
 				ConflictsWith: []string{"db_instance_description"},
 			},
 			"db_instance_description": {
 				Type:          schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				ValidateFunc:  validation.StringLenBetween(2, 256),
 				ConflictsWith: []string{"instance_name"},
 			},
@@ -255,8 +254,8 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		log.Print("Encryption key condition passed")
 		req := client.NewCommonRequest("POST", "Rds", "2014-08-15", "CheckCloudResourceAuthorized", "")
 		req.QueryParams["TargetRegionId"] = client.RegionId
-		ram, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
-			return crClient.ProcessCommonRequest(req)
+		ram, err := client.WithRdsClient(func(RdsClient *rds.Client) (interface{}, error) {
+			return RdsClient.ProcessCommonRequest(req)
 		})
 		resparn, ok := ram.(*responses.CommonResponse)
 		if err != nil {
@@ -364,8 +363,8 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 	})
 
 	log.Printf("request245 %v", request.QueryParams)
-	raw, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
-		return crClient.ProcessCommonRequest(request)
+	raw, err := client.WithRdsClient(func(RdsClient *rds.Client) (interface{}, error) {
+		return RdsClient.ProcessCommonRequest(request)
 	})
 	response, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -562,7 +561,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		
+
 	}
 
 	if d.HasChange("maintain_time") {
