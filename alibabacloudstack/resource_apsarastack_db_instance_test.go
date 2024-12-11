@@ -308,15 +308,12 @@ func resourceDBInstanceConfigDependence(name string) string {
 variable "name" {
 	default = "%s"
 }
-variable "creation" {
-		default = "Rds"
-}
 
 resource "alibabacloudstack_security_group" "default" {
 	name   = "${var.name}"
 	vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
-`, RdsCommonTestCase, name)
+`, VSwichCommonTestCase, name)
 }
 
 func TestAccAlibabacloudStackDBInstanceMultiInstance(t *testing.T) {
@@ -422,7 +419,7 @@ resource "alibabacloudstack_security_group" "default" {
 	name   = "${var.name}"
 	vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
-`, RdsCommonTestCase, name)
+`, VSwichCommonTestCase, name)
 }
 
 func TestAccAlibabacloudStackDBInstanceClassic(t *testing.T) {
@@ -475,9 +472,9 @@ variable "name" {
 	default = "%s"
 }
 
-data "alibabacloudstack_zones" "default" {
-  	available_resource_creation= "Rds"
-}`, name)
+%s
+
+`, name, VSwichCommonTestCase)
 }
 
 func testAccCheckSecurityIpExists(n string, ips []map[string]interface{}) resource.TestCheckFunc {

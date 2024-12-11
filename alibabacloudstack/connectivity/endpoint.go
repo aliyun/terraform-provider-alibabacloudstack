@@ -265,7 +265,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"ros.{{.region}}.{{.domain}}",
 	},
 	RDSCode: PopEndpoint{
-		"rds.{{.region}}.{{.domain}}",
+		"rds.{{.domain}}",
 		"rds.{{.region}}.{{.domain}}",
 	},
 	KVSTORECode: PopEndpoint{
