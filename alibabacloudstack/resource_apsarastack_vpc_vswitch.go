@@ -49,9 +49,13 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validateSwitchCIDRNetworkAddress,
 			},
+			"enable_ipv6": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"name": {
@@ -81,6 +85,13 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 
 	request := vpc.CreateCreateVSwitchRequest()
 	client.InitRpcRequest(*request.RpcRequest)
+
+	log.Printf("[DEBUG] alibabacloud_vswitch ipv6CidrBlock: %s", d.Get("ipv6_cidr_block").(string))
+
+	if d.Get("enable_ipv6").(bool) {
+		request.Ipv6CidrBlock = "0"
+	}
+
 	if v, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && v.(string) != "" {
 		request.ZoneId = v.(string)
 	}
@@ -94,6 +105,7 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 	if v, ok := d.GetOk("description"); ok && v != "" {
 		request.Description = v.(string)
 	}
+
 	request.ClientToken = buildClientToken(request.GetActionName())
 
 	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -181,6 +193,11 @@ func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interfac
 
 	if d.HasChange("description") {
 		request.Description = d.Get("description").(string)
+		update = true
+	}
+
+	if d.HasChange("enable_ipv6") && d.Get("enable_ipv6").(bool) {
+		request.Ipv6CidrBlock = "0"
 		update = true
 	}
 

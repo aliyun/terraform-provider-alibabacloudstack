@@ -151,7 +151,7 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 	rand := acctest.RandIntRange(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%svpcvswitch%d", defaultRegionToTest, rand)
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcVswitchBasicdependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcVswitchIPV6dependence)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -166,17 +166,42 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name": "${var.name}_ipv6",
+					"description": "modify_description",
 
-					"ipv6_cidr_block": "${alibabacloudstack_vpc.vpc.ipv6_cidr_block}",
+					"vswitch_name": name,
+
+					"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}",
+
+					"vpc_id": "${alibabacloudstack_vpc.vpc.id}",
+
+					"cidr_block": "172.16.0.0/24",
+
+					"enable_ipv6": true,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":            name + "_ipv6",
+						"name":            name,
+						"description":     "modify_description",
 						"ipv6_cidr_block": CHECKSET,
 					}),
 				),
 			},
 		},
 	})
+}
+
+func AlibabacloudTestAccVpcVswitchIPV6dependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+    default = "%s"
+}
+
+%s
+
+resource "alibabacloudstack_vpc" "vpc" {
+  vpc_name     = "${var.name}_vpc"
+  enable_ipv6  = true
+}
+
+`, name, DataZoneCommonTestCase)
 }
