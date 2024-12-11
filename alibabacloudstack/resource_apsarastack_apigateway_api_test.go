@@ -10,7 +10,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cloudapi"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -90,7 +90,7 @@ func TestAccAlibabacloudStackApigatewayApi_basic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &api, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf_testAccApiGatewayApi_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayApiConfigDependence)
 
@@ -271,7 +271,7 @@ func TestAccAlibabacloudStackApigatewayApi_vpc(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &api, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf_testAccApiGatewayApi_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayApiConfigDependence_vpc)
 
@@ -339,7 +339,7 @@ func TestAccAlibabacloudStackApigatewayApi_fc(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &api, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf_testAccApiGatewayApi_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayApiConfigDependence)
 
@@ -405,7 +405,7 @@ func TestAccAlibabacloudStackApigatewayApi_multi(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &api, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf_testAccApiGatewayApi_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayApiConfigDependence)
 

@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -79,7 +79,7 @@ func TestAccAlibabacloudStackLogProject_basic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacclogproject-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogProjectConfigDependence)
 	resource.Test(t, resource.TestCase{
@@ -129,7 +129,7 @@ func TestAccAlibabacloudStackLogProject_multi(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacclogproject-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogProjectConfigDependence)
 

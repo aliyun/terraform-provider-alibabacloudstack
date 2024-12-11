@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackKmsAliasesDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_kms_aliases.default"
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, fmt.Sprintf("alias/test_kms_ali%d", rand), dataSourceKmsAliasesDependence)
 

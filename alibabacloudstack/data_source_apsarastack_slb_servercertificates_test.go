@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackSlbServerCertificatesDataSource_basic(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackSlbServerCertificatesDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_slb_server_certificate.default.name}"`,

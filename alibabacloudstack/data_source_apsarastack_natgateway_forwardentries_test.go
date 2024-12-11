@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackForwardEntriesDataSourceBasic(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	forwardTableIdConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
 			"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,

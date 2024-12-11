@@ -29,7 +29,7 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
-				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use 'zone_id' instead.",
+				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
 				ConflictsWith: []string{"zone_id"},
 			},
 			"zone_id": {

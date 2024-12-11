@@ -2,12 +2,12 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"testing"
 )
 
 func TestAccAlibabacloudStackEdasDeployGroupDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	resourceId := "data.alibabacloudstack_edas_deploy_groups.default"
 	name := fmt.Sprintf("tf-testacc-edas-deploy-groups%v", rand)
 

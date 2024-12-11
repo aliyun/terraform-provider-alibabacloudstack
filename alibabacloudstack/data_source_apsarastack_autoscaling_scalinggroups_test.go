@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackEssScalinggroupsDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(5, 1000)
+	rand := getAccTestRandInt(5, 1000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackEssScalinggroupsDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_ess_scaling_group.default.scaling_group_name}"`,

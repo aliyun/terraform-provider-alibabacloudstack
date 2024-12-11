@@ -3,7 +3,7 @@ package alibabacloudstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 
 	"fmt"
 	"log"
@@ -147,7 +147,7 @@ func TestAccAlibabacloudStackHBaseInstanceVpc(t *testing.T) {
 	}, "DescribeHBaseInstance")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testAcc%sVpc%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackHbaseBasicDependence)
 	resource.Test(t, resource.TestCase{

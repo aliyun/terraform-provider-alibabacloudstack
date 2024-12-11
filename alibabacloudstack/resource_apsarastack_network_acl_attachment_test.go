@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
@@ -108,7 +108,7 @@ func testSweepNetworkAclAttachment(region string) error {
 func SkipTestAccAlibabacloudStackVpcNetworkAclAttachment_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_network_acl_attachment.default"
 	ra := resourceAttrInit(resourceId, testAccNaclAttachmentCheckMap)
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {

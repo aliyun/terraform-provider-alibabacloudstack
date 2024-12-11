@@ -13,7 +13,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -122,7 +122,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	// Setting schedule time to more than one day
 	oneDay, _ := time.ParseDuration("24h")
-	rand := acctest.RandIntRange(1000, 999999)
+	rand := getAccTestRandInt(1000, 999999)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -233,7 +233,7 @@ func TestAccAlibabacloudStackEssScheduledTask_multi(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	// Setting schedule time to more than one day
 	oneDay, _ := time.ParseDuration("24h")
-	rand := acctest.RandIntRange(1000, 999999)
+	rand := getAccTestRandInt(1000, 999999)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)

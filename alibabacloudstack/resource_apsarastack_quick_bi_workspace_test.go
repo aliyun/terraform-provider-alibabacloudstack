@@ -3,7 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
 )
@@ -18,7 +18,7 @@ func TestAccAlicloudQuickBIWorkspace_basic0(t *testing.T) {
 	}, "DescribeQuickBiWorkspace")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%squickbiWorkspace%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlicloudQuickBIWorkspaceBasicDependence0)
 	resource.Test(t, resource.TestCase{

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -12,7 +12,7 @@ func TestAccAlibabacloudStackMaxcompute_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_maxcompute_project.default"
 	ra := resourceAttrInit(resourceId, nil)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf_testAccack%d", rand)
 
 	resource.Test(t, resource.TestCase{

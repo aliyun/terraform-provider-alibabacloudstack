@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackVpcNetworkAclsDataSource(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackNetworkAclsDataSourceName(rand, map[string]string{
 			"ids": `["${alibabacloudstack_network_acl.default.id}"]`,

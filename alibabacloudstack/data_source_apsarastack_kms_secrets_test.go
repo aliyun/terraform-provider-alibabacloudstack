@@ -4,12 +4,12 @@ package alibabacloudstack
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackKmsSecretsDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_kms_secrets.default"
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testAccKmsSecret-%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceKmsSecretsDependence)
 

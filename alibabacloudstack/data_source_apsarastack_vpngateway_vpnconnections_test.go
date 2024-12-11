@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackVpnConnectionsDataSourceBasic(t *testing.T) {
 
 	resourceId := "data.alibabacloudstack_vpn_connections.default"
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf-testAccVpnConnDataResource%d", rand)
 	preCheck := func() {
 		testAccPreCheck(t)

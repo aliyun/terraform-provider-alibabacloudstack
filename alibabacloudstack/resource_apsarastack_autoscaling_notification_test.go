@@ -2,7 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
@@ -14,7 +14,7 @@ import (
 
 func TestAccAlibabacloudStackEssNotification_basic(t *testing.T) {
 	testAccPreCheckWithAPIIsNotSupport(t)
-	rand := acctest.RandIntRange(1000, 999999)
+	rand := getAccTestRandInt(1000, 999999)
 	var v ess.NotificationConfigurationModel
 	resourceId := "alibabacloudstack_ess_notification.default"
 

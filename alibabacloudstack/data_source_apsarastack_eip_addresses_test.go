@@ -2,13 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEipsDataSourceBasic(t *testing.T) {
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackEipsDataSourceConfig(rand, map[string]string{
 			"ids": `[ "${alibabacloudstack_eip.default.0.id}" ]`,

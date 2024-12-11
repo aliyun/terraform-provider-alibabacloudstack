@@ -5,14 +5,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackAlibabacloudstackEcsSecurityGroupsDataSource(t *testing.T) {
 	// 根据test_meta自动生成的tasecase
 
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackEcsSecurityGroupsDataSourceConfig(rand, map[string]string{

@@ -2,12 +2,12 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"testing"
 )
 
 func TestAccAlibabacloudStackSnapshotsDataSourceBasic(t *testing.T) {
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testaccSnapshotDataSourceBasic%d", rand)
 	resourceId := "data.alibabacloudstack_snapshots.default"
 

@@ -2,12 +2,12 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"testing"
 )
 
 func TestAccAlibabacloudStackImagesDataSource_basic(t *testing.T) {
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_images.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
@@ -88,7 +88,7 @@ func TestAccAlibabacloudStackImagesDataSource_basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackImagesDataSource_win(t *testing.T) {
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_images.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
@@ -145,7 +145,7 @@ func TestAccAlibabacloudStackImagesDataSource_win(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackImagesDataSource_linux_english(t *testing.T) {
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_images.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
@@ -223,7 +223,7 @@ func TestAccAlibabacloudStackImagesDataSource_linux_english(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackImagesDataSource_linux_chinese(t *testing.T) {
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_images.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,

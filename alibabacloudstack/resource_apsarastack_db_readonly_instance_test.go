@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -14,7 +14,7 @@ import (
 func TestAccAlibabacloudStackDBReadonlyInstance_update(t *testing.T) {
 	var instance *rds.DBInstanceAttribute
 	resourceId := "alibabacloudstack_db_readonly_instance.default"
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testAccDBInstance_vpc_%d", rand)
 	var DBReadonlyMap = map[string]string{
 		"instance_storage":      "5",
@@ -149,7 +149,7 @@ func TestAccAlibabacloudStackDBReadonlyInstance_update(t *testing.T) {
 func TestAccAlibabacloudStackDBReadonlyInstance_multi(t *testing.T) {
 	var instance *rds.DBInstanceAttribute
 	resourceId := "alibabacloudstack_db_readonly_instance.default.1"
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testAccDBInstance_vpc_%d", rand)
 	var DBReadonlyMap = map[string]string{
 		"instance_storage":      "5",

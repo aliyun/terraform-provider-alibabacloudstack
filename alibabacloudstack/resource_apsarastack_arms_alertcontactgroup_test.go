@@ -11,7 +11,7 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -92,7 +92,7 @@ func TestAccAlibabacloudStackArmsAlertContactGroup_basic(t *testing.T) {
 	}, "DescribeArmsAlertContactGroup")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testAccArmsAlertContactGroup%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ArmsAlertContactGroupBasicdependence)
 	resource.Test(t, resource.TestCase{

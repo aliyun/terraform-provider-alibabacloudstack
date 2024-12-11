@@ -12,7 +12,7 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -118,7 +118,7 @@ func TestAccAlibabacloudStackArmsDispatchRule_basic(t *testing.T) {
 	}, "DescribeArmsDispatchRule")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testAccArmsDispatchRule%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ArmsDispatchRuleBasicdependence)
 	resource.Test(t, resource.TestCase{

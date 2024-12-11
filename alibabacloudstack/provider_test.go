@@ -7,15 +7,18 @@ import (
 
 	//	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
-	//	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	//	
 	//	"log"
 	"os"
 	"testing"
 	"time"
 
 	"strings"
+	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -344,3 +347,13 @@ func testAccPreCheckWithEnvVariable(t *testing.T, envVariableName string) {
 var providerCommon = `
 
 `
+
+func getAccTestRandInt(min, max int) int {
+	if v := os.Getenv("ALIBABACLOUDSTACK_ACCRANDINT"); v != "" {
+		if i, err := strconv.Atoi(v); err == nil {
+			return i
+		}
+	}
+
+	return acctest.RandIntRange(min, max)
+}

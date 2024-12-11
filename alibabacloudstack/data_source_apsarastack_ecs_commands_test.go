@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackEcsCommandsDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_ecs_commands.default"
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testAccEcsCommandsTest%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceEcsCommandsDependence)
 

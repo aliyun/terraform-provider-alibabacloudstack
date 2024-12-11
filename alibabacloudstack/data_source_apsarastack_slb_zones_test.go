@@ -3,11 +3,11 @@ package alibabacloudstack
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackSlbZonesDataSource_basic(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	resourceId := "data.alibabacloudstack_slb_zones.default"
 
 	var existSlbZonesMapFunc = func(rand int) map[string]string {
