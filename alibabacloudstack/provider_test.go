@@ -58,8 +58,10 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ALIBABACLOUDSTACK_PROXY"); v == "" {
 		//t.Fatal("ALIBABACLOUDSTACK_PROXY must be set for acceptance tests")
 	}
-	if v := os.Getenv("ALIBABACLOUDSTACK_DOMAIN"); v == "" {
-		t.Fatal("ALIBABACLOUDSTACK_DOMAIN must be set for acceptance tests")
+	v1 := os.Getenv("ALIBABACLOUDSTACK_DOMAIN")
+	v2 := os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")
+	if v1 == "" && v2 == "" {
+		t.Fatal("ALIBABACLOUDSTACK_DOMAIN or ALIBABACLOUDSTACK_POPGW_DOMAIN must be set for acceptance tests")
 	}
 	//	if v := os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT"); v == "" {
 	//		t.Fatal("ALIBABACLOUDSTACK_DEPARTMENT must be set for acceptance tests")

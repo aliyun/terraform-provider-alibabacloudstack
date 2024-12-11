@@ -214,8 +214,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	//Ecs endpoint
 	EcsCode: PopEndpoint{
-		"ecs.{{.domain}}",
-		"ecs.{{.region}}.{{.domain}}",
+		"ecs-internal.{{.domain}}",
+		"ecs-internal.{{.region}}.{{.domain}}",
 	},
 	//Sts endpoint
 	STSCode: PopEndpoint{

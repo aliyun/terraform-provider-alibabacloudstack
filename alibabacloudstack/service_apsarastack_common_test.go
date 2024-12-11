@@ -733,6 +733,7 @@ func (s *SlbService) sweepSlb(id string) error {
 const DataAlibabacloudstackVswitchZones = `
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
+  enable_details = true
 }
 
 `
