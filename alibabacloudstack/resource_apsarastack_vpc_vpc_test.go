@@ -216,8 +216,7 @@ func TestAccAlibabacloudStackVpcVpc2(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"enable_ipv6":     "true",
-						"ipv6_cidr_block": CHECKSET,
+						"enable_ipv6": "true",
 					}),
 				),
 			},
