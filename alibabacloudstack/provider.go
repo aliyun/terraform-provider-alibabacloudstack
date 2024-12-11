@@ -104,9 +104,8 @@ func Provider() *schema.Provider {
 			"protocol": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "HTTP",
 				Description:  descriptions["protocol"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_PROTOCOL", false),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_PROTOCOL", "HTTP"),
 				ValidateFunc: validation.StringInSlice([]string{"HTTP", "HTTPS"}, false),
 			},
 			"client_read_timeout": {
