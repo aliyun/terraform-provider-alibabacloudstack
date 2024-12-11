@@ -527,7 +527,7 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_db_backup_policy":                      resourceAlibabacloudStackDBBackupPolicy(),
 			"alibabacloudstack_rds_backuppolicy":                      resourceAlibabacloudStackDBBackupPolicy(),
 			"alibabacloudstack_db_connection":                         resourceAlibabacloudStackDBConnection(),
-			"alibabacloudstack_rds_dbinstance":                        resourceAlibabacloudStackDBConnection(),
+			"alibabacloudstack_rds_dbinstance":                        resourceAlibabacloudStackDBInstance(),
 			"alibabacloudstack_db_database":                           resourceAlibabacloudStackDBDatabase(),
 			"alibabacloudstack_rds_database":                          resourceAlibabacloudStackDBDatabase(),
 			"alibabacloudstack_db_instance":                           resourceAlibabacloudStackDBInstance(),

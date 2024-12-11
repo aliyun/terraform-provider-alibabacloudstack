@@ -1351,7 +1351,7 @@ const SecurityGroupCommonTestCase = VSwichCommonTestCase + `
 
 resource "alibabacloudstack_security_group" "group" {
   name   = "${var.name}_sg"
-  vpc_id = "${alibabacloudstack_vpc.vpc.id}"
+  vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
 
 `
@@ -1447,10 +1447,10 @@ resource "alibabacloudstack_db_instance" "default" {
   engine_version       = "5.6"
   instance_type        = "rds.mysql.s2.large"
   instance_storage     = "30"
-  storage_type     = "local_ssd"
+  storage_type         = "local_ssd"
   instance_name        = "testacctf-mysql"
-  tde_status=false
-  enable_ssl=false
+  tde_status           = false
+  enable_ssl           = false
 }
 
 `
