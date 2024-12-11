@@ -242,5 +242,5 @@ func resourceEssScalingConfigurationConfigDependence(name string) string {
 		scaling_group_name = "${var.name}"
 		removal_policies = ["OldestInstance", "NewestInstance"]
 		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
-	}`, EcsInstanceCommonTestCase, name)
+	}`, ECSInstanceCommonTestCase, name)
 }

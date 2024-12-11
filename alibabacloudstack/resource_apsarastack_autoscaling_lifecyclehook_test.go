@@ -41,7 +41,7 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckEssLifecycleHookDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEssLifecycleHook(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssLifecycleHook(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -52,7 +52,7 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccEssLifecycleHookUpdateLifecycleTransition(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssLifecycleHookUpdateLifecycleTransition(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"lifecycle_transition": "SCALE_IN",
@@ -60,7 +60,7 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssLifecycleHookUpdateHeartbeatTimeout(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssLifecycleHookUpdateHeartbeatTimeout(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"heartbeat_timeout": "400",
@@ -68,7 +68,7 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssLifecycleHookUpdateNotificationMetadata(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssLifecycleHookUpdateNotificationMetadata(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"notification_metadata": "helloterraform",
@@ -76,7 +76,7 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssLifecycleHookUpdateDefaultResult(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssLifecycleHookUpdateDefaultResult(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"default_result": "ABANDON",
@@ -84,7 +84,7 @@ func TestAccAlibabacloudStackEssLifecycleHookBasic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssLifecycleHook(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssLifecycleHook(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(basicMap),
 				),
