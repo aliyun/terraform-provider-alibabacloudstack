@@ -172,7 +172,7 @@ func resourceAlibabacloudStackAdbAccountUpdate(d *schema.ResourceData, meta inte
 	instanceId := parts[0]
 	accountName := parts[1]
 
-	if d.HasChange("account_password") || d.HasChange("kms_encrypted_password") {
+	if d.HasChanges("account_password", "kms_encrypted_password") {
 		if err := adbService.WaitForAdbAccount(d.Id(), Available, DefaultTimeoutMedium); err != nil {
 			return errmsgs.WrapError(err)
 		}

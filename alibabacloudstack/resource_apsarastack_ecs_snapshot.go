@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -37,15 +36,19 @@ func resourceAlibabacloudStackSnapshot() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'snapshot_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'snapshot_name' instead.",
+				ConflictsWith: []string{"snapshot_name"},
 			},
 			"snapshot_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -65,10 +68,8 @@ func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interf
 	request.DiskId = d.Get("disk_id").(string)
 	request.ClientToken = buildClientToken(request.GetActionName())
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "snapshot_name", "name"); err == nil {
-		request.SnapshotName = v.(string)
-	} else {
-		return err
+	if name, ok := connectivity.GetResourceDataOk(d, "snapshot_name", "name"); ok {
+		request.SnapshotName = name.(string)
 	}
 
 	if description, ok := d.GetOk("description"); ok {

@@ -45,7 +45,7 @@ func resourceAlibabacloudStackEssScalingRule() *schema.Resource {
 			"ari": {
 				Type:         schema.TypeString,
 				Computed:     true,
-				Deprecated:   "Field 'ari' is deprecated and will be removed in a future release. Please use 'scaling_rule_aris' instead.",
+				Deprecated:   "Field 'ari' is deprecated and will be removed in a future release. Please use new field 'scaling_rule_aris' instead.",
 			},
 			"scaling_rule_aris": {
 				Type:     schema.TypeString,

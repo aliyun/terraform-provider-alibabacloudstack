@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -44,15 +43,19 @@ func resourceAlibabacloudStackSlbRule() *schema.Resource {
 
 			"name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'rule_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'rule_name' instead.",
+				ConflictsWith: []string{"rule_name"},
 			},
 
 			"rule_name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
+				ConflictsWith: []string{"name"},
 			},
 
 			"listener_sync": {
@@ -185,11 +188,9 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slb_id := d.Get("load_balancer_id").(string)
 	port := d.Get("frontend_port").(int)
-	name := ""
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "rule_name", "name"); err == nil && v.(string) != ""{
-		name = v.(string)
-	} else {
-		return err
+	name := strings.Trim(connectivity.GetResourceData(d, "rule_name", "name").(string), " ")
+	if err := errmsgs.CheckEmpty(name, schema.TypeString, "rule_name", "name"); err != nil {
+		return errmsgs.WrapError(err)
 	}
 	group_id := strings.Trim(d.Get("server_group_id").(string), " ")
 
@@ -321,18 +322,17 @@ func resourceAlibabacloudStackSlbRuleUpdate(d *schema.ResourceData, meta interfa
 		update = true
 	}
 
-	if d.HasChange("rule_name") || d.HasChange("name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "rule_name", "name"); err == nil {
-			request.RuleName = v.(string)
-			update = true
-		} else {
-			return err
+	if d.HasChanges("rule_name", "name") {
+		request.RuleName = connectivity.GetResourceData(d, "rule_name", "name").(string)
+		if err := errmsgs.CheckEmpty(request.RuleName, schema.TypeString, "rule_name", "name"); err != nil {
+			return errmsgs.WrapError(err)
 		}
+		update = true
 	}
 
-	fullUpdate = d.HasChange("listener_sync") || d.HasChange("scheduler") || d.HasChange("cookie") || d.HasChange("cookie_timeout") || d.HasChange("health_check") || d.HasChange("health_check_http_code") ||
-		d.HasChange("health_check_interval") || d.HasChange("health_check_domain") || d.HasChange("health_check_uri") || d.HasChange("health_check_connect_port") || d.HasChange("health_check_timeout") ||
-		d.HasChange("healthy_threshold") || d.HasChange("unhealthy_threshold") || d.HasChange("sticky_session") || d.HasChange("sticky_session_type")
+	fullUpdate = d.HasChanges("listener_sync","scheduler","cookie","cookie_timeout","health_check", "health_check_http_code",
+		"health_check_interval","health_check_domain","health_check_uri","health_check_connect_port", "health_check_timeout",
+		"healthy_threshold","unhealthy_threshold", "sticky_session", "sticky_session_type")
 
 	if fullUpdate {
 		request.ListenerSync = d.Get("listener_sync").(string)

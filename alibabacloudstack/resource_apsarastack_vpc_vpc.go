@@ -171,7 +171,6 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	d.Set("cidr_block", object.CidrBlock)
-	d.Set("name", object.VpcName)
 	d.Set("description", object.Description)
 	d.Set("router_id", object.VRouterId)
 	d.Set("ipv6_cidr_block", object.Ipv6CidrBlock)
@@ -181,8 +180,7 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 		d.Set("tags", vpcService.tagToMap(tag))
 	}
 	d.Set("user_cidrs", object.UserCidrs.UserCidr)
-	d.Set("vpc_name", object.VpcName)
-	d.Set("name", object.VpcName)
+	connectivity.SetResourceData(d, object.VpcName ,"vpc_name", "name")
 
 	request := vpc.CreateDescribeRouteTablesRequest()
 	client.InitRpcRequest(*request.RpcRequest)
@@ -287,13 +285,8 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VpcId = d.Id()
 
-	if d.HasChange("name") {
-		request.VpcName = d.Get("name").(string)
-		attributeUpdate = true
-	}
-
-	if d.HasChange("vpc_name") {
-		request.VpcName = d.Get("vpc_name").(string)
+	if d.HasChanges("name","vpc_name") {
+		request.VpcName = connectivity.GetResourceData(d,"vpc_name", "name").(string)
 		attributeUpdate = true
 	}
 
@@ -386,9 +379,7 @@ func buildAlibabacloudStackVpcArgs(d *schema.ResourceData, meta interface{}) *vp
 		request.UserCidr = convertListToCommaSeparate(v.([]interface{}))
 	}
 
-	if v, ok := d.GetOk("vpc_name"); ok {
-		request.VpcName = v.(string)
-	} else if v, ok := d.GetOk("name"); ok {
+	if v, ok := connectivity.GetResourceDataOk(d, "vpc_name", "name"); ok {
 		request.VpcName = v.(string)
 	}
 

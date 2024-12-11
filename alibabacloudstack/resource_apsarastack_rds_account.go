@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -29,12 +28,16 @@ func resourceAlibabacloudStackDBAccount() *schema.Resource {
 			"data_base_instance_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Required: true,
+				Optional:true,
+				Computed:true,
+				ConflictsWith: []string{"instance_id"},
 			},
 			"account_name": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Required: true,
+				Optional:true,
+				Computed:true,
+				ConflictsWith: []string{"name"},
 			},
 
 			"password": {
@@ -62,23 +65,30 @@ func resourceAlibabacloudStackDBAccount() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Normal", "Super"}, false),
 				ForceNew:     true,
 				Computed:     true,
+				ConflictsWith: []string{"type"},
 			},
 
 			"account_description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed:     true,
+				ConflictsWith: []string{"description"},
 			},
 			"instance_id": {
 				Type:         schema.TypeString,
 				ForceNew:     true,
-				Required:     true,
-				Deprecated:  "Field 'instance_id' is deprecated and will be removed in a future release. Please use 'data_base_instance_id' instead.",
+				Optional:true,
+				Computed:true,
+				Deprecated:  "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'data_base_instance_id' instead.",
+				ConflictsWith: []string{"data_base_instance_id"},
 			},
 			"name": {
 				Type:         schema.TypeString,
 				ForceNew:     true,
-				Required:     true,
-				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use 'account_name' instead.",
+				Optional:true,
+				Computed:true,
+				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use new field 'account_name' instead.",
+				ConflictsWith: []string{"account_name"},
 			},
 			"type": {
 				Type:         schema.TypeString,
@@ -86,12 +96,15 @@ func resourceAlibabacloudStackDBAccount() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Normal", "Super"}, false),
 				ForceNew:     true,
 				Computed:     true,
-				Deprecated:  "Field 'type' is deprecated and will be removed in a future release. Please use 'account_type' instead.",
+				Deprecated:  "Field 'type' is deprecated and will be removed in a future release. Please use new field 'account_type' instead.",
+				ConflictsWith: []string{"account_type"},
 			},
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Deprecated:  "Field 'description' is deprecated and will be removed in a future release. Please use 'account_description' instead.",
+				Computed:     true,
+				Deprecated:  "Field 'description' is deprecated and will be removed in a future release. Please use new field 'account_description' instead.",
+				ConflictsWith: []string{"account_description"},
 			},
 		},
 	}
@@ -102,15 +115,13 @@ func resourceAlibabacloudStackDBAccountCreate(d *schema.ResourceData, meta inter
 	rdsService := RdsService{client}
 	request := rds.CreateCreateAccountRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "data_base_instance_id", "instance_id"); err == nil {
-		request.DBInstanceId = v.(string)
-	} else {
-		return err
+	request.DBInstanceId = connectivity.GetResourceData(d, "data_base_instance_id", "instance_id").(string)
+	if err := errmsgs.CheckEmpty(request.DBInstanceId, schema.TypeString, "data_base_instance_id", "instance_id"); err != nil {
+		return errmsgs.WrapError(err)
 	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "account_name", "name"); err == nil {
-		request.AccountName = v.(string)
-	} else {
-		return err
+	request.AccountName = connectivity.GetResourceData(d, "account_name", "name").(string)
+	if err := errmsgs.CheckEmpty(request.AccountName, schema.TypeString, "account_name", "name"); err != nil {
+		return errmsgs.WrapError(err)
 	}
 
 	password := d.Get("password").(string)
@@ -130,18 +141,12 @@ func resourceAlibabacloudStackDBAccountCreate(d *schema.ResourceData, meta inter
 		}
 		request.AccountPassword = decryptResp.Plaintext
 	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "account_type", "type"); err == nil {
-		request.AccountType = v.(string)
-	} else {
-		return err
-	}
+	request.AccountType = connectivity.GetResourceData(d, "account_type", "type").(string)
 
 	// Description will not be set when account type is normal and it is a API bug
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "account_description", "description"); err == nil && v.(string) != "" {
+	if v, ok := connectivity.GetResourceDataOk(d,"account_description", "description"); ok && v.(string) != "" {
 		request.AccountDescription = v.(string)
-	} else if err != nil {
-		return err
-	}
+	} 
 	// wait instance running before modifying
 	if err := rdsService.WaitForDBInstance(request.DBInstanceId, Running, DefaultTimeoutMedium); err != nil {
 		return errmsgs.WrapError(err)
@@ -207,7 +212,7 @@ func resourceAlibabacloudStackDBAccountUpdate(d *schema.ResourceData, meta inter
 	instanceId := parts[0]
 	accountName := parts[1]
 
-	if d.HasChange("account_description") || d.HasChange("description") {
+	if d.HasChanges("account_description", "description") {
 		if err := rdsService.WaitForAccount(d.Id(), Available, DefaultTimeoutMedium); err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -215,11 +220,7 @@ func resourceAlibabacloudStackDBAccountUpdate(d *schema.ResourceData, meta inter
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = instanceId
 		request.AccountName = accountName
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "account_description", "description"); err == nil {
-			request.AccountDescription = v.(string)
-		} else {
-			return err
-		}
+		request.AccountDescription = connectivity.GetResourceData(d, "account_description", "description").(string)
 
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.ModifyAccountDescription(request)
@@ -236,7 +237,7 @@ func resourceAlibabacloudStackDBAccountUpdate(d *schema.ResourceData, meta inter
 		//d.SetPartial("account_description")
 	}
 
-	if d.HasChange("password") || d.HasChange("kms_encrypted_password") {
+	if d.HasChanges("password", "kms_encrypted_password") {
 		if err := rdsService.WaitForAccount(d.Id(), Available, DefaultTimeoutMedium); err != nil {
 			return errmsgs.WrapError(err)
 		}

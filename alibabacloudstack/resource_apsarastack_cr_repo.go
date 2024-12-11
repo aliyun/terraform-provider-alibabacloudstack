@@ -132,7 +132,7 @@ func resourceAlibabacloudStackCRRepoUpdate(d *schema.ResourceData, meta interfac
 	repoType := d.Get("repo_type").(string)
 	detail := d.Get("detail").(string)
 
-	if d.HasChange("summary") || d.HasChange("detail") || d.HasChange("repo_type") {
+	if d.HasChanges("summary", "detail", "repo_type") {
 		request := client.NewCommonRequest("POST", "cr", "2016-06-07", "UpdateRepo", "")
 		request.QueryParams["RepoNamespace"] = repoNamespace
 		request.QueryParams["RepoName"] = repoName

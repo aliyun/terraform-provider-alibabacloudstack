@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -26,15 +25,17 @@ func resourceAlibabacloudStackNetworkInterface() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "",
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'network_interface_name' instead.",
+				Type:          schema.TypeString,
+				Optional:true,
+				Computed:true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'network_interface_name' instead.",
+				ConflictsWith: []string{"network_interface_name"},
 			},
 			"network_interface_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "",
+				Type:          schema.TypeString,
+				Optional:true,
+				Computed:true,
+				ConflictsWith: []string{"name"},
 			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
@@ -50,17 +51,19 @@ func resourceAlibabacloudStackNetworkInterface() *schema.Resource {
 			},
 
 			"private_ip": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				Deprecated:   "Field 'private_ip' is deprecated and will be removed in a future release. Please use 'primary_ip_address' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'private_ip' is deprecated and will be removed in a future release. Please use new field 'primary_ip_address' instead.",
+				ConflictsWith: []string{"primary_ip_address"},
 			},
 			"primary_ip_address": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"private_ip"},
 			},
 			"private_ips": {
 				Type:          schema.TypeSet,
@@ -79,13 +82,13 @@ func resourceAlibabacloudStackNetworkInterface() *schema.Resource {
 				ConflictsWith: []string{"private_ips"},
 			},
 			"mac": {
-				Type:         schema.TypeString,
-				Computed:     true,
-				Deprecated:   "Field 'mac' is deprecated and will be removed in a future release. Please use 'mac_address' instead.",
+				Type:          schema.TypeString,
+				Computed:      true,
+				Deprecated:    "Field 'mac' is deprecated and will be removed in a future release. Please use new field 'mac_address' instead.",
 			},
 			"mac_address": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:          schema.TypeString,
+				Computed:      true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -107,16 +110,11 @@ func resourceNetworkInterfaceCreate(d *schema.ResourceData, meta interface{}) er
 
 	request.SecurityGroupId = groups[0].(string)
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "primary_ip_address", "private_ip"); err == nil {
-		request.PrimaryIpAddress = v.(string)
-	} else {
-		return err
+	if primaryIpAddress, ok := connectivity.GetResourceDataOk(d, "primary_ip_address", "private_ip"); ok {
+		request.PrimaryIpAddress = primaryIpAddress.(string)
 	}
-
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "network_interface_name", "name"); err == nil {
-		request.NetworkInterfaceName = v.(string)
-	} else {
-		return err
+	if name, ok := connectivity.GetResourceDataOk(d, "network_interface_name", "name"); ok {
+		request.NetworkInterfaceName = name.(string)
 	}
 
 	if description, ok := d.GetOk("description"); ok {
@@ -199,12 +197,8 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 		attributeUpdate = true
 	}
 
-	if !d.IsNewResource() && (d.HasChange("network_interface_name")||d.HasChange("name")) {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "network_interface_name", "name"); err == nil {
-		request.NetworkInterfaceName = v.(string)
-		} else {
-			return err
-		}
+	if !d.IsNewResource() && (d.HasChange("network_interface_name") || d.HasChange("name")) {
+		request.NetworkInterfaceName = connectivity.GetResourceData(d, "network_interface_name", "name").(string)
 		attributeUpdate = true
 	}
 

@@ -133,7 +133,7 @@ func (rc *resourceCheck) checkResourceExists() resource.TestCheckFunc {
 			reflect.ValueOf(rc.resourceObject).Elem().Set(outValue[0])
 			return nil
 		} else {
-			return errmsgs.WrapError(fmt.Errorf("The response object type expected *%s, got %s \n outValue: %v, \n resourceObject: %v", 
+			return errmsgs.WrapError(fmt.Errorf("The response object type expected *%s, got %s \n outValue: %v, \n resourceObject: %v",
 				outValue[0].Type().String(), reflect.TypeOf(rc.resourceObject).String(), outValue, rc.resourceObject))
 		}
 	}
@@ -801,7 +801,7 @@ resource "alibabacloudstack_vpc" "default" {
 resource "alibabacloudstack_vswitch" "default" {
   vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+  zone_id = data.alibabacloudstack_zones.default.zones[0].id
   name              = "${var.name}"
 }
 resource "alibabacloudstack_security_group" "default" {
@@ -828,7 +828,7 @@ resource "alibabacloudstack_vpc" "default" {
 resource "alibabacloudstack_vswitch" "default" {
   vpc_id            = "${alibabacloudstack_vpc.default.id}"
   cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
 resource "alibabacloudstack_security_group" "default" {
@@ -1246,7 +1246,7 @@ resource "alibabacloudstack_vpc" "default" {
 resource "alibabacloudstack_vswitch" "default" {
   vpc_id = "${alibabacloudstack_vpc.default.id}"
   cidr_block = "172.16.0.0/16"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name = "${var.name}"
 }
 
@@ -1262,7 +1262,7 @@ resource "alibabacloudstack_instance" "default" {
   count = "2"
   security_groups = "${alibabacloudstack_security_group.default.*.id}"
   internet_max_bandwidth_out = "10"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
   system_disk_category = "cloud_efficiency"
   vswitch_id = "${alibabacloudstack_vswitch.default.id}"
 }
@@ -1307,7 +1307,7 @@ const VpcCommonTestCase = `
 
 resource "alibabacloudstack_vpc" "default" {
   vpc_name = "${var.name}_vpc"
-  cidr_block = "10.1.0.0/21"
+  cidr_block = "172.16.0.0/24"
 }
 `
 
@@ -1316,8 +1316,8 @@ const VSwichCommonTestCase = DataZoneCommonTestCase + VpcCommonTestCase + `
 resource "alibabacloudstack_vswitch" "default" {
   name = "${var.name}_vsw"
   vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "10.1.1.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  cidr_block = "172.16.0.0/24"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
 
 `
@@ -1331,7 +1331,7 @@ resource "alibabacloudstack_adb_db_cluster" "cluster" {
   db_node_count       = 2
   db_node_storage     = 200
   pay_type            = "PostPaid"
-  vswitch_id          = alibabacloudstack_vswitch.default.id
+  vswitch_id          = ${alibabacloudstack_vswitch.default.id}
   description         = "${var.name}_am"
 }
 
@@ -1365,7 +1365,7 @@ resource "alibabacloudstack_instance" "instance" {
   security_groups      = [alibabacloudstack_security_group.group.id]
   instance_name        = "${var.name}_ecs"
   vswitch_id           = alibabacloudstack_vswitch.default.id
-  availability_zone    = data.alibabacloudstack_zones.default.zones.0.id
+  zone_id    = data.alibabacloudstack_zones.default.zones.0.id
   is_outdated          = false
 }
 
@@ -1429,7 +1429,7 @@ resource "alibabacloudstack_nat_gateway" "default" {
 const DiskCommonTestCase = DataZoneCommonTestCase + `
 
 resource "alibabacloudstack_disk" "disk" { 
-  availability_zone = data.alibabacloudstack_zones.default.zones.0.id
+  zone_id = data.alibabacloudstack_zones.default.zones.0.id
   name              = "New-disk"
   description       = "ECS-Disk"
   category          = "cloud_efficiency"

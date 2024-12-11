@@ -524,7 +524,7 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 		//d.SetPartial("security_groups")
 	}
 
-	if d.HasChange("maintain_start_time") || d.HasChange("maintain_end_time") {
+	if d.HasChanges("maintain_start_time", "maintain_end_time") {
 		request := hbase.CreateModifyInstanceMaintainTimeRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.ClusterId = d.Id()
@@ -558,7 +558,7 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 		return errmsgs.WrapError(err)
 	}
 
-	if d.HasChange("account") || d.HasChange("password") {
+	if d.HasChanges("account", "password") {
 		request := hbase.CreateModifyUIAccountPasswordRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.ClusterId = d.Id()
@@ -635,7 +635,7 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 		//d.SetPartial("core_instance_quantity")
 	}
 
-	if d.HasChange("master_instance_type") || d.HasChange("core_instance_type") {
+	if d.HasChanges("master_instance_type", "core_instance_type") {
 		request := hbase.CreateModifyInstanceTypeRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.ClusterId = d.Id()

@@ -6,7 +6,6 @@ import (
 	"log"
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
@@ -46,13 +45,17 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 			"tair_instance_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"instance_name"},
 			},
 			"instance_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'instance_name' is deprecated and will be removed in a future release. Please use 'tair_instance_name' instead.",
+				Deprecated:   "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'tair_instance_name' instead.",
+				ConflictsWith: []string{"tair_instance_name"},
 			},
 			"password": {
 				Type:      schema.TypeString,
@@ -87,26 +90,30 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
+				ConflictsWith: []string{"availability_zone"},
 			},
 			"availability_zone": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
 				Computed:     true,
-				Deprecated:   "Field 'availability_zone' is deprecated and will be removed in a future release. Please use 'zone_id' instead.",
+				Deprecated:   "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
+				ConflictsWith: []string{"zone_id"},
 			},
 			"payment_type": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
 				Optional:     true,
-				Default:      PostPaid,
+				Computed:true,
+				ConflictsWith: []string{"instance_charge_type"},
 			},
 			"instance_charge_type": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
 				Optional:     true,
-				Default:      PostPaid,
-				Deprecated:   "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use 'payment_type' instead.",
+				Computed:true,
+				Deprecated:   "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
+				ConflictsWith: []string{"payment_type"},
 			},
 			"period": {
 				Type:             schema.TypeInt,
@@ -227,10 +234,8 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	request := make(map[string]interface{})
 
 	request["ClientToken"] = buildClientToken("CreateInstance")
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "tair_instance_name", "instance_name"); err == nil {
+	if v, ok := connectivity.GetResourceDataOk(d, "tair_instance_name", "instance_name"); ok {
 		request["InstanceName"] = v.(string)
-	} else {
-		return err
 	}
 	if v, ok := d.GetOk("cpu_type"); ok {
 		request["CpuType"] = v.(string)
@@ -247,10 +252,10 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	if v, ok := d.GetOk("instance_class"); ok {
 		request["InstanceClass"] = v.(string)
 	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "payment_type", "instance_charge_type"); err == nil {
+	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
 		request["ChargeType"] = v.(string)
 	} else {
-		return err
+		request["ChargeType"] =string(PostPaid)
 	}
 	if v, ok := d.GetOk("password"); ok {
 		request["Password"] = v.(string)
@@ -277,10 +282,8 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 		request["Period"] = strconv.Itoa(d.Get("period").(int))
 	}
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "zone_id", "availability_zone"); err == nil && Trim(v.(string)) != "" {
+	if v, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && Trim(v.(string)) != "" {
 		request["ZoneId"] = Trim(v.(string))
-	} else if err != nil {
-		return err
 	}
 	request["NetworkType"] = strings.ToUpper(string(Classic))
 	if vswitchId, ok := d.GetOk("vswitch_id"); ok && vswitchId.(string) != "" {
@@ -415,13 +418,8 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 			}
 		}
 	}
-	configPayType := PayType("")
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "payment_type", "instance_charge_type"); err == nil {
-		configPayType = PayType(v.(string))
-	} else {
-		return err
-	}
-	if !d.IsNewResource() && (d.HasChange("payment_type")||d.HasChange("instance_charge_type")) && configPayType == PrePaid {
+	configPayType := PayType(connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string))
+	if !d.IsNewResource() && (d.HasChanges("payment_type", "instance_charge_type")) && configPayType == PrePaid {
 		// for now we just support charge change from PostPaid to PrePaid
 		prePaidRequest := r_kvstore.CreateTransformToPrePaidRequest()
 		client.InitRpcRequest(*prePaidRequest.RpcRequest)
@@ -451,7 +449,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 		//d.SetPartial("period")
 	}
 
-	if d.HasChange("maintain_start_time") || d.HasChange("maintain_end_time") {
+	if d.HasChanges("maintain_start_time", "maintain_end_time") {
 		request := r_kvstore.CreateModifyInstanceMaintainTimeRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.InstanceId = d.Id()
@@ -546,16 +544,12 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 	client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = d.Id()
 	update := false
-	if d.HasChange("tair_instance_name") || d.HasChange("instance_name") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "tair_instance_name", "instance_name"); err == nil {
-			request.InstanceName = v.(string)
-			update = true
-		} else {
-			return err
-		}
+	if d.HasChanges("tair_instance_name", "instance_name") {
+		request.InstanceName = connectivity.GetResourceData(d, "tair_instance_name", "instance_name").(string)
+		update = true
 	}
 
-	if d.HasChange("password") || d.HasChange("kms_encrypted_password") {
+	if d.HasChanges("password", "kms_encrypted_password") {
 		if v := d.Get("password").(string); v != "" {
 			//d.SetPartial("password")
 			request.NewPassword = v
@@ -716,18 +710,14 @@ func buildKVStoreCreateRequest(d *schema.ResourceData, meta interface{}) (*r_kvs
 
 	request := r_kvstore.CreateCreateInstanceRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "tair_instance_name", "instance_name"); err == nil {
-		request.InstanceName = Trim(v.(string))
-	} else {
-		return request, err
-	}
+	request.InstanceName = Trim(connectivity.GetResourceData(d, "tair_instance_name", "instance_name").(string))
 	request.InstanceType = Trim(d.Get("instance_type").(string))
 	request.EngineVersion = Trim(d.Get("engine_version").(string))
 	request.InstanceClass = Trim(d.Get("instance_class").(string))
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "payment_type", "instance_charge_type"); err == nil {
+	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok && Trim(v.(string)) != "" {
 		request.ChargeType = Trim(v.(string))
 	} else {
-		return request, err
+		request.ChargeType = string(PostPaid)
 	}
 	request.Password = Trim(d.Get("password").(string))
 
@@ -748,7 +738,7 @@ func buildKVStoreCreateRequest(d *schema.ResourceData, meta interface{}) (*r_kvs
 		request.Period = strconv.Itoa(d.Get("period").(int))
 	}
 
-	if zone, ok := d.GetOk("zone_id"); ok && Trim(zone.(string)) != "" {
+	if zone, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && Trim(zone.(string)) != "" {
 		request.ZoneId = Trim(zone.(string))
 	}
 

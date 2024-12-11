@@ -121,7 +121,7 @@ func resourceAlibabacloudStackLogMachineGroupRead(d *schema.ResourceData, meta i
 }
 
 func resourceAlibabacloudStackLogMachineGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-	if d.HasChange("identify_type") || d.HasChange("identify_list") || d.HasChange("topic") {
+	if d.HasChanges("identify_type", "identify_list", "topic") {
 		parts, err := ParseResourceId(d.Id(), 2)
 		if err != nil {
 			return errmsgs.WrapError(err)

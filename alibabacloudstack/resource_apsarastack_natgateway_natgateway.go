@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -35,27 +34,31 @@ func resourceAlibabacloudStackNatGateway() *schema.Resource {
 			"specification": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringInSlice([]string{"Small", "Middle", "Large"}, false),
-				Default:      "Small",
-				Deprecated:   "Field 'specification' is deprecated and will be removed in a future release. Please use 'spec' instead.",
+				Deprecated:   "Field 'specification' is deprecated and will be removed in a future release. Please use new field 'spec' instead.",
+				ConflictsWith: []string{"spec"},
 			},
 			"spec": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:true,
 				ValidateFunc: validation.StringInSlice([]string{"Small", "Middle", "Large"}, false),
-				Default:      "Small",
+				ConflictsWith: []string{"specification"},
 			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 				Deprecated: "Field 'name' is deprecated and will be removed in a future release. " +
-					"Please use 'nat_gateway_name' instead.",
+					"Please use new field 'nat_gateway_name' instead.",
+				ConflictsWith: []string{"nat_gateway_name"},
 			},
 			"nat_gateway_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ConflictsWith: []string{"name"},
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -115,13 +118,11 @@ func resourceAlibabacloudStackNatGatewayCreate(d *schema.ResourceData, meta inte
 	request := vpc.CreateCreateNatGatewayRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VpcId = string(d.Get("vpc_id").(string))
-
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "spec", "specification"); err == nil {
-		request.Spec = v.(string)
-	} else {
-		return err
+	request.Spec = connectivity.GetResourceData(d, "spec", "specification").(string)
+	if request.Spec == "" {
+		// Default must be nil if computed
+		request.Spec = "Small"
 	}
-
 	request.ClientToken = buildClientToken(request.GetActionName())
 	bandwidthPackages := []vpc.CreateNatGatewayBandwidthPackage{}
 	for _, e := range d.Get("bandwidth_packages").([]interface{}) {
@@ -138,10 +139,8 @@ func resourceAlibabacloudStackNatGatewayCreate(d *schema.ResourceData, meta inte
 
 	request.BandwidthPackage = &bandwidthPackages
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "nat_gateway_name", "name"); err == nil {
+	if v, ok := connectivity.GetResourceDataOk(d, "nat_gateway_name", "name"); ok {
 		request.Name = v.(string)
-	} else {
-		return err
 	}
 
 	if v, ok := d.GetOk("description"); ok {
@@ -234,9 +233,9 @@ func resourceAlibabacloudStackNatGatewayUpdate(d *schema.ResourceData, meta inte
 	client.InitRpcRequest(*modifyNatGatewayAttributeRequest.RpcRequest)
 	modifyNatGatewayAttributeRequest.NatGatewayId = natGateway.NatGatewayId
 
-	if d.HasChange("name") || d.HasChange("nat_gateway_name") {
+	if d.HasChanges("name", "nat_gateway_name") {
 		var name string
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "nat_gateway_name", "name"); err == nil {
+		if v, ok := connectivity.GetResourceDataOk(d, "nat_gateway_name", "name"); ok {
 			name = v.(string)
 		} else {
 			return errmsgs.WrapError(errmsgs.Error("cann't change name to empty string"))
@@ -273,15 +272,14 @@ func resourceAlibabacloudStackNatGatewayUpdate(d *schema.ResourceData, meta inte
 		addDebug(modifyNatGatewayAttributeRequest.GetActionName(), raw, modifyNatGatewayAttributeRequest.RpcRequest, modifyNatGatewayAttributeRequest)
 	}
 
-	if d.HasChange("specification") || d.HasChange("spec") {
+	if d.HasChanges("specification", "spec") {
 		modifyNatGatewaySpecRequest := vpc.CreateModifyNatGatewaySpecRequest()
 		client.InitRpcRequest(*modifyNatGatewaySpecRequest.RpcRequest)
 		modifyNatGatewaySpecRequest.NatGatewayId = natGateway.NatGatewayId
-
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "spec", "specification"); err == nil {
-			modifyNatGatewaySpecRequest.Spec = v.(string)
-		} else {
-			return err
+		modifyNatGatewaySpecRequest.Spec = connectivity.GetResourceData(d, "spec", "specification").(string)
+		if modifyNatGatewaySpecRequest.Spec == "" {
+			// modifyNatGatewaySpecRequest.Spec
+			modifyNatGatewaySpecRequest.Spec = "Small"
 		}
 
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {

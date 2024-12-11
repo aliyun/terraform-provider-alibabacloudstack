@@ -18,12 +18,14 @@ func dataSourceAlibabacloudStackDRDSInstances() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ValidateFunc: validation.StringIsValidRegExp,
-				Deprecated:  "Field 'name_regex' is deprecated and will be removed in a future release. Please use 'description_regex' instead.",
+				Deprecated:  "Field 'name_regex' is deprecated and will be removed in a future release. Please use new field 'description_regex' instead.",
+				ConflictsWith: []string{"description_regex"},
 			},
 			"description_regex": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ValidateFunc: validation.StringIsValidRegExp,
+				ConflictsWith: []string{"name_regex"},
 			},
 			"output_file": {
 				Type:     schema.TypeString,
@@ -93,16 +95,9 @@ func dataSourceAlibabacloudStackDRDSInstancesRead(d *schema.ResourceData, meta i
 
 	var dbi []drds.Instance
 	var regexString *regexp.Regexp
-	nameRegex, nameRegexGot := d.GetOk("name_regex")
-	descriptionRegex, descriptionRegexGot := d.GetOk("description_regex")
-	if nameRegexGot {
-		if r, err := regexp.Compile(nameRegex.(string)); err == nil {
-			regexString = r
-		}
-	} else if descriptionRegexGot {
-		if r, err := regexp.Compile(descriptionRegex.(string)); err == nil {
-			regexString = r
-		}
+	nameRegex := connectivity.GetResourceData(d, "description_regex", "name_regex").(string)
+	if r, err := regexp.Compile(nameRegex); err == nil {
+		regexString = r
 	}
 
 	idsMap := make(map[string]string)

@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -35,7 +34,8 @@ func resourceAlibabacloudStackEssLifecycleHook() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'lifecycle_hook_name' instead.",
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'lifecycle_hook_name' instead.",
+				ConflictsWith: []string{"lifecycle_hook_name"},
 			},
 			"lifecycle_hook_name": {
 				Type:         schema.TypeString,
@@ -43,6 +43,7 @@ func resourceAlibabacloudStackEssLifecycleHook() *schema.Resource {
 				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 			"lifecycle_transition": {
 				Type:         schema.TypeString,
@@ -201,7 +202,7 @@ func buildAlibabacloudStackEssLifeCycleHookArgs(d *schema.ResourceData) *ess.Cre
 
 	request.ScalingGroupId = d.Get("scaling_group_id").(string)
 
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "lifecycle_hook_name", "name"); err == nil && v.(string) != "" {
+	if v, ok := connectivity.GetResourceDataOk(d, "lifecycle_hook_name", "name"); ok && v.(string) != "" {
 		request.LifecycleHookName = v.(string)
 	}
 

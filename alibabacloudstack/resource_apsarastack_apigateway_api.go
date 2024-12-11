@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
@@ -37,16 +36,19 @@ func resourceAlibabacloudStackApigatewayApi() *schema.Resource {
 			},
 
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use 'api_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'api_name' instead.",
+				ConflictsWith: []string{"api_name"},
 			},
 
 			"api_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"name"},
 			},
 
 			"description": {
@@ -375,11 +377,7 @@ func resourceAlibabacloudStackApigatewayApiRead(d *schema.ResourceData, meta int
 
 	d.Set("api_id", object.ApiId)
 	d.Set("group_id", object.GroupId)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "api_name", "name"); err == nil && v.(string) != "" {
-		d.Set("api_name", v)
-	} else {
-		return err
-	}
+	connectivity.SetResourceData(d, object.ApiName, "api_name", "name")
 	d.Set("description", object.Description)
 	d.Set("auth_type", object.AuthType)
 	d.Set("force_nonce_check", object.ForceNonceCheck)
@@ -510,13 +508,12 @@ func resourceAlibabacloudStackApigatewayApiUpdate(d *schema.ResourceData, meta i
 
 	d.Partial(true)
 
-	if d.HasChange("api_name") || d.HasChange("name") || d.HasChange("description") || d.HasChange("auth_type") {
+	if d.HasChanges("api_name","name","description","auth_type") {
 		update = true
 	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "api_name", "name"); err == nil && v.(string) != "" {
-		request.ApiName = v.(string)
-	} else {
-		return err
+	request.ApiName = connectivity.GetResourceData(d, "api_name", "name").(string)
+	if err := errmsgs.CheckEmpty(request.ApiName, schema.TypeString, "api_name", "name"); err != nil {
+		return errmsgs.WrapError(err)
 	}
 	request.Description = d.Get("description").(string)
 	request.AuthType = d.Get("auth_type").(string)
@@ -541,7 +538,7 @@ func resourceAlibabacloudStackApigatewayApiUpdate(d *schema.ResourceData, meta i
 	}
 	request.RequestConfig = paramConfig
 
-	if d.HasChange("service_type") || d.HasChange("http_service_config") || d.HasChange("http_vpc_service_config") || d.HasChange("mock_service_config") {
+	if d.HasChanges("service_type","http_service_config","http_vpc_service_config","mock_service_config") {
 		update = true
 	}
 	serviceConfig, err := serviceConfigToJsonStr(d)
@@ -550,7 +547,7 @@ func resourceAlibabacloudStackApigatewayApiUpdate(d *schema.ResourceData, meta i
 	}
 	request.ServiceConfig = serviceConfig
 
-	if d.HasChange("request_parameters") || d.HasChange("constant_parameters") || d.HasChange("system_parameters") {
+	if d.HasChanges("request_parameters","constant_parameters","system_parameters") {
 		update = true
 	}
 	rps, sps, spm, err := setParameters(d)
@@ -671,10 +668,9 @@ func buildAlibabacloudStackApiArgs(d *schema.ResourceData, meta interface{}) (*c
 
 	request.GroupId = d.Get("group_id").(string)
 	request.Description = d.Get("description").(string)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "api_name", "name"); err == nil && v.(string) != "" {
-		request.ApiName = v.(string)
-	} else {
-		return request, err
+	request.ApiName = connectivity.GetResourceData(d, "api_name", "name").(string)
+	if err := errmsgs.CheckEmpty(request.ApiName, schema.TypeString, "api_name", "name"); err != nil {
+		return request, errmsgs.WrapError(err)
 	}
 	request.AuthType = d.Get("auth_type").(string)
 	if v, exist := d.GetOk("force_nonce_check"); exist {

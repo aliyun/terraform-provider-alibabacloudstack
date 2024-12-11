@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -38,17 +37,23 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 			},
 			"instance_class": {
 				Type:     schema.TypeString,
-				Required: true,
-				Deprecated:   "Field 'instance_class' is deprecated and will be removed in a future release. Please use 'db_instance_class' instead.",
+				Optional: true,
+				Computed:true,
+				ForceNew: true,
+				Deprecated:   "Field 'instance_class' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
+				ConflictsWith: []string{"db_instance_class"},
 			},
 			"db_instance_class": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed:true,
+				ForceNew: true,
+				ConflictsWith: []string{"instance_class"},
 			},
 			"instance_id": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Deprecated:   "Field 'instance_id' is deprecated and will be removed in a future release. Please use 'instance_id' instead.",
+				Deprecated:   "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'instance_id' instead.",
 			},
 			"db_instance_id": {
 				Type:     schema.TypeString,
@@ -65,7 +70,7 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 			"instance_network_type": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Deprecated:   "Field 'instance_network_type' is deprecated and will be removed in a future release. Please use 'network_type' instead.",
+				Deprecated:   "Field 'instance_network_type' is deprecated and will be removed in a future release. Please use new field 'network_type' instead.",
 			},
 			"network_type": {
 				Type:     schema.TypeString,
@@ -81,7 +86,8 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Computed:     true,
-				Deprecated:   "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use 'payment_type' instead.",
+				Deprecated:   "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
+				ConflictsWith: []string{"payment_type"},
 			},
 			"payment_type": {
 				Type:         schema.TypeString,
@@ -89,17 +95,22 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Computed:     true,
+				ConflictsWith: []string{"instance_charge_type"},
 			},
 			"description": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 				Optional:     true,
-				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use 'db_instance_description' instead.",
+				Computed:true,
+				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
+				ConflictsWith: []string{"db_instance_description"},
 			},
 			"db_instance_description": {
 				Type:         schema.TypeString,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 				Optional:     true,
+				Computed:true,
+				ConflictsWith: []string{"description"},
 			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
@@ -116,27 +127,21 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 			"instance_inner_port": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Optional: true,
 				Computed: true,
-				Deprecated:   "Field 'instance_inner_port' is deprecated and will be removed in a future release. Please use 'port' instead.",
+				Deprecated:   "Field 'instance_inner_port' is deprecated and will be removed in a future release. Please use new field 'port' instead.",
 			},
 			"port": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Optional: true,
 				Computed: true,
 			},
 			"instance_vpc_id": {
 				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
 				Computed: true,
-				Deprecated:   "Field 'instance_vpc_id' is deprecated and will be removed in a future release. Please use 'vpc_id' instead.",
+				Deprecated:   "Field 'instance_vpc_id' is deprecated and will be removed in a future release. Please use new field 'vpc_id' instead.",
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional: true,
 				Computed: true,
 			},
 			"security_ip_list": {
@@ -250,15 +255,11 @@ func resourceAlibabacloudStackGpdbInstanceUpdate(d *schema.ResourceData, meta in
 	d.Partial(true)
 
 	// Update Instance Description
-	if d.HasChange("db_instance_description") || d.HasChange("description"){
+	if d.HasChanges("db_instance_description", "description"){
 		request := gpdb.CreateModifyDBInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "description"); err == nil {
-			request.DBInstanceDescription = v.(string)
-		} else {
-			return err
-		}
+		request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "description").(string)
 		raw, err := client.WithGpdbClient(func(gpdbClient *gpdb.Client) (interface{}, error) {
 			return gpdbClient.ModifyDBInstanceDescription(request)
 		})
@@ -341,21 +342,12 @@ func buildGpdbCreateRequest(d *schema.ResourceData, meta interface{}) (*gpdb.Cre
 	request := gpdb.CreateCreateDBInstanceRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.ZoneId = Trim(d.Get("availability_zone").(string))
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "payment_type", "instance_charge_type"); err == nil {
-		request.PayType = v.(string)
-	} else {
-		return nil, err
-	}
+	request.PayType = connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string)
 	request.VSwitchId = Trim(d.Get("vswitch_id").(string))
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "description"); err == nil {
-		request.DBInstanceDescription = v.(string)
-	} else {
-		return nil, err
-	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_class", "instance_class"); err == nil {
-		request.DBInstanceClass = Trim(v.(string))
-	} else {
-		return nil, err
+	request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "description").(string)
+	request.DBInstanceClass = Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_class").(string))
+	if err := errmsgs.CheckEmpty(request.DBInstanceClass, schema.TypeString, "db_instance_class", "instance_class"); err != nil {
+		return nil, errmsgs.WrapError(err)
 	}
 	request.DBInstanceGroupCount = Trim(d.Get("instance_group_count").(string))
 	request.Engine = Trim(d.Get("engine").(string))

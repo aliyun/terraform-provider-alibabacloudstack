@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -31,16 +30,20 @@ func resourceAlibabacloudStackKeyPair() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"key_name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'key_name' is deprecated and will be removed in a future release. Please use 'key_pair_name' instead.",
+				Deprecated:   "Field 'key_name' is deprecated and will be removed in a future release. Please use new field 'key_pair_name' instead.",
+				ConflictsWith: []string{"key_pair_name"},
 			},
 			"key_pair_name": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
+				ConflictsWith: []string{"key_name"},
 			},
 			"key_name_prefix": {
 				Type:         schema.TypeString,
@@ -79,10 +82,11 @@ func resourceAlibabacloudStackKeyPairCreate(d *schema.ResourceData, meta interfa
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	var keyName string
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "key_pair_name", "key_name"); err == nil {
+	if v, ok := connectivity.GetResourceDataOk(d, "key_pair_name", "key_name"); ok {
+		if err := errmsgs.CheckEmpty(v, schema.TypeString, "key_pair_name", "key_name"); err != nil {
+			return errmsgs.WrapError(err)
+		}
 		keyName = v.(string)
-	} else if err != nil {
-		return err
 	} else if v, ok := d.GetOk("key_name_prefix"); ok {
 		keyName = resource.PrefixedUniqueId(v.(string))
 	} else {

@@ -4,7 +4,6 @@ import (
 	"log"
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -41,12 +40,18 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 
 			"master_db_instance_id": {
 				Type:         schema.TypeString,
-				Required:     true,
-				Deprecated:   "Field 'master_db_instance_id' is deprecated and will be removed in a future release. Please use 'master_instance_id' instead.",
+				Optional:true,
+				Computed:true,
+				ForceNew: true,
+				Deprecated:   "Field 'master_db_instance_id' is deprecated and will be removed in a future release. Please use new field 'master_instance_id' instead.",
+				ConflictsWith: []string{"master_instance_id"},
 			},
 			"master_instance_id": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
+				ForceNew: true,
+				ConflictsWith: []string{"master_db_instance_id"},
 			},
 
 			"instance_name": {
@@ -54,33 +59,43 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 				Computed:     true,
-				Deprecated:   "Field 'instance_name' is deprecated and will be removed in a future release. Please use 'db_instance_description' instead.",
+				Deprecated:   "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
+				ConflictsWith: []string{"db_instance_description"},
 			},
 			"db_instance_description": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 256),
 				Computed:     true,
+				ConflictsWith: []string{"instance_name"},
 			},
 
 			"instance_type": {
 				Type:         schema.TypeString,
-				Required:     true,
-				Deprecated:   "Field 'instance_type' is deprecated and will be removed in a future release. Please use 'db_instance_class' instead.",
+				Optional:true,
+				Computed:true,
+				Deprecated:   "Field 'instance_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
+				ConflictsWith: []string{"db_instance_class"},
 			},
 			"db_instance_class": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:true,
+				Computed:true,
+				ConflictsWith: []string{"instance_type"},
 			},
 
 			"instance_storage": {
 				Type:         schema.TypeInt,
-				Required:     true,
-				Deprecated:   "Field 'instance_storage' is deprecated and will be removed in a future release. Please use 'db_instance_storage' instead.",
+				Optional:true,
+				Computed:true,
+				Deprecated:   "Field 'instance_storage' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage' instead.",
+				ConflictsWith: []string{"db_instance_storage"},
 			},
 			"db_instance_storage": {
 				Type:         schema.TypeInt,
-				Required:     true,
+				Optional:true,
+				Computed:true,
+				ConflictsWith: []string{"instance_storage"},
 			},
 
 			"zone_id": {
@@ -198,15 +213,11 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 		return resourceAlibabacloudStackDBInstanceRead(d, meta)
 	}
 
-	if d.HasChange("db_instance_description") || d.HasChange("instance_name") {
+	if d.HasChanges("db_instance_description", "instance_name") {
 		request := rds.CreateModifyDBInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "instance_name"); err == nil {
-			request.DBInstanceDescription = v.(string)
-		} else {
-			return err
-		}
+		request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
 
 		err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 			raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
@@ -250,22 +261,19 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 		request.DBInstanceStorageType = d.Get("db_instance_storage_type").(string)
 		update = true
 	}
-	if d.HasChange("db_instance_class") || d.HasChange("instance_type") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_class", "instance_type"); err == nil {
-			request.DBInstanceClass = v.(string)
-		} else {
-			return err
+	if d.HasChanges("db_instance_class", "instance_type") {
+		request.DBInstanceClass = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
+		if err := errmsgs.CheckEmpty(request.DBInstanceClass, schema.TypeString, "db_instance_class", "instance_type"); err != nil {
+			return errmsgs.WrapError(err)
 		}
 		update = true
 	}
 
-	if d.HasChange("db_instance_storage") || d.HasChange("instance_storage") {
-		if v, err := connectivity.GetResourceData(d, reflect.TypeOf(0), "db_instance_storage", "instance_storage"); err == nil {
-			request.DBInstanceStorage = requests.NewInteger(v.(int))
-		} else {
-			return err
+	if d.HasChanges("db_instance_storage", "instance_storage") {
+		request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
+		if err := errmsgs.CheckEmpty(request.DBInstanceStorage, schema.TypeInt, "db_instance_storage", "instance_storage"); err != nil {
+			return errmsgs.WrapError(err)
 		}
-		update = true
 	}
 
 	if update {
@@ -419,27 +427,20 @@ func buildDBReadonlyCreateRequest(d *schema.ResourceData, meta interface{}) (*rd
 	vpcService := VpcService{client}
 	request := rds.CreateCreateReadOnlyDBInstanceRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "master_instance_id", "master_db_instance_id"); err == nil {
-		request.DBInstanceId = Trim(v.(string))
-	} else {
-		return nil, err
+	request.DBInstanceId = connectivity.GetResourceData(d, "master_instance_id", "master_db_instance_id").(string)
+	if err := errmsgs.CheckEmpty(request.DBInstanceId, schema.TypeString, "master_instance_id", "master_db_instance_id"); err != nil {
+		return request, errmsgs.WrapError(err)
 	}
 	request.EngineVersion = Trim(d.Get("engine_version").(string))
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(0), "db_instance_storage", "instance_storage"); err == nil {
-		request.DBInstanceStorage = requests.NewInteger(v.(int))
-	} else {
-		return nil, err
+	request.DBInstanceStorage = requests.NewInteger(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
+	if err := errmsgs.CheckEmpty(request.DBInstanceStorage, schema.TypeInt, "db_instance_storage", "instance_storage"); err != nil {
+		return request, errmsgs.WrapError(err)
 	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_class", "instance_type"); err == nil {
-		request.DBInstanceClass = Trim(v.(string))
-	} else {
-		return nil, err
+	request.DBInstanceClass = Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string))
+	if err := errmsgs.CheckEmpty(request.DBInstanceClass, schema.TypeString, "db_instance_class", "instance_type"); err != nil {
+			return request, errmsgs.WrapError(err)
 	}
-	if v, err := connectivity.GetResourceData(d, reflect.TypeOf(""), "db_instance_description", "instance_name"); err == nil {
-		request.DBInstanceDescription = v.(string)
-	} else {
-		return nil, err
-	}
+	request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
 	request.DBInstanceStorageType = d.Get("db_instance_storage_type").(string)
 
 	if zone, ok := d.GetOk("zone_id"); ok && Trim(zone.(string)) != "" {

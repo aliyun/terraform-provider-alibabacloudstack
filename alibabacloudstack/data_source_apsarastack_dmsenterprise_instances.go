@@ -17,14 +17,14 @@ func dataSourceAlibabacloudStackDmsEnterpriseInstances() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
 				Type:          schema.TypeString,
-				Optional:      true,
+				Optional: true,
 				ValidateFunc:  validation.StringIsValidRegExp,
 				ForceNew:      true,
 				ConflictsWith: []string{"instance_alias_regex"},
 			},
 			"instance_alias_regex": {
 				Type:          schema.TypeString,
-				Optional:      true,
+				Optional: true,
 				ValidateFunc:  validation.StringIsValidRegExp,
 				ForceNew:      true,
 				ConflictsWith: []string{"name_regex"},
@@ -217,7 +217,7 @@ func dataSourceAlibabacloudStackDmsEnterpriseInstancesRead(d *schema.ResourceDat
 	request["PageNumber"] = 1
 	var objects []map[string]interface{}
 	var instanceNameRegex *regexp.Regexp
-	if v, ok := d.GetOk("name_regex"); ok {
+	if v, ok := connectivity.GetResourceDataOk(d, "name_regex", "instance_alias_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
 			return errmsgs.WrapError(err)

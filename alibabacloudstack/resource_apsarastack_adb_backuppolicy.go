@@ -82,7 +82,7 @@ func resourceAlibabacloudStackAdbBackupPolicyUpdate(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	adbService := AdbService{client}
 
-	if d.HasChange("preferred_backup_period") || d.HasChange("preferred_backup_time") {
+	if d.HasChanges("preferred_backup_period", "preferred_backup_time") {
 		periodList := expandStringList(d.Get("preferred_backup_period").(*schema.Set).List())
 		preferredBackupPeriod := fmt.Sprintf("%s", strings.Join(periodList[:], COMMA_SEPARATED))
 		preferredBackupTime := d.Get("preferred_backup_time").(string)
