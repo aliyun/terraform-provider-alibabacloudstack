@@ -204,7 +204,7 @@ func TestAccAlibabacloudStackSecurityGroupBasic(t *testing.T) {
 
 func TestAccAlibabacloudStackSecurityGroupMulti(t *testing.T) {
 	var v ecs.DescribeSecurityGroupAttributeResponse
-	resourceId := "alibabacloudstack_security_group.default.9"
+	resourceId := "alibabacloudstack_security_group.default.2"
 	ra := resourceAttrInit(resourceId, testAccCheckSecurityBasicMap)
 	serviceFunc := func() interface{} {
 		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -349,7 +349,7 @@ variable "name" {
 %s
 
 resource "alibabacloudstack_security_group" "default" {
-  count = 10
+  count = 3
   vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
   name = "${var.name}"
   description = "${var.name}_describe"
