@@ -46,7 +46,7 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 
 					"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}",
 
-					"vpc_id": "${alibabacloudstack_vpc.default.id}",
+					"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}",
 
 					"cidr_block": "172.16.0.0/24",
 				}),
