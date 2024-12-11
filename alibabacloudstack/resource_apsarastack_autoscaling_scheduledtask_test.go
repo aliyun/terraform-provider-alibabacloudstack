@@ -135,7 +135,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 		CheckDestroy: testAccCheckEssScheduledTaskDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: providerCommon + testAccEssScheduleConfig(EcsInstanceCommonTestCase,
+				Config: providerCommon + testAccEssScheduleConfig(ECSInstanceCommonTestCase,
 					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -154,7 +154,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: providerCommon + testAccEssScheduleUpdateScheduledTaskName(EcsInstanceCommonTestCase,
+				Config: providerCommon + testAccEssScheduleUpdateScheduledTaskName(ECSInstanceCommonTestCase,
 					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -164,7 +164,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: providerCommon + testAccEssScheduleUpdateDescription(EcsInstanceCommonTestCase,
+				Config: providerCommon + testAccEssScheduleUpdateDescription(ECSInstanceCommonTestCase,
 					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -174,7 +174,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: providerCommon + testAccEssScheduleUpdateLaunchExpirationTime(EcsInstanceCommonTestCase,
+				Config: providerCommon + testAccEssScheduleUpdateLaunchExpirationTime(ECSInstanceCommonTestCase,
 					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -184,7 +184,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: providerCommon + testAccEssScheduleUpdateRecurrenceType(EcsInstanceCommonTestCase,
+				Config: providerCommon + testAccEssScheduleUpdateRecurrenceType(ECSInstanceCommonTestCase,
 					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -196,7 +196,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: providerCommon + testAccEssScheduleUpdateTaskEnabled(EcsInstanceCommonTestCase,
+				Config: providerCommon + testAccEssScheduleUpdateTaskEnabled(ECSInstanceCommonTestCase,
 					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -206,7 +206,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: providerCommon + testAccEssScheduleConfig(EcsInstanceCommonTestCase,
+				Config: providerCommon + testAccEssScheduleConfig(ECSInstanceCommonTestCase,
 					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
 
 				Check: resource.ComposeTestCheckFunc(
@@ -246,7 +246,7 @@ func TestAccAlibabacloudStackEssScheduledTask_multi(t *testing.T) {
 		CheckDestroy: testAccCheckEssScheduledTaskDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEssScheduleConfigMulti(EcsInstanceCommonTestCase,
+				Config: testAccEssScheduleConfigMulti(ECSInstanceCommonTestCase,
 					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
 
 				Check: resource.ComposeTestCheckFunc(

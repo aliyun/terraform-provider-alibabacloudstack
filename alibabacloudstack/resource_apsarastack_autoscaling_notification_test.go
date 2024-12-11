@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackEssNotification_basic(t *testing.T) {
 		CheckDestroy:  testAccCheckEssNotificationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEssNotification(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssNotification(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -51,7 +51,7 @@ func TestAccAlibabacloudStackEssNotification_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccEssNotification_update_notification_types(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssNotification_update_notification_types(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"notification_types.#": "4",
@@ -59,13 +59,13 @@ func TestAccAlibabacloudStackEssNotification_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssNotification_update_scaling_group_id(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssNotification_update_scaling_group_id(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
 			},
 			{
-				Config: testAccEssNotification_update_notification_arn(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssNotification_update_notification_arn(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),

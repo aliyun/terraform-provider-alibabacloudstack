@@ -106,6 +106,6 @@ resource "alibabacloudstack_ess_lifecycle_hook" "default" {
 data "alibabacloudstack_ess_lifecycle_hooks" "default"{
   %s
 }
-`, EcsInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
+`, ECSInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
 	return config
 }

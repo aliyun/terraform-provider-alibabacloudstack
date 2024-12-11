@@ -41,7 +41,7 @@ func TestAccAlibabacloudStackEssScalingRule_basic(t *testing.T) {
 		CheckDestroy: testAccCheckEssScalingRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEssScalingRuleConfig(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingRuleConfig(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -78,7 +78,7 @@ func TestAccAlibabacloudStackEssScalingRuleMulti(t *testing.T) {
 		CheckDestroy: testAccCheckEssScalingRuleDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEssScalingRuleConfigMulti(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingRuleConfigMulti(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),

@@ -81,6 +81,6 @@ resource "alibabacloudstack_ess_notification" "default" {
 data "alibabacloudstack_ess_notifications" "default"{
   %s
 }
-`, EcsInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
+`, ECSInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
 	return config
 }

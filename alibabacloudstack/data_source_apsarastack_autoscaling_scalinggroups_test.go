@@ -107,6 +107,6 @@ resource "alibabacloudstack_ess_scaling_group" "default" {
 data "alibabacloudstack_ess_scaling_groups" "default" {
   %s
 }
-`, EcsInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
+`, ECSInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
 	return config
 }
