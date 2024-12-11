@@ -77,6 +77,11 @@ func dataSourceAlibabacloudStackVSwitches() *schema.Resource {
 							Computed: true,
 						},
 						"name": {
+							Type:       schema.TypeString,
+							Computed:   true,
+							Deprecated: "Field 'name' is deprecated and will be removed in a future release. Please use 'vswitch_name' instead.",
+						},
+						"vswitch_name": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -212,14 +217,14 @@ func VSwitchesDecriptionAttributes(d *schema.ResourceData, vsws []vpc.VSwitch, m
 
 	for _, vsw := range vsws {
 		mapping := map[string]interface{}{
-			"id":                        vsw.VSwitchId,
-			"vpc_id":                    vsw.VpcId,
-			"zone_id":                   vsw.ZoneId,
-			"name":                      vsw.VSwitchName,
-			"cidr_block":                vsw.CidrBlock,
-			"description":               vsw.Description,
-			"is_default":                vsw.IsDefault,
-			"creation_time":             vsw.CreationTime,
+			"id":                         vsw.VSwitchId,
+			"vpc_id":                     vsw.VpcId,
+			"zone_id":                    vsw.ZoneId,
+			"name":                       vsw.VSwitchName,
+			"cidr_block":                 vsw.CidrBlock,
+			"description":                vsw.Description,
+			"is_default":                 vsw.IsDefault,
+			"creation_time":              vsw.CreationTime,
 			"available_ip_address_count": vsw.AvailableIpAddressCount,
 		}
 		request.VpcId = vsw.VpcId
