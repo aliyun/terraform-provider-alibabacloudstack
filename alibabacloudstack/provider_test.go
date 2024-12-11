@@ -18,6 +18,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -353,5 +354,6 @@ func getAccTestRandInt(min, max int) int {
 			return i
 		}
 	}
-	return getAccTestRandInt(min, max)
+
+	return acctest.RandIntRange(min, max)
 }
