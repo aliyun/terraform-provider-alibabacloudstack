@@ -52,7 +52,6 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 			"enable_ipv6": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
