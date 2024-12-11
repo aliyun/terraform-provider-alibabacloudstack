@@ -39,10 +39,19 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Optional:     true,
+				Computed:     true,
+				Deprecated:   "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
+				ConflictsWith: []string{"zone_id"},
+			},
+			"zone_id": {
 				Type:     schema.TypeString,
-				Optional: true,
 				ForceNew: true,
-				Computed: true,
+				Optional:     true,
+				Computed:     true,
+				ConflictsWith: []string{"availability_zone"},
 			},
 
 			"image_id": {
@@ -388,7 +397,7 @@ func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interfac
 	d.Set("instance_name", instance.InstanceName)
 	d.Set("description", instance.Description)
 	d.Set("status", instance.Status)
-	d.Set("availability_zone", instance.ZoneId)
+	connectivity.SetResourceData(d, instance.ZoneId, "zone_id", "availability_zone")
 	d.Set("host_name", instance.HostName)
 	d.Set("image_id", instance.ImageId)
 	d.Set("instance_type", instance.InstanceType)
@@ -718,7 +727,7 @@ func buildAlibabacloudStackInstanceArgs(d *schema.ResourceData, meta interface{}
 	}
 	systemDiskCategory := DiskCategory(d.Get("system_disk_category").(string))
 
-	if v, ok := d.GetOk("availability_zone"); ok && v.(string) != "" {
+	if v, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && v.(string) != "" {
 		request.ZoneId = v.(string)
 	}
 
