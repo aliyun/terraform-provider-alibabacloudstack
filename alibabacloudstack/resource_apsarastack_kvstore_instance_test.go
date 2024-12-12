@@ -16,10 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-var redisInstanceConnectionDomainRegexp = "^r-[a-z0-9]+.redis[.a-z-0-9]*.rds.aliyuncs.com"
-var redisInstanceClassForTest = "redis.master.small.default"
-var redisInstanceClassForTestUpdateClass = "redis.master.mid.default"
-var memcacheInstanceConnectionDomainRegexp = "^m-[a-z0-9]+.memcache[.a-z-0-9]*.rds.aliyuncs.com"
+var redisInstanceClassForTest = "redis.amber.master.small.multithread"
+var redisInstanceClassForTestUpdateClass = "redis.amber.logic.sharding.1g.2db.0rodb.6proxy.multithread"
 var memcacheInstanceClassForTest = "memcache.master.small.default"
 var memcacheInstanceClassForTestUpdateClass = "memcache.master.mid.default"
 
@@ -130,7 +128,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_classictest(t *testing.T) {
 		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKVStoreInstance_classic(string(KVStoreRedis), redisInstanceClassForTest, string(KVStore2Dot8)),
+				Config: testAccKVStoreInstance_classic(string(KVStoreRedis), redisInstanceClassForTest, string(KVStore5Dot0)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -278,12 +276,14 @@ variable "name" {
 resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
 	vswitch_id     = alibabacloudstack_vswitch.default.id
-	private_ip     = "172.16.0.10"
-	security_ips   = ["10.0.0.1"]
+	instance_charge_type = "PostPaid"
 	instance_type  = "%s"
 	instance_class = "%s"
 	engine_version = "%s"
     cpu_type = "intel"
+	series = "enterprise"
+	node_type = "double"
+	architecture_type = "standard"
 }
 
 	`, VSwichCommonTestCase, instanceType, instanceClass, engineVersion)

@@ -1254,6 +1254,10 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	authType := "AK"
 
 	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	if client.Config.Proxy != "" {
+		runtime.HttpProxy = &client.Config.Proxy
+		runtime.HttpsProxy = &client.Config.Proxy
+	}
 	runtime.SetAutoretry(true)
 
 	var response map[string]interface{}

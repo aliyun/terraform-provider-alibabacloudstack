@@ -104,7 +104,7 @@ func Provider() *schema.Provider {
 			"protocol": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      "HTTP",
+				DefaultFunc:  schema.EnvDefaultFunc("ALIBABACLOUDSTACK_PROTOCOL", "HTTP"),
 				Description:  descriptions["protocol"],
 				ValidateFunc: validation.StringInSlice([]string{"HTTP", "HTTPS"}, false),
 			},
@@ -1202,6 +1202,7 @@ func getResourceCredentials(config *connectivity.Config) (string, string, int, e
 	client.Domain = endpoint
 	if config.Proxy != "" {
 		client.SetHttpProxy(config.Proxy)
+		client.SetHttpsProxy(config.Proxy)
 	}
 	request.RegionId = config.RegionId
 	if strings.ToLower(config.Protocol) == "https" {

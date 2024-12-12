@@ -158,7 +158,7 @@ func resourceAlibabacloudStackSwitchRead(d *schema.ResourceData, meta interface{
 	d.Set("cidr_block", vswitch.CidrBlock)
 	d.Set("ipv6_cidr_block", vswitch.Ipv6CidrBlock)
 	connectivity.SetResourceData(d, vswitch.VSwitchName, "vswitch_name", "name")
-	listTagResourcesObject, err := vpcService.ListTagResources(d.Id(), "VSWITCH")
+	listTagResourcesObject, err := vpcService.ListTagResources(d.Id(), "vswitch")
 	if err == nil {
 		d.Set("tags", tagsToMap(listTagResourcesObject))
 	}
@@ -171,7 +171,7 @@ func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interfac
 	vpcService := VpcService{client}
 
 	if d.HasChange("tags") {
-		if err := vpcService.SetResourceTags(d, "VSWITCH"); err != nil {
+		if err := vpcService.SetResourceTags(d, "vswitch"); err != nil {
 			return errmsgs.WrapError(err)
 		}
 	}
