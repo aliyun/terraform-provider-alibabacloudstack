@@ -1260,6 +1260,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		response, err = conn.DoRequest(&apiname, &protocol, &method, &version, &authType, query, body, &runtime)
+		log.Printf(" ================================ %s ======================================\n query %v \n request %v \n response: %v", apiname, query, body, response)
 		if err != nil {
 			errmsg := errmsgs.GetAsapiErrorMessage(response)
 			if errmsg != "" {

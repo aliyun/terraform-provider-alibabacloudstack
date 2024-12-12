@@ -108,7 +108,7 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 
 	request.ClientToken = buildClientToken(request.GetActionName())
 
-	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+	if err := resource.Retry(1*time.Minute, func() *resource.RetryError {
 		args := *request
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.CreateVSwitch(&args)
