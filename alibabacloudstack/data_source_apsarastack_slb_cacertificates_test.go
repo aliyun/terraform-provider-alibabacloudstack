@@ -2,13 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackSlbCACertificatesDataSource_basic(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackSlbCaCertificatesDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_slb_ca_certificate.default.name}"`,

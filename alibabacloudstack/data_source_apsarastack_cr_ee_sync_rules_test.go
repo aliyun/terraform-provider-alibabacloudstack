@@ -5,11 +5,11 @@ package alibabacloudstack
 	"os"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackCrEESyncRulesDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-cr-ee-sr-%d", rand)
 	resourceId := "data.alibabacloudstack_cr_ee_sync_rules.default"
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")

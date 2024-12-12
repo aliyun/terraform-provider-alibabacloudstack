@@ -29,7 +29,7 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
-				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use 'zone_id' instead.",
+				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
 				ConflictsWith: []string{"zone_id"},
 			},
 			"zone_id": {
@@ -52,7 +52,6 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 			"enable_ipv6": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
 			},
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
@@ -68,6 +67,7 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 			"vswitch_name": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"name"},
 			},
 			"description": {

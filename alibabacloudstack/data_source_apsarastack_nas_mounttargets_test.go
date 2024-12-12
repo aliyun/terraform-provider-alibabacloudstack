@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackNasMountTargetDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(100000, 999999)
+	rand := getAccTestRandInt(100000, 999999)
 	fileSystemIdConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackMountTargetDataSourceConfig(rand, map[string]string{
 			"file_system_id": `"${alibabacloudstack_nas_mount_target.default.file_system_id}"`,

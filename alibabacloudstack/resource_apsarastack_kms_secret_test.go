@@ -3,7 +3,7 @@ package alibabacloudstack
 import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"fmt"
@@ -70,7 +70,7 @@ func TestAccAlibabacloudStackKmsSecret_Basic(t *testing.T) {
 	var v kms.DescribeSecretResponse
 
 	resourceId := "alibabacloudstack_kms_secret.default"
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf_testaccKmsSecret_%d", rand)
 	ra := resourceAttrInit(resourceId, map[string]string{
 		"arn":              CHECKSET,
@@ -201,7 +201,7 @@ func TestAccAlibabacloudStackKmsSecret_WithKey(t *testing.T) {
 	var v kms.DescribeSecretResponse
 
 	resourceId := "alibabacloudstack_kms_secret.default"
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf_testaccKmsSecretWithKey_%d", rand)
 	ra := resourceAttrInit(resourceId, map[string]string{
 		"arn":               CHECKSET,

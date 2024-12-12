@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackNasFileSystem_DataSource(t *testing.T) {
-	rand := acctest.RandIntRange(100000, 999999)
+	rand := getAccTestRandInt(100000, 999999)
 	storageTypeConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackFileSystemDataSourceConfig(rand, map[string]string{
 			"storage_type":      `"${alibabacloudstack_nas_file_system.default.storage_type}"`,

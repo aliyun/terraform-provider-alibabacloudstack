@@ -78,7 +78,7 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 			"router_table_id": {
 				Type:       schema.TypeString,
 				Computed:   true,
-				Deprecated: "Attribute router_table_id has been deprecated and replaced with route_table_id.",
+				Deprecated: "Field 'router_table_id' is deprecated and will be removed in a future release. Please use new field 'route_table_id' instead.",
 			},
 			"secondary_cidr_blocks": {
 				Type:     schema.TypeList,
@@ -180,7 +180,7 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 		d.Set("tags", vpcService.tagToMap(tag))
 	}
 	d.Set("user_cidrs", object.UserCidrs.UserCidr)
-	connectivity.SetResourceData(d, object.VpcName ,"vpc_name", "name")
+	connectivity.SetResourceData(d, object.VpcName, "vpc_name", "name")
 
 	request := vpc.CreateDescribeRouteTablesRequest()
 	client.InitRpcRequest(*request.RpcRequest)
@@ -229,8 +229,7 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 	// Generally, the system route table is the last one
 	for i := len(routeTabls) - 1; i >= 0; i-- {
 		if routeTabls[i].RouteTableType == "System" {
-			d.Set("route_table_id", routeTabls[i].RouteTableId)
-			d.Set("router_table_id", routeTabls[i].RouteTableId)
+			connectivity.SetResourceData(d, routeTabls[i].RouteTableId, "router_table_id", "route_table_id")
 			break
 		}
 	}
@@ -285,8 +284,8 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VpcId = d.Id()
 
-	if d.HasChanges("name","vpc_name") {
-		request.VpcName = connectivity.GetResourceData(d,"vpc_name", "name").(string)
+	if d.HasChanges("name", "vpc_name") {
+		request.VpcName = connectivity.GetResourceData(d, "vpc_name", "name").(string)
 		attributeUpdate = true
 	}
 

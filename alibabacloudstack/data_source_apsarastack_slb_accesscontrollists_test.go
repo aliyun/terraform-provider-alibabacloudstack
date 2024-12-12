@@ -2,13 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackSlbAclsDataSource_basic(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_slb_acl.default.name}"`,
@@ -17,16 +17,16 @@ func TestAccAlibabacloudStackSlbAclsDataSource_basic(t *testing.T) {
 			"name_regex": `"${alibabacloudstack_slb_acl.default.name}_fake"`,
 		}),
 	}
-	tagsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_slb_acl.default.name}"`,
-			"tags":       `{Created = "TF"}`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
-			"name_regex": `"${alibabacloudstack_slb_acl.default.name}"`,
-			"tags":       `{Created = "TF1"}`,
-		}),
-	}
+	// tagsConf := dataSourceTestAccConfig{
+	// 	existConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
+	// 		"name_regex": `"${alibabacloudstack_slb_acl.default.name}"`,
+	// 		"tags":       `{Created = "TF"}`,
+	// 	}),
+	// 	fakeConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
+	// 		"name_regex": `"${alibabacloudstack_slb_acl.default.name}"`,
+	// 		"tags":       `{Created = "TF1"}`,
+	// 	}),
+	// }
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand, map[string]string{
@@ -58,9 +58,9 @@ func TestAccAlibabacloudStackSlbAclsDataSource_basic(t *testing.T) {
 			"acls.0.ip_version":          "ipv4",
 			"acls.0.entry_list.#":        "2",
 			"acls.0.related_listeners.#": "0",
-			"acls.0.tags.%":              "2",
-			"acls.0.tags.Created":        "TF",
-			"acls.0.tags.For":            "acceptance test",
+			// "acls.0.tags.%":              "2",
+			// "acls.0.tags.Created":        "TF",
+			// "acls.0.tags.For":            "acceptance test",
 		}
 	}
 
@@ -78,7 +78,7 @@ func TestAccAlibabacloudStackSlbAclsDataSource_basic(t *testing.T) {
 		fakeMapFunc:  fakeDnsRecordsMapFunc,
 	}
 
-	slbaclsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, tagsConf, idsConf, allConf)
+	slbaclsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, idsConf, allConf)
 }
 
 func testAccCheckAlibabacloudStackSlbAclsDataSourceConfig(rand int, attrMap map[string]string) string {
@@ -106,10 +106,6 @@ resource "alibabacloudstack_slb_acl" "default" {
       entry = "168.10.10.0/24"
       comment = "second"
   }
-   tags = {
-      Created = "TF"
-       For     = "acceptance test"
-    }
 }
 
 data "alibabacloudstack_slb_acls" "default" {

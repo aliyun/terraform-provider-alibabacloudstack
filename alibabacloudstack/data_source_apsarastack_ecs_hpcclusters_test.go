@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackEcsHpcClustersDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_ecs_hpc_clusters.default"
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testAccEcsHpcClustersTest%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceEcsHpcClustersDependence)
 

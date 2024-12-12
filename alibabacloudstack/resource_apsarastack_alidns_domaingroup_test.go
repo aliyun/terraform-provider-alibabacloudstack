@@ -6,8 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform/helper/acctest"
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -96,7 +94,7 @@ func TestAccAlibabacloudStackDnsGroup_basic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testaccdns%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDnsGroupConfigDependence)

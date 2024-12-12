@@ -6,7 +6,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackEdasApplicationPackageAttachment_basic(t *testing.T
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf-testacc-edasdeploymentbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasAPAttachmentDependence)
 	resource.Test(t, resource.TestCase{

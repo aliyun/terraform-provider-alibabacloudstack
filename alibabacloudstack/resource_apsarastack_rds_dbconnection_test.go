@@ -8,15 +8,15 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackDBConnectionConfigUpdate(t *testing.T) {
 	var v *rds.DBInstanceNetInfo
 	var rdsEndpoint string
-	rand := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
-	name := fmt.Sprintf("tf-testAccDBconnection%s", rand)
+	rand := getAccTestRandInt(10000,20000)
+	name := fmt.Sprintf("tf-testAccDBconnection%d", rand)
 
 	if rdsEndpoint = os.Getenv("RDS_ENDPOINT"); rdsEndpoint == "" {
 		if rdsEndpoint = os.Getenv("ALIBABACLOUDSTACK_DOMAIN"); rdsEndpoint == "" {
@@ -27,7 +27,7 @@ func TestAccAlibabacloudStackDBConnectionConfigUpdate(t *testing.T) {
 
 	var basicMap = map[string]string{
 		"instance_id":       CHECKSET,
-		"connection_string": REGEXMATCH + fmt.Sprintf("tf-testacc%s.mysql.rds.%s", rand, rdsEndpoint),
+		"connection_string": REGEXMATCH + fmt.Sprintf("tf-testacc%d.mysql.rds.%s", rand, rdsEndpoint),
 		"port":              "3306",
 		"ip_address":        CHECKSET,
 	}
@@ -54,7 +54,7 @@ func TestAccAlibabacloudStackDBConnectionConfigUpdate(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":       "${alibabacloudstack_db_instance.instance.id}",
-					"connection_prefix": fmt.Sprintf("tf-testacc%s", rand),
+					"connection_prefix": fmt.Sprintf("tf-testacc%d", rand),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),

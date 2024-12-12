@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 var existMapFunc = func(rand int) map[string]string {
@@ -40,7 +40,7 @@ var checkInfo = dataSourceAttr{
 }
 
 func TestAccAlibabacloudStackHBaseInstancesDataSourceNewInstance(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackHBaseDataSourceConfigNewInstance(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_hbase_instance.default.name}"`,

@@ -2,13 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEssLifecycleHooksDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(10, 1000)
+	rand := getAccTestRandInt(10, 1000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackEssLifecycleHooksDataSourceConfig(rand, map[string]string{
 			"scaling_group_id": `"${alibabacloudstack_ess_lifecycle_hook.default.scaling_group_id}"`,
@@ -106,6 +106,6 @@ resource "alibabacloudstack_ess_lifecycle_hook" "default" {
 data "alibabacloudstack_ess_lifecycle_hooks" "default"{
   %s
 }
-`, EcsInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
+`, ECSInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
 	return config
 }

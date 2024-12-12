@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/elasticsearch"
@@ -150,7 +150,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
 	if len(name) > 30 {
 		name = name[:30]
@@ -356,7 +356,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_multizone(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
 	if len(name) > 30 {
 		name = name[:30]
@@ -414,7 +414,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_version(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
 	if len(name) > 30 {
 		name = name[:30]
@@ -477,7 +477,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_multi(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
 	if len(name) > 30 {
 		name = name[:30]
@@ -528,7 +528,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_encrypt_disk(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
 	if len(name) > 30 {
 		name = name[:30]
@@ -588,7 +588,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_client_node(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
 	if len(name) > 30 {
 		name = name[:30]
@@ -655,7 +655,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_https(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testAccES-keepit%s%d", defaultRegionToTest, rand)
 	if len(name) > 30 {
 		name = name[:30]
@@ -730,7 +730,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) 
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
 	if len(name) > 30 {
 		name = name[:30]

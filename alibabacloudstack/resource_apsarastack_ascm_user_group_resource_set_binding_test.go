@@ -8,7 +8,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/hashicorp/terraform/helper/acctest"
 )
 
 func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding(t *testing.T) {
@@ -18,7 +17,7 @@ func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding(t *testing.T) {
 	serviceFunc := func() interface{} {
 		return &AscmService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-ascmusergroup%v", rand)
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)

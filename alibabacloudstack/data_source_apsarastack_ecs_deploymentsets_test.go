@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackEcsDeploymentSetsDataSource(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackEcsDeploymentSetsDataSourceName(rand, map[string]string{
 			"ids": `["${alibabacloudstack_ecs_deployment_set.default.id}"]`,

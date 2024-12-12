@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 
 	"strings"
 
@@ -57,7 +57,7 @@ func TestAccAlibabacloudstackVpnConnectionBasic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testaccVpnConnectionBaisc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceVpnConnectionConfigDependence)
 
@@ -231,7 +231,7 @@ func TestAccAlibabacloudstackVpnConnectionMulti(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testaccVpnConnectionMulti%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceVpnConnectionConfigDependence)
 

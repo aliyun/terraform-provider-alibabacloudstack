@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackOssBucketObjectsDataSource_basic(t *testing.T) {
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_oss_bucket_objects.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
@@ -90,7 +90,7 @@ func TestAccAlibabacloudStackOssBucketObjectsDataSource_basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackOssBucketObjectsDataSource_versioning(t *testing.T) {
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_oss_bucket_objects.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,

@@ -13,7 +13,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -101,7 +101,7 @@ func testSweepEssGroups(region string) error {
 }
 
 func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
-	rand := acctest.RandIntRange(10000, 999999)
+	rand := getAccTestRandInt(10000, 999999)
 	var v ess.ScalingGroup
 	resourceId := "alibabacloudstack_ess_scaling_group.default"
 
@@ -133,7 +133,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 		CheckDestroy: testAccCheckEssScalingGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEssScalingGroup(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroup(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -144,7 +144,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccEssScalingGroupUpdateMaxSize(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupUpdateMaxSize(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"max_size": "5",
@@ -153,7 +153,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 			},
 
 			{
-				Config: testAccEssScalingGroupUpdateScalingGroupName(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupUpdateScalingGroupName(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"scaling_group_name": fmt.Sprintf("tf-testAccEssScalingGroupUpdate-%d", rand),
@@ -161,7 +161,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssScalingGroupUpdateRemovalPolicies(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupUpdateRemovalPolicies(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"removal_policies.#": "1",
@@ -169,7 +169,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssScalingGroupUpdateDefaultCooldown(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupUpdateDefaultCooldown(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"default_cooldown": "200",
@@ -177,7 +177,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssScalingGroupUpdateMinSize(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupUpdateMinSize(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"min_size": "2",
@@ -185,7 +185,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssScalingGroupModifyVSwitchIds(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupModifyVSwitchIds(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"vswitch_ids.#": "1",
@@ -193,7 +193,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssScalingGroup(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroup(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(basicMap),
 				),
@@ -204,7 +204,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
-	rand := acctest.RandIntRange(10000, 999999)
+	rand := getAccTestRandInt(10000, 999999)
 	var v ess.ScalingGroup
 	resourceId := "alibabacloudstack_ess_scaling_group.default"
 
@@ -236,7 +236,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 		CheckDestroy: testAccCheckEssScalingGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEssScalingGroupVpc(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupVpc(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -248,7 +248,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccEssScalingGroupVpcUpdateMaxSize(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupVpcUpdateMaxSize(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"max_size": "2",
@@ -256,7 +256,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssScalingGroupVpcUpdateScalingGroupName(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupVpcUpdateScalingGroupName(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"scaling_group_name": fmt.Sprintf("tf-testAccEssScalingGroupUpdate-%d", rand),
@@ -264,7 +264,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssScalingGroupVpcUpdateRemovalPolicies(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupVpcUpdateRemovalPolicies(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"removal_policies.#": "1",
@@ -272,7 +272,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssScalingGroupVpcUpdateDefaultCooldown(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupVpcUpdateDefaultCooldown(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"default_cooldown": "200",
@@ -280,7 +280,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssScalingGroupVpcUpdateMinSize(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupVpcUpdateMinSize(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"min_size": "2",
@@ -288,7 +288,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssScalingGroupVpc(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupVpc(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(basicMap),
 				),
@@ -301,7 +301,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 	var v ess.ScalingGroup
 	var slb *slb.DescribeLoadBalancerAttributeResponse
-	rand := acctest.RandIntRange(10000, 999999)
+	rand := getAccTestRandInt(10000, 999999)
 	resourceId := "alibabacloudstack_ess_scaling_group.default"
 
 	basicMap := map[string]string{
@@ -339,14 +339,14 @@ func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 		CheckDestroy: testAccCheckEssScalingGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccEssScalingGroupSlbempty(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupSlbempty(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
 				//ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccEssScalingGroupSlb(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupSlb(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					rcSlb0.checkResourceExists(),
 					rcSlb1.checkResourceExists(),
@@ -357,7 +357,7 @@ func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccEssScalingGroupSlbDetach(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupSlbDetach(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					rcSlb0.checkResourceExists(),
 					testAccCheck(map[string]string{
@@ -367,7 +367,7 @@ func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccEssScalingGroupSlbUpdateMaxSize(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupSlbUpdateMaxSize(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					rcSlb0.checkResourceExists(),
 					rcSlb1.checkResourceExists(),
@@ -379,7 +379,7 @@ func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccEssScalingGroupSlbUpdateScalingGroupName(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupSlbUpdateScalingGroupName(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					rcSlb0.checkResourceExists(),
 					rcSlb1.checkResourceExists(),
@@ -390,7 +390,7 @@ func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccEssScalingGroupSlbUpdateRemovalPolicies(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupSlbUpdateRemovalPolicies(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					rcSlb0.checkResourceExists(),
 					rcSlb1.checkResourceExists(),
@@ -401,7 +401,7 @@ func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccEssScalingGroupSlbUpdateDefaultCooldown(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupSlbUpdateDefaultCooldown(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					rcSlb0.checkResourceExists(),
 					rcSlb1.checkResourceExists(),
@@ -412,7 +412,7 @@ func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccEssScalingGroupSlbUpdateMinSize(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupSlbUpdateMinSize(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					rcSlb0.checkResourceExists(),
 					rcSlb1.checkResourceExists(),
@@ -423,7 +423,7 @@ func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				Config: testAccEssScalingGroupSlbempty(EcsInstanceCommonTestCase, rand),
+				Config: testAccEssScalingGroupSlbempty(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"loadbalancer_ids.#": "0",

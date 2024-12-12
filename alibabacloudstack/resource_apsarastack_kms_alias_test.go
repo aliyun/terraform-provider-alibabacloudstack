@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackKmsAlias_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("alias/tf-testKmsAlias_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceKmsAliadConfigDependence)
 

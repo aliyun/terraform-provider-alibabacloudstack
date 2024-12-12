@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackOosTemplatesDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_oos_templates.default"
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testAccOosTemplate-%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceOosTemplatesDependence)
 

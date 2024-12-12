@@ -1231,6 +1231,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	sdkConfig := client.teaSdkConfig
 	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
 	conn, err := rpc.NewClient(&sdkConfig)
+<<<<<<< HEAD
 	conn.Headers = make(map[string]*string)
 	for key, value := range client.defaultHeaders(popcode) {
 		conn.Headers[key] = &value
@@ -1241,8 +1242,15 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	}
 	query["Product"] = popcode
 
+=======
+>>>>>>> ff546a6f94d1b8341d8908267f17fd6f2669aca3
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize the %s client: %#v", popcode, err)
+	}
+	conn.Headers = make(map[string]*string)
+	for key, value := range client.defaultHeaders(popcode) {
+		v := value
+		conn.Headers[key] = &v
 	}
 
 	var protocol string

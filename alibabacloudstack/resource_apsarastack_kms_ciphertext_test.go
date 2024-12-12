@@ -5,8 +5,6 @@ import (
 
 	"fmt"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 )
 
 func TestAccAlibabacloudStackKmsCiphertext_basic(t *testing.T) {
@@ -16,7 +14,7 @@ func TestAccAlibabacloudStackKmsCiphertext_basic(t *testing.T) {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlibabacloudStackKmsCiphertextConfig_basic(acctest.RandomWithPrefix("tf-testacc-basic")),
+				Config: testAccAlibabacloudStackKmsCiphertextConfig_basic(getAccTestRandInt(1000000, 9999999)),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(
 						"alibabacloudstack_kms_ciphertext.default", "ciphertext_blob"),
@@ -34,7 +32,7 @@ func TestAccAlibabacloudStackKmsCiphertext_validate(t *testing.T) {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlibabacloudStackKmsCiphertextConfig_validate(acctest.RandomWithPrefix("tf-testacc-validate")),
+				Config: testAccAlibabacloudStackKmsCiphertextConfig_validate(getAccTestRandInt(1000000, 9999999)),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("alibabacloudstack_kms_ciphertext.default", "ciphertext_blob"),
 				),
@@ -50,7 +48,7 @@ func TestAccAlibabacloudStackKmsCiphertext_validate_withContext(t *testing.T) {
 		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAlibabacloudStackKmsCiphertextConfig_validate_withContext(acctest.RandomWithPrefix("tf-testacc-validate-withcontext")),
+				Config: testAccAlibabacloudStackKmsCiphertextConfig_validate_withContext(getAccTestRandInt(1000000, 9999999)),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet("alibabacloudstack_kms_ciphertext.default", "ciphertext_blob"),
 				),
@@ -59,10 +57,10 @@ func TestAccAlibabacloudStackKmsCiphertext_validate_withContext(t *testing.T) {
 	})
 }
 
-var testAccAlibabacloudStackKmsCiphertextConfig_basic = func(keyId string) string {
+var testAccAlibabacloudStackKmsCiphertextConfig_basic = func(keyId int) string {
 	return fmt.Sprintf(`
 resource "alibabacloudstack_kms_key" "default" {
-  	description = "%s"
+  	description = "tf-testacc-basic%d"
 	is_enabled  = true
 }
 
@@ -73,10 +71,10 @@ resource "alibabacloudstack_kms_ciphertext" "default" {
 `, keyId)
 }
 
-var testAccAlibabacloudStackKmsCiphertextConfig_validate = func(keyId string) string {
+var testAccAlibabacloudStackKmsCiphertextConfig_validate = func(keyId int) string {
 	return fmt.Sprintf(`
 	resource "alibabacloudstack_kms_key" "default" {
-        description = "%s"
+        description = "tf-testacc-validate%d"
 	}
 	
 	resource "alibabacloudstack_kms_ciphertext" "default" {
@@ -86,10 +84,10 @@ var testAccAlibabacloudStackKmsCiphertextConfig_validate = func(keyId string) st
 	`, keyId)
 }
 
-var testAccAlibabacloudStackKmsCiphertextConfig_validate_withContext = func(keyId string) string {
+var testAccAlibabacloudStackKmsCiphertextConfig_validate_withContext = func(keyId int) string {
 	return fmt.Sprintf(`
 	resource "alibabacloudstack_kms_key" "default" {
-        description = "%s"
+        description = "tf-testacc-validate-withcontext%d"
 	}
 	
 	resource "alibabacloudstack_kms_ciphertext" "default" {

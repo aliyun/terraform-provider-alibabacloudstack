@@ -118,8 +118,8 @@ type PopEndpoint struct {
 var PopEndpoints = map[ServiceCode]PopEndpoint{
 	//vpc endpoint
 	VPCCode: PopEndpoint{
-		"vpc.{{.domain}}",
-		"vpc.{{.region}}.{{.domain}}",
+		"vpc-internal.{{.domain}}",
+		"vpc-internal.{{.region}}.{{.domain}}",
 	},
 	//slb endpoint
 	SLBCode: PopEndpoint{

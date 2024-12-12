@@ -3,7 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
 )
@@ -19,7 +19,7 @@ func TestAccAlibabacloudStackLogonPolicy_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-ascmlogonpolicybasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testacclogonpolicyconfigBasic)
 	resource.Test(t, resource.TestCase{

@@ -132,6 +132,7 @@ func resourceAlibabacloudStackSecurityGroupRead(d *schema.ResourceData, meta int
 		return errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("SecurityGroup", d.Id())), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 	d.Set("tags", ecsService.tagsToMap(response.SecurityGroups.SecurityGroup[0].Tags.Tag))
+	d.Set("type",response.SecurityGroups.SecurityGroup[0].SecurityGroupType)
 
 	return nil
 }

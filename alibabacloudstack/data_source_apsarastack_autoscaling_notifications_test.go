@@ -2,13 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackEssNotificationsDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(0, 500)
+	rand := getAccTestRandInt(0, 500)
 	scalingGroupIdConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackEssNotificationsDataSourceConfig(rand, map[string]string{
 			"scaling_group_id": `"${alibabacloudstack_ess_notification.default.scaling_group_id}"`,
@@ -81,6 +81,6 @@ resource "alibabacloudstack_ess_notification" "default" {
 data "alibabacloudstack_ess_notifications" "default"{
   %s
 }
-`, EcsInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
+`, ECSInstanceCommonTestCase, rand, strings.Join(pairs, "\n  "))
 	return config
 }

@@ -820,35 +820,8 @@ resource "alibabacloudstack_security_group_rule" "default" {
   	cidr_ip = "172.16.0.0/24"
 }
 `
-
-const EcsInstanceCommonTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + `
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-resource "alibabacloudstack_security_group" "default" {
-  name   = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-resource "alibabacloudstack_security_group_rule" "default" {
-  	type = "ingress"
-  	ip_protocol = "tcp"
-  	nic_type = "intranet"
-  	policy = "accept"
-  	port_range = "22/22"
-  	priority = 1
-  	security_group_id = "${alibabacloudstack_security_group.default.id}"
-  	cidr_ip = "172.16.0.0/24"
-}
-`
 const RdsCommonTestCase = `
-data "alibabacloudstack_zones" "default" {
+data  "alibabacloudstack_zones" "default" {
   available_resource_creation = "${var.creation}"
 }
 resource "alibabacloudstack_vpc" "default" {
@@ -1238,23 +1211,7 @@ resource "alibabacloudstack_slb" "default" {
 }
 `
 
-const SlbListenerVserverCommonTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + `
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "172.16.0.0/16"
-  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name = "${var.name}"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-  name = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
+const SlbListenerVserverCommonTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + SecurityGroupCommonTestCase + `
 
 resource "alibabacloudstack_instance" "default" {
   image_id = "${data.alibabacloudstack_images.default.images.0.id}"
@@ -1307,7 +1264,7 @@ data "alibabacloudstack_zones" default {
 
 const VpcCommonTestCase = `
 
-resource "alibabacloudstack_vpc" "default" {
+resource "alibabacloudstack_vpc_vpc" "default" {
   vpc_name = "${var.name}_vpc"
   cidr_block = "172.16.0.0/24"
 }
@@ -1315,9 +1272,9 @@ resource "alibabacloudstack_vpc" "default" {
 
 const VSwichCommonTestCase = DataZoneCommonTestCase + VpcCommonTestCase + `
 
-resource "alibabacloudstack_vswitch" "default" {
+resource "alibabacloudstack_vpc_vswitch" "default" {
   name = "${var.name}_vsw"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
   cidr_block = "172.16.0.0/24"
   zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
@@ -1349,24 +1306,36 @@ resource "alibabacloudstack_eip" "example" {
 
 const SecurityGroupCommonTestCase = VSwichCommonTestCase + `
 
-resource "alibabacloudstack_security_group" "group" {
+resource "alibabacloudstack_ecs_securitygroup" "default" {
   name   = "${var.name}_sg"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+}
+
+resource "alibabacloudstack_security_group_rule" "default" {
+  	type = "ingress"
+  	ip_protocol = "tcp"
+  	nic_type = "intranet"
+  	policy = "accept"
+  	port_range = "22/22"
+  	priority = 1
+  	security_group_id = "${alibabacloudstack_ecs_securitygroup.default.id}"
+  	cidr_ip = "172.16.0.0/24"
+>>>>>>> ff546a6f94d1b8341d8908267f17fd6f2669aca3
 }
 
 `
 
-const ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + `
+const ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloudstackImages + `
 
-resource "alibabacloudstack_instance" "instance" {
-  image_id             = "ubuntu_18_04_64_20G_alibase_20190624.vhd"
+resource "alibabacloudstack_ecs_instance" "default" {
+  image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
   instance_type        = "ecs.n4.large"
-  system_disk_category = "cloud_efficiency"
+  system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
   system_disk_size     = 40
   system_disk_name     = "test_sys_disk"
-  security_groups      = [alibabacloudstack_security_group.group.id]
+  security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
   instance_name        = "${var.name}_ecs"
-  vswitch_id           = alibabacloudstack_vswitch.default.id
+  vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
   zone_id    = data.alibabacloudstack_zones.default.zones.0.id
   is_outdated          = false
 }

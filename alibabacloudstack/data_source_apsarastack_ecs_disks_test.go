@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackAlibabacloudstackEcsDisksDataSource(t *testing.T) {
 	// 根据test_meta自动生成的tasecase
 
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
@@ -259,11 +259,6 @@ func testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand int, attrMap map
 variable "name" {
 	default = "tf-testAlibabacloudstackEcsDisks%d"
 }
-
-
-
-
-
 
 data "alibabacloudstack_ecs_disks" "default" {
 %s

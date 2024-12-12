@@ -7,14 +7,14 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/gpdb"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackGpdbConnectionUpdate(t *testing.T) {
 	var v *gpdb.DBInstanceNetInfo
 
-	rand := acctest.RandStringFromCharSet(10, acctest.CharSetAlphaNum)
+	rand := getAccTestRandInt(10000,20000)
 	var basicMap = map[string]string{
 		"instance_id": CHECKSET,
 		"port":        "3306",
@@ -41,7 +41,7 @@ func TestAccAlibabacloudStackGpdbConnectionUpdate(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":       "${alibabacloudstack_gpdb_instance.default.id}",
-					"connection_prefix": fmt.Sprintf("tf-testacc%s", rand),
+					"connection_prefix": fmt.Sprintf("tf-testacc%d", rand),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
@@ -55,7 +55,7 @@ func TestAccAlibabacloudStackGpdbConnectionUpdate(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":       "${alibabacloudstack_gpdb_instance.default.id}",
-					"connection_prefix": fmt.Sprintf("tf-testacc%s", rand),
+					"connection_prefix": fmt.Sprintf("tf-testacc%d", rand),
 					"port":              "3333",
 				}),
 				Check: resource.ComposeTestCheckFunc(

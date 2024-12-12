@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackOnsInstance_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-testonsinstancebasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccOnsInstanceConfigBasic)
 

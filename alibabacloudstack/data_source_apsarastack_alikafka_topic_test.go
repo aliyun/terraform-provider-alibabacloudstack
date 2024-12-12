@@ -5,12 +5,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackAlibabacloudstackAlikafkaTopicsDataSource(t *testing.T) {
 
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackAlikafkaTopicsSourceConfig(rand, map[string]string{

@@ -6,7 +6,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -22,7 +22,7 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%svpcvswitch%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcVswitchBasicdependence)
@@ -46,7 +46,7 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 
 					"zone_id": "${data.alibabacloudstack_zones.default.zones.0.id}",
 
-					"vpc_id": "${alibabacloudstack_vpc.default.id}",
+					"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}",
 
 					"cidr_block": "172.16.0.0/24",
 				}),
@@ -131,7 +131,10 @@ func AlibabacloudTestAccVpcVswitchBasicdependence(name string) string {
 variable "name" {
     default = "%s"
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> ff546a6f94d1b8341d8908267f17fd6f2669aca3
 %s
 %s
 `, name, DataZoneCommonTestCase, VpcCommonTestCase)
@@ -148,7 +151,7 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%svpcvswitch%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcVswitchIPV6dependence)

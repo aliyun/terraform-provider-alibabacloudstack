@@ -5,11 +5,11 @@ import (
 
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackApigatewayGroupsDataSource(t *testing.T) {
-	rand := acctest.RandIntRange(1000000, 9999999)
+	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_api_gateway_groups.default"
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
 		fmt.Sprintf("tf_testAccGroup_%d", rand),

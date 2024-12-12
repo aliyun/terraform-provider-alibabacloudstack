@@ -6,12 +6,12 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
-	rand := acctest.RandIntRange(1000, 999999)
+	rand := getAccTestRandInt(1000, 999999)
 	var v ess.ScalingConfiguration
 	resourceId := "alibabacloudstack_ess_scaling_configuration.default"
 	basicMap := map[string]string{
@@ -166,7 +166,7 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackEssScalingConfigurationMulti(t *testing.T) {
-	rand := acctest.RandIntRange(1000, 999999)
+	rand := getAccTestRandInt(1000, 999999)
 	var v ess.ScalingConfiguration
 	resourceId := "alibabacloudstack_ess_scaling_configuration.default.0"
 	basicMap := map[string]string{
@@ -242,5 +242,5 @@ func resourceEssScalingConfigurationConfigDependence(name string) string {
 		scaling_group_name = "${var.name}"
 		removal_policies = ["OldestInstance", "NewestInstance"]
 		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
-	}`, EcsInstanceCommonTestCase, name)
+	}`, ECSInstanceCommonTestCase, name)
 }

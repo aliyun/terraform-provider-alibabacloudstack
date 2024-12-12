@@ -3,7 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"log"
 	"testing"
 
@@ -167,7 +167,7 @@ func TestAccAlibabacloudStackInstanceBasic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testAccEcsInstanceConfigBasic%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceInstanceBasicConfigDependence)
@@ -244,7 +244,7 @@ func TestAccAlibabacloudStackInstanceVpc(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testAcc%sEcsInstanceConfigVpc%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceInstanceVpcConfigDependence)
@@ -418,7 +418,7 @@ func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testAcc%sEcsInstanceDataDisks%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceInstancePrePaidConfigDependence)
@@ -499,7 +499,7 @@ func TestAccAlibabacloudStackInstanceTypeUpdate(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testAccEcsInstanceConfigInstanceType%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceInstanceTypeConfigDependence)
@@ -551,7 +551,7 @@ func TestAccAlibabacloudStackInstanceMulti(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testAcc%sEcsInstanceConfigMulti%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceInstanceVpcConfigDependence)

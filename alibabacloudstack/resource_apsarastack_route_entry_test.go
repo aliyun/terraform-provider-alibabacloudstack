@@ -6,7 +6,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
@@ -15,7 +15,7 @@ import (
 
 func TestAccAlibabacloudstackRouteEntryInstance(t *testing.T) {
 	var v *vpc.RouteEntry
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	resourceId := "alibabacloudstack_route_entry.default"
 	ra := resourceAttrInit(resourceId, testAccRouteEntryCheckMap)
 	serviceFunc := func() interface{} {
@@ -54,7 +54,7 @@ func TestAccAlibabacloudstackRouteEntryInstance(t *testing.T) {
 
 func TestAccAlibabacloudstackRouteEntryInterface(t *testing.T) {
 	var v *vpc.RouteEntry
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	resourceId := "alibabacloudstack_route_entry.default"
 	ra := resourceAttrInit(resourceId, testAccRouteEntryCheckMap)
 	serviceFunc := func() interface{} {
@@ -88,7 +88,7 @@ func TestAccAlibabacloudstackRouteEntryInterface(t *testing.T) {
 
 func TestAccAlibabacloudstackRouteEntryNatGateway(t *testing.T) {
 	var v *vpc.RouteEntry
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	resourceId := "alibabacloudstack_route_entry.default"
 	ra := resourceAttrInit(resourceId, testAccRouteEntryCheckMap)
 	serviceFunc := func() interface{} {
@@ -122,7 +122,7 @@ func TestAccAlibabacloudstackRouteEntryNatGateway(t *testing.T) {
 
 func TestAccAlibabacloudstackRouteEntryMulti(t *testing.T) {
 	var v *vpc.RouteEntry
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	resourceId := "alibabacloudstack_route_entry.default.2"
 	ra := resourceAttrInit(resourceId, testAccRouteEntryCheckMap)
 	serviceFunc := func() interface{} {

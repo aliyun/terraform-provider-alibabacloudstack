@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackOnsGroupsDataSource(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	resourceId := "data.alibabacloudstack_ons_groups.default"
 	name := fmt.Sprintf("GID-tf-testacconsgroup%v", rand)
 

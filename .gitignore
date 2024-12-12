@@ -45,3 +45,4 @@ website/vendor
 /workspace/*
 .vscode
 /dist
+alibabacloudstack/cover.out

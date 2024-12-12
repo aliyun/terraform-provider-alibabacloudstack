@@ -5,11 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	
 )
 
 func TestAccAlibabacloudStackNatGatewaysDataSourceBasic(t *testing.T) {
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(10000,20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackNatGatewaysDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_nat_gateway.default.name}"`,

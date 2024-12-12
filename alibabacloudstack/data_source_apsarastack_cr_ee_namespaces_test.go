@@ -4,11 +4,11 @@ package alibabacloudstack
 //	"fmt"
 //	"testing"
 //
-//	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+//	
 //)
 //
 //func TestAccAlibabacloudStackCrEENamespacesDataSource(t *testing.T) {
-//	rand := acctest.RandIntRange(1000000, 9999999)
+//	rand := getAccTestRandInt(1000000, 9999999)
 //	namespaceName := fmt.Sprintf("tf-testacc-cr-ee-ns-%d", rand)
 //	resourceId := "data.alibabacloudstack_cr_ee_namespaces.default"
 //
