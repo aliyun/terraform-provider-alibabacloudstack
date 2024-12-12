@@ -67,6 +67,7 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 			"vswitch_name": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"name"},
 			},
 			"description": {
