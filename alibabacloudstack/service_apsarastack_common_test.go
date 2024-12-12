@@ -903,24 +903,6 @@ const ElasticsearchInstanceCommonTestCase = `
 
 `
 
-const SlbVpcCommonTestCase = `
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation= "VSwitch"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "172.16.0.0/12"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "172.16.0.0/21"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name = "${var.name}"
-}
-`
-
 const EmrCommonTestCase = `
 data "alibabacloudstack_emr_main_versions" "default" {
 }
@@ -1201,16 +1183,6 @@ resource "alibabacloudstack_ram_role" "default" {
 }
 `
 
-const SlbListenerCommonTestCase = `
-variable "ip_version" {
-  default = "ipv4"
-}	
-resource "alibabacloudstack_slb" "default" {
-  name = "${var.name}"
-  address_type = "internet"
-}
-`
-
 const SlbListenerVserverCommonTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + SecurityGroupCommonTestCase + `
 
 resource "alibabacloudstack_instance" "default" {
@@ -1441,8 +1413,7 @@ const SlbCommonTestCase = VSwichCommonTestCase + `
 
 resource "alibabacloudstack_slb" "default" {
   name          = "${var.name}_slb"
-  vswitch_id    = "${alibabacloudstack_vswitch.default.id}"
-  specification = "slb.s2.small"
+  vswitch_id    = "${alibabacloudstack_vpc_vswitch.default.id}"
 }
 
 `

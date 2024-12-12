@@ -31,23 +31,8 @@ const testAccCheckAlibabacloudStackSlbsDataSource = `
 variable "name" {
 	default = "tf-SlbDataSourceSlbs"
 }
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation= "VSwitch"
-}
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "172.16.0.0/12"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "172.16.0.0/16"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name = "${var.name}"
-}
-resource "alibabacloudstack_slb" "default" {
-  name = "${var.name}"
-  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-}
+` + SlbCommonTestCase + `
+
 data "alibabacloudstack_slbs" "default" {
  ids = ["${alibabacloudstack_slb.default.id}"]
 }
