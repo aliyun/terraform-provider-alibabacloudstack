@@ -1664,7 +1664,7 @@ func (s *VpcService) ListTagResources(id string, resourceType string) (object in
 	var response map[string]interface{}
 
 	for {
-		_, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, request)
+		_, err := s.client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, request)
 		if err != nil {
 			return nil, err
 		}

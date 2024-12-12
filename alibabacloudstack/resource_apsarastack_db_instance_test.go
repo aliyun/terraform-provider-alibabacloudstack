@@ -39,7 +39,7 @@ func testSweepDBInstances(region string) error {
 	req := rds.CreateDescribeDBInstancesRequest()
 	req.RegionId = client.RegionId
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{"Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.PageSize = requests.NewInteger(PageSizeLarge)
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		req.Scheme = "https"
@@ -106,7 +106,7 @@ func testSweepDBInstances(region string) error {
 			}
 			request.DBInstanceId = id
 			request.Headers = map[string]string{"RegionId": client.RegionId}
-			request.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+			request.QueryParams = map[string]string{"Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 			if _, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 				return rdsClient.ReleaseReadWriteSplittingConnection(request)
 			}); err != nil {
@@ -123,7 +123,7 @@ func testSweepDBInstances(region string) error {
 			req.Scheme = "http"
 		}
 		req.Headers = map[string]string{"RegionId": client.RegionId}
-		req.QueryParams = map[string]string{"AccessKeySecret": client.SecretKey, "Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		req.QueryParams = map[string]string{"Product": "rds", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		_, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.DeleteDBInstance(req)
 		})
@@ -168,8 +168,8 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":           "MySQL",
-					"engine_version":   "5.6",
-					"instance_type":    "rds.mysql.s2.large",
+					"engine_version":   "5.7",
+					"instance_type":    "rds.mysql.t1.small",
 					"instance_storage": "30",
 					"instance_name":    "${var.name}",
 					"vswitch_id":       "${alibabacloudstack_vswitch.default.id}",
@@ -178,7 +178,7 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"engine":           "MySQL",
-						"engine_version":   "5.6",
+						"engine_version":   "5.7",
 						"instance_type":    CHECKSET,
 						"instance_storage": CHECKSET,
 					}),
@@ -222,7 +222,7 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_type": "rds.mysql.s2.large",
+					"instance_type": "rds.mysql.t1.small",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -268,8 +268,8 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":               "MySQL",
-					"engine_version":       "5.6",
-					"instance_type":        "rds.mysql.s2.large",
+					"engine_version":       "5.7",
+					"instance_type":        "rds.mysql.t1.small",
 					"instance_storage":     "30",
 					"instance_name":        "tf-testAccDBInstanceConfig",
 					"instance_charge_type": "Postpaid",
@@ -277,7 +277,7 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"engine":            "MySQL",
-						"engine_version":    "5.6",
+						"engine_version":    "5.7",
 						"instance_type":     CHECKSET,
 						"instance_storage":  "30",
 						"instance_name":     "tf-testAccDBInstanceConfig",
@@ -304,18 +304,16 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 func resourceDBInstanceConfigDependence(name string) string {
 	return fmt.Sprintf(`
 %s
+
 variable "name" {
 	default = "%s"
-}
-variable "creation" {
-		default = "Rds"
 }
 
 resource "alibabacloudstack_security_group" "default" {
 	name   = "${var.name}"
 	vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
-`, RdsCommonTestCase, name)
+`, VSwichCommonTestCase, name)
 }
 
 func TestAccAlibabacloudStackDBInstanceMultiInstance(t *testing.T) {
@@ -347,8 +345,8 @@ func TestAccAlibabacloudStackDBInstanceMultiInstance(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"count":            "3",
 					"engine":           "MySQL",
-					"engine_version":   "5.6",
-					"instance_type":    "rds.mysql.s2.large",
+					"engine_version":   "5.7",
+					"instance_type":    "rds.mysql.t1.small",
 					"instance_storage": "30",
 					"instance_name":    "${var.name}",
 					"vswitch_id":       "${alibabacloudstack_vswitch.default.id}",
@@ -375,6 +373,7 @@ func TestAccAlibabacloudStackDBInstanceMultiAZ(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBInstanceMysqlAZConfigDependence)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
+			testAccPreCheck(t)
 		},
 
 		// module name
@@ -386,8 +385,8 @@ func TestAccAlibabacloudStackDBInstanceMultiAZ(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":           "MySQL",
-					"engine_version":   "5.6",
-					"instance_type":    "rds.mysql.s2.large",
+					"engine_version":   "5.7",
+					"instance_type":    "rds.mysql.t1.small",
 					"instance_storage": "30",
 					"zone_id":          "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":    "${var.name}",
@@ -408,6 +407,7 @@ func TestAccAlibabacloudStackDBInstanceMultiAZ(t *testing.T) {
 func resourceDBInstanceMysqlAZConfigDependence(name string) string {
 	return fmt.Sprintf(`
 %s
+
 variable "name" {
 	default = "%s"
 }
@@ -419,7 +419,7 @@ resource "alibabacloudstack_security_group" "default" {
 	name   = "${var.name}"
 	vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
-`, RdsCommonTestCase, name)
+`, VSwichCommonTestCase, name)
 }
 
 func TestAccAlibabacloudStackDBInstanceClassic(t *testing.T) {
@@ -437,7 +437,7 @@ func TestAccAlibabacloudStackDBInstanceClassic(t *testing.T) {
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBInstanceClassicConfigDependence)
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-
+			testAccPreCheck(t)
 		},
 
 		// module name
@@ -449,8 +449,8 @@ func TestAccAlibabacloudStackDBInstanceClassic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":           "MySQL",
-					"engine_version":   "5.6",
-					"instance_type":    "rds.mysql.s2.large",
+					"engine_version":   "5.7",
+					"instance_type":    "rds.mysql.t1.small",
 					"instance_storage": "30",
 					"zone_id":          "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":    "${var.name}",
@@ -467,13 +467,14 @@ func TestAccAlibabacloudStackDBInstanceClassic(t *testing.T) {
 
 func resourceDBInstanceClassicConfigDependence(name string) string {
 	return fmt.Sprintf(`
+
 variable "name" {
 	default = "%s"
 }
 
-data "alibabacloudstack_zones" "default" {
-  	available_resource_creation= "Rds"
-}`, name)
+%s
+
+`, name, VSwichCommonTestCase)
 }
 
 func testAccCheckSecurityIpExists(n string, ips []map[string]interface{}) resource.TestCheckFunc {
@@ -507,7 +508,7 @@ func testAccCheckSecurityIpExists(n string, ips []map[string]interface{}) resour
 
 var instanceBasicMap = map[string]string{
 	"engine":            "MySQL",
-	"engine_version":    "5.6",
+	"engine_version":    "5.7",
 	"instance_type":     CHECKSET,
 	"instance_storage":  "30",
 	"instance_name":     "tf-testAccDBInstanceConfig",

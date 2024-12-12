@@ -131,6 +131,10 @@ func AlibabacloudTestAccVpcVswitchBasicdependence(name string) string {
 variable "name" {
     default = "%s"
 }
+<<<<<<< HEAD
+
+=======
+>>>>>>> ff546a6f94d1b8341d8908267f17fd6f2669aca3
 %s
 %s
 `, name, DataZoneCommonTestCase, VpcCommonTestCase)
