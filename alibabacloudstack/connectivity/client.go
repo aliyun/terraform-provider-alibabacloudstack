@@ -1223,13 +1223,24 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 }
 
 func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode string, version string, apiname string, pathpattern string, query map[string]interface{}, body map[string]interface{}) (_result map[string]interface{}, _err error) {
-	endpoint := client.Config.Endpoints[ServiceCode(strings.ToUpper(popcode))]
+	ServiceCodeStr := strings.ReplaceAll(strings.ToUpper(popcode), "-", "_")
+	endpoint := client.Config.Endpoints[ServiceCode(ServiceCodeStr)]
 	if endpoint == "" {
 		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", popcode)
 	}
 	sdkConfig := client.teaSdkConfig
 	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
 	conn, err := rpc.NewClient(&sdkConfig)
+	conn.Headers = make(map[string]*string)
+	for key, value := range client.defaultHeaders(popcode) {
+		conn.Headers[key] = &value
+	}
+
+	if query == nil {
+		query = make(map[string]interface{})
+	}
+	query["Product"] = popcode
+
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize the %s client: %#v", popcode, err)
 	}
@@ -1248,12 +1259,17 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	authType := "AK"
 
 	runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(client.Config.Insecure)}
+	if client.Config.Proxy != "" {
+		runtime.HttpProxy = &client.Config.Proxy
+		runtime.HttpsProxy = &client.Config.Proxy
+	}
 	runtime.SetAutoretry(true)
 
 	var response map[string]interface{}
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		response, err = conn.DoRequest(&apiname, &protocol, &method, &version, &authType, query, body, &runtime)
+		log.Printf(" ================================ %s ======================================\n query %v \n request %v \n response: %v", apiname, query, body, response)
 		if err != nil {
 			errmsg := errmsgs.GetAsapiErrorMessage(response)
 			if errmsg != "" {

@@ -43,18 +43,18 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"tair_instance_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"instance_name"},
 			},
 			"instance_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'tair_instance_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
+				Deprecated:    "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'tair_instance_name' instead.",
 				ConflictsWith: []string{"tair_instance_name"},
 			},
 			"password": {
@@ -86,33 +86,33 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Default:  KVStore5Dot0,
 			},
 			"zone_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
 				ConflictsWith: []string{"availability_zone"},
 			},
 			"availability_zone": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Computed:     true,
-				Deprecated:   "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
 				ConflictsWith: []string{"zone_id"},
 			},
 			"payment_type": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
-				Optional:     true,
-				Computed:true,
+				Type:          schema.TypeString,
+				ValidateFunc:  validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"instance_charge_type"},
 			},
 			"instance_charge_type": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
-				Optional:     true,
-				Computed:true,
-				Deprecated:   "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
+				Type:          schema.TypeString,
+				ValidateFunc:  validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
 				ConflictsWith: []string{"payment_type"},
 			},
 			"period": {
@@ -255,7 +255,7 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
 		request["ChargeType"] = v.(string)
 	} else {
-		request["ChargeType"] =string(PostPaid)
+		request["ChargeType"] = string(PostPaid)
 	}
 	if v, ok := d.GetOk("password"); ok {
 		request["Password"] = v.(string)
@@ -289,7 +289,7 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	if vswitchId, ok := d.GetOk("vswitch_id"); ok && vswitchId.(string) != "" {
 		request["VSwitchId"] = vswitchId.(string)
 		request["NetworkType"] = strings.ToUpper(string(Vpc))
-		request["PrivateIpAddress"] = Trim(d.Get("private_ip").(string))
+		// request["PrivateIpAddress"] = Trim(d.Get("private_ip").(string))
 
 		// check vswitchId in zone
 		object, err := vpcService.DescribeVSwitch(vswitchId.(string))
@@ -746,7 +746,7 @@ func buildKVStoreCreateRequest(d *schema.ResourceData, meta interface{}) (*r_kvs
 	if vswitchId, ok := d.GetOk("vswitch_id"); ok && vswitchId.(string) != "" {
 		request.VSwitchId = vswitchId.(string)
 		request.NetworkType = strings.ToUpper(string(Vpc))
-		request.PrivateIpAddress = Trim(d.Get("private_ip").(string))
+		// request.PrivateIpAddress = Trim(d.Get("private_ip").(string))
 
 		// check vswitchId in zone
 		object, err := vpcService.DescribeVSwitch(vswitchId.(string))

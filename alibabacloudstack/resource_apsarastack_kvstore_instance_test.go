@@ -16,10 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-var redisInstanceConnectionDomainRegexp = "^r-[a-z0-9]+.redis[.a-z-0-9]*.rds.aliyuncs.com"
-var redisInstanceClassForTest = "redis.master.small.default"
-var redisInstanceClassForTestUpdateClass = "redis.master.mid.default"
-var memcacheInstanceConnectionDomainRegexp = "^m-[a-z0-9]+.memcache[.a-z-0-9]*.rds.aliyuncs.com"
+var redisInstanceClassForTest = "redis.amber.master.small.multithread"
+var redisInstanceClassForTestUpdateClass = "redis.amber.logic.sharding.1g.2db.0rodb.6proxy.multithread"
 var memcacheInstanceClassForTest = "memcache.master.small.default"
 var memcacheInstanceClassForTestUpdateClass = "memcache.master.mid.default"
 
@@ -130,7 +128,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_classictest(t *testing.T) {
 		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKVStoreInstance_classic(string(KVStoreRedis), redisInstanceClassForTest, string(KVStore2Dot8)),
+				Config: testAccKVStoreInstance_classic(string(KVStoreRedis), redisInstanceClassForTest, string(KVStore5Dot0)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -144,38 +142,6 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_classictest(t *testing.T) {
 		},
 	})
 }
-
-//func TestAccAlibabacloudStackKVStoreMemcacheInstance_classictest(t *testing.T) {
-//	var instance *r_kvstore.DBInstanceAttribute
-//	resourceId := "alibabacloudstack_kvstore_instance.default"
-//	ra := resourceAttrInit(resourceId, KVStoreInstanceCheckMap)
-//	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
-//		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-//	}, "DescribeKVstoreInstance")
-//	rac := resourceAttrCheckInit(rc, ra)
-//	testAccCheck := rac.resourceAttrMapUpdateSet()
-//
-//	resource.Test(t, resource.TestCase{
-//		PreCheck: func() {
-//			testAccPreCheck(t)
-//		},
-//
-//		// module name
-//		IDRefreshName: resourceId,
-//
-//		Providers:    testAccProviders,
-//		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
-//		Steps: []resource.TestStep{
-//			{
-//				Config: testAccKVStoreInstance_classic(string(KVStoreMemcache), memcacheInstanceClassForTest, string(KVStore2Dot8)),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheck(nil),
-//				),
-//			},
-//
-//		},
-//	})
-//}
 
 func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 	var instance *r_kvstore.DBInstanceAttribute
@@ -213,90 +179,6 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 		},
 	})
 }
-
-// Currently Memcache instance only supports engine version 2.8.
-//func TestAccAlibabacloudStackKVStoreMemcacheInstance_vpctest(t *testing.T) {
-//	var instance *r_kvstore.DBInstanceAttribute
-//	resourceId := "alibabacloudstack_kvstore_instance.default"
-//	ra := resourceAttrInit(resourceId, KVStoreInstanceCheckMap)
-//	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
-//		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-//	}, "DescribeKVstoreInstance")
-//	rac := resourceAttrCheckInit(rc, ra)
-//	testAccCheck := rac.resourceAttrMapUpdateSet()
-//
-//	resource.Test(t, resource.TestCase{
-//		PreCheck: func() {
-//			testAccPreCheck(t)
-//		},
-//
-//		// module name
-//		IDRefreshName: resourceId,
-//
-//		Providers:    testAccProviders,
-//		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
-//		Steps: []resource.TestStep{
-//			{
-//				Config: testAccKVStoreInstance_vpc(KVStoreCommonTestCase, memcacheInstanceClassForTest, string(KVStoreMemcache), string(KVStore2Dot8)),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheck(nil),
-//				),
-//			},
-//			{
-//				ResourceName:            resourceId,
-//				ImportState:             true,
-//				ImportStateVerify:       true,
-//				ImportStateVerifyIgnore: []string{"password"},
-//			},
-//			{
-//				Config: testAccKVStoreInstance_vpcUpdateSecurityIps(KVStoreCommonTestCase, memcacheInstanceClassForTest, string(KVStoreMemcache), string(KVStore2Dot8)),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheck(map[string]string{
-//						"security_ips.#": "2",
-//					}),
-//				),
-//			},
-//			//{
-//			//	Config: testAccKVStoreInstance_vpcUpdateClass(KVStoreCommonTestCase, memcacheInstanceClassForTestUpdateClass, string(KVStoreMemcache), string(KVStore2Dot8)),
-//			//	Check: resource.ComposeTestCheckFunc(
-//			//		testAccCheck(map[string]string{
-//			//			"instance_class": memcacheInstanceClassForTestUpdateClass,
-//			//		}),
-//			//	),
-//			//},
-//			//{
-//			//	Config: testAccKVStoreInstance_vpcUpdateParameter(KVStoreCommonTestCase, memcacheInstanceClassForTestUpdateClass, string(KVStoreMemcache), string(KVStore2Dot8)),
-//			//	Check: resource.ComposeTestCheckFunc(
-//			//		testAccCheck(map[string]string{
-//			//			"parameters.#": "1",
-//			//		}),
-//			//	),
-//			//},
-//			//{
-//			//	Config: testAccKVStoreInstance_vpcAddParameter(KVStoreCommonTestCase, memcacheInstanceClassForTestUpdateClass, string(KVStoreMemcache), string(KVStore2Dot8)),
-//			//	Check: resource.ComposeTestCheckFunc(
-//			//		testAccCheck(map[string]string{
-//			//			"parameters.#": "2",
-//			//		}),
-//			//	),
-//			//},
-//			//{
-//			//	Config: testAccKVStoreInstance_vpcDeleteParameter(KVStoreCommonTestCase, memcacheInstanceClassForTestUpdateClass, string(KVStoreMemcache), string(KVStore2Dot8)),
-//			//	Check: resource.ComposeTestCheckFunc(
-//			//		testAccCheck(map[string]string{
-//			//			"parameters.#": "1",
-//			//		}),
-//			//	),
-//			//},
-//			{
-//				Config: testAccKVStoreInstance_vpcUpdateAll(KVStoreCommonTestCase, memcacheInstanceClassForTest, string(KVStoreMemcache), string(KVStore2Dot8)),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheck(nil),
-//				),
-//			},
-//		},
-//	})
-//}
 
 func TestAccAlibabacloudStackKVStoreRedisInstance_vpcmulti(t *testing.T) {
 	var instance *r_kvstore.DBInstanceAttribute
@@ -388,30 +270,23 @@ func testAccKVStoreInstance_classic(instanceType, instanceClass, engineVersion s
 variable "name" {
     default = "tf-testAccCheckAlibabacloudStackRKVInstancesDataSource4"
 }
-data "alibabacloudstack_zones"  "default" {
-}
-resource "alibabacloudstack_vpc" "default" {
-	name       = var.name
-	cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-	vpc_id            = alibabacloudstack_vpc.default.id
-	cidr_block        = "172.16.0.0/24"
-	availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-	name              = var.name
-}
+
+%s
+
 resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
 	vswitch_id     = alibabacloudstack_vswitch.default.id
-	private_ip     = "172.16.0.10"
-	security_ips   = ["10.0.0.1"]
+	instance_charge_type = "PostPaid"
 	instance_type  = "%s"
 	instance_class = "%s"
 	engine_version = "%s"
-cpu_type = "intel"
+    cpu_type = "intel"
+	series = "enterprise"
+	node_type = "double"
+	architecture_type = "standard"
 }
 
-	`, instanceType, instanceClass, engineVersion)
+	`, VSwichCommonTestCase, instanceType, instanceClass, engineVersion)
 }
 
 var KVStoreInstanceCheckMap = map[string]string{

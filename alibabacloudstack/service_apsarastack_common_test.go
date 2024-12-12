@@ -1292,6 +1292,7 @@ resource "alibabacloudstack_security_group_rule" "default" {
   	priority = 1
   	security_group_id = "${alibabacloudstack_ecs_securitygroup.default.id}"
   	cidr_ip = "172.16.0.0/24"
+>>>>>>> ff546a6f94d1b8341d8908267f17fd6f2669aca3
 }
 
 `
@@ -1387,10 +1388,10 @@ resource "alibabacloudstack_db_instance" "default" {
   engine_version       = "5.6"
   instance_type        = "rds.mysql.s2.large"
   instance_storage     = "30"
-  storage_type     = "local_ssd"
+  storage_type         = "local_ssd"
   instance_name        = "testacctf-mysql"
-  tde_status=false
-  enable_ssl=false
+  tde_status           = false
+  enable_ssl           = false
 }
 
 `
