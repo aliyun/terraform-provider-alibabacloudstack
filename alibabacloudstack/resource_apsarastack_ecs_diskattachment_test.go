@@ -19,11 +19,12 @@ func TestAccAlibabacloudStackDiskAttachment(t *testing.T) {
 	serverFunc := func() interface{} {
 		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	diskRc := resourceCheckInit("alibabacloudstack_disk.default", &v, serverFunc)
+	
+	diskRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_disk.default", &v, serverFunc, "DescribeDisk")
+	
+	instanceRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_instance.default", &i, serverFunc, "DescribeInstance")
 
-	instanceRc := resourceCheckInit("alibabacloudstack_instance.default", &i, serverFunc)
-
-	attachmentRc := resourceCheckInit("alibabacloudstack_disk_attachment.default", &attachment, serverFunc)
+	attachmentRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_diskattachment.default", &attachment, serverFunc, "DescribeDiskAttachment")
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -31,7 +32,7 @@ func TestAccAlibabacloudStackDiskAttachment(t *testing.T) {
 		},
 
 		// module name
-		IDRefreshName: "alibabacloudstack_disk_attachment.default",
+		IDRefreshName: "alibabacloudstack_ecs_diskattachment.default",
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckDiskAttachmentDestroy,
 		Steps: []resource.TestStep{
@@ -42,7 +43,7 @@ func TestAccAlibabacloudStackDiskAttachment(t *testing.T) {
 					instanceRc.checkResourceExists(),
 					attachmentRc.checkResourceExists(),
 					resource.TestCheckResourceAttrSet(
-						"alibabacloudstack_disk_attachment.default", "device_name"),
+						"alibabacloudstack_ecs_diskattachment.default", "device_name"),
 				),
 			},
 			{
@@ -52,9 +53,9 @@ func TestAccAlibabacloudStackDiskAttachment(t *testing.T) {
 					instanceRc.checkResourceExists(),
 					attachmentRc.checkResourceExists(),
 					resource.TestCheckResourceAttrSet(
-						"alibabacloudstack_disk_attachment.default", "device_name"),
+						"alibabacloudstack_ecs_diskattachment.default", "device_name"),
 					resource.TestCheckResourceAttr(
-						"alibabacloudstack_disk.default", "size", "70"),
+						"alibabacloudstack_ecs_disk.default", "size", "70"),
 				),
 			},
 		},
@@ -69,11 +70,11 @@ func TestAccAlibabacloudStackDiskMultiAttachment(t *testing.T) {
 	serverFunc := func() interface{} {
 		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	diskRc := resourceCheckInit("alibabacloudstack_disk.default.1", &v, serverFunc)
+	diskRc := resourceCheckInit("alibabacloudstack_ecs_disk.default.1", &v, serverFunc)
 
-	instanceRc := resourceCheckInit("alibabacloudstack_instance.default", &i, serverFunc)
+	instanceRc := resourceCheckInit("alibabacloudstack_ecs_instance.default", &i, serverFunc)
 
-	attachmentRc := resourceCheckInit("alibabacloudstack_disk_attachment.default.1", &attachment, serverFunc)
+	attachmentRc := resourceCheckInit("alibabacloudstack_ecs_diskattachment.default.1", &attachment, serverFunc)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -81,18 +82,18 @@ func TestAccAlibabacloudStackDiskMultiAttachment(t *testing.T) {
 		},
 
 		// module name
-		IDRefreshName: "alibabacloudstack_disk_attachment.default.1",
+		IDRefreshName: "alibabacloudstack_ecs_diskattachment.default.1",
 		Providers:     testAccProviders,
 		CheckDestroy:  testAccCheckDiskAttachmentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMultiDiskAttachmentConfig(EcsInstanceCommonNoZonesTestCase),
+				Config: testAccMultiDiskAttachmentConfig(ECSInstanceCommonTestCase),
 				Check: resource.ComposeTestCheckFunc(
 					diskRc.checkResourceExists(),
 					instanceRc.checkResourceExists(),
 					attachmentRc.checkResourceExists(),
 					resource.TestCheckResourceAttrSet(
-						"alibabacloudstack_disk_attachment.default.1", "device_name"),
+						"alibabacloudstack_ecs_diskattachment.default.1", "device_name"),
 				),
 			},
 		},
@@ -103,7 +104,7 @@ func TestAccAlibabacloudStackDiskMultiAttachment(t *testing.T) {
 func testAccCheckDiskAttachmentDestroy(s *terraform.State) error {
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "alibabacloudstack_disk_attachment" {
+		if rs.Type != "alibabacloudstack_ecs_diskattachment" {
 			continue
 		}
 		// Try to find the Disk
@@ -124,127 +125,59 @@ func testAccCheckDiskAttachmentDestroy(s *terraform.State) error {
 
 func testAccDiskAttachmentConfig() string {
 	return fmt.Sprintf(`
-	%s
-	
-	%s
-	
-    data "alibabacloudstack_images" "default" {
-	  # test for windows service
-      name_regex  = "^win*"
 
-      most_recent = true
-      owners      = "system"
-    }
-    resource "alibabacloudstack_vpc" "default" {
-      name       = "${var.name}"
-      cidr_block = "172.16.0.0/16"
-    }
-    resource "alibabacloudstack_vswitch" "default" {
-      vpc_id            = "${alibabacloudstack_vpc.default.id}"
-      cidr_block        = "172.16.0.0/24"
-      availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-      name              = "${var.name}"
-    }
-    resource "alibabacloudstack_security_group" "default" {
-      name   = "${var.name}"
-      vpc_id = "${alibabacloudstack_vpc.default.id}"
-    }
-   
 	variable "name" {
 		default = "tf-testAccEcsDiskAttachmentConfig"
 	}
+	
+%s
 
-	resource "alibabacloudstack_disk" "default" {
+	resource "alibabacloudstack_ecs_disk" "default" {
 	  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 	  size = "50"
 	  name = "${var.name}"
-	  category = "cloud_pperf"
+	  category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 
 	  tags = {
 	    Name = "TerraformTest-disk"
 	  }
 	}
 
-	resource "alibabacloudstack_instance" "default" {
-		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-		system_disk_category = "cloud_ssd"
-		system_disk_size = 40
-		instance_type = "ecs.n4.large"
-		security_groups = ["${alibabacloudstack_security_group.default.id}"]
-		instance_name = "${var.name}"
-		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-	}
 
-	resource "alibabacloudstack_disk_attachment" "default" {
-	  disk_id = "${alibabacloudstack_disk.default.id}"
-	  instance_id = "${alibabacloudstack_instance.default.id}"
+	resource "alibabacloudstack_ecs_diskattachment" "default" {
+	  disk_id = "${alibabacloudstack_ecs_disk.default.id}"
+	  instance_id = "${alibabacloudstack_ecs_instance.default.id}"
 	}
-	`, DataAlibabacloudstackVswitchZones, DataAlibabacloudstackInstanceTypes)
+	`, ECSInstanceCommonTestCase)
 }
 func testAccDiskAttachmentConfigResize() string {
 	return fmt.Sprintf(`
-	%s
-	
-	%s
-
-    data "alibabacloudstack_images" "default" {
-	  # test for windows service
-      name_regex  = "^win*"
-
-      most_recent = true
-      owners      = "system"
-    }
-    resource "alibabacloudstack_vpc" "default" {
-      name       = "${var.name}"
-      cidr_block = "172.16.0.0/16"
-    }
-    resource "alibabacloudstack_vswitch" "default" {
-      vpc_id            = "${alibabacloudstack_vpc.default.id}"
-      cidr_block        = "172.16.0.0/24"
-      availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-      name              = "${var.name}"
-    }
-    resource "alibabacloudstack_security_group" "default" {
-      name   = "${var.name}"
-      vpc_id = "${alibabacloudstack_vpc.default.id}"
-    }
     
 	variable "name" {
 		default = "tf-testAccEcsDiskAttachmentConfig"
 	}
+	
+	%s
 
-	resource "alibabacloudstack_disk" "default" {
+	resource "alibabacloudstack_ecs_disk" "default" {
 	  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 	  size = "70"
 	  name = "${var.name}"
-	  category = "cloud_pperf"
+	  category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 
 	  tags = {
 	    Name = "TerraformTest-disk"
 	  }
 	}
 
-	resource "alibabacloudstack_instance" "default" {
-		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-		system_disk_category = "cloud_ssd"
-		system_disk_size = 40
-		instance_type = "ecs.n4.large"
-		security_groups = ["${alibabacloudstack_security_group.default.id}"]
-		instance_name = "${var.name}"
-		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	resource "alibabacloudstack_ecs_diskattachment" "default" {
+	  disk_id = "${alibabacloudstack_ecs_disk.default.id}"
+	  instance_id = "${alibabacloudstack_ecs_instance.default.id}"
 	}
-
-	resource "alibabacloudstack_disk_attachment" "default" {
-	  disk_id = "${alibabacloudstack_disk.default.id}"
-	  instance_id = "${alibabacloudstack_instance.default.id}"
-	}
-	`, DataAlibabacloudstackVswitchZones, DataAlibabacloudstackInstanceTypes)
+	`, ECSInstanceCommonTestCase)
 }
 func testAccMultiDiskAttachmentConfig(common string) string {
 	return fmt.Sprintf(`
-	%s
 	variable "name" {
 		default = "tf-testAccEcsDiskAttachmentConfig"
 	}
@@ -252,8 +185,10 @@ func testAccMultiDiskAttachmentConfig(common string) string {
 	variable "number" {
 		default = "2"
 	}
+	
+	%s
 
-	resource "alibabacloudstack_disk" "default" {
+	resource "alibabacloudstack_ecs_disk" "default" {
 		name = "${var.name}-${count.index}"
 		count = "${var.number}"
 		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
@@ -264,21 +199,10 @@ func testAccMultiDiskAttachmentConfig(common string) string {
 		}
 	}
 
-	resource "alibabacloudstack_instance" "default" {
-		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-		system_disk_category = "cloud_ssd"
-		system_disk_size = 40
-		instance_type = "ecs.n4.large"
-		security_groups = ["${alibabacloudstack_security_group.default.id}"]
-		instance_name = "${var.name}"
-		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-	}
-
-	resource "alibabacloudstack_disk_attachment" "default" {
+	resource "alibabacloudstack_ecs_diskattachment" "default" {
 		count = "${var.number}"
-		disk_id     = "${element(alibabacloudstack_disk.default.*.id, count.index)}"
-		instance_id = "${alibabacloudstack_instance.default.id}"
+		disk_id     = "${element(alibabacloudstack_ecs_disk.default.*.id, count.index)}"
+		instance_id = "${alibabacloudstack_ecs_instance.default.id}"
 	}
 	`, common)
 }

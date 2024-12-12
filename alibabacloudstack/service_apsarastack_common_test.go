@@ -794,32 +794,7 @@ data "alibabacloudstack_images" "default" {
 
 `
 
-const EcsInstanceCommonNoZonesTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + `
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  zone_id = data.alibabacloudstack_zones.default.zones[0].id
-  name              = "${var.name}"
-}
-resource "alibabacloudstack_security_group" "default" {
-  name   = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-resource "alibabacloudstack_security_group_rule" "default" {
-  	type = "ingress"
-  	ip_protocol = "tcp"
-  	nic_type = "intranet"
-  	policy = "accept"
-  	port_range = "22/22"
-  	priority = 1
-  	security_group_id = "${alibabacloudstack_security_group.default.id}"
-  	cidr_ip = "172.16.0.0/24"
-}
-`
+
 const RdsCommonTestCase = `
 data  "alibabacloudstack_zones" "default" {
   available_resource_creation = "${var.creation}"
@@ -1297,10 +1272,18 @@ resource "alibabacloudstack_security_group_rule" "default" {
 `
 
 const ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloudstackImages + `
-
+data "alibabacloudstack_instance_types" "default" {
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+  cpu_core_count       = 2
+  memory_size          = 4
+  instance_type_family = "ecs.n4"
+  sorted_by            = "Memory"
+  
+ }
+ 
 resource "alibabacloudstack_ecs_instance" "default" {
   image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
-  instance_type        = "ecs.n4.large"
+  instance_type        = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
   system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
   system_disk_size     = 40
   system_disk_name     = "test_sys_disk"
