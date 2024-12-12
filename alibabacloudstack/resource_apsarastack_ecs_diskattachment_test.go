@@ -2,8 +2,9 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"testing"
+
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -157,7 +158,7 @@ func testAccDiskAttachmentConfig() string {
 	  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 	  size = "50"
 	  name = "${var.name}"
-	  category = "cloud_efficiency"
+	  category = "cloud_pperf"
 
 	  tags = {
 	    Name = "TerraformTest-disk"
@@ -169,7 +170,7 @@ func testAccDiskAttachmentConfig() string {
 		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 		system_disk_category = "cloud_ssd"
 		system_disk_size = 40
-		instance_type = "${local.instance_type_id}"
+		instance_type = "ecs.n4.large"
 		security_groups = ["${alibabacloudstack_security_group.default.id}"]
 		instance_name = "${var.name}"
 		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
@@ -217,7 +218,7 @@ func testAccDiskAttachmentConfigResize() string {
 	  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 	  size = "70"
 	  name = "${var.name}"
-	  category = "cloud_efficiency"
+	  category = "cloud_pperf"
 
 	  tags = {
 	    Name = "TerraformTest-disk"
@@ -229,7 +230,7 @@ func testAccDiskAttachmentConfigResize() string {
 		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 		system_disk_category = "cloud_ssd"
 		system_disk_size = 40
-		instance_type = "${local.instance_type_id}"
+		instance_type = "ecs.n4.large"
 		security_groups = ["${alibabacloudstack_security_group.default.id}"]
 		instance_name = "${var.name}"
 		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
@@ -268,7 +269,7 @@ func testAccMultiDiskAttachmentConfig(common string) string {
 		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 		system_disk_category = "cloud_ssd"
 		system_disk_size = 40
-		instance_type = "${local.instance_type_id}"
+		instance_type = "ecs.n4.large"
 		security_groups = ["${alibabacloudstack_security_group.default.id}"]
 		instance_name = "${var.name}"
 		vswitch_id = "${alibabacloudstack_vswitch.default.id}"

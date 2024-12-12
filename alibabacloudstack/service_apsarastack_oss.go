@@ -21,14 +21,11 @@ type OssService struct {
 func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoResult, err error) {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	mergeMaps(request.QueryParams, map[string]string{
-		"AccountInfo":      "123456",
+		"AccountInfo":      "",
 		"SignatureVersion": "1.0",
 		"OpenApiAction":    "GetService",
 		"ProductName":      "oss",
 	})
-	request.Headers["x-acs-organizationid"] = s.client.Department
-	request.Headers["x-acs-resourcegroupid"] = s.client.ResourceGroup
-
 	var bucketList = &BucketList{}
 	raw, err := s.client.WithOssNewClient(func(ossClient *ecs.Client) (interface{}, error) {
 		return ossClient.ProcessCommonRequest(request)

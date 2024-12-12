@@ -39,18 +39,18 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Optional:     true,
-				Computed:     true,
-				Deprecated:   "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
 				ConflictsWith: []string{"zone_id"},
 			},
 			"zone_id": {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional:     true,
-				Computed:     true,
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"availability_zone"},
 			},
 
@@ -293,8 +293,9 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 			},
 			"ipv6_address_list": {
 				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+
+				Elem: &schema.Schema{Type: schema.TypeString},
 			},
 			"tags":             tagsSchema(),
 			"system_disk_tags": tagsSchema(),
@@ -355,11 +356,9 @@ func resourceAlibabacloudStackInstanceCreate(d *schema.ResourceData, meta interf
 		}
 	}
 	if d.Get("enable_ipv6").(bool) && d.Get("ipv6_address_count").(int) > 0 {
-		ipv6s, err := AssignIpv6AddressesFunc(d.Id(), d.Get("ipv6_address_count").(int), d.Get("ipv6_address_list").([]string), meta)
+		_, err := AssignIpv6AddressesFunc(d.Id(), d.Get("ipv6_address_count").(int), d.Get("ipv6_address_list").([]string), meta)
 		if err != nil {
 			return errmsgs.WrapError(err)
-		} else {
-			d.Set("ipv6_address_list", ipv6s)
 		}
 	}
 	return resourceAlibabacloudStackInstanceUpdate(d, meta)
@@ -484,6 +483,28 @@ func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interfac
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
+	// 查询 ipv6地址集
+	// request := ecs.CreateDescribeNetworkInterfacesRequest()
+	// client.InitRpcRequest(*request.RpcRequest)
+	// request.InstanceId = d.Id()
+	// raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+	// 	return ecsClient.DescribeNetworkInterfaces(request)
+	// })
+	// bresponse, ok := raw.(*ecs.DescribeNetworkInterfacesResponse)
+	// if err != nil {
+	// 	errmsg := ""
+	// 	if ok {
+	// 		errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	// 	}
+	// 	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	// }
+	// ipv6_address_list := make([]string, 0)
+	// if len(bresponse.NetworkInterfaceSets.NetworkInterfaceSet) > 0 && len(bresponse.NetworkInterfaceSets.NetworkInterfaceSet[0].Ipv6Sets.Ipv6Set) > 0 {
+	// 	for _, ipv6 := range bresponse.NetworkInterfaceSets.NetworkInterfaceSet[0].Ipv6Sets.Ipv6Set {
+	// 		ipv6_address_list = append(ipv6_address_list, ipv6.Ipv6Address)
+	// 	}
+	// 	d.Set("ipv6_address_list", ipv6_address_list)
+	// }
 
 	return nil
 }
