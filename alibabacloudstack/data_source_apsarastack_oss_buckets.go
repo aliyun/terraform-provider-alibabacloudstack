@@ -19,6 +19,14 @@ func dataSourceAlibabacloudStackOssBuckets() *schema.Resource {
 		Read: dataSourceAlibabacloudStackOssBucketsRead,
 
 		Schema: map[string]*schema.Schema{
+			"ids": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+				ForceNew: true,
+				MinItems: 1,
+			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -41,6 +49,10 @@ func dataSourceAlibabacloudStackOssBuckets() *schema.Resource {
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -164,6 +176,7 @@ func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []oss.BucketPr
 	var names []string
 	for _, bucket := range buckets {
 		mapping := map[string]interface{}{
+			"id":				 bucket.Name,
 			"name":              bucket.Name,
 			"location":          bucket.Location,
 			"storage_class":     bucket.StorageClass,
