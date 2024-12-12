@@ -307,12 +307,13 @@ func dataSourceAlibabacloudStackVpcsRead(d *schema.ResourceData, meta interface{
 		request.VRouterId = v.VRouterId
 
 		var response *vpc.DescribeVRoutersResponse
+		var ok bool
 		wait := incrementalWait(1*time.Second, 1*time.Second)
 		err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 			raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 				return vpcClient.DescribeVRouters(request)
 			})
-			response, ok := raw.(*vpc.DescribeVRoutersResponse)
+			response, ok = raw.(*vpc.DescribeVRoutersResponse)
 			if err != nil {
 				if errmsgs.IsThrottling(err) {
 					wait()

@@ -903,24 +903,6 @@ const ElasticsearchInstanceCommonTestCase = `
 
 `
 
-const SlbVpcCommonTestCase = `
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation= "VSwitch"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "172.16.0.0/12"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "172.16.0.0/21"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name = "${var.name}"
-}
-`
-
 const EmrCommonTestCase = `
 data "alibabacloudstack_emr_main_versions" "default" {
 }
@@ -1201,16 +1183,6 @@ resource "alibabacloudstack_ram_role" "default" {
 }
 `
 
-const SlbListenerCommonTestCase = `
-variable "ip_version" {
-  default = "ipv4"
-}	
-resource "alibabacloudstack_slb" "default" {
-  name = "${var.name}"
-  address_type = "internet"
-}
-`
-
 const SlbListenerVserverCommonTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + SecurityGroupCommonTestCase + `
 
 resource "alibabacloudstack_instance" "default" {
@@ -1270,7 +1242,7 @@ resource "alibabacloudstack_vpc_vpc" "default" {
 }
 `
 
-const VSwichCommonTestCase = DataZoneCommonTestCase + VpcCommonTestCase + `
+const VSwitchCommonTestCase = DataZoneCommonTestCase + VpcCommonTestCase + `
 
 resource "alibabacloudstack_vpc_vswitch" "default" {
   name = "${var.name}_vsw"
@@ -1281,7 +1253,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 
 `
 
-const DBClusterCommonTestCase = VSwichCommonTestCase + `
+const DBClusterCommonTestCase = VSwitchCommonTestCase + `
 
 resource "alibabacloudstack_adb_db_cluster" "cluster" {
   db_cluster_version  = "3.0"
@@ -1304,7 +1276,7 @@ resource "alibabacloudstack_eip" "example" {
 
 `
 
-const SecurityGroupCommonTestCase = VSwichCommonTestCase + `
+const SecurityGroupCommonTestCase = VSwitchCommonTestCase + `
 
 resource "alibabacloudstack_ecs_securitygroup" "default" {
   name   = "${var.name}_sg"
@@ -1320,7 +1292,6 @@ resource "alibabacloudstack_security_group_rule" "default" {
   	priority = 1
   	security_group_id = "${alibabacloudstack_ecs_securitygroup.default.id}"
   	cidr_ip = "172.16.0.0/24"
->>>>>>> ff546a6f94d1b8341d8908267f17fd6f2669aca3
 }
 
 `
@@ -1388,7 +1359,7 @@ resource "alibabacloudstack_express_connect_physical_connection" "domestic" {
 
 `
 
-const FtbCommonTestCase = VSwichCommonTestCase + `
+const FtbCommonTestCase = VSwitchCommonTestCase + `
 
 resource "alibabacloudstack_nat_gateway" "default" {
   vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
@@ -1438,12 +1409,11 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 
 `
 
-const SlbCommonTestCase = VSwichCommonTestCase + `
+const SlbCommonTestCase = VSwitchCommonTestCase + `
 
 resource "alibabacloudstack_slb" "default" {
   name          = "${var.name}_slb"
-  vswitch_id    = "${alibabacloudstack_vswitch.default.id}"
-  specification = "slb.s2.small"
+  vswitch_id    = "${alibabacloudstack_vpc_vswitch.default.id}"
 }
 
 `

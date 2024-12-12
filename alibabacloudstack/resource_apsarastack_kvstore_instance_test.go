@@ -286,7 +286,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	architecture_type = "standard"
 }
 
-	`, VSwichCommonTestCase, instanceType, instanceClass, engineVersion)
+	`, VSwitchCommonTestCase, instanceType, instanceClass, engineVersion)
 }
 
 var KVStoreInstanceCheckMap = map[string]string{
