@@ -1223,7 +1223,8 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 }
 
 func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode string, version string, apiname string, pathpattern string, query map[string]interface{}, body map[string]interface{}) (_result map[string]interface{}, _err error) {
-	endpoint := client.Config.Endpoints[ServiceCode(strings.ToUpper(popcode))]
+	ServiceCodeStr := strings.ReplaceAll(strings.ToUpper(popcode), "-", "_")
+	endpoint := client.Config.Endpoints[ServiceCode(ServiceCodeStr)]
 	if endpoint == "" {
 		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", popcode)
 	}
@@ -1234,6 +1235,12 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	for key, value := range client.defaultHeaders(popcode) {
 		conn.Headers[key] = &value
 	}
+
+	if query == nil {
+		query = make(map[string]interface{})
+	}
+	query["Product"] = popcode
+
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize the %s client: %#v", popcode, err)
 	}

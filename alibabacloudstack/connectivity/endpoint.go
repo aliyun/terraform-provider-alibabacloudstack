@@ -44,7 +44,7 @@ const (
 	DDSCode             = ServiceCode("DDS")
 	GPDBCode            = ServiceCode("GPDB")
 	CENCode             = ServiceCode("CEN")
-	KVSTORECode         = ServiceCode("KVSTORE")
+	KVSTORECode         = ServiceCode("R_KVSTORE") // 不允许出现-，schema不接受，以_代替
 	POLARDBCode         = ServiceCode("POLARDB")
 	MNSCode             = ServiceCode("MNS")
 	CLOUDAPICode        = ServiceCode("CLOUDAPI")
