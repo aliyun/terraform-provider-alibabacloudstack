@@ -46,3 +46,4 @@ website/vendor
 .vscode
 /dist
 alibabacloudstack/cover.out
+alibabacloudstack/debug.test*

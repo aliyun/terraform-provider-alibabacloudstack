@@ -195,5 +195,5 @@ variable "name" {
 %s 
 `,
 
-		name, VSwichCommonTestCase)
+		name, VSwitchCommonTestCase)
 }

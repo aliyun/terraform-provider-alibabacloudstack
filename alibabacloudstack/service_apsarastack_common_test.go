@@ -1242,7 +1242,7 @@ resource "alibabacloudstack_vpc_vpc" "default" {
 }
 `
 
-const VSwichCommonTestCase = DataZoneCommonTestCase + VpcCommonTestCase + `
+const VSwitchCommonTestCase = DataZoneCommonTestCase + VpcCommonTestCase + `
 
 resource "alibabacloudstack_vpc_vswitch" "default" {
   name = "${var.name}_vsw"
@@ -1253,7 +1253,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 
 `
 
-const DBClusterCommonTestCase = VSwichCommonTestCase + `
+const DBClusterCommonTestCase = VSwitchCommonTestCase + `
 
 resource "alibabacloudstack_adb_db_cluster" "cluster" {
   db_cluster_version  = "3.0"
@@ -1276,7 +1276,7 @@ resource "alibabacloudstack_eip" "example" {
 
 `
 
-const SecurityGroupCommonTestCase = VSwichCommonTestCase + `
+const SecurityGroupCommonTestCase = VSwitchCommonTestCase + `
 
 resource "alibabacloudstack_ecs_securitygroup" "default" {
   name   = "${var.name}_sg"
@@ -1359,7 +1359,7 @@ resource "alibabacloudstack_express_connect_physical_connection" "domestic" {
 
 `
 
-const FtbCommonTestCase = VSwichCommonTestCase + `
+const FtbCommonTestCase = VSwitchCommonTestCase + `
 
 resource "alibabacloudstack_nat_gateway" "default" {
   vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
@@ -1409,7 +1409,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 
 `
 
-const SlbCommonTestCase = VSwichCommonTestCase + `
+const SlbCommonTestCase = VSwitchCommonTestCase + `
 
 resource "alibabacloudstack_slb" "default" {
   name          = "${var.name}_slb"
