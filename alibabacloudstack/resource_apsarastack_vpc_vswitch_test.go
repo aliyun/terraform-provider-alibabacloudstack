@@ -131,10 +131,6 @@ func AlibabacloudTestAccVpcVswitchBasicdependence(name string) string {
 variable "name" {
     default = "%s"
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> ff546a6f94d1b8341d8908267f17fd6f2669aca3
 %s
 %s
 `, name, DataZoneCommonTestCase, VpcCommonTestCase)
@@ -179,7 +175,7 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 
 					"cidr_block": "172.16.0.0/24",
 
-					"enable_ipv6": true,
+					"enable_ipv6": "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
