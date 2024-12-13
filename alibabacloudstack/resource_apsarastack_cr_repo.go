@@ -95,14 +95,14 @@ func resourceAlibabacloudStackCRRepoCreate(d *schema.ResourceData, meta interfac
 	request.ApiName = "CreateRepo"
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		
-		
 		"Product":         "cr",
 		"Department":      client.Department,
 		"ResourceGroup":   client.ResourceGroup,
 		"RegionId":        client.RegionId,
 		"Action":          "CreateRepo",
 		"Version":         "2016-06-07",
+		"RepoNamespace":   repoNamespace,
+		"RepoName":        repoName,
 		"X-acs-body":      fmt.Sprintf("{\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}", "repo", "RepoName", repoName, "RepoNamespace", repoNamespace, "repoType", repoType, "summary", summary, "detail", detail),
 	}
 
@@ -153,8 +153,6 @@ func resourceAlibabacloudStackCRRepoUpdate(d *schema.ResourceData, meta interfac
 		request.ApiName = "UpdateRepo"
 		request.Headers = map[string]string{"RegionId": client.RegionId}
 		request.QueryParams = map[string]string{
-			
-			
 			"Product":         "cr",
 			"Department":      client.Department,
 			"ResourceGroup":   client.ResourceGroup,
@@ -163,7 +161,7 @@ func resourceAlibabacloudStackCRRepoUpdate(d *schema.ResourceData, meta interfac
 			"Version":         "2016-06-07",
 			"RepoNamespace":   repoNamespace,
 			"RepoName":        repoName,
-			"X-acs-body":      fmt.Sprintf("{\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}", "repo", "repoType", repoType, "summary", summary, "detail", detail),
+			"X-acs-body":      fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}", "repoType", repoType, "summary", summary, "detail", detail),
 		}
 		raw, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
 			return crClient.ProcessCommonRequest(request)
