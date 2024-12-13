@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 
 	//	"github.com/aliyun/alibaba-cloud-sdk-go/services/cs"
@@ -823,8 +824,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	if attachinst == 1 {
 		if pod == 0 {
 			request.QueryParams = map[string]string{
-				"AccountInfo":      "123456",
-				"SignatureVersion": "1.0",
+				"Action": "CreateCluster",
 				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
 					"Product", "Cs",
 					"os_type", OsType,
@@ -871,9 +871,8 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 			}
 		} else {
 			request.QueryParams = map[string]string{
-				"Action":           "CreateCluster",
-				"AccountInfo":      "123456",
-				"SignatureVersion": "1.0",
+				"Action": "CreateCluster",
+
 				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
 					"Product", "Cs",
 					"os_type", OsType,
@@ -923,8 +922,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	} else {
 		if pod == 0 {
 			request.QueryParams = map[string]string{
-				"AccountInfo":      "123456",
-				"SignatureVersion": "1.0",
+				"Action": "CreateCluster",
 				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
 					"Product", "Cs",
 					"os_type", OsType,
@@ -972,8 +970,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 			}
 		} else {
 			request.QueryParams = map[string]string{
-				"AccountInfo":      "123456",
-				"SignatureVersion": "1.0",
+				"Action": "CreateCluster",
 				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
 					"Product", "Cs",
 					"os_type", OsType,
@@ -1022,7 +1019,8 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 			}
 		}
 	}
-
+	request.SetContent([]byte("{\"from\":\"terraform\"}"))
+	request.SetContentType(requests.Json)
 	var err error
 	err = nil
 	if err = invoker.Run(func() error {
@@ -1139,8 +1137,6 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 			}
 			req := client.NewCommonRequest("POST", "CS", "2015-12-15", "RemoveClusterNodes", "")
 			mergeMaps(req.QueryParams, map[string]string{
-				"AccountInfo":      "123456",
-				"SignatureVersion": "1.0",
 
 				"X-acs-body": fmt.Sprintf("{\"%s\":%t,\"%s\":%t,\"%s\":%q,\"%s\":\"%s\"}",
 
@@ -1175,11 +1171,10 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 		if newValue > oldValue {
 			request := client.NewCommonRequest("POST", "CS", "2015-12-15", "ScaleClusterNodePool", "")
 			mergeMaps(request.QueryParams, map[string]string{
-				"AccountInfo":      "123456",
-				"SignatureVersion": "1.0",
-				"ProductName":      "cs",
-				"NodepoolId":       nodepoolid,
-				"ClusterId":        d.Id(),
+
+				"ProductName": "cs",
+				"NodepoolId":  nodepoolid,
+				"ClusterId":   d.Id(),
 				"X-acs-body": fmt.Sprintf("{\"%s\":%d}",
 					"count", int64(newValue)-int64(oldValue),
 				),
