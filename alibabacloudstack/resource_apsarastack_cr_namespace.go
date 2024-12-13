@@ -61,10 +61,9 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 	}
 	request.ApiName = "CreateNamespace"
 	request.SetContentType("application/json")
+	request.SetContent([]byte("{}"))  // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
 	request.Headers = map[string]string{"RegionId": client.RegionId}
 	request.QueryParams = map[string]string{
-		
-		
 		"Product":          "cr",
 		"Department":       client.Department,
 		"ResourceGroup":    client.ResourceGroup,
@@ -97,10 +96,9 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 	if create == false || visibility == "PUBLIC" {
 		request.ApiName = "UpdateNamespace"
 		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-instanceId": namespaceName, "x-acs-content-type": "application/json;charset=UTF-8", "Content-type": "application/json;charset=UTF-8"}
-
+		request.SetContentType("application/json")
+		request.SetContent([]byte("{}"))
 		request.QueryParams = map[string]string{
-			
-			
 			"Product":          "cr",
 			"Department":       client.Department,
 			"ResourceGroup":    client.ResourceGroup,
@@ -154,10 +152,9 @@ func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta int
 		}
 		request.ApiName = "UpdateNamespace"
 		request.Headers = map[string]string{"RegionId": client.RegionId, "x-acs-instanceId": d.Id(), "x-acs-content-type": "application/json;charset=UTF-8", "Content-type": "application/json;charset=UTF-8"}
-
+		request.SetContentType("application/json")
+		request.SetContent([]byte("{}"))   // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
 		request.QueryParams = map[string]string{
-			
-			
 			"Product":          "cr",
 			"Format":           "JSON",
 			"Department":       client.Department,
