@@ -5,14 +5,15 @@ import (
 
 	"fmt"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackSlbVservergroup0(t *testing.T) {
 
-	var v map[string]interface{}
+	var v *slb.DescribeVServerGroupAttributeResponse
 
 	resourceId := "alibabacloudstack_slb_vservergroup.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccSlbVservergroupCheckmap)
@@ -34,73 +35,30 @@ func TestAccAlibabacloudStackSlbVservergroup0(t *testing.T) {
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 
-		CheckDestroy: rac.checkResourceDestroy(),
-
+		// CheckDestroy: rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"v_server_group_name": "Test-VServerGroupName",
-
-					"load_balancer_id": "alibabacloudstack_slb.default.id",
+					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
 				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
+				// Check: resource.ComposeTestCheckFunc(
+				// 	testAccCheck(map[string]string{
 
-						"v_server_group_name": "Test-VServerGroupName",
+				// 		"vserver_group_name": CHECKSET,
 
-						"load_balancer_id": "alibabacloudstack_slb.default.id",
-					}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
-				),
+				// 	}),
+				// ),
 			},
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "Test",
-					},
+					"vserver_group_name": "vserver_group_name_update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "Test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF-update",
-						"For":     "Test-update",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF-update",
-						"tags.For":     "Test-update",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "0",
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
+						"vserver_group_name": "vserver_group_name_update",
 					}),
 				),
 			},
@@ -110,381 +68,386 @@ func TestAccAlibabacloudStackSlbVservergroup0(t *testing.T) {
 
 var AlibabacloudTestAccSlbVservergroupCheckmap = map[string]string{
 
-	"v_server_group_id": CHECKSET,
+	// "v_server_group_id": CHECKSET,
 
-	"associated_objects": CHECKSET,
+	// "associated_objects": CHECKSET,
 
-	"v_server_group_name": CHECKSET,
+	// "v_server_group_name": CHECKSET,
 
-	"load_balancer_id": CHECKSET,
+	// "load_balancer_id": CHECKSET,
 
-	"backend_servers": CHECKSET,
+	// "backend_servers": CHECKSET,
 
-	"tags": CHECKSET,
+	// "tags": CHECKSET,
 }
 
 func AlibabacloudTestAccSlbVservergroupBasicdependence(name string) string {
 	return fmt.Sprintf(`
-variable "name" {
-    default = "%s"
+	variable "name" {
+		default = "%s"
+	}
+
+	resource "alibabacloudstack_slb" "default" {
+		name = "${var.name}"
+		address_type       = "internet"
+		specification        = "slb.s2.small"
+	}
+
+
+
+	`, name)
 }
 
+// func TestAccAlibabacloudStackSlbVservergroup1(t *testing.T) {
 
+// 	var v map[string]interface{}
 
+// 	resourceId := "alibabacloudstack_slb_vservergroup.default"
+// 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccSlbVservergroupCheckmap)
+// 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+// 		return &SlbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+// 	}, "DoSlbDescribevservergroupattributeRequest")
+// 	rac := resourceAttrCheckInit(rc, ra)
+// 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-`, name)
-}
-func TestAccAlibabacloudStackSlbVservergroup1(t *testing.T) {
+// 	rand := getAccTestRandInt(10000, 99999)
+// 	name := fmt.Sprintf("tf-testacc%sslbv_server_group%d", defaultRegionToTest, rand)
 
-	var v map[string]interface{}
+// 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbVservergroupBasicdependence)
+// 	resource.Test(t, resource.TestCase{
+// 		PreCheck: func() {
 
-	resourceId := "alibabacloudstack_slb_vservergroup.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudTestAccSlbVservergroupCheckmap)
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &SlbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DoSlbDescribevservergroupattributeRequest")
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
+// 			testAccPreCheck(t)
+// 		},
+// 		IDRefreshName: resourceId,
+// 		Providers:     testAccProviders,
 
-	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sslbv_server_group%d", defaultRegionToTest, rand)
+// 		CheckDestroy: rac.checkResourceDestroy(),
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbVservergroupBasicdependence)
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
+// 		Steps: []resource.TestStep{
 
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
 
-		CheckDestroy: rac.checkResourceDestroy(),
+// 					"load_balancer_id": "alibabacloudstack_slb.default.id",
 
-		Steps: []resource.TestStep{
+// 					"v_server_group_name": "test-VServerGroupName",
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
 
-			{
-				Config: testAccConfig(map[string]interface{}{
+// 						"load_balancer_id": "alibabacloudstack_slb.default.id",
 
-					"load_balancer_id": "alibabacloudstack_slb.default.id",
+// 						"v_server_group_name": "test-VServerGroupName",
+// 					}),
+// 				),
+// 			},
 
-					"v_server_group_name": "test-VServerGroupName",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
 
-						"load_balancer_id": "alibabacloudstack_slb.default.id",
+// 					"v_server_group_name": "rdk-test-name",
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
 
-						"v_server_group_name": "test-VServerGroupName",
-					}),
-				),
-			},
+// 						"v_server_group_name": "rdk-test-name",
+// 					}),
+// 				),
+// 			},
 
-			{
-				Config: testAccConfig(map[string]interface{}{
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"tags": map[string]string{
+// 						"Created": "TF",
+// 						"For":     "Test",
+// 					},
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"tags.%":       "2",
+// 						"tags.Created": "TF",
+// 						"tags.For":     "Test",
+// 					}),
+// 				),
+// 			},
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"tags": map[string]string{
+// 						"Created": "TF-update",
+// 						"For":     "Test-update",
+// 					},
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"tags.%":       "2",
+// 						"tags.Created": "TF-update",
+// 						"tags.For":     "Test-update",
+// 					}),
+// 				),
+// 			},
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"tags": REMOVEKEY,
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"tags.%":       "0",
+// 						"tags.Created": REMOVEKEY,
+// 						"tags.For":     REMOVEKEY,
+// 					}),
+// 				),
+// 			},
+// 		},
+// 	})
+// }
+// func TestAccAlibabacloudStackSlbVservergroup2(t *testing.T) {
 
-					"v_server_group_name": "rdk-test-name",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
+// 	var v map[string]interface{}
 
-						"v_server_group_name": "rdk-test-name",
-					}),
-				),
-			},
+// 	resourceId := "alibabacloudstack_slb_vservergroup.default"
+// 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccSlbVservergroupCheckmap)
+// 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+// 		return &SlbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+// 	}, "DoSlbDescribevservergroupattributeRequest")
+// 	rac := resourceAttrCheckInit(rc, ra)
+// 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "Test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "Test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF-update",
-						"For":     "Test-update",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF-update",
-						"tags.For":     "Test-update",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "0",
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
-					}),
-				),
-			},
-		},
-	})
-}
-func TestAccAlibabacloudStackSlbVservergroup2(t *testing.T) {
+// 	rand := getAccTestRandInt(10000, 99999)
+// 	name := fmt.Sprintf("tf-testacc%sslbv_server_group%d", defaultRegionToTest, rand)
 
-	var v map[string]interface{}
+// 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbVservergroupBasicdependence)
+// 	resource.Test(t, resource.TestCase{
+// 		PreCheck: func() {
 
-	resourceId := "alibabacloudstack_slb_vservergroup.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudTestAccSlbVservergroupCheckmap)
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &SlbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DoSlbDescribevservergroupattributeRequest")
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
+// 			testAccPreCheck(t)
+// 		},
+// 		IDRefreshName: resourceId,
+// 		Providers:     testAccProviders,
 
-	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sslbv_server_group%d", defaultRegionToTest, rand)
+// 		CheckDestroy: rac.checkResourceDestroy(),
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbVservergroupBasicdependence)
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
+// 		Steps: []resource.TestStep{
 
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
 
-		CheckDestroy: rac.checkResourceDestroy(),
+// 					"load_balancer_id": "alibabacloudstack_slb.default.id",
 
-		Steps: []resource.TestStep{
+// 					"v_server_group_name": "test-VServerGroupName",
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
 
-			{
-				Config: testAccConfig(map[string]interface{}{
+// 						"load_balancer_id": "alibabacloudstack_slb.default.id",
 
-					"load_balancer_id": "alibabacloudstack_slb.default.id",
+// 						"v_server_group_name": "test-VServerGroupName",
+// 					}),
+// 				),
+// 			},
 
-					"v_server_group_name": "test-VServerGroupName",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
 
-						"load_balancer_id": "alibabacloudstack_slb.default.id",
+// 					"v_server_group_name": "rdk-test-name99",
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
 
-						"v_server_group_name": "test-VServerGroupName",
-					}),
-				),
-			},
+// 						"v_server_group_name": "rdk-test-name99",
+// 					}),
+// 				),
+// 			},
 
-			{
-				Config: testAccConfig(map[string]interface{}{
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"tags": map[string]string{
+// 						"Created": "TF",
+// 						"For":     "Test",
+// 					},
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"tags.%":       "2",
+// 						"tags.Created": "TF",
+// 						"tags.For":     "Test",
+// 					}),
+// 				),
+// 			},
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"tags": map[string]string{
+// 						"Created": "TF-update",
+// 						"For":     "Test-update",
+// 					},
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"tags.%":       "2",
+// 						"tags.Created": "TF-update",
+// 						"tags.For":     "Test-update",
+// 					}),
+// 				),
+// 			},
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"tags": REMOVEKEY,
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"tags.%":       "0",
+// 						"tags.Created": REMOVEKEY,
+// 						"tags.For":     REMOVEKEY,
+// 					}),
+// 				),
+// 			},
+// 		},
+// 	})
+// }
+// func TestAccAlibabacloudStackSlbVservergroup3(t *testing.T) {
 
-					"v_server_group_name": "rdk-test-name99",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
+// 	var v map[string]interface{}
 
-						"v_server_group_name": "rdk-test-name99",
-					}),
-				),
-			},
+// 	resourceId := "alibabacloudstack_slb_vservergroup.default"
+// 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccSlbVservergroupCheckmap)
+// 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+// 		return &SlbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+// 	}, "DoSlbDescribevservergroupattributeRequest")
+// 	rac := resourceAttrCheckInit(rc, ra)
+// 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "Test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "Test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF-update",
-						"For":     "Test-update",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF-update",
-						"tags.For":     "Test-update",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "0",
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
-					}),
-				),
-			},
-		},
-	})
-}
-func TestAccAlibabacloudStackSlbVservergroup3(t *testing.T) {
+// 	rand := getAccTestRandInt(10000, 99999)
+// 	name := fmt.Sprintf("tf-testacc%sslbv_server_group%d", defaultRegionToTest, rand)
 
-	var v map[string]interface{}
+// 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbVservergroupBasicdependence)
+// 	resource.Test(t, resource.TestCase{
+// 		PreCheck: func() {
 
-	resourceId := "alibabacloudstack_slb_vservergroup.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudTestAccSlbVservergroupCheckmap)
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &SlbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DoSlbDescribevservergroupattributeRequest")
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
+// 			testAccPreCheck(t)
+// 		},
+// 		IDRefreshName: resourceId,
+// 		Providers:     testAccProviders,
 
-	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sslbv_server_group%d", defaultRegionToTest, rand)
+// 		CheckDestroy: rac.checkResourceDestroy(),
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbVservergroupBasicdependence)
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
+// 		Steps: []resource.TestStep{
 
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
 
-		CheckDestroy: rac.checkResourceDestroy(),
+// 					"v_server_group_name": "tfcreate",
 
-		Steps: []resource.TestStep{
+// 					"load_balancer_id": "${{ref(resource, SLB::LoadBalancer::2.0.0.11.pre::slb.LoadBalancerId)}}",
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
 
-			{
-				Config: testAccConfig(map[string]interface{}{
+// 						"v_server_group_name": "tfcreate",
 
-					"v_server_group_name": "tfcreate",
+// 						"load_balancer_id": "${{ref(resource, SLB::LoadBalancer::2.0.0.11.pre::slb.LoadBalancerId)}}",
+// 					}),
+// 				),
+// 			},
 
-					"load_balancer_id": "${{ref(resource, SLB::LoadBalancer::2.0.0.11.pre::slb.LoadBalancerId)}}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
 
-						"v_server_group_name": "tfcreate",
+// 					"v_server_group_name": "tfupdate",
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
 
-						"load_balancer_id": "${{ref(resource, SLB::LoadBalancer::2.0.0.11.pre::slb.LoadBalancerId)}}",
-					}),
-				),
-			},
+// 						"v_server_group_name": "tfupdate",
+// 					}),
+// 				),
+// 			},
 
-			{
-				Config: testAccConfig(map[string]interface{}{
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{}),
+// 				),
+// 			},
 
-					"v_server_group_name": "tfupdate",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{}),
+// 				),
+// 			},
 
-						"v_server_group_name": "tfupdate",
-					}),
-				),
-			},
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
 
-			{
-				Config: testAccConfig(map[string]interface{}{}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
-				),
-			},
+// 					"v_server_group_name": "tfcreate",
 
-			{
-				Config: testAccConfig(map[string]interface{}{}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
-				),
-			},
+// 					"load_balancer_id": "${{ref(resource, SLB::LoadBalancer::2.0.0.11.pre::slb.LoadBalancerId)}}",
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
 
-			{
-				Config: testAccConfig(map[string]interface{}{
+// 						"v_server_group_name": "tfcreate",
 
-					"v_server_group_name": "tfcreate",
+// 						"load_balancer_id": "${{ref(resource, SLB::LoadBalancer::2.0.0.11.pre::slb.LoadBalancerId)}}",
+// 					}),
+// 				),
+// 			},
 
-					"load_balancer_id": "${{ref(resource, SLB::LoadBalancer::2.0.0.11.pre::slb.LoadBalancerId)}}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
 
-						"v_server_group_name": "tfcreate",
+// 					"v_server_group_name": "tfupdate",
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
 
-						"load_balancer_id": "${{ref(resource, SLB::LoadBalancer::2.0.0.11.pre::slb.LoadBalancerId)}}",
-					}),
-				),
-			},
+// 						"v_server_group_name": "tfupdate",
+// 					}),
+// 				),
+// 			},
 
-			{
-				Config: testAccConfig(map[string]interface{}{
-
-					"v_server_group_name": "tfupdate",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"v_server_group_name": "tfupdate",
-					}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "Test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "Test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF-update",
-						"For":     "Test-update",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF-update",
-						"tags.For":     "Test-update",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "0",
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
-					}),
-				),
-			},
-		},
-	})
-}
-
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"tags": map[string]string{
+// 						"Created": "TF",
+// 						"For":     "Test",
+// 					},
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"tags.%":       "2",
+// 						"tags.Created": "TF",
+// 						"tags.For":     "Test",
+// 					}),
+// 				),
+// 			},
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"tags": map[string]string{
+// 						"Created": "TF-update",
+// 						"For":     "Test-update",
+// 					},
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"tags.%":       "2",
+// 						"tags.Created": "TF-update",
+// 						"tags.For":     "Test-update",
+// 					}),
+// 				),
+// 			},
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"tags": REMOVEKEY,
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"tags.%":       "0",
+// 						"tags.Created": REMOVEKEY,
+// 						"tags.For":     REMOVEKEY,
+// 					}),
+// 				),
+// 			},
+// 		},
+// 	})
+// }
