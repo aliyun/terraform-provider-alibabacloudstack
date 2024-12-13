@@ -123,8 +123,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	//slb endpoint
 	SLBCode: PopEndpoint{
-		"slb.{{.domain}}",
-		"slb.{{.region}}.{{.domain}}",
+		"slb-vpc.{{.domain}}",
+		"slb-vpc.{{.region}}.{{.domain}}",
 	},
 	//gdb endpoint
 	GDBCode: PopEndpoint{

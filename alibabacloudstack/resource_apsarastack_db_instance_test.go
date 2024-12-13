@@ -313,7 +313,7 @@ resource "alibabacloudstack_security_group" "default" {
 	name   = "${var.name}"
 	vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
-`, VSwichCommonTestCase, name)
+`, VSwitchCommonTestCase, name)
 }
 
 func TestAccAlibabacloudStackDBInstanceMultiInstance(t *testing.T) {
@@ -419,7 +419,7 @@ resource "alibabacloudstack_security_group" "default" {
 	name   = "${var.name}"
 	vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
-`, VSwichCommonTestCase, name)
+`, VSwitchCommonTestCase, name)
 }
 
 func TestAccAlibabacloudStackDBInstanceClassic(t *testing.T) {
@@ -474,7 +474,7 @@ variable "name" {
 
 %s
 
-`, name, VSwichCommonTestCase)
+`, name, VSwitchCommonTestCase)
 }
 
 func testAccCheckSecurityIpExists(n string, ips []map[string]interface{}) resource.TestCheckFunc {

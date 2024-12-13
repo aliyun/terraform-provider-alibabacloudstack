@@ -1,269 +1,210 @@
 package alibabacloudstack
 
 import (
-	"fmt"
 	"strings"
 	"testing"
-
-	
+	"fmt"
 )
 
-func TestAccAlibabacloudStackAlibabacloudstackEcsDisksDataSource(t *testing.T) {
-	// 根据test_meta自动生成的tasecase
-
+func TestAccAlibabacloudStackDisksDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 
-	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}"]`,
+	idsConfig := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudStackDisksDataSourceConfig(rand, map[string]string{
+			"ids": `[ "${alibabacloudstack_ecs_disk.default.id}" ]`,
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-		}),
-	}
-
-	auto_snapshot_policy_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":                     `["${alibabacloudstack_ecs_disks.default.id}"]`,
-			"auto_snapshot_policy_id": `"${alibabacloudstack_ecs_disks.default.AutoSnapshotPolicyId}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":                     `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-			"auto_snapshot_policy_id": `"${alibabacloudstack_ecs_disks.default.AutoSnapshotPolicyId}_fake"`,
+		fakeConfig: testAccCheckAlibabacloudStackDisksDataSourceConfig(rand, map[string]string{
+			"ids": `[ "${alibabacloudstack_ecs_disk.default.id}_fake" ]`,
 		}),
 	}
 
-	categoryConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":      `["${alibabacloudstack_ecs_disks.default.id}"]`,
-			"category": `"${alibabacloudstack_ecs_disks.default.Category}"`,
+	nameRegexConfig := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudStackDisksDataSourceConfig(rand, map[string]string{
+			"name_regex": `"${alibabacloudstack_ecs_disk.default.name}"`,
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":      `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-			"category": `"${alibabacloudstack_ecs_disks.default.Category}_fake"`,
+		fakeConfig: testAccCheckAlibabacloudStackDisksDataSourceConfig(rand, map[string]string{
+			"name_regex": `"${alibabacloudstack_ecs_disk.default.name}_fake"`,
 		}),
 	}
 
-	delete_auto_snapshotConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}"]`,
+	typeConfig := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudStackDisksDataSourceConfig(rand, map[string]string{
+			"name_regex": `"${alibabacloudstack_ecs_disk.default.name}"`,
+			"type":       `"data"`,
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-		}),
-	}
-
-	delete_with_instanceConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}"]`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
+		fakeConfig: testAccCheckAlibabacloudStackDisksDataSourceConfig(rand, map[string]string{
+			"name_regex": `"${alibabacloudstack_ecs_disk.default.name}"`,
+			"type":       `"system"`,
 		}),
 	}
 
-	disk_nameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":       `["${alibabacloudstack_ecs_disks.default.id}"]`,
-			"disk_name": `"${alibabacloudstack_ecs_disks.default.DiskName}"`,
+	//	categoryConfig := dataSourceTestAccConfig{
+	//		existConfig: testAccCheckAlibabacloudStackDisksDataSourceConfig(rand, map[string]string{
+	//			"name_regex": `"${alibabacloudstack_ecs_disk.default.name}"`,
+	//			"category":   `"cloud_efficiency"`,
+	//		}),
+	//		fakeConfig: testAccCheckAlibabacloudStackDisksDataSourceConfig(rand, map[string]string{
+	//			"name_regex": `"${alibabacloudstack_ecs_disk.default.name}"`,
+	//			"category":   `"cloud"`,
+	//		}),
+	//	}
+
+	//	tagsConfig := dataSourceTestAccConfig{
+	//		existConfig: testAccCheckAlibabacloudStackDisksDataSourceConfig(rand, map[string]string{
+	//			"name_regex": `"${alibabacloudstack_ecs_disk.default.name}"`,
+	//			"tags":       `"${alibabacloudstack_ecs_disk.default.tags}"`,
+	//		}),
+	//		fakeConfig: testAccCheckAlibabacloudStackDisksDataSourceConfig(rand, map[string]string{
+	//			"name_regex": `"${alibabacloudstack_ecs_disk.default.name}"`,
+	//			"tags": `{
+	//                           Name = "TerraformTest_fake"
+	//                           Name1 = "TerraformTest_fake"
+	//                        }`,
+	//		}),
+	//	}
+
+	instanceIdConfig := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudStackDisksDataSourceConfigWithCommon(rand, map[string]string{
+			"instance_id": `"${alibabacloudstack_ecs_diskattachment.default.instance_id}"`,
+			"name_regex":  `"${alibabacloudstack_ecs_disk.default.name}"`,
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":       `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-			"disk_name": `"${alibabacloudstack_ecs_disks.default.DiskName}_fake"`,
+		existChangMap: map[string]string{
+			"disks.0.instance_id":   CHECKSET,
+			"disks.0.attached_time": CHECKSET,
+			"disks.0.status":        "In_use",
+		},
+		fakeConfig: testAccCheckAlibabacloudStackDisksDataSourceConfigWithCommon(rand, map[string]string{
+			"instance_id": `"${alibabacloudstack_ecs_diskattachment.default.instance_id}_fake"`,
+			"name_regex":  `"${alibabacloudstack_ecs_disk.default.name}"`,
 		}),
 	}
 
-	enable_auto_snapshotConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}"]`,
+	allConfig := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudStackDisksDataSourceConfigWithCommon(rand, map[string]string{
+			"ids":         `[ "${alibabacloudstack_ecs_disk.default.id}" ]`,
+			"name_regex":  `"${alibabacloudstack_ecs_disk.default.name}"`,
+			"type":        `"data"`,
+			"category":    `"cloud_efficiency"`,
+			"tags":        `"${alibabacloudstack_ecs_disk.default.tags}"`,
+			"instance_id": `"${alibabacloudstack_ecs_diskattachment.default.instance_id}"`,
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-		}),
-	}
-
-	enable_automated_snapshot_policyConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}"]`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-		}),
-	}
-
-	encryptedConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}"]`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
+		existChangMap: map[string]string{
+			"disks.0.instance_id":   CHECKSET,
+			"disks.0.attached_time": CHECKSET,
+			"disks.0.status":        "In_use",
+		},
+		fakeConfig: testAccCheckAlibabacloudStackDisksDataSourceConfigWithCommon(rand, map[string]string{
+			"ids":         `[ "${alibabacloudstack_ecs_disk.default.id}" ]`,
+			"name_regex":  `"${alibabacloudstack_ecs_disk.default.name}"`,
+			"type":        `"data"`,
+			"category":    `"cloud_efficiency"`,
+			"tags":        `"${alibabacloudstack_ecs_disk.default.tags}"`,
+			"instance_id": `"${alibabacloudstack_ecs_diskattachment.default.instance_id}_fake"`,
 		}),
 	}
 
-	instance_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_ecs_disks.default.id}"]`,
-			"instance_id": `"${alibabacloudstack_ecs_disks.default.InstanceId}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-			"instance_id": `"${alibabacloudstack_ecs_disks.default.InstanceId}_fake"`,
-		}),
-	}
-
-	kms_key_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_ecs_disks.default.id}"]`,
-			"kms_key_id": `"${alibabacloudstack_ecs_disks.default.KmsKeyId}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":        `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-			"kms_key_id": `"${alibabacloudstack_ecs_disks.default.KmsKeyId}_fake"`,
-		}),
-	}
-
-	multi_attachConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_ecs_disks.default.id}"]`,
-			"multi_attach": `"${alibabacloudstack_ecs_disks.default.MultiAttach}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-			"multi_attach": `"${alibabacloudstack_ecs_disks.default.MultiAttach}_fake"`,
-		}),
-	}
-
-	payment_typeConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_ecs_disks.default.id}"]`,
-			"payment_type": `"${alibabacloudstack_ecs_disks.default.PaymentType}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-			"payment_type": `"${alibabacloudstack_ecs_disks.default.PaymentType}_fake"`,
-		}),
-	}
-
-	portableConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}"]`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-		}),
-	}
-
-	resource_group_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":               `["${alibabacloudstack_ecs_disks.default.id}"]`,
-			"resource_group_id": `"${alibabacloudstack_ecs_disks.default.ResourceGroupId}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":               `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-			"resource_group_id": `"${alibabacloudstack_ecs_disks.default.ResourceGroupId}_fake"`,
-		}),
-	}
-
-	snapshot_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_ecs_disks.default.id}"]`,
-			"snapshot_id": `"${alibabacloudstack_ecs_disks.default.SnapshotId}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-			"snapshot_id": `"${alibabacloudstack_ecs_disks.default.SnapshotId}_fake"`,
-		}),
-	}
-
-	statusConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":    `["${alibabacloudstack_ecs_disks.default.id}"]`,
-			"status": `"${alibabacloudstack_ecs_disks.default.Status}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":    `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-			"status": `"${alibabacloudstack_ecs_disks.default.Status}_fake"`,
-		}),
-	}
-
-	zone_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":     `["${alibabacloudstack_ecs_disks.default.id}"]`,
-			"zone_id": `"${alibabacloudstack_ecs_disks.default.ZoneId}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids":     `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-			"zone_id": `"${alibabacloudstack_ecs_disks.default.ZoneId}_fake"`,
-		}),
-	}
-
-	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}"]`,
-
-			"auto_snapshot_policy_id": `"${alibabacloudstack_ecs_disks.default.AutoSnapshotPolicyId}"`,
-			"category":                `"${alibabacloudstack_ecs_disks.default.Category}"`,
-			"disk_name":               `"${alibabacloudstack_ecs_disks.default.DiskName}"`,
-			"instance_id":             `"${alibabacloudstack_ecs_disks.default.InstanceId}"`,
-			"kms_key_id":              `"${alibabacloudstack_ecs_disks.default.KmsKeyId}"`,
-			"multi_attach":            `"${alibabacloudstack_ecs_disks.default.MultiAttach}"`,
-			"payment_type":            `"${alibabacloudstack_ecs_disks.default.PaymentType}"`,
-			"resource_group_id":       `"${alibabacloudstack_ecs_disks.default.ResourceGroupId}"`,
-			"snapshot_id":             `"${alibabacloudstack_ecs_disks.default.SnapshotId}"`,
-			"status":                  `"${alibabacloudstack_ecs_disks.default.Status}"`,
-			"zone_id":                 `"${alibabacloudstack_ecs_disks.default.ZoneId}"`}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_disks.default.id}_fake"]`,
-
-			"auto_snapshot_policy_id": `"${alibabacloudstack_ecs_disks.default.AutoSnapshotPolicyId}_fake"`,
-			"category":                `"${alibabacloudstack_ecs_disks.default.Category}_fake"`,
-			"disk_name":               `"${alibabacloudstack_ecs_disks.default.DiskName}_fake"`,
-			"instance_id":             `"${alibabacloudstack_ecs_disks.default.InstanceId}_fake"`,
-			"kms_key_id":              `"${alibabacloudstack_ecs_disks.default.KmsKeyId}_fake"`,
-			"multi_attach":            `"${alibabacloudstack_ecs_disks.default.MultiAttach}_fake"`,
-			"payment_type":            `"${alibabacloudstack_ecs_disks.default.PaymentType}_fake"`,
-			"resource_group_id":       `"${alibabacloudstack_ecs_disks.default.ResourceGroupId}_fake"`,
-			"snapshot_id":             `"${alibabacloudstack_ecs_disks.default.SnapshotId}_fake"`,
-			"status":                  `"${alibabacloudstack_ecs_disks.default.Status}_fake"`,
-			"zone_id":                 `"${alibabacloudstack_ecs_disks.default.ZoneId}_fake"`}),
-	}
-
-	AlibabacloudstackEcsDisksDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, auto_snapshot_policy_idConf, categoryConf, delete_auto_snapshotConf, delete_with_instanceConf, disk_nameConf, enable_auto_snapshotConf, enable_automated_snapshot_policyConf, encryptedConf, instance_idConf, kms_key_idConf, multi_attachConf, payment_typeConf, portableConf, resource_group_idConf, snapshot_idConf, statusConf, zone_idConf, allConf)
+	disksCheckInfo.dataSourceTestCheck(t, rand, idsConfig, nameRegexConfig, typeConfig,
+		instanceIdConfig, allConfig)
 }
 
-var existAlibabacloudstackEcsDisksDataMapFunc = func(rand int) map[string]string {
+func testAccCheckAlibabacloudStackDisksDataSourceConfig(rand int, attrMap map[string]string) string {
+	var pairs []string
+	for k, v := range attrMap {
+		pairs = append(pairs, k+" = "+v)
+	}
+
+	config := fmt.Sprintf(`
+%s
+
+variable "name" {
+	default = "tf-testAccCheckAlibabacloudStackDisksDataSource_ids-%d"
+}
+
+resource "alibabacloudstack_ecs_disk" "default" {
+	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+	name = "${var.name}"
+	description = "${var.name}_description"
+	size = "20"
+	tags = {
+		Name = "TerraformTest"
+		Name1 = "TerraformTest"
+	}
+}
+
+data "alibabacloudstack_ecs_disks" "default" {
+	%s
+}
+	`, DataAlibabacloudstackVswitchZones, rand, strings.Join(pairs, "\n	"))
+	return config
+}
+
+func testAccCheckAlibabacloudStackDisksDataSourceConfigWithCommon(rand int, attrMap map[string]string) string {
+	var pairs []string
+	for k, v := range attrMap {
+		pairs = append(pairs, k+" = "+v)
+	}
+
+	config := fmt.Sprintf(`
+%s
+
+variable "name" {
+	default = "tf-testAccCheckAlibabacloudStackDisksDataSource_ids-%d"
+}
+resource "alibabacloudstack_ecs_disk" "default" {
+	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+	name = "${var.name}"
+	description = "${var.name}_description"
+	tags = {
+		Name = "TerraformTest"
+		Name1 = "TerraformTest"
+	}
+	size = "20"
+}
+
+resource "alibabacloudstack_ecs_diskattachment" "default" {
+	disk_id = "${alibabacloudstack_ecs_disk.default.id}"
+	instance_id = "${alibabacloudstack_ecs_instance.default.id}"
+}
+
+data "alibabacloudstack_ecs_disks" "default" {
+	%s
+}
+`, ECSInstanceCommonTestCase, rand, strings.Join(pairs, "\n	"))
+	return config
+}
+
+var existDisksMapFunc = func(rand int) map[string]string {
 	return map[string]string{
-		"disks.#":    "1",
-		"disks.0.id": CHECKSET,
+		//"disks.#":                   "1",
+		"disks.0.id":                CHECKSET,
+		"disks.0.name":              fmt.Sprintf("tf-testAccCheckAlibabacloudStackDisksDataSource_ids-%d", rand),
+		"disks.0.description":       fmt.Sprintf("tf-testAccCheckAlibabacloudStackDisksDataSource_ids-%d_description", rand),
+		"disks.0.region_id":         CHECKSET,
+		"disks.0.availability_zone": CHECKSET,
+		"disks.0.status":            "Available",
+		"disks.0.type":              "data",
+		"disks.0.category":          "cloud_efficiency",
+		"disks.0.size":              "20",
+		"disks.0.image_id":          "",
+		"disks.0.snapshot_id":       "",
+		"disks.0.instance_id":       "",
+		"disks.0.creation_time":     CHECKSET,
+		"disks.0.attached_time":     "",
+		"disks.0.detached_time":     "",
+		"disks.0.tags.%":            "2",
 	}
 }
 
-var fakeAlibabacloudstackEcsDisksDataMapFunc = func(rand int) map[string]string {
+var fakeDisksMapFunc = func(rand int) map[string]string {
 	return map[string]string{
 		"disks.#": "0",
 	}
 }
 
-var AlibabacloudstackEcsDisksDataCheckInfo = dataSourceAttr{
+var disksCheckInfo = dataSourceAttr{
 	resourceId:   "data.alibabacloudstack_ecs_disks.default",
-	existMapFunc: existAlibabacloudstackEcsDisksDataMapFunc,
-	fakeMapFunc:  fakeAlibabacloudstackEcsDisksDataMapFunc,
+	existMapFunc: existDisksMapFunc,
+	fakeMapFunc:  fakeDisksMapFunc,
 }
-
-func testAccCheckAlibabacloudstackEcsDisksDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
-variable "name" {
-	default = "tf-testAlibabacloudstackEcsDisks%d"
-}
-
-data "alibabacloudstack_ecs_disks" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n   "))
-	return config
-}
-

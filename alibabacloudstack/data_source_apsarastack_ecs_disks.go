@@ -233,6 +233,7 @@ func dataSourceAlibabacloudStackDisksRead(d *schema.ResourceData, meta interface
 		}
 		log.Printf("filtereddisks %v", filteredDisksTemp)
 		allDisks = filteredDisksTemp
+		filteredDisksTemp = make([]interface{},0)
 	}
 	if ok && nameRegex.(string) != "" {
 		var r *regexp.Regexp

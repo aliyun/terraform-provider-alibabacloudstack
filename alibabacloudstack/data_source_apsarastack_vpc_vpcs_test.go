@@ -8,91 +8,65 @@ import (
 	
 )
 
-func TestAccAlibabacloudStackAlibabacloudstackVpcVpcsDataSource(t *testing.T) {
+func TestAccAlibabacloudStackVpcVpcsDataSource(t *testing.T) {
 	// 根据test_meta自动生成的tasecase
 
 	rand := getAccTestRandInt(10000, 99999)
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_vpc_vpcs.default.id}"]`,
+			"ids": `["${alibabacloudstack_vpc_vpc.default.id}"]`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_vpc_vpcs.default.id}_fake"]`,
-		}),
-	}
-
-	dhcp_options_set_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":                 `["${alibabacloudstack_vpc_vpcs.default.id}"]`,
-			"dhcp_options_set_id": `"${alibabacloudstack_vpc_vpcs.default.DhcpOptionsSetId}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":                 `["${alibabacloudstack_vpc_vpcs.default.id}_fake"]`,
-			"dhcp_options_set_id": `"${alibabacloudstack_vpc_vpcs.default.DhcpOptionsSetId}_fake"`,
-		}),
-	}
-
-	is_defaultConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_vpc_vpcs.default.id}"]`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_vpc_vpcs.default.id}_fake"]`,
+			"ids": `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
 		}),
 	}
 
 	resource_group_idConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":               `["${alibabacloudstack_vpc_vpcs.default.id}"]`,
-			"resource_group_id": `"${alibabacloudstack_vpc_vpcs.default.ResourceGroupId}"`,
+			"ids":               `["${alibabacloudstack_vpc_vpc.default.id}"]`,
+			"resource_group_id": `"${alibabacloudstack_vpc_vpc.default.resource_group_id}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":               `["${alibabacloudstack_vpc_vpcs.default.id}_fake"]`,
-			"resource_group_id": `"${alibabacloudstack_vpc_vpcs.default.ResourceGroupId}_fake"`,
+			"ids":               `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
+			"resource_group_id": `"${alibabacloudstack_vpc_vpc.default.resource_group_id}_fake"`,
 		}),
 	}
 
-	vpc_idConf := dataSourceTestAccConfig{
+	vswtich_idConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":    `["${alibabacloudstack_vpc_vpcs.default.id}"]`,
-			"vpc_id": `"${alibabacloudstack_vpc_vpcs.default.VpcId}"`,
+			"vswitch_id":    `"${alibabacloudstack_vpc_vswitch.default.id}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":    `["${alibabacloudstack_vpc_vpcs.default.id}_fake"]`,
-			"vpc_id": `"${alibabacloudstack_vpc_vpcs.default.VpcId}_fake"`,
+			"vswitch_id":    `"${alibabacloudstack_vpc_vswitch.default.id}_fake"`,
 		}),
 	}
 
 	vpc_nameConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":      `["${alibabacloudstack_vpc_vpcs.default.id}"]`,
-			"vpc_name": `"${alibabacloudstack_vpc_vpcs.default.VpcName}"`,
+			"ids":      `["${alibabacloudstack_vpc_vpc.default.id}"]`,
+			"vpc_name": `"${alibabacloudstack_vpc_vpc.default.vpc_name}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids":      `["${alibabacloudstack_vpc_vpcs.default.id}_fake"]`,
-			"vpc_name": `"${alibabacloudstack_vpc_vpcs.default.VpcName}_fake"`,
+			"ids":      `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
+			"vpc_name": `"${alibabacloudstack_vpc_vpc.default.vpc_name}_fake"`,
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_vpc_vpcs.default.id}"]`,
+			"ids": `["${alibabacloudstack_vpc_vpc.default.id}"]`,
 
-			"dhcp_options_set_id": `"${alibabacloudstack_vpc_vpcs.default.DhcpOptionsSetId}"`,
-			"resource_group_id":   `"${alibabacloudstack_vpc_vpcs.default.ResourceGroupId}"`,
-			"vpc_id":              `"${alibabacloudstack_vpc_vpcs.default.VpcId}"`,
-			"vpc_name":            `"${alibabacloudstack_vpc_vpcs.default.VpcName}"`}),
+			"resource_group_id":   `"${alibabacloudstack_vpc_vpc.default.resource_group_id}"`,
+			"vpc_name":            `"${alibabacloudstack_vpc_vpc.default.vpc_name}"`}),
 		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_vpc_vpcs.default.id}_fake"]`,
+			"ids": `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
 
-			"dhcp_options_set_id": `"${alibabacloudstack_vpc_vpcs.default.DhcpOptionsSetId}_fake"`,
-			"resource_group_id":   `"${alibabacloudstack_vpc_vpcs.default.ResourceGroupId}_fake"`,
-			"vpc_id":              `"${alibabacloudstack_vpc_vpcs.default.VpcId}_fake"`,
-			"vpc_name":            `"${alibabacloudstack_vpc_vpcs.default.VpcName}_fake"`}),
+			"resource_group_id":   `"${alibabacloudstack_vpc_vpc.default.resource_group_id}_fake"`,
+			"vpc_name":            `"${alibabacloudstack_vpc_vpc.default.vpc_name}_fake"`}),
 	}
 
-	AlibabacloudstackVpcVpcsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, dhcp_options_set_idConf, is_defaultConf, resource_group_idConf, vpc_idConf, vpc_nameConf, allConf)
+	AlibabacloudstackVpcVpcsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, vswtich_idConf, resource_group_idConf, vpc_nameConf, allConf)
 }
 
 var existAlibabacloudstackVpcVpcsDataMapFunc = func(rand int) map[string]string {
@@ -123,15 +97,11 @@ func testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand int, attrMap map[
 variable "name" {
 	default = "tf-testAlibabacloudstackVpcVpcs%d"
 }
-
-
-
-
-
+%s
 
 data "alibabacloudstack_vpc_vpcs" "default" {
 %s
 }
-`, rand, strings.Join(pairs, "\n   "))
+`, rand, VSwitchCommonTestCase, strings.Join(pairs, "\n   "))
 	return config
 }
