@@ -129,7 +129,7 @@ func resourceAlibabacloudStackEdasClusterRead(d *schema.ResourceData, meta inter
 	d.Set("cluster_name", response.Cluster.ClusterName)
 	d.Set("cluster_type", response.Cluster.ClusterType)
 	d.Set("network_mode", response.Cluster.NetworkMode)
-	//d.Set("region_id", response.Cluster.RegionId)
+	// d.Set("region_id", response.Cluster.RegionId)
 	d.Set("vpc_id", response.Cluster.VpcId)
 
 	return nil
