@@ -2,8 +2,9 @@ package alibabacloudstack
 
 import (
 	"fmt"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
+
 	"log"
 	"testing"
 
@@ -183,14 +184,14 @@ func TestAccAlibabacloudStackInstanceBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"image_id":                     "${data.alibabacloudstack_images.default.images.0.id}",
-					"security_groups":              []string{"${alibabacloudstack_security_group.default.id}"},
-					"instance_type":                "${local.instance_type_id}",
-					"storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.default.id}",
-					"storage_set_partition_number": "1",
-					"availability_zone":            "${data.alibabacloudstack_zones.default.zones[0].id}",
-					"system_disk_category":         "cloud_efficiency",
-					"instance_name":                "${var.name}",
+					"image_id":        "${data.alibabacloudstack_images.default.images.0.id}",
+					"security_groups": []string{"${alibabacloudstack_security_group.default.id}"},
+					"instance_type":   "ecs.e4.customize.undjfvanfg",
+					// "storage_set_id":       "${alibabacloudstack_ecs_ebs_storage_set.default.id}",
+					// "storage_set_partition_number": "1",
+					"availability_zone":    "${data.alibabacloudstack_zones.default.zones[0].id}",
+					"system_disk_category": "cloud_ssd",
+					"instance_name":        "${var.name}",
 					//"key_name":                      "${alibabacloudstack_key_pair.default.key_name}",
 					"user_data":                     "I_am_user_data",
 					"security_enhancement_strategy": "Active",
@@ -212,7 +213,7 @@ func TestAccAlibabacloudStackInstanceBasic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"security_enhancement_strategy", "dry_run", "user_data"},
+				ImportStateVerifyIgnore: []string{"security_enhancement_strategy", "dry_run", "user_data", "enable_ipv6", "ipv6_address_count"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -261,12 +262,11 @@ func TestAccAlibabacloudStackInstanceVpc(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":        "${data.alibabacloudstack_images.default.images.0.id}",
 					"security_groups": []string{"${alibabacloudstack_security_group.default.0.id}"},
-					"instance_type":   "${local.instance_type_id}",
+					"instance_type":   "ecs.e4.customize.undjfvanfg",
 
-					"availability_zone":    "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"system_disk_category": "cloud_sperf",
-					"instance_name":        "${var.name}",
-					//"key_name":                      "${alibabacloudstack_key_pair.default.key_name}",
+					"availability_zone":             "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"system_disk_category":          "cloud_ssd",
+					"instance_name":                 "${var.name}",
 					"security_enhancement_strategy": "Active",
 					"user_data":                     "I_am_user_data",
 
@@ -283,7 +283,7 @@ func TestAccAlibabacloudStackInstanceVpc(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"security_enhancement_strategy", "user_data"},
+				ImportStateVerifyIgnore: []string{"security_enhancement_strategy", "user_data", "enable_ipv6", "ipv6_address_count"},
 			},
 
 			{
@@ -435,10 +435,10 @@ func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":        "${data.alibabacloudstack_images.default.images.0.id}",
 					"security_groups": []string{"${alibabacloudstack_security_group.default.0.id}"},
-					"instance_type":   "${local.instance_type_id}",
+					"instance_type":   "ecs.e4.customize.undjfvanfg",
 
 					"availability_zone":    "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"system_disk_category": "cloud_sperf",
+					"system_disk_category": "cloud_ssd",
 					"instance_name":        "${var.name}",
 					//"key_name":                      "${alibabacloudstack_key_pair.default.key_name}",
 					"security_enhancement_strategy": "Active",
@@ -449,13 +449,13 @@ func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
 						{
 							"name":        "disk1",
 							"size":        "40",
-							"category":    "cloud_sperf",
+							"category":    "cloud_ssd",
 							"description": "disk1",
 						},
 						{
 							"name":        "disk2",
 							"size":        "40",
-							"category":    "cloud_sperf",
+							"category":    "cloud_ssd",
 							"description": "disk2",
 						},
 					},
@@ -469,11 +469,11 @@ func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
 						"data_disks.#":             "2",
 						"data_disks.0.name":        "disk1",
 						"data_disks.0.size":        "40",
-						"data_disks.0.category":    "cloud_sperf",
+						"data_disks.0.category":    "cloud_ssd",
 						"data_disks.0.description": "disk1",
 						"data_disks.1.name":        "disk2",
 						"data_disks.1.size":        "40",
-						"data_disks.1.category":    "cloud_sperf",
+						"data_disks.1.category":    "cloud_ssd",
 						"data_disks.1.description": "disk2",
 					}),
 				),
@@ -514,7 +514,7 @@ func TestAccAlibabacloudStackInstanceTypeUpdate(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":                      "${data.alibabacloudstack_images.default.images.0.id}",
-					"system_disk_category":          "cloud_sperf",
+					"system_disk_category":          "cloud_ssd",
 					"system_disk_size":              "40",
 					"instance_type":                 "${data.alibabacloudstack_instance_types.new1.instance_types.0.id}",
 					"instance_name":                 "${var.name}",
@@ -569,9 +569,9 @@ func TestAccAlibabacloudStackInstanceMulti(t *testing.T) {
 					"count":                "3",
 					"image_id":             "${data.alibabacloudstack_images.default.images.0.id}",
 					"security_groups":      []string{"${alibabacloudstack_security_group.default.0.id}"},
-					"instance_type":        "${local.instance_type_id}",
+					"instance_type":        "ecs.e4.customize.undjfvanfg",
 					"availability_zone":    "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"system_disk_category": "cloud_sperf",
+					"system_disk_category": "cloud_ssd",
 					"instance_name":        "${var.name}",
 					//"key_name":                      "${alibabacloudstack_key_pair.default.key_name}",
 					"security_enhancement_strategy": "Active",
@@ -709,6 +709,7 @@ resource "alibabacloudstack_security_group" "default" {
   name   = "${var.name}"
   vpc_id = "${alibabacloudstack_vpc.default.id}"
 }
+
 resource "alibabacloudstack_security_group_rule" "default" {
   type = "ingress"
   ip_protocol = "tcp"
@@ -785,12 +786,13 @@ data "alibabacloudstack_instance_types" "new2" {
 }
 
 var testAccInstanceCheckMap = map[string]string{
-	"image_id":          CHECKSET,
-	"instance_type":     CHECKSET,
-	"security_groups.#": "1",
-
+	"image_id":                      CHECKSET,
+	"instance_type":                 CHECKSET,
+	"security_groups.#":             "1",
+	"enable_ipv6":                   "false",
+	"ipv6_address_count":            "0",
 	"availability_zone":             CHECKSET,
-	"system_disk_category":          "cloud_sperf",
+	"system_disk_category":          "cloud_ssd",
 	"security_enhancement_strategy": "Active",
 	"vswitch_id":                    CHECKSET,
 	"user_data":                     "I_am_user_data",

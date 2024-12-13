@@ -792,7 +792,6 @@ data "alibabacloudstack_images" "default" {
 
 `
 
-
 const RdsCommonTestCase = `
 data  "alibabacloudstack_zones" "default" {
   available_resource_creation = "${var.creation}"
@@ -1235,7 +1234,7 @@ resource "alibabacloudstack_adb_db_cluster" "cluster" {
   db_node_count       = 2
   db_node_storage     = 200
   pay_type            = "PostPaid"
-  vswitch_id          = ${alibabacloudstack_vswitch.default.id}
+  vswitch_id          = ${alibabacloudstack_vpc_vswitch.default.id}
   description         = "${var.name}_am"
 }
 
@@ -1336,7 +1335,7 @@ resource "alibabacloudstack_express_connect_physical_connection" "domestic" {
 const FtbCommonTestCase = VSwitchCommonTestCase + `
 
 resource "alibabacloudstack_nat_gateway" "default" {
-  vpc_id = "${alibabacloudstack_vswitch.default.vpc_id}"
+  vpc_id = "${alibabacloudstack_vpc_vswitch.default.vpc_id}"
   name   = "${var.name}"
 }                                        
 

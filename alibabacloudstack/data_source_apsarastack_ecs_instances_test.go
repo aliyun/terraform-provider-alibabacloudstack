@@ -1,129 +1,61 @@
 package alibabacloudstack
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
-	
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAlibabacloudstackEcsInstancesDataSource(t *testing.T) {
-	// 根据test_meta自动生成的tasecase
+func TestAccAlibabacloudStackInstancesDataSourceBasic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckAlibabacloudStackInstancesDataSource,
+				Check: resource.ComposeTestCheckFunc(
 
-	rand := getAccTestRandInt(10000, 99999)
-
-	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_instances.default.id}"]`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_instances.default.id}_fake"]`,
-		}),
-	}
-
-	instance_network_typeConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids":                   `["${alibabacloudstack_ecs_instances.default.id}"]`,
-			"instance_network_type": `"${alibabacloudstack_ecs_instances.default.InstanceNetworkType}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids":                   `["${alibabacloudstack_ecs_instances.default.id}_fake"]`,
-			"instance_network_type": `"${alibabacloudstack_ecs_instances.default.InstanceNetworkType}_fake"`,
-		}),
-	}
-
-	payment_typeConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_ecs_instances.default.id}"]`,
-			"payment_type": `"${alibabacloudstack_ecs_instances.default.PaymentType}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_ecs_instances.default.id}_fake"]`,
-			"payment_type": `"${alibabacloudstack_ecs_instances.default.PaymentType}_fake"`,
-		}),
-	}
-
-	resource_group_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids":               `["${alibabacloudstack_ecs_instances.default.id}"]`,
-			"resource_group_id": `"${alibabacloudstack_ecs_instances.default.ResourceGroupId}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids":               `["${alibabacloudstack_ecs_instances.default.id}_fake"]`,
-			"resource_group_id": `"${alibabacloudstack_ecs_instances.default.ResourceGroupId}_fake"`,
-		}),
-	}
-
-	zone_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids":     `["${alibabacloudstack_ecs_instances.default.id}"]`,
-			"zone_id": `"${alibabacloudstack_ecs_instances.default.ZoneId}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids":     `["${alibabacloudstack_ecs_instances.default.id}_fake"]`,
-			"zone_id": `"${alibabacloudstack_ecs_instances.default.ZoneId}_fake"`,
-		}),
-	}
-
-	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_instances.default.id}"]`,
-
-			"instance_network_type": `"${alibabacloudstack_ecs_instances.default.InstanceNetworkType}"`,
-			"payment_type":          `"${alibabacloudstack_ecs_instances.default.PaymentType}"`,
-			"resource_group_id":     `"${alibabacloudstack_ecs_instances.default.ResourceGroupId}"`,
-			"zone_id":               `"${alibabacloudstack_ecs_instances.default.ZoneId}"`}),
-		fakeConfig: testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_ecs_instances.default.id}_fake"]`,
-
-			"instance_network_type": `"${alibabacloudstack_ecs_instances.default.InstanceNetworkType}_fake"`,
-			"payment_type":          `"${alibabacloudstack_ecs_instances.default.PaymentType}_fake"`,
-			"resource_group_id":     `"${alibabacloudstack_ecs_instances.default.ResourceGroupId}_fake"`,
-			"zone_id":               `"${alibabacloudstack_ecs_instances.default.ZoneId}_fake"`}),
-	}
-
-	AlibabacloudstackEcsInstancesDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, instance_network_typeConf, payment_typeConf, resource_group_idConf, zone_idConf, allConf)
+					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_instances.default"),
+					resource.TestCheckResourceAttr("data.alibabacloudstack_instances.default", "instances.#", "1"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_instances.default", "ids.#"),
+				),
+			},
+		},
+	})
 }
 
-var existAlibabacloudstackEcsInstancesDataMapFunc = func(rand int) map[string]string {
-	return map[string]string{
-		"instances.#":    "1",
-		"instances.0.id": CHECKSET,
-	}
-}
-
-var fakeAlibabacloudstackEcsInstancesDataMapFunc = func(rand int) map[string]string {
-	return map[string]string{
-		"instances.#": "0",
-	}
-}
-
-var AlibabacloudstackEcsInstancesDataCheckInfo = dataSourceAttr{
-	resourceId:   "data.alibabacloudstack_ecs_instances.default",
-	existMapFunc: existAlibabacloudstackEcsInstancesDataMapFunc,
-	fakeMapFunc:  fakeAlibabacloudstackEcsInstancesDataMapFunc,
-}
-
-func testAccCheckAlibabacloudstackEcsInstancesDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
-	config := fmt.Sprintf(`
+const testAccCheckAlibabacloudStackInstancesDataSource = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + `
 variable "name" {
-	default = "tf-testAlibabacloudstackEcsInstances%d"
+  default = "Tf-EcsInstanceDataSource"
 }
 
-
-
-
-
-
-data "alibabacloudstack_ecs_instances" "default" {
-%s
+resource "alibabacloudstack_vpc" "default" {
+  name = "${var.name}"
+  cidr_block = "172.16.0.0/16"
 }
-`, rand, strings.Join(pairs, "\n   "))
-	return config
+resource "alibabacloudstack_vswitch" "default" {
+  vpc_id = "${alibabacloudstack_vpc.default.id}"
+  cidr_block = "172.16.0.0/16"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  name = "${var.name}"
 }
-
+resource "alibabacloudstack_security_group" "default" {
+  name = "${var.name}"
+  vpc_id = "${alibabacloudstack_vpc.default.id}"
+}
+resource "alibabacloudstack_instance" "default" {
+  image_id = data.alibabacloudstack_images.default.images.0.id
+  instance_type = "ecs.e4.customize.undjfvanfg"
+  instance_name = "${var.name}"
+  internet_max_bandwidth_out = "10"
+  security_groups = "${alibabacloudstack_security_group.default.*.id}"
+  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  system_disk_category = "cloud_ssd"
+  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+}
+data "alibabacloudstack_instances" "default" {
+  ids = ["${alibabacloudstack_instance.default.id}"]
+}
+`

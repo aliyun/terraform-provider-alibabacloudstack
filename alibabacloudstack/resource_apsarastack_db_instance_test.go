@@ -168,17 +168,17 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":           "MySQL",
-					"engine_version":   "5.7",
-					"instance_type":    "rds.mysql.t1.small",
+					"engine_version":   "8.0",
+					"instance_type":    "mysql.x8.xlarge.2",
 					"instance_storage": "30",
 					"instance_name":    "${var.name}",
-					"vswitch_id":       "${alibabacloudstack_vswitch.default.id}",
+					"vswitch_id":       "${alibabacloudstack_vpc_vswitch.default.id}",
 					"storage_type":     "local_ssd",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"engine":           "MySQL",
-						"engine_version":   "5.7",
+						"engine_version":   "8.0",
 						"instance_type":    CHECKSET,
 						"instance_storage": CHECKSET,
 					}),
@@ -188,7 +188,7 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_restart", "encryption"},
+				ImportStateVerifyIgnore: []string{"force_restart", "encryption", "period", "auto_renew"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -222,7 +222,7 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_type": "rds.mysql.t1.small",
+					"instance_type": "mysql.x8.xlarge.2",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -268,8 +268,8 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":               "MySQL",
-					"engine_version":       "5.7",
-					"instance_type":        "rds.mysql.t1.small",
+					"engine_version":       "8.0",
+					"instance_type":        "mysql.x8.xlarge.2",
 					"instance_storage":     "30",
 					"instance_name":        "tf-testAccDBInstanceConfig",
 					"instance_charge_type": "Postpaid",
@@ -277,7 +277,7 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"engine":            "MySQL",
-						"engine_version":    "5.7",
+						"engine_version":    "8.0",
 						"instance_type":     CHECKSET,
 						"instance_storage":  "30",
 						"instance_name":     "tf-testAccDBInstanceConfig",
@@ -311,7 +311,7 @@ variable "name" {
 
 resource "alibabacloudstack_security_group" "default" {
 	name   = "${var.name}"
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
+	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
 }
 `, VSwitchCommonTestCase, name)
 }
@@ -345,11 +345,11 @@ func TestAccAlibabacloudStackDBInstanceMultiInstance(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"count":            "3",
 					"engine":           "MySQL",
-					"engine_version":   "5.7",
-					"instance_type":    "rds.mysql.t1.small",
+					"engine_version":   "8.0",
+					"instance_type":    "mysql.x8.xlarge.2",
 					"instance_storage": "30",
 					"instance_name":    "${var.name}",
-					"vswitch_id":       "${alibabacloudstack_vswitch.default.id}",
+					"vswitch_id":       "${alibabacloudstack_vpc_vswitch.default.id}",
 					"storage_type":     "local_ssd",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -378,19 +378,18 @@ func TestAccAlibabacloudStackDBInstanceMultiAZ(t *testing.T) {
 
 		// module name
 		IDRefreshName: resourceId,
-
-		Providers:    testAccProviders,
-		CheckDestroy: nil,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":           "MySQL",
-					"engine_version":   "5.7",
-					"instance_type":    "rds.mysql.t1.small",
+					"engine_version":   "8.0",
+					"instance_type":    "mysql.x8.xlarge.2",
 					"instance_storage": "30",
 					"zone_id":          "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":    "${var.name}",
-					"vswitch_id":       "${alibabacloudstack_vswitch.default.id}",
+					"vswitch_id":       "${alibabacloudstack_vpc_vswitch.default.id}",
 					"storage_type":     "local_ssd",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -417,7 +416,7 @@ variable "creation" {
 
 resource "alibabacloudstack_security_group" "default" {
 	name   = "${var.name}"
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
+	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
 }
 `, VSwitchCommonTestCase, name)
 }
@@ -449,8 +448,8 @@ func TestAccAlibabacloudStackDBInstanceClassic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":           "MySQL",
-					"engine_version":   "5.7",
-					"instance_type":    "rds.mysql.t1.small",
+					"engine_version":   "8.0",
+					"instance_type":    "mysql.x8.xlarge.2",
 					"instance_storage": "30",
 					"zone_id":          "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":    "${var.name}",
@@ -508,7 +507,7 @@ func testAccCheckSecurityIpExists(n string, ips []map[string]interface{}) resour
 
 var instanceBasicMap = map[string]string{
 	"engine":            "MySQL",
-	"engine_version":    "5.7",
+	"engine_version":    "8.0",
 	"instance_type":     CHECKSET,
 	"instance_storage":  "30",
 	"instance_name":     "tf-testAccDBInstanceConfig",
