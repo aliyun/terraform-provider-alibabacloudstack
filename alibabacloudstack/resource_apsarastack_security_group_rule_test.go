@@ -1,8 +1,9 @@
 package alibabacloudstack
 
 import (
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"testing"
+
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -220,7 +221,7 @@ resource "alibabacloudstack_security_group_rule" "default" {
 const testAccSecurityGroupRule_description = `
 
 variable "name" {
-  default = "tf-testAccSecurityGroupRule_description"
+  default = "tf-testAccSecurityGroupRuleBasic"
 }
 
 resource "alibabacloudstack_vpc" "default" {
@@ -250,7 +251,7 @@ resource "alibabacloudstack_security_group_rule" "default" {
 const testAccSecurityGroupRule_all = `
 
 variable "name" {
-  default = "tf-testAccSecurityGroupRule_description"
+  default = "tf-testAccSecurityGroupRuleBasic"
 }
 
 resource "alibabacloudstack_vpc" "default" {
@@ -283,7 +284,7 @@ variable "name" {
 }
 
 variable "cidr_ip_list" {
-  type = "list"
+  type = list(string)
   default = ["50.255.255.255/32", "75.250.250.250/32", "45.20.250.240/32"]
 }
 
