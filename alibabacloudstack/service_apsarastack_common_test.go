@@ -838,22 +838,6 @@ resource "alibabacloudstack_vswitch" "default" {
 }
 `
 
-const KVStoreCommonTestCase = `
-data "alibabacloudstack_zones" "default" {
-
-}
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-`
-
 const DBMultiAZCommonTestCase = `
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "${var.creation}"
@@ -1268,7 +1252,7 @@ resource "alibabacloudstack_security_group_rule" "default" {
 
 `
 
-const ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloudstackImages + DataAlibabacloudstackInstanceTypes +`
+const ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloudstackImages + DataAlibabacloudstackInstanceTypes + `
 
  
 resource "alibabacloudstack_ecs_instance" "default" {
