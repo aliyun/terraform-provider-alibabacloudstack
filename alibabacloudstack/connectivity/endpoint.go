@@ -269,8 +269,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"rds.{{.region}}.{{.domain}}",
 	},
 	KVSTORECode: PopEndpoint{
-		"kvstore.{{.domain}}",
-		"kvstore.{{.region}}.{{.domain}}",
+		"kvstore-vpc.{{.domain}}",
+		"kvstore-vpc.{{.region}}.{{.domain}}",
 	},
 	OosCode: PopEndpoint{
 		"oos-public-inner.{{.domain}}",

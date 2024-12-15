@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+	"fmt"
 )
 
 func TestAccAlibabacloudStackKVStoreInstancesDataSource(t *testing.T) {
@@ -13,7 +14,7 @@ func TestAccAlibabacloudStackKVStoreInstancesDataSource(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: dataSourceKVStoreInstancesConfigDependence,
+				Config: dataSourceKVStoreInstancesConfigDependence(),
 				Check: resource.ComposeTestCheckFunc(
 
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_kvstore_instances.default"),
@@ -37,27 +38,18 @@ func TestAccAlibabacloudStackKVStoreInstancesDataSource(t *testing.T) {
 	})
 }
 
-const dataSourceKVStoreInstancesConfigDependence = `
+func dataSourceKVStoreInstancesConfigDependence() string {
+	return fmt.Sprintf(`
 variable "name" {
-    default = "tf-testAccCheckAlibabacloudStackRKVInstancesDataSource0"
+    default = "tf-testAccCheckAlibabacloudStackRKVInstancesDataSource%d"
 }
-data "alibabacloudstack_zones"  "default" {
-}
-resource "alibabacloudstack_vpc" "default" {
-name       = var.name
-cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-vpc_id            = alibabacloudstack_vpc.default.id
-cidr_block        = "172.16.0.0/24"
-availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-name              = var.name
-}
+
+%s
+
 resource "alibabacloudstack_kvstore_instance" "default" {
 instance_class = "redis.master.small.default"
 instance_name  = var.name
-vswitch_id     = alibabacloudstack_vswitch.default.id
-private_ip     = "172.16.0.10"
+vswitch_id     = alibabacloudstack_vpc_vswitch.default.id
 security_ips   = ["10.0.0.1"]
 instance_type  = "Redis"
 engine_version = "4.0"
@@ -65,4 +57,5 @@ engine_version = "4.0"
 data "alibabacloudstack_kvstore_instances" "default" {
   name_regex = alibabacloudstack_kvstore_instance.default.instance_name
 }
-`
+`, getAccTestRandInt(10000, 99999), VSwitchCommonTestCase)
+}
