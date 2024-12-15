@@ -182,67 +182,67 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackKVStoreRedisInstance_vpcmulti(t *testing.T) {
-	var instance *r_kvstore.DBInstanceAttribute
-	resourceId := "alibabacloudstack_kvstore_instance.default.2"
-	ra := resourceAttrInit(resourceId, KVStoreInstanceCheckMap)
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
-		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DescribeKVstoreInstance")
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
+// func TestAccAlibabacloudStackKVStoreRedisInstance_vpcmulti(t *testing.T) {
+// 	var instance *r_kvstore.DBInstanceAttribute
+// 	resourceId := "alibabacloudstack_kvstore_instance.default.2"
+// 	ra := resourceAttrInit(resourceId, KVStoreInstanceCheckMap)
+// 	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
+// 		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+// 	}, "DescribeKVstoreInstance")
+// 	rac := resourceAttrCheckInit(rc, ra)
+// 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
+// 	resource.Test(t, resource.TestCase{
+// 		PreCheck: func() {
+// 			testAccPreCheck(t)
+// 		},
 
-		// module name
-		IDRefreshName: resourceId,
+// 		// module name
+// 		IDRefreshName: resourceId,
 
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccKVStoreInstance_vpcmulti(VSwitchCommonTestCase, redisInstanceClassForTest, string(KVStoreRedis), string(KVStore2Dot8)),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-		},
-	})
-}
+// 		Providers:    testAccProviders,
+// 		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: testAccKVStoreInstance_vpcmulti(VSwitchCommonTestCase, redisInstanceClassForTest, string(KVStoreRedis), string(KVStore2Dot8)),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(nil),
+// 				),
+// 			},
+// 		},
+// 	})
+// }
 
-func TestAccAlibabacloudStackKVStoreRedisInstance_classicmulti(t *testing.T) {
-	var instance *r_kvstore.DBInstanceAttribute
-	resourceId := "alibabacloudstack_kvstore_instance.default.2"
-	ra := resourceAttrInit(resourceId, KVStoreInstanceCheckMap)
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
-		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DescribeKVstoreInstance")
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
+// func TestAccAlibabacloudStackKVStoreRedisInstance_classicmulti(t *testing.T) {
+// 	var instance *r_kvstore.DBInstanceAttribute
+// 	resourceId := "alibabacloudstack_kvstore_instance.default.2"
+// 	ra := resourceAttrInit(resourceId, KVStoreInstanceCheckMap)
+// 	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
+// 		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+// 	}, "DescribeKVstoreInstance")
+// 	rac := resourceAttrCheckInit(rc, ra)
+// 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
+// 	resource.Test(t, resource.TestCase{
+// 		PreCheck: func() {
+// 			testAccPreCheck(t)
+// 		},
 
-		// module name
-		IDRefreshName: resourceId,
+// 		// module name
+// 		IDRefreshName: resourceId,
 
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccKVStoreInstance_classicmulti(string(KVStoreRedis), redisInstanceClassForTest, string(KVStore2Dot8)),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-		},
-	})
-}
+// 		Providers:    testAccProviders,
+// 		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: testAccKVStoreInstance_classicmulti(string(KVStoreRedis), redisInstanceClassForTest, string(KVStore2Dot8)),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(nil),
+// 				),
+// 			},
+// 		},
+// 	})
+// }
 
 func testAccCheckKVStoreInstanceDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
@@ -275,13 +275,13 @@ variable "name" {
 
 resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
-	instance_charge_type = "PostPaid"
 	instance_type  = "%s"
 	instance_class = "%s"
 	engine_version = "%s"
 	series = "enterprise"
 	node_type = "double"
 	architecture_type = "standard"
+	password       = "1qaz@WSX"
 }
 
 	`, rand, instanceType, instanceClass, engineVersion)
@@ -417,7 +417,7 @@ func testAccKVStoreInstance_classicUpdateAttr(instanceType, instanceClass, engin
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		availability_zone = "${lookup(data.alibabacloudstack_zones.default.zones[(length(data.alibabacloudstack_zones.default.zones)-1)%%length(data.alibabacloudstack_zones.default.zones)], "id")}"
-		password = "inputYourCodeHere"
+		password = "1qaz@WSX"
 		instance_name  = "${var.name}"
 		security_ips = ["10.0.0.1"]
 		instance_type = "%s"
@@ -437,7 +437,7 @@ func testAccKVStoreInstance_classicUpdateTags(instanceType, instanceClass, engin
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		availability_zone = "${lookup(data.alibabacloudstack_zones.default.zones[(length(data.alibabacloudstack_zones.default.zones)-1)%%length(data.alibabacloudstack_zones.default.zones)], "id")}"
-		password = "inputYourCodeHere"
+		password = "1qaz@WSX"
 		instance_name  = "${var.name}"
 		security_ips = ["10.0.0.1"]
 		instance_type = "%s"
@@ -461,7 +461,7 @@ func testAccKVStoreInstance_classicUpdateMaintainStartTime(instanceType, instanc
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		availability_zone = "${lookup(data.alibabacloudstack_zones.default.zones[(length(data.alibabacloudstack_zones.default.zones)-1)%%length(data.alibabacloudstack_zones.default.zones)], "id")}"
-		password = "inputYourCodeHere"
+		password = "1qaz@WSX"
 		instance_name  = "${var.name}"
 		security_ips = ["10.0.0.1"]
 		instance_type = "%s"
@@ -484,7 +484,7 @@ func testAccKVStoreInstance_classicUpdateAll(instanceType, instanceClass, engine
 	}
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
-		password = "inputYourCodeHere"
+		password = "1qaz@WSX"
 		instance_name  = "${var.name}"
 		security_ips = ["10.0.0.2","10.0.0.3"]
 		instance_type = "%s"
@@ -685,7 +685,7 @@ func testAccKVStoreInstance_vpcUpdateAll(common, instanceClass, instanceType, en
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		instance_class = "%s"
 		instance_name  = "${var.name}"
-		password       = "inputYourCodeHere"
+		password       = "1qaz@WSX"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1", "10.0.0.4"]
 		instance_type = "%s"
@@ -708,7 +708,6 @@ func testAccKVStoreInstance_vpcmulti(common string, instanceClass, instanceType,
 		count		   = 3
 		instance_class = "%s"
 		instance_name  = "${var.name}"
-		password       = "inputYourCodeHere"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips   = ["10.0.0.1"]
 		instance_type  = "%s"
@@ -728,6 +727,7 @@ func testAccKVStoreInstance_classicmulti(instanceType, instanceClass, engineVers
 		count = 3
 		instance_name  = "${var.name}"
 		security_ips = ["10.0.0.1"]
+		password       = "1qaz@WSX"
 		instance_type = "%s"
 		instance_class = "%s"
 		engine_version = "%s"

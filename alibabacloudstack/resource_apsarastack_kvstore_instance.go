@@ -13,8 +13,6 @@ import (
 
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 
-	"strconv"
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
@@ -706,75 +704,6 @@ func resourceAlibabacloudStackKVStoreInstanceDelete(d *schema.ResourceData, meta
 	stateConf := BuildStateConf([]string{"Creating", "Active", "Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, kvstoreService.RdsKvstoreInstanceStateRefreshFunc(d.Id(), []string{}))
 	_, err = stateConf.WaitForState()
 	return errmsgs.WrapError(err)
-}
-
-func buildKVStoreCreateRequest(d *schema.ResourceData, meta interface{}) (*r_kvstore.CreateInstanceRequest, error) {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	vpcService := VpcService{client}
-
-	request := r_kvstore.CreateCreateInstanceRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceName = Trim(connectivity.GetResourceData(d, "tair_instance_name", "instance_name").(string))
-	request.InstanceType = Trim(d.Get("instance_type").(string))
-	request.EngineVersion = Trim(d.Get("engine_version").(string))
-	request.InstanceClass = Trim(d.Get("instance_class").(string))
-// 	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok && Trim(v.(string)) != "" {
-// 		request.ChargeType = Trim(v.(string))
-// 	} else {
-// 		request.ChargeType = string(PostPaid)
-// 	}
-	request.Password = Trim(d.Get("password").(string))
-
-	if request.Password == "" {
-		if v := d.Get("kms_encrypted_password").(string); v != "" {
-			kmsService := KmsService{client}
-			decryptResp, err := kmsService.Decrypt(v, d.Get("kms_encryption_context").(map[string]interface{}))
-			if err != nil {
-				return request, errmsgs.WrapError(err)
-			}
-			request.Password = decryptResp.Plaintext
-		}
-	}
-
-	request.BackupId = Trim(d.Get("backup_id").(string))
-
-	if PayType(request.ChargeType) == PrePaid {
-		request.Period = strconv.Itoa(d.Get("period").(int))
-	}
-
-	if zone, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && Trim(zone.(string)) != "" {
-		request.ZoneId = Trim(zone.(string))
-	}
-
-	request.NetworkType = strings.ToUpper(string(Classic))
-	if vswitchId, ok := d.GetOk("vswitch_id"); ok && vswitchId.(string) != "" {
-		request.VSwitchId = vswitchId.(string)
-		request.NetworkType = strings.ToUpper(string(Vpc))
-		// request.PrivateIpAddress = Trim(d.Get("private_ip").(string))
-
-		// check vswitchId in zone
-		object, err := vpcService.DescribeVSwitch(vswitchId.(string))
-		if err != nil {
-			return nil, errmsgs.WrapError(err)
-		}
-
-		if request.ZoneId == "" {
-			request.ZoneId = object.ZoneId
-		} else if strings.Contains(request.ZoneId, MULTI_IZ_SYMBOL) {
-			zonestr := strings.Split(strings.SplitAfter(request.ZoneId, "(")[1], ")")[0]
-			if !strings.Contains(zonestr, string([]byte(object.ZoneId)[len(object.ZoneId)-1])) {
-				return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the multi zone %s", object.VSwitchId, request.ZoneId))
-			}
-		} else if request.ZoneId != object.ZoneId {
-			return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the zone %s", object.VSwitchId, request.ZoneId))
-		}
-
-		request.VpcId = object.VpcId
-	}
-
-	request.Token = buildClientToken(request.GetActionName())
-
-	return request, nil
 }
 
 func refreshParameters(d *schema.ResourceData, meta interface{}) error {
