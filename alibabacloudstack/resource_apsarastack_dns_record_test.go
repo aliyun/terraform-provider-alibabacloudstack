@@ -80,7 +80,7 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 					"type":         "A",
 					"ttl":          "0",
 					"rr_set":       []string{"192.168.2.4", "192.168.2.7", "10.0.0.4"},
-					"line_ids":		[]string{"default"},
+					"line_ids":     []string{"default"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
@@ -95,6 +95,10 @@ func testAccDnsRecordConfigBasicConfigBasic(name string) string {
 	return fmt.Sprintf(`
 resource "alibabacloudstack_dns_domain" "default" {
  domain_name = "%s"
+}
+
+data "alibabacloudstack_zones" default {
+  available_resource_creation = "VSwitch"
 }
 
 `, name)

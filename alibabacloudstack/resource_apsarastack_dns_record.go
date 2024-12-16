@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -60,7 +61,6 @@ func resourceAlibabacloudStackDnsRecord() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Default:  []string{"default"},
 			},
 			"remark": {
 				Type:     schema.TypeString,
@@ -72,32 +72,45 @@ func resourceAlibabacloudStackDnsRecord() *schema.Resource {
 
 func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := make(map[string]interface{})
-	ZoneId := d.Get("zone_id").(string)
+	ZoneId := SplitDnsZone(d.Get("zone_id").(string))
 	LbaStrategy := d.Get("lba_strategy").(string)
 	Type := d.Get("type").(string)
 	Name := d.Get("name").(string)
 	TTL := d.Get("ttl").(int)
+	line_ids := expandStringList(d.Get("line_ids").(*schema.Set).List())
+	if len(line_ids) <= 0 {
+		line_ids = []string{"default"}
+	}
+	line_ids_json, _ := json.Marshal(line_ids)
+	line_ids_str := string(line_ids_json)
+	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "AddGlobalZoneRecord", "")
+	request.QueryParams["LineIds"] = line_ids_str
+	request.QueryParams["Type"] = Type
+	request.QueryParams["Ttl"] = fmt.Sprintf("%d", TTL)
+	request.QueryParams["ZoneId"] = ZoneId
+	request.QueryParams["LbaStrategy"] = LbaStrategy
+	request.QueryParams["Name"] = Name
 	var rrsets []string
 	if v, ok := d.GetOk("rr_set"); ok {
 		rrsets = expandStringList(v.(*schema.Set).List())
 		for i, key := range rrsets {
-			request[fmt.Sprintf("RDatas.%d.Value", i+1)] = key
+			request.QueryParams[fmt.Sprintf("RDatas.%d.Value", i+1)] = key
+
 		}
 	}
-
-	action := "AddGlobalZoneRecord"
-	request["Type"] = Type
-	request["Ttl"] = TTL
-	request["ZoneId"] = ZoneId
-	request["LbaStrategy"] = LbaStrategy
-	request["Name"] = Name
-	request["LineIds"] = d.Get("line_ids").([]string)
-	request["ClientToken"] = buildClientToken(action)
-
-	_, err = client.DoTeaRequest("POST", "CloudDns", "2021-06-24", action, "", nil, request)
+	raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
+		return dnsClient.ProcessCommonRequest(request)
+	})
+	addDebug(request.GetActionName(), raw, request, request.QueryParams)
 	if err != nil {
-		return err
+		errmsg := ""
+		if raw != nil {
+			response, ok := raw.(*responses.CommonResponse)
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			}
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dns_record", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	d.SetId(fmt.Sprint(ZoneId))
@@ -118,12 +131,13 @@ func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interfa
 		}
 		return errmsgs.WrapError(err)
 	}
+	ZoneId := SplitDnsZone(object.Data[0].ZoneId)
 	d.Set("ttl", object.Data[0].TTL)
 	d.Set("record_id", object.Data[0].Id)
 	d.Set("name", object.Data[0].Name)
 	d.Set("type", object.Data[0].Type)
 	d.Set("remark", object.Data[0].Remark)
-	d.Set("zone_id", object.Data[0].ZoneId)
+	d.Set("zone_id", ZoneId)
 	d.Set("lba_strategy", object.Data[0].LbaStrategy)
 
 	return nil
@@ -132,8 +146,8 @@ func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interfa
 func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	dnsService := DnsService{client}
-	ID := d.Get("record_id").(int)
-	ZoneId := d.Get("zone_id").(int)
+	ID := d.Get("record_id").(string)
+	ZoneId := SplitDnsZone(d.Get("zone_id").(string))
 	Name := d.Get("name").(string)
 	LbaStrategy := d.Get("lba_strategy").(string)
 	check, err := dnsService.DescribeDnsRecord(d.Id())
@@ -150,7 +164,7 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		}
 		check.Data[0].Remark = desc
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "UpdateGlobalZoneRecordRemark", "")
-		request.QueryParams["Id"] = fmt.Sprint(ID)
+		request.QueryParams["Id"] = ID
 		request.QueryParams["Remark"] = desc
 		raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
 			return dnsClient.ProcessCommonRequest(request)
@@ -229,12 +243,12 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 
 func resourceAlibabacloudStackDnsRecordDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	ID := d.Get("record_id").(int)
-	ZoneId := d.Get("zone_id").(int)
+	ID := d.Get("record_id").(string)
+	ZoneId := SplitDnsZone(d.Get("zone_id").(string))
 
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DeleteGlobalZoneRecord", "")
-	request.QueryParams["Id"] = fmt.Sprint(ID)
-	request.QueryParams["ZoneId"] = fmt.Sprint(ZoneId)
+	request.QueryParams["Id"] = ID
+	request.QueryParams["ZoneId"] = ZoneId
 	raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
 		return dnsClient.ProcessCommonRequest(request)
 	})

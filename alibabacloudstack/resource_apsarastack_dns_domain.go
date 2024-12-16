@@ -67,7 +67,7 @@ func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta inter
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_dns_domain", "domain alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	if len(check.Data) == 0 {
+	if check == nil || len(check.Data) == 0 {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "AddGlobalZone", "")
 		request.QueryParams["Name"] = DomainName
 		raw, err := client.WithEcsClient(func(dnsClient *ecs.Client) (interface{}, error) {

@@ -243,32 +243,39 @@ func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err err
 	request.QueryParams["SignatureVersion"] = "2.1"
 	request.QueryParams["PageNumber"] = fmt.Sprint(1)
 	request.QueryParams["PageSize"] = fmt.Sprint(PageSizeLarge)
-	resp := &DnsDomains{}
 	raw, err := s.client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
 		return dnsClient.ProcessCommonRequest(request)
 	})
-	addDebug("DescribeGlobalZones", response, nil, request)
+	addDebug("DescribeGlobalZones", raw, request, request.QueryParams)
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorDomainNotFound"}) {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := ""
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeGlobalZones", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeGlobalZones", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("DescribeGlobalZones", response, nil, request)
+	addDebug("DescribeGlobalZones", response, request, request.QueryParams)
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), response)
 	if err != nil {
-		return resp, errmsgs.WrapError(err)
+		return response, errmsgs.WrapError(err)
 	}
 
-	if len(resp.Data) < 1 || resp.AsapiSuccess == true {
-		return resp, errmsgs.WrapError(err)
+	if len(response.Data) < 1 || response.AsapiSuccess == true {
+		return response, errmsgs.WrapError(err)
 	}
 
-	return resp, nil
+	return response, nil
+}
+
+func SplitDnsZone(zone_id string) string {
+	did := strings.Split(zone_id, COLON_SEPARATED)
+	if len(did) >= 2 {
+		return  did[1]
+	}
+	return zone_id
 }
