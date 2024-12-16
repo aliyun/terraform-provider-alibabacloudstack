@@ -1280,7 +1280,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 		}
 		return nil
 	})
-	return response, nil
+	return response, err
 }
 
 func IncrementalWait(firstDuration time.Duration, increaseDuration time.Duration) func() {

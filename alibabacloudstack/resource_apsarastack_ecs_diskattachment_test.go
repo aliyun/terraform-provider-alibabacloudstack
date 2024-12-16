@@ -55,7 +55,7 @@ func TestAccAlibabacloudStackDiskAttachment(t *testing.T) {
 					resource.TestCheckResourceAttrSet(
 						"alibabacloudstack_ecs_diskattachment.default", "device_name"),
 					resource.TestCheckResourceAttr(
-						"alibabacloudstack_ecs_disk.default", "size", "70"),
+						"alibabacloudstack_ecs_disk.default", "size", "30"),
 				),
 			},
 		},
@@ -134,7 +134,7 @@ func testAccDiskAttachmentConfig() string {
 
 	resource "alibabacloudstack_ecs_disk" "default" {
 	  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-	  size = "50"
+	  size = "20"
 	  name = "${var.name}"
 	  category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 
@@ -161,7 +161,7 @@ func testAccDiskAttachmentConfigResize() string {
 
 	resource "alibabacloudstack_ecs_disk" "default" {
 	  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-	  size = "70"
+	  size = "30"
 	  name = "${var.name}"
 	  category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 
@@ -192,7 +192,7 @@ func testAccMultiDiskAttachmentConfig(common string) string {
 		name = "${var.name}-${count.index}"
 		count = "${var.number}"
 		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-		size = "50"
+		size = "20"
 
 		tags = {
 			Name = "TerraformTest-disk-${count.index}"

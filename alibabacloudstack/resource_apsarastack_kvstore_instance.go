@@ -7,16 +7,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-
-	"github.com/denverdino/aliyungo/common"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
-
-	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -100,28 +95,28 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
 				ConflictsWith: []string{"zone_id"},
 			},
-			"payment_type": {
-				Type:          schema.TypeString,
-				ValidateFunc:  validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"instance_charge_type"},
-			},
-			"instance_charge_type": {
-				Type:          schema.TypeString,
-				ValidateFunc:  validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
-				Optional:      true,
-				Computed:      true,
-				Deprecated:    "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
-				ConflictsWith: []string{"payment_type"},
-			},
-			"period": {
-				Type:             schema.TypeInt,
-				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
-				Optional:         true,
-				Default:          1,
-				DiffSuppressFunc: PostPaidDiffSuppressFunc,
-			},
+// 			"payment_type": {
+// 				Type:          schema.TypeString,
+// 				ValidateFunc:  validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
+// 				Optional:      true,
+// 				Computed:      true,
+// 				ConflictsWith: []string{"instance_charge_type"},
+// 			},
+// 			"instance_charge_type": {
+// 				Type:          schema.TypeString,
+// 				ValidateFunc:  validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
+// 				Optional:      true,
+// 				Computed:      true,
+// 				Deprecated:    "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
+// 				ConflictsWith: []string{"payment_type"},
+// 			},
+// 			"period": {
+// 				Type:             schema.TypeInt,
+// 				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
+// 				Optional:         true,
+// 				Default:          1,
+// 				DiffSuppressFunc: PostPaidDiffSuppressFunc,
+// 			},
 			"instance_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -145,7 +140,7 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 			"private_ip": {
 				Type:     schema.TypeString,
 				Computed: true,
-				Optional: true,
+				// Optional: true, ASCM不支持设定
 			},
 			"backup_id": {
 				Type:     schema.TypeString,
@@ -197,15 +192,15 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"cpu_type": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
+// 			"cpu_type": {
+// 				Type:     schema.TypeString,
+// 				Required: true,
+// 			},
 			"node_type": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				ValidateFunc:     validation.StringInSlice([]string{"MASTER_SLAVE", "STAND_ALONE"}, false),
+				ValidateFunc:     validation.StringInSlice([]string{"MASTER_SLAVE", "STAND_ALONE", "double"}, false),
 				DiffSuppressFunc: NodeTypeDiffSuppressFunc,
 			},
 			"architecture_type": {
@@ -218,6 +213,7 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 			"series": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"community", "enterprise"}, false),
 			},
@@ -237,9 +233,9 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	if v, ok := connectivity.GetResourceDataOk(d, "tair_instance_name", "instance_name"); ok {
 		request["InstanceName"] = v.(string)
 	}
-	if v, ok := d.GetOk("cpu_type"); ok {
-		request["CpuType"] = v.(string)
-	}
+// 	if v, ok := d.GetOk("cpu_type"); ok {
+// 		request["CpuType"] = v.(string)
+// 	}
 	if v, ok := d.GetOk("node_type"); ok {
 		request["NodeType"] = v.(string)
 	}
@@ -252,11 +248,11 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	if v, ok := d.GetOk("instance_class"); ok {
 		request["InstanceClass"] = v.(string)
 	}
-	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
-		request["ChargeType"] = v.(string)
-	} else {
-		request["ChargeType"] = string(PostPaid)
-	}
+// 	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
+// 		request["ChargeType"] = v.(string)
+// 	} else {
+// 		request["ChargeType"] = string(PostPaid)
+// 	}
 	if v, ok := d.GetOk("password"); ok {
 		request["Password"] = v.(string)
 	}
@@ -278,9 +274,9 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 		request["BackupId"] = v.(string)
 	}
 
-	if request["ChargeType"] == PrePaid {
-		request["Period"] = strconv.Itoa(d.Get("period").(int))
-	}
+// 	if request["ChargeType"] == PrePaid {
+// 		request["Period"] = strconv.Itoa(d.Get("period").(int))
+// 	}
 
 	if v, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && Trim(v.(string)) != "" {
 		request["ZoneId"] = Trim(v.(string))
@@ -309,9 +305,9 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	if err != nil {
 		return err
 	}
-	if !response["asapiSuccess"].(bool) {
+	if value, exist:=response["asapiSuccess"]; ! exist || ! value.(bool) {
 		err = errmsgs.Error("create kvstroe instances Failed !!")
-		return errmsgs.WrapErrorf(err, " create kvstroe instances Failed !! %s", action, errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, "create kvstroe instances Failed !! %s", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	d.SetId(fmt.Sprint(response["InstanceId"]))
@@ -418,36 +414,36 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 			}
 		}
 	}
-	configPayType := PayType(connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string))
-	if !d.IsNewResource() && (d.HasChanges("payment_type", "instance_charge_type")) && configPayType == PrePaid {
-		// for now we just support charge change from PostPaid to PrePaid
-		prePaidRequest := r_kvstore.CreateTransformToPrePaidRequest()
-		client.InitRpcRequest(*prePaidRequest.RpcRequest)
-		prePaidRequest.InstanceId = d.Id()
-		prePaidRequest.Period = requests.Integer(strconv.Itoa(d.Get("period").(int)))
-		prePaidRequest.AutoPay = requests.NewBoolean(true)
-		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
-			return rkvClient.TransformToPrePaid(prePaidRequest)
-		})
-		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				baseResponse := &responses.BaseResponse{}
-				err = json.Unmarshal([]byte(raw.(*r_kvstore.TransformToPrePaidResponse).GetHttpContentString()), baseResponse)
-				if err == nil {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(baseResponse)
-				}
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), prePaidRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(prePaidRequest.GetActionName(), raw, prePaidRequest.RpcRequest, prePaidRequest)
-		// wait instance status is Normal after modifying
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapError(err)
-		}
-		//d.SetPartial("instance_charge_type")
-		//d.SetPartial("period")
-	}
+// 	configPayType := PayType(connectivity.GetResourceData(d, "payment_type", "instance_charge_type").(string))
+// 	if !d.IsNewResource() && (d.HasChanges("payment_type", "instance_charge_type")) && configPayType == PrePaid {
+// 		// for now we just support charge change from PostPaid to PrePaid
+// 		prePaidRequest := r_kvstore.CreateTransformToPrePaidRequest()
+// 		client.InitRpcRequest(*prePaidRequest.RpcRequest)
+// 		prePaidRequest.InstanceId = d.Id()
+// 		prePaidRequest.Period = requests.Integer(strconv.Itoa(d.Get("period").(int)))
+// 		prePaidRequest.AutoPay = requests.NewBoolean(true)
+// 		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
+// 			return rkvClient.TransformToPrePaid(prePaidRequest)
+// 		})
+// 		if err != nil {
+// 			errmsg := ""
+// 			if raw != nil {
+// 				baseResponse := &responses.BaseResponse{}
+// 				err = json.Unmarshal([]byte(raw.(*r_kvstore.TransformToPrePaidResponse).GetHttpContentString()), baseResponse)
+// 				if err == nil {
+// 					errmsg = errmsgs.GetBaseResponseErrorMessage(baseResponse)
+// 				}
+// 			}
+// 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), prePaidRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+// 		}
+// 		addDebug(prePaidRequest.GetActionName(), raw, prePaidRequest.RpcRequest, prePaidRequest)
+// 		// wait instance status is Normal after modifying
+// 		if _, err := stateConf.WaitForState(); err != nil {
+// 			return errmsgs.WrapError(err)
+// 		}
+// 		//d.SetPartial("instance_charge_type")
+// 		//d.SetPartial("period")
+// 	}
 
 	if d.HasChanges("maintain_start_time", "maintain_end_time") {
 		request := r_kvstore.CreateModifyInstanceMaintainTimeRequest()
@@ -615,8 +611,14 @@ func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta i
 
 	connectivity.SetResourceData(d, object.InstanceName, "tair_instance_name", "instance_name")
 	d.Set("instance_class", object.InstanceClass)
+	// 目前查询接口没有返回是否为企业版本，只能从类型判断
+	if strings.HasPrefix(object.InstanceClass, "redis.amber") {
+		d.Set("series", "enterprise")
+	} else {
+		d.Set("series", "community")
+	}
 	connectivity.SetResourceData(d, object.ZoneId, "zone_id", "availability_zone")
-	connectivity.SetResourceData(d, object.ChargeType, "payment_type", "instance_charge_type")
+// 	connectivity.SetResourceData(d, object.ChargeType, "payment_type", "instance_charge_type")
 	d.Set("instance_type", object.InstanceType)
 	d.Set("vswitch_id", object.VSwitchId)
 	d.Set("connection_domain", object.ConnectionDomain)
@@ -702,75 +704,6 @@ func resourceAlibabacloudStackKVStoreInstanceDelete(d *schema.ResourceData, meta
 	stateConf := BuildStateConf([]string{"Creating", "Active", "Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, kvstoreService.RdsKvstoreInstanceStateRefreshFunc(d.Id(), []string{}))
 	_, err = stateConf.WaitForState()
 	return errmsgs.WrapError(err)
-}
-
-func buildKVStoreCreateRequest(d *schema.ResourceData, meta interface{}) (*r_kvstore.CreateInstanceRequest, error) {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	vpcService := VpcService{client}
-
-	request := r_kvstore.CreateCreateInstanceRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceName = Trim(connectivity.GetResourceData(d, "tair_instance_name", "instance_name").(string))
-	request.InstanceType = Trim(d.Get("instance_type").(string))
-	request.EngineVersion = Trim(d.Get("engine_version").(string))
-	request.InstanceClass = Trim(d.Get("instance_class").(string))
-	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok && Trim(v.(string)) != "" {
-		request.ChargeType = Trim(v.(string))
-	} else {
-		request.ChargeType = string(PostPaid)
-	}
-	request.Password = Trim(d.Get("password").(string))
-
-	if request.Password == "" {
-		if v := d.Get("kms_encrypted_password").(string); v != "" {
-			kmsService := KmsService{client}
-			decryptResp, err := kmsService.Decrypt(v, d.Get("kms_encryption_context").(map[string]interface{}))
-			if err != nil {
-				return request, errmsgs.WrapError(err)
-			}
-			request.Password = decryptResp.Plaintext
-		}
-	}
-
-	request.BackupId = Trim(d.Get("backup_id").(string))
-
-	if PayType(request.ChargeType) == PrePaid {
-		request.Period = strconv.Itoa(d.Get("period").(int))
-	}
-
-	if zone, ok := connectivity.GetResourceDataOk(d, "zone_id", "availability_zone"); ok && Trim(zone.(string)) != "" {
-		request.ZoneId = Trim(zone.(string))
-	}
-
-	request.NetworkType = strings.ToUpper(string(Classic))
-	if vswitchId, ok := d.GetOk("vswitch_id"); ok && vswitchId.(string) != "" {
-		request.VSwitchId = vswitchId.(string)
-		request.NetworkType = strings.ToUpper(string(Vpc))
-		// request.PrivateIpAddress = Trim(d.Get("private_ip").(string))
-
-		// check vswitchId in zone
-		object, err := vpcService.DescribeVSwitch(vswitchId.(string))
-		if err != nil {
-			return nil, errmsgs.WrapError(err)
-		}
-
-		if request.ZoneId == "" {
-			request.ZoneId = object.ZoneId
-		} else if strings.Contains(request.ZoneId, MULTI_IZ_SYMBOL) {
-			zonestr := strings.Split(strings.SplitAfter(request.ZoneId, "(")[1], ")")[0]
-			if !strings.Contains(zonestr, string([]byte(object.ZoneId)[len(object.ZoneId)-1])) {
-				return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the multi zone %s", object.VSwitchId, request.ZoneId))
-			}
-		} else if request.ZoneId != object.ZoneId {
-			return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the zone %s", object.VSwitchId, request.ZoneId))
-		}
-
-		request.VpcId = object.VpcId
-	}
-
-	request.Token = buildClientToken(request.GetActionName())
-
-	return request, nil
 }
 
 func refreshParameters(d *schema.ResourceData, meta interface{}) error {
