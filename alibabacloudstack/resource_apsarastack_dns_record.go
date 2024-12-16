@@ -24,7 +24,7 @@ func resourceAlibabacloudStackDnsRecord() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Required: true,
 			},
 			"record_id": {

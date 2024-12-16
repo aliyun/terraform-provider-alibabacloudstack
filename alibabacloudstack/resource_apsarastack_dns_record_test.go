@@ -74,7 +74,7 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"zone_id":      "${alibabacloudstack_dns_domain.default.domain_id}",
+					"zone_id":      "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"lba_strategy": "ALL_RR",
 					"name":         "test",
 					"type":         "A",
@@ -92,11 +92,12 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 
 func testAccDnsRecordConfigBasicConfigBasic(name string) string {
 	return fmt.Sprintf(`
-
+%s
 resource "alibabacloudstack_dns_domain" "default" {
  domain_name = "%s"
 }
-`, name)
+
+`, DataZoneCommonTestCase, name)
 }
 
 var dnsRecordBasicMap = map[string]string{

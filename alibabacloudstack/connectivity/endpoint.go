@@ -183,7 +183,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"dbs.{{.region}}.{{.domain}}",
 	},
 	//dns endpoint
-	DNSCode: PopEndpoint{
+	DnsCode: PopEndpoint{
 		"dns.standard.api.{{.domain}}",
 		"dns.standard.api.{{.region}}.{{.domain}}",
 	},
