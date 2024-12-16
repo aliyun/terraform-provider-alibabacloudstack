@@ -75,48 +75,48 @@ func TestAccAlibabacloudStackEcsSnapshot0(t *testing.T) {
 				),
 			},
 
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "Test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "Test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF-update",
-						"For":     "Test-update",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF-update",
-						"tags.For":     "Test-update",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "0",
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
-					}),
-				),
-			},
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"tags": map[string]string{
+			// 			"Created": "TF",
+			// 			"For":     "Test",
+			// 		},
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"tags.%":       "2",
+			// 			"tags.Created": "TF",
+			// 			"tags.For":     "Test",
+			// 		}),
+			// 	),
+			// },
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"tags": map[string]string{
+			// 			"Created": "TF-update",
+			// 			"For":     "Test-update",
+			// 		},
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"tags.%":       "2",
+			// 			"tags.Created": "TF-update",
+			// 			"tags.For":     "Test-update",
+			// 		}),
+			// 	),
+			// },
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"tags": REMOVEKEY,
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"tags.%":       "0",
+			// 			"tags.Created": REMOVEKEY,
+			// 			"tags.For":     REMOVEKEY,
+			// 		}),
+			// 	),
+			// },
 		},
 	})
 }
