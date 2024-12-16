@@ -37,7 +37,7 @@ const (
 	CDNCode             = ServiceCode("CDN")
 	CMSCode             = ServiceCode("CMS")
 	OTSCode             = ServiceCode("OTS")
-	DNSCode             = ServiceCode("DNS")
+	DNSCode             = ServiceCode("CLOUDDNS")
 	PVTZCode            = ServiceCode("PVTZ")
 	LOGCode             = ServiceCode("LOG")
 	FCCode              = ServiceCode("FC")
@@ -183,7 +183,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"dbs.{{.region}}.{{.domain}}",
 	},
 	//dns endpoint
-	DnsCode: PopEndpoint{
+	DNSCode: PopEndpoint{
 		"dns.standard.api.{{.domain}}",
 		"dns.standard.api.{{.region}}.{{.domain}}",
 	},

@@ -30,6 +30,7 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 	raw, err := s.client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
 		return dnsClient.ProcessCommonRequest(request)
 	})
+	addDebug("DescribeGlobalZoneRecords", response, requestInfo, request)
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorRecordNotFound"}) {
