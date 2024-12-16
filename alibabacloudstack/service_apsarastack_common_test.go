@@ -741,14 +741,12 @@ data "alibabacloudstack_zones" "default" {
 const DataAlibabacloudstackInstanceTypes = `
 data "alibabacloudstack_instance_types" "default" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  cpu_core_count    = 2
-  sorted_by         = "Memory"
+  cpu_core_count       = 2
+  memory_size          = 4
+  instance_type_family = "ecs.n4"
+  sorted_by            = "Memory"
   
  }
-
- locals {
-  instance_type_id = sort(data.alibabacloudstack_instance_types.default.ids)[0]
-}
  
 `
 const DataAlibabacloudstackInstanceTypes_Eni2 = `
@@ -837,22 +835,6 @@ resource "alibabacloudstack_vswitch" "default" {
  vpc_id = "${alibabacloudstack_vpc.default.id}"
  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
  cidr_block = "172.16.0.0/24"
-}
-`
-
-const KVStoreCommonTestCase = `
-data "alibabacloudstack_zones" "default" {
-
-}
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
 }
 `
 
@@ -1270,15 +1252,8 @@ resource "alibabacloudstack_security_group_rule" "default" {
 
 `
 
-const ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloudstackImages + `
-data "alibabacloudstack_instance_types" "default" {
-  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  cpu_core_count       = 2
-  memory_size          = 4
-  instance_type_family = "ecs.n4"
-  sorted_by            = "Memory"
-  
- }
+const ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloudstackImages + DataAlibabacloudstackInstanceTypes + `
+
  
 resource "alibabacloudstack_ecs_instance" "default" {
   image_id             = "${data.alibabacloudstack_images.default.images.0.id}"

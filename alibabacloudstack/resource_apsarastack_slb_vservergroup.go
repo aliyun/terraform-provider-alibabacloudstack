@@ -30,17 +30,17 @@ func resourceAlibabacloudStackSlbServerGroup() *schema.Resource {
 				Required: true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'vserver_group_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'vserver_group_name' instead.",
 				ConflictsWith: []string{"vserver_group_name"},
 			},
 			"vserver_group_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 			"servers": {
@@ -105,7 +105,7 @@ func resourceAlibabacloudStackSlbServerGroupCreate(d *schema.ResourceData, meta 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response := raw.(*slb.CreateVServerGroupResponse)
 	d.SetId(response.VServerGroupId)
-	d.Set("load_balancer_id", d.Get("load_balancer_id").(string))
+	// d.Set("load_balancer_id", d.Get("load_balancer_id").(string))
 	return resourceAlibabacloudStackSlbServerGroupUpdate(d, meta)
 }
 
@@ -124,7 +124,7 @@ func resourceAlibabacloudStackSlbServerGroupRead(d *schema.ResourceData, meta in
 	}
 
 	connectivity.SetResourceData(d, object.VServerGroupName, "vserver_group_name", "name")
-	d.Set("load_balancer_id", object.LoadBalancerId)
+	// d.Set("load_balancer_id", object.LoadBalancerId)
 
 	servers := make([]map[string]interface{}, 0)
 	portAndWeight := make(map[string][]string)
@@ -273,7 +273,7 @@ func resourceAlibabacloudStackSlbServerGroupUpdate(d *schema.ResourceData, meta 
 	}
 	name := connectivity.GetResourceData(d, "vserver_group_name", "name").(string)
 	nameUpdate := false
-	if d.HasChanges("name","vserver_group_name") {
+	if d.HasChanges("name", "vserver_group_name") {
 		nameUpdate = true
 	}
 	if d.HasChange("servers") {
@@ -283,7 +283,7 @@ func resourceAlibabacloudStackSlbServerGroupUpdate(d *schema.ResourceData, meta 
 		request := slb.CreateSetVServerGroupAttributeRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.VServerGroupId = d.Id()
-		if nameUpdate{
+		if nameUpdate {
 			request.VServerGroupName = name
 		}
 		if serverUpdate {

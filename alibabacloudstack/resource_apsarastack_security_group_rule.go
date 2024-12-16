@@ -138,11 +138,6 @@ func resourceAlibabacloudStackSecurityGroupRuleCreate(d *schema.ResourceData, me
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
 
 	var cidr_ip string
 	if ip, ok := d.GetOk("cidr_ip"); ok {
@@ -260,11 +255,6 @@ func resourceAlibabacloudStackSecurityGroupRuleUpdate(d *schema.ResourceData, me
 	request, err := buildAlibabacloudStackSGRuleRequest(d, meta)
 	if err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
 	}
 
 	direction := d.Get("type").(string)
