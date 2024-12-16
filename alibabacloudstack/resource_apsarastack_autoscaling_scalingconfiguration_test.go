@@ -80,11 +80,11 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"system_disk_category": "cloud_efficiency",
+					"system_disk_category": "cloud_ssd",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"system_disk_category": "cloud_efficiency",
+						"system_disk_category": "cloud_ssd",
 					}),
 				),
 			},
@@ -102,7 +102,7 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"data_disk": []map[string]string{{
 						"size":                 "20",
-						"category":             "cloud_efficiency",
+						"category":             "cloud_ssd",
 						"delete_with_instance": "false",
 						"encrypted":            "true",
 					},
@@ -112,7 +112,7 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 					testAccCheck(map[string]string{
 						"data_disk.#":                      "1",
 						"data_disk.0.size":                 "20",
-						"data_disk.0.category":             "cloud_efficiency",
+						"data_disk.0.category":             "cloud_ssd",
 						"data_disk.0.delete_with_instance": "false",
 					}),
 				),
@@ -204,7 +204,7 @@ func TestAccAlibabacloudStackEssScalingConfigurationMulti(t *testing.T) {
 					"force_delete":      "true",
 					"data_disk": []map[string]string{{
 						"size":                 "20",
-						"category":             "cloud_efficiency",
+						"category":             "cloud_ssd",
 						"delete_with_instance": "false",
 						"encrypted":            "true",
 						"kms_key_id":           "149ca9b2-564d-42f7-ab60-abfd15a91503",

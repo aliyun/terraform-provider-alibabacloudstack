@@ -29,7 +29,7 @@ func resourceAlibabacloudStackDnsRecord() *schema.Resource {
 				Required: true,
 			},
 			"record_id": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"name": {
@@ -131,13 +131,11 @@ func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interfa
 		}
 		return errmsgs.WrapError(err)
 	}
-	ZoneId := SplitDnsZone(object.Data[0].ZoneId)
 	d.Set("ttl", object.Data[0].TTL)
 	d.Set("record_id", object.Data[0].Id)
 	d.Set("name", object.Data[0].Name)
 	d.Set("type", object.Data[0].Type)
 	d.Set("remark", object.Data[0].Remark)
-	d.Set("zone_id", ZoneId)
 	d.Set("lba_strategy", object.Data[0].LbaStrategy)
 
 	return nil
