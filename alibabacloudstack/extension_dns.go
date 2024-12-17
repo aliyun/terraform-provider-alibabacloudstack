@@ -11,12 +11,12 @@ type DnsRecord struct {
 	PageNumber   int    `json:"PageNumber"`
 	TotalItems   int    `json:"TotalItems"`
 	Data         []struct {
-		ZoneId     int       `json:"ZoneId"`
+		ZoneId     string    `json:"ZoneId"`
 		Name       string    `json:"Name"`
 		Type       string    `json:"Type"`
 		CreateTime time.Time `json:"CreateTime"`
 		//RDatas          string    `json:"RDatas"`
-		Id              int    `json:"Id"`
+		Id              string `json:"Id"`
 		UpdateTimestamp int64  `json:"UpdateTimestamp"`
 		TTL             int    `json:"Ttl"`
 		CreateTimestamp int64  `json:"CreateTimestamp"`

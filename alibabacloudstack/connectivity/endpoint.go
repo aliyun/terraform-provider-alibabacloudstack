@@ -37,7 +37,7 @@ const (
 	CDNCode             = ServiceCode("CDN")
 	CMSCode             = ServiceCode("CMS")
 	OTSCode             = ServiceCode("OTS")
-	DNSCode             = ServiceCode("DNS")
+	DNSCode             = ServiceCode("CLOUDDNS")
 	PVTZCode            = ServiceCode("PVTZ")
 	LOGCode             = ServiceCode("LOG")
 	FCCode              = ServiceCode("FC")
