@@ -223,10 +223,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"sts.{{.region}}.{{.domain}}",
 	},
 	//Sts endpoint
-	SLSCode: PopEndpoint{
-		"sls.{{.region}}.{{.domain}}",
-		"sls.{{.region}}.{{.domain}}",
-	},
+	SLSCode: PopEndpoint{"", ""},
+// sls没有pop接口
+//		"sls-vpc.{{.region}}.{{.domain}}",
+//		"sls-vpc.{{.region}}.{{.domain}}",
+
 	DmsEnterpriseCode: PopEndpoint{"", ""},
 	OSSCode: PopEndpoint{
 		"occ.{{.domain}}",
