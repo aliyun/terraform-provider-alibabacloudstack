@@ -1143,7 +1143,7 @@ const SlbListenerVserverCommonTestCase = DataAlibabacloudstackVswitchZones + Dat
 
 resource "alibabacloudstack_instance" "default" {
   image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-  instance_type = "${local.instance_type_id}"
+  instance_type = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
   instance_name = "${var.name}"
   count = "2"
   security_groups = "${alibabacloudstack_security_group.default.*.id}"

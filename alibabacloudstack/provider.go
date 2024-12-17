@@ -204,7 +204,7 @@ func Provider() *schema.Provider {
 			"sls_openapi_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SLS_OPENAPI_ENDPOINT", nil),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SLS_OPENAPI_ENDPOINT", os.Getenv("ALIBABACLOUDSTACK_SLS_OPENAPI_ENDPOINT")),
 				Description: descriptions["sls_openapi_endpoint"],
 				Deprecated:  "Use schema endpoints replace sls_openapi_endpoint.",
 			},

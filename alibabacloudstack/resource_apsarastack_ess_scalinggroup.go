@@ -91,6 +91,7 @@ func resourceAlibabacloudStackEssScalingGroupCreate(d *schema.ResourceData, meta
 		raw, err := client.WithEssClient(func(essClient *ess.Client) (interface{}, error) {
 			return essClient.CreateScalingGroup(request)
 		})
+		addDebug(request.GetActionName(), raw, request, request.QueryParams)
 		if err != nil {
 			errmsg := ""
 			if raw != nil {
@@ -104,7 +105,6 @@ func resourceAlibabacloudStackEssScalingGroupCreate(d *schema.ResourceData, meta
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ess_scalinggroup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		response, _ := raw.(*ess.CreateScalingGroupResponse)
 		d.SetId(response.ScalingGroupId)
 		return nil

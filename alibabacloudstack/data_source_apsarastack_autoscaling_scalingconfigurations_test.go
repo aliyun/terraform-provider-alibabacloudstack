@@ -2,7 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	
+
 	"strings"
 	"testing"
 )
@@ -105,12 +105,13 @@ resource "alibabacloudstack_ess_scaling_group" "default" {
 	vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
 }
 resource "alibabacloudstack_ess_scaling_configuration" "default"{
-	scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-	scaling_configuration_name = "${var.name}"
-	image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-	instance_type = "${local.instance_type_id}"
-	security_group_id = "${alibabacloudstack_security_group.default.id}"
-	force_delete = true
+	"scaling_group_id":   "${alibabacloudstack_ess_scaling_group.default.id}",
+	"image_id":           "${data.alibabacloudstack_images.default.images.0.id}",
+	"instance_type":      "ecs.n4.large",
+	"security_group_ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
+	"zone_id":            "${data.alibabacloudstack_zones.default.zones.0.id}",
+	"deployment_set_id":  "${alibabacloudstack_ecs_deployment_set.default.id}",
+	"force_delete":       "true",
 }
 data "alibabacloudstack_ess_scaling_configurations" "default"{
   %s
