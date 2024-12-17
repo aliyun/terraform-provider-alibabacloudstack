@@ -185,8 +185,8 @@ func TestAccAlibabacloudStackInstanceBasic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":        "${data.alibabacloudstack_images.default.images.0.id}",
-					"security_groups": []string{"${alibabacloudstack_security_group.default.id}"},
-					"instance_type":   "ecs.e4.customize.undjfvanfg",
+					"security_groups": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
+					"instance_type":   "${local.default_instance_type_id}",
 					// "storage_set_id":       "${alibabacloudstack_ecs_ebs_storage_set.default.id}",
 					// "storage_set_partition_number": "1",
 					"availability_zone":    "${data.alibabacloudstack_zones.default.zones[0].id}",
@@ -195,7 +195,7 @@ func TestAccAlibabacloudStackInstanceBasic(t *testing.T) {
 					//"key_name":                      "${alibabacloudstack_key_pair.default.key_name}",
 					"user_data":                     "I_am_user_data",
 					"security_enhancement_strategy": "Active",
-					"vswitch_id":                    "${alibabacloudstack_vswitch.default.id}",
+					"vswitch_id":                    "${alibabacloudstack_vpc_vswitch.default.id}",
 					"tags": map[string]string{
 						"foo": "foo",
 						"Bar": "Bar",
@@ -261,8 +261,8 @@ func TestAccAlibabacloudStackInstanceVpc(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":        "${data.alibabacloudstack_images.default.images.0.id}",
-					"security_groups": []string{"${alibabacloudstack_security_group.default.0.id}"},
-					"instance_type":   "ecs.e4.customize.undjfvanfg",
+					"security_groups": []string{"${alibabacloudstack_ecs_securitygroup.default.0.id}"},
+					"instance_type":   "${local.default_instance_type_id}",
 
 					"availability_zone":             "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"system_disk_category":          "cloud_ssd",
@@ -270,7 +270,7 @@ func TestAccAlibabacloudStackInstanceVpc(t *testing.T) {
 					"security_enhancement_strategy": "Active",
 					"user_data":                     "I_am_user_data",
 
-					"vswitch_id": "${alibabacloudstack_vswitch.default.id}",
+					"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -298,7 +298,7 @@ func TestAccAlibabacloudStackInstanceVpc(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"security_groups": []string{"${alibabacloudstack_security_group.default.0.id}"},
+					"security_groups": []string{"${alibabacloudstack_ecs_securitygroup.default.0.id}"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -434,8 +434,8 @@ func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":        "${data.alibabacloudstack_images.default.images.0.id}",
-					"security_groups": []string{"${alibabacloudstack_security_group.default.0.id}"},
-					"instance_type":   "ecs.e4.customize.undjfvanfg",
+					"security_groups": []string{"${alibabacloudstack_ecs_securitygroup.default.0.id}"},
+					"instance_type":   "${local.default_instance_type_id}",
 
 					"availability_zone":    "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"system_disk_category": "cloud_ssd",
@@ -444,7 +444,7 @@ func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
 					"security_enhancement_strategy": "Active",
 					"user_data":                     "I_am_user_data",
 
-					"vswitch_id": "${alibabacloudstack_vswitch.default.id}",
+					"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
 					"data_disks": []map[string]string{
 						{
 							"name":        "disk1",
@@ -518,10 +518,10 @@ func TestAccAlibabacloudStackInstanceTypeUpdate(t *testing.T) {
 					"system_disk_size":              "40",
 					"instance_type":                 "${data.alibabacloudstack_instance_types.new1.instance_types.0.id}",
 					"instance_name":                 "${var.name}",
-					"security_groups":               []string{"${alibabacloudstack_security_group.default.id}"},
+					"security_groups":               []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
 					"security_enhancement_strategy": "Active",
 					"user_data":                     "I_am_user_data",
-					"vswitch_id":                    "${alibabacloudstack_vswitch.default.id}",
+					"vswitch_id":                    "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
@@ -568,8 +568,8 @@ func TestAccAlibabacloudStackInstanceMulti(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"count":                "3",
 					"image_id":             "${data.alibabacloudstack_images.default.images.0.id}",
-					"security_groups":      []string{"${alibabacloudstack_security_group.default.0.id}"},
-					"instance_type":        "ecs.e4.customize.undjfvanfg",
+					"security_groups":      []string{"${alibabacloudstack_ecs_securitygroup.default.0.id}"},
+					"instance_type":        "${local.default_instance_type_id}",
 					"availability_zone":    "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"system_disk_category": "cloud_ssd",
 					"instance_name":        "${var.name}",
@@ -577,7 +577,7 @@ func TestAccAlibabacloudStackInstanceMulti(t *testing.T) {
 					"security_enhancement_strategy": "Active",
 					"user_data":                     "I_am_user_data",
 
-					"vswitch_id": "${alibabacloudstack_vswitch.default.id}",
+					"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -604,33 +604,6 @@ func resourceInstanceVpcConfigDependence(name string) string {
 %s
 
 %s
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-resource "alibabacloudstack_security_group" "default" {
-  count = "2"
-  name   = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-
-resource "alibabacloudstack_security_group_rule" "default" {
-   count = 2
-   type = "ingress"
-   ip_protocol = "tcp"
-   nic_type = "intranet"
-   policy = "accept"
-   port_range = "22/22"
-   priority = 1
-   security_group_id = "${element(alibabacloudstack_security_group.default.*.id,count.index)}"
-   cidr_ip = "172.16.0.0/24"
-}
 
 variable "name" {
 	default = "%s"
@@ -640,7 +613,7 @@ variable "name" {
 //	key_name = "${var.name}"
 //}
 
-`, DataAlibabacloudstackVswitchZones, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, name)
+`, SecurityGroupCommonTestCase , DataAlibabacloudstackImages , DataAlibabacloudstackInstanceTypes, name)
 }
 
 func resourceInstancePrePaidConfigDependence(name string) string {
@@ -650,32 +623,6 @@ func resourceInstancePrePaidConfigDependence(name string) string {
 %s
 
 %s
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-resource "alibabacloudstack_security_group" "default" {
-  count = "2"
-  name   = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-resource "alibabacloudstack_security_group_rule" "default" {
-	count = 2
-  	type = "ingress"
-  	ip_protocol = "tcp"
-  	nic_type = "intranet"
-  	policy = "accept"
-  	port_range = "22/22"
-  	priority = 1
-  	security_group_id = "${element(alibabacloudstack_security_group.default.*.id,count.index)}"
-  	cidr_ip = "172.16.0.0/24"
-}
 
 variable "name" {
 	default = "%s"
@@ -684,7 +631,7 @@ variable "name" {
 //	key_name = "${var.name}"
 //}
 
-`, DataAlibabacloudstackVswitchZones, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, name)
+`, SecurityGroupCommonTestCase , DataAlibabacloudstackImages , DataAlibabacloudstackInstanceTypes, name)
 }
 
 func resourceInstanceBasicConfigDependence(name string) string {
@@ -695,32 +642,6 @@ func resourceInstanceBasicConfigDependence(name string) string {
 
 %s
 
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  name              = "${var.name}"
-}
-resource "alibabacloudstack_security_group" "default" {
-  name   = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-
-resource "alibabacloudstack_security_group_rule" "default" {
-  type = "ingress"
-  ip_protocol = "tcp"
-  nic_type = "intranet"
-  policy = "accept"
-  port_range = "22/22"
-  priority = 1
-  security_group_id = alibabacloudstack_security_group.default.id
-  cidr_ip = "172.16.0.0/24"
-}
-
 variable "name" {
 	default = "%s"
 }
@@ -729,7 +650,7 @@ variable "name" {
 //	key_name = "${var.name}"
 //}
 
-`, DataAlibabacloudstackVswitchZones, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, name)
+`, SecurityGroupCommonTestCase, DataAlibabacloudstackImages, DataAlibabacloudstackInstanceTypes, name)
 }
 
 func resourceInstanceTypeConfigDependence(name string) string {
@@ -739,31 +660,6 @@ func resourceInstanceTypeConfigDependence(name string) string {
 %s
 
 %s
-
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = data.alibabacloudstack_zones.default.zones.0.id
-  name              = "${var.name}"
-}
-resource "alibabacloudstack_security_group" "default" {
-  name   = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-resource "alibabacloudstack_security_group_rule" "default" {
-  	type = "ingress"
-  	ip_protocol = "tcp"
-  	nic_type = "intranet"
-  	policy = "accept"
-  	port_range = "22/22"
-  	priority = 1
-  	security_group_id = "${alibabacloudstack_security_group.default.id}"
-  	cidr_ip = "172.16.0.0/24"
-}
 
 variable "name" {
 	default = "%s"
@@ -782,7 +678,7 @@ data "alibabacloudstack_instance_types" "new2" {
 
 
 
-`, DataAlibabacloudstackVswitchZones, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, name)
+`, SecurityGroupCommonTestCase , DataAlibabacloudstackImages , DataAlibabacloudstackInstanceTypes, name)
 }
 
 var testAccInstanceCheckMap = map[string]string{
