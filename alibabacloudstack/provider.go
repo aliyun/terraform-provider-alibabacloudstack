@@ -580,7 +580,6 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_ess_alarm":                             resourceAlibabacloudStackEssAlarm(),
 			"alibabacloudstack_autoscaling_alarmtask":                 resourceAlibabacloudStackEssAlarm(),
 			"alibabacloudstack_ess_attachment":                        resourceAlibabacloudstackEssAttachment(),
-			"alibabacloudstack_autoscaling_scalinggroup":              resourceAlibabacloudstackEssAttachment(),
 			"alibabacloudstack_ess_lifecycle_hook":                    resourceAlibabacloudStackEssLifecycleHook(),
 			"alibabacloudstack_ess_notification":                      resourceAlibabacloudStackEssNotification(),
 			"alibabacloudstack_autoscaling_notification":              resourceAlibabacloudStackEssNotification(),

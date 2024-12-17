@@ -29,16 +29,16 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"status": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-				Deprecated: "Field 'status' is deprecated and will be removed in a future release. Please use new field 'active' instead.",
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'status' is deprecated and will be removed in a future release. Please use new field 'active' instead.",
 				ConflictsWith: []string{"active"},
 			},
 			"active": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"status"},
 			},
 			"enable": {
@@ -162,34 +162,39 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"is_outdated": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"user_data": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"ram_role_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Deprecated: "Field 'ram_role_name' is deprecated and will be removed in a future release. Please use new field 'role_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'ram_role_name' is deprecated and will be removed in a future release. Please use new field 'role_name' instead.",
 				ConflictsWith: []string{"role_name"},
 			},
 			"role_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"ram_role_name"},
 			},
 			"key_pair_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				Deprecated: "Field 'key_pair_name' is deprecated and will be removed in a future release. Please use new field 'key_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'key_pair_name' is deprecated and will be removed in a future release. Please use new field 'key_name' instead.",
 				ConflictsWith: []string{"key_name"},
 			},
 			"key_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"key_pair_name"},
 			},
 			"force_delete": {
@@ -683,7 +688,7 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 	request.SecurityGroupIds = &sgs
 	request.DeploymentSetId = d.Get("deployment_set_id").(string)
 	request.InstanceName = d.Get("instance_name").(string)
-
+	request.ImageId = d.Get("image_id").(string)
 	types := make([]string, 0, int(MaxScalingConfigurationInstanceTypes))
 	instanceType := d.Get("instance_type").(string)
 	instanceTypes := d.Get("instance_types").([]interface{})
@@ -741,14 +746,14 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 		request.DataDisk = &createDataDisks
 	}
 
-	if v, ok :=  connectivity.GetResourceDataOk(d, "role_name", "ram_role_name"); ok && v.(string) != "" {
+	if v, ok := connectivity.GetResourceDataOk(d, "role_name", "ram_role_name"); ok && v.(string) != "" {
 		request.RamRoleName = v.(string)
 	}
-	
+
 	if v, ok := connectivity.GetResourceDataOk(d, "key_name", "key_pair_name"); ok && v.(string) != "" {
 		request.KeyPairName = v.(string)
 	}
-	
+
 	if v, ok := d.GetOk("user_data"); ok && v.(string) != "" {
 		_, base64DecodeError := base64.StdEncoding.DecodeString(v.(string))
 		if base64DecodeError == nil {

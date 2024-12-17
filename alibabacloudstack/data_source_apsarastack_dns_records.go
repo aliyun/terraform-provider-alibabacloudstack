@@ -2,15 +2,15 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"log"
+	"regexp"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"regexp"
-	"strconv"
 )
 
 func dataSourceAlibabacloudStackDnsRecords() *schema.Resource {
@@ -139,7 +139,7 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 			"remark":    record.Remark,
 			"ttl":       record.TTL,
 		}
-		ids = append(ids, strconv.Itoa(record.Id))
+		ids = append(ids, record.Id)
 		s = append(s, mapping)
 	}
 
