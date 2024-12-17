@@ -751,8 +751,8 @@ data "alibabacloudstack_instance_types" "any_n4" {
 
 data "alibabacloudstack_instance_types" "default" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  cpu_core_count       = 2
-  memory_size          = 4
+  cpu_core_count       = 1
+  memory_size          = 2
   instance_type_family = "ecs.n4"
   sorted_by            = "Memory"
 }
@@ -763,7 +763,7 @@ locals {
 `
 
 const DataAlibabacloudstackInstanceTypes_Eni2 = `
-data "alibabacloudstack_instance_types" "default" {
+data "alibabacloudstack_instance_types" "eni2" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   eni_amount        = 2
   sorted_by         = "Memory"

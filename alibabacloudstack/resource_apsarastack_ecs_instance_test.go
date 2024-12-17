@@ -261,7 +261,7 @@ func TestAccAlibabacloudStackInstanceVpc(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":        "${data.alibabacloudstack_images.default.images.0.id}",
-					"security_groups": []string{"${alibabacloudstack_ecs_securitygroup.default.0.id}"},
+					"security_groups": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
 					"instance_type":   "${local.default_instance_type_id}",
 
 					"availability_zone":             "${data.alibabacloudstack_zones.default.zones.0.id}",
@@ -298,7 +298,7 @@ func TestAccAlibabacloudStackInstanceVpc(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"security_groups": []string{"${alibabacloudstack_ecs_securitygroup.default.0.id}"},
+					"security_groups": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -434,7 +434,7 @@ func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":        "${data.alibabacloudstack_images.default.images.0.id}",
-					"security_groups": []string{"${alibabacloudstack_ecs_securitygroup.default.0.id}"},
+					"security_groups": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
 					"instance_type":   "${local.default_instance_type_id}",
 
 					"availability_zone":    "${data.alibabacloudstack_zones.default.zones.0.id}",
@@ -568,7 +568,7 @@ func TestAccAlibabacloudStackInstanceMulti(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"count":                "3",
 					"image_id":             "${data.alibabacloudstack_images.default.images.0.id}",
-					"security_groups":      []string{"${alibabacloudstack_ecs_securitygroup.default.0.id}"},
+					"security_groups":      []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
 					"instance_type":        "${local.default_instance_type_id}",
 					"availability_zone":    "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"system_disk_category": "cloud_ssd",
