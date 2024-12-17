@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -191,3 +189,5 @@ var testAccSlbMasterSlaveServerGroupCheckMap = map[string]string{
 	"name":      CHECKSET,
 	"servers.#": "2",
 }
+
+// aa
