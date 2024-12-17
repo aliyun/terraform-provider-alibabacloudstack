@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackLogMachineGroup_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacclogmachinegroupip-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogMachineGroupConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -104,7 +104,7 @@ func TestAccAlibabacloudStackLogMachineGroup_multi(t *testing.T) {
 	name := fmt.Sprintf("tf-testacclogmachinegroupip-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogMachineGroupConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

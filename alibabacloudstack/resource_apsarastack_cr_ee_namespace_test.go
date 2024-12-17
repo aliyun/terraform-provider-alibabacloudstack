@@ -95,7 +95,7 @@ func TestAccAlibabacloudStackCrEENamespace_Basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-cr-ns-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEENamespaceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckWithCrEE(t)
 		},
@@ -177,7 +177,7 @@ func TestAccAlibabacloudStackCrEENamespace_Multi(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-cr-ns-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEENamespaceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckWithCrEE(t)
 		},

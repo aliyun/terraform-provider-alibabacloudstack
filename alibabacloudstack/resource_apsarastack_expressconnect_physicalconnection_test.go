@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackExpressconnectPhysicalconnection0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sexpress_connectphysical_connection%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccExpressconnectPhysicalconnectionBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

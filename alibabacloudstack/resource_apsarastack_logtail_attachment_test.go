@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackLogtailAttachmentBasic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacclogtailattachment-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogtailAttachmentDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -69,7 +69,7 @@ func TestAccAlibabacloudStackLogtailAttachmentMultipleGroup(t *testing.T) {
 	name := fmt.Sprintf("tf-testacclogtailattachment-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogtailAttachmentDependenceMultipleGroup)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -106,7 +106,7 @@ func TestAccAlibabacloudStackLogtailAttachmentMultipleConfig(t *testing.T) {
 	name := fmt.Sprintf("tf-testacclogtailattachment-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogtailAttachmentDependenceMultipleConfig)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

@@ -124,7 +124,7 @@ func TestAccAlibabacloudStackNasFileSystem_basic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testAcc%sAlibabacloudStackNasFileSystem%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackNasFileSystemBasicDependence0)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 		},
@@ -187,7 +187,7 @@ func TestAccAlibabacloudStackNasFileSystemEncrypt(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testAcc%sAlibabacloudStackNasFileSystem%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackNasFileSystemBasicDependence1)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 		},

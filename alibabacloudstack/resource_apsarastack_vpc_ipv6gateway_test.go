@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackVpcIpv6Gateway0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%svpcipv6_gateway%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcIpv6GatewayBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

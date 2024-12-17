@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackDtsSynchronizationinstance0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sdtssynchronization_instance%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccDtsSynchronizationinstanceBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

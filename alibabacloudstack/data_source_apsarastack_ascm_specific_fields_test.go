@@ -6,7 +6,7 @@ import (
 )
 
 func TestAccAlibabacloudStackAscm_Service_FieldsDataSource(t *testing.T) { //not completed
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

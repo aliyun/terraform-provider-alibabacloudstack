@@ -27,7 +27,7 @@ package alibabacloudstack
 //	name := fmt.Sprintf("tf-testacc-cr-sync-%d", rand)
 //	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEESyncRuleConfigDependence)
 //
-//	resource.Test(t, resource.TestCase{
+//	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 //			getCrEESyncRuleTestEnv(t)
@@ -73,7 +73,7 @@ package alibabacloudstack
 //		},
 //	})
 //
-//	resource.Test(t, resource.TestCase{
+//	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 //			getCrEESyncRuleTestEnv(t)
@@ -141,7 +141,7 @@ package alibabacloudstack
 //	name := fmt.Sprintf("tf-testacc-cr-sync-%d", rand)
 //	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEESyncRuleConfigMultiDependence)
 //
-//	resource.Test(t, resource.TestCase{
+//	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 //			getCrEESyncRuleTestEnv(t)

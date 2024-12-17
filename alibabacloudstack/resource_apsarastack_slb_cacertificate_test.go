@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackSlbCacertificate0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sslbca_certificate%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbCacertificateBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

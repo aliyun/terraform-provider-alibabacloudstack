@@ -25,7 +25,7 @@ package alibabacloudstack
 //	name := fmt.Sprintf("tf-testacc-cr-repo-%d", rand)
 //	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEERepoConfigDependence)
 //
-//	resource.Test(t, resource.TestCase{
+//	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheckWithCrEE(t)
 //		},
@@ -130,7 +130,7 @@ package alibabacloudstack
 //	name := fmt.Sprintf("tf-testacc-cr-repo-%d", rand)
 //	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEERepoConfigDependence)
 //
-//	resource.Test(t, resource.TestCase{
+//	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheckWithCrEE(t)
 //		},

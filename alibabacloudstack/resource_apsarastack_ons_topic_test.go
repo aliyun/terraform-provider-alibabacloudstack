@@ -65,7 +65,7 @@ func TestAccAlibabacloudStackOnsTopic_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacconstopicbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccOnsTopicConfigBasic)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

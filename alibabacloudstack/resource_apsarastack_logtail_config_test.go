@@ -95,7 +95,7 @@ func TestAccAlibabacloudStackLogTail_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacclogtailconfig-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogTailDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -170,7 +170,7 @@ func TestAccAlibabacloudStackLogTail_plugin(t *testing.T) {
 	name := fmt.Sprintf("tf-testacclogtailconfig-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogTailDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -219,7 +219,7 @@ func TestAccAlibabacloudStackLogTail_multi(t *testing.T) {
 	name := fmt.Sprintf("tf-testacclogtailconfig-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogTailDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

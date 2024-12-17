@@ -95,7 +95,7 @@ func TestAccAlibabacloudStackArmsAlertContactGroup_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testAccArmsAlertContactGroup%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ArmsAlertContactGroupBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

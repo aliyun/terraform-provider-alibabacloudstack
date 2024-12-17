@@ -154,7 +154,7 @@ func TestAccAlibabacloudStackElasticsearchK8sInstance_multi(t *testing.T) {
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchK8sInstanceConfigDependence_multi)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

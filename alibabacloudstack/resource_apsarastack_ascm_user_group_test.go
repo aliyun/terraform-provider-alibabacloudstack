@@ -30,7 +30,7 @@ func TestAccAlibabacloudStackAscm_User_Group_Basic(t *testing.T) {
 		org_id = "${alibabacloudstack_ascm_organization.default.org_id}"
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testascmusergroupconfigbasic)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

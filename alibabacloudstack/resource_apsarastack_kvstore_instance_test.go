@@ -117,7 +117,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_classictest(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -155,7 +155,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 99999)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -192,7 +192,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 // 	rac := resourceAttrCheckInit(rc, ra)
 // 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-// 	resource.Test(t, resource.TestCase{
+// 	ResourceTest(t, resource.TestCase{
 // 		PreCheck: func() {
 // 			testAccPreCheck(t)
 // 		},
@@ -223,7 +223,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 // 	rac := resourceAttrCheckInit(rc, ra)
 // 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-// 	resource.Test(t, resource.TestCase{
+// 	ResourceTest(t, resource.TestCase{
 // 		PreCheck: func() {
 // 			testAccPreCheck(t)
 // 		},

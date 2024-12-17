@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackNasAccessgroup0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%snasaccess_group%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccNasAccessgroupBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

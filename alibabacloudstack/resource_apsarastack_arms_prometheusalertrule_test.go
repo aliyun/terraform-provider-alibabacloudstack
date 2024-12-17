@@ -20,7 +20,7 @@ func TestAccAlibabacloudStackARMSPrometheusAlertRule_basic0(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%sarmsprometheusalertrule%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackARMSPrometheusAlertRuleBasicDependence0)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -167,7 +167,7 @@ func TestAccAlibabacloudStackARMSPrometheusAlertRule_basic1(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%sarmsprometheusalertrule%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackARMSPrometheusAlertRuleBasicDependence1)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  rac.checkResourceDestroy(),

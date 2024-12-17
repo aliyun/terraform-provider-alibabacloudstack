@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccAlibabacloudStackSlbListenersDataSource_http(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -27,7 +27,7 @@ func TestAccAlibabacloudStackSlbListenersDataSource_http(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackSlbListenersDataSource_https(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -47,7 +47,7 @@ func TestAccAlibabacloudStackSlbListenersDataSource_https(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackSlbListenersDataSource_tcp(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -67,7 +67,7 @@ func TestAccAlibabacloudStackSlbListenersDataSource_tcp(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackSlbListenersDataSource_udp(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

@@ -154,7 +154,7 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := "tf-testAccDBInstanceConfig"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBInstanceConfigDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -330,7 +330,7 @@ func TestAccAlibabacloudStackDBInstanceMultiInstance(t *testing.T) {
 	name := "tf-testAccDBInstanceConfig"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBInstanceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -371,7 +371,7 @@ func TestAccAlibabacloudStackDBInstanceMultiAZ(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := "tf-testAccDBInstance_multiAZ"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBInstanceMysqlAZConfigDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -434,7 +434,7 @@ func TestAccAlibabacloudStackDBInstanceClassic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := "tf-testAccDBInstanceConfig"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBInstanceClassicConfigDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

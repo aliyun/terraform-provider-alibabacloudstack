@@ -207,7 +207,7 @@ func TestAccAlibabacloudStackAlikafkaSaslAcl_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-alikafkasaslaclbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaSaslAclConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckWithAlikafkaAclEnable(t)
 			testAccPreCheck(t)
@@ -309,7 +309,7 @@ func TestAccAlicloudAlikafkaSaslAcl_multi(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-alikafkasaslaclbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaSaslAclConfigDependenceForMulti)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckWithAlikafkaAclEnable(t)
 

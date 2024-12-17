@@ -82,7 +82,7 @@ func TestAccAlibabacloudStackLogProject_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacclogproject-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogProjectConfigDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -133,7 +133,7 @@ func TestAccAlibabacloudStackLogProject_multi(t *testing.T) {
 	name := fmt.Sprintf("tf-testacclogproject-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogProjectConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

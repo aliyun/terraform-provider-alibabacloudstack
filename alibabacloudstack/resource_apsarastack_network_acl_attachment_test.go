@@ -110,7 +110,7 @@ func SkipTestAccAlibabacloudStackVpcNetworkAclAttachment_basic(t *testing.T) {
 	ra := resourceAttrInit(resourceId, testAccNaclAttachmentCheckMap)
 	rand := getAccTestRandInt(10000,20000)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

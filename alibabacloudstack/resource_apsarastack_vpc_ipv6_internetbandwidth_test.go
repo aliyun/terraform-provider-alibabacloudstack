@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackVPCIpv6InternetBandwidth_basic0(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%svpcipv6internetbandwidth%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackVPCIpv6InternetBandwidthBasicDependence0)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithEnvVariable(t, "ECS_WITH_IPV6_ADDRESS")

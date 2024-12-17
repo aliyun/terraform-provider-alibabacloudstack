@@ -33,7 +33,7 @@ func TestAccAlibabacloudStackDBAccountPrivilege_mysql(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBAccountPrivilegeConfigDependenceForMySql)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -158,7 +158,7 @@ resource "alibabacloudstack_db_instance" "default" {
 //	testAccCheck := rac.resourceAttrMapUpdateSet()
 //	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBAccountPrivilegeConfigDependenceForPostgreSql)
 //
-//	resource.Test(t, resource.TestCase{
+//	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 //		},

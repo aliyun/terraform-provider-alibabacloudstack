@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackRedisConnection0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sredisconnection%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRedisConnectionBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackEcsSnapshot0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%secssnapshot%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccEcsSnapshotBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

@@ -524,7 +524,7 @@ func (dsa *dataSourceAttr) dataSourceTestCheck(t *testing.T, rand int, configs .
 	for _, conf := range configs {
 		steps = append(steps, conf.buildDataSourceSteps(t, dsa, rand)...)
 	}
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -539,7 +539,7 @@ func (dsa *dataSourceAttr) dataSourceTestCheckWithPreCheck(t *testing.T, rand in
 	for _, conf := range configs {
 		steps = append(steps, conf.buildDataSourceSteps(t, dsa, rand)...)
 	}
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		Steps:     steps,

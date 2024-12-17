@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackCloudmonitorserviceSitemonitor0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%scloud_monitor_servicesite_monitor%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCloudmonitorserviceSitemonitorBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

@@ -88,7 +88,7 @@ func TestAccAlibabacloudStackLaunchTemplateBasic(t *testing.T) {
 	name := fmt.Sprintf("tf-testaccLaunchTemplateBasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLaunchTemplateConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -676,7 +676,7 @@ func TestAccAlibabacloudStackLaunchTemplateMulti(t *testing.T) {
 	name := fmt.Sprintf("tf-testaccLaunchTemplateMulti%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLaunchTemplateConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
