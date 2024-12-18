@@ -3,8 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackOssBucketObjectsDataSource_basic(t *testing.T) {
@@ -178,7 +176,7 @@ variable "name" {
 
 resource "alibabacloudstack_oss_bucket" "default" {
 	bucket = "${var.name}"
-	acl = "private"
+	acl = "public-read-write"
 }
 
 resource "alibabacloudstack_oss_bucket_object" "default" {
@@ -190,7 +188,7 @@ resource "alibabacloudstack_oss_bucket_object" "default" {
 	content_disposition = "attachment; filename=\"my-object\""
 	content_encoding = "gzip"
 	expires = "Wed, 06 May 2020 00:00:00 GMT"
-	acl = "public-read"
+	acl = "public-read-write"
 }
 
 `, name)
@@ -203,7 +201,7 @@ variable "name" {
 
 resource "alibabacloudstack_oss_bucket" "default" {
 	bucket = "${var.name}"
-	acl = "private"
+	acl = "public-read-write"
 	force_destroy = true
 	versioning {
 		status = "Enabled"

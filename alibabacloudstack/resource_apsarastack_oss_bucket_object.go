@@ -94,8 +94,8 @@ func resourceAlibabacloudStackOssBucketObject() *schema.Resource {
 			},
 
 			"kms_key_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
+				Type:     schema.TypeString,
+				Optional: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return ServerSideEncryptionKMS != d.Get("server_side_encryption").(string)
 				},
@@ -171,7 +171,7 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 }
 
 func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
+	waitSecondsIfWithTest(3)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *oss.Client
 	raw, err := client.WithOssClientPutObject(func(ossClient *oss.Client) (interface{}, error) {
