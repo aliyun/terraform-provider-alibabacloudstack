@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackMongoDBInstancesDataSource(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackMongoDBDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_mongodb_instance.default.name}"`,
@@ -150,12 +148,16 @@ resource "alibabacloudstack_vswitch" "default" {
   name              = "${var.name}"
 }
 
+
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   engine_version      = "3.4"
   db_instance_class   = "dds.mongo.mid"
-  db_instance_storage = 10
+  db_instance_storage = "10"
   name                = "${var.name}"
+  storage_engine      = "WiredTiger"
+  instance_charge_type = "PostPaid"
+  replication_factor = "3"
 }
 data "alibabacloudstack_mongodb_instances" "default" {
   %s
