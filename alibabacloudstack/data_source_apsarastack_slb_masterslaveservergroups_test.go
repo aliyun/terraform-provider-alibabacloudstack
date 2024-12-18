@@ -1,13 +1,14 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackSlbMasterSlaveServerGroupsDataSource_basic(t *testing.T) {
 
-	ResourceTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -30,6 +31,12 @@ const testAccCheckAlibabacloudStackSlbMasterSlaveServerGroupsDataSourceBasic = D
 variable "name" {
   default = "tf-testAccslbmasterslaveservergroupsdatasourcebasic"
 }
+
+data "alibabacloudstack_instance_types" "new" {
+    availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+    cpu_core_count    = 2
+    memory_size       = 4
+    }
 
 resource "alibabacloudstack_vpc" "default" {
   name = "${var.name}"
@@ -54,14 +61,15 @@ resource "alibabacloudstack_slb" "default" {
 }
 
 resource "alibabacloudstack_instance" "default" {
-  availability_zone = data.alibabacloudstack_zones.default.zones.0.id
-  security_groups = ["${alibabacloudstack_security_group.default.id}"]
-  count                      = "2"
-  instance_type              = "${local.instance_type_id}"
-  image_id                   =  "${data.alibabacloudstack_images.default.images.0.id}"
-  instance_name              = "${var.name}"
-  vswitch_id                 = alibabacloudstack_vswitch.default.id
-  internet_max_bandwidth_out = 10
+    image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+    instance_type = "${data.alibabacloudstack_instance_types.new.instance_types.0.id}"
+    instance_name = "${var.name}"
+    count = "2"
+    security_groups = "${alibabacloudstack_security_group.default.*.id}"
+    internet_max_bandwidth_out = "10"
+    availability_zone = data.alibabacloudstack_zones.default.zones.0.id
+    system_disk_category = "cloud_efficiency"
+    vswitch_id = "${alibabacloudstack_vswitch.default.id}"
 }
 
 resource "alibabacloudstack_slb_master_slave_server_group" "default" {
