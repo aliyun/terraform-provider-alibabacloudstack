@@ -94,7 +94,7 @@ func TestAccAlibabacloudStackApigatewayApi_basic(t *testing.T) {
 	name := fmt.Sprintf("tf_testAccApiGatewayApi_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayApiConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -275,7 +275,7 @@ func TestAccAlibabacloudStackApigatewayApi_vpc(t *testing.T) {
 	name := fmt.Sprintf("tf_testAccApiGatewayApi_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayApiConfigDependence_vpc)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -343,7 +343,7 @@ func TestAccAlibabacloudStackApigatewayApi_fc(t *testing.T) {
 	name := fmt.Sprintf("tf_testAccApiGatewayApi_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayApiConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -409,7 +409,7 @@ func TestAccAlibabacloudStackApigatewayApi_multi(t *testing.T) {
 	name := fmt.Sprintf("tf_testAccApiGatewayApi_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayApiConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

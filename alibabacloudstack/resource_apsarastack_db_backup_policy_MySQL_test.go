@@ -53,7 +53,7 @@ func TestAccAlibabacloudStackDBBackupPolicy_mysql(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := "tf-testAccDBbackuppolicy"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBBackupPolicyMysqlConfigDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

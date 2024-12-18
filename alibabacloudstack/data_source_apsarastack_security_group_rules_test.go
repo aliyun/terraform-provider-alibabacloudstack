@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithDirection(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -38,7 +38,7 @@ func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithDirection(t *testin
 }
 
 func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithGroupId(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -69,7 +69,7 @@ func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithGroupId(t *testing.
 }
 
 func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithNic_Type(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -100,7 +100,7 @@ func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithNic_Type(t *testing
 }
 
 func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithPolicy(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -132,7 +132,7 @@ func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithPolicy(t *testing.T
 }
 
 func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithIp_Protocol(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -163,7 +163,7 @@ func TestAccAlibabacloudStackSecurityGroupRulesDataSourceWithIp_Protocol(t *test
 }
 
 func TestAccAlibabacloudStackSecurityGroupRulesDataSourceEmpty(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

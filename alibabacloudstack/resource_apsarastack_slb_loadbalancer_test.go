@@ -27,7 +27,7 @@ func TestAccAlibabacloudStackSlbLoadbalancer0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sslbload_balancer%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbLoadbalancerBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

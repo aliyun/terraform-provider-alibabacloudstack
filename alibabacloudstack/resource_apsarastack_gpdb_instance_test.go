@@ -121,7 +121,7 @@ func TestAccAlibabacloudStackGpdbInstance_classic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	testAccConfig := resourceTestAccConfigFunc(resourceId, "", resourceGpdbClassicConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -185,7 +185,7 @@ func TestAccAlibabacloudStackGpdbInstance_vpc(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	testAccConfig := resourceTestAccConfigFunc(resourceId, "", resourceGpdbVpcConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

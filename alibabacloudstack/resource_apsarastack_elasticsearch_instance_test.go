@@ -157,7 +157,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -363,7 +363,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_multizone(t *testing.T) {
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -421,7 +421,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_version(t *testing.T) {
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -484,7 +484,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_multi(t *testing.T) {
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence_multi)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -535,7 +535,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_encrypt_disk(t *testing.T) {
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -595,7 +595,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_client_node(t *testing.T) {
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -662,7 +662,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_https(t *testing.T) {
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -737,7 +737,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) 
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

@@ -29,7 +29,7 @@ func TestAccAlibabacloudStackEdasDeployGroup_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-edasdeploygroupbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasDeployGroupConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)
@@ -87,7 +87,7 @@ func TestAccAlibabacloudStackEdasDeployGroup_multi(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-edasdeploygroupmulti%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasDeployGroupConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

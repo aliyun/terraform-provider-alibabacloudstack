@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackSlbBackendServers_vpc(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccSlbBackendServersVpc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceBackendServerVpcCountConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -77,7 +77,7 @@ func TestAccAlibabacloudStackSlbBackendServers_multi_vpc(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccSlbBackendServersVpc_multi%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceBackendServerConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -128,7 +128,7 @@ func TestAccAlibabacloudStackSlbBackendServers_classic(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccSlbBackendServersVpc_multi%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceBackendServerConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 		},

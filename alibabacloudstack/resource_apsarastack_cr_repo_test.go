@@ -52,7 +52,7 @@ func TestAccAlibabacloudStackCRRepo_Basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-cr-repo-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCRRepoConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -127,7 +127,7 @@ func TestAccAlibabacloudStackCRRepo_Multi(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-cr-repo-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCRRepoConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

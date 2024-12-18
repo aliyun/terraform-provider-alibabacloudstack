@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackDataWorksUser_basic0(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%sdataworksuser%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackDataWorksUserBasicDependence0)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

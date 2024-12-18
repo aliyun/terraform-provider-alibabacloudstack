@@ -7,17 +7,19 @@ import (
 
 	//	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
-	//	
+	//
 	//	"log"
 	"os"
 	"testing"
 	"time"
 
-	"strings"
 	"strconv"
+	"strings"
+	"path/filepath"
+	"io/ioutil"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -356,4 +358,29 @@ func getAccTestRandInt(min, max int) int {
 	}
 
 	return acctest.RandIntRange(min, max)
+}
+
+func ResourceTest(t *testing.T, c resource.TestCase) {
+	if v := os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST"); v == "true" {
+		dateFolderName := "dryrun_" + time.Now().Format("2006_01_02") 
+		err := os.MkdirAll(dateFolderName, 0755)
+		if err != nil {
+			t.Skipf("Failed to create date folder: %v", err)
+		}
+		subFolderPath := filepath.Join(dateFolderName, t.Name())
+		err = os.MkdirAll(subFolderPath, 0755)
+		if err != nil {
+			t.Skipf("Failed to create sub folder: %v", err)
+		}
+		for index, step := range c.Steps{
+			filePath := filepath.Join(subFolderPath, fmt.Sprintf("Step%d.tf", index))
+			err = ioutil.WriteFile(filePath, []byte(step.Config), 0644)
+			if err != nil {
+				t.Skipf("Failed to write to file: %v", err)
+			}
+		}
+		t.Skip()
+	} else {
+		resource.Test(t, c)
+	}
 }

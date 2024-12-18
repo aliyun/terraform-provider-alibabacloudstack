@@ -43,7 +43,7 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-object-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketObjectConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

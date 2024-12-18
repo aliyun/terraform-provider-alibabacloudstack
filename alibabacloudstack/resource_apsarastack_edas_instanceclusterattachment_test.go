@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackEdasinstanceClusterAttachment_basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testacc-edasicattachment%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasICAttachmentDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 

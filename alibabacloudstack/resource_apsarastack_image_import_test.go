@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackImportImage(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testAccEcsImageImportConfigBasic%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageImageBasicConfigDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckOSSForImageImport(t)

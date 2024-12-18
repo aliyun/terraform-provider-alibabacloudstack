@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccAlibabacloudStackZonesDataSource_basic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackZonesDataSource_basic(t *testing.T) {
 
 func TestAccAlibabacloudStackZonesDataSource_filter(t *testing.T) {
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -78,7 +78,7 @@ func TestAccAlibabacloudStackZonesDataSource_filter(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackZonesDataSource_unitRegion(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -103,7 +103,7 @@ func TestAccAlibabacloudStackZonesDataSource_unitRegion(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackZonesDataSource_multiZone(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -137,7 +137,7 @@ func TestAccAlibabacloudStackZonesDataSource_multiZone(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackZonesDataSource_chargeType(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -166,7 +166,7 @@ func TestAccAlibabacloudStackZonesDataSource_chargeType(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackZonesDataSource_slb(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -191,7 +191,7 @@ func TestAccAlibabacloudStackZonesDataSource_slb(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackZonesDataSource_enable_details(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -215,7 +215,7 @@ func TestAccAlibabacloudStackZonesDataSource_enable_details(t *testing.T) {
 	})
 }
 func TestAccAlibabacloudStackZonesDataSource_empty(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

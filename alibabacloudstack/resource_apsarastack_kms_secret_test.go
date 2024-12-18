@@ -89,7 +89,7 @@ func TestAccAlibabacloudStackKmsSecret_Basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceKmsSecretConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 
@@ -220,7 +220,7 @@ func TestAccAlibabacloudStackKmsSecret_WithKey(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceKmsSecretWithKeyConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 

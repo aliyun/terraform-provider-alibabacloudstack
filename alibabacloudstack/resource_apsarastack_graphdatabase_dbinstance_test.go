@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackGraphdatabaseDbinstance0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sgraph_databasedb_instance%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccGraphdatabaseDbinstanceBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

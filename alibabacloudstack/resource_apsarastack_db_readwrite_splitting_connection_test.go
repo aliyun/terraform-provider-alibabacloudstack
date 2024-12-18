@@ -43,7 +43,7 @@ func TestAccAlibabacloudStackDBReadWriteSplittingConnection_update(t *testing.T)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	prefix := fmt.Sprintf("t-con-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, prefix, resourceDBReadWriteSplittingConfigDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

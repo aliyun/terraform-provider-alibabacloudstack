@@ -8,7 +8,7 @@ import (
 )
 
 func TestAccAlibabacloudStackKmsCiphertext_basic(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: nil,
@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackKmsCiphertext_basic(t *testing.T) {
 
 func TestAccAlibabacloudStackKmsCiphertext_validate(t *testing.T) {
 
-	resource.ParallelTest(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: nil,
@@ -42,7 +42,7 @@ func TestAccAlibabacloudStackKmsCiphertext_validate(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackKmsCiphertext_validate_withContext(t *testing.T) {
-	resource.ParallelTest(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: nil,

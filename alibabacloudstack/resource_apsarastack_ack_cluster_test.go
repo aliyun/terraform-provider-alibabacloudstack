@@ -55,7 +55,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccCsK8sConfigBasic%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCsK8sConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

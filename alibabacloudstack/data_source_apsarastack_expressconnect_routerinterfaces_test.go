@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccAlibabacloudStackRouterInterfacesDataSourceBasic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

@@ -7,8 +7,8 @@ import (
 )
 
 func TestAccAlibabacloudStackCms_Alarams_DataSource(t *testing.T) {
-	testAccPreCheckWithAPIIsNotSupport(t)
-	resource.Test(t, resource.TestCase{
+	// testAccPreCheckWithAPIIsNotSupport(t)
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -35,8 +35,35 @@ func TestAccAlibabacloudStackCms_Alarams_DataSource(t *testing.T) {
 	})
 }
 
-const dataSourceAlibabacloudStackcms_alarms = `
-data "alibabacloudstack_cms_alarms" "default" {
+const dataSourceAlibabacloudStackcms_alarms = VSwitchCommonTestCase + `
 
+%s
+
+resource "alibabacloudstack_slb" "default" {
+  name          = "terraform_test111"
+  address_type  = "internet"
+  specification = "slb.s2.small"
+  vswitch_id    = alibabacloudstack_vpc_vswitch.default.id
+}
+
+
+data "alibabacloudstack_cms_alarms" "default" {
+  name    = "tf-testAccCmsAlarm_basic"
+  project = "acs_slb_dashboard"
+  metric  = "ActiveConnection"
+  dimensions = {
+    instanceId = "${alibabacloudstack_slb.default.id}"
+  }
+  escalations_critical {
+    statistics = "Average"
+    comparison_operator = "<="
+    threshold = 35
+    times = 2
+  }
+  period  =    300
+  enabled =      true
+  contact_groups     = ["test-group"]
+  effective_interval = "0:00-2:00"
+  webhook = "http://www.aliyun.com"
 }
 `

@@ -922,7 +922,7 @@ func (client *AlibabacloudStackClient) WithCrClient(do func(*cr.Client) (interfa
 }
 func (client *AlibabacloudStackClient) WithDnsClient(do func(*alidns.Client) (interface{}, error)) (interface{}, error) {
 	if client.dnsconn == nil {
-		conn, error := client.WithProductSDKClient(DnsCode)
+		conn, error := client.WithProductSDKClient(DNSCode)
 		if error != nil {
 			return nil, error
 		}

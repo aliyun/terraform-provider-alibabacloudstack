@@ -123,7 +123,7 @@ func TestAccAlibabacloudStackVPCIpv6Gateway_basic0(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%svpcipv6gateway%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackVPCIpv6GatewayBasicDependence0)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

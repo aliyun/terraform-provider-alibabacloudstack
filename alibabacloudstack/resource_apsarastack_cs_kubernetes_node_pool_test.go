@@ -29,7 +29,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccNodePool-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCSNodePoolConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -140,7 +140,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_autoScaling(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccNodePool-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCSNodePoolConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -250,7 +250,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_PrePaid(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccNodePool-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCSNodePoolConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 		},
 		// module name
@@ -342,7 +342,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_Spot(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccNodePool-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCSNodePoolConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

@@ -27,9 +27,10 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZoneRecords", "")
 	request.QueryParams["ZoneId"] = ZoneId
 	var resp = &DnsRecord{}
-	raw, err := s.client.WithEcsClient(func(cmsClient *ecs.Client) (interface{}, error) {
-		return cmsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
+		return dnsClient.ProcessCommonRequest(request)
 	})
+	addDebug("DescribeGlobalZoneRecords", response, requestInfo, request)
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorRecordNotFound"}) {
@@ -243,9 +244,10 @@ func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err err
 	request.QueryParams["PageNumber"] = fmt.Sprint(1)
 	request.QueryParams["PageSize"] = fmt.Sprint(PageSizeLarge)
 	resp := &DnsDomains{}
-	raw, err := s.client.WithEcsClient(func(cmsClient *ecs.Client) (interface{}, error) {
-		return cmsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
+		return dnsClient.ProcessCommonRequest(request)
 	})
+	addDebug("DescribeGlobalZones", response, nil, request)
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorDomainNotFound"}) {
@@ -269,4 +271,12 @@ func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err err
 	}
 
 	return resp, nil
+}
+
+func SplitDnsZone(zone_id string) string {
+	did := strings.Split(zone_id, COLON_SEPARATED)
+	if len(did) >= 2 {
+		return did[1]
+	}
+	return zone_id
 }

@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackRdsAccount0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%srdsaccount%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRdsAccountBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)
@@ -113,7 +113,7 @@ func TestAccAlibabacloudStackRdsAccount1(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%srdsaccount%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRdsAccountBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

@@ -29,7 +29,7 @@ func TestAccAlibabacloudStackKmsAlias_basic(t *testing.T) {
 	name := fmt.Sprintf("alias/tf-testKmsAlias_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceKmsAliadConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

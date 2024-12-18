@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackDBBackupPolicy_pgdb(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := "tf-testAccDBbackuppolicyPgdb"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBBackupPolicyPostgreSQLConfigDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

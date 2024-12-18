@@ -96,7 +96,7 @@ func SkipTestAccAlibabacloudStackApigatewayApp_basic(t *testing.T) {
 	name := fmt.Sprintf("tf_testAccApp_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayAppConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -199,7 +199,7 @@ func SkipTestAccAlibabacloudStackApigatewayApp_multi(t *testing.T) {
 	name := fmt.Sprintf("tf_testAccApp_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayAppConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

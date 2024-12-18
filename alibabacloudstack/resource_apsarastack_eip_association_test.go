@@ -54,7 +54,7 @@ func TestAccAlibabacloudStackEipAssociationBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000,20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -88,7 +88,7 @@ func TestAccAlibabacloudStackEipAssociationMulti(t *testing.T) {
 	rand := getAccTestRandInt(10000,20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -122,7 +122,7 @@ func TestAccAlibabacloudStackEipAssociationEni(t *testing.T) {
 	rand := getAccTestRandInt(10000,20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

@@ -30,7 +30,7 @@ func TestAccAlibabacloudStackOtsTable_basic(t *testing.T) {
 	name := fmt.Sprintf("testAcc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsTableConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -129,7 +129,7 @@ func TestAccAlibabacloudStackOtsTable_basic(t *testing.T) {
 //	name := fmt.Sprintf("testAcc%d", rand)
 //	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsTableConfigDependenceHighperformance)
 //
-//	resource.Test(t, resource.TestCase{
+//	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 
@@ -229,7 +229,7 @@ func TestAccAlibabacloudStackOtsTable_basic(t *testing.T) {
 //	name := fmt.Sprintf("testAcc%d", rand)
 //	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsTableConfigDependence)
 //
-//	resource.Test(t, resource.TestCase{
+//	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
 

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackEssScalinggroupsDataSource(t *testing.T) {
@@ -101,7 +99,7 @@ resource "alibabacloudstack_ess_scaling_group" "default" {
 	scaling_group_name = "${var.name}"
 	default_cooldown = 20
 	removal_policies = ["OldestInstance", "NewestInstance"]
-	vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+	vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 }
 
 data "alibabacloudstack_ess_scaling_groups" "default" {

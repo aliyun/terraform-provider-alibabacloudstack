@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackOosTemplate0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%soostemplate%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccOosTemplateBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

@@ -2,9 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
 	"testing"
+
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"strings"
 	"time"
@@ -13,7 +14,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -110,7 +111,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 		"max_size":           "4",
 		"default_cooldown":   "20",
 		"scaling_group_name": fmt.Sprintf("tf-testAccEssScalingGroup-%d", rand),
-		"vswitch_ids.#":      "2",
+		"vswitch_ids.#":      "1",
 		"removal_policies.#": "2",
 	}
 
@@ -121,7 +122,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -156,7 +157,7 @@ func TestAccAlibabacloudStackEssScalingGroup_basic(t *testing.T) {
 				Config: testAccEssScalingGroupUpdateScalingGroupName(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"scaling_group_name": fmt.Sprintf("tf-testAccEssScalingGroupUpdate-%d", rand),
+						"scaling_group_name": fmt.Sprintf("tf-testAccEssScalingGroup-%d", rand),
 					}),
 				),
 			},
@@ -213,7 +214,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 		"max_size":           "1",
 		"default_cooldown":   "20",
 		"scaling_group_name": fmt.Sprintf("tf-testAccEssScalingGroup_vpc-%d", rand),
-		"vswitch_ids.#":      "2",
+		"vswitch_ids.#":      "1",
 		"removal_policies.#": "2",
 	}
 
@@ -224,7 +225,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -259,7 +260,7 @@ func TestAccAlibabacloudStackEssScalingGroup_vpc(t *testing.T) {
 				Config: testAccEssScalingGroupVpcUpdateScalingGroupName(ECSInstanceCommonTestCase, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"scaling_group_name": fmt.Sprintf("tf-testAccEssScalingGroupUpdate-%d", rand),
+						"scaling_group_name": fmt.Sprintf("tf-testAccEssScalingGroup-%d_update", rand),
 					}),
 				),
 			},
@@ -327,7 +328,7 @@ func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -384,7 +385,7 @@ func TestAccAlibabacloudStackEssScalingGroup_slb(t *testing.T) {
 					rcSlb0.checkResourceExists(),
 					rcSlb1.checkResourceExists(),
 					testAccCheck(map[string]string{
-						"scaling_group_name": fmt.Sprintf("tf-testAccEssScalingGroupUpdate-%d", rand),
+						"scaling_group_name": fmt.Sprintf("tf-testAccEssScalingGroup-%d_update", rand),
 					}),
 				),
 				ExpectNonEmptyPlan: true,
@@ -469,19 +470,13 @@ func testAccEssScalingGroup(common string, rand int) string {
 		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 4
 		scaling_group_name = "${var.name}"
 		default_cooldown = 20
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}`, common, rand)
 }
@@ -493,19 +488,13 @@ func testAccEssScalingGroupUpdateMaxSize(common string, rand int) string {
 		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 5
 		scaling_group_name = "${var.name}"
 		default_cooldown = 20
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}`, common, rand)
 }
@@ -514,22 +503,16 @@ func testAccEssScalingGroupUpdateScalingGroupName(common string, rand int) strin
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 5
 		scaling_group_name = "${var.name}"
 		default_cooldown = 20
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}`, common, rand)
 }
@@ -538,22 +521,16 @@ func testAccEssScalingGroupUpdateRemovalPolicies(common string, rand int) string
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 5
 		scaling_group_name = "${var.name}"
 		default_cooldown = 20
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance"]
 	}`, common, rand)
 }
@@ -562,22 +539,16 @@ func testAccEssScalingGroupUpdateDefaultCooldown(common string, rand int) string
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 5
 		scaling_group_name = "${var.name}"
 		default_cooldown = 200
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance"]
 	}`, common, rand)
 }
@@ -586,22 +557,16 @@ func testAccEssScalingGroupUpdateMinSize(common string, rand int) string {
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 2
 		max_size = 5
 		scaling_group_name = "${var.name}"
 		default_cooldown = 200
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance"]
 	}`, common, rand)
 }
@@ -609,22 +574,16 @@ func testAccEssScalingGroupVpc(common string, rand int) string {
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroup_vpc-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 1
 		scaling_group_name = "${var.name}"
 		default_cooldown = 20
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}`, common, rand)
 }
@@ -633,22 +592,16 @@ func testAccEssScalingGroupVpcUpdateMaxSize(common string, rand int) string {
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroup_vpc-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 2
 		scaling_group_name = "${var.name}"
 		default_cooldown = 20
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}`, common, rand)
 }
@@ -657,22 +610,16 @@ func testAccEssScalingGroupVpcUpdateScalingGroupName(common string, rand int) st
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 2
-		scaling_group_name = "${var.name}"
+		scaling_group_name = "${var.name}_update"
 		default_cooldown = 20
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}`, common, rand)
 }
@@ -681,22 +628,16 @@ func testAccEssScalingGroupVpcUpdateRemovalPolicies(common string, rand int) str
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 2
-		scaling_group_name = "${var.name}"
+		scaling_group_name = "${var.name}_update"
 		default_cooldown = 20
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance"]
 	}`, common, rand)
 }
@@ -705,22 +646,16 @@ func testAccEssScalingGroupVpcUpdateDefaultCooldown(common string, rand int) str
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 2
-		scaling_group_name = "${var.name}"
+		scaling_group_name = "${var.name}_update"
 		default_cooldown = 200
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance"]
 	}`, common, rand)
 }
@@ -729,22 +664,16 @@ func testAccEssScalingGroupVpcUpdateMinSize(common string, rand int) string {
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
-	}
-	
+
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 2
 		max_size = 2
-		scaling_group_name = "${var.name}"
+		scaling_group_name = "${var.name}_update"
 		default_cooldown = 200
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}", "${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance"]
 	}`, common, rand)
 }
@@ -753,7 +682,7 @@ func testAccEssScalingGroupSlb(common string, rand int) string {
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroup_slb-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
@@ -761,7 +690,7 @@ func testAccEssScalingGroupSlb(common string, rand int) string {
 	  max_size = "1"
 	  scaling_group_name = "${var.name}"
 	  removal_policies = ["OldestInstance", "NewestInstance"]
-	  vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+	  vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	  loadbalancer_ids = ["${alibabacloudstack_slb.default.0.id}","${alibabacloudstack_slb.default.1.id}"]
 	  depends_on = ["alibabacloudstack_slb_listener.default"]
 	}
@@ -769,7 +698,7 @@ func testAccEssScalingGroupSlb(common string, rand int) string {
 	resource "alibabacloudstack_slb" "default" {
 	  count=2
 	  name = "${var.name}"
-	  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 	}
 
 	resource "alibabacloudstack_slb_listener" "default" {
@@ -790,7 +719,7 @@ func testAccEssScalingGroupSlbDetach(common string, rand int) string {
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroup_slb-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
@@ -798,7 +727,7 @@ func testAccEssScalingGroupSlbDetach(common string, rand int) string {
 	  max_size = "1"
 	  scaling_group_name = "${var.name}"
 	  removal_policies = ["OldestInstance", "NewestInstance"]
-	  vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+	  vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	  loadbalancer_ids = ["${alibabacloudstack_slb.default.0.id}"]
 	  depends_on = ["alibabacloudstack_slb_listener.default"]
 	}
@@ -806,7 +735,7 @@ func testAccEssScalingGroupSlbDetach(common string, rand int) string {
 	resource "alibabacloudstack_slb" "default" {
 	  count=2
 	  name = "${var.name}"
-	  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 	}
 
 	resource "alibabacloudstack_slb_listener" "default" {
@@ -827,7 +756,7 @@ func testAccEssScalingGroupSlbempty(common string, rand int) string {
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroup_slb-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
@@ -835,7 +764,7 @@ func testAccEssScalingGroupSlbempty(common string, rand int) string {
 	  max_size = "1"
 	  scaling_group_name = "${var.name}"
 	  removal_policies = ["OldestInstance", "NewestInstance"]
-	  vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+	  vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	  loadbalancer_ids = []
 	}`, common, rand)
 }
@@ -844,7 +773,7 @@ func testAccEssScalingGroupSlbUpdateMaxSize(common string, rand int) string {
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroup_slb-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
@@ -852,7 +781,7 @@ func testAccEssScalingGroupSlbUpdateMaxSize(common string, rand int) string {
 	  max_size = "2"
 	  scaling_group_name = "${var.name}"
 	  removal_policies = ["OldestInstance", "NewestInstance"]
-	  vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+	  vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	  loadbalancer_ids = ["${alibabacloudstack_slb.default.0.id}","${alibabacloudstack_slb.default.1.id}"]
 	  depends_on = ["alibabacloudstack_slb_listener.default"]
 	}
@@ -860,7 +789,7 @@ func testAccEssScalingGroupSlbUpdateMaxSize(common string, rand int) string {
 	resource "alibabacloudstack_slb" "default" {
 	  count=2
 	  name = "${var.name}"
-	  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 	}
 
 	resource "alibabacloudstack_slb_listener" "default" {
@@ -881,15 +810,15 @@ func testAccEssScalingGroupSlbUpdateScalingGroupName(common string, rand int) st
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 	  min_size = "1"
 	  max_size = "2"
-	  scaling_group_name = "${var.name}"
+	  scaling_group_name = "${var.name}_update"
 	  removal_policies = ["OldestInstance", "NewestInstance"]
-	  vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+	  vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	  loadbalancer_ids = ["${alibabacloudstack_slb.default.0.id}","${alibabacloudstack_slb.default.1.id}"]
 	  depends_on = ["alibabacloudstack_slb_listener.default"]
 	}
@@ -897,7 +826,7 @@ func testAccEssScalingGroupSlbUpdateScalingGroupName(common string, rand int) st
 	resource "alibabacloudstack_slb" "default" {
 	  count=2
 	  name = "${var.name}"
-	  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 	}
 
 	resource "alibabacloudstack_slb_listener" "default" {
@@ -918,7 +847,7 @@ func testAccEssScalingGroupSlbUpdateRemovalPolicies(common string, rand int) str
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
@@ -926,7 +855,7 @@ func testAccEssScalingGroupSlbUpdateRemovalPolicies(common string, rand int) str
 	  max_size = "2"
 	  scaling_group_name = "${var.name}"
 	  removal_policies = ["OldestInstance"]
-	  vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+	  vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	  loadbalancer_ids = ["${alibabacloudstack_slb.default.0.id}","${alibabacloudstack_slb.default.1.id}"]
 	  depends_on = ["alibabacloudstack_slb_listener.default"]
 	}
@@ -934,7 +863,7 @@ func testAccEssScalingGroupSlbUpdateRemovalPolicies(common string, rand int) str
 	resource "alibabacloudstack_slb" "default" {
 	  count=2
 	  name = "${var.name}"
-	  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 	}
 
 	resource "alibabacloudstack_slb_listener" "default" {
@@ -955,7 +884,7 @@ func testAccEssScalingGroupSlbUpdateDefaultCooldown(common string, rand int) str
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
@@ -964,7 +893,7 @@ func testAccEssScalingGroupSlbUpdateDefaultCooldown(common string, rand int) str
       default_cooldown = 200
 	  scaling_group_name = "${var.name}"
 	  removal_policies = ["OldestInstance"]
-	  vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+	  vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	  loadbalancer_ids = ["${alibabacloudstack_slb.default.0.id}","${alibabacloudstack_slb.default.1.id}"]
 	  depends_on = ["alibabacloudstack_slb_listener.default"]
 	}
@@ -972,7 +901,7 @@ func testAccEssScalingGroupSlbUpdateDefaultCooldown(common string, rand int) str
 	resource "alibabacloudstack_slb" "default" {
 	  count=2
 	  name = "${var.name}"
-	  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 	}
 
 	resource "alibabacloudstack_slb_listener" "default" {
@@ -993,7 +922,7 @@ func testAccEssScalingGroupSlbUpdateMinSize(common string, rand int) string {
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
@@ -1002,7 +931,7 @@ func testAccEssScalingGroupSlbUpdateMinSize(common string, rand int) string {
       default_cooldown = 200
 	  scaling_group_name = "${var.name}"
 	  removal_policies = ["OldestInstance"]
-	  vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+	  vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	  loadbalancer_ids = ["${alibabacloudstack_slb.default.0.id}","${alibabacloudstack_slb.default.1.id}"]
 	  depends_on = ["alibabacloudstack_slb_listener.default"]
 	}
@@ -1010,7 +939,7 @@ func testAccEssScalingGroupSlbUpdateMinSize(common string, rand int) string {
 	resource "alibabacloudstack_slb" "default" {
 	  count=2
 	  name = "${var.name}"
-	  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 	}
 
 	resource "alibabacloudstack_slb_listener" "default" {
@@ -1031,14 +960,15 @@ func testAccEssScalingGroupModifyVSwitchIds(common string, rand int) string {
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
-		default = "tf-testAccEssScalingGroupUpdate-%d"
+		default = "tf-testAccEssScalingGroup-%d"
 	}
 	
-	resource "alibabacloudstack_vswitch" "default2" {
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-		  cidr_block = "172.16.1.0/24"
-		  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		  name = "${var.name}-bar"
+
+	resource "alibabacloudstack_vpc_vswitch" "default2" {
+		vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+		cidr_block = "172.16.0.0/24"
+		availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+		name = "${var.name}-bar"
 	}
 
 	resource "alibabacloudstack_ess_scaling_group" "default" {
@@ -1046,7 +976,7 @@ func testAccEssScalingGroupModifyVSwitchIds(common string, rand int) string {
 		max_size = 5
 		scaling_group_name = "${var.name}"
 		default_cooldown = 200
-		vswitch_ids = ["${alibabacloudstack_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default2.id}"]
 		removal_policies = ["OldestInstance"]
 	}`, common, rand)
 }

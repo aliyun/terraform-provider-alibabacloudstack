@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackNatgatewaySnatentry0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%snat_gatewaysnat_entry%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccNatgatewaySnatentryBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

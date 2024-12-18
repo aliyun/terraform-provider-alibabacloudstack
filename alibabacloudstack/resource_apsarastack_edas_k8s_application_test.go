@@ -138,7 +138,7 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	image := fmt.Sprintf("registry-vpc.%s.aliyuncs.com/edas-demo-image/consumer:1.0", region)
 	updateImg := fmt.Sprintf("registry-vpc.%s.aliyuncs.com/edas-demo-image/provider:1.0", region)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)
@@ -289,7 +289,7 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 		testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sApplicationConfigDependence)
 		packageUrl := "http://edas-bj.oss-cn-beijing.aliyuncs.com/prod/demo/SPRING_CLOUD_PROVIDER.jar"
 		updateUrl := "http://edas-bj.oss-cn-beijing.aliyuncs.com/prod/demo/DUBBO_PROVIDER.jar"
-		resource.Test(t, resource.TestCase{
+		ResourceTest(t, resource.TestCase{
 			PreCheck: func() {
 
 				testAccPreCheck(t)
@@ -413,7 +413,7 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 		testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sApplicationConfigDependence)
 		region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 		image := fmt.Sprintf("registry-vpc.%s.aliyuncs.com/edas-demo-image/consumer:1.0", region)
-		resource.Test(t, resource.TestCase{
+		ResourceTest(t, resource.TestCase{
 			PreCheck: func() {
 
 				testAccPreCheck(t)

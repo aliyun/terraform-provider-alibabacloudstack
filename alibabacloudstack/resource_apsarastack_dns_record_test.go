@@ -63,7 +63,7 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 	name := fmt.Sprint("tf-testdnsrecordbasic11.")
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccDnsRecordConfigBasicConfigBasic)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -79,7 +79,8 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 					"name":         "test",
 					"type":         "A",
 					"ttl":          "0",
-					"rr_set":       []string{"10.0.0.1", "10.0.0.3", "10.0.0.2"},
+					"rr_set":       []string{"192.168.2.4", "192.168.2.7", "10.0.0.4"},
+					"line_ids":     []string{"default"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
@@ -92,10 +93,14 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 
 func testAccDnsRecordConfigBasicConfigBasic(name string) string {
 	return fmt.Sprintf(`
-
 resource "alibabacloudstack_dns_domain" "default" {
  domain_name = "%s"
 }
+
+data "alibabacloudstack_zones" default {
+  available_resource_creation = "VSwitch"
+}
+
 `, name)
 }
 

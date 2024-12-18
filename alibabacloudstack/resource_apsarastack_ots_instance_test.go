@@ -140,7 +140,7 @@ func TestAccAlibabacloudStackOtsInstance_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testAcc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -252,7 +252,7 @@ func TestAccAlibabacloudStackOtsInstance_basic(t *testing.T) {
 		name := fmt.Sprintf("tf-testAcc%d", rand)
 		testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceConfigDependence)
 
-		resource.Test(t, resource.TestCase{
+		ResourceTest(t, resource.TestCase{
 			PreCheck: func() {
 				testAccPreCheck(t)
 
@@ -360,7 +360,7 @@ func TestAccAlibabacloudStackOtsInstance_basic(t *testing.T) {
 		name := fmt.Sprintf("tf-testAcc%d", rand)
 		testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceConfigDependence)
 
-		resource.Test(t, resource.TestCase{
+		ResourceTest(t, resource.TestCase{
 			PreCheck: func() {
 				testAccPreCheck(t)
 

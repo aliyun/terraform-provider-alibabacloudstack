@@ -9,7 +9,7 @@ import (
 func TestAccAlibabacloudStackDatahubServiceDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_datahub_service.current"
 	testAccCheck := resourceAttrInit(resourceId, map[string]string{}).resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

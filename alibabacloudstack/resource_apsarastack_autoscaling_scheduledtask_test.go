@@ -123,7 +123,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 	// Setting schedule time to more than one day
 	oneDay, _ := time.ParseDuration("24h")
 	rand := getAccTestRandInt(1000, 999999)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -234,7 +234,7 @@ func TestAccAlibabacloudStackEssScheduledTask_multi(t *testing.T) {
 	// Setting schedule time to more than one day
 	oneDay, _ := time.ParseDuration("24h")
 	rand := getAccTestRandInt(1000, 999999)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

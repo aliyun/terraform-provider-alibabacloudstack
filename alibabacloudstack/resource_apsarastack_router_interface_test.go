@@ -168,7 +168,7 @@ func TestAccAlibabacloudStackRouterInterfaceBasic(t *testing.T) {
 
 	rand := getAccTestRandInt(10000,20000)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithAccountSiteType(t, DomesticSite)
@@ -256,7 +256,7 @@ func TestAccAlibabacloudStackRouterInterfaceMulti(t *testing.T) {
 
 	rand := getAccTestRandInt(10000,20000)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithAccountSiteType(t, DomesticSite)

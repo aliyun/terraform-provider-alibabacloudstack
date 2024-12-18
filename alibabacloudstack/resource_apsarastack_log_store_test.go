@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-log-store-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogStoreConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -153,7 +153,7 @@ func TestAccAlibabacloudStackLogStore_multi(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-log-store-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogStoreConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

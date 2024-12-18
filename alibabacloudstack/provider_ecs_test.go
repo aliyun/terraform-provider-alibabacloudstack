@@ -29,7 +29,7 @@ func TestAccAlibabacloudStackProviderEcs(t *testing.T) {
 		return providerCommon + AlibabacloudTestAccVpcVswitchBasicdependence(name)
 	})
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

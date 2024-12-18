@@ -22,7 +22,7 @@ func TestAccAlibabacloudStackOssBucketKms_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-kms-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketKmsConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

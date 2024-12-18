@@ -15,7 +15,7 @@ func TestAccAlibabacloudStackMaxcompute_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf_testAccack%d", rand)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			// Currently does not support creating projects with sub-accounts
@@ -88,7 +88,7 @@ func TestAccAlibabacloudStackMaxcompute_advance(t *testing.T) {
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	name := "tf_testAccMCProject"
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			// Currently does not support creating projects with sub-accounts

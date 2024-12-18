@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackSlbListener0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sslblistener%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)
@@ -127,7 +127,7 @@ func TestAccAlibabacloudStackSlbListener1(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sslblistener%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)
@@ -185,7 +185,7 @@ func TestAccAlibabacloudStackSlbListener2(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sslblistener%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)
@@ -239,7 +239,7 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sslblistener%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)
