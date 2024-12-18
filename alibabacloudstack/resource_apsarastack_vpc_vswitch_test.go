@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%svpcvswitch%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcVswitchBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)
@@ -151,7 +151,7 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%svpcvswitch%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcVswitchIPV6dependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

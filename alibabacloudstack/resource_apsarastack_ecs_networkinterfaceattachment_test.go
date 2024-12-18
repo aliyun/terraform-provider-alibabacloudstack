@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackNetworkInterfaceAttachmentBasic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -58,7 +58,7 @@ func TestAccAlibabacloudStackNetworkInterfaceAttachmentMulti(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -128,7 +128,7 @@ resource "alibabacloudstack_instance" "default" {
     availability_zone = "${reverse(data.alibabacloudstack_zones.default.zones).0.id}"
     security_groups = ["${alibabacloudstack_security_group.default.id}"]
 
-    instance_type = "${local.instance_type_id}"
+    instance_type = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
     system_disk_category = "cloud_efficiency"
     image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
     instance_name        = "${var.name}"
@@ -180,7 +180,7 @@ resource "alibabacloudstack_instance" "default" {
     availability_zone = "${reverse(data.alibabacloudstack_zones.default.zones).0.id}"
     security_groups = ["${alibabacloudstack_security_group.default.id}"]
 
-    instance_type = "${local.instance_type_id}"
+    instance_type = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
     system_disk_category = "cloud_efficiency"
     image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
     instance_name        = "${var.name}"

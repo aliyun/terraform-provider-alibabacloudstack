@@ -8,7 +8,7 @@ import (
 
 func TestAccAlibabacloudStackCms_Alarams_DataSource(t *testing.T) {
 	// testAccPreCheckWithAPIIsNotSupport(t)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

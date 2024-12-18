@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackCloudfirewallControlpolicy0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%scloud_firewallcontrol_policy%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCloudfirewallControlpolicyBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

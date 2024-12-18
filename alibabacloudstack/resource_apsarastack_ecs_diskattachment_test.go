@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackDiskAttachment(t *testing.T) {
 
 	attachmentRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_diskattachment.default", &attachment, serverFunc, "DescribeDiskAttachment")
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -76,7 +76,7 @@ func TestAccAlibabacloudStackDiskMultiAttachment(t *testing.T) {
 
 	attachmentRc := resourceCheckInit("alibabacloudstack_ecs_diskattachment.default.1", &attachment, serverFunc)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

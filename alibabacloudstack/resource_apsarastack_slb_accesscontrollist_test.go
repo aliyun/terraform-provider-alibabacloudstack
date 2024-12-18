@@ -29,7 +29,7 @@ func TestAccAlibabacloudStackSlbAccesscontrollist0(t *testing.T) {
 		"comment": "test_entry",
 	})
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbAccesscontrollistBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

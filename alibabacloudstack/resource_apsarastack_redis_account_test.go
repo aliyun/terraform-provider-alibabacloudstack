@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sredisaccount%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRedisAccountBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)
@@ -41,7 +41,7 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 
 					"description": "rdk_test_description",
 
-					"instance_id": "r-bp1db1a29f56e904",
+					"instance_id": "${alibabacloudstack_kvstore_instance.instance.id}",
 
 					"account_name": "rdk_test_name_01",
 				}),
@@ -49,8 +49,6 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 					testAccCheck(map[string]string{
 
 						"description": "rdk_test_description",
-
-						"instance_id": "r-bp1db1a29f56e904",
 
 						"account_name": "rdk_test_name_01",
 					}),
@@ -112,6 +110,18 @@ func AlibabacloudTestAccRedisAccountBasicdependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
     default = "%s"
+}
+
+data "alibabacloudstack_zones" "default" {
+	available_resource_creation = "VSwitch"
+  }
+
+resource "alibabacloudstack_kvstore_instance" "instance" {
+	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	instance_class = "redis.master.small.default"
+	instance_name  = "${var.name}"
+	instance_charge_type = "PostPaid"
+	engine_version = "4.0"
 }
 
 

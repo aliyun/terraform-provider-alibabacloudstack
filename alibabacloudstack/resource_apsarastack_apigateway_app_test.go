@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackApigatewayAppAttachment(t *testing.T) {
 	name := fmt.Sprintf("tf_testAccApp_%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceApigatewayAppAttachmentConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

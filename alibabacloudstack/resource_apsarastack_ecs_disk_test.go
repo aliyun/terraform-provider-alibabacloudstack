@@ -144,7 +144,7 @@ func TestAccAlibabacloudStackDisk_basic(t *testing.T) {
 	ra := resourceAttrInit(resourceId, testAccCheckResourceDiskBasicMap)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -245,7 +245,7 @@ func TestAccAlibabacloudStackDisk_multi(t *testing.T) {
 	ra := resourceAttrInit(resourceId, testAccCheckResourceDiskBasicMap)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

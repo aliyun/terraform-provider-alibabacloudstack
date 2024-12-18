@@ -139,7 +139,7 @@ func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 	rand := getAccTestRandInt(1, 2999)
 	name := fmt.Sprintf("tf-testacc%sexpressconnectvirtualborderrouter%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlicloudExpressConnectVirtualBorderRouterBasicDependence0)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

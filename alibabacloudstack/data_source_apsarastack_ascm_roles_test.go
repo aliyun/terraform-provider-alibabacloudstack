@@ -6,7 +6,7 @@ import (
 )
 
 func TestAccAlibabacloudStackAscm_Roles_DataSource(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

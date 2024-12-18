@@ -147,7 +147,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_classic(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 		},
@@ -260,7 +260,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_classicVersion4(t *testing.
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 		},
@@ -322,7 +322,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_vpc(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithNoDefaultVpc(t)
@@ -437,7 +437,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_multi_instance(t *testing.T
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 		},

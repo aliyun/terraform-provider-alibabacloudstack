@@ -9,7 +9,7 @@ import (
 
 func TestAccAlibabacloudStackEssScheduledtasksDataSource(t *testing.T) {
 	oneDay, _ := time.ParseDuration("24h")
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

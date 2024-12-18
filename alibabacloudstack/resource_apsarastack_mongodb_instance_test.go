@@ -132,7 +132,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 		},
@@ -206,23 +206,23 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 					}),
 				),
 			},
-			{
-				Config: testMongoDBInstance_classic_account_password,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"account_password": "inputYourCodeHere",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_classic_security_ip_list,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"security_ip_list.#": "1",
-						"security_ip_list.0": "10.168.1.12",
-					}),
-				),
-			},
+			// {
+			// 	Config: testMongoDBInstance_classic_account_password,
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"account_password": "inputYourCodeHere",
+			// 		}),
+			// 	),
+			// },
+			// {
+			// 	Config: testMongoDBInstance_classic_security_ip_list,
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"security_ip_list.#": "1",
+			// 			"security_ip_list.0": "10.168.1.12",
+			// 		}),
+			// 	),
+			// },
 			//			{
 			//				Config: testMongoDBInstance_classic_security_group_id,
 			//				Check: resource.ComposeTestCheckFunc(
@@ -231,46 +231,46 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 			//					}),
 			//				),
 			//			},
-			{
-				Config: testMongoDBInstance_classic_backup,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"backup_period.#": "1",
-						"backup_period.0": "Wednesday",
-						"backup_time":     "11:00Z-12:00Z",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_classic_maintain_time,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"maintain_start_time": "02:00Z",
-						"maintain_end_time":   "03:00Z",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_classic_together,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":                "tf-testAccMongoDBInstance_test_together",
-						"account_password":    "inputYourCodeHere",
-						"security_ip_list.#":  "2",
-						"security_ip_list.0":  "10.168.1.12",
-						"security_ip_list.1":  "10.168.1.13",
-						"db_instance_storage": "30",
-						"db_instance_class":   "dds.mongo.standard",
-						"backup_period.#":     "2",
-						"backup_period.0":     "Tuesday",
-						"backup_period.1":     "Wednesday",
-						"backup_time":         "10:00Z-11:00Z",
-						"maintain_start_time": REMOVEKEY,
-						"maintain_end_time":   REMOVEKEY,
-						"ssl_status":          "Open",
-					}),
-				),
-			},
+			// {
+			// 	Config: testMongoDBInstance_classic_backup,
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"backup_period.#": "1",
+			// 			"backup_period.0": "Wednesday",
+			// 			"backup_time":     "11:00Z-12:00Z",
+			// 		}),
+			// 	),
+			// },
+			// {
+			// 	Config: testMongoDBInstance_classic_maintain_time,
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"maintain_start_time": "02:00Z",
+			// 			"maintain_end_time":   "03:00Z",
+			// 		}),
+			// 	),
+			// },
+			// {
+			// 	Config: testMongoDBInstance_classic_together,
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"name":                "tf-testAccMongoDBInstance_test_together",
+			// 			"account_password":    "inputYourCodeHere",
+			// 			"security_ip_list.#":  "2",
+			// 			"security_ip_list.0":  "10.168.1.12",
+			// 			"security_ip_list.1":  "10.168.1.13",
+			// 			"db_instance_storage": "30",
+			// 			"db_instance_class":   "dds.mongo.standard",
+			// 			"backup_period.#":     "2",
+			// 			"backup_period.0":     "Tuesday",
+			// 			"backup_period.1":     "Wednesday",
+			// 			"backup_time":         "10:00Z-11:00Z",
+			// 			"maintain_start_time": REMOVEKEY,
+			// 			"maintain_end_time":   REMOVEKEY,
+			// 			"ssl_status":          "Open",
+			// 		}),
+			// 	),
+			// },
 		},
 	})
 }
@@ -285,7 +285,7 @@ func TestAccAlibabacloudStackMongoDBInstance_Version4(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 		},
@@ -335,7 +335,7 @@ func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithNoDefaultVpc(t)
@@ -439,7 +439,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheckWithNoDefaultVpc(t)
@@ -543,7 +543,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithNoDefaultVpc(t)

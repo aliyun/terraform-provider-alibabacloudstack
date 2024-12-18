@@ -33,7 +33,7 @@ func TestAccAlibabacloudStackImageCopyBasic(t *testing.T) {
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testAccEcsCopyImageConfigBasic%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageCopyBasicConfigDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

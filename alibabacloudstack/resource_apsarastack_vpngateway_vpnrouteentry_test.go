@@ -29,7 +29,7 @@ func TestAccAlibabacloudStackVpnRouteEntry_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%svpnRouteEntrybasic%v", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceVpnRouteEntryConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithAccountSiteType(t, IntlSite)
@@ -109,7 +109,7 @@ func TestAccAlibabacloudStackVpnRouteEntry_multi(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%svpnRouteEntrybasic%v", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceVpnRouteEntryConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithAccountSiteType(t, IntlSite)

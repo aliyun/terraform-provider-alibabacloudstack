@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackGPDBAccount_basic0(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tftest%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackGPDBAccountBasicDependence0)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

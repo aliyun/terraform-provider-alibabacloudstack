@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackDmsenterpriseUser0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sdms_enterpriseuser%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccDmsenterpriseUserBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

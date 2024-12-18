@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -26,7 +24,7 @@ func TestAccAlibabacloudStackSlbMasterSlaveServerGroup_vpc(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccSlbMasterSlaveServerGroupVpc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceMasterSlaveServerGroupConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -88,7 +86,7 @@ func TestAccAlibabacloudStackSlbMasterSlaveServerGroup_multi_vpc(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccSlbMasterSlaveServerGroupVpc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceMasterSlaveServerGroupConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -191,3 +189,5 @@ var testAccSlbMasterSlaveServerGroupCheckMap = map[string]string{
 	"name":      CHECKSET,
 	"servers.#": "2",
 }
+
+// aa

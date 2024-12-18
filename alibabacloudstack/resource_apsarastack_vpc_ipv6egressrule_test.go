@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackVpcIpv6Egressrule0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%svpcipv6_egress_rule%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcIpv6EgressruleBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

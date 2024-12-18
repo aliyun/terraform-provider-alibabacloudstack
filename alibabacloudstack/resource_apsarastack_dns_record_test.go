@@ -63,7 +63,7 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 	name := fmt.Sprint("tf-testdnsrecordbasic11.")
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccDnsRecordConfigBasicConfigBasic)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

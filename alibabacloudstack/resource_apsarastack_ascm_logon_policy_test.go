@@ -22,7 +22,7 @@ func TestAccAlibabacloudStackLogonPolicy_basic(t *testing.T) {
 	rand := getAccTestRandInt(10000,20000)
 	name := fmt.Sprintf("tf-ascmlogonpolicybasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testacclogonpolicyconfigBasic)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

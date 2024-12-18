@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackOtsInstanceAttachmentBasic(t *testing.T) {
 	name := fmt.Sprintf("tf-testAcc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceAttachmentConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -72,7 +72,7 @@ func TestAccAlibabacloudStackOtsInstanceAttachmentHighPerformance(t *testing.T) 
 	name := fmt.Sprintf("tf-testAcc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOtsInstanceAttachmentConfigDependenceHighperformance)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

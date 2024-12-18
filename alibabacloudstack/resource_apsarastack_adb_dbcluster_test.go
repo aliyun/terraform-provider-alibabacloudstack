@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackAdbDbcluster0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%sadbdb_cluster%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccAdbDbclusterBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

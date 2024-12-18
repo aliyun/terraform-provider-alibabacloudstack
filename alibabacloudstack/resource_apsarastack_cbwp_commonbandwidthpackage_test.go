@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackCbwpCommonbandwidthpackage0(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc%scbwpcommon_bandwidth_package%d", defaultRegionToTest, rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCbwpCommonbandwidthpackageBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)

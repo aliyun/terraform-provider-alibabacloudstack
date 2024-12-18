@@ -126,7 +126,7 @@ func TestAccAlibabacloudStackAlikafkaSaslUser_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-alikafkasasluserbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaSaslUserConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckWithAlikafkaAclEnable(t)
 			testAccPreCheck(t)
@@ -210,7 +210,7 @@ func TestAccAlibabacloudStackAlikafkaSaslUser_multi(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-alikafkasasluserbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaSaslUserConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheckWithAlikafkaAclEnable(t)
 

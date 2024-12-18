@@ -524,7 +524,7 @@ func (dsa *dataSourceAttr) dataSourceTestCheck(t *testing.T, rand int, configs .
 	for _, conf := range configs {
 		steps = append(steps, conf.buildDataSourceSteps(t, dsa, rand)...)
 	}
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -539,7 +539,7 @@ func (dsa *dataSourceAttr) dataSourceTestCheckWithPreCheck(t *testing.T, rand in
 	for _, conf := range configs {
 		steps = append(steps, conf.buildDataSourceSteps(t, dsa, rand)...)
 	}
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
 		Steps:     steps,
@@ -739,25 +739,34 @@ data "alibabacloudstack_zones" "default" {
 `
 
 const DataAlibabacloudstackInstanceTypes = `
-data "alibabacloudstack_instance_types" "default" {
+data "alibabacloudstack_instance_types" "all" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  cpu_core_count       = 2
-  memory_size          = 4
+}
+
+data "alibabacloudstack_instance_types" "any_n4" {
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   instance_type_family = "ecs.n4"
   sorted_by            = "Memory"
-  
- }
- 
-`
-const DataAlibabacloudstackInstanceTypes_Eni2 = `
+}
+
 data "alibabacloudstack_instance_types" "default" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  eni_amount        = 2
-  sorted_by         = "Memory"
+  cpu_core_count       = 1
+  memory_size          = 2
+  instance_type_family = "ecs.n4"
+  sorted_by            = "Memory"
 }
 
 locals {
-  instance_type_id = sort(data.alibabacloudstack_instance_types.default.ids)[0]
+	default_instance_type_id = try(element(sort(length(data.alibabacloudstack_instance_types.default.instance_types) > 0 ? data.alibabacloudstack_instance_types.default.ids : data.alibabacloudstack_instance_types.any_n4.ids), 0), sort(data.alibabacloudstack_instance_types.all.ids)[0])
+}
+`
+
+const DataAlibabacloudstackInstanceTypes_Eni2 = `
+data "alibabacloudstack_instance_types" "eni2" {
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+  eni_amount        = 2
+  sorted_by         = "Memory"
 }
 `
 
@@ -1257,7 +1266,7 @@ const ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloud
  
 resource "alibabacloudstack_ecs_instance" "default" {
   image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
-  instance_type        = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
+  instance_type        = "${local.default_instance_type_id}"
   system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
   system_disk_size     = 40
   system_disk_name     = "test_sys_disk"

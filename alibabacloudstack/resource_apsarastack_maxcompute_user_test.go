@@ -14,7 +14,7 @@ func TestAccAlibabacloudStackMaxcomputeUser(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf_testAccAlibabacloudStack%d", rand)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			// Currently does not support creating projects with sub-accounts

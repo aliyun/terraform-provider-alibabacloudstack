@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccAlibabacloudStackInstanceTypesDataSource_basic(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -38,7 +38,7 @@ func TestAccAlibabacloudStackInstanceTypesDataSource_basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackInstanceTypesDataSource_empty(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -66,7 +66,7 @@ func TestAccAlibabacloudStackInstanceTypesDataSource_empty(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackInstanceTypesDataSource_k8sSpec(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -112,7 +112,7 @@ func TestAccAlibabacloudStackInstanceTypesDataSource_k8sSpec(t *testing.T) {
 	})
 }
 func TestAccAlibabacloudStackInstanceTypesDataSource_k8sFamily(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

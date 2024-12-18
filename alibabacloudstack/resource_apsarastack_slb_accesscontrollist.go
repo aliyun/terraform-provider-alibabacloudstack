@@ -74,7 +74,7 @@ func resourceAlibabacloudStackSlbAcl() *schema.Resource {
 				MaxItems: 300,
 				MinItems: 0,
 			},
-			"tags": tagsSchema(),
+			//"tags": tagsSchema(),
 		},
 	}
 }
@@ -119,11 +119,12 @@ func resourceAlibabacloudStackSlbAclRead(d *schema.ResourceData, meta interface{
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 
-	tags, err := slbService.DescribeTags(d.Id(), nil, TagResourceAcl)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	d.Set("tags", slbService.tagsToMap(tags))
+// 	slb-acl的tags由ascm实现，3162相关接口没有注册到pop
+// 	tags, err := slbService.DescribeTags(d.Id(), nil, TagResourceAcl)
+// 	if err != nil {
+// 		return errmsgs.WrapError(err)
+// 	}
+// 	d.Set("tags", slbService.tagsToMap(tags))
 
 	object, err := slbService.DescribeSlbAcl(d.Id())
 	if err != nil {

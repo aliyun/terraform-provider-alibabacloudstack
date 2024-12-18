@@ -22,7 +22,7 @@ func TestAccAlibabacloudStackAdbBackupPolicy(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := "tf-testAccAdbBackupPolicy"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAdbBackupPolicyConfigDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

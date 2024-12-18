@@ -121,7 +121,7 @@ func TestAccAlibabacloudStackArmsDispatchRule_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testAccArmsDispatchRule%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, ArmsDispatchRuleBasicdependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

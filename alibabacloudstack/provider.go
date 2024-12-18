@@ -208,6 +208,7 @@ func Provider() *schema.Provider {
 				Description: descriptions["sls_openapi_endpoint"],
 				Deprecated:  "Use schema endpoints replace sls_openapi_endpoint.",
 			},
+
 			"sts_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -869,9 +870,9 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	domain := d.Get("domain").(string)
 	if domain != "" {
-		if strings.Contains(domain, "/") && d.Get("proxy").(string) != "" {
-			return nil, fmt.Errorf("[Error]Domain containing the character '/' is not supported for proxy configuration.")
-		}
+		// if strings.Contains(domain, "/") && d.Get("proxy").(string) != "" {
+		// 	return nil, fmt.Errorf("[Error]Domain containing the character '/' is not supported for proxy configuration.")
+		// }
 		// 没有生成popgw地址的，继续使用asapi
 		var setEndpointIfEmpty = func(endpoint string, domain string) string {
 			if endpoint == "" {

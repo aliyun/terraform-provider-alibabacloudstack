@@ -61,7 +61,7 @@ func TestAccAlibabacloudstackVpnConnectionBasic(t *testing.T) {
 	name := fmt.Sprintf("tf-testaccVpnConnectionBaisc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceVpnConnectionConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithAccountSiteType(t, IntlSite)
@@ -235,7 +235,7 @@ func TestAccAlibabacloudstackVpnConnectionMulti(t *testing.T) {
 	name := fmt.Sprintf("tf-testaccVpnConnectionMulti%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceVpnConnectionConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithAccountSiteType(t, IntlSite)

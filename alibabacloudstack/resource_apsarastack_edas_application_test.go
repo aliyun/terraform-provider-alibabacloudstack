@@ -138,7 +138,7 @@ func TestAccAlibabacloudStackEdasApplication_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-edasapplicationbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasApplicationConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)
@@ -208,7 +208,7 @@ func TestAccAlibabacloudStackEdasApplication_multi(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-edasapplicationbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasApplicationConfigDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 			testAccPreCheck(t)
