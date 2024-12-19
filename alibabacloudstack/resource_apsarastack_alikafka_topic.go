@@ -125,9 +125,9 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
 	d.Partial(true)
-	if err := alikafkaService.SetResourceTags(d, "topic"); err != nil {
-		return errmsgs.WrapError(err)
-	}
+	// if err := alikafkaService.SetResourceTags(d, "topic"); err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
 	if d.IsNewResource() {
 		d.Partial(false)
 		return resourceAlibabacloudStackAlikafkaTopicRead(d, meta)
@@ -219,15 +219,14 @@ func resourceAlibabacloudStackAlikafkaTopicRead(d *schema.ResourceData, meta int
 	d.Set("instance_id", object.InstanceId)
 	d.Set("topic", object.Topic)
 	d.Set("local_topic", object.LocalTopic)
-	d.Set("compact_topic", object.CompactTopic)
-	d.Set("partition_num", object.PartitionNum)
-	d.Set("remark", object.Remark)
+	// d.Set("compact_topic", object.CompactTopic)
+	// d.Set("partition_num", object.PartitionNum)
+	// d.Set("remark", object.Remark)
 
-	tags, err := alikafkaService.ListTagResources(d.Id(), "topic")
-	if err != nil {
-		return WrapError(err)
-	}
-	d.Set("tags", alikafkaService.tagsToMap(tags))
+	// tags, err := alikafkaService.ListTagResources(d.Id(), "topic")
+	// if err == nil {
+	// 	d.Set("tags", tagsToMap(tags))
+	// }
 
 	return nil
 }
