@@ -248,17 +248,17 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*AliKa
 	instanceId := parts[0]
 	topic := parts[1]
 
-	request := alikafka.CreateGetTopicListRequest()
-	alikafkaService.client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceId = instanceId
+	// request := alikafka.CreateGetTopicListRequest()
+	request := alikafkaService.client.NewCommonRequest("POST", "alikafka", "2019-09-16", "GetTopicList", "")
+	request.QueryParams["InstanceId"] = instanceId
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	var raw interface{}
 
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err = alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
-			return alikafkaClient.GetTopicList(request)
+			return alikafkaClient.ProcessCommonRequest(request)
 		})
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		addDebug(request.GetActionName(), raw, request, request.QueryParams)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
 				wait()

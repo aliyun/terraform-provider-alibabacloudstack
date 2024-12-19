@@ -68,7 +68,7 @@ func testSweepAlikafkaTopic(region string) error {
 			continue
 		}
 
-		topicListResp, _ := raw.(*alikafka.GetTopicListResponse)
+		topicListResp, _ := raw.(*TopicListResponse)
 		topics := topicListResp.TopicList
 
 		for _, v := range topics {
