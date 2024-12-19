@@ -1,10 +1,15 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"regexp"
 	"time"
 
+	"github.com/PaesslerAG/jsonpath"
+	util "github.com/alibabacloud-go/tea-utils/service"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -15,7 +20,6 @@ import (
 )
 
 type TopicListResponse struct {
-	*responses.BaseResponse
 	EagleEyeTraceId string          `json:"eagleEyeTraceId"`
 	AsapiSuccess    bool            `json:"asapiSuccess"`
 	RequestId       string          `json:"RequestId"`
@@ -268,10 +272,11 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*AliKa
 		}
 		return nil
 	})
-
-	topicListResp, ok := raw.(*TopicListResponse)
+	topicListResp := TopicListResponse{}
+	bresponse, ok := raw.(*responses.CommonResponse)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &topicListResp)
 	if err != nil && !ok {
-		errmsg := errmsgs.GetBaseResponseErrorMessage(topicListResp.BaseResponse)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return alikafkaTopic, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
@@ -764,4 +769,138 @@ func (s *AlikafkaService) tagsFromMap(m map[string]interface{}) []alikafka.TagRe
 	}
 
 	return result
+}
+
+func (s *AlikafkaService) ListTagResources(id string, resourceType string) (object interface{}, err error) {
+	conn, err := s.client.NewVpcClient()
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	action := "ListTagResources"
+	request := map[string]interface{}{
+		"RegionId":       s.client.RegionId,
+		"ResourceType":   resourceType,
+		"ResourceId.1":   id,
+		"Product":        "alikafka",
+		"OrganizationId": s.client.Department,
+	}
+	tags := make([]interface{}, 0)
+	var response map[string]interface{}
+
+	for {
+		wait := incrementalWait(3*time.Second, 5*time.Second)
+		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+			response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
+			log.Printf("Response of alikafka ListTagResources: %v", response)
+			if err != nil {
+				if errmsgs.NeedRetry(err) {
+					wait()
+					return resource.RetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			addDebug(action, response, request)
+			v, err := jsonpath.Get("$.TagResources.TagResource", response)
+			if err != nil {
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.TagResources.TagResource", response))
+			}
+			if v != nil {
+				tags = append(tags, v.([]interface{})...)
+			}
+			return nil
+		})
+		if err != nil {
+			err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
+			return
+		}
+		if response["NextToken"] == nil {
+			break
+		}
+		request["NextToken"] = response["NextToken"]
+	}
+
+	return tags, nil
+}
+
+func (s *AlikafkaService) SetResourceTags(d *schema.ResourceData, resourceType string) error {
+
+	if d.HasChange("tags") {
+		added, removed := parsingTags(d)
+		conn, err := s.client.NewVpcClient()
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+
+		removedTagKeys := make([]string, 0)
+		for _, v := range removed {
+			if !ignoredTags(v, "") {
+				removedTagKeys = append(removedTagKeys, v)
+			}
+		}
+		if len(removedTagKeys) > 0 {
+			action := "UnTagResources"
+			request := map[string]interface{}{
+				"RegionId":     s.client.RegionId,
+				"ResourceType": resourceType,
+				"ResourceId.1": d.Id(),
+			}
+			for i, key := range removedTagKeys {
+				request[fmt.Sprintf("TagKey.%d", i+1)] = key
+			}
+			wait := incrementalWait(2*time.Second, 1*time.Second)
+			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
+				request["Product"] = "alikafka"
+				request["OrganizationId"] = s.client.Department
+				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
+				if err != nil {
+					if errmsgs.IsThrottling(err) {
+						wait()
+						return resource.RetryableError(err)
+
+					}
+					return resource.NonRetryableError(err)
+				}
+				addDebug(action, response, request)
+				return nil
+			})
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+		}
+		if len(added) > 0 {
+			action := "TagResources"
+			request := map[string]interface{}{
+				"RegionId":     s.client.RegionId,
+				"ResourceType": resourceType,
+				"ResourceId.1": d.Id(),
+			}
+			count := 1
+			for key, value := range added {
+				request[fmt.Sprintf("Tag.%d.Key", count)] = key
+				request[fmt.Sprintf("Tag.%d.Value", count)] = value
+				count++
+			}
+
+			wait := incrementalWait(2*time.Second, 1*time.Second)
+			err := resource.Retry(10*time.Minute, func() *resource.RetryError {
+				request["Product"] = "alikafka"
+				request["OrganizationId"] = s.client.Department
+				response, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2016-04-28"), StringPointer("AK"), nil, request, &util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)})
+				if err != nil {
+					if errmsgs.IsThrottling(err) {
+						wait()
+						return resource.RetryableError(err)
+
+					}
+					return resource.NonRetryableError(err)
+				}
+				addDebug(action, response, request)
+				return nil
+			})
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+		}
+	}
+	return nil
 }

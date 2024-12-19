@@ -136,35 +136,37 @@ func TestAccAlibabacloudStackAlikafkaTopic_basic(t *testing.T) {
 					//"instance_id":   "${alibabacloudstack_alikafka_instance.default.id}",
 					"instance_id":   "cluster-private-paas-default",
 					"topic":         "${var.name}",
-					"local_topic":   "false",
+					"local_topic":   "true",
 					"compact_topic": "false",
 					"partition_num": "12",
 					"remark":        "alibabacloudstack_alikafka_topic_remark",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"topic":       fmt.Sprintf("tf-testacc-alikafkatopicbasic%v", rand),
-						"local_topic": "true",
-						//"compact_topic": "false",
-						//"partition_num": "6",
-						//"remark":        "alibabacloudstack_alikafka_topic_remark",
+						"topic":         fmt.Sprintf("tf-testacc-alikafkatopicbasic%v", rand),
+						"local_topic":   "true",
+						"compact_topic": "false",
+						"partition_num": "12",
+						"remark":        "alibabacloudstack_alikafka_topic_remark",
 					}),
 				),
 			},
 
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// ImportStateVerifyIgnore: []string{"compact_topic", "partition_num", "remark"},
 			},
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"partition_num": "9",
+					"partition_num": "24",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"partition_num": "9"}),
+						"partition_num": "24",
+					}),
 				),
 			},
 
@@ -243,16 +245,16 @@ func TestAccAlibabacloudStackAlikafkaTopic_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"topic":         "${var.name}",
-					"local_topic":   "false",
+					"local_topic":   "true",
 					"compact_topic": "false",
-					"partition_num": "12",
+					"partition_num": "24",
 					"remark":        "alibabacloudstack_alikafka_topic_remark",
 					"tags":          REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"topic":         fmt.Sprintf("tf-testacc-alikafkatopicbasic%v", rand),
-						"local_topic":   "false",
+						"local_topic":   "true",
 						"compact_topic": "false",
 						//"partition_num": "12",
 						"remark":       "alibabacloudstack_alikafka_topic_remark",
@@ -342,7 +344,7 @@ variable "name" {
 
 var alikafkaTopicBasicMap = map[string]string{
 	"topic":         "${var.name}",
-	"local_topic":   "false",
+	"local_topic":   "true",
 	"compact_topic": "false",
 	"partition_num": "12",
 	"remark":        "alibabacloudstack_alikafka_topic_remark",

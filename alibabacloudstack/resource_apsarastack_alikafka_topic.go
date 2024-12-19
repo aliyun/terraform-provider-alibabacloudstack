@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"errors"
+	"log"
 	"strconv"
 	"time"
 
@@ -79,16 +80,19 @@ func resourceAlibabacloudStackAlikafkaTopicCreate(d *schema.ResourceData, meta i
 	client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	request.Topic = topic
-
-	if v, ok := d.GetOk("local_topic"); ok {
-		request.LocalTopic = requests.NewBoolean(v.(bool))
-	}
-	if v, ok := d.GetOk("compact_topic"); ok {
-		request.CompactTopic = requests.NewBoolean(v.(bool))
-	}
-	if v, ok := d.GetOk("partition_num"); ok {
-		request.PartitionNum = strconv.Itoa(v.(int))
-	}
+	request.LocalTopic = requests.NewBoolean(d.Get("local_topic").(bool))
+	request.CompactTopic = requests.NewBoolean(d.Get("compact_topic").(bool))
+	request.PartitionNum = strconv.Itoa(d.Get("partition_num").(int))
+	log.Printf("------------------ LocalTopic:%t CompactTopic:%t PartitionNum:%d", d.Get("local_topic").(bool), d.Get("local_topic").(bool), d.Get("partition_num").(int))
+	// if v, ok := d.GetOk("local_topic"); ok {
+	// 	request.LocalTopic = requests.NewBoolean(v.(bool))
+	// }
+	// if v, ok := d.GetOk("compact_topic"); ok {
+	// 	request.CompactTopic = requests.NewBoolean(v.(bool))
+	// }
+	// if v, ok := d.GetOk("partition_num"); ok {
+	// 	request.PartitionNum = strconv.Itoa(v.(int))
+	// }
 	if v, ok := d.GetOk("remark"); ok {
 		request.Remark = v.(string)
 	}
@@ -97,6 +101,7 @@ func resourceAlibabacloudStackAlikafkaTopicCreate(d *schema.ResourceData, meta i
 		raw, err := alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 			return alikafkaClient.CreateTopic(request)
 		})
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
 				time.Sleep(10 * time.Second)
@@ -104,7 +109,6 @@ func resourceAlibabacloudStackAlikafkaTopicCreate(d *schema.ResourceData, meta i
 			}
 			return resource.NonRetryableError(err)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 
@@ -121,7 +125,7 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
 	d.Partial(true)
-	if err := alikafkaService.setInstanceTags(d, TagResourceTopic); err != nil {
+	if err := alikafkaService.SetResourceTags(d, "topic"); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	if d.IsNewResource() {
@@ -215,6 +219,15 @@ func resourceAlibabacloudStackAlikafkaTopicRead(d *schema.ResourceData, meta int
 	d.Set("instance_id", object.InstanceId)
 	d.Set("topic", object.Topic)
 	d.Set("local_topic", object.LocalTopic)
+	d.Set("compact_topic", object.CompactTopic)
+	d.Set("partition_num", object.PartitionNum)
+	d.Set("remark", object.Remark)
+
+	tags, err := alikafkaService.ListTagResources(d.Id(), "topic")
+	if err != nil {
+		return WrapError(err)
+	}
+	d.Set("tags", alikafkaService.tagsToMap(tags))
 
 	return nil
 }
