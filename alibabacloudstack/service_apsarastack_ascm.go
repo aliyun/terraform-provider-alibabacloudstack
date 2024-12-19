@@ -480,6 +480,7 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	addDebug("GetOrganization", raw, request, request.QueryParams)
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		errmsg := ""
@@ -491,7 +492,6 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("GetOrganization", response, request, request)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -585,11 +585,11 @@ func (s *AscmService) DescribeAscmQuota(id string) (response *AscmQuota, err err
 	}
 	request := s.client.NewCommonRequest("GET", "Ascm", "2019-05-10", "GetQuota", "")
 	mergeMaps(request.QueryParams, map[string]string{
-		"productName":  did[0],
-		"quotaType":    did[1],
-		"quotaTypeId":  did[2],
-		"targetType":   targetType,
-		"regionName":   s.client.RegionId,
+		"productName": did[0],
+		"quotaType":   did[1],
+		"quotaTypeId": did[2],
+		"targetType":  targetType,
+		"regionName":  s.client.RegionId,
 	})
 	var resp = &AscmQuota{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {

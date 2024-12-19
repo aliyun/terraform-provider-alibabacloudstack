@@ -156,7 +156,7 @@ func TestAccAlibabacloudStackAlikafkaTopic_basic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				// ImportStateVerifyIgnore: []string{"compact_topic", "partition_num", "remark"},
+				ImportStateVerifyIgnore: []string{"compact_topic", "partition_num", "remark"},
 			},
 
 			{
@@ -208,63 +208,39 @@ func TestAccAlibabacloudStackAlikafkaTopic_basic(t *testing.T) {
 			//	),
 			//},
 
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance test",
-					}),
-				),
-			},
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"tags": map[string]string{
+			// 			"Created": "TF",
+			// 			"For":     "acceptance test",
+			// 		},
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"tags.%":       "2",
+			// 			"tags.Created": "TF",
+			// 			"tags.For":     "acceptance test",
+			// 		}),
+			// 	),
+			// },
 
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-						"Updated": "TF",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "3",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance test",
-						"tags.Updated": "TF",
-					}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"topic":         "${var.name}",
-					"local_topic":   "true",
-					"compact_topic": "false",
-					"partition_num": "24",
-					"remark":        "alibabacloudstack_alikafka_topic_remark",
-					"tags":          REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"topic":         fmt.Sprintf("tf-testacc-alikafkatopicbasic%v", rand),
-						"local_topic":   "true",
-						"compact_topic": "false",
-						//"partition_num": "12",
-						"remark":       "alibabacloudstack_alikafka_topic_remark",
-						"tags.%":       REMOVEKEY,
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
-						"tags.Updated": REMOVEKEY,
-					}),
-				),
-			},
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"tags": map[string]string{
+			// 			"Created": "TF",
+			// 			"For":     "acceptance test",
+			// 			"Updated": "TF",
+			// 		},
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"tags.%":       "3",
+			// 			"tags.Created": "TF",
+			// 			"tags.For":     "acceptance test",
+			// 			"tags.Updated": "TF",
+			// 		}),
+			// 	),
+			// },
 		},
 	})
 

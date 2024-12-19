@@ -2,18 +2,18 @@ package alibabacloudstack
 
 import (
 	"fmt"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
+
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"os"
-	"testing"
 )
 
 func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 	var v *User
-	var org_id string
 	resourceId := "alibabacloudstack_ascm_user.default"
 	ra := resourceAttrInit(resourceId, ascmuserBasicMap)
 	serviceFunc := func() interface{} {
@@ -22,13 +22,13 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-ascmusers%v", rand)
-	if os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT") != "" {
-		org_id = os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT")
-	} else {
-		org_id = "${alibabacloudstack_ascm_organization.default.org_id}"
-	}
+	// if os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT") != "" {
+	// 	org_id = os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT")
+	// } else {
+	// 	org_id = "${alibabacloudstack_ascm_organization.default.org_id}"
+	// }
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testascmuserconfigbasic)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -42,17 +42,31 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cellphone_number":   "13900000000",
+					"cellphone_number":   "15129022375",
 					"email":              "test01@gmail.com",
 					"display_name":       "Test-Apsara",
-					"organization_id":    org_id,
-					"mobile_nation_code": "91",
+					"mobile_nation_code": "85",
 					"login_name":         name,
 					"login_policy_id":    "1",
+					"role_ids":           []string{"8", "9"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"cellphone_number":   "15129022375",
+						"email":              "test01@gmail.com",
+						"display_name":       "Test-Apsara",
+						"mobile_nation_code": "85",
+						"login_name":         name,
+						"login_policy_id":    "1",
+						"role_ids.#":         "2",
+					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// ImportStateVerifyIgnore: []string{"compact_topic", "partition_num", "remark"},
 			},
 		},
 	})
@@ -79,30 +93,17 @@ func testAccCheckAscm_UserDestroy(s *terraform.State) error { //destroy function
 	return nil
 }
 func testascmuserconfigbasic(name string) string {
-	if os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT") != "" {
-		return fmt.Sprintf(`
+	return fmt.Sprintf(`
 variable name{
  default = "%s"
 }
 `, name)
-	} else {
-		return fmt.Sprintf(`
-variable name{
- default = "%s"
-}
-resource "alibabacloudstack_ascm_organization" "default" {
- name = "Test_binder"
- parent_id = "1"
-}
-`, name)
-	}
 }
 
 var ascmuserBasicMap = map[string]string{
 	"cellphone_number":   CHECKSET,
 	"email":              CHECKSET,
 	"display_name":       CHECKSET,
-	"organization_id":    CHECKSET,
 	"mobile_nation_code": CHECKSET,
 	"login_name":         CHECKSET,
 }
