@@ -8,10 +8,42 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alikafka"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
+
+type TopicListResponse struct {
+	*responses.BaseResponse
+	EagleEyeTraceId string          `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool            `json:"asapiSuccess"`
+	RequestId       string          `json:"RequestId"`
+	Message         string          `json:"Message"`
+	PageSize        int             `json:"PageSize"`
+	Code            int             `json:"Code"`
+	Success         bool            `json:"Success"`
+	ResponseVersion string          `json:"responseVersion"`
+	CurrentPage     int             `json:"CurrentPage"`
+	Total           int             `json:"Total"`
+	TopicList       []AliKafkaTopic `json:"TopicList"`
+}
+
+type AliKafkaTopic struct {
+	InstanceDo   interface{} `json:"instanceDo"`
+	RoleList     []string    `json:"roleList"`
+	Tags         []string    `json:"tags"`
+	LocalTopic   bool        `json:"localTopic"`
+	InstanceId   string      `json:"instanceId"`
+	RelationName string      `json:"relationName"`
+	HaveAlarm    bool        `json:"haveAlarm"`
+	StatusName   string      `json:"statusName"`
+	AlarmList    []string    `json:"alarmList"`
+	Topic        string      `json:"topic"`
+	ChannelName  string      `json:"channelName"`
+	AuthType     int         `json:"authType"`
+	Status       int         `json:"status"`
+}
 
 type AlikafkaService struct {
 	client *connectivity.AlibabacloudStackClient
@@ -42,7 +74,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstance(instanceId stri
 
 	instanceListResp, ok := raw.(*alikafka.GetInstanceListResponse)
 	if err != nil {
-		errmsg := ""			
+		errmsg := ""
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(instanceListResp.BaseResponse)
 		}
@@ -197,20 +229,18 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopicStatus(id string) (
 		return alikafkaTopicStatus, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	
-
 	if topicStatusResp.TopicStatus.OffsetTable.OffsetTableItem != nil {
 		return &topicStatusResp.TopicStatus, nil
 	}
 
 	return alikafkaTopicStatus, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("AlikafkaTopicStatus "+errmsgs.ResourceNotfound, id)), errmsgs.ResourceNotfound)
 }
-func (alikafkaService *AlikafkaService) DoAlikafkaGettopiclistRequest(id string) (*alikafka.TopicVO, error) {
+func (alikafkaService *AlikafkaService) DoAlikafkaGettopiclistRequest(id string) (*AliKafkaTopic, error) {
 	return alikafkaService.DescribeAlikafkaTopic(id)
 }
 
-func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*alikafka.TopicVO, error) {
-	alikafkaTopic := &alikafka.TopicVO{}
+func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*AliKafkaTopic, error) {
+	alikafkaTopic := &AliKafkaTopic{}
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
 		return alikafkaTopic, errmsgs.WrapError(err)
@@ -228,6 +258,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*alika
 		raw, err = alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
 			return alikafkaClient.GetTopicList(request)
 		})
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
 				wait()
@@ -235,20 +266,16 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*alika
 			}
 			return resource.NonRetryableError(err)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		return nil
 	})
 
-	topicListResp, ok := raw.(*alikafka.GetTopicListResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(topicListResp.BaseResponse)
-		}
+	topicListResp, ok := raw.(*TopicListResponse)
+	if err != nil && !ok {
+		errmsg := errmsgs.GetBaseResponseErrorMessage(topicListResp.BaseResponse)
 		return alikafkaTopic, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	for _, v := range topicListResp.TopicList.TopicVO {
+	for _, v := range topicListResp.TopicList {
 		if v.Topic == topic {
 			return &v, nil
 		}

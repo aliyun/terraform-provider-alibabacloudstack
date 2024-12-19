@@ -95,7 +95,7 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 			"Content":          fmt.Sprintf("%s%s%s%s%s%s%s", "<ServerSideEncryptionRule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>", sseAlgorithm, "</SSEAlgorithm><KMSDataEncryption>", kmsDateEncryption, "</KMSDataEncryption><KMSMasterKeyID>", kmsMasterKeyID, "</KMSMasterKeyID></ApplyServerSideEncryptionByDefault></ServerSideEncryptionRule>"),
 		})
 
-		raw, err := client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithOssNewClient(func(ossClient *ecs.Client) (interface{}, error) {
 			return ossClient.ProcessCommonRequest(request)
 		})
 		log.Printf("Response of PutBucketEncryption: %s", raw)
