@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -310,6 +311,7 @@ func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	addDebug("ListUsers", raw, request, request.QueryParams)
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		errmsg := ""
@@ -321,7 +323,6 @@ func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListUsers", response, request, request)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -480,6 +481,7 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
 	})
+	addDebug("GetOrganization", raw, request, request.QueryParams)
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		errmsg := ""
@@ -491,7 +493,6 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("GetOrganization", response, request, request)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -585,11 +586,11 @@ func (s *AscmService) DescribeAscmQuota(id string) (response *AscmQuota, err err
 	}
 	request := s.client.NewCommonRequest("GET", "Ascm", "2019-05-10", "GetQuota", "")
 	mergeMaps(request.QueryParams, map[string]string{
-		"productName":  did[0],
-		"quotaType":    did[1],
-		"quotaTypeId":  did[2],
-		"targetType":   targetType,
-		"regionName":   s.client.RegionId,
+		"productName": did[0],
+		"quotaType":   did[1],
+		"quotaTypeId": did[2],
+		"targetType":  targetType,
+		"regionName":  s.client.RegionId,
 	})
 	var resp = &AscmQuota{}
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
@@ -686,17 +687,9 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 func (s *AscmService) ExportInitPasswordByLoginName(loginname string) (initPassword string, err error) {
 	var loginnamelist []string
 	loginnamelist = append(loginnamelist, loginname)
-	QueryParams := map[string]interface{}{
-		"SecurityToken":    s.client.Config.SecurityToken,
-		"SignatureVersion": "1.0",
-		"SignatureMethod":  "HMAC-SHA1",
-		"LoginNameList":    loginnamelist,
-	}
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ExportInitPasswordByLoginNameList", "/roa/ascm/auth/user/exportInitPasswordByLoginNameList")
-	requeststring, jsonerr := json.Marshal(QueryParams)
-	log.Printf("=========================  ExportInitPasswordByLoginNameList jsonerr:%v", jsonerr)
-	request.SetContent(requeststring)
-	request.SetContentType("application/json")
+	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ExportInitPasswordByLoginNameList", "")
+	loginnamestring, _ := json.Marshal(loginnamelist)
+	request.QueryParams["LoginNameList"] = fmt.Sprint(loginnamestring)
 	var response InitPasswordListResponse
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
