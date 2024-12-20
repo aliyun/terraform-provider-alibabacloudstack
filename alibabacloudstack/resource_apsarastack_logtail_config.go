@@ -81,7 +81,7 @@ func resourceAlibabacloudStackLogtailConfigCreate(d *schema.ResourceData, meta i
 			LogStoreName: d.Get("logstore").(string),
 		},
 	}
-	raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+	raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 		requestInfo = slsClient
 		sls.AddNecessaryInputConfigField(inputConfigInputDetail)
 		covertInput, covertErr := assertInputDetailType(inputConfigInputDetail, logconfig)
@@ -184,7 +184,7 @@ func resourceAlibabacloudStackLogtailConfiglUpdate(d *schema.ResourceData, meta 
 				LogStoreName: d.Get("logstore").(string),
 			},
 		}
-		raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.UpdateConfig(parts[0], params)
 		})
@@ -211,7 +211,7 @@ func resourceAlibabacloudStackLogtailConfigDelete(d *schema.ResourceData, meta i
 	}
 	var requestInfo *sls.Client
 	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.DeleteConfig(parts[0], parts[2])
 		})

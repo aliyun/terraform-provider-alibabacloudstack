@@ -204,7 +204,7 @@ func Provider() *schema.Provider {
 			"sls_openapi_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SLS_OPENAPI_ENDPOINT", os.Getenv("ALIBABACLOUDSTACK_SLS_OPENAPI_ENDPOINT")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SLS_OPENAPI_ENDPOINT", nil),
 				Description: descriptions["sls_openapi_endpoint"],
 				Deprecated:  "Use schema endpoints replace sls_openapi_endpoint.",
 			},
@@ -212,7 +212,7 @@ func Provider() *schema.Provider {
 			"sts_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_STS_ENDPOINT", os.Getenv("ALIBABACLOUDSTACK_STS_ENDPOINT")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_STS_ENDPOINT", nil),
 				Description: descriptions["sts_endpoint"],
 				Deprecated:  "Use schema endpoints replace sts_endpoint.",
 			},
@@ -883,6 +883,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		for popcode := range connectivity.PopEndpoints {
 			if popcode == connectivity.OssDataCode {
 				// oss的数据网关不做配置
+				continue
+			}
+			if popcode == connectivity.SlSDataCode {
+				// SLS的数据网关不做配置
 				continue
 			}
 			config.Endpoints[popcode] = setEndpointIfEmpty(config.Endpoints[popcode], domain)

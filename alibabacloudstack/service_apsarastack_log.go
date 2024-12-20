@@ -7,7 +7,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 
-	slsPop "github.com/aliyun/alibaba-cloud-sdk-go/services/sls"
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -123,7 +122,7 @@ func (s *LogService) DescribeLogStore(id string) (*sls.LogStore, error) {
 	projectName, name := parts[0], parts[1]
 	var requestInfo *sls.Client
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return slsClient.GetLogStore(projectName, name)
 		})
@@ -190,7 +189,7 @@ func (s *LogService) DescribeLogStoreIndex(id string) (*sls.Index, error) {
 	projectName, name := parts[0], parts[1]
 	var requestInfo *sls.Client
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return slsClient.GetIndex(projectName, name)
 		})
@@ -232,7 +231,7 @@ func (s *LogService) DescribeLogMachineGroup(id string) (*sls.MachineGroup, erro
 	projectName, groupName := parts[0], parts[1]
 	var requestInfo *sls.Client
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return slsClient.GetMachineGroup(projectName, groupName)
 		})
@@ -301,7 +300,7 @@ func (s *LogService) DescribeLogtailConfig(id string) (*sls.LogConfig, error) {
 	projectName, configName := parts[0], parts[2]
 	var requestInfo *sls.Client
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return slsClient.GetConfig(projectName, configName)
 		})
@@ -369,7 +368,7 @@ func (s *LogService) DescribeLogtailAttachment(id string) (groupName string, err
 	var requestInfo *sls.Client
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 
-		raw, err := s.client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return slsClient.GetAppliedMachineGroups(projectName, configName)
 		})
@@ -441,7 +440,7 @@ func (s *LogService) DescribeLogAlert(id string) (*sls.Alert, error) {
 	projectName, alertName := parts[0], parts[1]
 	var requestInfo *sls.Client
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return slsClient.GetAlert(projectName, alertName)
 		})
@@ -507,7 +506,7 @@ func (s *LogService) CreateLogDashboard(project, name string) error {
 		ChartList:     []sls.Chart{},
 	}
 	err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			return nil, slsClient.CreateDashboard(project, dashboard)
 		})
 		if err != nil {
@@ -561,25 +560,6 @@ func CreateDashboard(project, name string, client *sls.Client) error {
 	return err
 }
 
-func (s *LogService) DescribeLogAudit(id string) (*slsPop.DescribeAppResponse, error) {
-	request := slsPop.CreateDescribeAppRequest()
-	s.client.InitRpcRequest(*request.RpcRequest)
-	request.AppName = "audit"
-	response := &slsPop.DescribeAppResponse{}
-	raw, err := s.client.WithSlsPopClient(func(client *slsPop.Client) (interface{}, error) {
-		return client.DescribeApp(request)
-	})
-
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"AppNotExist"}) {
-			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ = raw.(*slsPop.DescribeAppResponse)
-	return response, nil
-}
-
 func GetCharTitile(project, dashboard, char string, client *sls.Client) string {
 	board, err := client.GetDashboard(project, dashboard)
 	// If the query fails to ignore the error, return the original value.
@@ -606,7 +586,7 @@ func (s *LogService) DescribeLogDashboard(id string) (*sls.Dashboard, error) {
 	projectName, dashboardName := parts[0], parts[1]
 	var requestInfo *sls.Client
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := s.client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return slsClient.GetDashboard(projectName, dashboardName)
 		})

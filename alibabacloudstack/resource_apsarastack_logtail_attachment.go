@@ -43,7 +43,7 @@ func resourceAlibabacloudStackLogtailAttachmentCreate(d *schema.ResourceData, me
 	config_name := d.Get("logtail_config_name").(string)
 	group_name := d.Get("machine_group_name").(string)
 	var requestInfo *sls.Client
-	raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+	raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 		requestInfo = slsClient
 		return nil, slsClient.ApplyConfigToMachineGroup(project, config_name, group_name)
 	})
@@ -94,7 +94,7 @@ func resourceAlibabacloudStackLogtailAttachmentDelete(d *schema.ResourceData, me
 		return errmsgs.WrapError(err)
 	}
 	var requestInfo *sls.Client
-	raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+	raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 		requestInfo = slsClient
 		return nil, slsClient.RemoveConfigFromMachineGroup(parts[0], parts[1], parts[2])
 	})

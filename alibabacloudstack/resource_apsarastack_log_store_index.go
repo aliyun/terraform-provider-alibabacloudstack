@@ -285,7 +285,7 @@ func resourceAlibabacloudStackLogStoreIndexUpdate(d *schema.ResourceData, meta i
 	if update {
 		var requestInfo *sls.Client
 		if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-			raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+			raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 				requestInfo = slsClient
 				return nil, slsClient.UpdateIndex(parts[0], parts[1], *index)
 			})
@@ -329,7 +329,7 @@ func resourceAlibabacloudStackLogStoreIndexDelete(d *schema.ResourceData, meta i
 	}
 	var requestInfo *sls.Client
 	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.DeleteIndex(parts[0], parts[1])
 		})

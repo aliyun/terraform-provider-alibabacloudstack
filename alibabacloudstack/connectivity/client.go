@@ -799,13 +799,13 @@ func (client *AlibabacloudStackClient) WithOssBucketByName(bucketName string, do
 	})
 }
 
-func (client *AlibabacloudStackClient) WithSlsClient(do func(*sls.Client) (interface{}, error)) (interface{}, error) {
+func (client *AlibabacloudStackClient) WithSlsDataClient(do func(*sls.Client) (interface{}, error)) (interface{}, error) {
 	goSdkMutex.Lock()
 	defer goSdkMutex.Unlock()
 
 	// Initialize the LOG client if necessary
 	if client.logconn == nil {
-		endpoint := client.Config.Endpoints[SLSCode]
+		endpoint := client.Config.Endpoints[SlSDataCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("unable to initialize the log client: endpoint or domain is not provided for log service")
 		}
@@ -820,26 +820,13 @@ func (client *AlibabacloudStackClient) WithSlsClient(do func(*sls.Client) (inter
 			// AccessKeySecret: client.Config.OrganizationSecretKey,
 			AccessKeyID:     client.Config.AccessKey,
 			AccessKeySecret: client.Config.SecretKey,
-			Endpoint:        client.Config.Endpoints[SLSCode],
+			Endpoint:        client.Config.Endpoints[SlSDataCode],
 			SecurityToken:   client.Config.SecurityToken,
 			UserAgent:       client.getUserAgent(),
 		}
 	}
 
 	return do(client.logconn)
-}
-func (client *AlibabacloudStackClient) WithSlsPopClient(do func(*slsPop.Client) (interface{}, error)) (interface{}, error) {
-	if client.logpopconn == nil {
-		conn, error := client.WithProductSDKClient(SLSCode)
-		if error != nil {
-			return nil, error
-		}
-		client.logpopconn = &slsPop.Client{
-			Client: *conn,
-		}
-	}
-
-	return do(client.logpopconn)
 }
 
 func (client *AlibabacloudStackClient) WithAlikafkaClient(do func(*alikafka.Client) (interface{}, error)) (interface{}, error) {
@@ -1181,6 +1168,7 @@ func (client *AlibabacloudStackClient) NewCommonRequest(method string, popcode s
 	} else {
 		request.Scheme = "http"
 	}
+	request.Method = method
 	request.RegionId = client.RegionId
 	request.Headers = client.defaultHeaders(popcode)
 	request.QueryParams = client.defaultQueryParams()
