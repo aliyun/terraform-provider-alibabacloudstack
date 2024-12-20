@@ -179,7 +179,7 @@ resource "alibabacloudstack_instance" "default" {
   image_id = "${data.alibabacloudstack_images.default.images.0.id}"
   availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   system_disk_category = "cloud_ssd"
-  instance_type = "${local.instance_type_id}"
+  instance_type = "${local.default_instance_type_id}"
 
   security_groups = ["${alibabacloudstack_security_group.default.id}"]
   instance_name = "${var.name}"
@@ -238,7 +238,7 @@ resource "alibabacloudstack_instance" "default" {
   image_id = "${data.alibabacloudstack_images.default.images.0.id}"
   availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   system_disk_category = "cloud_ssd"
-  instance_type = "${local.instance_type_id}"
+  instance_type = "${local.default_instance_type_id}"
 
   security_groups = ["${alibabacloudstack_security_group.default.id}"]
   instance_name = "${var.name}"

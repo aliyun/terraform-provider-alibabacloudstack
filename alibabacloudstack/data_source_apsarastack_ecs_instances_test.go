@@ -26,36 +26,12 @@ func TestAccAlibabacloudStackInstancesDataSourceBasic(t *testing.T) {
 	})
 }
 
-const testAccCheckAlibabacloudStackInstancesDataSource = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + `
+const testAccCheckAlibabacloudStackInstancesDataSource = ECSInstanceCommonTestCase + `
 variable "name" {
   default = "Tf-EcsInstanceDataSource"
 }
 
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "172.16.0.0/16"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name = "${var.name}"
-}
-resource "alibabacloudstack_security_group" "default" {
-  name = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-resource "alibabacloudstack_instance" "default" {
-  image_id = data.alibabacloudstack_images.default.images.0.id
-  instance_type = "ecs.e4.customize.undjfvanfg"
-  instance_name = "${var.name}"
-  internet_max_bandwidth_out = "10"
-  security_groups = "${alibabacloudstack_security_group.default.*.id}"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  system_disk_category = "cloud_ssd"
-  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-}
 data "alibabacloudstack_instances" "default" {
-  ids = ["${alibabacloudstack_instance.default.id}"]
+  ids = ["${alibabacloudstack_ecs_instance.default.id}"]
 }
 `

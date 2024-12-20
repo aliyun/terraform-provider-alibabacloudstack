@@ -126,7 +126,7 @@ func testAccEssScalingRuleConfig(common string, rand int) string {
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${local.instance_type_id}"
+		instance_type = "${local.default_instance_type_id}"
 		security_group_id = "${alibabacloudstack_security_group.default.id}"
 		force_delete = "true"
 	}
@@ -155,7 +155,7 @@ func testAccEssScalingRuleUpdateAdjustmentType(common string, rand int) string {
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${local.instance_type_id}"
+		instance_type = "${local.default_instance_type_id}"
 		security_group_id = "${alibabacloudstack_security_group.default.id}"
 		force_delete = "true"
 	}
@@ -184,7 +184,7 @@ func testAccEssScalingRuleUpdateAdjustmentValue(common string, rand int) string 
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${local.instance_type_id}"
+		instance_type = "${local.default_instance_type_id}"
 		security_group_id = "${alibabacloudstack_security_group.default.id}"
 		force_delete = "true"
 	}
@@ -213,7 +213,7 @@ func testAccEssScalingRuleUpdateScalingRuleName(common string, rand int) string 
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${local.instance_type_id}"
+		instance_type = "${local.default_instance_type_id}"
 		security_group_id = "${alibabacloudstack_security_group.default.id}"
 		force_delete = "true"
 	}
@@ -243,7 +243,7 @@ func testAccEssScalingRuleUpdateCooldown(common string, rand int) string {
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${local.instance_type_id}"
+		instance_type = "${local.default_instance_type_id}"
 		security_group_id = "${alibabacloudstack_security_group.default.id}"
 		force_delete = "true"
 	}
@@ -273,7 +273,7 @@ func testAccEssScalingRuleConfigMulti(common string, rand int) string {
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${local.instance_type_id}"
+		instance_type = "${local.default_instance_type_id}"
 		security_group_id = "${alibabacloudstack_security_group.default.id}"
 		force_delete = "true"
 	}

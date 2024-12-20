@@ -786,7 +786,7 @@ data "alibabacloudstack_instance_types" "resizeable"{
 
 locals {
   resizeable_instance_ids = [for type_name, type in data.alibabacloudstack_instance_types.resizeable : type.instance_types.0.id if length(type.instance_types ) > 0 ]
-  resizeable_instance_id = length(local.resizeable_instance_ids ) > 0 ? local.resizeable_instance_ids[0]:  local.instance_type_id
+  resizeable_instance_id = length(local.resizeable_instance_ids ) > 0 ? local.resizeable_instance_ids[0]:  local.default_instance_type_id
 }
 `
 
@@ -1275,6 +1275,11 @@ resource "alibabacloudstack_ecs_instance" "default" {
   vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
   zone_id    = data.alibabacloudstack_zones.default.zones.0.id
   is_outdated          = false
+  lifecycle {
+    ignore_changes = [
+      instance_type
+    ]
+  }
 }
 
 `
