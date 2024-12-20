@@ -328,7 +328,7 @@ variable "name" {
 resource "alibabacloudstack_common_bandwidth_package" "default" {
   internet_charge_type = "%s"
   bandwidth = "10"
-  name = "${var.name}"
+  bandwidth_package_name = "${var.name}"
 }
 `, rand, internetChargeType)
 }
@@ -342,7 +342,7 @@ variable "name" {
 resource "alibabacloudstack_common_bandwidth_package" "default" {
   internet_charge_type = "%s"
   bandwidth = "10"
-  name = "${var.name}_change"
+  bandwidth_package_name = "${var.name}_change"
 }
 `, rand, internetChargeType)
 }
@@ -356,7 +356,7 @@ variable "name" {
 resource "alibabacloudstack_common_bandwidth_package" "default" {
   internet_charge_type = "%s"
   bandwidth = "10"
-  name = "${var.name}_change"
+  bandwidth_package_name = "${var.name}_change"
   description = "${var.name}_description"
 }
 `, rand, internetChargeType)
@@ -372,7 +372,7 @@ variable "name" {
 resource "alibabacloudstack_common_bandwidth_package" "default" {
   internet_charge_type = "%s"
   bandwidth = "20"
-  name = "${var.name}_change"
+  bandwidth_package_name = "${var.name}_change"
   description = "${var.name}_description"
 }
 `, rand, internetChargeType)
@@ -388,7 +388,7 @@ variable "name" {
 resource "alibabacloudstack_common_bandwidth_package" "default" {
   internet_charge_type = "%s"
   bandwidth = "20"
-  name = "${var.name}_all"
+  bandwidth_package_name = "${var.name}_all"
   description = "${var.name}_all"
 }
 `, rand, internetChargeType)
@@ -405,7 +405,7 @@ resource "alibabacloudstack_common_bandwidth_package" "default" {
   count = 10
   internet_charge_type = "%s"
   bandwidth = "10"
-  name = "${var.name}"
+  bandwidth_package_name = "${var.name}"
 }
 `, rand, internetChargeType)
 }

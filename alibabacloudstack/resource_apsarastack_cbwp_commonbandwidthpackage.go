@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"log"
 	"strconv"
 	"time"
 
@@ -31,18 +32,18 @@ func resourceAlibabacloudStackCommonBandwidthPackage() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(2, 256),
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use new field 'bandwidth_package_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'bandwidth_package_name' instead.",
 				ConflictsWith: []string{"bandwidth_package_name"},
 			},
 			"bandwidth_package_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 			"bandwidth": {
@@ -81,7 +82,7 @@ func resourceAlibabacloudStackCommonBandwidthPackageCreate(d *schema.ResourceDat
 	client.InitRpcRequest(*request.RpcRequest)
 
 	request.Bandwidth = requests.NewInteger(d.Get("bandwidth").(int))
-	request.Name = connectivity.GetResourceData(d,"bandwidth_package_name", "name").(string)
+	request.Name = connectivity.GetResourceData(d, "bandwidth_package_name", "name").(string)
 	request.Description = d.Get("description").(string)
 	request.InternetChargeType = d.Get("internet_charge_type").(string)
 	request.Ratio = requests.NewInteger(d.Get("ratio").(int))
@@ -162,11 +163,12 @@ func resourceAlibabacloudStackCommonBandwidthPackageUpdate(d *schema.ResourceDat
 		request.Name = connectivity.GetResourceData(d, "bandwidth_package_name", "name").(string)
 		update = true
 	}
-
+	log.Printf("111111111111111111111111111111")
 	if update {
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.ModifyCommonBandwidthPackageAttribute(request)
 		})
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		if err != nil {
 			errmsg := ""
 			if bresponse, ok := raw.(*vpc.ModifyCommonBandwidthPackageAttributeResponse); ok {
@@ -174,7 +176,6 @@ func resourceAlibabacloudStackCommonBandwidthPackageUpdate(d *schema.ResourceDat
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
 	if d.HasChange("bandwidth") {
