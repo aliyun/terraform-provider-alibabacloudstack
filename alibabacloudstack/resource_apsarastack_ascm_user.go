@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -49,6 +49,7 @@ func resourceAlibabacloudStackAscmUser() *schema.Resource {
 			"organization_id": {
 				Type:       schema.TypeString,
 				Optional:   true,
+				Computed:   true,
 				Deprecated: "Field 'organization_id' has been deprecated from provider version 1.0.32. Use the organization to which the current user belongs",
 			},
 			"user_id": {
@@ -90,18 +91,16 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 	if check.Data == nil {
 		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddUser", "")
 		mergeMaps(request.QueryParams, map[string]string{
-			"LoginName":        lname,
-			"DisplayName":      dname,
-			"CellphoneNum":     cellnum,
-			"MobileNationCode": mobnationcode,
-			"Email":            email,
-			"OrganizationId":   client.Department,
-			"LoginPolicyId":    fmt.Sprint(loginpolicyid),
+			"loginName":        lname,
+			"displayName":      dname,
+			"cellphoneNum":     cellnum,
+			"mobileNationCode": mobnationcode,
+			"email":            email,
+			"organizationId":   client.Department,
+			"loginPolicyId":    fmt.Sprint(loginpolicyid),
 		})
-		request.Headers["x-acs-content-type"] = "application/json"
-		request.Headers["Content-Type"] = "application/json"
 
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithAscmClient(func(ecsClient *sdk.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
 		addDebug("AddUser", raw, request, request.QueryParams)
@@ -135,80 +134,63 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lname := d.Get("login_name").(string)
-	var dname, cellnum, mobnationcode, email string
-	var loginpolicyid int
-	var roleIdList []string
-
-	if v, ok := d.GetOk("role_ids"); ok {
-		roleids := expandStringList(v.(*schema.Set).List())
-
-		for _, roleid := range roleids {
-			roleIdList = append(roleIdList, roleid)
-		}
-	}
+	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ModifyUserInformation", "")
+	update := false
 	if d.HasChange("display_name") {
-		dname = d.Get("display_name").(string)
+		update = true
+		request.QueryParams["displayName"] = d.Get("display_name").(string)
 	}
 	if d.HasChange("cellphone_number") {
-		cellnum = d.Get("cellphone_number").(string)
+		update = true
+		request.QueryParams["cellphoneNum"] = d.Get("cellphone_number").(string)
 	}
 	if d.HasChange("mobile_nation_code") {
-		mobnationcode = d.Get("mobile_nation_code").(string)
-	} else {
-		mobnationcode = d.Get("mobile_nation_code").(string)
+		update = true
+		request.QueryParams["mobileNationCode"] = d.Get("mobile_nation_code").(string)
 	}
+
 	if d.HasChange("email") {
-		email = d.Get("email").(string)
+		update = true
+		request.QueryParams["email"] = d.Get("email").(string)
 	}
 	if d.HasChange("login_policy_id") {
-		loginpolicyid = d.Get("login_policy_id").(int)
+		update = true
+		request.QueryParams["loginPolicyId"] = fmt.Sprint(d.Get("login_policy_id").(int))
+		request.QueryParams["policyId"] = fmt.Sprint(d.Get("login_policy_id").(int))
 	}
+	if update {
+		request.QueryParams["loginName"] = lname
 
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ModifyUserInformation", "")
-	mergeMaps(request.QueryParams, map[string]string{
-		"loginName":        lname,
-		"display_name":     dname,
-		"cellphone_num":    cellnum,
-		"mobileNationCode": mobnationcode,
-		"email":            email,
-		"organization_id":  client.Department,
-		"loginPolicyId":    fmt.Sprint(loginpolicyid),
-		"policyId":         fmt.Sprint(loginpolicyid),
-	})
-	request.Headers["x-acs-content-type"] = "application/json"
-	request.Headers["Content-Type"] = "application/json"
+		raw, err := client.WithAscmClient(func(ecsClient *sdk.Client) (interface{}, error) {
+			return ecsClient.ProcessCommonRequest(request)
+		})
+		addDebug("ModifyUserInformation", raw, request, request.QueryParams)
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	addDebug("ModifyUserInformation", raw, request, request.QueryParams)
-
-	bresponse, ok := raw.(*responses.CommonResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		bresponse, ok := raw.(*responses.CommonResponse)
+		if err != nil || !bresponse.IsSuccess() {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "ModifyUserInformationRequestFailed", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "ModifyUserInformationRequestFailed", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	if !bresponse.IsSuccess() {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), bresponse)
+		if err != nil {
+			return errmsgs.WrapError(err)
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "ModifyUserInformationFailed", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), bresponse)
-	if err != nil {
-		return errmsgs.WrapError(err)
 	}
 	if len(d.Get("role_ids").(*schema.Set).List()) > 0 {
+		role_ids := d.Get("role_ids").(*schema.Set).List()
+		roleIdList := make([]string, 0)
+		for _, role_id := range role_ids {
+			roleIdList = append(roleIdList, role_id.(string))
+		}
 		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ResetRolesForUserByLoginName", "")
 		requeststring, err := json.Marshal(roleIdList)
 		request.QueryParams["loginName"] = lname
-		request.QueryParams["roleIdList"] = string(requeststring)
+		request.QueryParams["roleIdList"] = fmt.Sprint(requeststring)
 
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithAscmClient(func(ecsClient *sdk.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
 		})
 
@@ -252,7 +234,7 @@ func resourceAlibabacloudStackAscmUserRead(d *schema.ResourceData, meta interfac
 	d.Set("email", object.Data[0].Email)
 	d.Set("mobile_nation_code", object.Data[0].MobileNationCode)
 	d.Set("cellphone_number", object.Data[0].CellphoneNum)
-	d.Set("organization_id", strconv.Itoa(object.Data[0].Organization.ID))
+	d.Set("organization_id", client.Department)
 	d.Set("login_policy_id", object.Data[0].LoginPolicy.ID)
 	var user_roles []string
 	for _, role := range object.Data[0].UserRoles {
@@ -271,7 +253,7 @@ func resourceAlibabacloudStackAscmUserRead(d *schema.ResourceData, meta interfac
 func resourceAlibabacloudStackAscmUserDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
-	var requestInfo *ecs.Client
+	var requestInfo *sdk.Client
 	check, err := ascmService.DescribeAscmUser(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsUserExist", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -284,7 +266,7 @@ func resourceAlibabacloudStackAscmUserDelete(d *schema.ResourceData, meta interf
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
 
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithAscmClient(func(csClient *sdk.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)
 		})
 
