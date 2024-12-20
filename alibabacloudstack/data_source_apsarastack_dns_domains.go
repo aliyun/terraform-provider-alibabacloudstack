@@ -6,7 +6,7 @@ import (
 	"regexp"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -75,8 +75,8 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 
 	var addDomains = DnsDomains{}
 	for {
-		raw, err := client.WithEcsClient(func(alidnsClient *ecs.Client) (interface{}, error) {
-			return alidnsClient.ProcessCommonRequest(request)
+		raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
+			return dnsClient.ProcessCommonRequest(request)
 		})
 		response, ok := raw.(*responses.CommonResponse)
 		if err != nil {

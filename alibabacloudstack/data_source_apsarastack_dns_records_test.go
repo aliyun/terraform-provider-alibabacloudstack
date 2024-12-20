@@ -33,21 +33,24 @@ func TestAccAlibabacloudStackDnsRecordDataSource(t *testing.T) {
 }
 
 const dataSourceAlibabacloudStackDnsRecord = `
+variable "name" {
+	default = "tf-testdnsrecordbasic-%d"
+}
 
 resource "alibabacloudstack_dns_domain" "default" {
- domain_name = "tf-testdnsrecordbasic-%d."
+ domain_name = "${var.name}."
 }
 resource "alibabacloudstack_dns_record" "default" {
  zone_id   = alibabacloudstack_dns_domain.default.domain_id
-lba_strategy = "ALL_RR",
- name = "testrecord"
+ lba_strategy = "ALL_RR"
+ name = "${var.name}"
  type        = "A"
  ttl         = 300
  rr_set      = ["192.168.2.4","192.168.2.7","10.0.0.4"]
 }
 
 data "alibabacloudstack_dns_records" "default"{
- zone_id         = alibabacloudstack_dns_record.default.zone_id
- name = alibabacloudstack_dns_record.default.name
+ zone_id    = alibabacloudstack_dns_record.default.zone_id
+ ids       = [alibabacloudstack_dns_record.default.record_id, ]
 }
 `
