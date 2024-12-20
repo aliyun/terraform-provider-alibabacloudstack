@@ -80,6 +80,7 @@ type AlibabacloudStackClient struct {
 	teaSdkConfig                 rpc.Config
 	accountId                    string
 	roleId                       int
+	ascmconn                     *sdk.Client
 	ecsconn                      *ecs.Client
 	accountIdMutex               sync.RWMutex
 	roleIdMutex                  sync.RWMutex
@@ -230,6 +231,17 @@ func (client *AlibabacloudStackClient) WithEcsClient(do func(*ecs.Client) (inter
 		}
 	}
 	return do(client.ecsconn)
+}
+
+func (client *AlibabacloudStackClient) WithAscmClient(do func(*sdk.Client) (interface{}, error)) (interface{}, error) {
+	var err error
+	if client.ascmconn == nil {
+		client.ascmconn, err = client.WithProductSDKClient(ASCMCode)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return do(client.ascmconn)
 }
 
 func (client *AlibabacloudStackClient) WithElasticsearchClient(do func(*elasticsearch.Client) (interface{}, error)) (interface{}, error) {
