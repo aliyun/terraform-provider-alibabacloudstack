@@ -33,7 +33,7 @@ func testSweepLogConfigs(region string) error {
 		"tf_testAcc",
 	}
 
-	raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+	raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 		return slsClient.ListProject()
 	})
 	if err != nil {
@@ -46,7 +46,7 @@ func testSweepLogConfigs(region string) error {
 		skip := true
 		for _, prefix := range prefixes {
 			if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-				cfNameList, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+				cfNameList, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 					cfNames, _, cfErr := slsClient.ListConfig(name, 0, 100)
 					return cfNames, cfErr
 				})
@@ -55,7 +55,7 @@ func testSweepLogConfigs(region string) error {
 				}
 				for _, cfName := range cfNameList.([]string) {
 					log.Printf("[INFO] Deleting Log config: %s", cfName)
-					_, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+					_, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 						return nil, slsClient.DeleteConfig(name, cfName)
 					})
 					if err != nil {
@@ -71,7 +71,7 @@ func testSweepLogConfigs(region string) error {
 			continue
 		}
 		log.Printf("[INFO] Deleting Log Project: %s", name)
-		_, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		_, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			return nil, slsClient.DeleteProject(name)
 		})
 		if err != nil {

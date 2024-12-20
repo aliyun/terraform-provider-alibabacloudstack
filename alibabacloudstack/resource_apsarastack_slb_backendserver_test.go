@@ -254,7 +254,7 @@ resource "alibabacloudstack_security_group" "group" {
 resource "alibabacloudstack_instance" "default" {
 	image_id = "${data.alibabacloudstack_images.default.images.0.id}"
 	availability_zone = data.alibabacloudstack_zones.slbbackendserver1.zones.0.id
-	instance_type = "${local.instance_type_id}"
+	instance_type = "${local.default_instance_type_id}"
 	system_disk_category = "cloud_efficiency"
 	count = "1"
 	security_groups = ["${alibabacloudstack_security_group.group.id}"]
@@ -280,7 +280,7 @@ resource "alibabacloudstack_network_interface" "default" {
 resource "alibabacloudstack_instance" "new" {
 	image_id = "${data.alibabacloudstack_images.default.images.0.id}"
 	availability_zone = data.alibabacloudstack_zones.slbbackendserver1.zones.0.id
-	instance_type = "${local.instance_type_id}"
+	instance_type = "${local.default_instance_type_id}"
 	count = "1"
 	system_disk_category = "cloud_efficiency"
 	security_groups = ["${alibabacloudstack_security_group.group.id}"]
@@ -327,7 +327,7 @@ resource "alibabacloudstack_security_group" "new" {
 }
 resource "alibabacloudstack_instance" "instance" {
   	image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-  	instance_type = "${local.instance_type_id}"
+  	instance_type = "${local.default_instance_type_id}"
   	instance_name = "${var.name}"
   	count = "2"
   	security_groups = "${alibabacloudstack_security_group.new.*.id}"

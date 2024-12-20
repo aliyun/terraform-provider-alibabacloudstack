@@ -87,7 +87,7 @@ resource "alibabacloudstack_security_group" "default" {
 }
 resource "alibabacloudstack_instance" "default" {
   image_id = data.alibabacloudstack_images.default.images.0.id
-  instance_type = local.instance_type_id
+  instance_type = local.default_instance_type_id
   instance_name = var.name
   security_groups = [alibabacloudstack_security_group.default.id]
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id

@@ -110,7 +110,7 @@ resource "alibabacloudstack_instance" "default" {
    security_groups = ["${alibabacloudstack_security_group.default.id}"]
    vswitch_id = "${alibabacloudstack_vswitch.default.id}"
    # series III
-   instance_type = "${local.instance_type_id}"
+   instance_type = "${local.default_instance_type_id}"
    internet_max_bandwidth_out = 5
    system_disk_category = "cloud_pperf"
    image_id = "${data.alibabacloudstack_images.default.images.0.id}"

@@ -67,7 +67,7 @@ func resourceAlibabacloudStackLogMachineGroupCreate(d *schema.ResourceData, meta
 	}
 	var requestInfo *sls.Client
 	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.CreateMachineGroup(d.Get("project").(string), params)
 		})
@@ -138,7 +138,7 @@ func resourceAlibabacloudStackLogMachineGroupUpdate(d *schema.ResourceData, meta
 			},
 		}
 		if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-			raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+			raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 				requestInfo = slsClient
 				return nil, slsClient.UpdateMachineGroup(parts[0], params)
 			})
@@ -173,7 +173,7 @@ func resourceAlibabacloudStackLogMachineGroupDelete(d *schema.ResourceData, meta
 	}
 	var requestInfo *sls.Client
 	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.DeleteMachineGroup(parts[0], parts[1])
 		})

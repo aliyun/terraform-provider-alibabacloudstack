@@ -9,7 +9,6 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -118,7 +117,7 @@ func TestAccAlibabacloudStackAdbDbCluster_basic(t *testing.T) {
 	}, "DescribeAdbDbCluster")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%sadbCluster%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackAdbDbClusterBasicDependence0)
 	resource.Test(t, resource.TestCase{
@@ -287,7 +286,7 @@ func TestAccAlibabacloudStackAdbDbCluster_flexible(t *testing.T) {
 	}, "DescribeAdbDbCluster")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(10000, 99999)
+	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%sadbCluster%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackAdbDbClusterBasicDependence1)
 	resource.Test(t, resource.TestCase{

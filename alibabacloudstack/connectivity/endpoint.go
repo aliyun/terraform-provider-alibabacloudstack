@@ -184,8 +184,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	//dns endpoint
 	DNSCode: PopEndpoint{
-		"dns.standard.api.{{.domain}}",
-		"dns.standard.api.{{.region}}.{{.domain}}",
+		"dns-control.pop.{{.domain}}",
+		"dns-control.pop.{{.region}}.{{.domain}}",
 	},
 	//drds endpoint
 	DRDSCode: PopEndpoint{
@@ -227,6 +227,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 // sls没有pop接口
 //		"sls-vpc.{{.region}}.{{.domain}}",
 //		"sls-vpc.{{.region}}.{{.domain}}",
+
+	SlSDataCode: PopEndpoint{
+		"data.{{.region}}.sls-pub.{{.domain}}", 
+		"data.{{.region}}.sls-pub.{{.domain}}",
+	},
 
 	DmsEnterpriseCode: PopEndpoint{"", ""},
 	OSSCode: PopEndpoint{
@@ -289,7 +294,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	KmsCode:     PopEndpoint{"", ""},
 	CDNCode:     PopEndpoint{"", ""},
 	QuickbiCode: PopEndpoint{"", ""},
-	OssDataCode: PopEndpoint{"", ""},
+	OssDataCode: PopEndpoint{
+		"oss-{{.region}}.{{.domain}}",
+		"oss-{{.region}}.{{.domain}}",
+	},
 	BssDataCode: PopEndpoint{"", ""},
 	OTSCode:     PopEndpoint{"", ""},
 }

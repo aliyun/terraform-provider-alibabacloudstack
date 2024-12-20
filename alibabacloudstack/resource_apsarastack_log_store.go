@@ -157,7 +157,7 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 		}
 	}
 	err := resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			return nil, slsClient.CreateLogStoreV2(d.Get("project").(string), logstore)
 		})
 		addDebug("CreateLogStoreV2", raw, logstore, map[string]interface{}{
@@ -283,7 +283,7 @@ func resourceAlibabacloudStackLogStoreUpdate(d *schema.ResourceData, meta interf
 		store.AppendMeta = d.Get("append_meta").(bool)
 		store.AutoSplit = d.Get("auto_split").(bool)
 		var requestInfo *sls.Client
-		raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+		raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 			requestInfo = slsClient
 			return nil, slsClient.UpdateLogStoreV2(parts[0], store)
 		})
@@ -308,7 +308,7 @@ func resourceAlibabacloudStackLogStoreDelete(d *schema.ResourceData, meta interf
 	name := d.Get("name").(string)
 	project := d.Get("project").(string)
 	var requestInfo *sls.Client
-	raw, err := client.WithSlsClient(func(slsClient *sls.Client) (interface{}, error) {
+	raw, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
 		return nil, slsClient.DeleteLogStore(project, name)
 	})
 	addDebug("DeleteLogStore", raw, requestInfo, map[string]interface{}{

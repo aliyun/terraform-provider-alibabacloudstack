@@ -6,7 +6,7 @@ import (
 	"regexp"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -97,8 +97,8 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 	response := DnsRecord{}
 
 	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+		raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
+			return dnsClient.ProcessCommonRequest(request)
 		})
 		log.Printf(" response of raw ObtainGlobalAuthRecordList : %s", raw)
 

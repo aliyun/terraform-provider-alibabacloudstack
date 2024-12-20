@@ -60,7 +60,7 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprint("tf-testdnsrecordbasic11.")
+	name := fmt.Sprintf("tf-testdnsrecordbasic%d.", getAccTestRandInt(10000, 99999))
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccDnsRecordConfigBasicConfigBasic)
 
 	ResourceTest(t, resource.TestCase{

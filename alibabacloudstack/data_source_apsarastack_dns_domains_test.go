@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
 )
@@ -13,7 +14,7 @@ func TestAccAlibabacloudStackDnsDomainDataSource(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: dataSourceAlibabacloudStackDnsDomain,
+				Config: dataSourceAlibabacloudStackDnsDomain(),
 				Check: resource.ComposeTestCheckFunc(
 
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_dns_domains.default"),
@@ -25,13 +26,14 @@ func TestAccAlibabacloudStackDnsDomainDataSource(t *testing.T) {
 	})
 }
 
-const dataSourceAlibabacloudStackDnsDomain = `
+func dataSourceAlibabacloudStackDnsDomain () string {
+	return  fmt.Sprintf(`
 
 resource "alibabacloudstack_dns_domain" "default" {
- domain_name = "testdummy11."
+ domain_name = "testdummy%d."
 }
 data "alibabacloudstack_dns_domains" "default"{
  domain_name  = alibabacloudstack_dns_domain.default.domain_name
-}
+}`, getAccTestRandInt(10000, 99999))
 
-`
+}

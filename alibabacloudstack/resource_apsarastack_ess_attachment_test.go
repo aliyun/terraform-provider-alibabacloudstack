@@ -7,13 +7,12 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccalibabacloudstackdEssAttachment_update(t *testing.T) {
-	rand := acctest.RandIntRange(1000, 999999)
+	rand := getAccTestRandInt(1000, 999999)
 	var v ess.ScalingGroup
 	resourceId := "alibabacloudstack_ess_attachment.default"
 	basicMap := map[string]string{

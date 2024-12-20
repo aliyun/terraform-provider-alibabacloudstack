@@ -10,6 +10,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 )
 
 func resourceAlibabacloudStackDnsDomain() *schema.Resource {
@@ -70,7 +71,7 @@ func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta inter
 	if check == nil || len(check.Data) == 0 {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "AddGlobalZone", "")
 		request.QueryParams["Name"] = DomainName
-		raw, err := client.WithEcsClient(func(dnsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
 			return dnsClient.ProcessCommonRequest(request)
 		})
 		if err != nil {
@@ -151,8 +152,8 @@ func resourceAlibabacloudStackDnsDomainUpdate(d *schema.ResourceData, meta inter
 		request.QueryParams["Name"] = did[0]
 		request.QueryParams["Id"] = did[1]
 		request.QueryParams["Remark"] = desc
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+		raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
+			return dnsClient.ProcessCommonRequest(request)
 		})
 		log.Printf(" response of raw UpdateGlobalZoneRemark : %s", raw)
 
@@ -186,8 +187,8 @@ func resourceAlibabacloudStackDnsDomainDelete(d *schema.ResourceData, meta inter
 	if len(check.Data) != 0 {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DeleteGlobalZone", "")
 		request.QueryParams["Id"] = did[1]
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
+		raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
+			return dnsClient.ProcessCommonRequest(request)
 		})
 		if err != nil {
 			errmsg := ""

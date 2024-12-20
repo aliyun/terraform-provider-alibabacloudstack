@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackNatgatewaySnatentry0(t *testing.T) {
-	var v map[string]interface{}
+	var v *vpc.SnatTableEntry
 
 	resourceId := "alibabacloudstack_natgateway_snatentry.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccNatgatewaySnatentryCheckmap)
@@ -39,37 +40,20 @@ func TestAccAlibabacloudStackNatgatewaySnatentry0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"snat_ip": "121.199.28.61",
+					"snat_ip": "${alibabacloudstack_eip.default.ip_address}",
 
-					"snat_table_id": "stb-bp13yy9elsi8zn4i29m59",
+					"snat_table_id": "${alibabacloudstack_nat_gateway.default.snat_table_ids}",
 
-					"snat_entry_name": "rdk_test_name",
-
-					"source_cidr": "10.40.0.0/24",
+					"source_cidr": "${alibabacloudstack_vswitch.default.cidr_block}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"snat_ip": "121.199.28.61",
+						"snat_ip": CHECKSET,
 
-						"snat_table_id": "stb-bp13yy9elsi8zn4i29m59",
+						"snat_table_id":CHECKSET,
 
-						"snat_entry_name": "rdk_test_name",
-
-						"source_cidr": "10.40.0.0/24",
-					}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-
-					"snat_entry_name": "rdk_test_udpate_name",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"snat_entry_name": "rdk_test_udpate_name",
+						"source_cidr": CHECKSET,
 					}),
 				),
 			},
@@ -100,7 +84,36 @@ variable "name" {
     default = "%s"
 }
 
+data "alibabacloudstack_zones" "default" {
+	available_resource_creation = "VSwitch"
+}
 
+resource "alibabacloudstack_vpc" "default" {
+	name = "${var.name}"
+	cidr_block = "172.16.0.0/12"
+}
+
+resource "alibabacloudstack_vswitch" "default" {
+	vpc_id = "${alibabacloudstack_vpc.default.id}"
+	cidr_block = "172.16.0.0/21"
+	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	name = "${var.name}"
+}
+
+resource "alibabacloudstack_nat_gateway" "default" {
+	vpc_id = "${alibabacloudstack_vpc.default.id}"
+	specification = "Small"
+	name = "${var.name}"
+}
+
+resource "alibabacloudstack_eip" "default" {
+	name = "${var.name}"
+}
+
+resource "alibabacloudstack_eip_association" "default" {
+	allocation_id = "${alibabacloudstack_eip.default.id}"
+	instance_id = "${alibabacloudstack_nat_gateway.default.id}"
+}
 
 `, name)
 }

@@ -41,7 +41,7 @@ func TestAccAlibabacloudStackProviderEcs(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":        "${data.alibabacloudstack_images.default.images.0.id}",
 					"security_groups": []string{"${alibabacloudstack_security_group.default.0.id}"},
-					"instance_type":   "${local.instance_type_id}",
+					"instance_type":   "${local.default_instance_type_id}",
 
 					"availability_zone":             "${data.alibabacloudstack_instance_types.default.instance_types.0.availability_zones.0}",
 					"system_disk_category":          "cloud_efficiency",

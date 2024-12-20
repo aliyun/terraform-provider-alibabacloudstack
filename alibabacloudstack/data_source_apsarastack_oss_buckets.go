@@ -105,10 +105,10 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 
 		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		mergeMaps(request.QueryParams, map[string]string{
-			"AccountInfo":     "123456",
+			"AccountInfo":      "123456",
 			"SignatureVersion": "1.0",
-			"OpenApiAction":   "GetService",
-			"ProductName":     "oss",
+			"OpenApiAction":    "GetService",
+			"ProductName":      "oss",
 		})
 
 		var bucketList = &BucketList{}
@@ -139,9 +139,9 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 
 		for _, k := range bucketList.Data.ListAllMyBucketsResult.Buckets.Bucket {
 			allBuckets = append(allBuckets, oss.BucketProperties{
-				XMLName:  xml.Name{},
-				Name:     k.Name,
-				Location: k.Location,
+				XMLName:          xml.Name{},
+				Name:             k.Name,
+				Location:         k.Location,
 				StorageClass:     k.StorageClass,
 				CreationDate:     k.CreationDate,
 				Extranetendpoint: k.ExtranetEndpoint,
@@ -176,7 +176,7 @@ func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []oss.BucketPr
 	var names []string
 	for _, bucket := range buckets {
 		mapping := map[string]interface{}{
-			"id":				 bucket.Name,
+			"id":                bucket.Name,
 			"name":              bucket.Name,
 			"location":          bucket.Location,
 			"storage_class":     bucket.StorageClass,
