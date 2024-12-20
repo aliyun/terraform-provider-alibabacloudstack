@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	slsPop "github.com/aliyun/alibaba-cloud-sdk-go/services/sls"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -46,7 +46,7 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	request.QueryParams["projectName"] = name
 	request.QueryParams["Description"] = d.Get("description").(string)
 
-	raw, err := client.WithEcsClient(func(alidnsClient *ecs.Client) (interface{}, error) {
+	raw, err := client.WithSlsClient(func(alidnsClient *slsPop.Client) (interface{}, error) {
 		return alidnsClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.BaseResponse)
@@ -101,7 +101,7 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 		request.QueryParams["ProjectName"] = name
 		request.QueryParams["description"] = d.Get("description").(string)
 
-		raw, err := client.WithEcsClient(func(slsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithSlsClient(func(slsClient *slsPop.Client) (interface{}, error) {
 			return slsClient.ProcessCommonRequest(request)
 		})
 		bresponse, ok := raw.(*responses.BaseResponse)
@@ -126,7 +126,7 @@ func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta inte
 	request.QueryParams["ProjectName"] = name
 
 	err := resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithEcsClient(func(slsClient *ecs.Client) (interface{}, error) {
+		raw, err := client.WithSlsClient(func(slsClient *slsPop.Client) (interface{}, error) {
 			return slsClient.ProcessCommonRequest(request)
 		})
 		bresponse, ok := raw.(*responses.BaseResponse)
