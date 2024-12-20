@@ -1291,11 +1291,18 @@ func GetResourceData(d *schema.ResourceData, keys ...string) interface{} {
 }
 
 func GetResourceDataOk(d *schema.ResourceData, keys ...string) (interface{}, bool) {
-
-	for _, key := range keys {
-		value, ok := d.GetOk(key)
-		if ok {
-			return value, true
+	if d.IsNewResource() {
+		for _, key := range keys {
+			value, ok := d.GetOk(key)
+			if ok {
+				return value, true
+			}
+		}
+	} else {
+		for _, key := range keys {
+			if d.HasChange(key) {
+				return d.Get(key), true
+			}
 		}
 	}
 	return d.GetOk(keys[0])
