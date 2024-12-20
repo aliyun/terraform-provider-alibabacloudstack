@@ -2,7 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	
+
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
@@ -120,15 +120,26 @@ func testAccEssScalingRuleConfig(common string, rand int) string {
 		min_size = 1
 		max_size = 1
 		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}
+
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
+
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${local.default_instance_type_id}"
-		security_group_id = "${alibabacloudstack_security_group.default.id}"
-		force_delete = "true"
+	scaling_group_id =   "${alibabacloudstack_ess_scaling_group.default.id}"
+	image_id =           "${data.alibabacloudstack_images.default.images.0.id}"
+	instance_type =      ${local.default_instance_type_id}"
+	security_group_ids = ["${alibabacloudstack_ecs_securitygroup.default.id}"]
+	zone_id =            "${data.alibabacloudstack_zones.default.zones.0.id}"
+	deployment_set_id =  "${alibabacloudstack_ecs_deployment_set.default.id}"
+	force_delete =       true
 	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
@@ -149,15 +160,32 @@ func testAccEssScalingRuleUpdateAdjustmentType(common string, rand int) string {
 		min_size = 1
 		max_size = 1
 		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+<<<<<<< HEAD
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
 		instance_type = "${local.default_instance_type_id}"
 		security_group_id = "${alibabacloudstack_security_group.default.id}"
 		force_delete = "true"
+=======
+		scaling_group_id =   "${alibabacloudstack_ess_scaling_group.default.id}",
+		image_id =           "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type =      "ecs.n4.large"
+		security_group_ids = ["${alibabacloudstack_ess_scaling_group.default.id}"]
+		zone_id =            "${data.alibabacloudstack_zones.default.zones.0.id}"
+		deployment_set_id =  "${alibabacloudstack_ecs_deployment_set.default.id}"
+		force_delete =       true
+>>>>>>> branch 'rebase_add_testcase_code' of git@gitlab.alibaba-inc.com:apsarastack-cross-platform/terraform-provider-apsarastack.git
 	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
@@ -178,15 +206,32 @@ func testAccEssScalingRuleUpdateAdjustmentValue(common string, rand int) string 
 		min_size = 1
 		max_size = 1
 		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+<<<<<<< HEAD
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
 		instance_type = "${local.default_instance_type_id}"
 		security_group_id = "${alibabacloudstack_security_group.default.id}"
 		force_delete = "true"
+=======
+		scaling_group_id =   "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id =           "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type =      "ecs.n4.large"
+		security_group_ids = ["${alibabacloudstack_ess_scaling_group.default.id}"]
+		zone_id =            "${data.alibabacloudstack_zones.default.zones.0.id}"
+		deployment_set_id =  "${alibabacloudstack_ecs_deployment_set.default.id}"
+		force_delete =       true
+>>>>>>> branch 'rebase_add_testcase_code' of git@gitlab.alibaba-inc.com:apsarastack-cross-platform/terraform-provider-apsarastack.git
 	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
@@ -207,15 +252,32 @@ func testAccEssScalingRuleUpdateScalingRuleName(common string, rand int) string 
 		min_size = 1
 		max_size = 1
 		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+<<<<<<< HEAD
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
 		instance_type = "${local.default_instance_type_id}"
 		security_group_id = "${alibabacloudstack_security_group.default.id}"
 		force_delete = "true"
+=======
+		scaling_group_id =   "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id =           "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type =      "ecs.n4.large"
+		security_group_ids = ["${alibabacloudstack_ess_scaling_group.default.id}"]
+		zone_id =            "${data.alibabacloudstack_zones.default.zones.0.id}"
+		deployment_set_id =  "${alibabacloudstack_ecs_deployment_set.default.id}"
+		force_delete =       true
+>>>>>>> branch 'rebase_add_testcase_code' of git@gitlab.alibaba-inc.com:apsarastack-cross-platform/terraform-provider-apsarastack.git
 	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
@@ -237,15 +299,32 @@ func testAccEssScalingRuleUpdateCooldown(common string, rand int) string {
 		min_size = 1
 		max_size = 1
 		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+<<<<<<< HEAD
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
 		instance_type = "${local.default_instance_type_id}"
 		security_group_id = "${alibabacloudstack_security_group.default.id}"
 		force_delete = "true"
+=======
+		scaling_group_id =   "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id =           "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type =      "ecs.n4.large"
+		security_group_ids = ["${alibabacloudstack_ess_scaling_group.default.id}"]
+		zone_id =            "${data.alibabacloudstack_zones.default.zones.0.id}"
+		deployment_set_id =  "${alibabacloudstack_ecs_deployment_set.default.id}"
+		force_delete =       true
+>>>>>>> branch 'rebase_add_testcase_code' of git@gitlab.alibaba-inc.com:apsarastack-cross-platform/terraform-provider-apsarastack.git
 	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
@@ -267,15 +346,32 @@ func testAccEssScalingRuleConfigMulti(common string, rand int) string {
 		min_size = 1
 		max_size = 1
 		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 		removal_policies = ["OldestInstance", "NewestInstance"]
 	}
+		resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+<<<<<<< HEAD
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
 		instance_type = "${local.default_instance_type_id}"
 		security_group_id = "${alibabacloudstack_security_group.default.id}"
 		force_delete = "true"
+=======
+		scaling_group_id =   "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id =           "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type =      "ecs.n4.large"
+		security_group_ids = ["${alibabacloudstack_ess_scaling_group.default.id}"]
+		zone_id =            "${data.alibabacloudstack_zones.default.zones.0.id}"
+		deployment_set_id =  "${alibabacloudstack_ecs_deployment_set.default.id}"
+		force_delete =       true
+>>>>>>> branch 'rebase_add_testcase_code' of git@gitlab.alibaba-inc.com:apsarastack-cross-platform/terraform-provider-apsarastack.git
 	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		count = 10
@@ -296,7 +392,7 @@ func testAccEssTargetTrackingScalingRuleConfig(common string, rand int) string {
 		min_size = 1
 		max_size = 1
 		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
@@ -316,7 +412,7 @@ func testAccEssStepScalingRuleConfig(common string, rand int) string {
 		min_size = 1
 		max_size = 1
 		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"

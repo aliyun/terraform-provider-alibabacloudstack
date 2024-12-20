@@ -59,8 +59,8 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Basic", "Cluster", "basic", "cluster"}, false),
 			},
 			"db_cluster_class": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
 				Deprecated: "It duplicates with attribute db_node_class and is deprecated from 1.121.2.",
 			},
 			"storage_resource": {
@@ -80,16 +80,16 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"3.0"}, false),
 				Default:      "3.0",
 			},
-			// "cluster_type": {
-			// 	Type:         schema.TypeString,
-			// 	Required:     true,
-			// 	ValidateFunc: validation.StringInSlice([]string{"analyticdb", "AnalyticdbOnPanguHybrid", "AnalyticdbOnPanguSSD"}, false),
-			// },
-			// "cpu_type": {
-			// 	Type:         schema.TypeString,
-			// 	Required:     true,
-			// 	ValidateFunc: validation.StringInSlice([]string{"intel", "hygon"}, false),
-			// },
+			"cluster_type": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"analyticdb", "AnalyticdbOnPanguHybrid", "AnalyticdbOnPanguSSD"}, false),
+			},
+			"cpu_type": {
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"intel", "hygon"}, false),
+			},
 			"db_node_class": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -147,7 +147,7 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 				Computed:      true,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringInSlice([]string{"PayAsYouGo", "Subscription"}, false),
-				Deprecated: "Field 'payment_type' is deprecated and will be removed in a future release. Please use new field 'pay_type' instead.",
+				Deprecated:    "Field 'payment_type' is deprecated and will be removed in a future release. Please use new field 'pay_type' instead.",
 				ConflictsWith: []string{"pay_type"},
 			},
 			"pay_type": {
@@ -195,17 +195,17 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 				ForceNew: true,
 			},
 			"instance_inner_connection": {
-				Type: schema.TypeString,
+				Type:       schema.TypeString,
 				Deprecated: "Field 'instance_inner_connection' is deprecated and will be removed in a future release. Please use new field 'connection_string' instead.",
-				Computed: true,
+				Computed:   true,
 			},
 			"instance_inner_port": {
-				Type: schema.TypeString,
+				Type:       schema.TypeString,
 				Deprecated: "Field 'instance_inner_port' is deprecated and will be removed in a future release. Please use new field 'port' instead.",
-				Computed: true,
+				Computed:   true,
 			},
 			"instance_vpc_id": {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"connection_string": {
@@ -295,13 +295,14 @@ func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta in
 	}
 
 	request.DBClusterNetworkType = "Classic"
+	request.QueryParams["ClusterType"] = d.Get("cluster_type").(string)
+	request.QueryParams["CpuType"] = d.Get("cpu_type").(string)
 
 	vswitchId := Trim(d.Get("vswitch_id").(string))
 	if vswitchId != "" {
 		vpcService := VpcService{client}
 		//vsw, err := vpcService.DescribeVSwitchWithTeadsl(vswitchId)
 		var vsw, err = vpcService.DescribeVSwitch(vswitchId)
-		fmt.Sprint(vsw)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -366,7 +367,7 @@ func resourceAlibabacloudStackAdbDbClusterRead(d *schema.ResourceData, meta inte
 	//d.Set("elastic_io_resource", formatInt(object["ElasticIOResource"]))
 	d.Set("maintain_time", object["MaintainTime"])
 	d.Set("mode", object["Mode"])
-	paytype :=  convertAdbDBClusterPaymentTypeResponse(object["PayType"].(string))
+	paytype := convertAdbDBClusterPaymentTypeResponse(object["PayType"].(string))
 	connectivity.SetResourceData(d, paytype, "pay_type", "payment_type")
 	//d.Set("resource_group_id", object["ResourceGroupId"])
 	d.Set("status", object["DBClusterStatus"])
