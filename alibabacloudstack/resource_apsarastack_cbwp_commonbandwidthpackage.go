@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"log"
 	"strconv"
 	"time"
 
@@ -163,7 +162,6 @@ func resourceAlibabacloudStackCommonBandwidthPackageUpdate(d *schema.ResourceDat
 		request.Name = connectivity.GetResourceData(d, "bandwidth_package_name", "name").(string)
 		update = true
 	}
-	log.Printf("111111111111111111111111111111")
 	if update {
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.ModifyCommonBandwidthPackageAttribute(request)
