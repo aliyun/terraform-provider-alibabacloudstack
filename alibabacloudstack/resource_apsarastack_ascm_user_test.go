@@ -78,7 +78,7 @@ func testAccCheckAscm_UserDestroy(s *terraform.State) error { //destroy function
 	ascmService := AscmService{client}
 
 	for _, rs := range s.RootModule().Resources {
-		if true {
+		if rs.Type != "alibabacloudstack_ascm_user" {
 			continue
 		}
 		_, err := ascmService.DescribeAscmUser(rs.Primary.ID)
