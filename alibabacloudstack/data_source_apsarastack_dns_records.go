@@ -52,7 +52,7 @@ func dataSourceAlibabacloudStackDnsRecords() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"record_id": {
-							Type:     schema.TypeInt,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"zone_id": {
