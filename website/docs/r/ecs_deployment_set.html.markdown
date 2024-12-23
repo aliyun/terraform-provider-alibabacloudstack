@@ -33,7 +33,7 @@ resource "alibabacloudstack_ecs_deployment_set" "default" {
 
 The following arguments are supported:
 
-* `deployment_set_name` - (Optional) The name of the deployment set. The name must be 2 to 128 characters in length and can contain letters, digits, colons (:), underscores (_), and hyphens (-). It must start with a letter and cannot start with `http://` or `https://`.
+* `deployment_set_name` - (Optional, ForceNew) The name of the deployment set. The name must be 2 to 128 characters in length and can contain letters, digits, colons (:), underscores (_), and hyphens (-). It must start with a letter and cannot start with `http://` or `https://`.
 * `description` - (Optional) The description of the deployment set. The description must be 2 to 256 characters in length and cannot start with `http://` or `https://`.
 * `domain` - (Optional, ForceNew) The deployment domain. Valid values: `Default`.
 * `granularity` - (Optional, ForceNew) The deployment granularity. Valid values: `Host`.
