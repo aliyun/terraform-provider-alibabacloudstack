@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -50,7 +50,7 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 	namespaceName := d.Get("name").(string)
 	request := client.NewCommonRequest("POST", "cr", "2016-06-07", "CreateNamespace", "")
 	request.SetContentType("application/json")
-	request.SetContent([]byte("{}"))  // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
+	request.SetContent([]byte("{}")) // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
 	request.QueryParams["NamespaceName"] = namespaceName
 	request.QueryParams["Arch"] = "x86_64"
 	request.QueryParams["HaApsaraStack"] = "false"
@@ -58,8 +58,8 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 	request.QueryParams["Language"] = "zh"
 	request.QueryParams["x-acs-body"] = fmt.Sprintf("{\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%d\",\"%s\":\"%d\"}}",
 		"namespace", "NamespaceName", namespaceName, "namespace", namespaceName, "Language", "zh", "haApsaraStack", "false", "arch", "x86_64", "RegionId", "cn-wulan-env48-d01", "Department", 37, "ResourceGroup", 124)
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := client.WithCrClient(func(crClient *cr.Client) (interface{}, error) {
+		return crClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -86,8 +86,8 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 		request.QueryParams["Namespace"] = namespaceName
 		request.QueryParams["AutoCreate"] = fmt.Sprintf("%t", create)
 		request.QueryParams["DefaultVisibility"] = visibility
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+		raw, err := client.WithCrClient(func(crClient *cr.Client) (interface{}, error) {
+			return crClient.ProcessCommonRequest(request)
 		})
 		uresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
@@ -130,8 +130,8 @@ func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta int
 		request.QueryParams["Namespace"] = d.Id()
 		request.QueryParams["AutoCreate"] = fmt.Sprintf("%t", create)
 		request.QueryParams["DefaultVisibility"] = visibility
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+		raw, err := client.WithCrClient(func(crClient *cr.Client) (interface{}, error) {
+			return crClient.ProcessCommonRequest(request)
 		})
 		uresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
@@ -176,8 +176,8 @@ func resourceAlibabacloudStackCRNamespaceDelete(d *schema.ResourceData, meta int
 	request.Headers["x-acs-content-type"] = "application/json;charset=UTF-8"
 	request.Headers["Content-type"] = "application/json;charset=UTF-8"
 	request.QueryParams["Namespace"] = d.Id()
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := client.WithCrClient(func(crClient *cr.Client) (interface{}, error) {
+		return crClient.ProcessCommonRequest(request)
 	})
 	uresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {

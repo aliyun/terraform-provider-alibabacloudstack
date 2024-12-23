@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 
 	//	"github.com/aliyun/alibaba-cloud-sdk-go/services/cs"
@@ -738,6 +737,8 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	}
 
 	request := client.NewCommonRequest("POST", "Cs", "2015-12-15", "CreateCluster", "")
+	request.SetContentType("application/json")
+	request.SetContent([]byte("{}")) // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
 	var wvid, mvid, winst, minst, podid, inst string
 	var formatDisk, retainIname bool
 
@@ -824,7 +825,8 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	if attachinst == 1 {
 		if pod == 0 {
 			request.QueryParams = map[string]string{
-				"Action": "CreateCluster",
+				"Action":    "CreateCluster",
+				"SNatEntry": "false",
 				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
 					"Product", "Cs",
 					"os_type", OsType,
@@ -871,8 +873,8 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 			}
 		} else {
 			request.QueryParams = map[string]string{
-				"Action": "CreateCluster",
-
+				"Action":    "CreateCluster",
+				"SNatEntry": "false",
 				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
 					"Product", "Cs",
 					"os_type", OsType,
@@ -922,7 +924,8 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	} else {
 		if pod == 0 {
 			request.QueryParams = map[string]string{
-				"Action": "CreateCluster",
+				"Action":    "CreateCluster",
+				"SNatEntry": "false",
 				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
 					"Product", "Cs",
 					"os_type", OsType,
@@ -970,7 +973,8 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 			}
 		} else {
 			request.QueryParams = map[string]string{
-				"Action": "CreateCluster",
+				"Action":    "CreateCluster",
+				"SNatEntry": "false",
 				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
 					"Product", "Cs",
 					"os_type", OsType,
@@ -1019,8 +1023,6 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 			}
 		}
 	}
-	request.SetContent([]byte("{\"from\":\"terraform\"}"))
-	request.SetContentType(requests.Json)
 	var err error
 	err = nil
 	if err = invoker.Run(func() error {
