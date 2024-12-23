@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackEcsDeploymentSetsDataSource(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackEcsDeploymentSetsDataSourceName(rand, map[string]string{
 			"ids": `["${alibabacloudstack_ecs_deployment_set.default.id}"]`,
@@ -98,8 +96,8 @@ variable "name" {
 
 resource "alibabacloudstack_ecs_deployment_set" "default" {
   strategy            = "Availability"
-  domain              = "default"
-  granularity         = "host"
+  domain              = "Default"
+  granularity         = "Host"
   deployment_set_name = var.name
   description         = var.name
 }

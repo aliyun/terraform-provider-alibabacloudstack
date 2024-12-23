@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
@@ -30,6 +31,7 @@ func resourceAlibabacloudStackEcsDeploymentSet() *schema.Resource {
 			"deployment_set_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^([\w\\:\-]){2,128}$`), "\t\nThe name of the deployment set.\n\nThe name must be 2 to 128 characters in length and can contain letters, digits, colons (:), underscores (_), and hyphens (-)."),
 			},
 			"description": {
@@ -149,35 +151,30 @@ func resourceAlibabacloudStackEcsDeploymentSetRead(d *schema.ResourceData, meta 
 
 func resourceAlibabacloudStackEcsDeploymentSetUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	ecsService := EcsService{client}
-	if d.HasChange("tags") {
-		if err := ecsService.SetResourceTagsNew(d, "deployment_set"); err != nil {
-			return errmsgs.WrapError(err)
-		}
+	err := setTags(client, "deployment_set", d)
+	if err != nil {
+		return errmsgs.WrapError(err)
 	}
 
 	update := false
 	DeploymentSetId := d.Id()
-
-	var DeploymentSetName string
-	if d.HasChange("deployment_set_name") {
+	Description := ""
+	if d.HasChange("description") {
 		update = true
-		if v, ok := d.GetOk("deployment_set_name"); ok {
-			DeploymentSetName = fmt.Sprint(v.(string))
+		if v, ok := d.GetOk("description"); ok {
+			Description = fmt.Sprint(v.(string))
 		}
 	}
-	Description := d.Get("description").(string)
 	action := "ModifyDeploymentSetAttribute"
 
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", action, "")
 	request.QueryParams["DeploymentSetId"] = DeploymentSetId
-	request.QueryParams["DeploymentSetName"] = DeploymentSetName
 	request.QueryParams["Description"] = Description
 	if update {
 		response, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
 			return EcsClient.ProcessCommonRequest(request)
 		})
-		addDebug(action, response, request)
+		addDebug(action, response, request, request.QueryParams)
 		bresponse, ok := response.(*responses.CommonResponse)
 		if err != nil {
 			errmsg := ""
