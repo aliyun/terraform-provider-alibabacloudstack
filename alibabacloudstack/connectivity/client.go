@@ -284,6 +284,19 @@ func (client *AlibabacloudStackClient) WithEssClient(do func(*ess.Client) (inter
 	return do(client.essconn)
 }
 
+func (client *AlibabacloudStackClient) WithOnsClient(do func(*ons.Client) (interface{}, error)) (interface{}, error) {
+	if client.onsconn == nil {
+		conn, error := client.WithProductSDKClient(ONSCode)
+		if error != nil {
+			return nil, error
+		}
+		client.onsconn = &ons.Client{
+			Client: *conn,
+		}
+	}
+	return do(client.onsconn)
+}
+
 func (client *AlibabacloudStackClient) WithRkvClient(do func(*r_kvstore.Client) (interface{}, error)) (interface{}, error) {
 	if client.rkvconn == nil {
 		conn, error := client.WithProductSDKClient(KVSTORECode)

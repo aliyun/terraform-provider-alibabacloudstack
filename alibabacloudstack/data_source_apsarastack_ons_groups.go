@@ -6,7 +6,7 @@ import (
 	"regexp"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -93,8 +93,8 @@ func dataSourceAlibabacloudStackOnsGroupsRead(d *schema.ResourceData, meta inter
 	response := OnsGroup{}
 
 	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+		raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
+			return onsClient.ProcessCommonRequest(request)
 		})
 		log.Printf(" response of raw ConsoleGroupList : %s", raw)
 
@@ -127,13 +127,13 @@ func dataSourceAlibabacloudStackOnsGroupsRead(d *schema.ResourceData, meta inter
 			continue
 		}
 		mapping := map[string]interface{}{
-			"id":                  ons.ID,
-			"remark":              ons.Remark,
-			"instance_id":         ons.NamespaceID,
-			"group_id":            ons.GroupID,
-			"owner":               ons.Owner,
-			"independent_naming":  ons.IndependentNaming,
-			"create_time":         ons.CreateTime,
+			"id":                 ons.ID,
+			"remark":             ons.Remark,
+			"instance_id":        ons.NamespaceID,
+			"group_id":           ons.GroupID,
+			"owner":              ons.Owner,
+			"independent_naming": ons.IndependentNaming,
+			"create_time":        ons.CreateTime,
 		}
 		ids = append(ids, string(rune(ons.ID)))
 		s = append(s, mapping)

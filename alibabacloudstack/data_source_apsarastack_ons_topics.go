@@ -6,7 +6,7 @@ import (
 	"regexp"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -103,8 +103,8 @@ func dataSourceAlibabacloudStackOnsTopicsRead(d *schema.ResourceData, meta inter
 	response := Topic{}
 
 	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+		raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
+			return onsClient.ProcessCommonRequest(request)
 		})
 		log.Printf(" response of raw ConsoleTopicList : %s", raw)
 

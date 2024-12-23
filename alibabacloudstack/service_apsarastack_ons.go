@@ -2,8 +2,9 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
@@ -13,7 +14,7 @@ type OnsService struct {
 }
 
 func (s *OnsService) DescribeOnsInstance(instanceid string) (response *OnsInstance, err error) {
-	var requestInfo *ecs.Client
+	var requestInfo *ons.Client
 
 	request := s.client.NewCommonRequest("POST", "Ons-inner", "2018-02-05", "ConsoleInstanceBaseInfo", "")
 	request.QueryParams["OnsRegionId"] = s.client.RegionId
@@ -21,8 +22,8 @@ func (s *OnsService) DescribeOnsInstance(instanceid string) (response *OnsInstan
 	request.QueryParams["InstanceId"] = instanceid
 
 	var resp = &OnsInstance{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
+		return onsClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -49,15 +50,15 @@ func (s *OnsService) DescribeOnsInstance(instanceid string) (response *OnsInstan
 }
 
 type TopicStruct struct {
-	Data       string `json:"Data"`
-	Message    string `json:"Message"`
-	RequestID  string `json:"RequestId"`
-	Success    bool   `json:"Success"`
-	Code       int    `json:"Code"`
+	Data      string `json:"Data"`
+	Message   string `json:"Message"`
+	RequestID string `json:"RequestId"`
+	Success   bool   `json:"Success"`
+	Code      int    `json:"Code"`
 }
 
 func (s *OnsService) DescribeOnsTopic(id string) (response *Topic, err error) {
-	var requestInfo *ecs.Client
+	var requestInfo *ons.Client
 	did, err := ParseResourceId(id, 2)
 	if err != nil {
 		return response, errmsgs.WrapError(err)
@@ -72,8 +73,8 @@ func (s *OnsService) DescribeOnsTopic(id string) (response *Topic, err error) {
 	request.QueryParams["InstanceId"] = InstanceId
 
 	var resp = &Topic{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
+		return onsClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -100,7 +101,7 @@ func (s *OnsService) DescribeOnsTopic(id string) (response *Topic, err error) {
 }
 
 func (s *OnsService) DescribeOnsGroup(id string) (response *OnsGroup, err error) {
-	var requestInfo *ecs.Client
+	var requestInfo *ons.Client
 	did, err := ParseResourceId(id, 2)
 	if err != nil {
 		return response, errmsgs.WrapError(err)
@@ -115,8 +116,8 @@ func (s *OnsService) DescribeOnsGroup(id string) (response *OnsGroup, err error)
 	request.QueryParams["InstanceId"] = InstanceId
 
 	var resp = &OnsGroup{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
+		return onsClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {

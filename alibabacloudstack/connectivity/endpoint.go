@@ -224,12 +224,12 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	//Sts endpoint
 	SLSCode: PopEndpoint{"", ""},
-// sls没有pop接口
-//		"sls-vpc.{{.region}}.{{.domain}}",
-//		"sls-vpc.{{.region}}.{{.domain}}",
+	// sls没有pop接口
+	//		"sls-vpc.{{.region}}.{{.domain}}",
+	//		"sls-vpc.{{.region}}.{{.domain}}",
 
 	SlSDataCode: PopEndpoint{
-		"data.{{.region}}.sls-pub.{{.domain}}", 
+		"data.{{.region}}.sls-pub.{{.domain}}",
 		"data.{{.region}}.sls-pub.{{.domain}}",
 	},
 
@@ -290,7 +290,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"hbase.{{.domain}}",
 		"hbase.{{.region}}.{{.domain}}",
 	},
-	ONSCode:     PopEndpoint{"", ""},
+	ONSCode: PopEndpoint{
+		"ons-biz.{{.region}}.{{.domain}}",
+		"ons-biz.{{.region}}.{{.domain}}",
+	},
 	KmsCode:     PopEndpoint{"", ""},
 	CDNCode:     PopEndpoint{"", ""},
 	QuickbiCode: PopEndpoint{"", ""},

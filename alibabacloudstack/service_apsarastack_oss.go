@@ -3,11 +3,12 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"strconv"
 	"time"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -71,33 +72,69 @@ func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoRes
 	return
 }
 
+func (s *OssService) ListOssBucket() (response BucketList, err error) {
+	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"AccountInfo":      "",
+		"SignatureVersion": "1.0",
+		"OpenApiAction":    "GetService",
+		"ProductName":      "oss",
+	})
+	bucketList := BucketList{}
+	raw, err := s.client.WithOssNewClient(func(ossClient *ecs.Client) (interface{}, error) {
+		return ossClient.ProcessCommonRequest(request)
+	})
+
+	bresponse, ok := raw.(*responses.CommonResponse)
+	if err != nil {
+		if ossNotFoundError(err) {
+			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
+		}
+		errmsg := ""
+		if ok {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		}
+		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+	}
+	addDebug("GetBucketInfo", raw, request)
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), bucketList)
+	if err != nil {
+		return response, errmsgs.WrapError(err)
+	}
+	if bucketList.Code != "200" || len(bucketList.Data.ListAllMyBucketsResult.Buckets.Bucket) < 1 {
+		return response, errmsgs.WrapError(err)
+	}
+	return bucketList, nil
+}
+
 type BucketList struct {
 	Data struct {
 		ListAllMyBucketsResult struct {
 			Buckets struct {
 				Bucket []struct {
-					Comment            string `json:"Comment"`
-					CreationDate       string `json:"CreationDate"`
-					Department         int64  `json:"Department"`
-					DepartmentName     string `json:"DepartmentName"`
-					ExtranetEndpoint   string `json:"ExtranetEndpoint"`
-					IntranetEndpoint   string `json:"IntranetEndpoint"`
-					Location           string `json:"Location"`
-					Name               string `json:"Name"`
-					ResourceGroup      int64  `json:"ResourceGroup"`
-					ResourceGroupName  string `json:"ResourceGroupName"`
-					StorageClass       string `json:"StorageClass"`
+					Comment           string `json:"Comment"`
+					CreationDate      string `json:"CreationDate"`
+					Department        int64  `json:"Department"`
+					DepartmentName    string `json:"DepartmentName"`
+					ExtranetEndpoint  string `json:"ExtranetEndpoint"`
+					IntranetEndpoint  string `json:"IntranetEndpoint"`
+					Location          string `json:"Location"`
+					Name              string `json:"Name"`
+					ResourceGroup     int64  `json:"ResourceGroup"`
+					ResourceGroupName string `json:"ResourceGroupName"`
+					StorageClass      string `json:"StorageClass"`
 				} `json:"Bucket"`
 			} `json:"Buckets"`
 			Owner struct{} `json:"Owner"`
 		} `json:"ListAllMyBucketsResult"`
 	} `json:"Data"`
-	Code        string `json:"code"`
-	Cost        int64  `json:"cost"`
-	Message     string `json:"message"`
+	Code         string `json:"code"`
+	Cost         int64  `json:"cost"`
+	Message      string `json:"message"`
 	PureListData bool   `json:"pureListData"`
-	Redirect    bool   `json:"redirect"`
-	Success     bool   `json:"success"`
+	Redirect     bool   `json:"redirect"`
+	Success      bool   `json:"success"`
 }
 
 func (s *OssService) WaitForOssBucket(id string, status Status, timeout int) error {
@@ -129,9 +166,9 @@ func (s *OssService) WaitForOssBucket(id string, status Status, timeout int) err
 func (s *OssService) HeadOssBucketObject(bucketName string, objectName string) error {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoApi", "")
 	mergeMaps(request.QueryParams, map[string]string{
-		"AppAction": "HeadObject",
-		"AppName":   "one-console-app-oss",
-		"Params":    "{\"region\":\"" + s.client.RegionId + "\",\"params\":{\"bucketName\":\"" + bucketName + "\",\"objectName\":\"" + objectName + "\"}}",
+		"AppAction":   "HeadObject",
+		"AppName":     "one-console-app-oss",
+		"Params":      "{\"region\":\"" + s.client.RegionId + "\",\"params\":{\"bucketName\":\"" + bucketName + "\",\"objectName\":\"" + objectName + "\"}}",
 		"AccountInfo": "",
 	})
 	request.Headers["x-acs-instanceid"] = bucketName
@@ -141,7 +178,7 @@ func (s *OssService) HeadOssBucketObject(bucketName string, objectName string) e
 	})
 
 	bresponse, ok := raw.(*responses.CommonResponse)
-	if err != nil || bresponse.GetHttpStatus() != 200{
+	if err != nil || bresponse.GetHttpStatus() != 200 {
 		errmsg := ""
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)

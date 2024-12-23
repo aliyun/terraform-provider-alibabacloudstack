@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -100,8 +100,8 @@ func resourceAlibabacloudStackOnsInstanceCreate(d *schema.ResourceData, meta int
 		"IndependentNaming": independentname,
 	})
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
+		return onsClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -243,8 +243,8 @@ func resourceAlibabacloudStackOnsInstanceUpdate(d *schema.ResourceData, meta int
 	check.Data.InstanceID = d.Id()
 
 	if attributeUpdate {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+		raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
+			return onsClient.ProcessCommonRequest(request)
 		})
 		bresponse, ok := raw.(*responses.CommonResponse)
 		log.Printf(" response of raw ConsoleInstanceUpdate : %s", raw)
@@ -267,7 +267,7 @@ func resourceAlibabacloudStackOnsInstanceUpdate(d *schema.ResourceData, meta int
 func resourceAlibabacloudStackOnsInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	onsService := OnsService{client}
-	var requestInfo *ecs.Client
+	var requestInfo *ons.Client
 	check, err := onsService.DescribeOnsInstance(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsInstanceExist", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -278,8 +278,8 @@ func resourceAlibabacloudStackOnsInstanceDelete(d *schema.ResourceData, meta int
 		request.QueryParams["OnsRegionId"] = client.RegionId
 		request.QueryParams["InstanceId"] = d.Id()
 
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
+		raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
+			return onsClient.ProcessCommonRequest(request)
 		})
 		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {

@@ -2,14 +2,15 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"log"
+	"regexp"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"regexp"
 )
 
 func dataSourceAlibabacloudStackOnsInstances() *schema.Resource {
@@ -108,8 +109,8 @@ func dataSourceAlibabacloudStackOnsInstancesRead(d *schema.ResourceData, meta in
 	response := OInstance{}
 
 	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+		raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
+			return onsClient.ProcessCommonRequest(request)
 		})
 		log.Printf(" response of raw ConsoleInstanceList : %s", raw)
 
@@ -143,17 +144,17 @@ func dataSourceAlibabacloudStackOnsInstancesRead(d *schema.ResourceData, meta in
 			continue
 		}
 		mapping := map[string]interface{}{
-			"id":                   item.InstanceID,
-			"instance_id":          item.InstanceID,
-			"instance_status":      item.InstanceStatus,
-			"create_time":          item.CreateTime,
-			"instance_type":        item.InstanceType,
-			"instance_name":        item.InstanceName,
-			"cluster":              item.Cluster,
-			"tps_receive_max":      item.TpsReceiveMax,
-			"tps_send_max":         item.TpsMax,
-			"topic_capacity":       item.TopicCapacity,
-			"independent_naming":   item.IndependentNaming,
+			"id":                 item.InstanceID,
+			"instance_id":        item.InstanceID,
+			"instance_status":    item.InstanceStatus,
+			"create_time":        item.CreateTime,
+			"instance_type":      item.InstanceType,
+			"instance_name":      item.InstanceName,
+			"cluster":            item.Cluster,
+			"tps_receive_max":    item.TpsReceiveMax,
+			"tps_send_max":       item.TpsMax,
+			"topic_capacity":     item.TopicCapacity,
+			"independent_naming": item.IndependentNaming,
 		}
 
 		names = append(names, item.InstanceName)

@@ -3,10 +3,11 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"errors"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"log"
 	"time"
+
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -33,10 +34,10 @@ func resourceAlibabacloudStackOnsGroup() *schema.Resource {
 				ForceNew: true,
 			},
 			"group_id": {
-				Type:             schema.TypeString,
-				Required:         true,
-				ForceNew:         true,
-				ValidateFunc:     validateOnsGroupId,
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				ValidateFunc: validateOnsGroupId,
 			},
 			"remark": {
 				Type:         schema.TypeString,
@@ -53,7 +54,7 @@ func resourceAlibabacloudStackOnsGroup() *schema.Resource {
 
 func resourceAlibabacloudStackOnsGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *ecs.Client
+	var requestInfo *ons.Client
 
 	instanceId := d.Get("instance_id").(string)
 	groupId := d.Get("group_id").(string)
@@ -61,17 +62,17 @@ func resourceAlibabacloudStackOnsGroupCreate(d *schema.ResourceData, meta interf
 
 	request := client.NewCommonRequest("POST", "Ons-inner", "2018-02-05", "ConsoleGroupCreate", "")
 	mergeMaps(request.QueryParams, map[string]string{
-		"ProductName": "Ons-inner",
+		"ProductName":  "Ons-inner",
 		"PreventCache": "",
-		"GroupId":     groupId,
-		"Remark":      remark,
-		"OnsRegionId": client.RegionId,
-		"InstanceId":  instanceId,
+		"GroupId":      groupId,
+		"Remark":       remark,
+		"OnsRegionId":  client.RegionId,
+		"InstanceId":   instanceId,
 	})
 	grp_resp := OGroup{}
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
+		return onsClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -135,7 +136,7 @@ func resourceAlibabacloudStackOnsGroupUpdate(d *schema.ResourceData, meta interf
 func resourceAlibabacloudStackOnsGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	onsService := OnsService{client}
-	var requestInfo *ecs.Client
+	var requestInfo *ons.Client
 	check, err := onsService.DescribeOnsGroup(d.Id())
 	parts, err := ParseResourceId(d.Id(), 2)
 
@@ -148,15 +149,15 @@ func resourceAlibabacloudStackOnsGroupDelete(d *schema.ResourceData, meta interf
 
 		request := client.NewCommonRequest("POST", "Ons-inner", "2018-02-05", "ConsoleGroupDelete", "")
 		mergeMaps(request.QueryParams, map[string]string{
-			"ProductName": "Ons-inner",
+			"ProductName":  "Ons-inner",
 			"PreventCache": "",
-			"GroupId":     parts[0],
-			"OnsRegionId": client.RegionId,
-			"InstanceId":  parts[1],
+			"GroupId":      parts[0],
+			"OnsRegionId":  client.RegionId,
+			"InstanceId":   parts[1],
 		})
 
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
+		raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
+			return onsClient.ProcessCommonRequest(request)
 		})
 		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
