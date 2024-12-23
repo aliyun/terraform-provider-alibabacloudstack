@@ -31,6 +31,7 @@ vars-pipeline*
 develop*
 /vendor/*
 /.settings
+!vendor/github.com/valyala/**/*.pem
 
 website/vendor
 

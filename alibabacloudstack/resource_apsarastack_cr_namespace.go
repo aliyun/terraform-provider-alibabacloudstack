@@ -50,6 +50,7 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 	namespaceName := d.Get("name").(string)
 	request := client.NewCommonRequest("POST", "cr", "2016-06-07", "CreateNamespace", "")
 	request.SetContentType("application/json")
+	request.SetContent([]byte("{}"))  // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
 	request.QueryParams["NamespaceName"] = namespaceName
 	request.QueryParams["Arch"] = "x86_64"
 	request.QueryParams["HaApsaraStack"] = "false"
@@ -119,6 +120,8 @@ func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta int
 	visibility := d.Get("default_visibility").(string)
 	if d.HasChanges("auto_create", "default_visibility") {
 		request := client.NewCommonRequest("POST", "cr", "2016-06-07", "UpdateNamespace", "")
+		request.SetContentType("application/json")
+		request.SetContent([]byte("{}")) // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
 		request.Headers["x-acs-instanceId"] = d.Id()
 		request.Headers["x-acs-content-type"] = "application/json;charset=UTF-8"
 		request.Headers["Content-type"] = "application/json;charset=UTF-8"

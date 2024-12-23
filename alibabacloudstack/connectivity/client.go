@@ -811,6 +811,20 @@ func (client *AlibabacloudStackClient) WithOssBucketByName(bucketName string, do
 	})
 }
 
+func (client *AlibabacloudStackClient) WithSlsClient(do func(*slsPop.Client) (interface{}, error)) (interface{}, error) {
+	if client.logpopconn == nil {
+		conn, error := client.WithProductSDKClient(SLSCode)
+		if error != nil {
+			return nil, error
+		}
+		client.logpopconn = &slsPop.Client{
+			Client: *conn,
+		}
+	}
+
+	return do(client.logpopconn)
+}
+
 func (client *AlibabacloudStackClient) WithSlsDataClient(do func(*sls.Client) (interface{}, error)) (interface{}, error) {
 	goSdkMutex.Lock()
 	defer goSdkMutex.Unlock()
