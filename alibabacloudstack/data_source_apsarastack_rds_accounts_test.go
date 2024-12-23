@@ -8,7 +8,7 @@ import (
 	
 )
 
-func TestAccAlibabacloudStackAlibabacloudstackRdsAccountsDataSource(t *testing.T) {
+func TestAccAlibabacloudStackRdsAccountsDataSource(t *testing.T) {
 	// 根据test_meta自动生成的tasecase
 
 	rand := getAccTestRandInt(10000, 99999)

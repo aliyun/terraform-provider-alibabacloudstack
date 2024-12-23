@@ -8,7 +8,7 @@ import (
 	
 )
 
-func TestAccAlibabacloudStackAlibabacloudstackEcsHpcClustersDataSource(t *testing.T) {
+func TestAccAlibabacloudStackEcsHpcClustersDataSource(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
 
