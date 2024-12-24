@@ -2,111 +2,96 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackEcsStorageset0(t *testing.T) {
-	var v map[string]interface{}
-
-	resourceId := "alibabacloudstack_ecs_storageset.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudTestAccEcsStoragesetCheckmap)
+func TestAccAlibabacloudStackEcsEbsStorageSets_basic(t *testing.T) {
+	var v *datahub.EcsDescribeEcsEbsStorageSetsResult
+	resourceId := "alibabacloudstack_ecs_ebs_storage_set.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudStackEcsEbsMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DoEcsDescribestoragesetdetailsRequest")
+	}, "DescribeEcsEbsStorageSet")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%secsstorage_set%d", defaultRegionToTest, rand)
-
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccEcsStoragesetBasicdependence)
+	rand := getAccTestRandInt(1000, 9999)
+	name := fmt.Sprintf("tf-testAcc%sAlibabacloudStackEcsCommand%d", defaultRegionToTest, rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackEcsEbsBasicDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-
 			testAccPreCheck(t)
 		},
+
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-
 		CheckDestroy: rac.checkResourceDestroy(),
-
 		Steps: []resource.TestStep{
-
 			{
-				Config: testAccConfig(map[string]interface{}{
-
-					"description": "wTest",
-
-					"zone_id": "cn-hangzhou-j",
-
-					"region_id": "cn-hangzhou",
-
-					"storage_set_name": "w测试",
+				Config: providerCommon + testAccConfig(map[string]interface{}{
+					"storage_set_name":    name,
+					"maxpartition_number": "2",
+					"zone_id":             "${data.alibabacloudstack_zones.default.zones.0.id}",
+					//"name":            name,
+					//"type":            "RunShellScript",
+					//"working_dir":     "/root",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"description": "wTest",
-
-						"zone_id": "cn-hangzhou-j",
-
-						"region_id": "cn-hangzhou",
-
-						"storage_set_name": "w测试",
+						//"command_content": "bHMK",
+						//"description":     "For Terraform Test",
+						//"name":            name,
+						//"type":            "RunShellScript",
+						"storage_set_name": name,
 					}),
 				),
 			},
-
 			{
-				Config: testAccConfig(map[string]interface{}{
-
-					"description": "update",
-
-					"region_id": "cn-hangzhou",
-
-					"storage_set_name": "存储集修改",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"description": "update",
-
-						"region_id": "cn-hangzhou",
-
-						"storage_set_name": "存储集修改",
-					}),
-				),
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-var AlibabacloudTestAccEcsStoragesetCheckmap = map[string]string{
-
-	"description": CHECKSET,
-
-	"zone_id": CHECKSET,
-
-	"max_partition_number": CHECKSET,
-
-	"region_id": CHECKSET,
-
-	"storage_set_id": CHECKSET,
-
-	"storage_set_name": CHECKSET,
+var AlibabacloudStackEcsEbsMap = map[string]string{
+	//"enable_parameter": "false",
 }
 
-func AlibabacloudTestAccEcsStoragesetBasicdependence(name string) string {
+//func AlibabacloudStackEcsEbsBasicDependence(name string) string {
+//	return ""
+//}
+
+func AlibabacloudStackEcsEbsBasicDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-    default = "%s"
+	default = "%s"
 }
+data "alibabacloudstack_zones" "default" {}
 
-
-
+//data "alibabacloudstack_vpcs" "default" {
+//	name_regex = "default-NODELETING"
+//}
+//resource "alibabacloudstack_vpc" "default" {
+//name       = var.name
+//cidr_block = "172.16.0.0/16"
+//}
+//resource "alibabacloudstack_vswitch" "default" {
+//  vpc_id            = "${alibabacloudstack_vpc.default.id}"
+//  cidr_block        = "172.16.0.0/24"
+//  availability_zone = data.alibabacloudstack_hbase_zones.default.ids.0
+//  name              = "${var.name}"
+//}
+//
+//resource "alibabacloudstack_security_group" "default" {
+//	count = 2
+//	vpc_id = alibabacloudstack_vpc.default.id
+//	name = var.name
+//}
 `, name)
 }
