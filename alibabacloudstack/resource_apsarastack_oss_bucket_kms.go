@@ -8,7 +8,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -45,24 +44,24 @@ func resourceAlibabacloudStackOssBucketKms() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"content3": {
-				Type:     schema.TypeString,
-				Optional: true,
-				//ConflictsWith: []string{"source3"},
-			},
-
-			"acl3": {
-				Type:         schema.TypeString,
-				Default:      oss.ACLPrivate,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"private", "public-read", "public-read-write"}, false),
-			},
-
-			"content_type3": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
+// 			"content3": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 				ConflictsWith: []string{"source3"},
+// 			},
+// 
+// 			"acl3": {
+// 				Type:         schema.TypeString,
+// 				Default:      oss.ACLPrivate,
+// 				Optional:     true,
+// 				ValidateFunc: validation.StringInSlice([]string{"private", "public-read", "public-read-write"}, false),
+// 			},
+// 
+// 			"content_type3": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 				Computed: true,
+// 			},
 		},
 	}
 }
