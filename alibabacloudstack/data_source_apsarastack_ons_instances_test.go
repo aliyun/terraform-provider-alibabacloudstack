@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+	"fmt"
 )
 
 func TestAccAlibabacloudStackOnsInstancesDataSource(t *testing.T) {
@@ -13,7 +14,7 @@ func TestAccAlibabacloudStackOnsInstancesDataSource(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: dataSourceOnsInstancesConfigDependence,
+				Config: dataSourceOnsInstancesConfigDependence(),
 				Check: resource.ComposeTestCheckFunc(
 
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_ons_instances.default"),
@@ -30,9 +31,9 @@ func TestAccAlibabacloudStackOnsInstancesDataSource(t *testing.T) {
 	})
 }
 
-const dataSourceOnsInstancesConfigDependence = `
-variable "name" {
-  default = "Tf-OnsInstanceDataSource"
+func dataSourceOnsInstancesConfigDependence() string {
+	return fmt.Sprintf(`variable "name" {
+  default = "Tf-OnsInstanceDataSource%d"
 }
 
 resource "alibabacloudstack_ons_instance" "default" {
@@ -48,4 +49,5 @@ data "alibabacloudstack_ons_instances" "default" {
   ids = [alibabacloudstack_ons_instance.default.id]
 
 }
-`
+`, getAccTestRandInt(10000,20000) )
+}
