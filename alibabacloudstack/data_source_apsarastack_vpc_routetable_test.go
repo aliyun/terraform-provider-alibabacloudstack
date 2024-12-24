@@ -8,7 +8,7 @@ import (
 	
 )
 
-func TestAccAlibabacloudStackAlibabacloudstackVpcRouteTablesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackVpcRouteTablesDataSource(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
 

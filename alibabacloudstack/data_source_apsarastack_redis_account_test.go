@@ -8,7 +8,7 @@ import (
 	
 )
 
-func TestAccAlibabacloudStackAlibabacloudstackRedisAccountsDataSource(t *testing.T) {
+func TestAccAlibabacloudStackRedisAccountsDataSource(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
 
