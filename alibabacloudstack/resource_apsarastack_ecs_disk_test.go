@@ -144,7 +144,7 @@ func TestAccAlibabacloudStackDisk_basic(t *testing.T) {
 	ra := resourceAttrInit(resourceId, testAccCheckResourceDiskBasicMap)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	ResourceTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -245,7 +245,7 @@ func TestAccAlibabacloudStackDisk_multi(t *testing.T) {
 	ra := resourceAttrInit(resourceId, testAccCheckResourceDiskBasicMap)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	ResourceTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -444,7 +444,7 @@ var testAccCheckResourceDiskBasicMap = map[string]string{
 	"size":                 "50",
 	"disk_name":            "",
 	"description":          "",
-	"category":             "cloud_efficiency",
+	"category":             "CHECKSET",
 	"snapshot_id":          "",
 	"encrypted":            "false",
 	"tags.%":               "0",
