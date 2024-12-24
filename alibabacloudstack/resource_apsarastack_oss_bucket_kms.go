@@ -19,7 +19,6 @@ func resourceAlibabacloudStackOssBucketKms() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAlibabacloudStackOssBucketKmsCreate,
 		Read:   resourceAlibabacloudStackOssBucketKmsRead,
-		Update: resourceAlibabacloudStackOssBucketKmsCreate,
 		Delete: resourceAlibabacloudStackOssBucketKmsDelete,
 
 		Schema: map[string]*schema.Schema{
