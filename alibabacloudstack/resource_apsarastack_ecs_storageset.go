@@ -68,6 +68,7 @@ func resourceAlibabacloudStackEcsEbsStorageSetsCreate(d *schema.ResourceData, me
 		raw, err := client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
 			return EcsClient.ProcessCommonRequest(request)
 		})
+		addDebug(action, raw, request)
 		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
 			if errmsgs.NeedRetry(err) {
@@ -80,7 +81,6 @@ func resourceAlibabacloudStackEcsEbsStorageSetsCreate(d *schema.ResourceData, me
 			}
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ecs_command", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		addDebug(action, raw, request)
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), response)
 		d.SetId(fmt.Sprint(response.StorageSetId))
 		return nil
