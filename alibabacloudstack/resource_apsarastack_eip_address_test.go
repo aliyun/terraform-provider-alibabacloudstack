@@ -5,8 +5,6 @@ import (
 	"log"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-
 	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
@@ -149,10 +147,10 @@ func TestAccAlibabacloudStackEipBasic_PayByBandwidth(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 			testAccPreCheckWithAccountSiteType(t, DomesticSite)
@@ -224,7 +222,7 @@ func TestAccAlibabacloudStackEipBasic_PayByTraffic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	resource.Test(t, resource.TestCase{
@@ -293,7 +291,7 @@ func TestAccAlibabacloudStackEipMulti(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := acctest.RandInt()
+	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	resource.Test(t, resource.TestCase{
@@ -330,6 +328,9 @@ resource "alibabacloudstack_eip" "default" {
 
 func testAccCheckEipConfig_bandwidth(rand int) string {
 	return fmt.Sprintf(`
+variable "name"{
+	default = "tf-testAcceEipName%d"
+}
 
 resource "alibabacloudstack_eip" "default" {
      bandwidth = "10"

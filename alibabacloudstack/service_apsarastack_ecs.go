@@ -279,7 +279,7 @@ func (s *EcsService) LeaveSecurityGroups(instanceId string, securityGroupIds []s
 }
 
 func (s *EcsService) DoEcsDescribesecuritygroupattributeRequest(id string) (group ecs.DescribeSecurityGroupAttributeResponse, err error) {
-    return s.DescribeSecurityGroup(id)
+	return s.DescribeSecurityGroup(id)
 }
 func (s *EcsService) DescribeSecurityGroup(id string) (group ecs.DescribeSecurityGroupAttributeResponse, err error) {
 	request := ecs.CreateDescribeSecurityGroupAttributeRequest()
@@ -505,7 +505,7 @@ func (s *EcsService) QueryInstancesWithKeyPair(instanceIdsStr, keyPair string) (
 }
 
 func (s *EcsService) DoEcsDescribekeypairsRequest(id string) (keyPair ecs.KeyPair, err error) {
-    return s.DescribeKeyPair(id)
+	return s.DescribeKeyPair(id)
 }
 func (s *EcsService) DescribeKeyPair(id string) (keyPair ecs.KeyPair, err error) {
 	request := ecs.CreateDescribeKeyPairsRequest()
@@ -549,7 +549,7 @@ func (s *EcsService) DescribeKeyPairAttachment(id string) (keyPair ecs.KeyPair, 
 }
 
 func (s *EcsService) DoEcsDescribedisksRequest(id string) (disk ecs.Disk, err error) {
-    return s.DescribeDisk(id)
+	return s.DescribeDisk(id)
 }
 func (s *EcsService) DescribeDisk(id string) (disk ecs.Disk, err error) {
 	request := ecs.CreateDescribeDisksRequest()
@@ -719,13 +719,13 @@ func (s *EcsService) updateImage(d *schema.ResourceData) error {
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.ImageId = d.Id()
 
-	if d.HasChanges("description","name", "image_name") {
+	if d.HasChanges("description", "name", "image_name") {
 		if description, ok := d.GetOk("description"); ok {
 			request.Description = description.(string)
 		}
 		if imageName, ok := connectivity.GetResourceDataOk(d, "image_name", "name"); ok {
 			request.ImageName = imageName.(string)
-		} 
+		}
 		raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ModifyImageAttribute(request)
 		})
@@ -1352,7 +1352,7 @@ func (s *EcsService) DescribeTaskById(id string) (task *ecs.DescribeTaskAttribut
 }
 
 func (s *EcsService) DoEcsDescribesnapshotsRequest(id string) (*ecs.Snapshot, error) {
-    return s.DescribeSnapshot(id)
+	return s.DescribeSnapshot(id)
 }
 func (s *EcsService) DescribeSnapshot(id string) (*ecs.Snapshot, error) {
 	snapshot := &ecs.Snapshot{}
@@ -1385,7 +1385,7 @@ func (s *EcsService) DescribeSnapshot(id string) (*ecs.Snapshot, error) {
 }
 
 func (s *EcsService) DoEcsDescribeautosnapshotpolicyexRequest(id string) (*ecs.AutoSnapshotPolicy, error) {
-    return s.DescribeSnapshotPolicy(id)
+	return s.DescribeSnapshotPolicy(id)
 }
 func (s *EcsService) DescribeSnapshotPolicy(id string) (*ecs.AutoSnapshotPolicy, error) {
 	policy := &ecs.AutoSnapshotPolicy{}
@@ -1415,7 +1415,7 @@ func (s *EcsService) DescribeSnapshotPolicy(id string) (*ecs.AutoSnapshotPolicy,
 }
 
 func (s *EcsService) DoEcsDescribereservedinstancesRequest(id string) (reservedInstance ecs.ReservedInstance, err error) {
-    return s.DescribeReservedInstance(id)
+	return s.DescribeReservedInstance(id)
 }
 func (s *EcsService) DescribeReservedInstance(id string) (reservedInstance ecs.ReservedInstance, err error) {
 	request := ecs.CreateDescribeReservedInstancesRequest()
@@ -1906,7 +1906,7 @@ func (s *EcsService) UpdateSystemDiskTags(d *schema.ResourceData) error {
 }
 
 func (s *EcsService) DoEcsDescribededicatedhostautorenewRequest(id string) (object ecs.DedicatedHost, err error) {
-    return s.DescribeEcsDedicatedHost(id)
+	return s.DescribeEcsDedicatedHost(id)
 }
 func (s *EcsService) DescribeEcsDedicatedHost(id string) (object ecs.DedicatedHost, err error) {
 	request := ecs.CreateDescribeDedicatedHostsRequest()
@@ -1976,7 +1976,7 @@ func (s *EcsService) EcsDedicatedHostStateRefreshFunc(id string, failStates []st
 }
 
 func (s *EcsService) DoEcsDescribestoragesetdetailsRequest(id string) (result *datahub.EcsDescribeEcsEbsStorageSetsResult, err error) {
-    return s.DescribeEcsEbsStorageSet(id)
+	return s.DescribeEcsEbsStorageSet(id)
 }
 func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub.EcsDescribeEcsEbsStorageSetsResult, err error) {
 
@@ -1989,6 +1989,7 @@ func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub.EcsDes
 	raw, err := s.client.WithEcsClient(func(EcsClient *ecs.Client) (interface{}, error) {
 		return EcsClient.ProcessCommonRequest(request)
 	})
+	addDebug("DescribeStorageSets", raw, request)
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidRegionId.NotFound", "Operation.Forbidden"}) {
@@ -2002,7 +2003,6 @@ func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub.EcsDes
 		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return resp, err
 	}
-	addDebug("DescribeStorageSets", raw, request)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	//v, err := jsonpath.Get("$.Commands.Command", bresponse)
@@ -2021,13 +2021,13 @@ func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub.EcsDes
 }
 
 func (s *EcsService) DoEcsDescribecommandsRequest(id string) (result *datahub.EcsDescribeEcsCommandResult, err error) {
-    return s.DescribeEcsCommand(id)
+	return s.DescribeEcsCommand(id)
 }
 func (s *EcsService) DescribeEcsCommand(id string) (result *datahub.EcsDescribeEcsCommandResult, err error) {
 
 	action := "DescribeCommands"
 	resp := &datahub.EcsDescribeEcsCommandResult{}
-	request:= s.client.NewCommonRequest("GET", "Ecs", "2014-05-26", action, "")
+	request := s.client.NewCommonRequest("GET", "Ecs", "2014-05-26", action, "")
 
 	mergeMaps(request.QueryParams, map[string]string{
 		"CommandId":  id,
@@ -2070,7 +2070,7 @@ func (s *EcsService) DescribeEcsCommand(id string) (result *datahub.EcsDescribeE
 	return resp, nil
 }
 func (s *EcsService) DoEcsDescribehpcclustersRequest(id string) (result *datahub.EcsDescribeEcsHpcClusterResult, err error) {
-    return s.DescribeEcsHpcCluster(id)
+	return s.DescribeEcsHpcCluster(id)
 }
 func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub.EcsDescribeEcsHpcClusterResult, err error) {
 	//var response map[string]interface{}
@@ -2085,7 +2085,7 @@ func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub.EcsDescri
 	//
 	//	"HpcClusterIds": string(ids),
 	//}
-	
+
 	ClientToken := buildClientToken("DescribeHpcClusters")
 	request := s.client.NewCommonRequest("POST", "Ecs", "2014-05-26", action, "")
 	request.QueryParams["HpcClusterIds"] = string(ids)
@@ -2128,7 +2128,7 @@ func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub.EcsDescri
 	return resp, nil
 }
 func (s *EcsService) DoEcsDescribedeploymentsetsRequest(id string) (object map[string]interface{}, err error) {
-    return s.DescribeEcsDeploymentSet(id)
+	return s.DescribeEcsDeploymentSet(id)
 }
 func (s *EcsService) DescribeEcsDeploymentSet(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
