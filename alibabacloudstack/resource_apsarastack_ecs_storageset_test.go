@@ -7,8 +7,33 @@ import (
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
+
+func testAccCheckEbsDestroy(s *terraform.State) error {
+	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
+	ecsService := EcsService{client}
+
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "alibabacloudstack_ecs_ebs_storage_set" {
+			continue
+		}
+
+		_, err := ecsService.DescribeEcsEbsStorageSet(rs.Primary.ID)
+
+		// Verify the error is what we want
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				continue
+			}
+			return errmsgs.WrapError(err)
+		}
+	}
+
+	return nil
+}
 
 func TestAccAlibabacloudStackEcsEbsStorageSets_basic(t *testing.T) {
 	var v *datahub.EcsDescribeEcsEbsStorageSetsResult
@@ -29,7 +54,7 @@ func TestAccAlibabacloudStackEcsEbsStorageSets_basic(t *testing.T) {
 
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		CheckDestroy:  testAccCheckEbsDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: providerCommon + testAccConfig(map[string]interface{}{
