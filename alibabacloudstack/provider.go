@@ -1204,6 +1204,7 @@ func getResourceCredentials(config *connectivity.Config) (string, string, int, e
 	} else {
 		client, err = sts.NewClientWithStsToken(config.RegionId, config.AccessKey, config.SecretKey, config.SecurityToken)
 	}
+
 	request := requests.NewCommonRequest()
 	if config.Insecure {
 		request.SetHTTPSInsecure(config.Insecure)
@@ -1219,7 +1220,6 @@ func getResourceCredentials(config *connectivity.Config) (string, string, int, e
 	} else {
 		request.Scheme = "http"
 	}
-	request.Domain = endpoint
 	request.Version = "2019-05-10"
 	request.Method = "POST"
 	request.Product = "ascm"
@@ -1235,7 +1235,7 @@ func getResourceCredentials(config *connectivity.Config) (string, string, int, e
 	request.Headers["Content-Type"] = "application/json"
 	request.Headers["x-ascm-product-name"] = "ascm"
 	resp, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), resp, request.QueryParams, request)
+	addDebug(request.GetActionName(), resp, request, request.QueryParams)
 	if err != nil {
 		return "", "", 0, err
 	}
