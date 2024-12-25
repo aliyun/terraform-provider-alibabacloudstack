@@ -1231,21 +1231,17 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	}
 	sdkConfig := client.teaSdkConfig
 	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
-	conn, err := rpc.NewClient(&sdkConfig)
-	conn.Headers = make(map[string]*string)
+
+	headers := make(map[string]*string)
 	for key, value := range client.defaultHeaders(popcode) {
 		v := value
-		conn.Headers[key] = &v
+		headers[key] = &v
 	}
 
 	if query == nil {
 		query = make(map[string]interface{})
 	}
 	query["Product"] = popcode
-
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", popcode, err)
-	}
 
 	var protocol string
 	if strings.ToLower(client.Config.Protocol) == "https" {
@@ -1264,7 +1260,15 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 
 	var response map[string]interface{}
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+
+		// conn 必须在每次请求前初始化，因为DoRequest会修改conn的内容，会导致下次conn的配置失效
+		conn, err := rpc.NewClient(&sdkConfig)
+		if err != nil {
+			return resource.RetryableError(fmt.Errorf("unable to initialize the %s client: %#v", popcode, err))
+		}
+		conn.Headers = headers
+
 		response, err = conn.DoRequest(&apiname, &protocol, &method, &version, &authType, query, body, &runtime)
 		log.Printf(" ================================ %s ======================================\n query %v \n request %v \n response: %v", apiname, query, body, response)
 		if err != nil {
