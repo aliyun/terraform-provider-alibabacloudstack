@@ -335,7 +335,7 @@ variable "name"{
 resource "alibabacloudstack_eip" "default" {
      bandwidth = "10"
 }
-`)
+`, rand)
 }
 
 func testAccCheckEipConfig_name(rand int) string {
