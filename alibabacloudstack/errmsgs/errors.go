@@ -2,10 +2,10 @@ package errmsgs
 
 import (
 	"encoding/json"
+	"errors"
+	"reflect"
 	"regexp"
 	"strings"
-	"reflect"
-	"errors"
 
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
@@ -116,6 +116,10 @@ func NotFoundError(err error) bool {
 
 	if e, ok := err.(oss.ServiceError); ok {
 		return e.StatusCode == 404 || strings.HasPrefix(e.Code, "NoSuch") || strings.HasPrefix(e.Message, "No Row found")
+	}
+
+	if e, ok := err.(*tea.SDKError); ok {
+		return *e.StatusCode == 404 || strings.HasSuffix(*e.Code, ".NotFound")
 	}
 
 	return false
@@ -395,7 +399,7 @@ func GetAsapiErrorMessage(raw_data map[string]interface{}) (showMsg string) {
 	return showMsg
 }
 
-func CheckEmpty(value interface{}, schemaType schema.ValueType, keys ... string) error{
+func CheckEmpty(value interface{}, schemaType schema.ValueType, keys ...string) error {
 	zero := schemaType.Zero()
 
 	empty := false
@@ -404,8 +408,8 @@ func CheckEmpty(value interface{}, schemaType schema.ValueType, keys ... string)
 	} else {
 		empty = reflect.DeepEqual(value, zero)
 	}
-	
-	if ! empty {
+
+	if !empty {
 		return nil
 	}
 	errmsg := strings.Join(keys, " or ")
