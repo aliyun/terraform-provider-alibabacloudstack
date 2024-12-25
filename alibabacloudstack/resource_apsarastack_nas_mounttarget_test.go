@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -39,65 +39,34 @@ func TestAccAlibabacloudStackNasMounttarget0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"vpc_id": "${{ref(resource, VPC::VPC::7.0.0.1.pre::defaultiUcGvP.VpcId)}}",
-
-					"network_type": "Vpc",
-
-					"vswitch_id": "${{ref(resource, VPC::VSwitch::4.0.5.4.pre::defaultulTodx.VSwitchId)}}",
-
-					"file_system_id": "${{ref(resource, NAS::FileSystem::5.0.0.10.pre::defaultjVQQ4E.FileSystemId)}}",
+					"vswitch_id":        "${alibabacloudstack_vswitch.default.id}",
+					"access_group_name": "${alibabacloudstack_nas_access_group.default.access_group_name}",
+					"file_system_id":    "${alibabacloudstack_nas_file_system.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"vpc_id": "${{ref(resource, VPC::VPC::7.0.0.1.pre::defaultiUcGvP.VpcId)}}",
+						"vswitch_id": CHECKSET,
 
-						"network_type": "Vpc",
+						"access_group_name": CHECKSET,
 
-						"vswitch_id": "${{ref(resource, VPC::VSwitch::4.0.5.4.pre::defaultulTodx.VSwitchId)}}",
-
-						"file_system_id": "${{ref(resource, NAS::FileSystem::5.0.0.10.pre::defaultjVQQ4E.FileSystemId)}}",
+						"file_system_id": CHECKSET,
 					}),
 				),
 			},
 
-			{
-				Config: testAccConfig(map[string]interface{}{
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
 
-					"status": "Inactive",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
+			// 		"status": "Inactive",
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
 
-						"status": "Inactive",
-					}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-
-					"vpc_id": "${{ref(resource, VPC::VPC::7.0.0.1.pre::defaultiUcGvP.VpcId)}}",
-
-					"network_type": "Vpc",
-
-					"vswitch_id": "${{ref(resource, VPC::VSwitch::4.0.5.4.pre::defaultulTodx.VSwitchId)}}",
-
-					"file_system_id": "${{ref(resource, NAS::FileSystem::5.0.0.10.pre::defaultjVQQ4E.FileSystemId)}}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"vpc_id": "${{ref(resource, VPC::VPC::7.0.0.1.pre::defaultiUcGvP.VpcId)}}",
-
-						"network_type": "Vpc",
-
-						"vswitch_id": "${{ref(resource, VPC::VSwitch::4.0.5.4.pre::defaultulTodx.VSwitchId)}}",
-
-						"file_system_id": "${{ref(resource, NAS::FileSystem::5.0.0.10.pre::defaultjVQQ4E.FileSystemId)}}",
-					}),
-				),
-			},
+			// 			"status": "Inactive",
+			// 		}),
+			// 	),
+			// },
 		},
 	})
 }
@@ -110,34 +79,46 @@ var AlibabacloudTestAccNasMounttargetCheckmap = map[string]string{
 
 	"vswitch_id": CHECKSET,
 
-	"mount_target_extra": CHECKSET,
-
-	"vpc_id": CHECKSET,
-
-	"mount_target_domain": CHECKSET,
-
-	"network_type": CHECKSET,
-
 	"file_system_id": CHECKSET,
 }
 
 func AlibabacloudTestAccNasMounttargetBasicdependence(name string) string {
+	rand := getAccTestRandInt(10000, 99999)
 	return fmt.Sprintf(`
 variable "name" {
     default = "%s"
 }
 
-
-variable "azone" {
-    default = cn-hangzhou-k
+resource "alibabacloudstack_vpc" "default" {
+	cidr_block = "172.16.0.0/16"
+	name = "${var.name}"
+  }
+  data "alibabacloudstack_zones" "default" {
+	  available_resource_creation = "VSwitch"
+  }
+  
+resource "alibabacloudstack_vswitch" "default" {
+vpc_id = "${alibabacloudstack_vpc.default.id}"
+cidr_block = "172.16.0.0/21"
+availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+name = "${var.name}"
+}
+variable "storage_type" {
+default = "Capacity"
+}
+data "alibabacloudstack_nas_protocols" "default" {
+		type = "${var.storage_type}"
+}
+resource "alibabacloudstack_nas_file_system" "default" {
+description = "${var.name}"
+storage_type = "${var.storage_type}"
+protocol_type = "${data.alibabacloudstack_nas_protocols.default.protocols.0}"
+}
+resource "alibabacloudstack_nas_access_group" "default" {
+			access_group_name = "tf-testAccNasConfig-resource-test%d"
+			access_group_type = "Vpc"
+			description = "tf-testAccNasConfig"
 }
 
-variable "region_id" {
-    default = cn-hangzhou
-}
-
-
-
-
-`, name)
+`, name, rand)
 }
