@@ -40,17 +40,17 @@ func resourceAlibabacloudStackForwardEntry() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"tcp", "udp", "any"}, false),
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'forward_entry_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'forward_entry_name' instead.",
 				ConflictsWith: []string{"forward_entry_name"},
 			},
 			"forward_entry_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 			"internal_ip": {
@@ -148,6 +148,7 @@ func resourceAlibabacloudStackForwardEntryRead(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackForwardEntryUpdate(d *schema.ResourceData, meta interface{}) error {
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	if !strings.Contains(d.Id(), COLON_SEPARATED) {
@@ -207,6 +208,7 @@ func resourceAlibabacloudStackForwardEntryUpdate(d *schema.ResourceData, meta in
 }
 
 func resourceAlibabacloudStackForwardEntryDelete(d *schema.ResourceData, meta interface{}) error {
+	waitSecondsIfWithTest(1)
 	if !strings.Contains(d.Id(), COLON_SEPARATED) {
 		d.SetId(d.Get("forward_table_id").(string) + COLON_SEPARATED + d.Id())
 	}
@@ -221,12 +223,12 @@ func resourceAlibabacloudStackForwardEntryDelete(d *schema.ResourceData, meta in
 	request.ForwardTableId = parts[0]
 	request.ForwardEntryId = parts[1]
 
-	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.DeleteForwardEntry(request)
 		})
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"UnknownError"}) {
+			if errmsgs.IsExpectedErrors(err, []string{"IncorretForwardEntryStatus"}) {
 				return resource.RetryableError(err)
 			}
 			errmsg := ""
