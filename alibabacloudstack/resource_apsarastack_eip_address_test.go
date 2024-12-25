@@ -319,11 +319,14 @@ func TestAccAlibabacloudStackEipMulti(t *testing.T) {
 
 func testAccCheckEipConfigBasic(rand int) string {
 	return fmt.Sprintf(`
+variable "name"{
+	default = "tf-testAcceEipName%d"
+}
 
 resource "alibabacloudstack_eip" "default" {
 	bandwidth = "5"
 }
-`)
+`, rand)
 }
 
 func testAccCheckEipConfig_bandwidth(rand int) string {
