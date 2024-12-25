@@ -246,17 +246,15 @@ type crResponse struct {
 
 func (c *CrService) DescribeCrNamespace(id string) (*crDescribeNamespaceResponse, error) {
 	response := crDescribeNamespaceResponse{}
-	request := c.client.NewCommonRequest("POST", "cr", "2016-06-07", "GetNamespace", "")
+	request := c.client.NewCommonRequest("GET", "cr", "2016-06-07", "GetNamespace", "/namespace/"+id)
 	request.QueryParams["Namespace"] = id
-	raw, err := c.client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
-		return crClient.ProcessCommonRequest(request)
-	})
-	resp, ok := raw.(*responses.CommonResponse)
+	resp, err := c.client.ProcessCommonRequest(request)
 	if err != nil {
 		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(resp.BaseResponse)
+		if resp == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg = errmsgs.GetBaseResponseErrorMessage(resp.BaseResponse)
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	log.Printf("response for read %v", resp)
@@ -266,7 +264,7 @@ func (c *CrService) DescribeCrNamespace(id string) (*crDescribeNamespaceResponse
 	if response.Data.Namespace.Namespace != id {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	addDebug(request.GetActionName(), raw, request)
+	addDebug(request.GetActionName(), resp, request)
 
 	return &response, nil
 }

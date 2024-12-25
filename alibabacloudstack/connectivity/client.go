@@ -1305,15 +1305,20 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		return nil, err
 	}
 
-	request.Domain = conn.Domain
-	if strings.HasPrefix(request.Domain, "internal.asapi.") || strings.HasPrefix(request.Domain, "public.asapi.") {
+	//request.Domain = conn.Domain
+	if strings.HasPrefix(conn.Domain, "internal.asapi.") || strings.HasPrefix(conn.Domain, "public.asapi.") {
+		// asapi兼容逻辑
 		// # asapi 使用common SDK时不能拼接pathpattern，否则会报错
-		var r []string = strings.SplitN(request.Domain, "/", 2)
-		if len(r) == 2 {
-			request.Domain, request.PathPattern = r[0], "/"+r[1]
-		} else {
+		if request.PathPattern != "" {
+			var r []string = strings.SplitN(conn.Domain, "/", 2)
+			request.Domain = r[0]
 			request.PathPattern = "/asapi/v3"
 		}
+		if len(request.Content) > 0 {
+			request.QueryParams["x-acs-body"] = string(request.Content)
+			request.SetContent([]byte("{}"))
+		}
+		request.Method = "POST"
 	}
 
 	response, err := conn.ProcessCommonRequest(request)
