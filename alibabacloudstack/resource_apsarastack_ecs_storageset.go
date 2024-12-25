@@ -42,7 +42,7 @@ func resourceAlibabacloudStackEcsEbsStorageSets() *schema.Resource {
 			},
 			"storage_set_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 		},
