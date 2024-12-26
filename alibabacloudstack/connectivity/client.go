@@ -1241,6 +1241,11 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	if query == nil {
 		query = make(map[string]interface{})
 	}
+	for key, value := range client.defaultQueryParams() {
+		if _, exist := query[key]; !exist {
+			query[key] = value
+		}
+	}
 	query["Product"] = popcode
 
 	var protocol string
