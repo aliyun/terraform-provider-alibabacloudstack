@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -99,24 +98,23 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 			"organizationId":   client.Department,
 			"loginPolicyId":    fmt.Sprint(loginpolicyid),
 		})
-		request.Headers["x-acs-content-type"] = "application/json"
-		request.Headers["Content-Type"] = "application/json"
-		raw, err := client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
-			return ascmClient.ProcessCommonRequest(request)
-		})
-		addDebug("AddUser", raw, request, request.QueryParams)
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("AddUser", bresponse, request, request.QueryParams)
 		if err != nil {
 			errmsg := ""
-			if ok {
+			if err != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			} else {
+				return err
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "AddUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		if bresponse.GetHttpStatus() != 200 {
 			errmsg := ""
-			if ok {
+			if err != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			} else {
+				return err
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "AddUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
@@ -127,7 +125,7 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 	if err != nil {
 		d.Set("init_password", init_password)
 	}
-	log.Printf("response of raw ExportInitPasswordByLoginName is : %s", init_password)
+	log.Printf("response of bresponse ExportInitPasswordByLoginName is : %s", init_password)
 
 	return resourceAlibabacloudStackAscmUserUpdate(d, meta)
 }
@@ -162,16 +160,15 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 	if update {
 		request.QueryParams["loginName"] = lname
 
-		raw, err := client.WithAscmClient(func(ecsClient *sdk.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		addDebug("ModifyUserInformation", raw, request, request.QueryParams)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("ModifyUserInformation", bresponse, request, request.QueryParams)
 
-		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil || !bresponse.IsSuccess() {
 			errmsg := ""
-			if ok {
+			if err != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			} else {
+				return err
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "ModifyUserInformationRequestFailed", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
@@ -191,22 +188,20 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 		request.QueryParams["loginName"] = lname
 		request.QueryParams["roleIdList"] = fmt.Sprint(requeststring)
 
-		raw, err := client.WithAscmClient(func(ecsClient *sdk.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
+		bresponse, err := client.ProcessCommonRequest(request)
 
-		log.Printf("response of raw ResetRolesForUserByLoginName is : %s", raw)
-
-		bresponse, ok := raw.(*responses.CommonResponse)
+		log.Printf("response of bresponse ResetRolesForUserByLoginName is : %s", bresponse)
 		if err != nil {
 			errmsg := ""
-			if ok {
+			if err != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			} else {
+				return err
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "ResetRolesForUserByLoginName", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
-		addDebug("ResetRolesForUserByLoginName", raw, request)
+		addDebug("ResetRolesForUserByLoginName", bresponse, request)
 	}
 	return resourceAlibabacloudStackAscmUserRead(d, meta)
 }
@@ -267,14 +262,11 @@ func resourceAlibabacloudStackAscmUserDelete(d *schema.ResourceData, meta interf
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
 
-		raw, err := client.WithAscmClient(func(csClient *sdk.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
-		})
+		bresponse, err := client.ProcessCommonRequest(request)
 
-		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
 			errmsg := ""
-			if ok {
+			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "RemoveUserByLoginName", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
