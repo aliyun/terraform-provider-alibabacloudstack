@@ -590,6 +590,9 @@ func (client *AlibabacloudStackClient) GetCallerInfo() (*responses.BaseResponse,
 func (client *AlibabacloudStackClient) GetCallerIdentity() (string, error) {
 
 	resp, err := client.GetCallerInfo()
+	if err != nil {
+		return "", err
+	}
 	response := &AccountId{}
 	err = json.Unmarshal(resp.GetHttpContentBytes(), response)
 	ownerId := response.Data.PrimaryKey

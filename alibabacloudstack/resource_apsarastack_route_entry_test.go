@@ -6,7 +6,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
@@ -146,7 +146,7 @@ func TestAccAlibabacloudstackRouteEntryMulti(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"nexthop_type":          "NetworkInterface",
-						"destination_cidrblock": "172.16.4.0/24",
+						"destination_cidrblock": "172.16.2.0/24",
 						"name":                  fmt.Sprintf("tf-testAccRouteEntryConcurrence%d", rand),
 					}),
 				),
@@ -183,111 +183,49 @@ func testAccCheckRouteEntryDestroy(s *terraform.State) error {
 
 func testAccRouteEntryConfig_instance(rand int) string {
 	return fmt.Sprintf(`
-%s
-
-%s
-
-%s
 
 variable "name" {
    default = "tf-testAccRouteEntryConfigName%d"
 }
-resource "alibabacloudstack_vpc" "default" {
-   name = "${var.name}"
-   cidr_block = "10.1.0.0/21"
-}
-resource "alibabacloudstack_vswitch" "default" {
-   vpc_id = "${alibabacloudstack_vpc.default.id}"
-   cidr_block = "10.1.1.0/24"
-   availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-   name = "${var.name}"
-}
-resource "alibabacloudstack_security_group" "default" {
-   name = "${var.name}"
-   description = "default"
-   vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-resource "alibabacloudstack_security_group_rule" "default" {
-   type = "ingress"
-   ip_protocol = "tcp"
-   nic_type = "intranet"
-   policy = "accept"
-   port_range = "22/22"
-   priority = 1
-   security_group_id = "${alibabacloudstack_security_group.default.id}"
-   cidr_ip = "0.0.0.0/0"
-}
-resource "alibabacloudstack_instance" "default" {
-   security_groups = ["${alibabacloudstack_security_group.default.id}"]
-   vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-   instance_type = "${local.default_instance_type_id}"
-   internet_max_bandwidth_out = 5
-   system_disk_category = "cloud_pperf"
-   image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-   instance_name = "${var.name}"
-}
+
+
+%s
+
 resource "alibabacloudstack_route_entry" "default" {
-   route_table_id = "${alibabacloudstack_vpc.default.route_table_id}"
-   destination_cidrblock = "172.11.1.1/32"
-   nexthop_type = "Instance"
-   nexthop_id = "${alibabacloudstack_instance.default.id}"
-   name = "${var.name}"
-}
-`, DataAlibabacloudstackVswitchZones, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, rand)
+	route_table_id = "${alibabacloudstack_vpc_vpc.default.route_table_id}"
+	destination_cidrblock = "172.11.1.1/32"
+	nexthop_type = "Instance"
+	nexthop_id = "${alibabacloudstack_ecs_instance.default.id}"
+	name = "${var.name}"
+ }
+	`, rand, ECSInstanceCommonTestCase)
 }
 
 func testAccRouteEntryConfig_interface(rand int) string {
 	return fmt.Sprintf(
 		`
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation= "VSwitch"
-}
 variable "name" {
-   default = "tf-testAccRouteEntryInterfaceConfig%d"
-}
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "10.1.0.0/21"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "10.1.1.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name = "${var.name}"
-}
-resource "alibabacloudstack_security_group" "default" {
-  name = "${var.name}"
-  description = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-resource "alibabacloudstack_security_group_rule" "default" {
-  type = "ingress"
-  ip_protocol = "tcp"
-  nic_type = "intranet"
-  policy = "accept"
-  port_range = "22/22"
-  priority = 1
-  security_group_id = "${alibabacloudstack_security_group.default.id}"
-  cidr_ip = "0.0.0.0/0"
-}
+	default = "tf-testAccRouteEntryInterfaceConfig%d"
+	}
+%s
 
 resource "alibabacloudstack_router_interface" "default" {
-  opposite_region = "cn-wulan-env200-d01"
+  opposite_region = "cn-wulan-env212-d01"
   router_type = "VRouter"
-  router_id = "${alibabacloudstack_vpc.default.router_id}"
+  router_id = "${alibabacloudstack_vpc_vpc.default.router_id}"
   role = "InitiatingSide"
   specification = "Large.2"
   name = "${var.name}"
   description = "${var.name}"
 }
 resource "alibabacloudstack_route_entry" "default" {
-  route_table_id = "${alibabacloudstack_vpc.default.route_table_id}"
+  route_table_id = "${alibabacloudstack_vpc_vpc.default.route_table_id}"
   destination_cidrblock = "172.11.1.1/32"
   nexthop_type = "RouterInterface"
   nexthop_id = "${alibabacloudstack_router_interface.default.id}"
   name = "${var.name}"
 }
-`, rand)
+`, rand, SecurityGroupCommonTestCase)
 }
 
 func testAccRouteEntryConfig_natGateway(rand int) string {
