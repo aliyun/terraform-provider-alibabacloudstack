@@ -5,9 +5,6 @@ import (
 	"log"
 	"regexp"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -67,17 +64,14 @@ func dataSourceAlibabacloudStackCRNamespacesRead(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := CrService{client}
 
-	request := client.NewCommonRequest("POST", "cr", "2016-06-07", "GetNamespaceList", "")
+	request := client.NewCommonRequest("GET", "cr", "2016-06-07", "GetNamespaceList", "/namespace")
 
-	raw, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
-		return crClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	var crResp crListResponse

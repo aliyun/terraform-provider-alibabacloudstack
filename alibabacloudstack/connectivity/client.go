@@ -196,7 +196,12 @@ func (client *AlibabacloudStackClient) WithProductSDKClient(popcode ServiceCode)
 	if endpoint == "" {
 		return nil, fmt.Errorf("[ERROR] unable to initialize the %s client: endpoint or domain is not provided", string(popcode))
 	}
-	conn, err := sdk.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
+
+	ramSupported := true
+	if popcode == STSCode {
+		ramSupported = false  // TODO: STS不支持NewRamRoleArnWithPolicyCredential，待排查
+	}
+	conn, err := sdk.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true, ramSupported))
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize the %s client: %#v", popcode, err)
 	}
@@ -396,7 +401,7 @@ func (client *AlibabacloudStackClient) WithOssNewClient(do func(*ecs.Client) (in
 		if endpoint == "" {
 			return nil, fmt.Errorf("unable to initialize the oss client: endpoint or domain is not provided for ecs service")
 		}
-		ecsconn, err := ecs.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig().WithTimeout(time.Duration(60)*time.Second), client.Config.getAuthCredential(true))
+		ecsconn, err := ecs.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig().WithTimeout(time.Duration(60)*time.Second), client.Config.getAuthCredential(true, true))
 		if err != nil {
 			return nil, fmt.Errorf("unable to initialize the ECS client: %#v", err)
 		}

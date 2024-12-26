@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+	"fmt"
 )
 
 func TestAccAlibabacloudStackCRNamespacesDataSource(t *testing.T) {
@@ -13,7 +14,7 @@ func TestAccAlibabacloudStackCRNamespacesDataSource(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: dataSourceCRNamespacesConfigDependence,
+				Config: dataSourceCRNamespacesConfigDependence(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_cr_namespaces.default"),
 					resource.TestCheckNoResourceAttr("data.alibabacloudstack_cr_namespaces.default", "namespaces.default_visibility"),
@@ -26,9 +27,10 @@ func TestAccAlibabacloudStackCRNamespacesDataSource(t *testing.T) {
 	})
 }
 
-const dataSourceCRNamespacesConfigDependence = `
+func dataSourceCRNamespacesConfigDependence() string {
+	return fmt.Sprintf(`
   resource "alibabacloudstack_cr_namespace" "default" {
-  name               = "testing-db-nspace"
+  name               = "testacc-cr-namespace%d"
   auto_create        = false
   default_visibility = "PUBLIC"
 }
@@ -36,4 +38,5 @@ const dataSourceCRNamespacesConfigDependence = `
   data "alibabacloudstack_cr_namespaces" "default" {
   name_regex    = alibabacloudstack_cr_namespace.default.name
 }
-`
+`, getAccTestRandInt(1000000, 9999999))
+}
