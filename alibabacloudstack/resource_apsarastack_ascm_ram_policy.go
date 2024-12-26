@@ -2,6 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -9,9 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"strings"
-	"time"
 )
 
 func resourceAlibabacloudStackAscmRamPolicy() *schema.Resource {
@@ -60,7 +61,7 @@ func resourceAlibabacloudStackAscmRamPolicyCreate(d *schema.ResourceData, meta i
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_ram_policy", "policy alreadyExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if len(check.Data) == 0 {
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateRAMPolicy", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateRAMPolicy", "/ascm/auth/role/createRAMPolicy")
 		request.QueryParams["policyName"] = name
 		request.QueryParams["description"] = description
 		request.QueryParams["policyDocument"] = policyDoc
@@ -176,7 +177,7 @@ func resourceAlibabacloudStackAscmRamPolicyUpdate(d *schema.ResourceData, meta i
 		check.Data[0].PolicyDocument = policydoc
 	}
 	if attributeUpdate {
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateRAMPolicy", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateRAMPolicy", "/ascm/auth/role/updateRAMPolicy")
 		request.QueryParams["RamPolicyId"] = did[1]
 		request.QueryParams["NewPolicyName"] = name
 		request.QueryParams["NewDescription"] = description
@@ -217,7 +218,7 @@ func resourceAlibabacloudStackAscmRamPolicyDelete(d *schema.ResourceData, meta i
 	}
 	addDebug("IsPolicyExist", check, requestInfo, map[string]string{"policyName": did[0]})
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRAMPolicy", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRAMPolicy", "/ascm/auth/role/removeRAMPolicy")
 		request.QueryParams["ramPolicyId"] = did[1]
 
 		_, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {

@@ -16,7 +16,7 @@ type AscmService struct {
 }
 
 func (s *AscmService) DescribeAscmLogonPolicy(id string) (response *LoginPolicy, err error) {
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListLoginPolicies", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListLoginPolicies", "/ascm/auth/loginPolicy/listLoginPolicies")
 	request.QueryParams["name"] = id
 	var resp = &LoginPolicy{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -48,7 +48,7 @@ func (s *AscmService) DescribeAscmLogonPolicy(id string) (response *LoginPolicy,
 
 func (s *AscmService) DescribeAscmResourceGroup(id string) (response *ResourceGroup, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListResourceGroup", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListResourceGroup", "/ascm/auth/resource_group/list_resource_group")
 	request.QueryParams["resourceGroupName"] = did[0]
 
 	var resp = &ResourceGroup{}
@@ -81,7 +81,7 @@ func (s *AscmService) DescribeAscmResourceGroup(id string) (response *ResourceGr
 
 func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRole, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRoles", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "/ascm/auth/role/listRoles")
 	request.QueryParams["roleName"] = did[0]
 	request.QueryParams["roleType"] = "ROLETYPE_ASCM"
 
@@ -116,7 +116,7 @@ func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRol
 
 func (s *AscmService) DescribeAscmRamRole(id string) (response *AscmRoles, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRoles", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "/ascm/auth/role/listRoles")
 	request.QueryParams["roleName"] = did[0]
 	request.QueryParams["roleType"] = "ROLETYPE_RAM"
 	var resp = &AscmRoles{}
@@ -149,7 +149,7 @@ func (s *AscmService) DescribeAscmRamRole(id string) (response *AscmRoles, err e
 }
 
 func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, err error) {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRAMServiceRoles", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoles", "/ascm/auth/role/listRAMServiceRoles")
 	request.QueryParams["id"] = id
 	request.QueryParams["roleType"] = "ROLETYPE_RAM"
 	var resp = &RamRole{}
@@ -194,7 +194,7 @@ type BindResourceAndUsers struct {
 }
 
 func (s *AscmService) DescribeAscmResourceGroupUserAttachment(id string) (response *AscmResourceGroupUser, err error) {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListAscmUsersInsideResourceGroup", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListAscmUsersInsideResourceGroup", "/ascm/auth/resource_group/list_ascm_users")
 	request.QueryParams["resourceGroupId"] = id
 	var resp = &AscmResourceGroupUser{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -227,7 +227,7 @@ func (s *AscmService) DescribeAscmResourceGroupUserAttachment(id string) (respon
 
 func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *ListResourceGroup, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListResourceGroup", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListResourceGroup", "/ascm/auth/resource_group/list_resource_group")
 	if id == "" {
 		request.QueryParams["pageSize"] = "1000"
 	} else {
@@ -262,7 +262,7 @@ func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *Lis
 }
 
 func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (response *ListResourceGroup, err error) {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListResourceGroup", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListResourceGroup", "/ascm/auth/resource_group/list_resource_group")
 	request.QueryParams["pageSize"] = "1000"
 	var resp = &ListResourceGroup{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -303,7 +303,7 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (respon
 }
 
 func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUsers", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUsers", "/ascm/auth/user/listUsers")
 	request.QueryParams["loginName"] = id
 	var resp = &User{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -335,7 +335,7 @@ func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
 }
 
 func (s *AscmService) DescribeAscmUserGroup(id string) (response *UserGroup, err error) {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUserGroups", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUserGroups", "/ascm/auth/user/listUserGroups")
 	if id != "" {
 		request.QueryParams["userGroupName"] = id
 	}
@@ -369,7 +369,7 @@ func (s *AscmService) DescribeAscmUserGroup(id string) (response *UserGroup, err
 }
 
 func (s *AscmService) DescribeAscmUserGroupRoleBinding(id string) (response *UserGroup, err error) {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUserGroups", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUserGroups", "/ascm/auth/user/listUserGroups")
 	request.QueryParams["pageSize"] = "1000"
 	var resp = &UserGroup{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -409,7 +409,7 @@ func (s *AscmService) DescribeAscmUserGroupRoleBinding(id string) (response *Use
 }
 
 func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, err error) {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUsers", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUsers", "/ascm/auth/user/listUsers")
 	request.QueryParams["loginName"] = id
 	var resp = &User{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -441,7 +441,7 @@ func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, er
 }
 
 func (s *AscmService) DescribeAscmDeletedUser(id string) (response *DeletedUser, err error) {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListDeletedUsers", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListDeletedUsers", "/ascm/auth/user/listDeletedUsers")
 	request.QueryParams["loginName"] = id
 	var resp = &DeletedUser{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -473,7 +473,7 @@ func (s *AscmService) DescribeAscmDeletedUser(id string) (response *DeletedUser,
 
 func (s *AscmService) DescribeAscmOrganization(id string) (response *Organization, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "GetOrganizationList", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetOrganizationList", "/ascm/auth/organization/queryList")
 	request.QueryParams["name"] = did[0]
 	var resp = &Organization{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -506,7 +506,7 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 
 func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRAMPolicies", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMPolicies", "/ascm/auth/role/listRAMPolicies")
 	request.QueryParams["policyName"] = did[0]
 	var resp = &RamPolicies{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -539,7 +539,7 @@ func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, e
 
 func (s *AscmService) DescribeAscmRamPolicyForRole(id string) (response *RamPolicies, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRAMPolicies", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMPolicies", "/ascm/auth/role/listRAMPolicies")
 	request.QueryParams["RamPolicyId"] = did[0]
 	var resp = &RamPolicies{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -619,7 +619,7 @@ func (s *AscmService) DescribeAscmQuota(id string) (response *AscmQuota, err err
 }
 
 func (s *AscmService) DescribeAscmPasswordPolicy(id string) (response *PasswordPolicy, err error) {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "GetPasswordPolicy", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetPasswordPolicy", "/ascm/auth/user/getPasswordPolicy")
 	request.QueryParams["id"] = id
 	var resp = &PasswordPolicy{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -651,7 +651,7 @@ func (s *AscmService) DescribeAscmPasswordPolicy(id string) (response *PasswordP
 }
 
 func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err error) {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUsersInUserGroup", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUsersInUserGroup", "/ascm/auth/user/listUsersInUserGroup")
 	request.QueryParams["userGroupId"] = id
 	var resp = &User{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -685,7 +685,7 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 func (s *AscmService) ExportInitPasswordByLoginName(loginname string) (initPassword string, err error) {
 	var loginnamelist []string
 	loginnamelist = append(loginnamelist, loginname)
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ExportInitPasswordByLoginNameList", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ExportInitPasswordByLoginNameList", "/ascm/auth/user/exportInitPasswordByLoginNameList")
 	loginnamestring, _ := json.Marshal(loginnamelist)
 	request.QueryParams["LoginNameList"] = fmt.Sprint(loginnamestring)
 	var response InitPasswordListResponse

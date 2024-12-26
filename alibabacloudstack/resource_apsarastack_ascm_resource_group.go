@@ -53,7 +53,7 @@ func resourceAlibabacloudStackAscmResourceGroupCreate(d *schema.ResourceData, me
 	organizationid := d.Get("organization_id").(string)
 
 	if len(check.Data) == 0 {
-		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "CreateResourceGroup", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateResourceGroup", "/ascm/auth/resource_group/create_resource_group")
 		request.QueryParams["ProductName"] = "ascm"
 		request.QueryParams["resource_group_name"] = name
 		request.QueryParams["organization_id"] = organizationid
@@ -122,7 +122,7 @@ func resourceAlibabacloudStackAscmResourceGroupUpdate(d *schema.ResourceData, me
 	}
 
 	if attributeUpdate {
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateResourceGroup", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateResourceGroup", "/ascm/auth/resource_group/update_resource_group")
 		request.QueryParams["resourceGroupName"] = name
 		request.QueryParams["id"] = did[1]
 		request.Headers["x-acs-content-type"] = "application/json"
@@ -185,7 +185,7 @@ func resourceAlibabacloudStackAscmResourceGroupDelete(d *schema.ResourceData, me
 	}
 	addDebug("IsResourceGroupExist", check, requestInfo, map[string]string{"resourceGroupName": did[0]})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveResourceGroup", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveResourceGroup", "/ascm/auth/resource_group/delete_resource_group")
 		request.QueryParams["resourceGroupName"] = did[0]
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"

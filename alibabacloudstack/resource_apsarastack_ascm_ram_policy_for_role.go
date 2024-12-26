@@ -2,15 +2,16 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func resourceAlibabacloudStackAscmRamPolicyForRole() *schema.Resource {
@@ -37,7 +38,7 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleCreate(d *schema.ResourceData,
 	ram_id := d.Get("ram_policy_id").(string)
 	roleid := d.Get("role_id").(int)
 
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddRAMPolicyToRole", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddRAMPolicyToRole", "/ascm/auth/role/addRAMPolicyToRole")
 	request.QueryParams["RamPolicyId"] = ram_id
 	request.QueryParams["RoleId"] = fmt.Sprint(roleid)
 
@@ -106,7 +107,7 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleDelete(d *schema.ResourceData,
 	addDebug("IsBindingExist", check, map[string]string{"ramPolicyId": did[0]})
 
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RemoveRAMPolicyFromRole", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRAMPolicyFromRole", "/ascm/auth/role/removeRAMPolicyFromRole")
 		request.QueryParams["ramPolicyId"] = did[0]
 		request.QueryParams["roleId"] = did[1]
 

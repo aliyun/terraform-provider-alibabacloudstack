@@ -128,7 +128,7 @@ func resourceAlibabacloudstackAscmAccessKeyDelete(d *schema.ResourceData, meta i
 	addDebug("IsKeyExist", check, nil, map[string]string{"resourceGroupName": d.Id()})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 
-		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RamDeleteAccessKey", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RamDeleteAccessKey", "/ascm/auth/ramCompatible/deleteAccessKey")
 		request.QueryParams["id"] = d.Id()
 
 		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {

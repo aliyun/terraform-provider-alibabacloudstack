@@ -177,7 +177,7 @@ func resourceAlibabacloudStackMaxcomputeProjectUpdate(d *schema.ResourceData, me
 			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateOdpsQuota", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateOdpsQuota", "/ascm/manage/resource_mgmt/updateOdpsQuota")
 		request.Headers["x-acs-roleid"] = strconv.Itoa(roleId)
 		mergeMaps(request.QueryParams, map[string]string{
 			"Cluster":           d.Get("cluster").(string),

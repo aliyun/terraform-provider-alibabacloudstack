@@ -7,58 +7,10 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
-
-// response json struct
-type AscmUsersListResponse struct {
-	*responses.BaseResponse
-
-	Data []struct {
-		AccessKeys         []interface{} `json:"accessKeys"`
-		Roles              []interface{} `json:"roles"`
-		UserGroupRoles     []interface{} `json:"userGroupRoles"`
-		UserGroups         []interface{} `json:"userGroups"`
-		ResourceSets       []interface{} `json:"resourceSets"`
-		Roles1             []interface{} `json:"roles1"`
-		Users              []interface{} `json:"users"`
-		CellphoneNum       string        `json:"CellphoneNum"`
-		Default            bool          `json:"default"`
-		Deleted            bool          `json:"Deleted"`
-		DisplayName        string        `json:"DisplayName"`
-		Email              string        `json:"Email"`
-		EnableDingTalk     bool          `json:"EnableDingTalk"`
-		EnableEmail        bool          `json:"EnableEmail"`
-		EnableShortMessage bool          `json:"EnableShortMessage"`
-		Id                 int           `json:"Id"`
-		LastLoginTime      int64         `json:"LastLoginTime"`
-		LoginName          string        `json:"LoginName"`
-		MobileNationCode   string        `json:"MobileNationCode"`
-		ParentPk           string        `json:"ParentPk"`
-		PrimaryKey         string        `json:"PrimaryKey"`
-		Status             string        `json:"Status"`
-		OrganizationId     int           `json:"OrganizationId"`
-		DefaultRole        interface{}   `json:"defaultRole"`
-		LoginPolicy        interface{}   `json:"loginPolicy"`
-		Organization       interface{}   `json:"organization"`
-	} `json:"Data"`
-
-	UserRoles       []interface{} `json:"userRoles"`
-	SuccessResponse bool          `json:"SuccessResponse"`
-	Code            string        `json:"Code"`
-	ErrorKey        string        `json:"ErrorKey"`
-	Message         string        `json:"Message"`
-	ExtraMessage    string        `json:"ExtraMessage"`
-	RequestId       string        `json:"RequestId"`
-	Action          string        `json:"Action"`
-	Cost            int64         `json:"Cost"`
-	Domain          string        `json:"Domain"`
-	ServerRole      string        `json:"ServerRole"`
-	PageInfo        interface{}   `json:"pageInfo"`
-}
 
 // parameter switch map
 
@@ -183,12 +135,10 @@ func dataSourceAlibabacloudStackAscmUsers() *schema.Resource {
 }
 
 func dataSourceAlibabacloudStackAscmUsersRead(d *schema.ResourceData, meta interface{}) error {
-	response := AscmUsersListResponse{}
-
 	// request list api
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUsers", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUsers", "/ascm/auth/user/listUsers")
 
 	bodyMap := make(map[string]string)
 	if v, ok := d.GetOk("login_name"); ok && v.(string) != "" {
@@ -218,28 +168,31 @@ func dataSourceAlibabacloudStackAscmUsersRead(d *schema.ResourceData, meta inter
 
 	mergeMaps(request.QueryParams, bodyMap)
 
-	proxy_client, err := client.WithProductSDKClient(connectivity.ASCMCode)
-	request.TransToAcsRequest()
-
-	bresponse, err := proxy_client.ProcessCommonRequest(request)
+	var resp = &User{}
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug("ListUsers", bresponse, request, request.QueryParams)
 	if err != nil {
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "Process Common Request failed", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := ""
+		if bresponse != nil {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		} else {
+			return err
+		}
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserNotFound"}) {
+			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "ListUsers", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	if !response.IsSuccess() {
-		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		return errmsgs.WrapErrorf(nil, errmsgs.RequestV1ErrorMsg, "Request failed", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
 
-	// mapping response
+	// mapping resp
 
 	var users []map[string]interface{}
-	for _, Data_item := range response.Data {
+	for _, Data_item := range resp.Data {
 		users_item := map[string]interface{}{
 			"cellphone_num":        Data_item.CellphoneNum,
 			"default":              Data_item.Default,
@@ -255,7 +208,7 @@ func dataSourceAlibabacloudStackAscmUsersRead(d *schema.ResourceData, meta inter
 			"parent_pk":            Data_item.ParentPk,
 			"primary_key":          Data_item.PrimaryKey,
 			"status":               Data_item.Status,
-			"organization_id":      Data_item.OrganizationId,
+			"organization_id":      Data_item.Organization.ID,
 		}
 		users = append(users, users_item)
 	}

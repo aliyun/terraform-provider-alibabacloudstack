@@ -90,7 +90,7 @@ func dataSourceAlibabacloudStackAscmRamServiceRoles() *schema.Resource {
 
 func dataSourceAlibabacloudStackAscmRamServiceRolesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoles", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoles", "/ascm/auth/role/listRAMServiceRoles")
 	request.QueryParams["roleType"] = "ROLETYPE_RAM"
 	response := RamRole{}
 

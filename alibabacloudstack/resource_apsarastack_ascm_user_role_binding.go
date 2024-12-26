@@ -49,7 +49,7 @@ func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, 
 	flag = true
 	if flag {
 		for i := range roleids {
-			request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddRoleToUser", "")
+			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddRoleToUser", "/ascm/auth/role/addRoleToUser")
 			request.QueryParams["loginName"] = lname
 			request.QueryParams["roleId"] = fmt.Sprint(roleids[i])
 
@@ -59,14 +59,14 @@ func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, 
 			log.Printf("response of raw AddRoleToUser Role(%s) is : %s", roleids[i], raw)
 
 			bresponse, ok := raw.(*responses.CommonResponse)
-			if err != nil || bresponse.GetHttpStatus() != 200{
+			if err != nil || bresponse.GetHttpStatus() != 200 {
 				errmsg := ""
 				if ok {
 					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				}
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_role_binding", "AddRoleToUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			
+
 			addDebug("AddRoleToUser", raw, requestInfo, bresponse.GetHttpContentString())
 			log.Printf("response of queryparams AddRoleToUser is : %s", request.QueryParams)
 		}
@@ -111,7 +111,7 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 	lname := d.Get("login_name").(string)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *ecs.Client
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ResetRolesForUserByLoginName", "/roa/ascm/auth/user/ResetRolesForUserByLoginName")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ResetRolesForUserByLoginName", "/roa/ascm/auth/user/ResetRolesForUserByLoginName")
 
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 
@@ -182,7 +182,7 @@ func resourceAlibabacloudStackAscmUserRoleBindingDelete(d *schema.ResourceData, 
 	addDebug("IsBindingExist", check, requestInfo, map[string]string{"loginName": d.Id()})
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 		if flag {
-			request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RemoveRoleFromUser", "")
+			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUser", "/ascm/auth/role/removeRoleFromUser")
 			request.QueryParams["loginName"] = d.Id()
 			request.QueryParams["roleId"] = fmt.Sprint(roleid)
 

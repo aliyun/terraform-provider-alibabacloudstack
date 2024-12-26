@@ -48,7 +48,7 @@ func resourceAlibabacloudStackAscmUserGroupUserCreate(d *schema.ResourceData, me
 		"LoginNameList": loginNamesList,
 	}
 
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddUsersToUserGroup", "/roa/ascm/auth/user/addUsersToUserGroup")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddUsersToUserGroup", "/roa/ascm/auth/user/addUsersToUserGroup")
 
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 	request.Headers["Content-Type"] = requests.Json
@@ -145,7 +145,7 @@ func resourceAlibabacloudStackAscmUserGroupUserUpdate(d *schema.ResourceData, me
 		"LoginNameList": loginNames,
 	}
 
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RemoveUsersFromUserGroup", "/roa/ascm/auth/user/RemoveUsersFromUserGroup")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveUsersFromUserGroup", "/roa/ascm/auth/user/RemoveUsersFromUserGroup")
 
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 	request.Headers["Content-Type"] = requests.Json
@@ -180,7 +180,7 @@ func resourceAlibabacloudStackAscmUserGroupUserUpdate(d *schema.ResourceData, me
 		"LoginNameList": loginNamesList,
 	}
 
-	request = client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddUsersToUserGroup", "/roa/ascm/auth/user/addUsersToUserGroup")
+	request = client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddUsersToUserGroup", "/roa/ascm/auth/user/addUsersToUserGroup")
 
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 	request.Headers["Content-Type"] = requests.Json
@@ -221,7 +221,7 @@ func resourceAlibabacloudStackAscmUserGroupUserDelete(d *schema.ResourceData, me
 		"LoginNameList": loginNames,
 	}
 
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RemoveUsersFromUserGroup", "/roa/ascm/auth/user/RemoveUsersFromUserGroup")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveUsersFromUserGroup", "/roa/ascm/auth/user/RemoveUsersFromUserGroup")
 
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 	request.Headers["Content-Type"] = requests.Json

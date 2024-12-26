@@ -88,7 +88,7 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_resource_group", "\"Login Name already exist in Historical Users, try with a different name.\"", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if check.Data == nil {
-		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddUser", "/ascm/auth/user/addUser")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddUser", "/ascm/auth/user/addUser")
 		mergeMaps(request.QueryParams, map[string]string{
 			"loginName":        lname,
 			"displayName":      dname,
@@ -135,7 +135,7 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	lname := d.Get("login_name").(string)
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ModifyUserInformation", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ModifyUserInformation", "/ascm/auth/user/modifyUserInformation")
 	update := false
 	if d.HasChange("display_name") {
 		update = true
@@ -186,7 +186,7 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 		for _, role_id := range role_ids {
 			roleIdList = append(roleIdList, role_id.(string))
 		}
-		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ResetRolesForUserByLoginName", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ResetRolesForUserByLoginName", "/ascm/auth/role/resetRolesForUserByLoginName")
 		requeststring, err := json.Marshal(roleIdList)
 		request.QueryParams["loginName"] = lname
 		request.QueryParams["roleIdList"] = fmt.Sprint(requeststring)
@@ -260,7 +260,7 @@ func resourceAlibabacloudStackAscmUserDelete(d *schema.ResourceData, meta interf
 	}
 	addDebug("IsUserExist", check, requestInfo, map[string]string{"loginName": d.Id()})
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RemoveUserByLoginName", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveUserByLoginName", "/ascm/auth/user/removeUserByLoginName")
 		request.QueryParams["loginName"] = d.Id()
 
 		request.Headers["x-acs-content-type"] = "application/json"

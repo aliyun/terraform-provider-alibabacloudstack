@@ -173,7 +173,7 @@ func resourceAlibabacloudStackAscmUserGroupDelete(d *schema.ResourceData, meta i
 	}
 	addDebug("IsUserGroupExist", check, requestInfo, map[string]string{"groupName": d.Id()})
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DeleteUserGroup", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DeleteUserGroup", "/ascm/auth/user/deleteUserGroup")
 		request.QueryParams["userGroupId"] = strconv.Itoa(check.Data[0].Id)
 
 		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {

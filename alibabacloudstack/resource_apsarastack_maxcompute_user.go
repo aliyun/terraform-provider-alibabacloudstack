@@ -81,7 +81,7 @@ func resourceAlibabacloudStackMaxcomputeUserCreate(d *schema.ResourceData, meta 
 	request["Description"] = d.Get("description")
 
 	response, err = client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, request)
-	
+
 	if err != nil {
 		return err
 	}
@@ -147,7 +147,7 @@ func resourceAlibabacloudStackMaxcomputeUserUpdate(d *schema.ResourceData, meta 
 			OrganizationId = client.Department
 		}
 
-		commonRequest := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateOdpsUser", "")
+		commonRequest := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateOdpsUser", "/ascm/manage/resource_mgmt/updateOdpsUser")
 		mergeMaps(commonRequest.QueryParams, map[string]string{
 			"Id":               d.Get("id").(string),
 			"UserId":           d.Get("user_id").(string),
@@ -157,7 +157,7 @@ func resourceAlibabacloudStackMaxcomputeUserUpdate(d *schema.ResourceData, meta 
 			"OrganizationName": d.Get("organization_name").(string),
 			"Description":      d.Get("description").(string),
 		})
-		commonRequest.Headers["x-acs-roleid"] =strconv.Itoa(roleId)
+		commonRequest.Headers["x-acs-roleid"] = strconv.Itoa(roleId)
 
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(commonRequest)
@@ -186,7 +186,7 @@ func resourceAlibabacloudStackMaxcomputeUserDelete(d *schema.ResourceData, meta 
 	request["ClusterName"] = d.Get("cluster_name")
 
 	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, request)
-	
+
 	if err != nil {
 		return err
 	}
