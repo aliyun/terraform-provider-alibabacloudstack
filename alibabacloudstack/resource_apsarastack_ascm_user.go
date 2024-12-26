@@ -99,9 +99,10 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 			"organizationId":   client.Department,
 			"loginPolicyId":    fmt.Sprint(loginpolicyid),
 		})
-
-		raw, err := client.WithAscmClient(func(ecsClient *sdk.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
+		request.Headers["x-acs-content-type"] = "application/json"
+		request.Headers["Content-Type"] = "application/json"
+		raw, err := client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+			return ascmClient.ProcessCommonRequest(request)
 		})
 		addDebug("AddUser", raw, request, request.QueryParams)
 		bresponse, ok := raw.(*responses.CommonResponse)
