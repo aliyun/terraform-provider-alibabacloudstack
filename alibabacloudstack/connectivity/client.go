@@ -18,7 +18,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cdn"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cloudapi"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/drds"
@@ -80,6 +79,7 @@ type AlibabacloudStackClient struct {
 	teaSdkConfig                 rpc.Config
 	accountId                    string
 	roleId                       int
+	Conns                        map[ServiceCode]*sdk.Client
 	ascmconn                     *sdk.Client
 	ecsconn                      *ecs.Client
 	accountIdMutex               sync.RWMutex
@@ -109,7 +109,6 @@ type AlibabacloudStackClient struct {
 	dnsconn                      *alidns.Client
 	edasconn                     *edas.Client
 	creeconn                     *cr_ee.Client
-	crconn                       *cr.Client
 	cmsconn                      *cms.Client
 	maxcomputeconn               *maxcompute.Client
 	alikafkaconn                 *alikafka.Client
@@ -170,6 +169,7 @@ func (c *Config) Client() (*AlibabacloudStackClient, error) {
 		ResourceGroupId:              c.ResourceGroupId,
 		Domain:                       c.Domain,
 		OtsInstanceName:              c.OtsInstanceName,
+		Conns:                        make(map[ServiceCode]*sdk.Client),
 		tablestoreconnByInstanceName: make(map[string]*tablestore.TableStoreClient),
 		Eagleeye:                     c.Eagleeye,
 	}, nil
@@ -195,9 +195,6 @@ func (client *AlibabacloudStackClient) WithProductSDKClient(popcode ServiceCode)
 	endpoint := client.Config.Endpoints[popcode]
 	if endpoint == "" {
 		return nil, fmt.Errorf("[ERROR] unable to initialize the %s client: endpoint or domain is not provided", string(popcode))
-	}
-	if strings.HasPrefix(endpoint, "http") {
-		endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
 	}
 	conn, err := sdk.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true))
 	if err != nil {
@@ -398,9 +395,6 @@ func (client *AlibabacloudStackClient) WithOssNewClient(do func(*ecs.Client) (in
 		endpoint := client.Config.Endpoints[OSSCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("unable to initialize the oss client: endpoint or domain is not provided for ecs service")
-		}
-		if strings.HasPrefix(endpoint, "http") {
-			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
 		}
 		ecsconn, err := ecs.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig().WithTimeout(time.Duration(60)*time.Second), client.Config.getAuthCredential(true))
 		if err != nil {
@@ -777,9 +771,6 @@ func (client *AlibabacloudStackClient) WithCsClient(do func(*cs.Client) (interfa
 			return nil, fmt.Errorf("unable to initialize the cs client: endpoint or domain is not provided for cs service")
 		}
 		if endpoint != "" {
-			if strings.HasPrefix(endpoint, "http") {
-				endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
-			}
 			if strings.ToLower(client.Config.Protocol) == "https" {
 				endpoint = fmt.Sprintf("https://%s", endpoint)
 			} else {
@@ -847,9 +838,6 @@ func (client *AlibabacloudStackClient) WithSlsDataClient(do func(*sls.Client) (i
 		endpoint := client.Config.Endpoints[SlSDataCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("unable to initialize the log client: endpoint or domain is not provided for log service")
-		}
-		if strings.HasPrefix(endpoint, "http") {
-			endpoint = strings.TrimPrefix(strings.TrimPrefix(endpoint, "http://"), "https://")
 		}
 		if client.Config.Proxy != "" {
 			os.Setenv("http_proxy", client.Config.Proxy)
@@ -932,20 +920,6 @@ func (client *AlibabacloudStackClient) WithCrEEClient(do func(*cr_ee.Client) (in
 	return do(client.creeconn)
 }
 
-func (client *AlibabacloudStackClient) WithCrClient(do func(*cr.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the CR client if necessary
-	if client.crconn == nil {
-		conn, error := client.WithProductSDKClient(CRCode)
-		if error != nil {
-			return nil, error
-		}
-		client.crconn = &cr.Client{
-			Client: *conn,
-		}
-	}
-
-	return do(client.crconn)
-}
 func (client *AlibabacloudStackClient) WithDnsClient(do func(*alidns.Client) (interface{}, error)) (interface{}, error) {
 	if client.dnsconn == nil {
 		conn, error := client.WithProductSDKClient(DNSCode)
@@ -1257,25 +1231,22 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	}
 	sdkConfig := client.teaSdkConfig
 	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
-	conn, err := rpc.NewClient(&sdkConfig)
-	conn.Headers = make(map[string]*string)
+
+	headers := make(map[string]*string)
 	for key, value := range client.defaultHeaders(popcode) {
-		conn.Headers[key] = &value
+		v := value
+		headers[key] = &v
 	}
 
 	if query == nil {
 		query = make(map[string]interface{})
 	}
+	for key, value := range client.defaultQueryParams() {
+		if _, exist := query[key]; !exist {
+			query[key] = value
+		}
+	}
 	query["Product"] = popcode
-
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s client: %#v", popcode, err)
-	}
-	conn.Headers = make(map[string]*string)
-	for key, value := range client.defaultHeaders(popcode) {
-		v := value
-		conn.Headers[key] = &v
-	}
 
 	var protocol string
 	if strings.ToLower(client.Config.Protocol) == "https" {
@@ -1290,14 +1261,25 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 		runtime.HttpProxy = &client.Config.Proxy
 		runtime.HttpsProxy = &client.Config.Proxy
 	}
-	runtime.SetAutoretry(true)
+	runtime.SetAutoretry(false) // 使用ASAPI时，Tea包不能重试，他会修改endpoint
 
 	var response map[string]interface{}
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
+
+		// conn 必须在每次请求前初始化，因为DoRequest会修改conn的内容，会导致下次conn的配置失效
+		conn, err := rpc.NewClient(&sdkConfig)
+		if err != nil {
+			return resource.RetryableError(fmt.Errorf("unable to initialize the %s client: %#v", popcode, err))
+		}
+		conn.Headers = headers
+
 		response, err = conn.DoRequest(&apiname, &protocol, &method, &version, &authType, query, body, &runtime)
 		log.Printf(" ================================ %s ======================================\n query %v \n request %v \n response: %v", apiname, query, body, response)
 		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				return resource.NonRetryableError(err)
+			}
 			errmsg := errmsgs.GetAsapiErrorMessage(response)
 			if errmsg != "" {
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "popcode", apiname, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
@@ -1307,6 +1289,48 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 		}
 		return nil
 	})
+	return response, err
+}
+
+func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*sdk.Client, error) {
+	var conn *sdk.Client
+	var exists bool
+	if conn, exists = client.Conns[popcode]; !exists {
+		c, err := client.WithProductSDKClient(popcode)
+		if err != nil {
+			return nil, err
+		}
+		client.Conns[popcode] = c
+		conn = c
+	}
+	return conn, nil
+}
+
+func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.CommonRequest) (*responses.CommonResponse, error) {
+	popcode := ServiceCode(strings.ToUpper(request.Product))
+
+	conn, err := client.getConnectClient(popcode)
+	if err != nil {
+		return nil, err
+	}
+
+	//request.Domain = conn.Domain
+	if strings.HasPrefix(conn.Domain, "internal.asapi.") || strings.HasPrefix(conn.Domain, "public.asapi.") {
+		// asapi兼容逻辑
+		// # asapi 使用common SDK时不能拼接pathpattern，否则会报错
+		if request.PathPattern != "" {
+			var r []string = strings.SplitN(conn.Domain, "/", 2)
+			request.Domain = r[0]
+			request.PathPattern = "/asapi/v3"
+		}
+		if len(request.Content) > 0 {
+			request.QueryParams["x-acs-body"] = string(request.Content)
+			request.SetContent([]byte("{}"))
+		}
+		request.Method = "POST"
+	}
+
+	response, err := conn.ProcessCommonRequest(request)
 	return response, err
 }
 

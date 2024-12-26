@@ -164,8 +164,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	//cr endpoint
 	CRCode: PopEndpoint{
-		"cr.{{.domain}}",
-		"cr.{{.region}}.{{.domain}}",
+		"cr-biz.{{.region}}.{{.domain}}",
+		"cr-biz.{{.region}}.{{.domain}}",
 	},
 	//csb endpoint
 	CSBCode: PopEndpoint{

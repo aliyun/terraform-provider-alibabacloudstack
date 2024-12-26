@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"log"
 	"regexp"
 	"time"
@@ -128,16 +127,18 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 			requestInfo = &bucket.Client
 			return bucket.ListObjects(options...)
 		})
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket_object", "ListObjects", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
-		}
-		var response *oss.ListObjectsResult
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		response, ok := raw.(oss.ListObjectsResult)
+		log.Printf("err is %s", err)
+		log.Printf("ok is %t", ok)
+		// if err != nil {
+		// 	errmsg := ""
+		// 	if ok {
+		// 		errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		// 	}
+		// 	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_adb_zones", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		// }
+		// var response *oss.ListObjectsResult
+		// err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if debugOn() {
 			addDebug("ListObjects", raw, requestInfo, map[string]interface{}{"options": options})
 		}
