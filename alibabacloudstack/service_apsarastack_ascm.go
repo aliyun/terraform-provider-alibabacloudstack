@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
@@ -21,8 +21,8 @@ func (s *AscmService) DescribeAscmLogonPolicy(id string) (response *LoginPolicy,
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListLoginPolicies", "")
 	request.QueryParams["name"] = id
 	var resp = &LoginPolicy{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -54,8 +54,8 @@ func (s *AscmService) DescribeAscmResourceGroup(id string) (response *ResourceGr
 	request.QueryParams["resourceGroupName"] = did[0]
 
 	var resp = &ResourceGroup{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -88,8 +88,8 @@ func (s *AscmService) DescribeAscmCustomRole(id string) (response *AscmCustomRol
 	request.QueryParams["roleType"] = "ROLETYPE_ASCM"
 
 	var resp = &AscmCustomRole{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -122,8 +122,8 @@ func (s *AscmService) DescribeAscmRamRole(id string) (response *AscmRoles, err e
 	request.QueryParams["roleName"] = did[0]
 	request.QueryParams["roleType"] = "ROLETYPE_RAM"
 	var resp = &AscmRoles{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -155,8 +155,8 @@ func (s *AscmService) DescribeAscmRamServiceRole(id string) (response *RamRole, 
 	request.QueryParams["id"] = id
 	request.QueryParams["roleType"] = "ROLETYPE_RAM"
 	var resp = &RamRole{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -199,8 +199,8 @@ func (s *AscmService) DescribeAscmResourceGroupUserAttachment(id string) (respon
 	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListAscmUsersInsideResourceGroup", "")
 	request.QueryParams["resourceGroupId"] = id
 	var resp = &AscmResourceGroupUser{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -236,8 +236,8 @@ func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *Lis
 		request.QueryParams["resourceGroupName"] = did[0]
 	}
 	var resp = &ListResourceGroup{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -267,8 +267,8 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (respon
 	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListResourceGroup", "")
 	request.QueryParams["pageSize"] = "1000"
 	var resp = &ListResourceGroup{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -308,8 +308,8 @@ func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
 	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUsers", "")
 	request.QueryParams["loginName"] = id
 	var resp = &User{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	addDebug("ListUsers", raw, request, request.QueryParams)
 	bresponse, ok := raw.(*responses.CommonResponse)
@@ -342,8 +342,8 @@ func (s *AscmService) DescribeAscmUserGroup(id string) (response *UserGroup, err
 		request.QueryParams["userGroupName"] = id
 	}
 	var resp = &UserGroup{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -374,8 +374,8 @@ func (s *AscmService) DescribeAscmUserGroupRoleBinding(id string) (response *Use
 	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUserGroups", "")
 	request.QueryParams["pageSize"] = "1000"
 	var resp = &UserGroup{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -414,8 +414,8 @@ func (s *AscmService) DescribeAscmUserRoleBinding(id string) (response *User, er
 	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUsers", "")
 	request.QueryParams["loginName"] = id
 	var resp = &User{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -446,8 +446,8 @@ func (s *AscmService) DescribeAscmDeletedUser(id string) (response *DeletedUser,
 	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListDeletedUsers", "")
 	request.QueryParams["loginName"] = id
 	var resp = &DeletedUser{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -478,8 +478,8 @@ func (s *AscmService) DescribeAscmOrganization(id string) (response *Organizatio
 	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "GetOrganizationList", "")
 	request.QueryParams["name"] = did[0]
 	var resp = &Organization{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	addDebug("GetOrganization", raw, request, request.QueryParams)
 	bresponse, ok := raw.(*responses.CommonResponse)
@@ -511,8 +511,8 @@ func (s *AscmService) DescribeAscmRamPolicy(id string) (response *RamPolicies, e
 	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRAMPolicies", "")
 	request.QueryParams["policyName"] = did[0]
 	var resp = &RamPolicies{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -544,8 +544,8 @@ func (s *AscmService) DescribeAscmRamPolicyForRole(id string) (response *RamPoli
 	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListRAMPolicies", "")
 	request.QueryParams["RamPolicyId"] = did[0]
 	var resp = &RamPolicies{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -593,8 +593,8 @@ func (s *AscmService) DescribeAscmQuota(id string) (response *AscmQuota, err err
 		"regionName":  s.client.RegionId,
 	})
 	var resp = &AscmQuota{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -624,8 +624,8 @@ func (s *AscmService) DescribeAscmPasswordPolicy(id string) (response *PasswordP
 	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "GetPasswordPolicy", "")
 	request.QueryParams["id"] = id
 	var resp = &PasswordPolicy{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -656,8 +656,8 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListUsersInUserGroup", "")
 	request.QueryParams["userGroupId"] = id
 	var resp = &User{}
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
@@ -691,8 +691,8 @@ func (s *AscmService) ExportInitPasswordByLoginName(loginname string) (initPassw
 	loginnamestring, _ := json.Marshal(loginnamelist)
 	request.QueryParams["LoginNameList"] = fmt.Sprint(loginnamestring)
 	var response InitPasswordListResponse
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
+	raw, err := s.client.WithAscmClient(func(ascmClient *sdk.Client) (interface{}, error) {
+		return ascmClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
