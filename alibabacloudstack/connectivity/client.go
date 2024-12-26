@@ -1321,7 +1321,9 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		if request.PathPattern != "" {
 			var r []string = strings.SplitN(conn.Domain, "/", 2)
 			request.Domain = r[0]
-			request.PathPattern = "/asapi/v3"
+			if strings.HasPrefix(conn.Domain, "internal.asapi.") {
+				request.PathPattern = "/asapi/v3"
+			}
 		}
 		if len(request.Content) > 0 {
 			request.QueryParams["x-acs-body"] = string(request.Content)

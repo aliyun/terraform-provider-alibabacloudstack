@@ -88,7 +88,7 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_resource_group", "\"Login Name already exist in Historical Users, try with a different name.\"", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if check.Data == nil {
-		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddUser", "")
+		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddUser", "/ascm/auth/user/addUser")
 		mergeMaps(request.QueryParams, map[string]string{
 			"loginName":        lname,
 			"displayName":      dname,
@@ -98,11 +98,13 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 			"organizationId":   client.Department,
 			"loginPolicyId":    fmt.Sprint(loginpolicyid),
 		})
+		request.Headers["x-acs-content-type"] = "application/json"
+		request.Headers["Content-Type"] = "application/json"
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug("AddUser", bresponse, request, request.QueryParams)
 		if err != nil {
 			errmsg := ""
-			if err != nil {
+			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			} else {
 				return err
@@ -111,7 +113,7 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 		}
 		if bresponse.GetHttpStatus() != 200 {
 			errmsg := ""
-			if err != nil {
+			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			} else {
 				return err
@@ -159,13 +161,14 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 	}
 	if update {
 		request.QueryParams["loginName"] = lname
-
+		request.Headers["x-acs-content-type"] = "application/json"
+		request.Headers["Content-Type"] = "application/json"
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug("ModifyUserInformation", bresponse, request, request.QueryParams)
 
 		if err != nil || !bresponse.IsSuccess() {
 			errmsg := ""
-			if err != nil {
+			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			} else {
 				return err
@@ -187,13 +190,14 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 		requeststring, err := json.Marshal(roleIdList)
 		request.QueryParams["loginName"] = lname
 		request.QueryParams["roleIdList"] = fmt.Sprint(requeststring)
-
+		request.Headers["x-acs-content-type"] = "application/json"
+		request.Headers["Content-Type"] = "application/json"
 		bresponse, err := client.ProcessCommonRequest(request)
 
 		log.Printf("response of bresponse ResetRolesForUserByLoginName is : %s", bresponse)
 		if err != nil {
 			errmsg := ""
-			if err != nil {
+			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			} else {
 				return err
@@ -261,7 +265,6 @@ func resourceAlibabacloudStackAscmUserDelete(d *schema.ResourceData, meta interf
 
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
-
 		bresponse, err := client.ProcessCommonRequest(request)
 
 		if err != nil {
