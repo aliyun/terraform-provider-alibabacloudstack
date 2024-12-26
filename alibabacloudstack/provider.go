@@ -824,6 +824,9 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.RamRoleArn = getProviderConfig(d.Get("role_arn").(string), "ram_role_arn")
 	log.Printf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$led!!! %s", config.RamRoleArn)
 	config.RamRoleSessionName = getProviderConfig("", "ram_session_name")
+	if config.RamRoleSessionName == "" {
+		config.RamRoleSessionName = "terraform"
+	}
 	expiredSeconds, err := getConfigFromProfile(d, "expired_seconds")
 	if err == nil && expiredSeconds != nil {
 		config.RamRoleSessionExpiration = (int)(expiredSeconds.(float64))
@@ -839,9 +842,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		log.Printf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$led!!! %s", config.RamRoleArn)
 		if assumeRole["session_name"].(string) != "" {
 			config.RamRoleSessionName = assumeRole["session_name"].(string)
-		}
-		if config.RamRoleSessionName == "" {
-			config.RamRoleSessionName = "terraform"
 		}
 		config.RamRolePolicy = assumeRole["policy"].(string)
 		if assumeRole["session_expiration"].(int) == 0 {
@@ -1148,45 +1148,26 @@ func assumeRoleSchema() *schema.Schema {
 }
 
 func getAssumeRoleAK(config *connectivity.Config) (string, string, string, error) {
-	request := sts.CreateAssumeRoleRequest()
-	request.RoleArn = config.RamRoleArn
-	if config.RamRoleSessionName == "" {
-		config.RamRoleSessionName = "terraform"
-	}
-	request.RoleSessionName = config.RamRoleSessionName
-	//request.DurationSeconds = requests.NewInteger(config.RamRoleSessionExpiration)
-	request.Policy = config.RamRolePolicy
-	request.Scheme = "https"
-	request.SetHTTPSInsecure(config.Insecure)
-
-	request.Domain = config.Endpoints[connectivity.STSCode]
-	log.Printf("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ StsEndpoint:%s", config.Endpoints[connectivity.STSCode])
-	request.QueryParams["Region"] = config.RegionId
-	request.Headers["x-ascm-product-name"] = "Sts"
-	request.Headers["x-acs-organizationId"] = config.Department
-
-	var client *sts.Client
-	var err error
-	if config.SecurityToken == "" {
-		client, err = sts.NewClientWithAccessKey(config.RegionId, config.AccessKey, config.SecretKey)
-	} else {
-		client, err = sts.NewClientWithStsToken(config.RegionId, config.AccessKey, config.SecretKey, config.SecurityToken)
-	}
-
+	client, err := config.Client()
 	if err != nil {
 		return "", "", "", err
 	}
+	request := sts.CreateAssumeRoleRequest()
+	client.InitRpcRequest(*request.RpcRequest)
+	request.Scheme = "https" // sts必须是https连接
+	request.RoleArn = config.RamRoleArn
+	request.RoleSessionName = config.RamRoleSessionName
+	//request.DurationSeconds = requests.NewInteger(config.RamRoleSessionExpiration)
+	request.Policy = config.RamRolePolicy
 
-	client.Domain = config.Endpoints[connectivity.STSCode]
-	client.AppendUserAgent(connectivity.Terraform, connectivity.TerraformVersion)
-	client.AppendUserAgent(connectivity.Provider, connectivity.ProviderVersion)
-	client.AppendUserAgent(connectivity.Module, config.ConfigurationSource)
-	client.SetHTTPSInsecure(config.Insecure)
-	if config.Proxy != "" {
-		client.SetHttpProxy(config.Proxy)
-		client.SetHttpsProxy(config.Proxy)
+	conn, err := client.WithProductSDKClient(connectivity.STSCode)
+	if err != nil {
+		return "", "", "", err
 	}
-	response, err := client.AssumeRole(request)
+	stsClient := &sts.Client{
+		Client: *conn,
+	}
+	response, err := stsClient.AssumeRole(request)
 	addDebug(request.GetActionName(), response, request.RpcRequest, request)
 	if err != nil {
 		return config.AccessKey, config.SecretKey, config.SecurityToken, err

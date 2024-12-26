@@ -52,12 +52,12 @@ type Config struct {
 	Eagleeye                EagleEye
 }
 
-func (c *Config) getAuthCredential(stsSupported bool) auth.Credential {
+func (c *Config) getAuthCredential(stsSupported , ramSupported bool) auth.Credential {
 	if c.AccessKey != "" && c.SecretKey != "" {
 		if stsSupported && c.SecurityToken != "" {
 			return credentials.NewStsTokenCredential(c.AccessKey, c.SecretKey, c.SecurityToken)
 		}
-		if c.RamRoleArn != "" {
+		if ramSupported && c.RamRoleArn != "" {
 			log.Printf("[INFO] Assume RAM Role specified in provider block assume_role { ... }")
 			return credentials.NewRamRoleArnWithPolicyCredential(
 				c.AccessKey, c.SecretKey, c.RamRoleArn,
