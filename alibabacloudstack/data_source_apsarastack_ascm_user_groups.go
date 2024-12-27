@@ -3,12 +3,11 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"regexp"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"regexp"
 )
 
 func dataSourceAlibabacloudStackAscmUserGroups() *schema.Resource {
@@ -87,26 +86,22 @@ func dataSourceAlibabacloudStackAscmUserGroups() *schema.Resource {
 
 func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("GET", "ascm", "2019-05-10", "ListUserGroups", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListUserGroups", "/ascm/auth/user/listUserGroups")
 	userGroupName := d.Get("name_regex").(string)
 	request.QueryParams["userGroupName"] = userGroupName
 
 	response := UserGroup{}
 	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			errmsg := ""
-			if ok {
+			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_users", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
-		addDebug("ListUserGroups", raw, request)
+		addDebug("ListUserGroups", bresponse, request)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
@@ -139,12 +134,12 @@ func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta 
 		}
 
 		mapping := map[string]interface{}{
-			"id":             fmt.Sprint(group.Id),
-			"group_name":     group.GroupName,
+			"id":              fmt.Sprint(group.Id),
+			"group_name":      group.GroupName,
 			"organization_id": group.Organization.Id,
-			"user_group_id":  group.AugId,
-			"role_ids":       roleids,
-			"users":          users,
+			"user_group_id":   group.AugId,
+			"role_ids":        roleids,
+			"users":           users,
 		}
 
 		ids = append(ids, fmt.Sprint(group.Id))

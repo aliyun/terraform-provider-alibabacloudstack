@@ -2,13 +2,15 @@ package alibabacloudstack
 
 import (
 	"fmt"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
 	"os"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlibabacloudStackAscm_User_Group_Basic(t *testing.T) {
@@ -22,7 +24,7 @@ func TestAccAlibabacloudStackAscm_User_Group_Basic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-ascmusergroup%v", rand)
 	if os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT") != "" {
 		org_id = os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT")
@@ -88,10 +90,10 @@ variable name{
 }
 
 
-resource "alibabacloudstack_ascm_organization" "default" {
- name = "Test_binder"
- parent_id = "1"
-}
+// resource "alibabacloudstack_ascm_organization" "default" {
+//  name = "terraform"
+//  parent_id = "1"
+// }
 
 `, name)
 	}

@@ -354,7 +354,7 @@ func (s *AscmService) DescribeAscmUserGroup(id string) (response *UserGroup, err
 		}
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUserGroups", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListUserGroups", response, request, request.QueryParams)
+	addDebug("ListUserGroups", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
