@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -20,6 +21,7 @@ func TestAccAlibabacloudStackAscm_UserRoleBinding(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
+	org_id := os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT")
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -33,7 +35,7 @@ func TestAccAlibabacloudStackAscm_UserRoleBinding(t *testing.T) {
 		CheckDestroy: testAccCheckAscm_UserRoleBinding_Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckAscm_UserRoleBinding, rand),
+				Config: fmt.Sprintf(testAccCheckAscm_UserRoleBinding, org_id, rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"role_ids.#": "1",
@@ -70,16 +72,15 @@ func testAccCheckAscm_UserRoleBinding_Destroy(s *terraform.State) error {
 }
 
 const testAccCheckAscm_UserRoleBinding = `
-resource "alibabacloudstack_ascm_organization" "default" {
- name = "Test_binder"
- parent_id = "1"
+variable org_id {
+ default = "%s"
 }
 
 resource "alibabacloudstack_ascm_user" "default" {
  cellphone_number = "13900000000"
  email = "test@gmail.com"
  display_name = "C2C-DELTA"
- organization_id = alibabacloudstack_ascm_organization.default.org_id
+ organization_id = "${var.org_id}"
  mobile_nation_code = "91"
  login_name = "User_Role_Test%d"
  login_policy_id = 1
