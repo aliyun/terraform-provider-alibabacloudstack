@@ -141,11 +141,11 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 func resourceAlibabacloudStackAscmUserRoleBindingDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
-	var roleid int
+	var roleid string
 	flag := false
-	var roleids []int
+	var roleids []string
 	if v, ok := d.GetOk("role_ids"); ok {
-		roleids = expandIntList(v.(*schema.Set).List())
+		roleids = expandStringList(v.(*schema.Set).List())
 		for i := range roleids {
 			if len(roleids) > 1 {
 				roleid = roleids[i]
