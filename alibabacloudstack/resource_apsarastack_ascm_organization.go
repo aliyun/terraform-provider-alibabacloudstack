@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -64,23 +63,19 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateOrganization", "/ascm/auth/organization/add")
 		request.QueryParams["parentId"] = parentid
 		request.QueryParams["name"] = name
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf("response of raw CreateOrganization is : %s", raw)
+		bresponse, err := client.ProcessCommonRequest(request)
+		log.Printf("response of raw CreateOrganization is : %s", bresponse)
 
 		if err != nil {
-			errmsg := ""
-			bresponse, ok := raw.(*responses.CommonResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organization", "CreateOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug("CreateOrganization", raw, requestInfo, request)
+		addDebug("CreateOrganization", bresponse, requestInfo, request)
 
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if !ok || bresponse.GetHttpStatus() != 200 {
+		if bresponse.GetHttpStatus() != 200 {
 			errmsg := ""
 			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
@@ -88,7 +83,7 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organization", "CreateOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		// TODO: 父组织未找到这里不会报错，因为HttpStatus依旧为200
-		addDebug("CreateOrganization", raw, requestInfo, bresponse.GetHttpContentString())
+		addDebug("CreateOrganization", bresponse, requestInfo, bresponse.GetHttpContentString())
 	}
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		check, err = ascmService.DescribeAscmOrganization(name)
@@ -130,20 +125,17 @@ func resourceAlibabacloudStackAscmOrganizationUpdate(d *schema.ResourceData, met
 	request.QueryParams["id"] = d.Id()
 
 	if attributeUpdate {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw UpdateOrganization : %s", raw)
+		bresponse, err := client.ProcessCommonRequest(request)
+		log.Printf(" response of raw UpdateOrganization : %s", bresponse)
 
 		if err != nil {
-			errmsg := ""
-			bresponse, ok := raw.(*responses.CommonResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_instance", "ConsoleInstanceCreate", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request)
+		addDebug(request.GetActionName(), bresponse, request)
 	}
 
 	d.SetId(fmt.Sprint(check.Data[0].ID))
@@ -190,15 +182,12 @@ func resourceAlibabacloudStackAscmOrganizationDelete(d *schema.ResourceData, met
 			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveOrganization", "/ascm/auth/organization/delete")
 			request.QueryParams["id"] = d.Id()
 
-			raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-				return csClient.ProcessCommonRequest(request)
-			})
+			bresponse, err := client.ProcessCommonRequest(request)
 			if err != nil {
-				errmsg := ""
-				bresponse, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				if bresponse == nil {
+					return resource.RetryableError(err)
 				}
+				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_organization", "RemoveOrganization", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
 			check, err = ascmService.DescribeAscmOrganization(d.Id())

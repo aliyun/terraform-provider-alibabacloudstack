@@ -26,6 +26,7 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 			"organization_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"user_group_id": {
 				Type:     schema.TypeString,
