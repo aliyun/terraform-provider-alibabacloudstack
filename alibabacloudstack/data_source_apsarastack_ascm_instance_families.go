@@ -2,13 +2,14 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"log"
+	"regexp"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
-	"regexp"
 )
 
 func dataSourceAlibabacloudStackInstanceFamilies() *schema.Resource {
@@ -83,7 +84,7 @@ func dataSourceAlibabacloudStackInstanceFamilies() *schema.Resource {
 func dataSourceAlibabacloudStackInstanceFamiliesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DescribeSeriesIdFamilies", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "DescribeSeriesIdFamilies", "/ascm/manage/saleconf/drdsSpec/describeSeriesIdFamilies")
 	response := InstanceFamily{}
 
 	for {
@@ -121,13 +122,13 @@ func dataSourceAlibabacloudStackInstanceFamiliesRead(d *schema.ResourceData, met
 			continue
 		}
 		mapping := map[string]interface{}{
-			"id":                  rg.SeriesID,
-			"order_by_id":         rg.OrderBy.ID,
-			"resource_type":       rg.ResourceType,
-			"series_name":         rg.SeriesName,
-			"modifier":            rg.Modifier,
-			"series_name_label":   rg.SeriesNameLabel,
-			"is_deleted":          rg.IsDeleted,
+			"id":                rg.SeriesID,
+			"order_by_id":       rg.OrderBy.ID,
+			"resource_type":     rg.ResourceType,
+			"series_name":       rg.SeriesName,
+			"modifier":          rg.Modifier,
+			"series_name_label": rg.SeriesNameLabel,
+			"is_deleted":        rg.IsDeleted,
 		}
 		ids = append(ids, rg.SeriesID)
 		s = append(s, mapping)
