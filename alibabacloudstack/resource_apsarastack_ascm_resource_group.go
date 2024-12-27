@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -60,28 +59,20 @@ func resourceAlibabacloudStackAscmResourceGroupCreate(d *schema.ResourceData, me
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
 
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf("response of raw CreateResourceGroup : %s", raw)
-		addDebug("CreateResourceGroup", raw, request, request.QueryParams)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("CreateResourceGroup", bresponse, request, request.QueryParams)
 		if err != nil {
 			errmsg := ""
-			if bresponse, ok := raw.(*responses.CommonResponse); ok {
+			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_resource_group", "CreateResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if !ok || bresponse.GetHttpStatus() != 200 {
-			errmsg := ""
-			if bresponse, ok := raw.(*responses.CommonResponse); ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
+		if bresponse.GetHttpStatus() != 200 {
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_resource_group", "CreateResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug("CreateResourceGroup", raw, requestInfo, bresponse.GetHttpContentString())
+		addDebug("CreateResourceGroup", bresponse, requestInfo, bresponse.GetHttpContentString())
 	}
 
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
@@ -128,19 +119,17 @@ func resourceAlibabacloudStackAscmResourceGroupUpdate(d *schema.ResourceData, me
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
 
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw UpdateResourceGroup : %s", raw)
+		bresponse, err := client.ProcessCommonRequest(request)
+		log.Printf(" response of raw UpdateResourceGroup : %s", bresponse)
 
 		if err != nil {
 			errmsg := ""
-			if bresponse, ok := raw.(*responses.CommonResponse); ok {
+			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_resource_group", "UpdateResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request)
+		addDebug(request.GetActionName(), bresponse, request)
 	}
 	d.SetId(name + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
 
@@ -190,17 +179,15 @@ func resourceAlibabacloudStackAscmResourceGroupDelete(d *schema.ResourceData, me
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
 
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
-		})
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			errmsg := ""
-			if bresponse, ok := raw.(*responses.CommonResponse); ok {
+			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_resource_group", "RemoveResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		log.Printf(" response of raw RemoveResourceGroup : %s", raw)
+		log.Printf(" response of raw RemoveResourceGroup : %s", bresponse)
 		_, err = ascmService.DescribeAscmResourceGroup(d.Id())
 
 		if err != nil {

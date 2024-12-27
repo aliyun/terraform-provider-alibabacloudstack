@@ -1,11 +1,9 @@
 package alibabacloudstack
 
 import (
-	"log"
 	"strconv"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -58,27 +56,20 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate(d *schema.Re
 		"ascmRoleId":    ascmRoleId,
 	})
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	log.Printf("response of raw AddResourceSetToUserGroup is : %s", raw)
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
 		errmsg := ""
-		if ok {
+		if bresponse != nil {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group_resource_set_binding", "AddResourceSetToUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("AddResourceSetToUserGroup", raw, requestInfo, request)
+	addDebug("AddResourceSetToUserGroup", bresponse, requestInfo, request)
 	if bresponse.GetHttpStatus() != 200 {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group_resource_set_binding", "AddResourceSetToUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("AddResourceSetToUserGroup", raw, requestInfo, bresponse.GetHttpContentString())
+	addDebug("AddResourceSetToUserGroup", bresponse, requestInfo, bresponse.GetHttpContentString())
 	d.SetId(resourceSetId)
 	return resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead(d, meta)
 }
@@ -118,19 +109,16 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingDelete(d *schema.Re
 		request.QueryParams["userGroupId"] = userGroupId
 		request.QueryParams["resourceSetId"] = d.Id()
 
-		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-			return csClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			errmsg := ""
-			if ok {
+			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group_resource_set_binding", "RemoveResourceSetFromUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 
-		addDebug("RemoveResourceSetFromUserGroup", raw, request)
+		addDebug("RemoveResourceSetFromUserGroup", bresponse, request)
 		_, err = ascmService.DescribeAscmUserGroupResourceSetBinding(d.Id())
 
 		if err != nil {
