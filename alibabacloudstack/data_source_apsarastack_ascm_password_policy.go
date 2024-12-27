@@ -3,12 +3,13 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
 )
 
 func dataSourceAlibabacloudStackAscmPasswordPolicies() *schema.Resource {
@@ -120,7 +121,7 @@ func dataSourceAlibabacloudStackAscmPasswordPolicies() *schema.Resource {
 
 func dataSourceAlibabacloudStackAscmPasswordPoliciesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetPasswordPolicy", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GetPasswordPolicy", "/ascm/auth/user/getPasswordPolicy")
 	response := PasswordPolicy{}
 
 	for {

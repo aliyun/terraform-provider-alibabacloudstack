@@ -1,6 +1,8 @@
 package alibabacloudstack
 
 import (
+	"strings"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -25,18 +27,18 @@ func resourceAlibabacloudStackRouteTable() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(2, 256),
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'route_table_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'route_table_name' instead.",
 				ConflictsWith: []string{"route_table_name"},
 			},
 			"route_table_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 			"vpc_id": {
@@ -54,8 +56,17 @@ func resourceAliyunRouteTableCreate(d *schema.ResourceData, meta interface{}) er
 	vpcService := VpcService{client}
 
 	request := vpc.CreateCreateRouteTableRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.VpcId = connectivity.GetResourceData(d, "route_table_name", "name").(string)
+	request.RegionId = client.RegionId
+	if strings.ToLower(client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.Headers = map[string]string{"RegionId": client.RegionId}
+	request.QueryParams = map[string]string{"Product": "vpc", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+
+	request.VpcId = d.Get("vpc_id").(string)
+	request.RouteTableName = d.Get("name").(string)
 	request.Description = d.Get("description").(string)
 	request.ClientToken = buildClientToken(request.GetActionName())
 

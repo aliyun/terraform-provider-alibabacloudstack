@@ -2,14 +2,15 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"log"
+	"regexp"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"regexp"
 )
 
 func dataSourceAlibabacloudstackRamServiceRoleProducts() *schema.Resource {
@@ -52,7 +53,7 @@ func dataSourceAlibabacloudstackRamServiceRoleProducts() *schema.Resource {
 func dataSourceAlibabacloudstackRamServiceRoleProductsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoleProducts", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoleProducts", "/ascm/auth/ramServiceRole/listRAMServiceRoleProducts")
 
 	response := RoleProducts{}
 
@@ -116,12 +117,12 @@ type RoleProducts struct {
 		ASCIIName   string `json:"asciiName"`
 		Key         string `json:"key"`
 	} `json:"data"`
-	Message         string `json:"message"`
-	ServerRole      string `json:"serverRole"`
-	AsapiRequestID  string `json:"asapiRequestId"`
-	Success         bool   `json:"success"`
-	Domain          string `json:"domain"`
-	PureListData    bool   `json:"pureListData"`
-	API             string `json:"api"`
-	AsapiErrorCode  string `json:"asapiErrorCode"`
+	Message        string `json:"message"`
+	ServerRole     string `json:"serverRole"`
+	AsapiRequestID string `json:"asapiRequestId"`
+	Success        bool   `json:"success"`
+	Domain         string `json:"domain"`
+	PureListData   bool   `json:"pureListData"`
+	API            string `json:"api"`
+	AsapiErrorCode string `json:"asapiErrorCode"`
 }

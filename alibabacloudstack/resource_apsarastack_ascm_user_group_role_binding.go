@@ -49,7 +49,7 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingCreate(d *schema.ResourceD
 	flag = true
 	if flag {
 		for i := range roleids {
-			request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddRoleToUserGroup", "")
+			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddRoleToUserGroup", "/ascm/auth/user/addRoleToUserGroup")
 			mergeMaps(request.QueryParams, map[string]string{
 				"ProductName":      "ascm",
 				"userGroupId":      strconv.Itoa(userGroupId),
@@ -126,7 +126,7 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d *schema.ResourceD
 	user_group_id := d.Get("user_group_id").(int)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *ecs.Client
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ResetRolesForUserGroup", "/roa/ascm/auth/user/resetRolesForUserGroup")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ResetRolesForUserGroup", "/roa/ascm/auth/user/resetRolesForUserGroup")
 
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 
@@ -190,11 +190,11 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingDelete(d *schema.ResourceD
 	addDebug("IsBindingExist", check, requestInfo, map[string]string{"userGroupId": d.Id()})
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 		if flag {
-			request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RemoveRoleFromUserGroup", "")
+			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUserGroup", "/ascm/auth/user/removeRoleFromUserGroup")
 			mergeMaps(request.QueryParams, map[string]string{
-				"ProductName":     "ascm",
-				"userGroupId":     d.Id(),
-				"roleId":          fmt.Sprint(roleid),
+				"ProductName": "ascm",
+				"userGroupId": d.Id(),
+				"roleId":      fmt.Sprint(roleid),
 			})
 
 			raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {

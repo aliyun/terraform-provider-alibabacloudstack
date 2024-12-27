@@ -2,13 +2,14 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"log"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
 )
 
 func dataSourceAlibabacloudStackSpecificFields() *schema.Resource {
@@ -51,7 +52,7 @@ func dataSourceAlibabacloudStackSpecificFields() *schema.Resource {
 
 func dataSourceAlibabacloudStackSpecificFieldsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GroupCommonSpec", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "GroupCommonSpec", "/ascm/manage/saleconf/commonSpec/group")
 	resourceType := d.Get("resource_type").(string)
 	groupFiled := d.Get("group_filed").(string)
 	request.QueryParams["resourceType"] = resourceType

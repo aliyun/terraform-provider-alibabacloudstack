@@ -2,6 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -9,9 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"log"
-	"strings"
-	"time"
 )
 
 func resourceAlibabacloudStackAscmRole() *schema.Resource {
@@ -77,13 +78,13 @@ func resourceAlibabacloudStackAscmRoleCreate(d *schema.ResourceData, meta interf
 	}
 	organizationvisibility := d.Get("organization_visibility").(string)
 	if len(check.Data) == 0 {
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateRole", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateRole", "/ascm/auth/role/createRole")
 		mergeMaps(request.QueryParams, map[string]string{
-			"roleName":                name,
-			"description":             description,
-			"roleRange":               roleRange,
-			"organizationVisibility":  organizationvisibility,
-			"params":                  fmt.Sprintf("{\"privileges\":%s}", priv),
+			"roleName":               name,
+			"description":            description,
+			"roleRange":              roleRange,
+			"organizationVisibility": organizationvisibility,
+			"params":                 fmt.Sprintf("{\"privileges\":%s}", priv),
 		})
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 			return ecsClient.ProcessCommonRequest(request)
@@ -156,7 +157,7 @@ func resourceAlibabacloudStackAscmRoleDelete(d *schema.ResourceData, meta interf
 	}
 	addDebug("IsCustomRoleExist", check, requestInfo, map[string]string{"roleName": did[0]})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRole", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRole", "/ascm/auth/role/removeRole")
 		request.QueryParams["roleName"] = did[0]
 
 		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {

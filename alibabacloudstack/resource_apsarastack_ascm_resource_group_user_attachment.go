@@ -2,14 +2,15 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
-	"time"
 )
 
 func resourceAlibabacloudStackAscmResourceGroupUserAttachment() *schema.Resource {
@@ -42,7 +43,7 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate(d *schema.Re
 	RgId := d.Get("rg_id").(string)
 	userIds := d.Get("user_id").(string)
 
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "BindAscmUserAndResourceGroup", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "BindAscmUserAndResourceGroup", "/ascm/auth/resource_group/add_ascm_users")
 	request.QueryParams["ascm_user_ids"] = fmt.Sprintf("%s", userIds)
 	request.QueryParams["resource_group_id"] = RgId
 
@@ -101,7 +102,7 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachmentDelete(d *schema.Re
 	addDebug("IsBindingExist", check, requestInfo, map[string]string{"resourceGroupId": d.Id()})
 
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UnbindAscmUserAndResourceGroup", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UnbindAscmUserAndResourceGroup", "/ascm/auth/resource_group/remove_ascm_users")
 		request.QueryParams["resourceGroupId"] = d.Id()
 
 		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {

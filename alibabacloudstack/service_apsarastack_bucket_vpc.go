@@ -15,27 +15,27 @@ type BucketVpcService struct {
 }
 
 type VpcListResult struct {
-	Api                string        `json:"api"`
-	AsapiRequestId     string        `json:"asapiRequestId"`
-	AsapiSuccess       bool          `json:"asapiSuccess"`
-	HttpOk             bool          `json:"httpOk"`
-	Success            bool          `json:"success"`
-	Code               int64         `json:"code"`
-	Domain             string        `json:"domain"`
-	Message            string        `json:"message"`
-	ServerRole         string        `json:"serverRole"`
-	EagleEyeTraceId    string        `json:"eagleEyeTraceId"`
-	VpcList            []interface{} `json:"data"`
-	PageModel          interface{}   `json:"pageModel"`
+	Api             string        `json:"api"`
+	AsapiRequestId  string        `json:"asapiRequestId"`
+	AsapiSuccess    bool          `json:"asapiSuccess"`
+	HttpOk          bool          `json:"httpOk"`
+	Success         bool          `json:"success"`
+	Code            int64         `json:"code"`
+	Domain          string        `json:"domain"`
+	Message         string        `json:"message"`
+	ServerRole      string        `json:"serverRole"`
+	EagleEyeTraceId string        `json:"eagleEyeTraceId"`
+	VpcList         []interface{} `json:"data"`
+	PageModel       interface{}   `json:"pageModel"`
 }
 
 func (s *BucketVpcService) BucketVpcList(bucketName string) (vpclist *VpcListResult, err error) {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ListBucketVpc", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListBucketVpc", "/ascm/manage/saleconf/ossIsolationVpc/select")
 	mergeMaps(request.QueryParams, map[string]string{
-		"AccountInfo": "123456",
-		"BucketName":  bucketName,
+		"AccountInfo":      "123456",
+		"BucketName":       bucketName,
 		"SignatureVersion": "2.1",
-		"OpenApiAction": "ListBucketVpc",
+		"OpenApiAction":    "ListBucketVpc",
 	})
 	raw, err := s.client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
 		return ossClient.ProcessCommonRequest(request)
@@ -66,12 +66,12 @@ func (s *BucketVpcService) BucketVpcList(bucketName string) (vpclist *VpcListRes
 }
 
 func (s *BucketVpcService) BindBucket(vpcId string, vpcName string, vLan string, bucket string) error {
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "BindBucketPolicy", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "BindBucketPolicy", "/ascm/manage/saleconf/ossIsolationVpc/bind")
 	mergeMaps(request.QueryParams, map[string]string{
-		"bucketName":  bucket,
-		"vpcName":     vpcName,
-		"vLan":        vLan,
-		"vpcId":       vpcId,
+		"bucketName":       bucket,
+		"vpcName":          vpcName,
+		"vLan":             vLan,
+		"vpcId":            vpcId,
 		"SignatureVersion": "2.1",
 	})
 	raw, err := s.client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
@@ -80,7 +80,7 @@ func (s *BucketVpcService) BindBucket(vpcId string, vpcName string, vLan string,
 	log.Printf("Response of BindBucketPolicy: %s", raw)
 	log.Printf("Bresponse BindBucketPolicy before error")
 	bresponse, ok := raw.(*responses.CommonResponse)
-	if err != nil || bresponse.GetHttpStatus() != 200{
+	if err != nil || bresponse.GetHttpStatus() != 200 {
 		errmsg := ""
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
@@ -99,10 +99,10 @@ func (s *BucketVpcService) BindBucket(vpcId string, vpcName string, vLan string,
 }
 
 func (s *BucketVpcService) UnBindBucket(vpcId string, bucket string) error {
-	request := s.client.NewCommonRequest("POST", "Ascm", "2019-05-10", "UnBindBucketPolicy", "")
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "UnBindBucketPolicy", "/ascm/manage/saleconf/ossIsolationVpc/unBind")
 	mergeMaps(request.QueryParams, map[string]string{
-		"bucketName":  bucket,
-		"vpcId":       vpcId,
+		"bucketName":       bucket,
+		"vpcId":            vpcId,
 		"SignatureVersion": "2.1",
 	})
 	raw, err := s.client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
@@ -111,7 +111,7 @@ func (s *BucketVpcService) UnBindBucket(vpcId string, bucket string) error {
 	log.Printf("Response of UnBindBucketPolicy: %s", raw)
 	log.Printf("Bresponse UnBindBucketPolicy before error")
 	bresponse, ok := raw.(*responses.CommonResponse)
-	if err != nil || bresponse.GetHttpStatus() != 200{
+	if err != nil || bresponse.GetHttpStatus() != 200 {
 		errmsg := ""
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)

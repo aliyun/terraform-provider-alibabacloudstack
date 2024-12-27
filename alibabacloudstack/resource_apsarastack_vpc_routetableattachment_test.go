@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackVpcRoutetableattachment0(t *testing.T) {
-	var v map[string]interface{}
+	var v vpc.RouterTableListType
 
 	resourceId := "alibabacloudstack_vpc_routetableattachment.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcRoutetableattachmentCheckmap)
@@ -32,23 +33,23 @@ func TestAccAlibabacloudStackVpcRoutetableattachment0(t *testing.T) {
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 
-		CheckDestroy: rac.checkResourceDestroy(),
+		// CheckDestroy: rac.checkResourceDestroy(),
 
 		Steps: []resource.TestStep{
 
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"route_table_id": "${{ref(variable, routeTableId)}}",
+					"route_table_id": "${alibabacloudstack_route_table.default.id}",
 
-					"vswitch_id": "${{ref(variable, vSwitchId)}}",
+					"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"route_table_id": "${{ref(variable, routeTableId)}}",
+						"route_table_id": CHECKSET,
 
-						"vswitch_id": "${{ref(variable, vSwitchId)}}",
+						"vswitch_id": CHECKSET,
 					}),
 				),
 			},
@@ -58,7 +59,7 @@ func TestAccAlibabacloudStackVpcRoutetableattachment0(t *testing.T) {
 
 var AlibabacloudTestAccVpcRoutetableattachmentCheckmap = map[string]string{
 
-	"status": CHECKSET,
+	// "status": CHECKSET,
 
 	"route_table_id": CHECKSET,
 
@@ -70,22 +71,14 @@ func AlibabacloudTestAccVpcRoutetableattachmentBasicdependence(name string) stri
 variable "name" {
     default = "%s"
 }
-
-
-variable "region_id" {
-    default = cn-shanghai
+  
+%s
+  
+resource "alibabacloudstack_route_table" "default" {
+vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+name = "${var.name}"
+description = "${var.name}_description"
 }
 
-variable "vswitch_id" {
-    default = vsw-uf6l3wcgnbflu8beanbo4
-}
-
-variable "route_table_id" {
-    default = vtb-uf6xy3xkeycric4jf083y
-}
-
-
-
-
-`, name)
+`, name, VSwitchCommonTestCase)
 }

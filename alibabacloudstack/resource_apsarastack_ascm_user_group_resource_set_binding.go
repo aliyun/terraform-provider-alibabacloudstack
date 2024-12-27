@@ -1,15 +1,16 @@
 package alibabacloudstack
 
 import (
+	"log"
+	"strconv"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"log"
-	"strconv"
-	"time"
 )
 
 func resourceAlibabacloudStackAscmUserGroupResourceSetBinding() *schema.Resource {
@@ -49,12 +50,12 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate(d *schema.Re
 
 	ascmRoleId := d.Get("ascm_role_id").(string)
 
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "AddResourceSetToUserGroup", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddResourceSetToUserGroup", "/ascm/auth/user/addResourceSetToUserGroup")
 	mergeMaps(request.QueryParams, map[string]string{
-		"ProductName":  "ascm",
-		"userGroupId":  userGroupId,
+		"ProductName":   "ascm",
+		"userGroupId":   userGroupId,
 		"resourceSetId": resourceSetId,
-		"ascmRoleId":   ascmRoleId,
+		"ascmRoleId":    ascmRoleId,
 	})
 
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
@@ -112,7 +113,7 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingDelete(d *schema.Re
 	userGroupId := d.Get("user_group_id").(string)
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 
-		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RemoveResourceSetFromUserGroup", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveResourceSetFromUserGroup", "/ascm/auth/user/removeResourceSetFromUserGroup")
 		request.QueryParams["ProductName"] = "ascm"
 		request.QueryParams["userGroupId"] = userGroupId
 		request.QueryParams["resourceSetId"] = d.Id()

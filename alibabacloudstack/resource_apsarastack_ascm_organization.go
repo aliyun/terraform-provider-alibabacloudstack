@@ -61,7 +61,7 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 	parentid := d.Get("parent_id").(string)
 
 	if len(check.Data) == 0 {
-		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "CreateOrganization", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateOrganization", "/ascm/auth/organization/add")
 		request.QueryParams["parentId"] = parentid
 		request.QueryParams["name"] = name
 		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
@@ -125,7 +125,7 @@ func resourceAlibabacloudStackAscmOrganizationUpdate(d *schema.ResourceData, met
 		}
 		check.Data[0].Name = name
 	}
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "UpdateOrganization", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateOrganization", "/ascm/auth/organization/update")
 	request.QueryParams["name"] = name
 	request.QueryParams["id"] = d.Id()
 
@@ -187,7 +187,7 @@ func resourceAlibabacloudStackAscmOrganizationDelete(d *schema.ResourceData, met
 	addDebug("IsOrganizationExist", check, requestInfo, map[string]string{"id": d.Id()})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 		if len(check.Data) != 0 {
-			request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "RemoveOrganization", "")
+			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveOrganization", "/ascm/auth/organization/delete")
 			request.QueryParams["id"] = d.Id()
 
 			raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {

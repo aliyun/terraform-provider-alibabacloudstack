@@ -3,13 +3,14 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
+	"regexp"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"log"
-	"regexp"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -90,7 +91,7 @@ func dataSourceAlibabacloudStackAscmResourceGroupsRead(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	name := d.Get("name_regex").(string)
 
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListResourceGroup", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListResourceGroup", "/ascm/auth/resource_group/list_resource_group")
 	request.QueryParams["resourceGroupName"] = name
 
 	response := ResourceGroup{}

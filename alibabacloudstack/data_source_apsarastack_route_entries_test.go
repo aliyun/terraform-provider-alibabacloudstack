@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackRouteEntriesDataSourceBasic(t *testing.T) {
@@ -48,13 +46,13 @@ func TestAccAlibabacloudStackRouteEntriesDataSourceBasic(t *testing.T) {
 
 	allConfig := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand, map[string]string{
-			"instance_id":    `"${alibabacloudstack_instance.default.id}"`,
+			"instance_id":    `"${alibabacloudstack_ecs_instance.default.id}"`,
 			"route_table_id": `"${alibabacloudstack_route_entry.default.route_table_id}"`,
 			"type":           `"Custom"`,
 			"cidr_block":     `"${alibabacloudstack_route_entry.default.destination_cidrblock}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand, map[string]string{
-			"instance_id":    `"${alibabacloudstack_instance.default.id}"`,
+			"instance_id":    `"${alibabacloudstack_ecs_instance.default.id}"`,
 			"route_table_id": `"${alibabacloudstack_route_entry.default.route_table_id}"`,
 			"type":           `"Custom"`,
 			"cidr_block":     `"${alibabacloudstack_route_entry.default.destination_cidrblock}_fake"`,
@@ -71,60 +69,21 @@ func testAccCheckAlibabacloudStackRouteEntriesDataSourceConfig(rand int, attrMap
 	}
 
 	config := fmt.Sprintf(`
-%s
-
-%s
-
-%s
 
 variable "name" {
-   default = "tf-testAcc-for-route-entries-datasource%d"
-}
-resource "alibabacloudstack_vpc" "default" {
-   name = "${var.name}"
-   cidr_block = "10.1.0.0/21"
-}
-resource "alibabacloudstack_vswitch" "default" {
-   vpc_id = "${alibabacloudstack_vpc.default.id}"
-   cidr_block = "10.1.1.0/24"
-   availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-   name = "${var.name}"
-}
-resource "alibabacloudstack_security_group" "default" {
-   name = "${var.name}"
-   description = "${var.name}"
-   vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-resource "alibabacloudstack_security_group_rule" "default" {
-   type = "ingress"
-   ip_protocol = "tcp"
-   nic_type = "intranet"
-   policy = "accept"
-   port_range = "22/22"
-   priority = 1
-   security_group_id = "${alibabacloudstack_security_group.default.id}"
-   cidr_ip = "0.0.0.0/0"
-}
-resource "alibabacloudstack_instance" "default" {
-   # cn-beijing
-   security_groups = ["${alibabacloudstack_security_group.default.id}"]
-   vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-   # series III
-   instance_type = "${local.default_instance_type_id}"
-   internet_max_bandwidth_out = 5
-   system_disk_category = "cloud_pperf"
-   image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-   instance_name = "${var.name}"
-}
+	default = "tf-testAccRouteEntryConfigNameDatasource%d"
+	}
+
+%s
 resource "alibabacloudstack_route_entry" "default" {
-   route_table_id = "${alibabacloudstack_vpc.default.route_table_id}"
+   route_table_id = "${alibabacloudstack_vpc_vpc.default.route_table_id}"
    destination_cidrblock = "172.11.1.1/32"
    nexthop_type = "Instance"
-   nexthop_id = "${alibabacloudstack_instance.default.id}"
+   nexthop_id = "${alibabacloudstack_ecs_instance.default.id}"
 }
 data "alibabacloudstack_route_entries" "default" {
   %s
-}`, DataAlibabacloudstackVswitchZones, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, rand, strings.Join(pairs, "\n  "))
+}`, rand, ECSInstanceCommonTestCase, strings.Join(pairs, "\n  "))
 	return config
 }
 

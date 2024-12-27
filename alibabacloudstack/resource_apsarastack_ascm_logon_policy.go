@@ -61,7 +61,7 @@ func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta int
 		return errmsgs.WrapError(err)
 	}
 	if len(object.Data) == 0 {
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddLoginPolicy", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddLoginPolicy", "/ascm/auth/loginPolicy/addLoginPolicy")
 		mergeMaps(request.QueryParams, map[string]string{
 			"AccountInfo":            "123456",
 			"SignatureVersion":       "1.0",
@@ -130,12 +130,12 @@ func resourceAlibabacloudStackLogonPolicyUpdate(d *schema.ResourceData, meta int
 	}
 	policyId := fmt.Sprint(d.Get("policy_id").(int))
 
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ModifyLoginPolicy", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ModifyLoginPolicy", "/ascm/auth/loginPolicy/modifyLoginPolicy")
 	mergeMaps(request.QueryParams, map[string]string{
-		"id":              policyId,
-		"name":            name,
-		"rule":            rule,
-		"description":     desc,
+		"id":          policyId,
+		"name":        name,
+		"rule":        rule,
+		"description": desc,
 	})
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.ProcessCommonRequest(request)
@@ -203,12 +203,12 @@ func resourceAlibabacloudStackLogonPolicyDelete(d *schema.ResourceData, meta int
 	}
 	addDebug("IsLoginPolicyExist", check, requestInfo, map[string]string{"loginpolicyName": d.Id()})
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveLoginPolicyByName", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveLoginPolicyByName", "/ascm/auth/loginPolicy/removeLoginPolicyByName")
 		mergeMaps(request.QueryParams, map[string]string{
-			"AccountInfo":            "123456",
-			"SignatureVersion":       "1.0",
-			"ProductName":            "ascm",
-			"name":                   name,
+			"AccountInfo":      "123456",
+			"SignatureVersion": "1.0",
+			"ProductName":      "ascm",
+			"name":             name,
 		})
 		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
 			return csClient.ProcessCommonRequest(request)

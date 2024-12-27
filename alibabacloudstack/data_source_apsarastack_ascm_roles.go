@@ -110,7 +110,7 @@ func dataSourceAlibabacloudStackAscmRolesRead(d *schema.ResourceData, meta inter
 	id := d.Get("id").(int)
 	roleType := d.Get("role_type").(string)
 
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRoles", "/ascm/auth/role/listRoles")
 	request.QueryParams["pageSize"] = "100000"
 	//request.QueryParams["roleType"] = roleType
 

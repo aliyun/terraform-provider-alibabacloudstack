@@ -3,6 +3,9 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -10,8 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"strconv"
-	"time"
 )
 
 func resourceAlibabacloudStackAscmPasswordPolicy() *schema.Resource {
@@ -66,7 +67,7 @@ func resourceAlibabacloudStackAscmPasswordPolicyCreate(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	value123 := strconv.Itoa(d.Get("minimum_password_length").(int))
 
-	request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "SetPasswordPolicy", "")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "SetPasswordPolicy", "/ascm/auth/user/setPasswordPolicy")
 	request.QueryParams["minimumPasswordLength"] = value123
 
 	var response = PasswordPolicy{}
@@ -139,7 +140,7 @@ func resourceAlibabacloudStackAscmPasswordPolicyDelete(d *schema.ResourceData, m
 	addDebug("IsResourceGroupExist", check, map[string]string{"resourceGroupName": d.Id()})
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 
-		request := client.NewCommonRequest("POST", "Ascm", "2019-05-10", "ResetPasswordPolicy", "")
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ResetPasswordPolicy", "/ascm/auth/user/resetPasswordPolicy")
 		request.QueryParams["id"] = d.Id()
 
 		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
