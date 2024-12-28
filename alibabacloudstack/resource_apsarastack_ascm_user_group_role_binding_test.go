@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -19,6 +20,7 @@ func TestAccAlibabacloudStackAscm_UserGroupRoleBinding(t *testing.T) {
 	}
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-ascmusergroup%v", rand)
+	org_id := os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT")
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -34,7 +36,7 @@ func TestAccAlibabacloudStackAscm_UserGroupRoleBinding(t *testing.T) {
 		CheckDestroy: testAccCheckAscm_UserGroupRoleBinding_Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckAscm_UserGroupRoleBinding, name),
+				Config: fmt.Sprintf(testAccCheckAscm_UserGroupRoleBinding, org_id, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"role_ids.#": "1",
@@ -71,14 +73,13 @@ func testAccCheckAscm_UserGroupRoleBinding_Destroy(s *terraform.State) error {
 }
 
 const testAccCheckAscm_UserGroupRoleBinding = `
-resource "alibabacloudstack_ascm_organization" "default" {
- name = "Test_binder"
- parent_id = "1"
+variable org_id {
+ default = "%s"
 }
 
 resource "alibabacloudstack_ascm_user_group" "default" {
  group_name =      "%s"
- organization_id = "alibabacloudstack_ascm_organization.default.org_id"
+ organization_id = "${var.org_id}"
 }
 
 resource "alibabacloudstack_ascm_user_group_role_binding" "default" {

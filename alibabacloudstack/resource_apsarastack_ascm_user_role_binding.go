@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -38,7 +36,6 @@ func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
 
 func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *ecs.Client
 	lname := d.Get("login_name").(string)
 	flag := false
 	var roleids []string
@@ -53,21 +50,16 @@ func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, 
 			request.QueryParams["loginName"] = lname
 			request.QueryParams["roleId"] = fmt.Sprint(roleids[i])
 
-			raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-				return ecsClient.ProcessCommonRequest(request)
-			})
-			log.Printf("response of raw AddRoleToUser Role(%s) is : %s", roleids[i], raw)
-
-			bresponse, ok := raw.(*responses.CommonResponse)
+			bresponse, err := client.ProcessCommonRequest(request)
 			if err != nil || bresponse.GetHttpStatus() != 200 {
 				errmsg := ""
-				if ok {
+				if bresponse != nil {
 					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				}
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_role_binding", "AddRoleToUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 
-			addDebug("AddRoleToUser", raw, requestInfo, bresponse.GetHttpContentString())
+			addDebug("AddRoleToUser", bresponse, request, request.QueryParams)
 			log.Printf("response of queryparams AddRoleToUser is : %s", request.QueryParams)
 		}
 	}
@@ -110,8 +102,7 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 	}
 	lname := d.Get("login_name").(string)
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var requestInfo *ecs.Client
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ResetRolesForUserByLoginName", "/roa/ascm/auth/user/ResetRolesForUserByLoginName")
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ResetRolesForUserByLoginName", "/ascm/auth/user/ResetRolesForUserByLoginName")
 
 	request.Headers["x-ascm-product-version"] = "2019-05-10"
 
@@ -131,38 +122,30 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 	request.SetContent(requeststring)
 	request.Headers["Content-Type"] = requests.Json
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
+	bresponse, err := client.ProcessCommonRequest(request)
 
-	log.Printf("response of raw ResetRolesForUserByLoginName is : %s", raw)
+	log.Printf("response of raw ResetRolesForUserByLoginName is : %s", bresponse)
 
 	if err != nil {
 		errmsg := ""
-		if bresponse, ok := raw.(*responses.CommonResponse); ok {
+		if bresponse != nil {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "ResetRolesForUserByLoginName", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	bresponse, ok := raw.(*responses.CommonResponse)
-	if !ok {
-		return fmt.Errorf("Failed to cast response to CommonResponse")
-	}
-	addDebug("ResetRolesForUserByLoginName", raw, requestInfo, bresponse.GetHttpContentString())
+	addDebug("ResetRolesForUserByLoginName", bresponse, request, request.QueryParams)
 	return resourceAlibabacloudStackAscmUserRoleBindingRead(d, meta)
 }
 
 func resourceAlibabacloudStackAscmUserRoleBindingDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
-	var requestInfo *ecs.Client
-	var roleid int
+	var roleid string
 	flag := false
-	var roleids []int
-
+	var roleids []string
 	if v, ok := d.GetOk("role_ids"); ok {
-		roleids = expandIntList(v.(*schema.Set).List())
+		roleids = expandStringList(v.(*schema.Set).List())
 		for i := range roleids {
 			if len(roleids) > 1 {
 				roleid = roleids[i]
@@ -175,28 +158,25 @@ func resourceAlibabacloudStackAscmUserRoleBindingDelete(d *schema.ResourceData, 
 	}
 	log.Printf("roleid is %v", roleid)
 	log.Printf("roleids is %v", roleids)
-	check, err := ascmService.DescribeAscmUserRoleBinding(d.Id())
+	_, err := ascmService.DescribeAscmUserRoleBinding(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsBindingExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	addDebug("IsBindingExist", check, requestInfo, map[string]string{"loginName": d.Id()})
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
 		if flag {
 			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUser", "/ascm/auth/role/removeRoleFromUser")
 			request.QueryParams["loginName"] = d.Id()
 			request.QueryParams["roleId"] = fmt.Sprint(roleid)
 
-			raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-				return csClient.ProcessCommonRequest(request)
-			})
+			bresponse, err := client.ProcessCommonRequest(request)
 			if err != nil {
 				errmsg := ""
-				if bresponse, ok := raw.(*responses.CommonResponse); ok {
+				if bresponse != nil {
 					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				}
 				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "RemoveRoleFromUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
-			check, err = ascmService.DescribeAscmUserRoleBinding(d.Id())
+			_, err = ascmService.DescribeAscmUserRoleBinding(d.Id())
 
 			if err != nil {
 				return resource.NonRetryableError(err)
