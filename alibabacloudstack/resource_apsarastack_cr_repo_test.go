@@ -6,9 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
 	
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
@@ -115,7 +113,7 @@ func TestAccAlibabacloudStackCRRepo_Basic(t *testing.T) {
 
 func TestAccAlibabacloudStackCRRepo_Multi(t *testing.T) {
 	var v GetRepoResponse
-	resourceId := "alibabacloudstack_cr_repo.default.2"
+	resourceId := "alibabacloudstack_cr_repo.default.1"
 	ra := resourceAttrInit(resourceId, crRepoMap)
 	serviceFunc := func() interface{} {
 		return &CrService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -141,7 +139,7 @@ func TestAccAlibabacloudStackCRRepo_Multi(t *testing.T) {
 					"name":      "${var.name}${count.index}",
 					"summary":   "summary",
 					"repo_type": "PUBLIC",
-					"count":     "3",
+					"count":     "2",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),

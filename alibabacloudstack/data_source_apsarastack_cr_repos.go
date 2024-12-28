@@ -5,9 +5,6 @@ import (
 	"log"
 	"regexp"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -103,26 +100,22 @@ func dataSourceAlibabacloudStackCRRepos() *schema.Resource {
 
 func dataSourceAlibabacloudStackCRReposRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("POST", "cr", "2016-06-07", "GetRepoList", "")
+	request := client.NewCommonRequest("GET", "cr", "2016-06-07", "GetRepoList", "/repos")
 	request.Domain = client.Domain
 
-	raw, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
-		return crClient.ProcessCommonRequest(request)
-	})
-	response, ok := raw.(*responses.CommonResponse)
-	addDebug(request.GetActionName(), raw, request)
+	response, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), response, request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if response == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	repos := crResponseList{}
-	resp := raw.(*responses.CommonResponse)
-	log.Printf("response %v", resp)
-	err = json.Unmarshal(resp.GetHttpContentBytes(), &repos)
+	log.Printf("response %v", response)
+	err = json.Unmarshal(response.GetHttpContentBytes(), &repos)
 	log.Printf("unmarshalled response %v", &repos)
 	if err != nil {
 		return errmsgs.WrapError(err)
