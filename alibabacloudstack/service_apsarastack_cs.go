@@ -44,7 +44,6 @@ func (s *CsService) DoCsDescribeclusterdetailRequest(id string) (cl *cs.Kubernet
 }
 
 func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDetail, err error) {
-	invoker := NewInvoker()
 	cluster := &cs.KubernetesClusterDetail{}
 	cluster.ClusterId = ""
 
@@ -52,23 +51,16 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDet
 	request.QueryParams["SignatureVersion"] = "1.0"
 	request.QueryParams["ProductName"] = "cs"
 
-	var raw interface{}
-	err = invoker.Run(func() error {
-		raw, err = s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		return err
-	})
-	clusterdetails, ok := raw.(*responses.CommonResponse)
-		if err != nil {
-				if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNotFound"}) {
+	clusterdetails, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if clusterdetails == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNotFound"}) {
 			return cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.DenverdinoAlibabacloudStackgo)
 		}
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(clusterdetails.BaseResponse)
-			}
-			return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.DenverdinoAlibabacloudStackgo, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(clusterdetails.BaseResponse)
+		return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.DenverdinoAlibabacloudStackgo, errmsg)
 
 	}
 
@@ -112,39 +104,30 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDet
 }
 
 func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePools, err error) {
-	invoker := NewInvoker()
-	request := s.client.NewCommonRequest("POST", "CS", "2015-12-15", "DescribeClusterNodes", "")
+	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterNodes", fmt.Sprintf("/clusters/%s/nodes", id))
 	mergeMaps(request.QueryParams, map[string]string{
 		"SignatureVersion": "1.0",
-		"ProductName":      "cs",
 		"nodepool_id":      nodepoolid,
 		"ClusterId":        id,
 	})
 
-	var raw interface{}
-	err = invoker.Run(func() error {
-		raw, err = s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		return err
-	})
-	clusternodepooldetails, ok := raw.(*responses.CommonResponse)
+	response, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
+		if response == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNodePoolNotFound"}) {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(clusternodepooldetails.BaseResponse)
-		}		
+		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	if !clusternodepooldetails.IsSuccess() {
+	if !response.IsSuccess() {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "DescribeClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	var clusternodepools *NodePools
-	_ = json.Unmarshal(clusternodepooldetails.GetHttpContentBytes(), &clusternodepools)
+	_ = json.Unmarshal(response.GetHttpContentBytes(), &clusternodepools)
 	return clusternodepools, nil
 }
 
@@ -165,7 +148,7 @@ func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", raw, errmsg)
 	}
 	var node *NodePool
-	
+
 	if nodePool.IsSuccess() == false {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", nodePool.GetHttpContentString())
 	}
@@ -216,36 +199,26 @@ func (s *CsService) CsKubernetesNodePoolStateRefreshFunc(id, clusterid string, f
 }
 
 func (s *CsService) DescribeCsKubernetesNodePool(id, clusterid string) (*NodePoolAlone, error) {
-	req := s.client.NewCommonRequest("sPOST", "CS", "2015-12-15", "DescribeClusterNodePoolDetail", "")
-	req.QueryParams["AccountInfo"] = "123456"
-	req.QueryParams["SignatureVersion"] = "1.0"
-	req.QueryParams["ProductName"] = "cs"
-	req.QueryParams["X-acs-body"] = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\"}", "ClusterId", clusterid, "NodepoolId", id)
-
+	req := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterNodePoolDetail", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterid, id))
 	req.Headers["x-acs-asapi-gateway-version"] = "3.0"
-
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(req)
-	})
-	nodePool, ok := raw.(*responses.CommonResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(nodePool.BaseResponse)
+	req.QueryParams["ClusterId"] = clusterid
+	req.QueryParams["NodepoolId"] = id
+	response, err := s.client.ProcessCommonRequest(req)
+	if err != nil || !response.IsSuccess() {
+		if response == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"<QuerySeter> no row found"}) {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.DenverdinoAlibabacloudStackgo)
 		}
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_nodepool", "DescribeNodePool", raw, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_nodepool", "DescribeNodePool", response, errmsg)
 	}
 	var node *NodePoolAlone
-	
-	if nodePool.IsSuccess() == false {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", nodePool.GetHttpContentString())
-	}
-	err = json.Unmarshal(nodePool.GetHttpContentBytes(), &node)
+
+	err = json.Unmarshal(response.GetHttpContentBytes(), &node)
 	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_nodepool", "ParsenodepoolResponse", raw)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_nodepool", "ParsenodepoolResponse", response)
 	}
 	return node, nil
 }
@@ -592,45 +565,45 @@ type ClustersV1 struct {
 	PureListData bool   `json:"pureListData"`
 	API          string `json:"api"`
 	Clusters     []struct {
-		Tags                   []cs.Tag `json:"tags"`
-		ResourceGroupID        string   `json:"resource_group_id"`
-		PrivateZone            bool     `json:"private_zone"`
-		VpcID                  string   `json:"vpc_id"`
-		NetworkMode            string   `json:"network_mode"`
-		SecurityGroupID        string   `json:"security_group_id"`
-		ClusterType            string   `json:"cluster_type"`
-		DockerVersion          string   `json:"docker_version"`
-		DataDiskCategory       string   `json:"data_disk_category"`
-		NextVersion            string   `json:"next_version"`
-		ZoneID                 string   `json:"zone_id"`
-		ClusterID              string   `json:"cluster_id"`
-		Department             int      `json:"Department"`
-		ExternalLoadbalancerID string   `json:"external_loadbalancer_id"`
-		VswitchID              string   `json:"vswitch_id"`
-		SwarmMode              bool     `json:"swarm_mode"`
-		RMRegionID             string   `json:"RMRegionId"`
-		State                  string   `json:"state"`
-		ResourceGroup          int      `json:"ResourceGroup"`
-		InitVersion            string   `json:"init_version"`
-		NodeStatus             string   `json:"node_status"`
-		NeedUpdateAgent        bool     `json:"need_update_agent"`
+		Tags                   []cs.Tag  `json:"tags"`
+		ResourceGroupID        string    `json:"resource_group_id"`
+		PrivateZone            bool      `json:"private_zone"`
+		VpcID                  string    `json:"vpc_id"`
+		NetworkMode            string    `json:"network_mode"`
+		SecurityGroupID        string    `json:"security_group_id"`
+		ClusterType            string    `json:"cluster_type"`
+		DockerVersion          string    `json:"docker_version"`
+		DataDiskCategory       string    `json:"data_disk_category"`
+		NextVersion            string    `json:"next_version"`
+		ZoneID                 string    `json:"zone_id"`
+		ClusterID              string    `json:"cluster_id"`
+		Department             int       `json:"Department"`
+		ExternalLoadbalancerID string    `json:"external_loadbalancer_id"`
+		VswitchID              string    `json:"vswitch_id"`
+		SwarmMode              bool      `json:"swarm_mode"`
+		RMRegionID             string    `json:"RMRegionId"`
+		State                  string    `json:"state"`
+		ResourceGroup          int       `json:"ResourceGroup"`
+		InitVersion            string    `json:"init_version"`
+		NodeStatus             string    `json:"node_status"`
+		NeedUpdateAgent        bool      `json:"need_update_agent"`
 		Created                time.Time `json:"created"`
-		DeletionProtection     bool     `json:"deletion_protection"`
-		SubnetCidr             string   `json:"subnet_cidr"`
-		Profile                string   `json:"profile"`
-		RegionID               string   `json:"region_id"`
-		MasterURL              string   `json:"master_url"`
-		CurrentVersion         string   `json:"current_version"`
-		NAMING_FAILED          string   `json:"-"`
-		VswitchCidr            string   `json:"vswitch_cidr"`
-		ClusterHealthy         string   `json:"cluster_healthy"`
-		ClusterSpec            string   `json:"cluster_spec"`
-		Size                   int      `json:"size"`
-		DataDiskSize           int      `json:"data_disk_size"`
-		Port                   int      `json:"port"`
-		EnabledMigration       bool     `json:"enabled_migration"`
-		Name                   string   `json:"name"`
-		DepartmentName         string   `json:"DepartmentName"`
+		DeletionProtection     bool      `json:"deletion_protection"`
+		SubnetCidr             string    `json:"subnet_cidr"`
+		Profile                string    `json:"profile"`
+		RegionID               string    `json:"region_id"`
+		MasterURL              string    `json:"master_url"`
+		CurrentVersion         string    `json:"current_version"`
+		NAMING_FAILED          string    `json:"-"`
+		VswitchCidr            string    `json:"vswitch_cidr"`
+		ClusterHealthy         string    `json:"cluster_healthy"`
+		ClusterSpec            string    `json:"cluster_spec"`
+		Size                   int       `json:"size"`
+		DataDiskSize           int       `json:"data_disk_size"`
+		Port                   int       `json:"port"`
+		EnabledMigration       bool      `json:"enabled_migration"`
+		Name                   string    `json:"name"`
+		DepartmentName         string    `json:"DepartmentName"`
 		Updated                time.Time `json:"updated"`
 		InstanceType           string    `json:"instance_type"`
 		WorkerRAMRoleName      string    `json:"worker_ram_role_name"`

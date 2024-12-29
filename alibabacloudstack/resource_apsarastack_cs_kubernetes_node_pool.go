@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/alibabacloud-go/tea/tea"
@@ -15,11 +14,8 @@ import (
 
 	roacs "github.com/alibabacloud-go/cs-20151215/v5/client"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -128,7 +124,7 @@ func resourceAlibabacloudStackCSKubernetesNodePool() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Default:      PostPaid,
-				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
+				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
 			},
 			"period": {
 				Type:             schema.TypeInt,
@@ -390,6 +386,24 @@ type kubernetesConfig struct {
 type tEEConfig struct {
 	TEEEnable bool `json:"tee_enable"`
 }
+type CreateClusterNodePoolRequest struct {
+	Count            int64            `json:"count"`
+	NodePoolInfo     NodePoolInfo     `json:"node_pool_info"`
+	ScalingGroup     scalingGroup     `json:"scaling_group"`
+	KubernetesConfig kubernetesConfig `json:"kubernetes_config"`
+	AutoScaling      autoScaling      `json:"auto_scaling"`
+}
+
+type NodePoolInfo struct {
+	NodePoolId      string    `json:"nodepool_id"`
+	RegionId        string    `json:"region_id"`
+	Name            string    `json:"name"`
+	Created         time.Time `json:"created"`
+	Updated         time.Time `json:"updated"`
+	IsDefault       bool      `json:"is_default"`
+	NodePoolType    string    `json:"type"`
+	ResourceGroupId string    `json:"resource_group_id"`
+}
 type scalingGroup struct {
 	VswitchIds    []string `json:"vswitch_ids"`
 	InstanceTypes []string `json:"instance_types"`
@@ -424,63 +438,31 @@ type CreateNodePoolRequest struct {
 func resourceAlibabacloudStackCSKubernetesNodePoolCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
-	invoker := NewInvoker()
 
-	var requestInfo *cs.Client
-	var raw interface{}
-
-	clusterId := d.Get("cluster_id").(string)
 	// prepare args and set default value
 	request, err := buildNodePoolArgs(d, meta)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "PrepareKubernetesNodePoolArgs", err)
 	}
-	request.Method = "POST"        // Set request method
-	request.Product = "CS"         // Specify product
-	request.Version = "2015-12-15" // Specify product version
-	request.ServiceCode = "cs"
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	} // Set request scheme. Default: http
-	request.ApiName = "CreateClusterNodePool"
 	request.Headers["x-acs-asapi-gateway-version"] = "3.0"
 
-	if err = invoker.Run(func() error {
-		raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		return err
-	}); err != nil {
-		errmsg := ""
-		if raw != nil {
-			response, ok := raw.(*responses.CommonResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
+	response, err := client.ProcessCommonRequest(request)
+	if err != nil {
+		if response == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "CreateKubernetesNodePool", raw, errmsg)
-	}
-
-	if debugOn() {
-		requestMap := make(map[string]interface{})
-		requestMap["Params"] = request.GetQueryParams()
-		addDebug("CreateKubernetesNodePool", raw, requestInfo, requestMap)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "CreateKubernetesNodePool", response, errmsg)
 	}
 	nodepoolresponse := NodePoolCommonResponse{}
-	nodePool, ok := raw.(*responses.CommonResponse)
-	if !ok || !nodePool.IsSuccess() {
-		return err
-	}
-	if err := json.Unmarshal(nodePool.GetHttpContentBytes(), &nodepoolresponse); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "ParseKubernetesNodePoolResponse", raw)
+	if err := json.Unmarshal(response.GetHttpContentBytes(), &nodepoolresponse); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "ParseKubernetesNodePoolResponse", response)
 	}
 
 	d.SetId(nodepoolresponse.NodePoolID)
 
 	// reset interval to 10s
-	stateConf := BuildStateConf([]string{"initial", "scaling"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterId, []string{"deleting", "failed"}))
+	stateConf := BuildStateConf([]string{"initial", "scaling"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), d.Get("cluster_id").(string), []string{"deleting", "failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, "ResourceID:%s , TaskID:%s ", d.Id(), nodepoolresponse.TaskId)
 	}
@@ -500,7 +482,6 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 	clusterId := d.Get("cluster_id").(string)
 	d.Partial(true)
 	update := false
-	invoker := NewInvoker()
 
 	args := &CreateNodePoolRequest{
 		ClusterID:        clusterId,
@@ -652,40 +633,23 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 
 	if update {
 		//begin
-		request := client.NewCommonRequest("POST", "CS", "2015-12-15", "ModifyClusterNodePool", "")
-		argJson, _ := json.Marshal(args)
-		mergeMaps(request.QueryParams, map[string]string{
-			"ClusterId":        d.Get("cluster_id").(string),
-			"AccountInfo":      "123456",
-			"SignatureVersion": "1.0",
-			"ProductName":      "cs",
-			"X-acs-body":       fmt.Sprintf("%s", argJson),
-		})
+		request := client.NewCommonRequest("POST", "CS", "2015-12-15", "ModifyClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterId, d.Id()))
+		request.QueryParams["ClusterId"] = clusterId
+		request.QueryParams["SignatureVersion"] = "1.0"
 		request.Headers["x-acs-asapi-gateway-version"] = "3.0"
-
-		var raw interface{}
-		if err := invoker.Run(func() error {
-			var err error
-			raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-				return ecsClient.ProcessCommonRequest(request)
-			})
-			return err
-		}); err != nil {
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateKubernetesNodePool", raw, errmsg)
+		jsonData, err := json.Marshal(args)
+		if err != nil {
+			return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
 		}
-		if debugOn() {
-			resizeRequestMap := make(map[string]interface{})
-			resizeRequestMap["ClusterId"] = clusterId
-			resizeRequestMap["NodePoolId"] = d.Id()
-			resizeRequestMap["Args"] = args
-			addDebug("UpdateKubernetesNodePool", raw, resizeRequestMap)
+		request.SetContentType(requests.Json)
+		request.SetContent(jsonData)
+		response, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if response == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateKubernetesNodePool", response, errmsg)
 		}
 
 		stateConf := BuildStateConf([]string{"scaling", "updating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterId, []string{"deleting", "failed"}))
@@ -814,7 +778,6 @@ func resourceAlibabacloudStackCSNodePoolRead(d *schema.ResourceData, meta interf
 func resourceAlibabacloudStackCSNodePoolDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
-	invoker := NewInvoker()
 	clusterId := d.Get("cluster_id").(string)
 	var raw interface{}
 	// delete all nodes
@@ -823,40 +786,18 @@ func resourceAlibabacloudStackCSNodePoolDelete(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	req := client.NewCommonRequest("POST", "CS", "2015-12-15", "DeleteClusterNodepool", "")
-	mergeMaps(req.QueryParams, map[string]string{
-		"AccountInfo":      "123456",
-		"SignatureVersion": "1.0",
-		"ProductName":      "cs",
-		"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\"}",
-			"ClusterId", clusterId,
-			"NodepoolId", d.Id(),
-		),
-	})
+	req := client.NewCommonRequest("DELETE", "CS", "2015-12-15", "DeleteClusterNodepool", fmt.Sprintf("/clusters/%s/nodepools/%s", clusterId, d.Id()))
+	req.QueryParams["ClusterId"] = clusterId
+	req.QueryParams["NodepoolId"] = d.Id()
 	req.Headers["x-acs-asapi-gateway-version"] = "3.0"
 
-	if err := invoker.Run(func() error {
-		var err error
-		raw, err = csService.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(req)
-		})
-
-		return err
-	}); err != nil {
-		errmsg := ""
-		if raw != nil {
-			response, ok := raw.(*responses.CommonResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
+	response, err := client.ProcessCommonRequest(req)
+	if err != nil {
+		if response == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteClusterNodePool", raw, errmsg)
-	}
-	if debugOn() {
-		requestMap := make(map[string]interface{})
-		requestMap["ClusterId"] = clusterId
-		requestMap["NodePoolId"] = d.Id()
-		addDebug("DeleteClusterNodePool", raw, d.Id(), requestMap)
 	}
 
 	stateConf := BuildStateConf([]string{"deleting"}, []string{}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterId, []string{"failed"}))
@@ -881,12 +822,9 @@ func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*requests.Comm
 			password = decryptResp
 		}
 	}
-	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "CreateClusterNodePool", "")
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
+	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "CreateClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools", d.Get("cluster_id").(string)))
 
-	NodePoolInfo := cs.NodePoolInfo{
+	NodePoolInfo := NodePoolInfo{
 		Name:         d.Get("name").(string),
 		NodePoolType: "ess", // hard code the type
 	}
@@ -956,25 +894,21 @@ func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*requests.Comm
 	if v, ok := d.GetOk("internet_max_bandwidth_out"); ok {
 		ScalingGroup.InternetMaxBandwidthOut = v.(int)
 	}
-	NodePoolInfoJson, _ := json.Marshal(NodePoolInfo)
-	ScalingGroupJson, _ := json.Marshal(ScalingGroup)
-	KubernetesConfigJson, _ := json.Marshal(KubernetesConfig)
-	AutoScalingJson, _ := json.Marshal(AutoScaling)
-	mergeMaps(request.QueryParams, map[string]string{
-		"ClusterId":        d.Get("cluster_id").(string),
-		"AccountInfo":      "123456",
-		"SignatureVersion": "1.0",
-		"ProductName":      "cs",
-		"X-acs-body": fmt.Sprintf("{\"%s\":%d,\"%s\":%s,\"%s\":%s,\"%s\":%s,\"%s\":%s}",
-
-			"count", int64(d.Get("node_count").(int)),
-			"nodepool_info", NodePoolInfoJson,
-			"scaling_group", ScalingGroupJson,
-			"kubernetes_config", KubernetesConfigJson,
-			"auto_scaling", AutoScalingJson,
-		),
-	})
-
+	request.QueryParams["ClusterId"] = d.Get("cluster_id").(string)
+	request.QueryParams["SignatureVersion"] = "1.0"
+	body := CreateClusterNodePoolRequest{
+		Count:            int64(d.Get("node_count").(int)),
+		NodePoolInfo:     NodePoolInfo,
+		ScalingGroup:     ScalingGroup,
+		KubernetesConfig: KubernetesConfig,
+		AutoScaling:      AutoScaling,
+	}
+	jsonData, err := json.Marshal(body)
+	if err != nil {
+		return nil, errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
+	}
+	request.SetContentType(requests.Json)
+	request.SetContent(jsonData)
 	return request, nil
 }
 
@@ -1244,10 +1178,8 @@ func flattenTagsConfig(config []cs.Tag) map[string]string {
 	return m
 }
 func RemoveNodePoolNodes(d *schema.ResourceData, meta interface{}, clusterid, nodepoolid string, oldNodes []interface{}, newNodes []interface{}) error {
-	var raw interface{}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
-	invoker := NewInvoker()
 
 	// list all nodes of the nodepool
 	object, err := csService.DescribeClusterNodes(clusterid, d.Id())
@@ -1293,35 +1225,27 @@ func RemoveNodePoolNodes(d *schema.ResourceData, meta interface{}, clusterid, no
 		removeNodesName = removeInstanceList
 	}
 	if len(removeNodesName) > 0 {
-		req := csService.client.NewCommonRequest("POST", "CS", "2015-12-15", "RemoveClusterNodes", "")
-		mergeMaps(req.QueryParams, map[string]string{
-			"AccountInfo":      "123456",
-			"SignatureVersion": "1.0",
-			"ProductName":      "cs",
-
-			"X-acs-body": fmt.Sprintf("{\"%s\":%t,\"%s\":%t,\"%s\":%q,\"%s\":\"%s\"}",
-
-				"release_node", true,
-				"drain_node", true,
-				"nodes", removeNodesName,
-				"ClusterId", clusterid,
-			),
-		})
+		req := csService.client.NewCommonRequest("POST", "CS", "2015-12-15", "RemoveClusterNodes", fmt.Sprintf("/api/v2/clusters/%s/nodes/remove", clusterid))
+		req.QueryParams["SignatureVersion"] = "1.0"
 		req.Headers["x-acs-asapi-gateway-version"] = "3.0"
-		if err := invoker.Run(func() error {
-			var err error
-			raw, err = csService.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-				return ecsClient.ProcessCommonRequest(req)
-			})
-
-			return err
-		}); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteKubernetesClusterNodes", errmsgs.DenverdinoAliyungo)
+		body := map[string]interface{}{
+			"release_node": true,
+			"drain_node":   true,
+			"nodes":        removeNodesName,
+			"ClusterId":    clusterid,
 		}
-		resp, _ := raw.(*responses.CommonResponse)
-		if resp.IsSuccess() == false {
-			//return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", cluster.GetHttpContentString())
-			return err
+		jsonData, err := json.Marshal(body)
+		if err != nil {
+			return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
+		}
+		req.SetContentType(requests.Json)
+		req.SetContent(jsonData)
+		resp, err := csService.client.ProcessCommonRequest(req)
+		if err != nil {
+			if resp == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteKubernetesClusterNodes", errmsgs.DenverdinoAliyungo)
 		}
 		stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterid, []string{"deleting", "failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
@@ -1334,31 +1258,28 @@ func ScaleClusterNodePool(d *schema.ResourceData, meta interface{}, clusterid, n
 	var raw interface{}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
-	invoker := NewInvoker()
 
 	// list all nodes of the nodepool
-	req := csService.client.NewCommonRequest("POST", "CS", "2015-12-15", "ScaleClusterNodePool", "")
-	mergeMaps(req.QueryParams, map[string]string{
-		"AccountInfo":      "123456",
-		"SignatureVersion": "1.0",
-		"ProductName":      "cs",
+	req := csService.client.NewCommonRequest("POST", "CS", "2015-12-15", "ScaleClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools/%s)", clusterid, nodepoolid))
+	req.QueryParams["SignatureVersion"] = "1.0"
+	body := map[string]interface{}{
+		"ClusterId":  clusterid,
+		"NodepoolId": nodepoolid,
+		"count":      int64(newValue) - int64(oldValue),
+	}
+	jsonData, err := json.Marshal(body)
+	if err != nil {
+		return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
+	}
+	req.SetContentType(requests.Json)
+	req.SetContent(jsonData)
 
-		"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d}",
-
-			"ClusterId", clusterid,
-			"NodepoolId", nodepoolid,
-			"count", int64(newValue)-int64(oldValue),
-		),
-	})
 	req.Headers["x-acs-asapi-gateway-version"] = "3.0"
-	if err := invoker.Run(func() error {
-		var err error
-		raw, err = csService.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(req)
-		})
-
-		return err
-	}); err != nil {
+	response, err := csService.client.ProcessCommonRequest(req)
+	if err != nil {
+		if response == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "ScaleClusterNodePool", raw)
 	}
 
