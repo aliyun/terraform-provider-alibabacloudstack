@@ -69,7 +69,7 @@ func TestAccAlibabacloudStackDBBackupPolicy_mysql(t *testing.T) {
 					"engine_version":   "5.6",
 					"storage_type":     "local_ssd",
 					"instance_type":    "rds.mysql.s2.large",
-					"instance_storage": "30",
+					"instance_storage": "20",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{

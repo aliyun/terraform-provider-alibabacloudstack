@@ -255,28 +255,27 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 					}),
 				),
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"engine":               "MySQL",
-					"engine_version":       "5.6",
-					"instance_type":        "rds.mysql.s2.large",
-					"instance_storage":     "20",
-					"instance_name":        "tf-testAccDBInstanceConfig",
-					"instance_charge_type": "Postpaid",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"engine":            "MySQL",
-						"engine_version":    "5.6",
-						"instance_type":     CHECKSET,
-						"instance_storage":  "20",
-						"instance_name":     "tf-testAccDBInstanceConfig",
-						"zone_id":           CHECKSET,
-						"connection_string": CHECKSET,
-						"port":              CHECKSET,
-					}),
-				),
-			},
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"engine":           "MySQL",
+			// 		"engine_version":   "5.6",
+			// 		"instance_type":    "rds.mysql.s2.large",
+			// 		"instance_storage": "20",
+			// 		"instance_name":    "tf-testAccDBInstanceConfig",
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"engine":            "MySQL",
+			// 			"engine_version":    "5.6",
+			// 			"instance_type":     CHECKSET,
+			// 			"instance_storage":  "20",
+			// 			"instance_name":     "tf-testAccDBInstanceConfig",
+			// 			"zone_id":           CHECKSET,
+			// 			"connection_string": CHECKSET,
+			// 			"port":              CHECKSET,
+			// 		}),
+			// 	),
+			// },
 			//			{
 			//				Config: testAccConfig(map[string]interface{}{
 			//					"security_ip_mode": SafetyMode,

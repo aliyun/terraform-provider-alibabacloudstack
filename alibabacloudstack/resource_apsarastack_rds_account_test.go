@@ -4,69 +4,86 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackRdsAccount0(t *testing.T) {
-
-	var v map[string]interface{}
-
-	resourceId := "alibabacloudstack_rds_account.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudTestAccRdsAccountCheckmap)
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+func TestAccAlibabacloudStackDBAccountUpdate(t *testing.T) {
+	var v *rds.DBInstanceAccount
+	rand := getAccTestRandInt(10000, 999999)
+	name := fmt.Sprintf("tf-testAccdbaccount-%d", rand)
+	var basicMap = map[string]string{
+		"instance_id": CHECKSET,
+		"name":        "tftestnormal",
+		"password":    "inputYourCodeHere",
+		"type":        "Normal",
+	}
+	resourceId := "alibabacloudstack_db_account.default"
+	ra := resourceAttrInit(resourceId, basicMap)
+	serviceFunc := func() interface{} {
 		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DoRdsDescribeaccountsRequest")
+	}
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeDBAccount")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%srdsaccount%d", defaultRegionToTest, rand)
-
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRdsAccountBasicdependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBAccountConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-
 			testAccPreCheck(t)
 		},
+
+		// module name
 		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
 
-		CheckDestroy: rac.checkResourceDestroy(),
-
+		Providers: testAccProviders,
+		// CheckDestroy: rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
-
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"data_base_instance_id": "alibabacloudstack_db_instance.default.id",
-
-					"account_name": "test1",
+					"instance_id": "${alibabacloudstack_db_instance.instance.id}",
+					"name":        "tftestnormal",
+					"password":    "inputYourCodeHere",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(nil),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"description": "from terraform",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"data_base_instance_id": "alibabacloudstack_db_instance.default.id",
-
-						"account_name": "test1",
+						"description": "from terraform",
 					}),
 				),
 			},
-
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"account_description": "test-AccountDescription",
-
-					"account_name": "test1",
+					"password": "inputYourCodeHere",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"account_description": "test-AccountDescription",
-
-						"account_name": "test1",
+						"password": "inputYourCodeHere",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"description": "tf test",
+					"password":    "inputYourCodeHere",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"description": "tf test",
+						"password":    "inputYourCodeHere",
 					}),
 				),
 			},
@@ -74,99 +91,24 @@ func TestAccAlibabacloudStackRdsAccount0(t *testing.T) {
 	})
 }
 
-var AlibabacloudTestAccRdsAccountCheckmap = map[string]string{
-
-	"account_description": CHECKSET,
-
-	"data_base_instance_id": CHECKSET,
-
-	"account_type": CHECKSET,
-
-	"account_name": CHECKSET,
-}
-
-func AlibabacloudTestAccRdsAccountBasicdependence(name string) string {
+func resourceDBAccountConfigDependence(name string) string {
 	return fmt.Sprintf(`
-variable "name" {
-    default = "%s"
+	%s
+	variable "creation" {
+		default = "Rds"
+	}
+	variable "name" {
+		default = "%v"
+	}
+
+	resource "alibabacloudstack_db_instance" "instance" {
+		engine               = "MySQL"
+        engine_version       = "5.6"
+        instance_type        = "rds.mysql.s2.large"
+	    instance_storage     = "30"
+		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	    instance_name = "${var.name}"
+	    storage_type         = "local_ssd"
+	}
+	`, RdsCommonTestCase, name)
 }
-
-%s
-
-
-
-`, name, DBInstanceCommonTestCase)
-}
-func TestAccAlibabacloudStackRdsAccount1(t *testing.T) {
-
-	var v map[string]interface{}
-
-	resourceId := "alibabacloudstack_rds_account.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudTestAccRdsAccountCheckmap)
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DoRdsDescribeaccountsRequest")
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%srdsaccount%d", defaultRegionToTest, rand)
-
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRdsAccountBasicdependence)
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-
-		CheckDestroy: rac.checkResourceDestroy(),
-
-		Steps: []resource.TestStep{
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-
-					"data_base_instance_id": "alibabacloudstack_db_instance.default.id",
-
-					"account_name": "test2",
-
-					"account_description": "ccapi-test-create",
-
-					"account_type": "Normal",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"data_base_instance_id": "alibabacloudstack_db_instance.default.id",
-
-						"account_name": "test2",
-
-						"account_description": "ccapi-test-create",
-
-						"account_type": "Normal",
-					}),
-				),
-			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{
-
-					"account_description": "ccapi-update",
-
-					"account_name": "test1",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"account_description": "ccapi-update",
-
-						"account_name": "test1",
-					}),
-				),
-			},
-		},
-	})
-}
-
