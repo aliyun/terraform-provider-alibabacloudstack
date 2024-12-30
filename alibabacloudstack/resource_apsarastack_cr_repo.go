@@ -3,8 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"log"
 	"strings"
@@ -12,6 +10,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 )
 
 func resourceAlibabacloudStackCRRepo() *schema.Resource {
@@ -87,19 +86,29 @@ func resourceAlibabacloudStackCRRepoCreate(d *schema.ResourceData, meta interfac
 	repoType := d.Get("repo_type").(string)
 	detail := d.Get("detail").(string)
 
-	request := client.NewCommonRequest("POST", "cr", "2016-06-07", "CreateRepo", "")
-	request.QueryParams["X-acs-body"] = fmt.Sprintf("{\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}", "repo", "RepoName", repoName, "RepoNamespace", repoNamespace, "repoType", repoType, "summary", summary, "detail", detail)
-
-	raw, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
-		return crClient.ProcessCommonRequest(request)
-	})
-	response, ok := raw.(*responses.CommonResponse)
-	addDebug(request.GetActionName(), raw, request)
+	request := client.NewCommonRequest("PUT", "cr", "2016-06-07", "CreateRepo", "/repos")
+	body := map[string]interface{}{
+		"repo": map[string]interface{}{
+			"RepoName":     repoName,
+			"RepoNamespace": repoNamespace,
+			"repoType":          repoType,
+			"summary":           summary,
+			"detail": detail,
+		},
+	}
+	jsonData, err := json.Marshal(body)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
+	}
+	request.SetContentType(requests.Json)
+	request.SetContent(jsonData)
+	response, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), response, request)
+	if err != nil {
+		if response == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_repo", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	log.Printf("repo create response %v", response)
@@ -133,21 +142,29 @@ func resourceAlibabacloudStackCRRepoUpdate(d *schema.ResourceData, meta interfac
 	detail := d.Get("detail").(string)
 
 	if d.HasChanges("summary", "detail", "repo_type") {
-		request := client.NewCommonRequest("POST", "cr", "2016-06-07", "UpdateRepo", "")
+		request := client.NewCommonRequest("POST", "cr", "2016-06-07", "UpdateRepo", fmt.Sprintf("/repos/%s/%s",repoNamespace,repoName) )
 		request.QueryParams["RepoNamespace"] = repoNamespace
 		request.QueryParams["RepoName"] = repoName
-		request.QueryParams["X-acs-body"] = fmt.Sprintf("{\"%s\":{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}}", "repo", "repoType", repoType, "summary", summary, "detail", detail)
-
-		raw, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
-			return crClient.ProcessCommonRequest(request)
-		})
-		response, ok := raw.(*responses.CommonResponse)
-		addDebug(request.GetActionName(), raw, request)
+		body := map[string]interface{}{
+			"repo": map[string]interface{}{
+				"repoType":          repoType,
+				"summary":           summary,
+				"detail": detail,
+			},
+		}
+		jsonData, err := json.Marshal(body)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
+		}
+		request.SetContentType(requests.Json)
+		request.SetContent(jsonData)
+		response, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), response, request)
+		if err != nil {
+			if response == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_repo", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		log.Printf("repo update response %v", response)
@@ -180,10 +197,12 @@ func resourceAlibabacloudStackCRRepoRead(d *schema.ResourceData, meta interface{
 	d.Set("summary", object.Data.Repo.Summary)
 	d.Set("repo_type", object.Data.Repo.RepoType)
 
-	domainList := make(map[string]string)
-	domainList["public"] = object.Data.Repo.RepoDomainList.Public
-	domainList["internal"] = object.Data.Repo.RepoDomainList.Internal
-	domainList["vpc"] = object.Data.Repo.RepoDomainList.Vpc
+	domainList := make([]map[string]string, 1)
+	domains := make(map[string]string)
+	domains["public"] = object.Data.Repo.RepoDomainList.Public
+	domains["internal"] = object.Data.Repo.RepoDomainList.Internal
+	domains["vpc"] = object.Data.Repo.RepoDomainList.Vpc
+	domainList = append(domainList, domains)
 
 	d.Set("domain_list", domainList)
 
@@ -197,20 +216,17 @@ func resourceAlibabacloudStackCRRepoDelete(d *schema.ResourceData, meta interfac
 	repoNamespace := sli[0]
 	repoName := sli[1]
 
-	request := client.NewCommonRequest("POST", "cr", "2016-06-07", "DeleteRepo", "")
+	request := client.NewCommonRequest("DELETE", "cr", "2016-06-07", "DeleteRepo", fmt.Sprintf("/repos/%s/%s",repoNamespace,repoName))
 	request.QueryParams["RepoNamespace"] = repoNamespace
 	request.QueryParams["RepoName"] = repoName
 
-	raw, err := client.WithEcsClient(func(crClient *ecs.Client) (interface{}, error) {
-		return crClient.ProcessCommonRequest(request)
-	})
-	response, ok := raw.(*responses.CommonResponse)
-	addDebug(request.GetActionName(), raw, request)
+	response, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), response, request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if response == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_repo", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 

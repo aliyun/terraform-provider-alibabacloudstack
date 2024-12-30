@@ -1,9 +1,12 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
+	"log"
 	"strings"
 	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -58,72 +61,82 @@ func resourceAlibabacloudStackEdasK8sCluster() *schema.Resource {
 	}
 }
 
+type ImportK8sClusterResponse struct {
+	*responses.BaseResponse
+	Code      string `json:"Code" xml:"Code"`
+	Message   string `json:"Message" xml:"Message"`
+	Data      string `json:"Data" xml:"Data"`
+	RequestId string `json:"RequestId" xml:"RequestId"`
+}
+
 func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	edasService := EdasService{client}
 
-	request := edas.CreateImportK8sClusterRequest()
-	client.InitRoaRequest(*request.RoaRequest)
-	request.ClusterId = d.Get("cs_cluster_id").(string)
+	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "ImportK8sCluster", "/pop/v5/import_k8s_cluster")
+	request.QueryParams["ClusterId"] = d.Get("cs_cluster_id").(string)
+	if v, ok := d.GetOk("namespace_id"); ok {
+		request.QueryParams["NamespaceId"] = v.(string)
+	}
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
-	if v, ok := d.GetOk("namespace_id"); ok {
-		request.NamespaceId = v.(string)
-	}
-	raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-		return edasClient.ImportK8sCluster(request)
-	})
-
-	bresponse, ok := raw.(*edas.ImportK8sClusterResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-
-	if bresponse.Code != 200 {
-		return errmsgs.WrapError(errmsgs.Error("import k8s cluster failed for " + bresponse.Message))
+	addDebug(request.GetActionName(), bresponse, request)
+	response := ImportK8sClusterResponse{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return errmsgs.WrapError(err)
 	}
-	if len(bresponse.Data) == 0 {
+
+	log.Printf("unmarshal response for read %v", &response)
+
+	if response.Code != "200" {
+		return errmsgs.WrapError(errmsgs.Error("import k8s cluster failed for " + response.Message))
+	}
+	if len(response.Data) == 0 {
 		return errmsgs.WrapError(errmsgs.Error("null cluster id after import k8s cluster"))
 	}
-	d.SetId(bresponse.Data)
+	d.SetId(response.Data)
 	// Wait until import succeed
-	req := edas.CreateGetClusterRequest()
-	client.InitRoaRequest(*req.RoaRequest)
-	req.ClusterId = bresponse.Data
-	req.Headers["x-acs-content-type"] = "application/json"
-	req.Headers["Content-Type"] = "application/json"
+	request = client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetCluster", "/pop/v5/resource/cluster")
+	request.QueryParams["ClusterId"] = d.Get("cs_cluster_id").(string)
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
 	wait := incrementalWait(1*time.Second, 2*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-			return edasClient.GetCluster(req)
-		})
+		bresponse, err := client.ProcessCommonRequest(request)
 		time.Sleep(120 * time.Second)
-		bresponse, ok := raw.(*edas.GetClusterResponse)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
 			}
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
 				wait()
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		if bresponse.Code != 200 {
-			return resource.NonRetryableError(errmsgs.Error("Get cluster failed for " + bresponse.Message))
+		response := edas.GetClusterResponse{}
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if err != nil {
+			return resource.RetryableError(errmsgs.WrapError(err))
+		}
+		if response.Code != 200 {
+			return resource.NonRetryableError(errmsgs.Error("Get cluster failed for " + response.Message))
 		}
 
-		addDebug(req.GetActionName(), raw, req.RoaRequest, req)
+		addDebug(request.GetActionName(), response, request)
 		return nil
 	})
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	return resourceAlibabacloudStackEdasK8sClusterRead(d, meta)
@@ -160,74 +173,70 @@ func resourceAlibabacloudStackEdasK8sClusterRead(d *schema.ResourceData, meta in
 
 func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	edasService := EdasService{client}
 
 	clusterId := d.Id()
 
-	request := edas.CreateDeleteClusterRequest()
-	client.InitRoaRequest(*request.RoaRequest)
-	request.ClusterId = clusterId
+	request := client.NewCommonRequest("DELETE", "Edas", "2017-08-01", "DeleteCluster", "/pop/v5/resource/cluster")
+	request.QueryParams["ClusterId"] = clusterId
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	wait := incrementalWait(1*time.Second, 2*time.Second)
+	response := edas.DeleteClusterResponse{}
 	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-			return edasClient.DeleteCluster(request)
-		})
-		bresponse, ok := raw.(*edas.DeleteClusterResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return resource.RetryableError(err)
 			}
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
 				wait()
 				return resource.RetryableError(err)
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		if bresponse.Code != 200 {
-			return resource.NonRetryableError(errmsgs.Error("Delete EDAS K8s cluster failed for " + bresponse.Message))
+
+		json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if response.Code != 200 {
+			return resource.NonRetryableError(errmsgs.Error("Delete EDAS K8s cluster failed for " + response.Message))
 		}
 
-		addDebug(request.GetActionName(), raw, request.RoaRequest, request)
+		addDebug(request.GetActionName(), response, request)
 		return nil
 	})
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	reqGet := edas.CreateGetClusterRequest()
-	client.InitRoaRequest(*reqGet.RoaRequest)
-	reqGet.ClusterId = clusterId
-	reqGet.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	request = client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetCluster", "/pop/v5/resource/cluster")
+	request.QueryParams["ClusterId"] = d.Get("cs_cluster_id").(string)
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		raw, err := edasService.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-			return edasClient.GetCluster(reqGet)
-		})
-		bresponse, ok := raw.(*edas.GetClusterResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return resource.RetryableError(err)
 			}
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
 				wait()
 				return resource.RetryableError(err)
 			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", reqGet.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
-		addDebug(reqGet.GetActionName(), raw, reqGet.RoaRequest, reqGet)
-
-		if bresponse.Code == 200 {
+		addDebug(request.GetActionName(), bresponse, request)
+		response := edas.GetClusterResponse{}
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if response.Code == 200 {
 			return resource.RetryableError(errmsgs.Error("cluster deleting"))
-		} else if bresponse.Code == 601 && strings.Contains(bresponse.Message, "does not exist") {
+		} else if response.Code == 601 && strings.Contains(response.Message, "does not exist") {
 			return nil
 		} else {
-			return resource.NonRetryableError(errmsgs.Error("check cluster status failed for " + bresponse.Message))
+			return resource.NonRetryableError(errmsgs.Error("check cluster status failed for " + response.Message))
 		}
 	})
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), reqGet.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	return nil

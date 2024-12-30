@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+	"fmt"
 )
 
 func TestAccAlibabacloudStackCRReposDataSource(t *testing.T) {
@@ -13,7 +14,7 @@ func TestAccAlibabacloudStackCRReposDataSource(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: dataSourceCRReposConfigDataSource,
+				Config: dataSourceCRReposConfigDataSource(),
 				Check: resource.ComposeTestCheckFunc(
 
 					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_cr_repos.default"),
@@ -28,9 +29,10 @@ func TestAccAlibabacloudStackCRReposDataSource(t *testing.T) {
 	})
 }
 
-const dataSourceCRReposConfigDataSource = `
+func dataSourceCRReposConfigDataSource() string {
+	return fmt.Sprintf(`
 variable "name" {
-    default = "cr-repos-datasource"
+    default = "acc-cr-repos-%d"
 }
 
 resource "alibabacloudstack_cr_namespace" "default" {
@@ -51,4 +53,5 @@ data "alibabacloudstack_cr_repos" "default" {
   name_regex = alibabacloudstack_cr_repo.default.name
 }
 
-`
+`, getAccTestRandInt(1000000, 9999999))
+}

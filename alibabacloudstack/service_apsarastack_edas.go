@@ -77,7 +77,7 @@ func (e *EdasService) GetChangeOrderStatus(id string) (info *edas.ChangeOrderInf
 	}
 
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	
+
 	return &rsp.ChangeOrderInfo, nil
 }
 
@@ -91,7 +91,7 @@ func (e *EdasService) GetDeployGroup(appId, groupId string) (groupInfo *edas.Dep
 		return edasClient.ListDeployGroup(request)
 	})
 
-	rsp, ok:= raw.(*edas.ListDeployGroupResponse)
+	rsp, ok := raw.(*edas.ListDeployGroupResponse)
 	if err != nil {
 		errmsg := ""
 		if ok {
@@ -153,7 +153,7 @@ func (e *EdasService) SyncResource(resourceType string) error {
 	}
 
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	
+
 	if rsp.Code != 200 || !rsp.Success {
 		return errmsgs.WrapError(errmsgs.Error("sync resource failed for " + rsp.Message))
 	}
@@ -212,7 +212,6 @@ func (e *EdasService) GetLastPackgeVersion(appId, groupId string) (string, error
 		return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_application_package_version", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	
 
 	if response.Code != 200 {
 		return "", errmsgs.WrapError(errmsgs.Error("QueryApplicationStatus failed for " + response.Message))
@@ -241,7 +240,6 @@ func (e *EdasService) GetLastPackgeVersion(appId, groupId string) (string, error
 		return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_application_package_version_list", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-	
 
 	if rsp.Code != 200 {
 		return "", errmsgs.WrapError(errmsgs.Error("QueryApplicationStatus failed for " + response.Message))
@@ -277,7 +275,6 @@ func (e *EdasService) DescribeEdasApplication(appId string) (*edas.Applcation, e
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
-	
 	if response.Code != 200 {
 		return application, errmsgs.WrapError(errmsgs.Error("get application error :" + response.Message))
 	}
@@ -309,7 +306,6 @@ func (e *EdasService) DescribeEdasGetCluster(clusterId string) (*edas.Cluster, e
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
-	
 	if response.Code != 200 {
 		return cluster, errmsgs.WrapError(errmsgs.Error("create cluster failed for " + response.Message))
 	}
@@ -320,44 +316,42 @@ func (e *EdasService) DescribeEdasGetCluster(clusterId string) (*edas.Cluster, e
 }
 
 func (e *EdasService) DescribeEdasListCluster(clusterId string) (*edas.Cluster, error) {
-	cluster := &edas.Cluster{}
+	cluster := edas.Cluster{}
 
-	request := edas.CreateListClusterRequest()
-	e.client.InitRoaRequest(*request.RoaRequest)
-	request.RegionId = e.client.RegionId
-	request.ResourceGroupId = e.client.ResourceGroup
-	request.LogicalRegionId = e.client.RegionId
+	request := e.client.NewCommonRequest("POST", "Edas", "2017-08-01", "ListCluster", "/pop/v5/resource/cluster_list")
+	request.QueryParams["ResourceGroupId"] = e.client.ResourceGroup
+	request.QueryParams["LogicalRegionId"] = e.client.RegionId
 
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-		return edasClient.ListCluster(request)
-	})
+	bresponse, err := e.client.ProcessCommonRequest(request)
 
-	response, ok := raw.(*edas.ListClusterResponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return &cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
+	addDebug(request.GetActionName(), bresponse, request, request)
 
-	
+	response := edas.ListClusterResponse{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return &cluster, errmsgs.WrapError(err)
+	}
 	if response.Code != 200 {
-		return cluster, errmsgs.WrapError(errmsgs.Error("create cluster failed for " + response.Message))
+		return &cluster, errmsgs.WrapError(errmsgs.Error("create cluster failed for " + response.Message))
 	}
 
-	v := edas.Cluster{}
 	for _, onecluster := range response.ClusterList.Cluster {
 		if onecluster.ClusterId == clusterId {
 			if onecluster.CsClusterStatus == "running" {
-				v = onecluster
+				cluster = onecluster
 			}
 		}
 	}
 
-	return &v, nil
+	return &cluster, nil
 }
 
 func (e *EdasService) DescribeEdasDeployGroup(id string) (*edas.DeployGroup, error) {
@@ -384,7 +378,6 @@ func (e *EdasService) DescribeEdasDeployGroup(id string) (*edas.DeployGroup, err
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
-	
 	if response.Code != 200 {
 		return group, errmsgs.WrapError(errmsgs.Error("create cluster failed for " + response.Message))
 	}
@@ -504,7 +497,6 @@ func (e *EdasService) QueryK8sAppPackageType(appId string) (string, error) {
 		return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_k8s_app_package_type", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	
 	if response.Code != 200 {
 		return "", errmsgs.WrapError(errmsgs.Error("get application for appId:" + appId + " failed:" + response.Message))
 	}
@@ -536,7 +528,6 @@ func (e *EdasService) DescribeEdasK8sCluster(clusterId string) (*edas.Cluster, e
 	}
 	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
 
-	
 	if response.Code != 200 {
 		if strings.Contains(response.Message, "does not exist") {
 			return cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)

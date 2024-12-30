@@ -199,7 +199,7 @@ func (client *AlibabacloudStackClient) WithProductSDKClient(popcode ServiceCode)
 
 	ramSupported := true
 	if popcode == STSCode {
-		ramSupported = false  // TODO: STS不支持NewRamRoleArnWithPolicyCredential，待排查
+		ramSupported = false // TODO: STS不支持NewRamRoleArnWithPolicyCredential，待排查
 	}
 	conn, err := sdk.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig(), client.Config.getAuthCredential(true, ramSupported))
 	if err != nil {
