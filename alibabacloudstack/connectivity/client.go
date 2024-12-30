@@ -1333,7 +1333,6 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		}
 		if len(request.Content) > 0 {
 			request.QueryParams["x-acs-body"] = string(request.Content)
-			request.SetContent([]byte("{}"))
 		}
 		request.Method = "POST"
 	}

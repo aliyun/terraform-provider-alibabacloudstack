@@ -63,7 +63,7 @@ func testAccCheckAscmUserGroupUserDestroy(s *terraform.State) error {
 			return errmsgs.WrapError(err)
 		}
 		if ascm.Message != "" {
-			return errmsgs.WrapError(errmsgs.Error("user  still exist"))
+			return errmsgs.WrapError(errmsgs.Error("user still exist"))
 		}
 	}
 
@@ -85,19 +85,19 @@ variable name {
  default = "tftest%d"
 }
 
-// resource "alibabacloudstack_ascm_user" "default1" {
-//  cellphone_number = "13900000000"
-//  email = "test@gmail.com"
-//  display_name = "${var.name}"
-//  organization_id = "${var.org_id}"
-//  mobile_nation_code = "86"
-//  login_name = "${var.name}"
-//  login_policy_id = 1
-// }
+resource "alibabacloudstack_ascm_user" "default" {
+ cellphone_number = "13900000000"
+ email = "test@gmail.com"
+ display_name = "${var.name}"
+ organization_id = "${var.org_id}"
+ mobile_nation_code = "86"
+ login_name = "${var.name}"
+ login_policy_id = 1
+}
 
 
 resource "alibabacloudstack_ascm_usergroup_user" "default" {
-  login_names = ["tftest529", "tftest5292"]
+  login_names = [alibabacloudstack_ascm_user.default.login_name, ]
   user_group_id = alibabacloudstack_ascm_user_group.default.user_group_id
 }
 `
