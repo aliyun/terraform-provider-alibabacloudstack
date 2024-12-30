@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -682,26 +683,34 @@ func (s *AscmService) DescribeAscmUsergroupUser(id string) (response *User, err 
 }
 
 func (s *AscmService) ExportInitPasswordByLoginName(loginname string) (initPassword string, err error) {
+	// 该接口不支持pop网关
 	var loginnamelist []string
 	loginnamelist = append(loginnamelist, loginname)
-	request := map[string]interface{}{
-		"LoginNameList": loginnamelist,
-	}
-	bresponse, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "ExportInitPasswordByLoginNameList", "/ascm/auth/user/exportInitPasswordByLoginNameList", nil, request)
-	// err = mapstructure.Decode(bresponse, &response)
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ExportInitPasswordByLoginNameList", "/ascm/auth/user/exportInitPasswordByLoginNameList")
+	loginnamestring, _ := json.Marshal(loginnamelist)
+	request.QueryParams["LoginNameList"] = fmt.Sprint(loginnamestring)
+	var response InitPasswordListResponse
+	bresponse, err := s.client.ProcessCommonRequest(request)
 
 	if err != nil {
-		return initPassword, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ExportInitPasswordByLoginNameList", errmsgs.AlibabacloudStackSdkGoERROR, "")
+		errmsg := ""
+		if bresponse != nil {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		} else {
+			return initPassword, err
+		}
+		log.Printf("ExportInitPasswordByLoginNameList err:%v", err)
+		return initPassword, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ExportInitPasswordByLoginNameList", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug("ExportInitPasswordByLoginNameList", bresponse, request, loginname)
-	if bresponse != nil && bresponse["Data"] != nil {
-		data := bresponse["Data"].([]interface{})
-		if len(data) > 0 {
-			user := data[0].(map[string]interface{})
-			initPassword = user["Password"].(string)
-		} else {
-			return initPassword, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
+	e := json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	log.Printf("ExportInitPasswordByLoginNameList response:%v", response)
+	if e != nil {
+		log.Printf("ExportInitPasswordByLoginNameList err:%v", e)
+		return initPassword, errmsgs.WrapErrorf(e, errmsgs.DefaultErrorMsg, "", "ExportInitPasswordByLoginNameList", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	if len(response.Data) > 0 {
+		initPassword = response.Data[0].Password
 	}
 	log.Printf("ExportInitPasswordByLoginNameList initPassword:%v", initPassword)
 	return initPassword, err
