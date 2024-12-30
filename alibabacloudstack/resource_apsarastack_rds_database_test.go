@@ -4,103 +4,86 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackRdsDatabase0(t *testing.T) {
-	var v map[string]interface{}
+func TestAccAlibabacloudStackDBDatabaseUpdate(t *testing.T) {
+	var database *rds.Database
+	resourceId := "alibabacloudstack_db_database.default"
 
-	resourceId := "alibabacloudstack_rds_database.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudTestAccRdsDatabaseCheckmap)
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+	var dbDatabaseBasicMap = map[string]string{
+		"instance_id":   CHECKSET,
+		"name":          "tftestdatabase",
+		"character_set": "utf8",
+		"description":   "",
+	}
+
+	ra := resourceAttrInit(resourceId, dbDatabaseBasicMap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &database, func() interface{} {
 		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DoRdsDescribedatabasesRequest")
+	}, "DescribeDBDatabase")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-
-	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%srdsdatabase%d", defaultRegionToTest, rand)
-
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRdsDatabaseBasicdependence)
-	ResourceTest(t, resource.TestCase{
+	name := "tf-testAccDBdatabase_basic"
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBDatabaseConfigDependence)
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-
 			testAccPreCheck(t)
 		},
+
+		// module name
 		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
 
+		Providers:    testAccProviders,
 		CheckDestroy: rac.checkResourceDestroy(),
-
 		Steps: []resource.TestStep{
-
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"character_set_name": "gbk",
-
-					"data_base_instance_id": "rm-bp107i59mi7wvqsf2",
-
-					"data_base_name": "rds_mysql",
+					"instance_id":   "${alibabacloudstack_db_instance.instance.id}",
+					"name":          "tftestdatabase",
+					"character_set": "utf8",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"character_set_name": "gbk",
-
-						"data_base_instance_id": "rm-bp107i59mi7wvqsf2",
-
-						"data_base_name": "rds_mysql",
-					}),
+					testAccCheck(nil),
 				),
 			},
-
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					"data_base_name": "rds_mysql",
-
-					"data_base_description": "test-DataBaseDescription",
+					"description": "from terraform",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"data_base_name": "rds_mysql",
-
-						"data_base_description": "test-DataBaseDescription",
-					}),
+					testAccCheck(map[string]string{"description": "from terraform"}),
 				),
 			},
 		},
 	})
+
 }
 
-var AlibabacloudTestAccRdsDatabaseCheckmap = map[string]string{
-
-	"status": CHECKSET,
-
-	"character_set_name": CHECKSET,
-
-	"data_base_instance_id": CHECKSET,
-
-	"data_base_description": CHECKSET,
-
-	"accounts": CHECKSET,
-
-	"data_base_name": CHECKSET,
-
-	"engine": CHECKSET,
-}
-
-func AlibabacloudTestAccRdsDatabaseBasicdependence(name string) string {
+func resourceDBDatabaseConfigDependence(name string) string {
 	return fmt.Sprintf(`
-variable "name" {
-    default = "%s"
-}
 
 
+	variable "name" {
+		default = "%s"
+	}
 
-`, name)
+	%s
+
+	resource "alibabacloudstack_db_instance" "instance" {
+	     engine               = "MySQL"
+        engine_version       = "5.6"
+        instance_type        = "rds.mysql.s2.large"
+	    instance_storage     = "30"
+		vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
+		instance_name = "${var.name}"
+		storage_type         = "local_ssd"
+	}`, name, VSwitchCommonTestCase)
 }

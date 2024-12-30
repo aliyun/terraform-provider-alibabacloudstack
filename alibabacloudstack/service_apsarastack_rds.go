@@ -216,7 +216,7 @@ func (s *RdsService) DescribeDBDatabase(id string) (*rds.Database, error) {
 	request.DBInstanceId = parts[0]
 	request.DBName = dbName
 
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+	err = resource.Retry(30*time.Minute, func() *resource.RetryError {
 		raw, err := s.client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
 			return rdsClient.DescribeDatabases(request)
 		})
