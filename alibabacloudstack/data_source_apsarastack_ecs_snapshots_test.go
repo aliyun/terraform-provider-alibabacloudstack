@@ -24,19 +24,19 @@ func TestAccAlibabacloudStackSnapshotsDataSourceBasic(t *testing.T) {
 
 	instanceIdConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"instance_id": "${alibabacloudstack_instance.instance.id}",
+			"instance_id": "${alibabacloudstack_ecs_instance.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"instance_id": "${alibabacloudstack_instance.instance.id}_fake",
+			"instance_id": "${alibabacloudstack_ecs_instance.default.id}_fake",
 		}),
 	}
 
 	diskIdConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"disk_id": "${alibabacloudstack_instance.instance.system_disk_id}",
+			"disk_id": "${alibabacloudstack_ecs_instance.default.system_disk_id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"disk_id": "${alibabacloudstack_instance.instance.system_disk_id}_fake",
+			"disk_id": "${alibabacloudstack_ecs_instance.default.system_disk_id}_fake",
 		}),
 	}
 
@@ -180,57 +180,13 @@ func dataSourceSnapshotsConfigDependence(name string) string {
 	variable "name" {
 		default = "%s"
 	}
-	
-	data "alibabacloudstack_zones" "default" {
-		available_resource_creation = "Instance"
-	  }
-	
-	data "alibabacloudstack_images" "default" {
-	name_regex  = "^ubuntu_18.*64"
-	most_recent = true
-	owners      = "system"
-	}
-	
-	data "alibabacloudstack_instance_types" "default" {
-	  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-	  eni_amount        = 2
-	  sorted_by         = "Memory"
-	}
-	
-	resource "alibabacloudstack_vpc" "default" {
-		name = "${var.name}"
-		cidr_block = "172.16.0.0/16"
-	}
-	resource "alibabacloudstack_vswitch" "default" {
-		vpc_id = "${alibabacloudstack_vpc.default.id}"
-		cidr_block = "172.16.0.0/16"
-		availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		name = "${var.name}"
-	}
-	
-	resource "alibabacloudstack_security_group" "new" {
-		name = "${var.name}"
-		  vpc_id = "${alibabacloudstack_vpc.default.id}"
-	}
-	
-	resource "alibabacloudstack_instance" "instance" {
-		image_id = "${data.alibabacloudstack_images.default.ids[0]}"
-		// instance_type = "${data.alibabacloudstack_instance_types.default.ids[0]}"
-		instance_type = "ecs.gn7em-k10.c1m1g1.customize.testbuwei"
-		instance_name = "${var.name}"
-		security_groups = "${alibabacloudstack_security_group.new.*.id}"
-		internet_max_bandwidth_out = "10"
-		availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		system_disk_category = "cloud_efficiency"
-		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-		system_disk_size = 20
-		system_disk_name = "system_disk"
-	}
+
+	%s
 
 	resource "alibabacloudstack_snapshot" "default" {
-		disk_id = "${alibabacloudstack_instance.instance.system_disk_id}"
+		disk_id = "${alibabacloudstack_ecs_instance.default.system_disk_id}"
 		name = "${var.name}"
 		description = "${var.name}"
 	  }
-`, name)
+`, name, ECSInstanceCommonTestCase)
 }
