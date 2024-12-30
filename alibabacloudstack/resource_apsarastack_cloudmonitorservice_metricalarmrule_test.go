@@ -6,14 +6,12 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"log"
 	"testing"
+	"fmt"
 )
 
 func TestAccAlibabacloudStackCmsAlarmBasic(t *testing.T) {
-	log.Printf("2022.7.29 ")
-	testAccPreCheckWithAPIIsNotSupport(t)
-	var v cms.Alarm
+	var v cms.AlarmInDescribeMetricRuleList
 	resourceId := "alibabacloudstack_cms_alarm.default"
 	ra := resourceAttrInit(resourceId, testAccCheckAlarm)
 	serviceFunc := func() interface{} {
@@ -34,7 +32,7 @@ func TestAccAlibabacloudStackCmsAlarmBasic(t *testing.T) {
 		CheckDestroy: testAccCheckCmsAlarm_Destroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckCmsAlarm,
+				Config: testAccCheckCmsAlarm(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -68,12 +66,17 @@ func testAccCheckCmsAlarm_Destroy(s *terraform.State) error {
 	return nil
 }
 
-const testAccCheckCmsAlarm = `
+func testAccCheckCmsAlarm() string { 
+	return fmt.Sprintf(`
+variable "name" {
+ default = "tf_testacc_cmsalarm%d"
+}
+
 resource "alibabacloudstack_slb" "basic" {
- name          = "terraform_omega_1"
+ name          = "${var.name}"
 }
 resource "alibabacloudstack_cms_alarm" "default" {
-  name    = "TfAccCmsAlarm_omega_1"
+  name    = "${var.name}"
   project = "acs_slb_dashboard"
   metric  = "ActiveConnection"
   dimensions = {
@@ -89,7 +92,8 @@ resource "alibabacloudstack_cms_alarm" "default" {
   contact_groups     = ["test-group"]
   effective_interval = "0:00-2:00"
 }
-`
+`,  getAccTestRandInt(1000000, 9999999) )
+}
 
 var testAccCheckAlarm = map[string]string{
 	"name":    CHECKSET,

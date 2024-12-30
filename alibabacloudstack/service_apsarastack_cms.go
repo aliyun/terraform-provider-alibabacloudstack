@@ -32,13 +32,12 @@ func (s *CmsService) DescribeCmsAlarm(id string) (alarm cms.AlarmInDescribeMetri
 		request.RuleName = parts[1]
 	}
 	s.client.InitRpcRequest(*request.RpcRequest)
-	request.QueryParams["Product"] = "cms"
 
 	wait := incrementalWait(3*time.Second, 5*time.Second)
 	var response *cms.DescribeMetricRuleListResponse
 	var raw interface{}
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
-		raw, err := s.client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
+		raw, err = s.client.WithCmsClient(func(cmsClient *cms.Client) (interface{}, error) {
 			return cmsClient.DescribeMetricRuleList(request)
 		})
 		if err != nil {

@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -12,7 +11,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -306,7 +304,7 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 		}
 	}
 
-	nrequest := client.NewCommonRequest("POST", "cms", "2019-01-01", "PutResourceMetricRule", "")
+	nrequest := client.NewCommonRequest("POST", "Cms", "2019-01-01", "PutResourceMetricRule", "")
 	mergeMaps(nrequest.QueryParams, map[string]string{
 		"RuleName":                       request.RuleName,
 		"RuleId":                         request.RuleId,
@@ -334,20 +332,16 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 		"SignatureVersion":                        "1.0",
 	})
 
-	raw, err := client.WithEcsClient(func(cmsClient *ecs.Client) (interface{}, error) {
-		return cmsClient.ProcessCommonRequest(nrequest)
-	})
-	response, ok := raw.(*responses.CommonResponse)
-	log.Printf("testing cms %v", raw)
+	response, err := client.ProcessCommonRequest(nrequest)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
+			if response == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	if connectivity.GetResourceData(d, "status", "enabled").(bool) {
+	if d.Get("enabled").(bool) {
 		request := cms.CreateEnableMetricRulesRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.RuleId = &[]string{d.Id()}
@@ -480,7 +474,7 @@ func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interfac
 	d.Set("effective_interval", alarm.EffectiveInterval)
 	d.Set("silence_time", alarm.SilenceTime)
 	d.Set("status", alarm.AlertState)
-	connectivity.SetResourceData(d, alarm.EnableState, "status", "enabled")
+	d.Set("enabled", alarm.EnableState)
 	d.Set("contact_groups", strings.Split(alarm.ContactGroups, ","))
 
 	var dims map[string]interface{}
