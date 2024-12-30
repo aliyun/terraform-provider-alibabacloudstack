@@ -34,6 +34,10 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 				Computed:true,
 				ConflictsWith: []string{"name"},
 			},
+			"rule_id": {
+				Type:     schema.TypeString,
+				Computed:true,
+			},
 			"name": {
 				Type:     schema.TypeString,
 				Optional:true,
@@ -471,6 +475,7 @@ func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interfac
 		d.Set("escalations_info", escalationsInfo)
 	}
 
+	d.Set("rule_id", alarm.RuleId)
 	d.Set("effective_interval", alarm.EffectiveInterval)
 	d.Set("silence_time", alarm.SilenceTime)
 	d.Set("status", alarm.AlertState)
@@ -478,6 +483,7 @@ func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interfac
 	d.Set("contact_groups", strings.Split(alarm.ContactGroups, ","))
 
 	var dims map[string]interface{}
+	// TODO: 当前接口无法正常返回Dimensions
 	if alarm.Dimensions != "" {
 		if err := json.Unmarshal([]byte(alarm.Dimensions), &dims); err != nil {
 			return fmt.Errorf("Unmarshaling Dimensions got an error: %#v.", err)
