@@ -1,8 +1,9 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackDBInstancesDataSource(t *testing.T) {
@@ -40,7 +41,7 @@ resource "alibabacloudstack_db_instance" "default" {
   engine               = "MySQL"
   engine_version       = "5.6"
   instance_type        = "rds.mysql.s2.large"
-  instance_storage     = "30"
+  instance_storage     = "20"
   instance_name        = "${var.name}"
   vswitch_id = "${alibabacloudstack_vswitch.default.id}"
   storage_type         = "local_ssd"
