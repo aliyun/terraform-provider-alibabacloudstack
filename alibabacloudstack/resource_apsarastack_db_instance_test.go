@@ -168,9 +168,9 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":           "MySQL",
-					"engine_version":   "8.0",
-					"instance_type":    "mysql.x8.xlarge.2",
-					"instance_storage": "30",
+					"engine_version":   "5.6",
+					"instance_type":    "rds.mysql.s2.large",
+					"instance_storage": "20",
 					"instance_name":    "${var.name}",
 					"vswitch_id":       "${alibabacloudstack_vpc_vswitch.default.id}",
 					"storage_type":     "local_ssd",
@@ -178,7 +178,7 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"engine":           "MySQL",
-						"engine_version":   "8.0",
+						"engine_version":   "5.6",
 						"instance_type":    CHECKSET,
 						"instance_storage": CHECKSET,
 					}),
@@ -222,16 +222,6 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_type": "mysql.x8.xlarge.2",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"instance_type": CHECKSET,
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
 					"security_ips": []string{"10.168.1.12", "100.69.7.112"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -268,18 +258,18 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":               "MySQL",
-					"engine_version":       "8.0",
-					"instance_type":        "mysql.x8.xlarge.2",
-					"instance_storage":     "30",
+					"engine_version":       "5.6",
+					"instance_type":        "rds.mysql.s2.large",
+					"instance_storage":     "20",
 					"instance_name":        "tf-testAccDBInstanceConfig",
 					"instance_charge_type": "Postpaid",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"engine":            "MySQL",
-						"engine_version":    "8.0",
+						"engine_version":    "5.6",
 						"instance_type":     CHECKSET,
-						"instance_storage":  "30",
+						"instance_storage":  "20",
 						"instance_name":     "tf-testAccDBInstanceConfig",
 						"zone_id":           CHECKSET,
 						"connection_string": CHECKSET,
@@ -345,9 +335,9 @@ func TestAccAlibabacloudStackDBInstanceMultiInstance(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"count":            "3",
 					"engine":           "MySQL",
-					"engine_version":   "8.0",
-					"instance_type":    "mysql.x8.xlarge.2",
-					"instance_storage": "30",
+					"engine_version":   "5.6",
+					"instance_type":    "rds.mysql.s2.large",
+					"instance_storage": "20",
 					"instance_name":    "${var.name}",
 					"vswitch_id":       "${alibabacloudstack_vpc_vswitch.default.id}",
 					"storage_type":     "local_ssd",
@@ -384,9 +374,9 @@ func TestAccAlibabacloudStackDBInstanceMultiAZ(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":           "MySQL",
-					"engine_version":   "8.0",
-					"instance_type":    "mysql.x8.xlarge.2",
-					"instance_storage": "30",
+					"engine_version":   "5.6",
+					"instance_type":    "rds.mysql.s2.large",
+					"instance_storage": "20",
 					"zone_id":          "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":    "${var.name}",
 					"vswitch_id":       "${alibabacloudstack_vpc_vswitch.default.id}",
@@ -448,9 +438,9 @@ func TestAccAlibabacloudStackDBInstanceClassic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"engine":           "MySQL",
-					"engine_version":   "8.0",
-					"instance_type":    "mysql.x8.xlarge.2",
-					"instance_storage": "30",
+					"engine_version":   "5.6",
+					"instance_type":    "rds.mysql.s2.large",
+					"instance_storage": "20",
 					"zone_id":          "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":    "${var.name}",
 					"storage_type":     "local_ssd",
@@ -507,9 +497,9 @@ func testAccCheckSecurityIpExists(n string, ips []map[string]interface{}) resour
 
 var instanceBasicMap = map[string]string{
 	"engine":            "MySQL",
-	"engine_version":    "8.0",
+	"engine_version":    "5.6",
 	"instance_type":     CHECKSET,
-	"instance_storage":  "30",
+	"instance_storage":  "20",
 	"instance_name":     "tf-testAccDBInstanceConfig",
 	"zone_id":           CHECKSET,
 	"connection_string": CHECKSET,
