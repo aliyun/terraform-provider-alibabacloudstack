@@ -5,8 +5,6 @@ import (
 	"log"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -43,45 +41,31 @@ func resourceAlibabacloudStackAscmUserGroupUserCreate(d *schema.ResourceData, me
 		loginNamesList = append(loginNamesList, loginNames...)
 	}
 
-	queryParams := map[string]interface{}{
+	// queryParams := map[string]string{
+	// 	"userGroupId":   userGroupId,
+	// 	"loginNameList": fmt.Sprint(loginNamesList),
+	// }
+
+	// request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddUsersToUserGroup", "/ascm/auth/user/addUsersToUserGroup")
+	request := map[string]interface{}{
 		"userGroupId":   userGroupId,
-		"LoginNameList": loginNamesList,
+		"loginNameList": loginNamesList,
 	}
+	log.Printf("====================================================================   loginNameList is : %v", loginNamesList)
+	// request.Headers["x-ascm-product-version"] = "2019-05-10"
+	// request.Headers["Content-Type"] = requests.Json
+	// requeststring, err := json.Marshal(queryParams)
+	// if err != nil {
+	// 	return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_usergroup_user", "AddUsersToUserGroup", "")
+	// }
+	// request.SetContent(requeststring)
 
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddUsersToUserGroup", "/ascm/auth/user/addUsersToUserGroup")
-
-	request.Headers["x-ascm-product-version"] = "2019-05-10"
-	request.Headers["Content-Type"] = requests.Json
-	requeststring, err := json.Marshal(queryParams)
+	result, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "AddUsersToUserGroup", "/ascm/auth/user/addUsersToUserGroup", nil, request)
+	// bresponse, err := client.ProcessCommonRequest(request)
+	log.Printf("response of raw AddUsersToUserGroup is : %s", result)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_usergroup_user", "AddUsersToUserGroup", "")
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "AddUsersToUserGroup", "")
 	}
-	request.SetContent(requeststring)
-
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	log.Printf("response of raw AddUsersToUserGroup is : %s", raw)
-
-	bresponse, ok := raw.(*responses.CommonResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "AddUsersToUserGroup", errmsg)
-	}
-
-	addDebug("AddUsersToUserGroup", raw, nil, request)
-
-	if bresponse.GetHttpStatus() != 200 {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "AddUsersToUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug("AddUsersToUserGroup", raw, nil, bresponse.GetHttpContentString())
 
 	d.SetId(userGroupId)
 
@@ -140,33 +124,17 @@ func resourceAlibabacloudStackAscmUserGroupUserUpdate(d *schema.ResourceData, me
 	}
 	userGroupId := d.Get("user_group_id").(string)
 
-	queryParams := map[string]interface{}{
+	request := map[string]interface{}{
 		"userGroupId":   userGroupId,
-		"LoginNameList": loginNames,
+		"loginNameList": loginNames,
 	}
 
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveUsersFromUserGroup", "/ascm/auth/user/RemoveUsersFromUserGroup")
+	bresponse, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "RemoveUsersFromUserGroup", "/ascm/auth/user/RemoveUsersFromUserGroup", nil, request)
 
-	request.Headers["x-ascm-product-version"] = "2019-05-10"
-	request.Headers["Content-Type"] = requests.Json
-	requeststring, err := json.Marshal(queryParams)
+	log.Printf("response of raw RemoveUsersFromUserGroup is : %s", bresponse)
+
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_usergroup_user", "RemoveUsersFromUserGroup", "")
-	}
-	request.SetContent(requeststring)
-
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	log.Printf("response of raw RemoveUsersFromUserGroup is : %s", raw)
-
-	bresponse, ok := raw.(*responses.CommonResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "RemoveUsersFromUserGroup", errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "RemoveUsersFromUserGroup", "")
 	}
 
 	var loginNamesList []string
@@ -175,32 +143,17 @@ func resourceAlibabacloudStackAscmUserGroupUserUpdate(d *schema.ResourceData, me
 		loginNamesList = append(loginNamesList, loginNames...)
 	}
 
-	queryParams = map[string]interface{}{
+	add_request := map[string]interface{}{
 		"userGroupId":   userGroupId,
-		"LoginNameList": loginNamesList,
+		"loginNameList": loginNames,
 	}
 
-	request = client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddUsersToUserGroup", "/ascm/auth/user/addUsersToUserGroup")
+	bresponse, err = client.DoTeaRequest("POST", "ascm", "2019-05-10", "AddUsersToUserGroup", "/ascm/auth/user/addUsersToUserGroup", nil, add_request)
 
-	request.Headers["x-ascm-product-version"] = "2019-05-10"
-	request.Headers["Content-Type"] = requests.Json
-	requeststring, err = json.Marshal(queryParams)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_usergroup_user", "AddUsersToUserGroup", "")
-	}
-	request.SetContent(requeststring)
+	log.Printf("response of raw AddUsersToUserGroup is : %s", bresponse)
 
-	raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	log.Printf("response of raw AddUsersToUserGroup is : %s", raw)
-
-	bresponse, ok = raw.(*responses.CommonResponse)
 	if err != nil {
 		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "AddUsersToUserGroup", errmsg)
 	}
 
@@ -218,7 +171,7 @@ func resourceAlibabacloudStackAscmUserGroupUserDelete(d *schema.ResourceData, me
 
 	queryParams := map[string]interface{}{
 		"userGroupId":   userGroupId,
-		"LoginNameList": loginNames,
+		"loginNameList": loginNames,
 	}
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveUsersFromUserGroup", "/ascm/auth/user/RemoveUsersFromUserGroup")
@@ -231,15 +184,11 @@ func resourceAlibabacloudStackAscmUserGroupUserDelete(d *schema.ResourceData, me
 	}
 	request.SetContent(requeststring)
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	log.Printf("response of raw RemoveUsersFromUserGroup is : %s", raw)
-
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
+	log.Printf("response of raw RemoveUsersFromUserGroup is : %s", bresponse)
 	if err != nil {
 		errmsg := ""
-		if ok {
+		if bresponse != nil {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "RemoveUsersFromUserGroup", errmsg)
