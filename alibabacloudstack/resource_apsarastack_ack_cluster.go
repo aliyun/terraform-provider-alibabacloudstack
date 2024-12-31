@@ -15,7 +15,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/denverdino/aliyungo/common"
 	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -615,9 +614,6 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 	invoker := NewInvoker()
-	var requestInfo *cs.Client
-	var raw interface{}
-
 	timeout := d.Get("timeout_mins").(int)
 	Name := d.Get("name").(string)
 	OsType := d.Get("os_type").(string)
@@ -736,7 +732,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		SecurityGroup = d.Get("security_group_id").(bool)
 	}
 
-	request := client.NewCommonRequest("POST", "Cs", "2015-12-15", "CreateCluster", "")
+	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "CreateCluster", "/clusters")
 	request.SetContentType("application/json")
 	request.SetContent([]byte("{}")) // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
 	var wvid, mvid, winst, minst, podid, inst string
@@ -822,242 +818,217 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	cpuPolicy := d.Get("cpu_policy").(string)
 	log.Printf("wswitchids %v mswitchids %v", wvid, mvid)
 	log.Printf("winsts %v minsts %v", winst, minst)
+	request.QueryParams = map[string]string{
+		"Action":    "CreateCluster",
+		"SNatEntry": "false",
+	}
+	var body string
 	if attachinst == 1 {
 		if pod == 0 {
-			request.QueryParams = map[string]string{
-				"Action":    "CreateCluster",
-				"SNatEntry": "false",
-				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
-					"Product", "Cs",
-					"os_type", OsType,
-					"platform", Platform,
-					"cluster_type", clustertype,
-					"region_id", client.RegionId,
-					"timeout_mins", timeout,
-					"disable_rollback", true,
-					"kubernetes_version", KubernetesVersion,
-					"container_cidr", pcidr,
-					"service_cidr", scdir,
-					"name", Name,
-					"master_instance_types", minst,
-					"master_vswitch_ids", mvid,
-					"login_Password", LoginPassword,
-					"num_of_nodes", NumOfNodes,
-					"master_count", mastercount,
-					"snat_entry", SnatEntry,
-					"endpoint_public_access", end,
-					"ssh_flags", enabSsh,
-					"master_system_disk_category", msysdiskcat,
-					"master_system_disk_size", msysdisksize,
-					"deletion_protection", delete_pro,
-					"node_cidr_mask", nodecidr,
-					"vpcid", VpcId,
-					"addons", req,
-					"proxy_mode", proxy_mode,
-					"instances", inst,
-					"format_disk", formatDisk,
-					"keep_instance_name", retainIname,
-					"user_data", udata,
-					"runtime", runtime,
-					"node_port_range", nodeportrange,
-					"cpu_policy", cpuPolicy,
-					"worker_data_disks", workerdisks,
-					secgroup, SecurityGroup,
-					"cloud_monitor_flags", CloudMonitorFlags,
-					"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
-					"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
-					"is_enterprise_security_group", IsEnterpriseSecurityGroup,
-					"image_id", ImageId,
-					"tags", tags,
-				),
-			}
+			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
+				"Product", "Cs",
+				"os_type", OsType,
+				"platform", Platform,
+				"cluster_type", clustertype,
+				"region_id", client.RegionId,
+				"timeout_mins", timeout,
+				"disable_rollback", true,
+				"kubernetes_version", KubernetesVersion,
+				"container_cidr", pcidr,
+				"service_cidr", scdir,
+				"name", Name,
+				"master_instance_types", minst,
+				"master_vswitch_ids", mvid,
+				"login_Password", LoginPassword,
+				"num_of_nodes", NumOfNodes,
+				"master_count", mastercount,
+				"snat_entry", SnatEntry,
+				"endpoint_public_access", end,
+				"ssh_flags", enabSsh,
+				"master_system_disk_category", msysdiskcat,
+				"master_system_disk_size", msysdisksize,
+				"deletion_protection", delete_pro,
+				"node_cidr_mask", nodecidr,
+				"vpcid", VpcId,
+				"addons", req,
+				"proxy_mode", proxy_mode,
+				"instances", inst,
+				"format_disk", formatDisk,
+				"keep_instance_name", retainIname,
+				"user_data", udata,
+				"runtime", runtime,
+				"node_port_range", nodeportrange,
+				"cpu_policy", cpuPolicy,
+				"worker_data_disks", workerdisks,
+				secgroup, SecurityGroup,
+				"cloud_monitor_flags", CloudMonitorFlags,
+				"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
+				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
+				"is_enterprise_security_group", IsEnterpriseSecurityGroup,
+				"image_id", ImageId,
+				"tags", tags,
+			)
 		} else {
-			request.QueryParams = map[string]string{
-				"Action":    "CreateCluster",
-				"SNatEntry": "false",
-				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
-					"Product", "Cs",
-					"os_type", OsType,
-					"platform", Platform,
-					"cluster_type", clustertype,
-					"region_id", client.RegionId,
-					"timeout_mins", timeout,
-					"disable_rollback", true,
-					"kubernetes_version", KubernetesVersion,
-					"container_cidr", pcidr,
-					"service_cidr", scdir,
-					"name", Name,
-					"master_instance_types", minst,
-					"master_vswitch_ids", mvid,
-					"login_Password", LoginPassword,
-					"num_of_nodes", NumOfNodes,
-					"master_count", mastercount,
-					"snat_entry", SnatEntry,
-					"endpoint_public_access", end,
-					"ssh_flags", enabSsh,
-					"master_system_disk_category", msysdiskcat,
-					"master_system_disk_size", msysdisksize,
-					"deletion_protection", delete_pro,
-					"node_cidr_mask", nodecidr,
-					"vpcid", VpcId,
-					"addons", req,
-					"pod_vswitch_ids", podid,
-					"proxy_mode", proxy_mode,
-					"instances", inst,
-					"format_disk", formatDisk,
-					"keep_instance_name", retainIname,
-					"user_data", udata,
-					"runtime", runtime,
-					"node_port_range", nodeportrange,
-					"cpu_policy", cpuPolicy,
-					"worker_data_disks", workerdisks,
-					secgroup, SecurityGroup,
-					"cloud_monitor_flags", CloudMonitorFlags,
-					"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
-					"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
-					"is_enterprise_security_group", IsEnterpriseSecurityGroup,
-					"image_id", ImageId,
-					"tags", tags,
-				),
-			}
+			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
+				"Product", "Cs",
+				"os_type", OsType,
+				"platform", Platform,
+				"cluster_type", clustertype,
+				"region_id", client.RegionId,
+				"timeout_mins", timeout,
+				"disable_rollback", true,
+				"kubernetes_version", KubernetesVersion,
+				"container_cidr", pcidr,
+				"service_cidr", scdir,
+				"name", Name,
+				"master_instance_types", minst,
+				"master_vswitch_ids", mvid,
+				"login_Password", LoginPassword,
+				"num_of_nodes", NumOfNodes,
+				"master_count", mastercount,
+				"snat_entry", SnatEntry,
+				"endpoint_public_access", end,
+				"ssh_flags", enabSsh,
+				"master_system_disk_category", msysdiskcat,
+				"master_system_disk_size", msysdisksize,
+				"deletion_protection", delete_pro,
+				"node_cidr_mask", nodecidr,
+				"vpcid", VpcId,
+				"addons", req,
+				"pod_vswitch_ids", podid,
+				"proxy_mode", proxy_mode,
+				"instances", inst,
+				"format_disk", formatDisk,
+				"keep_instance_name", retainIname,
+				"user_data", udata,
+				"runtime", runtime,
+				"node_port_range", nodeportrange,
+				"cpu_policy", cpuPolicy,
+				"worker_data_disks", workerdisks,
+				secgroup, SecurityGroup,
+				"cloud_monitor_flags", CloudMonitorFlags,
+				"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
+				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
+				"is_enterprise_security_group", IsEnterpriseSecurityGroup,
+				"image_id", ImageId,
+				"tags", tags,
+			)
 		}
 	} else {
 		if pod == 0 {
-			request.QueryParams = map[string]string{
-				"Action":    "CreateCluster",
-				"SNatEntry": "false",
-				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
-					"Product", "Cs",
-					"os_type", OsType,
-					"platform", Platform,
-					"cluster_type", clustertype,
-					"region_id", client.RegionId,
-					"timeout_mins", timeout,
-					"disable_rollback", true,
-					"kubernetes_version", KubernetesVersion,
-					"container_cidr", pcidr,
-					"service_cidr", scdir,
-					"name", Name,
-					"master_instance_types", minst,
-					"worker_instance_types", winst,
-					"master_vswitch_ids", mvid,
-					"worker_vswitch_ids", wvid,
-					"login_Password", LoginPassword,
-					"num_of_nodes", NumOfNodes,
-					"master_count", mastercount,
-					"snat_entry", SnatEntry,
-					"endpoint_public_access", end,
-					"ssh_flags", enabSsh,
-					"master_system_disk_category", msysdiskcat,
-					"master_system_disk_size", msysdisksize,
-					"worker_system_disk_category", wsysdiskcat,
-					"worker_system_disk_size", wsysdisksize,
-					"deletion_protection", delete_pro,
-					"node_cidr_mask", nodecidr,
-					"vpcid", VpcId,
-					"addons", req,
-					"proxy_mode", proxy_mode,
-					"user_data", udata,
-					"runtime", runtime,
-					"node_port_range", nodeportrange,
-					"cpu_policy", cpuPolicy,
-					secgroup, SecurityGroup,
-					"cloud_monitor_flags", CloudMonitorFlags,
-					"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
-					"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
-					"worker_data_disks", workerdisks,
-					"is_enterprise_security_group", IsEnterpriseSecurityGroup,
-					"image_id", ImageId,
-					"tags", tags,
-				),
-			}
+			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
+				"Product", "Cs",
+				"os_type", OsType,
+				"platform", Platform,
+				"cluster_type", clustertype,
+				"region_id", client.RegionId,
+				"timeout_mins", timeout,
+				"disable_rollback", true,
+				"kubernetes_version", KubernetesVersion,
+				"container_cidr", pcidr,
+				"service_cidr", scdir,
+				"name", Name,
+				"master_instance_types", minst,
+				"worker_instance_types", winst,
+				"master_vswitch_ids", mvid,
+				"worker_vswitch_ids", wvid,
+				"login_Password", LoginPassword,
+				"num_of_nodes", NumOfNodes,
+				"master_count", mastercount,
+				"snat_entry", SnatEntry,
+				"endpoint_public_access", end,
+				"ssh_flags", enabSsh,
+				"master_system_disk_category", msysdiskcat,
+				"master_system_disk_size", msysdisksize,
+				"worker_system_disk_category", wsysdiskcat,
+				"worker_system_disk_size", wsysdisksize,
+				"deletion_protection", delete_pro,
+				"node_cidr_mask", nodecidr,
+				"vpcid", VpcId,
+				"addons", req,
+				"proxy_mode", proxy_mode,
+				"user_data", udata,
+				"runtime", runtime,
+				"node_port_range", nodeportrange,
+				"cpu_policy", cpuPolicy,
+				secgroup, SecurityGroup,
+				"cloud_monitor_flags", CloudMonitorFlags,
+				"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
+				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
+				"worker_data_disks", workerdisks,
+				"is_enterprise_security_group", IsEnterpriseSecurityGroup,
+				"image_id", ImageId,
+				"tags", tags,
+			)
 		} else {
-			request.QueryParams = map[string]string{
-				"Action":    "CreateCluster",
-				"SNatEntry": "false",
-				"X-acs-body": fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
-					"Product", "Cs",
-					"os_type", OsType,
-					"platform", Platform,
-					"cluster_type", clustertype,
-					"region_id", client.RegionId,
-					"timeout_mins", timeout,
-					"disable_rollback", true,
-					"kubernetes_version", KubernetesVersion,
-					"container_cidr", pcidr,
-					"service_cidr", scdir,
-					"name", Name,
-					"master_instance_types", minst,
-					"worker_instance_types", winst,
-					"master_vswitch_ids", mvid,
-					"worker_vswitch_ids", wvid,
-					"login_Password", LoginPassword,
-					"num_of_nodes", NumOfNodes,
-					"master_count", mastercount,
-					"snat_entry", SnatEntry,
-					"endpoint_public_access", end,
-					"ssh_flags", enabSsh,
-					"master_system_disk_category", msysdiskcat,
-					"master_system_disk_size", msysdisksize,
-					"worker_system_disk_category", wsysdiskcat,
-					"worker_system_disk_size", wsysdisksize,
-					"deletion_protection", delete_pro,
-					"node_cidr_mask", nodecidr,
-					"vpcid", VpcId,
-					"addons", req,
-					"proxy_mode", proxy_mode,
-					"user_data", udata,
-					"runtime", runtime,
-					"node_port_range", nodeportrange,
-					"cpu_policy", cpuPolicy,
-					secgroup, SecurityGroup,
-					"cloud_monitor_flags", CloudMonitorFlags,
-					"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
-					"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
-					"worker_data_disks", workerdisks,
-					"pod_vswitch_ids", podid,
-					"is_enterprise_security_group", IsEnterpriseSecurityGroup,
-					"image_id", ImageId,
-					"tags", tags,
-				),
-			}
+			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":%t,\"%s\":\"%s\",\"%s\":%s}",
+				"Product", "Cs",
+				"os_type", OsType,
+				"platform", Platform,
+				"cluster_type", clustertype,
+				"region_id", client.RegionId,
+				"timeout_mins", timeout,
+				"disable_rollback", true,
+				"kubernetes_version", KubernetesVersion,
+				"container_cidr", pcidr,
+				"service_cidr", scdir,
+				"name", Name,
+				"master_instance_types", minst,
+				"worker_instance_types", winst,
+				"master_vswitch_ids", mvid,
+				"worker_vswitch_ids", wvid,
+				"login_Password", LoginPassword,
+				"num_of_nodes", NumOfNodes,
+				"master_count", mastercount,
+				"snat_entry", SnatEntry,
+				"endpoint_public_access", end,
+				"ssh_flags", enabSsh,
+				"master_system_disk_category", msysdiskcat,
+				"master_system_disk_size", msysdisksize,
+				"worker_system_disk_category", wsysdiskcat,
+				"worker_system_disk_size", wsysdisksize,
+				"deletion_protection", delete_pro,
+				"node_cidr_mask", nodecidr,
+				"vpcid", VpcId,
+				"addons", req,
+				"proxy_mode", proxy_mode,
+				"user_data", udata,
+				"runtime", runtime,
+				"node_port_range", nodeportrange,
+				"cpu_policy", cpuPolicy,
+				secgroup, SecurityGroup,
+				"cloud_monitor_flags", CloudMonitorFlags,
+				"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
+				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
+				"worker_data_disks", workerdisks,
+				"pod_vswitch_ids", podid,
+				"is_enterprise_security_group", IsEnterpriseSecurityGroup,
+				"image_id", ImageId,
+				"tags", tags,
+			)
 		}
 	}
+	request.SetContent([]byte(body))
 	var err error
 	err = nil
+	var cluster *responses.CommonResponse
 	if err = invoker.Run(func() error {
-		raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
+		cluster, err = client.ProcessCommonRequest(request)
+		addDebug("CreateKubernetesCluster", cluster, request, request.QueryParams)
 		return err
 	}); err != nil {
 		//return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", raw)
 		return err
 	}
-	if debugOn() {
-		requestMap := make(map[string]interface{})
-		requestMap["RegionId"] = common.Region(client.RegionId)
-		requestMap["Params"] = request.GetQueryParams()
-		addDebug("CreateKubernetesCluster", raw, requestInfo, requestMap)
-	}
 
-	if err != nil {
-		//return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-		return err
-	}
-
-	if debugOn() {
-		addDebug("CreateKubernetesCluster", raw, request)
-	}
 	clusterresponse := ClusterCommonResponse{}
-	cluster, _ := raw.(*responses.CommonResponse)
 	if cluster.IsSuccess() == false {
 		//return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", cluster.GetHttpContentString())
 		return err
 	}
 	ok := json.Unmarshal(cluster.GetHttpContentBytes(), &clusterresponse)
 	if ok != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "ParseKubernetesClusterResponse", raw)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "ParseKubernetesClusterResponse", cluster)
 	}
 	d.SetId(clusterresponse.ClusterID)
 
@@ -1137,29 +1108,22 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 			removeNodesName := allNodeName[:count]
 			if len(removeNodesName) > 0 {
 			}
-			req := client.NewCommonRequest("POST", "CS", "2015-12-15", "RemoveClusterNodes", "")
-			mergeMaps(req.QueryParams, map[string]string{
-
-				"X-acs-body": fmt.Sprintf("{\"%s\":%t,\"%s\":%t,\"%s\":%q,\"%s\":\"%s\"}",
-
-					"release_node", true,
-					"drain_node", true,
-					"nodes", removeNodesName,
-					"ClusterId", d.Id(),
-				),
-			})
+			req := client.NewCommonRequest("POST", "CS", "2015-12-15", "RemoveClusterNodes", fmt.Sprintf("/api/v2/clusters/%s/nodes/remove", d.Id()))
+			body := fmt.Sprintf("{\"%s\":%t,\"%s\":%t,\"%s\":%q,\"%s\":\"%s\"}",
+				"release_node", true,
+				"drain_node", true,
+				"nodes", removeNodesName,
+				"ClusterId", d.Id(),
+			)
+			req.SetContent([]byte(body))
 			req.Headers["x-acs-content-type"] = "application/json"
+			var resp *responses.CommonResponse
 			if err := invoker.Run(func() error {
-				var err error
-				raw, err = csService.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-					return ecsClient.ProcessCommonRequest(req)
-				})
-
+				resp, err = client.ProcessCommonRequest(req)
 				return err
 			}); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, nodepoolid, "DeleteKubernetesClusterNodes", errmsgs.DenverdinoAliyungo)
 			}
-			resp, _ := raw.(*responses.CommonResponse)
 			if resp.IsSuccess() == false {
 				//return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", cluster.GetHttpContentString())
 				return err
@@ -1171,16 +1135,13 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 		}
 
 		if newValue > oldValue {
-			request := client.NewCommonRequest("POST", "CS", "2015-12-15", "ScaleClusterNodePool", "")
-			mergeMaps(request.QueryParams, map[string]string{
-
-				"ProductName": "cs",
-				"NodepoolId":  nodepoolid,
-				"ClusterId":   d.Id(),
-				"X-acs-body": fmt.Sprintf("{\"%s\":%d}",
-					"count", int64(newValue)-int64(oldValue),
-				),
-			})
+			request := client.NewCommonRequest("POST", "CS", "2015-12-15", "ScaleClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools/%s", d.Id(), nodepoolid))
+			body := fmt.Sprintf("{\"%s\":%d}",
+				"count", int64(newValue)-int64(oldValue),
+			)
+			request.QueryParams["NodepoolId"] = nodepoolid
+			request.QueryParams["ClusterId"] = d.Id()
+			request.SetContent([]byte(body))
 			request.Headers["x-acs-content-type"] = "application/json"
 			//var err error
 			err = nil
@@ -1273,25 +1234,20 @@ func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 	invoker := NewInvoker()
-	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "DeleteCluster", "")
+	body := fmt.Sprintf("{\"%s\":\"%t\",\"%s\":\"%s\"}", "keep_slb", false, "ClusterId", d.Id())
+	request := client.NewCommonRequest("DELETE", "CS", "2015-12-15", "DeleteCluster", fmt.Sprintf("/clusters/%s", d.Id()))
 	request.QueryParams["ClusterId"] = d.Id()
-	request.QueryParams["X-acs-body"] = fmt.Sprintf("{\"%s\":\"%t\",\"%s\":\"%s\"}", "keep_slb", false, "ClusterId", d.Id())
+	request.SetContent([]byte(body))
 	request.Headers["x-acs-content-type"] = "application/json"
-	var response interface{}
+	var response *responses.CommonResponse
 	err := resource.Retry(30*time.Minute, func() *resource.RetryError {
 		if err := invoker.Run(func() error {
-			raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-				return csClient.ProcessCommonRequest(request)
-			})
-			response = raw
+			var err error
+			response, err = client.ProcessCommonRequest(request)
+			addDebug("DeleteCluster", response, request, request.QueryParams)
 			return err
 		}); err != nil {
 			return resource.RetryableError(err)
-		}
-		if debugOn() {
-			requestMap := make(map[string]interface{})
-			requestMap["ClusterId"] = d.Id()
-			addDebug("DeleteCluster", response, d.Id(), requestMap)
 		}
 		return nil
 	})
@@ -1312,10 +1268,8 @@ func updateKubernetesClusterTag(d *schema.ResourceData, meta interface{}) error 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 	d.Partial(true)
-	var raw interface{}
 	invoker := NewInvoker()
 	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "ModifyClusterTags", fmt.Sprintf("/clusters/%s/tags", d.Id()))
-	var tags string
 	tagss := make([]interface{}, 0)
 	if v, ok := d.GetOk("tags"); ok && len(v.(map[string]interface{})) > 0 {
 		for key, value := range v.(map[string]interface{}) {
@@ -1325,32 +1279,19 @@ func updateKubernetesClusterTag(d *schema.ResourceData, meta interface{}) error 
 			})
 		}
 	}
-	tagsBytes, _ := json.Marshal(tagss)
-	tags = string(tagsBytes)
-	log.Printf("checking tags %v", tags)
-	mergeMaps(request.QueryParams, map[string]string{
-		"SignatureVersion": "1.0",
-		"ProductName":      "cs",
-		"ClusterId":        d.Id(),
-		"X-acs-body": fmt.Sprintf("{\"%s\":%s}",
-			"tags", tags,
-		),
-	})
+	tagsBytes, _ := json.Marshal(map[string]interface{}{"tags": tagss})
+	request.SetContent([]byte(tagsBytes))
+	request.QueryParams["ClusterId"] = d.Id()
+	request.QueryParams["ProductName"] = "cs"
+	request.QueryParams["SignatureVersion"] = "1.0"
 	var err error
+	var raw *responses.CommonResponse
 	if err = invoker.Run(func() error {
-		raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			//ecsClient.Domain = "cs.inter.env17e.shuguang.com"
-			return ecsClient.ProcessCommonRequest(request)
-		})
+		raw, err = client.ProcessCommonRequest(request)
+		addDebug("ModifyClusterTags", raw, request, request.QueryParams)
 		return err
 	}); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "ModifyClusterTags", raw)
-	}
-	if debugOn() {
-		resizeRequestMap := make(map[string]interface{})
-		resizeRequestMap["ClusterId"] = d.Id()
-		resizeRequestMap["Args"] = request.GetQueryParams()
-		addDebug("ModifyClusterTags", raw, resizeRequestMap)
 	}
 	stateConf := BuildStateConf([]string{"scaling"}, []string{"running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {

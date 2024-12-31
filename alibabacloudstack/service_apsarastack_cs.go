@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/denverdino/aliyungo/common"
@@ -47,9 +46,9 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDet
 	cluster := &cs.KubernetesClusterDetail{}
 	cluster.ClusterId = ""
 
-	request := s.client.NewCommonRequest("POST", "CS", "2015-12-15", "DescribeClustersV1", "")
+	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClustersV1", "/api/v1/clusters")
 	request.QueryParams["SignatureVersion"] = "1.0"
-	request.QueryParams["ProductName"] = "cs"
+	request.QueryParams["ProductName"] = "CS"
 
 	clusterdetails, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
@@ -132,20 +131,17 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 }
 
 func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
-	req := s.client.NewCommonRequest("POST", "CS", "2015-12-15", "DescribeClusterNodePools", "")
+	req := s.client.NewCommonRequest("POST", "CS", "2015-12-15", "DescribeClusterNodePools", fmt.Sprintf("/clusters/%s/nodepools", id))
 	req.QueryParams["ProductName"] = "cs"
 	req.QueryParams["ClusterId"] = id
-
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(req)
-	})
-	nodePool, ok := raw.(*responses.CommonResponse)
+	var nodePool *responses.CommonResponse
+	nodePool, err := s.client.ProcessCommonRequest(req)
 	if err != nil {
 		errmsg := ""
-		if ok {
+		if nodePool != nil {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(nodePool.BaseResponse)
 		}
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", raw, errmsg)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", nodePool, errmsg)
 	}
 	var node *NodePool
 
@@ -154,7 +150,7 @@ func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
 	}
 	err = json.Unmarshal(nodePool.GetHttpContentBytes(), &node)
 	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "ParseKubernetesClusterResponse", raw)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "ParseKubernetesClusterResponse", nodePool)
 	}
 	return node, nil
 }
