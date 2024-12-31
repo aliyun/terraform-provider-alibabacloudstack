@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strconv"
 	"time"
+	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/bssopenapi"
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
@@ -136,7 +137,8 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 		raw, err := client.WithRkvClient(func(rkvClient *r_kvstore.Client) (interface{}, error) {
 			return rkvClient.DescribeInstances(request)
 		})
-		response, ok := raw.(*r_kvstore.DescribeInstancesResponse)
+		var ok bool
+		response, ok = raw.(*r_kvstore.DescribeInstancesResponse)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
 				time.Sleep(time.Duration(5) * time.Second)
@@ -159,10 +161,22 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 	var instanceClasses []string
 	var ids []string
 
-	Datas2 := response.Instances.KVStoreInstance
-	for _, Data := range Datas2 {
-		instanceClasses = append(instanceClasses, Data.InstanceClass)
+	Datas := response.Instances.KVStoreInstance
+	if series, ok := d.GetOk("edition_type") ; ok {
+		for _, Data := range Datas {
+			// 目前查询接口没有返回是否为企业版本，只能从类型判断
+			if series == "Enterprise" && strings.Contains(Data.InstanceClass, ".amber.") {
+				instanceClasses = append(instanceClasses, Data.InstanceClass)
+			} else if series == "Community" && ! strings.Contains(Data.InstanceClass, ".amber.") {
+				instanceClasses = append(instanceClasses, Data.InstanceClass)
+	 		} 
+ 		}
+	} else {
+		for _, Data := range Datas {
+			instanceClasses = append(instanceClasses, Data.InstanceClass)
+		}
 	}
+
 
 	instanceClasses = removeRepByMap(instanceClasses)
 	d.SetId(dataResourceIdHash(ids))
