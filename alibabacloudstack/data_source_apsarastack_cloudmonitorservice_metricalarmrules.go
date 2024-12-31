@@ -2,27 +2,17 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"log"
 	"regexp"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudstackCmsAlarms() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudstackCmsAlarmsRead,
 		Schema: map[string]*schema.Schema{
-			"rule_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringIsValidRegExp,
-				ForceNew:     true,
-			},
 			"name_regex": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -181,20 +171,16 @@ func dataSourceAlibabacloudstackCmsAlarmsRead(d *schema.ResourceData, meta inter
 	response := AlarmsData{}
 
 	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw DescribeMetricRuleList : %s", raw)
+		bresponse, err := client.ProcessCommonRequest(request)
 
 		if err != nil {
-			errmsg := ""
-			if bresponse, ok := raw.(*responses.CommonResponse); ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse != nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms_alarms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
-		bresponse, _ := raw.(*responses.CommonResponse)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {

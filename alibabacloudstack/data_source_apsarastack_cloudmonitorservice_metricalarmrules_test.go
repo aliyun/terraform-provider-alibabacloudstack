@@ -1,58 +1,66 @@
 package alibabacloudstack
 
 import (
+	"fmt"
+	"strings"
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackCms_Alarams_DataSource(t *testing.T) {
 	// testAccPreCheckWithAPIIsNotSupport(t)
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			{
-				Config: dataSourceAlibabacloudStackcms_alarms,
-				Check: resource.ComposeTestCheckFunc(
+	rand := getAccTestRandInt(10000, 20000)
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: dataSourceAlibabacloudStackcms_alarms(rand, map[string]string{
+			"name_regex": `"${alibabacloudstack_cms_alarm.default.rule_name}"`,
+		}),
+		fakeConfig: dataSourceAlibabacloudStackcms_alarms(rand, map[string]string{
+			"name_regex": `"${alibabacloudstack_cms_alarm.default.rule_name}_fake"`,
+		}),
+	}
 
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_cms_alarms.default"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_cms_alarms.default", "alarms.group_name"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_cms_alarms.default", "alarms.metric_name"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_cms_alarms.default", "alarms.no_effective_interval"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_cms_alarms.default", "alarms.silence_time"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_cms_alarms.default", "alarms.contact_groups"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_cms_alarms.default", "alarms.mail_subject"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_cms_alarms.default", "alarms.source_type"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_cms_alarms.default", "alarms.rule_id"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_cms_alarms.default", "alarms.period"),
-					resource.TestCheckNoResourceAttr("data.alibabacloudstack_cms_alarms.default", "alarms.dimensions"),
-				),
-			},
-		},
-	})
+	var existcmsAlarmsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"alarms.#":           "1",
+			"alarms.0.rule_name": CHECKSET,
+		}
+	}
+
+	var fakecmsAlarmsMapFunc = func(rand int) map[string]string {
+		return map[string]string{
+			"alarms.#": "0",
+		}
+	}
+
+	var cmsAlarmContactsCheckInfo = dataSourceAttr{
+		resourceId:   "data.alibabacloudstack_cms_alarms.default",
+		existMapFunc: existcmsAlarmsMapFunc,
+		fakeMapFunc:  fakecmsAlarmsMapFunc,
+	}
+
+	cmsAlarmContactsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf)
 }
 
-const dataSourceAlibabacloudStackcms_alarms = VSwitchCommonTestCase + `
+func dataSourceAlibabacloudStackcms_alarms(rand int, attrMap map[string]string) string {
+	var pairs []string
+	for k, v := range attrMap {
+		pairs = append(pairs, k+" = "+v)
+	}
 
-%s
+	return fmt.Sprintf(`
 
-resource "alibabacloudstack_slb" "default" {
-  name          = "terraform_test111"
-  address_type  = "internet"
-  specification = "slb.s2.small"
-  vswitch_id    = alibabacloudstack_vpc_vswitch.default.id
+variable "name" {
+ default = "tf_testacc_cmsalarm%d"
 }
 
-
-data "alibabacloudstack_cms_alarms" "default" {
-  name    = "tf-testAccCmsAlarm_basic"
+resource "alibabacloudstack_slb" "basic" {
+ name          = "${var.name}"
+}
+resource "alibabacloudstack_cms_alarm" "default" {
+  name    = "${var.name}"
   project = "acs_slb_dashboard"
   metric  = "ActiveConnection"
   dimensions = {
-    instanceId = "${alibabacloudstack_slb.default.id}"
+    instanceId = alibabacloudstack_slb.basic.id
   }
   escalations_critical {
     statistics = "Average"
@@ -60,10 +68,20 @@ data "alibabacloudstack_cms_alarms" "default" {
     threshold = 35
     times = 2
   }
-  period  =    300
   enabled =      true
   contact_groups     = ["test-group"]
   effective_interval = "0:00-2:00"
-  webhook = "http://www.aliyun.com"
+  
+  lifecycle {
+    ignore_changes = [
+      dimensions,
+      period,
+    ]
+  }
 }
-`
+
+data "alibabacloudstack_cms_alarms" "default" {
+%s
+}
+`, rand, strings.Join(pairs, "\n  "))
+}

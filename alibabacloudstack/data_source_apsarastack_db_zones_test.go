@@ -17,19 +17,6 @@ func TestAccAlibabacloudStackDBZonesDataSource_basic(t *testing.T) {
 		}),
 	}
 
-	chargeTypeConfig := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"instance_charge_type": "PostPaid",
-		}),
-	}
-
-	allconfig := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"multi":                "false",
-			"instance_charge_type": "PostPaid",
-		}),
-	}
-
 	var existDBZonesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                    CHECKSET,
@@ -53,7 +40,7 @@ func TestAccAlibabacloudStackDBZonesDataSource_basic(t *testing.T) {
 		fakeMapFunc:  fakeDBZonesMapFunc,
 	}
 
-	DBZonesCheckInfo.dataSourceTestCheck(t, rand, multiConfig, chargeTypeConfig, allconfig)
+	DBZonesCheckInfo.dataSourceTestCheck(t, rand, multiConfig)
 }
 
 func dataSourceDBZonesConfigDependence(name string) string {

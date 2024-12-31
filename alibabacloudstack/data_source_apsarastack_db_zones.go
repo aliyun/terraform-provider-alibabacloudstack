@@ -66,7 +66,8 @@ func dataSourceAlibabacloudStackDBZonesRead(d *schema.ResourceData, meta interfa
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (i interface{}, err error) {
 			return rdsClient.DescribeRegions(request)
 		})
-		response, ok := raw.(*rds.DescribeRegionsResponse)
+		var ok bool
+		response, ok = raw.(*rds.DescribeRegionsResponse)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.Throttling}) {
 				time.Sleep(time.Duration(3) * time.Second)
