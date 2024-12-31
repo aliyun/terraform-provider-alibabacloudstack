@@ -1242,15 +1242,12 @@ func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta in
 	var response *responses.CommonResponse
 	err := resource.Retry(30*time.Minute, func() *resource.RetryError {
 		if err := invoker.Run(func() error {
-			response, err := client.ProcessCommonRequest(request)
+			var err error
+			response, err = client.ProcessCommonRequest(request)
+			addDebug("DeleteCluster", response, request, request.QueryParams)
 			return err
 		}); err != nil {
 			return resource.RetryableError(err)
-		}
-		if debugOn() {
-			requestMap := make(map[string]interface{})
-			requestMap["ClusterId"] = d.Id()
-			addDebug("DeleteCluster", response, d.Id(), requestMap)
 		}
 		return nil
 	})
@@ -1271,7 +1268,6 @@ func updateKubernetesClusterTag(d *schema.ResourceData, meta interface{}) error 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 	d.Partial(true)
-	var raw interface{}
 	invoker := NewInvoker()
 	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "ModifyClusterTags", fmt.Sprintf("/clusters/%s/tags", d.Id()))
 	tagss := make([]interface{}, 0)
@@ -1292,15 +1288,10 @@ func updateKubernetesClusterTag(d *schema.ResourceData, meta interface{}) error 
 	var raw *responses.CommonResponse
 	if err = invoker.Run(func() error {
 		raw, err = client.ProcessCommonRequest(request)
+		addDebug("ModifyClusterTags", raw, request, request.QueryParams)
 		return err
 	}); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "ModifyClusterTags", raw)
-	}
-	if debugOn() {
-		resizeRequestMap := make(map[string]interface{})
-		resizeRequestMap["ClusterId"] = d.Id()
-		resizeRequestMap["Args"] = request.GetQueryParams()
-		addDebug("ModifyClusterTags", raw, resizeRequestMap)
 	}
 	stateConf := BuildStateConf([]string{"scaling"}, []string{"running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
