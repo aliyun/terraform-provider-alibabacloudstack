@@ -80,7 +80,7 @@ func (s *EssService) DescribeEssLifecycleHook(id string) (hook ess.LifecycleHook
 		return hook, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	
+
 	for _, v := range response.LifecycleHooks.LifecycleHook {
 		if v.LifecycleHookId == id {
 			return v, nil
@@ -184,7 +184,7 @@ func (s *EssService) DescribeEssScalingGroup(id string) (group ess.ScalingGroup,
 		return group, errmsgs.WrapErrorf(e, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	
+
 	for _, v := range response.ScalingGroups.ScalingGroup {
 		if v.ScalingGroupId == id {
 			return v, nil
@@ -277,7 +277,7 @@ func (s *EssService) flattenDataDiskMappings(list []ess.DataDisk) []map[string]i
 			"snapshot_id":          i.SnapshotId,
 			"device":               i.Device,
 			"delete_with_instance": i.DeleteWithInstance,
-			//			"encrypted":               i.Encrypted,
+			"encrypted":            i.Encrypted,
 			//			"kms_key_id":              i.KMSKeyId,
 			//			"disk_name":               i.DiskName,
 			//			"description":             i.Description,
@@ -331,7 +331,7 @@ func (s *EssService) DescribeEssScalingRule(id string) (rule ess.ScalingRule, er
 		return rule, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	
+
 	for _, v := range response.ScalingRules.ScalingRule {
 		if v.ScalingRuleId == id {
 			return v, nil
@@ -382,7 +382,6 @@ func (s *EssService) DescribeEssScheduledTask(id string) (task ess.ScheduledTask
 		return task, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	
 
 	for _, v := range response.ScheduledTasks.ScheduledTask {
 		if v.ScheduledTaskId == id {
@@ -451,7 +450,7 @@ func (srv *EssService) DescribeEssAttachment(id string, instanceIds []string) (i
 		}
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	
+
 	if len(response.ScalingInstances.ScalingInstance) < 1 {
 		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("EssAttachment", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 		return
@@ -581,7 +580,6 @@ func (srv *EssService) EssRemoveInstances(id string, instanceIds []string) error
 	return nil
 }
 
-
 // ess dimensions to map
 func (s *EssService) flattenDimensionsToMap(dimensions []ess.Dimension) map[string]string {
 	result := make(map[string]string)
@@ -617,8 +615,6 @@ func (s *EssService) WaitForEssScalingGroup(id string, status Status, timeout in
 		}
 	}
 }
-
-
 
 func (s *EssService) WaitForEssAttachment(id string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)

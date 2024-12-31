@@ -76,10 +76,6 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"zone_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"scaling_configuration_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -541,6 +537,8 @@ func resourceAlibabacloudStackEssScalingConfigurationRead(d *schema.ResourceData
 		return errmsgs.WrapError(err)
 	}
 
+	d.Set("deployment_set_id", object.DeploymentSetId)
+	d.Set("is_outdated", object.IoOptimized == string(NoneOptimized))
 	d.Set("scaling_group_id", object.ScalingGroupId)
 	connectivity.SetResourceData(d, object.LifecycleState == string(Active), "active", "status")
 	d.Set("image_id", object.ImageId)
