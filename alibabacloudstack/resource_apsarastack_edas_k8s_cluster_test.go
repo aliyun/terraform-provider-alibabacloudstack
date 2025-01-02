@@ -135,7 +135,6 @@ func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						//"cluster_name":  name,
-						"cluster_type":  "5",
 						"cs_cluster_id": CHECKSET,
 					}),
 				),
@@ -201,7 +200,6 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 		  default = "%v"
 		}
 
-		%s
 
 		// resource "alibabacloudstack_cs_kubernetes" "default" {
 		//  name = var.name
@@ -225,5 +223,5 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 		//  slb_internet_enabled 		= "true"
 		// }
 
-		`, name, VSwitchCommonTestCase)
+		`, name)
 }

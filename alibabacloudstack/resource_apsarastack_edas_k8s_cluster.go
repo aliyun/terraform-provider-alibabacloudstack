@@ -94,47 +94,17 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 
 	log.Printf("unmarshal response for read %v", &response)
 
-	if response.Code != 200 {
-		return errmsgs.WrapError(errmsgs.Error("import k8s cluster failed for " + response.Message))
-	}
 	if len(response.Data) == 0 {
 		return errmsgs.WrapError(errmsgs.Error("null cluster id after import k8s cluster"))
 	}
 	d.SetId(response.Data)
 	// Wait until import succeed
+	edasService := EdasService{client}
 	request = client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetCluster", "/pop/v5/resource/cluster")
-	request.QueryParams["ClusterId"] = d.Get("cs_cluster_id").(string)
-	request.Headers["x-acs-content-type"] = "application/json"
-	request.Headers["Content-Type"] = "application/json"
-	wait := incrementalWait(1*time.Second, 2*time.Second)
-	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		bresponse, err := client.ProcessCommonRequestForOrganization(request)
-		time.Sleep(10 * time.Second)
-		if err != nil {
-			if bresponse == nil {
-				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
-			}
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-		}
-		response := edas.GetClusterResponse{}
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if err != nil {
-			return resource.RetryableError(errmsgs.WrapError(err))
-		}
-		if response.Code != 200 {
-			return resource.NonRetryableError(errmsgs.Error("Get cluster failed for " + response.Message))
-		}
-
-		addDebug(request.GetActionName(), response, request)
-		return nil
-	})
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	request.QueryParams["ClusterId"] = d.Id()
+	stateConf := BuildStateConf([]string{"2", "3", "4"}, []string{"1"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, edasService.ClusterImportStateRefreshFunc(d.Id(), []string{"3"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return resourceAlibabacloudStackEdasK8sClusterRead(d, meta)
@@ -172,15 +142,14 @@ func resourceAlibabacloudStackEdasK8sClusterRead(d *schema.ResourceData, meta in
 func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	clusterId := d.Id()
-
 	request := client.NewCommonRequest("DELETE", "Edas", "2017-08-01", "DeleteCluster", "/pop/v5/resource/cluster")
-	request.QueryParams["ClusterId"] = clusterId
+	request.QueryParams["ClusterId"] = d.Id()
 	// request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	wait := incrementalWait(1*time.Second, 2*time.Second)
 	response := edas.DeleteClusterResponse{}
 	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		bresponse, err := client.ProcessCommonRequestForOrganization(request)
+		addDebug(request.GetActionName(), bresponse, request)
 		if err != nil {
 			if bresponse == nil {
 				return resource.RetryableError(err)
@@ -206,11 +175,12 @@ func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta 
 	}
 
 	request = client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetCluster", "/pop/v5/resource/cluster")
-	request.QueryParams["ClusterId"] = d.Get("cs_cluster_id").(string)
+	request.QueryParams["ClusterId"] = d.Id()
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
 		bresponse, err := client.ProcessCommonRequestForOrganization(request)
+		addDebug(request.GetActionName(), bresponse, request)
 		if err != nil {
 			if bresponse == nil {
 				return resource.RetryableError(err)
