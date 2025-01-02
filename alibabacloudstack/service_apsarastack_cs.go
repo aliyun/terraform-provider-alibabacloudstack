@@ -131,11 +131,9 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 }
 
 func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
-	req := s.client.NewCommonRequest("POST", "CS", "2015-12-15", "DescribeClusterNodePools", fmt.Sprintf("/clusters/%s/nodepools", id))
+	req := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterNodePools", fmt.Sprintf("/clusters/%s/nodepools", id))
 	req.QueryParams["ProductName"] = "CS"
 	req.QueryParams["ClusterId"] = id
-	body, _ := json.Marshal(map[string]string{"ClusterId": id})
-	req.SetContent(body)
 	var nodePool *responses.CommonResponse
 	nodePool, err := s.client.ProcessCommonRequest(req)
 	if err != nil {
