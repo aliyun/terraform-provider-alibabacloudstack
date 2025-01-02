@@ -379,7 +379,7 @@ func ResourceTest(t *testing.T, c resource.TestCase) {
 				t.Skipf("Failed to write to file: %v", err)
 			}
 		}
-		t.Skip()
+		t.Skip("Print Terraform .tf file only!")
 	} else {
 		resource.Test(t, c)
 	}

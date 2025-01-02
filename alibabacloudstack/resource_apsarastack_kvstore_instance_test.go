@@ -521,7 +521,7 @@ func testAccKVStoreInstance_vpc(rand int, instanceClass, engineVersion string) s
 	%s 
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
-		instance_class = instance_class
+		instance_class = local.default_kv_instance_classes
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]
