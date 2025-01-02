@@ -26,9 +26,10 @@ func TestAccAlibabacloudStackSnapshotsDataSourceBasic(t *testing.T) {
 		existConfig: testAccConfig(map[string]interface{}{
 			"instance_id": "${alibabacloudstack_ecs_instance.default.id}",
 		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"instance_id": "${alibabacloudstack_ecs_instance.default.id}_fake",
-		}),
+// 		TODO: 暂时不支持，当前ascm测查询不到时会报内部错误
+// 		fakeConfig: testAccConfig(map[string]interface{}{
+// 			"instance_id": "${alibabacloudstack_ecs_instance.default.id}_fake",
+// 		}),
 	}
 
 	diskIdConfig := dataSourceTestAccConfig{
