@@ -1377,6 +1377,10 @@ data alibabacloudstack_kvstore_instance_classes "default" {
   edition_type = "${var.kv_edition}"
   engine = "${var.kv_engine}"
 }
+
+locals {
+	default_kv_instance_classes = length(data.alibabacloudstack_kvstore_instance_classes.default.instance_classes) > 0 ? data.alibabacloudstack_kvstore_instance_classes.default.instance_classes[0] : "redis.master.small.default"
+}
 `
 
 const SlbCommonTestCase = VSwitchCommonTestCase + `

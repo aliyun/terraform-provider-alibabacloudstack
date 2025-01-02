@@ -129,7 +129,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_classictest(t *testing.T) {
 		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKVStoreInstance_classic(rand, string(KVStoreRedis), string(KVStore5Dot0)),
+				Config: testAccKVStoreInstance_classic(rand, string(KVStoreRedis), string(KVStore4Dot0)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -286,7 +286,7 @@ variable "kv_engine" {
 resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
 	instance_type  = var.kv_engine
-	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes[0]
+	instance_class = local.default_kv_instance_classes
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
@@ -521,7 +521,7 @@ func testAccKVStoreInstance_vpc(rand int, instanceClass, engineVersion string) s
 	%s 
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
-		instance_class = "data.alibabacloudstack_kvstore_instance_classes.default.instance_classes[0]
+		instance_class = instance_class
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]
