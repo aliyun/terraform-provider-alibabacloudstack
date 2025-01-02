@@ -131,8 +131,8 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 }
 
 func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
-	req := s.client.NewCommonRequest("POST", "CS", "2015-12-15", "DescribeClusterNodePools", fmt.Sprintf("/clusters/%s/nodepools", id))
-	req.QueryParams["ProductName"] = "cs"
+	req := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClusterNodePools", fmt.Sprintf("/clusters/%s/nodepools", id))
+	req.QueryParams["ProductName"] = "CS"
 	req.QueryParams["ClusterId"] = id
 	var nodePool *responses.CommonResponse
 	nodePool, err := s.client.ProcessCommonRequest(req)
@@ -141,7 +141,7 @@ func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
 		if nodePool != nil {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(nodePool.BaseResponse)
 		}
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", nodePool, errmsg)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes", "DescribeClusterNodePools", nodePool, errmsg)
 	}
 	var node *NodePool
 
@@ -150,7 +150,7 @@ func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
 	}
 	err = json.Unmarshal(nodePool.GetHttpContentBytes(), &node)
 	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "ParseKubernetesClusterResponse", nodePool)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "DescribeClusterNodePools", nodePool)
 	}
 	return node, nil
 }

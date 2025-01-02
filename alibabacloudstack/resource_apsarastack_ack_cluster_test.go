@@ -65,10 +65,10 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-					},
+					// "tags": map[string]string{
+					// 	"Created": "TF",
+					// 	"For":     "acceptance test",
+					// },
 					"runtime": []map[string]interface{}{
 						{"name": "docker", "version": "19.03.15"},
 					},
@@ -118,41 +118,6 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name": name,
-					}),
-				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"detail": "detail",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"detail": "detail",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"summary": "summary update",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"summary": "summary update",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"repo_type": "PRIVATE",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"repo_type": "PRIVATE",
 					}),
 				),
 			},

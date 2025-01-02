@@ -247,17 +247,17 @@ func dataSourceAlibabacloudStackCSKubernetesClusters() *schema.Resource {
 func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := client.NewCommonRequest("GET", "Cs", "2015-12-15", "DescribeClustersV1", "")
+	request := client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClustersV1", "/api/v1/clusters")
+	request.QueryParams["SignatureVersion"] = "1.0"
+	request.QueryParams["ProductName"] = "CS"
+
 	Cresponse := ClustersV1{}
 	Clusterresponse := ClustersV1{}
 
-	raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
-		return csClient.ProcessCommonRequest(request)
-	})
-	response, ok := raw.(*responses.CommonResponse)
+	response, err := client.ProcessCommonRequest(request)
 	if err != nil {
 		errmsg := ""
-		if ok {
+		if response != nil {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes_clusters", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -303,12 +303,12 @@ func dataSourceAlibabacloudStackCSKubernetesClustersRead(d *schema.ResourceData,
 			continue
 		}
 		mapping := map[string]interface{}{
-			"id":                kc.ClusterID,
-			"name":              kc.Name,
-			"vpc_id":            kc.VpcID,
-			"security_group_id": kc.SecurityGroupID,
-			"availability_zone": kc.ZoneID,
-			"state":             kc.State,
+			"id":                   kc.ClusterID,
+			"name":                 kc.Name,
+			"vpc_id":               kc.VpcID,
+			"security_group_id":    kc.SecurityGroupID,
+			"availability_zone":    kc.ZoneID,
+			"state":                kc.State,
 			"cluster_network_type": kc.NetworkMode,
 			"pod_cidr":             kc.SubnetCidr,
 		}
