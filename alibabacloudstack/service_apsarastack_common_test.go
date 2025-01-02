@@ -1379,7 +1379,9 @@ data alibabacloudstack_kvstore_instance_classes "default" {
 }
 
 locals {
-	default_kv_instance_classes = length(data.alibabacloudstack_kvstore_instance_classes.default.instance_classes) > 0 ? data.alibabacloudstack_kvstore_instance_classes.default.instance_classes[0] : "redis.master.small.default"
+	# data alibabacloudstack_kvstore_instance_classes接口错误
+	#default_kv_instance_classes = length(data.alibabacloudstack_kvstore_instance_classes.default.instance_classes) > 0 ? data.alibabacloudstack_kvstore_instance_classes.default.instance_classes[0] : "redis.master.small.default"
+	default_kv_instance_classes = "redis.master.small.default"
 }
 `
 
