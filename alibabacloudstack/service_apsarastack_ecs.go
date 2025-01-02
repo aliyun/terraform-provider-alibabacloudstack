@@ -656,7 +656,7 @@ func (s *EcsService) DescribeImageById(id string) (image ecs.Image, err error) {
 	if err != nil {
 		errmsg := ""
 		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(raw.(*responses.BaseResponse))
+			errmsg = errmsgs.GetBaseResponseErrorMessage(resp.BaseResponse)
 		}
 		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DescribeImage", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return
