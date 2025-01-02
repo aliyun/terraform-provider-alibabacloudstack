@@ -103,13 +103,13 @@ func TestAccAlibabacloudStackSlbMasterSlaveServerGroup_multi_vpc(t *testing.T) {
 					"name":             "${var.name}",
 					"servers": []map[string]interface{}{
 						{
-							"server_id":   "${alibabacloudstack_instance.default.id}",
+							"server_id":   "${alibabacloudstack_ecs_instance.default.id}",
 							"port":        "100",
 							"weight":      "100",
 							"server_type": "Master",
 						},
 						{
-							"server_id":   "${alibabacloudstack_instance.new.id}",
+							"server_id":   "${alibabacloudstack_ecs_instance.new.id}",
 							"port":        "100",
 							"weight":      "100",
 							"server_type": "Slave",

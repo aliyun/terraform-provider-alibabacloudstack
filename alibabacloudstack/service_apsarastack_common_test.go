@@ -1366,18 +1366,21 @@ resource "alibabacloudstack_db_instance" "default" {
 
 `
 
-const KVRInstanceCommonTestCase = `
-
-resource "alibabacloudstack_kvstore_instance" "default" {
-  instance_class = "redis.master.small.default"
-  instance_name  = "testacctf-redis"
-  private_ip     = "172.16.0.10"
-  security_ips   = ["10.0.0.1"]
-  instance_type  = "Redis"
-  cpu_type       = "intel"
-  architecture_type = "standard"
+const KVRInstanceClassCommonTestCase = `
+data "alibabacloudstack_zones" "kv_zone" {
+  available_resource_creation = "KVStore"
+  enable_details = true
+}
+ 
+data alibabacloudstack_kvstore_instance_classes "default" {
+  zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id  
+  edition_type = "${var.kv_edition}"
+  engine = "${var.kv_engine}"
 }
 
+locals {
+	default_kv_instance_classes = length(data.alibabacloudstack_kvstore_instance_classes.default.instance_classes) > 0 ? data.alibabacloudstack_kvstore_instance_classes.default.instance_classes[0] : "redis.master.small.default"
+}
 `
 
 const SlbCommonTestCase = VSwitchCommonTestCase + `

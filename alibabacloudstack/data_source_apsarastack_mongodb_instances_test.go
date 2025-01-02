@@ -118,7 +118,6 @@ func TestAccAlibabacloudStackMongoDBInstancesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeMapFunc,
 	}
 	preCheck := func() {
-		testAccPreCheckWithNoDefaultVpc(t)
 	}
 	CheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, idsConf, instanceTypeConf, instanceClassConf, availabilityZoneConf, allConf)
 }

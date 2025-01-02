@@ -7,10 +7,11 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
 )
 
 func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
-	var v map[string]interface{}
+	var v *r_kvstore.Account
 
 	resourceId := "alibabacloudstack_redis_account.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccRedisAccountCheckmap)
@@ -21,7 +22,7 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sredisaccount%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc-redisaccount%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRedisAccountBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -41,9 +42,11 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 
 					"description": "rdk_test_description",
 
-					"instance_id": "${alibabacloudstack_kvstore_instance.instance.id}",
+					"instance_id": "${alibabacloudstack_kvstore_instance.default.id}",
 
 					"account_name": "rdk_test_name_01",
+					
+					"account_password": "1qaz@WSX",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -51,6 +54,8 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 						"description": "rdk_test_description",
 
 						"account_name": "rdk_test_name_01",
+						
+						"account_password": "1qaz@WSX",
 					}),
 				),
 			},
@@ -93,8 +98,6 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 
 var AlibabacloudTestAccRedisAccountCheckmap = map[string]string{
 
-	"status": CHECKSET,
-
 	"description": CHECKSET,
 
 	"account_privilege": CHECKSET,
@@ -112,19 +115,31 @@ variable "name" {
     default = "%s"
 }
 
+variable "kv_edition" {
+    default = "Enterprise"
+}
+
+variable "kv_engine" {
+    default = "%s"
+}
+
+%s
+
 data "alibabacloudstack_zones" "default" {
 	available_resource_creation = "VSwitch"
   }
 
-resource "alibabacloudstack_kvstore_instance" "instance" {
-	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	instance_class = "redis.master.small.default"
-	instance_name  = "${var.name}"
-	instance_charge_type = "PostPaid"
-	engine_version = "4.0"
+resource "alibabacloudstack_kvstore_instance" "default" {
+	instance_name  = var.name
+	instance_type  = var.kv_engine
+	instance_class = local.default_kv_instance_classes
+	engine_version = "%s"
+	node_type = "double"
+	architecture_type = "standard"
+	password       = "1qaz@WSX"
 }
 
 
 
-`, name)
+`, name, string(KVStoreRedis), KVRInstanceClassCommonTestCase, string(KVStore4Dot0))
 }

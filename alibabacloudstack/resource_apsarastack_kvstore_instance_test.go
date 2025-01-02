@@ -129,7 +129,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_classictest(t *testing.T) {
 		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKVStoreInstance_classic(rand, string(KVStoreRedis), redisInstanceClassForTest, string(KVStore5Dot0)),
+				Config: testAccKVStoreInstance_classic(rand, string(KVStoreRedis), string(KVStore4Dot0)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -167,7 +167,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKVStoreInstance_vpc(VSwitchCommonTestCase, rand, redisInstanceClassForTest, string(KVStoreRedis), string(KVStore4Dot0)),
+				Config: testAccKVStoreInstance_vpc(rand, string(KVStoreRedis), string(KVStore4Dot0)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -265,7 +265,7 @@ func testAccCheckKVStoreInstanceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccKVStoreInstance_classic(rand int, instanceType, instanceClass, engineVersion string) string {
+func testAccKVStoreInstance_classic(rand int, instanceType, engineVersion string) string {
 	return fmt.Sprintf(`
 
 	
@@ -273,18 +273,27 @@ variable "name" {
     default = "tf-testAccCheckAlibabacloudStackRKVInstances%d"
 }
 
+variable "kv_edition" {
+    default = "Enterprise"
+}
+
+variable "kv_engine" {
+    default = "%s"
+}
+
+%s 
+
 resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
-	instance_type  = "%s"
-	instance_class = "%s"
+	instance_type  = var.kv_engine
+	instance_class = local.default_kv_instance_classes
 	engine_version = "%s"
-	series = "enterprise"
 	node_type = "double"
 	architecture_type = "standard"
 	password       = "1qaz@WSX"
 }
 
-	`, rand, instanceType, instanceClass, engineVersion)
+	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion)
 }
 
 var KVStoreInstanceCheckMap = map[string]string{
@@ -494,25 +503,32 @@ func testAccKVStoreInstance_classicUpdateAll(instanceType, instanceClass, engine
 	`, instanceType, instanceClass, engineVersion)
 }
 
-func testAccKVStoreInstance_vpc(common string, rand int, instanceClass, instanceType, engineVersion string) string {
+func testAccKVStoreInstance_vpc(rand int, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
-	%s
-
-	variable "creation" {
-		default = "KVStore"
-	}
+	%s 
 	variable "name" {
 		default = "tf-testAccKVStoreInstance_vpc%d"
 	}
+	
+	variable "kv_edition" {
+    default = "Enterprise"
+	}
+	
+	variable "kv_engine" {
+    default = "%s"
+	}
+
+	%s 
+
 	resource "alibabacloudstack_kvstore_instance" "default" {
-		instance_class = "%s"
+		instance_class = instance_class
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]
-		instance_type = "%s"
+		instance_type = var.kv_engine
 		engine_version = "%s"
 	}
-	`, common, rand, instanceClass, instanceType, engineVersion)
+	`, VSwitchCommonTestCase, rand, instanceClass, KVRInstanceClassCommonTestCase, engineVersion)
 }
 func testAccKVStoreInstance_vpcUpdateSecurityIps(common, instanceClass, instanceType, engineVersion string) string {
 	return fmt.Sprintf(`

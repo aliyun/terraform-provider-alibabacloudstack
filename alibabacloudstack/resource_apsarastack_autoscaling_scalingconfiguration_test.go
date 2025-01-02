@@ -12,13 +12,13 @@ import (
 
 func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 	rand := getAccTestRandInt(1000, 999999)
-	var v ess.ScalingConfiguration
+	var v ess.ScalingConfigurationInDescribeScalingConfigurations
 	resourceId := "alibabacloudstack_ess_scaling_configuration.default"
 	basicMap := map[string]string{
 		"scaling_group_id":     CHECKSET,
 		"instance_type":        CHECKSET,
 		"security_group_ids.#": "1",
-		"image_id":             REGEXMATCH + "^ubuntu_18",
+		"image_id":             CHECKSET,
 		"override":             "false",
 	}
 	ra := resourceAttrInit(resourceId, basicMap)
@@ -45,7 +45,6 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 					"image_id":           "${data.alibabacloudstack_images.default.images.0.id}",
 					"instance_type":      "ecs.n4.large",
 					"security_group_ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
-					"zone_id":            "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"deployment_set_id":  "${alibabacloudstack_ecs_deployment_set.default.id}",
 					"force_delete":       "true",
 				}),
@@ -175,7 +174,7 @@ func TestAccAlibabacloudStackEssScalingConfigurationMulti(t *testing.T) {
 		"scaling_group_id":     CHECKSET,
 		"instance_type":        CHECKSET,
 		"security_group_ids.#": "1",
-		"image_id":             REGEXMATCH + "^ubuntu_18",
+		"image_id":             CHECKSET,
 		"override":             "false",
 	}
 	ra := resourceAttrInit(resourceId, basicMap)
@@ -205,7 +204,6 @@ func TestAccAlibabacloudStackEssScalingConfigurationMulti(t *testing.T) {
 					"security_group_ids": []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
 					"deployment_set_id":  "${alibabacloudstack_ecs_deployment_set.default.id}",
 					"force_delete":       "true",
-					"zone_id":            "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"data_disk": []map[string]string{{
 						"size":                 "20",
 						"category":             "cloud_ssd",
@@ -239,15 +237,6 @@ func resourceEssScalingConfigurationConfigDependence(name string) string {
 		description         = "example_value"
 	}
 	
-	resource "alibabacloudstack_security_group" "default1" {
-	  name   = "${var.name}"
-	  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-	}
-	data "alibabacloudstack_images" "default1" {
-		name_regex  = "^centos.*_64"
-  		most_recent = true
-  		owners      = "system"
-	}
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 1
 		max_size = 1
