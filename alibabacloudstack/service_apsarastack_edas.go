@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"reflect"
 	"strconv"
@@ -282,6 +283,27 @@ func (e *EdasService) DescribeEdasApplication(appId string) (*edas.Applcation, e
 	v := response.Applcation
 
 	return &v, nil
+}
+
+func (s *EdasService) ClusterImportStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeEdasGetCluster(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		status := fmt.Sprintf("%d", object.ClusterImportStatus)
+		for _, failState := range failStates {
+			if status == failState {
+				return object, status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, status))
+			}
+		}
+
+		return object, status, nil
+	}
 }
 
 func (e *EdasService) DescribeEdasGetCluster(clusterId string) (*edas.Cluster, error) {
