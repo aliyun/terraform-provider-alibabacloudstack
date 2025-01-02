@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -62,8 +61,7 @@ func resourceAlibabacloudStackEdasK8sCluster() *schema.Resource {
 }
 
 type ImportK8sClusterResponse struct {
-	*responses.BaseResponse
-	Code      string `json:"Code" xml:"Code"`
+	Code      int    `json:"Code" xml:"Code"`
 	Message   string `json:"Message" xml:"Message"`
 	Data      string `json:"Data" xml:"Data"`
 	RequestId string `json:"RequestId" xml:"RequestId"`
@@ -79,7 +77,7 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 	}
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
-	bresponse, err := client.ProcessCommonRequest(request)
+	bresponse, err := client.ProcessCommonRequestForOrganization(request)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -96,7 +94,7 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 
 	log.Printf("unmarshal response for read %v", &response)
 
-	if response.Code != "200" {
+	if response.Code != 200 {
 		return errmsgs.WrapError(errmsgs.Error("import k8s cluster failed for " + response.Message))
 	}
 	if len(response.Data) == 0 {
@@ -110,8 +108,8 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 	request.Headers["Content-Type"] = "application/json"
 	wait := incrementalWait(1*time.Second, 2*time.Second)
 	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
-		bresponse, err := client.ProcessCommonRequest(request)
-		time.Sleep(120 * time.Second)
+		bresponse, err := client.ProcessCommonRequestForOrganization(request)
+		time.Sleep(10 * time.Second)
 		if err != nil {
 			if bresponse == nil {
 				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
@@ -178,11 +176,11 @@ func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta 
 
 	request := client.NewCommonRequest("DELETE", "Edas", "2017-08-01", "DeleteCluster", "/pop/v5/resource/cluster")
 	request.QueryParams["ClusterId"] = clusterId
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
+	// request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	wait := incrementalWait(1*time.Second, 2*time.Second)
 	response := edas.DeleteClusterResponse{}
 	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		bresponse, err := client.ProcessCommonRequest(request)
+		bresponse, err := client.ProcessCommonRequestForOrganization(request)
 		if err != nil {
 			if bresponse == nil {
 				return resource.RetryableError(err)
@@ -212,7 +210,7 @@ func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta 
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
 	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		bresponse, err := client.ProcessCommonRequest(request)
+		bresponse, err := client.ProcessCommonRequestForOrganization(request)
 		if err != nil {
 			if bresponse == nil {
 				return resource.RetryableError(err)

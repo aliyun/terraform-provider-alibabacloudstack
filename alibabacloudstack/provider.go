@@ -192,13 +192,13 @@ func Provider() *schema.Provider {
 			"organization_accesskey": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY", nil),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY", os.Getenv("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY")),
 				Description: descriptions["organization_accesskey"],
 			},
 			"organization_secretkey": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY", nil),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY", os.Getenv("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY")),
 				Description: descriptions["organization_secretkey"],
 			},
 			"sls_openapi_endpoint": {

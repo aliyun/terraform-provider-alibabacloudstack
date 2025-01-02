@@ -2,13 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
 	"os"
 	"testing"
 	"time"
 
-	
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"strings"
@@ -128,7 +128,8 @@ func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cs_cluster_id": "cbd2c8f2c58c24c17b0c7462794a862ea",
+					// "cs_cluster_id": "${alibabacloudstack_cs_kubernetes.default.id}",
+					"cs_cluster_id": "c89eeac401e7b43d985c6ac2b94ceee66",
 					"namespace_id":  region,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -200,49 +201,29 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 		  default = "%v"
 		}
 
-		//data "alicloud_zones" default {
-		//  available_resource_creation = "VSwitch"
-		//}
-		//
-		//data "alicloud_instance_types" "default" {
-		//  availability_zone = data.alicloud_zones.default.zones.0.id
-		//  cpu_core_count = 2
-		//  memory_size = 4
-		//  kubernetes_node_role = "Worker"
-		//}
-		//
-		//resource "alicloud_vpc" "default" {
-		//  vpc_name = var.name
-		//  cidr_block = "10.1.0.0/21"
-		//}
-		//
-		//resource "alicloud_vswitch" "default" {
-		//  vswitch_name = var.name
-		//  vpc_id = alicloud_vpc.default.id
-		//  cidr_block = "10.1.1.0/24"
-		//  availability_zone = data.alicloud_zones.default.zones.0.id
-		//}
-		//
-		//resource "alicloud_log_project" "log" {
-		//  name        = var.name
-		//  description = "created by terraform for managedkubernetes cluster"
-		//}
-		//
-		//resource "alicloud_cs_managed_kubernetes" "default" {
-		//  worker_instance_types = [data.alicloud_instance_types.default.instance_types.0.id]
-		//  name = var.name
-		//  worker_vswitch_ids = [alicloud_vswitch.default.id]
-		//  worker_number = "2"
-		//  password =                    "Test12345"
-		//  pod_cidr =                   "172.20.0.0/16"
-		//  service_cidr =               "172.21.0.0/20"
-		//  worker_disk_size =            "50"
-		//  worker_disk_category =         "cloud_ssd"
-		//  worker_data_disk_size =       "20"
-		//  worker_data_disk_category =   "cloud_ssd"
-		//  worker_instance_charge_type = "PostPaid"
-		//  slb_internet_enabled =        "true"
-		//}
+		%s
 
-		`, name)
+		// resource "alibabacloudstack_cs_kubernetes" "default" {
+		//  name = var.name
+		//  version 					= "1.20.11-aliyun.1"
+		//  os_type 					= "linux"
+		//  platform 					= "AliyunLinux"
+		//  num_of_nodes 				= "1"
+		//  master_count				= "3"
+		//  master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
+		//  master_instance_types 		= ["ecs.n4v2.large","ecs.n4v2.large","ecs.n4v2.large"]
+		//  master_disk_category 		= "cloud_ssd"
+		//  vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
+		//  worker_instance_types 		= ["ecs.n4v2.large"]
+		//  worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
+		//  worker_disk_category 		= "cloud_ssd"
+		//  password 					= "Test12345"
+		//  pod_cidr 					= "172.20.0.0/16"
+		//  service_cidr 				= "172.21.0.0/20"
+		//  worker_disk_size 			= "40"
+		//  master_disk_size 			= "40"
+		//  slb_internet_enabled 		= "true"
+		// }
+
+		`, name, VSwitchCommonTestCase)
 }
