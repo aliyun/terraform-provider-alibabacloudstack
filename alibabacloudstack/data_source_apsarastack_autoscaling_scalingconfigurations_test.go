@@ -96,7 +96,7 @@ func testAccCheckAlibabacloudStackEssScalingconfigurationsDataSourceConfig(rand 
 	config := fmt.Sprintf(`
 %s
 variable "name" {
-	default = "tf-testAccDataSourceEssScalingRules-%d"
+	default = "tf-testscalconf-%d"
 }
 resource "alibabacloudstack_ess_scaling_group" "default" {
 	min_size = 0
