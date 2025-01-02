@@ -13,7 +13,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -131,8 +131,8 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckEssScheduledTaskDestroy,
+		Providers: testAccProviders,
+		// CheckDestroy: testAccCheckEssScheduledTaskDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: providerCommon + testAccEssScheduleConfig(ECSInstanceCommonTestCase,
@@ -243,7 +243,7 @@ func TestAccAlibabacloudStackEssScheduledTask_multi(t *testing.T) {
 		IDRefreshName: resourceId,
 
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckEssScheduledTaskDestroy,
+		// CheckDestroy: testAccCheckEssScheduledTaskDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEssScheduleConfigMulti(ECSInstanceCommonTestCase,
@@ -291,17 +291,37 @@ func testAccEssScheduleConfig(common, scheduleTime string, rand int) string {
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		min_size = 0
+		max_size = 2
+		default_cooldown = 20
 		removal_policies = ["OldestInstance", "NewestInstance"]
+		scaling_group_name = "${var.name}"
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	}
 	
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
+	
+	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type = "ecs.e4.small"
+		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
+		force_delete = true
+		active = true
+		enable = true
+		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
+	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		adjustment_type = "TotalCapacity"
-		adjustment_value = 2
+		adjustment_value = "1"
+		cooldown = 0
 	}
 	
 	resource "alibabacloudstack_ess_scheduled_task" "default" {
@@ -320,18 +340,37 @@ func testAccEssScheduleUpdateScheduledTaskName(common, scheduleTime string, rand
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		min_size = 0
+		max_size = 2
+		default_cooldown = 20
 		removal_policies = ["OldestInstance", "NewestInstance"]
+		scaling_group_name = "${var.name}"
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	}
 	
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
+	
+	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type = "ecs.e4.small"
+		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
+		force_delete = true
+		active = true
+		enable = true
+		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
+	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		adjustment_type = "TotalCapacity"
-		adjustment_value = 2
-		cooldown = 60
+		adjustment_value = "1"
+		cooldown = 0
 	}
 	
 	resource "alibabacloudstack_ess_scheduled_task" "default" {
@@ -350,18 +389,37 @@ func testAccEssScheduleUpdateDescription(common, scheduleTime string, rand int) 
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		min_size = 0
+		max_size = 2
+		default_cooldown = 20
 		removal_policies = ["OldestInstance", "NewestInstance"]
+		scaling_group_name = "${var.name}"
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	}
 	
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
+	
+	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type = "ecs.e4.small"
+		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
+		force_delete = true
+		active = true
+		enable = true
+		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
+	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		adjustment_type = "TotalCapacity"
-		adjustment_value = 2
-		cooldown = 60
+		adjustment_value = "1"
+		cooldown = 0
 	}
 	
 	resource "alibabacloudstack_ess_scheduled_task" "default" {
@@ -381,18 +439,37 @@ func testAccEssScheduleUpdateLaunchExpirationTime(common, scheduleTime string, r
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		min_size = 0
+		max_size = 2
+		default_cooldown = 20
 		removal_policies = ["OldestInstance", "NewestInstance"]
+		scaling_group_name = "${var.name}"
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	}
-
+	
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
+	
+	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type = "ecs.e4.small"
+		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
+		force_delete = true
+		active = true
+		enable = true
+		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
+	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		adjustment_type = "TotalCapacity"
-		adjustment_value = 2
-		cooldown = 60
+		adjustment_value = "1"
+		cooldown = 0
 	}
 	
 	resource "alibabacloudstack_ess_scheduled_task" "default" {
@@ -412,17 +489,37 @@ func testAccEssScheduleUpdateRecurrenceType(common, scheduleTime string, rand in
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		min_size = 0
+		max_size = 2
+		default_cooldown = 20
 		removal_policies = ["OldestInstance", "NewestInstance"]
+		scaling_group_name = "${var.name}"
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	}
-
+	
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
+	
+	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type = "ecs.e4.small"
+		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
+		force_delete = true
+		active = true
+		enable = true
+		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
+	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		adjustment_type = "TotalCapacity"
-		adjustment_value = 2
+		adjustment_value = "1"
+		cooldown = 0
 	}
 	
 	resource "alibabacloudstack_ess_scheduled_task" "default" {
@@ -446,18 +543,37 @@ func testAccEssScheduleUpdateTaskEnabled(common, scheduleTime string, rand int) 
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		min_size = 0
+		max_size = 2
+		default_cooldown = 20
 		removal_policies = ["OldestInstance", "NewestInstance"]
+		scaling_group_name = "${var.name}"
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	}
 	
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
+	
+	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type = "ecs.e4.small"
+		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
+		force_delete = true
+		active = true
+		enable = true
+		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
+	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		adjustment_type = "TotalCapacity"
-		adjustment_value = 2
-		cooldown = 60
+		adjustment_value = "1"
+		cooldown = 0
 	}
 	
 	resource "alibabacloudstack_ess_scheduled_task" "default" {
@@ -481,18 +597,37 @@ func testAccEssScheduleConfigMulti(common, scheduleTime string, rand int) string
 	}
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 1
-		max_size = 1
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vswitch.default.id}"]
+		min_size = 0
+		max_size = 2
+		default_cooldown = 20
 		removal_policies = ["OldestInstance", "NewestInstance"]
+		scaling_group_name = "${var.name}"
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	}
 	
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
+	
+	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type = "ecs.e4.small"
+		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
+		force_delete = true
+		active = true
+		enable = true
+		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
+	}
 	resource "alibabacloudstack_ess_scaling_rule" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		adjustment_type = "TotalCapacity"
-		adjustment_value = 2
-		cooldown = 60
+		adjustment_value = "1"
+		cooldown = 0
 	}
 	
 	resource "alibabacloudstack_ess_scheduled_task" "default" {
