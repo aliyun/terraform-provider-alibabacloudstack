@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccalibabacloudstackdEssAttachment_update(t *testing.T) {
-	rand := getAccTestRandInt(1000, 999999)
+	rand := getAccTestRandInt(10000, 999999)
 	var v ess.ScalingGroup
 	resourceId := "alibabacloudstack_ess_attachment.default"
 	basicMap := map[string]string{
@@ -182,12 +182,11 @@ func testAccEssAttachmentConfig(rand int) string {
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "ecs.e4.small"
+		instance_type = "${local.default_instance_type_id}"
 		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 		force_delete = true
 		active = true
 		enable = true
-		zone_id = data.alibabacloudstack_zones.default.zones.0.id
 		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
 	}
 
@@ -230,7 +229,6 @@ func testAccEssAttachmentConfigInstance(rand int) string {
 		force_delete = true
 		active = true
 		enable = true
-		zone_id = data.alibabacloudstack_zones.default.zones.0.id
 		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
 	}
 
