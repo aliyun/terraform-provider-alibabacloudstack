@@ -852,6 +852,11 @@ func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*requests.Comm
 		ScalingGroup.InstanceChargeType = v.(string)
 
 	}
+
+	if v, ok := d.GetOk("password"); ok {
+		ScalingGroup.LoginPassword = v.(string)
+
+	}
 	if v, ok := d.GetOk("install_cloud_monitor"); ok {
 		KubernetesConfig.CmsEnabled = v.(bool)
 	}
@@ -895,6 +900,7 @@ func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*requests.Comm
 		ScalingGroup.InternetMaxBandwidthOut = v.(int)
 	}
 	request.QueryParams["ClusterId"] = d.Get("cluster_id").(string)
+	request.QueryParams["Password"] = d.Get("password").(string)
 	request.QueryParams["SignatureVersion"] = "1.0"
 	body := CreateClusterNodePoolRequest{
 		Count:            int64(d.Get("node_count").(int)),

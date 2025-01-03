@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -89,7 +88,7 @@ func (e *EdasService) GetChangeOrderStatus(id string) (info *EdasChangeOrderInfo
 
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
-	bresponse, err := e.client.ProcessCommonRequest(request)
+	bresponse, err := e.client.ProcessCommonRequestForOrganization(request)
 
 	if err != nil {
 		if bresponse == nil {
@@ -449,7 +448,7 @@ func (e *EdasService) DescribeEdasListCluster(clusterId string) (*edas.Cluster, 
 	request.QueryParams["LogicalRegionId"] = e.client.RegionId
 
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	bresponse, err := e.client.ProcessCommonRequest(request)
+	bresponse, err := e.client.ProcessCommonRequestForOrganization(request)
 
 	if err != nil {
 		if bresponse == nil {
@@ -604,32 +603,24 @@ func (e *EdasService) GetK8sEnvs(envs map[string]interface{}) (string, error) {
 }
 
 func (e *EdasService) QueryK8sAppPackageType(appId string) (string, error) {
-	request := edas.CreateGetApplicationRequest()
-	e.client.InitRoaRequest(*request.RoaRequest)
-	request.AppId = appId
+	request := e.client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetK8sApplication", "/pop/v5/changeorder/co_application")
+	request.QueryParams["ResourceGroupId"] = e.client.ResourceGroup
+	request.QueryParams["AppId"] = appId
 
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	log.Printf("-------------------------------------------- %v", request.Headers)
-	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-		return edasClient.GetApplication(request)
-	})
-	addDebug(request.GetActionName(), raw, request, request.RoaRequest)
-	response, ok := raw.(*edas.GetApplicationResponse)
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
+	bresponse, err := e.client.ProcessCommonRequestForOrganization(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if bresponse != nil {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
 		return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_k8s_app_package_type", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
-	if response.Code != 200 {
-		return "", errmsgs.WrapError(errmsgs.Error("get application for appId:" + appId + " failed:" + response.Message))
-	}
-	if len(response.Applcation.ApplicationType) > 0 {
-		return response.Applcation.ApplicationType, nil
-	}
-	return "", errmsgs.WrapError(errmsgs.Error("not package type for appId:" + appId))
+	var response map[string]interface{}
+	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	return response["Applcation"].(map[string]interface{})["ApplicationType"].(string), nil
 }
 
 type EdasK8sApplcation struct {
@@ -687,13 +678,13 @@ type EdasGetK8sApplcationResponse struct {
 
 func (e *EdasService) DescribeEdasK8sApplication(appId string) (*EdasK8sApplcation, error) {
 	v := EdasK8sApplcation{}
-	request := e.client.NewCommonRequest("POST", "Edas", "2017-08-01", "GetK8sCluster", "/pop/v5/k8s_clusters")
+	request := e.client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetK8sApplication", "/pop/v5/changeorder/co_application")
 	request.QueryParams["ResourceGroupId"] = e.client.ResourceGroup
 	request.QueryParams["AppId"] = appId
 
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
-	bresponse, err := e.client.ProcessCommonRequest(request)
+	bresponse, err := e.client.ProcessCommonRequestForOrganization(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 
 	if err != nil {

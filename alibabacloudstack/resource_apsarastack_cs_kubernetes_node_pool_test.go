@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -41,7 +39,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"name":                  name,
-					"cluster_id":            "c180d1d233d2d47f68f301b129f622665",
+					"cluster_id":            "c89eeac401e7b43d985c6ac2b94ceee66",
 					"vswitch_ids":           []string{"${alibabacloudstack_vswitch.default.id}"},
 					"instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
 					"node_count":            "1",
@@ -55,26 +53,26 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":                         name,
-						"cluster_id":                   CHECKSET,
-						"vswitch_ids.#":                "1",
-						"instance_types.#":             "1",
-						"node_count":                   "1",
-						"key_name":                     CHECKSET,
-						"system_disk_category":         "cloud_efficiency",
-						"system_disk_size":             "40",
-						"install_cloud_monitor":        "false",
-						"data_disks.#":                 "1",
-						"data_disks.0.size":            "100",
-						"data_disks.0.category":        "cloud_ssd",
-						"tags.%":                       "2",
-						"tags.Created":                 "TF",
-						"tags.Foo":                     "Bar",
-// 						"management.#":                 "1",
-// 						"management.0.auto_repair":     "true",
-// 						"management.0.auto_upgrade":    "true",
-// 						"management.0.surge":           "0",
-// 						"management.0.max_unavailable": "0",
+						"name":                  name,
+						"cluster_id":            CHECKSET,
+						"vswitch_ids.#":         "1",
+						"instance_types.#":      "1",
+						"node_count":            "1",
+						"key_name":              CHECKSET,
+						"system_disk_category":  "cloud_efficiency",
+						"system_disk_size":      "40",
+						"install_cloud_monitor": "false",
+						"data_disks.#":          "1",
+						"data_disks.0.size":     "100",
+						"data_disks.0.category": "cloud_ssd",
+						"tags.%":                "2",
+						"tags.Created":          "TF",
+						"tags.Foo":              "Bar",
+						// 						"management.#":                 "1",
+						// 						"management.0.auto_repair":     "true",
+						// 						"management.0.auto_upgrade":    "true",
+						// 						"management.0.surge":           "0",
+						// 						"management.0.max_unavailable": "0",
 					}),
 				),
 			},
@@ -94,16 +92,16 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"node_count":                   "2",
-						"system_disk_size":             "80",
-						"data_disks.#":                 "1",
-						"data_disks.0.size":            "40",
-						"data_disks.0.category":        "cloud",
-// 						"management.#":                 "1",
-// 						"management.0.auto_repair":     "true",
-// 						"management.0.auto_upgrade":    "true",
-// 						"management.0.surge":           "1",
-// 						"management.0.max_unavailable": "1",
+						"node_count":            "2",
+						"system_disk_size":      "80",
+						"data_disks.#":          "1",
+						"data_disks.0.size":     "40",
+						"data_disks.0.category": "cloud",
+						// 						"management.#":                 "1",
+						// 						"management.0.auto_repair":     "true",
+						// 						"management.0.auto_upgrade":    "true",
+						// 						"management.0.surge":           "1",
+						// 						"management.0.max_unavailable": "1",
 					}),
 				),
 			},
