@@ -103,7 +103,7 @@ func testSweepEdasK8sCluster(region string) error {
 }
 
 func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
-	var v *edas.Cluster
+	var v *EdasK8sCluster
 	resourceId := "alibabacloudstack_edas_k8s_cluster.default"
 	ra := resourceAttrInit(resourceId, edasK8sClusterBasicMap)
 	serviceFunc := func() interface{} {

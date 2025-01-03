@@ -285,9 +285,9 @@ func (e *EdasService) DescribeEdasApplication(appId string) (*edas.Applcation, e
 	return &v, nil
 }
 
-func (s *EdasService) ClusterImportStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+func (s *EdasService) ClusterImportK8sStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		object, err := s.DescribeEdasGetCluster(id)
+		object, err := s.DescribeEdasK8sCluster(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
@@ -307,34 +307,109 @@ func (s *EdasService) ClusterImportStateRefreshFunc(id string, failStates []stri
 }
 
 func (e *EdasService) DescribeEdasGetCluster(clusterId string) (*edas.Cluster, error) {
-	cluster := &edas.Cluster{}
-
-	request := edas.CreateGetClusterRequest()
-	e.client.InitRoaRequest(*request.RoaRequest)
-	request.ClusterId = clusterId
+	cluster := edas.Cluster{}
+	request := e.client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetCluster", "/pop/v5/resource/cluster")
+	request.QueryParams["ResourceGroupId"] = e.client.ResourceGroup
+	request.QueryParams["ClusterId"] = clusterId
 
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-		return edasClient.GetCluster(request)
-	})
+	bresponse, err := e.client.ProcessCommonRequest(request)
 
-	response, ok := raw.(*edas.GetClusterResponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return &cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
+	addDebug(request.GetActionName(), bresponse, request, request)
+
+	response := edas.GetClusterResponse{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return &cluster, errmsgs.WrapError(err)
+	}
 
 	if response.Code != 200 {
-		return cluster, errmsgs.WrapError(errmsgs.Error("create cluster failed for " + response.Message))
+		return &cluster, errmsgs.WrapError(errmsgs.Error("create cluster failed for " + response.Message))
 	}
 
-	v := response.Cluster
+	cluster = response.Cluster
 
-	return &v, nil
+	return &cluster, nil
+}
+
+type EdasK8sCluster struct {
+	ClusterImportStatus int    `json:"ClusterImportStatus"`
+	NodeNum             int    `json:"NodeNum"`
+	ClusterId           string `json:"ClusterId"`
+	Cpu                 int    `json:"Cpu"`
+	ClusterType         int    `json:"ClusterType"`
+	NetworkMode         int    `json:"NetworkMode"`
+	CsClusterId         string `json:"CsClusterId"`
+	VswitchId           string `json:"VswitchId"`
+	VpcId               string `json:"VpcId"`
+	Mem                 int    `json:"Mem"`
+	ClusterName         string `json:"ClusterName"`
+	SubNetCidr          string `json:"SubNetCidr"`
+	RegionId            string `json:"RegionId"`
+	CsClusterStatus     string `json:"CsClusterStatus"`
+	ClusterStatus       int    `json:"ClusterStatus"`
+	SubClusterType      string `json:"SubClusterType"`
+}
+
+type EdasGetK8sClusterResponse struct {
+	EagleEyeTraceId string `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool   `json:"asapiSuccess"`
+	ResponseVersion string `json:"responseVersion"`
+	RequestId       string `json:"RequestId"`
+	Message         string `json:"Message"`
+	ClusterPage     struct {
+		ClusterList []EdasK8sCluster `json:"ClusterList"`
+		PageSize    int              `json:"PageSize"`
+		CurrentPage int              `json:"CurrentPage"`
+		TotalSize   int              `json:"TotalSize"`
+	} `json:"ClusterPage"`
+	Success bool `json:"success"`
+	Code    int  `json:"Code"`
+}
+
+func (e *EdasService) DescribeEdasK8sCluster(clusterId string) (*EdasK8sCluster, error) {
+	cluster := EdasK8sCluster{}
+	request := e.client.NewCommonRequest("POST", "Edas", "2017-08-01", "GetK8sCluster", "/pop/v5/k8s_clusters")
+	request.QueryParams["ResourceGroupId"] = e.client.ResourceGroup
+	request.QueryParams["ClusterId"] = clusterId
+
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
+	bresponse, err := e.client.ProcessCommonRequestForOrganization(request)
+
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return &cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	addDebug(request.GetActionName(), bresponse, request, request)
+
+	response := EdasGetK8sClusterResponse{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return &cluster, errmsgs.WrapError(err)
+	}
+
+	if response.Code != 200 {
+		return &cluster, errmsgs.WrapError(errmsgs.Error("create cluster failed for " + response.Message))
+	}
+	ClusterList := response.ClusterPage.ClusterList
+	if len(ClusterList) == 0 {
+		return &cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+	} else {
+		cluster = ClusterList[0]
+	}
+
+	return &cluster, nil
 }
 
 func (e *EdasService) DescribeEdasListCluster(clusterId string) (*edas.Cluster, error) {
@@ -526,40 +601,6 @@ func (e *EdasService) QueryK8sAppPackageType(appId string) (string, error) {
 		return response.Applcation.ApplicationType, nil
 	}
 	return "", errmsgs.WrapError(errmsgs.Error("not package type for appId:" + appId))
-}
-
-func (e *EdasService) DescribeEdasK8sCluster(clusterId string) (*edas.Cluster, error) {
-	cluster := &edas.Cluster{}
-
-	request := edas.CreateGetClusterRequest()
-	e.client.InitRoaRequest(*request.RoaRequest)
-	request.ClusterId = clusterId
-
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-		return edasClient.GetCluster(request)
-	})
-
-	response, ok := raw.(*edas.GetClusterResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, clusterId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-
-	if response.Code != 200 {
-		if strings.Contains(response.Message, "does not exist") {
-			return cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return cluster, errmsgs.WrapError(errmsgs.Error("create k8s cluster failed for " + response.Message))
-	}
-
-	v := response.Cluster
-
-	return &v, nil
 }
 
 func (e *EdasService) DescribeEdasK8sApplication(appId string) (*edas.Applcation, error) {
