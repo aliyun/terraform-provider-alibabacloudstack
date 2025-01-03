@@ -653,7 +653,7 @@ func (client *AlibabacloudStackClient) NewNasClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("nas", client.Config.Endpoints[NasCode])
 }
 
-func (client *AlibabacloudStackClient) WithOssClientPutObject(do func(*oss.Client) (interface{}, error)) (interface{}, error) {
+func (client *AlibabacloudStackClient) WithOssDataClient(do func(*oss.Client) (interface{}, error)) (interface{}, error) {
 	goSdkMutex.Lock()
 	defer goSdkMutex.Unlock()
 
@@ -661,40 +661,6 @@ func (client *AlibabacloudStackClient) WithOssClientPutObject(do func(*oss.Clien
 	if client.ossconn == nil {
 		schma := "http"
 		endpoint := client.Config.Endpoints[OssDataCode]
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the oss client: endpoint or domain is not provided for OSS service")
-		}
-		if !strings.HasPrefix(endpoint, "http") {
-			endpoint = fmt.Sprintf("%s://%s", schma, endpoint)
-		}
-
-		clientOptions := []oss.ClientOption{oss.UserAgent(client.getUserAgent()),
-			oss.SecurityToken(client.Config.SecurityToken)}
-		if client.Config.Proxy != "" {
-			clientOptions = append(clientOptions, oss.Proxy(client.Config.Proxy))
-		}
-
-		clientOptions = append(clientOptions, oss.UseCname(false))
-
-		ossconn, err := oss.New(endpoint, client.Config.AccessKey, client.Config.SecretKey, clientOptions...)
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the OSS client: %#v", err)
-		}
-
-		client.ossconn = ossconn
-	}
-
-	return do(client.ossconn)
-}
-
-func (client *AlibabacloudStackClient) WithOssClient(do func(*oss.Client) (interface{}, error)) (interface{}, error) {
-	goSdkMutex.Lock()
-	defer goSdkMutex.Unlock()
-
-	// Initialize the OSS client if necessary
-	if client.ossconn == nil {
-		schma := "http"
-		endpoint := client.Config.Endpoints[OSSCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("unable to initialize the oss client: endpoint or domain is not provided for OSS service")
 		}
@@ -813,8 +779,8 @@ func (client *AlibabacloudStackClient) getHttpProxyUrl() *url.URL {
 	return nil
 }
 
-func (client *AlibabacloudStackClient) WithOssBucketByName(bucketName string, do func(*oss.Bucket) (interface{}, error)) (interface{}, error) {
-	return client.WithOssClient(func(ossClient *oss.Client) (interface{}, error) {
+func (client *AlibabacloudStackClient) WithOssBucketClient(bucketName string, do func(*oss.Bucket) (interface{}, error)) (interface{}, error) {
+	return client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
 		bucket, err := client.ossconn.Bucket(bucketName)
 
 		if err != nil {

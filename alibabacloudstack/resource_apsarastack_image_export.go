@@ -95,7 +95,7 @@ func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta int
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client: client}
 	var requestInfo *oss.Client
-	raw, err := client.WithOssClient(func(ossClient *oss.Client) (interface{}, error) {
+	raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
 		requestInfo = ossClient
 		return ossClient.Bucket(d.Get("oss_bucket").(string))
 	})

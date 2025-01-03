@@ -123,7 +123,7 @@ func dataSourceAlibabacloudStackOssBucketObjectsRead(d *schema.ResourceData, met
 			options = append(options, oss.Marker(nextMarker))
 		}
 
-		raw, err := client.WithOssBucketByName(bucketName, func(bucket *oss.Bucket) (interface{}, error) {
+		raw, err := client.WithOssBucketClient(bucketName, func(bucket *oss.Bucket) (interface{}, error) {
 			requestInfo = &bucket.Client
 			return bucket.ListObjects(options...)
 		})
@@ -187,7 +187,7 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 		}
 
 		// Add metadata information
-		raw, err := client.WithOssBucketByName(bucketName, func(bucket *oss.Bucket) (interface{}, error) {
+		raw, err := client.WithOssBucketClient(bucketName, func(bucket *oss.Bucket) (interface{}, error) {
 			requestInfo = &bucket.Client
 			return bucket.GetObjectDetailedMeta(object.Key)
 		})
@@ -213,7 +213,7 @@ func bucketObjectsDescriptionAttributes(d *schema.ResourceData, bucketName strin
 			addDebug("GetObjectDetailedMeta", raw, requestInfo, map[string]string{"objectKey": object.Key})
 		}
 		// Add ACL information
-		raw, err = client.WithOssBucketByName(bucketName, func(bucket *oss.Bucket) (interface{}, error) {
+		raw, err = client.WithOssBucketClient(bucketName, func(bucket *oss.Bucket) (interface{}, error) {
 			requestInfo = &bucket.Client
 			return bucket.GetObjectACL(object.Key)
 		})

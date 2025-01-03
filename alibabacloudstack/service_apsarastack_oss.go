@@ -21,12 +21,8 @@ type OssService struct {
 
 func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoResult, err error) {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	mergeMaps(request.QueryParams, map[string]string{
-		"AccountInfo":      "",
-		"SignatureVersion": "1.0",
-		"OpenApiAction":    "GetService",
-		"ProductName":      "oss",
-	})
+	request.QueryParams["OpenApiAction"]=    "GetService"
+	request.QueryParams["ProductName"]=      "oss"
 	var bucketList = &BucketList{}
 	raw, err := s.client.WithOssNewClient(func(ossClient *ecs.Client) (interface{}, error) {
 		return ossClient.ProcessCommonRequest(request)
