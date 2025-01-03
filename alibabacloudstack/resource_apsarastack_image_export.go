@@ -1,10 +1,8 @@
 package alibabacloudstack
 
 import (
-	"log"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -109,49 +107,60 @@ func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta int
 	if d.Get("oss_prefix").(string) != "" {
 		objectName = d.Get("oss_prefix").(string) + "_" + objectName
 	}
-
-	request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoApi", "")
-	request.QueryParams["AppAction"] = "DeleteObjects"
-	request.QueryParams["AppName"] = "one-console-app-oss"
-	request.QueryParams["Params"] = "{\"region\":\"" + client.RegionId + "\",\"params\":{\"bucketName\":\"" + d.Get("oss_bucket").(string) + "\",\"objects\":[\"" + objectName + "\"]}}"
-	// mergeMaps(request.QueryParams, map[string]string{
-	// 	"AppAction": "DeleteObjects",
-	// 	"AppName":   "one-console-app-oss",
-	// 	"Params":    "{\"region\":\"" + client.RegionId + "\",\"params\":{\"bucketName\":\"" + d.Get("oss_bucket").(string) + "\",\"objects\":[\"" + objectName + "\"]}}",
-	// })
-	log.Printf("--------------image export check %v------------", request.QueryParams)
-	raw, err = client.WithOssNewClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-
+	err = bucket.DeleteObject(objectName)
 	if err != nil {
-		errmsg := ""
-		if raw != nil {
-			response, ok := raw.(*responses.CommonResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
+		if errmsgs.IsExpectedErrors(err, []string{"No Content", "Not Found"}) {
+			return nil
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteObject", raw, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, objectName, "DeleteObject", errmsgs.AlibabacloudStackLogGoSdkERROR)
 	}
 
-	addDebug("DeleteObjects", raw, requestInfo, request)
+	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucket, objectName, Deleted, DefaultTimeoutMedium))
 
-	bresponse, ok := raw.(*responses.CommonResponse)
-	if !ok {
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteObject", raw, "Invalid response type")
-	}
-	if bresponse.GetHttpStatus() != 200 {
-		errmsg := ""
-		if raw != nil {
-			response, ok := raw.(*responses.CommonResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteObject", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
-	}
-	addDebug("DeleteObjects", raw, requestInfo, bresponse.GetHttpContentString())
-
-	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucket, d.Id(), Deleted, DefaultTimeoutMedium))
 }
+
+// 	request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoApi", "")
+// 	request.QueryParams["AppAction"] = "DeleteObjects"
+// 	request.QueryParams["AppName"] = "one-console-app-oss"
+// 	request.QueryParams["Params"] = "{\"region\":\"" + client.RegionId + "\",\"params\":{\"bucketName\":\"" + d.Get("oss_bucket").(string) + "\",\"objects\":[\"" + objectName + "\"]}}"
+// 	// mergeMaps(request.QueryParams, map[string]string{
+// 	// 	"AppAction": "DeleteObjects",
+// 	// 	"AppName":   "one-console-app-oss",
+// 	// 	"Params":    "{\"region\":\"" + client.RegionId + "\",\"params\":{\"bucketName\":\"" + d.Get("oss_bucket").(string) + "\",\"objects\":[\"" + objectName + "\"]}}",
+// 	// })
+// 	log.Printf("--------------image export check %v------------", request.QueryParams)
+// 	raw, err = client.WithOssNewClient(func(ecsClient *ecs.Client) (interface{}, error) {
+// 		return ecsClient.ProcessCommonRequest(request)
+// 	})
+
+// 	if err != nil {
+// 		errmsg := ""
+// 		if raw != nil {
+// 			response, ok := raw.(*responses.CommonResponse)
+// 			if ok {
+// 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+// 			}
+// 		}
+// 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteObject", raw, errmsg)
+// 	}
+
+// 	addDebug("DeleteObjects", raw, requestInfo, request)
+
+// 	bresponse, ok := raw.(*responses.CommonResponse)
+// 	if !ok {
+// 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteObject", raw, "Invalid response type")
+// 	}
+// 	if bresponse.GetHttpStatus() != 200 {
+// 		errmsg := ""
+// 		if raw != nil {
+// 			response, ok := raw.(*responses.CommonResponse)
+// 			if ok {
+// 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+// 			}
+// 		}
+// 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteObject", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+// 	}
+// 	addDebug("DeleteObjects", raw, requestInfo, bresponse.GetHttpContentString())
+
+// 	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucket, d.Id(), Deleted, DefaultTimeoutMedium))
+// }
