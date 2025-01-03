@@ -232,7 +232,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
 	// request := edas.CreateInsertK8sApplicationRequest()
-	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "DeleteCluster", "/pop/v5/k8s/acs/create_k8s_app")
+	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "InsertK8sApplication", "/pop/v5/k8s/acs/create_k8s_app")
 	packageType := d.Get("package_type").(string)
 
 	request.QueryParams["AppName"] = d.Get("application_name").(string)
@@ -354,7 +354,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	if v, ok := d.GetOk("limit_m_cpu"); ok {
 		request.QueryParams["LimitmCpu"] = fmt.Sprintf("%d", v.(int))
 	}
-	bresponse, err := client.ProcessCommonRequest(request)
+	bresponse, err := client.ProcessCommonRequestForOrganization(request)
 	addDebug("InsertK8sApplication", bresponse, request, request.QueryParams)
 	if err != nil {
 		errmsg := ""
@@ -368,7 +368,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	appId := response["ApplicationInfo"].(map[string]interface{})["AppId"].(string)
 	changeOrderId := response["ApplicationInfo"].(map[string]interface{})["ChangeOrderId"].(string)
 	d.SetId(appId)
-	if response["Code"].(int) != 200 {
+	if response["Code"].(float64) != 200 {
 		return errmsgs.WrapError(errmsgs.Error("Create k8s application failed for " + response["Message"].(string)))
 	}
 
@@ -630,7 +630,7 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 			request.QueryParams["UpdateStrategy"] = fmt.Sprintf("{\"type\":\"%s\",\"batchUpdate\":{\"batch\":%d,\"releaseType\":\"%s\"}%s}", update_type, update_batch, update_release_type, gray_update_strategy)
 		}
 
-		bresponse, err := client.ProcessCommonRequest(request)
+		bresponse, err := client.ProcessCommonRequestForOrganization(request)
 		addDebug(request.GetActionName(), bresponse, request)
 
 		if err != nil {
@@ -644,7 +644,7 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 		response := make(map[string]interface{})
 		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		changeOrderId := response["ChangeOrderId"].(string)
-		if response["Code"].(int) != 200 {
+		if response["Code"].(float64) != 200 {
 			return errmsgs.WrapError(errmsgs.Error("deploy k8s application failed for " + response["Message"].(string)))
 		}
 
@@ -674,7 +674,7 @@ func resourceAlibabacloudStackEdasK8sApplicationDelete(d *schema.ResourceData, m
 	request.Headers["Content-Type"] = "application/json"
 	wait := incrementalWait(1*time.Second, 2*time.Second)
 	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		bresponse, err := client.ProcessCommonRequest(request)
+		bresponse, err := client.ProcessCommonRequestForOrganization(request)
 		addDebug(request.GetActionName(), bresponse, request)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
@@ -692,7 +692,7 @@ func resourceAlibabacloudStackEdasK8sApplicationDelete(d *schema.ResourceData, m
 		response := make(map[string]interface{})
 		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		changeOrderId := response["ChangeOrderId"].(string)
-		if response["Code"].(int) != 200 {
+		if response["Code"].(float64) != 200 {
 			return resource.NonRetryableError(errmsgs.Error("Delete k8s application failed for " + response["Message"].(string)))
 		}
 
@@ -733,7 +733,7 @@ func K8sBindSlb(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 	if bind_intranet_slb {
-		bresponse, err := client.ProcessCommonRequest(intranet_request)
+		bresponse, err := client.ProcessCommonRequestForOrganization(intranet_request)
 		addDebug("BindK8sSlb: intranet", bresponse, intranet_request)
 		if err != nil {
 			errmsg := ""
@@ -773,7 +773,7 @@ func K8sBindSlb(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 	if bind_internet_slb {
-		bresponse, err := client.ProcessCommonRequest(internet_request)
+		bresponse, err := client.ProcessCommonRequestForOrganization(internet_request)
 		addDebug("BindK8sSlb: internet", bresponse, internet_request)
 		if err != nil {
 			errmsg := ""

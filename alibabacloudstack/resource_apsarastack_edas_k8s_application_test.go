@@ -496,7 +496,7 @@ func resourceEdasK8sApplicationConfigDependence(name string) string {
 		//}
 		
 		resource "alibabacloudstack_edas_k8s_cluster" "default" {
-		  cs_cluster_id = "c3fc38ba25bb4452e8656a48534241888"
+		  cs_cluster_id = "c89eeac401e7b43d985c6ac2b94ceee66"
 		}
 		`, name)
 }
