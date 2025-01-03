@@ -112,7 +112,7 @@ func resourceAlibabacloudStackOssBucketObject() *schema.Resource {
 func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *oss.Client
-	raw, err := client.WithOssClientPutObject(func(ossClient *oss.Client) (interface{}, error) {
+	raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
 		requestInfo = ossClient
 		return ossClient.Bucket(d.Get("bucket").(string))
 	})
@@ -174,7 +174,7 @@ func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta i
 	waitSecondsIfWithTest(3)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *oss.Client
-	raw, err := client.WithOssClientPutObject(func(ossClient *oss.Client) (interface{}, error) {
+	raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
 		requestInfo = ossClient
 		return ossClient.Bucket(d.Get("bucket").(string))
 	})
@@ -216,7 +216,7 @@ func resourceAlibabacloudStackOssBucketObjectDelete(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	var requestInfo *oss.Client
-	raw, err := client.WithOssClientPutObject(func(ossClient *oss.Client) (interface{}, error) {
+	raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
 		requestInfo = ossClient
 		return ossClient.Bucket(d.Get("bucket").(string))
 	})

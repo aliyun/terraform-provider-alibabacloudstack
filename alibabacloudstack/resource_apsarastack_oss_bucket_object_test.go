@@ -174,7 +174,7 @@ func testAccCheckOssBucketObjectExistsWithProviders(n string, bucket string, obj
 				continue
 			}
 			client := provider.Meta().(*connectivity.AlibabacloudStackClient)
-			raw, err := client.WithOssClient(func(ossClient *oss.Client) (interface{}, error) {
+			raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
 				return ossClient.Bucket(bucket)
 			})
 			buck, _ := raw.(*oss.Bucket)
@@ -209,7 +209,7 @@ func testAccCheckOssBucketObjectDestroyWithProvider(s *terraform.State, provider
 		if rs.Type != "alibabacloudstack_oss_bucket" {
 			continue
 		}
-		raw, err := client.WithOssClient(func(ossClient *oss.Client) (interface{}, error) {
+		raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {
 			return ossClient.Bucket(rs.Primary.ID)
 		})
 		if err != nil {
