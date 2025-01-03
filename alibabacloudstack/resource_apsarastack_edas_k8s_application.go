@@ -413,9 +413,6 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 
 	allDeploy := response.DeployGroups.DeployGroup
 	for _, v := range allDeploy {
-		if len(v.PackageUrl) > 0 {
-			d.Set("package_url", v.PackageUrl)
-		}
 		if len(v.PackageVersion) > 0 {
 			d.Set("package_version", v.PackageVersion)
 		}
