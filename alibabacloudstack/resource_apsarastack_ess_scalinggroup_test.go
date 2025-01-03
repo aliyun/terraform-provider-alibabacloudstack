@@ -966,7 +966,7 @@ func testAccEssScalingGroupModifyVSwitchIds(common string, rand int) string {
 
 	resource "alibabacloudstack_vpc_vswitch" "default2" {
 		vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-		cidr_block = "172.16.0.0/24"
+		cidr_block = "172.16.1.0/24"
 		availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
 		name = "${var.name}-bar"
 	}

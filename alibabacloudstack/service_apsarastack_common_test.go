@@ -1203,7 +1203,7 @@ const VpcCommonTestCase = `
 
 resource "alibabacloudstack_vpc_vpc" "default" {
   vpc_name = "${var.name}_vpc"
-  cidr_block = "172.16.0.0/24"
+  cidr_block = "172.16.0.0/16"
 }
 `
 
