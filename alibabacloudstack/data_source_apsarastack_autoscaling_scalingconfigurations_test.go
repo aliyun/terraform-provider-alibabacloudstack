@@ -123,7 +123,6 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 	force_delete = true
 	active = true
 	enable = true
-	zone_id = data.alibabacloudstack_zones.default.zones.0.id
 	deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
 }
 
