@@ -169,7 +169,7 @@ func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta 
 		if errmsgs.NotFoundError(err) {
 			return nil
 		}
-		return nil
+		return err
 	}
 
 	return nil

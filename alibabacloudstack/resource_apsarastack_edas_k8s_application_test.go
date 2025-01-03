@@ -2,16 +2,17 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -122,7 +123,7 @@ func testSweepEdasK8sApplication(region string) error {
 }
 
 func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
-	var v *edas.Applcation
+	var v *EdasK8sApplcation
 	resourceId := "alibabacloudstack_edas_k8s_application.default"
 	ra := resourceAttrInit(resourceId, edasK8sApplicationBasicMap)
 	serviceFunc := func() interface{} {
