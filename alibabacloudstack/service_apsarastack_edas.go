@@ -55,31 +55,60 @@ type Prober struct {
 	Hook                `json:",inline"`
 }
 
-func (e *EdasService) GetChangeOrderStatus(id string) (info *edas.ChangeOrderInfo, err error) {
-	request := edas.CreateGetChangeOrderInfoRequest()
-	e.client.InitRoaRequest(*request.RoaRequest)
-	request.ChangeOrderId = id
+type EdasChangeOrderInfo struct {
+	Status                 int         `json:"Status" xml:"Status"`
+	ChangeOrderId          string      `json:"ChangeOrderId" xml:"ChangeOrderId"`
+	BatchType              string      `json:"BatchType" xml:"BatchType"`
+	CoType                 string      `json:"CoType" xml:"CoType"`
+	CreateTime             string      `json:"CreateTime" xml:"CreateTime"`
+	ChangeOrderDescription string      `json:"ChangeOrderDescription" xml:"ChangeOrderDescription"`
+	BatchCount             int         `json:"BatchCount" xml:"BatchCount"`
+	CreateUserId           string      `json:"CreateUserId" xml:"CreateUserId"`
+	SupportRollback        bool        `json:"SupportRollback" xml:"SupportRollback"`
+	Desc                   string      `json:"Desc" xml:"Desc"`
+	Targets                interface{} `json:"Targets" xml:"Targets"`
+	TrafficControl         interface{} `json:"TrafficControl" xml:"TrafficControl"`
+	PipelineInfoList       interface{} `json:"PipelineInfoList" xml:"PipelineInfoList"`
+}
 
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	raw, err := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-		return edasClient.GetChangeOrderInfo(request)
-	})
+type EdasGetChangeOrderInfoResponse struct {
+	EagleEyeTraceId string              `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool                `json:"asapiSuccess"`
+	ResponseVersion string              `json:"responseVersion"`
+	RequestId       string              `json:"RequestId"`
+	Message         string              `json:"Message"`
+	ChangeOrderInfo EdasChangeOrderInfo `json:"ChangeOrderInfo"`
+	Success         bool                `json:"success"`
+	Code            int                 `json:"Code"`
+}
 
-	rsp, ok := raw.(*edas.GetChangeOrderInfoResponse)
+func (e *EdasService) GetChangeOrderStatus(id string) (info *EdasChangeOrderInfo, err error) {
+	order := EdasChangeOrderInfo{}
+	request := e.client.NewCommonRequest("POST", "Edas", "2017-08-01", "GetChangeOrderInfo", "/pop/v5/changeorder/change_order_info")
+	request.QueryParams["ChangeOrderId"] = id
+
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
+	bresponse, err := e.client.ProcessCommonRequest(request)
+
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(rsp.BaseResponse)
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.InvalidDBClusterIdNotFound", "OperationDenied.InvalidDBClusterNameNotFound"}) {
-			return info, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return info, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return &order, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-
-	return &rsp.ChangeOrderInfo, nil
+	addDebug(request.GetActionName(), bresponse, request, request)
+	response := EdasGetChangeOrderInfoResponse{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return &order, errmsgs.WrapError(err)
+	}
+	if response.Code != 200 {
+		return &order, errmsgs.Error("Get change order info failed for " + response.Message)
+	}
+	order = response.ChangeOrderInfo
+	return &order, nil
 }
 
 func (e *EdasService) GetDeployGroup(appId, groupId string) (groupInfo *edas.DeployGroup, err error) {
@@ -404,7 +433,7 @@ func (e *EdasService) DescribeEdasK8sCluster(clusterId string) (*EdasK8sCluster,
 	}
 	ClusterList := response.ClusterPage.ClusterList
 	if len(ClusterList) == 0 {
-		return &cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		return &cluster, errmsgs.Error(errmsgs.NotFoundMsg, " Edas K8s cluster")
 	} else {
 		cluster = ClusterList[0]
 	}
@@ -603,21 +632,78 @@ func (e *EdasService) QueryK8sAppPackageType(appId string) (string, error) {
 	return "", errmsgs.WrapError(errmsgs.Error("not package type for appId:" + appId))
 }
 
-func (e *EdasService) DescribeEdasK8sApplication(appId string) (*edas.Applcation, error) {
+type EdasK8sApplcation struct {
+	Name                 string             `json:"Name" xml:"Name"`
+	WorkloadType         string             `json:"WorkloadType" xml:"WorkloadType"`
+	CreateTime           int64              `json:"CreateTime" xml:"CreateTime"`
+	Dockerize            bool               `json:"Dockerize" xml:"Dockerize"`
+	SlbInfo              string             `json:"SlbInfo" xml:"SlbInfo"`
+	AppPhase             string             `json:"AppPhase" xml:"AppPhase"`
+	RegionId             string             `json:"RegionId" xml:"RegionId"`
+	SlbPort              int                `json:"SlbPort" xml:"SlbPort"`
+	ResourceGroupId      string             `json:"ResourceGroupId" xml:"ResourceGroupId"`
+	UserId               string             `json:"UserId" xml:"UserId"`
+	ApplicationType      string             `json:"ApplicationType" xml:"ApplicationType"`
+	Description          string             `json:"Description" xml:"Description"`
+	ClusterId            string             `json:"ClusterId" xml:"ClusterId"`
+	Port                 int                `json:"Port" xml:"Port"`
+	ExtSlbIp             string             `json:"ExtSlbIp" xml:"ExtSlbIp"`
+	BuildPackageId       int64              `json:"BuildPackageId" xml:"BuildPackageId"`
+	Email                string             `json:"Email" xml:"Email"`
+	EnablePortCheck      bool               `json:"EnablePortCheck" xml:"EnablePortCheck"`
+	Memory               int                `json:"Memory" xml:"Memory"`
+	NameSpace            string             `json:"NameSpace" xml:"NameSpace"`
+	ExtSlbId             string             `json:"ExtSlbId" xml:"ExtSlbId"`
+	Owner                string             `json:"Owner" xml:"Owner"`
+	ExtSlbName           string             `json:"ExtSlbName" xml:"ExtSlbName"`
+	SlbName              string             `json:"SlbName" xml:"SlbName"`
+	AppId                string             `json:"AppId" xml:"AppId"`
+	EnableUrlCheck       bool               `json:"EnableUrlCheck" xml:"EnableUrlCheck"`
+	InstanceCount        int                `json:"InstanceCount" xml:"InstanceCount"`
+	HaveManageAccess     bool               `json:"HaveManageAccess" xml:"HaveManageAccess"`
+	HealthCheckUrl       string             `json:"HealthCheckUrl" xml:"HealthCheckUrl"`
+	SlbId                string             `json:"SlbId" xml:"SlbId"`
+	Cpu                  int                `json:"Cpu" xml:"Cpu"`
+	ClusterType          int                `json:"ClusterType" xml:"ClusterType"`
+	RunningInstanceCount int                `json:"RunningInstanceCount" xml:"RunningInstanceCount"`
+	SlbIp                string             `json:"SlbIp" xml:"SlbIp"`
+	Conf                 edas.Conf          `json:"Conf" xml:"Conf"`
+	App                  edas.App           `json:"App" xml:"App"`
+	ImageInfo            edas.ImageInfo     `json:"ImageInfo" xml:"ImageInfo"`
+	LatestVersion        edas.LatestVersion `json:"LatestVersion" xml:"LatestVersion"`
+	DeployGroups         edas.DeployGroups  `json:"DeployGroups" xml:"DeployGroups"`
+}
 
-	request := edas.CreateGetK8sApplicationRequest()
-	e.client.InitRoaRequest(*request.RoaRequest)
-	request.AppId = appId
+type EdasGetK8sApplcationResponse struct {
+	EagleEyeTraceId string            `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool              `json:"asapiSuccess"`
+	ResponseVersion string            `json:"responseVersion"`
+	RequestId       string            `json:"RequestId"`
+	Message         string            `json:"Message"`
+	Applcation      EdasK8sApplcation `json:"Applcation"`
+	Success         bool              `json:"success"`
+	Code            int               `json:"Code"`
+}
 
-	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	raw, _ := e.client.WithEdasClient(func(edasClient *edas.Client) (interface{}, error) {
-		return edasClient.GetK8sApplication(request)
-	})
+func (e *EdasService) DescribeEdasK8sApplication(appId string) (*EdasK8sApplcation, error) {
+	v := EdasK8sApplcation{}
+	request := e.client.NewCommonRequest("POST", "Edas", "2017-08-01", "GetK8sCluster", "/pop/v5/k8s_clusters")
+	request.QueryParams["ResourceGroupId"] = e.client.ResourceGroup
+	request.QueryParams["AppId"] = appId
 
-	addDebug(request.GetActionName(), raw, request.RoaRequest, request)
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
+	bresponse, err := e.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 
-	response, _ := raw.(*edas.GetK8sApplicationResponse)
-	v := response.Applcation
+	if err != nil {
+		return &v, err
+	}
+
+	response := EdasGetK8sApplcationResponse{}
+	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+
+	v = response.Applcation
 
 	return &v, nil
 }
