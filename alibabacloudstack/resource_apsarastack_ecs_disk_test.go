@@ -444,7 +444,7 @@ var testAccCheckResourceDiskBasicMap = map[string]string{
 	"size":                 "50",
 	"disk_name":            "",
 	"description":          "",
-	"category":             "CHECKSET",
+	"category":             CHECKSET,
 	"snapshot_id":          "",
 	"encrypted":            "false",
 	"tags.%":               "0",
