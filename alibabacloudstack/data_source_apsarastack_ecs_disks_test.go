@@ -185,7 +185,7 @@ var existDisksMapFunc = func(rand int) map[string]string {
 		"disks.0.availability_zone": CHECKSET,
 		"disks.0.status":            "Available",
 		"disks.0.type":              "data",
-		"disks.0.category":          "cloud_efficiency",
+		"disks.0.category":          CHECKSET,
 		"disks.0.size":              "20",
 		"disks.0.image_id":          "",
 		"disks.0.snapshot_id":       "",

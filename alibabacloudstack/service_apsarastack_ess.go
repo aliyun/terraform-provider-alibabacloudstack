@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 	"time"
 
@@ -426,13 +425,7 @@ func (srv *EssService) DescribeEssAttachment(id string, instanceIds []string) (i
 	request := ess.CreateDescribeScalingInstancesRequest()
 	srv.client.InitRpcRequest(*request.RpcRequest)
 	request.ScalingGroupId = id
-	s := reflect.ValueOf(request).Elem()
-
-	if len(instanceIds) > 0 {
-		for i, id := range instanceIds {
-			s.FieldByName(fmt.Sprintf("InstanceId%d", i+1)).Set(reflect.ValueOf(id))
-		}
-	}
+	request.InstanceId = &instanceIds
 
 	raw, err := srv.client.WithEssClient(func(essClient *ess.Client) (interface{}, error) {
 		return essClient.DescribeScalingInstances(request)
@@ -525,6 +518,7 @@ func (srv *EssService) EssRemoveInstances(id string, instanceIds []string) error
 	if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 		request := ess.CreateRemoveInstancesRequest()
 		srv.client.InitRpcRequest(*request.RpcRequest)
+		request.ScalingGroupId = id
 		if len(removed) > 0 {
 			request.InstanceId = &removed
 		} else {

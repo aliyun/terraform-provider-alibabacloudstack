@@ -1,10 +1,7 @@
 package alibabacloudstack
 
 import (
-	"fmt"
 	"time"
-
-	"reflect"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -79,23 +76,9 @@ func resourceAlibabacloudstackEssAttachmentUpdate(d *schema.ResourceData, meta i
 			request := ess.CreateAttachInstancesRequest()
 			client.InitRpcRequest(*request.RpcRequest)
 			request.ScalingGroupId = d.Id()
-			s := reflect.ValueOf(request).Elem()
+			request.InstanceId = &add
 
 			err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-				for i, id := range add {
-					fieldName := fmt.Sprintf("InstanceId%d", i+1)
-					field := s.FieldByName(fieldName)
-					if !field.IsValid() {
-						fmt.Printf("Warning: Field %s does not exist.\n", fieldName)
-						continue
-					}
-					// 确保可以写入
-					if field.CanSet() {
-						field.Set(reflect.ValueOf(id))
-					} else {
-						fmt.Printf("Error: Cannot set value for field %s.\n", fieldName)
-					}
-				}
 
 				raw, err := client.WithEssClient(func(essClient *ess.Client) (interface{}, error) {
 					return essClient.AttachInstances(request)
