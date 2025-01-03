@@ -100,9 +100,7 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 	d.SetId(response.Data)
 	// Wait until import succeed
 	edasService := EdasService{client}
-	request = client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetCluster", "/pop/v5/resource/cluster")
-	request.QueryParams["ClusterId"] = d.Id()
-	stateConf := BuildStateConf([]string{"2", "3", "4"}, []string{"1"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, edasService.ClusterImportStateRefreshFunc(d.Id(), []string{"3"}))
+	stateConf := BuildStateConf([]string{"0", "2", "4"}, []string{"1"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, edasService.ClusterImportStateRefreshFunc(d.Id(), []string{"3"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -174,37 +172,10 @@ func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	request = client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetCluster", "/pop/v5/resource/cluster")
-	request.QueryParams["ClusterId"] = d.Id()
-	request.Headers["x-acs-content-type"] = "application/json"
-	request.Headers["Content-Type"] = "application/json"
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		bresponse, err := client.ProcessCommonRequestForOrganization(request)
-		addDebug(request.GetActionName(), bresponse, request)
-		if err != nil {
-			if bresponse == nil {
-				return resource.RetryableError(err)
-			}
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-		}
-		addDebug(request.GetActionName(), bresponse, request)
-		response := edas.GetClusterResponse{}
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if response.Code == 200 {
-			return resource.RetryableError(errmsgs.Error("cluster deleting"))
-		} else if response.Code == 601 && strings.Contains(response.Message, "does not exist") {
-			return nil
-		} else {
-			return resource.NonRetryableError(errmsgs.Error("check cluster status failed for " + response.Message))
-		}
-	})
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	edasService := EdasService{client}
+	stateConf := BuildStateConf([]string{ "1", "2","3"}, []string{"0"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, edasService.ClusterImportStateRefreshFunc(d.Id(), []string{"4"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return nil
