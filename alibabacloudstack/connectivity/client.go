@@ -94,7 +94,6 @@ type AlibabacloudStackClient struct {
 	bssopenapiconn               *bssopenapi.Client
 	rdsconn                      *rds.Client
 	ramconn                      *ram.Client
-	essconn                      *ess.Client
 	gpdbconn                     *gpdb.Client
 	drdsconn                     *drds.Client
 	elasticsearchconn            *elasticsearch.Client
@@ -275,16 +274,16 @@ func (client *AlibabacloudStackClient) WithCloudApiClient(do func(*cloudapi.Clie
 }
 
 func (client *AlibabacloudStackClient) WithEssClient(do func(*ess.Client) (interface{}, error)) (interface{}, error) {
-	if client.essconn == nil {
-		conn, error := client.WithProductSDKClient(ESSCode)
-		if error != nil {
-			return nil, error
-		}
-		client.essconn = &ess.Client{
-			Client: *conn,
-		}
+	conn, err := client.getConnectClient("ESS")
+	if err != nil {
+		return nil, err
 	}
-	return do(client.essconn)
+	essconn := &ess.Client{
+		Client: *conn,
+	}
+	return retryDo(func() (interface{}, error) {
+		return do(essconn)
+	})
 }
 
 func (client *AlibabacloudStackClient) WithOnsClient(do func(*ons.Client) (interface{}, error)) (interface{}, error) {
@@ -1395,4 +1394,24 @@ func SetResourceData(d *schema.ResourceData, value interface{}, keys ...string) 
 		}
 	}
 	return nil
+}
+
+func retryDo(do func() (interface{}, error)) (interface{}, error) {
+	var response interface{}
+	var err error
+	wait := IncrementalWait(3*time.Second, 3*time.Second)
+	resource.Retry(5*time.Minute, func() *resource.RetryError {
+		//仅在请求无正常返回时重试
+		response, err = do()
+		if err == nil {
+			return nil
+		}
+		if response == nil {
+			wait()
+			return resource.RetryableError(err)
+		}
+		return resource.NonRetryableError(err)
+
+	})
+	return response, err
 }
