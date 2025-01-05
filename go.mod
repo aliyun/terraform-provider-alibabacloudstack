@@ -1,8 +1,6 @@
 module github.com/aliyun/terraform-provider-alibabacloudstack
 
-go 1.21.4
-
-toolchain go1.22.0
+go 1.21
 
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1
@@ -19,14 +17,13 @@ require (
 	github.com/aliyun/credentials-go v1.3.1
 	github.com/aliyun/fc-go-sdk v0.0.0-20200619091938-0882be48e49f
 	github.com/denverdino/aliyungo v0.0.0-20200831100606-661b4d73f397
-	gopkg.in/yaml.v2 v2.2.8
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-uuid v1.0.3
-	github.com/hashicorp/terraform v0.13.5
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
 	github.com/jmespath/go-jmespath v0.4.0
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/panjf2000/ants/v2 v2.10.0
+	gopkg.in/yaml.v2 v2.2.8
 )
 
 require (
@@ -40,7 +37,6 @@ require (
 	github.com/alibabacloud-go/tea-rpc-utils v1.1.2 // indirect
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.5 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect
-	github.com/apparentlymart/go-cidr v1.1.0 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/clbanning/mxj/v2 v2.5.5 // indirect
