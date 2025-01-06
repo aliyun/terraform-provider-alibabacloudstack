@@ -5,12 +5,12 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/sdk_patch/datahub_patch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -75,7 +75,7 @@ func dataSourceAlibabacloudStackEcsEbsStorageSets() *schema.Resource {
 
 func dataSourceAlibabacloudStackEcsEbsStorageSetsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var addDomains = &datahub.EcsDescribeEcsEbsStorageSetsResult{}
+	var addDomains = &datahub_patch.EcsDescribeEcsEbsStorageSetsResult{}
 	action := "DescribeStorageSets"
 
 	request := client.NewCommonRequest("GET", "Ecs", "2014-05-26", action, "")

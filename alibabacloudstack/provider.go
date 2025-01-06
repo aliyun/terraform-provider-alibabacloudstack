@@ -256,7 +256,31 @@ func Provider() *schema.Provider {
 				Deprecated:  "Use schema endpoints replace dbs_endpoint.",
 			},
 		},
-		DataSourcesMap: map[string]*schema.Resource{
+		DataSourcesMap: getDataSourcesMap(),
+		ResourcesMap:   getResourcesMap(),
+		ConfigureFunc:  providerConfigure,
+	}
+}
+
+var providerConfig map[string]interface{}
+
+func stringToBool(value string) (bool, error) {
+	// 将字符串转换为小写以便于比较
+	value = strings.ToLower(value)
+
+	// 检查常见的布尔值表示
+	switch value {
+	case "true", "1", "yes", "on":
+		return true, nil
+	case "false", "0", "no", "off":
+		return false, nil
+	default:
+		return false, fmt.Errorf("invalid boolean value for environment variable: %s", value)
+	}
+}
+
+func getDataSourcesMap() map[string]*schema.Resource {
+	maps := map[string]*schema.Resource{
 			"alibabacloudstack_account":                                dataSourceAlibabacloudStackAccount(),
 			"alibabacloudstack_adb_clusters":                           dataSourceAlibabacloudStackAdbDbClusters(),
 			"alibabacloudstack_adb_zones":                              dataSourceAlibabacloudStackAdbZones(),
@@ -461,8 +485,23 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_expressconnect_virtualborderrouters":    dataSourceAlibabacloudStackExpressConnectVirtualBorderRouters(),
 			"alibabacloudStack_cloud_firewall_control_policies":        dataSourceAlibabacloudStackCloudFirewallControlPolicies(),
 			"alibabacloudstack_ecs_ebs_storage_sets":                   dataSourceAlibabacloudStackEcsEbsStorageSets(),
-		},
-		ResourcesMap: map[string]*schema.Resource{
+		}
+	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
+		return maps
+	}
+	new_map := map[string]*schema.Resource{}
+	for key, value := range maps {
+		new_map[key] = value
+		if strings.HasPrefix(key, "alibabacloudstack_") {
+			new_key := strings.Replace(key, "alibabacloudstack_", "apsarastack_", 1)
+			new_map[new_key] = value
+		}
+	}
+	return new_map
+}
+
+func getResourcesMap() map[string]*schema.Resource {
+	maps := map[string]*schema.Resource{
 			"alibabacloudstack_ess_scaling_configuration":             resourceAlibabacloudStackEssScalingConfiguration(),
 			"alibabacloudstack_adb_account":                           resourceAlibabacloudStackAdbAccount(),
 			"alibabacloudstack_adb_backup_policy":                     resourceAlibabacloudStackAdbBackupPolicy(),
@@ -756,12 +795,20 @@ func Provider() *schema.Provider {
 			"alibabacloudstack_csb_project":                           resourceAlibabacloudStackCsbProject(),
 			"alibabacloudstack_graph_database_db_instance":            resourceAlibabacloudStackGraphDatabaseDbInstance(),
 			"alibabacloudstack_graphdatabase_dbinstance":              resourceAlibabacloudStackGraphDatabaseDbInstance(),
-		},
-		ConfigureFunc: providerConfigure,
+		}
+	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
+		return maps
 	}
+	new_map := map[string]*schema.Resource{}
+	for key, value := range maps {
+		new_map[key] = value
+		if strings.HasPrefix(key, "alibabacloudstack_") {
+			new_key := strings.Replace(key, "alibabacloudstack_", "apsarastack_", 1)
+			new_map[new_key] = value
+		}
+	}
+	return new_map
 }
-
-var providerConfig map[string]interface{}
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	var getProviderConfig = func(str string, key string) string {
@@ -800,8 +847,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		AccessKey:            strings.TrimSpace(accessKey),
 		SecretKey:            strings.TrimSpace(secretKey),
 		EcsRoleName:          strings.TrimSpace(ecsRoleName),
-		Region:               connectivity.Region(region),
-		RegionId:             region,
+		Region:               connectivity.Region(strings.TrimSpace(region)),
+		RegionId:             strings.TrimSpace(region),
 		ConfigurationSource:  d.Get("configuration_source").(string),
 		Protocol:             d.Get("protocol").(string),
 		ClientReadTimeout:    d.Get("client_read_timeout").(int),

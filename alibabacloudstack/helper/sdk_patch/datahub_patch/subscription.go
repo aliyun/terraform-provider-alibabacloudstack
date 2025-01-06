@@ -1,15 +1,5 @@
-package datahub
+package datahub_patch
 
-type SubscriptionEntry struct {
-	SubId          string            `json:"SubId"`
-	TopicName      string            `json:"TopicName"`
-	IsOwner        bool              `json:"IsOwner"`
-	Type           SubscriptionType  `json:"Type"`
-	State          SubscriptionState `json:"State,omitempty"`
-	Comment        string            `json:"Comment,omitempty"`
-	CreateTime     int64             `json:"CreateTime"`
-	LastModifyTime int64             `json:"LastModifyTime"`
-}
 type SubscriptionCreate struct {
 	SubId           string `json:"SubscriptionId"`
 	TopicName       string `json:"TopicName"`
@@ -38,13 +28,6 @@ type EcsCreate struct {
 }
 
 type EcsStorageSetsCreate struct {
-	RequestId       string `json:"RequestId"`
-	StorageSetId       string `json:"StorageSetId"`
-}
-
-type SubscriptionOffset struct {
-	Timestamp int64  `json:"Timestamp"`
-	Sequence  int64  `json:"Sequence"`
-	VersionId int64  `json:"Version"`
-	SessionId *int64 `json:"SessionId"`
+	RequestId    string `json:"RequestId"`
+	StorageSetId string `json:"StorageSetId"`
 }

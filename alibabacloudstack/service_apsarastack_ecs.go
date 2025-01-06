@@ -9,7 +9,6 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 
 	"time"
 
@@ -19,6 +18,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/sdk_patch/datahub_patch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -1975,12 +1975,12 @@ func (s *EcsService) EcsDedicatedHostStateRefreshFunc(id string, failStates []st
 	}
 }
 
-func (s *EcsService) DoEcsDescribestoragesetdetailsRequest(id string) (result *datahub.EcsDescribeEcsEbsStorageSetsResult, err error) {
+func (s *EcsService) DoEcsDescribestoragesetdetailsRequest(id string) (result *datahub_patch.EcsDescribeEcsEbsStorageSetsResult, err error) {
 	return s.DescribeEcsEbsStorageSet(id)
 }
-func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub.EcsDescribeEcsEbsStorageSetsResult, err error) {
+func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub_patch.EcsDescribeEcsEbsStorageSetsResult, err error) {
 
-	resp := &datahub.EcsDescribeEcsEbsStorageSetsResult{}
+	resp := &datahub_patch.EcsDescribeEcsEbsStorageSetsResult{}
 	request := s.client.NewCommonRequest("GET", "Ecs", "2014-05-26", "DescribeStorageSets", "")
 
 	request.QueryParams["PageNumber"] = "1"
@@ -2020,13 +2020,13 @@ func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub.EcsDes
 	return resp, nil
 }
 
-func (s *EcsService) DoEcsDescribecommandsRequest(id string) (result *datahub.EcsDescribeEcsCommandResult, err error) {
+func (s *EcsService) DoEcsDescribecommandsRequest(id string) (result *datahub_patch.EcsDescribeEcsCommandResult, err error) {
 	return s.DescribeEcsCommand(id)
 }
-func (s *EcsService) DescribeEcsCommand(id string) (result *datahub.EcsDescribeEcsCommandResult, err error) {
+func (s *EcsService) DescribeEcsCommand(id string) (result *datahub_patch.EcsDescribeEcsCommandResult, err error) {
 
 	action := "DescribeCommands"
-	resp := &datahub.EcsDescribeEcsCommandResult{}
+	resp := &datahub_patch.EcsDescribeEcsCommandResult{}
 	request := s.client.NewCommonRequest("GET", "Ecs", "2014-05-26", action, "")
 
 	mergeMaps(request.QueryParams, map[string]string{
@@ -2069,13 +2069,13 @@ func (s *EcsService) DescribeEcsCommand(id string) (result *datahub.EcsDescribeE
 	//object = v.([]interface{})[0].(map[string]interface{})
 	return resp, nil
 }
-func (s *EcsService) DoEcsDescribehpcclustersRequest(id string) (result *datahub.EcsDescribeEcsHpcClusterResult, err error) {
+func (s *EcsService) DoEcsDescribehpcclustersRequest(id string) (result *datahub_patch.EcsDescribeEcsHpcClusterResult, err error) {
 	return s.DescribeEcsHpcCluster(id)
 }
-func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub.EcsDescribeEcsHpcClusterResult, err error) {
+func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub_patch.EcsDescribeEcsHpcClusterResult, err error) {
 	//var response map[string]interface{}
 
-	resp := &datahub.EcsDescribeEcsHpcClusterResult{}
+	resp := &datahub_patch.EcsDescribeEcsHpcClusterResult{}
 	action := "DescribeHpcClusters"
 	ids, err := json.Marshal([]string{id})
 	if err != nil {

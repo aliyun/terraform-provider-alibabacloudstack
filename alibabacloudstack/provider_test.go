@@ -361,7 +361,7 @@ func getAccTestRandInt(min, max int) int {
 }
 
 func ResourceTest(t *testing.T, c resource.TestCase) {
-	if v := os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST"); v == "true" {
+	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err == nil && v {
 		dateFolderName := "dryrun_" + time.Now().Format("2006_01_02") 
 		err := os.MkdirAll(dateFolderName, 0755)
 		if err != nil {

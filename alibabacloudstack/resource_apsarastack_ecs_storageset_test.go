@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/sdk_patch/datahub_patch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -36,7 +35,7 @@ func testAccCheckEbsDestroy(s *terraform.State) error {
 }
 
 func TestAccAlibabacloudStackEcsEbsStorageSets_basic(t *testing.T) {
-	var v *datahub.EcsDescribeEcsEbsStorageSetsResult
+	var v *datahub_patch.EcsDescribeEcsEbsStorageSetsResult
 	resourceId := "alibabacloudstack_ecs_ebs_storage_set.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackEcsEbsMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
