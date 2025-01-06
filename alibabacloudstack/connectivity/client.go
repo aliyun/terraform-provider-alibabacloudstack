@@ -394,33 +394,6 @@ func (client *AlibabacloudStackClient) WithDdsClient(do func(*dds.Client) (inter
 	return do(client.ddsconn)
 }
 
-func (client *AlibabacloudStackClient) WithOssNewClient(do func(*ecs.Client) (interface{}, error)) (interface{}, error) {
-	// Initialize the ECS client if necessary
-	if client.ecsconn == nil {
-		endpoint := client.Config.Endpoints[OSSCode]
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the oss client: endpoint or domain is not provided for ecs service")
-		}
-		ecsconn, err := ecs.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig().WithTimeout(time.Duration(60)*time.Second), client.Config.getAuthCredential(true, true))
-		if err != nil {
-			return nil, fmt.Errorf("unable to initialize the ECS client: %#v", err)
-		}
-
-		ecsconn.Domain = endpoint
-		ecsconn.AppendUserAgent(Terraform, TerraformVersion)
-		ecsconn.AppendUserAgent(Provider, ProviderVersion)
-		ecsconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-		ecsconn.SetHTTPSInsecure(client.Config.Insecure)
-		if client.Config.Proxy != "" {
-			ecsconn.SetHttpsProxy(client.Config.Proxy)
-			ecsconn.SetHttpProxy(client.Config.Proxy)
-		}
-		client.ecsconn = ecsconn
-	}
-
-	return do(client.ecsconn)
-}
-
 func (client *AlibabacloudStackClient) getSdkConfig() *sdk.Config {
 	log.Printf("Protocol is set to %s", client.Config.Protocol)
 	return sdk.NewConfig().
@@ -1315,6 +1288,10 @@ func (client *AlibabacloudStackClient) ProcessCommonRequestForOrganization(reque
 		if len(request.Content) > 0 {
 			request.QueryParams["x-acs-body"] = string(request.Content)
 		}
+		if strings.HasPrefix(conn.Domain, "public.asapi.") {
+			// 如果public的asapi网关，强制使用https
+			request.SetScheme("https")
+		}
 		request.Method = "POST"
 	}
 
@@ -1344,9 +1321,27 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 			request.QueryParams["x-acs-body"] = string(request.Content)
 		}
 		request.Method = "POST"
+		if strings.HasPrefix(conn.Domain, "public.asapi.") {
+			// 如果public的asapi网关，强制使用https
+			request.SetScheme("https")
+		}
 	}
 
-	response, err := conn.ProcessCommonRequest(request)
+	var response *responses.CommonResponse
+	wait := IncrementalWait(3*time.Second, 3*time.Second)
+	resource.Retry(5*time.Minute, func() *resource.RetryError {
+		//仅在请求无正常返回时重试
+		response, err = conn.ProcessCommonRequest(request)
+		if err == nil {
+			return nil
+		}
+		if response == nil {
+			wait()
+			return resource.RetryableError(err)
+		}
+		return resource.NonRetryableError(err)
+
+	})
 	return response, err
 }
 

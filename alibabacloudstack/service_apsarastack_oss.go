@@ -21,25 +21,21 @@ type OssService struct {
 
 func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoResult, err error) {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	request.QueryParams["OpenApiAction"]=    "GetService"
-	request.QueryParams["ProductName"]=      "oss"
+	request.QueryParams["OpenApiAction"] = "GetService"
+	request.QueryParams["ProductName"] = "oss"
 	var bucketList = &BucketList{}
-	raw, err := s.client.WithOssNewClient(func(ossClient *ecs.Client) (interface{}, error) {
-		return ossClient.ProcessCommonRequest(request)
-	})
-
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
+		if bresponse == nil {
+			return response, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
 		if ossNotFoundError(err) {
 			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 	}
-	addDebug("GetBucketInfo", raw, request)
+	addDebug("GetBucketInfo", bresponse, request)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), bucketList)
 	if err != nil {
@@ -70,29 +66,21 @@ func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoRes
 
 func (s *OssService) ListOssBucket() (response BucketList, err error) {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	mergeMaps(request.QueryParams, map[string]string{
-		"AccountInfo":      "",
-		"SignatureVersion": "1.0",
-		"OpenApiAction":    "GetService",
-		"ProductName":      "oss",
-	})
+	request.QueryParams["OpenApiAction"] = "GetService"
+	request.QueryParams["ProductName"] = "oss"
 	bucketList := BucketList{}
-	raw, err := s.client.WithOssNewClient(func(ossClient *ecs.Client) (interface{}, error) {
-		return ossClient.ProcessCommonRequest(request)
-	})
-
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
+		if bresponse == nil {
+			return response, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
 		if ossNotFoundError(err) {
 			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 	}
-	addDebug("GetBucketInfo", raw, request)
+	addDebug("GetBucketInfo", bresponse, request)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), bucketList)
 	if err != nil {

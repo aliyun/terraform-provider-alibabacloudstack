@@ -7,8 +7,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -125,34 +123,26 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	// If not present, Create Bucket
 	if det.BucketInfo.Name == "" {
 		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		request.QueryParams["AccountInfo"] = "123456"
-		request.QueryParams["SignatureVersion"] = "1.0"
 		request.QueryParams["OpenApiAction"] = "PutBucket"
 		request.QueryParams["ProductName"] = "oss"
 		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":%s,\"%s\":%s,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}", "Department", client.Department, "ResourceGroup", client.ResourceGroup, "RegionId", client.RegionId, "asVersion", "enterprise", "asArchitechture", "x86", "haAlibabacloudStack", "true", "Language", "en", "BucketName", bucketName, "StorageClass", storageClass, "x-oss-acl", acl, "SSEAlgorithm", sse_algo)
 
-		raw, err := client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
-			return ossClient.ProcessCommonRequest(request)
-		})
-		log.Printf("Response of Create Bucket: %s", raw)
+		bresponse, err := client.ProcessCommonRequest(request)
+		log.Printf("Response of Create Bucket: %s", bresponse)
 		log.Printf("Bresponse ossbucket before error")
 		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				bresponse, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
 			if ossNotFoundError(err) {
 				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 		}
 		log.Printf("Bresponse ossbucket after error")
-		addDebug("CreateBucketInfo", raw, request)
+		addDebug("CreateBucketInfo", bresponse, request)
 		log.Printf("Bresponse ossbucket check")
-		bresponse, _ := raw.(*responses.CommonResponse)
 		log.Printf("Bresponse ossbucket %s", bresponse)
 
 		if bresponse.GetHttpStatus() != 200 {
@@ -314,27 +304,20 @@ func resourceAlibabacloudStackOssBucketDelete(d *schema.ResourceData, meta inter
 
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		request.QueryParams["AccountInfo"] = "123456"
-		request.QueryParams["SignatureVersion"] = "1.0"
 		request.QueryParams["OpenApiAction"] = "DeleteBucket"
 		request.QueryParams["ProductName"] = "oss"
 		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":%s,\"%s\":%s,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}", "Department", client.Department, "ResourceGroup", client.ResourceGroup, "RegionId", client.RegionId, "asVersion", "enterprise", "asArchitechture", "x86", "haAlibabacloudStack", "true", "Language", "en", "BucketName", d.Id(), "StorageClass", "Standard")
 
-		raw, err := client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
-			return ossClient.ProcessCommonRequest(request)
-		})
+		bresponse, err := client.ProcessCommonRequest(request)
 
 		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				bresponse, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
+			if bresponse == nil {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
 			}
 			if ossNotFoundError(err) {
 				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk))
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteBucket", errmsgs.AlibabacloudStackOssGoSdk, errmsg))
 		}
 		det, err := ossService.DescribeOssBucket(d.Id())
@@ -433,28 +416,21 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 		if _, v := d.GetOk("logging"); v == false {
 			log.Print("logging is being disabled")
 			logrequest := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-			logrequest.QueryParams["AccountInfo"] = "123456"
-			logrequest.QueryParams["SignatureVersion"] = "1.0"
 			logrequest.QueryParams["OpenApiAction"] = "PutBucketLogging"
 			logrequest.QueryParams["ProductName"] = "oss"
 			logrequest.QueryParams["Content"] = fmt.Sprint("<BucketLoggingStatus></BucketLoggingStatus>")
 			logrequest.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", d.Id())
 
-			raw, err := client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
-				return ossClient.ProcessCommonRequest(logrequest)
-			})
-			log.Printf("Response of Logging Bucket: %s", raw)
+			bresponse, err := client.ProcessCommonRequest(logrequest)
+			log.Printf("Response of Logging Bucket: %s", bresponse)
 			if err != nil {
-				errmsg := ""
-				if raw != nil {
-					bresponse, ok := raw.(*responses.CommonResponse)
-					if ok {
-						errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-					}
+				if bresponse == nil {
+					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 				}
 				if ossNotFoundError(err) {
 					return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 				}
+				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 			}
 			log.Printf("deleting logs oss done")
@@ -480,28 +456,22 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 						return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "DescribeBucket")
 					}
 					logrequest := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-					logrequest.QueryParams["AccountInfo"] = "123456"
-					logrequest.QueryParams["SignatureVersion"] = "1.0"
 					logrequest.QueryParams["OpenApiAction"] = "PutBucketLogging"
 					logrequest.QueryParams["ProductName"] = "oss"
 					logrequest.QueryParams["Content"] = fmt.Sprint("<BucketLoggingStatus><LoggingEnabled><TargetBucket>", logging["target_bucket"], "</TargetBucket><TargetPrefix>", logging["target_prefix"], "</TargetPrefix></LoggingEnabled></BucketLoggingStatus>")
 					logrequest.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", d.Id())
 
-					raw, err := client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
-						return ossClient.ProcessCommonRequest(logrequest)
-					})
-					log.Printf("Response of Logging Bucket: %s", raw)
+					bresponse, err := client.ProcessCommonRequest(logrequest)
+					log.Printf("Response of Logging Bucket: %s", bresponse)
 					if err != nil {
-						errmsg := ""
-						if raw != nil {
-							bresponse, ok := raw.(*responses.CommonResponse)
-							if ok {
-								errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-							}
+						if bresponse == nil {
+							return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 						}
+
 						if ossNotFoundError(err) {
 							return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 						}
+						errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 						return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 					}
 					log.Printf("logging oss done")
@@ -530,28 +500,22 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "DescribeBucket")
 				}
 				logrequest := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-				logrequest.QueryParams["AccountInfo"] = "123456"
-				logrequest.QueryParams["SignatureVersion"] = "1.0"
 				logrequest.QueryParams["OpenApiAction"] = "PutBucketLogging"
 				logrequest.QueryParams["ProductName"] = "oss"
 				logrequest.QueryParams["Content"] = fmt.Sprint("<BucketLoggingStatus><LoggingEnabled><TargetBucket>", logging["target_bucket"], "</TargetBucket><TargetPrefix>", logging["target_prefix"], "</TargetPrefix></LoggingEnabled></BucketLoggingStatus>")
 				logrequest.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", d.Id())
 
-				raw, err := client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
-					return ossClient.ProcessCommonRequest(logrequest)
-				})
-				log.Printf("Response of Logging Bucket: %s", raw)
+				bresponse, err := client.ProcessCommonRequest(logrequest)
+				log.Printf("Response of Logging Bucket: %s", bresponse)
 				if err != nil {
-					errmsg := ""
-					if raw != nil {
-						bresponse, ok := raw.(*responses.CommonResponse)
-						if ok {
-							errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-						}
+					if bresponse == nil {
+						return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 					}
+
 					if ossNotFoundError(err) {
 						return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 					}
+					errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 				}
 				log.Printf("logging oss done")
@@ -564,32 +528,24 @@ func resourceAlibabacloudStackOssBucketLoggingCreate(client *connectivity.Alibab
 
 func resourceAlibabacloudStackOssBucketLoggingDescribe(client *connectivity.AlibabacloudStackClient, d *schema.ResourceData) (*Logging, error) {
 	logdescribe := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	logdescribe.QueryParams["AccountInfo"] = "123456"
 	logdescribe.QueryParams["Forwardedregionid"] = client.RegionId
-	logdescribe.QueryParams["SignatureVersion"] = "1.0"
 	logdescribe.QueryParams["OpenApiAction"] = "GetBucketLogging"
 	logdescribe.QueryParams["ProductName"] = "oss"
 	logdescribe.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", d.Id())
 
-	lograw, err := client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
-		return ossClient.ProcessCommonRequest(logdescribe)
-	})
-	log.Printf("Response of Logging Bucket: %s", lograw)
+	bresponse, err := client.ProcessCommonRequest(logdescribe)
+	log.Printf("Response of Logging Bucket: %s", bresponse)
 	if err != nil {
-		errmsg := ""
-		if lograw != nil {
-			bresponse, ok := lograw.(*responses.CommonResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
+		if bresponse == nil {
+			return &Logging{}, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return &Logging{}, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "GetBucketLogging", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 	}
 
-	osslog, _ := lograw.(*responses.CommonResponse)
 	var describelogging Logging
-	_ = json.Unmarshal(osslog.GetHttpContentBytes(), &describelogging)
-	log.Printf("describerawlogging %v", osslog)
+	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &describelogging)
+	log.Printf("describerawlogging %v", bresponse)
 	log.Printf("describelogging %v", describelogging)
 
 	return &describelogging, nil

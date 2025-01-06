@@ -3,11 +3,9 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -43,24 +41,24 @@ func resourceAlibabacloudStackOssBucketKms() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-// 			"content3": {
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 				ConflictsWith: []string{"source3"},
-// 			},
-// 
-// 			"acl3": {
-// 				Type:         schema.TypeString,
-// 				Default:      oss.ACLPrivate,
-// 				Optional:     true,
-// 				ValidateFunc: validation.StringInSlice([]string{"private", "public-read", "public-read-write"}, false),
-// 			},
-// 
-// 			"content_type3": {
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 				Computed: true,
-// 			},
+			// 			"content3": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 				ConflictsWith: []string{"source3"},
+			// 			},
+			//
+			// 			"acl3": {
+			// 				Type:         schema.TypeString,
+			// 				Default:      oss.ACLPrivate,
+			// 				Optional:     true,
+			// 				ValidateFunc: validation.StringInSlice([]string{"private", "public-read", "public-read-write"}, false),
+			// 			},
+			//
+			// 			"content_type3": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 				Computed: true,
+			// 			},
 		},
 	}
 }
@@ -85,37 +83,24 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 	if det.BucketInfo.Name == bucketName {
 		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		mergeMaps(request.QueryParams, map[string]string{
-			"AccountInfo":      "123456",
-			"SignatureVersion": "1.0",
-			"OpenApiAction":    "PutBucketEncryption",
-			"ProductName":      "oss",
-			"Params":           fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", bucketName),
-			"Content":          fmt.Sprintf("%s%s%s%s%s%s%s", "<ServerSideEncryptionRule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>", sseAlgorithm, "</SSEAlgorithm><KMSDataEncryption>", kmsDateEncryption, "</KMSDataEncryption><KMSMasterKeyID>", kmsMasterKeyID, "</KMSMasterKeyID></ApplyServerSideEncryptionByDefault></ServerSideEncryptionRule>"),
+			"OpenApiAction": "PutBucketEncryption",
+			"ProductName":   "oss",
+			"Params":        fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", bucketName),
+			"Content":       fmt.Sprintf("%s%s%s%s%s%s%s", "<ServerSideEncryptionRule><ApplyServerSideEncryptionByDefault><SSEAlgorithm>", sseAlgorithm, "</SSEAlgorithm><KMSDataEncryption>", kmsDateEncryption, "</KMSDataEncryption><KMSMasterKeyID>", kmsMasterKeyID, "</KMSMasterKeyID></ApplyServerSideEncryptionByDefault></ServerSideEncryptionRule>"),
 		})
 
-		raw, err := client.WithOssNewClient(func(ossClient *ecs.Client) (interface{}, error) {
-			return ossClient.ProcessCommonRequest(request)
-		})
-		log.Printf("Response of PutBucketEncryption: %s", raw)
-		log.Printf("Bresponse ossbucket before error")
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				bresponse, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
 			if ossNotFoundError(err) {
 				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
-		log.Printf("Bresponse ossbucket after error")
-		addDebug("PutBucketEncryption", raw, requestInfo, request)
-		log.Printf("Bresponse ossbucket check")
-		bresponse, _ := raw.(*responses.CommonResponse)
-		log.Printf("Bresponse ossbucket %s", bresponse)
+		addDebug("PutBucketEncryption", bresponse, requestInfo, request)
 
 		if bresponse.GetHttpStatus() != 200 {
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
@@ -199,35 +184,24 @@ func resourceAlibabacloudStackOssBucketKmsDelete(d *schema.ResourceData, meta in
 		return nil
 	}
 
-	err = resource.Retry(3*time.Second, func() *resource.RetryError {
-		request := client.NewCommonRequest("DELETE", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		mergeMaps(request.QueryParams, map[string]string{
-			"AccountInfo":      "123456",
-			"SignatureVersion": "1.0",
-			"OpenApiAction":    "DeleteBucketEncryption",
-			"ProductName":      "oss",
-			"Params":           fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", d.Id()),
-		})
-
-		raw, err := client.WithOssNewClient(func(ossClient *ecs.Client) (interface{}, error) {
-			return ossClient.ProcessCommonRequest(request)
-		})
-
-		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				bresponse, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
-			}
-			if ossNotFoundError(err) {
-				return resource.NonRetryableError(err)
-			}
-			err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "OssBucketKms", "DeleteBucketEncryption", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			return resource.RetryableError(err)
-		}
-		return nil
+	request := client.NewCommonRequest("DELETE", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"OpenApiAction": "DeleteBucketEncryption",
+		"ProductName":   "oss",
+		"Params":        fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", d.Id()),
 	})
+
+	bresponse, err := client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		if ossNotFoundError(err) {
+			return nil
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "OssBucketKms", "DeleteBucketEncryption", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return err
+	}
 	return nil
 }
