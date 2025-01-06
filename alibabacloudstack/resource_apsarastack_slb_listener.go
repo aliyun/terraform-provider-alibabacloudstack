@@ -291,6 +291,22 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"logs_download_attributes": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"log_project": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"log_store": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -688,6 +704,22 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request, request.QueryParams)
+	}
+	if protocol == Https && d.HasChange("logs_download_attributes") {
+		slbService := SlbService{client}
+		old, new := d.GetChange("logs_download_attributes")
+		if len(old.(map[string]interface{})) > 0 {
+			err = slbService.DeleteAccessLogsDownloadAttribute(d.Get("load_balancer_id").(string))
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+		}
+		if new != "" {
+			err = slbService.SetAccessLogsDownloadAttribute(new.(map[string]interface{}), d.Get("load_balancer_id").(string))
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+		}
 	}
 
 	d.Partial(false)
