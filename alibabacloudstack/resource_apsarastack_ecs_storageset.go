@@ -9,9 +9,9 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/sdk_patch/datahub_patch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -52,7 +52,7 @@ func resourceAlibabacloudStackEcsEbsStorageSets() *schema.Resource {
 func resourceAlibabacloudStackEcsEbsStorageSetsCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "CreateStorageSet"
-	response := &datahub.EcsStorageSetsCreate{}
+	response := &datahub_patch.EcsStorageSetsCreate{}
 
 	StorageSetName := d.Get("storage_set_name").(string)
 	MaxPartitionNumber := d.Get("maxpartition_number").(string)

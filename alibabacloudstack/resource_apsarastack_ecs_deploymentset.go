@@ -8,12 +8,12 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/sdk_patch/datahub_patch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -113,7 +113,7 @@ func resourceAlibabacloudStackEcsDeploymentSetCreate(d *schema.ResourceData, met
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ecs_deployment_set", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	resp := &datahub.EcsDeploymentSetCreateResult{}
+	resp := &datahub_patch.EcsDeploymentSetCreateResult{}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ecs_deployment_set", action, errmsgs.AlibabacloudStackSdkGoERROR)

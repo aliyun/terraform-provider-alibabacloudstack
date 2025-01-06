@@ -12,6 +12,7 @@ import (
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/sdk_patch/datahub_patch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -85,7 +86,7 @@ func resourceAlibabacloudStackDatahubSubscriptionCreate(d *schema.ResourceData, 
 	raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
 		return dataHubClient.ProcessCommonRequest(request)
 	})
-	var subscription *datahub.SubscriptionCreate
+	var subscription *datahub_patch.SubscriptionCreate
 	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
 		errmsg := ""
