@@ -353,7 +353,7 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 
 		addDebug("ModifyInstanceTDE", tde_response, tde_req)
 		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "ModifyInstanceTDE", AlibabacloudStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "ModifyInstanceTDE", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		if value, exist := tde_response["asapiSuccess"]; !exist || !value.(bool) {
 			err = errmsgs.Error("kvstroe ModifyInstanceTDE Failed !!")
