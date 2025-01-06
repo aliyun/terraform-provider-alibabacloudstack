@@ -217,6 +217,22 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"community", "enterprise"}, false),
 			},
+			"tde_status": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"encryption_key": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Deprecated:    "TDE does not support the simultaneous use of `encryption_key` and `role_arn`.",
+				ConflictsWith: []string{"role_arn"},
+			},
+			"role_arn": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Deprecated:    "TDE does not support the simultaneous use of `encryption_key` and `role_arn`.",
+				ConflictsWith: []string{"encryption_key"},
+			},
 		},
 	}
 }
@@ -319,7 +335,35 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	}
 
 	log.Printf("begin update kvstroe instances !!")
+	if tde, ok := d.GetOk("tde_status"); ok && tde.(string) == "Enabled" {
+		client := meta.(*connectivity.ApsaraStackClient)
+		kvstoreService = KvstoreService{client}
+		tde_req := make(map[string]interface{})
+		tde_req["InstanceId"] = d.Id()
+		tde_req["TDEStatus"] = tde.(string)
+		if encryption_key, ok := d.GetOk("encryption_key"); && encryption_key != "" {
+			tde_req["EncryptionKey"] = encryption_key
+		} else {
+			if role_arn, ok := d.GetOk("role_arn"); ok && role_arn.(string) != "" {
+				tde_req["RoleArn"] = d.Get("role_arn").(string)
+			} else if client.Config.RamRoleArn != "" {
+				tde_req["RoleArn"] = client.Config.RamRoleArn
+			}
+		}
 
+		tde_response, err := client.DoTeaRequest("POST", "R-kvstore", "2015-01-01", "ModifyInstanceTDE", "", nil, tde_req)
+
+		addDebug(tde_req.GetActionName(), tde_response, tde_req)
+		if err != nil {
+			return WrapErrorf(err, DefaultErrorMsg, "apsarastack_kvstroe_instance", "ModifyInstanceTDE", ApsaraStackSdkGoERROR)
+		}
+		if value, exist := tde_response["asapiSuccess"]; !exist || !value.(bool) {
+			err = errmsgs.Error("kvstroe ModifyInstanceTDE Failed !!")
+			return errmsgs.WrapErrorf(err, "kvstroe ModifyInstanceTDE Failed !! %s", action, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+
+		log.Print("enabled TDE")
+	}
 	return resourceAlibabacloudStackKVStoreInstanceUpdate(d, meta)
 }
 
@@ -616,7 +660,7 @@ func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta i
 		d.Set("series", "enterprise")
 	} else {
 		d.Set("series", "community")
- 	}
+	}
 	connectivity.SetResourceData(d, object.ZoneId, "zone_id", "availability_zone")
 	// 	connectivity.SetResourceData(d, object.ChargeType, "payment_type", "instance_charge_type")
 	d.Set("instance_type", object.InstanceType)
