@@ -336,12 +336,10 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 
 	log.Printf("begin update kvstroe instances !!")
 	if tde, ok := d.GetOk("tde_status"); ok && tde.(string) == "Enabled" {
-		client := meta.(*connectivity.ApsaraStackClient)
-		kvstoreService = KvstoreService{client}
 		tde_req := make(map[string]interface{})
 		tde_req["InstanceId"] = d.Id()
 		tde_req["TDEStatus"] = tde.(string)
-		if encryption_key, ok := d.GetOk("encryption_key"); && encryption_key != "" {
+		if encryption_key, ok := d.GetOk("encryption_key"); ok && encryption_key != "" {
 			tde_req["EncryptionKey"] = encryption_key
 		} else {
 			if role_arn, ok := d.GetOk("role_arn"); ok && role_arn.(string) != "" {
@@ -353,9 +351,9 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 
 		tde_response, err := client.DoTeaRequest("POST", "R-kvstore", "2015-01-01", "ModifyInstanceTDE", "", nil, tde_req)
 
-		addDebug(tde_req.GetActionName(), tde_response, tde_req)
+		addDebug("ModifyInstanceTDE", tde_response, tde_req)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, "apsarastack_kvstroe_instance", "ModifyInstanceTDE", ApsaraStackSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "ModifyInstanceTDE", AlibabacloudStackSdkGoERROR)
 		}
 		if value, exist := tde_response["asapiSuccess"]; !exist || !value.(bool) {
 			err = errmsgs.Error("kvstroe ModifyInstanceTDE Failed !!")
