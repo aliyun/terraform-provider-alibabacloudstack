@@ -28,11 +28,12 @@ type VpcListResult struct {
 }
 
 func (s *BucketVpcService) BucketVpcList(bucketName string) (vpclist *VpcListResult, err error) {
+	// TODO: 该接口为asapi接口，未对pop开放
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListBucketVpc", "/ascm/manage/saleconf/ossIsolationVpc/select")
+	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	mergeMaps(request.QueryParams, map[string]string{
-		"BucketName":       bucketName,
-		"SignatureVersion": "2.1",
-		"OpenApiAction":    "ListBucketVpc",
+		"BucketName":    bucketName,
+		"OpenApiAction": "ListBucketVpc",
 	})
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	log.Printf("Response of ListBucketVpc: %s", bresponse)
@@ -61,12 +62,12 @@ func (s *BucketVpcService) BucketVpcList(bucketName string) (vpclist *VpcListRes
 func (s *BucketVpcService) BindBucket(vpcId string, vpcName string, vLan string, bucket string) error {
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "BindBucketPolicy", "/ascm/manage/saleconf/ossIsolationVpc/bind")
 	mergeMaps(request.QueryParams, map[string]string{
-		"bucketName":       bucket,
-		"vpcName":          vpcName,
-		"vLan":             vLan,
-		"vpcId":            vpcId,
-		"SignatureVersion": "2.1",
+		"bucketName": bucket,
+		"vpcName":    vpcName,
+		"vLan":       vLan,
+		"vpcId":      vpcId,
 	})
+	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if bresponse == nil {
@@ -89,10 +90,10 @@ func (s *BucketVpcService) BindBucket(vpcId string, vpcName string, vLan string,
 func (s *BucketVpcService) UnBindBucket(vpcId string, bucket string) error {
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "UnBindBucketPolicy", "/ascm/manage/saleconf/ossIsolationVpc/unBind")
 	mergeMaps(request.QueryParams, map[string]string{
-		"bucketName":       bucket,
-		"vpcId":            vpcId,
-		"SignatureVersion": "2.1",
+		"bucketName": bucket,
+		"vpcId":      vpcId,
 	})
+	request.SetDomain(s.client.Config.Endpoints[connectivity.ASAPICode])
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	log.Printf("Bresponse UnBindBucketPolicy before error")
 	if err != nil {

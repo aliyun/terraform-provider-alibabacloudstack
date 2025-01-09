@@ -1309,19 +1309,26 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 	}
 
 	//request.Domain = conn.Domain
-	if strings.HasPrefix(conn.Domain, "internal.asapi.") || strings.HasPrefix(conn.Domain, "public.asapi.") {
+	domain := request.Domain
+	if domain == ""{
+		domain = conn.Domain
+	}
+	if strings.HasPrefix(domain, "internal.asapi.") || strings.HasPrefix(domain, "public.asapi.") {
 		// asapi兼容逻辑
 		// # asapi 使用common SDK时不能拼接pathpattern，否则会报错
 		if request.PathPattern != "" {
-			var r []string = strings.SplitN(conn.Domain, "/", 2)
+			var r []string = strings.SplitN(domain, "/", 2)
 			request.Domain = r[0]
 			request.PathPattern = "/asapi/v3"
 		}
 		if len(request.Content) > 0 {
 			request.QueryParams["x-acs-body"] = string(request.Content)
 		}
+		if popcode == OneRouterCode {
+			request.QueryParams["AccountInfo"] = "123456" //TODO: 3162 ~ 3180 onerouter必传，后续版本移除
+		}
 		request.Method = "POST"
-		if strings.HasPrefix(conn.Domain, "public.asapi.") {
+		if strings.HasPrefix(domain, "public.asapi.") {
 			// 如果public的asapi网关，强制使用https
 			request.SetScheme("https")
 		}

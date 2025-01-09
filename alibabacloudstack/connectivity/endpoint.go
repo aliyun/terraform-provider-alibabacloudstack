@@ -82,6 +82,9 @@ const (
 	SlSDataCode  = ServiceCode("SLSDATA")
 	ALIKAFKACode = ServiceCode("ALIKAFKADATA")
 	BssDataCode  = ServiceCode("BSSDATA")
+	
+	// ASAPI
+	ASAPICode    = ServiceCode("ASAPI")
 )
 
 type Endpoints struct {
@@ -306,6 +309,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	OTSCode:     PopEndpoint{"", ""},
 	// 3.18.3新局点将不会开放
 	OneRouterCode: PopEndpoint{
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+	},
+	ASAPICode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",
 	},
