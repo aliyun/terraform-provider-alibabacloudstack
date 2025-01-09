@@ -11,7 +11,7 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -122,13 +122,15 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckOssBucketDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: providerCommon + testAccConfig(map[string]interface{}{
+				Config: testAccConfig(map[string]interface{}{
 					"bucket":  name,
 					"vpclist": []string{"${alibabacloudstack_vpc.vpc.id}", "${alibabacloudstack_vpc.vpc2.id}"},
+					"acl":     "public-read",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bucket":    name,
+						"acl":       "public-read",
 						"vpclist.0": CHECKSET,
 						"vpclist.#": "2",
 					}),
@@ -141,7 +143,7 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: providerCommon + testAccConfig(map[string]interface{}{
+				Config: testAccConfig(map[string]interface{}{
 					"bucket":  name,
 					"vpclist": []string{"${alibabacloudstack_vpc.vpc.id}"},
 				}),
@@ -164,6 +166,16 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 			//					}),
 			//				),
 			//			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"bucket_sync": "false",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"bucket_sync": "false",
+					}),
+				),
+			},
 		},
 	})
 }

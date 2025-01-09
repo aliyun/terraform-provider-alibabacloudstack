@@ -97,6 +97,11 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"bucket_sync": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 		},
 	}
 }
@@ -125,7 +130,7 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		request.QueryParams["OpenApiAction"] = "PutBucket"
 		request.QueryParams["ProductName"] = "oss"
-		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":%s,\"%s\":%s,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}", "Department", client.Department, "ResourceGroup", client.ResourceGroup, "RegionId", client.RegionId, "asVersion", "enterprise", "asArchitechture", "x86", "haAlibabacloudStack", "true", "Language", "en", "BucketName", bucketName, "StorageClass", storageClass, "x-oss-acl", acl, "SSEAlgorithm", sse_algo)
+		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":%s,\"%s\":%s,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\"}", "Department", client.Department, "ResourceGroup", client.ResourceGroup, "RegionId", client.RegionId, "asVersion", "enterprise", "asArchitechture", "x86", "haAlibabacloudStack", "true", "Language", "en", "BucketName", bucketName, "StorageClass", storageClass, "xossacl", acl, "SSEAlgorithm", sse_algo)
 
 		bresponse, err := client.ProcessCommonRequest(request)
 		log.Printf("Response of Create Bucket: %s", bresponse)
@@ -167,30 +172,9 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", errmsgs.AlibabacloudStackOssGoSdk)
 		}
 	}
-
 	// Assign the bucket name as the resource ID
 	d.SetId(bucketName)
-	if v := d.Get("logging"); v != nil {
-		log.Printf("Enter for logging condition passed")
-
-		err = resourceAlibabacloudStackOssBucketLoggingCreate(client, d)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Logging Failed", errmsgs.AlibabacloudStackOssGoSdk)
-		}
-	}
-	newlist := d.Get("vpclist").([]interface{})
-	bvclient := meta.(*connectivity.AlibabacloudStackClient)
-	bvserver := BucketVpcService{bvclient}
-	vpclist, binderr := bvserver.BucketVpcList(bucketName)
-	if binderr != nil {
-		return errmsgs.WrapError(binderr)
-	}
-	oldlist := vpclist.VpcList
-	vpc_err := checkVpcListChange(oldlist, newlist, d, meta)
-	if vpc_err != nil {
-		return errmsgs.WrapError(vpc_err)
-	}
-	return resourceAlibabacloudStackOssBucketRead(d, meta)
+	return resourceAlibabacloudStackOssBucketUpdate(d, meta)
 }
 
 func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interface{}) error {
@@ -198,10 +182,6 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	object, err := ossService.DescribeOssBucket(d.Id())
-	acl := d.Get("acl").(string)
-	if acl == "" {
-		acl = "private"
-	}
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -215,7 +195,6 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	if object.BucketInfo.Name == "" {
 		log.Print("read: BucketInfo fail!!!!!!")
 	}
-	d.Set("acl", acl)
 	d.Set("creation_date", object.BucketInfo.CreationDate.Format("2006-01-02"))
 	d.Set("extranet_endpoint", object.BucketInfo.ExtranetEndpoint)
 	d.Set("intranet_endpoint", object.BucketInfo.IntranetEndpoint)
@@ -243,13 +222,87 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	}
 	d.Set("vpclist", vlist)
 
+	bucketName := d.Get("bucket").(string)
+
+	// 获取同城容灾信息
+	request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	request.QueryParams["OpenApiAction"] = "GetBucketSync"
+	request.QueryParams["ProductName"] = "oss"
+	request.QueryParams["Params"] = fmt.Sprintf("{\"BucketName\":\"%s\"}", bucketName)
+
+	bresponse, err := client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		if ossNotFoundError(err) {
+			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+	}
+	bucketSync := BucketSyncResponse{}
+	json.Unmarshal([]byte(bresponse.GetHttpContentString()), &bucketSync)
+	d.Set("bucket_sync", true)
+	for _, rule := range bucketSync.Data.ReplicationConfiguration.Rule {
+		if rule.Status == "closing" {
+			// 容灾关系是成对出现的
+			d.Set("bucket_sync", false)
+			break
+		}
+	}
+
+	// 获取acl信息
+	request = client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	request.QueryParams["OpenApiAction"] = "GetBucketAcl"
+	request.QueryParams["ProductName"] = "oss"
+	request.QueryParams["Params"] = fmt.Sprintf("{\"BucketName\":\"%s\", \"acl\":\"acl\"}", bucketName)
+
+	bresponse, err = client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		if ossNotFoundError(err) {
+			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+	}
+	bucketAcl := BucketAclResponse{}
+	json.Unmarshal([]byte(bresponse.GetHttpContentString()), &bucketAcl)
+	d.Set("bucket_sync", bucketAcl.Data.AccessControlPolicy.AccessControlList.Grant)
+
 	return nil
 }
 
 func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	d.Partial(true)
+	if (d.IsNewResource() && !d.Get("bucket_sync").(bool)) || (!d.IsNewResource() && d.HasChange("bucket_sync")) {
+		bucketName := d.Get("bucket").(string)
+		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+		if v := d.Get("bucket_sync").(bool); v {
+			request.QueryParams["OpenApiAction"] = "PutBucketSync"
+		} else {
+			request.QueryParams["OpenApiAction"] = "DeleteBucketSync"
+		}
+		request.QueryParams["ProductName"] = "oss"
+		request.QueryParams["Params"] = fmt.Sprintf("{\"BucketName\":\"%s\"}", bucketName)
+
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			if ossNotFoundError(err) {
+				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "CreateBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+		}
+	}
+
 	if d.HasChange("logging") {
 		log.Print("changes in logging")
 		err := resourceAlibabacloudStackOssBucketLoggingCreate(client, d)
@@ -266,7 +319,7 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 			return errmsgs.WrapError(vpc_err)
 		}
 	}
-	d.Partial(false)
+
 	return resourceAlibabacloudStackOssBucketRead(d, meta)
 }
 

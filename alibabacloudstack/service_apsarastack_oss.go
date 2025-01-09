@@ -19,6 +19,48 @@ type OssService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
+type BucketSyncResponse struct {
+	RequestID string `json:"requestId"`
+	Code      string `json:"code"`
+	Data      struct {
+		ReplicationConfiguration struct {
+			Rule []struct {
+				Status                      string            `json:"Status"`
+				Destination                 map[string]string `json:"Destination"`
+				Action                      string            `json:Action`
+				ID                          string            `json:"ID"`
+				HistoricalObjectReplication string            `json:"HistoricalObjectReplication"`
+			} `json:"Rule"`
+		} `json:"ReplicationConfiguration"`
+	} `json:"data"`
+	Cost            int    `json:"cost"`
+	APICost         int    `json:"apiCost"`
+	EagleEyeTraceID string `json:"eagleEyeTraceId"`
+	AscmCode        bool   `json:"ascmCode"`
+	SuccessResponse bool   `json:"successResponse"`
+}
+
+type BucketAclResponse struct {
+	RequestID string `json:"requestId"`
+	Code      string `json:"code"`
+	Data      struct {
+		AccessControlPolicy struct {
+			AccessControlList struct {
+				Grant string `json:"Grant	"`
+			} `json:"AccessControlList"`
+			Owner struct {
+				DisplayName string `json:"DisplayName"`
+				ID          string `json:"ID"`
+			} `json:"Owner"`
+		} `json:"AccessControlPolicy"`
+	} `json:"data"`
+	Cost            int    `json:"cost"`
+	APICost         int    `json:"apiCost"`
+	EagleEyeTraceID string `json:"eagleEyeTraceId"`
+	AscmCode        bool   `json:"ascmCode"`
+	SuccessResponse bool   `json:"successResponse"`
+}
+
 func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoResult, err error) {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	request.QueryParams["OpenApiAction"] = "GetService"
