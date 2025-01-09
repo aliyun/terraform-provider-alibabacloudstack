@@ -123,14 +123,78 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"bucket": name,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"bucket": name,
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"acl": "public-read",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"acl": "public-read",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"bucket_sync": "false",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"bucket_sync": "false",
+					}),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackOssBucketVpc(t *testing.T) {
+	var v oss.GetBucketInfoResult
+
+	resourceId := "alibabacloudstack_oss_bucket.default"
+	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
+
+	serviceFunc := func() interface{} {
+		return &OssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000000, 9999999)
+	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketConfigDependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		// module name
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckOssBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"bucket":  name,
 					"vpclist": []string{"${alibabacloudstack_vpc.vpc.id}", "${alibabacloudstack_vpc.vpc2.id}"},
-					"acl":     "public-read",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bucket":    name,
-						"acl":       "public-read",
 						"vpclist.0": CHECKSET,
 						"vpclist.#": "2",
 					}),
@@ -152,27 +216,6 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 						"bucket":    name,
 						"vpclist.0": CHECKSET,
 						"vpclist.#": "1",
-					}),
-				),
-			},
-			//暂不支持修改acl
-			//			{
-			//				Config: testAccConfig(map[string]interface{}{
-			//					"acl": "public-read",
-			//				}),
-			//				Check: resource.ComposeTestCheckFunc(
-			//					testAccCheck(map[string]string{
-			//						"acl": "public-read",
-			//					}),
-			//				),
-			//			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"bucket_sync": "false",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"bucket_sync": "false",
 					}),
 				),
 			},
