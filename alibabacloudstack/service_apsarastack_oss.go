@@ -27,7 +27,7 @@ type BucketSyncResponse struct {
 			Rule []struct {
 				Status                      string            `json:"Status"`
 				Destination                 map[string]string `json:"Destination"`
-				Action                      string            `json:Action`
+				Action                      string            `json:"Action"`
 				ID                          string            `json:"ID"`
 				HistoricalObjectReplication string            `json:"HistoricalObjectReplication"`
 			} `json:"Rule"`
@@ -46,7 +46,7 @@ type BucketAclResponse struct {
 	Data      struct {
 		AccessControlPolicy struct {
 			AccessControlList struct {
-				Grant string `json:"Grant	"`
+				Grant string `json:"Grant"`
 			} `json:"AccessControlList"`
 			Owner struct {
 				DisplayName string `json:"DisplayName"`
@@ -77,9 +77,9 @@ type BucketEncryptionResponse struct {
 		ServerSideEncryptionRule struct {
 			ApplyServerSideEncryptionByDefault struct {
 				SSEAlgorithm   string `json:"SSEAlgorithm"`
-				KMSMasterKeyID string `KMSMasterKeyID`
+				KMSMasterKeyID string `json:"KMSMasterKeyID"`
 			} `json:"ApplyServerSideEncryptionByDefault"`
-		} `json:ServerSideEncryptionRule`
+		} `json:"ServerSideEncryptionRule"`
 	} `json:"data"`
 }
 
