@@ -15,7 +15,7 @@ func resourceAlibabacloudStackOssBucketKms() *schema.Resource {
 		Create: resourceAlibabacloudStackOssBucketKmsCreate,
 		Read:   resourceAlibabacloudStackOssBucketKmsRead,
 		Delete: resourceAlibabacloudStackOssBucketKmsDelete,
-
+		DeprecationMessage: "oss_bucket already includes corresponding functions",
 		Schema: map[string]*schema.Schema{
 			"bucket": {
 				Type:     schema.TypeString,

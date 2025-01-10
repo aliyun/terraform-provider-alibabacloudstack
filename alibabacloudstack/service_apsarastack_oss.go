@@ -61,6 +61,28 @@ type BucketAclResponse struct {
 	SuccessResponse bool   `json:"successResponse"`
 }
 
+type BucketStorageCapacityResponse struct {
+	RequestID string `json:"requestId"`
+	Data      struct {
+		BucketUserQos struct {
+			StorageCapacity string `json:"StorageCapacity"`
+		} `json:"BucketUserQos"`
+	} `json:"data"`
+}
+
+type BucketEncryptionResponse struct {
+	RequestID string `json:"requestId"`
+	Code      string `json:"code"`
+	Data      struct {
+		ServerSideEncryptionRule struct {
+			ApplyServerSideEncryptionByDefault struct {
+				SSEAlgorithm   string `json:"SSEAlgorithm"`
+				KMSMasterKeyID string `KMSMasterKeyID`
+			} `json:"ApplyServerSideEncryptionByDefault"`
+		} `json:ServerSideEncryptionRule`
+	} `json:"data"`
+}
+
 func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoResult, err error) {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	request.QueryParams["OpenApiAction"] = "GetService"

@@ -298,7 +298,6 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"ons-biz.{{.region}}.{{.domain}}",
 		"ons-biz.{{.region}}.{{.domain}}",
 	},
-	KmsCode:     PopEndpoint{"", ""},
 	CDNCode:     PopEndpoint{"", ""},
 	QuickbiCode: PopEndpoint{"", ""},
 	OssDataCode: PopEndpoint{
@@ -313,6 +312,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 	},
 	ASAPICode: PopEndpoint{
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+	},
+	KmsCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",
 	},

@@ -127,7 +127,8 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"bucket": name,
+						"bucket":           name,
+						"storage_capacity": "-1",
 					}),
 				),
 			},
@@ -149,11 +150,53 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"sse_algorithm": "AES256",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sse_algorithm": "AES256",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sse_algorithm": "KMS",
+					"kms_key_id": "${alibabacloudstack_kms_key.key.id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sse_algorithm": "KMS",
+						"kms_key_id": CHECKSET,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sse_algorithm": "",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sse_algorithm": "",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"bucket_sync": "false",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bucket_sync": "false",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"storage_capacity": "10",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"storage_capacity": "10",
 					}),
 				),
 			},
@@ -256,7 +299,8 @@ resource "alibabacloudstack_vpc" "vpc2" {
 	name = "%s-v2"
 	cidr_block = "192.168.0.0/24"
 }
-`, name, name)
+%s
+`, name, name, KeyCommonTestCase)
 }
 
 var ossBucketBasicMap = map[string]string{
