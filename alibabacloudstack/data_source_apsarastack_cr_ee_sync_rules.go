@@ -255,7 +255,9 @@ func dataSourceAlibabacloudStackCrEESyncRulesRead(d *schema.ResourceData, meta i
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), rulesMaps)
+		if err := writeToFile(output.(string), rulesMaps); err != nil {
+			return err
+		}
 	}
 
 	return nil
