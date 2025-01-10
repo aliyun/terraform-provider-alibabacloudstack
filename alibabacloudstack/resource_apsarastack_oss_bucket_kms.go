@@ -4,9 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -136,26 +133,20 @@ func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta inte
 			"Params":           fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", bucketName),
 		})
 
-		raw, err := client.WithEcsClient(func(ossClient *ecs.Client) (interface{}, error) {
-			return ossClient.ProcessCommonRequest(request)
-		})
-		log.Printf("Response of GetBucketEncryption: %s", raw)
+		bresponse, err := client.ProcessCommonRequest(request)
+		log.Printf("Response of GetBucketEncryption: %s", bresponse)
 		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				bresponse, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
 			if ossNotFoundError(err) {
 				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "GetBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
-		addDebug("BucketEncryption", raw, requestInfo, request)
+		addDebug("BucketEncryption", bresponse, requestInfo, request)
 		log.Printf("Bresponse ossbucket check")
-		bresponse, _ := raw.(*responses.CommonResponse)
 		log.Printf("Bresponse ossbucket %s", bresponse)
 
 		if bresponse.GetHttpStatus() != 200 {
