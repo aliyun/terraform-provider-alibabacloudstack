@@ -42,6 +42,10 @@ func resourceAlibabacloudStackEssScalingGroup() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(2, 40),
 			},
+			"multi_az_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"default_cooldown": {
 				Type:         schema.TypeInt,
 				Default:      300,
@@ -137,6 +141,7 @@ func resourceAlibabacloudStackEssScalingGroupRead(d *schema.ResourceData, meta i
 	d.Set("max_size", object.MaxSize)
 	d.Set("scaling_group_name", object.ScalingGroupName)
 	d.Set("default_cooldown", object.DefaultCooldown)
+	d.Set("multi_az_policy", object.MultiAZPolicy)
 	var polices []string
 	if len(object.RemovalPolicies.RemovalPolicy) > 0 {
 		for _, v := range object.RemovalPolicies.RemovalPolicy {
@@ -181,7 +186,9 @@ func resourceAlibabacloudStackEssScalingGroupUpdate(d *schema.ResourceData, meta
 	if d.HasChange("scaling_group_name") {
 		request.ScalingGroupName = d.Get("scaling_group_name").(string)
 	}
-
+	if d.HasChange("multi_az_policy") {
+		request.MultiAZPolicy = d.Get("multi_az_policy").(string)
+	}
 	if d.HasChange("min_size") {
 		request.MinSize = requests.NewInteger(d.Get("min_size").(int))
 	}
@@ -269,7 +276,9 @@ func buildAlibabacloudStackEssScalingGroupArgs(d *schema.ResourceData, meta inte
 	if v, ok := d.GetOk("scaling_group_name"); ok && v.(string) != "" {
 		request.ScalingGroupName = v.(string)
 	}
-
+	if v, ok := d.GetOk("multi_az_policy"); ok && v.(string) != "" {
+		request.MultiAZPolicy = v.(string)
+	}
 	if v, ok := d.GetOk("vswitch_ids"); ok {
 		ids := expandStringList(v.(*schema.Set).List())
 		request.VSwitchIds = &ids
