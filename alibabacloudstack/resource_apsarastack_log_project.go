@@ -46,8 +46,8 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 	request.QueryParams["projectName"] = name
 	request.QueryParams["Description"] = d.Get("description").(string)
 
-	raw, err := client.WithSlsClient(func(alidnsClient *slsPop.Client) (interface{}, error) {
-		return alidnsClient.ProcessCommonRequest(request)
+	raw, err := client.WithSlsClient(func(slsClient *slsPop.Client) (interface{}, error) {
+		return slsClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.BaseResponse)
 	if err != nil {

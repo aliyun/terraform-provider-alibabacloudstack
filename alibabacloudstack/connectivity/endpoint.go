@@ -223,11 +223,6 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"sts.{{.domain}}",
 		"sts.{{.region}}.{{.domain}}",
 	},
-	//Sts endpoint
-	SLSCode: PopEndpoint{"", ""},
-	// sls没有pop接口
-	//		"sls-vpc.{{.region}}.{{.domain}}",
-	//		"sls-vpc.{{.region}}.{{.domain}}",
 
 	SlSDataCode: PopEndpoint{
 		"data.{{.region}}.sls-pub.{{.domain}}",
@@ -306,6 +301,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	OTSCode:     PopEndpoint{"", ""},
 	// 3.18.3新局点将不会开放
 	OneRouterCode: PopEndpoint{
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+	},
+	SLSCode: PopEndpoint{
+	// sls没有pop接口
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",
 	},
