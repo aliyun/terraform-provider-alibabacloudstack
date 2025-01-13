@@ -173,6 +173,58 @@ func (s *EcsService) DescribeInstanceAttribute(id string) (instance ecs.Describe
 	return *response, nil
 }
 
+func (s *EcsService) DescribeInstanceDisksByType(id string, rg string, disk_type string) (disks []ecs.Disk, err error) {
+	request := ecs.CreateDescribeDisksRequest()
+	request.InstanceId = id
+	//request.DiskType = string(DiskTypeSystem)
+	if strings.ToLower(s.client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.RegionId = s.client.RegionId
+	request.Headers = map[string]string{"RegionId": s.client.RegionId}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	var response *ecs.DescribeDisksResponse
+	wait := incrementalWait(1*time.Second, 1*time.Second)
+	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+		raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			return ecsClient.DescribeDisks(request)
+		})
+		if err != nil {
+			if errmsgs.IsThrottling(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		response, _ = raw.(*ecs.DescribeDisksResponse)
+		if len(response.Disks.Disk) < 1 {
+			return resource.RetryableError(errmsgs.Error("Disk Not Found"))
+		}
+		return nil
+	})
+	if err != nil {
+		return disks, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	log.Printf("[ECS Creation]: Getting Disks Query Params : %s ", request.GetQueryParams())
+	log.Printf("[ECS Creation]: Getting Disks response : %s ", response)
+	//log.Printf("[ECS Creation]: Getting Disks Details: %s, Instance ID: %s, Id_to_compare: %s ",response.Disks.Disk[0],response.Disks.Disk[0].InstanceId,id)
+	if len(response.Disks.Disk) < 1 || response.Disks.Disk[0].InstanceId != id {
+		return disks, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, response.RequestId)
+	}
+	for _, diskdata := range response.Disks.Disk {
+		if diskdata.InstanceId == id && diskdata.Type == string(disk_type) {
+			disks = append(disks, diskdata)
+		}
+	}
+	if len(disks) > 0 {
+		return disks, nil
+	}
+	return disks, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, response.RequestId)
+}
+
 func (s *EcsService) DescribeInstanceSystemDisk(id, rg string) (disk ecs.Disk, err error) {
 	request := ecs.CreateDescribeDisksRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)

@@ -306,10 +306,9 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	OTSCode:     PopEndpoint{"", ""},
 	// 3.18.3新局点将不会开放
 	OneRouterCode: PopEndpoint{
-		"public.asapi.${.region}.${.domain}",
-		"public.asapi.${.region}.${.domain}",
-	}
-	
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+	},
 }
 
 func GeneratorEndpoint(serviceCode ServiceCode, region string, domain string, isCenter bool) string {
