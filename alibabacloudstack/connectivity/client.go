@@ -1310,7 +1310,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 
 	//request.Domain = conn.Domain
 	domain := request.Domain
-	if domain == ""{
+	if domain == "" {
 		domain = conn.Domain
 	}
 	if strings.HasPrefix(domain, "internal.asapi.") || strings.HasPrefix(domain, "public.asapi.") {
@@ -1344,6 +1344,9 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		}
 		if response == nil {
 			wait()
+			return resource.RetryableError(err)
+		}
+		if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout, "RequestTimeout"}) {
 			return resource.RetryableError(err)
 		}
 		return resource.NonRetryableError(err)
