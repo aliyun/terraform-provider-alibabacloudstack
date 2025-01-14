@@ -9,7 +9,6 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 
 	"time"
 
@@ -19,6 +18,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/sdk_patch/datahub_patch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -171,6 +171,58 @@ func (s *EcsService) DescribeInstanceAttribute(id string) (instance ecs.Describe
 	}
 
 	return *response, nil
+}
+
+func (s *EcsService) DescribeInstanceDisksByType(id string, rg string, disk_type string) (disks []ecs.Disk, err error) {
+	request := ecs.CreateDescribeDisksRequest()
+	request.InstanceId = id
+	//request.DiskType = string(DiskTypeSystem)
+	if strings.ToLower(s.client.Config.Protocol) == "https" {
+		request.Scheme = "https"
+	} else {
+		request.Scheme = "http"
+	}
+	request.RegionId = s.client.RegionId
+	request.Headers = map[string]string{"RegionId": s.client.RegionId}
+	request.QueryParams = map[string]string{ "Product": "ecs", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	var response *ecs.DescribeDisksResponse
+	wait := incrementalWait(1*time.Second, 1*time.Second)
+	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+		raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			return ecsClient.DescribeDisks(request)
+		})
+		if err != nil {
+			if errmsgs.IsThrottling(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		response, _ = raw.(*ecs.DescribeDisksResponse)
+		if len(response.Disks.Disk) < 1 {
+			return resource.RetryableError(errmsgs.Error("Disk Not Found"))
+		}
+		return nil
+	})
+	if err != nil {
+		return disks, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	log.Printf("[ECS Creation]: Getting Disks Query Params : %s ", request.GetQueryParams())
+	log.Printf("[ECS Creation]: Getting Disks response : %s ", response)
+	//log.Printf("[ECS Creation]: Getting Disks Details: %s, Instance ID: %s, Id_to_compare: %s ",response.Disks.Disk[0],response.Disks.Disk[0].InstanceId,id)
+	if len(response.Disks.Disk) < 1 || response.Disks.Disk[0].InstanceId != id {
+		return disks, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, response.RequestId)
+	}
+	for _, diskdata := range response.Disks.Disk {
+		if diskdata.InstanceId == id && diskdata.Type == string(disk_type) {
+			disks = append(disks, diskdata)
+		}
+	}
+	if len(disks) > 0 {
+		return disks, nil
+	}
+	return disks, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, response.RequestId)
 }
 
 func (s *EcsService) DescribeInstanceSystemDisk(id, rg string) (disk ecs.Disk, err error) {
@@ -1975,12 +2027,12 @@ func (s *EcsService) EcsDedicatedHostStateRefreshFunc(id string, failStates []st
 	}
 }
 
-func (s *EcsService) DoEcsDescribestoragesetdetailsRequest(id string) (result *datahub.EcsDescribeEcsEbsStorageSetsResult, err error) {
+func (s *EcsService) DoEcsDescribestoragesetdetailsRequest(id string) (result *datahub_patch.EcsDescribeEcsEbsStorageSetsResult, err error) {
 	return s.DescribeEcsEbsStorageSet(id)
 }
-func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub.EcsDescribeEcsEbsStorageSetsResult, err error) {
+func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub_patch.EcsDescribeEcsEbsStorageSetsResult, err error) {
 
-	resp := &datahub.EcsDescribeEcsEbsStorageSetsResult{}
+	resp := &datahub_patch.EcsDescribeEcsEbsStorageSetsResult{}
 	request := s.client.NewCommonRequest("GET", "Ecs", "2014-05-26", "DescribeStorageSets", "")
 
 	request.QueryParams["PageNumber"] = "1"
@@ -2020,13 +2072,13 @@ func (s *EcsService) DescribeEcsEbsStorageSet(id string) (result *datahub.EcsDes
 	return resp, nil
 }
 
-func (s *EcsService) DoEcsDescribecommandsRequest(id string) (result *datahub.EcsDescribeEcsCommandResult, err error) {
+func (s *EcsService) DoEcsDescribecommandsRequest(id string) (result *datahub_patch.EcsDescribeEcsCommandResult, err error) {
 	return s.DescribeEcsCommand(id)
 }
-func (s *EcsService) DescribeEcsCommand(id string) (result *datahub.EcsDescribeEcsCommandResult, err error) {
+func (s *EcsService) DescribeEcsCommand(id string) (result *datahub_patch.EcsDescribeEcsCommandResult, err error) {
 
 	action := "DescribeCommands"
-	resp := &datahub.EcsDescribeEcsCommandResult{}
+	resp := &datahub_patch.EcsDescribeEcsCommandResult{}
 	request := s.client.NewCommonRequest("GET", "Ecs", "2014-05-26", action, "")
 
 	mergeMaps(request.QueryParams, map[string]string{
@@ -2069,13 +2121,13 @@ func (s *EcsService) DescribeEcsCommand(id string) (result *datahub.EcsDescribeE
 	//object = v.([]interface{})[0].(map[string]interface{})
 	return resp, nil
 }
-func (s *EcsService) DoEcsDescribehpcclustersRequest(id string) (result *datahub.EcsDescribeEcsHpcClusterResult, err error) {
+func (s *EcsService) DoEcsDescribehpcclustersRequest(id string) (result *datahub_patch.EcsDescribeEcsHpcClusterResult, err error) {
 	return s.DescribeEcsHpcCluster(id)
 }
-func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub.EcsDescribeEcsHpcClusterResult, err error) {
+func (s *EcsService) DescribeEcsHpcCluster(id string) (result *datahub_patch.EcsDescribeEcsHpcClusterResult, err error) {
 	//var response map[string]interface{}
 
-	resp := &datahub.EcsDescribeEcsHpcClusterResult{}
+	resp := &datahub_patch.EcsDescribeEcsHpcClusterResult{}
 	action := "DescribeHpcClusters"
 	ids, err := json.Marshal([]string{id})
 	if err != nil {

@@ -76,6 +76,7 @@ const (
 	RosCode             = ServiceCode("ROS")
 	QuickbiCode         = ServiceCode("QUICKBI")
 	DataworkspublicCode = ServiceCode("DATAWORKSPUBLIC")
+	OneRouterCode       = ServiceCode("OneRouter")
 	//自建网关虚假Code
 	OssDataCode  = ServiceCode("OSSDATA")
 	SlSDataCode  = ServiceCode("SLSDATA")
@@ -222,11 +223,6 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"sts.{{.domain}}",
 		"sts.{{.region}}.{{.domain}}",
 	},
-	//Sts endpoint
-	SLSCode: PopEndpoint{"", ""},
-	// sls没有pop接口
-	//		"sls-vpc.{{.region}}.{{.domain}}",
-	//		"sls-vpc.{{.region}}.{{.domain}}",
 
 	SlSDataCode: PopEndpoint{
 		"data.{{.region}}.sls-pub.{{.domain}}",
@@ -303,6 +299,16 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	BssDataCode: PopEndpoint{"", ""},
 	OTSCode:     PopEndpoint{"", ""},
+	// 3.18.3新局点将不会开放
+	OneRouterCode: PopEndpoint{
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+	},
+	SLSCode: PopEndpoint{
+	// sls没有pop接口
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+	},
 }
 
 func GeneratorEndpoint(serviceCode ServiceCode, region string, domain string, isCenter bool) string {

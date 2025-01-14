@@ -176,7 +176,7 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 	d.Set("ipv6_cidr_block", object.Ipv6CidrBlock)
 	d.Set("secondary_cidr_blocks", object.SecondaryCidrBlocks.SecondaryCidrBlock)
 	d.Set("status", object.Status)
-	d.Set("resource_group_id",object.ResourceGroupId)
+	d.Set("resource_group_id", object.ResourceGroupId)
 	if tag := object.Tags.Tag; tag != nil {
 		d.Set("tags", vpcService.tagToMap(tag))
 	}
@@ -284,6 +284,64 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 	request := vpc.CreateModifyVpcAttributeRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VpcId = d.Id()
+
+	if d.HasChange("secondary_cidr_blocks") {
+		o, n := d.GetChange("secondary_cidr_blocks")
+		oldList := o.([]interface{})
+		newList := n.([]interface{})
+		var added, removed []string
+		for _, new := range newList {
+			for _, old := range oldList {
+				if new.(string) == old.(string) {
+					continue
+				}
+			}
+			added = append(added, new.(string))
+		}
+		for _, old := range oldList {
+			for _, new := range newList {
+				if old.(string) == new.(string) {
+					continue
+				}
+			}
+			removed = append(removed, old.(string))
+		}
+
+		for _, addedCidrBlock := range added {
+			assorequest := vpc.CreateAssociateVpcCidrBlockRequest()
+			client.InitRpcRequest(*assorequest.RpcRequest)
+			assorequest.VpcId = d.Id()
+			assorequest.SecondaryCidrBlock = addedCidrBlock
+			raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
+				return vpcClient.AssociateVpcCidrBlock(assorequest)
+			})
+			if err != nil {
+				errmsg := ""
+				bresponse, ok := raw.(*vpc.AssociateVpcCidrBlockResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), groupRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+		}
+		for _, removedCidrBlock := range removed {
+			unassorequest := vpc.CreateUnassociateVpcCidrBlockRequest()
+			client.InitRpcRequest(*unassorequest.RpcRequest)
+			unassorequest.VpcId = d.Id()
+			unassorequest.SecondaryCidrBlock = removedCidrBlock
+			raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
+				return vpcClient.UnassociateVpcCidrBlock(unassorequest)
+			})
+			if err != nil {
+				errmsg := ""
+				bresponse, ok := raw.(*vpc.UnassociateVpcCidrBlockResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), groupRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+		}
+	}
 
 	if d.HasChanges("name", "vpc_name") {
 		request.VpcName = connectivity.GetResourceData(d, "vpc_name", "name").(string)

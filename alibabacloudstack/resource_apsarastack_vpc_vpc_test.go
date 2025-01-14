@@ -224,50 +224,62 @@ func TestAccAlibabacloudStackVpcVpc2(t *testing.T) {
 	})
 }
 
-// func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
+func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 
-// 	var v map[string]interface{}
+	var v map[string]interface{}
 
-// 	// TODO Describe method，v 的类型
+	// TODO Describe method，v 的类型
 
-// 	resourceId := "alibabacloudstack_vpc_vpc.default"
-// 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVpcCheckmap)
-// 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-// 		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-// 	}, "DoVpcDescribevpcattributesRequest")
-// 	rac := resourceAttrCheckInit(rc, ra)
-// 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	resourceId := "alibabacloudstack_vpc_vpc.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVpcCheckmap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DoVpcDescribevpcattributesRequest")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
 
-// 	rand := getAccTestRandInt(10000, 99999)
-// 	name := fmt.Sprintf("tf-testacc%svpcvpc%d", defaultRegionToTest, rand)
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc%svpcvpc%d", defaultRegionToTest, rand)
 
-// 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcVpcBasicdependence)
-// 	ResourceTest(t, resource.TestCase{
-// 		PreCheck: func() {
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcVpcBasicdependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
 
-// 			testAccPreCheck(t)
-// 		},
-// 		IDRefreshName: resourceId,
-// 		Providers:     testAccProviders,
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
 
-// 		CheckDestroy: rac.checkResourceDestroy(),
+		CheckDestroy: rac.checkResourceDestroy(),
 
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccConfig(map[string]interface{}{
-// 					"cidr_block":            "192.168.0.0/16",
-// 					"secondary_cidr_blocks": []string{"172.16.0.0/12"},
-// 				}),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheck(map[string]string{
-// 						"cidr_block":              "192.168.0.0/16",
-// 						"secondary_cidr_blocks.#": "1",
-// 					}),
-// 				),
-// 			},
-// 		},
-// 	})
-// }
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"cidr_block":            "192.168.0.0/24",
+					"secondary_cidr_blocks": []string{"172.16.0.0/24"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"cidr_block":              "192.168.0.0/24",
+						"secondary_cidr_blocks.#": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"cidr_block":            "192.168.0.0/24",
+					"secondary_cidr_blocks": []string{"172.16.1.0/24", "172.16.2.0/24"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"cidr_block":              "192.168.0.0/24",
+						"secondary_cidr_blocks.#": "2",
+					}),
+				),
+			},
+		},
+	})
+}
 
 var AlibabacloudTestAccVpcVpcCheckmap = map[string]string{
 	//  TODO  checkmap 和 case的资源对齐

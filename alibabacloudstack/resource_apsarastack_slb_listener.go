@@ -37,6 +37,7 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"frontend_port": {
 				Type:         schema.TypeInt,
@@ -775,14 +776,22 @@ func buildListenerCommonArgs(d *schema.ResourceData, meta interface{}) (*request
 	// acl status
 	if aclStatus, ok := d.GetOk("acl_status"); ok && aclStatus.(string) != "" {
 		request.QueryParams["AclStatus"] = aclStatus.(string)
-	}
-	// acl type
-	if aclType, ok := d.GetOk("acl_type"); ok && aclType.(string) != "" {
-		request.QueryParams["AclType"] = aclType.(string)
-	}
-	// acl id
-	if aclId, ok := d.GetOk("acl_id"); ok && aclId.(string) != "" {
-		request.QueryParams["AclId"] = aclId.(string)
+		if aclStatus.(string) == string(OnFlag) {
+			if v, ok := d.GetOk("acl_type"); !ok || v.(string) == "" {
+				return nil, fmt.Errorf("when 'acl_status' is 'on', 'acl_type' must not be empty")
+			}
+			if v, ok := d.GetOk("acl_id"); !ok || v.(string) == "" {
+				return nil, fmt.Errorf("when 'acl_status' is 'on', 'acl_id' must not be empty")
+			}
+			// acl type
+			if aclType, ok := d.GetOk("acl_type"); ok && aclType.(string) != "" {
+				request.QueryParams["AclType"] = aclType.(string)
+			}
+			// acl id
+			if aclId, ok := d.GetOk("acl_id"); ok && aclId.(string) != "" {
+				request.QueryParams["AclId"] = aclId.(string)
+			}
+		}
 	}
 	// description
 	if description, ok := d.GetOk("description"); ok && description.(string) != "" {

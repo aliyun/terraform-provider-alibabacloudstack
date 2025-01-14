@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	slsPop "github.com/aliyun/alibaba-cloud-sdk-go/services/sls"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -49,7 +49,7 @@ func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
 
 	var logProject *LogProject
 	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err = s.client.WithEcsClient(func(slsClient *ecs.Client) (interface{}, error) {
+		raw, err = s.client.WithSlsClient(func(slsClient *slsPop.Client) (interface{}, error) {
 			return slsClient.ProcessCommonRequest(request)
 		})
 		if err != nil {
