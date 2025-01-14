@@ -166,7 +166,9 @@ func slbRulesDescriptionAttributes(d *schema.ResourceData, rules []slb.Rule) err
 
 	// create a json file in current directory and write data source to it.
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), s)
+		if err := writeToFile(output.(string), s); err != nil {
+			return err
+		}
 	}
 	return nil
 }

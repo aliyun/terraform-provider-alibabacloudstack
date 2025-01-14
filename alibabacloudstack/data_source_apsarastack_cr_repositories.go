@@ -262,7 +262,9 @@ func dataSourceAlibabacloudStackCrEEReposRead(d *schema.ResourceData, meta inter
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), reposMaps)
+			if err := writeToFile(output.(string), reposMaps); err != nil {
+			return err
+		}
 	}
 
 	return nil

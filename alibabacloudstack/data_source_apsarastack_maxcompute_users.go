@@ -119,7 +119,9 @@ func dataSourceAlibabacloudStackMaxcomputeUsersRead(d *schema.ResourceData, meta
 		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), t)
+		if err := writeToFile(output.(string), t); err != nil {
+			return err
+		}
 	}
 	return nil
 }

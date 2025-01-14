@@ -191,7 +191,9 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), rules)
+		if err := writeToFile(output.(string), rules); err != nil {
+			return err
+		}
 	}
 	return nil
 }

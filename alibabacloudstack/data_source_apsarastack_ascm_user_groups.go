@@ -154,7 +154,9 @@ func dataSourceAlibabacloudStackAscmUserGroupsRead(d *schema.ResourceData, meta 
 		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), groups)
+		if err := writeToFile(output.(string), groups); err != nil {
+			return err
+		}
 	}
 	return nil
 }
