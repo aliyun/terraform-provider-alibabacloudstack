@@ -625,7 +625,6 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	wsysdiskcat := d.Get("worker_disk_category").(string)
 	delete_pro := d.Get("delete_protection").(bool)
 	KubernetesVersion := d.Get("version").(string)
-	IsEnterpriseSecurityGroup := d.Get("is_enterprise_security_group").(bool)
 	addons := make([]cs.Addon, 0)
 	type WorkerData struct {
 		Size                 int
@@ -722,14 +721,14 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	WorkerSystemDiskPerformanceLevel := d.Get("worker_system_disk_performance_level").(string)
 	CloudMonitorFlags := d.Get("cloud_monitor_flags").(bool)
 	var secgroup string
-	var SecurityGroup bool
-	if _, ok := d.GetOk("is_enterprise_security_group"); ok {
-		secgroup = "is_enterprise_security_group"
-		SecurityGroup = d.Get("is_enterprise_security_group").(bool)
-
-	} else if _, ok := d.GetOk("security_group_id"); ok {
+	var SecurityGroup string
+	if _, ok := d.GetOk("security_group_id"); ok {
 		secgroup = "security_group_id"
-		SecurityGroup = d.Get("security_group_id").(bool)
+		SecurityGroup = fmt.Sprintf("\"%s\"", d.Get("security_group_id").(string))
+	} else {
+		secgroup = "is_enterprise_security_group"
+		is_enterprise_security_group := d.Get("is_enterprise_security_group").(bool)
+		SecurityGroup = fmt.Sprintf("%t", is_enterprise_security_group)
 	}
 
 	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "CreateCluster", "/clusters")
@@ -864,7 +863,6 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 				"cloud_monitor_flags", CloudMonitorFlags,
 				"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
 				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
-				"is_enterprise_security_group", IsEnterpriseSecurityGroup,
 				"image_id", ImageId,
 				"tags", tags,
 			)
@@ -909,7 +907,6 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 				"cloud_monitor_flags", CloudMonitorFlags,
 				"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
 				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
-				"is_enterprise_security_group", IsEnterpriseSecurityGroup,
 				"image_id", ImageId,
 				"tags", tags,
 			)
@@ -956,7 +953,6 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 				"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
 				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
 				"worker_data_disks", workerdisks,
-				"is_enterprise_security_group", IsEnterpriseSecurityGroup,
 				"image_id", ImageId,
 				"tags", tags,
 			)
@@ -1002,7 +998,6 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
 				"worker_data_disks", workerdisks,
 				"pod_vswitch_ids", podid,
-				"is_enterprise_security_group", IsEnterpriseSecurityGroup,
 				"image_id", ImageId,
 				"tags", tags,
 			)
