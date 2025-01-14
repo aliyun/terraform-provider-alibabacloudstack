@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -11,7 +12,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -33,6 +34,7 @@ func TestAccAlibabacloudStackImageCopyBasic(t *testing.T) {
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testAccEcsCopyImageConfigBasic%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageCopyBasicConfigDependence)
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -43,11 +45,10 @@ func TestAccAlibabacloudStackImageCopyBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"provider":         "alibabacloudstack.sh",
-					"source_image_id":  "${alibabacloudstack_image.default.id}",
-					"source_region_id": "cn-hangzhou",
-					"description":      fmt.Sprintf("tf-testAccEcsImageConfigBasic%ddescription", rand),
-					"image_name":       name,
+					"source_image_id":       "${alibabacloudstack_image.default.id}",
+					"description":           fmt.Sprintf("tf-testAccEcsImageConfigBasic%ddescription", rand),
+					"image_name":            name,
+					"destination_region_id": region,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImageExistsWithProviders(resourceId, &v, &providers),
@@ -87,6 +88,52 @@ func TestAccAlibabacloudStackImageCopyBasic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckImageExistsWithProviders(resourceId, &v, &providers),
+					testAccCheck(map[string]string{
+						"description": fmt.Sprintf("tf-testAccEcsImageConfigBasic%ddescription", rand),
+						"image_name":  name,
+					}),
+				),
+			},
+		},
+	})
+}
+
+func TestAccApsaraStackImageCopyEncrypted(t *testing.T) {
+
+	resourceId := "alibabacloudstack_image_copy.default"
+	// multi provideris
+	var providers []*schema.Provider
+	providerFactories := map[string]func() (*schema.Provider, error){
+		"alibabacloudstack": func() (*schema.Provider, error) {
+			p := Provider()
+			providers = append(providers, p)
+			return p, nil
+		},
+	}
+	ra := resourceAttrInit(resourceId, testAccCopyImageCheckMap)
+	rand := getAccTestRandInt(1000, 9999)
+	testAccCheck := ra.resourceAttrMapUpdateSet()
+	name := fmt.Sprintf("tf-testAccEcsCopyImageConfigBasic%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceImageCopyBasicConfigDependenceEncrypted)
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName:     resourceId,
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckImageDestroyWithProviders(&providers),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"source_image_id":       "m-ob6014mhpuyko0jkpvs6",
+					"description":           fmt.Sprintf("tf-testAccEcsImageConfigBasic%ddescription", rand),
+					"destination_region_id": region,
+					"image_name":            name,
+					"kms_key_id":            "3852c3cd-3ace-468d-8b9b-c301c33a32b2",
+					"encrypted":             "true",
+				}),
+				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"description": fmt.Sprintf("tf-testAccEcsImageConfigBasic%ddescription", rand),
 						"image_name":  name,
@@ -150,7 +197,7 @@ func testAccCheckImageDestroyWithProvider(s *terraform.State, provider *schema.P
 	ecsService := EcsService{client}
 
 	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "alibabacloudstack_copy_image" {
+		if rs.Type != "alibabacloudstack_image_copy" {
 			continue
 		}
 
@@ -216,4 +263,11 @@ resource "alibabacloudstack_image" "default" {
   image_name        = "${var.name}"
 }
 `, name)
+}
+
+func resourceImageCopyBasicConfigDependenceEncrypted(name string) string {
+	return fmt.Sprintf(`
+	variable "name" {
+		default = "%s"
+}`, name)
 }

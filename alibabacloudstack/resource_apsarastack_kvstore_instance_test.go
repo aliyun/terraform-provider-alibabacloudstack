@@ -244,6 +244,37 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 // 	})
 // }
 
+func TestAccAlibabacloudStackKVStoreRedisInstance_Tde(t *testing.T) {
+	var instance *r_kvstore.DBInstanceAttribute
+	resourceId := "alibabacloudstack_kvstore_instance.default"
+	ra := resourceAttrInit(resourceId, KVStoreInstanceCheckMap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
+		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeKVstoreInstance")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		// module name
+		IDRefreshName: resourceId,
+
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccKVStoreInstanceTde_classic(string(KVStoreRedis), string(KVStore5Dot0)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(nil),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckKVStoreInstanceDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)
 	kvstoreService := KvstoreService{client}
@@ -323,6 +354,50 @@ func testAccKVStoreInstance_classicUpdateParameter(instanceType, instanceClass, 
 			}
 	}
 	`, instanceType, instanceClass, engineVersion)
+}
+
+func testAccKVStoreInstanceTde_classic(instanceClass, engineVersion string) string {
+	return fmt.Sprintf(`
+	
+variable "name" {
+    default = "tf-testAccCheckApsaraStackRKVInstancesDataSource4"
+}
+data "apsarastack_zones"  "default" {
+}
+
+resource "alibabacloudstack_kms_key" "key" {
+  description             = "Hello KMS"
+  pending_window_in_days  = "7"
+  key_state               = "Enabled"
+}
+
+resource "apsarastack_vpc" "default" {
+	name       = var.name
+	cidr_block = "172.16.0.0/16"
+}
+resource "apsarastack_vswitch" "default" {
+	vpc_id            = apsarastack_vpc.default.id
+	cidr_block        = "172.16.0.0/24"
+	availability_zone = data.apsarastack_zones.default.zones[0].id
+	name              = var.name
+}
+
+resource "apsarastack_kvstore_instance" "default" {
+	instance_name  = var.name
+	vswitch_id     = apsarastack_vswitch.default.id
+	private_ip     = "172.16.0.10"
+	security_ips   = ["10.0.0.1"]
+	instance_type  = "%s"
+	instance_class = "redis.amber.logic.sharding.1g.2db.0rodb.6proxy.multithread"
+	engine_version = "%s"
+    cpu_type = "intel"
+    architecture_type = "cluster"
+
+	tde_status = "Enabled"
+	encryption_key = alibabacloudstack_kms_key.key.id
+}
+
+	`, instanceClass, engineVersion)
 }
 
 func testAccKVStoreInstance_classicAddParameter(instanceType, instanceClass, engineVersion string) string {

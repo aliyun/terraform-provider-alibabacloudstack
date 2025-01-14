@@ -597,6 +597,80 @@ func TestAccAlibabacloudStackInstanceMulti(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackInstanceImageUpdateTags(t *testing.T) {
+	var v ecs.Instance
+
+	resourceId := "alibabacloudstack_instance.default"
+	ra := resourceAttrInit(resourceId, map[string]string{})
+	serviceFunc := func() interface{} {
+		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rac := resourceAttrCheckInit(rc, ra)
+
+	rand := getAccTestRandInt(1000, 9999)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := fmt.Sprintf("tf-testAcc%sEcsInstanceConfigMulti%d", defaultRegionToTest, rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceInstanceImageUpdateConfigDependence)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"image_id":                      "${data.alibabacloudstack_images.default.images.0.id}",
+					"security_groups":               []string{"${alibabacloudstack_security_group.default.0.id}"},
+					"instance_type":                 "${data.alibabacloudstack_instance_types.default.instance_types.0.id}",
+					"availability_zone":             "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"system_disk_category":          "cloud_ssd",
+					"system_disk_size":              "40",
+					"instance_name":                 "${var.name}",
+					"security_enhancement_strategy": "Active",
+					"user_data":                     "I_am_user_data",
+					"vswitch_id":                    "${alibabacloudstack_vswitch.default.id}",
+					"tags": map[string]string{
+						"foo": "foo",
+						"Bar": "Bar",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"instance_name": name,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"image_id": "${data.alibabacloudstack_images.default.images.1.id}",
+					"system_disk_tags": map[string]string{
+						"foo": "foo",
+						"Bar": "Bar",
+					},
+					"data_disk_tags": map[string]string{
+						"foo": "foo",
+						"Bar": "Bar",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"system_disk_tags.%":   "2",
+						"system_disk_tags.foo": "foo",
+						"system_disk_tags.Bar": "Bar",
+						"data_disk_tags.%":   "2",
+						"data_disk_tags.foo": "foo",
+						"data_disk_tags.Bar": "Bar",
+					}),
+				),
+			},
+		},
+	})
+}
+
 func resourceInstanceVpcConfigDependence(name string) string {
 	return fmt.Sprintf(`
 %s
@@ -613,7 +687,7 @@ variable "name" {
 //	key_name = "${var.name}"
 //}
 
-`, SecurityGroupCommonTestCase , DataAlibabacloudstackImages , DataAlibabacloudstackInstanceTypes, name)
+`, SecurityGroupCommonTestCase, DataAlibabacloudstackImages, DataAlibabacloudstackInstanceTypes, name)
 }
 
 func resourceInstancePrePaidConfigDependence(name string) string {
@@ -631,7 +705,7 @@ variable "name" {
 //	key_name = "${var.name}"
 //}
 
-`, SecurityGroupCommonTestCase , DataAlibabacloudstackImages , DataAlibabacloudstackInstanceTypes, name)
+`, SecurityGroupCommonTestCase, DataAlibabacloudstackImages, DataAlibabacloudstackInstanceTypes, name)
 }
 
 func resourceInstanceBasicConfigDependence(name string) string {
@@ -678,7 +752,7 @@ data "alibabacloudstack_instance_types" "new2" {
 
 
 
-`, SecurityGroupCommonTestCase , DataAlibabacloudstackImages , DataAlibabacloudstackInstanceTypes, name)
+`, SecurityGroupCommonTestCase, DataAlibabacloudstackImages, DataAlibabacloudstackInstanceTypes, name)
 }
 
 var testAccInstanceCheckMap = map[string]string{
@@ -706,4 +780,50 @@ var testAccInstanceCheckMap = map[string]string{
 	"status":                     "Running",
 	"internet_max_bandwidth_out": "0",
 	"force_delete":               NOSET,
+}
+
+func resourceInstanceImageUpdateConfigDependence(name string) string {
+	return fmt.Sprintf(`
+	
+	data "alibabacloudstack_images" "default" {
+	  name_regex  = "^ubuntu*"
+	  owners      = "system"
+	}
+
+	resource "alibabacloudstack_vpc" "default" {
+	  name       = "${var.name}"
+	  cidr_block = "172.16.0.0/16"
+	}
+
+	data "alibabacloudstack_zones" "default" {
+		available_resource_creation = "VSwitch"
+	}
+
+	data "alibabacloudstack_instance_types" "default" {
+		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+		cpu_core_count       = 1
+		memory_size          = 2
+		instance_type_family = "ecs.n4"
+		sorted_by            = "Memory"
+	}
+
+	
+	resource "alibabacloudstack_vswitch" "default" {
+	  vpc_id            = "${alibabacloudstack_vpc.default.id}"
+	  cidr_block        = "172.16.0.0/24"
+	  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	  name              = "${var.name}"
+	}
+	
+	resource "alibabacloudstack_security_group" "default" {
+	  count = "2"
+	  name   = "${var.name}"
+	  vpc_id = "${alibabacloudstack_vpc.default.id}"
+	}
+
+	variable "name" {
+		default = "%s"
+	}
+	
+	`, name)
 }
