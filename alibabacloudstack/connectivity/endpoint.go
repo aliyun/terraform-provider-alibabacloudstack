@@ -76,12 +76,15 @@ const (
 	RosCode             = ServiceCode("ROS")
 	QuickbiCode         = ServiceCode("QUICKBI")
 	DataworkspublicCode = ServiceCode("DATAWORKSPUBLIC")
-	OneRouterCode       = ServiceCode("OneRouter")
+	OneRouterCode       = ServiceCode("ONEROUTER")
 	//自建网关虚假Code
 	OssDataCode  = ServiceCode("OSSDATA")
 	SlSDataCode  = ServiceCode("SLSDATA")
 	ALIKAFKACode = ServiceCode("ALIKAFKADATA")
 	BssDataCode  = ServiceCode("BSSDATA")
+	
+	// ASAPI
+	ASAPICode    = ServiceCode("ASAPI")
 )
 
 type Endpoints struct {
@@ -290,7 +293,6 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"ons-biz.{{.region}}.{{.domain}}",
 		"ons-biz.{{.region}}.{{.domain}}",
 	},
-	KmsCode:     PopEndpoint{"", ""},
 	CDNCode:     PopEndpoint{"", ""},
 	QuickbiCode: PopEndpoint{"", ""},
 	OssDataCode: PopEndpoint{
@@ -304,8 +306,15 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",
 	},
+	ASAPICode: PopEndpoint{
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+	},
+	KmsCode: PopEndpoint{
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+	},
 	SLSCode: PopEndpoint{
-	// sls没有pop接口
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",
 	},

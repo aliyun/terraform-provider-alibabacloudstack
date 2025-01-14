@@ -19,27 +19,87 @@ type OssService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
+type BucketSyncResponse struct {
+	RequestID string `json:"requestId"`
+	Code      string `json:"code"`
+	Data      struct {
+		ReplicationConfiguration struct {
+			Rule []struct {
+				Status                      string            `json:"Status"`
+				Destination                 map[string]string `json:"Destination"`
+				Action                      string            `json:"Action"`
+				ID                          string            `json:"ID"`
+				HistoricalObjectReplication string            `json:"HistoricalObjectReplication"`
+			} `json:"Rule"`
+		} `json:"ReplicationConfiguration"`
+	} `json:"data"`
+	Cost            int    `json:"cost"`
+	APICost         int    `json:"apiCost"`
+	EagleEyeTraceID string `json:"eagleEyeTraceId"`
+	AscmCode        bool   `json:"ascmCode"`
+	SuccessResponse bool   `json:"successResponse"`
+}
+
+type BucketAclResponse struct {
+	RequestID string `json:"requestId"`
+	Code      string `json:"code"`
+	Data      struct {
+		AccessControlPolicy struct {
+			AccessControlList struct {
+				Grant string `json:"Grant"`
+			} `json:"AccessControlList"`
+			Owner struct {
+				DisplayName string `json:"DisplayName"`
+				ID          string `json:"ID"`
+			} `json:"Owner"`
+		} `json:"AccessControlPolicy"`
+	} `json:"data"`
+	Cost            int    `json:"cost"`
+	APICost         int    `json:"apiCost"`
+	EagleEyeTraceID string `json:"eagleEyeTraceId"`
+	AscmCode        bool   `json:"ascmCode"`
+	SuccessResponse bool   `json:"successResponse"`
+}
+
+type BucketStorageCapacityResponse struct {
+	RequestID string `json:"requestId"`
+	Data      struct {
+		BucketUserQos struct {
+			StorageCapacity string `json:"StorageCapacity"`
+		} `json:"BucketUserQos"`
+	} `json:"data"`
+}
+
+type BucketEncryptionResponse struct {
+	RequestID string `json:"requestId"`
+	Code      string `json:"code"`
+	Data      struct {
+		ServerSideEncryptionRule struct {
+			ApplyServerSideEncryptionByDefault struct {
+				SSEAlgorithm   string `json:"SSEAlgorithm"`
+				KMSMasterKeyID string `json:"KMSMasterKeyID"`
+			} `json:"ApplyServerSideEncryptionByDefault"`
+		} `json:"ServerSideEncryptionRule"`
+	} `json:"data"`
+}
+
 func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoResult, err error) {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	request.QueryParams["OpenApiAction"]=    "GetService"
-	request.QueryParams["ProductName"]=      "oss"
+	request.QueryParams["OpenApiAction"] = "GetService"
+	request.QueryParams["ProductName"] = "oss"
 	var bucketList = &BucketList{}
-	raw, err := s.client.WithOssNewClient(func(ossClient *ecs.Client) (interface{}, error) {
-		return ossClient.ProcessCommonRequest(request)
-	})
-
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
+		if bresponse == nil {
+			return response, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
 		if ossNotFoundError(err) {
 			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 	}
-	addDebug("GetBucketInfo", raw, request)
+	addDebug("GetBucketInfo", bresponse, request)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), bucketList)
 	if err != nil {
@@ -70,29 +130,21 @@ func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoRes
 
 func (s *OssService) ListOssBucket() (response BucketList, err error) {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-	mergeMaps(request.QueryParams, map[string]string{
-		"AccountInfo":      "",
-		"SignatureVersion": "1.0",
-		"OpenApiAction":    "GetService",
-		"ProductName":      "oss",
-	})
+	request.QueryParams["OpenApiAction"] = "GetService"
+	request.QueryParams["ProductName"] = "oss"
 	bucketList := BucketList{}
-	raw, err := s.client.WithOssNewClient(func(ossClient *ecs.Client) (interface{}, error) {
-		return ossClient.ProcessCommonRequest(request)
-	})
-
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
+		if bresponse == nil {
+			return response, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
 		if ossNotFoundError(err) {
 			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackOssGoSdk)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 	}
-	addDebug("GetBucketInfo", raw, request)
+	addDebug("GetBucketInfo", bresponse, request)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), bucketList)
 	if err != nil {
