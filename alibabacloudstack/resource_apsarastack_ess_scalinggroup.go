@@ -45,6 +45,7 @@ func resourceAlibabacloudStackEssScalingGroup() *schema.Resource {
 			"multi_az_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"default_cooldown": {
 				Type:         schema.TypeInt,

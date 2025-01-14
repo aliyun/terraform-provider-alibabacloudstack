@@ -26,7 +26,7 @@ func TestAccAlibabacloudEssAlarmBasic(t *testing.T) {
 		// "evaluation_count":       "2",
 		// "threshold":              "200.3",
 		"cloud_monitor_group_id": NOSET,
-		// "enable":                 "true",
+		//"enable":                 "true",
 	}
 	resourceId := "alibabacloudstack_ess_alarm.default"
 	ra := resourceAttrInit(resourceId, basicMap)
@@ -183,26 +183,26 @@ func TestAccAlibabacloudEssAlarmBasic(t *testing.T) {
 			// 		}),
 			// 	),
 			// },
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"enable": "false",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"enable": "false",
-			// 		}),
-			// 	),
-			// },
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"enable": "true",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"enable": "true",
-			// 		}),
-			// 	),
-			// },
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable": "false",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"enable": "false",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable": "true",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"enable": "true",
+					}),
+				),
+			},
 			// {
 			// 	Config: testAccConfig(map[string]interface{}{
 			// 		"name":                name,
