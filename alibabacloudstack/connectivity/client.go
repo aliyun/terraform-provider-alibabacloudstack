@@ -75,7 +75,7 @@ type AlibabacloudStackClient struct {
 	SecretKey                    string
 	Department                   string
 	ResourceGroup                string
-	ResourceGroupId              int
+	ResourceGroupId              string
 	Config                       *Config
 	teaSdkConfig                 rpc.Config
 	accountId                    string

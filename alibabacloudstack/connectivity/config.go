@@ -28,7 +28,7 @@ type Config struct {
 	RegionId                 string
 	Department               string
 	ResourceGroup            string
-	ResourceGroupId          int
+	ResourceGroupId          string
 	SecurityToken            string
 	OtsInstanceName          string
 	AccountId                string
@@ -42,17 +42,17 @@ type Config struct {
 	RamRoleSessionName       string
 	RamRolePolicy            string
 	RamRoleSessionExpiration int
-	Endpoints               map[ServiceCode]string
-	OrganizationAccessKey   string
-	OrganizationSecretKey   string
-	ConfigurationSource     string
-	Insecure                bool
-	Proxy                   string
-	Domain                  string
-	Eagleeye                EagleEye
+	Endpoints                map[ServiceCode]string
+	OrganizationAccessKey    string
+	OrganizationSecretKey    string
+	ConfigurationSource      string
+	Insecure                 bool
+	Proxy                    string
+	Domain                   string
+	Eagleeye                 EagleEye
 }
 
-func (c *Config) getAuthCredential(stsSupported , ramSupported bool) auth.Credential {
+func (c *Config) getAuthCredential(stsSupported, ramSupported bool) auth.Credential {
 	if c.AccessKey != "" && c.SecretKey != "" {
 		if stsSupported && c.SecurityToken != "" {
 			return credentials.NewStsTokenCredential(c.AccessKey, c.SecretKey, c.SecurityToken)

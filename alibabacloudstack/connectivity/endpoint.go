@@ -308,8 +308,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	OneRouterCode: PopEndpoint{
 		"public.asapi.${.region}.${.domain}",
 		"public.asapi.${.region}.${.domain}",
-	}
-	
+	},
 }
 
 func GeneratorEndpoint(serviceCode ServiceCode, region string, domain string, isCenter bool) string {

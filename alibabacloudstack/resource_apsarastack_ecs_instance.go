@@ -379,7 +379,7 @@ func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interfac
 		return errmsgs.WrapError(err)
 	}
 	log.Printf("[ECS Creation]: Getting Instance Details Successfully: %s", instance.Status)
-	disk, err := ecsService.DescribeInstanceSystemDisk(d.Id(), instance.ResourceGroupId)
+	disks, err := ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "system")
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -388,12 +388,12 @@ func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interfac
 		return errmsgs.WrapError(err)
 	}
 
-	d.Set("system_disk_category", disk.Category)
-	d.Set("system_disk_size", disk.Size)
-	d.Set("system_disk_name", disk.DiskName)
-	d.Set("system_disk_description", disk.Description)
-	d.Set("system_disk_id", disk.DiskId)
-	d.Set("storage_set_id", disk.StorageSetId)
+	d.Set("system_disk_category", disks[0].Category)
+	d.Set("system_disk_size", disks[0].Size)
+	d.Set("system_disk_name", disks[0].DiskName)
+	d.Set("system_disk_description", disks[0].Description)
+	d.Set("system_disk_id", disks[0].DiskId)
+	d.Set("storage_set_id", disks[0].StorageSetId)
 	d.Set("instance_name", instance.InstanceName)
 	d.Set("description", instance.Description)
 	d.Set("status", instance.Status)
@@ -948,9 +948,9 @@ func modifyInstanceImage(d *schema.ResourceData, meta interface{}, run bool) (bo
 			if errDesc != nil {
 				return update, errmsgs.WrapError(errDesc)
 			}
-			var disk ecs.Disk
+			var disks []ecs.Disk
 			err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-				disk, err = ecsService.DescribeInstanceSystemDisk(d.Id(), instance.ResourceGroupId)
+				disks, err = ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "system")
 				if err != nil {
 					if errmsgs.NotFoundError(err) {
 						return resource.RetryableError(err)
@@ -963,7 +963,7 @@ func modifyInstanceImage(d *schema.ResourceData, meta interface{}, run bool) (bo
 				return update, errmsgs.WrapError(err)
 			}
 
-			if instance.ImageId == d.Get("image_id") && disk.Size == d.Get("system_disk_size").(int) {
+			if instance.ImageId == d.Get("image_id") && disks[0].Size == d.Get("system_disk_size").(int) {
 				break
 			}
 			time.Sleep(DefaultIntervalShort * time.Second)

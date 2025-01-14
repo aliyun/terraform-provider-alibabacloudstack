@@ -202,12 +202,12 @@ func (s *EcsService) DescribeInstanceDisksByType(id string, rg string, disk_type
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		response, _ = raw.(*ecs.DescribeDisksResponse)
 		if len(response.Disks.Disk) < 1 {
-			return resource.RetryableError(errmsgs.New("Disk Not Found"))
+			return resource.RetryableError(err)
 		}
 		return nil
 	})
 	if err != nil {
-		return disks, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.ApsaraStackSdkGoERROR)
+		return disks, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	log.Printf("[ECS Creation]: Getting Disks Query Params : %s ", request.GetQueryParams())
 	log.Printf("[ECS Creation]: Getting Disks response : %s ", response)

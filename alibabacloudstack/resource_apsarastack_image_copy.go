@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -36,16 +37,16 @@ func resourceAlibabacloudStackImageCopy() *schema.Resource {
 				Required: true,
 			},
 			"name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'image_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'image_name' instead.",
 				ConflictsWith: []string{"image_name"},
 			},
 			"image_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"name"},
 			},
 			"description": {
