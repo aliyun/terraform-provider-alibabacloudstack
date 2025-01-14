@@ -148,7 +148,9 @@ func dataSourceAlibabacloudStackAscmOrganizationsRead(d *schema.ResourceData, me
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), s)
+		if err := writeToFile(output.(string), s); err != nil {
+			return err
+		}
 	}
 	if s == nil {
 		d.SetId(parentId)

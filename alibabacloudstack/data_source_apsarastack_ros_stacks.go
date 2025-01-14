@@ -324,7 +324,9 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 		return err
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), s)
+		if err := writeToFile(output.(string), s); err != nil {
+			return err
+		}
 	}
 
 	return nil

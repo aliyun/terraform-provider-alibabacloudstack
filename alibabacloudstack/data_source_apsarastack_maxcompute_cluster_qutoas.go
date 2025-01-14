@@ -93,7 +93,9 @@ func dataSourceAlibabacloudStackMaxcomputeClusterQutaosRead(d *schema.ResourceDa
 	d.SetId(d.Get("cluster").(string))
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), d)
+		if err := writeToFile(output.(string), d); err != nil {
+			return err
+		}
 	}
 	return nil
 }

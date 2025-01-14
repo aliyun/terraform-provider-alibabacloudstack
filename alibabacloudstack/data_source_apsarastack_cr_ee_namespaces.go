@@ -157,7 +157,9 @@ func dataSourceAlibabacloudStackCrEENamespacesRead(d *schema.ResourceData, meta 
 	}
 
 	if output, ok := d.GetOk("output_file"); ok {
-		writeToFile(output.(string), namespaceMaps)
+		if err := writeToFile(output.(string), namespaceMaps); err != nil {
+			return err
+		}
 	}
 
 	return nil

@@ -226,11 +226,6 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"sts.{{.domain}}",
 		"sts.{{.region}}.{{.domain}}",
 	},
-	//Sts endpoint
-	SLSCode: PopEndpoint{"", ""},
-	// sls没有pop接口
-	//		"sls-vpc.{{.region}}.{{.domain}}",
-	//		"sls-vpc.{{.region}}.{{.domain}}",
 
 	SlSDataCode: PopEndpoint{
 		"data.{{.region}}.sls-pub.{{.domain}}",
@@ -316,6 +311,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 	},
 	KmsCode: PopEndpoint{
+		"public.asapi.{{.region}}.{{.domain}}",
+		"public.asapi.{{.region}}.{{.domain}}",
+	},
+	SLSCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
 		"public.asapi.{{.region}}.{{.domain}}",
 	},

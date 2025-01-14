@@ -325,7 +325,9 @@ func instanceTypesDescriptionAttributes(d *schema.ResourceData, types []instance
 
 	// create a json file in current directory and write data source to it.
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), s)
+		if err := writeToFile(output.(string), s); err != nil {
+			return err
+		}
 	}
 	return nil
 }

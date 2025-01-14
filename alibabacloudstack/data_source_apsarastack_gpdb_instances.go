@@ -178,7 +178,9 @@ func dataSourceAlibabacloudStackGpdbInstancesRead(d *schema.ResourceData, meta i
 		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), instances)
+		if err := writeToFile(output.(string), instances); err != nil {
+			return err
+		}
 	}
 	return nil
 }

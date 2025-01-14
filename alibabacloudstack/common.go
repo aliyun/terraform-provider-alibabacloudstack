@@ -543,22 +543,24 @@ func GetUserHomeDir() (string, error) {
 	return usr.HomeDir, nil
 }
 
+
+// writeToFile 函数
 func writeToFile(filePath string, data interface{}) error {
 	var out string
-	switch data.(type) {
+	switch v := data.(type) {
 	case string:
-		out = data.(string)
-		break
+		out = v
 	case nil:
 		return nil
 	default:
 		bs, err := json.MarshalIndent(data, "", "\t")
 		if err != nil {
-			return fmt.Errorf("MarshalIndent data %#v got an error: %#v", data, err)
+			return fmt.Errorf("MarshalIndent data %#v got an error: %v", data, err)
 		}
 		out = string(bs)
 	}
 
+	// 替换 ~ 为用户主目录
 	if strings.HasPrefix(filePath, "~") {
 		home, err := GetUserHomeDir()
 		if err != nil {
@@ -569,13 +571,31 @@ func writeToFile(filePath string, data interface{}) error {
 		}
 	}
 
-	if _, err := os.Stat(filePath); err == nil {
-		if err := os.Remove(filePath); err != nil {
-			return err
-		}
+	// 获取当前工作目录
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get current working directory: %v", err)
 	}
 
-	return ioutil.WriteFile(filePath, []byte(out), 422)
+	// 获取用户主目录
+	home, err := GetUserHomeDir()
+	if err != nil {
+		return fmt.Errorf("failed to get user home directory: %v", err)
+	}
+
+	// 获取文件路径的绝对路径
+	absFilePath, err := filepath.Abs(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path for %s: %v", filePath, err)
+	}
+
+	// 确保文件路径是相对于当前工作目录或用户主目录
+	if !strings.HasPrefix(absFilePath, currentDir+string(filepath.Separator)) && !strings.HasPrefix(absFilePath, home+string(filepath.Separator)) {
+		return fmt.Errorf("file path %s is not within the allowed directories: current directory %s or home directory %s", absFilePath, currentDir, home)
+	}
+
+	// 写入文件
+	return ioutil.WriteFile(absFilePath, []byte(out), 0644)
 }
 
 type Invoker struct {
