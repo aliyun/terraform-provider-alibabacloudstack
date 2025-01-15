@@ -208,7 +208,13 @@ func Provider() *schema.Provider {
 				Description: descriptions["sls_openapi_endpoint"],
 				Deprecated:  "Use schema endpoints replace sls_openapi_endpoint.",
 			},
-
+			"ascm_openapi_endpoint": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("APSARASTACK_ASCM_OPENAPI_ENDPOINT", nil),
+				Description: descriptions["ascm_openapi_endpoint"],
+				Deprecated:  "Use schema endpoints replace ascm_openapi_endpoint.",
+			},
 			"sts_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -999,6 +1005,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	slsOpenAPIEndpoint := d.Get("sls_openapi_endpoint").(string)
 	if slsOpenAPIEndpoint != "" {
 		config.Endpoints[connectivity.SlSDataCode] = slsOpenAPIEndpoint
+	}
+	ascmOpenAPIEndpoint := d.Get("ascm_openapi_endpoint").(string)
+	if ascmOpenAPIEndpoint != "" {
+		config.Endpoints[connectivity.ASCMCode] = ascmOpenAPIEndpoint
 	}
 	if strings.ToLower(config.Protocol) == "https" {
 		config.Protocol = "HTTPS"
