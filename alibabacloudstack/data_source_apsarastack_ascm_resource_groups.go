@@ -7,8 +7,6 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
@@ -96,28 +94,21 @@ func dataSourceAlibabacloudStackAscmResourceGroupsRead(d *schema.ResourceData, m
 
 	response := ResourceGroup{}
 
-	for {
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw ListResourceGroup : %s", raw)
+	bresponse, err := client.ProcessCommonRequest(request)
+	log.Printf(" response of raw ListResourceGroup : %s", bresponse)
 
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_resource_groups", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	// TODO: 需要考虑数据超过一页时的数据获取
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
 
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		if response.Code == "200" || len(response.Data) < 1 {
-			break
-		}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return errmsgs.WrapError(err)
 	}
 
 	var r *regexp.Regexp
