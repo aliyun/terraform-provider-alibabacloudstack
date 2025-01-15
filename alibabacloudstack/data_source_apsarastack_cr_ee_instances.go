@@ -206,7 +206,9 @@ func dataSourceAlibabacloudStackCrEEInstancesRead(d *schema.ResourceData, meta i
 	}
 
 	if output, ok := d.GetOk("output_file"); ok {
-		writeToFile(output.(string), instanceMaps)
+		if err := writeToFile(output.(string), instanceMaps); err != nil {
+			return err
+		}
 	}
 
 	return nil

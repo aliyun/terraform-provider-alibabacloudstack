@@ -114,6 +114,14 @@ func resourceAlibabacloudStackDisk() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"auto_snapshot_policy_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"enable_automated_snapshot_policy": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 
 			"tags": tagsSchema(),
 		},
@@ -226,6 +234,8 @@ func resourceAlibabacloudStackDiskRead(d *schema.ResourceData, meta interface{})
 	d.Set("delete_auto_snapshot", object.DeleteAutoSnapshot)
 	d.Set("delete_with_instance", object.DeleteWithInstance)
 	d.Set("enable_auto_snapshot", object.EnableAutoSnapshot)
+	d.Set("enable_automated_snapshot_policy", object.EnableAutomatedSnapshotPolicy)
+	d.Set("auto_snapshot_policy_id", object.AutoSnapshotPolicyId)
 	d.Set("tags", ecsService.tagsToMap(object.Tags.Tag))
 
 	return nil

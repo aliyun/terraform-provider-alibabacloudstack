@@ -11,7 +11,7 @@ import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -122,7 +122,162 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 		CheckDestroy:  testAccCheckOssBucketDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: providerCommon + testAccConfig(map[string]interface{}{
+				Config: testAccConfig(map[string]interface{}{
+					"bucket": name,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"bucket":           name,
+						"storage_capacity": "-1",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"acl": "public-read",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"acl": "public-read",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sse_algorithm": "AES256",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sse_algorithm": "AES256",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sse_algorithm": "KMS",
+					"kms_key_id": "${alibabacloudstack_kms_key.key.id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sse_algorithm": "KMS",
+						"kms_key_id": CHECKSET,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"sse_algorithm": "",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"sse_algorithm": "",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"storage_capacity": "10",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"storage_capacity": "10",
+					}),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
+	var v oss.GetBucketInfoResult
+
+	resourceId := "alibabacloudstack_oss_bucket.default"
+	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
+
+	serviceFunc := func() interface{} {
+		return &OssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000000, 9999999)
+	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketConfigDependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		// module name
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckOssBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"bucket": name,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"bucket":           name,
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"bucket_sync": "false",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"bucket_sync": "false",
+					}),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackOssBucketVpc(t *testing.T) {
+	var v oss.GetBucketInfoResult
+
+	resourceId := "alibabacloudstack_oss_bucket.default"
+	ra := resourceAttrInit(resourceId, ossBucketBasicMap)
+
+	serviceFunc := func() interface{} {
+		return &OssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000000, 9999999)
+	name := fmt.Sprintf("tf-testacc-bucket-%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceOssBucketConfigDependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		// module name
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckOssBucketDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"bucket":  name,
 					"vpclist": []string{"${alibabacloudstack_vpc.vpc.id}", "${alibabacloudstack_vpc.vpc2.id}"},
 				}),
@@ -141,7 +296,7 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: providerCommon + testAccConfig(map[string]interface{}{
+				Config: testAccConfig(map[string]interface{}{
 					"bucket":  name,
 					"vpclist": []string{"${alibabacloudstack_vpc.vpc.id}"},
 				}),
@@ -153,17 +308,6 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 					}),
 				),
 			},
-			//暂不支持修改acl
-			//			{
-			//				Config: testAccConfig(map[string]interface{}{
-			//					"acl": "public-read",
-			//				}),
-			//				Check: resource.ComposeTestCheckFunc(
-			//					testAccCheck(map[string]string{
-			//						"acl": "public-read",
-			//					}),
-			//				),
-			//			},
 		},
 	})
 }
@@ -201,7 +345,8 @@ resource "alibabacloudstack_vpc" "vpc2" {
 	name = "%s-v2"
 	cidr_block = "192.168.0.0/24"
 }
-`, name, name)
+%s
+`, name, name, KeyCommonTestCase)
 }
 
 var ossBucketBasicMap = map[string]string{

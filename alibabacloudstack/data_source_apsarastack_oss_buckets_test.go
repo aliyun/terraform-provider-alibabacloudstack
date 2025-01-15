@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackOssBucketsDataSource_basic(t *testing.T) {
 func dataSourceOssBucketsConfigDependence_basic() string {
 	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testaccalibabacloudstackossbucketsdatasource-basic%d"
+	default = "tf-testacc-ossbucketsdatasource-basic%d"
 }
 
 resource "alibabacloudstack_oss_bucket" "demo" {

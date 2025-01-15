@@ -4,9 +4,6 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -41,41 +38,23 @@ type LogProject struct {
 }
 
 func (s *LogService) DescribeLogProject(id string) (*LogProject, error) {
-	var raw interface{}
 	var err error
-	var requestInfo *sls.Client
 	request := s.client.NewCommonRequest("POST", "SLS", "2020-03-31", "GetProject", "")
 	request.QueryParams["projectName"] = id
 
 	var logProject *LogProject
-	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
-		raw, err = s.client.WithEcsClient(func(slsClient *ecs.Client) (interface{}, error) {
-			return slsClient.ProcessCommonRequest(request)
-		})
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{errmsgs.LogClientTimeout}) {
-				time.Sleep(5 * time.Second)
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		if debugOn() {
-			addDebug("GetProject", raw, requestInfo, map[string]string{"name": id})
-		}
-		return nil
-	})
-	project, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ProjectNotExist"}) {
 			return logProject, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(project.BaseResponse)
+		if bresponse == nil {
+			return logProject, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return logProject, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetProject", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return logProject, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	err = json.Unmarshal(project.GetHttpContentBytes(), &logProject)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &logProject)
 	if logProject != nil && logProject.ProjectName == "" && len(logProject.Projects) > 0 {
 		for _, k := range logProject.Projects {
 			if k.ProjectName == id {

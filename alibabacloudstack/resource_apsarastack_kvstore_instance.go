@@ -192,10 +192,11 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			// 			"cpu_type": {
-			// 				Type:     schema.TypeString,
-			// 				Required: true,
-			// 			},
+			"cpu_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Deprecated:    "Field 'cpu_type' is deprecated and will be removed in a future release.",
+			},
 			"node_type": {
 				Type:             schema.TypeString,
 				Optional:         true,

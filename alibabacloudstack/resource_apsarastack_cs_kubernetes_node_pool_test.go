@@ -40,14 +40,14 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":                  name,
 					"cluster_id":            "c89eeac401e7b43d985c6ac2b94ceee66",
-					"vswitch_ids":           []string{"${alibabacloudstack_vswitch.default.id}"},
-					"instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
+					"instance_types":        []string{"${local.default_instance_type_id}"},
 					"node_count":            "1",
-					"key_name":              "cck8s123",
-					"system_disk_category":  "cloud_efficiency",
+					"password":              "1qaz@WSX",
+					"system_disk_category":  "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"system_disk_size":      "40",
 					"install_cloud_monitor": "false",
-					"data_disks":            []map[string]string{{"size": "100", "category": "cloud_ssd"}},
+					"data_disks":            []map[string]string{{"size": "100", "category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"}},
 					"tags":                  map[string]interface{}{"Created": "TF", "Foo": "Bar"},
 					//"management":            []map[string]string{{"auto_repair": "true", "auto_upgrade": "true", "surge": "0", "max_unavailable": "0"}},
 				}),
@@ -59,12 +59,12 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 						"instance_types.#":      "1",
 						"node_count":            "1",
 						"key_name":              CHECKSET,
-						"system_disk_category":  "cloud_efficiency",
+						"system_disk_category":  CHECKSET,
 						"system_disk_size":      "40",
 						"install_cloud_monitor": "false",
 						"data_disks.#":          "1",
 						"data_disks.0.size":     "100",
-						"data_disks.0.category": "cloud_ssd",
+						"data_disks.0.category": CHECKSET,
 						"tags.%":                "2",
 						"tags.Created":          "TF",
 						"tags.Foo":              "Bar",
@@ -87,7 +87,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"node_count":       "2",
 					"system_disk_size": "80",
-					"data_disks":       []map[string]string{{"size": "40", "category": "cloud"}},
+					"data_disks":       []map[string]string{{"size": "40", "category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"}},
 					//"management":       []map[string]string{{"auto_repair": "true", "auto_upgrade": "true", "surge": "1", "max_unavailable": "1"}},
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -96,7 +96,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 						"system_disk_size":      "80",
 						"data_disks.#":          "1",
 						"data_disks.0.size":     "40",
-						"data_disks.0.category": "cloud",
+						"data_disks.0.category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 						// 						"management.#":                 "1",
 						// 						"management.0.auto_repair":     "true",
 						// 						"management.0.auto_upgrade":    "true",
@@ -151,10 +151,10 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_autoScaling(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":                  name,
 					"cluster_id":            "c180d1d233d2d47f68f301b129f622665",
-					"vswitch_ids":           []string{"${alibabacloudstack_vswitch.default.id}"},
-					"instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
+					"instance_types":        []string{"${local.default_instance_type_id}"},
 					"key_name":              "${alibabacloudstack_key_pair.default.key_name}",
-					"system_disk_category":  "cloud_efficiency",
+					"system_disk_category":  "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"system_disk_size":      "40",
 					"install_cloud_monitor": "false",
 					"platform":              "AliyunLinux",
@@ -168,7 +168,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_autoScaling(t *testing.T) {
 						"vswitch_ids.#":                "1",
 						"instance_types.#":             "1",
 						"key_name":                     CHECKSET,
-						"system_disk_category":         "cloud_efficiency",
+						"system_disk_category":         "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 						"system_disk_size":             "40",
 						"install_cloud_monitor":        "false",
 						"platform":                     "AliyunLinux",
@@ -260,10 +260,10 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_PrePaid(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":                  name,
 					"cluster_id":            "c180d1d233d2d47f68f301b129f622665",
-					"vswitch_ids":           []string{"${alibabacloudstack_vswitch.default.id}"},
+					"vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
 					"password":              "Terraform1234",
-					"instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
-					"system_disk_category":  "cloud_efficiency",
+					"instance_types":        []string{"${local.default_instance_type_id}"},
+					"system_disk_category":  "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"system_disk_size":      "120",
 					"install_cloud_monitor": "false",
 					"instance_charge_type":  "PrePaid",
@@ -280,7 +280,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_PrePaid(t *testing.T) {
 						"password":                  CHECKSET,
 						"vswitch_ids.#":             "1",
 						"instance_types.#":          "1",
-						"system_disk_category":      "cloud_efficiency",
+						"system_disk_category":      "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 						"system_disk_size":          "120",
 						"instance_charge_type":      "PrePaid",
 						"install_cloud_monitor":     "false",
@@ -353,9 +353,9 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_Spot(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":                       name,
 					"cluster_id":                 "c180d1d233d2d47f68f301b129f622665",
-					"vswitch_ids":                []string{"${alibabacloudstack_vswitch.default.id}"},
-					"instance_types":             []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
-					"system_disk_category":       "cloud_efficiency",
+					"vswitch_ids":                []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
+					"instance_types":             []string{"${local.default_instance_type_id}"},
+					"system_disk_category":       "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"system_disk_size":           "120",
 					"resource_group_id":          "8",
 					"password":                   "Terraform1234",
@@ -366,7 +366,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_Spot(t *testing.T) {
 					"spot_strategy":              "SpotWithPriceLimit",
 					"spot_price_limit": []map[string]string{
 						{
-							"instance_type": "${data.alibabacloudstack_instance_types.default.instance_types.0.id}",
+							"instance_type": "${local.default_instance_type_id}",
 							"price_limit":   "0.57",
 						},
 					},
@@ -377,7 +377,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_Spot(t *testing.T) {
 						"cluster_id":                       CHECKSET,
 						"vswitch_ids.#":                    "1",
 						"instance_types.#":                 "1",
-						"system_disk_category":             "cloud_efficiency",
+						"system_disk_category":             "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 						"system_disk_size":                 "120",
 						"resource_group_id":                CHECKSET,
 						"password":                         CHECKSET,
@@ -404,7 +404,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_Spot(t *testing.T) {
 					"internet_max_bandwidth_out": "10",
 					"spot_price_limit": []map[string]string{
 						{
-							"instance_type": "${data.alibabacloudstack_instance_types.default.instance_types.0.id}",
+							"instance_type": "${local.default_instance_type_id}",
 							"price_limit":   "0.60",
 						},
 					},
@@ -426,7 +426,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_Spot(t *testing.T) {
 
 var csdKubernetesNodePoolBasicMap = map[string]string{
 	"system_disk_size":     "40",
-	"system_disk_category": "cloud_efficiency",
+	"system_disk_category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 }
 
 func resourceCSNodePoolConfigDependence(name string) string {
@@ -435,32 +435,10 @@ variable "name" {
 	default = "%s"
 }
 
-data "alibabacloudstack_zones" default {
-  available_resource_creation  = "VSwitch"
-}
-
-
-data "alibabacloudstack_instance_types" "default" {
-	availability_zone          = data.alibabacloudstack_zones.default.zones.0.id
-	cpu_core_count             = 2
-	memory_size                = 4
-	kubernetes_node_role       = "Worker"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  vpc_name                     = var.name
-  cidr_block                   = "10.1.0.0/21"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-  name                 = var.name
-  vpc_id                       = alibabacloudstack_vpc.default.id
-  cidr_block                   = "10.1.1.0/24"
-  availability_zone            = data.alibabacloudstack_zones.default.zones.0.id
-}
+%s
 
 
 
 
-`, name)
+`, name, VSwitchCommonTestCase + DataAlibabacloudstackInstanceTypes)
 }

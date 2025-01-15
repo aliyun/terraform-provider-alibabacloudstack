@@ -176,7 +176,7 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 	d.Set("ipv6_cidr_block", object.Ipv6CidrBlock)
 	d.Set("secondary_cidr_blocks", object.SecondaryCidrBlocks.SecondaryCidrBlock)
 	d.Set("status", object.Status)
-	d.Set("resource_group_id",object.ResourceGroupId)
+	d.Set("resource_group_id", object.ResourceGroupId)
 	if tag := object.Tags.Tag; tag != nil {
 		d.Set("tags", vpcService.tagToMap(tag))
 	}
@@ -284,6 +284,7 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 	request := vpc.CreateModifyVpcAttributeRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VpcId = d.Id()
+
 
 	if d.HasChanges("name", "vpc_name") {
 		request.VpcName = connectivity.GetResourceData(d, "vpc_name", "name").(string)

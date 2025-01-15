@@ -452,11 +452,11 @@ func resourceAlibabacloudStackCSKubernetesNodePoolCreate(d *schema.ResourceData,
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "CreateKubernetesNodePool", response, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "CreateClusterNodePool", response, errmsg)
 	}
 	nodepoolresponse := NodePoolCommonResponse{}
 	if err := json.Unmarshal(response.GetHttpContentBytes(), &nodepoolresponse); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "ParseKubernetesNodePoolResponse", response)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes_node_pool", "NodePoolCommonResponse", response)
 	}
 
 	d.SetId(nodepoolresponse.NodePoolID)
@@ -820,6 +820,8 @@ func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*requests.Comm
 				return nil, errmsgs.WrapError(err)
 			}
 			password = decryptResp
+		} else if v := d.Get("key_name").(string); v == "" {
+				return nil, errmsgs.WrapError(fmt.Errorf("password is require while kms_encrypted_password or key_name not set"))
 		}
 	}
 	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "CreateClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools", d.Get("cluster_id").(string)))

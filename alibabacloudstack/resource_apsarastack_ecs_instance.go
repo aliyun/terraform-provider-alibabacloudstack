@@ -523,6 +523,23 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 		}
 	}
 
+	if d.HasChange("data_disk_tags") {
+		oraw, nraw := d.GetChange("data_disk_tags")
+		disks, err := ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "data")
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		diskids := make([]string, 0, len(disks))
+		for _, disk := range disks {
+			diskids = append(diskids, disk.DiskId)
+			err := updateTags(client, diskids, "disk", oraw, nraw)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+		}
+
+	}
+
 	if d.HasChange("security_groups") {
 		if !d.IsNewResource() || d.Get("vswitch_id").(string) == "" {
 			o, n := d.GetChange("security_groups")

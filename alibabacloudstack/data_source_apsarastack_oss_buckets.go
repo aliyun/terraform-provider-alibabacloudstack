@@ -5,8 +5,6 @@ import (
 	"encoding/xml"
 	"regexp"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -104,30 +102,21 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 		}
 
 		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		mergeMaps(request.QueryParams, map[string]string{
-			"AccountInfo":      "123456",
-			"SignatureVersion": "1.0",
-			"OpenApiAction":    "GetService",
-			"ProductName":      "oss",
-		})
-
+		request.QueryParams["OpenApiAction"] = "GetService"
+		request.QueryParams["ProductName"] = "oss"
 		var bucketList = &BucketList{}
-		raw, err := client.WithOssNewClient(func(ossClient *ecs.Client) (interface{}, error) {
-			return ossClient.ProcessCommonRequest(request)
-		})
-
-		bresponse, ok := raw.(*responses.CommonResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
 			if ossNotFoundError(err) {
 				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackLogGoSdkERROR)
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetBucketInfo", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
-		addDebug("GetBucketInfo", raw, requestInfo, request)
+		addDebug("GetBucketInfo", bresponse, requestInfo, request)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), bucketList)
 		if err != nil {
@@ -197,7 +186,9 @@ func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []oss.BucketPr
 		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), s)
+		if err := writeToFile(output.(string), s); err != nil {
+			return err
+		}
 	}
 	return nil
 }

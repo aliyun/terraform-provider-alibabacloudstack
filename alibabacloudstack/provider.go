@@ -661,6 +661,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_redis_tairinstance":                    resourceAlibabacloudStackKVStoreInstance(),
 		"alibabacloudstack_launch_template":                       resourceAlibabacloudStackLaunchTemplate(),
 		"alibabacloudstack_ecs_launchtemplate":                    resourceAlibabacloudStackLaunchTemplate(),
+		"alibabacloudstack_log_alert":                             resourceAlibabacloudStackLogAlert(),
 		"alibabacloudstack_log_machine_group":                     resourceAlibabacloudStackLogMachineGroup(),
 		"alibabacloudstack_log_project":                           resourceAlibabacloudStackLogProject(),
 		"alibabacloudstack_log_store":                             resourceAlibabacloudStackLogStore(),
@@ -1286,6 +1287,8 @@ func getResourceCredentials(config *connectivity.Config) (string, string, int, e
 			return "", "", 0, fmt.Errorf("resource group ID and organization not found for resource set %s", config.ResourceSetName)
 		}
 		return "", "", 0, fmt.Errorf("unable to initialize the ascm client: department or resource_group is not provided")
+	} else if len(response.Data) > 1 {
+		return "", "", 0, fmt.Errorf("There exists a resource group set name with the same name, Please Provider department or resource_group")
 	} else {
 		for _, j := range response.Data {
 			if j.ResourceGroupName == config.ResourceSetName {
