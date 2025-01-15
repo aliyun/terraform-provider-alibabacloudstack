@@ -277,6 +277,7 @@ func resourceAlibabacloudStackOnsInstanceDelete(d *schema.ResourceData, meta int
 		request := client.NewCommonRequest("POST", "Ons-inner", "2018-02-05", "ConsoleInstanceDelete", "")
 		request.QueryParams["OnsRegionId"] = client.RegionId
 		request.QueryParams["InstanceId"] = d.Id()
+		request.QueryParams["PreventCache"] = ""
 
 		raw, err := client.WithOnsClient(func(onsClient *ons.Client) (interface{}, error) {
 			return onsClient.ProcessCommonRequest(request)
