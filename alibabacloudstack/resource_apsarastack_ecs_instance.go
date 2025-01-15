@@ -379,7 +379,7 @@ func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interfac
 		return errmsgs.WrapError(err)
 	}
 	log.Printf("[ECS Creation]: Getting Instance Details Successfully: %s", instance.Status)
-	disk, err := ecsService.DescribeInstanceSystemDisk(d.Id(), instance.ResourceGroupId)
+	disks, err := ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "system")
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -388,12 +388,12 @@ func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interfac
 		return errmsgs.WrapError(err)
 	}
 
-	d.Set("system_disk_category", disk.Category)
-	d.Set("system_disk_size", disk.Size)
-	d.Set("system_disk_name", disk.DiskName)
-	d.Set("system_disk_description", disk.Description)
-	d.Set("system_disk_id", disk.DiskId)
-	d.Set("storage_set_id", disk.StorageSetId)
+	d.Set("system_disk_category", disks[0].Category)
+	d.Set("system_disk_size", disks[0].Size)
+	d.Set("system_disk_name", disks[0].DiskName)
+	d.Set("system_disk_description", disks[0].Description)
+	d.Set("system_disk_id", disks[0].DiskId)
+	d.Set("storage_set_id", disks[0].StorageSetId)
 	d.Set("instance_name", instance.InstanceName)
 	d.Set("description", instance.Description)
 	d.Set("status", instance.Status)
@@ -518,21 +518,6 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 
 	if !d.IsNewResource() {
 		err := setTags(client, TagResourceInstance, d)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
-	if d.HasChange("system_disk_tags") {
-		oraw, nraw := d.GetChange("system_disk_tags")
-		diskid := d.Get("system_disk_id").(string)
-		if diskid == "" {
-			disk, err := ecsService.DescribeInstanceSystemDisk(d.Id(), client.ResourceGroup)
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
-			diskid = disk.DiskId
-		}
-		err := updateTags(client, []string{diskid}, "disk", oraw, nraw)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -685,6 +670,35 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 
 	if err := modifyInstanceNetworkSpec(d, meta); err != nil {
 		return errmsgs.WrapError(err)
+	}
+
+	if d.HasChange("system_disk_tags") || d.HasChange("system_disk_id") {
+		oraw, nraw := d.GetChange("system_disk_tags")
+		disks, err := ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "system")
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		err = updateTags(client, []string{disks[0].DiskId}, "disk", oraw, nraw)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+	}
+
+	if d.HasChange("data_disk_tags") {
+		oraw, nraw := d.GetChange("data_disk_tags")
+		disks, err := ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "data")
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		diskids := make([]string, 0, len(disks))
+		for _, disk := range disks {
+			diskids = append(diskids, disk.DiskId)
+			err := updateTags(client, diskids, "disk", oraw, nraw)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+		}
+
 	}
 
 	d.Partial(false)
@@ -951,9 +965,9 @@ func modifyInstanceImage(d *schema.ResourceData, meta interface{}, run bool) (bo
 			if errDesc != nil {
 				return update, errmsgs.WrapError(errDesc)
 			}
-			var disk ecs.Disk
+			var disks []ecs.Disk
 			err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-				disk, err = ecsService.DescribeInstanceSystemDisk(d.Id(), instance.ResourceGroupId)
+				disks, err = ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "system")
 				if err != nil {
 					if errmsgs.NotFoundError(err) {
 						return resource.RetryableError(err)
@@ -966,7 +980,7 @@ func modifyInstanceImage(d *schema.ResourceData, meta interface{}, run bool) (bo
 				return update, errmsgs.WrapError(err)
 			}
 
-			if instance.ImageId == d.Get("image_id") && disk.Size == d.Get("system_disk_size").(int) {
+			if instance.ImageId == d.Get("image_id") && disks[0].Size == d.Get("system_disk_size").(int) {
 				break
 			}
 			time.Sleep(DefaultIntervalShort * time.Second)

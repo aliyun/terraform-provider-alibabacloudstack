@@ -175,6 +175,7 @@ func (s *EcsService) DescribeInstanceAttribute(id string) (instance ecs.Describe
 
 func (s *EcsService) DescribeInstanceDisksByType(id string, rg string, disk_type string) (disks []ecs.Disk, err error) {
 	request := ecs.CreateDescribeDisksRequest()
+	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = id
 	//request.DiskType = string(DiskTypeSystem)
 	if strings.ToLower(s.client.Config.Protocol) == "https" {
@@ -184,7 +185,7 @@ func (s *EcsService) DescribeInstanceDisksByType(id string, rg string, disk_type
 	}
 	request.RegionId = s.client.RegionId
 	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{ "Product": "ecs", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
+	request.QueryParams = map[string]string{"Product": "ecs", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	var response *ecs.DescribeDisksResponse
 	wait := incrementalWait(1*time.Second, 1*time.Second)
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
@@ -201,7 +202,7 @@ func (s *EcsService) DescribeInstanceDisksByType(id string, rg string, disk_type
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		response, _ = raw.(*ecs.DescribeDisksResponse)
 		if len(response.Disks.Disk) < 1 {
-			return resource.RetryableError(errmsgs.Error("Disk Not Found"))
+			return resource.RetryableError(err)
 		}
 		return nil
 	})
@@ -223,47 +224,6 @@ func (s *EcsService) DescribeInstanceDisksByType(id string, rg string, disk_type
 		return disks, nil
 	}
 	return disks, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, response.RequestId)
-}
-
-func (s *EcsService) DescribeInstanceSystemDisk(id, rg string) (disk ecs.Disk, err error) {
-	request := ecs.CreateDescribeDisksRequest()
-	s.client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceId = id
-	var raw interface{}
-	wait := incrementalWait(1*time.Second, 1*time.Second)
-	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
-		raw, err = s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.DescribeDisks(request)
-		})
-		if err != nil {
-			if errmsgs.IsThrottling(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		return nil
-	})
-	response, ok := raw.(*ecs.DescribeDisksResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		return disk, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	log.Printf("[ECS Creation]: Getting Disks Query Params : %s ", request.GetQueryParams())
-	log.Printf("[ECS Creation]: Getting Disks response : %s ", response)
-	if len(response.Disks.Disk) < 1 || response.Disks.Disk[0].InstanceId != id {
-		return disk, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, response.RequestId)
-	}
-	for _, disk := range response.Disks.Disk {
-		if disk.Type == "system" {
-			return disk, nil
-		}
-	}
-	return disk, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, response.RequestId)
 }
 
 func (s *EcsService) ResourceAvailable(zone ecs.Zone, resourceType ResourceType) error {
@@ -1839,119 +1799,6 @@ func (s *EcsService) SetResourceTagsNew(d *schema.ResourceData, resourceType str
 			if err != nil {
 				return err
 			}
-		}
-	}
-	return nil
-}
-
-func (s *EcsService) SetSystemDiskTags(d *schema.ResourceData) error {
-	resourceType := "disk"
-	diskid := d.Get("system_disk_id").(string)
-	if diskid == "" {
-		disk, err := s.DescribeInstanceSystemDisk(d.Id(), s.client.ResourceGroup)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		diskid = disk.DiskId
-	}
-	instance_tags := d.Get("tags").(map[string]interface{})
-	tags := d.Get("system_disk_tags").(map[string]interface{})
-	removed := make([]string, 0)
-	for key, value := range instance_tags {
-		old, ok := tags[key]
-		if !ok || old != value {
-			// Delete it!
-			removed = append(removed, key)
-		}
-	}
-	action := "UnTagResources"
-	request := map[string]interface{}{
-		"ResourceType": resourceType,
-		"ResourceId.1": diskid,
-	}
-	for i, key := range removed {
-		request[fmt.Sprintf("TagKey.%d", i+1)] = key
-	}
-	_, err := s.client.DoTeaRequest("POST", "Ecs", "2019-05-10", action, "", nil, request)
-	if err != nil {
-		return err
-	}
-	add_request := map[string]interface{}{
-		"ResourceType": resourceType,
-		"ResourceId.1": diskid,
-	}
-	count := 1
-	for key, value := range tags {
-		add_request[fmt.Sprintf("Tag.%d.Key", count)] = key
-		add_request[fmt.Sprintf("Tag.%d.Value", count)] = value
-		count++
-	}
-	_, err = s.client.DoTeaRequest("POST", "Ecs", "2019-05-10", "TagResources", "", nil, request)
-	if err != nil {
-		return err
-	}
-	return err
-}
-
-func (s *EcsService) UpdateSystemDiskTags(d *schema.ResourceData) error {
-	resourceType := "disk"
-	diskid := d.Get("system_disk_id").(string)
-	if diskid == "" {
-		disk, err := s.DescribeInstanceSystemDisk(d.Id(), s.client.ResourceGroup)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		diskid = disk.DiskId
-	}
-	oraw, nraw := d.GetChange("system_disk_tags")
-	removedTags := oraw.(map[string]interface{})
-	added := nraw.(map[string]interface{})
-	// Build the list of what to remove
-	removed := make([]string, 0)
-	for key, value := range removedTags {
-		old, ok := added[key]
-		if !ok || old != value {
-			// Delete it!
-			removed = append(removed, key)
-		}
-	}
-
-	removedTagKeys := make([]string, 0)
-	for _, v := range removed {
-		if !ignoredTags(v, "") {
-			removedTagKeys = append(removedTagKeys, v)
-		}
-	}
-	if len(removedTagKeys) > 0 {
-		action := "UnTagResources"
-		request := map[string]interface{}{
-			"ResourceType": resourceType,
-			"ResourceId.1": diskid,
-		}
-		for i, key := range removedTagKeys {
-			request[fmt.Sprintf("TagKey.%d", i+1)] = key
-		}
-		_, err := s.client.DoTeaRequest("POST", "Ecs", "2019-05-10", action, "", nil, request)
-		if err != nil {
-			return err
-		}
-	}
-	if len(added) > 0 {
-		action := "TagResources"
-		request := map[string]interface{}{
-			"ResourceType": resourceType,
-			"ResourceId.1": diskid,
-		}
-		count := 1
-		for key, value := range added {
-			request[fmt.Sprintf("Tag.%d.Key", count)] = key
-			request[fmt.Sprintf("Tag.%d.Value", count)] = value
-			count++
-		}
-
-		_, err := s.client.DoTeaRequest("POST", "Ecs", "2019-05-10", action, "", nil, request)
-		if err != nil {
-			return err
 		}
 	}
 	return nil

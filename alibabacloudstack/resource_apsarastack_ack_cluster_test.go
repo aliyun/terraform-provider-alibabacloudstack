@@ -125,6 +125,91 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 	})
 }
 
+func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
+	var v *cs.KubernetesClusterDetail
+	resourceId := "alibabacloudstack_cs_kubernetes.k8s"
+	ra := resourceAttrInit(resourceId, CsK8sMap)
+	serviceFunc := func() interface{} {
+		return &CsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(1000000, 9999999)
+	name := fmt.Sprintf("tf-testAccCsK8sConfigBasic%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCsK8sConfigDependence)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckCsK8sDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					// "tags": map[string]string{
+					// 	"Created": "TF",
+					// 	"For":     "acceptance test",
+					// },
+					"runtime": []map[string]interface{}{
+						{"name": "docker", "version": "19.03.15"},
+					},
+					"addons": []map[string]interface{}{
+						{
+							"name": "flannel",
+						},
+						{
+							"name": "csi-plugin",
+						},
+						{
+							"name": "csi-provisioner",
+						},
+						{
+							"name": "nginx-ingress-controller",
+						},
+					},
+					"name":                         "${var.name}",
+					"version":                      "1.20.11-aliyun.1",
+					"os_type":                      "linux",
+					"platform":                     "AliyunLinux",
+					"timeout_mins":                 "60",
+					"vpc_id":                       "${alibabacloudstack_vpc_vpc.default.id}",
+					"master_count":                 "3",
+					"master_disk_category":         "cloud_ssd",
+					"image_id":                     "${var.image_id}",
+					"master_disk_size":             "40",
+					"master_instance_types":        "${var.master_instance_types}",
+					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
+					"num_of_nodes":                 "1",
+					"worker_disk_category":         "cloud_ssd",
+					"worker_disk_size":             "40",
+					"worker_instance_types":        "${var.worker_instance_types}",
+					"worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
+					"security_group_id":            "${alibabacloudstack_ecs_securitygroup.default.id}",
+					"enable_ssh":                   "${var.enable_ssh}",
+					"password":                     "${var.password}",
+					"delete_protection":            "false",
+					"pod_cidr":                     "${var.pod_cidr}",
+					"service_cidr":                 "${var.service_cidr}",
+					"node_cidr_mask":               "${var.node_cidr_mask}",
+					"is_enterprise_security_group": "true",
+					"new_nat_gateway":              "false",
+					"slb_internet_enabled":         "false",
+					"proxy_mode":                   "ipvs",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name": name,
+					}),
+				),
+			},
+		},
+	})
+}
+
 func resourceCsK8sConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
@@ -203,7 +288,7 @@ variable "service_cidr" {
 }
 
 
-`, name, VSwitchCommonTestCase)
+`, name, SecurityGroupCommonTestCase)
 }
 
 var CsK8sMap = map[string]string{}

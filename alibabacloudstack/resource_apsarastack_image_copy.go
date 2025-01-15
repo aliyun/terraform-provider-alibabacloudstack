@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -21,8 +22,8 @@ func resourceAlibabacloudStackImageCopy() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(10 * time.Minute),
-			Delete: schema.DefaultTimeout(10 * time.Minute),
+			Create: schema.DefaultTimeout(60 * time.Minute),
+			Delete: schema.DefaultTimeout(60 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"source_image_id": {
@@ -36,21 +37,31 @@ func resourceAlibabacloudStackImageCopy() *schema.Resource {
 				Required: true,
 			},
 			"name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'image_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'image_name' instead.",
 				ConflictsWith: []string{"image_name"},
 			},
 			"image_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"name"},
 			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"kms_key_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"encrypted": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
 			},
 		},
 	}
@@ -66,6 +77,13 @@ func resourceAlibabacloudStackImageCopyCreate(d *schema.ResourceData, meta inter
 	request.DestinationRegionId = d.Get("destination_region_id").(string)
 	request.DestinationImageName = connectivity.GetResourceData(d, "image_name", "name").(string)
 	request.DestinationDescription = d.Get("description").(string)
+	request.ResourceGroupId = client.Config.ResourceGroupId
+	if v, ok := d.GetOk("kms_key_id"); ok && v != "" {
+		request.KMSKeyId = v.(string)
+	}
+	if v, ok := d.GetOk("encrypted"); ok {
+		request.Encrypted = requests.NewBoolean(v.(bool))
+	}
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.CopyImage(request)
 	})
@@ -81,7 +99,8 @@ func resourceAlibabacloudStackImageCopyCreate(d *schema.ResourceData, meta inter
 	response, _ := raw.(*ecs.CopyImageResponse)
 	d.SetId(response.ImageId)
 	log.Printf("[DEBUG] state %#v", d.Id())
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ecsService.ImageStateRefreshFuncforcopy(d.Id(), d.Get("destination_region_id").(string), []string{"CreateFailed", "UnAvailable"}))
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 10*time.Minute, ecsService.ImageStateRefreshFuncforcopy(d.Id(), d.Get("destination_region_id").(string), []string{"CreateFailed", "UnAvailable"}))
+	stateConf.NotFoundChecks = 1000
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

@@ -82,9 +82,9 @@ const (
 	SlSDataCode  = ServiceCode("SLSDATA")
 	ALIKAFKACode = ServiceCode("ALIKAFKADATA")
 	BssDataCode  = ServiceCode("BSSDATA")
-	
+
 	// ASAPI
-	ASAPICode    = ServiceCode("ASAPI")
+	ASAPICode = ServiceCode("ASAPI")
 )
 
 type Endpoints struct {
