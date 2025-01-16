@@ -362,7 +362,7 @@ func testAccKVStoreInstanceTde_classic(instanceClass, engineVersion string) stri
 variable "name" {
     default = "tf-testAccCheckApsaraStackRKVInstancesDataSource4"
 }
-data "apsarastack_zones"  "default" {
+data "alibabacloudstack_zones"  "default" {
 }
 
 resource "alibabacloudstack_kms_key" "key" {
@@ -371,21 +371,20 @@ resource "alibabacloudstack_kms_key" "key" {
   key_state               = "Enabled"
 }
 
-resource "apsarastack_vpc" "default" {
+resource "alibabacloudstack_vpc" "default" {
 	name       = var.name
 	cidr_block = "172.16.0.0/16"
 }
-resource "apsarastack_vswitch" "default" {
-	vpc_id            = apsarastack_vpc.default.id
+resource "alibabacloudstack_vswitch" "default" {
+	vpc_id            = alibabacloudstack_vpc.default.id
 	cidr_block        = "172.16.0.0/24"
-	availability_zone = data.apsarastack_zones.default.zones[0].id
+	availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 	name              = var.name
 }
 
-resource "apsarastack_kvstore_instance" "default" {
+resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
-	vswitch_id     = apsarastack_vswitch.default.id
-	private_ip     = "172.16.0.10"
+	vswitch_id     = alibabacloudstack_vswitch.default.id
 	security_ips   = ["10.0.0.1"]
 	instance_type  = "%s"
 	instance_class = "redis.amber.logic.sharding.1g.2db.0rodb.6proxy.multithread"

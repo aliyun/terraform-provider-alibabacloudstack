@@ -292,7 +292,7 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Default:  false,
 			},
 			"logs_download_attributes": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

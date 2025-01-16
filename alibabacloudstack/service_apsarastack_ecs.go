@@ -178,14 +178,6 @@ func (s *EcsService) DescribeInstanceDisksByType(id string, rg string, disk_type
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = id
 	//request.DiskType = string(DiskTypeSystem)
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{"RegionId": s.client.RegionId}
-	request.QueryParams = map[string]string{"Product": "ecs", "Department": s.client.Department, "ResourceGroup": s.client.ResourceGroup}
 	var response *ecs.DescribeDisksResponse
 	wait := incrementalWait(1*time.Second, 1*time.Second)
 	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
