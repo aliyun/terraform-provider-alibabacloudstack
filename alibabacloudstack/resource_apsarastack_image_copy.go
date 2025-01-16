@@ -139,10 +139,10 @@ func resourceAlibabacloudStackImageCopyRead(d *schema.ResourceData, meta interfa
 
 func resourceAlibabacloudStackImageCopyDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	ecsService := EcsService{client}
+	request := ecs.CreateDeleteImageRequest()
+	request.ImageId = d.Id()
+	client.InitRpcRequest(*request.RpcRequest)
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		request := ecs.CreateDeleteImageRequest()
-		request.ImageId = d.Id()
 		return ecsClient.DeleteImage(request)
 	})
 	if err != nil {
@@ -152,9 +152,5 @@ func resourceAlibabacloudStackImageCopyDelete(d *schema.ResourceData, meta inter
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	stateConf := BuildStateConf([]string{"Available", "CreateFailed"}, []string{"Deprecated", "UnAvailable"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ecsService.ImageStateRefreshFuncforcopy(d.Id(), d.Get("destination_region_id").(string), []string{"CreateFailed", "UnAvailable"}))
-	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	}
-	return resourceAlibabacloudStackImageCopyRead(d, meta)
+	return nil
 }

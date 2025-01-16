@@ -972,6 +972,7 @@ func (s *EcsService) DescribeImage(id, region string) (image ecs.Image, err erro
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.RegionId = region
 	request.ImageId = id
+	request.ImageOwnerAlias = "self"
 	request.Status = fmt.Sprintf("%s,%s,%s,%s,%s", "Creating", "Waiting", "Available", "UnAvailable", "CreateFailed")
 	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.DescribeImages(request)
