@@ -752,7 +752,7 @@ data "alibabacloudstack_instance_types" "any_n4" {
 data "alibabacloudstack_instance_types" "default" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   cpu_core_count       = 1
-  memory_size          = 2
+  memory_size          = 1
   instance_type_family = "ecs.n4"
   sorted_by            = "Memory"
 }
@@ -1268,7 +1268,7 @@ resource "alibabacloudstack_ecs_instance" "default" {
   image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
   instance_type        = "${local.default_instance_type_id}"
   system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-  system_disk_size     = 40
+  system_disk_size     = 20
   system_disk_name     = "test_sys_disk"
   security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
   instance_name        = "${var.name}_ecs"

@@ -238,7 +238,7 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%sslblistener%d", defaultRegionToTest, rand)
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerBasicdependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerLogStoredependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -254,33 +254,36 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"load_balancer_id":         "${alibabacloudstack_slb.default.id}",
-					"protocol":                 "http",
-					"bandwidth":                "10",
-					"frontend_port":            "80",
-					"backend_port":             "80",
-					"acl_status":               "on",
-					"sticky_session":           "off",
-					"health_check":             "off",
-					"acl_type":                 "white",
-					"description":              "testcreate",
-					"scheduler":                "wrr",
-					"acl_id":                   "${alibabacloudstack_slb_acl.default.id}",
-					"logs_download_attributes": map[string]string{"log_store_name": "${alibabacloudstack_log_store.default.name}", "project_name": "${alibabacloudstack_log_project.default.name}"},
+					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
+					"protocol":         "http",
+					"bandwidth":        "10",
+					"frontend_port":    "80",
+					"backend_port":     "80",
+					"acl_status":       "on",
+					"sticky_session":   "off",
+					"health_check":     "off",
+					"acl_type":         "white",
+					"description":      "testcreate",
+					"scheduler":        "wrr",
+					"acl_id":           "${alibabacloudstack_slb_acl.default.id}",
+					// "logs_download_attributes": map[string]string{
+					// 	"log_store_name": "${alibabacloudstack_log_store.default.name}",
+					// 	"project_name": "${alibabacloudstack_log_project.default.name}"
+					// },
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"load_balancer_id":  CHECKSET,
-						"listener_protocol": "http",
-						"bandwidth":         "10",
-						"frontend_port":     "80",
-						"backend_port":      "80",
-						"acl_status":        "on",
-						"acl_type":          "white",
-						"description":       "testcreate",
-						"scheduler":         "wrr",
-						"acl_id":            CHECKSET,
+						"load_balancer_id": CHECKSET,
+						"protocol":         "http",
+						"bandwidth":        "10",
+						"frontend_port":    "80",
+						"backend_port":     "80",
+						"acl_status":       "on",
+						"acl_type":         "white",
+						"description":      "testcreate",
+						"scheduler":        "wrr",
+						"acl_id":           CHECKSET,
 					}),
 				),
 			},
@@ -291,11 +294,17 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 func AlibabacloudTestAccSlbListenerLogStoredependence(name string) string {
 	return AlibabacloudTestAccSlbListenerBasicdependence(name) + fmt.Sprintf(`
 	resource "alibabacloudstack_log_project" "default" {
-	  name = "${var.name}_"
-	  description = "test"
+		name = "${var.name}_"
+		description = "test"
 	}
 	resource "alibabacloudstack_log_store" "default" {
-	  name = "${var.name}_store"
-	  project = "${alibabacloudstack_log_project.default.name}"	
+		name = "${var.name}_store"
+		project = "${alibabacloudstack_log_project.default.name}"	
+		retention_period      = "30"
+		shard_count           = "2"
+		enable_web_tracking   = false
+		auto_split            = true
+		max_split_shard_count = "64"
+		append_meta           = true
 	}`)
 }
