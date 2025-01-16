@@ -2,6 +2,7 @@ module github.com/aliyun/terraform-provider-alibabacloudstack
 
 go 1.21
 
+
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/alibabacloud-go/cs-20151215/v5 v5.4.0

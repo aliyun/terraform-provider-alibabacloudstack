@@ -628,11 +628,19 @@ func TestAccAlibabacloudStackInstanceImageUpdateTags(t *testing.T) {
 					"instance_type":                 "${data.alibabacloudstack_instance_types.default.instance_types.0.id}",
 					"availability_zone":             "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"system_disk_category":          "cloud_ssd",
-					"system_disk_size":              "40",
+					"system_disk_size":              "20",
 					"instance_name":                 "${var.name}",
 					"security_enhancement_strategy": "Active",
 					"user_data":                     "I_am_user_data",
 					"vswitch_id":                    "${alibabacloudstack_vswitch.default.id}",
+					"data_disks": []map[string]string{
+						{
+							"name":        "disk1",
+							"size":        "20",
+							"category":    "cloud_ssd",
+							"description": "disk1",
+						},
+					},
 					"tags": map[string]string{
 						"foo": "foo",
 						"Bar": "Bar",
@@ -661,9 +669,9 @@ func TestAccAlibabacloudStackInstanceImageUpdateTags(t *testing.T) {
 						"system_disk_tags.%":   "2",
 						"system_disk_tags.foo": "foo",
 						"system_disk_tags.Bar": "Bar",
-						"data_disk_tags.%":   "2",
-						"data_disk_tags.foo": "foo",
-						"data_disk_tags.Bar": "Bar",
+						"data_disk_tags.%":     "2",
+						"data_disk_tags.foo":   "foo",
+						"data_disk_tags.Bar":   "Bar",
 					}),
 				),
 			},
@@ -802,9 +810,7 @@ func resourceInstanceImageUpdateConfigDependence(name string) string {
 	data "alibabacloudstack_instance_types" "default" {
 		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 		cpu_core_count       = 1
-		memory_size          = 2
-		instance_type_family = "ecs.n4"
-		sorted_by            = "Memory"
+		memory_size          = 1
 	}
 
 	
