@@ -934,10 +934,6 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 		if endpoint == "" {
 			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
 		}
-		// if !strings.HasPrefix(endpoint, "https") && !strings.HasPrefix(endpoint, "http") {
-		// 	endpoint = fmt.Sprintf("https://%s", endpoint)
-		// }
-		// endpoint := "http://test1111.cn-wulan-env212-d01.ots-internal.inter.env212.shuguang.com"
 		tableStoreClient = tablestore.NewClientWithConfig(endpoint, instanceName, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken, tablestore.NewDefaultTableStoreConfig())
 		client.tablestoreconnByInstanceName[instanceName] = tableStoreClient
 	}
