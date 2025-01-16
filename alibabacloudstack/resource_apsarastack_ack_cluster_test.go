@@ -86,24 +86,23 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 							"name": "nginx-ingress-controller",
 						},
 					},
-					"name":                  "${var.name}",
-					"version":               "1.20.11-aliyun.1",
-					"os_type":               "linux",
-					"platform":              "AliyunLinux",
-					"timeout_mins":          "60",
-					"vpc_id":                "${alibabacloudstack_vpc_vpc.default.id}",
-					"master_count":          "3",
-					"master_disk_category":  "cloud_ssd",
-					"image_id":              "${var.image_id}",
-					"master_disk_size":      "40",
-					"master_instance_types": "${var.master_instance_types}",
-					"master_vswitch_ids":    []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
-					"num_of_nodes":          "1",
-					"worker_disk_category":  "cloud_ssd",
-					"worker_disk_size":      "40",
-					"worker_instance_types": "${var.worker_instance_types}",
-					"worker_vswitch_ids":    []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
-
+					"name":                         "${var.name}",
+					"version":                      "1.20.11-aliyun.1",
+					"os_type":                      "linux",
+					"platform":                     "AliyunLinux",
+					"timeout_mins":                 "60",
+					"vpc_id":                       "${alibabacloudstack_vpc_vpc.default.id}",
+					"master_count":                 "3",
+					"master_disk_category":         "cloud_ssd",
+					"image_id":                     "${var.image_id}",
+					"master_disk_size":             "40",
+					"master_instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
+					"num_of_nodes":                 "1",
+					"worker_disk_category":         "cloud_ssd",
+					"worker_disk_size":             "40",
+					"worker_instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
 					"enable_ssh":                   "${var.enable_ssh}",
 					"password":                     "${var.password}",
 					"delete_protection":            "false",
@@ -171,34 +170,33 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 							"name": "nginx-ingress-controller",
 						},
 					},
-					"name":                         "${var.name}",
-					"version":                      "1.20.11-aliyun.1",
-					"os_type":                      "linux",
-					"platform":                     "AliyunLinux",
-					"timeout_mins":                 "60",
-					"vpc_id":                       "${alibabacloudstack_vpc_vpc.default.id}",
-					"master_count":                 "3",
-					"master_disk_category":         "cloud_ssd",
-					"image_id":                     "${var.image_id}",
-					"master_disk_size":             "40",
-					"master_instance_types":        "${var.master_instance_types}",
-					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
-					"num_of_nodes":                 "1",
-					"worker_disk_category":         "cloud_ssd",
-					"worker_disk_size":             "40",
-					"worker_instance_types":        "${var.worker_instance_types}",
-					"worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
-					"security_group_id":            "${alibabacloudstack_ecs_securitygroup.default.id}",
-					"enable_ssh":                   "${var.enable_ssh}",
-					"password":                     "${var.password}",
-					"delete_protection":            "false",
-					"pod_cidr":                     "${var.pod_cidr}",
-					"service_cidr":                 "${var.service_cidr}",
-					"node_cidr_mask":               "${var.node_cidr_mask}",
-					"is_enterprise_security_group": "true",
-					"new_nat_gateway":              "false",
-					"slb_internet_enabled":         "false",
-					"proxy_mode":                   "ipvs",
+					"name":                  "${var.name}",
+					"version":               "1.20.11-aliyun.1",
+					"os_type":               "linux",
+					"platform":              "AliyunLinux",
+					"timeout_mins":          "60",
+					"vpc_id":                "${alibabacloudstack_vpc_vpc.default.id}",
+					"master_count":          "3",
+					"master_disk_category":  "cloud_ssd",
+					"image_id":              "${var.image_id}",
+					"master_disk_size":      "40",
+					"master_instance_types": []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"master_vswitch_ids":    []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
+					"num_of_nodes":          "1",
+					"worker_disk_category":  "cloud_ssd",
+					"worker_disk_size":      "40",
+					"worker_instance_types": []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"worker_vswitch_ids":    []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
+					"security_group_id":     "${alibabacloudstack_ecs_securitygroup.default.id}",
+					"enable_ssh":            "${var.enable_ssh}",
+					"password":              "${var.password}",
+					"delete_protection":     "false",
+					"pod_cidr":              "${var.pod_cidr}",
+					"service_cidr":          "${var.service_cidr}",
+					"node_cidr_mask":        "${var.node_cidr_mask}",
+					"new_nat_gateway":       "false",
+					"slb_internet_enabled":  "false",
+					"proxy_mode":            "ipvs",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -227,6 +225,12 @@ variable "image_id" {
 
 %s
 
+data "alibabacloudstack_instance_types" "default" {
+  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+  cpu_core_count       = 1
+  memory_size          = 1
+}
+
 # leave it to empty then terraform will create several vswitches
 
 variable "runtime" {
@@ -241,17 +245,6 @@ variable "runtime" {
 variable "new_nat_gateway" {
   description = "Whether to create a new nat gateway. In this template, a new nat gateway will create a nat gateway, eip and server snat entries."
   default     = "ture"
-}
-
-# 3 masters is default settings,so choose three appropriate instance types in the availability zones above.
-variable "master_instance_types" {
-  description = "The ecs instance types used to launch master nodes."
-   default     = ["ecs.n4v2.large","ecs.n4v2.large","ecs.n4v2.large"]
-}
-
-variable "worker_instance_types" {
-  description = "The ecs instance types used to launch worker nodes."
-  default     = ["ecs.n4v2.large"]
 }
 
 # options: between 24-28
