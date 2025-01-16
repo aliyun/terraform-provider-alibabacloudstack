@@ -788,6 +788,7 @@ func (client *AlibabacloudStackClient) WithSlsDataClient(do func(*sls.Client) (i
 		}
 		if client.Config.Proxy != "" {
 			os.Setenv("http_proxy", client.Config.Proxy)
+			os.Setenv("https_proxy", client.Config.Proxy)
 		}
 		client.logconn = &sls.Client{
 			// AccessKeyID:     client.Config.OrganizationAccessKey,
@@ -1199,6 +1200,10 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		protocol = "https"
 	} else {
+		protocol = "http"
+	}
+	if popcode == "CloudDns" {
+		// CloudDns不支持HTTPS
 		protocol = "http"
 	}
 	authType := "AK"

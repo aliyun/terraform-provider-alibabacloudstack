@@ -25,21 +25,18 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 
 	ZoneId := id
 	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZoneRecords", "")
+	request.Scheme="HTTP" // CloudDns不支持HTTPS
 	request.QueryParams["ZoneId"] = ZoneId
 	var resp = &DnsRecord{}
-	raw, err := s.client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
-		return dnsClient.ProcessCommonRequest(request)
-	})
-	addDebug("DescribeGlobalZoneRecords", response, requestInfo, request)
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorRecordNotFound"}) {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if response == nil {
+			return resp, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeGlobalZoneRecords", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug("DescribeGlobalZoneRecords", response, requestInfo, request)
@@ -238,25 +235,22 @@ func (s *DnsService) SetResourceTags(d *schema.ResourceData, resourceType string
 func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZones", "")
+	request.Scheme="HTTP" // CloudDns不支持HTTPS
 	request.QueryParams["Name"] = did[0]
 	request.QueryParams["Forwardedregionid"] = s.client.RegionId
 	request.QueryParams["SignatureVersion"] = "2.1"
 	request.QueryParams["PageNumber"] = fmt.Sprint(1)
 	request.QueryParams["PageSize"] = fmt.Sprint(PageSizeLarge)
 	resp := &DnsDomains{}
-	raw, err := s.client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
-		return dnsClient.ProcessCommonRequest(request)
-	})
-	addDebug("DescribeGlobalZones", response, nil, request)
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorDomainNotFound"}) {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if response == nil {
+			return resp, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeGlobalZones", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug("DescribeGlobalZones", response, nil, request)

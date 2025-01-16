@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -67,6 +65,7 @@ func dataSourceAlibabacloudStackDnsDomains() *schema.Resource {
 func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZones", "")
+	request.Scheme="HTTP" // CloudDns不支持HTTPS
 	request.QueryParams["PageNumber"] = fmt.Sprint(1)
 	request.QueryParams["PageSize"] = fmt.Sprint(PageSizeLarge)
 	request.QueryParams["Name"] = d.Get("domain_name").(string)
@@ -75,18 +74,16 @@ func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta inte
 
 	var addDomains = DnsDomains{}
 	for {
-		raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
-			return dnsClient.ProcessCommonRequest(request)
-		})
-		response, ok := raw.(*responses.CommonResponse)
+		// FIXME: 分页逻辑错误
+		response, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if response == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dns_domains", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request)
+		addDebug(request.GetActionName(), response, request)
 		err = json.Unmarshal(response.GetHttpContentBytes(), &addDomains)
 		if err != nil {
 			return errmsgs.WrapError(err)

@@ -792,7 +792,7 @@ locals {
 
 const DataAlibabacloudstackImages = `
 data "alibabacloudstack_images" "default" {
-  name_regex  = "^ubuntu_18.*64"
+  name_regex  = "^ubuntu_"
   //name_regex  = "arm_centos_7_6_20G_20211110.raw"
   //name_regex  = "^arm_centos_7"
   most_recent = true

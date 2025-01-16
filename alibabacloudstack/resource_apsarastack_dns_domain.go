@@ -5,12 +5,9 @@ import (
 	"log"
 	"strings"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 )
 
 func resourceAlibabacloudStackDnsDomain() *schema.Resource {
@@ -62,7 +59,6 @@ func resourceAlibabacloudStackDnsDomain() *schema.Resource {
 func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	dnsService := DnsService{client}
-	var requestInfo *ecs.Client
 	DomainName := d.Get("domain_name").(string)
 	check, err := dnsService.DescribeDnsDomain(DomainName)
 	if err != nil {
@@ -70,29 +66,20 @@ func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta inter
 	}
 	if check == nil || len(check.Data) == 0 {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "AddGlobalZone", "")
+		request.Scheme="HTTP" // CloudDns不支持HTTPS
 		request.QueryParams["Name"] = DomainName
-		raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
-			return dnsClient.ProcessCommonRequest(request)
-		})
+		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dns_domain", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw)
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if !ok {
-			return fmt.Errorf("Failed to cast raw response to CommonResponse")
-		}
+		addDebug(request.GetActionName(), bresponse)
 		if bresponse.GetHttpStatus() != 200 {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_dns_domain", "AddGlobalZone", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		addDebug("AddGlobalZone", raw, requestInfo, bresponse.GetHttpContentString())
 	}
 	check, err = dnsService.DescribeDnsDomain(DomainName)
 	if err != nil {
@@ -149,25 +136,21 @@ func resourceAlibabacloudStackDnsDomainUpdate(d *schema.ResourceData, meta inter
 
 	if remarkUpdate {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "UpdateGlobalZoneRemark", "")
+		request.Scheme="HTTP" // CloudDns不支持HTTPS
 		request.QueryParams["Name"] = did[0]
 		request.QueryParams["Id"] = did[1]
 		request.QueryParams["Remark"] = desc
-		raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
-			return dnsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw UpdateGlobalZoneRemark : %s", raw)
+		response, err := client.ProcessCommonRequest(request)
+		log.Printf(" response of raw UpdateGlobalZoneRemark : %s", response)
 
 		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
+			if response == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dns_domain", "UpdateGlobalZoneRemark", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		addDebug(request.GetActionName(), raw, request)
+		addDebug(request.GetActionName(), response, request)
 	}
 	d.SetId(check.Data[0].Name + COLON_SEPARATED + fmt.Sprint(check.Data[0].Id))
 	return resourceAlibabacloudStackDnsDomainRead(d, meta)
@@ -176,28 +159,22 @@ func resourceAlibabacloudStackDnsDomainUpdate(d *schema.ResourceData, meta inter
 func resourceAlibabacloudStackDnsDomainDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	dnsService := DnsService{client}
-	var requestInfo *ecs.Client
 	check, err := dnsService.DescribeDnsDomain(d.Id())
 	did := strings.Split(d.Id(), COLON_SEPARATED)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsDomainExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	addDebug("IsDomainExist", check, requestInfo, map[string]string{"Id": did[1]})
 
 	if len(check.Data) != 0 {
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DeleteGlobalZone", "")
+		request.Scheme="HTTP" // CloudDns不支持HTTPS
 		request.QueryParams["Id"] = did[1]
-		raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
-			return dnsClient.ProcessCommonRequest(request)
-		})
+		response, err := client.ProcessCommonRequest(request)
 		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*responses.CommonResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
+			if response == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dns_domain", "DeleteGlobalZone", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
