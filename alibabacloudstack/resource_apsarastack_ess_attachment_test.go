@@ -22,7 +22,7 @@ func TestAccalibabacloudstackdEssAttachment_update(t *testing.T) {
 	ra := resourceAttrInit(resourceId, basicMap)
 
 	testAccCheck := ra.resourceAttrMapUpdateSet()
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},

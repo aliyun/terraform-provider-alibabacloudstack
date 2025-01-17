@@ -26,7 +26,7 @@ func TestAccAlibabacloudStackLogAlert_basic(t *testing.T) {
 	content := "aliyun sls alert test"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLogAlertDependence)
 
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 
 		PreCheck: func() {
 			testAccPreCheck(t)
