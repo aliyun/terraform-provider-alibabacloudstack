@@ -296,8 +296,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	CDNCode:     PopEndpoint{"", ""},
 	QuickbiCode: PopEndpoint{"", ""},
 	OssDataCode: PopEndpoint{
-		"oss-{{.region}}.{{.domain}}",
-		"oss-{{.region}}.{{.domain}}",
+		"oss-{{.region}}-a.{{.domain}}",
+		"oss-{{.region}}-a.{{.domain}}",
 	},
 	BssDataCode: PopEndpoint{"", ""},
 	OTSCode:     PopEndpoint{"", ""},
