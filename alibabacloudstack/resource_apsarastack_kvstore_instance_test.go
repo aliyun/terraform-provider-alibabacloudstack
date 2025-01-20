@@ -129,7 +129,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_classictest(t *testing.T) {
 		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKVStoreInstance_classic(rand, string(KVStoreRedis), string(KVStore4Dot0)),
+				Config: testAccKVStoreInstance_classic(rand, string(KVStoreRedis), string(KVStore5Dot0)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -167,7 +167,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKVStoreInstance_vpc(rand, string(KVStoreRedis), string(KVStore4Dot0)),
+				Config: testAccKVStoreInstance_vpc(rand, string(KVStoreRedis), string(KVStore5Dot0)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
@@ -305,7 +305,7 @@ variable "name" {
 }
 
 variable "kv_edition" {
-    default = "enterprise"
+    default = "community"
 }
 
 variable "kv_engine" {
@@ -585,7 +585,7 @@ func testAccKVStoreInstance_vpc(rand int, instanceClass, engineVersion string) s
 	}
 	
 	variable "kv_edition" {
-    default = "enterprise"
+    default = "community"
 	}
 	
 	variable "kv_engine" {

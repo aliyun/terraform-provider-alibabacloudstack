@@ -1373,7 +1373,7 @@ data "alibabacloudstack_zones" "kv_zone" {
 }
  
 data alibabacloudstack_kvstore_instance_classes "default" {
-  zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id  
+  zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
   edition_type = "${var.kv_edition}"
   engine = "${var.kv_engine}"
 }
