@@ -5,8 +5,6 @@ import (
 	"log"
 	"regexp"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -92,22 +90,20 @@ func dataSourceAlibabacloudStackDnsRecordsRead(d *schema.ResourceData, meta inte
 	ZoneId := d.Get("zone_id").(string)
 
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZoneRecords", "")
+	request.Scheme="HTTP" // CloudDns不支持HTTPS
 	request.QueryParams["ZoneId"] = ZoneId
 
 	response := DnsRecord{}
 
 	for {
-		raw, err := client.WithDnsClient(func(dnsClient *alidns.Client) (interface{}, error) {
-			return dnsClient.ProcessCommonRequest(request)
-		})
-		log.Printf(" response of raw ObtainGlobalAuthRecordList : %s", raw)
+		bresponse, err := client.ProcessCommonRequest(request)
+		log.Printf(" response of raw ObtainGlobalAuthRecordList : %s", bresponse)
 
-		bresponse, ok := raw.(*responses.CommonResponse)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dns_records", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 

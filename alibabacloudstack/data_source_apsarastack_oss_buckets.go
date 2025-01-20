@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"encoding/xml"
 	"regexp"
 
@@ -104,7 +103,6 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 		request.QueryParams["OpenApiAction"] = "GetService"
 		request.QueryParams["ProductName"] = "oss"
-		var bucketList = &BucketList{}
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			if bresponse == nil {
@@ -118,15 +116,12 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 		}
 		addDebug("GetBucketInfo", bresponse, requestInfo, request)
 
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), bucketList)
+		buckets, err := getBucketListResponseBuckets(bresponse)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		if bucketList.Code != "200" || len(bucketList.Data.ListAllMyBucketsResult.Buckets.Bucket) < 1 {
-			return errmsgs.WrapError(err)
-		}
 
-		for _, k := range bucketList.Data.ListAllMyBucketsResult.Buckets.Bucket {
+		for _, k := range buckets {
 			allBuckets = append(allBuckets, oss.BucketProperties{
 				XMLName:          xml.Name{},
 				Name:             k.Name,

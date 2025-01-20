@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -210,7 +211,7 @@ variable "name" {
 %s
 
 resource "alibabacloudstack_router_interface" "default" {
-  opposite_region = "cn-wulan-env212-d01"
+  opposite_region = "%s"
   router_type = "VRouter"
   router_id = "${alibabacloudstack_vpc_vpc.default.router_id}"
   role = "InitiatingSide"
@@ -225,7 +226,7 @@ resource "alibabacloudstack_route_entry" "default" {
   nexthop_id = "${alibabacloudstack_router_interface.default.id}"
   name = "${var.name}"
 }
-`, rand, SecurityGroupCommonTestCase)
+`, rand, SecurityGroupCommonTestCase, os.Getenv("ALIBABACLOUDSTACK_REGION"),)
 }
 
 func testAccRouteEntryConfig_natGateway(rand int) string {

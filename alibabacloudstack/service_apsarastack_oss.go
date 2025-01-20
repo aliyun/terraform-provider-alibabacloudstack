@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -87,7 +86,6 @@ func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoRes
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	request.QueryParams["OpenApiAction"] = "GetService"
 	request.QueryParams["ProductName"] = "oss"
-	var bucketList = &BucketList{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if bresponse == nil {
@@ -101,22 +99,15 @@ func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoRes
 	}
 	addDebug("GetBucketInfo", bresponse, request)
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), bucketList)
-	if err != nil {
-		return response, errmsgs.WrapError(err)
-	}
-	if bucketList.Code != "200" || len(bucketList.Data.ListAllMyBucketsResult.Buckets.Bucket) < 1 {
-		return response, errmsgs.WrapError(err)
-	}
+	buckets, err := getBucketListResponseBuckets(bresponse)
 
 	var found = false
-	for _, j := range bucketList.Data.ListAllMyBucketsResult.Buckets.Bucket {
+	for _, j := range buckets {
 		if j.Name == id {
 			response.BucketInfo.Name = j.Name
 			response.BucketInfo.StorageClass = j.StorageClass
 			response.BucketInfo.ExtranetEndpoint = j.ExtranetEndpoint
 			response.BucketInfo.IntranetEndpoint = j.IntranetEndpoint
-			response.BucketInfo.Owner.ID = fmt.Sprint(j.ResourceGroupName)
 			response.BucketInfo.Location = j.Location
 			found = true
 			break
@@ -128,11 +119,10 @@ func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoRes
 	return
 }
 
-func (s *OssService) ListOssBucket() (response BucketList, err error) {
+func (s *OssService) ListOssBucket() (response []BucketListBucket, err error) {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
 	request.QueryParams["OpenApiAction"] = "GetService"
 	request.QueryParams["ProductName"] = "oss"
-	bucketList := BucketList{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if bresponse == nil {
@@ -146,35 +136,86 @@ func (s *OssService) ListOssBucket() (response BucketList, err error) {
 	}
 	addDebug("GetBucketInfo", bresponse, request)
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), bucketList)
+	buckets, err := getBucketListResponseBuckets(bresponse)
 	if err != nil {
-		return response, errmsgs.WrapError(err)
+		return buckets, errmsgs.WrapError(err)
 	}
-	if bucketList.Code != "200" || len(bucketList.Data.ListAllMyBucketsResult.Buckets.Bucket) < 1 {
-		return response, errmsgs.WrapError(err)
+	return buckets, nil
+}
+func getBucketListResponseBuckets(response *responses.CommonResponse) ([]BucketListBucket, error) {
+	var buckets []BucketListBucket
+
+	var bucketList BucketList
+	err := json.Unmarshal(response.GetHttpContentBytes(), &bucketList)
+	// 3.16.2 会发返回，但3.18.x不返回
+	if err != nil || (bucketList.Code != "" && bucketList.Code != "200") {
+		return buckets, errmsgs.WrapError(err)
 	}
-	return bucketList, nil
+
+	if _, ok := bucketList.Data.ListAllMyBucketsResult.Buckets.(string); ok {
+		return buckets, errmsgs.WrapErrorf(err, "Not Found: Oss Bucket")
+	}
+
+	var bucketInterface interface{}
+	if v, ok := bucketList.Data.ListAllMyBucketsResult.Buckets.(map[string]interface{}); !ok {
+		return buckets, errmsgs.WrapErrorf(err, "Error Response Format")
+	} else {
+		bucketInterface = v["Bucket"]
+	}
+
+	switch v := bucketInterface.(type) {
+	case map[string]interface{}:
+		// 单个 Bucket 结构体
+		bucket := BucketListBucket{
+			Comment:          v["Comment"].(string),
+			CreationDate:     v["CreationDate"].(string),
+			ExtranetEndpoint: v["ExtranetEndpoint"].(string),
+			IntranetEndpoint: v["IntranetEndpoint"].(string),
+			Location:         v["Location"].(string),
+			Name:             v["Name"].(string),
+			StorageClass:     v["StorageClass"].(string),
+		}
+		buckets = append(buckets, bucket)
+	case []interface{}:
+		// 多个 Bucket 结构体
+		for _, vv := range v {
+			vvv, ok := vv.(map[string]interface{})
+			if !ok {
+				return buckets, errmsgs.WrapErrorf(err, "Error Response Format")
+			}
+
+			bucket := BucketListBucket{
+				Comment:          vvv["Comment"].(string),
+				CreationDate:     vvv["CreationDate"].(string),
+				ExtranetEndpoint: vvv["ExtranetEndpoint"].(string),
+				IntranetEndpoint: vvv["IntranetEndpoint"].(string),
+				Location:         vvv["Location"].(string),
+				Name:             vvv["Name"].(string),
+				StorageClass:     vvv["StorageClass"].(string),
+			}
+			buckets = append(buckets, bucket)
+		}
+	default:
+		return buckets, errmsgs.WrapErrorf(err, "Error Response Format")
+	}
+	return buckets, nil
+}
+
+type BucketListBucket struct {
+	Comment          string `json:"Comment"`
+	CreationDate     string `json:"CreationDate"`
+	ExtranetEndpoint string `json:"ExtranetEndpoint"`
+	IntranetEndpoint string `json:"IntranetEndpoint"`
+	Location         string `json:"Location"`
+	Name             string `json:"Name"`
+	StorageClass     string `json:"StorageClass"`
 }
 
 type BucketList struct {
 	Data struct {
 		ListAllMyBucketsResult struct {
-			Buckets struct {
-				Bucket []struct {
-					Comment           string `json:"Comment"`
-					CreationDate      string `json:"CreationDate"`
-					Department        int64  `json:"Department"`
-					DepartmentName    string `json:"DepartmentName"`
-					ExtranetEndpoint  string `json:"ExtranetEndpoint"`
-					IntranetEndpoint  string `json:"IntranetEndpoint"`
-					Location          string `json:"Location"`
-					Name              string `json:"Name"`
-					ResourceGroup     int64  `json:"ResourceGroup"`
-					ResourceGroupName string `json:"ResourceGroupName"`
-					StorageClass      string `json:"StorageClass"`
-				} `json:"Bucket"`
-			} `json:"Buckets"`
-			Owner struct{} `json:"Owner"`
+			Buckets interface{} `json:"Buckets"`
+			Owner   struct{}    `json:"Owner"`
 		} `json:"ListAllMyBucketsResult"`
 	} `json:"Data"`
 	Code         string `json:"code"`

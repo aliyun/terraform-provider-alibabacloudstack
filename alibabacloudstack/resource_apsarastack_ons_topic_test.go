@@ -79,7 +79,7 @@ func TestAccAlibabacloudStackOnsTopic_basic(t *testing.T) {
 					"instance_id":  "${alibabacloudstack_ons_instance.default.id}",
 					"topic":        name,
 					"remark":       "Ons_topic",
-					"message_type": "2",
+					"message_type": "0",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),

@@ -726,6 +726,7 @@ func (client *AlibabacloudStackClient) WithCsClient(do func(*cs.Client) (interfa
 			csconn.SetEndpoint(endpoint)
 		}
 		if client.Config.Proxy != "" {
+			// FIXME: 修改环境变量会存在风险
 			os.Setenv("http_proxy", client.Config.Proxy)
 		}
 		client.csconn = csconn
@@ -787,7 +788,9 @@ func (client *AlibabacloudStackClient) WithSlsDataClient(do func(*sls.Client) (i
 			return nil, fmt.Errorf("unable to initialize the log client: endpoint or domain is not provided for log service")
 		}
 		if client.Config.Proxy != "" {
+			// FIXME: 修改环境变量会存在风险
 			os.Setenv("http_proxy", client.Config.Proxy)
+			os.Setenv("https_proxy", client.Config.Proxy)
 		}
 		client.logconn = &sls.Client{
 			// AccessKeyID:     client.Config.OrganizationAccessKey,
@@ -933,10 +936,6 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 		if endpoint == "" {
 			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
 		}
-		// if !strings.HasPrefix(endpoint, "https") && !strings.HasPrefix(endpoint, "http") {
-		// 	endpoint = fmt.Sprintf("https://%s", endpoint)
-		// }
-		// endpoint := "http://test1111.cn-wulan-env212-d01.ots-internal.inter.env212.shuguang.com"
 		tableStoreClient = tablestore.NewClientWithConfig(endpoint, instanceName, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken, tablestore.NewDefaultTableStoreConfig())
 		client.tablestoreconnByInstanceName[instanceName] = tableStoreClient
 	}
@@ -1199,6 +1198,10 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	if strings.ToLower(client.Config.Protocol) == "https" {
 		protocol = "https"
 	} else {
+		protocol = "http"
+	}
+	if popcode == "CloudDns" {
+		// CloudDns不支持HTTPS
 		protocol = "http"
 	}
 	authType := "AK"

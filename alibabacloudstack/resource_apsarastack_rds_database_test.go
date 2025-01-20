@@ -28,7 +28,7 @@ func TestAccAlibabacloudStackDBDatabaseUpdate(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := "tf-testAccDBdatabase_basic"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDBDatabaseConfigDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
