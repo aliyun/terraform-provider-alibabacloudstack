@@ -315,6 +315,7 @@ variable "kv_engine" {
 %s 
 
 resource "alibabacloudstack_kvstore_instance" "default" {
+	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
 	instance_name  = var.name
 	instance_type  = var.kv_engine
 	instance_class = local.default_kv_instance_classes
@@ -595,6 +596,7 @@ func testAccKVStoreInstance_vpc(rand int, instanceClass, engineVersion string) s
 	%s 
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
+		zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
 		instance_class = local.default_kv_instance_classes
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"

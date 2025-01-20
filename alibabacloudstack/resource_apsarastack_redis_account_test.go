@@ -116,7 +116,7 @@ variable "name" {
 }
 
 variable "kv_edition" {
-    default = "Enterprise"
+    default = "enterprise"
 }
 
 variable "kv_engine" {
@@ -130,6 +130,7 @@ data "alibabacloudstack_zones" "default" {
   }
 
 resource "alibabacloudstack_kvstore_instance" "default" {
+	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
 	instance_name  = var.name
 	instance_type  = var.kv_engine
 	instance_class = local.default_kv_instance_classes
