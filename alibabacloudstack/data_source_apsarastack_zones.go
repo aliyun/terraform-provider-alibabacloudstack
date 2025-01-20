@@ -196,6 +196,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	gpdbZones := make(map[string]string)
 	hbaseZones := make(map[string]string)
 	adbZones := make(map[string]string)
+	elasticsearchZones := make(map[string]string)
 	instanceChargeType := d.Get("instance_charge_type").(string)
 
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeRds)) {
@@ -215,7 +216,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 				return resource.NonRetryableError(err)
 			}
 			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-			
+
 			return nil
 		})
 		response, ok := raw.(*rds.DescribeRegionsResponse)
@@ -256,7 +257,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 			return errmsgs.WrapError(fmt.Errorf("[ERROR] There is no available region for KVStore"))
 		}
 		for _, r := range regions.RegionIds.KVStoreRegion {
-			if len(regions.RegionIds.KVStoreRegion) > 0 {
+			if len(r.ZoneIdList.ZoneId) > 0 {
 				for _, zone_id := range r.ZoneIdList.ZoneId {
 					if multi && strings.Contains(zone_id, MULTI_IZ_SYMBOL) && r.RegionId == string(client.Region) {
 						zoneIds = append(zoneIds, zone_id)
@@ -265,10 +266,12 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 					rkvZones[zone_id] = r.RegionId
 				}
 			} else if r.ZoneIds != "" {
-				if multi && strings.Contains(r.ZoneIds, MULTI_IZ_SYMBOL) && r.RegionId == string(client.Region) {
-					zoneIds = append(zoneIds, r.ZoneIds)
+				for _, zoneId := range strings.Split(r.ZoneIds, ",") {
+					if multi && strings.Contains(r.ZoneIds, MULTI_IZ_SYMBOL) && r.RegionId == string(client.Region) {
+						zoneIds = append(zoneIds, r.ZoneIds)
+					}
+					rkvZones[zoneId] = r.RegionId
 				}
-				rkvZones[r.ZoneIds] = r.RegionId
 			}
 		}
 	}
@@ -384,7 +387,7 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 			}
 		}
 	}
-	elasticsearchZones := make(map[string]string)
+
 	if strings.ToLower(Trim(resType)) == strings.ToLower(string(ResourceTypeElasticsearch)) {
 		request := elasticsearch.CreateGetRegionConfigurationRequest()
 		client.InitRoaRequest(*request.RoaRequest)
