@@ -151,12 +151,6 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_PROXY", nil),
 				Description: descriptions["proxy"],
 			},
-			"force_use_asapi": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: descriptions["force_use_asapi"],
-			},
 			"is_center_region": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -168,13 +162,6 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_POPGW_DOMAIN", nil),
 				Description: descriptions["popgw_domain"],
-			},
-			"domain": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_DOMAIN", nil),
-				Description: descriptions["domain"],
-				Deprecated:  "ASAPI will no longer provide external services by default on apsarastack v3.18.1",
 			},
 			"ossservice_domain": {
 				Type:        schema.TypeString,
@@ -924,31 +911,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Endpoints[connectivity.OssDataCode] = ossServicedomain
 	}
 
-	domain := d.Get("domain").(string)
-	if domain != "" {
-		if strings.Contains(domain, "/") && d.Get("proxy").(string) != "" {
-			return nil, fmt.Errorf("[Error]Domain containing the character '/' is not supported for proxy configuration.")
-		}
-		// 没有生成popgw地址的，继续使用asapi
-		var setEndpointIfEmpty = func(endpoint string, domain string) string {
-			if endpoint == "" {
-				return domain
-			}
-			return endpoint
-		}
-		for popcode := range connectivity.PopEndpoints {
-			if popcode == connectivity.OssDataCode {
-				// oss的数据网关不做配置
-				continue
-			}
-			if popcode == connectivity.SlSDataCode {
-				// SLS的数据网关不做配置
-				continue
-			}
-			config.Endpoints[popcode] = setEndpointIfEmpty(config.Endpoints[popcode], domain)
-		}
-	}
-	if v, ok := d.GetOk("popgw_domain"); !d.Get("force_use_asapi").(bool) && ok && v.(string) != "" {
+	if v, ok := d.GetOk("popgw_domain"); ok && v.(string) != "" {
 		popgw_domain := v.(string)
 		log.Printf("Generator Popgw Endpoint: %s", popgw_domain)
 		// 使用各云产品的endpoint的规则生成popgw地址
@@ -1069,7 +1032,7 @@ func init() {
 
 		"proxy": "Use this to set proxy connection",
 
-		"domain": "Use this to override the default domain. It's typically used to connect to custom domain.",
+		"popgw_domain": "Use this to override the default domain. It's typically used to connect to custom domain.",
 	}
 }
 func endpointsSchema() *schema.Schema {

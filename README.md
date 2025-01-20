@@ -112,7 +112,7 @@ cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabacloudstack
 export ALIBABACLOUDSTACK_ACCESS_KEY=xxx
 export ALIBABACLOUDSTACK_SECRET_KEY=xxx
 export ALIBABACLOUDSTACK_REGION=xxx
-export ALIBABACLOUDSTACK_DOMAIN=xxx
+export ALIBABACLOUDSTACK_POPGW_DOMAIN=xxx
 export ALIBABACLOUDSTACK_RESOURCE_GROUP_SET=xxx
 export outfile=gotest.out
 TF_ACC=1 TF_LOG=INFO go test ./alibabacloudstack -v -run=TestAccAlibabacloudStack -timeout=1440m | tee $outfile

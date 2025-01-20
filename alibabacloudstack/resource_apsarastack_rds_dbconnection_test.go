@@ -19,8 +19,8 @@ func TestAccAlibabacloudStackDBConnectionConfigUpdate(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccDBconnection%d", rand)
 
 	if rdsEndpoint = os.Getenv("RDS_ENDPOINT"); rdsEndpoint == "" {
-		if rdsEndpoint = os.Getenv("ALIBABACLOUDSTACK_DOMAIN"); rdsEndpoint == "" {
-			t.Fatal("ALIBABACLOUDSTACK_DOMAIN must be set for acceptance tests")
+		if rdsEndpoint = os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"); rdsEndpoint == "" {
+			t.Fatal("ALIBABACLOUDSTACK_POPGW_DOMAIN must be set for acceptance tests")
 		}
 		rdsEndpoint = regexp.MustCompile(`.*\.(intra\..*\.com)\/.*`).FindStringSubmatch(rdsEndpoint)[1]
 	}
