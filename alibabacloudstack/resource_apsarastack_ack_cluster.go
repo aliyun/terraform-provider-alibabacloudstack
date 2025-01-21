@@ -73,8 +73,9 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Optional: true,
 			},
 			"num_of_nodes": {
-				Type:     schema.TypeInt,
-				Required: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntAtLeast(1),
 			},
 			"worker_disk_size": {
 				Type:             schema.TypeInt,
@@ -520,9 +521,10 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			// 				//Removed:          "Field 'vswitch_ids' has been removed from provider version 1.75.0. New field 'master_vswitch_ids' and 'worker_vswitch_ids' replace it.",
 			// 			},
 			"master_count": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  3,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      3,
+				ValidateFunc: validation.IntAtLeast(3),
 			},
 			// single instance type would cause extra troubles
 			// 			"master_instance_type": {
@@ -797,25 +799,16 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 	d.Partial(true)
 	invoker := NewInvoker()
 
-	nodepool, err := csService.DescribeClusterNodePools(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 	var nodepoolid string
-	for _, k := range nodepool.Nodepools {
-		//Considering multiple nodepools
-		if k.NodepoolInfo.IsDefault {
-			nodepoolid = k.NodepoolInfo.NodepoolID
+	if d.IsNewResource() {
+		var err error
+		nodepoolid, err = getDefaultNodePoolId(csService, d.Id())
+		if err != nil {
+			return err
 		}
+	} else {
+		nodepoolid = d.Get("nodepool_id").(string)
 	}
-	if nodepoolid == "" {
-		if len(nodepool.Nodepools) == 1 && nodepool.Nodepools[0].NodepoolInfo.Name == "default-nodepool" {
-			nodepoolid = nodepool.Nodepools[0].NodepoolInfo.NodepoolID
-		} else {
-			return errmsgs.WrapErrorf(fmt.Errorf("can not found default node_pool"), "DescribeClusterNodePools", nodepool.Nodepools)
-		}
-	}
-	d.Set("nodepool_id", nodepoolid)
 	if d.HasChange("num_of_nodes") && !d.IsNewResource() {
 		password := d.Get("password").(string)
 		if password == "" {
@@ -893,9 +886,9 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 			request.SetContent([]byte(body))
 			request.Headers["x-acs-content-type"] = "application/json"
 			//var err error
-			err = nil
 			var resp *responses.CommonResponse
-			if err = invoker.Run(func() error {
+			if err := invoker.Run(func() error {
+				var err error
 				resp, err = client.ProcessCommonRequest(request)
 				return err
 			}); err != nil {
@@ -934,7 +927,11 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		}
 		return errmsgs.WrapError(err)
 	}
-	nodepoolid := d.Get("nodepool_id").(string)
+	nodepoolid, err := getDefaultNodePoolId(csService, d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	d.Set("nodepool_id", nodepoolid)
 	clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
 	if err != nil {
 		return errmsgs.WrapError(err)
@@ -1010,6 +1007,35 @@ func resourceAlibabacloudStackCSKubernetesDelete(d *schema.ResourceData, meta in
 	}
 	return nil
 }
+
+func getDefaultNodePoolId(csService CsService, clusterId string) (string, error) {
+	var nodepoolid string
+	if err := resource.Retry(3*time.Minute, func() *resource.RetryError {
+		nodepool, err := csService.DescribeClusterNodePools(clusterId)
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+
+		for _, k := range nodepool.Nodepools {
+			//Considering multiple nodepools
+			if k.NodepoolInfo.IsDefault {
+				nodepoolid = k.NodepoolInfo.NodepoolID
+			}
+		}
+		if nodepoolid == "" {
+			if len(nodepool.Nodepools) == 1 && nodepool.Nodepools[0].NodepoolInfo.Name == "default-nodepool" {
+				nodepoolid = nodepool.Nodepools[0].NodepoolInfo.NodepoolID
+			} else {
+				return resource.RetryableError(errmsgs.WrapErrorf(fmt.Errorf("can not found default node_pool"), "DescribeClusterNodePools", nodepool.Nodepools))
+			}
+		}
+		return nil
+	}); err != nil {
+		return "", err
+	}
+	return nodepoolid, nil
+}
+
 func updateKubernetesClusterTag(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
