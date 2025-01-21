@@ -47,6 +47,7 @@ variable "name" {
 %s
 
 resource "alibabacloudstack_kvstore_instance" "default" {
+zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
 instance_class = "redis.master.small.default"
 instance_name  = var.name
 vswitch_id     = alibabacloudstack_vpc_vswitch.default.id

@@ -30,8 +30,8 @@ func sharedClientForRegion(region string) (interface{}, error) {
 	if proxy = os.Getenv("ALIBABACLOUDSTACK_PROXY"); proxy == "" {
 		return nil, fmt.Errorf("empty ALIBABACLOUDSTACK_PROXY")
 	}
-	if domain = os.Getenv("ALIBABACLOUDSTACK_DOMAIN"); domain == "" {
-		return nil, fmt.Errorf("empty ALIBABACLOUDSTACK_DOMAIN")
+	if domain = os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"); domain == "" {
+		return nil, fmt.Errorf("empty ALIBABACLOUDSTACK_POPGW_DOMAIN")
 	}
 	if ossEndpoint = os.Getenv("OSS_ENDPOINT"); ossEndpoint == "" {
 		ossEndpoint = domain
