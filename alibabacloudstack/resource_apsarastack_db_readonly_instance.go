@@ -39,62 +39,62 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 			},
 
 			"master_db_instance_id": {
-				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ForceNew: true,
-				Deprecated:   "Field 'master_db_instance_id' is deprecated and will be removed in a future release. Please use new field 'master_instance_id' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'master_db_instance_id' is deprecated and will be removed in a future release. Please use new field 'master_instance_id' instead.",
 				ConflictsWith: []string{"master_instance_id"},
 			},
 			"master_instance_id": {
-				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"master_db_instance_id"},
 			},
 
 			"instance_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
-				Computed:     true,
-				Deprecated:   "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
+				Computed:      true,
+				Deprecated:    "Field 'instance_name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
 				ConflictsWith: []string{"db_instance_description"},
 			},
 			"db_instance_description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
-				Computed:     true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
+				Computed:      true,
 				ConflictsWith: []string{"instance_name"},
 			},
 
 			"instance_type": {
-				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
-				Deprecated:   "Field 'instance_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'instance_type' is deprecated and will be removed in a future release. Please use new field 'db_instance_class' instead.",
 				ConflictsWith: []string{"db_instance_class"},
 			},
 			"db_instance_class": {
-				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"instance_type"},
 			},
 
 			"instance_storage": {
-				Type:         schema.TypeInt,
-				Optional:true,
-				Computed:true,
-				Deprecated:   "Field 'instance_storage' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage' instead.",
+				Type:          schema.TypeInt,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'instance_storage' is deprecated and will be removed in a future release. Please use new field 'db_instance_storage' instead.",
 				ConflictsWith: []string{"db_instance_storage"},
 			},
 			"db_instance_storage": {
-				Type:         schema.TypeInt,
-				Optional:true,
-				Computed:true,
+				Type:          schema.TypeInt,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"instance_storage"},
 			},
 
@@ -144,7 +144,6 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"port": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -210,7 +209,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackDBInstanceRead(d, meta)
+		return resourceAlibabacloudStackDBReadonlyInstanceRead(d, meta)
 	}
 
 	if d.HasChanges("db_instance_description", "instance_name") {
@@ -438,7 +437,7 @@ func buildDBReadonlyCreateRequest(d *schema.ResourceData, meta interface{}) (*rd
 	}
 	request.DBInstanceClass = Trim(connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string))
 	if err := errmsgs.CheckEmpty(request.DBInstanceClass, schema.TypeString, "db_instance_class", "instance_type"); err != nil {
-			return request, errmsgs.WrapError(err)
+		return request, errmsgs.WrapError(err)
 	}
 	request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
 	request.DBInstanceStorageType = d.Get("db_instance_storage_type").(string)

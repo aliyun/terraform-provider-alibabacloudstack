@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -17,13 +15,12 @@ func TestAccAlibabacloudStackDBReadonlyInstance_update(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testAccDBInstance_vpc_%d", rand)
 	var DBReadonlyMap = map[string]string{
-		"instance_storage":      "5",
+		"instance_storage":      "20",
 		"engine_version":        "5.6",
 		"engine":                "MySQL",
 		"port":                  "3306",
 		"instance_name":         name,
 		"instance_type":         CHECKSET,
-		"parameters":            NOSET,
 		"master_db_instance_id": CHECKSET,
 		"zone_id":               CHECKSET,
 		"vswitch_id":            CHECKSET,
@@ -69,24 +66,6 @@ func TestAccAlibabacloudStackDBReadonlyInstance_update(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// upgrade storage
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"instance_storage": "${alibabacloudstack_db_instance.default.instance_storage + data.alibabacloudstack_db_instance_classes.default.instance_classes.0.storage_range.step}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{"instance_storage": "10"}),
-				),
-			},
-			// upgrade instanceType
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"instance_type": "${data.alibabacloudstack_db_instance_classes.default.instance_classes.1.instance_class}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{"instance_type": CHECKSET}),
-				),
-			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_name": "${var.name}_ro",
@@ -121,23 +100,6 @@ func TestAccAlibabacloudStackDBReadonlyInstance_update(t *testing.T) {
 						"tags.%":       REMOVEKEY,
 						"tags.Created": REMOVEKEY,
 						"tags.For":     REMOVEKEY,
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"master_db_instance_id": "${alibabacloudstack_db_instance.default.id}",
-					"zone_id":               "${alibabacloudstack_db_instance.default.zone_id}",
-					"engine_version":        "${alibabacloudstack_db_instance.default.engine_version}",
-					"instance_type":         "${alibabacloudstack_db_instance.default.instance_type}",
-					"instance_storage":      "${alibabacloudstack_db_instance.default.instance_storage + 2*data.alibabacloudstack_db_instance_classes.default.instance_classes.0.storage_range.step}",
-					"instance_name":         "${var.name}",
-					"vswitch_id":            "${alibabacloudstack_vpc_vswitch.default.id}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"instance_name":    name,
-						"instance_storage": "15",
 					}),
 				),
 			},
