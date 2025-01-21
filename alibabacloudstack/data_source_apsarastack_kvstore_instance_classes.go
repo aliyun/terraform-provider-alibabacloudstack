@@ -165,9 +165,9 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 	if series, ok := d.GetOk("edition_type") ; ok {
 		for _, Data := range Datas {
 			// 目前查询接口没有返回是否为企业版本，只能从类型判断
-			if series == "Enterprise" && strings.Contains(Data.InstanceClass, ".amber.") {
+			if series == "enterprise" && strings.Contains(Data.InstanceClass, ".amber.") {
 				instanceClasses = append(instanceClasses, Data.InstanceClass)
-			} else if series == "Community" && ! strings.Contains(Data.InstanceClass, ".amber.") {
+			} else if series == "community" && ! strings.Contains(Data.InstanceClass, ".amber.") {
 				instanceClasses = append(instanceClasses, Data.InstanceClass)
 	 		} 
  		}
