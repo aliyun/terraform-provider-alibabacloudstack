@@ -116,7 +116,7 @@ variable "name" {
 }
 
 variable "kv_edition" {
-    default = "Enterprise"
+    default = "enterprise"
 }
 
 variable "kv_engine" {

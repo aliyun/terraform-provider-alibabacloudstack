@@ -305,7 +305,7 @@ variable "name" {
 }
 
 variable "kv_edition" {
-    default = "Enterprise"
+    default = "enterprise"
 }
 
 variable "kv_engine" {
@@ -585,7 +585,7 @@ func testAccKVStoreInstance_vpc(rand int, instanceClass, engineVersion string) s
 	}
 	
 	variable "kv_edition" {
-    default = "Enterprise"
+    default = "enterprise"
 	}
 	
 	variable "kv_engine" {
