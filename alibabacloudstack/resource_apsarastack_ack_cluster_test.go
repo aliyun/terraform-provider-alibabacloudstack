@@ -70,7 +70,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					// 	"For":     "acceptance test",
 					// },
 					"runtime": []map[string]interface{}{
-						{"name": "docker", "version": "19.03.15"},
+						{"name": "containerd", "version": "1.6.28"},
 					},
 					"addons": []map[string]interface{}{
 						{
@@ -86,23 +86,23 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 							"name": "nginx-ingress-controller",
 						},
 					},
-					"name":                         "${var.name}",
-					"version":                      "1.20.11-aliyun.1",
-					"os_type":                      "linux",
-					"platform":                     "AliyunLinux",
-					"timeout_mins":                 "60",
-					"vpc_id":                       "${alibabacloudstack_vpc_vpc.default.id}",
-					"master_count":                 "3",
-					"master_disk_category":         "cloud_ssd",
-					"image_id":                     "${var.image_id}",
-					"master_disk_size":             "40",
-					"master_instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
-					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
-					"num_of_nodes":                 "1",
-					"worker_disk_category":         "cloud_ssd",
-					"worker_disk_size":             "40",
-					"worker_instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
-					"worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
+					"name":                  "${var.name}",
+					"version":               "1.30.1-aliyun.1",
+					"os_type":               "linux",
+					"platform":              "AliyunLinux",
+					"timeout_mins":          "60",
+					"vpc_id":                "${alibabacloudstack_vpc_vpc.default.id}",
+					"master_count":          "3",
+					"master_disk_category":  "cloud_ssd",
+					"image_id":              "${data.alibabacloudstack_images.default.images.0.id}",
+					"master_disk_size":      "40",
+					"master_instance_types": []string{"ecs.sn1ne.large", "ecs.sn1ne.large", "ecs.sn1ne.large"},
+					"master_vswitch_ids":    []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
+					"num_of_nodes":          "0",
+					// "worker_disk_category":         "cloud_ssd",
+					// "worker_disk_size":             "40",
+					// "worker_instance_types":        []string{"ecs.sn1ne.large"},
+					// "worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
 					"enable_ssh":                   "${var.enable_ssh}",
 					"password":                     "${var.password}",
 					"delete_protection":            "false",
@@ -154,7 +154,7 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 					// 	"For":     "acceptance test",
 					// },
 					"runtime": []map[string]interface{}{
-						{"name": "docker", "version": "19.03.15"},
+						{"name": "containerd", "version": "1.6.28"},
 					},
 					"addons": []map[string]interface{}{
 						{
@@ -171,21 +171,21 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 						},
 					},
 					"name":                  "${var.name}",
-					"version":               "1.20.11-aliyun.1",
+					"version":               "1.30.1-aliyun.1",
 					"os_type":               "linux",
 					"platform":              "AliyunLinux",
 					"timeout_mins":          "60",
 					"vpc_id":                "${alibabacloudstack_vpc_vpc.default.id}",
 					"master_count":          "3",
 					"master_disk_category":  "cloud_ssd",
-					"image_id":              "${var.image_id}",
+					"image_id":              "${data.alibabacloudstack_images.default.images.0.id}",
 					"master_disk_size":      "40",
-					"master_instance_types": []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"master_instance_types": []string{"ecs.sn1ne.large", "ecs.sn1ne.large", "ecs.sn1ne.large"},
 					"master_vswitch_ids":    []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
 					"num_of_nodes":          "1",
 					"worker_disk_category":  "cloud_ssd",
 					"worker_disk_size":      "40",
-					"worker_instance_types": []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"worker_instance_types": []string{"ecs.sn1ne.large"},
 					"worker_vswitch_ids":    []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
 					"security_group_id":     "${alibabacloudstack_ecs_securitygroup.default.id}",
 					"enable_ssh":            "${var.enable_ssh}",
@@ -214,30 +214,31 @@ variable "name" {
 	default = "%s"
 }
 
-variable "k8s_number" {
-  description = "The number of kubernetes cluster."
-  default     = 1
-}
-
-variable "image_id" {
-  default     = "centos_7_9_x64_20G_alibase_20220322.vhd"
-}
 
 %s
 
+data "alibabacloudstack_images" "default" {
+  name_regex  = "^ubuntu_"
+  //name_regex  = "arm_centos_7_6_20G_20211110.raw"
+  //name_regex  = "^arm_centos_7"
+  most_recent = true
+  owners      = "system"
+}
+
 data "alibabacloudstack_instance_types" "default" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  cpu_core_count       = 1
-  memory_size          = 1
+  cpu_core_count       = 2
+  memory_size          = 2
 }
+
 
 # leave it to empty then terraform will create several vswitches
 
 variable "runtime" {
  default     = [
 		{
-			name = "containerd"
-  			version = "1.5.13"
+			name    = "containerd"
+			version = "1.6.28"
 		}
 	]
 }
