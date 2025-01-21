@@ -144,13 +144,6 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"monitoring_period": {
-				Type:         schema.TypeInt,
-				ValidateFunc: validation.IntInSlice([]int{5, 60, 300}),
-				Optional:     true,
-				Computed:     true,
-			},
-
 			"port": {
 				Type:     schema.TypeString,
 				Computed: true,
