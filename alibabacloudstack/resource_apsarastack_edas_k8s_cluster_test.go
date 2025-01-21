@@ -239,7 +239,8 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 		%s
 
 		data "alibabacloudstack_images" "default" {
-		  name_regex  = "^ubuntu_18.*64"
+		  name_regex  = "^anolisos_"
+		  most_recent = true
 		  owners      = "system"
 		}
 
@@ -255,15 +256,15 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 			os_type 					= "linux"
 			platform 					= "AliyunLinux"
 			image_id                    = "${data.alibabacloudstack_images.default.images.0.id}"
-			num_of_nodes 				= "1"
+			num_of_nodes 				= "3"
 			master_count				= "3"
 			master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
 			master_instance_types 		= ["${data.alibabacloudstack_instance_types.default.instance_types.0.id}","${data.alibabacloudstack_instance_types.default.instance_types.0.id}","${data.alibabacloudstack_instance_types.default.instance_types.0.id}"]
-			master_disk_category 		= "cloud_pperf"
+			master_disk_category 		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 			vpc_id 					    = "${alibabacloudstack_vpc_vpc.default.id}"
 			worker_instance_types 		= ["${data.alibabacloudstack_instance_types.default.instance_types.0.id}"]
 			worker_vswitch_ids 		    = ["${alibabacloudstack_vpc_vswitch.default.id}"]
-			worker_disk_category 		= "cloud_pperf"
+			worker_disk_category 		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 			password 					= "Test@12345"
 			pod_cidr 					= "172.20.0.0/16"
 			service_cidr 				= "172.21.0.0/20"

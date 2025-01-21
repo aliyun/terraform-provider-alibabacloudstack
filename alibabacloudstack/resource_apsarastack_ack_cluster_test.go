@@ -93,15 +93,15 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"timeout_mins":                 "60",
 					"vpc_id":                       "${alibabacloudstack_vpc_vpc.default.id}",
 					"master_count":                 "3",
-					"master_disk_category":         "cloud_ssd",
+					"master_disk_category":         "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"image_id":                     "${data.alibabacloudstack_images.default.images.0.id}",
 					"master_disk_size":             "40",
-					"master_instance_types":        []string{"ecs.sn1ne.large", "ecs.sn1ne.large", "ecs.sn1ne.large"},
+					"master_instance_types":        []string{"${local.default_instance_type_id}", "${local.default_instance_type_id}", "${local.default_instance_type_id}"},
 					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
-					"num_of_nodes":                 "0",
-					"worker_disk_category":         "cloud_ssd",
+					"num_of_nodes":                 "1",
+					"worker_disk_category":         "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"worker_disk_size":             "40",
-					"worker_instance_types":        []string{"ecs.sn1ne.large"},
+					"worker_instance_types":        []string{"${local.default_instance_type_id}"},
 					"worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
 					"enable_ssh":                   "${var.enable_ssh}",
 					"password":                     "${var.password}",
@@ -217,18 +217,12 @@ variable "name" {
 
 %s
 
+%s
+
 data "alibabacloudstack_images" "default" {
-  name_regex  = "^ubuntu_"
-  //name_regex  = "arm_centos_7_6_20G_20211110.raw"
-  //name_regex  = "^arm_centos_7"
+  name_regex  = "^anolisos_"
   most_recent = true
   owners      = "system"
-}
-
-data "alibabacloudstack_instance_types" "default" {
-  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  cpu_core_count       = 2
-  memory_size          = 2
 }
 
 
@@ -282,7 +276,7 @@ variable "service_cidr" {
 }
 
 
-`, name, SecurityGroupCommonTestCase)
+`, name, SecurityGroupCommonTestCase, DataAlibabacloudstackInstanceTypes)
 }
 
 var CsK8sMap = map[string]string{}
