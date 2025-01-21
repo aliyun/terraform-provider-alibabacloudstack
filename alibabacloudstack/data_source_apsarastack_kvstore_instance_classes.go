@@ -48,7 +48,7 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Community", "Enterprise"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"community", "enterprise"}, false),
 			},
 			"series_type": {
 				Type:         schema.TypeString,

@@ -1676,7 +1676,7 @@ func (s *EcsService) tagsToMap(tags []ecs.Tag) map[string]string {
 }
 
 func (s *EcsService) ecsTagIgnored(t ecs.Tag) bool {
-	filter := []string{"^aliyun", "^acs:", "^http://", "^https://"}
+	filter := []string{"^aliyun", "^acs:", "^ascm:", "^http://", "^https://"}
 	for _, v := range filter {
 		log.Printf("[DEBUG] Matching prefix %v with %v\n", v, t.TagKey)
 		ok, _ := regexp.MatchString(v, t.TagKey)

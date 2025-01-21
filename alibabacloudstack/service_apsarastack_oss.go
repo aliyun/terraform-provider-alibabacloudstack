@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
@@ -262,20 +261,17 @@ func (s *OssService) HeadOssBucketObject(bucketName string, objectName string) e
 	})
 	request.Headers["x-acs-instanceid"] = bucketName
 
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
+	bresponse, err := s.client.ProcessCommonRequest(request)
 
-	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil || bresponse.GetHttpStatus() != 200 {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, objectName, "HeadObject", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 	}
 
-	addDebug("HeadObject", raw, request, bresponse.GetHttpContentString())
+	addDebug("HeadObject", bresponse, request, bresponse.GetHttpContentString())
 
 	resp := make(map[string]interface{})
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
