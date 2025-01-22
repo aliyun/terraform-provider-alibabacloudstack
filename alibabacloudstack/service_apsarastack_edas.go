@@ -316,10 +316,6 @@ func (s *EdasService) ClusterImportK8sStateRefreshFunc(id string, failStates []s
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeEdasK8sCluster(id)
 		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
 			return nil, "", errmsgs.WrapError(err)
 		}
 		status := fmt.Sprintf("%d", object.ClusterImportStatus)
