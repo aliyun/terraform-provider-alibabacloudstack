@@ -282,6 +282,12 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 					config = lookup(addons.value, "config", var.cluster_addons)
 				}
 			}
+			lifecycle {
+				ignore_changes = [
+					master_instance_types,
+					worker_instance_types,
+				]
+			}
 		}
 
 		`, name, SecurityGroupCommonTestCase)
