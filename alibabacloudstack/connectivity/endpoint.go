@@ -77,6 +77,7 @@ const (
 	QuickbiCode         = ServiceCode("QUICKBI")
 	DataworkspublicCode = ServiceCode("DATAWORKSPUBLIC")
 	OneRouterCode       = ServiceCode("ONEROUTER")
+	BastionHostCode     = ServiceCode("BASTIONHOSTPRIVATE")
 	//自建网关虚假Code
 	OssDataCode  = ServiceCode("OSSDATA")
 	SlSDataCode  = ServiceCode("SLSDATA")

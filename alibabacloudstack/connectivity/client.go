@@ -1091,6 +1091,10 @@ func (client *AlibabacloudStackClient) NewCloudfwClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("cloudfw", client.Config.Endpoints[WafOpenapiCode])
 }
 
+func (client *AlibabacloudStackClient) NewBastionhostClient() (*rpc.Client, error) {
+	return client.NewTeaSDkClient("Bastionhostprivate", client.Config.Endpoints[BastionHostCode])
+}
+
 func (client *AlibabacloudStackClient) defaultHeaders(popcode string) map[string]string {
 	return map[string]string{
 		"RegionId":              client.RegionId, //	ASAPI

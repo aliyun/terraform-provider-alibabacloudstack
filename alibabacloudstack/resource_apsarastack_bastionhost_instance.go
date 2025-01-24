@@ -1,26 +1,25 @@
-package alicloud
+package alibabacloudstack
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-
-	"github.com/aliyun/terraform-provider-alicloud/alicloud/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlicloudBastionhostInstance() *schema.Resource {
+func resourceAlibabacloudStackBastionhostInstance() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAlicloudBastionhostInstanceCreate,
-		Read:   resourceAlicloudBastionhostInstanceRead,
-		Update: resourceAlicloudBastionhostInstanceUpdate,
-		Delete: resourceAlicloudBastionhostInstanceDelete,
+		Create: resourceAlibabacloudStackBastionhostInstanceCreate,
+		Read:   resourceAlibabacloudStackBastionhostInstanceRead,
+		Update: resourceAlibabacloudStackBastionhostInstanceUpdate,
+		Delete: resourceAlibabacloudStackBastionhostInstanceDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -251,7 +250,7 @@ func resourceAlicloudBastionhostInstance() *schema.Resource {
 	}
 }
 
-func resourceAlicloudBastionhostInstanceCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
 	var response map[string]interface{}
 	action := "CreateInstance"
@@ -259,7 +258,7 @@ func resourceAlicloudBastionhostInstanceCreate(d *schema.ResourceData, meta inte
 	parameterMapList := make([]map[string]interface{}, 0)
 	conn, err := client.NewBssopenapiClient()
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	parameterMapList = append(parameterMapList, map[string]interface{}{
 		"Code":  "NetworkType",
@@ -292,7 +291,7 @@ func resourceAlicloudBastionhostInstanceCreate(d *schema.ResourceData, meta inte
 	if v, ok := d.GetOk("renew_period"); ok {
 		request["RenewPeriod"] = v
 	} else if v, ok := d.GetOk("renewal_status"); ok && v.(string) == "AutoRenewal" {
-		return WrapError(fmt.Errorf("attribute '%s' is required when '%s' is %v ", "renew_period", "renewal_status", d.Get("renewal_status")))
+		return errmsgs.WrapError(fmt.Errorf("attribute '%s' is required when '%s' is %v ", "renew_period", "renewal_status", d.Get("renewal_status")))
 	}
 	request["ProductCode"] = "bastionhost"
 	request["ProductType"] = "bastionhost"
@@ -323,7 +322,7 @@ func resourceAlicloudBastionhostInstanceCreate(d *schema.ResourceData, meta inte
 	})
 	addDebug(action, response, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alicloud_bastionhost_instance", action, AlibabaCloudSdkGoERROR)
+		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudctack_bastionhost_instance", action, AlibabaCloudSdkGoERROR)
 	}
 	if fmt.Sprint(response["Code"]) != "Success" {
 		return WrapError(fmt.Errorf("%s failed, response: %v", action, response))
@@ -349,17 +348,17 @@ func resourceAlicloudBastionhostInstanceCreate(d *schema.ResourceData, meta inte
 	}
 	// start instance
 	if err := bastionhostService.StartBastionhostInstance(d.Id(), d.Get("vswitch_id").(string), securityGroupIds); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	// wait for pending
 	stateConf = BuildStateConf([]string{"PENDING", "CREATING"}, []string{"RUNNING"}, d.Timeout(schema.TimeoutCreate), 600*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"UPGRADING", "UPGRADE_FAILED", "CREATE_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return WrapErrorf(err, IdMsg, d.Id())
 	}
-	return resourceAlicloudBastionhostInstanceUpdate(d, meta)
+	return resourceAlibabacloudStackBastionhostInstanceUpdate(d, meta)
 }
 
-func resourceAlicloudBastionhostInstanceRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackBastionhostInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
 	BastionhostService := YundunBastionhostService{client}
 	instance, err := BastionhostService.DescribeBastionhostInstance(d.Id())
@@ -368,7 +367,7 @@ func resourceAlicloudBastionhostInstanceRead(d *schema.ResourceData, meta interf
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("description", instance["Description"])
@@ -384,19 +383,19 @@ func resourceAlicloudBastionhostInstanceRead(d *schema.ResourceData, meta interf
 
 	instance, err = BastionhostService.DescribeBastionhostInstances(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("plan_code", instance["PlanCode"])
 
 	tags, err := BastionhostService.DescribeTags(d.Id(), nil, TagResourceInstance)
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("tags", BastionhostService.tagsToMap(tags))
 
 	adAuthServer, err := BastionhostService.DescribeBastionhostAdAuthServer(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	adAuthServerMap := map[string]interface{}{
 		"account":        adAuthServer["Account"],
@@ -415,7 +414,7 @@ func resourceAlicloudBastionhostInstanceRead(d *schema.ResourceData, meta interf
 
 	ldapAuthServer, err := BastionhostService.DescribeBastionhostLdapAuthServer(d.Id())
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	ldapAuthServerMap := map[string]interface{}{
 		"account":            ldapAuthServer["Account"],
@@ -436,7 +435,7 @@ func resourceAlicloudBastionhostInstanceRead(d *schema.ResourceData, meta interf
 	// can not set region when invoking QueryAvailableInstances for bastionhost instance
 	getQueryInstanceObject, err := bssOpenApiService.QueryAvailableInstances(d.Id(), "", "bastionhost", "bastionhost", "bastionhost", "bastionhost_std_public_intl")
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	d.Set("renewal_status", getQueryInstanceObject["RenewStatus"])
@@ -446,11 +445,11 @@ func resourceAlicloudBastionhostInstanceRead(d *schema.ResourceData, meta interf
 	return nil
 }
 
-func resourceAlicloudBastionhostInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AliyunClient)
 	conn, err := client.NewBastionhostClient()
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	bastionhostService := YundunBastionhostService{client}
 
@@ -458,21 +457,21 @@ func resourceAlicloudBastionhostInstanceUpdate(d *schema.ResourceData, meta inte
 
 	if d.HasChange("tags") {
 		if err := bastionhostService.setInstanceTags(d, TagResourceInstance); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		d.SetPartial("tags")
 	}
 
 	if d.HasChange("description") {
 		if err := bastionhostService.UpdateBastionhostInstanceDescription(d.Id(), d.Get("description").(string)); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		d.SetPartial("description")
 	}
 
 	if d.HasChange("resource_group_id") {
 		if err := bastionhostService.UpdateResourceGroup(d.Id(), d.Get("resource_group_id").(string)); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		d.SetPartial("resource_group_id")
 	}
@@ -482,7 +481,7 @@ func resourceAlicloudBastionhostInstanceUpdate(d *schema.ResourceData, meta inte
 			"LicenseCode": "license_code",
 		}
 		if err := bastionhostService.UpdateInstanceSpec(params, d, meta); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		stateConf := BuildStateConf([]string{"UPGRADING"}, []string{"PENDING", "RUNNING"}, d.Timeout(schema.TimeoutUpdate), 20*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"CREATING", "UPGRADE_FAILED", "CREATE_FAILED"}))
 		if _, err := stateConf.WaitForState(); err != nil {
@@ -498,7 +497,7 @@ func resourceAlicloudBastionhostInstanceUpdate(d *schema.ResourceData, meta inte
 			sgs = append(sgs, rawSecurityGroupId.(string))
 		}
 		if err := bastionhostService.UpdateBastionhostSecurityGroups(d.Id(), sgs); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		stateConf := BuildStateConf([]string{"UPGRADING"}, []string{"RUNNING"}, d.Timeout(schema.TimeoutUpdate), 20*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"CREATING", "UPGRADE_FAILED", "CREATE_FAILED"}))
 		if _, err := stateConf.WaitForState(); err != nil {
@@ -513,19 +512,19 @@ func resourceAlicloudBastionhostInstanceUpdate(d *schema.ResourceData, meta inte
 		BastionhostService := YundunBastionhostService{client}
 		instance, err := BastionhostService.DescribeBastionhostInstance(d.Id())
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		target := strconv.FormatBool(d.Get("enable_public_access").(bool))
 		if strconv.FormatBool(instance["PublicNetworkAccess"].(bool)) != target {
 			if target == "false" {
 				err := BastionhostService.DisableInstancePublicAccess(d.Id())
 				if err != nil {
-					return WrapError(err)
+					return errmsgs.WrapError(err)
 				}
 			} else {
 				err := BastionhostService.EnableInstancePublicAccess(d.Id())
 				if err != nil {
-					return WrapError(err)
+					return errmsgs.WrapError(err)
 				}
 			}
 		}
@@ -659,7 +658,7 @@ func resourceAlicloudBastionhostInstanceUpdate(d *schema.ResourceData, meta inte
 		action := "SetRenewal"
 		conn, err := client.NewBssopenapiClient()
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		wait := incrementalWait(3*time.Second, 3*time.Second)
 		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
@@ -737,10 +736,10 @@ func resourceAlicloudBastionhostInstanceUpdate(d *schema.ResourceData, meta inte
 
 	d.Partial(false)
 	// wait for order complete
-	return resourceAlicloudBastionhostInstanceRead(d, meta)
+	return resourceAlibabacloudStackBastionhostInstanceRead(d, meta)
 }
 
-func resourceAlicloudBastionhostInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackBastionhostInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[WARN] Cannot destroy resourceBastionhostInstance. Terraform will remove this resource from the state file, however resources may remain.")
 	return nil
 }

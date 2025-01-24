@@ -1,4 +1,4 @@
-package alicloud
+package alibabacloudstack
 
 import (
 	"fmt"
@@ -8,14 +8,16 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/yundun_bastionhost"
-	"github.com/aliyun/terraform-provider-alicloud/alicloud/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func init() {
-	resource.AddTestSweepers("alicloud_bastionhost_instance", &resource.Sweeper{
-		Name: "alicloud_bastionhost_instance",
+	resource.AddTestSweepers("alibabacloudctack_bastionhost_instance", &resource.Sweeper{
+		Name: "alibabacloudctack_bastionhost_instance",
 		F:    testSweepBastionhostInstances,
 	})
 }
@@ -23,7 +25,7 @@ func init() {
 func testSweepBastionhostInstances(region string) error {
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return fmt.Errorf("error getting Alicloud client: %s", err)
+		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
 	}
 	client := rawClient.(*connectivity.AliyunClient)
 
@@ -41,7 +43,7 @@ func testSweepBastionhostInstances(region string) error {
 			return bastionhostClient.DescribeInstanceBastionhost(request)
 		})
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alicloud_yundun_bastionhost", request.GetActionName(), AlibabaCloudSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudctack_yundun_bastionhost", request.GetActionName(), AlibabaCloudSdkGoERROR)
 		}
 
 		addDebug(request.GetActionName(), raw)
@@ -58,11 +60,11 @@ func testSweepBastionhostInstances(region string) error {
 
 		currentPageNo := request.CurrentPage
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alicloud_yundun_bastionhost", request.GetActionName(), AlibabaCloudSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudctack_yundun_bastionhost", request.GetActionName(), AlibabaCloudSdkGoERROR)
 		}
 
 		if page, err := getNextpageNumber(currentPageNo); err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		} else {
 			request.CurrentPage = page
 		}
@@ -98,9 +100,9 @@ func testSweepBastionhostInstances(region string) error {
 	return nil
 }
 
-func TestAccAliCloudBastionhostInstance_basic(t *testing.T) {
+func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 	var v yundun_bastionhost.Instance
-	resourceId := "alicloud_bastionhost_instance.default"
+	resourceId := "alibabacloudctack_bastionhost_instance.default"
 	ra := resourceAttrInit(resourceId, bastionhostInstanceBasicMap)
 	serviceFunc := func() interface{} {
 		return &YundunBastionhostService{testAccProvider.Meta().(*connectivity.AliyunClient)}
@@ -108,7 +110,7 @@ func TestAccAliCloudBastionhostInstance_basic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf_testAcc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceBastionhostInstanceDependence)
 	resource.Test(t, resource.TestCase{
@@ -128,8 +130,8 @@ func TestAccAliCloudBastionhostInstance_basic(t *testing.T) {
 					"bandwidth":          "10",
 					"period":             "1",
 					"vswitch_id":         "${local.vswitch_id}",
-					"security_group_ids": []string{"${alicloud_security_group.default.0.id}", "${alicloud_security_group.default.1.id}"},
-					"resource_group_id":  "${data.alicloud_resource_manager_resource_groups.default.ids.0}",
+					"security_group_ids": []string{"${alibabacloudctack_security_group.default.0.id}", "${alibabacloudctack_security_group.default.1.id}"},
+					"resource_group_id":  "${data.alibabacloudctack_resource_manager_resource_groups.default.ids.0}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -141,7 +143,7 @@ func TestAccAliCloudBastionhostInstance_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"resource_group_id": "${data.alicloud_resource_manager_resource_groups.default.ids.1}",
+					"resource_group_id": "${data.alibabacloudctack_resource_manager_resource_groups.default.ids.1}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -181,7 +183,7 @@ func TestAccAliCloudBastionhostInstance_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"security_group_ids": []string{"${alicloud_security_group.default.1.id}"},
+					"security_group_ids": []string{"${alibabacloudctack_security_group.default.1.id}"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -319,10 +321,10 @@ func TestAccAliCloudBastionhostInstance_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"resource_group_id":  "${data.alicloud_resource_manager_resource_groups.default.ids.0}",
+					"resource_group_id":  "${data.alibabacloudctack_resource_manager_resource_groups.default.ids.0}",
 					"description":        "${var.name}",
 					"license_code":       "bhah_ent_200_asset",
-					"security_group_ids": []string{"${alicloud_security_group.default.0.id}", "${alicloud_security_group.default.1.id}"},
+					"security_group_ids": []string{"${alibabacloudctack_security_group.default.0.id}", "${alibabacloudctack_security_group.default.1.id}"},
 					"tags":               REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -347,9 +349,9 @@ func TestAccAliCloudBastionhostInstance_basic(t *testing.T) {
 	})
 }
 
-func TestAccAliCloudBastionhostInstance_PublicAccess(t *testing.T) {
+func TestAccAlibabacloudStackBastionhostInstance_PublicAccess(t *testing.T) {
 	var v yundun_bastionhost.Instance
-	resourceId := "alicloud_bastionhost_instance.default"
+	resourceId := "alibabacloudctack_bastionhost_instance.default"
 	ra := resourceAttrInit(resourceId, bastionhostInstanceBasicMap)
 	serviceFunc := func() interface{} {
 		return &YundunBastionhostService{testAccProvider.Meta().(*connectivity.AliyunClient)}
@@ -377,7 +379,7 @@ func TestAccAliCloudBastionhostInstance_PublicAccess(t *testing.T) {
 					"bandwidth":            "10",
 					"description":          "${var.name}",
 					"vswitch_id":           "${local.vswitch_id}",
-					"security_group_ids":   []string{"${alicloud_security_group.default.0.id}"},
+					"security_group_ids":   []string{"${alibabacloudctack_security_group.default.0.id}"},
 					"enable_public_access": "false",
 					"public_white_list":    []string{"192.168.0.0/16"},
 				}),
@@ -426,11 +428,11 @@ func TestAccAliCloudBastionhostInstance_PublicAccess(t *testing.T) {
 
 func resourceBastionhostInstanceDependence(name string) string {
 	return fmt.Sprintf(
-		`data "alicloud_zones" "default" {
+		`data "alibabacloudctack_zones" "default" {
 				  available_resource_creation = "VSwitch"
 				}
 
-				data "alicloud_resource_manager_resource_groups" "default"{
+				data "alibabacloudctack_resource_manager_resource_groups" "default"{
 					status="OK"
 				}
 				
@@ -438,25 +440,25 @@ func resourceBastionhostInstanceDependence(name string) string {
 				  default = "%s"
 				}
 
-				data "alicloud_vpcs" "default" {
+				data "alibabacloudctack_vpcs" "default" {
 					name_regex = "^default-NODELETING$"
 				}
-				data "alicloud_vswitches" "default" {
-					vpc_id = data.alicloud_vpcs.default.ids.0
-					zone_id = data.alicloud_zones.default.zones.0.id
+				data "alibabacloudctack_vswitches" "default" {
+					vpc_id = data.alibabacloudctack_vpcs.default.ids.0
+					zone_id = data.alibabacloudctack_zones.default.zones.0.id
 				}
 				
 				locals {
-				  vswitch_id = data.alicloud_vswitches.default.ids[0]
+				  vswitch_id = data.alibabacloudctack_vswitches.default.ids[0]
 				}
 				
-				resource "alicloud_security_group" "default" {
+				resource "alibabacloudctack_security_group" "default" {
 				  count  = 2
 				  name   = "${var.name}"
-				  vpc_id = data.alicloud_vpcs.default.ids.0
+				  vpc_id = data.alibabacloudctack_vpcs.default.ids.0
 				}
 				
-				provider "alicloud" {
+				provider "alibabacloudctack" {
 				  endpoints {
 					bssopenapi = "business.aliyuncs.com"
 				  }

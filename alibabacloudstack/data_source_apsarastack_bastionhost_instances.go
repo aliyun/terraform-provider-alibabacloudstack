@@ -1,4 +1,4 @@
-package alicloud
+package alibabacloudstack
 
 import (
 	"fmt"
@@ -7,24 +7,22 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-
-	"github.com/aliyun/terraform-provider-alicloud/alicloud/connectivity"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlicloudBastionhostInstances() *schema.Resource {
+func dataSourceAlibabacloudStackBastionhostInstances() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlicloudBastionhostInstancesRead,
+		Read: dataSourceAlibabacloudStackBastionhostInstancesRead,
 
 		Schema: map[string]*schema.Schema{
 			"description_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.ValidateRegexp,
+				ValidateFunc: validation.StringIsValidRegExp,
 			},
 			"output_file": {
 				Type:     schema.TypeString,
@@ -94,8 +92,8 @@ func dataSourceAlicloudBastionhostInstances() *schema.Resource {
 	}
 }
 
-func dataSourceAlicloudBastionhostInstancesRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AliyunClient)
+func dataSourceAlibabacloudStackBastionhostInstancesRead(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	action := "DescribeInstances"
 	request := make(map[string]interface{})
@@ -110,7 +108,7 @@ func dataSourceAlicloudBastionhostInstancesRead(d *schema.ResourceData, meta int
 	if v, ok := d.GetOk("description_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		descriptionRegex = r
 	}
@@ -141,7 +139,7 @@ func dataSourceAlicloudBastionhostInstancesRead(d *schema.ResourceData, meta int
 	var response map[string]interface{}
 	conn, err := client.NewBastionhostClient()
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	for {
 		runtime := util.RuntimeOptions{}
@@ -150,7 +148,7 @@ func dataSourceAlicloudBastionhostInstancesRead(d *schema.ResourceData, meta int
 		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-12-09"), StringPointer("AK"), nil, request, &runtime)
 			if err != nil {
-				if NeedRetry(err) {
+				if errmsgs.NeedRetry(err) {
 					wait()
 					return resource.RetryableError(err)
 				}
@@ -160,11 +158,11 @@ func dataSourceAlicloudBastionhostInstancesRead(d *schema.ResourceData, meta int
 		})
 		addDebug(action, response, request)
 		if err != nil {
-			return WrapErrorf(err, DataDefaultErrorMsg, "alicloud_bastionhost_instances", action, AlibabaCloudSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "AlibabacloudStack_bastionhost_instances", action, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		resp, err := jsonpath.Get("$.Instances", response)
 		if err != nil {
-			return WrapErrorf(err, FailedGetAttributeMsg, action, "$.Instances", response)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.Instances", response)
 		}
 		result, _ := resp.([]interface{})
 		for _, v := range result {
@@ -207,13 +205,13 @@ func dataSourceAlicloudBastionhostInstancesRead(d *schema.ResourceData, meta int
 
 		getResp, err := bastionhostService.DescribeBastionhostInstance(id)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		mapping["security_group_ids"] = getResp["AuthorizedSecurityGroups"]
 
 		getResp2, err := bastionhostService.ListTagResources(id, "instance")
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		mapping["tags"] = tagsToMap(getResp2)
 
@@ -224,15 +222,15 @@ func dataSourceAlicloudBastionhostInstancesRead(d *schema.ResourceData, meta int
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("ids", ids); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("descriptions", names); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if err := d.Set("instances", s); err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
