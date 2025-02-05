@@ -302,6 +302,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	BssDataCode: PopEndpoint{"", ""},
 	OTSCode:     PopEndpoint{"", ""},
+	BastionHostCode: PopEndpoint{
+		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
+		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
+	},
 	// 3.18.3新局点将不会开放
 	OneRouterCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
