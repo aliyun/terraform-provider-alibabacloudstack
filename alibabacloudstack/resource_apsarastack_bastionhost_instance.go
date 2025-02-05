@@ -6,10 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -251,15 +249,15 @@ func resourceAlibabacloudStackBastionhostInstance() *schema.Resource {
 }
 
 func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AliyunClient)
+	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "CreateInstance"
 	request := make(map[string]interface{})
 	parameterMapList := make([]map[string]interface{}, 0)
-	conn, err := client.NewBssopenapiClient()
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
+	// conn, err := client.NewBastionhostClient()
+	// if err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
 	parameterMapList = append(parameterMapList, map[string]interface{}{
 		"Code":  "NetworkType",
 		"Value": "vpc",
@@ -301,31 +299,35 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	})
 	request["Parameter"] = parameterMapList
 	request["ClientToken"] = buildClientToken("CreateInstance")
-	runtime := util.RuntimeOptions{}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutCreate)), func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-12-14"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			if IsExpectedErrors(err, []string{"NotApplicable"}) {
-				request["ProductType"] = "bastionhost_std_public_intl"
-				conn.Endpoint = String(connectivity.BssOpenAPIEndpointInternational)
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
+	_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
+	if err != nil {
+		return err
+	}
+	// runtime := util.RuntimeOptions{}
+	// runtime.SetAutoretry(true)
+	// wait := incrementalWait(3*time.Second, 3*time.Second)
+	// err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+	// 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-12-14"), StringPointer("AK"), nil, request, &runtime)
+	// 	if err != nil {
+	// 		if errmsgs.NeedRetry(err) {
+	// 			wait()
+	// 			return resource.RetryableError(err)
+	// 		}
+	// 		if errmsgs.IsExpectedErrors(err, []string{"NotApplicable"}) {
+	// 			request["ProductType"] = "bastionhost_std_public_intl"
+	// 			conn.Endpoint = String(connectivity.BssOpenAPIEndpointInternational)
+	// 			return resource.RetryableError(err)
+	// 		}
+	// 		return resource.NonRetryableError(err)
+	// 	}
+	// 	return nil
+	// })
 	addDebug(action, response, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alibabacloudctack_bastionhost_instance", action, AlibabaCloudSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudctack_bastionhost_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if fmt.Sprint(response["Code"]) != "Success" {
-		return WrapError(fmt.Errorf("%s failed, response: %v", action, response))
+		return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
 	}
 	responseData := response["Data"].(map[string]interface{})
 	d.SetId(fmt.Sprint(responseData["InstanceId"]))
@@ -334,12 +336,12 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 
 	// check RAM policy
 	if err := bastionhostService.ProcessRolePolicy(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	// wait for order complete
 	stateConf := BuildStateConf([]string{}, []string{"PENDING"}, d.Timeout(schema.TimeoutCreate), 20*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"UPGRADING", "UPGRADE_FAILED", "CREATE_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	rawSecurityGroupIds := d.Get("security_group_ids").(*schema.Set).List()
 	securityGroupIds := make([]string, len(rawSecurityGroupIds))
@@ -353,17 +355,17 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	// wait for pending
 	stateConf = BuildStateConf([]string{"PENDING", "CREATING"}, []string{"RUNNING"}, d.Timeout(schema.TimeoutCreate), 600*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"UPGRADING", "UPGRADE_FAILED", "CREATE_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return WrapErrorf(err, IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return resourceAlibabacloudStackBastionhostInstanceUpdate(d, meta)
 }
 
 func resourceAlibabacloudStackBastionhostInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AliyunClient)
+	client := meta.(*connectivity.AlibabacloudStackClient)
 	BastionhostService := YundunBastionhostService{client}
 	instance, err := BastionhostService.DescribeBastionhostInstance(d.Id())
 	if err != nil {
-		if !d.IsNewResource() && NotFoundError(err) {
+		if !d.IsNewResource() && errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
@@ -431,26 +433,17 @@ func resourceAlibabacloudStackBastionhostInstanceRead(d *schema.ResourceData, me
 	}
 	d.Set("ldap_auth_server", []map[string]interface{}{ldapAuthServerMap})
 
-	bssOpenApiService := BssOpenApiService{client}
 	// can not set region when invoking QueryAvailableInstances for bastionhost instance
-	getQueryInstanceObject, err := bssOpenApiService.QueryAvailableInstances(d.Id(), "", "bastionhost", "bastionhost", "bastionhost", "bastionhost_std_public_intl")
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 
-	d.Set("renewal_status", getQueryInstanceObject["RenewStatus"])
-	d.Set("renew_period", formatInt(getQueryInstanceObject["RenewalDuration"]))
-	d.Set("renewal_period_unit", getQueryInstanceObject["RenewalDurationUnit"])
+	d.Set("renewal_status", instance["RenewStatus"])
+	d.Set("renew_period", formatInt(instance["RenewalDuration"]))
+	d.Set("renewal_period_unit", instance["RenewalDurationUnit"])
 
 	return nil
 }
 
 func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AliyunClient)
-	conn, err := client.NewBastionhostClient()
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
+	client := meta.(*connectivity.AlibabacloudStackClient)
 	bastionhostService := YundunBastionhostService{client}
 
 	d.Partial(true)
@@ -459,21 +452,21 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 		if err := bastionhostService.setInstanceTags(d, TagResourceInstance); err != nil {
 			return errmsgs.WrapError(err)
 		}
-		d.SetPartial("tags")
+
 	}
 
 	if d.HasChange("description") {
 		if err := bastionhostService.UpdateBastionhostInstanceDescription(d.Id(), d.Get("description").(string)); err != nil {
 			return errmsgs.WrapError(err)
 		}
-		d.SetPartial("description")
+
 	}
 
 	if d.HasChange("resource_group_id") {
 		if err := bastionhostService.UpdateResourceGroup(d.Id(), d.Get("resource_group_id").(string)); err != nil {
 			return errmsgs.WrapError(err)
 		}
-		d.SetPartial("resource_group_id")
+
 	}
 
 	if !d.IsNewResource() && d.HasChange("license_code") {
@@ -485,9 +478,9 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 		}
 		stateConf := BuildStateConf([]string{"UPGRADING"}, []string{"PENDING", "RUNNING"}, d.Timeout(schema.TimeoutUpdate), 20*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"CREATING", "UPGRADE_FAILED", "CREATE_FAILED"}))
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-		d.SetPartial("license_code")
+
 	}
 
 	if !d.IsNewResource() && d.HasChange("security_group_ids") {
@@ -501,14 +494,13 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 		}
 		stateConf := BuildStateConf([]string{"UPGRADING"}, []string{"RUNNING"}, d.Timeout(schema.TimeoutUpdate), 20*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"CREATING", "UPGRADE_FAILED", "CREATE_FAILED"}))
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-		d.SetPartial("security_group_ids")
 	}
 
 	_, ok := d.GetOkExists("enable_public_access")
 	if d.HasChange("enable_public_access") || (d.IsNewResource() && ok) {
-		client := meta.(*connectivity.AliyunClient)
+		client := meta.(*connectivity.AlibabacloudStackClient)
 		BastionhostService := YundunBastionhostService{client}
 		instance, err := BastionhostService.DescribeBastionhostInstance(d.Id())
 		if err != nil {
@@ -531,10 +523,9 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 
 		stateConf := BuildStateConf([]string{}, []string{"RUNNING"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 
-		d.SetPartial("enable_public_access")
 	}
 
 	if d.HasChange("ad_auth_server") {
@@ -559,23 +550,15 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 			modifyAdRequest["StandbyServer"] = adAuthServer["standby_server"]
 
 			action := "ModifyInstanceADAuthServer"
-			wait := incrementalWait(3*time.Second, 3*time.Second)
-			err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
-				response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-12-09"), StringPointer("AK"), nil, modifyAdRequest, &util.RuntimeOptions{})
-				if err != nil {
-					if NeedRetry(err) {
-						wait()
-						return resource.RetryableError(err)
-					}
-					return resource.NonRetryableError(err)
-				}
-				return nil
-			})
+			_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2019-12-09", action, "", nil, modifyAdRequest)
+			if err != nil {
+				return err
+			}
 			addDebug(action, response, modifyAdRequest)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			d.SetPartial("ad_auth_server")
+
 		}
 	}
 
@@ -602,23 +585,27 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 			modifyLdapRequest["StandbyServer"] = adAuthServer["standby_server"]
 
 			action := "ModifyInstanceLDAPAuthServer"
-			wait := incrementalWait(3*time.Second, 3*time.Second)
-			err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
-				response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-12-09"), StringPointer("AK"), nil, modifyLdapRequest, &util.RuntimeOptions{})
-				if err != nil {
-					if NeedRetry(err) {
-						wait()
-						return resource.RetryableError(err)
-					}
-					return resource.NonRetryableError(err)
-				}
-				return nil
-			})
+			// wait := incrementalWait(3*time.Second, 3*time.Second)
+			// err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
+			// 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-12-09"), StringPointer("AK"), nil, modifyLdapRequest, &util.RuntimeOptions{})
+			// 	if err != nil {
+			// 		if NeedRetry(err) {
+			// 			wait()
+			// 			return resource.RetryableError(err)
+			// 		}
+			// 		return resource.NonRetryableError(err)
+			// 	}
+			// 	return nil
+			// })
+			_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2019-12-09", action, "", nil, modifyLdapRequest)
+			if err != nil {
+				return err
+			}
 			addDebug(action, response, modifyLdapRequest)
 			if err != nil {
-				return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			d.SetPartial("ldap_auth_server")
+
 		}
 	}
 
@@ -651,45 +638,47 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 	if v, ok := d.GetOk("renewal_period_unit"); ok {
 		setRenewalReq["RenewalPeriodUnit"] = v
 	} else if v, ok := d.GetOk("renewal_status"); ok && v.(string) == "AutoRenewal" {
-		return WrapError(fmt.Errorf("attribute '%s' is required when '%s' is %v ", "renewal_period_unit", "renewal_status", d.Get("renewal_status")))
+		return errmsgs.WrapError(fmt.Errorf("attribute '%s' is required when '%s' is %v ", "renewal_period_unit", "renewal_status", d.Get("renewal_status")))
 	}
 
 	if update {
+		request := map[string]interface{}{}
 		action := "SetRenewal"
-		conn, err := client.NewBssopenapiClient()
+		_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2017-12-14", action, "", nil, request)
 		if err != nil {
-			return errmsgs.WrapError(err)
+			return err
 		}
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
-			setRenewalResponse, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-12-14"), StringPointer("AK"), nil, setRenewalReq, &util.RuntimeOptions{})
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				if IsExpectedErrors(err, []string{"NotApplicable"}) {
-					conn.Endpoint = String(connectivity.BssOpenAPIEndpointInternational)
-					setRenewalReq["ProductType"] = "bastionhost_std_public_intl"
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
+		// conn, err := client.NewBssopenapiClient()
+		// if err != nil {
+		// 	return errmsgs.WrapError(err)
+		// }
+		// wait := incrementalWait(3*time.Second, 3*time.Second)
+		// err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
+		// 	setRenewalResponse, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-12-14"), StringPointer("AK"), nil, setRenewalReq, &util.RuntimeOptions{})
+		// 	if err != nil {
+		// 		if NeedRetry(err) {
+		// 			wait()
+		// 			return resource.RetryableError(err)
+		// 		}
+		// 		if IsExpectedErrors(err, []string{"NotApplicable"}) {
+		// 			conn.Endpoint = String(connectivity.BssOpenAPIEndpointInternational)
+		// 			setRenewalReq["ProductType"] = "bastionhost_std_public_intl"
+		// 			return resource.RetryableError(err)
+		// 		}
+		// 		return resource.NonRetryableError(err)
+		// 	}
+		// 	return nil
+		// })
 		addDebug(action, setRenewalResponse, setRenewalReq)
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
 		if fmt.Sprint(setRenewalResponse["Code"]) != "Success" {
-			return WrapError(fmt.Errorf("%s failed, response: %v", action, setRenewalResponse))
+			return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, setRenewalResponse))
 		}
 
-		d.SetPartial("renewal_status")
-		d.SetPartial("renew_period")
-		d.SetPartial("renewal_period_unit")
 	}
 
 	update = false
@@ -706,32 +695,35 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 	}
 
 	if update {
+		request := map[string]interface{}{}
 		action := "ConfigInstanceWhiteList"
-
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
-			resp, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-12-09"), StringPointer("AK"), nil, configInstanceWhiteListReq, &util.RuntimeOptions{})
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			addDebug(action, resp, configInstanceWhiteListReq)
-			return nil
-		})
+		_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2019-12-09", action, "", nil, request)
+		if err != nil {
+			return err
+		}
+		// wait := incrementalWait(3*time.Second, 3*time.Second)
+		// err = resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
+		// 	resp, err := conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-12-09"), StringPointer("AK"), nil, configInstanceWhiteListReq, &util.RuntimeOptions{})
+		// 	if err != nil {
+		// 		if NeedRetry(err) {
+		// 			wait()
+		// 			return resource.RetryableError(err)
+		// 		}
+		// 		return resource.NonRetryableError(err)
+		// 	}
+		// 	addDebug(action, resp, configInstanceWhiteListReq)
+		// 	return nil
+		// })
 
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
 		stateConf := BuildStateConf([]string{}, []string{"RUNNING"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
-			return WrapErrorf(err, IdMsg, d.Id())
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 
-		d.SetPartial("public_white_list")
 	}
 
 	d.Partial(false)
