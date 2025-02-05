@@ -29,47 +29,43 @@ func resourceAlibabacloudStackBastionhostInstance() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"description": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringLenBetween(1, 64),
 			},
 			"license_code": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"plan_code": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"cloudbastion", "cloudbastion_ha"}, false),
-			},
-			"storage": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"bandwidth": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"public_white_list": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-			"period": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ValidateFunc: validation.IntInSlice([]int{1, 3, 6, 12, 24, 36}),
-			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"asset": {
+				Type:     schema.TypeInt,
+				Required: true,
+				ForceNew: true,
+			},
+			"highavailability": {
+				Type:     schema.TypeBool,
+				Required: true,
+				ForceNew: true,
+			},
+			"disasterrecovery": {
+				Type:     schema.TypeBool,
+				Required: true,
+				ForceNew: true,
+			},
 			"security_group_ids": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Computed: true,
+				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"tags": tagsSchema(),
@@ -266,24 +262,44 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 		"Code":  "LicenseCode",
 		"Value": d.Get("license_code").(string),
 	})
-	parameterMapList = append(parameterMapList, map[string]interface{}{
-		"Code":  "PlanCode",
-		"Value": d.Get("plan_code").(string),
-	})
-	parameterMapList = append(parameterMapList, map[string]interface{}{
-		"Code":  "Storage",
-		"Value": d.Get("storage").(string),
-	})
-	parameterMapList = append(parameterMapList, map[string]interface{}{
-		"Code":  "Bandwidth",
-		"Value": d.Get("bandwidth").(string),
-	})
+	// parameterMapList = append(parameterMapList, map[string]interface{}{
+	// 	"Code":  "PlanCode",
+	// 	"Value": d.Get("plan_code").(string),
+	// })
+	// parameterMapList = append(parameterMapList, map[string]interface{}{
+	// 	"Code":  "Storage",
+	// 	"Value": d.Get("storage").(string),
+	// })
+	// parameterMapList = append(parameterMapList, map[string]interface{}{
+	// 	"Code":  "Bandwidth",
+	// 	"Value": d.Get("bandwidth").(string),
+	// })
 	request["SubscriptionType"] = "Subscription"
 	if v, ok := d.GetOk("period"); ok {
 		request["Period"] = v
 	}
 	if v, ok := d.GetOk("renewal_status"); ok {
 		request["RenewalStatus"] = v
+	}
+
+	if v, ok := d.GetOk("vpc_id"); ok {
+		request["vpcId"] = v
+	}
+	if v, ok := d.GetOk("vswitch_id"); ok {
+		request["vswitchId"] = v
+	}
+	if v, ok := d.GetOk("asset"); ok {
+		request["asset"] = v
+	}
+	if v, ok := d.GetOk("highavailability"); ok {
+		request["highAvailability"] = v
+	}
+	if v, ok := d.GetOk("disasterrecovery"); ok {
+		request["disasterRecovery"] = v
+	}
+
+	if v, ok := d.GetOk("license_code"); ok {
+		request["licenseCode"] = v
 	}
 
 	if v, ok := d.GetOk("renew_period"); ok {
@@ -300,6 +316,7 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	request["Parameter"] = parameterMapList
 	request["ClientToken"] = buildClientToken("CreateInstance")
 	_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
+	addDebug(action, response, request)
 	if err != nil {
 		return err
 	}
@@ -322,7 +339,6 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	// 	}
 	// 	return nil
 	// })
-	addDebug(action, response, request)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudctack_bastionhost_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
