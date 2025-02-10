@@ -224,8 +224,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	//Sts endpoint
 	STSCode: PopEndpoint{
-		"sts.{{.domain}}",
-		"sts.{{.region}}.{{.domain}}",
+		"sts-vpc.{{.domain}}",
+		"sts-vpc.{{.region}}.{{.domain}}",
 	},
 
 	SlSDataCode: PopEndpoint{

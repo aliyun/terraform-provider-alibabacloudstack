@@ -283,23 +283,23 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	}
 
 	if v, ok := d.GetOk("vpc_id"); ok {
-		request["vpcId"] = v
+		request["VpcId"] = v
 	}
 	if v, ok := d.GetOk("vswitch_id"); ok {
-		request["vswitchId"] = v
+		request["VswitchId"] = v
 	}
 	if v, ok := d.GetOk("asset"); ok {
-		request["asset"] = v
+		request["Asset"] = v
 	}
 	if v, ok := d.GetOk("highavailability"); ok {
-		request["highAvailability"] = v
+		request["HighAvailability"] = v
 	}
 	if v, ok := d.GetOk("disasterrecovery"); ok {
-		request["disasterRecovery"] = v
+		request["DisasterRecovery"] = v
 	}
 
 	if v, ok := d.GetOk("license_code"); ok {
-		request["licenseCode"] = v
+		request["LicenseCode"] = v
 	}
 
 	if v, ok := d.GetOk("renew_period"); ok {
@@ -315,7 +315,8 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	})
 	request["Parameter"] = parameterMapList
 	request["ClientToken"] = buildClientToken("CreateInstance")
-	_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
+	// response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
 	addDebug(action, response, request)
 	if err != nil {
 		return err
@@ -339,21 +340,21 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	// 	}
 	// 	return nil
 	// })
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudctack_bastionhost_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	if fmt.Sprint(response["Code"]) != "Success" {
-		return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
-	}
-	responseData := response["Data"].(map[string]interface{})
-	d.SetId(fmt.Sprint(responseData["InstanceId"]))
+	// if err != nil {
+	// 	return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudctack_bastionhost_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
+	// }
+	// if fmt.Sprint(response["Code"]) != "Success" {
+	// 	return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
+	// }
+	// responseData := response["Data"].(map[string]interface{})
+	d.SetId(fmt.Sprint(response["InstanceId"]))
 
 	bastionhostService := YundunBastionhostService{client}
 
 	// check RAM policy
-	if err := bastionhostService.ProcessRolePolicy(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	}
+	// if err := bastionhostService.ProcessRolePolicy(); err != nil {
+	// 	return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	// }
 	// wait for order complete
 	stateConf := BuildStateConf([]string{}, []string{"PENDING"}, d.Timeout(schema.TimeoutCreate), 20*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"UPGRADING", "UPGRADE_FAILED", "CREATE_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
