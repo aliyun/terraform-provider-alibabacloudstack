@@ -47,9 +47,8 @@ func Provider() *schema.Provider {
 			"region_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", os.Getenv("ALIBABACLOUDSTACK_REGION")),
 				Description: descriptions["region_id"],
-				Deprecated:  "Use parameter region replace it.",
+				Deprecated:  "Field region_id is Deprecated, Please use parameter region replace it.",
 			},
 			"role_arn": {
 				Type:        schema.TypeString,

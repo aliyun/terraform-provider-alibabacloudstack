@@ -1334,6 +1334,9 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		if strings.HasPrefix(domain, "public.asapi.") {
 			// 如果public的asapi网关，强制使用https
 			request.SetScheme("https")
+		}else{
+			// 如果internal的asapi网关，强制使用https
+			request.SetScheme("http")
 		}
 	}
 
