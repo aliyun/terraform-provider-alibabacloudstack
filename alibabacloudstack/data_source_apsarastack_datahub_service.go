@@ -1,13 +1,10 @@
 package alibabacloudstack
 
 import (
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"time"
 
-	_ "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -45,16 +42,13 @@ func dataSourceAlibabacloudStackDatahubServiceRead(d *schema.ResourceData, meta 
 	request := client.NewCommonRequest("GET", "datahub", "2019-11-20", "OpenDataHubService", "")
 
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
-			return dataHubClient.ProcessCommonRequest(request)
-		})
-		response, ok := raw.(*responses.CommonResponse)
-		addDebug(action, raw, nil)
+		response, err := client.ProcessCommonRequest(request)	
+		addDebug(action, response, nil)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if response == nil {
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
 			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			if errmsgs.IsExpectedErrors(err, []string{"QPS Limit Exceeded"}) || errmsgs.NeedRetry(err) {
 				return resource.RetryableError(err)
 			}
