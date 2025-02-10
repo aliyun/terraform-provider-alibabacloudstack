@@ -5,14 +5,10 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -148,18 +144,15 @@ func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta in
 		request.QueryParams["RecordSchema"] = record_schema_str
 	}
 
-	raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
-		return dataHubClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_topic", "CreateTopic", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
-	addDebug("CreateTopic", raw, request.Content, t)
+	addDebug("CreateTopic", bresponse, request.Content, t)
 
 	d.SetId(strings.ToLower(fmt.Sprintf("%s%s%s", t.ProjectName, COLON_SEPARATED, t.TopicName)))
 	return resourceAlibabacloudStackDatahubTopicRead(d, meta)
@@ -213,34 +206,22 @@ func resourceAlibabacloudStackDatahubTopicDelete(d *schema.ResourceData, meta in
 	request.QueryParams["ProjectName"] = projectName
 	request.QueryParams["TopicName"] = topicName
 
-	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
-			return dataHubClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if err != nil {
-			if isRetryableDatahubError(err) {
-				return resource.RetryableError(err)
-			}
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_topic", "DeleteTopic", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg))
-		}
-		if debugOn() {
-			requestMap := make(map[string]string)
-			requestMap["ProjectName"] = projectName
-			requestMap["TopicName"] = topicName
-			addDebug("DeleteTopic", raw, requestMap)
-		}
-		return nil
-	})
+	bresponse, err := client.ProcessCommonRequest(request)
+	if debugOn() {
+		requestMap := make(map[string]string)
+		requestMap["ProjectName"] = projectName
+		requestMap["TopicName"] = topicName
+		addDebug("DeleteTopic", bresponse, requestMap)
+	}
 	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
 		if isDatahubNotExistError(err) {
 			return nil
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteTopic", errmsgs.AlibabacloudStackDatahubSdkGo)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_topic", "DeleteTopic", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
 	return errmsgs.WrapError(datahubService.WaitForDatahubTopic(d.Id(), Deleted, DefaultTimeout))
 }

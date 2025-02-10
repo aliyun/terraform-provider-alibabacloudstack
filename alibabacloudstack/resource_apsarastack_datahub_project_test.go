@@ -7,10 +7,12 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	
+	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 )
 
 func TestAccAlibabacloudStackDatahubProject0(t *testing.T) {
-	var v map[string]interface{}
+	var v *datahub.GetProjectResult
 
 	resourceId := "alibabacloudstack_datahub_project.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccDatahubProjectCheckmap)
@@ -21,7 +23,7 @@ func TestAccAlibabacloudStackDatahubProject0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sdata_hubproject%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf_testacc_datahub_project%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccDatahubProjectBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -41,30 +43,30 @@ func TestAccAlibabacloudStackDatahubProject0(t *testing.T) {
 
 					"comment": "rdk_test_comment_1",
 
-					"project_name": "rdk_test_project_name_358",
+					"name": name,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"comment": "rdk_test_comment_1",
 
-						"project_name": "rdk_test_project_name_358",
+						"name": name,
 					}),
 				),
 			},
 
-			{
-				Config: testAccConfig(map[string]interface{}{
-
-					"comment": "update_test",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"comment": "update_test",
-					}),
-				),
-			},
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 
+// 					"comment": "update_test",
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 
+// 						"comment": "update_test",
+// 					}),
+// 				),
+// 			},
 		},
 	})
 }
@@ -73,15 +75,10 @@ var AlibabacloudTestAccDatahubProjectCheckmap = map[string]string{
 
 	"comment": CHECKSET,
 
-	"project_name": CHECKSET,
+	"name": CHECKSET,
 
 	"create_time": CHECKSET,
 
-	"update_time": CHECKSET,
-
-	"creator": CHECKSET,
-
-	"region_id": CHECKSET,
 }
 
 func AlibabacloudTestAccDatahubProjectBasicdependence(name string) string {

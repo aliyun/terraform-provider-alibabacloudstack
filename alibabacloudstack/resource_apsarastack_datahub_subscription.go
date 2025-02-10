@@ -5,15 +5,11 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/sdk_patch/datahub_patch"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -22,7 +18,7 @@ func resourceAlibabacloudStackDatahubSubscription() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAlibabacloudStackDatahubSubscriptionCreate,
 		Read:   resourceAlibabacloudStackDatahubSubscriptionRead,
-		Update: resourceAlibabacloudStackDatahubSubscriptionUpdate,
+		//Update: resourceAlibabacloudStackDatahubSubscriptionUpdate,
 		Delete: resourceAlibabacloudStackDatahubSubscriptionDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -50,6 +46,7 @@ func resourceAlibabacloudStackDatahubSubscription() *schema.Resource {
 			"comment": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(0, 255),
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return strings.ToLower(new) == strings.ToLower(old)
@@ -83,27 +80,24 @@ func resourceAlibabacloudStackDatahubSubscriptionCreate(d *schema.ResourceData, 
 	request.QueryParams["Application"] = "CreateSubscription"
 	request.QueryParams["Comment"] = subComment
 
-	raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
-		return dataHubClient.ProcessCommonRequest(request)
-	})
-	var subscription *datahub_patch.SubscriptionCreate
-	bresponse, ok := raw.(*responses.CommonResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_subscription", "CreateSubscription", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
-	}
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &subscription)
-
+	bresponse, err := client.ProcessCommonRequest(request)
 	if debugOn() {
 		requestMap := make(map[string]string)
 		requestMap["ProjectName"] = projectName
 		requestMap["TopicName"] = topicName
 		requestMap["SubComment"] = subComment
-		addDebug("CreateSubscription", raw, nil, requestMap)
+		addDebug("CreateSubscription", bresponse, nil, requestMap)
 	}
+	var subscription *datahub_patch.SubscriptionCreate
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_datahub_subscription", "CreateSubscription", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
+	}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &subscription)
+
 	d.SetId(fmt.Sprintf("%s%s%s%s%s", strings.ToLower(projectName), COLON_SEPARATED, strings.ToLower(topicName), COLON_SEPARATED, subscription.SubId))
 	return resourceAlibabacloudStackDatahubSubscriptionRead(d, meta)
 }
@@ -132,7 +126,7 @@ func resourceAlibabacloudStackDatahubSubscriptionRead(d *schema.ResourceData, me
 	d.Set("project_name", projectName)
 	d.Set("topic_name", TopicName)
 	d.Set("sub_id", SubId)
-	d.Set("comment", object.Comment)
+	//d.Set("comment", object.Comment) //专有云无法获取comment
 	d.Set("create_time", strconv.FormatInt(object.CreateTime, 10))
 	d.Set("last_modify_time", strconv.FormatInt(object.LastModifyTime, 10))
 	return nil
@@ -188,35 +182,23 @@ func resourceAlibabacloudStackDatahubSubscriptionDelete(d *schema.ResourceData, 
 
 	var requestInfo *datahub.DataHub
 
-	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
-			return dataHubClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			if isRetryableDatahubError(err) {
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteSubscription", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg))
-		}
-		if debugOn() {
-			requestMap := make(map[string]string)
-			requestMap["ProjectName"] = projectName
-			requestMap["TopicName"] = topicName
-			requestMap["SubId"] = subId
-			addDebug("DeleteSubscription", raw, requestInfo, requestMap)
-		}
-		return nil
-	})
+	bresponse, err := client.ProcessCommonRequest(request)
+	if debugOn() {
+		requestMap := make(map[string]string)
+		requestMap["ProjectName"] = projectName
+		requestMap["TopicName"] = topicName
+		requestMap["SubId"] = subId
+		addDebug("DeleteSubscription", bresponse, requestInfo, requestMap)
+	}
 	if err != nil {
 		if isDatahubNotExistError(err) {
 			return nil
 		}
-		return err
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteSubscription", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
 	return errmsgs.WrapError(datahubService.WaitForDatahubSubscription(d.Id(), Deleted, DefaultTimeout))
 }

@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccAlibabacloudStackDatahubTopic0(t *testing.T) {
-	var v map[string]interface{}
+	var v *GetTopicResult
 
 	resourceId := "alibabacloudstack_datahub_topic.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccDatahubTopicCheckmap)
@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackDatahubTopic0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sdata_hubtopic%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf_testacc_datahub_topic%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccDatahubTopicBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -43,11 +43,9 @@ func TestAccAlibabacloudStackDatahubTopic0(t *testing.T) {
 
 					"record_type": "BLOB",
 
-					"project_name": "${{ref(resource, DataHub::Project::4.0.0::XviFXs.resourceAttribute.ProjectName)}}",
+					"project_name": "${alibabacloudstack_datahub_project.default.name}",
 
-					"expand_mode": "true",
-
-					"topic_name": "rdk_test_topic_name_355",
+					"name": name,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -56,11 +54,9 @@ func TestAccAlibabacloudStackDatahubTopic0(t *testing.T) {
 
 						"record_type": "BLOB",
 
-						"project_name": "${{ref(resource, DataHub::Project::4.0.0::XviFXs.resourceAttribute.ProjectName)}}",
+						"project_name": name,
 
-						"expand_mode": "true",
-
-						"topic_name": "rdk_test_topic_name_355",
+						"name": name,
 					}),
 				),
 			},
@@ -72,31 +68,18 @@ var AlibabacloudTestAccDatahubTopicCheckmap = map[string]string{
 
 	"comment": CHECKSET,
 
-	"enable_schema_registry": CHECKSET,
-
 	"project_name": CHECKSET,
 
 	"create_time": CHECKSET,
 
-	"expand_mode": CHECKSET,
-
-	"lifecycle": CHECKSET,
-
-	"creator": CHECKSET,
+	"life_cycle": CHECKSET,
 
 	"shard_count": CHECKSET,
 
-	"topic_name": CHECKSET,
-
-	"total_count": CHECKSET,
-
-	"storage": CHECKSET,
+	"name": CHECKSET,
 
 	"record_type": CHECKSET,
 
-	"update_time": CHECKSET,
-
-	"record_schema": CHECKSET,
 }
 
 func AlibabacloudTestAccDatahubTopicBasicdependence(name string) string {
@@ -105,43 +88,9 @@ variable "name" {
     default = "%s"
 }
 
-
-
-
-resource "_data_hub_project" "XviFXs" {
-
-
-    
-
-
-    
-    "comment" : "test",
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-    
-    "project_name" : "dependency_test",
-
-
-
-
-
-
-
-
-
-
+resource "alibabacloudstack_datahub_project" "default" {
+    comment = "test"
+    name = var.name
 }
 
 

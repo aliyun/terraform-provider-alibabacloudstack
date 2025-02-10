@@ -7,10 +7,11 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 )
 
 func TestAccAlibabacloudStackDatahubSubscription0(t *testing.T) {
-	var v map[string]interface{}
+	var v *datahub.GetSubscriptionResult
 
 	resourceId := "alibabacloudstack_datahub_subscription.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccDatahubSubscriptionCheckmap)
@@ -21,7 +22,7 @@ func TestAccAlibabacloudStackDatahubSubscription0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sdata_hubsubscription%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf_testacc_datahub_sub%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccDatahubSubscriptionBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -39,24 +40,20 @@ func TestAccAlibabacloudStackDatahubSubscription0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"comment": "test",
+					"comment": name,
 
-					"project_name": "datahub_pop_test",
+					"project_name": "${alibabacloudstack_datahub_project.default.name}",
 
-					"application": "pop",
-
-					"topic_name": "test_topic",
+					"topic_name": "${alibabacloudstack_datahub_topic.default.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"comment": "test",
+						"comment": name,
 
-						"project_name": "datahub_pop_test",
+						"project_name": name,
 
-						"application": "pop",
-
-						"topic_name": "test_topic",
+						"topic_name": name,
 					}),
 				),
 			},
@@ -66,25 +63,13 @@ func TestAccAlibabacloudStackDatahubSubscription0(t *testing.T) {
 
 var AlibabacloudTestAccDatahubSubscriptionCheckmap = map[string]string{
 
-	"status": CHECKSET,
-
 	"comment": CHECKSET,
 
 	"project_name": CHECKSET,
 
-	"creator": CHECKSET,
-
 	"topic_name": CHECKSET,
 
-	"total_count": CHECKSET,
-
-	"type": CHECKSET,
-
-	"subscription_id": CHECKSET,
-
-	"subscription_offset": CHECKSET,
-
-	"application": CHECKSET,
+	"sub_id": CHECKSET,
 }
 
 func AlibabacloudTestAccDatahubSubscriptionBasicdependence(name string) string {
@@ -93,7 +78,17 @@ variable "name" {
     default = "%s"
 }
 
+resource "alibabacloudstack_datahub_project" "default" {
+    comment = "test"
+    name = var.name
+}
 
+resource "alibabacloudstack_datahub_topic" "default" {
+  name = var.name
+  comment = "test"
+  record_type = "BLOB"
+  project_name = "${alibabacloudstack_datahub_project.default.name}"
+}
 
 `, name)
 }
