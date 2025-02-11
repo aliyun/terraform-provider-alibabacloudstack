@@ -645,6 +645,10 @@ func TestAccAlibabacloudStackInstanceImageUpdateTags(t *testing.T) {
 						"foo": "foo",
 						"Bar": "Bar",
 					},
+					"system_disk_tags": map[string]string{
+						"sys_foo": "sys_foo",
+						"sys_Bar": "sys_Bar",
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -656,22 +660,15 @@ func TestAccAlibabacloudStackInstanceImageUpdateTags(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"image_id": "${data.alibabacloudstack_images.default.images.1.id}",
 					"system_disk_tags": map[string]string{
-						"foo": "foo",
-						"Bar": "Bar",
-					},
-					"data_disk_tags": map[string]string{
-						"foo": "foo",
-						"Bar": "Bar",
+						"sys_foo": "sys_foo",
+						"sys_Bar": "sys_Bar",
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"system_disk_tags.%":   "2",
-						"system_disk_tags.foo": "foo",
-						"system_disk_tags.Bar": "Bar",
-						"data_disk_tags.%":     "2",
-						"data_disk_tags.foo":   "foo",
-						"data_disk_tags.Bar":   "Bar",
+						"system_disk_tags.%":       "2",
+						"system_disk_tags.sys_foo": "sys_foo",
+						"system_disk_tags.sys_Bar": "sys_Bar",
 					}),
 				),
 			},

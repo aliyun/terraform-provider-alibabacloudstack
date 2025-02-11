@@ -250,11 +250,14 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	if v, ok := connectivity.GetResourceDataOk(d, "tair_instance_name", "instance_name"); ok {
 		request["InstanceName"] = v.(string)
 	}
-	// 	if v, ok := d.GetOk("cpu_type"); ok {
-	// 		request["CpuType"] = v.(string)
-	// 	}
+		if v, ok := d.GetOk("cpu_type"); ok {
+			request["CpuType"] = v.(string)
+		}
 	if v, ok := d.GetOk("node_type"); ok {
 		request["NodeType"] = v.(string)
+	}
+	if v, ok := d.GetOk("architecture_type"); ok && v.(string) != "" {
+		request["ArchitectureType"] = v.(string)
 	}
 	if v, ok := d.GetOk("instance_type"); ok {
 		request["InstanceType"] = v.(string)

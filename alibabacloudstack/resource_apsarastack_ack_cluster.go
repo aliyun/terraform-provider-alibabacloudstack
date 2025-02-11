@@ -356,16 +356,14 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Computed: true,
 			},
 			"security_group_id": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"is_enterprise_security_group"},
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 			"master_system_disk_performance_level": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"is_enterprise_security_group"},
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
 			},
 			"worker_system_disk_performance_level": {
 				Type:     schema.TypeString,
@@ -373,10 +371,9 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Computed: true,
 			},
 			"is_enterprise_security_group": {
-				Type:          schema.TypeBool,
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"security_group_id"},
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
 			},
 			"cloud_monitor_flags": {
 				Type:     schema.TypeBool,
@@ -722,15 +719,21 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	CloudMonitorFlags := d.Get("cloud_monitor_flags").(bool)
 	var secgroup string
 	var SecurityGroup string
-	if _, ok := d.GetOk("security_group_id"); ok {
-		secgroup = "security_group_id"
-		SecurityGroup = fmt.Sprintf("\"%s\"", d.Get("security_group_id").(string))
-	} else {
+	if v, ok := d.GetOk("is_enterprise_security_group"); ok && v.(bool) {
+		if v, ok := d.GetOk("security_group_id"); ok && v.(string) != "" {
+			return fmt.Errorf("security_group_id must be `` or nil when is_enterprise_security_group is `true`")
+		}
 		secgroup = "is_enterprise_security_group"
-		is_enterprise_security_group := d.Get("is_enterprise_security_group").(bool)
+		is_enterprise_security_group := v.(bool)
 		SecurityGroup = fmt.Sprintf("%t", is_enterprise_security_group)
+	} else {
+		if v, ok := d.GetOk("security_group_id"); ok && v.(string) != "" {
+			secgroup = "security_group_id"
+			SecurityGroup = fmt.Sprintf("\"%s\"", d.Get("security_group_id").(string))
+		} else {
+			return fmt.Errorf("security_group_id must be set when is_enterprise_security_group is `false` or not set")
+		}
 	}
-
 	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "CreateCluster", "/clusters")
 	request.SetContentType("application/json")
 	request.SetContent([]byte("{}")) // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
