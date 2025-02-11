@@ -317,20 +317,19 @@ resource "alibabacloudstack_disk" "default" {
 
 func testAccDiskConfig_encrypted() string {
 	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation= "VSwitch"
-}
-
+%s
 
 resource "alibabacloudstack_disk" "default" {
     name = "testAccDiskConfig_encrypted"
 	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   	size = "50"
-	category = "cloud_efficiency"
+	category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 	encrypted = true
-	kms_key_id = "3852c3cd-3ace-468d-8b9b-c301c33a32b2"
+	kms_key_id = "${alibabacloudstack_kms_key.key.id}"
 }
-`)
+
+%s
+`, DataZoneCommonTestCase, KeyCommonTestCase)
 }
 
 func testAccDiskConfig_size() string {
