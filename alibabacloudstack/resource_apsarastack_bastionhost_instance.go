@@ -360,7 +360,6 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	} else {
 		return fmt.Errorf("Failed to convert instance to map[string]interface{}")
 	}
-	d.SetId("bastionhost-ga5n2tqvmagz3wk199")
 
 	bastionhostService := YundunBastionhostService{client}
 
