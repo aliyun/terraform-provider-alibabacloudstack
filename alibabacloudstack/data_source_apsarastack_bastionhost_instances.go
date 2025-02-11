@@ -3,13 +3,10 @@ package alibabacloudstack
 import (
 	"fmt"
 	"regexp"
-	"time"
 
 	"github.com/PaesslerAG/jsonpath"
-	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -95,7 +92,7 @@ func dataSourceAlibabacloudStackBastionhostInstances() *schema.Resource {
 func dataSourceAlibabacloudStackBastionhostInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	action := "DescribeInstances"
+	action := "QueryInstance"
 	request := make(map[string]interface{})
 	request["RegionId"] = client.RegionId
 	request["PageSize"] = PageSizeLarge
@@ -136,30 +133,13 @@ func dataSourceAlibabacloudStackBastionhostInstancesRead(d *schema.ResourceData,
 		}
 		request["Tag.*"] = tags
 	}
-	var response map[string]interface{}
-	conn, err := client.NewBastionhostClient()
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
 	for {
-		runtime := util.RuntimeOptions{}
-		runtime.SetAutoretry(true)
-		wait := incrementalWait(3*time.Second, 3*time.Second)
-		err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-			response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-12-09"), StringPointer("AK"), nil, request, &runtime)
-			if err != nil {
-				if errmsgs.NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			return nil
-		})
-		addDebug(action, response, request)
+		response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
 		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "AlibabacloudStack_bastionhost_instances", action, errmsgs.AlibabacloudStackSdkGoERROR)
+			return err
 		}
+		addDebug(action, response, request)
+		// addDebug(action, response, request)
 		resp, err := jsonpath.Get("$.Instances", response)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.Instances", response)
@@ -207,13 +187,13 @@ func dataSourceAlibabacloudStackBastionhostInstancesRead(d *schema.ResourceData,
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		mapping["security_group_ids"] = getResp["AuthorizedSecurityGroups"]
+		mapping["security_group_ids"] = getResp["SecurityGroupIds"]
 
-		getResp2, err := bastionhostService.ListTagResources(id, "instance")
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		mapping["tags"] = tagsToMap(getResp2)
+		// getResp2, err := bastionhostService.ListTagResources(id, "instance")
+		// if err != nil {
+		// 	return errmsgs.WrapError(err)
+		// }
+		// mapping["tags"] = tagsToMap(getResp2)
 
 		ids = append(ids, fmt.Sprint(mapping["id"]))
 		names = append(names, object["Description"])

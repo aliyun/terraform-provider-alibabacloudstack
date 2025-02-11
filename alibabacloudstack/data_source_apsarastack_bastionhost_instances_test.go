@@ -7,38 +7,38 @@ import (
 
 func TestAccAlibabacloudStackBastionhostInstancesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
-	resourceId := "data.alibabacloudctack_bastionhost_instances.default"
+	resourceId := "data.alibabacloudstack_bastionhost_instances.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, fmt.Sprintf("tf_testAcc%d", rand),
 		dataSourceYundunBastionhostInstanceConfigDependency)
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudctack_bastionhost_instance.default.id}"},
+			"ids": []string{"${alibabacloudstack_bastionhost_instances.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudctack_bastionhost_instance.default.id}-fake"},
+			"ids": []string{"${alibabacloudstack_bastionhost_instances.default.id}-fake"},
 		}),
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"description_regex": "${alibabacloudctack_bastionhost_instance.default.description}",
+			"description_regex": "${alibabacloudstack_bastionhost_instances.default.description}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"description_regex": "${alibabacloudctack_bastionhost_instance.default.description}-fake",
+			"description_regex": "${alibabacloudstack_bastionhost_instances.default.description}-fake",
 		}),
 	}
 
 	tagsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudctack_bastionhost_instance.default.id}"},
+			"ids": []string{"${alibabacloudstack_bastionhost_instances.default.id}"},
 			"tags": map[string]interface{}{
 				"Created": "TF",
 			},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudctack_bastionhost_instance.default.id}-fake"},
+			"ids": []string{"${alibabacloudstack_bastionhost_instances.default.id}-fake"},
 			"tags": map[string]interface{}{
 				"Created": "TF-fake",
 			},
@@ -47,15 +47,15 @@ func TestAccAlibabacloudStackBastionhostInstancesDataSource(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"description_regex": "${alibabacloudctack_bastionhost_instance.default.description}",
-			"ids":               []string{"${alibabacloudctack_bastionhost_instance.default.id}"},
+			"description_regex": "${alibabacloudstack_bastionhost_instances.default.description}",
+			"ids":               []string{"${alibabacloudstack_bastionhost_instances.default.id}"},
 			"tags": map[string]interface{}{
 				"For": "acceptance test",
 			},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"description_regex": "${alibabacloudctack_bastionhost_instance.default.description}-fake",
-			"ids":               []string{"${alibabacloudctack_bastionhost_instance.default.id}-fake"},
+			"description_regex": "${alibabacloudstack_bastionhost_instances.default.description}-fake",
+			"ids":               []string{"${alibabacloudstack_bastionhost_instances.default.id}-fake"},
 			"tags": map[string]interface{}{
 				"For": "acceptance test-fake",
 			},
@@ -85,7 +85,7 @@ func TestAccAlibabacloudStackBastionhostInstancesDataSource(t *testing.T) {
 		}
 	}
 	var yundunBastionhostInstanceCheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudctack_bastionhost_instances.default",
+		resourceId:   "data.alibabacloudstack_bastionhost_instances.default",
 		existMapFunc: existYundunBastionhostInstanceMapFunc,
 		fakeMapFunc:  fakeYundunBastionhostInstanceMapFunc,
 	}
@@ -102,42 +102,8 @@ func dataSourceYundunBastionhostInstanceConfigDependency(description string) str
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"
-}
-data "alibabacloudctack_zones" "default" {
-  available_resource_creation = "VSwitch"
-}
-data "alibabacloudctack_vpcs" "default" {
-    name_regex = "^default-NODELETING$"
-}
-data "alibabacloudctack_vswitches" "default" {
-  vpc_id  = data.alibabacloudctack_vpcs.default.ids.0
-}
-resource "alibabacloudctack_vswitch" "this" {
-  count        = length(data.alibabacloudctack_vswitches.default.ids) > 0 ? 0 : 1
-  vswitch_name = var.name
-  vpc_id       = data.alibabacloudctack_vpcs.default.ids.0
-  zone_id      = data.alibabacloudctack_zones.default.ids.0
-  cidr_block   = cidrsubnet(data.alibabacloudctack_vpcs.default.vpcs.0.cidr_block, 8, 4)
-}
-resource "alibabacloudctack_security_group" "default" {
-  vpc_id = data.alibabacloudctack_vpcs.default.ids.0
-  name   = var.name
-}
-locals {
-  vswitch_id  = length(data.alibabacloudctack_vswitches.default.ids) > 0 ? data.alibabacloudctack_vswitches.default.ids.0 : concat(alibabacloudctack_vswitch.this.*.id, [""])[0]
-  zone_id     = data.alibabacloudctack_zones.default.ids[length(data.alibabacloudctack_zones.default.ids) - 1]
-  instance_id = length(data.alibabacloudctack_bastionhost_instances.default.ids) > 0 ? data.alibabacloudctack_bastionhost_instances.default.ids.0 : concat(alibabacloudctack_bastionhost_instance.default.*.id, [""])[0]
-}
-				
-resource "alibabacloudctack_bastionhost_instance" "default" {
-  description        = "${var.name}"
-  license_code       = "bhah_ent_50_asset"
-  period             = "1"
-  vswitch_id         = local.vswitch_id
-  security_group_ids = ["${alibabacloudctack_security_group.default.id}"]
-  tags 				 = {
-		Created = "TF"
-		For 	= "acceptance test"
+}				
+data "alibabacloudstack_bastionhost_instances" "default" {
   }
 }`, description)
 }

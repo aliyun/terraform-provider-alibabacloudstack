@@ -59,40 +59,24 @@ var bastionhostpolicyRequired = []BastionhostPolicyRequired{
 }
 
 func (s *YundunBastionhostService) DescribeBastionhostInstance(id string) (object map[string]interface{}, err error) {
-	var response map[string]interface{}
-	conn, err := s.client.NewBastionhostClient()
-	if err != nil {
-		return nil, errmsgs.WrapError(err)
-	}
+	// var response map[string]interface{}
+	// conn, err := s.client.NewBastionhostClient()
+	// if err != nil {
+	// 	return nil, errmsgs.WrapError(err)
+	// }
 	action := "DescribeInstanceAttribute"
 	request := map[string]interface{}{
 		"RegionId":   s.client.RegionId,
 		"InstanceId": id,
 	}
-	runtime := util.RuntimeOptions{}
-	runtime.SetAutoretry(true)
-	wait := incrementalWait(3*time.Second, 3*time.Second)
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2019-12-09"), StringPointer("AK"), nil, request, &runtime)
-		if err != nil {
-			if errmsgs.NeedRetry(err) || errmsgs.IsExpectedErrors(err, []string{"InvalidApi"}) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		return nil
-	})
-	addDebug(action, response, request)
+	response, err := s.client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
 	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"Commodity.BizError.InvalidStatus"}) {
-			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Instance", id)), errmsgs.NotFoundWithResponse, response)
-		}
-		return object, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
+		return object, err
 	}
-	v, err := jsonpath.Get("$.InstanceAttribute", response)
+	addDebug(action, response, request)
+	v, err := jsonpath.Get("$.Instances[0]", response)
 	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.InstanceAttribute", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Instances[0]", response)
 	}
 	object = v.(map[string]interface{})
 	return object, nil
@@ -240,11 +224,11 @@ func (s *YundunBastionhostService) BastionhostInstanceRefreshFunc(id string, fai
 		}
 
 		for _, failState := range failStates {
-			if fmt.Sprint(object["InstanceStatus"]) == failState {
-				return object, fmt.Sprint(object["InstanceStatus"]), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(object["InstanceStatus"])))
+			if fmt.Sprint(object["ClusterStatus"]) == failState {
+				return object, fmt.Sprint(object["ClusterStatus"]), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(object["ClusterStatus"])))
 			}
 		}
-		return object, fmt.Sprint(object["InstanceStatus"]), nil
+		return object, fmt.Sprint(object["ClusterStatus"]), nil
 	}
 }
 

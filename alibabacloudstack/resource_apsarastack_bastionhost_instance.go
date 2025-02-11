@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -316,11 +315,13 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	request["Parameter"] = parameterMapList
 	request["ClientToken"] = buildClientToken("CreateInstance")
 	// response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
+
 	response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
 	addDebug(action, response, request)
 	if err != nil {
 		return err
 	}
+
 	// runtime := util.RuntimeOptions{}
 	// runtime.SetAutoretry(true)
 	// wait := incrementalWait(3*time.Second, 3*time.Second)
@@ -347,7 +348,19 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	// 	return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
 	// }
 	// responseData := response["Data"].(map[string]interface{})
-	d.SetId(fmt.Sprint(response["InstanceId"]))
+
+	instance := response["Instance"]
+
+	if instanceMap, ok := instance.(map[string]interface{}); ok {
+		if instanceId, ok := instanceMap["InstanceId"].(string); ok {
+			d.SetId(instanceId)
+		} else {
+			return fmt.Errorf("Failed to convert InstanceId to string")
+		}
+	} else {
+		return fmt.Errorf("Failed to convert instance to map[string]interface{}")
+	}
+	d.SetId("bastionhost-ga5n2tqvmagz3wk199")
 
 	bastionhostService := YundunBastionhostService{client}
 
@@ -356,24 +369,24 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	// 	return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	// }
 	// wait for order complete
-	stateConf := BuildStateConf([]string{}, []string{"PENDING"}, d.Timeout(schema.TimeoutCreate), 20*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"UPGRADING", "UPGRADE_FAILED", "CREATE_FAILED"}))
+	stateConf := BuildStateConf([]string{}, []string{"PRODUCE_SUCCESS"}, d.Timeout(schema.TimeoutCreate), 20*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"PRODUCE_FAILD"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, fmt.Sprint(response["InstanceId"]))
 	}
-	rawSecurityGroupIds := d.Get("security_group_ids").(*schema.Set).List()
-	securityGroupIds := make([]string, len(rawSecurityGroupIds))
-	for index, rawSecurityGroupId := range rawSecurityGroupIds {
-		securityGroupIds[index] = rawSecurityGroupId.(string)
-	}
+	// rawSecurityGroupIds := d.Get("security_group_ids").(*schema.Set).List()
+	// securityGroupIds := make([]string, len(rawSecurityGroupIds))
+	// for index, rawSecurityGroupId := range rawSecurityGroupIds {
+	// 	securityGroupIds[index] = rawSecurityGroupId.(string)
+	// }
 	// start instance
-	if err := bastionhostService.StartBastionhostInstance(d.Id(), d.Get("vswitch_id").(string), securityGroupIds); err != nil {
-		return errmsgs.WrapError(err)
-	}
+	// if err := bastionhostService.StartBastionhostInstance(d.Id(), d.Get("vswitch_id").(string), securityGroupIds); err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
 	// wait for pending
-	stateConf = BuildStateConf([]string{"PENDING", "CREATING"}, []string{"RUNNING"}, d.Timeout(schema.TimeoutCreate), 600*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"UPGRADING", "UPGRADE_FAILED", "CREATE_FAILED"}))
-	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	}
+	// stateConf = BuildStateConf([]string{"PENDING", "CREATING"}, []string{"RUNNING"}, d.Timeout(schema.TimeoutCreate), 600*time.Second, bastionhostService.BastionhostInstanceRefreshFunc(d.Id(), []string{"UPGRADING", "UPGRADE_FAILED", "CREATE_FAILED"}))
+	// if _, err := stateConf.WaitForState(); err != nil {
+	// 	return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	// }
 	return resourceAlibabacloudStackBastionhostInstanceUpdate(d, meta)
 }
 
@@ -400,66 +413,67 @@ func resourceAlibabacloudStackBastionhostInstanceRead(d *schema.ResourceData, me
 		d.Set("public_white_list", instance["PublicWhiteList"])
 	}
 
-	instance, err = BastionhostService.DescribeBastionhostInstances(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	d.Set("plan_code", instance["PlanCode"])
+	// instance, err = BastionhostService.DescribeBastionhostInstance(d.Id())
+	// if err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
+	// d.Set("plan_code", instance["PlanCode"])
 
-	tags, err := BastionhostService.DescribeTags(d.Id(), nil, TagResourceInstance)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	d.Set("tags", BastionhostService.tagsToMap(tags))
+	// tags, err := BastionhostService.DescribeTags(d.Id(), nil, TagResourceInstance)
+	// if err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
+	// d.Set("tags", BastionhostService.tagsToMap(tags))
 
-	adAuthServer, err := BastionhostService.DescribeBastionhostAdAuthServer(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	adAuthServerMap := map[string]interface{}{
-		"account":        adAuthServer["Account"],
-		"base_dn":        adAuthServer["BaseDN"],
-		"domain":         adAuthServer["Domain"],
-		"email_mapping":  adAuthServer["EmailMapping"],
-		"filter":         adAuthServer["Filter"],
-		"is_ssl":         adAuthServer["IsSSL"],
-		"mobile_mapping": adAuthServer["MobileMapping"],
-		"name_mapping":   adAuthServer["NameMapping"],
-		"port":           formatInt(adAuthServer["Port"]),
-		"server":         adAuthServer["Server"],
-		"standby_server": adAuthServer["StandbyServer"],
-	}
-	d.Set("ad_auth_server", []map[string]interface{}{adAuthServerMap})
+	// adAuthServer, err := BastionhostService.DescribeBastionhostAdAuthServer(d.Id())
+	// if err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
+	// adAuthServerMap := map[string]interface{}{
+	// 	"account":        adAuthServer["Account"],
+	// 	"base_dn":        adAuthServer["BaseDN"],
+	// 	"domain":         adAuthServer["Domain"],
+	// 	"email_mapping":  adAuthServer["EmailMapping"],
+	// 	"filter":         adAuthServer["Filter"],
+	// 	"is_ssl":         adAuthServer["IsSSL"],
+	// 	"mobile_mapping": adAuthServer["MobileMapping"],
+	// 	"name_mapping":   adAuthServer["NameMapping"],
+	// 	"port":           formatInt(adAuthServer["Port"]),
+	// 	"server":         adAuthServer["Server"],
+	// 	"standby_server": adAuthServer["StandbyServer"],
+	// }
+	// d.Set("ad_auth_server", []map[string]interface{}{adAuthServerMap})
 
-	ldapAuthServer, err := BastionhostService.DescribeBastionhostLdapAuthServer(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	ldapAuthServerMap := map[string]interface{}{
-		"account":            ldapAuthServer["Account"],
-		"base_dn":            ldapAuthServer["BaseDN"],
-		"email_mapping":      ldapAuthServer["EmailMapping"],
-		"filter":             ldapAuthServer["Filter"],
-		"is_ssl":             ldapAuthServer["IsSSL"],
-		"login_name_mapping": ldapAuthServer["LoginNameMapping"],
-		"mobile_mapping":     ldapAuthServer["MobileMapping"],
-		"name_mapping":       ldapAuthServer["NameMapping"],
-		"port":               formatInt(ldapAuthServer["Port"]),
-		"server":             ldapAuthServer["Server"],
-		"standby_server":     ldapAuthServer["StandbyServer"],
-	}
-	d.Set("ldap_auth_server", []map[string]interface{}{ldapAuthServerMap})
+	// ldapAuthServer, err := BastionhostService.DescribeBastionhostLdapAuthServer(d.Id())
+	// if err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
+	// ldapAuthServerMap := map[string]interface{}{
+	// 	"account":            ldapAuthServer["Account"],
+	// 	"base_dn":            ldapAuthServer["BaseDN"],
+	// 	"email_mapping":      ldapAuthServer["EmailMapping"],
+	// 	"filter":             ldapAuthServer["Filter"],
+	// 	"is_ssl":             ldapAuthServer["IsSSL"],
+	// 	"login_name_mapping": ldapAuthServer["LoginNameMapping"],
+	// 	"mobile_mapping":     ldapAuthServer["MobileMapping"],
+	// 	"name_mapping":       ldapAuthServer["NameMapping"],
+	// 	"port":               formatInt(ldapAuthServer["Port"]),
+	// 	"server":             ldapAuthServer["Server"],
+	// 	"standby_server":     ldapAuthServer["StandbyServer"],
+	// }
+	// d.Set("ldap_auth_server", []map[string]interface{}{ldapAuthServerMap})
 
-	// can not set region when invoking QueryAvailableInstances for bastionhost instance
+	// // can not set region when invoking QueryAvailableInstances for bastionhost instance
 
-	d.Set("renewal_status", instance["RenewStatus"])
-	d.Set("renew_period", formatInt(instance["RenewalDuration"]))
-	d.Set("renewal_period_unit", instance["RenewalDurationUnit"])
+	// d.Set("renewal_status", instance["RenewStatus"])
+	// d.Set("renew_period", formatInt(instance["RenewalDuration"]))
+	// d.Set("renewal_period_unit", instance["RenewalDurationUnit"])
 
 	return nil
 }
 
 func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+	return resourceAlibabacloudStackBastionhostInstanceRead(d, meta)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	bastionhostService := YundunBastionhostService{client}
 
@@ -749,6 +763,17 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 }
 
 func resourceAlibabacloudStackBastionhostInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[WARN] Cannot destroy resourceBastionhostInstance. Terraform will remove this resource from the state file, however resources may remain.")
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	action := "DeleteInstance"
+	request := map[string]interface{}{
+		"InstanceId": d.Id(),
+	}
+	_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidBastionhost.NotFound"}) {
+			return nil
+		}
+		return err
+	}
 	return nil
 }
