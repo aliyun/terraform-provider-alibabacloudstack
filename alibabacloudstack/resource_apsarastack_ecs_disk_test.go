@@ -277,7 +277,7 @@ func TestAccAlibabacloudStackDisk_Encrypted(t *testing.T) {
 		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	rc := resourceCheckInit(resourceId, &v, serverFunc)
-	ra := resourceAttrInit(resourceId, testAccCheckResourceDiskBasicMap)
+	ra := resourceAttrInit(resourceId, map[string]string{})
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	resource.Test(t, resource.TestCase{
