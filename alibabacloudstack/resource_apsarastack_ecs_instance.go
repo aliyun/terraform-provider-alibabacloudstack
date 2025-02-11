@@ -381,7 +381,7 @@ func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interfac
 	log.Printf("[ECS Creation]: Getting Instance Details Successfully: %s", instance.Status)
 	system_disks, err := ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "system")
 	if err != nil {
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	system_disk_tags := getOnlySystemTags(d, system_disks[0].Tags.Tag)
 
@@ -666,20 +666,20 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 	if system_disk_tags, ok := d.GetOk("system_disk_tags"); ok {
 		disks, err := ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "system")
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		oraw := make(map[string]interface{})
 		sysdisk_tags := ecsMergeTags(d, system_disk_tags.(map[string]interface{}))
 		err = updateTags(client, []string{disks[0].DiskId}, "disk", oraw, sysdisk_tags)
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 	}
 
 	if data_disk_tags, ok := d.GetOk("data_disk_tags"); ok {
 		disks, err := ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "data")
 		if err != nil {
-			return WrapError(err)
+			return errmsgs.WrapError(err)
 		}
 		if len(disks) > 0 {
 			oraw := make(map[string]interface{})
@@ -690,7 +690,7 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 			}
 			err = updateTags(client, diskids, "disk", oraw, datadisk_tags)
 			if err != nil {
-				return WrapError(err)
+				return errmsgs.WrapError(err)
 			}
 		}
 
@@ -1342,8 +1342,6 @@ func AssignIpv6AddressesFunc(id string, ipv6_addresses_count int, ipv6_addresses
 	ipv6s = response.Ipv6Sets.Ipv6Address
 	return ipv6s, nil
 }
-
-
 
 func ecsMergeTags(d *schema.ResourceData, disktags map[string]interface{}) map[string]interface{} {
 	if intance_tags, ok := d.GetOk("tags"); ok && len(intance_tags.(map[string]interface{})) > 0 {

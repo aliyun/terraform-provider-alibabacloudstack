@@ -182,7 +182,7 @@ func resourceAlibabacloudStackDiskCreate(d *schema.ResourceData, meta interface{
 				request.KMSKeyId = j.(string)
 			}
 			if request.KMSKeyId == "" {
-				return WrapError(errors.New("KmsKeyId can not be empty if encrypted is set to \"true\""))
+				return errmsgs.WrapError(errors.New("KmsKeyId can not be empty if encrypted is set to \"true\""))
 			}
 			request.EncryptAlgorithm = d.Get("encrypt_algorithm").(string)
 		}
