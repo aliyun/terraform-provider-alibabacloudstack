@@ -40,7 +40,7 @@ func testSweepDisks(region string) error {
 	req := ecs.CreateDescribeDisksRequest()
 	req.RegionId = client.RegionId
 	req.Headers = map[string]string{"RegionId": client.RegionId}
-	req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+	req.QueryParams = map[string]string{"Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 	req.QueryParams["Department"] = client.Department
 	req.QueryParams["ResourceGroup"] = client.ResourceGroup
 	if strings.ToLower(client.Config.Protocol) == "https" {
@@ -91,7 +91,7 @@ func testSweepDisks(region string) error {
 		log.Printf("[INFO] Deleting Disk: %s (%s)", name, id)
 		req := ecs.CreateDeleteDiskRequest()
 		req.Headers = map[string]string{"RegionId": client.RegionId}
-		req.QueryParams = map[string]string{ "Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
+		req.QueryParams = map[string]string{"Product": "ecs", "Department": client.Department, "ResourceGroup": client.ResourceGroup}
 		req.QueryParams["Department"] = client.Department
 		req.QueryParams["ResourceGroup"] = client.ResourceGroup
 		req.DiskId = id
@@ -162,9 +162,10 @@ func TestAccAlibabacloudStackDisk_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"encrypt_algorithm"},
 			},
 			{
 				Config: testAccDiskConfig_size(),
@@ -222,7 +223,7 @@ func TestAccAlibabacloudStackDisk_basic(t *testing.T) {
 						"tags.name1":           "name1",
 						"tags.name2":           "name2",
 						"tags.name3":           "name3",
-						"disk_name":                 "tf-testAccDiskConfig_all",
+						"disk_name":            "tf-testAccDiskConfig_all",
 						"description":          "nothing",
 						"delete_auto_snapshot": "false",
 						"delete_with_instance": "false",
@@ -260,7 +261,7 @@ func TestAccAlibabacloudStackDisk_multi(t *testing.T) {
 				Config: testAccDiskConfig_multi(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"disk_name":        "tf-testAccDiskConfig_multi",
+						"disk_name":   "tf-testAccDiskConfig_multi",
 						"description": "nothing",
 					}),
 				),
@@ -268,6 +269,40 @@ func TestAccAlibabacloudStackDisk_multi(t *testing.T) {
 		},
 	})
 
+}
+
+func TestAccAlibabacloudStackDisk_Encrypted(t *testing.T) {
+	var v ecs.Disk
+	resourceId := "alibabacloudstack_disk.default"
+	serverFunc := func() interface{} {
+		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &v, serverFunc)
+	ra := resourceAttrInit(resourceId, map[string]string{})
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		// module name
+		IDRefreshName: "alibabacloudstack_disk.default",
+
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckDiskDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDiskConfig_encrypted(),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name":      "testAccDiskConfig_encrypted",
+						"encrypted": "true",
+					}),
+				),
+			},
+		},
+	})
 }
 
 func testAccDiskConfig_basic() string {
@@ -279,6 +314,32 @@ resource "alibabacloudstack_disk" "default" {
   	size = "50"
 }
 `, DataAlibabacloudstackVswitchZones)
+}
+
+func testAccDiskConfig_encrypted() string {
+	return fmt.Sprintf(`
+data "alibabacloudstack_zones" "default" {
+	available_resource_creation= "VSwitch"
+}
+
+resource "alibabacloudstack_kms_key" "key" {
+  description             = "Hello KMS"
+  pending_window_in_days  = "7"
+  origin				  = "Aliyun_KMS"
+  protection_level		  = "SOFTWARE"
+
+}
+
+
+resource "alibabacloudstack_disk" "default" {
+    name = "testAccDiskConfig_encrypted"
+	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  	size = "50"
+	category = "cloud_efficiency"
+	encrypted = true
+	kms_key_id = "${alibabacloudstack_kms_key.key.id}"
+}
+`)
 }
 
 func testAccDiskConfig_size() string {
@@ -307,7 +368,7 @@ resource "alibabacloudstack_disk" "default" {
   	size = "70"
 	disk_name = "${var.name}"
 }
-`,DataAlibabacloudstackVswitchZones)
+`, DataAlibabacloudstackVswitchZones)
 }
 
 func testAccDiskConfig_description() string {
@@ -440,7 +501,7 @@ resource "alibabacloudstack_disk" "default" {
 }
 
 var testAccCheckResourceDiskBasicMap = map[string]string{
-	"zone_id":    CHECKSET,
+	"zone_id":              CHECKSET,
 	"size":                 "50",
 	"disk_name":            "",
 	"description":          "",
