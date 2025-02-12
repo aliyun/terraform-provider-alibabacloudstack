@@ -1,22 +1,20 @@
-package alicloud
+package alibabacloudstack
 
 import (
 	"fmt"
 	"log"
-	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-
-	"github.com/aliyun/terraform-provider-alicloud/alicloud/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-func resourceAlicloudWafInstance() *schema.Resource {
+func resourceAlibabacloudstackWafInstance() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAlicloudWafInstanceCreate,
-		Read:   resourceAlicloudWafInstanceRead,
-		Update: resourceAlicloudWafInstanceUpdate,
-		Delete: resourceAlicloudWafInstanceDelete,
+		Create: resourceAlibabacloudstackWafInstanceCreate,
+		Read:   resourceAlibabacloudstackWafInstanceRead,
+		Update: resourceAlibabacloudstackWafInstanceUpdate,
+		Delete: resourceAlibabacloudstackWafInstanceDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -96,12 +94,10 @@ func resourceAlicloudWafInstance() *schema.Resource {
 	}
 }
 
-func resourceAlicloudWafInstanceCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AliyunClient)
-	var response map[string]interface{}
+func resourceAlibabacloudstackWafInstanceCreate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
 	var err error
-	var endpoint string
-	action := "CreateInstance"
+	action := "CreateWAFInstance"
 	request := make(map[string]interface{})
 	if v, ok := d.GetOk("period"); ok {
 		request["Period"] = v
@@ -164,52 +160,34 @@ func resourceAlicloudWafInstanceCreate(d *schema.ResourceData, meta interface{})
 			"Value": d.Get("waf_log").(string),
 		},
 	}
-	wait := incrementalWait(3*time.Second, 5*time.Second)
-	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-		response, err = client.RpcPostWithEndpoint("BssOpenApi", "2017-12-14", action, nil, request, true, endpoint)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			if IsExpectedErrors(err, []string{"NotApplicable"}) {
-				endpoint = connectivity.BssOpenAPIEndpointInternational
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, request)
-		return nil
-	})
+	response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", action, "", nil, request)
 	if err != nil {
-		return WrapErrorf(err, DefaultErrorMsg, "alicloud_waf_instance", action, AlibabaCloudSdkGoERROR)
+		return err
 	}
+	addDebug(action, response, request)
 	response = response["Data"].(map[string]interface{})
 	d.SetId(fmt.Sprint(response["InstanceId"]))
 
-	return resourceAlicloudWafInstanceUpdate(d, meta)
+	return resourceAlibabacloudstackWafInstanceUpdate(d, meta)
 }
-func resourceAlicloudWafInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AliyunClient)
+func resourceAlibabacloudstackWafInstanceRead(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
 	waf_openapiService := WafOpenapiService{client}
 	object, err := waf_openapiService.DescribeWafInstance(d.Id())
 	if err != nil {
-		if NotFoundError(err) {
-			log.Printf("[DEBUG] Resource alicloud_waf_instance waf_openapiService.DescribeWafInstance Failed!!! %s", err)
+		if errmsgs.NotFoundError(err) {
+			log.Printf("[DEBUG] Resource alibabacloudstack_waf_instance waf_openapiService.DescribeWafInstance Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
-		return WrapError(err)
+		return errmsgs.WrapError(err)
 	}
 	d.Set("status", formatInt(object["Status"]))
 	d.Set("subscription_type", object["SubscriptionType"])
 	return nil
 }
-func resourceAlicloudWafInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AliyunClient)
-	var response map[string]interface{}
-	var err error
-	var endpoint string
+func resourceAlibabacloudstackWafInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
 	update := false
 	request := map[string]interface{}{
 		"InstanceId": d.Id(),
@@ -260,34 +238,18 @@ func resourceAlicloudWafInstanceUpdate(d *schema.ResourceData, meta interface{})
 		},
 	}
 	if update {
-		action := "ModifyInstance"
-		wait := incrementalWait(3*time.Second, 5*time.Second)
-		err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-			response, err = client.RpcPostWithEndpoint("BssOpenApi", "2017-12-14", action, nil, request, true, endpoint)
-			if err != nil {
-				if NeedRetry(err) {
-					wait()
-					return resource.RetryableError(err)
-				}
-				if IsExpectedErrors(err, []string{"NotApplicable"}) {
-					endpoint = connectivity.BssOpenAPIEndpointInternational
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
-			}
-			addDebug(action, response, request)
-			return nil
-		})
+		action := "EditWAFInstance"
+		response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", action, "", nil, request)
 		if err != nil {
-			return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+			return err
 		}
+		addDebug(action, response, request)
 	}
-	return resourceAlicloudWafInstanceRead(d, meta)
+	return resourceAlibabacloudstackWafInstanceRead(d, meta)
 }
-func resourceAlicloudWafInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AliyunClient)
-	action := "DeleteInstance"
-	var response map[string]interface{}
+func resourceAlibabacloudstackWafInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	action := "DeleteWAFInstance"
 	var err error
 	request := map[string]interface{}{
 		"InstanceId": d.Id(),
@@ -296,28 +258,10 @@ func resourceAlicloudWafInstanceDelete(d *schema.ResourceData, meta interface{})
 	if v, ok := d.GetOk("resource_group_id"); ok {
 		request["ResourceGroupId"] = v
 	}
-	wait := incrementalWait(3*time.Second, 5*time.Second)
-	err = resource.Retry(3*time.Minute, func() *resource.RetryError {
-		response, err = client.RpcPost("waf-openapi", "2019-09-10", action, nil, request, false)
-		if err != nil {
-			if NeedRetry(err) {
-				wait()
-				return resource.RetryableError(err)
-			}
-			return resource.NonRetryableError(err)
-		}
-		addDebug(action, response, request)
-		return nil
-	})
+	response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", action, "", nil, request)
 	if err != nil {
-		if IsExpectedErrors(err, []string{"ComboError"}) {
-			return nil
-		}
-		if IsExpectedErrors(err, []string{"NotExpiredInstanceReleaseError"}) {
-			log.Printf("[WARN] Resource alicloud_waf_instance DeleteInstance Failed!!! %s", err)
-			return nil
-		}
-		return WrapErrorf(err, DefaultErrorMsg, d.Id(), action, AlibabaCloudSdkGoERROR)
+		return err
 	}
+	addDebug(action, response, request)
 	return nil
 }

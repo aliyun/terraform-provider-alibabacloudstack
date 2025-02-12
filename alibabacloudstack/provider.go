@@ -804,6 +804,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_graph_database_db_instance":            resourceAlibabacloudStackGraphDatabaseDbInstance(),
 		"alibabacloudstack_graphdatabase_dbinstance":              resourceAlibabacloudStackGraphDatabaseDbInstance(),
 		"alibabacloudstack_bastionhost_instance":                  resourceAlibabacloudStackBastionhostInstance(),
+		"alibabacloudstack_waf_instance":                          resourceAlibabacloudstackWafInstance(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
