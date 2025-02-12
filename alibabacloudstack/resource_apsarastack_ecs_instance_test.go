@@ -157,7 +157,7 @@ func testSweepInstances(region string) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackInstanceBasic(t *testing.T) {
+func TestAccAlibabacloudStackInstance_Basic(t *testing.T) {
 	var v ecs.Instance
 
 	resourceId := "alibabacloudstack_instance.default"
@@ -190,7 +190,7 @@ func TestAccAlibabacloudStackInstanceBasic(t *testing.T) {
 					// "storage_set_id":       "${alibabacloudstack_ecs_ebs_storage_set.default.id}",
 					// "storage_set_partition_number": "1",
 					"availability_zone":    "${data.alibabacloudstack_zones.default.zones[0].id}",
-					"system_disk_category": "cloud_efficiency",
+					"system_disk_category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"instance_name":        "${var.name}",
 					//"key_name":                      "${alibabacloudstack_key_pair.default.key_name}",
 					"user_data":                     "I_am_user_data",
@@ -210,12 +210,6 @@ func TestAccAlibabacloudStackInstanceBasic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"security_enhancement_strategy", "dry_run", "user_data", "enable_ipv6", "ipv6_address_count"},
-			},
-			{
 				Config: testAccConfig(map[string]interface{}{
 					"tags": map[string]interface{}{
 						"Created": "Terraform",
@@ -230,11 +224,24 @@ func TestAccAlibabacloudStackInstanceBasic(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"security_enhancement_strategy",
+					"dry_run", "user_data", "enable_ipv6",
+					"ipv6_address_count",
+					"system_disk_tags.%",
+					"system_disk_tags.Bar",
+					"system_disk_tags.foo",
+				},
+			},
 		},
 	})
 }
 
-func TestAccAlibabacloudStackInstanceVpc(t *testing.T) {
+func TestAccAlibabacloudStackInstance_Vpc(t *testing.T) {
 	var v ecs.Instance
 
 	resourceId := "alibabacloudstack_instance.default"
@@ -265,7 +272,7 @@ func TestAccAlibabacloudStackInstanceVpc(t *testing.T) {
 					"instance_type":   "${local.default_instance_type_id}",
 
 					"availability_zone":             "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"system_disk_category":          "cloud_efficiency",
+					"system_disk_category":          "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"instance_name":                 "${var.name}",
 					"security_enhancement_strategy": "Active",
 					"user_data":                     "I_am_user_data",
@@ -407,7 +414,7 @@ func TestAccAlibabacloudStackInstanceVpc(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
+func TestAccAlibabacloudStackInstance_DataDisks(t *testing.T) {
 	var v ecs.Instance
 
 	resourceId := "alibabacloudstack_instance.default"
@@ -438,7 +445,7 @@ func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
 					"instance_type":   "${local.default_instance_type_id}",
 
 					"availability_zone":    "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"system_disk_category": "cloud_efficiency",
+					"system_disk_category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"instance_name":        "${var.name}",
 					//"key_name":                      "${alibabacloudstack_key_pair.default.key_name}",
 					"security_enhancement_strategy": "Active",
@@ -449,13 +456,13 @@ func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
 						{
 							"name":        "disk1",
 							"size":        "40",
-							"category":    "cloud_efficiency",
+							"category":    "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 							"description": "disk1",
 						},
 						{
 							"name":        "disk2",
 							"size":        "40",
-							"category":    "cloud_efficiency",
+							"category":    "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 							"description": "disk2",
 						},
 					},
@@ -469,11 +476,9 @@ func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
 						"data_disks.#":             "2",
 						"data_disks.0.name":        "disk1",
 						"data_disks.0.size":        "40",
-						"data_disks.0.category":    "cloud_efficiency",
 						"data_disks.0.description": "disk1",
 						"data_disks.1.name":        "disk2",
 						"data_disks.1.size":        "40",
-						"data_disks.1.category":    "cloud_efficiency",
 						"data_disks.1.description": "disk2",
 					}),
 				),
@@ -488,7 +493,7 @@ func TestAccAlibabacloudStackInstanceDataDisks(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackInstanceTypeUpdate(t *testing.T) {
+func TestAccAlibabacloudStackInstance_TypeUpdate(t *testing.T) {
 	var v ecs.Instance
 
 	resourceId := "alibabacloudstack_instance.default"
@@ -514,7 +519,7 @@ func TestAccAlibabacloudStackInstanceTypeUpdate(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":                      "${data.alibabacloudstack_images.default.images.0.id}",
-					"system_disk_category":          "cloud_efficiency",
+					"system_disk_category":          "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"system_disk_size":              "40",
 					"instance_type":                 "${data.alibabacloudstack_instance_types.new1.instance_types.0.id}",
 					"instance_name":                 "${var.name}",
@@ -540,7 +545,7 @@ func TestAccAlibabacloudStackInstanceTypeUpdate(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackInstanceMulti(t *testing.T) {
+func TestAccAlibabacloudStackInstance_Multi(t *testing.T) {
 	var v ecs.Instance
 
 	resourceId := "alibabacloudstack_instance.default.2"
@@ -571,7 +576,7 @@ func TestAccAlibabacloudStackInstanceMulti(t *testing.T) {
 					"security_groups":      []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
 					"instance_type":        "${local.default_instance_type_id}",
 					"availability_zone":    "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"system_disk_category": "cloud_efficiency",
+					"system_disk_category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"instance_name":        "${var.name}",
 					//"key_name":                      "${alibabacloudstack_key_pair.default.key_name}",
 					"security_enhancement_strategy": "Active",
@@ -597,7 +602,7 @@ func TestAccAlibabacloudStackInstanceMulti(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackInstanceImageUpdateTags(t *testing.T) {
+func TestAccAlibabacloudStackInstance_ImageUpdateTags(t *testing.T) {
 	var v ecs.Instance
 
 	resourceId := "alibabacloudstack_instance.default"
@@ -627,7 +632,7 @@ func TestAccAlibabacloudStackInstanceImageUpdateTags(t *testing.T) {
 					"security_groups":               []string{"${alibabacloudstack_security_group.default.0.id}"},
 					"instance_type":                 "ecs.se1.large",
 					"availability_zone":             "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"system_disk_category":          "cloud_efficiency",
+					"system_disk_category":          "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"system_disk_size":              "20",
 					"instance_name":                 "${var.name}",
 					"security_enhancement_strategy": "Active",
@@ -637,7 +642,7 @@ func TestAccAlibabacloudStackInstanceImageUpdateTags(t *testing.T) {
 						{
 							"name":        "disk1",
 							"size":        "20",
-							"category":    "cloud_efficiency",
+							"category":    "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 							"description": "disk1",
 						},
 					},
@@ -767,7 +772,7 @@ var testAccInstanceCheckMap = map[string]string{
 	"enable_ipv6":                   "false",
 	"ipv6_address_count":            "0",
 	"availability_zone":             CHECKSET,
-	"system_disk_category":          "cloud_efficiency",
+	"system_disk_category":          CHECKSET,
 	"security_enhancement_strategy": "Active",
 	"vswitch_id":                    CHECKSET,
 	"user_data":                     "I_am_user_data",
