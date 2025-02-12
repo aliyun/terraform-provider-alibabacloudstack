@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAlibabacloudStackDiskAttachment(t *testing.T) {
+func TestAccAlibabacloudStackDiskAttachment_basic(t *testing.T) {
 	var i ecs.Instance
 	var v ecs.Disk
 	var attachment ecs.Disk
@@ -63,18 +63,18 @@ func TestAccAlibabacloudStackDiskAttachment(t *testing.T) {
 
 }
 
-func TestAccAlibabacloudStackDiskMultiAttachment(t *testing.T) {
+func TestAccAlibabacloudStackDiskAttachment_multi(t *testing.T) {
 	var i ecs.Instance
 	var v ecs.Disk
 	var attachment ecs.Disk
 	serverFunc := func() interface{} {
 		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	diskRc := resourceCheckInit("alibabacloudstack_ecs_disk.default.1", &v, serverFunc)
+	diskRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_disk.default.1", &v, serverFunc, "DescribeDisk")
 
-	instanceRc := resourceCheckInit("alibabacloudstack_ecs_instance.default", &i, serverFunc)
+	instanceRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_instance.default", &i, serverFunc, "DescribeInstance")
 
-	attachmentRc := resourceCheckInit("alibabacloudstack_ecs_diskattachment.default.1", &attachment, serverFunc)
+	attachmentRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_diskattachment.default.1", &attachment, serverFunc, "DescribeDiskAttachment")
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
