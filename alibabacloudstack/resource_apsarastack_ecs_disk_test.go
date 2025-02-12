@@ -162,10 +162,9 @@ func TestAccAlibabacloudStackDisk_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"encrypt_algorithm"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccDiskConfig_size(),
@@ -318,28 +317,19 @@ resource "alibabacloudstack_disk" "default" {
 
 func testAccDiskConfig_encrypted() string {
 	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation= "VSwitch"
-}
-
-resource "alibabacloudstack_kms_key" "key" {
-  description             = "Hello KMS"
-  pending_window_in_days  = "7"
-  origin				  = "Aliyun_KMS"
-  protection_level		  = "SOFTWARE"
-
-}
-
+%s
 
 resource "alibabacloudstack_disk" "default" {
     name = "testAccDiskConfig_encrypted"
 	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   	size = "50"
-	category = "cloud_efficiency"
+	category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
 	encrypted = true
 	kms_key_id = "${alibabacloudstack_kms_key.key.id}"
 }
-`)
+
+%s
+`, DataZoneCommonTestCase, KeyCommonTestCase)
 }
 
 func testAccDiskConfig_size() string {
