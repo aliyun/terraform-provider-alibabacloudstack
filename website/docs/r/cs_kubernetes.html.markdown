@@ -211,7 +211,8 @@ The following arguments are supported:
 * `instances`- (Optional) A list of instances that can be attached as worker nodes in the same Vpc.
 * `os_type`- (Optional)  The operating system of the nodes that run pods, its valid value is either Linux or Windows. Default to Linux.
 * `platform` - (Optional) The architecture of the nodes that run pods. Default to CentOS.
-* `is_enterprise_security_group` -(Optional) Specifies whether an advanced security group is automatically created. You must set the security_group_id or is_enterprise_security_group parameter.
+* `security_group_id` - (Optional) The ID of the security group to which the ECSs in the cluster belong，Conflict with the `is_enterprise_security_group`
+* `is_enterprise_security_group` -(Optional) Specifies whether an advanced security group is automatically created. You must set the `security_group_id` or `is_enterprise_security_group` parameter.
 * `runtime`-  (Optional) The platform on which the clusters are going to run.
     * `name`- (Optional) Name of the runtime platform
     * `version`- (Optional) Version of the runtime platform

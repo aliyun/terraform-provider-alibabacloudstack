@@ -26,33 +26,33 @@ func resourceAlibabacloudStackDisk() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Optional:     true,
-				Computed:     true,
-				Deprecated:   "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
 				ConflictsWith: []string{"zone_id"},
 			},
 			"zone_id": {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Optional:     true,
-				Computed:     true,
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"availability_zone"},
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'disk_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'disk_name' instead.",
 				ConflictsWith: []string{"disk_name"},
 			},
 			"disk_name": {
-				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 
@@ -90,6 +90,12 @@ func resourceAlibabacloudStackDisk() *schema.Resource {
 				Optional:      true,
 				ForceNew:      true,
 				ConflictsWith: []string{"snapshot_id"},
+			},
+			"encrypt_algorithm": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
 			},
 
 			"delete_auto_snapshot": {
@@ -153,7 +159,9 @@ func resourceAlibabacloudStackDiskCreate(d *schema.ResourceData, meta interface{
 		request.DiskCategory = v.(string)
 	}
 
-	request.Size = requests.NewInteger(d.Get("size").(int))
+	if v, ok := d.GetOk("size"); ok {
+		request.Size = requests.NewInteger(v.(int))
+	}
 
 	if v, ok := d.GetOk("snapshot_id"); ok && v.(string) != "" {
 		request.SnapshotId = v.(string)
@@ -175,6 +183,7 @@ func resourceAlibabacloudStackDiskCreate(d *schema.ResourceData, meta interface{
 			if request.KMSKeyId == "" {
 				return errmsgs.WrapError(errors.New("KmsKeyId can not be empty if encrypted is set to \"true\""))
 			}
+			request.EncryptAlgorithm = d.Get("encrypt_algorithm").(string)
 		}
 	}
 	if v, ok := d.GetOk("tags"); ok && len(v.(map[string]interface{})) > 0 {
