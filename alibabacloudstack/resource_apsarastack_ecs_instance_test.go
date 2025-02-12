@@ -616,7 +616,7 @@ func TestAccAlibabacloudStackInstance_ImageUpdateTags(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testAcc%sEcsInstanceConfigMulti%d", defaultRegionToTest, rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceInstanceImageUpdateConfigDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceInstanceBasicConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -629,15 +629,15 @@ func TestAccAlibabacloudStackInstance_ImageUpdateTags(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":                      "${data.alibabacloudstack_images.default.images.0.id}",
-					"security_groups":               []string{"${alibabacloudstack_security_group.default.0.id}"},
-					"instance_type":                 "ecs.se1.large",
+					"security_groups":                []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
+					"instance_type":                 "${local.default_instance_type_id}",
 					"availability_zone":             "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"system_disk_category":          "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 					"system_disk_size":              "20",
 					"instance_name":                 "${var.name}",
 					"security_enhancement_strategy": "Active",
 					"user_data":                     "I_am_user_data",
-					"vswitch_id":                    "${alibabacloudstack_vswitch.default.id}",
+					"vswitch_id":                    "${alibabacloudstack_vpc_vswitch.default.id}",
 					"data_disks": []map[string]string{
 						{
 							"name":        "disk1",
@@ -663,7 +663,7 @@ func TestAccAlibabacloudStackInstance_ImageUpdateTags(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"image_id": "${data.alibabacloudstack_images.default.images.1.id}",
+					"image_id": "${data.alibabacloudstack_images.update.images.1.id}",
 					"system_disk_tags": map[string]string{
 						"sys_foo": "sys_foo",
 						"sys_Bar": "sys_Bar",
@@ -725,6 +725,11 @@ func resourceInstanceBasicConfigDependence(name string) string {
 %s
 
 %s
+
+data "alibabacloudstack_images" "update" {
+	name_regex  = "^ubuntu*"
+	owners      = "system"
+}
 
 variable "name" {
 	default = "%s"
@@ -790,48 +795,4 @@ var testAccInstanceCheckMap = map[string]string{
 	"status":                     "Running",
 	"internet_max_bandwidth_out": "0",
 	"force_delete":               NOSET,
-}
-
-func resourceInstanceImageUpdateConfigDependence(name string) string {
-	return fmt.Sprintf(`
-	
-	data "alibabacloudstack_images" "default" {
-	  name_regex  = "^ubuntu*"
-	  owners      = "system"
-	}
-
-	resource "alibabacloudstack_vpc" "default" {
-	  name       = "${var.name}"
-	  cidr_block = "172.16.0.0/16"
-	}
-
-	data "alibabacloudstack_zones" "default" {
-		available_resource_creation = "VSwitch"
-	}
-
-	data "alibabacloudstack_instance_types" "default" {
-		availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-		cpu_core_count       = 1
-		memory_size          = 1
-	}
-
-	
-	resource "alibabacloudstack_vswitch" "default" {
-	  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-	  cidr_block        = "172.16.0.0/24"
-	  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	  name              = "${var.name}"
-	}
-	
-	resource "alibabacloudstack_security_group" "default" {
-	  count = "2"
-	  name   = "${var.name}"
-	  vpc_id = "${alibabacloudstack_vpc.default.id}"
-	}
-
-	variable "name" {
-		default = "%s"
-	}
-	
-	`, name)
 }
