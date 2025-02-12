@@ -96,7 +96,6 @@ func resourceAlibabacloudStackDisk() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
-				Default:      "aes-256",
 			},
 
 			"delete_auto_snapshot": {

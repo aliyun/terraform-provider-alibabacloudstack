@@ -162,9 +162,10 @@ func TestAccAlibabacloudStackDisk_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"encrypt_algorithm"},
 			},
 			{
 				Config: testAccDiskConfig_size(),
