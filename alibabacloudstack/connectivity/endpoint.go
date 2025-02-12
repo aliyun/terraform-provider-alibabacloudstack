@@ -65,6 +65,7 @@ const (
 	OtsCode             = ServiceCode("OTS")
 	DatahubCode         = ServiceCode("DATAHUB")
 	STSCode             = ServiceCode("STS")
+	CLOUDFWCode         = ServiceCode("CLOUDFW")
 	//undefined code 先添加
 	GDBCode             = ServiceCode("GDB")
 	ARMSCode            = ServiceCode("ARMS")
@@ -166,6 +167,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	WafOpenapiCode: PopEndpoint{
 		"cloudfw.{{.domain}}",
 		"cloudfw.{{.region}}.{{.domain}}",
+	},
+	//cloudfw endpoint
+	CLOUDFWCode: PopEndpoint{
+		"cfwctl-cloudfw-biz.{{.region}}.{{.domain}}",
+		"cfwctl-cloudfw-biz.{{.region}}.{{.domain}}",
 	},
 	//cr endpoint
 	CRCode: PopEndpoint{
