@@ -651,34 +651,23 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 		return errmsgs.WrapError(err)
 	}
 
-	if system_disk_tags, ok := d.GetOk("system_disk_tags"); ok {
-		disks, err := ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "system")
+	if d.HasChanges("system_disk_tags", "system_disk_id", "tags") {
+		var oraw, nraw map[string]interface{}
+		system_disks, err := ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "system")
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		oraw := make(map[string]interface{})
-		sysdisk_tags := make(map[string]interface{})
-		if d.IsNewResource() || d.HasChange("image_id") {
-			sysdisk_tags = ecsMergeTags(d, system_disk_tags.(map[string]interface{}))
-		} else {
-			sysdisk_tags = system_disk_tags.(map[string]interface{})
+		system_disk_tags := getOnlySystemTags(d, system_disks[0].Tags.Tag)
+		oraw = make(map[string]interface{})
+		for k, v := range ecsService.tagsToMap(system_disk_tags) {
+			oraw[k] = v
 		}
-		if !d.IsNewResource() && d.HasChange("tags") {
-			// ecs tags 删除时，对sys_disk_tags里同属于ecs tags里的数据进行同步修改
-			oraw, nraw := d.GetChange("tags")
-			deleteTags := oraw.(map[string]interface{})
-			for k, _ := range deleteTags {
-				if _, ok := nraw.(map[string]interface{})[k]; ok {
-					deleteTags[k] = nil
-				}
-			}
-			for k, _ := range sysdisk_tags {
-				if _, ok := deleteTags[k]; !ok {
-					sysdisk_tags[k] = nil
-				}
-			}
+
+		if v, ok := d.GetOk("system_disk_tags"); ok {
+			nraw = v.(map[string]interface{})
 		}
-		err = updateTags(client, []string{disks[0].DiskId}, "disk", oraw, sysdisk_tags)
+
+		err = updateTags(client, []string{system_disks[0].DiskId}, "disk", oraw, nraw)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -692,12 +681,7 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 		if len(disks) > 0 {
 			oraw := make(map[string]interface{})
 			diskids := make([]string, 0, len(disks))
-			datadisk_tags := make(map[string]interface{})
-			if d.IsNewResource() {
-				datadisk_tags = ecsMergeTags(d, data_disk_tags.(map[string]interface{}))
-			} else {
-				datadisk_tags = data_disk_tags.(map[string]interface{})
-			}
+			datadisk_tags := ecsMergeTags(d, data_disk_tags.(map[string]interface{}))
 			for _, disk := range disks {
 				diskids = append(diskids, disk.DiskId)
 			}
