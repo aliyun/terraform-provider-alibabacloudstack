@@ -322,6 +322,14 @@ data "alibabacloudstack_zones" "default" {
 	available_resource_creation= "VSwitch"
 }
 
+resource "alibabacloudstack_kms_key" "key" {
+  description             = "Hello KMS"
+  pending_window_in_days  = "7"
+  origin				  = "Aliyun_KMS"
+  protection_level		  = "SOFTWARE"
+
+}
+
 
 resource "alibabacloudstack_disk" "default" {
     name = "testAccDiskConfig_encrypted"
@@ -329,7 +337,7 @@ resource "alibabacloudstack_disk" "default" {
   	size = "50"
 	category = "cloud_efficiency"
 	encrypted = true
-	kms_key_id = "3852c3cd-3ace-468d-8b9b-c301c33a32b2"
+	kms_key_id = "${alibabacloudstack_kms_key.key.id}"
 }
 `)
 }
