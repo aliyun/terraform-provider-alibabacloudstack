@@ -79,6 +79,7 @@ const (
 	DataworkspublicCode = ServiceCode("DATAWORKSPUBLIC")
 	OneRouterCode       = ServiceCode("ONEROUTER")
 	BastionHostCode     = ServiceCode("BASTIONHOSTPRIVATE")
+	WAFONECSCode        = ServiceCode("WAF_ONECS")
 	//自建网关虚假Code
 	OssDataCode  = ServiceCode("OSSDATA")
 	SlSDataCode  = ServiceCode("SLSDATA")
@@ -182,6 +183,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	CSBCode: PopEndpoint{
 		"csb.{{.domain}}",
 		"csb.{{.region}}.{{.domain}}",
+	},
+	// waf-onecs endpoint
+	WAFONECSCode: PopEndpoint{
+		"waf-onecs-biz.{{.region}}.{{.domain}}",
+		"waf-onecs-biz.{{.region}}.{{.domain}}",
 	},
 	//datahub endpoint
 	DatahubCode: PopEndpoint{
