@@ -651,7 +651,7 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 		return errmsgs.WrapError(err)
 	}
 
-	if d.HasChanges("system_disk_tags", "system_disk_id", "tags") {
+	if d.HasChanges("system_disk_tags", "system_disk_id", "image_id", "tags") {
 		var oraw, nraw map[string]interface{}
 		system_disks, err := ecsService.DescribeInstanceDisksByType(d.Id(), client.ResourceGroup, "system")
 		if err != nil {
