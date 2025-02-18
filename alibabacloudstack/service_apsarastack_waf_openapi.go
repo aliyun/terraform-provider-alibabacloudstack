@@ -3,15 +3,26 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/PaesslerAG/jsonpath"
-
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 type WafOpenapiService struct {
 	client *connectivity.AlibabacloudStackClient
+}
+
+// waf vpc vswitch
+type WafVPCVSwitch struct {
+	VSwitchName   string `json:"vswitch_name"`
+	VSwitch       string `json:"vswitch"`
+	CIDRBlock     string `json:"cidr_block"`
+	AvailableZone string `json:"available_zone"`
+	VPC           string `json:"vpc"`
+	VPCName       string `json:"vpc_name"`
 }
 
 func (s *WafOpenapiService) convertLogHeadersToString(v []interface{}) (string, error) {
@@ -59,22 +70,30 @@ func (s *WafOpenapiService) DescribeWafInstance(id string) (object map[string]in
 	client := s.client
 	action := "DescribeWAFInstance"
 	request := map[string]interface{}{
-		"RegionId":   s.client.RegionId,
-		"InstanceId": id,
+		"RegionId": s.client.RegionId,
 	}
-	response, err = client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", action, "", nil, request)
+	response, err = client.DoTeaRequest("GET", "waf-onecs", "2020-07-01", action, "", nil, request)
 	if err != nil {
 		err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
 		return
 	}
 	addDebug(action, response, request)
-	v, err := jsonpath.Get("$.InstanceInfo", response)
+	// data, err := jsonpath.Get("$.data", response)
+	// if err != nil {
+	// 	return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.data", response)
+	// }
+	result, err := jsonpath.Get("$.Result", response)
 	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.InstanceInfo", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Result", response)
 	}
-	object = v.(map[string]interface{})
-	if v, ok := object["InstanceId"]; !ok || v.(string) != id {
-		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("WAF", id)), errmsgs.NotFoundWithResponse, response)
+	items, err := jsonpath.Get("$.items", result)
+	if err != nil {
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.items", response)
+	}
+	for _, v := range items.([]interface{}) {
+		if fmt.Sprint(v.(map[string]interface{})["instance_id"]) == id {
+			return v.(map[string]interface{}), nil
+		}
 	}
 	return object, nil
 }
@@ -195,25 +214,25 @@ func (s *WafOpenapiService) DescribeWafv3Instance(id string) (object map[string]
 	return v.(map[string]interface{}), nil
 }
 
-// func (s *WafOpenapiService) Wafv3InstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
-// 	return func() (interface{}, string, error) {
-// 		object, err := s.DescribeWafv3Instance(id)
-// 		if err != nil {
-// 			if errmsgs.NotFoundError(err) {
-// 				return nil, "", nil
-// 			}
-// 			return nil, "", errmsgs.WrapError(err)
-// 		}
-
-// 		status84 := object["Status"]
-// 		for _, failState := range failStates {
-// 			if fmt.Sprint(status84) == failState {
-// 				return object, fmt.Sprint(status84), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(status84)))
-// 			}
-// 		}
-// 		return object, fmt.Sprint(status84), nil
-// 	}
-// }
+func (s *WafOpenapiService) Wafv3InstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeWafInstance(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		log.Printf("[DEBUG] instance_make_status is %s", object["instance_make_status"])
+		status84 := object["instance_make_status"]
+		for _, failState := range failStates {
+			if fmt.Sprint(status84) == failState {
+				return object, fmt.Sprint(status84), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(status84)))
+			}
+		}
+		return object, fmt.Sprint(status84), nil
+	}
+}
 
 func (s *WafOpenapiService) DescribeWafv3Domain(id string) (object map[string]interface{}, err error) {
 	client := s.client

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -116,7 +117,7 @@ func resourceAlibabacloudstackWafInstance() *schema.Resource {
 
 func resourceAlibabacloudstackWafInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var err error
+	// var err error
 	action := "CreateWAFInstance"
 	request := make(map[string]interface{})
 	if v, ok := d.GetOk("name"); ok {
@@ -147,19 +148,44 @@ func resourceAlibabacloudstackWafInstanceCreate(d *schema.ResourceData, meta int
 	if v, ok := d.GetOk("detector_nodenum"); ok {
 		request["DetectorNodeNum"] = v
 	}
-	vpcvswitchitem := map[string]interface{}{}
-	// if value, ok := d.GetOk("vpc_vswitch"); ok {
-	for _, vpcvswitchinfo := range d.Get("vpc_vswitch").([]interface{}) {
-		vswitchMap := vpcvswitchinfo.(map[string]interface{})
-		vpcvswitchitem["vswitch_name"] = vswitchMap["vswitch_name"]
-		vpcvswitchitem["vswitch"] = vswitchMap["vswitch"]
-		vpcvswitchitem["cidr_block"] = vswitchMap["cidr_block"]
-		vpcvswitchitem["available_zone"] = vswitchMap["available_zone"]
-		vpcvswitchitem["vpc"] = vswitchMap["vpc"]
-		vpcvswitchitem["vpc_name"] = vswitchMap["vpc_name"]
+	// vpcvswitchitem := map[string]interface{}{}
+	// // if value, ok := d.GetOk("vpc_vswitch"); ok {
+	// for _, vpcvswitchinfo := range d.Get("vpc_vswitch").([]interface{}) {
+	// 	vswitchMap := vpcvswitchinfo.(map[string]interface{})
+	// 	vpcvswitchitem["vswitch_name"] = vswitchMap["vswitch_name"]
+	// 	vpcvswitchitem["vswitch"] = vswitchMap["vswitch"]
+	// 	vpcvswitchitem["cidr_block"] = vswitchMap["cidr_block"]
+	// 	vpcvswitchitem["available_zone"] = vswitchMap["available_zone"]
+	// 	vpcvswitchitem["vpc"] = vswitchMap["vpc"]
+	// 	vpcvswitchitem["vpc_name"] = vswitchMap["vpc_name"]
+	// }
+	// }
+	// }
+	if value, ok := d.GetOk("vpc_vswitch"); ok {
+		vpcvswitchsMappings := value.([]interface{})
+		if vpcvswitchsMappings != nil && len(vpcvswitchsMappings) > 0 {
+			mappings := make([]string, 0, len(vpcvswitchsMappings))
+			for _, diskDeviceMapping := range vpcvswitchsMappings {
+				mapping := diskDeviceMapping.(map[string]interface{})
+				vpcvswithMapping := WafVPCVSwitch{
+					VSwitchName:   mapping["vswitch_name"].(string),
+					VSwitch:       mapping["vswitch"].(string),
+					CIDRBlock:     mapping["cidr_block"].(string),
+					AvailableZone: mapping["available_zone"].(string),
+					VPC:           mapping["vpc"].(string),
+					VPCName:       mapping["vpc_name"].(string),
+				}
+				jsonBytes, err := json.Marshal(vpcvswithMapping)
+				if err != nil {
+					fmt.Println("Error marshalling to JSON:", err)
+					return errmsgs.WrapError(err)
+				}
+				jsonStr := string(jsonBytes)
+				mappings = append(mappings, jsonStr)
+			}
+			request["VpcVswitch"] = mappings
+		}
 	}
-	// }
-	// }
 	parameterMapList := make([]map[string]interface{}, 0)
 	parameterMapList = append(parameterMapList, map[string]interface{}{
 		"Code":  "RegionId",
@@ -240,28 +266,32 @@ func resourceAlibabacloudstackWafInstanceCreate(d *schema.ResourceData, meta int
 		// vpcvswitchitem["vswitch"] = v.(string)
 		// vpcvswitchitem["available_zone"] = object_vswitch.ZoneId
 	}
-	jsonBytes, err := json.Marshal(vpcvswitchitem)
-	if err != nil {
-		fmt.Println("Error marshalling to JSON:", err)
-		return errmsgs.WrapError(err)
-	}
-	jsonStr := string(jsonBytes)
-	vpcvswitch := []string{jsonStr}
-	request["vpcVswitch"] = vpcvswitch
+	// jsonBytes, err := json.Marshal(vpcvswitchitem)
+	// if err != nil {
+	// 	fmt.Println("Error marshalling to JSON:", err)
+	// 	return errmsgs.WrapError(err)
+	// }
+	// jsonStr := string(jsonBytes)
+	// vpcvswitch := []string{jsonStr}
 	response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", action, "", nil, request)
+	addDebug(action, response, request)
 	if err != nil {
 		return err
 	}
-	addDebug(action, response, request)
-	response = response["Data"].(map[string]interface{})
-	d.SetId(fmt.Sprint(response["InstanceId"]))
+	response = response["Result"].(map[string]interface{})
+	d.SetId(fmt.Sprint(response["instance_id"]))
+	WafInstanceService := WafOpenapiService{client}
+	stateConf := BuildStateConf([]string{}, []string{"success"}, d.Timeout(schema.TimeoutCreate), 20*time.Second, WafInstanceService.Wafv3InstanceStateRefreshFunc(d.Id(), []string{"faild"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, fmt.Sprint(response["instance_id"]))
+	}
 
 	return resourceAlibabacloudstackWafInstanceUpdate(d, meta)
 }
 func resourceAlibabacloudstackWafInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	waf_openapiService := WafOpenapiService{client}
-	object, err := waf_openapiService.DescribeWafInstance(d.Id())
+	_, err := waf_openapiService.DescribeWafInstance(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_waf_instance waf_openapiService.DescribeWafInstance Failed!!! %s", err)
@@ -270,11 +300,12 @@ func resourceAlibabacloudstackWafInstanceRead(d *schema.ResourceData, meta inter
 		}
 		return errmsgs.WrapError(err)
 	}
-	d.Set("status", formatInt(object["Status"]))
-	d.Set("subscription_type", object["SubscriptionType"])
+	// d.Set("status", formatInt(object["Status"]))
+	// d.Set("instance_make_status", object["instance_make_status"])
 	return nil
 }
 func resourceAlibabacloudstackWafInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+	return resourceAlibabacloudstackWafInstanceRead(d, meta)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	update := false
 	request := map[string]interface{}{
@@ -340,7 +371,7 @@ func resourceAlibabacloudstackWafInstanceDelete(d *schema.ResourceData, meta int
 	action := "DeleteWAFInstance"
 	var err error
 	request := map[string]interface{}{
-		"InstanceId": d.Id(),
+		"WafInstanceId": d.Id(),
 	}
 
 	if v, ok := d.GetOk("resource_group_id"); ok {
