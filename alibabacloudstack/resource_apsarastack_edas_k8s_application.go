@@ -159,10 +159,6 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"local_volume": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"namespace": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -224,6 +220,80 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"config_mount_descs": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"type": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{"ConfigMap", "Secret"}, false),
+						},
+						"mount_path": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				}
+			},
+			"local_volume": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": {
+							Type:     schema.TypeString,
+							Required: true,
+							// ValidateFunc: validation.StringInSlice([]string{"file", "filepath"}, false),
+						},
+						"node_path": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"mount_path": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				}
+			},
+			"pvc_mount_descs": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"pvc_name": {
+							Type:     schema.TypeString,
+							Required: true,
+							// ValidateFunc: validation.StringInSlice([]string{"file", "filepath"}, false),
+						},
+						"mount_paths": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"mount_path": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"read_only": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  false,
+									}
+								}
+							}
+
+						},
+					},
+				}
+			},
+
 		},
 	}
 }
@@ -335,8 +405,22 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 		request.QueryParams["MountDescs"] = v.(string)
 	}
 
+	if v, ok := d.GetOk("config_mount_descs"); ok {
+		configmaps :=v.([]map[string]string)
+		jsondata, _ := json.Marshal(configmaps)
+		request.QueryParams["MountDescs"] = string(jsondata)
+	}
+
 	if v, ok := d.GetOk("local_volume"); ok {
-		request.QueryParams["LocalVolume"] = v.(string)
+		local_volumes := v.([]map[string]string)
+		jsondata, _ := json.Marshal(local_volumes)
+		request.QueryParams["LocalVolume"] = string(jsondata)
+	}
+
+	if v, ok := d.GetOk("pvc_mount_descs"); ok {
+		pvc_mount_descs := v.([]map[string]interface{})
+		jsondata, _ := json.Marshal(pvc_mount_descs)
+		request.QueryParams["PvcMountDescs"] = string(jsondata)
 	}
 
 	if v, ok := d.GetOk("namespace"); ok {
