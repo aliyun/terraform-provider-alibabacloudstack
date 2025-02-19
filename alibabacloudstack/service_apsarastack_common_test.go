@@ -1403,3 +1403,31 @@ resource "alibabacloudstack_kms_key" "key" {
 }
 
 `
+
+const Provider2 = `
+
+provider "alibabacloudstack" {
+	alias = "provider1"
+	popgw_domain = "inter.env116.shuguang.com"
+	access_key   = "kUREyhbNN4xtrJ73"
+	secret_key   = "9gpWEqZfNrNS18bndq8DzBPeAZaIT6"
+	region                  = "cn-wulan-env116-d01"
+	proxy                   = "HTTP://100.64.64.132:50416"
+	protocol                = "HTTP"
+	insecure                = "true"
+	resource_group_set_name = "ld_test"
+	role_arn                = "acs:ram::1412437534536216:role/ascm-role-272-11-6369"
+  }
+
+// provider "alibabacloudstack" {
+// 	alias = "provider2"
+// 	popgw_domain = "inter.env116.shuguang.com"
+// 	access_key   = "xKFZerDkvkXNa9uE"
+// 	secret_key   = "sIazxpGgs7UBv1BbKzmMvLZ3B9KMYB"
+// 	region                  = "cn-wulan-env116-d01"
+// 	proxy                   = "HTTP://100.64.64.132:50416"
+// 	protocol                = "HTTP"
+// 	insecure                = "true"
+// 	resource_group_set_name = "ld_test"
+//   }
+`

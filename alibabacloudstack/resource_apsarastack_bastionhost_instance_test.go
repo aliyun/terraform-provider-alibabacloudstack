@@ -121,9 +121,9 @@ func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"vswitch_id":       "vsw-me9aqwfuwjnn6z25wrzh4",
+					"vswitch_id":       "${alibabacloudstack_vswitch.vsw.id}",
 					"license_code":     "bastionhostah_small_lic",
-					"vpc_id":           "vpc-me9h257abnisfmgast9hg",
+					"vpc_id":           "${alibabacloudstack_vpc.vpc.id}",
 					"asset":            "50",
 					"highavailability": "false",
 					"disasterrecovery": "false",
@@ -423,7 +423,27 @@ func resourceBastionhostInstanceDependence(name string) string {
 	return fmt.Sprintf(
 		`       variable "name" {
 			default = "%s"
-		  }`, name)
+		  }
+
+		  %s
+
+		  data "alibabacloudstack_zones" "default" {
+			available_resource_creation = "VSwitch"
+		  
+		  }
+		  
+		  resource "alibabacloudstack_vpc" "vpc" {	
+			vpc_name = var.name
+			cidr_block = "192.168.0.0/16" #vpc口段
+		  }
+		  resource "alibabacloudstack_vswitch" "vsw" {
+			vpc_id = alibabacloudstack_vpc.vpc.id
+			cidr_block = "192.168.0.0/16" #⽹段
+			availability_zone = data.alibabacloudstack_zones.default.zones.0.id #可⽤区
+		  }
+
+
+		  `, name, Provider2)
 }
 
 var bastionhostInstanceBasicMap = map[string]string{
