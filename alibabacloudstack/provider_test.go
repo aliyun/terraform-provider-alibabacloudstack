@@ -80,6 +80,21 @@ func testAccPreCheck(t *testing.T) {
 
 }
 
+func testAccPreYunCheck(t *testing.T){
+	if v := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY"); v == "" {
+		t.Skipf("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY must be set for acceptance tests")
+		t.Skipped()
+	}
+	if v := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY"); v == "" {
+		t.Skipf("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY must be set for acceptance tests")
+		t.Skipped()
+	}
+	if v := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN"); v == "" {
+		t.Skipf("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN must be set for acceptance tests")
+		t.Skipped()
+	}
+}
+
 func testAccPreCheckWithAccountSiteType(t *testing.T, account AccountSite) {
 	defaultAccount := string(DomesticSite)
 	if v := strings.TrimSpace(os.Getenv("ALIBABACLOUDSTACK_ACCOUNT_SITE")); v != "" {

@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func init() {
@@ -111,12 +112,38 @@ func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf_testAcc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceBastionhostInstanceDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreYunCheck(t)
 		},
 		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		Providers: func() map[string]*schema.Provider {
+			commonProvider := Provider()
+			yundunProvider := Provider()
+			yundunProvider.Schema["access_key"] = &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY",""),
+				Description: descriptions["access_key"],
+			}
+			yundunProvider.Schema["secret_key"] = &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY",""),
+				Description: descriptions["secret_key"],
+			}
+			yundunProvider.Schema["role_arn"] = &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["assume_role_role_arn"],
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN",""),
+			}
+			return map[string]*schema.Provider{
+				"alibabacloudstack":        yundunProvider,
+				"alibabacloudstack-common": commonProvider,
+			}
+		}(),
 		//CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
@@ -355,7 +382,7 @@ func TestAccAlibabacloudStackBastionhostInstance_PublicAccess(t *testing.T) {
 	rand := acctest.RandIntRange(1000, 9999)
 	name := fmt.Sprintf("tf_testAcc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceBastionhostInstanceDependence)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
@@ -420,30 +447,28 @@ func TestAccAlibabacloudStackBastionhostInstance_PublicAccess(t *testing.T) {
 }
 
 func resourceBastionhostInstanceDependence(name string) string {
-	return fmt.Sprintf(
-		`       variable "name" {
-			default = "%s"
-		  }
+	return fmt.Sprintf(`
+variable "name" {
+	default = "%s"
+}
 
-		  %s
+data "alibabacloudstack_zones" "default" {
+	provider = alibabacloudstack-common
+	available_resource_creation = "VSwitch"
+}
 
-		  data "alibabacloudstack_zones" "default" {
-			available_resource_creation = "VSwitch"
-		  
-		  }
-		  
-		  resource "alibabacloudstack_vpc" "vpc" {	
-			vpc_name = var.name
-			cidr_block = "192.168.0.0/16" #vpc口段
-		  }
-		  resource "alibabacloudstack_vswitch" "vsw" {
-			vpc_id = alibabacloudstack_vpc.vpc.id
-			cidr_block = "192.168.0.0/16" #⽹段
-			availability_zone = data.alibabacloudstack_zones.default.zones.0.id #可⽤区
-		  }
-
-
-		  `, name, Provider2)
+resource "alibabacloudstack_vpc" "vpc" {	
+	provider = alibabacloudstack-common
+	vpc_name = var.name
+	cidr_block = "192.168.0.0/16" #vpc口段
+}
+resource "alibabacloudstack_vswitch" "vsw" {
+	provider = alibabacloudstack-common
+	vpc_id = alibabacloudstack_vpc.vpc.id
+	cidr_block = "192.168.0.0/16" #⽹段
+	availability_zone = data.alibabacloudstack_zones.default.zones.0.id #可⽤区
+}
+`, name)
 }
 
 var bastionhostInstanceBasicMap = map[string]string{

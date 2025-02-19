@@ -29,25 +29,25 @@ func Provider() *schema.Provider {
 			"access_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ACCESS_KEY", os.Getenv("ALIBABACLOUDSTACK_ACCESS_KEY")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ACCESS_KEY", nil),
 				Description: descriptions["access_key"],
 			},
 			"secret_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECRET_KEY", os.Getenv("ALIBABACLOUDSTACK_SECRET_KEY")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECRET_KEY", nil),
 				Description: descriptions["secret_key"],
 			},
 			"region": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", os.Getenv("ALIBABACLOUDSTACK_REGION")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", nil),
 				Description: descriptions["region"],
 			},
 			"region_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", os.Getenv("ALIBABACLOUDSTACK_REGION")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", nil),
 				Description: descriptions["region_id"],
 				Deprecated:  "Use parameter region replace it.",
 			},
@@ -55,18 +55,18 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["assume_role_role_arn"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ASSUME_ROLE_ARN", os.Getenv("ALIBABACLOUDSTACK_ASSUME_ROLE_ARN")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ASSUME_ROLE_ARN", nil),
 			},
 			"security_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURITY_TOKEN", os.Getenv("SECURITY_TOKEN")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURITY_TOKEN", nil),
 				Description: descriptions["security_token"],
 			},
 			"ecs_role_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ECS_ROLE_NAME", os.Getenv("ALIBABACLOUDSTACK_ECS_ROLE_NAME")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ECS_ROLE_NAME", nil),
 				Description: descriptions["ecs_role_name"],
 			},
 			"skip_region_validation": {
@@ -80,14 +80,14 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["profile"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_PROFILE", ""),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_PROFILE", nil),
 			},
 			"endpoints": endpointsSchema(),
 			"shared_credentials_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["shared_credentials_file"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SHARED_CREDENTIALS_FILE", ""),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SHARED_CREDENTIALS_FILE", nil),
 			},
 			"insecure": {
 				Type:        schema.TypeBool,
@@ -123,19 +123,19 @@ func Provider() *schema.Provider {
 			"source_ip": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SOURCE_IP", os.Getenv("ALIBABACLOUDSTACK_SOURCE_IP")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SOURCE_IP", nil),
 				Description: descriptions["source_ip"],
 			},
 			"security_transport": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURITY_TRANSPORT", os.Getenv("ALIBABACLOUDSTACK_SECURITY_TRANSPORT")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURITY_TRANSPORT", nil),
 				//Deprecated:  "It has been deprecated from version 1.136.0 and using new field secure_transport instead.",
 			},
 			"secure_transport": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURE_TRANSPORT", os.Getenv("ALIBABACLOUDSTACK_SECURE_TRANSPORT")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURE_TRANSPORT",nil),
 				Description: descriptions["secure_transport"],
 			},
 			"configuration_source": {
@@ -192,13 +192,13 @@ func Provider() *schema.Provider {
 			"organization_accesskey": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY", os.Getenv("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY", nil),
 				Description: descriptions["organization_accesskey"],
 			},
 			"organization_secretkey": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY", os.Getenv("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY", nil),
 				Description: descriptions["organization_secretkey"],
 			},
 			"sls_openapi_endpoint": {
