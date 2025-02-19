@@ -230,8 +230,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Required: true,
 						},
 						"type": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"ConfigMap", "Secret"}, false),
 						},
 						"mount_path": {
@@ -239,7 +239,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Required: true,
 						},
 					},
-				}
+				},
 			},
 			"local_volume": {
 				Type:     schema.TypeList,
@@ -260,7 +260,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Required: true,
 						},
 					},
-				}
+				},
 			},
 			"pvc_mount_descs": {
 				Type:     schema.TypeList,
@@ -285,15 +285,13 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Type:     schema.TypeBool,
 										Optional: true,
 										Default:  false,
-									}
-								}
-							}
-
+									},
+								},
+							},
 						},
 					},
-				}
+				},
 			},
-
 		},
 	}
 }
@@ -406,23 +404,57 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	}
 
 	if v, ok := d.GetOk("config_mount_descs"); ok {
-		configmaps :=v.([]map[string]string)
-		jsondata, _ := json.Marshal(configmaps)
-		request.QueryParams["MountDescs"] = string(jsondata)
+		configmaps := v.([]interface{})
+		config_mount_descs := make([]map[string]interface{}, 0)
+		for _, v := range configmaps {
+			m := v.(map[string]interface{})
+			config_mount_descs = append(config_mount_descs, map[string]interface{}{
+				"type":      "ConfigMap",
+				"name":      m["name"],
+				"mountPath": m["mount_path"],
+			})
+		}
+		jsondata, _ := json.Marshal(config_mount_descs)
+		request.QueryParams["ConfigMountDescs"] = string(jsondata)
 	}
 
 	if v, ok := d.GetOk("local_volume"); ok {
-		local_volumes := v.([]map[string]string)
-		jsondata, _ := json.Marshal(local_volumes)
+		local_volumes := v.([]interface{})
+		localVolume := make([]map[string]interface{}, 0)
+		for _, v := range local_volumes {
+			m := v.(map[string]interface{})
+			localVolume = append(localVolume, map[string]interface{}{
+				"type":       m["type"],
+				"mountPaths": m["mount_path"],
+				"nodePath":   m["node_path"],
+			})
+		}
+		jsondata, _ := json.Marshal(localVolume)
 		request.QueryParams["LocalVolume"] = string(jsondata)
 	}
 
 	if v, ok := d.GetOk("pvc_mount_descs"); ok {
-		pvc_mount_descs := v.([]map[string]interface{})
-		jsondata, _ := json.Marshal(pvc_mount_descs)
+		pvc_mount_descs := v.([]interface{})
+		pvcMountDescs := make([]map[string]interface{}, 0)
+		for _, pvc_mount_desc := range pvc_mount_descs {
+			p := pvc_mount_desc.(map[string]interface{})
+			mountPaths := p["mount_paths"].([]interface{})
+			mount_paths := make([]map[string]interface{}, 0)
+			for _, mountPath := range mountPaths {
+				m := mountPath.(map[string]string)
+				mount_paths = append(mount_paths, map[string]interface{}{
+					"mountPath": m["mount_path"],
+					"readOnly":  m["read_only"],
+				})
+			}
+			pvcMountDescs = append(pvcMountDescs, map[string]interface{}{
+				"pvcName":    p["pvc_name"],
+				"mountPaths": p["mount_path"],
+			})
+		}
+		jsondata, _ := json.Marshal(pvcMountDescs)
 		request.QueryParams["PvcMountDescs"] = string(jsondata)
 	}
-
 	if v, ok := d.GetOk("namespace"); ok {
 		request.QueryParams["Namespace"] = v.(string)
 	}
@@ -536,6 +568,21 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 		d.Set("readiness", response.Conf.Readiness)
 	}
 	d.Set("namespace", response.NameSpace)
+	// if len(response.Conf.K8sVolumeInfo) > 0 {
+	// 	k8sVolumeInfo := make(map[string]interface{})
+	// 	err = json.Unmarshal([]byte(response.Conf.K8sVolumeInfo), &k8sVolumeInfo)
+	// 	if err != nil {
+	// 		return errmsgs.WrapError(err)
+	// 	}
+	// 	configMountDescs, ok := k8sVolumeInfo["configMountDescs"]
+	// 	if ok {
+	// 		d.Set("config_mount_descs", configMountDescs)
+	// 	}
+	// 	pvcMountDescs, ok := k8sVolumeInfo["pvcMountDescs"]
+	// 	if ok {
+	// 		d.Set("pvc_mount_descs", pvcMountDescs)
+	// 	}
+	// }
 	return nil
 }
 
@@ -676,9 +723,60 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 		request.QueryParams["MountDescs"] = d.Get("mount_descs").(string)
 	}
 
+	if d.HasChange("config_mount_descs") {
+		partialKeys = append(partialKeys, "config_mount_descs")
+		configmaps := d.Get("config_mount_descs").([]interface{})
+		config_mount_descs := make([]map[string]interface{}, 0)
+		for _, v := range configmaps {
+			m := v.(map[string]interface{})
+			config_mount_descs = append(config_mount_descs, map[string]interface{}{
+				"type":      m["type"],
+				"name":      m["name"],
+				"mountPath": m["mount_path"],
+			})
+		}
+		jsondata, _ := json.Marshal(config_mount_descs)
+		request.QueryParams["ConfigMountDescs"] = string(jsondata)
+	}
+
 	if d.HasChange("local_volume") {
 		partialKeys = append(partialKeys, "local_volume")
-		request.QueryParams["LocalVolume"] = d.Get("local_volume").(string)
+		local_volumes := d.Get("local_volume").([]interface{})
+		localVolume := make([]map[string]interface{}, 0)
+		for _, v := range local_volumes {
+			m := v.(map[string]interface{})
+			localVolume = append(localVolume, map[string]interface{}{
+				"type":       m["type"],
+				"mountPaths": m["mount_path"],
+				"nodePath":   m["node_path"],
+			})
+		}
+		jsondata, _ := json.Marshal(localVolume)
+		request.QueryParams["LocalVolume"] = string(jsondata)
+	}
+
+	if d.HasChange("pvc_mount_descs") {
+		partialKeys = append(partialKeys, "pvc_mount_descs")
+		pvc_mount_descs := d.Get("pvc_mount_descs").([]interface{})
+		pvcMountDescs := make([]map[string]interface{}, 0)
+		for _, pvc_mount_desc := range pvc_mount_descs {
+			p := pvc_mount_desc.(map[string]interface{})
+			mountPaths := p["mount_paths"].([]interface{})
+			mount_paths := make([]map[string]interface{}, 0)
+			for _, mountPath := range mountPaths {
+				m := mountPath.(map[string]string)
+				mount_paths = append(mount_paths, map[string]interface{}{
+					"mountPath": m["mount_path"],
+					"readOnly":  m["read_only"],
+				})
+			}
+			pvcMountDescs = append(pvcMountDescs, map[string]interface{}{
+				"pvcName":    p["pvc_name"],
+				"mountPaths": p["mount_path"],
+			})
+		}
+		jsondata, _ := json.Marshal(pvcMountDescs)
+		request.QueryParams["PvcMountDescs"] = string(jsondata)
 	}
 
 	if d.HasChange("requests_m_cpu") {
@@ -825,7 +923,7 @@ func K8sBindSlb(d *schema.ResourceData, meta interface{}) error {
 		}
 		response := make(map[string]interface{})
 		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if response["Code"] != 200 {
+		if response["Code"].(float64) != 200 {
 			return errmsgs.WrapError(fmt.Errorf("BindK8sSlb Failed , response: %#v", response))
 		}
 		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(response["ChangeOrderId"].(string), []string{"3", "6", "10"}))
@@ -865,8 +963,8 @@ func K8sBindSlb(d *schema.ResourceData, meta interface{}) error {
 		}
 		response := make(map[string]interface{})
 		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if response["Code"] != 200 {
-			return errmsgs.WrapError(fmt.Errorf("BindK8sSlb Failed , response: %#v", response))
+		if response["Code"].(float64) != 200 {
+			return errmsgs.WrapError(fmt.Errorf("BindK8sSlb Failed , ============================ response:  ============================ \n%#v", response))
 		}
 		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(response["ChangeOrderId"].(string), []string{"3", "6", "10"}))
 		if _, err := stateConf.WaitForState(); err != nil {
