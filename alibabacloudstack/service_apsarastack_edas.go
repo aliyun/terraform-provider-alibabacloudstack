@@ -576,6 +576,87 @@ func (e *EdasService) GetK8sCommandArgs(args []interface{}) (string, error) {
 	return string(b), nil
 }
 
+type PvcMountPaths struct {
+	MountPath string `json:"mountPath" xml:"mountPath"`
+	ReadOnly  bool   `json:"readOnly" xml:"readOnly"`
+}
+
+type PvcMountDescs struct {
+	PvcName    string          `json:"pvcName" xml:"pvcName"`
+	MountPaths []PvcMountPaths `json:"mountPaths" xml:"mountPaths"`
+}
+
+func (e *EdasService) GetK8sPvcMountDescs(pvc_mount_descs []interface{}) (string, error) {
+	pvcMountDescs := make([]PvcMountDescs, 0)
+	for _, pvc_mount_desc := range pvc_mount_descs {
+		p := pvc_mount_desc.(map[string]interface{})
+		mountPaths := p["mount_paths"].([]interface{})
+		mount_paths := make([]PvcMountPaths, 0)
+		for _, mountPath := range mountPaths {
+			m := mountPath.(map[string]interface{})
+			mount_paths = append(mount_paths, PvcMountPaths{
+				MountPath: m["mount_path"].(string),
+				ReadOnly:  m["read_only"].(bool),
+			})
+		}
+		pvcMountDescs = append(pvcMountDescs, PvcMountDescs{
+			PvcName:    p["pvc_name"].(string),
+			MountPaths: mount_paths,
+		})
+	}
+	b, err := json.Marshal(pvcMountDescs)
+	if err != nil {
+		return "", errmsgs.WrapError(err)
+	}
+	return string(b), nil
+}
+
+type ConfigMaps struct {
+	Type      string `json:"type" xml:"type"`
+	Name      string `json:"name" xml:"name"`
+	MountPath string `json:"mountPath" xml:"mountPath"`
+}
+
+func (e *EdasService) GetK8sConfigMaps(configmaps []interface{}) (string, error) {
+	config_mount_descs := make([]ConfigMaps, 0)
+	for _, v := range configmaps {
+		m := v.(map[string]interface{})
+		config_mount_descs = append(config_mount_descs, ConfigMaps{
+			Type:      m["type"].(string),
+			Name:      m["name"].(string),
+			MountPath: m["mount_path"].(string),
+		})
+	}
+	b, err := json.Marshal(config_mount_descs)
+	if err != nil {
+		return "", errmsgs.WrapError(err)
+	}
+	return string(b), nil
+}
+
+type LocalVolume struct {
+	Type      string `json:"type" xml:"type"`
+	NodePath  string `json:"mountPath" xml:"mountPath"`
+	MountPath string `json:"mountPath" xml:"mountPath"`
+}
+
+func (e *EdasService) GetK8sLocalVolumes(local_volumes []interface{}) (string, error) {
+	localVolume := make([]LocalVolume, 0)
+	for _, v := range local_volumes {
+		m := v.(map[string]interface{})
+		localVolume = append(localVolume, LocalVolume{
+			Type:      m["type"].(string),
+			MountPath: m["mount_path"].(string),
+			NodePath:  m["node_path"].(string),
+		})
+	}
+	b, err := json.Marshal(localVolume)
+	if err != nil {
+		return "", errmsgs.WrapError(err)
+	}
+	return string(b), nil
+}
+
 func (e *EdasService) GetK8sCommandArgsForDeploy(args []interface{}) (string, error) {
 	b, err := json.Marshal(args)
 	if err != nil {
@@ -603,66 +684,43 @@ func (e *EdasService) GetK8sEnvs(envs map[string]interface{}) (string, error) {
 }
 
 func (e *EdasService) QueryK8sAppPackageType(appId string) (string, error) {
-	request := e.client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetK8sApplication", "/pop/v5/changeorder/co_application")
-	request.QueryParams["ResourceGroupId"] = e.client.ResourceGroup
-	request.QueryParams["AppId"] = appId
-
-	request.Headers["x-acs-content-type"] = "application/json"
-	request.Headers["Content-Type"] = "application/json"
-	bresponse, err := e.client.ProcessCommonRequestForOrganization(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	v, err := e.DescribeEdasK8sApplication(appId)
 	if err != nil {
-		errmsg := ""
-		if bresponse != nil {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return "", errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_k8s_app_package_type", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return "", err
 	}
-	var response map[string]interface{}
-	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-	return response["Applcation"].(map[string]interface{})["ApplicationType"].(string), nil
+	return v.App.ApplicationType, nil
 }
 
 type EdasK8sApplcation struct {
-	Name                 string             `json:"Name" xml:"Name"`
-	WorkloadType         string             `json:"WorkloadType" xml:"WorkloadType"`
-	CreateTime           int64              `json:"CreateTime" xml:"CreateTime"`
-	Dockerize            bool               `json:"Dockerize" xml:"Dockerize"`
-	SlbInfo              string             `json:"SlbInfo" xml:"SlbInfo"`
-	AppPhase             string             `json:"AppPhase" xml:"AppPhase"`
-	RegionId             string             `json:"RegionId" xml:"RegionId"`
-	SlbPort              int                `json:"SlbPort" xml:"SlbPort"`
-	ResourceGroupId      string             `json:"ResourceGroupId" xml:"ResourceGroupId"`
-	UserId               string             `json:"UserId" xml:"UserId"`
-	ApplicationType      string             `json:"ApplicationType" xml:"ApplicationType"`
-	Description          string             `json:"Description" xml:"Description"`
-	ClusterId            string             `json:"ClusterId" xml:"ClusterId"`
-	Port                 int                `json:"Port" xml:"Port"`
-	ExtSlbIp             string             `json:"ExtSlbIp" xml:"ExtSlbIp"`
-	BuildPackageId       int64              `json:"BuildPackageId" xml:"BuildPackageId"`
-	Email                string             `json:"Email" xml:"Email"`
-	EnablePortCheck      bool               `json:"EnablePortCheck" xml:"EnablePortCheck"`
-	Memory               int                `json:"Memory" xml:"Memory"`
-	NameSpace            string             `json:"NameSpace" xml:"NameSpace"`
-	ExtSlbId             string             `json:"ExtSlbId" xml:"ExtSlbId"`
-	Owner                string             `json:"Owner" xml:"Owner"`
-	ExtSlbName           string             `json:"ExtSlbName" xml:"ExtSlbName"`
-	SlbName              string             `json:"SlbName" xml:"SlbName"`
-	AppId                string             `json:"AppId" xml:"AppId"`
-	EnableUrlCheck       bool               `json:"EnableUrlCheck" xml:"EnableUrlCheck"`
-	InstanceCount        int                `json:"InstanceCount" xml:"InstanceCount"`
-	HaveManageAccess     bool               `json:"HaveManageAccess" xml:"HaveManageAccess"`
-	HealthCheckUrl       string             `json:"HealthCheckUrl" xml:"HealthCheckUrl"`
-	SlbId                string             `json:"SlbId" xml:"SlbId"`
-	Cpu                  int                `json:"Cpu" xml:"Cpu"`
-	ClusterType          int                `json:"ClusterType" xml:"ClusterType"`
-	RunningInstanceCount int                `json:"RunningInstanceCount" xml:"RunningInstanceCount"`
-	SlbIp                string             `json:"SlbIp" xml:"SlbIp"`
-	Conf                 edas.Conf          `json:"Conf" xml:"Conf"`
-	App                  edas.App           `json:"App" xml:"App"`
-	ImageInfo            edas.ImageInfo     `json:"ImageInfo" xml:"ImageInfo"`
-	LatestVersion        edas.LatestVersion `json:"LatestVersion" xml:"LatestVersion"`
-	DeployGroups         edas.DeployGroups  `json:"DeployGroups" xml:"DeployGroups"`
+	Instaces      EdasK8sAppInstances `json:"Instances" xml:"Instances"`
+	Conf          edas.Conf           `json:"Conf" xml:"Conf"`
+	App           edas.App            `json:"App" xml:"App"`
+	ImageInfo     edas.ImageInfo      `json:"ImageInfo" xml:"ImageInfo"`
+	LatestVersion edas.LatestVersion  `json:"LatestVersion" xml:"LatestVersion"`
+	DeployGroups  edas.DeployGroups   `json:"DeployGroups" xml:"DeployGroups"`
+}
+
+type EdasK8sAppInstances struct {
+	Instance []EdasK8sAppInstance `json:"Instance"`
+}
+
+type EdasK8sAppInstance struct {
+	GroupName       string `json:"GroupName"`
+	Status          int    `json:"Status"`
+	ContainerIp     string `json:"ContainerIp"`
+	Expired         bool   `json:"Expired"`
+	PackageVersion  string `json:"PackageVersion"`
+	Url             string `json:"Url"`
+	GroupId         string `json:"GroupId"`
+	ContainerStatus string `json:"ContainerStatus"`
+	AppId           string `json:"AppId"`
+	GroupType       int    `json:"GroupType"`
+	PrivateIp       string `json:"PrivateIp"`
+	Running         bool   `json:"Running"`
+	EccId           string `json:"EccId"`
+	Id              string `json:"Id"`
+	AppState        int    `json:"AppState"`
+	Online          int    `json:"Online"`
 }
 
 type EdasGetK8sApplcationResponse struct {
