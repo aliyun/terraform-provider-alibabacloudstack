@@ -96,11 +96,6 @@ func Provider() *schema.Provider {
 				Description: descriptions["insecure"],
 			},
 			"assume_role": assumeRoleSchema(),
-			"fc": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "Field 'fc' has been deprecated from provider version 1.28.0. New field 'fc' which in nested endpoints instead.",
-			},
 			"protocol": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -151,12 +146,6 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_PROXY", nil),
 				Description: descriptions["proxy"],
 			},
-			"force_use_asapi": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: descriptions["force_use_asapi"],
-			},
 			"is_center_region": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -168,13 +157,6 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_POPGW_DOMAIN", nil),
 				Description: descriptions["popgw_domain"],
-			},
-			"domain": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_DOMAIN", nil),
-				Description: descriptions["domain"],
-				Deprecated:  "ASAPI will no longer provide external services by default on apsarastack v3.18.1",
 			},
 			"ossservice_domain": {
 				Type:        schema.TypeString,
