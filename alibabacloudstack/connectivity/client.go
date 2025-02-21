@@ -1261,7 +1261,12 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 					"Version":        tea.StringValue(&version),
 					"SignatureNonce": tea.StringValue(util.GetNonce()),
 				}, query))
-				return conn.DoRequestWithAction(&apiname, &version, &protocol, &method, &authType, &pathpattern, roa_query, headers, body, &runtime)
+				r, e := conn.DoRequestWithAction(&apiname, &version, &protocol, &method, &authType, &pathpattern, roa_query, headers, body, &runtime)
+				if e != nil {
+					return r, e
+				} else {
+					return r["body"].(map[string]interface{}), e
+				}
 			}()
 		} else {
 			response, err = func() (map[string]interface{}, error) {
