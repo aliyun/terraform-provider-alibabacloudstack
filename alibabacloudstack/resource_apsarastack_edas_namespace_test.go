@@ -117,7 +117,7 @@ func TestAccAlibabacloudStackEDASNamespace_basic0(t *testing.T) {
 	rand := getAccTestRandInt(100, 999)
 	name := fmt.Sprintf("tftestacc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackEDASNamespaceBasicDependence0)
-	resource.Test(t, resource.TestCase{
+	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
 		},
