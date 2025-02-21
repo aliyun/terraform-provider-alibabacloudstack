@@ -618,6 +618,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_edas_instanceclusterattachment":        resourceAlibabacloudStackEdasInstanceClusterAttachment(),
 		"alibabacloudstack_edas_k8s_application":                  resourceAlibabacloudStackEdasK8sApplication(),
 		"alibabacloudstack_edas_k8s_cluster":                      resourceAlibabacloudStackEdasK8sCluster(),
+		"alibabacloudstack_edas_namespace":                       resourceAlibabacloudStackEdasNamespace(),
 		"alibabacloudstack_edas_slb_attachment":                   resourceAlibabacloudStackEdasSlbAttachment(),
 		"alibabacloudstack_ehpc_job_template":                     resourceAlibabacloudStackEhpcJobTemplate(),
 		"alibabacloudstack_eip":                                   resourceAlibabacloudStackEip(),
