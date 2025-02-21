@@ -1770,7 +1770,7 @@ func (s *EcsService) SetResourceTagsNew(d *schema.ResourceData, resourceType str
 			for i, key := range removedTagKeys {
 				request[fmt.Sprintf("TagKey.%d", i+1)] = key
 			}
-			_, err := s.client.DoTeaRequest("POST", "Ecs", "2019-05-10", action, "", nil, request)
+			_, err := s.client.DoTeaRequest("POST", "Ecs", "2019-05-10", action, "", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -1788,7 +1788,7 @@ func (s *EcsService) SetResourceTagsNew(d *schema.ResourceData, resourceType str
 				count++
 			}
 
-			_, err := s.client.DoTeaRequest("POST", "Ecs", "2019-05-10", action, "", nil, request)
+			_, err := s.client.DoTeaRequest("POST", "Ecs", "2019-05-10", action, "", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -2027,7 +2027,7 @@ func (s *EcsService) DescribeEcsDeploymentSet(id string) (object map[string]inte
 	request := map[string]interface{}{
 		"DeploymentSetIds": convertListToJsonString([]interface{}{id}),
 	}
-	response, err = s.client.DoTeaRequest("POST", "Ecs", "2014-05-26", "DescribeDeploymentSets", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "Ecs", "2014-05-26", "DescribeDeploymentSets", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}

@@ -332,7 +332,7 @@ func dataSourceAlibabacloudStackEcsDedicatedHostsRead(d *schema.ResourceData, me
 	}
 
 	for {
-		response, err := client.DoTeaRequest("POST", "ECS", "2014-05-26", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "ECS", "2014-05-26", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}

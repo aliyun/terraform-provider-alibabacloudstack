@@ -49,12 +49,18 @@ github.com/alibabacloud-go/tea v1.1.8/go.mod h1:/tmnEaQMyb4Ky1/5D+SE1BAsa5zj/KeG
 github.com/alibabacloud-go/tea v1.1.17/go.mod h1:nXxjm6CIFkBhwW4FQkNrolwbfon8Svy6cujmKFUq98A=
 github.com/alibabacloud-go/tea v1.2.1 h1:rFF1LnrAdhaiPmKwH5xwYOKlMh66CqRwPUTzIK74ask=
 github.com/alibabacloud-go/tea v1.2.1/go.mod h1:qbzof29bM/IFhLMtJPrgTGK3eauV5J2wSyEUo4OEmnA=
+github.com/alibabacloud-go/tea-roa v1.3.4 h1:afc1MrB9d5euBR5cxQTZ5Erswshguf1KSZmyttxJSTU=
+github.com/alibabacloud-go/tea-roa v1.3.4/go.mod h1:eja7Dg6m9p0X9XUL4LH3BeXjGf74gJGgecA8FUyzP70=
+github.com/alibabacloud-go/tea-roa-utils v1.1.5 h1:BkZAywim4piCeTA9qmRTq9gkcOI3Gltu3VobZwegnUE=
+github.com/alibabacloud-go/tea-roa-utils v1.1.5/go.mod h1:7mkMI3FZEm4LGKIR1322y0N6N9EC0R1G/oXvzQjf1fQ=
 github.com/alibabacloud-go/tea-rpc v1.3.3 h1:NZJtukZouR0jpN0dWeBB5bMZdVvTyRPyISxc/hfOALo=
 github.com/alibabacloud-go/tea-rpc v1.3.3/go.mod h1:zwKwxuf92liNsPcLOxPdrkvR5Dq6jtX2du6qx8FT094=
 github.com/alibabacloud-go/tea-rpc-utils v1.1.2 h1:ZTfFREnP2q9D49T2J/1jYYOndepGdrUOgm/JR8/bIQ0=
 github.com/alibabacloud-go/tea-rpc-utils v1.1.2/go.mod h1:V5HdNi6Xdn0JMpgVhQ19vsFAS51tydr7BqcJtuXH1Yw=
+github.com/alibabacloud-go/tea-utils v1.3.0/go.mod h1:EI/o33aBfj3hETm4RLiAxF/ThQdSngxrpF8rKUDJjPE=
 github.com/alibabacloud-go/tea-utils v1.3.1/go.mod h1:EI/o33aBfj3hETm4RLiAxF/ThQdSngxrpF8rKUDJjPE=
 github.com/alibabacloud-go/tea-utils v1.3.5/go.mod h1:EI/o33aBfj3hETm4RLiAxF/ThQdSngxrpF8rKUDJjPE=
+github.com/alibabacloud-go/tea-utils v1.3.9/go.mod h1:EI/o33aBfj3hETm4RLiAxF/ThQdSngxrpF8rKUDJjPE=
 github.com/alibabacloud-go/tea-utils v1.4.5 h1:h0/6Xd2f3bPE4XHTvkpjwxowIwRCJAJOqY6Eq8f3zfA=
 github.com/alibabacloud-go/tea-utils v1.4.5/go.mod h1:KNcT0oXlZZxOXINnZBs6YvgOd5aYp9U67G+E3R8fcQw=
 github.com/alibabacloud-go/tea-utils/v2 v2.0.5 h1:EUakYEUAwr6L3wLT0vejIw2rc0IA1RSXDwLnIb3f2vU=
@@ -66,6 +72,7 @@ github.com/aliyun/alibaba-cloud-sdk-go v1.62.681/go.mod h1:CJJYa1ZMxjlN/NbXEwmej
 github.com/aliyun/aliyun-datahub-sdk-go v0.1.5 h1:c2TFcJ5PjkqkHr2use7Av2wHB8jVgoKxX1gmLDsysR4=
 github.com/aliyun/aliyun-datahub-sdk-go v0.1.5/go.mod h1:GwtZxKUD+aLBrtlkEcyPNAx+jRkBioEC7EKOlQ26lTc=
 github.com/aliyun/credentials-go v1.1.2/go.mod h1:ozcZaMR5kLM7pwtCMEpVmQ242suV6qTJya2bDq4X1Tw=
+github.com/aliyun/credentials-go v1.3.0/go.mod h1:8jKYhQuDawt8x2+fusqa1Y6mPxemTsBEN04dgcAcYz0=
 github.com/aliyun/credentials-go v1.3.1 h1:uq/0v7kWrxmoLGpqjx7vtQ/s03f0zR//0br/xWDTE28=
 github.com/aliyun/credentials-go v1.3.1/go.mod h1:8jKYhQuDawt8x2+fusqa1Y6mPxemTsBEN04dgcAcYz0=
 github.com/aliyun/fc-go-sdk v0.0.0-20200619091938-0882be48e49f h1:8ZIQHvhYUGGmS8qlipiooanGBESy6JJKTZ9/vPmh0UE=

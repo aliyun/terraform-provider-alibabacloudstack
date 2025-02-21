@@ -67,7 +67,7 @@ func resourceAlibabacloudStackGpdbAccountCreate(d *schema.ResourceData, meta int
 	request["DBInstanceId"] = d.Get("db_instance_id")
 	request["AccountPassword"] = d.Get("account_password")
 
-	_, err := client.DoTeaRequest("POST", "gpdb", "2016-05-03", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "gpdb", "2016-05-03", action, "", nil, nil, request)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_gpdb_account", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -127,7 +127,7 @@ func resourceAlibabacloudStackGpdbAccountUpdate(d *schema.ResourceData, meta int
 
 	if update {
 		action := "ResetAccountPassword"
-		_, err = client.DoTeaRequest("POST", "gpdb", "2016-05-03", action, "", nil, request)
+		_, err = client.DoTeaRequest("POST", "gpdb", "2016-05-03", action, "", nil, nil, request)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
 		}

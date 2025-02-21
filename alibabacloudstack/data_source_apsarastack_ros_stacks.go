@@ -210,7 +210,7 @@ func dataSourceAlibabacloudStackRosStacksRead(d *schema.ResourceData, meta inter
 	status, statusOk := d.GetOk("status")
 
 	for {
-		response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}

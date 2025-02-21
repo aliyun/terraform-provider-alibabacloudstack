@@ -79,7 +79,7 @@ func resourceAlibabacloudStackVpcIpv6EgressRuleCreate(d *schema.ResourceData, me
 	}
 	request["Ipv6GatewayId"] = d.Get("ipv6_gateway_id")
 	request["ClientToken"] = buildClientToken("CreateIpv6EgressOnlyRule")
-	response, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func resourceAlibabacloudStackVpcIpv6EgressRuleDelete(d *schema.ResourceData, me
 	}
 
 	request["ClientToken"] = buildClientToken("DeleteIpv6EgressOnlyRule")
-	_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

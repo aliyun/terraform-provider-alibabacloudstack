@@ -209,7 +209,7 @@ func resourceAlibabacloudStackRosStackCreate(d *schema.ResourceData, meta interf
 		request["TimeoutInMinutes"] = v
 	}
 
-	response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -325,7 +325,7 @@ func resourceAlibabacloudStackRosStackUpdate(d *schema.ResourceData, meta interf
 			request["UsePreviousParameters"] = d.Get("use_previous_parameters")
 		}
 
-		_, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", "UpdateStack", "", nil, request)
+		_, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", "UpdateStack", "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -356,7 +356,7 @@ func resourceAlibabacloudStackRosStackDelete(d *schema.ResourceData, meta interf
 		request["RetainResources"] = v.(*schema.Set).List()
 	}
 
-	_, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"StackNotFound"}) {
 			return nil

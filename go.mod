@@ -1,13 +1,15 @@
 module github.com/aliyun/terraform-provider-alibabacloudstack
 
-go 1.21
+go 1.21.4
 
+toolchain go1.23.2
 
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/alibabacloud-go/cs-20151215/v5 v5.4.0
 	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.8
 	github.com/alibabacloud-go/tea v1.2.1
+	github.com/alibabacloud-go/tea-roa v1.3.4
 	github.com/alibabacloud-go/tea-rpc v1.3.3
 	github.com/alibabacloud-go/tea-utils v1.4.5
 	github.com/aliyun/alibaba-cloud-sdk-go v1.62.681
@@ -35,6 +37,7 @@ require (
 	github.com/alibabacloud-go/debug v1.0.0 // indirect
 	github.com/alibabacloud-go/endpoint-util v1.1.0 // indirect
 	github.com/alibabacloud-go/openapi-util v0.1.0 // indirect
+	github.com/alibabacloud-go/tea-roa-utils v1.1.5 // indirect
 	github.com/alibabacloud-go/tea-rpc-utils v1.1.2 // indirect
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.5 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect

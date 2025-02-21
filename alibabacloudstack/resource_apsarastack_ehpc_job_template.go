@@ -147,7 +147,7 @@ func resourceAlibabacloudStackEhpcJobTemplateCreate(d *schema.ResourceData, meta
 		request["Variables"] = v
 	}
 
-	response, err = client.DoTeaRequest("GET", "ECS", "2018-04-12", action, "", nil, request)
+	response, err = client.DoTeaRequest("GET", "ECS", "2018-04-12", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func resourceAlibabacloudStackEhpcJobTemplateUpdate(d *schema.ResourceData, meta
 	}
 
 	action := "EditJobTemplate"
-	_, err = client.DoTeaRequest("GET", "ECS", "2018-04-12", action, "", nil, request)
+	_, err = client.DoTeaRequest("GET", "ECS", "2018-04-12", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -275,7 +275,7 @@ func resourceAlibabacloudStackEhpcJobTemplateDelete(d *schema.ResourceData, meta
 		"Templates": fmt.Sprintf("[{\"Id\":\"%s\"}]", d.Id()),
 	}
 
-	_, err = client.DoTeaRequest("GET", "ECS", "2018-04-12", action, "", nil, request)
+	_, err = client.DoTeaRequest("GET", "ECS", "2018-04-12", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

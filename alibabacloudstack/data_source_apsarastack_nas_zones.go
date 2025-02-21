@@ -57,7 +57,7 @@ func dataSourceAlibabacloudStackNasZonesRead(d *schema.ResourceData, meta interf
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
 
-	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeZones", "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeZones", "", nil, nil, request)
 	if err != nil {
 		return err
 	}

@@ -147,7 +147,7 @@ func (s *HBaseService) DescribeHBaseInstance(id string) (object map[string]inter
 		"PageSize":  PageSizeLarge,
 		"PageNumber": 1,
 	}
-	response, err = s.client.DoTeaRequest("POST", "HBase", "2019-01-01", "DescribeInstance", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "HBase", "2019-01-01", "DescribeInstance", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Instance.NotFound"}) {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Hbase:Instance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))

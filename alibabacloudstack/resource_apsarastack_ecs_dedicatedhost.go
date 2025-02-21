@@ -227,7 +227,7 @@ func resourceAlibabacloudStackEcsDedicatedHostCreate(d *schema.ResourceData, met
 		request["ZoneId"] = v
 	}
 
-	response, err = client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -288,7 +288,7 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 		}
 		request["AutoReleaseTime"] = d.Get("auto_release_time")
 		action := "ModifyDedicatedHostAutoReleaseTime"
-		_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, request)
+		_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -305,7 +305,7 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 			"ResourceGroupId": d.Get("resource_group_id"),
 		}
 		action := "JoinResourceGroup"
-		_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, request)
+		_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -329,7 +329,7 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 	}
 	if update {
 		action := "RenewDedicatedHosts"
-		_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, request)
+		_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -359,7 +359,7 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 			modifyDedicatedHostsChargeTypeReq["DryRun"] = d.Get("dry_run")
 		}
 		action := "ModifyDedicatedHostsChargeType"
-		_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, modifyDedicatedHostsChargeTypeReq)
+		_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, nil, modifyDedicatedHostsChargeTypeReq)
 		if err != nil {
 			return err
 		}
@@ -414,7 +414,7 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 			modifyDedicatedHostAttributeReq["DedicatedHostClusterId"] = d.Get("dedicated_host_cluster_id")
 		}
 		action := "ModifyDedicatedHostAttribute"
-		_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, modifyDedicatedHostAttributeReq)
+		_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, nil, modifyDedicatedHostAttributeReq)
 		if err != nil {
 			return err
 		}
@@ -440,7 +440,7 @@ func resourceAlibabacloudStackEcsDedicatedHostDelete(d *schema.ResourceData, met
 	request := map[string]interface{}{
 		"DedicatedHostId": d.Id(),
 	}
-	_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

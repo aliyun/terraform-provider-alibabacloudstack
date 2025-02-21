@@ -111,7 +111,7 @@ func resourceAlibabacloudStackOosTemplateCreate(d *schema.ResourceData, meta int
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
-	response, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
 	if err != nil {
 		errmsg := ""
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oos_template", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -179,7 +179,7 @@ func resourceAlibabacloudStackOosTemplateUpdate(d *schema.ResourceData, meta int
 		action := "UpdateTemplate"
 		request["PageSize"] = PageSizeLarge
 		request["PageNumber"] = 1
-		_, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, request)
+		_, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
 		if err != nil {
 			errmsg := ""
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
@@ -200,7 +200,7 @@ func resourceAlibabacloudStackOosTemplateDelete(d *schema.ResourceData, meta int
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
-	_, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"EntityNotExists.Template"}) {
 			return nil

@@ -247,7 +247,7 @@ func resourceAlibabacloudStackElasticsearchCreate(d *schema.ResourceData, meta i
 
 	// retry
 
-	response, err = client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", action, "", nil, requestBody)
+	response, err = client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", action, "", nil, nil, requestBody)
 	if err != nil {
 		return err
 	}
@@ -465,7 +465,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 		config := d.Get("setting_config").(map[string]interface{})
 		content["esConfig"] = config
-		_, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", action, "", nil, content)
+		_, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", action, "", nil, nil, content)
 
 		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 			return err
@@ -544,7 +544,7 @@ func resourceAlibabacloudStackElasticsearchDelete(d *schema.ResourceData, meta i
 		"RegionId":    client.RegionId,
 		"clientToken": StringPointer(buildClientToken(action)),
 	}
-	_, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
 			return nil

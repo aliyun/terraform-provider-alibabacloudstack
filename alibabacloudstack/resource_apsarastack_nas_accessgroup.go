@@ -94,7 +94,7 @@ func resourceAlibabacloudStackNasAccessGroupCreate(d *schema.ResourceData, meta 
 		request["FileSystemType"] = v
 	}
 
-	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 
 	if err != nil {
 		return err
@@ -148,7 +148,7 @@ func resourceAlibabacloudStackNasAccessGroupUpdate(d *schema.ResourceData, meta 
 		}
 		action := "ModifyAccessGroup"
 
-		_, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+		_, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 		
 		if err != nil {
 			return err
@@ -172,7 +172,7 @@ func resourceAlibabacloudStackNasAccessGroupDelete(d *schema.ResourceData, meta 
 		"FileSystemType":  parts[1],
 	}
 
-	_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.NasNotFound"}) {
 			return nil

@@ -428,7 +428,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		}
 		request["DBClusterDescription"] = d.Get("description")
 		action := "ModifyDBClusterDescription"
-		_, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, request)
+		_, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -524,7 +524,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 	}
 	if update {
 		action := "ModifyAutoRenewAttribute"
-		response, err = client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, request)
+		response, err = client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, nil, request)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
@@ -543,7 +543,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 	modifyDBClusterAccessWhiteListReq["SecurityIps"] = convertListToCommaSeparate(d.Get("security_ips").(*schema.Set).List())
 	if update {
 		action := "ModifyDBClusterAccessWhiteList"
-		_, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, modifyDBClusterAccessWhiteListReq)
+		_, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, nil, modifyDBClusterAccessWhiteListReq)
 		if err != nil {
 			return err
 		}
@@ -590,7 +590,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 			modifyDBClusterReq["ModifyType"] = d.Get("modify_type")
 		}
 		action := "ModifyDBCluster"
-		_, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, modifyDBClusterReq)
+		_, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, nil, modifyDBClusterReq)
 		if err != nil {
 			return err
 		}
@@ -616,7 +616,7 @@ func resourceAlibabacloudStackAdbDbClusterDelete(d *schema.ResourceData, meta in
 	request := map[string]interface{}{
 		"DBClusterId": d.Id(),
 	}
-	_, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
 			return nil
