@@ -74,11 +74,15 @@ func (s *YundunBastionhostService) DescribeBastionhostInstance(id string) (objec
 		return object, err
 	}
 	addDebug(action, response, request)
-	v, err := jsonpath.Get("$.Instances[0]", response)
+	instances, err := jsonpath.Get("$.Instances", response)
 	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Instances[0]", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Instances", response)
 	}
-	object = v.(map[string]interface{})
+	for _, v := range instances.([]interface{}) {
+		if fmt.Sprint(v.(map[string]interface{})["InstanceId"]) == id {
+			return v.(map[string]interface{}), nil
+		}
+	}
 	return object, nil
 }
 

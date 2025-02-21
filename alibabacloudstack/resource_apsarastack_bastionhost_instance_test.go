@@ -124,53 +124,76 @@ func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 			yundunProvider.Schema["access_key"] = &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY",""),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY", ""),
 				Description: descriptions["access_key"],
 			}
 			yundunProvider.Schema["secret_key"] = &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY",""),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_SECRET_KEY", ""),
 				Description: descriptions["secret_key"],
 			}
 			yundunProvider.Schema["role_arn"] = &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["assume_role_role_arn"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN",""),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_YUNDUN_ASSUME_ROLE_ARN", ""),
 			}
 			return map[string]*schema.Provider{
 				"alibabacloudstack":        yundunProvider,
 				"alibabacloudstack-common": commonProvider,
 			}
 		}(),
+		// resource "alibabacloudstack_bastionhost_instance" "default" {
+		// 	vswitch_id = alibabacloudstack_vswitch.vsw.id
+		// 	license_code = "bastionhostah_small_lic"
+		// 	vpc_id = alibabacloudstack_vpc.vpc.id
+		// 	asset = "50"
+		// 	highavailability = "false"
+		// 	disasterrecovery = "false"
+		// 	provider = alibabacloudstack
+		//   }
 		//CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"vswitch_id":       "${alibabacloudstack_vswitch.vsw.id}",
-					"license_code":     "bastionhostah_small_lic",
 					"vpc_id":           "${alibabacloudstack_vpc.vpc.id}",
-					"asset":            "50",
+					"license_code":     "bastionhostah_small_lic",
 					"highavailability": "false",
 					"disasterrecovery": "false",
+					"provider":         "alibabacloudstack",
+					"asset":            "50",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"vswitch_id": CHECKSET,
+						"vswitch_id":       CHECKSET,
+						"asset":            "50",
+						"highavailability": "false",
+						"disasterrecovery": "false",
+						"license_code":     "bastionhostah_small_lic",
+						"vpc_id":           CHECKSET,
 					}),
 				),
 			},
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"resource_group_id": "${data.alibabacloudctack_resource_manager_resource_groups.default.ids.1}",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"resource_group_id": CHECKSET,
-			// 		}),
-			// 	),
-			// },
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"description":      "bastionhost_instance_test",
+					"asset":            "60",
+					"highavailability": "true",
+					"disasterrecovery": "true",
+					"license_code":     "bastionhostah_large_lic",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"description":      "bastionhost_instance_test",
+						"asset":            "60",
+						"highavailability": "true",
+						"disasterrecovery": "true",
+						"license_code":     "bastionhostah_large_lic",
+					}),
+				),
+			},
 			// {
 			// 	Config: testAccConfig(map[string]interface{}{
 			// 		"description": "${var.name}_update",

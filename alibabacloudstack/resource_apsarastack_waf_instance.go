@@ -104,9 +104,18 @@ func resourceAlibabacloudstackWafInstance() *schema.Resource {
 			"detector_nodenum": {
 				Type:     schema.TypeFloat,
 				Optional: true,
-				ForceNew: true,
 			},
 			"wafinstance_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"instance_status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"instance_make_status": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -273,6 +282,7 @@ func resourceAlibabacloudstackWafInstanceCreate(d *schema.ResourceData, meta int
 	// }
 	// jsonStr := string(jsonBytes)
 	// vpcvswitch := []string{jsonStr}
+
 	response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", action, "", nil, request)
 	addDebug(action, response, request)
 	if err != nil {
@@ -291,7 +301,7 @@ func resourceAlibabacloudstackWafInstanceCreate(d *schema.ResourceData, meta int
 func resourceAlibabacloudstackWafInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	waf_openapiService := WafOpenapiService{client}
-	_, err := waf_openapiService.DescribeWafInstance(d.Id())
+	object, err := waf_openapiService.DescribeWafInstance(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_waf_instance waf_openapiService.DescribeWafInstance Failed!!! %s", err)
@@ -300,69 +310,99 @@ func resourceAlibabacloudstackWafInstanceRead(d *schema.ResourceData, meta inter
 		}
 		return errmsgs.WrapError(err)
 	}
-	// d.Set("status", formatInt(object["Status"]))
-	// d.Set("instance_make_status", object["instance_make_status"])
+	d.Set("name", object["name"])
+	d.Set("instance_status", object["instance_status"])
+	d.Set("vpc_vswitch", object["vpc_vswitch"])
+	d.Set("detector_version", object["detector_version"])
+	d.Set("instance_make_status", object["instance_make_status"])
+	d.Set("detector_specs", object["detector_specs"])
+	d.Set("detector_nodenum", object["detector_node_num"])
 	return nil
 }
 func resourceAlibabacloudstackWafInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudstackWafInstanceRead(d, meta)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	update := false
 	request := map[string]interface{}{
-		"InstanceId": d.Id(),
+		"WafInstanceId": d.Id(),
 	}
-	if !d.IsNewResource() && d.HasChange("subscription_type") {
+	if !d.IsNewResource() && d.HasChange("detector_nodenum") {
 		update = true
 	}
-	request["ProductType"] = "waf"
-	request["SubscriptionType"] = d.Get("subscription_type")
-	request["ProductCode"] = "waf"
-	request["ModifyType"] = d.Get("modify_type")
-	request["Parameter"] = []map[string]string{
-		{
-			"Code":  "BigScreen",
-			"Value": d.Get("big_screen").(string),
-		},
-		{
-			"Code":  "ExclusiveIpPackage",
-			"Value": d.Get("exclusive_ip_package").(string),
-		},
-		{
-			"Code":  "ExtBandwidth",
-			"Value": d.Get("ext_bandwidth").(string),
-		},
-		{
-			"Code":  "ExtDomainPackage",
-			"Value": d.Get("ext_domain_package").(string),
-		},
-		{
-			"Code":  "LogStorage",
-			"Value": d.Get("log_storage").(string),
-		},
-		{
-			"Code":  "LogTime",
-			"Value": d.Get("log_time").(string),
-		},
-		{
-			"Code":  "PackageCode",
-			"Value": d.Get("package_code").(string),
-		},
-		{
-			"Code":  "PrefessionalService",
-			"Value": d.Get("prefessional_service").(string),
-		},
-		{
-			"Code":  "WafLog",
-			"Value": d.Get("waf_log").(string),
-		},
-	}
 	if update {
-		action := "EditWAFInstance"
-		response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", action, "", nil, request)
+		waf_openapiService := WafOpenapiService{client}
+		object, err := waf_openapiService.DescribeWafInstance(d.Id())
 		if err != nil {
-			return err
+			if errmsgs.NotFoundError(err) {
+				log.Printf("[DEBUG] Resource alibabacloudstack_waf_instance waf_openapiService.DescribeWafInstance Failed!!! %s", err)
+				d.SetId("")
+				return nil
+			}
+			return errmsgs.WrapError(err)
 		}
-		addDebug(action, response, request)
+		request["WafInstanceId"] = object["instance_id"]
+		request["InstanceId"] = object["instance_id"]
+		vpcvswitchsMappings := object["vpc_vswitch"].([]interface{})
+		if vpcvswitchsMappings != nil && len(vpcvswitchsMappings) > 0 {
+			mappings := make([]string, 0, len(vpcvswitchsMappings))
+			for _, diskDeviceMapping := range vpcvswitchsMappings {
+				mapping := diskDeviceMapping.(map[string]interface{})
+				vpcvswithMapping := WafVPCVSwitch{
+					VSwitchName:   mapping["vswitch_name"].(string),
+					VSwitch:       mapping["vswitch"].(string),
+					CIDRBlock:     mapping["cidr_block"].(string),
+					AvailableZone: mapping["available_zone"].(string),
+					VPC:           mapping["vpc"].(string),
+					VPCName:       mapping["vpc_name"].(string),
+				}
+				jsonBytes, err := json.Marshal(vpcvswithMapping)
+				if err != nil {
+					fmt.Println("Error marshalling to JSON:", err)
+					return errmsgs.WrapError(err)
+				}
+				jsonStr := string(jsonBytes)
+				mappings = append(mappings, jsonStr)
+			}
+			request["VpcVswitch"] = mappings
+		}
+		request["DetectorNodeNum"] = d.Get("detector_nodenum")
+		detectorNodeNumObject, ok := object["detector_node_num"].(json.Number)
+		if !ok {
+			return fmt.Errorf("failed to convert object[\"detector_node_num\"] to json.Number")
+		}
+		detectorNodeNumInt, err := detectorNodeNumObject.Int64()
+		if err != nil {
+			return fmt.Errorf("failed to convert json.Number to int: %v", err)
+		}
+		dgetnodenumberobject := int64(d.Get("detector_nodenum").(float64))
+		if !ok {
+			return fmt.Errorf("failed to convert d.Get(\"detector_node_num\") to int")
+		}
+		log.Printf("detectorNodeNumObject is %d  %d", detectorNodeNumInt, dgetnodenumberobject)
+		if detectorNodeNumInt > dgetnodenumberobject {
+			prescaledown := "CreatePreScaleDownInstance"
+			scaledown := "CreateScaleDownInstance"
+			response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", prescaledown, "", nil, request)
+			if err != nil {
+				return err
+			}
+			addDebug(prescaledown, response, request)
+			response, err = client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", scaledown, "", nil, request)
+			if err != nil {
+				return err
+			}
+			addDebug(scaledown, response, request)
+		} else {
+			scaleup := "CreateScaleUpInstance"
+			response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", scaleup, "", nil, request)
+			if err != nil {
+				return err
+			}
+			addDebug(scaleup, response, request)
+		}
+		stateConf := BuildStateConf([]string{}, []string{"success"}, d.Timeout(schema.TimeoutCreate), 20*time.Second, waf_openapiService.Wafv3InstanceStateRefreshFunc(d.Id(), []string{"faild"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, fmt.Sprint(d.Id()))
+		}
 	}
 	return resourceAlibabacloudstackWafInstanceRead(d, meta)
 }
