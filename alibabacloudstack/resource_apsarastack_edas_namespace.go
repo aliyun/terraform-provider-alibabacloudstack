@@ -3,8 +3,8 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"time"
+	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -29,11 +29,12 @@ func resourceAlibabacloudStackEdasNamespace() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
-			"debug_enable": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-			},
+// FIXME: edas缺少查询接口
+// 			"debug_enable": {
+// 				Type:     schema.TypeBool,
+// 				Optional: true,
+// 				Computed: true,
+// 			},
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -59,9 +60,9 @@ func resourceAlibabacloudStackEdasNamespaceCreate(d *schema.ResourceData, meta i
 	request := make(map[string]interface{})
 	action := "InsertOrUpdateRegion"
 	var err error
-	if v, ok := d.GetOkExists("debug_enable"); ok {
-		request["DebugEnable"] = StringPointer(strconv.FormatBool(v.(bool)))
-	}
+// 	if v, ok := d.GetOkExists("debug_enable"); ok {
+// 		request["DebugEnable"] = StringPointer(strconv.FormatBool(v.(bool)))
+// 	}
 	if v, ok := d.GetOk("description"); ok {
 		request["Description"] = StringPointer(v.(string))
 	}
@@ -76,6 +77,15 @@ func resourceAlibabacloudStackEdasNamespaceCreate(d *schema.ResourceData, meta i
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
+		}
+		if code , ok:= response["Code"]; !ok{
+			return resource.NonRetryableError(errmsgs.Error("No Code in body of InsertOrUpdateRegion"))
+		} else if v, ok := code.(string); ok && v != "200"{
+			return resource.NonRetryableError(errmsgs.Error(response["Message"].(string)))
+		} else if vv, ok := code.(json.Number); !ok {
+			return resource.NonRetryableError(errmsgs.Error("Unknow Code type in body of InsertOrUpdateRegion"))
+		} else if string(vv) != "200"{
+			return resource.NonRetryableError(errmsgs.Error(response["Message"].(string)))
 		}
 		return nil
 	})
@@ -100,7 +110,7 @@ func resourceAlibabacloudStackEdasNamespaceRead(d *schema.ResourceData, meta int
 		}
 		return errmsgs.WrapError(err)
 	}
-	d.Set("debug_enable", object["DebugEnable"])
+// 	d.Set("debug_enable", object["DebugEnable"])
 	d.Set("description", object["Description"])
 	d.Set("namespace_logical_id", object["RegionId"])
 	d.Set("namespace_name", object["RegionName"])
@@ -120,12 +130,12 @@ func resourceAlibabacloudStackEdasNamespaceUpdate(d *schema.ResourceData, meta i
 		update = true
 	}
 	request["RegionName"] = StringPointer(d.Get("namespace_name").(string))
-	if v, ok := d.GetOkExists("debug_enable"); ok {
-		request["DebugEnable"] = StringPointer(strconv.FormatBool(v.(bool)))
-	}
-	if d.HasChange("debug_enable") || d.IsNewResource() {
-		update = true
-	}
+// 	if v, ok := d.GetOkExists("debug_enable"); ok {
+// 		request["DebugEnable"] = StringPointer(strconv.FormatBool(v.(bool)))
+// 	}
+// 	if d.HasChange("debug_enable") || d.IsNewResource() {
+// 		update = true
+// 	}
 	if v, ok := d.GetOk("description"); ok {
 		request["Description"] = StringPointer(v.(string))
 	}

@@ -114,7 +114,7 @@ func TestAccAlibabacloudStackEDASNamespace_basic0(t *testing.T) {
 	}, "DescribeEdasNamespace")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000, 99999)
+	rand := getAccTestRandInt(100, 999)
 	name := fmt.Sprintf("tftestacc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackEDASNamespaceBasicDependence0)
 	resource.Test(t, resource.TestCase{
@@ -127,14 +127,14 @@ func TestAccAlibabacloudStackEDASNamespace_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"debug_enable":         "false",
+// 					"debug_enable":         "false",
 					"description":          "${var.name}",
 					"namespace_name":       "${var.name}",
 					"namespace_logical_id": "${var.logical_id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"debug_enable":         "false",
+// 						"debug_enable":         "false",
 						"description":          name,
 						"namespace_name":       name,
 						"namespace_logical_id": defaultRegionToTest + ":" + name,
@@ -161,16 +161,16 @@ func TestAccAlibabacloudStackEDASNamespace_basic0(t *testing.T) {
 					}),
 				),
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"debug_enable": "true",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"debug_enable": "true",
-					}),
-				),
-			},
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"debug_enable": "true",
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"debug_enable": "true",
+// 					}),
+// 				),
+// 			},
 			{
 				ResourceName:      resourceId,
 				ImportState:       true,
@@ -183,7 +183,7 @@ func TestAccAlibabacloudStackEDASNamespace_basic0(t *testing.T) {
 var AlibabacloudStackEDASNamespaceMap0 = map[string]string{
 	"namespace_logical_id": CHECKSET,
 	"namespace_name":       CHECKSET,
-	"debug_enable":         CHECKSET,
+// 	"debug_enable":         CHECKSET,
 }
 
 func AlibabacloudStackEDASNamespaceBasicDependence0(name string) string {
@@ -203,7 +203,7 @@ func TestUnitAccAlibabacloudStackEDASNamespace(t *testing.T) {
 	dExisted, _ := schema.InternalMap(p["alibabacloudstack_edas_namespace"].Schema).Data(nil, nil)
 	dInit.MarkNewResource()
 	attributes := map[string]interface{}{
-		"debug_enable":         false,
+// 		"debug_enable":         false,
 		"description":          "CreateEdasNamespaceValue",
 		"namespace_name":       "CreateEdasNamespaceValue",
 		"namespace_logical_id": "CreateEdasNamespaceValue",
@@ -331,7 +331,7 @@ func TestUnitAccAlibabacloudStackEDASNamespace(t *testing.T) {
 	patches.Reset()
 	assert.NotNil(t, err)
 	attributesDiff := map[string]interface{}{
-		"debug_enable":   true,
+// 		"debug_enable":   true,
 		"description":    "UpdateEdasNamespaceValue",
 		"namespace_name": "UpdateEdasNamespaceValue",
 	}
