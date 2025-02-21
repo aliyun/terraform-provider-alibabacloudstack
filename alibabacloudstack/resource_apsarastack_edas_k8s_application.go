@@ -561,7 +561,7 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 					"mount_path": v.MountPath,
 				})
 			}
-			d.Set("config_mount_descs", configMountDescs)
+			d.Set("config_mount_descs", config_mount_descs)
 		}
 
 		pvcMountDescs, ok := k8sVolumeInfo["pvcMountDescs"]
@@ -585,7 +585,7 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 					"mount_paths": mountPaths,
 				})
 			}
-			d.Set("pvc_mount_descs", pvcMountDescs)
+			d.Set("pvc_mount_descs", pvc_mount_descs)
 		}
 	}
 	if len(response.Conf.K8sLocalvolumeInfo) > 0 {
@@ -607,7 +607,7 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 				"type":       v.Type,
 			})
 		}
-		d.Set("local_volumes", localVolumes)
+		d.Set("local_volume", local_volumes)
 	}
 	return nil
 }
