@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -24,6 +25,8 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 type InstanceNetWork string
@@ -543,7 +546,6 @@ func GetUserHomeDir() (string, error) {
 	return usr.HomeDir, nil
 }
 
-
 // writeToFile 函数
 func writeToFile(filePath string, data interface{}) error {
 	var out string
@@ -864,4 +866,128 @@ func mergeMaps(map1, map2 map[string]string) {
 	for key, value := range map2 {
 		map1[key] = value
 	}
+}
+
+func mapMerge(target, merged map[string]interface{}) map[string]interface{} {
+	for key, value := range merged {
+		if _, exist := target[key]; !exist {
+			target[key] = value
+		} else {
+			// key existed in both src,target
+			switch merged[key].(type) {
+			case []interface{}:
+				sourceSlice := value.([]interface{})
+				targetSlice := make([]interface{}, len(sourceSlice))
+				copy(targetSlice, target[key].([]interface{}))
+
+				for index, val := range sourceSlice {
+					switch val.(type) {
+					case map[string]interface{}:
+						targetMap, ok := targetSlice[index].(map[string]interface{})
+						if ok {
+							targetSlice[index] = mapMerge(targetMap, val.(map[string]interface{}))
+						} else {
+							targetSlice[index] = mapMerge(map[string]interface{}{}, val.(map[string]interface{}))
+						}
+					default:
+						targetSlice[index] = val
+					}
+				}
+				target[key] = targetSlice
+			case map[string]interface{}:
+				target[key] = mapMerge(target[key].(map[string]interface{}), merged[key].(map[string]interface{}))
+			default:
+				target[key] = merged[key]
+			}
+		}
+	}
+	return target
+}
+
+func mapSort(target map[string]string) []string {
+	result := make([]string, 0)
+	for key := range target {
+		result = append(result, key)
+	}
+	sort.Strings(result)
+	return result
+}
+
+func newInstanceDiff(resourceName string, attributes, attributesDiff map[string]interface{}, state *terraform.InstanceState) (*terraform.InstanceDiff, error) {
+
+	p := Provider().ResourcesMap
+	dOld, _ := schema.InternalMap(p[resourceName].Schema).Data(state, nil)
+	dNew, _ := schema.InternalMap(p[resourceName].Schema).Data(state, nil)
+	for key, value := range attributes {
+		err := dOld.Set(key, value)
+		if err != nil {
+			return nil, errmsgs.WrapErrorf(err, "[ERROR] the field %s setting error.", key)
+		}
+	}
+	for key, value := range attributesDiff {
+		attributes[key] = value
+	}
+
+	for key, value := range attributes {
+		err := dNew.Set(key, value)
+		if err != nil {
+			return nil, errmsgs.WrapErrorf(err, "[ERROR] the field %s setting error.", key)
+		}
+	}
+
+	diff := terraform.NewInstanceDiff()
+	objectKey := ""
+	for _, key := range mapSort(dNew.State().Attributes) {
+		newValue := dNew.State().Attributes[key]
+		if objectKey != "" && !strings.HasPrefix(key, objectKey) {
+			objectKey = ""
+		}
+		if objectKey == "" {
+			for _, suffix := range []string{"#", "%"} {
+				if strings.HasSuffix(key, suffix) {
+					objectKey = strings.TrimSuffix(key, suffix)
+					break
+				}
+			}
+		}
+		oldValue, ok := dOld.State().Attributes[key]
+		if ok && oldValue == newValue {
+			continue
+		}
+		if oldValue == "" {
+			for _, suffix := range []string{"#", "%"} {
+				if strings.HasSuffix(key, suffix) {
+					oldValue = "0"
+				}
+			}
+		}
+		// 使用 SetNew 和 SetOld 方法来设置属性差异
+		if diff.Attributes == nil {
+			diff.Attributes = make(map[string]*terraform.ResourceAttrDiff)
+		}
+		diff.Attributes[key] = &terraform.ResourceAttrDiff{
+			Old: oldValue,
+			New: newValue,
+		}
+
+		if objectKey != "" {
+			for removeKey, removeValue := range dOld.State().Attributes {
+				if strings.HasPrefix(removeKey, objectKey) {
+					if _, ok := dNew.State().Attributes[removeKey]; !ok {
+						// If the attribue has complex elements, there should remove the key, not setting it to empty
+						if len(strings.Split(removeKey, ".")) > 2 {
+							delete(diff.Attributes, removeKey)
+						} else {
+							diff.Attributes[removeKey] = &terraform.ResourceAttrDiff{
+								Old: removeValue,
+								New: "",
+							}
+						}
+					}
+				}
+			}
+			objectKey = ""
+		}
+	}
+	return diff, nil
 }
