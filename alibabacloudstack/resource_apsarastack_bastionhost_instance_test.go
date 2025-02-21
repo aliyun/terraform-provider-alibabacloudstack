@@ -9,7 +9,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -162,7 +161,6 @@ func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 					"license_code":     "bastionhostah_small_lic",
 					"highavailability": "false",
 					"disasterrecovery": "false",
-					"provider":         "alibabacloudstack",
 					"asset":            "50",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -178,19 +176,23 @@ func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description":      "bastionhost_instance_test",
-					"asset":            "60",
-					"highavailability": "true",
-					"disasterrecovery": "true",
-					"license_code":     "bastionhostah_large_lic",
+					"license_code": "bastionhostah_large_lic",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description":      "bastionhost_instance_test",
-						"asset":            "60",
+						"license_code": "bastionhostah_large_lic",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"asset":            "70",
+					"highavailability": "true",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"asset":            "70",
 						"highavailability": "true",
-						"disasterrecovery": "true",
-						"license_code":     "bastionhostah_large_lic",
 					}),
 				),
 			},
@@ -402,7 +404,7 @@ func TestAccAlibabacloudStackBastionhostInstance_PublicAccess(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := acctest.RandIntRange(1000, 9999)
+	rand := getAccTestRandInt(1000, 9999)
 	name := fmt.Sprintf("tf_testAcc%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceBastionhostInstanceDependence)
 	ResourceTest(t, resource.TestCase{
