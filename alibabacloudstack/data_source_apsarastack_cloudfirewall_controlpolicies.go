@@ -231,7 +231,7 @@ func dataSourceAlibabacloudStackCloudFirewallControlPoliciesRead(d *schema.Resou
 	var objects []map[string]interface{}
 
 	for {
-		response, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}

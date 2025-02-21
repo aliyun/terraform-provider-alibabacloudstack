@@ -23,7 +23,7 @@ func (s *Dms_enterpriseService) DescribeDmsEnterpriseInstance(id string) (object
 		"PageSize": PageSizeLarge,
 		"PageNumber": 1,
 	}
-	response, err = s.client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", "GetInstance", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", "GetInstance", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InstanceNoEnoughNumber"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DmsEnterpriseInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
@@ -50,7 +50,7 @@ func (s *Dms_enterpriseService) DescribeDmsEnterpriseUser(id string) (object map
 		"PageSize": PageSizeLarge,
 		"PageNumber": 1,
 	}
-	response, err = s.client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", "GetUser", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", "GetUser", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}

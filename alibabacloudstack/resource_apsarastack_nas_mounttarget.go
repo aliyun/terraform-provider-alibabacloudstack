@@ -81,7 +81,7 @@ func resourceAlibabacloudStackNasMountTargetCreate(d *schema.ResourceData, meta 
 		request["VSwitchId"] = vswitchId
 	}
 	
-	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func resourceAlibabacloudStackNasMountTargetUpdate(d *schema.ResourceData, meta 
 	}
 	if update {
 		action := "ModifyMountTarget"
-		_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+		_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -169,7 +169,7 @@ func resourceAlibabacloudStackNasMountTargetDelete(d *schema.ResourceData, meta 
 		"MountTargetDomain": parts[1],
 	}
 
-	_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.NasNotFound"}) {
 			return nil

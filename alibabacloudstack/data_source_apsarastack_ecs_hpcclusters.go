@@ -94,7 +94,7 @@ func dataSourceAlibabacloudStackEcsHpcClustersRead(d *schema.ResourceData, meta 
 
 	for {
 		request["ClientToken"] = buildClientToken("DescribeHpcClusters")
-		response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}

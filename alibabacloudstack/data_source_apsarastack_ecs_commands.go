@@ -160,7 +160,7 @@ func dataSourceAlibabacloudStackEcsCommandsRead(d *schema.ResourceData, meta int
 	}
 
 	for {
-		response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", "DescribeCommands", "", nil, request)
+		response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", "DescribeCommands", "", nil, nil, request)
 		if err != nil {
 			return err
 		}

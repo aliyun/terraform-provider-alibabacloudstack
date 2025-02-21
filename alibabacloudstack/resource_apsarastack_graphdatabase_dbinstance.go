@@ -144,7 +144,7 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceCreate(d *schema.ResourceDa
 		request["VPCId"] = v
 	}
 
-	response, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -218,7 +218,7 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate(d *schema.ResourceDa
 	}
 	if update {
 		action := "ModifyDBInstanceDescription"
-		_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, request)
+		_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -249,7 +249,7 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate(d *schema.ResourceDa
 				modifyDBInstanceAccessWhiteListReq["DBInstanceIPArrayName"] = dBInstanceIPArrayArg["db_instance_ip_array_name"]
 				modifyDBInstanceAccessWhiteListReq["SecurityIps"] = "Empty"
 				action := "ModifyDBInstanceAccessWhiteList"
-				_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, modifyDBInstanceAccessWhiteListReq)
+				_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, nil, modifyDBInstanceAccessWhiteListReq)
 				if err != nil {
 					return err
 				}
@@ -264,7 +264,7 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate(d *schema.ResourceDa
 				modifyDBInstanceAccessWhiteListReq["DBInstanceIPArrayName"] = dBInstanceIPArrayArg["db_instance_ip_array_name"]
 				modifyDBInstanceAccessWhiteListReq["SecurityIps"] = dBInstanceIPArrayArg["security_ips"]
 				action := "ModifyDBInstanceAccessWhiteList"
-				_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, modifyDBInstanceAccessWhiteListReq)
+				_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, nil, modifyDBInstanceAccessWhiteListReq)
 				if err != nil {
 					return err
 				}
@@ -289,7 +289,7 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate(d *schema.ResourceDa
 		modifyDBInstanceSpecReq["DBInstanceStorageType"] = d.Get("db_instance_storage_type")
 		action := "ModifyDBInstanceSpec"
 		modifyDBInstanceSpecReq["ClientToken"] = buildClientToken("ModifyDBInstanceSpec")
-		_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, modifyDBInstanceSpecReq)
+		_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, nil, modifyDBInstanceSpecReq)
 		if err != nil {
 			return err
 		}
@@ -313,7 +313,7 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceDelete(d *schema.ResourceDa
 		"DBInstanceId": d.Id(),
 	}
 
-	_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "gdb", "2019-09-03", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstance.NotFound"}) {
 			return nil

@@ -6,6 +6,7 @@ import (
 
 	roaCS "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
+	roa "github.com/alibabacloud-go/tea-roa/client"
 	rpc "github.com/alibabacloud-go/tea-rpc/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
@@ -48,6 +49,7 @@ import (
 
 	"sync"
 
+	rpcutil "github.com/alibabacloud-go/tea-rpc-utils/service"
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -77,7 +79,8 @@ type AlibabacloudStackClient struct {
 	ResourceGroup                string
 	ResourceGroupId              string
 	Config                       *Config
-	teaSdkConfig                 rpc.Config
+	teaRpcSdkConfig              rpc.Config
+	teaRoaSdkConfig              roa.Config
 	accountId                    string
 	roleId                       int
 	Conns                        map[ServiceCode]*sdk.Client
@@ -152,14 +155,19 @@ func (c *Config) Client() (*AlibabacloudStackClient, error) {
 	// Get the auth and region. This can fail if keys/regions were not
 	// specified and we're attempting to use the environment.
 
-	teaSdkConfig, err := c.getTeaDslSdkConfig(true)
+	teaRpcSdkConfig, err := c.getTeaRpcDslSdkConfig(true)
+	if err != nil {
+		return nil, err
+	}
+	teaRoaSdkConfig, err := c.getTeaRoaDslSdkConfig(true)
 	if err != nil {
 		return nil, err
 	}
 
 	return &AlibabacloudStackClient{
 		Config:                       c,
-		teaSdkConfig:                 teaSdkConfig,
+		teaRpcSdkConfig:              teaRpcSdkConfig,
+		teaRoaSdkConfig:              teaRoaSdkConfig,
 		Region:                       c.Region,
 		RegionId:                     c.RegionId,
 		AccessKey:                    c.AccessKey,
@@ -179,7 +187,7 @@ func (client *AlibabacloudStackClient) NewTeaSDkClient(productCode string, endpo
 	if endpoint == "" {
 		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
 	}
-	sdkConfig := client.teaSdkConfig
+	sdkConfig := client.teaRpcSdkConfig
 	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
 	conn, err := rpc.NewClient(&sdkConfig)
 	for key, value := range client.defaultHeaders(productCode) {
@@ -1169,16 +1177,16 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 	request.QueryParams = client.defaultQueryParams()
 }
 
-func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode string, version string, apiname string, pathpattern string, query map[string]interface{}, body map[string]interface{}) (_result map[string]interface{}, _err error) {
+func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode string, version string, apiname string, pathpattern string, headers map[string]*string, query map[string]interface{}, body map[string]interface{}) (_result map[string]interface{}, _err error) {
 	ServiceCodeStr := strings.ReplaceAll(strings.ToUpper(popcode), "-", "_")
 	endpoint := client.Config.Endpoints[ServiceCode(ServiceCodeStr)]
 	if endpoint == "" {
 		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", popcode)
 	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
 
-	headers := make(map[string]*string)
+	if headers == nil {
+		headers = make(map[string]*string)
+	}
 	for key, value := range client.defaultHeaders(popcode) {
 		v := value
 		headers[key] = &v
@@ -1217,14 +1225,37 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 
+		var err error
 		// conn 必须在每次请求前初始化，因为DoRequest会修改conn的内容，会导致下次conn的配置失效
-		conn, err := rpc.NewClient(&sdkConfig)
-		if err != nil {
-			return resource.RetryableError(fmt.Errorf("unable to initialize the %s client: %#v", popcode, err))
+		if pathpattern != "" {
+			response, err = func() (map[string]interface{}, error) {
+				sdkConfig := client.teaRoaSdkConfig
+				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
+				conn, err := roa.NewClient(&sdkConfig)
+				if err != nil {
+					return nil, err
+				}
+				roa_query := rpcutil.Query(tea.ToMap(map[string]interface{}{
+					"Format":         "json",
+					"Timestamp":      tea.StringValue(rpcutil.GetTimestamp()),
+					"Version":        tea.StringValue(&version),
+					"SignatureNonce": tea.StringValue(util.GetNonce()),
+				}, query))
+				return conn.DoRequestWithAction(&apiname, &version, &protocol, &method, &authType, &pathpattern, roa_query, headers, body, &runtime)
+			}()
+		} else {
+			response, err = func() (map[string]interface{}, error) {
+				sdkConfig := client.teaRpcSdkConfig
+				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
+				conn, err := rpc.NewClient(&sdkConfig)
+				if err != nil {
+					return nil, err
+				}
+				conn.Headers = headers
+				return conn.DoRequest(&apiname, &protocol, &method, &version, &authType, query, body, &runtime)
+			}()
 		}
-		conn.Headers = headers
 
-		response, err = conn.DoRequest(&apiname, &protocol, &method, &version, &authType, query, body, &runtime)
 		log.Printf(" ================================ %s ======================================\n query %v \n request %v \n response: %v", apiname, query, body, response)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
@@ -1334,7 +1365,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		if strings.HasPrefix(domain, "public.asapi.") {
 			// 如果public的asapi网关，强制使用https
 			request.SetScheme("https")
-		}else{
+		} else {
 			// 如果internal的asapi网关，强制使用http
 			request.SetScheme("http")
 		}

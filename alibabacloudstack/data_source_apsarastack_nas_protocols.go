@@ -43,7 +43,7 @@ func dataSourceAlibabacloudStackNasProtocolsRead(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := make(map[string]interface{})
 
-	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeZones", "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeZones", "", nil, nil, request)
 	if err != nil {
 		return err
 	}

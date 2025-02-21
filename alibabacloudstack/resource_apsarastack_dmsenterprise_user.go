@@ -91,7 +91,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserCreate(d *schema.ResourceData, me
 	request["Uid"] = d.Get("uid")
 	request["UserNick"] = connectivity.GetResourceData(d, "user_name", "nick_name").(string)
 
-	_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserUpdate(d *schema.ResourceData, me
 			request["Tid"] = d.Get("tid")
 		}
 		action := "UpdateUser"
-		_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, request)
+		_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -175,7 +175,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserUpdate(d *schema.ResourceData, me
 					request["Tid"] = v
 				}
 				action := "DisableUser"
-				_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, request)
+				_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
 				if err != nil {
 					return err
 				}
@@ -188,7 +188,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserUpdate(d *schema.ResourceData, me
 					request["Tid"] = v
 				}
 				action := "EnableUser"
-				_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, request)
+				_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
 				if err != nil {
 					return err
 				}
@@ -209,7 +209,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserDelete(d *schema.ResourceData, me
 	if v, ok := d.GetOk("tid"); ok {
 		request["Tid"] = v
 	}
-	_, err := client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

@@ -20,7 +20,7 @@ func (s *DbsService) DescribeDbsBackupPlan(id string) (object map[string]interfa
 	}
 	request["ClientToken"] = buildClientToken("DescribeBackupPlanList")
 
-	response, err = s.client.DoTeaRequest("POST", "dbs", "2019-03-06", "DescribeBackupPlanList", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "dbs", "2019-03-06", "DescribeBackupPlanList", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}

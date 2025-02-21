@@ -227,7 +227,7 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		request["Remark"] = check.Data[0].Remark
 		request["ClientToken"] = buildClientToken(action)
 
-		_, err := client.DoTeaRequest("POST", "CloudDns", "2021-06-24", action, "", nil, request)
+		_, err := client.DoTeaRequest("POST", "CloudDns", "2021-06-24", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}

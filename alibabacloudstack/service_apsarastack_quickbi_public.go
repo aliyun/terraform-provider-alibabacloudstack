@@ -17,7 +17,7 @@ func (s *QuickbiPublicService) DescribeQuickBiUser(id string) (object map[string
 	request := map[string]interface{}{
 		"UserId": id,
 	}
-	response, err = s.client.DoTeaRequest("POST", "Quickbi", "2022-03-01", "QueryUserInfoByUserId", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "Quickbi", "2022-03-01", "QueryUserInfoByUserId", "", nil, nil, request)
 	addDebug("QueryUserInfoByUserId", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
@@ -38,7 +38,7 @@ func (s *QuickbiPublicService) QueryUserInfoByUserId(id string) (object map[stri
 	request := map[string]interface{}{
 		"UserId": id,
 	}
-	response, err = s.client.DoTeaRequest("POST", "Quickbi", "2022-03-01", "QueryUserInfoByUserId", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "Quickbi", "2022-03-01", "QueryUserInfoByUserId", "", nil, nil, request)
 	addDebug("QueryUserInfoByUserId", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
@@ -59,7 +59,7 @@ func (s *QuickbiPublicService) DescribeQuickBiUserGroup(id string) (object map[s
 	request := map[string]interface{}{
 		"UserGroupIds": id,
 	}
-	response, err = s.client.DoTeaRequest("POST", "Quickbi", "2022-03-01", "ListByUserGroupId", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "Quickbi", "2022-03-01", "ListByUserGroupId", "", nil, nil, request)
 	addDebug("ListByUserGroupId", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
@@ -80,7 +80,7 @@ func (s *QuickbiPublicService) DescribeQuickBiWorkspace(id string) (object map[s
 	request := map[string]interface{}{
 		"UserId": id,
 	}
-	response, err = s.client.DoTeaRequest("POST", "Quickbi", "2022-03-01", "QueryWorkspaceUserList", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "Quickbi", "2022-03-01", "QueryWorkspaceUserList", "", nil, nil, request)
 	addDebug("QueryWorkspaceUserList", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {

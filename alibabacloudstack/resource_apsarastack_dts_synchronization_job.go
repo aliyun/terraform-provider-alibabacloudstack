@@ -683,7 +683,7 @@ func resourceAlibabacloudStackDtsSynchronizationJobDelete(d *schema.ResourceData
 	if v, ok := d.GetOk("dts_instance_id"); ok {
 		request["DtsInstanceId"] = v
 	}
-	_, err := client.DoTeaRequest("POST", "Dts", "2020-01-01", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "Dts", "2020-01-01", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.InstanceNotFound"}) {
 			return nil

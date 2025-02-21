@@ -159,7 +159,7 @@ func resourceAlibabacloudStackNetworkAclCreate(d *schema.ResourceData, meta inte
 	}
 	request["VpcId"] = d.Get("vpc_id")
 	request["ClientToken"] = buildClientToken("CreateNetworkAcl")
-	response, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -268,7 +268,7 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 	if update {
 		action := "ModifyNetworkAclAttributes"
 		request["ClientToken"] = buildClientToken("ModifyNetworkAclAttributes")
-		_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, request)
+		_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -319,7 +319,7 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 	if update {
 		action := "UpdateNetworkAclEntries"
 		updateNetworkAclEntriesReq["ClientToken"] = buildClientToken("UpdateNetworkAclEntries")
-		_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, updateNetworkAclEntriesReq)
+		_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, updateNetworkAclEntriesReq)
 		if err != nil {
 			return err
 		}
@@ -355,7 +355,7 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 			associatenetworkaclrequest["Resource"] = resourcesMaps
 			action := "AssociateNetworkAcl"
 			associatenetworkaclrequest["ClientToken"] = buildClientToken("AssociateNetworkAcl")
-			_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, associatenetworkaclrequest)
+			_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, associatenetworkaclrequest)
 			if err != nil {
 				return err
 			}
@@ -381,7 +381,7 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 			unassociatenetworkaclrequest["Resource"] = resourcesMaps
 			action := "UnassociateNetworkAcl"
 			unassociatenetworkaclrequest["ClientToken"] = buildClientToken("UnassociateNetworkAcl")
-			_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, unassociatenetworkaclrequest)
+			_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, unassociatenetworkaclrequest)
 			if err != nil {
 				return err
 			}
@@ -410,7 +410,7 @@ func resourceAlibabacloudStackNetworkAclDelete(d *schema.ResourceData, meta inte
 		"NetworkAclId": d.Id(),
 	}
 	request["ClientToken"] = buildClientToken("DeleteNetworkAcl")
-	_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

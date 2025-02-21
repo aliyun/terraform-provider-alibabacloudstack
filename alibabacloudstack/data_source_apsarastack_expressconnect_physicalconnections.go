@@ -197,7 +197,7 @@ func dataSourceAlibabacloudStackExpressConnectPhysicalConnectionsRead(d *schema.
 	status, statusOk := d.GetOk("status")
 
 	for {
-		response, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
