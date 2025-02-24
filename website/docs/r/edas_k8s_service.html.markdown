@@ -79,16 +79,16 @@ The following arguments are supported:
 * `type` - (Required, ForceNew) Edas K8s service types, currently only the "ClusterIP" type is supported.
 * `service_ports` - (Optional) K8s Service port mapping table, which needs to conform to the JsonArray format. The supported parameters are as follows:
   * `protocol` - (Required) the service protocol, supporting TCP and UDP.
-  * `port` - (Required) the frontend service port, with a value range of 1~65535.
+  * `service_port` - (Required) the frontend service port, with a value range of 1~65535.
   * `target_port` - (Required) the backend container port, with a value range of 1~65535.
 * `external_traffic_policy` - (Optional) Set the external traffic management policy. Valid values are `Local`, `Cluster`, Default to `Local`.
-* `cluster_ip` - (Optional) The description of the application
-
+* `annotations` - (Optional) The annotations map of the application
+* `labels` - (Optional) The labels map of the application
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `cluster_ip` - 
+* `cluster_ip` - The cluster ip of the application
 
 ## Import
 

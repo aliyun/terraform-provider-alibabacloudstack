@@ -34,7 +34,7 @@ func resourceAlibabacloudStackEdasK8sService() *schema.Resource {
 			"type": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"ClusterIP"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"ClusterIP", "NodePort", "LoadBalancer"}, false),
 			},
 			"service_ports": {
 				Type:     schema.TypeList,
@@ -47,7 +47,7 @@ func resourceAlibabacloudStackEdasK8sService() *schema.Resource {
 							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"TCP", "UDP"}, false),
 						},
-						"port": {
+						"service_port": {
 							Type:     schema.TypeInt,
 							Required: true,
 						},
@@ -57,6 +57,14 @@ func resourceAlibabacloudStackEdasK8sService() *schema.Resource {
 						},
 					},
 				},
+			},
+			"annotations": {
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
+			"labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
 			},
 			"external_traffic_policy": {
 				Type:         schema.TypeString,
@@ -75,17 +83,32 @@ func resourceAlibabacloudStackEdasK8sService() *schema.Resource {
 func resourceAlibabacloudStackEdasK8sServiceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
-	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "CreateK8sService", "/pop/v5/k8s/acs/k8s_service")
+	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "CreateK8sService", "/pop/v5/k8s/service/service")
 	request.QueryParams["AppId"] = d.Get("app_id").(string)
-	request.QueryParams["Name"] = d.Get("name").(string)
+	request.QueryParams["Act"] = "1" // 创建接口默认值
+	request.QueryParams["ServiceName"] = d.Get("name").(string)
 	request.QueryParams["Type"] = d.Get("type").(string)
 	service_ports := d.Get("service_ports").([]interface{})
 	k8s_service_ports, err := edasService.GetK8sServicePorts(service_ports)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	request.QueryParams["ServicePorts"] = k8s_service_ports
+	request.QueryParams["PortMappingsStrs"] = k8s_service_ports
 	request.QueryParams["ExternalTrafficPolicy"] = d.Get("external_traffic_policy").(string)
+	if v, ok := d.GetOk("annotations"); ok {
+		AnnotationsStrs, err := json.Marshal(v.(map[string]interface{}))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.QueryParams["AnnotationsStrs"] = string(AnnotationsStrs)
+	}
+	if v, ok := d.GetOk("labels"); ok {
+		labelsStrs, err := json.Marshal(v.(map[string]interface{}))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.QueryParams["LabelsStrs"] = string(labelsStrs)
+	}
 	bresponse, err := client.ProcessCommonRequestForOrganization(request)
 	addDebug("CreateK8sService", bresponse, request.QueryParams, request)
 	if err != nil {
@@ -97,7 +120,7 @@ func resourceAlibabacloudStackEdasK8sServiceCreate(d *schema.ResourceData, meta 
 	}
 	var response map[string]interface{}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-	if response["Code"].(float64) != 200 {
+	if fmt.Sprint(response["Code"]) != "200" {
 		return errmsgs.WrapError(fmt.Errorf("Create edas k8s service failed for %s", response["Message"].(string)))
 	}
 
@@ -116,8 +139,7 @@ func resourceAlibabacloudStackEdasK8sServiceRead(d *schema.ResourceData, meta in
 			d.SetId("")
 			return nil
 		}
-		return errmsgs.WrapError(err)
-
+		return err
 	}
 	d.Set("type", service.Type)
 	d.Set("name", service.Name)
@@ -125,13 +147,14 @@ func resourceAlibabacloudStackEdasK8sServiceRead(d *schema.ResourceData, meta in
 	service_ports := make([]map[string]interface{}, 0)
 	for _, service_port := range service.ServicePorts {
 		service_ports = append(service_ports, map[string]interface{}{
-			"protocol":    service_port.Protocol,
-			"port":        service_port.Port,
-			"target_port": service_port.TargetPort,
+			"protocol":     service_port.Protocol,
+			"service_port": service_port.Port,
+			"target_port":  service_port.TargetPort,
 		})
 	}
 	d.Set("service_ports", service_ports)
-
+	d.Set("labels", service.Labels)
+	d.Set("annotations", service.Annotations)
 	return nil
 }
 
@@ -143,11 +166,12 @@ func resourceAlibabacloudStackEdasK8sServiceUpdate(d *schema.ResourceData, meta 
 	request.QueryParams["AppId"] = d.Get("app_id").(string)
 	request.QueryParams["Name"] = d.Get("name").(string)
 	request.QueryParams["Type"] = d.Get("type").(string)
+	request.QueryParams["Act"] = "2" // 更新接口默认值
 	service_ports, err := edasService.GetK8sServicePorts(d.Get("service_ports").([]interface{}))
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	request.QueryParams["ServicePorts"] = service_ports
+	request.QueryParams["PortMappingsStrs"] = service_ports
 	update := false
 	if d.HasChange("name") {
 		update = true
@@ -161,6 +185,20 @@ func resourceAlibabacloudStackEdasK8sServiceUpdate(d *schema.ResourceData, meta 
 	if d.HasChange("external_traffic_policy") {
 		update = true
 		request.QueryParams["ExternalTrafficPolicy"] = d.Get("external_traffic_policy").(string)
+	}
+	if d.HasChange("annotations") {
+		AnnotationsStrs, err := json.Marshal(d.Get("annotations").(map[string]interface{}))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.QueryParams["AnnotationsStrs"] = string(AnnotationsStrs)
+	}
+	if d.HasChange("labels") {
+		labelsStrs, err := json.Marshal(d.Get("labels").(map[string]interface{}))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.QueryParams["LabelsStrs"] = string(labelsStrs)
 	}
 	if update {
 		bresponse, err := client.ProcessCommonRequestForOrganization(request)
@@ -176,7 +214,7 @@ func resourceAlibabacloudStackEdasK8sServiceUpdate(d *schema.ResourceData, meta 
 
 		response := make(map[string]interface{})
 		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if response["Code"].(float64) != 200 {
+		if fmt.Sprint(response["Code"]) != "200" {
 			return errmsgs.WrapError(errmsgs.Error("update edas k8s service failed for " + response["Message"].(string)))
 		}
 	}
@@ -206,7 +244,7 @@ func resourceAlibabacloudStackEdasK8sServiceDelete(d *schema.ResourceData, meta 
 
 	response := make(map[string]interface{})
 	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-	if response["Code"].(float64) != 200 {
+	if fmt.Sprint(response["Code"]) != "200" {
 		return errmsgs.WrapError(errmsgs.Error("delete edas k8s service failed for " + response["Message"].(string)))
 	}
 	return nil
