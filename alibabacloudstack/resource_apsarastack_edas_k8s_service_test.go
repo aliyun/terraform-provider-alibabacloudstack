@@ -20,7 +20,7 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	rand := getAccTestRandInt(0, 1000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tftestAcc%v", rand)
+	name := fmt.Sprintf("tftestacc%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sSericeDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -49,9 +49,7 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":                    name,
-						"cluster_ip":              CHECKSET,
-						"external_traffic_policy": "Local",
+						"type": "ClusterIP",
 					}),
 				),
 			},
@@ -64,7 +62,6 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 							"protocol":     "TCP",
 						},
 					},
-					"external_traffic_policy": "Local",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{

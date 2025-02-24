@@ -531,7 +531,7 @@ func (e *EdasService) ListEdasK8sServices(app_id string) ([]*EdasK8sService, err
 	return response.Services, nil
 }
 
-func (e *EdasService) DescribeEdasService(id string) (*EdasK8sService, error) {
+func (e *EdasService) DescribeEdasK8sService(id string) (*EdasK8sService, error) {
 	parts := strings.Split(id, ":")
 	app_id := parts[0]
 	name := parts[1]
