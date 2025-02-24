@@ -233,7 +233,7 @@ func resourceAlibabacloudStackArmsDispatchRuleCreate(d *schema.ResourceData, met
 		request["DispatchRule"] = v
 	}
 
-	response, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -417,7 +417,7 @@ func resourceAlibabacloudStackArmsDispatchRuleUpdate(d *schema.ResourceData, met
 	} else {
 		request["DispatchRule"] = v
 	}
-	_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -431,7 +431,7 @@ func resourceAlibabacloudStackArmsDispatchRuleDelete(d *schema.ResourceData, met
 	request := map[string]interface{}{
 		"Id":       d.Id(),
 	}
-	_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

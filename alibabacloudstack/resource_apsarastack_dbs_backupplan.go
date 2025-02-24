@@ -187,7 +187,7 @@ func resourceAlibabacloudStackDbsBackupPlanUpdate(d *schema.ResourceData, meta i
 	action := "ModifyBackupPlanName"
 	request["ClientToken"] = buildClientToken("ModifyBackupPlanName")
 
-	_, err := client.DoTeaRequest("POST", "DBS", "2019-03-06", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "DBS", "2019-03-06", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

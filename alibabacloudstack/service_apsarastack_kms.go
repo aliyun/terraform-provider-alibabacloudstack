@@ -84,7 +84,7 @@ func (s *KmsService) Decrypt2(ciphertextBlob string, encryptionContext map[strin
 	}
 
 	var response map[string]interface{}
-	response, err = s.client.DoTeaRequest("POST", "Kms", "2016-01-20", "Decrypt", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "Kms", "2016-01-20", "Decrypt", "", nil, nil, request)
 	if err != nil {
 		return plaintext, err
 	}

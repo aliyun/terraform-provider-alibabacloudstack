@@ -644,7 +644,7 @@ func (s *AdbService) AdbTaskStateRefreshFunc(id, taskId string) resource.StateRe
 func (s *AdbService) DescribeAutoRenewAttribute(id string) (object map[string]interface{}, err error) {
 	request := make(map[string]interface{})
 	request["DBClusterIds"] = id
-	response, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "DescribeAutoRenewAttribute", "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "DescribeAutoRenewAttribute", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("AnalyticDBForMySQL3.0", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
@@ -670,7 +670,7 @@ func (s *AdbService) DescribeAutoRenewAttribute(id string) (object map[string]in
 func (s *AdbService) DescribeDBClusterAccessWhiteList(id string) (object map[string]interface{}, err error) {
 	request := make(map[string]interface{})
 	request["DBClusterId"] = id
-	response, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "DescribeDBClusterAccessWhiteList", "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "DescribeDBClusterAccessWhiteList", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("AnalyticdbForMysql3.0DbCluster", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
@@ -708,7 +708,7 @@ func (s *AdbService) SetResourceTags(d *schema.ResourceData, resourceType string
 			for i, key := range removed {
 				request[fmt.Sprintf("TagKey.%d", i+1)] = key
 			}
-			_, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "UntagResources", "", nil, request)
+			_, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "UntagResources", "", nil, nil, request)
 			if err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UntagResources", errmsgs.AlibabacloudStackSdkGoERROR)
 			}
@@ -723,7 +723,7 @@ func (s *AdbService) SetResourceTags(d *schema.ResourceData, resourceType string
 				request[fmt.Sprintf("Tag.%d.Value", count)] = value
 				count++
 			}
-			_, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "TagResources", "", nil, request)
+			_, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "TagResources", "", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -739,7 +739,7 @@ func (s *AdbService) DoAdbDescribebackuppolicyRequest(id string) (object map[str
 func (s *AdbService) DescribeAdbDbCluster(id string) (object map[string]interface{}, err error) {
 	request := make(map[string]interface{})
 	request["DBClusterId"] = id
-	response, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "DescribeDBClusterAttribute", "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "DescribeDBClusterAttribute", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBCluster.NotFound", "InvalidDBClusterId.NotFoundError"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("AdbDbCluster", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
@@ -765,7 +765,7 @@ func (s *AdbService) DescribeAdbDbCluster(id string) (object map[string]interfac
 func (s *AdbService) DescribeDBClusters(id string) (object map[string]interface{}, err error) {
 	request := make(map[string]interface{})
 	request["DBClusterIds"] = id
-	response, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "DescribeDBClusters", "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "ADB", "2019-03-15", "DescribeDBClusters", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}

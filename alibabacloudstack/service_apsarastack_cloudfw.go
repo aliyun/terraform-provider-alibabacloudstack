@@ -29,7 +29,7 @@ func (s *CloudfwService) DescribeCloudFirewallControlPolicy(id string) (object m
 		"PageSize":  100,
 	}
 
-	response, err = s.client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}

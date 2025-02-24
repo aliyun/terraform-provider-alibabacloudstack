@@ -36,7 +36,7 @@ func (s *MaxcomputeService) DescribeMaxcomputeProject(name string) (object *MaxC
 		request["Name"] = name
 	}
 
-	response, err := client.DoTeaRequest("POST", "dataworks-private-cloud", "2019-01-17", "ListCalcEnginesForAscm", "", nil, request)
+	response, err := client.DoTeaRequest("POST", "dataworks-private-cloud", "2019-01-17", "ListCalcEnginesForAscm", "", nil, nil, request)
 	addDebug("ListCalcEnginesForAscm", response, request)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func (s *MaxcomputeService) DescribeMaxcomputeCu(name string) (object map[string
 	request["ResourceGroupId"] = s.client.ResourceGroup
 	request["Department"] = s.client.Department
 
-	response, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "ListOdpsCus", "/ascm/manage/odps/list_cus", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "ListOdpsCus", "/ascm/manage/odps/list_cus", nil, nil, request)
 	addDebug("ListOdpsCus", response, request)
 	if err != nil {
 		err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, name, "ListOdpsCus", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -101,7 +101,7 @@ func (s *MaxcomputeService) DescribeMaxcomputeUser(name string) (response *OdpsU
 	request["UserName"] = name
 	request["x-acs-roleid"] = strconv.Itoa(roleId)
 
-	responseData, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "GetOdpsUserList", "/ascm/manage/resource_mgmt/listOdpsUser", nil, request)
+	responseData, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "GetOdpsUserList", "/ascm/manage/resource_mgmt/listOdpsUser", nil, nil, request)
 	addDebug("GetOdpsUserList", responseData, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Error OdpsUser Not Found"}) {

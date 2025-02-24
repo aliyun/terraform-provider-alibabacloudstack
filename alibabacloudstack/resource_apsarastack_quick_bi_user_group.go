@@ -61,7 +61,7 @@ func resourceAlibabacloudStackQuickBiUserGroupCreate(d *schema.ResourceData, met
 	request["UserGroupDescription"] = UserGroupDescription
 	request["ParentUserGroupId"] = ParentUserGroupId
 
-	response, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func resourceAlibabacloudStackQuickBiUserGroupUpdate(d *schema.ResourceData, met
 		request["UserGroupDescription"] = UserGroupDescription
 		request["ParentUserGroupId"] = ParentUserGroupId
 
-		_, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, request)
+		_, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -121,7 +121,7 @@ func resourceAlibabacloudStackQuickBiUserGroupDelete(d *schema.ResourceData, met
 		"UserGroupId": d.Id(),
 	}
 
-	_, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "QuickBI", "2022-03-01", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
 			return nil

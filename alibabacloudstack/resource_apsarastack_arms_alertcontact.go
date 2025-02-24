@@ -77,7 +77,7 @@ func resourceAlibabacloudStackArmsAlertContactCreate(d *schema.ResourceData, met
 	if v, ok := d.GetOkExists("system_noc"); ok {
 		request["SystemNoc"] = v
 	}
-	response, err := client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -157,7 +157,7 @@ func resourceAlibabacloudStackArmsAlertContactUpdate(d *schema.ResourceData, met
 	}
 	if update {
 		action := "UpdateAlertContact"
-		_, err := client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+		_, err := client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -172,7 +172,7 @@ func resourceAlibabacloudStackArmsAlertContactDelete(d *schema.ResourceData, met
 		"ContactId": d.Id(),
 	}
 
-	_, err := client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

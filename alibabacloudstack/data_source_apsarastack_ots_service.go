@@ -41,7 +41,7 @@ func dataSourceAlibabacloudStackOtsServiceRead(d *schema.ResourceData, meta inte
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
 	action := "OpenOtsService"
-	response, err := client.DoTeaRequest("POST", "Ots", "2016-06-20", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Ots", "2016-06-20", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ORDER.OPEND"}) {
 			d.SetId("OtsServicHasBeenOpened")

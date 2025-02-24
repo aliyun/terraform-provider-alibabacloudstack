@@ -132,7 +132,7 @@ func dataSourceAlibabacloudStackEhpcJobTemplatesRead(d *schema.ResourceData, met
 		}
 	}
 	for {
-		response, err := client.DoTeaRequest("GET", "ECS", "2018-04-12", action, "", nil, request)
+		response, err := client.DoTeaRequest("GET", "ECS", "2018-04-12", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}

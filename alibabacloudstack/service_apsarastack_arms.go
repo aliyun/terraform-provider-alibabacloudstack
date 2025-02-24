@@ -23,7 +23,7 @@ func (s *ArmsService) DescribeArmsAlertContact(id string) (object map[string]int
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
-	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "SearchAlertContact", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "SearchAlertContact", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}
@@ -50,7 +50,7 @@ func (s *ArmsService) DescribeArmsAlertContactGroup(id string) (object map[strin
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
-	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "SearchAlertContactGroup", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "SearchAlertContactGroup", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}
@@ -76,7 +76,7 @@ func (s *ArmsService) DescribeArmsDispatchRule(id string) (object map[string]int
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
-	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "DescribeDispatchRule", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "DescribeDispatchRule", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"50003"}) {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ARMS", id)), errmsgs.NotFoundWithResponse, response)
@@ -102,7 +102,7 @@ func (s *ArmsService) DescribeArmsPrometheusAlertRule(id string) (object map[str
 	}
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
-	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "ListPrometheusAlertRules", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "ARMS", "2019-08-08", "ListPrometheusAlertRules", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}

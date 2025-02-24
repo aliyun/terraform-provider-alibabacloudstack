@@ -233,7 +233,7 @@ func dataSourceAlibabacloudStackOosTemplatesRead(d *schema.ResourceData, meta in
 	}
 
 	for {
-		response, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "Oos", "2019-06-01", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}

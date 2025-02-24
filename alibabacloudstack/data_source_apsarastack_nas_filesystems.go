@@ -138,7 +138,7 @@ func dataSourceAlibabacloudStackFileSystemsRead(d *schema.ResourceData, meta int
 		filesystemDescriptionRegex = r
 	}
 	for {
-		response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}

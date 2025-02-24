@@ -102,7 +102,7 @@ func dataSourceAlibabacloudStackMaxcomputeCusRead(d *schema.ResourceData, meta i
 		filter_query = d.Get("cluster_name").(string)
 	}
 
-	response, err := client.DoTeaRequest("POST", "ASCM", "2019-05-10", action, "/ascm/manage/odps/list_cus", nil, request)
+	response, err := client.DoTeaRequest("POST", "ASCM", "2019-05-10", action, "/ascm/manage/odps/list_cus", nil, nil, request)
 
 	if err != nil {
 		return err

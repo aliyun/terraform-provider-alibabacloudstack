@@ -151,7 +151,7 @@ func resourceAlibabacloudStackArmsPrometheusAlertRuleCreate(d *schema.ResourceDa
 	if v, ok := d.GetOk("type"); ok {
 		request["Type"] = v
 	}
-	response, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -297,7 +297,7 @@ func resourceAlibabacloudStackArmsPrometheusAlertRuleUpdate(d *schema.ResourceDa
 
 	if update {
 		action := "UpdatePrometheusAlertRule"
-		_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+		_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -315,7 +315,7 @@ func resourceAlibabacloudStackArmsPrometheusAlertRuleDelete(d *schema.ResourceDa
 	request := map[string]interface{}{
 		"AlertId": parts[1],
 	}
-	_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

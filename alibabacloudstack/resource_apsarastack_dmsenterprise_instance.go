@@ -211,7 +211,7 @@ func resourceAlibabacloudStackDmsEnterpriseInstanceCreate(d *schema.ResourceData
 		request["VpcId"] = v
 	}
 
-	_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -357,7 +357,7 @@ func resourceAlibabacloudStackDmsEnterpriseInstanceUpdate(d *schema.ResourceData
 			request["Tid"] = d.Get("tid")
 		}
 		action := "UpdateInstance"
-		_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, request)
+		_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -383,7 +383,7 @@ func resourceAlibabacloudStackDmsEnterpriseInstanceDelete(d *schema.ResourceData
 	if v, ok := d.GetOk("tid"); ok {
 		request["Tid"] = v
 	}
-	_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

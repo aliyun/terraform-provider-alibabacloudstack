@@ -23,7 +23,7 @@ func (s *DtsService) DescribeDtsJobMonitorRule(id string) (object map[string]int
 		"RegionId": s.client.RegionId,
 		"DtsJobId": id,
 	}
-	response, err := s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "DescribeJobMonitorRule", "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "DescribeJobMonitorRule", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}
@@ -43,7 +43,7 @@ func (s *DtsService) DescribeDtsSubscriptionJob(id string) (object map[string]in
 		"RegionId": s.client.RegionId,
 		"DtsJobId": id,
 	}
-	response, err := s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "DescribeDtsJobDetail", "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "DescribeDtsJobDetail", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.InstanceNotFound"}) {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DTS:SubscriptionJob", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
@@ -93,7 +93,7 @@ func (s *DtsService) DescribeDtsSynchronizationInstance(id string) (object map[s
 	var response map[string]interface{}
 	idExist := false
 	for {
-		response, err = s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "DescribeSynchronizationJobs", "", nil, request)
+		response, err = s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "DescribeSynchronizationJobs", "", nil, nil, request)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{"Forbidden.InstanceNotFound"}) {
 				return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DTS:SynchronizationInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
@@ -133,7 +133,7 @@ func (s *DtsService) ListTagResources(id string, resourceType string) (object in
 	var response map[string]interface{}
 
 	for {
-		response, err = s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "ListTagResources", "", nil, request)
+		response, err = s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "ListTagResources", "", nil, nil, request)
 		if err != nil {
 			return object, err
 		}
@@ -170,7 +170,7 @@ func (s *DtsService) SetResourceTags(d *schema.ResourceData, resourceType string
 			for i, key := range removedTagKeys {
 				request[fmt.Sprintf("TagKey.%d", i+1)] = key
 			}
-			_, err = s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "UntagResources", "", nil, request)
+			_, err = s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "UntagResources", "", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -187,7 +187,7 @@ func (s *DtsService) SetResourceTags(d *schema.ResourceData, resourceType string
 				request[fmt.Sprintf("Tag.%d.Value", count)] = value
 				count++
 			}
-			_, err = s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "TagResources", "", nil, request)
+			_, err = s.client.DoTeaRequest("POST", "Dts", "2020-01-01", "TagResources", "", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -202,7 +202,7 @@ func (s *DtsService) DescribeDtsSynchronizationJob(id string) (object map[string
 		"DtsJobId": id,
 	}
 	action := "DescribeDtsJobDetail"
-	response, err := s.client.DoTeaRequest("POST", "Dts", "2020-01-01", action, "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "Dts", "2020-01-01", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.InstanceNotFound"}) {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DTS:SynchronizationJob", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
@@ -229,7 +229,7 @@ func (s *DtsService) DescribeDtsJobDetail(id string) (object map[string]interfac
 		"DtsJobId": id,
 	}
 	action := "DescribeDtsJobDetail"
-	response, err := s.client.DoTeaRequest("POST", "Dts", "2020-01-01", action, "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "Dts", "2020-01-01", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.InstanceNotFound"}) {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DTS:SynchronizationJob", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))

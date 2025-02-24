@@ -270,7 +270,7 @@ func dataSourceAlibabacloudStackAdbDbClustersRead(d *schema.ResourceData, meta i
 	}
 
 	for {
-		response, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "adb", "2019-03-15", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}

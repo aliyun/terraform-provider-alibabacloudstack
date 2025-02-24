@@ -107,7 +107,7 @@ func dataSourceAlibabacloudStackGpdbAccountsRead(d *schema.ResourceData, meta in
 	}
 	status, statusOk := d.GetOk("status")
 
-	response, err := client.DoTeaRequest("POST", "gpdb", "2016-05-03", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "gpdb", "2016-05-03", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
