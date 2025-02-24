@@ -282,8 +282,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"oos-public-inner.{{.region}}.{{.domain}}",
 	},
 	CONTAINCode: PopEndpoint{
-		"cs.{{.domain}}",
-		"cs.{{.region}}.{{.domain}}",
+		"cs-intranet.{{.domain}}",
+		"cs-intranet.{{.region}}.{{.domain}}",
 	},
 	HBASECode: PopEndpoint{
 		"hbase.{{.domain}}",
