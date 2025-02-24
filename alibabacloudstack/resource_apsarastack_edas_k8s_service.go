@@ -33,27 +33,30 @@ func resourceAlibabacloudStackEdasK8sService() *schema.Resource {
 			},
 			"type": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Default:      "ClusterIP",
 				ValidateFunc: validation.StringInSlice([]string{"ClusterIP", "NodePort", "LoadBalancer"}, false),
 			},
 			"service_ports": {
 				Type:     schema.TypeList,
-				Required: true,
-				ForceNew: true,
+				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"protocol": {
 							Type:         schema.TypeString,
-							Required:     true,
+							Optional:     true,
 							ValidateFunc: validation.StringInSlice([]string{"TCP", "UDP"}, false),
 						},
 						"service_port": {
 							Type:     schema.TypeInt,
-							Required: true,
+							Optional: true,
+							Computed: true,
 						},
 						"target_port": {
 							Type:     schema.TypeInt,
-							Required: true,
+							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -133,7 +136,7 @@ func resourceAlibabacloudStackEdasK8sServiceRead(d *schema.ResourceData, meta in
 	edasService := EdasService{client}
 
 	id := d.Id()
-	service, err := edasService.DescribeEdasService(id)
+	service, err := edasService.DescribeEdasK8sService(id)
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -223,13 +226,13 @@ func resourceAlibabacloudStackEdasK8sServiceUpdate(d *schema.ResourceData, meta 
 
 func resourceAlibabacloudStackEdasK8sServiceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := client.NewCommonRequest("DELETE", "Edas", "2017-08-01", "DeleteK8sService", "/pop/v5/k8s/acs/k8s_service")
+	request := client.NewCommonRequest("DELETE", "Edas", "2017-08-01", "DeleteK8sService", "/pop/v5/k8s/service/service")
 	parts := strings.Split(d.Id(), ":")
 	app_id := parts[0]
 	name := parts[1]
 	request.QueryParams = map[string]string{
-		"AppId": app_id,
-		"Name":  name,
+		"AppId":       app_id,
+		"ServiceName": name,
 	}
 	bresponse, err := client.ProcessCommonRequestForOrganization(request)
 	addDebug(request.GetActionName(), bresponse, request)
