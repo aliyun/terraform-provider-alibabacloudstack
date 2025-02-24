@@ -479,7 +479,7 @@ func (e *EdasService) DescribeEdasListCluster(clusterId string) (*edas.Cluster, 
 }
 
 type ServicePort struct {
-	TargetPort string `json:"TargetPort"`
+	TargetPort int    `json:"TargetPort"`
 	NodePort   int    `json:"NodePort"`
 	Port       int    `json:"Port"`
 	Protocol   string `json:"Protocol"`
