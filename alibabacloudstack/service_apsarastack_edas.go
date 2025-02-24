@@ -3,10 +3,11 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
+
 	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
@@ -489,14 +490,22 @@ type ServicePort struct {
 }
 
 type EdasK8sService struct {
-	Type         string        `json:"Type"`
-	Name         string        `json:"Name"`
-	ClusterIP    string        `json:"ClusterIP"`
-	ServicePorts []ServicePort `json:"ServicePorts"`
+	Type         string                 `json:"Type"`
+	Name         string                 `json:"Name"`
+	ClusterIP    string                 `json:"ClusterIP"`
+	ServicePorts []ServicePort          `json:"ServicePorts"`
+	Annotations  map[string]interface{} `json:"Annotations"`
+	Labels       map[string]interface{} `json:"Labels"`
+}
+
+type EdasK8sServiceResponse struct {
+	Code      int               `json:"Code"`
+	Message   string            `json:"Message"`
+	RequestId string            `json:"RequestId"`
+	Services  []*EdasK8sService `json:"Services"`
 }
 
 func (e *EdasService) ListEdasK8sServices(app_id string) ([]*EdasK8sService, error) {
-	var services []*EdasK8sService
 
 	request := e.client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetK8sServices", "/pop/v5/k8s/acs/k8s_service")
 	request.QueryParams["AppId"] = app_id
@@ -510,20 +519,20 @@ func (e *EdasService) ListEdasK8sServices(app_id string) ([]*EdasK8sService, err
 		}
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_service", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	var response map[string]interface{}
+	var response *EdasK8sServiceResponse
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	if response["Code"].(float64) != 200 {
-		return nil, errmsgs.WrapError(fmt.Errorf("Get k8s services failed for %s", response["Message"].(string)))
+	if fmt.Sprint(response.Code) != "200" {
+		return nil, errmsgs.WrapError(fmt.Errorf("Get k8s services failed for %s", response.Message))
 	}
-	services_map := response["Services"].([]interface{})
-	err = json.Unmarshal([]byte(fmt.Sprint(services_map)), &services)
-	if err != nil {
-		return nil, errmsgs.WrapError(err)
-	}
-	return services, nil
+	// services_map := response["Services"].([]interface{})
+	// err = json.Unmarshal([]byte(fmt.Sprint(services_map)), &services)
+	// if err != nil {
+	// 	return nil, errmsgs.WrapError(err)
+	// }
+	return response.Services, nil
 }
 
 func (e *EdasService) DescribeEdasService(id string) (*EdasK8sService, error) {
@@ -755,9 +764,9 @@ func (e *EdasService) QueryK8sAppPackageType(appId string) (string, error) {
 }
 
 type K8sServicePorts struct {
-	Protocol   string `json:"protocol" xml:"protocol"`
-	Port       int    `json:"port" xml:"port"`
-	TargetPort int    `json:"targetPort" xml:"targetPort"`
+	Protocol    string `json:"protocol" xml:"protocol"`
+	ServicePort int    `json:"servicePort" xml:"servicePort"`
+	TargetPort  int    `json:"targetPort" xml:"targetPort"`
 }
 
 func (e *EdasService) GetK8sServicePorts(service_ports []interface{}) (string, error) {
@@ -765,9 +774,9 @@ func (e *EdasService) GetK8sServicePorts(service_ports []interface{}) (string, e
 	for _, v := range service_ports {
 		s := v.(map[string]interface{})
 		k8s_service_ports = append(k8s_service_ports, K8sServicePorts{
-			Protocol:   s["protocol"].(string),
-			Port:       s["port"].(int),
-			TargetPort: s["target_port"].(int),
+			Protocol:    s["protocol"].(string),
+			ServicePort: s["service_port"].(int),
+			TargetPort:  s["target_port"].(int),
 		})
 	}
 	b, err := json.Marshal(k8s_service_ports)
