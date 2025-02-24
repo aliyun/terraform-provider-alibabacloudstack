@@ -99,7 +99,7 @@ func resourceAlibabacloudStackDataWorksConnectionCreate(d *schema.ResourceData, 
 		request["SubType"] = v.(string)
 	}
 
-	response, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func resourceAlibabacloudStackDataWorksConnectionUpdate(d *schema.ResourceData, 
 	}
 	action := "UpdateConnection"
 
-	_, err = client.DoTeaRequest("PUT", "dataworks-public", "2020-05-18", action, "", nil, request)
+	_, err = client.DoTeaRequest("PUT", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -180,7 +180,7 @@ func resourceAlibabacloudStackDataWorksConnectionDelete(d *schema.ResourceData, 
 		"ConnectionId": parts[0],
 	}
 	
-	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

@@ -3,17 +3,19 @@ package alibabacloudstack
 import (
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackExpressConnectAccessPoints() *schema.Resource {
+func dataSourceAlibabacloudStackEdasNamespaces() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackExpressConnectAccessPointsRead,
+		Read: dataSourceAlibabacloudStackEdasNamespacesRead,
 		Schema: map[string]*schema.Schema{
 			"ids": {
 				Type:     schema.TypeList,
@@ -33,54 +35,44 @@ func dataSourceAlibabacloudStackExpressConnectAccessPoints() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			"status": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"disabled", "full", "hot", "recommended"}, false),
-			},
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"points": {
+			"namespaces": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"access_point_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"access_point_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"attached_region_no": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
+// 						"debug_enable": {
+// 							Type:     schema.TypeBool,
+// 							Computed: true,
+// 						},
 						"description": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"host_operator": {
+						"id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"location": {
+						"namespace_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"status": {
+						"namespace_logical_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"type": {
+						"namespace_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"belong_region": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"user_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -91,22 +83,19 @@ func dataSourceAlibabacloudStackExpressConnectAccessPoints() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackExpressConnectAccessPointsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackEdasNamespacesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	action := "DescribeAccessPoints"
-	request := map[string]interface{}{
-		"PageSize": PageSizeLarge,
-		"PageNumber": 1,
-	}
+	action := "ListUserDefineRegion"
+	request := make(map[string]interface{})
 	var objects []map[string]interface{}
-	var accessPointNameRegex *regexp.Regexp
+	var namespaceNameRegex *regexp.Regexp
 	if v, ok := d.GetOk("name_regex"); ok {
 		r, err := regexp.Compile(v.(string))
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		accessPointNameRegex = r
+		namespaceNameRegex = r
 	}
 
 	idsMap := make(map[string]string)
@@ -118,56 +107,57 @@ func dataSourceAlibabacloudStackExpressConnectAccessPointsRead(d *schema.Resourc
 			idsMap[vv.(string)] = vv.(string)
 		}
 	}
-	status, statusOk := d.GetOk("status")
-
-	for {
-		response, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
+	var response map[string]interface{}
+	var err error
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		response, err = client.DoTeaRequest("POST", "Edas", "2017-08-01", action, "/pop/v5/user_region_defs", nil, request, nil)
 		if err != nil {
-			return err
+			if errmsgs.NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
 		}
-		resp, err := jsonpath.Get("$.AccessPointSet.AccessPointType", response)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.AccessPointSet.AccessPointType", response)
+		return nil
+	})
+	addDebug(action, response, request)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DataDefaultErrorMsg, "alibabacloudstack_edas_namespaces", action, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	resp, err := jsonpath.Get("$.UserDefineRegionList.UserDefineRegionEntity", response)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.UserDefineRegionList.UserDefineRegionEntity", response)
+	}
+	result, _ := resp.([]interface{})
+	for _, v := range result {
+		item := v.(map[string]interface{})
+		if namespaceNameRegex != nil && !namespaceNameRegex.MatchString(fmt.Sprint(item["RegionName"])) {
+			continue
 		}
-		result, _ := resp.([]interface{})
-		for _, v := range result {
-			item := v.(map[string]interface{})
-			if accessPointNameRegex != nil && !accessPointNameRegex.MatchString(fmt.Sprint(item["Name"])) {
+		if len(idsMap) > 0 {
+			if _, ok := idsMap[fmt.Sprint(item["Id"])]; !ok {
 				continue
 			}
-			if len(idsMap) > 0 {
-				if _, ok := idsMap[fmt.Sprint(item["AccessPointId"])]; !ok {
-					continue
-				}
-			}
-			if statusOk && status.(string) != "" && status.(string) != item["Status"].(string) {
-				continue
-			}
-			objects = append(objects, item)
 		}
-		if len(result) < PageSizeXLarge {
-			break
-		}
-		request["PageNumber"] = request["PageNumber"].(int) + 1
+		objects = append(objects, item)
 	}
 	ids := make([]string, 0)
 	names := make([]interface{}, 0)
 	s := make([]map[string]interface{}, 0)
 	for _, object := range objects {
 		mapping := map[string]interface{}{
-			"id":                 fmt.Sprint(object["AccessPointId"]),
-			"access_point_id":    fmt.Sprint(object["AccessPointId"]),
-			"access_point_name":  object["Name"],
-			"attached_region_no": object["AttachedRegionNo"],
-			"description":        object["Description"],
-			"host_operator":      object["HostOperator"],
-			"location":           object["Location"],
-			"status":             object["Status"],
-			"type":               object["Type"],
+// 			"debug_enable":         object["DebugEnable"],
+			"description":          object["Description"],
+			"id":                   fmt.Sprint(object["Id"]),
+			"namespace_id":         fmt.Sprint(object["Id"]),
+			"namespace_logical_id": object["RegionId"],
+			"namespace_name":       object["RegionName"],
+			"user_id":              object["UserId"],
+			"belong_region":        object["BelongRegion"],
 		}
-
 		ids = append(ids, fmt.Sprint(mapping["id"]))
-		names = append(names, object["Name"])
+		names = append(names, object["RegionName"])
 		s = append(s, mapping)
 	}
 
@@ -180,13 +170,11 @@ func dataSourceAlibabacloudStackExpressConnectAccessPointsRead(d *schema.Resourc
 		return errmsgs.WrapError(err)
 	}
 
-	if err := d.Set("points", s); err != nil {
+	if err := d.Set("namespaces", s); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
-			return err
-		}
+		writeToFile(output.(string), s)
 	}
 
 	return nil

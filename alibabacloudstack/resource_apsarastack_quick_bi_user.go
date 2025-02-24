@@ -73,7 +73,7 @@ func resourceAlibabacloudStackQuickBiUserCreate(d *schema.ResourceData, meta int
 	request["NickName"] = d.Get("nick_name")
 	request["UserType"] = convertQuickBiUserUserTypeRequest(d.Get("user_type").(string))
 
-	response, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func resourceAlibabacloudStackQuickBiUserUpdate(d *schema.ResourceData, meta int
 	request["UserType"] = convertQuickBiUserUserTypeRequest(d.Get("user_type").(string))
 	if update {
 		action := "UpdateUser"
-		_, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, request)
+		_, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -142,7 +142,7 @@ func resourceAlibabacloudStackQuickBiUserDelete(d *schema.ResourceData, meta int
 		"UserId": d.Id(),
 	}
 
-	_, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "quickbi-user", "2022-03-01", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"User.Not.In.Organization"}) {
 			return nil

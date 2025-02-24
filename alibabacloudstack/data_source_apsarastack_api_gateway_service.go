@@ -43,7 +43,7 @@ func dataSourceAlibabacloudStackApigatewayServiceRead(d *schema.ResourceData, me
 
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
-	response, err := client.DoTeaRequest("POST", "CloudAPI", "2016-07-14", "OpenApiGatewayService", "", nil, request)
+	response, err := client.DoTeaRequest("POST", "CloudAPI", "2016-07-14", "OpenApiGatewayService", "", nil, nil, request)
 	addDebug("OpenApiGatewayService", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ORDER.OPEND"}) {

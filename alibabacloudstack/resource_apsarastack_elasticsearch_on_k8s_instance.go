@@ -519,7 +519,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sUpdate(d *schema.ResourceData, m
 		}
 		config := d.Get("setting_config").(map[string]interface{})
 		content["esConfig"] = config
-		_, err = client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", action, "", nil, content)
+		_, err = client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", action, "", nil, nil, content)
 		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 			return err
 		}
@@ -625,7 +625,7 @@ func resourceAlibabacloudStackElasticsearchOnk8sDelete(d *schema.ResourceData, m
 	// retry
 
 
-	_, err = client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
 			return nil

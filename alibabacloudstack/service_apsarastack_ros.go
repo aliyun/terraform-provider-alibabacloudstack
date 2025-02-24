@@ -24,7 +24,7 @@ func (s *RosService) DescribeRosChangeSet(id string) (object map[string]interfac
 		"ChangeSetId":  id,
 		"ShowTemplate": true,
 	}
-	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetChangeSet", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetChangeSet", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ChangeSetNotFound"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RosChangeSet", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
@@ -67,7 +67,7 @@ func (s *RosService) DescribeRosStack(id string) (object map[string]interface{},
 		"StackId": id,
 	}
 	request["ClientToken"] = buildClientToken("GetStack")
-	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetStack", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetStack", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"StackNotFound"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RosStack", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
@@ -108,7 +108,7 @@ func (s *RosService) GetStackPolicy(id string) (object map[string]interface{}, e
 	request := map[string]interface{}{
 		"StackId": id,
 	}
-	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetStackPolicy", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetStackPolicy", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"StackNotFound"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RosStack", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
@@ -133,7 +133,7 @@ func (s *RosService) ListTagResources(id string, resourceType string) (object in
 	tags := make([]interface{}, 0)
 
 	for {
-		response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "ListTagResources", "", nil, request)
+		response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "ListTagResources", "", nil, nil, request)
 		if err != nil {
 			return tags, err
 		}
@@ -170,7 +170,7 @@ func (s *RosService) SetResourceTags(d *schema.ResourceData, resourceType string
 			for i, key := range removedTagKeys {
 				request[fmt.Sprintf("TagKey.%d", i+1)] = key
 			}
-			_, err := s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "UntagResources", "", nil, request)
+			_, err := s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "UntagResources", "", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -187,7 +187,7 @@ func (s *RosService) SetResourceTags(d *schema.ResourceData, resourceType string
 				count++
 			}
 
-			_, err := s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "TagResources", "", nil, request)
+			_, err := s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "TagResources", "", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -202,7 +202,7 @@ func (s *RosService) DescribeRosStackGroup(id string) (object map[string]interfa
 	request := map[string]interface{}{
 		"StackGroupName": id,
 	}
-	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetStackGroup", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetStackGroup", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"StackGroupNotFound"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RosStackGroup", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
@@ -244,7 +244,7 @@ func (s *RosService) DescribeRosTemplate(id string) (object map[string]interface
 	request := map[string]interface{}{
 		"TemplateId": id,
 	}
-	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetTemplate", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "ROS", "2019-09-10", "GetTemplate", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ChangeSetNotFound", "StackNotFound", "TemplateNotFound"}) {
 			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("RosTemplate", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)

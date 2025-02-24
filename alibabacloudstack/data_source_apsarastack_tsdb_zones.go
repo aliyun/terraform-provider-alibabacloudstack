@@ -52,7 +52,7 @@ func dataSourceAlibabacloudStackTsdbZonesRead(d *schema.ResourceData, meta inter
 
 	request := make(map[string]interface{})
 	request["Product"] = "hitsdb"
-	response, err := client.DoTeaRequest("POST", "hitsdb", "2017-06-01", "DescribeZones", "", nil, request)
+	response, err := client.DoTeaRequest("POST", "hitsdb", "2017-06-01", "DescribeZones", "", nil, nil, request)
 	if err != nil {
 		return err
 	}

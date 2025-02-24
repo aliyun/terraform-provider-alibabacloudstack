@@ -59,7 +59,7 @@ func resourceAlibabacloudStackDataWorksUserCreate(d *schema.ResourceData, meta i
 
 	request["ClientToken"] = fmt.Sprint(uuid.NewRandom())
 
-	response, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_data_works_folder", action, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -110,7 +110,7 @@ func resourceAlibabacloudStackDataWorksUserDelete(d *schema.ResourceData, meta i
 		"UserId":    parts[2],
 	}
 
-	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}

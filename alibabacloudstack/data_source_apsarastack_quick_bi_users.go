@@ -108,7 +108,7 @@ func dataSourceAlibabacloudStackQuickBiUsersRead(d *schema.ResourceData, meta in
 		}
 	}
 	for {
-		response, err := client.DoTeaRequest("GET", "QuickBI", "2022-03-01", action, "", nil, request)
+		response, err := client.DoTeaRequest("GET", "QuickBI", "2022-03-01", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}

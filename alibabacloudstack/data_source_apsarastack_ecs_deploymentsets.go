@@ -137,7 +137,7 @@ func dataSourceAlibabacloudStackEcsDeploymentSetsRead(d *schema.ResourceData, me
 	}
 
 	for {
-		response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", "DescribeDeploymentSets", "", nil, request)
+		response, err := client.DoTeaRequest("POST", "Ecs", "2014-05-26", "DescribeDeploymentSets", "", nil, nil, request)
 		if err != nil {
 			return err
 		}

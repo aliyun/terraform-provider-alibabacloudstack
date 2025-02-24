@@ -54,7 +54,7 @@ func resourceAlibabacloudStackDataWorksProjectCreate(d *schema.ResourceData, met
 
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
-	response, err := client.DoTeaRequest("POST", "dataworks-public", "2019-01-17", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "dataworks-public", "2019-01-17", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

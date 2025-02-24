@@ -156,7 +156,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyCreate(d *schema.Resourc
 	}
 	request["SourceType"] = d.Get("source_type")
 
-	response, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -239,7 +239,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyUpdate(d *schema.Resourc
 			request["SourceIp"] = v
 		}
 		action := "ModifyControlPolicy"
-		_, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, request)
+		_, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -262,7 +262,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyDelete(d *schema.Resourc
 		request["SourceIp"] = v
 	}
 
-	_, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

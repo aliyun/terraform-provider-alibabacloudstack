@@ -41,7 +41,7 @@ func resourceAlibabacloudStackArmsAlertContactGroupCreate(d *schema.ResourceData
 	if v, ok := d.GetOk("contact_ids"); ok {
 		request["ContactIds"] = convertArrayToString(v.(*schema.Set).List(), " ")
 	}
-	response, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func resourceAlibabacloudStackArmsAlertContactGroupUpdate(d *schema.ResourceData
 	}
 	if update {
 		action := "UpdateAlertContactGroup"
-		_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+		_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -108,7 +108,7 @@ func resourceAlibabacloudStackArmsAlertContactGroupDelete(d *schema.ResourceData
 	request := map[string]interface{}{
 		"ContactGroupId": d.Id(),
 	}
-	_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 	if err != nil {
 		return err	}
 	return nil

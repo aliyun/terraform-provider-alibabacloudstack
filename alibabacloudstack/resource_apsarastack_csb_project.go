@@ -93,7 +93,7 @@ func resourceAlibabacloudStackCsbProjectCreate(d *schema.ResourceData, meta inte
 		request["Data"] = v
 	}
 
-	_, err := client.DoTeaRequest("POST", "CSB", "2017-11-18", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "CSB", "2017-11-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -143,7 +143,7 @@ func resourceAlibabacloudStackCsbProjectUpdate(d *schema.ResourceData, meta inte
 
 	if update {
 		action := "UpdateProject"
-		_, err := client.DoTeaRequest("POST", "CSB", "2017-11-18", action, "", nil, request)
+		_, err := client.DoTeaRequest("POST", "CSB", "2017-11-18", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -161,7 +161,7 @@ func resourceAlibabacloudStackCsbProjectDelete(d *schema.ResourceData, meta inte
 		"CsbId":          object["CsbId"],
 	}
 
-	_, err = client.DoTeaRequest("POST", "CSB", "2017-11-18", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "CSB", "2017-11-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

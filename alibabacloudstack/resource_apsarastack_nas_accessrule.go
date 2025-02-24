@@ -72,7 +72,7 @@ func resourceAlibabacloudStackNasAccessRuleCreate(d *schema.ResourceData, meta i
 	}
 	request["Priority"] = d.Get("priority")
 
-	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 	
 	if err != nil {
 		return err
@@ -99,7 +99,7 @@ func resourceAlibabacloudStackNasAccessRuleUpdate(d *schema.ResourceData, meta i
 
 	if d.HasChanges("source_cidr_ip", "rw_access_type", "user_access_type", "priority") {
 		action := "ModifyAccessRule"
-		_, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+		_, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -147,7 +147,7 @@ func resourceAlibabacloudStackNasAccessRuleDelete(d *schema.ResourceData, meta i
 		"AccessRuleId":    parts[1],
 	}
 
-	_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.NasNotFound"}) {
 			return nil

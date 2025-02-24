@@ -49,7 +49,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyOrderCreate(d *schema.Re
 	request["Order"] = d.Get("order")
 	request["AclUuid"] = d.Get("acl_uuid")
 
-	response, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
 	addDebug(action, response, request)
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyOrderUpdate(d *schema.Re
 		request["Order"] = d.Get("order")
 	}
 
-	response, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "Cloudfw", "2017-12-07", action, "", nil, nil, request)
 	addDebug(action, response, request)
 	if err != nil {
 		return err

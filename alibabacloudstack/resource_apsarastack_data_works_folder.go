@@ -58,7 +58,7 @@ func resourceAlibabacloudStackDataWorksFolderCreate(d *schema.ResourceData, meta
 	}
 	request["PageSize"] = 1
 	request["PageNumber"] = 1
-	response, err := client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func resourceAlibabacloudStackDataWorksFolderUpdate(d *schema.ResourceData, meta
 	request["PageSize"] = 1
 	request["PageNumber"] = 1
 	action := "UpdateFolder"
-	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func resourceAlibabacloudStackDataWorksFolderDelete(d *schema.ResourceData, meta
 	}
 	request["PageSize"] = 1
 	request["PageNumber"] = 1
-	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

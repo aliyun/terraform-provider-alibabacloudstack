@@ -3,9 +3,11 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 	"reflect"
 	"strconv"
 	"strings"
+	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -903,4 +905,44 @@ func (e *EdasService) ReadinessEqual(old, new interface{}) bool {
 		return false
 	}
 	return reflect.DeepEqual(oldProber, newProber)
+}
+func (s *EdasService) DescribeEdasNamespace(id string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	client := s.client
+	action := "/pop/v5/user_region_defs"
+	request := map[string]interface{}{}
+	idExist := false
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		response, err = client.DoTeaRequest("POST", "Edas", "2017-08-01", "ListUserDefineRegion", "/pop/v5/user_region_defs", nil, request, nil)
+		if err != nil {
+			if errmsgs.NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	addDebug(action, response, request)
+	if err != nil {
+		return object, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	v, err := jsonpath.Get("$.UserDefineRegionList.UserDefineRegionEntity", response)
+	if err != nil {
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.UserDefineRegionList.UserDefineRegionEntity", response)
+	}
+	if len(v.([]interface{})) < 1 {
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("EDAS", id)), errmsgs.NotFoundWithResponse, response)
+	}
+	for _, v := range v.([]interface{}) {
+		if fmt.Sprint(v.(map[string]interface{})["Id"]) == id {
+			idExist = true
+			return v.(map[string]interface{}), nil
+		}
+	}
+	if !idExist {
+		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("EDAS", id)), errmsgs.NotFoundWithResponse, response)
+	}
+	return object, nil
 }

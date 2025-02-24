@@ -20,7 +20,7 @@ func (s *EhpcService) DescribeEhpcJobTemplate(id string) (object map[string]inte
 	}
 	idExist := false
 	for {
-		response, err = s.client.DoTeaRequest("GET", "EHPC", "2018-04-12", "ListJobTemplates", "", nil, request)
+		response, err = s.client.DoTeaRequest("GET", "EHPC", "2018-04-12", "ListJobTemplates", "", nil, nil, request)
 		if err != nil {
 			return object, err
 		}

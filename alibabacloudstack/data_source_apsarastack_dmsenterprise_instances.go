@@ -233,7 +233,7 @@ func dataSourceAlibabacloudStackDmsEnterpriseInstancesRead(d *schema.ResourceDat
 	}
 
 	for {
-		response, err := client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "dms-enterprise", "2018-11-01", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}

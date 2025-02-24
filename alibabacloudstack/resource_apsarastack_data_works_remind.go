@@ -115,7 +115,7 @@ func resourceAlibabacloudStackDataWorksRemindCreate(d *schema.ResourceData, meta
 	action := "CreateRemind"
 	request := buildRemindArgs(d)
 
-	response, err := client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -232,7 +232,7 @@ func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta
 	}
 
 	action := "UpdateRemind"
-	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -247,7 +247,7 @@ func resourceAlibabacloudStackDataWorksRemindDelete(d *schema.ResourceData, meta
 		"RemindId": d.Id(),
 		"RegionId": "default",
 	}
-	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

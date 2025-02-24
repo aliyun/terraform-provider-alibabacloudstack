@@ -22,7 +22,7 @@ func (s *DataworksPublicService) DescribeDataWorksFolder(id string) (object map[
 		"FolderId":   parts[0],
 		"ProjectId":  parts[1],
 	}
-	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetFolder", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetFolder", "", nil, nil, request)
 	if err != nil {
 		return object, err	}
 	v, err := jsonpath.Get("$.Data", response)
@@ -47,7 +47,7 @@ func (s *DataworksPublicService) GetFolder(id string) (object map[string]interfa
 		"FolderId":   parts[0],
 		"ProjectId":  parts[1],
 	}
-	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetFolder", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetFolder", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}
@@ -70,7 +70,7 @@ func (s *DataworksPublicService) DescribeDataWorksConnection(id string) (object 
 		"ProjectId":  parts[1],
 		"Name":       parts[2],
 	}
-	response, err = s.client.DoTeaRequest("GET", "dataworks-public", "2020-05-18", "ListConnections", "", nil, request)
+	response, err = s.client.DoTeaRequest("GET", "dataworks-public", "2020-05-18", "ListConnections", "", nil, nil, request)
 	addDebug("ListConnections", response, request)
 	if err != nil {
 		return object, err
@@ -99,7 +99,7 @@ func (s *DataworksPublicService) DescribeDataWorksUser(id string) (object map[st
 	request := map[string]interface{}{
 		"ProjectId":  parts[1],
 	}
-	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "ListProjectMembers", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "ListProjectMembers", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}
@@ -128,7 +128,7 @@ func (s *DataworksPublicService) DescribeDataWorksUserRoleBinding(id string) (ob
 	request := map[string]interface{}{
 		"ProjectId":  parts[1],
 	}
-	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "ListProjectRoles", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "ListProjectRoles", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}
@@ -152,7 +152,7 @@ func (s *DataworksPublicService) DescribeDataWorksRemind(id string) (object map[
 	request := map[string]interface{}{
 		"RemindId":   id,
 	}
-	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetRemind", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetRemind", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}
@@ -179,7 +179,7 @@ func (s *DataworksPublicService) DescribeDataWorksProject(id string) (object map
 	request := map[string]interface{}{
 		"ProjectId":  parts[1],
 	}
-	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetProjectDetail", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", "GetProjectDetail", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}

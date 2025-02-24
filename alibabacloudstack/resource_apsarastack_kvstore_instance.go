@@ -320,7 +320,7 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 		request["VpcId"] = object.VpcId
 	}
 
-	response, err := client.DoTeaRequest("POST", "R-kvstore", "2015-01-01", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "R-kvstore", "2015-01-01", action, "", nil, nil, request)
 	log.Printf(" create kvstroe instances Finished !! response: %v", response)
 	if err != nil {
 		return err
@@ -353,7 +353,7 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 			}
 		}
 
-		tde_response, err := client.DoTeaRequest("POST", "R-kvstore", "2015-01-01", "ModifyInstanceTDE", "", nil, tde_req)
+		tde_response, err := client.DoTeaRequest("POST", "R-kvstore", "2015-01-01", "ModifyInstanceTDE", "", nil, nil, tde_req)
 
 		addDebug("ModifyInstanceTDE", tde_response, tde_req)
 		if err != nil {
