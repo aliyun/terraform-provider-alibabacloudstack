@@ -61,6 +61,7 @@ func resourceAlibabacloudStackEdasK8sService() *schema.Resource {
 			"external_traffic_policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Default:      "Local",
 				ValidateFunc: validation.StringInSlice([]string{"Local", "Cluster"}, false),
 			},
 			"cluster_ip": {
@@ -84,9 +85,7 @@ func resourceAlibabacloudStackEdasK8sServiceCreate(d *schema.ResourceData, meta 
 		return errmsgs.WrapError(err)
 	}
 	request.QueryParams["ServicePorts"] = k8s_service_ports
-	if v, ok := d.GetOk("external_traffic_policy"); ok && v.(string) != "" {
-		request.QueryParams["ExternalTrafficPolicy"] = v.(string)
-	}
+	request.QueryParams["ExternalTrafficPolicy"] = d.Get("external_traffic_policy").(string)
 	bresponse, err := client.ProcessCommonRequestForOrganization(request)
 	addDebug("CreateK8sService", bresponse, request.QueryParams, request)
 	if err != nil {

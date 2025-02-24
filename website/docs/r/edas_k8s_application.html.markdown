@@ -100,9 +100,21 @@ The following arguments are supported:
 * `readiness` - (Optional) Container service status check. If the check fails, the traffic passing through K8s Service will not be transferred to the container. The format is: `{"failureThreshold": 3,"initialDelaySeconds": 5,"successThreshold": 1,"timeoutSeconds": 1, "httpGet": {"path": "/consumer","port": 8080,"scheme": "HTTP","httpHeaders": [{"name": "test","value": "testvalue"} ]}}`.
 * `nas_id` - (Optional) The ID of the mounted NAS must be in the same region as the cluster. It must have an available mount point creation quota, or its mount point must be on a switch in the VPC. If it is not filled in and the mountDescs field exists, a NAS will be automatically purchased and mounted on the switch in the VPC by default.
 * `mount_descs` - (Optional, ForceNew) Mount configuration description, as a serialized JSON. For example: `[{"nasPath": "/k8s","mountPath": "/mnt"},{"nasPath": "/files","mountPath": "/app/files"}]`. Among them, nasPath refers to the file storage path; mountPath refers to the path mounted in the container.
-* `local_volume` - (Optional, ForceNew) The configuration of the host file mounted to the container. For example: `[{"type":"","nodePath":"/localfiles","mountPath":"/app/files"},{"type":"Directory","nodePath":"/mnt", "mountPath":"/app/storage"}]`. Among them, nodePath is the host path; mountPath is the path in the container; type is the mount type.
 * `namespace` - (Optional) The namespace of the K8s cluster, it will determine which K8s namespace your application is deployed in. The default is 'default'.
 * `logical_region_id` - (Optional) The ID corresponding to the EDAS namespace, the non-default namespace must be filled in.
+* `config_mount_descs` - (Optional) Configuring K8s ConfigMap and Secret Mounts, supporting the mounting of ConfigMaps and Secrets to specified container directories. The configuration parameters for ConfigMountDescs are as follows:
+  * `name` - (Required) The name of the ConfigMap or Secret.
+  * `type` - (Required) The configuration type, supporting ConfigMap and Secret types.
+  * `mount_path` - (Required) The mount path, an absolute path in the container that starts with a forward slash (/).
+* `pvc_mount_descs` - (Optional) Configure K8s PVC (PersistentVolumeClaim) mounting, supporting the mounting of K8s PVC volumes to specified container directories. The configuration parameters for PvcMountDescs are described as follows:
+  * `pvc_name` - (Required) The name of the PVC volume. The PVC volume must already exist and be in the Bound state.
+  * `mount_paths` - (Required) A list of mount directories, supporting the configuration of multiple mount directories. Each mount directory supports two configuration parameters:
+    * `mount_path` - (Required) The mount path, an absolute path in the container that starts with a forward slash (/).
+    * `read_only` - (Required) The mount mode, true for read-only, false for read-write, defaulting to false.
+* `local_volume` - (Optional) Configuration for mounting host files to container directories.
+  * `node_path` - (Required) The path on the host machine.
+  * `mount_path` - (Required) The path within the container.
+  * `type` - (Optional) The type of mount.
 
 ## Attributes Reference
 
@@ -118,6 +130,20 @@ The following attributes are exported:
 * `update_release_type` - Release type of batch deployment. Optional Values: `auto` and `manual`.
 * `update_batch_wait_time` - Automatic release time for batch deployment. When the update_release_type is set to `auto`, You need to set an automatic release time.
 * `update_gray` - Number of batches for grayscale deployment.
+* `config_mount_descs` - Configuring K8s ConfigMap and Secret Mounts, supporting the mounting of ConfigMaps and Secrets to specified container directories. The configuration parameters for ConfigMountDescs are as follows:
+  * `name` - The name of the ConfigMap or Secret.
+  * `type` - The configuration type, supporting ConfigMap and Secret types.
+  * `mount_path` - The mount path, an absolute path in the container that starts with a forward slash (/).
+* `pvc_mount_descs` - Configure K8s PVC (PersistentVolumeClaim) mounting, supporting the mounting of K8s PVC volumes to specified container directories. The configuration parameters for PvcMountDescs are described as follows:
+
+  * `pvc_name` - The name of the PVC volume. The PVC volume must already exist and be in the Bound state.
+  * `mount_paths` - A list of mount directories, supporting the configuration of multiple mount directories. Each mount directory supports two configuration parameters:
+    * `mount_path` - The mount path, an absolute path in the container that starts with a forward slash (/).
+    * `read_only` - The mount mode, true for read-only, false for read-write, defaulting to false.
+* `local_volume` - Configuration for mounting host files to container directories.
+  * `node_path`: The path on the host machine.
+  * `mount_path`: The path within the container.
+  * `type`: The type of mount.
 
 ## Import
 
