@@ -63,7 +63,7 @@ resource "alibabacloudstack_edas_k8s_service" "default" {
   external_traffic_policy = "Local"
   service_ports {
     protocol = "TCP"
-    port = 80
+    service_port = 80
     target_port = 8080
   }
 }
