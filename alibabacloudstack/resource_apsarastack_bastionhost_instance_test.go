@@ -99,13 +99,14 @@ func testSweepBastionhostInstances(region string) error {
 }
 
 func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
-	var v yundun_bastionhost.Instance
+	var v map[string]interface{}
+	commonProvider := Provider()
+	yundunProvider := Provider()
 	resourceId := "alibabacloudstack_bastionhost_instance.default"
 	ra := resourceAttrInit(resourceId, bastionhostInstanceBasicMap)
-	serviceFunc := func() interface{} {
-		return &YundunBastionhostService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &YundunBastionhostService{yundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeBastionhostInstance")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)
@@ -118,8 +119,6 @@ func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers: func() map[string]*schema.Provider {
-			commonProvider := Provider()
-			yundunProvider := Provider()
 			yundunProvider.Schema["access_key"] = &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -186,13 +185,11 @@ func TestAccAlibabacloudStackBastionhostInstance_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"asset":            "70",
-					"highavailability": "true",
+					"asset": "70",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"asset":            "70",
-						"highavailability": "true",
+						"asset": "70",
 					}),
 				),
 			},

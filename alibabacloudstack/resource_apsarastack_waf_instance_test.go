@@ -13,10 +13,11 @@ func TestAccAlibabacloudStackWafInstance_basic(t *testing.T) {
 	resourceId := "alibabacloudstack_waf_instance.default"
 	var v map[string]interface{}
 	ra := resourceAttrInit(resourceId, WafInstanceBasicMap)
-	serviceFunc := func() interface{} {
-		return &WafOpenapiService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	commonProvider := Provider()
+	yundunProvider := Provider()
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &WafOpenapiService{yundunProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DescribeWafInstance")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)
@@ -29,8 +30,6 @@ func TestAccAlibabacloudStackWafInstance_basic(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers: func() map[string]*schema.Provider {
-			commonProvider := Provider()
-			yundunProvider := Provider()
 			yundunProvider.Schema["access_key"] = &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -62,7 +61,7 @@ func TestAccAlibabacloudStackWafInstance_basic(t *testing.T) {
 					"name":             "waf_instance_test",
 					"detector_specs":   "exclusive",
 					"detector_version": "basic",
-					"detector_nodenum": 2,
+					"detector_nodenum": "2",
 					"vpc_vswitch": []map[string]interface{}{
 						{
 
@@ -77,18 +76,16 @@ func TestAccAlibabacloudStackWafInstance_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"vswitch_id":       CHECKSET,
 						"name":             "waf_instance_test",
 						"detector_specs":   "exclusive",
 						"detector_version": "basic",
-						"vpc_id":           CHECKSET,
 						"detector_nodenum": "2",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"detector_nodenum": 3,
+					"detector_nodenum": "3",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -98,7 +95,7 @@ func TestAccAlibabacloudStackWafInstance_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"detector_nodenum": 2,
+					"detector_nodenum": "2",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{

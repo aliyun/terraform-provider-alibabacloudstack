@@ -474,6 +474,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudStack_cloud_firewall_control_policies":        dataSourceAlibabacloudStackCloudFirewallControlPolicies(),
 		"alibabacloudstack_ecs_ebs_storage_sets":                   dataSourceAlibabacloudStackEcsEbsStorageSets(),
 		"alibabacloudstack_bastionhost_instances":                  dataSourceAlibabacloudStackBastionhostInstances(),
+		"alibabacloudstack_waf_instances":                          dataSourceAlibabacloudStackWafInstances(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

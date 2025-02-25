@@ -317,36 +317,7 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	if err != nil {
 		return err
 	}
-
-	// runtime := util.RuntimeOptions{}
-	// runtime.SetAutoretry(true)
-	// wait := incrementalWait(3*time.Second, 3*time.Second)
-	// err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-	// 	response, err = conn.DoRequest(StringPointer(action), nil, StringPointer("POST"), StringPointer("2017-12-14"), StringPointer("AK"), nil, request, &runtime)
-	// 	if err != nil {
-	// 		if errmsgs.NeedRetry(err) {
-	// 			wait()
-	// 			return resource.RetryableError(err)
-	// 		}
-	// 		if errmsgs.IsExpectedErrors(err, []string{"NotApplicable"}) {
-	// 			request["ProductType"] = "bastionhost_std_public_intl"
-	// 			conn.Endpoint = String(connectivity.BssOpenAPIEndpointInternational)
-	// 			return resource.RetryableError(err)
-	// 		}
-	// 		return resource.NonRetryableError(err)
-	// 	}
-	// 	return nil
-	// })
-	// if err != nil {
-	// 	return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudctack_bastionhost_instance", action, errmsgs.AlibabacloudStackSdkGoERROR)
-	// }
-	// if fmt.Sprint(response["Code"]) != "Success" {
-	// 	return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", action, response))
-	// }
-	// responseData := response["Data"].(map[string]interface{})
-
 	instance := response["Instance"]
-	// d.SetId("bastionhostah-ncsawmpzna0szxzihm")
 	if instanceMap, ok := instance.(map[string]interface{}); ok {
 		if instanceId, ok := instanceMap["InstanceId"].(string); ok {
 			d.SetId(instanceId)
