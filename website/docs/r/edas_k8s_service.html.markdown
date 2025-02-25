@@ -18,7 +18,7 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   // package type is Image / FatJar / War
   package_type            = "Image"
   application_name        = "DemoApplication"
-  application_descriotion = "This is description of application"
+  application_description = "This is description of application"
   cluster_id              = var.cluster_id
   replicas                = 2
 
@@ -53,7 +53,7 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   mount_descs           = var.mount_descs
   local_volume          = var.local_volume
   namespace             = "default"
-  logical_region_id     = cn-beijing
+  logical_region_id     = "cn-beijing"
 }
 
 resource "alibabacloudstack_edas_k8s_service" "default" {

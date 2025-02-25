@@ -22,7 +22,7 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   // package type is Image / FatJar / War
   package_type            = "Image"
   application_name        = "DemoApplication"
-  application_descriotion = "This is description of application"
+  application_description = "This is description of application"
   cluster_id              = var.cluster_id
   replicas                = 2
 
@@ -70,7 +70,7 @@ The following arguments are supported:
 * `package_type` - (Required, ForceNew) Application package type. Optional parameter values include: FatJar, WAR and Image.
 * `replicas` - (Optional) Number of application instances.
 * `image_url` - (Optional) Mirror address. When the package_type is set to 'Image', this parameter item is required.
-* `application_descriotion` - (Optional) The description of the application
+* `application_description` - (Optional) The description of the application
 * `package_url` - (Optional) The url of the package to deploy.Applications deployed through FatJar or WAR packages need to configure it.
 * `package_version` - (Optional) The version number of the deployment package. WAR and FatJar types are required. Please customize its meaning.
 * `jdk` - (Optional, ForceNew) The JDK version that the deployed package depends on. The optional parameter values are Open JDK 7 and Open JDK 8. Image does not support this parameter.

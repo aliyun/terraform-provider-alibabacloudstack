@@ -57,7 +57,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"FatJar", "War", "Image"}, false),
 				Default:      "Image",
 			},
-			"application_descriotion": {
+			"application_description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -347,7 +347,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 
 	request.QueryParams["Replicas"] = fmt.Sprintf("%d", d.Get("replicas").(int))
 
-	if v, ok := d.GetOk("application_descriotion"); ok {
+	if v, ok := d.GetOk("application_description"); ok {
 		request.QueryParams["ApplicationDescription"] = v.(string)
 	}
 

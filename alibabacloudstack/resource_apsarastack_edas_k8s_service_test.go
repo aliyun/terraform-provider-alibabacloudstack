@@ -116,7 +116,7 @@ func resourceEdasK8sSericeDependence(name string) string {
 		resource "alibabacloudstack_edas_k8s_application" "default" {
 			package_type            = "FatJar"
 			application_name        = "terraform-test-fatjar"
-			application_descriotion = "This is description of application"
+			application_description = "This is description of application"
 			cluster_id              = "${alibabacloudstack_edas_k8s_cluster.default.id}"
 			replicas                = 1
 			package_url    		 	= "http://fileserver.edas.intra.env212.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar"
