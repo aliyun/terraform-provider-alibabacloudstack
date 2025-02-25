@@ -61,6 +61,11 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"application_descriotion": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "Field 'application_descriotion' is deprecated and will be removed in a future release. Please use new field 'application_description' instead.",
+			},
 			"limit_mem": {
 				Type:     schema.TypeInt,
 				Optional: true,
@@ -347,7 +352,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 
 	request.QueryParams["Replicas"] = fmt.Sprintf("%d", d.Get("replicas").(int))
 
-	if v, ok := d.GetOk("application_description"); ok {
+	if v, ok := connectivity.GetResourceDataOk(d, "application_description", "application_descriotion"); ok {
 		request.QueryParams["ApplicationDescription"] = v.(string)
 	}
 
