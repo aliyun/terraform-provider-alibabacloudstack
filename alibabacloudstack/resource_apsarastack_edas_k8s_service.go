@@ -64,6 +64,7 @@ func resourceAlibabacloudStackEdasK8sService() *schema.Resource {
 			"annotations": {
 				Type:     schema.TypeMap,
 				Optional: true,
+				Computed: true,
 			},
 			"labels": {
 				Type:     schema.TypeMap,
@@ -144,6 +145,7 @@ func resourceAlibabacloudStackEdasK8sServiceRead(d *schema.ResourceData, meta in
 		}
 		return err
 	}
+	d.Set("app_id", strings.Split(id, ":")[0])
 	d.Set("type", service.Type)
 	d.Set("name", service.Name)
 	d.Set("cluster_ip", service.ClusterIP)
@@ -156,7 +158,7 @@ func resourceAlibabacloudStackEdasK8sServiceRead(d *schema.ResourceData, meta in
 		})
 	}
 	d.Set("service_ports", service_ports)
-	d.Set("labels", service.Labels)
+	// d.Set("labels", service.Labels)
 	d.Set("annotations", service.Annotations)
 	return nil
 }
@@ -203,7 +205,7 @@ func resourceAlibabacloudStackEdasK8sServiceUpdate(d *schema.ResourceData, meta 
 		}
 		request.QueryParams["LabelsStrs"] = string(labelsStrs)
 	}
-	if update {
+	if update && !d.IsNewResource() {
 		bresponse, err := client.ProcessCommonRequestForOrganization(request)
 		addDebug(request.GetActionName(), bresponse, request)
 
@@ -221,6 +223,7 @@ func resourceAlibabacloudStackEdasK8sServiceUpdate(d *schema.ResourceData, meta 
 			return errmsgs.WrapError(errmsgs.Error("update edas k8s service failed for " + response["Message"].(string)))
 		}
 	}
+	d.Partial(false)
 	return resourceAlibabacloudStackEdasK8sServiceRead(d, meta)
 }
 
