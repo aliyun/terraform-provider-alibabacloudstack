@@ -646,6 +646,9 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 		if len(request.QueryParams["PackageUrl"]) == 0 {
 			return errmsgs.WrapError(errmsgs.Error("package_url is needed for creating fatjar k8s application"))
 		}
+		if d.HasChange("package_version") {
+			partialKeys = append(partialKeys, "package_version")
+		}
 		request.QueryParams["PackageVersion"] = d.Get("package_version").(string)
 
 		if d.HasChange("jdk") {
