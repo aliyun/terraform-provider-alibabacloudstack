@@ -122,7 +122,8 @@ func NotFoundError(err error) bool {
 		return *e.StatusCode == 404 || strings.HasSuffix(*e.Code, ".NotFound")
 	}
 
-	return false
+	return strings.HasSuffix(err.Error(), ".NotFound") || strings.HasPrefix(err.Error(), ResourceNotfound)
+
 }
 
 func NeedRetry(err error) bool {

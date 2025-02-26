@@ -14,6 +14,13 @@ with the proper credentials before it can be used.
 
 Use the navigation on the left to read about the available resources.
 
+
+| Apsara Version | AlibabacloudStack Provider Version |
+| --- | --- |
+| 3.16.2 | < 3.18.0 |
+| 3.18.x | > 3.18.0 |
+
+
 ## Example Usage
 
 ```hcl
@@ -21,7 +28,7 @@ terraform {
   required_providers {
     alibabacloudstack = {
       source = "aliyun/alibabacloudstack"
-      version = "1.0.8"
+      version = "3.18.0"
     }
   }
 }
@@ -34,7 +41,7 @@ provider "alibabacloudstack" {
   insecure    =  true
   proxy      = "${var.proxy}"
   resource_group_set_name ="${var.resource_group_set_name}"
-  domain = "${var.domain}"
+  popgw_domain = "${var.domain}"
   protocol = "HTTPS"
 }
 

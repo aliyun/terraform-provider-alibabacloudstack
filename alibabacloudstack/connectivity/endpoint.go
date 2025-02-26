@@ -271,8 +271,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"hitsdb.{{.region}}.{{.domain}}",
 	},
 	ALIKAFKACode: PopEndpoint{
-		"kafka.openapi.{{.domain}}",
-		"kafka.openapi.{{.region}}.{{.domain}}",
+		"kafka.biz.openapi.{{.domain}}",
+		"kafka.biz.openapi.{{.region}}.{{.domain}}",
 	},
 	NasCode: PopEndpoint{
 		"nas.{{.region}}.{{.domain}}",

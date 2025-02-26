@@ -49,7 +49,7 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", nil),
 				Description: descriptions["region_id"],
-				Deprecated:  "Use parameter region replace it.",
+				Deprecated:  "Field region_id is Deprecated, Please use parameter region replace it.",
 			},
 			"role_arn": {
 				Type:        schema.TypeString,
@@ -1055,7 +1055,7 @@ func init() {
 
 		"proxy": "Use this to set proxy connection",
 
-		"domain": "Use this to override the default domain. It's typically used to connect to custom domain.",
+		"popgw_domain": "Use this to override the default domain. It's typically used to connect to custom domain.",
 	}
 }
 func endpointsSchema() *schema.Schema {

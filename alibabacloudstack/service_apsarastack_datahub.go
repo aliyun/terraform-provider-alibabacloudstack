@@ -1,12 +1,10 @@
 package alibabacloudstack
 
 import (
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"strings"
 	"time"
 
 	"encoding/json"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -28,21 +26,18 @@ func (s *DatahubService) DescribeDatahubProject(id string) (*datahub.GetProjectR
 	request := s.client.NewCommonRequest("GET", "datahub", "2019-11-20", "GetProject", "")
 	request.QueryParams["ProjectName"] = id
 
-	raw, err := s.client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
-		return dataHubClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if isDatahubNotExistError(err) {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackDatahubSdkGo)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return resp, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetProject", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
-	addDebug("GetProject", raw, nil, request)
+	addDebug("GetProject", bresponse, nil, request)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
@@ -97,18 +92,15 @@ func (s *DatahubService) DescribeDatahubSubscription(id string) (*datahub.GetSub
 	request.QueryParams["Format"] = "JSON"
 	request.QueryParams["SignatureVersion"] = "2.1"
 
-	raw, err := s.client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
-		return dataHubClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if isDatahubNotExistError(err) {
 			return subscription, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackDatahubSdkGo)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return subscription,errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return subscription, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetSubscription", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
 	if debugOn() {
@@ -116,7 +108,7 @@ func (s *DatahubService) DescribeDatahubSubscription(id string) (*datahub.GetSub
 		requestMap["ProjectName"] = projectName
 		requestMap["TopicName"] = topicName
 		requestMap["SubId"] = subId
-		addDebug("GetProject", raw, nil, requestMap)
+		addDebug("GetProject", bresponse, nil, requestMap)
 	}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), subscription)
 	if err != nil {
@@ -168,25 +160,22 @@ func (s *DatahubService) DescribeDatahubTopic(id string) (*GetTopicResult, error
 	request.QueryParams["ProjectName"] = projectName
 	request.QueryParams["TopicName"] = topicName
 
-	raw, err := s.client.WithEcsClient(func(dataHubClient *ecs.Client) (interface{}, error) {
-		return dataHubClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if isDatahubNotExistError(err) {
 			return topic, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackDatahubSdkGo)
 		}
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return topic, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return topic, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetTopic", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
 	if debugOn() {
 		requestMap := make(map[string]string)
 		requestMap["ProjectName"] = projectName
 		requestMap["TopicName"] = topicName
-		addDebug("GetTopic", raw, nil, requestMap)
+		addDebug("GetTopic", bresponse, nil, requestMap)
 	}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), topic)
 	if err != nil {
