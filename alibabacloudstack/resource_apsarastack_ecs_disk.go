@@ -96,6 +96,18 @@ func resourceAlibabacloudStackDisk() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// 无法直接读取 encrypted 的当前值，只能通过 ResourceData 获取可能不准确的状态
+					if encrypted := d.Get("encrypted").(bool); !encrypted {
+						return true
+					} else if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && v {
+						if old == "aes-256" && new == "" {
+							// 如果是APSARASTACK迁移模式，aes-256改""不触发变更
+							return true
+						}
+					}
+					return !d.HasChange("encrypt_algorithm")
+				},
 			},
 
 			"delete_auto_snapshot": {
