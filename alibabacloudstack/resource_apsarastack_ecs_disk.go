@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -101,7 +102,7 @@ func resourceAlibabacloudStackDisk() *schema.Resource {
 					if encrypted := d.Get("encrypted").(bool); !encrypted {
 						return true
 					} else if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && v {
-						if old == "aes-256" && new == ""
+						if (old == "aes-256" && new == "") || (old == "" && new == "aes-256") {
 							// 如果是APSARASTACK迁移模式，aes-256改""不触发变更
 							return true
 						}
