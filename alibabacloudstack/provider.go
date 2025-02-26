@@ -29,24 +29,25 @@ func Provider() *schema.Provider {
 			"access_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ACCESS_KEY", os.Getenv("ALIBABACLOUDSTACK_ACCESS_KEY")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ACCESS_KEY", nil),
 				Description: descriptions["access_key"],
 			},
 			"secret_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECRET_KEY", os.Getenv("ALIBABACLOUDSTACK_SECRET_KEY")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECRET_KEY", nil),
 				Description: descriptions["secret_key"],
 			},
 			"region": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", os.Getenv("ALIBABACLOUDSTACK_REGION")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", nil),
 				Description: descriptions["region"],
 			},
 			"region_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_REGION", nil),
 				Description: descriptions["region_id"],
 				Deprecated:  "Field region_id is Deprecated, Please use parameter region replace it.",
 			},
@@ -54,18 +55,18 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["assume_role_role_arn"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ASSUME_ROLE_ARN", os.Getenv("ALIBABACLOUDSTACK_ASSUME_ROLE_ARN")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ASSUME_ROLE_ARN", nil),
 			},
 			"security_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURITY_TOKEN", os.Getenv("SECURITY_TOKEN")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURITY_TOKEN", nil),
 				Description: descriptions["security_token"],
 			},
 			"ecs_role_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ECS_ROLE_NAME", os.Getenv("ALIBABACLOUDSTACK_ECS_ROLE_NAME")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ECS_ROLE_NAME", nil),
 				Description: descriptions["ecs_role_name"],
 			},
 			"skip_region_validation": {
@@ -79,14 +80,14 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["profile"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_PROFILE", ""),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_PROFILE", nil),
 			},
 			"endpoints": endpointsSchema(),
 			"shared_credentials_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["shared_credentials_file"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SHARED_CREDENTIALS_FILE", ""),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SHARED_CREDENTIALS_FILE", nil),
 			},
 			"insecure": {
 				Type:        schema.TypeBool,
@@ -95,11 +96,6 @@ func Provider() *schema.Provider {
 				Description: descriptions["insecure"],
 			},
 			"assume_role": assumeRoleSchema(),
-			"fc": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "Field 'fc' has been deprecated from provider version 1.28.0. New field 'fc' which in nested endpoints instead.",
-			},
 			"protocol": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -122,19 +118,19 @@ func Provider() *schema.Provider {
 			"source_ip": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SOURCE_IP", os.Getenv("ALIBABACLOUDSTACK_SOURCE_IP")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SOURCE_IP", nil),
 				Description: descriptions["source_ip"],
 			},
 			"security_transport": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURITY_TRANSPORT", os.Getenv("ALIBABACLOUDSTACK_SECURITY_TRANSPORT")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURITY_TRANSPORT", nil),
 				//Deprecated:  "It has been deprecated from version 1.136.0 and using new field secure_transport instead.",
 			},
 			"secure_transport": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURE_TRANSPORT", os.Getenv("ALIBABACLOUDSTACK_SECURE_TRANSPORT")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURE_TRANSPORT", nil),
 				Description: descriptions["secure_transport"],
 			},
 			"configuration_source": {
@@ -178,13 +174,13 @@ func Provider() *schema.Provider {
 			"organization_accesskey": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY", os.Getenv("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY", nil),
 				Description: descriptions["organization_accesskey"],
 			},
 			"organization_secretkey": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY", os.Getenv("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY", nil),
 				Description: descriptions["organization_secretkey"],
 			},
 			"sls_openapi_endpoint": {
@@ -477,6 +473,8 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_expressconnect_virtualborderrouters":    dataSourceAlibabacloudStackExpressConnectVirtualBorderRouters(),
 		"alibabacloudStack_cloud_firewall_control_policies":        dataSourceAlibabacloudStackCloudFirewallControlPolicies(),
 		"alibabacloudstack_ecs_ebs_storage_sets":                   dataSourceAlibabacloudStackEcsEbsStorageSets(),
+		"alibabacloudstack_bastionhost_instances":                  dataSourceAlibabacloudStackBastionhostInstances(),
+		"alibabacloudstack_waf_instances":                          dataSourceAlibabacloudStackWafInstances(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -507,9 +505,9 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_alikafka_topic":                        resourceAlibabacloudStackAlikafkaTopic(),
 		"alibabacloudstack_api_gateway_api":                       resourceAlibabacloudStackApigatewayApi(),
 		"alibabacloudstack_apigateway_api":                        resourceAlibabacloudStackApigatewayApi(),
+		"alibabacloudstack_api_gateway_app_attachment":            resourceAlibabacloudStackApigatewayAppAttachment(),
 		"alibabacloudstack_api_gateway_app":                       resourceAlibabacloudStackApigatewayApp(),
-		"alibabacloudstack_api_gateway_app_attachment":            resourceAliyunApigatewayAppAttachment(),
-		"alibabacloudstack_apigateway_app":                        resourceAliyunApigatewayAppAttachment(),
+		"alibabacloudstack_apigateway_app":                        resourceAlibabacloudStackApigatewayApp(),
 		"alibabacloudstack_api_gateway_group":                     resourceAlibabacloudStackApigatewayGroup(),
 		"alibabacloudstack_apigateway_apigroup":                   resourceAlibabacloudStackApigatewayGroup(),
 		"alibabacloudstack_api_gateway_vpc_access":                resourceAlibabacloudStackApigatewayVpc(),
@@ -788,6 +786,8 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_csb_project":                           resourceAlibabacloudStackCsbProject(),
 		"alibabacloudstack_graph_database_db_instance":            resourceAlibabacloudStackGraphDatabaseDbInstance(),
 		"alibabacloudstack_graphdatabase_dbinstance":              resourceAlibabacloudStackGraphDatabaseDbInstance(),
+		"alibabacloudstack_bastionhost_instance":                  resourceAlibabacloudStackBastionhostInstance(),
+		"alibabacloudstack_waf_instance":                          resourceAlibabacloudstackWafInstance(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -910,6 +910,30 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Endpoints[connectivity.OssDataCode] = ossServicedomain
 	}
 
+	// domain := d.Get("domain").(string)
+	// if domain != "" {
+	// 	if strings.Contains(domain, "/") && d.Get("proxy").(string) != "" {
+	// 		return nil, fmt.Errorf("[Error]Domain containing the character '/' is not supported for proxy configuration.")
+	// 	}
+	// 	// 没有生成popgw地址的，继续使用asapi
+	// 	var setEndpointIfEmpty = func(endpoint string, domain string) string {
+	// 		if endpoint == "" {
+	// 			return domain
+	// 		}
+	// 		return endpoint
+	// 	}
+	// 	for popcode := range connectivity.PopEndpoints {
+	// 		if popcode == connectivity.OssDataCode {
+	// 			// oss的数据网关不做配置
+	// 			continue
+	// 		}
+	// 		if popcode == connectivity.SlSDataCode {
+	// 			// SLS的数据网关不做配置
+	// 			continue
+	// 		}
+	// 		config.Endpoints[popcode] = setEndpointIfEmpty(config.Endpoints[popcode], domain)
+	// 	}
+	// }
 	if v, ok := d.GetOk("popgw_domain"); ok && v.(string) != "" {
 		popgw_domain := v.(string)
 		log.Printf("Generator Popgw Endpoint: %s", popgw_domain)

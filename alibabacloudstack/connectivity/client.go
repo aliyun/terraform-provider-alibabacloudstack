@@ -45,6 +45,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/kms"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ram"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/yundun_bastionhost"
 
 	"sync"
 
@@ -86,6 +87,7 @@ type AlibabacloudStackClient struct {
 	accountIdMutex               sync.RWMutex
 	roleIdMutex                  sync.RWMutex
 	vpcconn                      *vpc.Client
+	bastionhostprivateconn       *yundun_bastionhost.Client
 	slbconn                      *slb.Client
 	csconn                       *cs.Client
 	polarDBconn                  *polardb.Client
@@ -365,6 +367,20 @@ func (client *AlibabacloudStackClient) WithVpcClient(do func(*vpc.Client) (inter
 	}
 
 	return do(client.vpcconn)
+}
+
+func (client *AlibabacloudStackClient) WithBastionhostClient(do func(*yundun_bastionhost.Client) (interface{}, error)) (interface{}, error) {
+	if client.bastionhostprivateconn == nil {
+		conn, error := client.WithProductSDKClient(BastionHostCode)
+		if error != nil {
+			return nil, error
+		}
+		client.bastionhostprivateconn = &yundun_bastionhost.Client{
+			Client: *conn,
+		}
+	}
+
+	return do(client.bastionhostprivateconn)
 }
 
 func (client *AlibabacloudStackClient) WithSlbClient(do func(*slb.Client) (interface{}, error)) (interface{}, error) {
@@ -1089,6 +1105,10 @@ func (client *AlibabacloudStackClient) NewOosClient() (*rpc.Client, error) {
 }
 func (client *AlibabacloudStackClient) NewCloudfwClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("cloudfw", client.Config.Endpoints[WafOpenapiCode])
+}
+
+func (client *AlibabacloudStackClient) NewBastionhostClient() (*rpc.Client, error) {
+	return client.NewTeaSDkClient("Bastionhostprivate", client.Config.Endpoints[BastionHostCode])
 }
 
 func (client *AlibabacloudStackClient) defaultHeaders(popcode string) map[string]string {

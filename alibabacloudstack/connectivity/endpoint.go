@@ -65,6 +65,7 @@ const (
 	OtsCode             = ServiceCode("OTS")
 	DatahubCode         = ServiceCode("DATAHUB")
 	STSCode             = ServiceCode("STS")
+	CLOUDFWCode         = ServiceCode("CLOUDFW")
 	//undefined code 先添加
 	GDBCode             = ServiceCode("GDB")
 	ARMSCode            = ServiceCode("ARMS")
@@ -77,6 +78,8 @@ const (
 	QuickbiCode         = ServiceCode("QUICKBI")
 	DataworkspublicCode = ServiceCode("DATAWORKSPUBLIC")
 	OneRouterCode       = ServiceCode("ONEROUTER")
+	BastionHostCode     = ServiceCode("BASTIONHOSTPRIVATE")
+	WAFONECSCode        = ServiceCode("WAF_ONECS")
 	//自建网关虚假Code
 	OssDataCode  = ServiceCode("OSSDATA")
 	SlSDataCode  = ServiceCode("SLSDATA")
@@ -166,6 +169,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"cloudfw.{{.domain}}",
 		"cloudfw.{{.region}}.{{.domain}}",
 	},
+	//cloudfw endpoint
+	CLOUDFWCode: PopEndpoint{
+		"cfwctl-cloudfw-biz.{{.region}}.{{.domain}}",
+		"cfwctl-cloudfw-biz.{{.region}}.{{.domain}}",
+	},
 	//cr endpoint
 	CRCode: PopEndpoint{
 		"cr-biz.{{.region}}.{{.domain}}",
@@ -175,6 +183,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	CSBCode: PopEndpoint{
 		"csb.{{.domain}}",
 		"csb.{{.region}}.{{.domain}}",
+	},
+	// waf-onecs endpoint
+	WAFONECSCode: PopEndpoint{
+		"waf-onecs-biz.{{.region}}.{{.domain}}",
+		"waf-onecs-biz.{{.region}}.{{.domain}}",
 	},
 	//datahub endpoint
 	DatahubCode: PopEndpoint{
@@ -223,8 +236,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	//Sts endpoint
 	STSCode: PopEndpoint{
-		"sts.{{.domain}}",
-		"sts.{{.region}}.{{.domain}}",
+		"sts-vpc.{{.domain}}",
+		"sts-vpc.{{.region}}.{{.domain}}",
 	},
 
 	SlSDataCode: PopEndpoint{
@@ -301,6 +314,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	},
 	BssDataCode: PopEndpoint{"", ""},
 	OTSCode:     PopEndpoint{"", ""},
+	BastionHostCode: PopEndpoint{
+		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
+		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
+	},
 	// 3.18.3新局点将不会开放
 	OneRouterCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
