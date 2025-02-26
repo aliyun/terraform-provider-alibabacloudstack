@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackWafInstancesDataSource(t *testing.T) {
 
 	var existDnsRecordsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#": "0",
+			"ids.#": "1",
 			// "instances.#":                   "1",
 			// "instances.0.id":                CHECKSET,
 			// "instances.0.instance_id":       CHECKSET,

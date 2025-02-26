@@ -118,7 +118,7 @@ func dataSourceAlibabacloudStackWafInstancesRead(d *schema.ResourceData, meta in
 	}
 	for _, v := range resp.([]interface{}) {
 		if len(idsMap) > 0 {
-			if _, ok := idsMap[fmt.Sprint(v.(map[string]interface{})["InstanceId"])]; !ok {
+			if _, ok := idsMap[fmt.Sprint(v.(map[string]interface{})["instance_id"])]; !ok {
 				continue
 			}
 		}
