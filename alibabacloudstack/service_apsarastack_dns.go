@@ -23,10 +23,17 @@ type DnsService struct {
 func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err error) {
 	var requestInfo *ecs.Client
 
-	ZoneId := id
+	var zoneId, recordId string
+	if v := strings.SplitN(id, ":", 2); len(v) > 1 {
+		zoneId = v[0]
+		recordId = v[1]
+	} else {
+		zoneId = v[0]
+		recordId = ""
+	}
 	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZoneRecords", "")
-	request.Scheme="HTTP" // CloudDns不支持HTTPS
-	request.QueryParams["ZoneId"] = ZoneId
+	request.Scheme = "HTTP" // CloudDns不支持HTTPS
+	request.QueryParams["ZoneId"] = zoneId
 	var resp = &DnsRecord{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
@@ -48,8 +55,22 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 
 	if len(resp.Data) < 1 || resp.AsapiSuccess == true {
 		return resp, errmsgs.WrapError(err)
+	} else if recordId == "" && len(resp.Data) > 1 {
+		return resp, errmsgs.WrapErrorf(err, "record id is Empty, and mutple records found")
 	}
 
+	filtered := resp.Data[:0] // 复用底层数组
+	for _, data := range resp.Data {
+		if data.Id == recordId {
+			filtered = append(filtered, data)
+			break
+		}
+	}
+	resp.Data = filtered
+
+	if len(resp.Data) < 1 {
+		return resp, fmt.Errorf("not found dnsrecord")
+	}
 	return resp, nil
 }
 
@@ -235,7 +256,7 @@ func (s *DnsService) SetResourceTags(d *schema.ResourceData, resourceType string
 func (s *DnsService) DescribeDnsDomain(id string) (response *DnsDomains, err error) {
 	did := strings.Split(id, COLON_SEPARATED)
 	request := s.client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZones", "")
-	request.Scheme="HTTP" // CloudDns不支持HTTPS
+	request.Scheme = "HTTP" // CloudDns不支持HTTPS
 	request.QueryParams["Name"] = did[0]
 	request.QueryParams["Forwardedregionid"] = s.client.RegionId
 	request.QueryParams["SignatureVersion"] = "2.1"
