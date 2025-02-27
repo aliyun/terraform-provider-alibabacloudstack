@@ -76,6 +76,11 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"zone_id": {
+				Type:     schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+			},
 			"scaling_configuration_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -318,6 +323,10 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("override") {
 		request.Override = requests.NewBoolean(d.Get("override").(bool))
 	}
+	
+	if d.HasChange("zone_id") && d.Get("zone_id").(string) != "" {
+		request.ZoneId = d.Get("zone_id").(string)
+	}
 
 	if d.HasChange("image_id") || d.Get("override").(bool) {
 		request.ImageId = d.Get("image_id").(string)
@@ -555,6 +564,10 @@ func resourceAlibabacloudStackEssScalingConfigurationRead(d *schema.ResourceData
 	d.Set("instance_name", object.InstanceName)
 	d.Set("override", d.Get("override").(bool))
 	d.Set("host_name", object.HostName)
+	if object.ZoneId != "" {
+		// 在专有云的实际环境中可能不会返回相关值
+		d.Set("zone_id", object.ZoneId)
+	}
 	if sg, ok := d.GetOk("security_group_ids"); ok && len(sg.([]interface{})) >= 0 {
 		d.Set("security_group_ids", object.SecurityGroupIds.SecurityGroupId)
 	}
@@ -672,7 +685,9 @@ func buildAlibabacloudStackEssScalingConfigurationArgs(d *schema.ResourceData, m
 
 	request := ess.CreateCreateScalingConfigurationRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-
+	if v, ok := d.GetOk("zone_id"); ok && v.(string) != "" {
+		request.ZoneId = v.(string)
+	}
 	request.ScalingGroupId = d.Get("scaling_group_id").(string)
 	security_group_ids := d.Get("security_group_ids").([]interface{})
 	if len(security_group_ids) <= 0 {
