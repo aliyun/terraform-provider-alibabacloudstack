@@ -1664,7 +1664,8 @@ func (s *VpcService) ListTagResources(id string, resourceType string) (object in
 	var response map[string]interface{}
 
 	for {
-		_, err := s.client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, request)
+		response, err = s.client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
+		addDebug("ListTagResources", response, request)
 		if err != nil {
 			return nil, err
 		}
@@ -1675,7 +1676,7 @@ func (s *VpcService) ListTagResources(id string, resourceType string) (object in
 		if v != nil {
 			tags = append(tags, v.([]interface{})...)
 		}
-		if response["NextToken"] == nil {
+		if response["NextToken"].(string) == "" {
 			break
 		}
 		request["NextToken"] = response["NextToken"]
