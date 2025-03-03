@@ -98,16 +98,19 @@ func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta inter
 
 		}
 	}
-	response, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), response, request, request.QueryParams)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		if response == nil {
+		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dns_record", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
+	response := make(map[string]interface{})
+	if err := json.Unmarshal(bresponse.GetHttpContentBytes(), &response); err != nil {
+		return errmsgs.WrapErrorf(err, "Unmarshal Response Failed")
+	}
 	if recordId, err := jsonpath.Get("$.Id", response); err != nil {
 		return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 	} else {

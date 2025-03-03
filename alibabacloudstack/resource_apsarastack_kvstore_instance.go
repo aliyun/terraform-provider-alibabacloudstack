@@ -200,7 +200,7 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				ValidateFunc:     validation.StringInSlice([]string{"MASTER_SLAVE", "STAND_ALONE", "double"}, false),
+				ValidateFunc:     validation.StringInSlice([]string{"MASTER_SLAVE", "STAND_ALONE", "double", "readone"}, false),
 				DiffSuppressFunc: NodeTypeDiffSuppressFunc,
 			},
 			"architecture_type": {
