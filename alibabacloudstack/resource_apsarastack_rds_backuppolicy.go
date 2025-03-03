@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"strconv"
 	"strings"
 	"time"
 
@@ -152,7 +153,8 @@ func resourceAlibabacloudStackDBBackupPolicyRead(d *schema.ResourceData, meta in
 	d.Set("enable_backup_log", object.EnableBackupLog == "1")
 	d.Set("log_backup_retention_period", object.LogBackupRetentionPeriod)
 	d.Set("local_log_retention_hours", object.LocalLogRetentionHours)
-	d.Set("local_log_retention_space", object.LocalLogRetentionSpace)
+	int, err := strconv.Atoi(object.LocalLogRetentionSpace)
+	d.Set("local_log_retention_space", int)
 	instance, err := rdsService.DescribeDBInstance(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
