@@ -1294,12 +1294,18 @@ func getResourceCredentials(config *connectivity.Config) (string, string, int, e
 	var resGrpId int //ID of resource set
 	var resGrp string
 	deptId = 0
-	if len(response.Data) == 0 || response.Code != "200" {
-		if len(response.Data) == 0 {
-			return "", "", 0, fmt.Errorf("resource group ID and organization not found for resource set %s", config.ResourceSetName)
-		}
+	matched := 0
+	if response.Code != "200" {
 		return "", "", 0, fmt.Errorf("unable to initialize the ascm client: department or resource_group is not provided")
-	} else if len(response.Data) > 1 {
+	}
+	for _, d := range response.Data{
+		if d.ResourceGroupName == config.ResourceSetName{
+			matched += 1
+		}
+	}
+	if matched == 0 {
+			return "", "", 0, fmt.Errorf("resource group ID and organization not found for resource set %s", config.ResourceSetName)	
+	} else if matched > 1 {
 		return "", "", 0, fmt.Errorf("There exists a resource group set name with the same name, Please Provider department or resource_group")
 	} else {
 		for _, j := range response.Data {
