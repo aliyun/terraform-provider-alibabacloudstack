@@ -28,6 +28,7 @@ func resourceAlibabacloudStackSlbServerGroup() *schema.Resource {
 			"load_balancer_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"name": {
 				Type:          schema.TypeString,
@@ -124,7 +125,9 @@ func resourceAlibabacloudStackSlbServerGroupRead(d *schema.ResourceData, meta in
 	}
 
 	connectivity.SetResourceData(d, object.VServerGroupName, "vserver_group_name", "name")
-	// d.Set("load_balancer_id", object.LoadBalancerId)
+	if object.LoadBalancerId != "" {
+		d.Set("load_balancer_id", object.LoadBalancerId)
+	}
 
 	servers := make([]map[string]interface{}, 0)
 	portAndWeight := make(map[string][]string)
