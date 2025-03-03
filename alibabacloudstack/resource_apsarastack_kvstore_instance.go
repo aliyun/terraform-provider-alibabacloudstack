@@ -103,11 +103,11 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 			// 				ConflictsWith: []string{"instance_charge_type"},
 			// 			},
 			"instance_charge_type": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"PrePaid", "PostPaid"}, false),
-				Optional:     true,
-				Computed:     true,
-				Deprecated:   "Field 'instance_charge_type' is deprecated and will be removed in a future release, and not for any use now.",
+				Type:          schema.TypeString,
+				ValidateFunc:  validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'instance_charge_type' is deprecated and will be removed in a future release, and not for any use now.",
 			},
 			// 			"period": {
 			// 				Type:             schema.TypeInt,
