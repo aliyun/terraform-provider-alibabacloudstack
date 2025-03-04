@@ -75,8 +75,8 @@ resource "alibabacloudstack_edas_k8s_service" "default" {
 The following arguments are supported:
 
 * `app_id` - (Required, ForceNew) The id of the Edas k8s application
-* `name` - (Required, ForceNew) The name of the Edas k8s application
-* `type` - (Required, ForceNew) Edas K8s service types, currently only the "ClusterIP" type is supported.
+* `name` - (Required, ForceNew) The name of the Edas k8s service
+* `type` - (Required, ForceNew) Edas K8s service types, Valid values are `ClusterIP`, `NodePort`, `LoadBalancer`
 * `service_ports` - (Optional) K8s Service port mapping table, which needs to conform to the JsonArray format. The supported parameters are as follows:
   * `protocol` - (Required) the service protocol, supporting TCP and UDP.
   * `service_port` - (Required) the frontend service port, with a value range of 1~65535.

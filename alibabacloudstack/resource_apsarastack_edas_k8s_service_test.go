@@ -34,8 +34,7 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					// "cs_cluster_id": "${alibabacloudstack_cs_kubernetes.default.id}",
-					"app_id": "77f1587c-5a02-41ca-b4e1-cc5771d4f93c",
+					"app_id": "${alibabacloudstack_edas_k8s_application.default.id}",
 					"name":   "${var.name}",
 					"type":   "ClusterIP",
 					"service_ports": []map[string]interface{}{

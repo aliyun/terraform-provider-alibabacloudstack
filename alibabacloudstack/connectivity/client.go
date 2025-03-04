@@ -1314,7 +1314,13 @@ func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*s
 
 func (client *AlibabacloudStackClient) ProcessCommonRequestForOrganization(request *requests.CommonRequest) (*responses.CommonResponse, error) {
 	popcode := ServiceCode(strings.ToUpper(request.Product))
-	conn, err := sts.NewClientWithAccessKey(client.Config.RegionId, client.Config.OrganizationAccessKey, client.Config.OrganizationSecretKey)
+	var conn *sts.Client
+	var err error
+	if client.Config.OrganizationAccessKey != "" && client.Config.OrganizationSecretKey != "" {
+		conn, err = sts.NewClientWithAccessKey(client.Config.RegionId, client.Config.OrganizationAccessKey, client.Config.OrganizationSecretKey)
+	} else {
+		conn, err = sts.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize the %s Organization client: %#v", popcode, err)
 	}
