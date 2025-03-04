@@ -170,6 +170,7 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_KAFKAOPENAPI_DOMAIN", nil),
 				Description: descriptions["kafkaopenapi_domain"],
+				Deprecated:  "Use schema endpoints replace kafkaopenapi_domain.",
 			},
 			"organization_accesskey": {
 				Type:        schema.TypeString,
