@@ -91,7 +91,7 @@ func (e *EdasService) GetChangeOrderStatus(id string) (info *EdasChangeOrderInfo
 
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
-	bresponse, err := e.client.ProcessCommonRequestForOrganization(request)
+	bresponse, err := e.client.ProcessCommonRequest(request)
 
 	if err != nil {
 		if bresponse == nil {
@@ -413,7 +413,7 @@ func (e *EdasService) DescribeEdasK8sCluster(clusterId string) (*EdasK8sCluster,
 
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
-	bresponse, err := e.client.ProcessCommonRequestForOrganization(request)
+	bresponse, err := e.client.ProcessCommonRequest(request)
 
 	if err != nil {
 		if bresponse == nil {
@@ -451,7 +451,7 @@ func (e *EdasService) DescribeEdasListCluster(clusterId string) (*edas.Cluster, 
 	request.QueryParams["LogicalRegionId"] = e.client.RegionId
 
 	request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
-	bresponse, err := e.client.ProcessCommonRequestForOrganization(request)
+	bresponse, err := e.client.ProcessCommonRequest(request)
 
 	if err != nil {
 		if bresponse == nil {
@@ -510,7 +510,7 @@ func (e *EdasService) ListEdasK8sServices(app_id string) ([]*EdasK8sService, err
 	request := e.client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetK8sServices", "/pop/v5/k8s/acs/k8s_service")
 	request.QueryParams["AppId"] = app_id
 
-	bresponse, err := e.client.ProcessCommonRequestForOrganization(request)
+	bresponse, err := e.client.ProcessCommonRequest(request)
 	addDebug("GetK8sServices", bresponse, request.QueryParams, request)
 	if err != nil {
 		errmsg := ""
@@ -837,7 +837,7 @@ func (e *EdasService) DescribeEdasK8sApplication(appId string) (*EdasK8sApplcati
 
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
-	bresponse, err := e.client.ProcessCommonRequestForOrganization(request)
+	bresponse, err := e.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 
 	if err != nil {

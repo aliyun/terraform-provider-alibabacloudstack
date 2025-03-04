@@ -76,7 +76,7 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 	}
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
-	bresponse, err := client.ProcessCommonRequestForOrganization(request)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -144,7 +144,7 @@ func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta 
 	// request.Headers["x-acs-content-type"] = "application/x-www-form-urlencoded"
 	wait := incrementalWait(1*time.Second, 2*time.Second)
 	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		bresponse, err := client.ProcessCommonRequestForOrganization(request)
+		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request)
 		if err != nil {
 			if bresponse == nil {
