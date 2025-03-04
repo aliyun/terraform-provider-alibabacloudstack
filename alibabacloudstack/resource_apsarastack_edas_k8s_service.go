@@ -113,7 +113,7 @@ func resourceAlibabacloudStackEdasK8sServiceCreate(d *schema.ResourceData, meta 
 		}
 		request.QueryParams["LabelsStrs"] = string(labelsStrs)
 	}
-	bresponse, err := client.ProcessCommonRequestForOrganization(request)
+	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug("CreateK8sService", bresponse, request.QueryParams, request)
 	if err != nil {
 		errmsg := ""
@@ -206,7 +206,7 @@ func resourceAlibabacloudStackEdasK8sServiceUpdate(d *schema.ResourceData, meta 
 		request.QueryParams["LabelsStrs"] = string(labelsStrs)
 	}
 	if update && !d.IsNewResource() {
-		bresponse, err := client.ProcessCommonRequestForOrganization(request)
+		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request)
 
 		if err != nil {
@@ -237,7 +237,7 @@ func resourceAlibabacloudStackEdasK8sServiceDelete(d *schema.ResourceData, meta 
 		"AppId":       app_id,
 		"ServiceName": name,
 	}
-	bresponse, err := client.ProcessCommonRequestForOrganization(request)
+	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request)
 
 	if err != nil {

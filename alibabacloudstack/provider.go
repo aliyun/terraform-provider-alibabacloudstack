@@ -191,14 +191,16 @@ func Provider() *schema.Provider {
 			"organization_accesskey": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY", os.Getenv("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY", nil),
 				Description: descriptions["organization_accesskey"],
+				Deprecated:  "Use access_key replace organization_accesskey.",
 			},
 			"organization_secretkey": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY", os.Getenv("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY")),
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY", nil),
 				Description: descriptions["organization_secretkey"],
+				Deprecated:  "Use secret_key replace organization_secretkey.",
 			},
 			"sls_openapi_endpoint": {
 				Type:        schema.TypeString,
@@ -997,12 +999,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Endpoints[connectivity.STSCode] = StsEndpoint
 	}
 	organizationAccessKey := d.Get("organization_accesskey").(string)
-	if organizationAccessKey != "" {
-		config.OrganizationAccessKey = organizationAccessKey
-	}
 	organizationSecretKey := d.Get("organization_secretkey").(string)
-	if organizationSecretKey != "" {
-		config.OrganizationSecretKey = organizationSecretKey
+	if organizationAccessKey != "" &&  organizationSecretKey != "" {
+		config.AccessKey = organizationAccessKey
+		config.SecretKey = organizationSecretKey
 	}
 	slsOpenAPIEndpoint := d.Get("sls_openapi_endpoint").(string)
 	if slsOpenAPIEndpoint != "" {
