@@ -35,7 +35,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	slsPop "github.com/aliyun/alibaba-cloud-sdk-go/services/sls"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
@@ -852,13 +851,7 @@ func (client *AlibabacloudStackClient) WithEdasClient(do func(*edas.Client) (int
 			return nil, fmt.Errorf("unable to initialize the Edas client: endpoint or domain is not provided for Edas service")
 		}
 		// edasconn, err := edas.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig().WithTimeout(time.Duration(60)*time.Second), client.Config.getAuthCredential(true))
-		var edasconn *edas.Client
-		var err error
-		if client.Config.OrganizationAccessKey != "" && client.Config.OrganizationSecretKey != "" {
-			edasconn, err = edas.NewClientWithAccessKey(client.Config.RegionId, client.Config.OrganizationAccessKey, client.Config.OrganizationSecretKey)
-		} else {
-			edasconn, err = edas.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
-		}
+		edasconn, err := edas.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
 		if err != nil {
 			return nil, fmt.Errorf("unable to initialize the Edas client: %#v", err)
 		}
@@ -1310,59 +1303,6 @@ func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*s
 		conn = c
 	}
 	return conn, nil
-}
-
-func (client *AlibabacloudStackClient) ProcessCommonRequestForOrganization(request *requests.CommonRequest) (*responses.CommonResponse, error) {
-	popcode := ServiceCode(strings.ToUpper(request.Product))
-	var conn *sts.Client
-	var err error
-	if client.Config.OrganizationAccessKey != "" && client.Config.OrganizationSecretKey != "" {
-		conn, err = sts.NewClientWithAccessKey(client.Config.RegionId, client.Config.OrganizationAccessKey, client.Config.OrganizationSecretKey)
-	} else {
-		conn, err = sts.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
-	}
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s Organization client: %#v", popcode, err)
-	}
-	endpoint := client.Config.Endpoints[popcode]
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] unable to initialize the %s client: endpoint or domain is not provided", string(popcode))
-	}
-	conn.Domain = endpoint
-	conn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Hour)
-	conn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Hour)
-	conn.SourceIp = client.Config.SourceIp
-	conn.SecureTransport = client.Config.SecureTransport
-	conn.AppendUserAgent(Terraform, TerraformVersion)
-	conn.AppendUserAgent(Provider, ProviderVersion)
-	conn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-	conn.SetHTTPSInsecure(client.Config.Insecure)
-	if client.Config.Proxy != "" {
-		conn.SetHttpsProxy(client.Config.Proxy)
-		conn.SetHttpProxy(client.Config.Proxy)
-	}
-
-	if strings.HasPrefix(conn.Domain, "internal.asapi.") || strings.HasPrefix(conn.Domain, "public.asapi.") {
-		// asapi兼容逻辑
-		// # asapi 使用common SDK时不能拼接pathpattern，否则会报错
-		if request.PathPattern != "" {
-			var r []string = strings.SplitN(conn.Domain, "/", 2)
-			request.Domain = r[0]
-			request.PathPattern = "/asapi/v3"
-		}
-		if len(request.Content) > 0 {
-			request.QueryParams["x-acs-body"] = string(request.Content)
-		}
-		if strings.HasPrefix(conn.Domain, "public.asapi.") {
-			// 如果public的asapi网关，强制使用https
-			request.SetScheme("https")
-		}
-		request.Method = "POST"
-	}
-
-	response, err := conn.ProcessCommonRequest(request)
-	return response, err
-
 }
 
 func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.CommonRequest) (*responses.CommonResponse, error) {

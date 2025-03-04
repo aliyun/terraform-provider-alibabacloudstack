@@ -44,8 +44,6 @@ type Config struct {
 	RamRolePolicy            string
 	RamRoleSessionExpiration int
 	Endpoints                map[ServiceCode]string
-	OrganizationAccessKey    string
-	OrganizationSecretKey    string
 	ConfigurationSource      string
 	Insecure                 bool
 	Proxy                    string
