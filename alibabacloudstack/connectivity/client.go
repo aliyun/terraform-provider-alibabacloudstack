@@ -137,7 +137,7 @@ const Provider = "Terraform-Provider"
 
 const Module = "Terraform-Module"
 
-var providerVersion = "1.0.32"
+var providerVersion = "3.16.5"
 var terraformVersion = strings.TrimSuffix(schema.Provider{}.TerraformVersion, "-dev")
 
 type ApiVersion string
