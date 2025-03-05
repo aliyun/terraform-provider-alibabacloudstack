@@ -225,17 +225,17 @@ func TestAccAlibabacloudStackInstance_Basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{
-					"security_enhancement_strategy",
-					"dry_run", "user_data", "enable_ipv6",
+					"security_enhancement_strategy", 
+					"dry_run", "user_data", "enable_ipv6", 
 					"ipv6_address_count",
 					"system_disk_tags.%",
 					"system_disk_tags.Bar",
 					"system_disk_tags.foo",
-				},
+					},
 			},
 		},
 	})

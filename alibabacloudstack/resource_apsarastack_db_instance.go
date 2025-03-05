@@ -231,6 +231,11 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"force_restart": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Deprecated:    "Field 'force_restart' is deprecated and will be removed in a future release, and not for any use now.",
+			},
 		},
 	}
 }
@@ -784,7 +789,10 @@ func resourceAlibabacloudStackDBInstanceRead(d *schema.ResourceData, meta interf
 	d.Set("port", instance.Port)
 	connectivity.SetResourceData(d, instance.DBInstanceStorage, "db_instance_storage", "instance_storage")
 	d.Set("zone_id", instance.ZoneId)
-	connectivity.SetResourceData(d, instance.PayType, "payment_type", "instance_charge_type")
+	if instance.PayType != "" {
+		// 专有云场景下不会返回pay type
+		connectivity.SetResourceData(d, instance.PayType, "payment_type", "instance_charge_type")
+	}
 	d.Set("period", d.Get("period"))
 	d.Set("vswitch_id", instance.VSwitchId)
 	d.Set("connection_string", instance.ConnectionString)

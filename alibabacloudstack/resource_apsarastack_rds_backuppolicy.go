@@ -1,8 +1,10 @@
 package alibabacloudstack
 
 import (
+	"strconv"
 	"strings"
 	"time"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -152,7 +154,11 @@ func resourceAlibabacloudStackDBBackupPolicyRead(d *schema.ResourceData, meta in
 	d.Set("enable_backup_log", object.EnableBackupLog == "1")
 	d.Set("log_backup_retention_period", object.LogBackupRetentionPeriod)
 	d.Set("local_log_retention_hours", object.LocalLogRetentionHours)
-	d.Set("local_log_retention_space", object.LocalLogRetentionSpace)
+	if localLogRetentionSpaceInt, err := strconv.Atoi(object.LocalLogRetentionSpace) ; err != nil {
+		return errmsgs.WrapError(fmt.Errorf("failed to convert LocalLogRetentionSpace to integer: %v", err))
+	} else {
+		d.Set("local_log_retention_space", localLogRetentionSpaceInt)
+	}
 	instance, err := rdsService.DescribeDBInstance(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
@@ -168,8 +174,16 @@ func resourceAlibabacloudStackDBBackupPolicyRead(d *schema.ResourceData, meta in
 	}
 	d.Set("log_backup_frequency", object.LogBackupFrequency)
 	d.Set("compress_type", object.CompressType)
-	d.Set("archive_backup_retention_period", object.ArchiveBackupRetentionPeriod)
-	d.Set("archive_backup_keep_count", object.ArchiveBackupKeepCount)
+	if archiveBackupRetentionPeriodInt, err := strconv.Atoi(object.ArchiveBackupRetentionPeriod) ; err != nil {
+		return errmsgs.WrapError(fmt.Errorf("failed to convert ArchiveBackupRetentionPeriod to integer: %v", err))
+	} else {
+		d.Set("archive_backup_retention_period", archiveBackupRetentionPeriodInt)
+	}
+	if archiveBackupKeepCountdInt, err := strconv.Atoi(object.ArchiveBackupKeepCount) ; err != nil {
+		return errmsgs.WrapError(fmt.Errorf("failed to convert ArchiveBackupRetentionPeriod to integer: %v", err))
+	} else {
+		d.Set("archive_backup_keep_count", archiveBackupKeepCountdInt)
+	}
 	d.Set("archive_backup_keep_policy", object.ArchiveBackupKeepPolicy)
 	return nil
 }
