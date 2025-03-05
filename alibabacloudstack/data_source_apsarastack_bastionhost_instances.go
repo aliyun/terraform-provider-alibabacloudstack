@@ -134,7 +134,7 @@ func dataSourceAlibabacloudStackBastionhostInstancesRead(d *schema.ResourceData,
 		request["Tag.*"] = tags
 	}
 	for {
-		response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
