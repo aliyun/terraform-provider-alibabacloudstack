@@ -688,6 +688,20 @@ func (client *AlibabacloudStackClient) WithRdsClient(do func(*rds.Client) (inter
 	return do(client.rdsconn)
 }
 
+func (client *AlibabacloudStackClient) WithPolardbClient(do func(*polardb.Client) (interface{}, error)) (interface{}, error) {
+	if client.rdsconn == nil {
+		conn, error := client.WithProductSDKClient(RDSCode)
+		if error != nil {
+			return nil, error
+		}
+		client.rdsconn = &rds.Client{
+			Client: *conn,
+		}
+	}
+
+	return do(client.polarDBconn)
+}
+
 func (client *AlibabacloudStackClient) WithCdnClient(do func(*cdn.Client) (interface{}, error)) (interface{}, error) {
 	if client.cdnconn == nil {
 		conn, error := client.WithProductSDKClient(CDNCode)
@@ -1334,7 +1348,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		if strings.HasPrefix(domain, "public.asapi.") {
 			// 如果public的asapi网关，强制使用https
 			request.SetScheme("https")
-		}else{
+		} else {
 			// 如果internal的asapi网关，强制使用http
 			request.SetScheme("http")
 		}

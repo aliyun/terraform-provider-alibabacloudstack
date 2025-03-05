@@ -403,7 +403,9 @@ func GetFunc(level int) string {
 }
 
 func ParseResourceId(id string, length int) (parts []string, err error) {
-	parts = strings.Split(id, ":")
+	if strings.Contains(id, ":") {
+		parts = strings.Split(id, ":")
+	}
 
 	if len(parts) != length {
 		err = errmsgs.WrapError(fmt.Errorf("Invalid Resource Id %s. Expected parts' length %d, got %d", id, length, len(parts)))
@@ -542,7 +544,6 @@ func GetUserHomeDir() (string, error) {
 	}
 	return usr.HomeDir, nil
 }
-
 
 // writeToFile 函数
 func writeToFile(filePath string, data interface{}) error {
