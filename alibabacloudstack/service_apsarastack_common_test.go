@@ -125,6 +125,7 @@ func (rc *resourceCheck) checkResourceExists() resource.TestCheckFunc {
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
+
 		errorValue := outValue[1]
 		if !errorValue.IsNil() {
 			return errmsgs.WrapError(fmt.Errorf("Checking resource %s %s exists error:%s ", rc.resourceId, rs.Primary.ID, errorValue.Interface().(error).Error()))
@@ -160,7 +161,11 @@ func (rc *resourceCheck) checkResourceDestroy() resource.TestCheckFunc {
 				continue
 			}
 			outValue, err := rc.callDescribeMethod(rs)
+			// if len(outValue) == 0 {
+			// 	continue
+			// }
 			errorValue := outValue[1]
+
 			if !errorValue.IsNil() {
 				err = errorValue.Interface().(error)
 				if err != nil {

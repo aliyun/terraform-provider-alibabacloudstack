@@ -695,6 +695,20 @@ func (client *AlibabacloudStackClient) WithRdsClient(do func(*rds.Client) (inter
 	return do(client.rdsconn)
 }
 
+func (client *AlibabacloudStackClient) WithPolardbClient(do func(*polardb.Client) (interface{}, error)) (interface{}, error) {
+	if client.rdsconn == nil {
+		conn, error := client.WithProductSDKClient(RDSCode)
+		if error != nil {
+			return nil, error
+		}
+		client.rdsconn = &rds.Client{
+			Client: *conn,
+		}
+	}
+
+	return do(client.polarDBconn)
+}
+
 func (client *AlibabacloudStackClient) WithCdnClient(do func(*cdn.Client) (interface{}, error)) (interface{}, error) {
 	if client.cdnconn == nil {
 		conn, error := client.WithProductSDKClient(CDNCode)

@@ -227,6 +227,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"sts.{{.region}}.{{.domain}}",
 	},
 
+	POLARDBCode: PopEndpoint{
+		"polardb-vpc.{{.domain}}",
+		"polardb-vpc.{{.region}}.{{.domain}}",
+	},
+
 	SlSDataCode: PopEndpoint{
 		"data.{{.region}}.sls-pub.{{.domain}}",
 		"data.{{.region}}.sls-pub.{{.domain}}",

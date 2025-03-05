@@ -159,7 +159,7 @@ func Provider() *schema.Provider {
 			"is_center_region": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_CENTER_REGION", "true"),
 				Description: descriptions["is_center_region"],
 			},
 			"popgw_domain": {
@@ -494,6 +494,10 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_expressconnect_virtualborderrouters":    dataSourceAlibabacloudStackExpressConnectVirtualBorderRouters(),
 		"alibabacloudStack_cloud_firewall_control_policies":        dataSourceAlibabacloudStackCloudFirewallControlPolicies(),
 		"alibabacloudstack_ecs_ebs_storage_sets":                   dataSourceAlibabacloudStackEcsEbsStorageSets(),
+		"alibabacloudstack_polardb_zones":                          dataSourceAlibabacloudStackPolardbZones(),
+		//	"alibabacloudstack_polardb_databases":                      dataSourceAlibabacloudStackPolardbDatabases(),
+		"alibabacloudstack_polardb_instances": dataSourceAlibabacloudStackPolardbDbInstances(),
+		//	"alibabacloudstack_polardb_accounts":                       dataSourceAlibabacloudStackPolardbAccounts(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -807,6 +811,13 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_csb_project":                           resourceAlibabacloudStackCsbProject(),
 		"alibabacloudstack_graph_database_db_instance":            resourceAlibabacloudStackGraphDatabaseDbInstance(),
 		"alibabacloudstack_graphdatabase_dbinstance":              resourceAlibabacloudStackGraphDatabaseDbInstance(),
+		"alibabacloudstack_polardb_account":                       resourceAlibabacloudStackPolardbAccount(),
+		"alibabacloudstack_polardb_database":                      resourceAlibabacloudStackPolardbDatabase(),
+		"alibabacloudstack_polardb_backuppolicy":                  resourceAlibabacloudStackPolardbBackuppolicy(),
+		"alibabacloudstack_polardb_dbconnection":                  resourceAlibabacloudStackPolardbConnection(),
+		"alibabacloudstack_polardb_instance":                      resourceAlibabacloudStackPolardbInstance(),
+		//"alibabacloudstack_polardb_readonly_instance":              resourceAlibabacloudStackPolardbReadonlyInstance(),
+		//"alibabacloudstack_polardb_readwrite_splitting_connection": resourceAlibabacloudStackPolardbReadWriteSplittingConnection(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
