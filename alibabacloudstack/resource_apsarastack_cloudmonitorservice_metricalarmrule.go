@@ -29,57 +29,77 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"rule_name": {
-				Type:     schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"name"},
 			},
 			"rule_id": {
 				Type:     schema.TypeString,
-				Computed:true,
+				Computed: true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Optional:true,
-				Computed:true,
-				Deprecated: "Field 'name' is deprecated and will be removed in a future release. Please use new field 'rule_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'rule_name' instead.",
 				ConflictsWith: []string{"rule_name"},
 			},
 			"namespace": {
-				Type:     schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"project"},
 			},
 			"project": {
-				Type:     schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ForceNew: true,
-				Deprecated: "Field 'project' is deprecated and will be removed in a future release. Please use new field 'namespace' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'project' is deprecated and will be removed in a future release. Please use new field 'namespace' instead.",
 				ConflictsWith: []string{"namespace"},
 			},
 			"metric_name": {
-				Type:     schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"metric"},
 			},
 			"metric": {
-				Type:     schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ForceNew: true,
-				Deprecated: "Field 'metric' is deprecated and will be removed in a future release. Please use new field 'metric_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'metric' is deprecated and will be removed in a future release. Please use new field 'metric_name' instead.",
 				ConflictsWith: []string{"metric_name"},
 			},
 			"dimensions": {
-				Type:     schema.TypeMap,
-				Required: true,
+				Type:          schema.TypeMap,
+				Optional:      true,
+				ForceNew:      true,
+				Elem:          schema.TypeString,
+				Deprecated:    "Field 'dimensions' is deprecated and will be removed in a future release. Please use new field 'resources' instead.",
+				ConflictsWith: []string{"resources"},
+			},
+			"resources": {
+				Type:     schema.TypeList,
+				Optional: true,
 				ForceNew: true,
-				Elem:     schema.TypeString,
+				Elem: &schema.Schema{
+					Type: schema.TypeMap,
+					Elem: &schema.Schema{
+						Type: schema.TypeString,
+					},
+					ValidateFunc: func(i interface{}, k string) ([]string, []error) {
+						m := i.(map[string]interface{})
+						if len(m) > 1 {
+							return nil, []error{fmt.Errorf("too large map")}
+						}
+						return nil, nil
+					},
+				},
 			},
 			"period": {
 				Type:     schema.TypeInt,
@@ -287,6 +307,7 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 
 	var instanceId string
 	var dimList []map[string]string
+
 	if dimensions, ok := d.GetOk("dimensions"); ok {
 		for k, v := range dimensions.(map[string]interface{}) {
 			values := strings.Split(v.(string), COMMA_SEPARATED)
@@ -299,7 +320,16 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 				dimList = append(dimList, map[string]string{k: Trim(v.(string))})
 			}
 		}
+	} else if resources, ok := d.GetOk("resources"); ok {
+		for _, item := range resources.([]interface{}) {
+			for k, v := range item.(map[string]interface{}) {
+				dimList = append(dimList, map[string]string{k: Trim(v.(string))})
+			}
+		}
+	} else {
+		return fmt.Errorf("dimensions and resources can not be empty at the same time")
 	}
+
 	if len(dimList) > 0 {
 		if bytes, err := json.Marshal(dimList); err != nil {
 			return fmt.Errorf("marshaling dimensions to json string got an error: %#v", err)
@@ -338,10 +368,10 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 
 	response, err := client.ProcessCommonRequest(nrequest)
 	if err != nil {
-			if response == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if response == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
@@ -373,7 +403,7 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 			return fmt.Errorf("Enabling alarm got an error: %#v", err)
 		}
 	} else if err != nil {
-		return err 
+		return err
 	} else {
 		request := cms.CreateDisableMetricRulesRequest()
 		client.InitRpcRequest(*request.RpcRequest)
@@ -482,14 +512,14 @@ func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interfac
 	d.Set("enabled", alarm.EnableState)
 	d.Set("contact_groups", strings.Split(alarm.ContactGroups, ","))
 
-	var dims map[string]interface{}
+	//var dims map[string]interface{}
 	// TODO: 当前接口无法正常返回Dimensions
-	if alarm.Dimensions != "" {
-		if err := json.Unmarshal([]byte(alarm.Dimensions), &dims); err != nil {
-			return fmt.Errorf("Unmarshaling Dimensions got an error: %#v.", err)
-		}
-	}
-	d.Set("dimensions", dims)
+	// if alarm.Dimensions != "" {
+	// 	if err := json.Unmarshal([]byte(alarm.Dimensions), &dims); err != nil {
+	// 		return fmt.Errorf("Unmarshaling Dimensions got an error: %#v.", err)
+	// 	}
+	// 	d.Set("dimensions", dims)
+	// }
 
 	return nil
 }

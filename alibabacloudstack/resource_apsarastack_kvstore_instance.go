@@ -102,14 +102,13 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 			// 				Computed:      true,
 			// 				ConflictsWith: []string{"instance_charge_type"},
 			// 			},
-			// 			"instance_charge_type": {
-			// 				Type:          schema.TypeString,
-			// 				ValidateFunc:  validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
-			// 				Optional:      true,
-			// 				Computed:      true,
-			// 				Deprecated:    "Field 'instance_charge_type' is deprecated and will be removed in a future release. Please use new field 'payment_type' instead.",
-			// 				ConflictsWith: []string{"payment_type"},
-			// 			},
+			"instance_charge_type": {
+				Type:          schema.TypeString,
+				ValidateFunc:  validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'instance_charge_type' is deprecated and will be removed in a future release, and not for any use now.",
+			},
 			// 			"period": {
 			// 				Type:             schema.TypeInt,
 			// 				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
@@ -193,15 +192,15 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Computed: true,
 			},
 			"cpu_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Deprecated:    "Field 'cpu_type' is deprecated and will be removed in a future release.",
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "Field 'cpu_type' is deprecated and will be removed in a future release.",
 			},
 			"node_type": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				ValidateFunc:     validation.StringInSlice([]string{"MASTER_SLAVE", "STAND_ALONE", "double"}, false),
+				ValidateFunc:     validation.StringInSlice([]string{"MASTER_SLAVE", "STAND_ALONE", "double", "readone"}, false),
 				DiffSuppressFunc: NodeTypeDiffSuppressFunc,
 			},
 			"architecture_type": {
@@ -250,9 +249,9 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	if v, ok := connectivity.GetResourceDataOk(d, "tair_instance_name", "instance_name"); ok {
 		request["InstanceName"] = v.(string)
 	}
-		if v, ok := d.GetOk("cpu_type"); ok {
-			request["CpuType"] = v.(string)
-		}
+	if v, ok := d.GetOk("cpu_type"); ok {
+		request["CpuType"] = v.(string)
+	}
 	if v, ok := d.GetOk("node_type"); ok {
 		request["NodeType"] = v.(string)
 	}

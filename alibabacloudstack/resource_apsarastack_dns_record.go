@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -82,7 +83,7 @@ func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta inter
 	line_ids_json, _ := json.Marshal(line_ids)
 	line_ids_str := string(line_ids_json)
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "AddGlobalZoneRecord", "")
-	request.Scheme="HTTP" // CloudDns不支持HTTPS
+	request.Scheme = "HTTP" // CloudDns不支持HTTPS
 	request.QueryParams["LineIds"] = line_ids_str
 	request.QueryParams["Type"] = Type
 	request.QueryParams["Ttl"] = fmt.Sprintf("%d", TTL)
@@ -97,19 +98,27 @@ func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta inter
 
 		}
 	}
-	response, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), response, request, request.QueryParams)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		if response == nil {
+		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_dns_record", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
+	response := make(map[string]interface{})
+	if err := json.Unmarshal(bresponse.GetHttpContentBytes(), &response); err != nil {
+		return errmsgs.WrapErrorf(err, "Unmarshal Response Failed")
+	}
+	if recordId, err := jsonpath.Get("$.Id", response); err != nil {
+		return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	} else {
+		d.Set("record_id", recordId)
+		d.SetId(fmt.Sprintf("%s:%s", ZoneId, recordId))
+	}
 
-	d.SetId(fmt.Sprint(ZoneId))
-
-	return resourceAlibabacloudStackDnsRecordRead(d, meta)
+	return resourceAlibabacloudStackDnsRecordUpdate(d, meta)
 }
 
 func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interface{}) error {
@@ -125,6 +134,11 @@ func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interfa
 		}
 		return errmsgs.WrapError(err)
 	}
+	// 强制重新设置id，为了实现后续主键的迁移
+	if d.Get("record_id").(string) == "" {
+		d.SetId(fmt.Sprintf("%s:%s", object.Data[0].ZoneId, d.Get("record_id").(string)))
+	}
+	d.SetId(fmt.Sprintf("%s:%s", object.Data[0].ZoneId, object.Data[0].Id))
 	d.Set("ttl", object.Data[0].TTL)
 	d.Set("record_id", object.Data[0].Id)
 	d.Set("name", object.Data[0].Name)
@@ -156,7 +170,7 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		}
 		check.Data[0].Remark = desc
 		request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "UpdateGlobalZoneRecordRemark", "")
-		request.Scheme="HTTP" // CloudDns不支持HTTPS
+		request.Scheme = "HTTP" // CloudDns不支持HTTPS
 		request.QueryParams["Id"] = ID
 		request.QueryParams["Remark"] = desc
 		response, err := client.ProcessCommonRequest(request)
@@ -208,7 +222,7 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		attributeUpdate = true
 	}
 
-	if attributeUpdate {
+	if !d.IsNewResource() && attributeUpdate {
 		request := make(map[string]interface{})
 		var rrsets []string
 		if v, ok := d.GetOk("rr_set"); ok {
@@ -242,7 +256,7 @@ func resourceAlibabacloudStackDnsRecordDelete(d *schema.ResourceData, meta inter
 	ZoneId := SplitDnsZone(d.Get("zone_id").(string))
 
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DeleteGlobalZoneRecord", "")
-	request.Scheme="HTTP" // CloudDns不支持HTTPS
+	request.Scheme = "HTTP" // CloudDns不支持HTTPS
 	request.QueryParams["Id"] = ID
 	request.QueryParams["ZoneId"] = ZoneId
 	bresponse, err := client.ProcessCommonRequest(request)
