@@ -403,9 +403,7 @@ func GetFunc(level int) string {
 }
 
 func ParseResourceId(id string, length int) (parts []string, err error) {
-	if strings.Contains(id, ":") {
-		parts = strings.Split(id, ":")
-	}
+	parts = strings.Split(id, ":")
 
 	if len(parts) != length {
 		err = errmsgs.WrapError(fmt.Errorf("Invalid Resource Id %s. Expected parts' length %d, got %d", id, length, len(parts)))
