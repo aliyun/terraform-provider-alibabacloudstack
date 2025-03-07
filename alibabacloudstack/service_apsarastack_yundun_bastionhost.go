@@ -69,7 +69,7 @@ func (s *YundunBastionhostService) DescribeBastionhostInstance(id string) (objec
 		"RegionId":   s.client.RegionId,
 		"InstanceId": id,
 	}
-	response, err := s.client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}

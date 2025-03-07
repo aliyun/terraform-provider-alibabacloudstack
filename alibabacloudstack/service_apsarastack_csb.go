@@ -22,7 +22,7 @@ func (s *CsbService) DescribeCsbProjectDetail(id string) (object map[string]inte
 	}
 	request["PageSize"] = 1
 	request["PageNumber"] = 1
-	response, err = s.client.DoTeaRequest("POST", "CSB", "2017-11-18", "GetProject", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "CSB", "2017-11-18", "GetProject", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}

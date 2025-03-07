@@ -1055,7 +1055,7 @@ func (s *VpcService) DescribeNetworkAcl(id string) (object map[string]interface{
 
 		"NetworkAclId": id,
 	}
-	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeNetworkAclAttributes", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeNetworkAclAttributes", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidNetworkAcl.NotFound"}) {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("VPC:NetworkAcl", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))
@@ -1362,7 +1362,7 @@ func (s *VpcService) DescribeVSwitchWithTeadsl(id string) (object map[string]int
 	request := map[string]interface{}{
 		"VSwitchId": id,
 	}
-	response, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeVSwitchAttributes", "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeVSwitchAttributes", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidVswitchID.NotFound"}) {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -1423,7 +1423,7 @@ func (s *VpcService) DeleteAclResources(id string) (object map[string]interface{
 		"Resource":     deleteResources,
 	}
 	request["ClientToken"] = buildClientToken("UnassociateNetworkAcl")
-	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "UnassociateNetworkAcl", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "UnassociateNetworkAcl", "", nil, nil, request)
 	if err != nil {
 		return response, err
 	}
@@ -1450,7 +1450,7 @@ func (s *VpcService) DescribeVpcIpv6EgressRule(id string) (object map[string]int
 	for {
 		runtime := util.RuntimeOptions{IgnoreSSL: tea.Bool(s.client.Config.Insecure)}
 		runtime.SetAutoretry(true)
-		response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeIpv6EgressOnlyRules", "", nil, request)
+		response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeIpv6EgressOnlyRules", "", nil, nil, request)
 		if err != nil {
 			return object, err
 		}
@@ -1503,7 +1503,7 @@ func (s *VpcService) DescribeVpcIpv6Gateway(id string) (object map[string]interf
 	request := map[string]interface{}{
 		"Ipv6GatewayId": id,
 	}
-	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeIpv6GatewayAttribute", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeIpv6GatewayAttribute", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}
@@ -1544,7 +1544,7 @@ func (s *VpcService) DescribeVpcIpv6InternetBandwidth(id string) (object map[str
 
 		"Ipv6InternetBandwidthId": id,
 	}
-	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeIpv6Addresses", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "DescribeIpv6Addresses", "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}
@@ -1577,7 +1577,7 @@ func (s *VpcService) setInstanceSecondaryCidrBlocks(d *schema.ResourceData) erro
 			}
 			for _, item := range removed {
 				request["SecondaryCidrBlock"] = item
-				response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "UnassociateVpcCidrBlock", "", nil, request)
+				response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "UnassociateVpcCidrBlock", "", nil, nil, request)
 				if err != nil {
 					return err
 				}
@@ -1591,7 +1591,7 @@ func (s *VpcService) setInstanceSecondaryCidrBlocks(d *schema.ResourceData) erro
 			}
 			for _, item := range added {
 				request["SecondaryCidrBlock"] = item
-				response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "AssociateVpcCidrBlock", "", nil, request)
+				response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "AssociateVpcCidrBlock", "", nil, nil, request)
 				if err != nil {
 					return err
 				}
@@ -1623,7 +1623,7 @@ func (s *VpcService) SetResourceTags(d *schema.ResourceData, resourceType string
 			for i, key := range removedTagKeys {
 				request[fmt.Sprintf("TagKey.%d", i+1)] = key
 			}
-			_, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, request)
+			_, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -1642,7 +1642,7 @@ func (s *VpcService) SetResourceTags(d *schema.ResourceData, resourceType string
 				count++
 			}
 
-			_, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, request)
+			_, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -1664,7 +1664,7 @@ func (s *VpcService) ListTagResources(id string, resourceType string) (object in
 	var response map[string]interface{}
 
 	for {
-		response, err = s.client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, request)
+		response, err = s.client.DoTeaRequest("POST", "Vpc", "2016-04-28", action, "", nil, nil, request)
 		addDebug("ListTagResources", response, request)
 		if err != nil {
 			return nil, err
@@ -1702,7 +1702,7 @@ func (s *VpcService) DescribeExpressConnectPhysicalConnection(id string) (object
 		"Value": []string{id},
 	})
 	request["Filter"] = filterMapList
-	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, nil, request)
 	if err != nil {
 		return object, err
 	}
@@ -1752,7 +1752,7 @@ func (s *VpcService) DescribeExpressConnectVirtualBorderRouter(id string) (objec
 	}
 	idExist := false
 	for {
-		response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, request)
+		response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, nil, request)
 		if err != nil {
 			return object, err
 		}

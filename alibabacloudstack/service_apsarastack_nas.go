@@ -31,7 +31,7 @@ func (s *NasService) DescribeNasFileSystem(id string) (object map[string]interfa
 		"PageSize":     1,
 		"PageNumber":   1,
 	}
-	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeFileSystems", "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeFileSystems", "", nil, nil, request)
 	addDebug("DescribeFileSystems", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidFileSystem.NotFound", "Forbidden.NasNotFound", "Resource.NotFound"}) {
@@ -63,7 +63,7 @@ func (s *NasService) DescribeNasMountTarget(id string) (object map[string]interf
 		"PageSize":          1,
 		"PageNumber":        1,
 	}
-	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeMountTargets", "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeMountTargets", "", nil, nil, request)
 	addDebug("DescribeMountTargets", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.NasNotFound", "InvalidFileSystem.NotFound", "InvalidLBid.NotFound", "InvalidMountTarget.NotFound", "VolumeUnavailable"}) {
@@ -99,7 +99,7 @@ func (s *NasService) DescribeNasAccessGroup(id string) (object map[string]interf
 		"PageSize":        1,
 		"PageNumber":      1,
 	}
-	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeAccessGroups", "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeAccessGroups", "", nil, nil, request)
 	addDebug("DescribeAccessGroups", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Forbidden.NasNotFound", "InvalidAccessGroup.NotFound", "Resource.NotFound"}) {
@@ -131,7 +131,7 @@ func (s *NasService) DescribeNasAccessRule(id string) (object map[string]interfa
 		"PageSize":        1,
 		"PageNumber":      1,
 	}
-	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeAccessRules", "", nil, request)
+	response, err := s.client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeAccessRules", "", nil, nil, request)
 	addDebug("DescribeAccessRules", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidAccessGroup.NotFound", "Forbidden.NasNotFound"}) {

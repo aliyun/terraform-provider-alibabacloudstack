@@ -57,7 +57,7 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingCreate(d *schema.ResourceD
 
 
 	request["ClientToken"] = fmt.Sprint(uuid.NewRandom())
-	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingDelete(d *schema.ResourceD
 		"RoleCode":  parts[0],
 	}
 
-	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}

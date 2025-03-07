@@ -117,7 +117,7 @@ func DescribeMaxcomputeProject(meta interface{}) ([]interface{}, error) {
 		"CurrentRoleId": roleId,
 	}
 
-	response, err = client.DoTeaRequest("POST", "ASCM", "2019-05-10", "ListOdpsClusters", "/ascm/manage/resource_mgmt/getOdpsClusters", nil, request)
+	response, err = client.DoTeaRequest("POST", "ASCM", "2019-05-10", "ListOdpsClusters", "/ascm/manage/resource_mgmt/getOdpsClusters", nil, nil, request)
 
 	if err != nil {
 		if errmsgs.IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {

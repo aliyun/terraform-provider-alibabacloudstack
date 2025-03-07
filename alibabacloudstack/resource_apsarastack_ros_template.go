@@ -65,7 +65,7 @@ func resourceAlibabacloudStackRosTemplateCreate(d *schema.ResourceData, meta int
 		request["TemplateURL"] = v
 	}
 
-	response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, nil, request)
 	if err != nil {
 		errmsg := ""
 		if response != nil {
@@ -120,7 +120,7 @@ func resourceAlibabacloudStackRosTemplateUpdate(d *schema.ResourceData, meta int
 			request["TemplateURL"] = d.Get("template_url")
 		}
 		action := "UpdateTemplate"
-		response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, nil, request)
 		if err != nil {
 			errmsg := ""
 			if response != nil {
@@ -141,7 +141,7 @@ func resourceAlibabacloudStackRosTemplateDelete(d *schema.ResourceData, meta int
 	request := map[string]interface{}{
 		"TemplateId": d.Id(),
 	}
-	response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "ROS", "2019-09-10", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ChangeSetNotFound", "StackNotFound", "TemplateNotFound"}) {
 			return nil

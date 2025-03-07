@@ -55,7 +55,7 @@ func (s *WafOpenapiService) DescribeWafDomain(id string) (object map[string]inte
 		"Domain":     parts[1],
 		"InstanceId": parts[0],
 	}
-	response, err = client.DoTeaRequest("POST", "waf-openapi", "2019-09-10", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "waf-openapi", "2019-09-10", action, "", nil, nil, request)
 	addDebug(action, response, request)
 	v, err := jsonpath.Get("$.Domain", response)
 	if err != nil {
@@ -72,7 +72,7 @@ func (s *WafOpenapiService) DescribeWafInstance(id string) (object map[string]in
 	request := map[string]interface{}{
 		"RegionId": s.client.RegionId,
 	}
-	response, err = client.DoTeaRequest("GET", "waf-onecs", "2020-07-01", action, "", nil, request)
+	response, err = client.DoTeaRequest("GET", "waf-onecs", "2020-07-01", action, "", nil, nil, request)
 	if err != nil {
 		err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
 		return
@@ -112,7 +112,7 @@ func (s *WafOpenapiService) DescribeWafCertificate(id string) (object map[string
 		"InstanceId": parts[0],
 	}
 	idExist := false
-	response, err = client.DoTeaRequest("POST", "waf-openapi", "2019-09-10", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "waf-openapi", "2019-09-10", action, "", nil, nil, request)
 	addDebug(action, response, request)
 	if err != nil {
 		return object, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -150,7 +150,7 @@ func (s *WafOpenapiService) DescribeProtectionModuleStatus(id string) (object ma
 		"Domain":      parts[1],
 		"InstanceId":  parts[0],
 	}
-	response, err = client.DoTeaRequest("POST", "waf-openapi", "2019-09-10", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "waf-openapi", "2019-09-10", action, "", nil, nil, request)
 	addDebug(action, response, request)
 	if err != nil {
 		return object, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -177,7 +177,7 @@ func (s *WafOpenapiService) DescribeWafProtectionModule(id string) (object map[s
 		"Domain":      parts[1],
 		"InstanceId":  parts[0],
 	}
-	response, err = client.DoTeaRequest("POST", "waf-openapi", "2019-09-10", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "waf-openapi", "2019-09-10", action, "", nil, nil, request)
 	addDebug(action, response, request)
 	if err != nil {
 		return object, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -198,7 +198,7 @@ func (s *WafOpenapiService) DescribeWafv3Instance(id string) (object map[string]
 
 	var response map[string]interface{}
 	action := "DescribeInstance"
-	response, err = client.DoTeaRequest("POST", "waf-openapi", "2021-10-01", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "waf-openapi", "2021-10-01", action, "", nil, nil, request)
 	if err != nil {
 		return object, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -249,7 +249,7 @@ func (s *WafOpenapiService) DescribeWafv3Domain(id string) (object map[string]in
 
 	var response map[string]interface{}
 	action := "DescribeDomainDetail"
-	response, err = client.DoTeaRequest("POST", "waf-openapi", "2021-10-01", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "waf-openapi", "2021-10-01", action, "", nil, nil, request)
 	v, err := jsonpath.Get("$", response)
 	if err != nil {
 		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$", response)

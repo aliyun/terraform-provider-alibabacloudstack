@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strings"
 
+	roa "github.com/alibabacloud-go/tea-roa/client"
 	rpc "github.com/alibabacloud-go/tea-rpc/client"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/auth/credentials"
@@ -43,8 +44,6 @@ type Config struct {
 	RamRolePolicy            string
 	RamRoleSessionExpiration int
 	Endpoints                map[ServiceCode]string
-	OrganizationAccessKey    string
-	OrganizationSecretKey    string
 	ConfigurationSource      string
 	Insecure                 bool
 	Proxy                    string
@@ -156,7 +155,7 @@ func (c *Config) MakeConfigByEcsRoleName() error {
 	return nil
 }
 
-func (c *Config) getTeaDslSdkConfig(stsSupported bool) (config rpc.Config, err error) {
+func (c *Config) getTeaRpcDslSdkConfig(stsSupported bool) (config rpc.Config, err error) {
 	config.SetRegionId(c.RegionId)
 	config.SetUserAgent(fmt.Sprintf("%s/%s %s/%s %s/%s", Terraform, terraformVersion, Provider, providerVersion, Module, c.ConfigurationSource))
 	credential, err := credential.NewCredential(c.getCredentialConfig(stsSupported))
@@ -181,6 +180,34 @@ func (c *Config) getTeaDslSdkConfig(stsSupported bool) (config rpc.Config, err e
 		config.SetHttpsProxy(c.Proxy)
 	case "SOCKS":
 		config.SetSocks5Proxy(c.Proxy)
+	}
+
+	return
+}
+
+func (c *Config) getTeaRoaDslSdkConfig(stsSupported bool) (config roa.Config, err error) {
+	config.SetRegionId(c.RegionId)
+	config.SetUserAgent(fmt.Sprintf("%s/%s %s/%s %s/%s", Terraform, terraformVersion, Provider, providerVersion, Module, c.ConfigurationSource))
+	credential, err := credential.NewCredential(c.getCredentialConfig(stsSupported))
+	config.SetCredential(credential).
+		SetRegionId(c.RegionId).
+		SetProtocol(c.Protocol).
+		SetReadTimeout(c.ClientReadTimeout).
+		SetConnectTimeout(c.ClientConnectTimeout).
+		SetMaxIdleConns(500)
+	if c.SourceIp != "" {
+		config.SetSourceIp(c.SourceIp)
+	}
+	if c.SecureTransport != "" {
+		config.SetSecureTransport(c.SecureTransport)
+	}
+
+	proxyProtocol := strings.ToUpper(strings.Split(c.Proxy, ":")[0])
+	switch proxyProtocol {
+	case "HTTP":
+		config.SetHttpProxy(c.Proxy)
+	case "HTTPS":
+		config.SetHttpsProxy(c.Proxy)
 	}
 
 	return

@@ -6,6 +6,7 @@ import (
 
 	roaCS "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
+	roa "github.com/alibabacloud-go/tea-roa/client"
 	rpc "github.com/alibabacloud-go/tea-rpc/client"
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
@@ -34,7 +35,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/slb"
 	slsPop "github.com/aliyun/alibaba-cloud-sdk-go/services/sls"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/sts"
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	sls "github.com/aliyun/aliyun-log-go-sdk"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
@@ -49,6 +49,7 @@ import (
 
 	"sync"
 
+	rpcutil "github.com/alibabacloud-go/tea-rpc-utils/service"
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -78,7 +79,8 @@ type AlibabacloudStackClient struct {
 	ResourceGroup                string
 	ResourceGroupId              string
 	Config                       *Config
-	teaSdkConfig                 rpc.Config
+	teaRpcSdkConfig              rpc.Config
+	teaRoaSdkConfig              roa.Config
 	accountId                    string
 	roleId                       int
 	Conns                        map[ServiceCode]*sdk.Client
@@ -154,14 +156,19 @@ func (c *Config) Client() (*AlibabacloudStackClient, error) {
 	// Get the auth and region. This can fail if keys/regions were not
 	// specified and we're attempting to use the environment.
 
-	teaSdkConfig, err := c.getTeaDslSdkConfig(true)
+	teaRpcSdkConfig, err := c.getTeaRpcDslSdkConfig(true)
+	if err != nil {
+		return nil, err
+	}
+	teaRoaSdkConfig, err := c.getTeaRoaDslSdkConfig(true)
 	if err != nil {
 		return nil, err
 	}
 
 	return &AlibabacloudStackClient{
 		Config:                       c,
-		teaSdkConfig:                 teaSdkConfig,
+		teaRpcSdkConfig:              teaRpcSdkConfig,
+		teaRoaSdkConfig:              teaRoaSdkConfig,
 		Region:                       c.Region,
 		RegionId:                     c.RegionId,
 		AccessKey:                    c.AccessKey,
@@ -181,7 +188,7 @@ func (client *AlibabacloudStackClient) NewTeaSDkClient(productCode string, endpo
 	if endpoint == "" {
 		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", productCode)
 	}
-	sdkConfig := client.teaSdkConfig
+	sdkConfig := client.teaRpcSdkConfig
 	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
 	conn, err := rpc.NewClient(&sdkConfig)
 	for key, value := range client.defaultHeaders(productCode) {
@@ -844,13 +851,7 @@ func (client *AlibabacloudStackClient) WithEdasClient(do func(*edas.Client) (int
 			return nil, fmt.Errorf("unable to initialize the Edas client: endpoint or domain is not provided for Edas service")
 		}
 		// edasconn, err := edas.NewClientWithOptions(client.Config.RegionId, client.getSdkConfig().WithTimeout(time.Duration(60)*time.Second), client.Config.getAuthCredential(true))
-		var edasconn *edas.Client
-		var err error
-		if client.Config.OrganizationAccessKey != "" && client.Config.OrganizationSecretKey != "" {
-			edasconn, err = edas.NewClientWithAccessKey(client.Config.RegionId, client.Config.OrganizationAccessKey, client.Config.OrganizationSecretKey)
-		} else {
-			edasconn, err = edas.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
-		}
+		edasconn, err := edas.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
 		if err != nil {
 			return nil, fmt.Errorf("unable to initialize the Edas client: %#v", err)
 		}
@@ -1189,16 +1190,16 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 	request.QueryParams = client.defaultQueryParams()
 }
 
-func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode string, version string, apiname string, pathpattern string, query map[string]interface{}, body map[string]interface{}) (_result map[string]interface{}, _err error) {
+func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode string, version string, apiname string, pathpattern string, headers map[string]*string, query map[string]interface{}, body map[string]interface{}) (_result map[string]interface{}, _err error) {
 	ServiceCodeStr := strings.ReplaceAll(strings.ToUpper(popcode), "-", "_")
 	endpoint := client.Config.Endpoints[ServiceCode(ServiceCodeStr)]
 	if endpoint == "" {
 		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", popcode)
 	}
-	sdkConfig := client.teaSdkConfig
-	sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
 
-	headers := make(map[string]*string)
+	if headers == nil {
+		headers = make(map[string]*string)
+	}
 	for key, value := range client.defaultHeaders(popcode) {
 		v := value
 		headers[key] = &v
@@ -1237,14 +1238,42 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 	wait := IncrementalWait(3*time.Second, 3*time.Second)
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
 
+		var err error
 		// conn 必须在每次请求前初始化，因为DoRequest会修改conn的内容，会导致下次conn的配置失效
-		conn, err := rpc.NewClient(&sdkConfig)
-		if err != nil {
-			return resource.RetryableError(fmt.Errorf("unable to initialize the %s client: %#v", popcode, err))
+		if pathpattern != "" {
+			response, err = func() (map[string]interface{}, error) {
+				sdkConfig := client.teaRoaSdkConfig
+				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
+				conn, err := roa.NewClient(&sdkConfig)
+				if err != nil {
+					return nil, err
+				}
+				roa_query := rpcutil.Query(tea.ToMap(map[string]interface{}{
+					"Format":         "json",
+					"Timestamp":      tea.StringValue(rpcutil.GetTimestamp()),
+					"Version":        tea.StringValue(&version),
+					"SignatureNonce": tea.StringValue(util.GetNonce()),
+				}, query))
+				r, e := conn.DoRequestWithAction(&apiname, &version, &protocol, &method, &authType, &pathpattern, roa_query, headers, body, &runtime)
+				if e != nil {
+					return r, e
+				} else {
+					return r["body"].(map[string]interface{}), e
+				}
+			}()
+		} else {
+			response, err = func() (map[string]interface{}, error) {
+				sdkConfig := client.teaRpcSdkConfig
+				sdkConfig.SetEndpoint(endpoint).SetReadTimeout(client.Config.ClientReadTimeout * 1000) //单位毫秒
+				conn, err := rpc.NewClient(&sdkConfig)
+				if err != nil {
+					return nil, err
+				}
+				conn.Headers = headers
+				return conn.DoRequest(&apiname, &protocol, &method, &version, &authType, query, body, &runtime)
+			}()
 		}
-		conn.Headers = headers
 
-		response, err = conn.DoRequest(&apiname, &protocol, &method, &version, &authType, query, body, &runtime)
 		log.Printf(" ================================ %s ======================================\n query %v \n request %v \n response: %v", apiname, query, body, response)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
@@ -1274,53 +1303,6 @@ func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*s
 		conn = c
 	}
 	return conn, nil
-}
-
-func (client *AlibabacloudStackClient) ProcessCommonRequestForOrganization(request *requests.CommonRequest) (*responses.CommonResponse, error) {
-	popcode := ServiceCode(strings.ToUpper(request.Product))
-	conn, err := sts.NewClientWithAccessKey(client.Config.RegionId, client.Config.OrganizationAccessKey, client.Config.OrganizationSecretKey)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the %s Organization client: %#v", popcode, err)
-	}
-	endpoint := client.Config.Endpoints[popcode]
-	if endpoint == "" {
-		return nil, fmt.Errorf("[ERROR] unable to initialize the %s client: endpoint or domain is not provided", string(popcode))
-	}
-	conn.Domain = endpoint
-	conn.SetReadTimeout(time.Duration(client.Config.ClientReadTimeout) * time.Hour)
-	conn.SetConnectTimeout(time.Duration(client.Config.ClientConnectTimeout) * time.Hour)
-	conn.SourceIp = client.Config.SourceIp
-	conn.SecureTransport = client.Config.SecureTransport
-	conn.AppendUserAgent(Terraform, TerraformVersion)
-	conn.AppendUserAgent(Provider, ProviderVersion)
-	conn.AppendUserAgent(Module, client.Config.ConfigurationSource)
-	conn.SetHTTPSInsecure(client.Config.Insecure)
-	if client.Config.Proxy != "" {
-		conn.SetHttpsProxy(client.Config.Proxy)
-		conn.SetHttpProxy(client.Config.Proxy)
-	}
-
-	if strings.HasPrefix(conn.Domain, "internal.asapi.") || strings.HasPrefix(conn.Domain, "public.asapi.") {
-		// asapi兼容逻辑
-		// # asapi 使用common SDK时不能拼接pathpattern，否则会报错
-		if request.PathPattern != "" {
-			var r []string = strings.SplitN(conn.Domain, "/", 2)
-			request.Domain = r[0]
-			request.PathPattern = "/asapi/v3"
-		}
-		if len(request.Content) > 0 {
-			request.QueryParams["x-acs-body"] = string(request.Content)
-		}
-		if strings.HasPrefix(conn.Domain, "public.asapi.") {
-			// 如果public的asapi网关，强制使用https
-			request.SetScheme("https")
-		}
-		request.Method = "POST"
-	}
-
-	response, err := conn.ProcessCommonRequest(request)
-	return response, err
-
 }
 
 func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.CommonRequest) (*responses.CommonResponse, error) {
@@ -1354,7 +1336,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 		if strings.HasPrefix(domain, "public.asapi.") {
 			// 如果public的asapi网关，强制使用https
 			request.SetScheme("https")
-		}else{
+		} else {
 			// 如果internal的asapi网关，强制使用http
 			request.SetScheme("http")
 		}

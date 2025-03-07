@@ -145,7 +145,7 @@ func resourceAlibabacloudStackMaxcomputeCuDelete(d *schema.ResourceData, meta in
 	request["CuName"] = d.Get("cu_name")
 	request["ClusterName"] = d.Get("cluster_name")
 
-	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, nil, request)
 	
 	if err != nil {
 		return err

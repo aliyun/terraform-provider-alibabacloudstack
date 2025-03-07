@@ -94,7 +94,7 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 		request["KmsKeyId"] = v
 	}
 
-	response, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+	response, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 	
 	if err != nil {
 		return err
@@ -121,7 +121,7 @@ func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta i
 	if d.HasChange("description") {
 		request["Description"] = d.Get("description")
 		action := "ModifyFileSystem"
-		_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+		_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
@@ -159,7 +159,7 @@ func resourceAlibabacloudStackNasFileSystemDelete(d *schema.ResourceData, meta i
 	request := map[string]interface{}{
 		"FileSystemId": d.Id(),
 	}
-	_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, request)
+	_, err = client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidFileSystem.NotFound", "Forbidden.NasNotFound"}) {
 			return nil

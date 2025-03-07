@@ -312,7 +312,7 @@ func resourceAlibabacloudStackBastionhostInstanceCreate(d *schema.ResourceData, 
 	request["ClientToken"] = buildClientToken("CreateInstance")
 	// response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
 
-	response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
 	addDebug(action, response, request)
 	if err != nil {
 		return err
@@ -478,7 +478,7 @@ func resourceAlibabacloudStackBastionhostInstanceUpdate(d *schema.ResourceData, 
 		request["Description"] = d.Get("description")
 	}
 	if update && !d.IsNewResource() {
-		response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
+		response, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
 		addDebug(action, response, request)
 		if err != nil {
 			return err
@@ -764,7 +764,7 @@ func resourceAlibabacloudStackBastionhostInstanceDelete(d *schema.ResourceData, 
 	request := map[string]interface{}{
 		"InstanceId": d.Id(),
 	}
-	_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, request)
+	_, err := client.DoTeaRequest("POST", "Bastionhostprivate", "2023-03-23", action, "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidBastionhost.NotFound"}) {
 			return nil

@@ -57,9 +57,14 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"FatJar", "War", "Image"}, false),
 				Default:      "Image",
 			},
-			"application_descriotion": {
+			"application_description": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"application_descriotion": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "Field 'application_descriotion' is deprecated and will be removed in a future release. Please use new field 'application_description' instead.",
 			},
 			"limit_mem": {
 				Type:     schema.TypeInt,
@@ -159,10 +164,6 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"local_volume": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"namespace": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -224,6 +225,78 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"config_mount_descs": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"type": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"ConfigMap", "Secret"}, false),
+						},
+						"mount_path": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+			"local_volume": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": {
+							Type:     schema.TypeString,
+							Required: true,
+							// ValidateFunc: validation.StringInSlice([]string{"file", "filepath"}, false),
+						},
+						"node_path": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"mount_path": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+			},
+			"pvc_mount_descs": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"pvc_name": {
+							Type:     schema.TypeString,
+							Required: true,
+							// ValidateFunc: validation.StringInSlice([]string{"file", "filepath"}, false),
+						},
+						"mount_paths": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"mount_path": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"read_only": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  false,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -279,7 +352,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 
 	request.QueryParams["Replicas"] = fmt.Sprintf("%d", d.Get("replicas").(int))
 
-	if v, ok := d.GetOk("application_descriotion"); ok {
+	if v, ok := connectivity.GetResourceDataOk(d, "application_description", "application_descriotion"); ok {
 		request.QueryParams["ApplicationDescription"] = v.(string)
 	}
 
@@ -335,8 +408,28 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 		request.QueryParams["MountDescs"] = v.(string)
 	}
 
+	if v, ok := d.GetOk("config_mount_descs"); ok {
+		configmaps, err := edasService.GetK8sConfigMaps(v.([]interface{}))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.QueryParams["ConfigMountDescs"] = configmaps
+	}
+
 	if v, ok := d.GetOk("local_volume"); ok {
-		request.QueryParams["LocalVolume"] = v.(string)
+		local_volumes, err := edasService.GetK8sLocalVolumes(v.([]interface{}))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.QueryParams["LocalVolume"] = local_volumes
+	}
+
+	if v, ok := d.GetOk("pvc_mount_descs"); ok {
+		pvc_mount_descs, err := edasService.GetK8sPvcMountDescs(v.([]interface{}))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.QueryParams["PvcMountDescs"] = pvc_mount_descs
 	}
 
 	if v, ok := d.GetOk("namespace"); ok {
@@ -354,8 +447,8 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	if v, ok := d.GetOk("limit_m_cpu"); ok {
 		request.QueryParams["LimitmCpu"] = fmt.Sprintf("%d", v.(int))
 	}
-	bresponse, err := client.ProcessCommonRequestForOrganization(request)
-	addDebug("InsertK8sApplication", bresponse, request, request.QueryParams)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug("InsertK8sApplication", bresponse, request.QueryParams, request)
 	if err != nil {
 		errmsg := ""
 		if bresponse != nil {
@@ -365,12 +458,12 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	}
 	var response map[string]interface{}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if response["Code"].(float64) != 200 {
+		return errmsgs.WrapError(fmt.Errorf("Create k8s application failed for %s", response["Message"].(string)))
+	}
 	appId := response["ApplicationInfo"].(map[string]interface{})["AppId"].(string)
 	changeOrderId := response["ApplicationInfo"].(map[string]interface{})["ChangeOrderId"].(string)
 	d.SetId(appId)
-	if response["Code"].(float64) != 200 {
-		return errmsgs.WrapError(errmsgs.Error("Create k8s application failed for " + response["Message"].(string)))
-	}
 
 	if len(changeOrderId) > 0 {
 		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(changeOrderId, []string{"3", "6", "10"}))
@@ -382,7 +475,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	if bind_slb_err != nil {
 		return errmsgs.WrapError(bind_slb_err)
 	}
-	return resourceAlibabacloudStackEdasK8sApplicationRead(d, meta)
+	return resourceAlibabacloudStackEdasK8sApplicationUpdate(d, meta)
 }
 
 func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, meta interface{}) error {
@@ -451,7 +544,76 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 	if len(response.Conf.Readiness) > 0 {
 		d.Set("readiness", response.Conf.Readiness)
 	}
-	d.Set("namespace", response.NameSpace)
+	d.Set("namespace", response.DeployGroups.DeployGroup[0].NameSpace)
+	if len(response.Conf.K8sVolumeInfo) > 0 {
+		k8sVolumeInfo := make(map[string]interface{})
+		err = json.Unmarshal([]byte(response.Conf.K8sVolumeInfo), &k8sVolumeInfo)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		configMountDescs, ok := k8sVolumeInfo["configMountDescs"]
+		if ok {
+			configmaps := make([]ConfigMaps, 0)
+			err = json.Unmarshal([]byte(configMountDescs.(string)), &configmaps)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+			config_mount_descs := make([]map[string]interface{}, 0)
+			for _, v := range configmaps {
+				config_mount_descs = append(config_mount_descs, map[string]interface{}{
+					"name":       v.Name,
+					"type":       v.Type,
+					"mount_path": v.MountPath,
+				})
+			}
+			d.Set("config_mount_descs", config_mount_descs)
+		}
+
+		pvcMountDescs, ok := k8sVolumeInfo["pvcMountDescs"]
+		if ok {
+			pvcmounts := make([]PvcMountDescs, 0)
+			err = json.Unmarshal([]byte(pvcMountDescs.(string)), &pvcmounts)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+			pvc_mount_descs := make([]map[string]interface{}, 0)
+			for _, v := range pvcmounts {
+				mountPaths := make([]map[string]interface{}, 0)
+				for _, vm := range v.MountPaths {
+					mountPaths = append(mountPaths, map[string]interface{}{
+						"mount_path": vm.MountPath,
+						"read_only":  vm.ReadOnly,
+					})
+				}
+				pvc_mount_descs = append(pvc_mount_descs, map[string]interface{}{
+					"pvc_name":    v.PvcName,
+					"mount_paths": mountPaths,
+				})
+			}
+			d.Set("pvc_mount_descs", pvc_mount_descs)
+		}
+	}
+	if len(response.Conf.K8sLocalvolumeInfo) > 0 {
+		K8sLocalvolumeInfo := make(map[string]interface{})
+		err = json.Unmarshal([]byte(response.Conf.K8sLocalvolumeInfo), &K8sLocalvolumeInfo)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		localVolumes := make([]LocalVolume, 0)
+		err = json.Unmarshal([]byte(response.Conf.K8sLocalvolumeInfo), &K8sLocalvolumeInfo)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		local_volumes := make([]map[string]interface{}, 0)
+		for _, v := range localVolumes {
+			local_volumes = append(local_volumes, map[string]interface{}{
+				"mount_path": v.MountPath,
+				"node_path":  v.NodePath,
+				"type":       v.Type,
+			})
+		}
+		d.Set("local_volume", local_volumes)
+	}
 	return nil
 }
 
@@ -462,9 +624,6 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "DeployK8sApplication", "/pop/v5/k8s/acs/k8s_apps")
 	request.QueryParams["RegionId"] = client.RegionId
 	request.QueryParams["AppId"] = d.Id()
-
-	request.Headers["x-acs-content-type"] = "application/json"
-	request.Headers["Content-Type"] = "application/json"
 
 	d.Partial(true)
 	packageType, err := edasService.QueryK8sAppPackageType(d.Id())
@@ -486,6 +645,9 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 		request.QueryParams["PackageUrl"] = d.Get("package_url").(string)
 		if len(request.QueryParams["PackageUrl"]) == 0 {
 			return errmsgs.WrapError(errmsgs.Error("package_url is needed for creating fatjar k8s application"))
+		}
+		if d.HasChange("package_version") {
+			partialKeys = append(partialKeys, "package_version")
 		}
 		request.QueryParams["PackageVersion"] = d.Get("package_version").(string)
 
@@ -519,7 +681,8 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 	if d.HasChange("replicas") {
 		partialKeys = append(partialKeys, "replicas")
 	}
-	request.QueryParams["Replicas"] = fmt.Sprintf("%d", d.Get("replicas").(int))
+	replicas := d.Get("replicas").(int)
+	request.QueryParams["Replicas"] = fmt.Sprintf("%d", replicas)
 
 	if d.HasChange("limit_mem") {
 		partialKeys = append(partialKeys, "limit_mem")
@@ -592,9 +755,28 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 		request.QueryParams["MountDescs"] = d.Get("mount_descs").(string)
 	}
 
+	if d.HasChange("config_mount_descs") {
+		configmaps, err := edasService.GetK8sConfigMaps(d.Get("config_mount_descs").([]interface{}))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.QueryParams["ConfigMountDescs"] = configmaps
+	}
+
 	if d.HasChange("local_volume") {
-		partialKeys = append(partialKeys, "local_volume")
-		request.QueryParams["LocalVolume"] = d.Get("local_volume").(string)
+		local_volumes, err := edasService.GetK8sLocalVolumes(d.Get("local_volume").([]interface{}))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.QueryParams["LocalVolume"] = local_volumes
+	}
+
+	if d.HasChange("pvc_mount_descs") {
+		pvc_mount_descs, err := edasService.GetK8sPvcMountDescs(d.Get("pvc_mount_descs").([]interface{}))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		request.QueryParams["PvcMountDescs"] = pvc_mount_descs
 	}
 
 	if d.HasChange("requests_m_cpu") {
@@ -607,27 +789,28 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 		request.QueryParams["McpuLimit"] = fmt.Sprintf("%d", d.Get("limit_m_cpu").(int))
 	}
 
-	if len(partialKeys) > 0 {
-		partialKeys = append(partialKeys, "update_type")
-		update_type := d.Get("update_type").(string)
-		update_batch := d.Get("update_batch").(int)
-		if update_batch < 2 {
-			return errmsgs.WrapError(errmsgs.Error("`update_batch` must be greater than 2"))
+	if len(partialKeys) > 0 && !d.IsNewResource() {
+		if v, ok := d.GetOk("update_type"); ok && v.(string) != "" && replicas > 1 {
+			partialKeys = append(partialKeys, "update_type")
+			update_type := d.Get("update_type").(string)
+			update_batch := d.Get("update_batch").(int)
+			if update_batch < 2 {
+				return errmsgs.WrapError(errmsgs.Error("`update_batch` must be greater than 2"))
+			}
+			update_release_type := d.Get("update_release_type").(string)
+			gray_update_strategy := ""
+			if v, ok := d.GetOk("update_gray"); ok {
+				update_gray := v.(int)
+				gray_update_strategy = fmt.Sprintf(",\"grayUpdate\":{\"gray\":%d}", update_gray)
+			}
+			if update_release_type == "auto" {
+				update_batch_wait_time := d.Get("update_batch_wait_time").(int)
+				request.QueryParams["UpdateStrategy"] = fmt.Sprintf("{\"type\":\"%s\",\"batchUpdate\":{\"batch\":%d,\"releaseType\":\"%s\",\"batchWaitTime\":%d}%s}", update_type, update_batch, update_release_type, update_batch_wait_time, gray_update_strategy)
+			} else {
+				request.QueryParams["UpdateStrategy"] = fmt.Sprintf("{\"type\":\"%s\",\"batchUpdate\":{\"batch\":%d,\"releaseType\":\"%s\"}%s}", update_type, update_batch, update_release_type, gray_update_strategy)
+			}
 		}
-		update_release_type := d.Get("update_release_type").(string)
-		gray_update_strategy := ""
-		if v, ok := d.GetOk("update_gray"); ok {
-			update_gray := v.(int)
-			gray_update_strategy = fmt.Sprintf(",\"grayUpdate\":{\"gray\":%d}", update_gray)
-		}
-		if update_release_type == "auto" {
-			update_batch_wait_time := d.Get("update_batch_wait_time").(int)
-			request.QueryParams["UpdateStrategy"] = fmt.Sprintf("{\"type\":\"%s\",\"batchUpdate\":{\"batch\":%d,\"releaseType\":\"%s\",\"batchWaitTime\":%d}%s}", update_type, update_batch, update_release_type, update_batch_wait_time, gray_update_strategy)
-		} else {
-			request.QueryParams["UpdateStrategy"] = fmt.Sprintf("{\"type\":\"%s\",\"batchUpdate\":{\"batch\":%d,\"releaseType\":\"%s\"}%s}", update_type, update_batch, update_release_type, gray_update_strategy)
-		}
-
-		bresponse, err := client.ProcessCommonRequestForOrganization(request)
+		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request)
 
 		if err != nil {
@@ -671,7 +854,7 @@ func resourceAlibabacloudStackEdasK8sApplicationDelete(d *schema.ResourceData, m
 	request.Headers["Content-Type"] = "application/json"
 	wait := incrementalWait(1*time.Second, 2*time.Second)
 	err := resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		bresponse, err := client.ProcessCommonRequestForOrganization(request)
+		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser}) {
@@ -711,7 +894,7 @@ func K8sBindSlb(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
 	bind_intranet_slb := false
-	intranet_request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "BindK8sSlb", "/pop/k8s/acs/k8s_slb_binding")
+	intranet_request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "BindK8sSlb", "/pop/v5/k8s/acs/k8s_slb_binding")
 	intranet_request.QueryParams["RegionId"] = client.RegionId
 	intranet_request.QueryParams["AppId"] = d.Id()
 	intranet_request.QueryParams["ClusterId"] = d.Get("cluster_id").(string)
@@ -730,7 +913,7 @@ func K8sBindSlb(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 	if bind_intranet_slb {
-		bresponse, err := client.ProcessCommonRequestForOrganization(intranet_request)
+		bresponse, err := client.ProcessCommonRequest(intranet_request)
 		addDebug("BindK8sSlb: intranet", bresponse, intranet_request)
 		if err != nil {
 			errmsg := ""
@@ -741,7 +924,7 @@ func K8sBindSlb(d *schema.ResourceData, meta interface{}) error {
 		}
 		response := make(map[string]interface{})
 		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if response["Code"] != 200 {
+		if response["Code"].(float64) != 200 {
 			return errmsgs.WrapError(fmt.Errorf("BindK8sSlb Failed , response: %#v", response))
 		}
 		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(response["ChangeOrderId"].(string), []string{"3", "6", "10"}))
@@ -751,7 +934,7 @@ func K8sBindSlb(d *schema.ResourceData, meta interface{}) error {
 	}
 	time.Sleep(time.Duration(20) * time.Second)
 	bind_internet_slb := false
-	internet_request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "BindK8sSlb", "/pop/k8s/acs/k8s_slb_binding")
+	internet_request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "BindK8sSlb", "/pop/v5/k8s/acs/k8s_slb_binding")
 	internet_request.QueryParams["RegionId"] = client.RegionId
 	internet_request.QueryParams["AppId"] = d.Id()
 	internet_request.QueryParams["ClusterId"] = d.Get("cluster_id").(string)
@@ -770,7 +953,7 @@ func K8sBindSlb(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 	if bind_internet_slb {
-		bresponse, err := client.ProcessCommonRequestForOrganization(internet_request)
+		bresponse, err := client.ProcessCommonRequest(internet_request)
 		addDebug("BindK8sSlb: internet", bresponse, internet_request)
 		if err != nil {
 			errmsg := ""
@@ -781,8 +964,8 @@ func K8sBindSlb(d *schema.ResourceData, meta interface{}) error {
 		}
 		response := make(map[string]interface{})
 		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-		if response["Code"] != 200 {
-			return errmsgs.WrapError(fmt.Errorf("BindK8sSlb Failed , response: %#v", response))
+		if response["Code"].(float64) != 200 {
+			return errmsgs.WrapError(fmt.Errorf("BindK8sSlb Failed , ============================ response:  ============================ \n%#v", response))
 		}
 		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(response["ChangeOrderId"].(string), []string{"3", "6", "10"}))
 		if _, err := stateConf.WaitForState(); err != nil {

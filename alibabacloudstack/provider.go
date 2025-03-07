@@ -170,18 +170,21 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_KAFKAOPENAPI_DOMAIN", nil),
 				Description: descriptions["kafkaopenapi_domain"],
+				Deprecated:  "Use schema endpoints replace kafkaopenapi_domain.",
 			},
 			"organization_accesskey": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_ACCESSKEY", nil),
 				Description: descriptions["organization_accesskey"],
+				Deprecated:  "Use access_key replace organization_accesskey.",
 			},
 			"organization_secretkey": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ORGANIZATION_SECRETKEY", nil),
 				Description: descriptions["organization_secretkey"],
+				Deprecated:  "Use secret_key replace organization_secretkey.",
 			},
 			"sls_openapi_endpoint": {
 				Type:        schema.TypeString,
@@ -344,6 +347,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_edas_clusters":                          dataSourceAlibabacloudStackEdasClusters(),
 		"alibabacloudstack_edas_applications":                      dataSourceAlibabacloudStackEdasApplications(),
 		"alibabacloudstack_edas_slbattachments":                    dataSourceAlibabacloudStackEdasApplications(),
+		"alibabacloudstack_edas_namespaces":                        dataSourceAlibabacloudStackEdasNamespaces(),
 		"alibabacloudstack_eips":                                   dataSourceAlibabacloudStackEips(),
 		"alibabacloudstack_eip_addresses":                          dataSourceAlibabacloudStackEips(),
 		"alibabacloudstack_ess_scaling_configurations":             dataSourceAlibabacloudStackEssScalingConfigurations(),
@@ -594,7 +598,8 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ecs_hpccluster":                        resourceAlibabacloudStackEcsHpcCluster(),
 		"alibabacloudstack_ecs_ebs_storage_set":                   resourceAlibabacloudStackEcsEbsStorageSets(),
 		"alibabacloudstack_edas_application":                      resourceAlibabacloudStackEdasApplication(),
-		"alibabacloudstack_edas_slbattachment":                    resourceAlibabacloudStackEdasApplication(),
+		"alibabacloudstack_edas_k8s_service":                      resourceAlibabacloudStackEdasK8sService(),
+		"alibabacloudstack_edas_slbattachment":                    resourceAlibabacloudStackEdasSlbAttachment(),
 		"alibabacloudstack_edas_application_scale":                resourceAlibabacloudStackEdasInstanceApplicationAttachment(),
 		"alibabacloudstack_edas_cluster":                          resourceAlibabacloudStackEdasCluster(),
 		"alibabacloudstack_edas_deploy_group":                     resourceAlibabacloudStackEdasDeployGroup(),
@@ -603,6 +608,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_edas_instanceclusterattachment":        resourceAlibabacloudStackEdasInstanceClusterAttachment(),
 		"alibabacloudstack_edas_k8s_application":                  resourceAlibabacloudStackEdasK8sApplication(),
 		"alibabacloudstack_edas_k8s_cluster":                      resourceAlibabacloudStackEdasK8sCluster(),
+		"alibabacloudstack_edas_namespace":                        resourceAlibabacloudStackEdasNamespace(),
 		"alibabacloudstack_edas_slb_attachment":                   resourceAlibabacloudStackEdasSlbAttachment(),
 		"alibabacloudstack_ehpc_job_template":                     resourceAlibabacloudStackEhpcJobTemplate(),
 		"alibabacloudstack_eip":                                   resourceAlibabacloudStackEip(),
@@ -981,12 +987,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Endpoints[connectivity.STSCode] = StsEndpoint
 	}
 	organizationAccessKey := d.Get("organization_accesskey").(string)
-	if organizationAccessKey != "" {
-		config.OrganizationAccessKey = organizationAccessKey
-	}
 	organizationSecretKey := d.Get("organization_secretkey").(string)
-	if organizationSecretKey != "" {
-		config.OrganizationSecretKey = organizationSecretKey
+	if organizationAccessKey != "" &&  organizationSecretKey != "" {
+		config.AccessKey = organizationAccessKey
+		config.SecretKey = organizationSecretKey
 	}
 	slsOpenAPIEndpoint := d.Get("sls_openapi_endpoint").(string)
 	if slsOpenAPIEndpoint != "" {
@@ -1278,12 +1282,18 @@ func getResourceCredentials(config *connectivity.Config) (string, string, int, e
 	var resGrpId int //ID of resource set
 	var resGrp string
 	deptId = 0
-	if len(response.Data) == 0 || response.Code != "200" {
-		if len(response.Data) == 0 {
-			return "", "", 0, fmt.Errorf("resource group ID and organization not found for resource set %s", config.ResourceSetName)
-		}
+	matched := 0
+	if response.Code != "200" {
 		return "", "", 0, fmt.Errorf("unable to initialize the ascm client: department or resource_group is not provided")
-	} else if len(response.Data) > 1 {
+	}
+	for _, d := range response.Data{
+		if d.ResourceGroupName == config.ResourceSetName{
+			matched += 1
+		}
+	}
+	if matched == 0 {
+			return "", "", 0, fmt.Errorf("resource group ID and organization not found for resource set %s", config.ResourceSetName)	
+	} else if matched > 1 {
 		return "", "", 0, fmt.Errorf("There exists a resource group set name with the same name, Please Provider department or resource_group")
 	} else {
 		for _, j := range response.Data {

@@ -54,7 +54,7 @@ func (s *GpdbService) DescribeGpdbAccount(id string) (object map[string]interfac
 	request["DBInstanceId"] = parts[0]
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
-	response, err = s.client.DoTeaRequest("POST", "gpdb", "2016-05-03", "DescribeAccounts", "", nil, request)
+	response, err = s.client.DoTeaRequest("POST", "gpdb", "2016-05-03", "DescribeAccounts", "", nil, nil, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
 			return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("GPDB:Account", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, fmt.Sprint(response["RequestId"]))

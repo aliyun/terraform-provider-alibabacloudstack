@@ -102,7 +102,7 @@ func dataSourceAlibabacloudStackWafInstancesRead(d *schema.ResourceData, meta in
 	}
 	var response map[string]interface{}
 	var err error
-	response, err = client.DoTeaRequest("GET", "waf-onecs", "2020-07-01", action, "", nil, request)
+	response, err = client.DoTeaRequest("GET", "waf-onecs", "2020-07-01", action, "", nil, nil, request)
 	if err != nil {
 		err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", action, errmsgs.AlibabacloudStackSdkGoERROR)
 		return err

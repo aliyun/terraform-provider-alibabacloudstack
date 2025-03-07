@@ -283,7 +283,7 @@ func resourceAlibabacloudstackWafInstanceCreate(d *schema.ResourceData, meta int
 	// jsonStr := string(jsonBytes)
 	// vpcvswitch := []string{jsonStr}
 
-	response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", action, "", nil, nil, request)
 	addDebug(action, response, request)
 	if err != nil {
 		return err
@@ -381,19 +381,19 @@ func resourceAlibabacloudstackWafInstanceUpdate(d *schema.ResourceData, meta int
 		if detectorNodeNumInt > dgetnodenumberobject {
 			prescaledown := "CreatePreScaleDownInstance"
 			scaledown := "CreateScaleDownInstance"
-			response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", prescaledown, "", nil, request)
+			response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", prescaledown, "", nil, nil, request)
 			if err != nil {
 				return err
 			}
 			addDebug(prescaledown, response, request)
-			response, err = client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", scaledown, "", nil, request)
+			response, err = client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", scaledown, "", nil, nil, request)
 			if err != nil {
 				return err
 			}
 			addDebug(scaledown, response, request)
 		} else {
 			scaleup := "CreateScaleUpInstance"
-			response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", scaleup, "", nil, request)
+			response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", scaleup, "", nil, nil, request)
 			if err != nil {
 				return err
 			}
@@ -417,7 +417,7 @@ func resourceAlibabacloudstackWafInstanceDelete(d *schema.ResourceData, meta int
 	if v, ok := d.GetOk("resource_group_id"); ok {
 		request["ResourceGroupId"] = v
 	}
-	response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", action, "", nil, request)
+	response, err := client.DoTeaRequest("POST", "waf-onecs", "2020-07-01", action, "", nil, nil, request)
 	if err != nil {
 		return err
 	}
