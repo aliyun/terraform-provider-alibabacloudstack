@@ -1,9 +1,10 @@
 ---
+subcategory: "Zone"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack"
 sidebar_current: "docs-alibabacloudstack-datasource-zones"
 description: |-
-    Provides a list of availability zones that can be used by an Alibabacloudstack Cloud account.
+  Provides a list of availability zones that can be used by an Alibabacloudstack Cloud account.
 ---
 
 # alibabacloudstack\_zones
