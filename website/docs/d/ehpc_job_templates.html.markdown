@@ -11,7 +11,7 @@ description: |-
 
 This data source provides the Ehpc Job Templates of the current Alibaba Cloud user.
 
--> **NOTE:** Available in v1.133.0+.
+
 
 ## Example Usage
 

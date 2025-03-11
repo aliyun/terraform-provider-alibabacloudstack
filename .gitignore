@@ -40,6 +40,7 @@ website/vendor
 !command/test-fixtures/**/.terraform/
 /terraform-provider-alibabacloudstack
 /.project
+/.pydevproject
 /terraform
 /terraform
 /tf-templates

@@ -11,7 +11,7 @@ description: |-
 
 This data source provides a list Container Registry Enterprise Edition sync rules on Alibaba Cloud.
 
--> **NOTE:** Available in v1.90.0+
+
 
 ## Example Usage
 

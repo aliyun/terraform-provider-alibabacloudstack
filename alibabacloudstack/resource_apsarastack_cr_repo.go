@@ -34,7 +34,7 @@ func resourceAlibabacloudStackCRRepo() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringLenBetween(2, 30),
+				ValidateFunc: validation.StringLenBetween(2, 64),
 			},
 			"summary": {
 				Type:         schema.TypeString,

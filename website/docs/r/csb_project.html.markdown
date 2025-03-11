@@ -13,7 +13,7 @@ This resource will help you to manager CSB Project.
 
 For information about CSB Project and how to use it, see [Create a Project](https://help.aliyun.com/apsara/enterprise/v_3_17_0_30393230/csb/apsarastack-developer-guide/obtains-information-about-a-single-service-group.html?spm=a2c4g.14484438.10001.97)
 
--> **NOTE:** Available in v1.86.0+.
+
 
 -> **NOTE:** You need to set your registry password in CSB Project console before use this resource.
 

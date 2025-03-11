@@ -11,7 +11,7 @@ description: |-
 
 Provides an ALIKAFKA topic resource.
 
--> **NOTE:** Available in 1.56.0+
+
 
 -> **NOTE:**  Only the following regions support create alikafka topic.
 [`cn-hangzhou`,`cn-beijing`,`cn-shenzhen`,`cn-shanghai`,`cn-qingdao`,`cn-hongkong`,`cn-huhehaote`,`cn-zhangjiakou`,`cn-chengdu`,`cn-heyuan`,`ap-southeast-1`,`ap-southeast-3`,`ap-southeast-5`,`ap-south-1`,`ap-northeast-1`,`eu-central-1`,`eu-west-1`,`us-west-1`,`us-east-1`]
@@ -87,7 +87,7 @@ $ terraform import alibabacloudstack_alikafka_topic.topic alikafka_post-cn-12345
 
 ### Timeouts
 
--> **NOTE:** Available in v1.119.0+.
+
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 

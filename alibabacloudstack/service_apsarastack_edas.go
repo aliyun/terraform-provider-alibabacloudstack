@@ -482,36 +482,41 @@ func (e *EdasService) DescribeEdasListCluster(clusterId string) (*edas.Cluster, 
 	return &cluster, nil
 }
 
-type ServicePort struct {
-	TargetPort int    `json:"TargetPort"`
-	NodePort   int    `json:"NodePort"`
-	Port       int    `json:"Port"`
-	Protocol   string `json:"Protocol"`
+type PortMapping struct {
+	TargetPort  string `json:"targetPort"`
+	ServicePort string `json:"servicePort"`
+	Protocol    string `json:"protocol"`
 }
 
 type EdasK8sService struct {
-	Type         string                 `json:"Type"`
-	Name         string                 `json:"Name"`
-	ClusterIP    string                 `json:"ClusterIP"`
-	ServicePorts []ServicePort          `json:"ServicePorts"`
-	Annotations  map[string]interface{} `json:"Annotations"`
-	Labels       map[string]interface{} `json:"Labels"`
+	Type                  string                 `json:"type"`
+	ServiceName           string                 `json:"serviceName"`
+	AllowEdit             bool                   `json:"allowEdit"`
+	ClusterIP             string                 `json:"clusterIP"`
+	PortMappings          []PortMapping          `json:"portMappings"`
+	Annotations           map[string]interface{} `json:"annotations"`
+	Labels                map[string]interface{} `json:"labels"`
+	ExternalTrafficPolicy string                 `json:"externalTrafficPolicy"`
+	InnerEndpointer       string                 `json:"innerEndpointer"`
+	Namespace             string                 `json:"namespace"`
+	NodeIpList            []string               `json:"nodeIpList"`
+	LoadBalancerIP        string                 `json:"loadbalancerip"`
 }
 
 type EdasK8sServiceResponse struct {
 	Code      int               `json:"Code"`
 	Message   string            `json:"Message"`
 	RequestId string            `json:"RequestId"`
-	Services  []*EdasK8sService `json:"Services"`
+	Data      []*EdasK8sService `json:"Data"`
 }
 
 func (e *EdasService) ListEdasK8sServices(app_id string) ([]*EdasK8sService, error) {
 
-	request := e.client.NewCommonRequest("GET", "Edas", "2017-08-01", "GetK8sServices", "/pop/v5/k8s/acs/k8s_service")
+	request := e.client.NewCommonRequest("GET", "Edas", "2017-08-01", "ListK8sServices", "/pop/v5/k8s/service/list_service")
 	request.QueryParams["AppId"] = app_id
 
 	bresponse, err := e.client.ProcessCommonRequest(request)
-	addDebug("GetK8sServices", bresponse, request.QueryParams, request)
+	addDebug("ListK8sServices", bresponse, request, request.QueryParams)
 	if err != nil {
 		errmsg := ""
 		if bresponse != nil {
@@ -525,14 +530,14 @@ func (e *EdasService) ListEdasK8sServices(app_id string) ([]*EdasK8sService, err
 		return nil, errmsgs.WrapError(err)
 	}
 	if fmt.Sprint(response.Code) != "200" {
-		return nil, errmsgs.WrapError(fmt.Errorf("Get k8s services failed for %s", response.Message))
+		return nil, errmsgs.WrapError(fmt.Errorf("List k8s services failed for %s", response.Message))
 	}
 	// services_map := response["Services"].([]interface{})
 	// err = json.Unmarshal([]byte(fmt.Sprint(services_map)), &services)
 	// if err != nil {
 	// 	return nil, errmsgs.WrapError(err)
 	// }
-	return response.Services, nil
+	return response.Data, nil
 }
 
 func (e *EdasService) DescribeEdasK8sService(id string) (*EdasK8sService, error) {
@@ -544,7 +549,7 @@ func (e *EdasService) DescribeEdasK8sService(id string) (*EdasK8sService, error)
 		return nil, err
 	}
 	for _, service := range services {
-		if service.Name == name {
+		if service.ServiceName == name {
 			return service, nil
 		}
 	}
@@ -764,9 +769,9 @@ func (e *EdasService) QueryK8sAppPackageType(appId string) (string, error) {
 }
 
 type K8sServicePorts struct {
-	Protocol    string `json:"protocol" xml:"protocol"`
-	ServicePort int    `json:"servicePort" xml:"servicePort"`
-	TargetPort  int    `json:"targetPort" xml:"targetPort"`
+	TargetPort  int    `json:"TargetPort"`
+	ServicePort int    `json:"ServicePort"`
+	Protocol    string `json:"Protocol"`
 }
 
 func (e *EdasService) GetK8sServicePorts(service_ports []interface{}) (string, error) {

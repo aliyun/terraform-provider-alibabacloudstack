@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Monitor Service"
+subcategory: "Cloud Monitor"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cms_metric_rule_template"
 sidebar_current: "docs-alibabacloudstack-resource-cms-metric-rule-template"
@@ -12,8 +12,6 @@ description: |-
 Provides a Cloud Monitor Service Metric Rule Template resource.
 
 For information about Cloud Monitor Service Metric Rule Template and how to use it, see [What is Metric Rule Template](https://www.alibabacloud.com/help/en/cloudmonitor/latest/createmetricruletemplate).
-
--> **NOTE:** Available since v1.134.0.
 
 ## Example Usage
 

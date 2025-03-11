@@ -13,7 +13,7 @@ Provides a Ehpc Job Template resource.
 
 For information about Ehpc Job Template and how to use it, see [What is Job Template](https://www.alibabacloud.com/help/product/57664.html).
 
--> **NOTE:** Available in v1.133.0+.
+
 
 ## Example Usage
 

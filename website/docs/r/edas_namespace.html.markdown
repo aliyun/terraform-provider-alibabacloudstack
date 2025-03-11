@@ -13,7 +13,7 @@ Provides a EDAS Namespace resource.
 
 For information about EDAS Namespace and how to use it, see [What is Namespace](https://www.alibabacloud.com/help/en/enterprise-distributed-application-service/latest/insertorupdateregion).
 
--> **NOTE:** Available since v1.173.0.
+-> **NOTE:** Available since v3.16.5
 
 ## Example Usage
 

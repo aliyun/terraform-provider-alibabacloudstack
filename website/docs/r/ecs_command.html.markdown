@@ -13,7 +13,7 @@ Provides a ECS Command resource.
 
 For information about ECS Command and how to use it, see [What is Command](https://www.alibabacloud.com/help/en/doc-detail/64844.htm).
 
--> **NOTE:** Available in v1.116.0+.
+
 
 ## Example Usage
 

@@ -11,7 +11,7 @@ description: |-
 
 Operate the public network ip of the specified resource. How to use it, see [What is Resource Alibabacloudstack KVStore Connection](https://www.alibabacloud.com/help/doc-detail/125795.htm).
 
--> **NOTE:** Available in v1.101.0+.
+
 
 ## Example Usage
 

@@ -1,5 +1,5 @@
 ---
-subcategory: "Max Compute"
+subcategory: "MaxCompute"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_maxcompute_projects"
 sidebar_current: "docs-alibabacloudstack-datasource-maxcompute-projects"

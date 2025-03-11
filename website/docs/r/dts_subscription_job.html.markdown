@@ -13,7 +13,7 @@ Provides a DTS Subscription Job resource.
 
 For information about DTS Subscription Job and how to use it, see [What is Subscription Job](https://help.aliyun.com/document_detail/254791.html).
 
--> **NOTE:** Available in v1.138.0+.
+
 
 ## Example Usage
 

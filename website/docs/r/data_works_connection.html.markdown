@@ -3,7 +3,8 @@ subcategory: "Data Works"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_data_works_connection"
 sidebar_current: "docs-alibabacloudstack-resource-data-works-connection"
-description: |- Provides a AlibabacloudStack Data Works Connection resource.
+description: |-
+  Provides a AlibabacloudStack Data Works Connection resource.
 ---
 
 # alibabacloudstack\_data\_works\_connection

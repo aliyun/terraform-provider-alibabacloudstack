@@ -13,7 +13,7 @@ This resource will help you to manager Container Registry Enterprise Edition nam
 
 For information about Container Registry Enterprise Edition namespaces and how to use it, see [Create a Namespace](https://www.alibabacloud.com/help/doc-detail/145483.htm)
 
--> **NOTE:** Available in v1.86.0+.
+
 
 -> **NOTE:** You need to set your registry password in Container Registry Enterprise Edition console before use this resource.
 

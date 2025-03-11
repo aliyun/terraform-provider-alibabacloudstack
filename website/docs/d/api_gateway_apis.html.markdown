@@ -1,10 +1,10 @@
-api_gateway_apps.html.markdown---
+---
 subcategory: "API Gateway"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_api_gateway_apis"
 sidebar_current: "docs-alibabacloudstack-datasource-api-gateway-apis"
 description: |-
-    Provides a list of apis to the user.
+  Provides a list of apis to the user.
 ---
 
 # alibabacloudstack\_api\_gateway\_apis

@@ -11,7 +11,7 @@ description: |-
 
 This data source provides the Vpc Ipv6 Gateways of the current Alibaba Cloud user.
 
--> **NOTE:** Available in v1.142.0+.
+
 
 ## Example Usage
 

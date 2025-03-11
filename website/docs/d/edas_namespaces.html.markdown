@@ -11,7 +11,7 @@ description: |-
 
 This data source provides the Edas Namespaces of the current Alibaba Cloud user.
 
--> **NOTE:** Available in v1.173.0+.
+
 
 ## Example Usage
 

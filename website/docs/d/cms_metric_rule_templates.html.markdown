@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Monitor Service"
+subcategory: "Cloud Monitor"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cms_metric_rule_templates"
 sidebar_current: "docs-alibabacloudstack-datasource-cms-metric-rule-templates"
