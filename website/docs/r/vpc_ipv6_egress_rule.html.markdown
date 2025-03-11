@@ -13,7 +13,7 @@ Provides a VPC Ipv6 Egress Rule resource.
 
 For information about VPC Ipv6 Egress Rule and how to use it, see [What is Ipv6 Egress Rule](https://www.alibabacloud.com/help/doc-detail/102200.htm).
 
--> **NOTE:** Available in v1.142.0+.
+
 
 ## Example Usage
 

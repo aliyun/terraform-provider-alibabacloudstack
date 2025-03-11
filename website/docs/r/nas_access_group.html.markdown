@@ -14,7 +14,7 @@ Provides a NAS Access Group resource.
 In NAS, the permission group acts as a whitelist that allows you to restrict file system access. You can allow specified IP addresses or CIDR blocks to access the file system, and assign different levels of access permission to different IP addresses or CIDR blocks by adding rules to the permission group.
 For information about NAS Access Group and how to use it, see [What is NAS Access Group](https://www.alibabacloud.com/help/en/doc-detail/27534)
 
--> **NOTE:** Available in v1.33.0+.
+
 
 ## Example Usage
 

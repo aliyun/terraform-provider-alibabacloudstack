@@ -13,7 +13,7 @@ Provides a DTS Synchronization Job resource.
 
 For information about DTS Synchronization Job and how to use it, see [What is Synchronization Job](https://www.alibabacloud.com/product/data-transmission-service).
 
--> **NOTE:** Available in v1.138.0+.
+
 
 ## Example Usage
 

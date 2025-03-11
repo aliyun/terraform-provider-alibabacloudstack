@@ -13,7 +13,7 @@ Provides a Cloud Firewall Control Policy resource.
 
 For information about Cloud Firewall Control Policy and how to use it, see [What is Control Policy](https://www.alibabacloud.com/help/doc-detail/138867.htm).
 
--> **NOTE:** Available in v1.129.0+.
+
 
 ## Example Usage
 

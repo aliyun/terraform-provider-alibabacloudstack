@@ -13,7 +13,7 @@ Provides a VPC Ipv6 Internet Bandwidth resource.
 
 For information about VPC Ipv6 Internet Bandwidth and how to use it, see [What is Ipv6 Internet Bandwidth](https://www.alibabacloud.com/help/doc-detail/102213.htm).
 
--> **NOTE:** Available in v1.143.0+.
+
 
 ## Example Usage
 

@@ -13,8 +13,6 @@ Provides a Cloud Monitor Service Metric Rule Template resource.
 
 For information about Cloud Monitor Service Metric Rule Template and how to use it, see [What is Metric Rule Template](https://www.alibabacloud.com/help/en/cloudmonitor/latest/createmetricruletemplate).
 
--> **NOTE:** Available since v1.134.0.
-
 ## Example Usage
 
 Basic Usage

@@ -11,7 +11,7 @@ description: |-
 
 This data source provides a list Container Registry Enterprise Edition namespaces on Alibaba Cloud.
 
--> **NOTE:** Available in v1.86.0+
+
 
 ## Example Usage
 

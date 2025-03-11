@@ -13,7 +13,7 @@ Using this data source can enable API gateway service automatically. If the serv
 
 For information about API Gateway and how to use it, see [What is API Gateway](https://www.alibabacloud.com/help/product/29462.htm).
 
--> **NOTE:** Available in v1.96.0+
+
 
 ## Example Usage
 

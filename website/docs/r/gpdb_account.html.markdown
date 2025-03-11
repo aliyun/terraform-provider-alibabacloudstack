@@ -13,7 +13,7 @@ Provides a GPDB Account resource.
 
 For information about GPDB Account and how to use it, see [What is Account](https://help.aliyun.com/apsara/enterprise/v_3_16_0_20220117/gpdb/enterprise-ascm-developer-guide/CreateAccount-1.html?spm=a2c4g.14484438.10001.131).
 
--> **NOTE:** Available in v1.142.0+.
+
 
 ## Example Usage
 

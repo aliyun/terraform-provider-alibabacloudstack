@@ -11,7 +11,7 @@ description: |-
 
 This resouce used to create a dedicated host and store its initial version. For information about Aliecs Dedicated Host and how to use it, see [What is Resource Aliecs Dedicated Host](https://www.alibabacloud.com/help/doc-detail/134238.htm).
 
--> **NOTE:** Available in 1.91.0+.
+
 
 ## Example Usage
 Basic Usage

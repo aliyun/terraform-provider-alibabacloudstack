@@ -11,7 +11,7 @@ description: |-
 
 This data source provides a list of OOS Templates in an Alibaba Cloud account according to the specified filters.
  
--> **NOTE:** Available in v1.92.0+.
+
 
 ## Example Usage
 

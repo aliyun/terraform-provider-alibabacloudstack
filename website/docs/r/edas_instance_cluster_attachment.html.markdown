@@ -11,7 +11,7 @@ description: |-
 
 Provides an EDAS instance cluster attachment resource.
 
--> **NOTE:** Available in 1.82.0+
+
 
 
 ## Example Usage

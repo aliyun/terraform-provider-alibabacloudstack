@@ -13,7 +13,7 @@ Provides a Graph Database Db Instance resource.
 
 For information about Graph Database Db Instance and how to use it, see [What is Db Instance](https://help.aliyun.com/document_detail/102865.html).
 
--> **NOTE:** Available in v1.136.0+.
+
 
 ## Example Usage
 

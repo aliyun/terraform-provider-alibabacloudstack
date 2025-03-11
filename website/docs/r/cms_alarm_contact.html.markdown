@@ -11,7 +11,7 @@ description: |-
 
 Creates or modifies an alarm contact. For information about alarm contact and how to use it, see [What is alarm contact](https://www.alibabacloud.com/help/en/doc-detail/114923.htm).
 
--> **NOTE:** Available in v1.99.0+.
+
 
 ## Example Usage
 

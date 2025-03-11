@@ -9,6 +9,8 @@ description: |-
 
 # alibabacloudstack\_edas\_k8s\_service
 
+-> **NOTE:** Available since v3.16.5
+
 ## Example Usage
 
 Basic Usage
