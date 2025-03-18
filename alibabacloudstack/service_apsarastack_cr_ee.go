@@ -12,30 +12,33 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
 )
 
-func (c *CrService) ListCrEeInstances(pageNo int, pageSize int) (*cr_ee.ListInstanceResponse, error) {
-	response := &cr_ee.ListInstanceResponse{}
-	request := cr_ee.CreateListInstanceRequest()
-	c.client.InitRpcRequest(*request.RpcRequest)
-	request.PageNo = requests.NewInteger(pageNo)
-	request.PageSize = requests.NewInteger(pageSize)
-	action := request.GetActionName()
-
-	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
-		return creeClient.ListInstance(request)
-	})
-	response, ok := raw.(*cr_ee.ListInstanceResponse)
+func (c *CrService) ListCrEeInstances(pageNo int, pageSize int) (map[string]interface {}, error) {
+	request := c.client.NewCommonRequest("POST", "cr-ee", "2018-12-01", "ListInstance", "")
+	
+	bresponse, err := c.client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "ListInstance", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(action, raw, request.RpcRequest, request)
 
-	if !response.ListInstanceIsSuccess {
-		return response, errmsgs.WrapErrorf(errors.New(response.Code), errmsgs.DataDefaultErrorMsg, "ListInstance", action, errmsgs.AlibabacloudStackSdkGoERROR)
+	response := make(map[string]interface{})
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
 	}
+	if !response["asapiSuccess"].(bool) {
+		return nil, fmt.Errorf("read ee repo failed, %s", response["asapiErrorMessage"].(string))
+	}
+	repoList := response["Instances"].([]interface{})
+	if len(repoList) == 0 {
+		return nil, errmsgs.WrapError(fmt.Errorf("cr-ee instance not found"))
+	}
+
 	return response, nil
 }
 
@@ -68,64 +71,65 @@ func (c *CrService) DescribeCrEeInstance(instanceId string) (*cr_ee.GetInstanceR
 	return response, nil
 }
 
-func (c *CrService) GetCrEeInstanceUsage(instanceId string) (*cr_ee.GetInstanceUsageResponse, error) {
-	response := &cr_ee.GetInstanceUsageResponse{}
-	request := cr_ee.CreateGetInstanceUsageRequest()
-	c.client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceId = instanceId
-	resource := instanceId
-	action := request.GetActionName()
-
-	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
-		return creeClient.GetInstanceUsage(request)
-	})
-	response, ok := raw.(*cr_ee.GetInstanceUsageResponse)
+func (c *CrService) GetCrEeInstanceUsage(instanceId string) (map[string]interface{}, error) {
+	
+	request := c.client.NewCommonRequest("POST", "cr-ee", "2018-12-01", "GetInstanceUsage", "")
+	request.QueryParams["InstanceId"] = instanceId
+	
+	bresponse, err := c.client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"INSTANCE_NOT_EXIST"}) {
-			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(action, raw, request.RpcRequest, request)
 
-	if !response.GetInstanceUsageIsSuccess {
-		return response, c.wrapCrServiceError(resource, action, response.Code)
+	response := make(map[string]interface{})
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
 	}
+	if !response["asapiSuccess"].(bool) {
+		return nil, fmt.Errorf("read ee repo failed, %s", response["asapiErrorMessage"].(string))
+	}
+
 	return response, nil
 }
 
-func (c *CrService) ListCrEeInstanceEndpoint(instanceId string) (*cr_ee.ListInstanceEndpointResponse, error) {
-	response := &cr_ee.ListInstanceEndpointResponse{}
-	request := cr_ee.CreateListInstanceEndpointRequest()
-	c.client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceId = instanceId
-	resource := instanceId
-	action := request.GetActionName()
-
-	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
-		return creeClient.ListInstanceEndpoint(request)
-	})
-	response, ok := raw.(*cr_ee.ListInstanceEndpointResponse)
-	if err != nil{
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+func (c *CrService) ListCrEeInstanceEndpoint(instanceId string) (map[string]interface{}, error) {
+	
+	request := c.client.NewCommonRequest("POST", "cr-ee", "2018-12-01", "ListInstanceEndpoint", "")
+	request.QueryParams["InstanceId"] = instanceId
+	
+	bresponse, err := c.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"INSTANCE_NOT_EXIST"}) {
-			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(action, raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.ListInstanceEndpointResponse)
-	if !response.ListInstanceEndpointIsSuccess {
-		return response, c.wrapCrServiceError(resource, action, response.Code)
+	response := make(map[string]interface{})
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
 	}
+	if !response["asapiSuccess"].(bool) {
+		return nil, fmt.Errorf("read ee repo failed, %s", response["asapiErrorMessage"].(string))
+	}
+
 	return response, nil
 }
 
@@ -152,7 +156,7 @@ func (c *CrService) ListCrEeNamespaces(instanceId string, pageNo int, pageSize i
 	}
 	addDebug(action, raw, request.RpcRequest, request)
 
-	if !response.ListNamespaceIsSuccess {
+	if !response.ListNamespaceIsSuccess && response.Code != "success"{
 		return response, errmsgs.WrapErrorf(errors.New(response.Code), errmsgs.DataDefaultErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return response, nil

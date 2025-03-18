@@ -3,8 +3,9 @@ package alibabacloudstack
 import (
 	"regexp"
 	"sort"
+	"strings"
+	"strconv"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -97,14 +98,15 @@ func dataSourceAlibabacloudStackCrEeInstancesRead(d *schema.ResourceData, meta i
 	pageNo := 1
 	pageSize := 50
 
-	var instances []cr_ee.InstancesItem
+	var instances []interface{}
 	for {
 		resp, err := crService.ListCrEeInstances(pageNo, pageSize)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		instances = append(instances, resp.Instances...)
-		if len(resp.Instances) < pageSize {
+		respInstanceList := resp["Instances"].([]interface{})
+		instances = append(instances, respInstanceList ...)
+		if len(respInstanceList) < pageSize {
 			break
 		}
 		pageNo++
@@ -123,23 +125,23 @@ func dataSourceAlibabacloudStackCrEeInstancesRead(d *schema.ResourceData, meta i
 		}
 	}
 
-	var targetInstances []cr_ee.InstancesItem
-	for _, instance := range instances {
-		if nameRegex != nil && !nameRegex.MatchString(instance.InstanceName) {
+	var targetInstances []map[string]interface{}
+	for _, respInstance := range instances {
+		instance := respInstance.(map[string]interface{})
+		if nameRegex != nil && !nameRegex.MatchString(instance["InstanceName"].(string)) {
 			continue
 		}
 
-		if idsMap != nil && idsMap[instance.InstanceId] == "" {
+		if idsMap != nil && idsMap[instance["InstanceId"].(string)] == "" {
 			continue
 		}
 
 		targetInstances = append(targetInstances, instance)
 	}
 
-	instances = targetInstances
 
 	sort.SliceStable(instances, func(i, j int) bool {
-		return instances[i].CreateTime < instances[j].CreateTime
+		return targetInstances[i]["CreateTime"].(float64) < targetInstances[j]["CreateTime"].(float64)
 	})
 
 	var (
@@ -148,12 +150,12 @@ func dataSourceAlibabacloudStackCrEeInstancesRead(d *schema.ResourceData, meta i
 		instanceMaps	[]map[string]interface{}
 	)
 
-	for _, instance := range instances {
-		usageResp, err := crService.GetCrEeInstanceUsage(instance.InstanceId)
+	for _, instance := range targetInstances {
+		usageResp, err := crService.GetCrEeInstanceUsage(instance["InstanceId"].(string))
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		endpointResp, err := crService.ListCrEeInstanceEndpoint(instance.InstanceId)
+		endpointResp, err := crService.ListCrEeInstanceEndpoint(instance["InstanceId"].(string))
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -162,35 +164,41 @@ func dataSourceAlibabacloudStackCrEeInstancesRead(d *schema.ResourceData, meta i
 			publicDomains	[]string
 			vpcDomains	[]string
 		)
-		for _, endpoint := range endpointResp.Endpoints {
-			if !endpoint.Enable {
+		
+		endpoints := endpointResp["Endpoints"].([]interface{})
+		for _, endpointItem := range endpoints {
+			endpoint := endpointItem.(map[string]interface{})
+			if !endpoint["Enable"].(bool) {
 				continue
 			}
-			if endpoint.EndpointType == "internet" {
-				for _, d := range endpoint.Domains {
-					publicDomains = append(publicDomains, d.Domain)
+			domains := endpoint["Domains"].([]interface{})
+			if endpoint["EndpointType"].(string) == "internet" {
+				for _, domainItem := range domains {
+					domain := domainItem.(map[string]interface{})
+					publicDomains = append(publicDomains, domain["Domain"].(string))
 				}
-			} else if endpoint.EndpointType == "vpc" {
-				for _, d := range endpoint.Domains {
-					vpcDomains = append(vpcDomains, d.Domain)
+			} else if endpoint["EndpointType"].(string) == "vpc" {
+				for _, domainItem := range domains {
+					domain := domainItem.(map[string]interface{})
+					vpcDomains = append(publicDomains, domain["Domain"].(string))
 				}
 			}
 		}
 
 		mapping := make(map[string]interface{})
-		mapping["id"] = instance.InstanceId
-		mapping["name"] = instance.InstanceName
-		mapping["region"] = instance.RegionId
-		mapping["specification"] = instance.InstanceSpecification
-		mapping["namespace_quota"] = usageResp.NamespaceQuota
-		mapping["namespace_usage"] = usageResp.NamespaceUsage
-		mapping["repo_quota"] = usageResp.RepoQuota
-		mapping["repo_usage"] = usageResp.RepoUsage
+		mapping["id"] = instance["InstanceId"].(string)
+		mapping["name"] = instance["InstanceName"].(string)
+		mapping["region"] = instance["RegionId"].(string)
+		mapping["specification"] = instance["InstanceSpecification"].(string)
+		mapping["namespace_quota"] = strings.TrimRight(strconv.FormatFloat(usageResp["NamespaceQuota"].(float64), 'f', -1, 64), "0")
+		mapping["namespace_usage"] = strings.TrimRight(strconv.FormatFloat(usageResp["NamespaceUsage"].(float64), 'f', -1, 64), "0")
+		mapping["repo_quota"] = strings.TrimRight(strconv.FormatFloat(usageResp["RepoQuota"].(float64), 'f', -1, 64), "0")
+		mapping["repo_usage"] = strings.TrimRight(strconv.FormatFloat(usageResp["RepoUsage"].(float64), 'f', -1, 64), "0")
 		mapping["vpc_endpoints"] = vpcDomains
 		mapping["public_endpoints"] = publicDomains
 
-		ids = append(ids, instance.InstanceId)
-		names = append(names, instance.InstanceName)
+		ids = append(ids, instance["InstanceId"].(string))
+		names = append(names, instance["InstanceName"].(string))
 		instanceMaps = append(instanceMaps, mapping)
 	}
 

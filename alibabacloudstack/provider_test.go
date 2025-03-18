@@ -282,6 +282,31 @@ func testAccPreCheckWithEnvVariable(t *testing.T, envVariableName string) {
 	}
 }
 
+
+func getDefaultCrEeInstanceId(t *testing.T) string{
+	testAccPreCheck(t)
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	rawClient, err := sharedClientForRegion(region)
+	if err != nil {
+		t.Skipf("Skipping cr ee test case with err: %s", err)
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	crService := &CrService{client}
+	resp, err := crService.ListCrEeInstances(1, 10)
+	if err != nil {
+		//Maybe crEE has not opened int the region
+		t.Skipf("Skipping cr ee test case with err: %s", err)
+	}
+	if len(resp.Instances) == 0 {
+		t.Skipf("Skipping cr ee test case without default instances")
+	}
+	return resp.Instances[0].InstanceId
+}
+
+func testAccPreCheckWithCrEe(t *testing.T) {
+	getDefaultCrEeInstanceId(t)
+}
+
 // func checkoutSupportedRegions(t *testing.T, supported bool, regions []connectivity.Region) {
 // 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 // 	find := false
