@@ -60,9 +60,9 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ALIBABACLOUDSTACK_INSECURE"); v == "" {
 		t.Fatal("ALIBABACLOUDSTACK_INSECURE must be set for acceptance tests")
 	}
-	if v := os.Getenv("ALIBABACLOUDSTACK_PROXY"); v == "" {
+	//if v := os.Getenv("ALIBABACLOUDSTACK_PROXY"); v == "" {
 		//t.Fatal("ALIBABACLOUDSTACK_PROXY must be set for acceptance tests")
-	}
+	//}
 	v1 := os.Getenv("ALIBABACLOUDSTACK_DOMAIN")
 	v2 := os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")
 	if v1 == "" && v2 == "" {
@@ -283,7 +283,7 @@ func testAccPreCheckWithEnvVariable(t *testing.T, envVariableName string) {
 }
 
 
-func getDefaultCrEeInstanceId(t *testing.T) string{
+func testAccPreCheckWithCrEe(t *testing.T){
 	testAccPreCheck(t)
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rawClient, err := sharedClientForRegion(region)
@@ -297,14 +297,10 @@ func getDefaultCrEeInstanceId(t *testing.T) string{
 		//Maybe crEE has not opened int the region
 		t.Skipf("Skipping cr ee test case with err: %s", err)
 	}
-	if len(resp.Instances) == 0 {
+	instances := resp["Instances"].([]interface{})
+	if len(instances) == 0 {
 		t.Skipf("Skipping cr ee test case without default instances")
 	}
-	return resp.Instances[0].InstanceId
-}
-
-func testAccPreCheckWithCrEe(t *testing.T) {
-	getDefaultCrEeInstanceId(t)
 }
 
 // func checkoutSupportedRegions(t *testing.T, supported bool, regions []connectivity.Region) {

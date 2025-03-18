@@ -162,36 +162,37 @@ func (c *CrService) ListCrEeNamespaces(instanceId string, pageNo int, pageSize i
 	return response, nil
 }
 
-func (c *CrService) DescribeCrEeNamespace(id string) (*cr_ee.GetNamespaceResponse, error) {
+func (c *CrService) DescribeCrEeNamespace(id string) (map[string]interface{}, error) {
 	strRet := c.ParseResourceId(id)
 	instanceId := strRet[0]
 	namespaceName := strRet[1]
-	response := &cr_ee.GetNamespaceResponse{}
-	request := cr_ee.CreateGetNamespaceRequest()
-	c.client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceId = instanceId
-	request.NamespaceName = namespaceName
-	resource := c.GenResourceId(instanceId, namespaceName)
-	action := request.GetActionName()
+	
 
-	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
-		return creeClient.GetNamespace(request)
-	})
-	response, ok := raw.(*cr_ee.GetNamespaceResponse)
+	request := c.client.NewCommonRequest("POST", "cr-ee", "2018-12-01", "GetNamespace", "")
+	request.QueryParams["InstanceId"] = instanceId
+	request.QueryParams["NamespaceName"] = namespaceName
+
+	bresponse, err := c.client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"NAMESPACE_NOT_EXIST"}) {
-			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil,  errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(action, raw, request.RpcRequest, request)
 
-	if !response.GetNamespaceIsSuccess {
-		return response, c.wrapCrServiceError(resource, action, response.Code)
+	response := make(map[string]interface{})
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil,  errmsgs.WrapError(err)
+	}
+	if !response["asapiSuccess"].(bool) {
+		if response["errorMessage"].(string) == "Namespace is not exist."{
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return nil, fmt.Errorf("read ee namespace failed, %s", response["errorMessage"].(string))
 	}
 	return response, nil
 }
@@ -226,32 +227,6 @@ func (c *CrService) DeleteCrEeNamespace(instanceId string, namespaceName string)
 		return response, c.wrapCrServiceError(resource, action, response.Code)
 	}
 	return response, nil
-}
-
-func (c *CrService) WaitForCrEeNamespace(instanceId string, namespaceName string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	resource := c.GenResourceId(instanceId, namespaceName)
-
-	for {
-		resp, err := c.DescribeCrEeNamespace(c.GenResourceId(instanceId, namespaceName))
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-
-		if resp.NamespaceName == namespaceName && status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, resource, GetFunc(1), timeout, resp.NamespaceName, namespaceName, errmsgs.ProviderERROR)
-		}
-		time.Sleep(3 * time.Second)
-	}
 }
 
 func (c *CrService) ListCrEeRepos(instanceId string, namespace string, pageNo int, pageSize int) (*cr_ee.ListRepositoryResponse, error) {
