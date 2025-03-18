@@ -5,10 +5,10 @@ package alibabacloudstack
 //	"testing"
 //)
 //
-//func TestAccAlibabacloudStackCrEEInstancesDataSource(t *testing.T) {
+//func TestAccAlibabacloudStackCrEeInstancesDataSource(t *testing.T) {
 //	resourceId := "data.alibabacloudstack_cr_ee_instances.default"
 //	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "",
-//		dataSourceCrEEInstancesConfigDependence)
+//		dataSourceCrEeInstancesConfigDependence)
 //
 //	nameRegexConf := dataSourceTestAccConfig{
 //		existConfig: testAccConfig(map[string]interface{}{}),
@@ -32,7 +32,7 @@ package alibabacloudstack
 //		}),
 //	}
 //
-//	var existCrEEInstancesMapFunc = func(rand int) map[string]string {
+//	var existCrEeInstancesMapFunc = func(rand int) map[string]string {
 //		return map[string]string{
 //			"names.#":                        CHECKSET,
 //			"names.0":                        CHECKSET,
@@ -50,7 +50,7 @@ package alibabacloudstack
 //		}
 //	}
 //
-//	var fakeCrEEInstancesMapFunc = func(rand int) map[string]string {
+//	var fakeCrEeInstancesMapFunc = func(rand int) map[string]string {
 //		return map[string]string{
 //			"ids.#":       "0",
 //			"names.#":     "0",
@@ -60,15 +60,15 @@ package alibabacloudstack
 //
 //	var crEEInstancesCheckInfo = dataSourceAttr{
 //		resourceId:   resourceId,
-//		existMapFunc: existCrEEInstancesMapFunc,
-//		fakeMapFunc:  fakeCrEEInstancesMapFunc,
+//		existMapFunc: existCrEeInstancesMapFunc,
+//		fakeMapFunc:  fakeCrEeInstancesMapFunc,
 //	}
 //	preCheck := func() {
-//		testAccPreCheckWithCrEE(t)
+//		testAccPreCheckWithCrEe(t)
 //	}
 //	crEEInstancesCheckInfo.dataSourceTestCheckWithPreCheck(t, 0, preCheck, nameRegexConf, idsConf, allConf)
 //}
 //
-//func dataSourceCrEEInstancesConfigDependence(name string) string {
+//func dataSourceCrEeInstancesConfigDependence(name string) string {
 //	return ""
 //}

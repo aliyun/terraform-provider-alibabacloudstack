@@ -10,7 +10,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
 )
 
-func (c *CrService) ListCrEEInstances(pageNo int, pageSize int) (*cr_ee.ListInstanceResponse, error) {
+func (c *CrService) ListCrEeInstances(pageNo int, pageSize int) (*cr_ee.ListInstanceResponse, error) {
 	response := &cr_ee.ListInstanceResponse{}
 	request := cr_ee.CreateListInstanceRequest()
 	c.client.InitRpcRequest(*request.RpcRequest)
@@ -18,7 +18,7 @@ func (c *CrService) ListCrEEInstances(pageNo int, pageSize int) (*cr_ee.ListInst
 	request.PageSize = requests.NewInteger(pageSize)
 	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.ListInstance(request)
 	})
 	response, ok := raw.(*cr_ee.ListInstanceResponse)
@@ -37,14 +37,14 @@ func (c *CrService) ListCrEEInstances(pageNo int, pageSize int) (*cr_ee.ListInst
 	return response, nil
 }
 
-func (c *CrService) DescribeCrEEInstance(instanceId string) (*cr_ee.GetInstanceResponse, error) {
+func (c *CrService) DescribeCrEeInstance(instanceId string) (*cr_ee.GetInstanceResponse, error) {
 	request := cr_ee.CreateGetInstanceRequest()
 	c.client.InitRpcRequest(*request.RpcRequest)
 	request.InstanceId = instanceId
 	resource := instanceId
 	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.GetInstance(request)
 	})
 	response, ok := raw.(*cr_ee.GetInstanceResponse)
@@ -66,7 +66,7 @@ func (c *CrService) DescribeCrEEInstance(instanceId string) (*cr_ee.GetInstanceR
 	return response, nil
 }
 
-func (c *CrService) GetCrEEInstanceUsage(instanceId string) (*cr_ee.GetInstanceUsageResponse, error) {
+func (c *CrService) GetCrEeInstanceUsage(instanceId string) (*cr_ee.GetInstanceUsageResponse, error) {
 	response := &cr_ee.GetInstanceUsageResponse{}
 	request := cr_ee.CreateGetInstanceUsageRequest()
 	c.client.InitRpcRequest(*request.RpcRequest)
@@ -74,7 +74,7 @@ func (c *CrService) GetCrEEInstanceUsage(instanceId string) (*cr_ee.GetInstanceU
 	resource := instanceId
 	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.GetInstanceUsage(request)
 	})
 	response, ok := raw.(*cr_ee.GetInstanceUsageResponse)
@@ -96,7 +96,7 @@ func (c *CrService) GetCrEEInstanceUsage(instanceId string) (*cr_ee.GetInstanceU
 	return response, nil
 }
 
-func (c *CrService) ListCrEEInstanceEndpoint(instanceId string) (*cr_ee.ListInstanceEndpointResponse, error) {
+func (c *CrService) ListCrEeInstanceEndpoint(instanceId string) (*cr_ee.ListInstanceEndpointResponse, error) {
 	response := &cr_ee.ListInstanceEndpointResponse{}
 	request := cr_ee.CreateListInstanceEndpointRequest()
 	c.client.InitRpcRequest(*request.RpcRequest)
@@ -104,7 +104,7 @@ func (c *CrService) ListCrEEInstanceEndpoint(instanceId string) (*cr_ee.ListInst
 	resource := instanceId
 	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.ListInstanceEndpoint(request)
 	})
 	response, ok := raw.(*cr_ee.ListInstanceEndpointResponse)
@@ -127,7 +127,7 @@ func (c *CrService) ListCrEEInstanceEndpoint(instanceId string) (*cr_ee.ListInst
 	return response, nil
 }
 
-func (c *CrService) ListCrEENamespaces(instanceId string, pageNo int, pageSize int) (*cr_ee.ListNamespaceResponse, error) {
+func (c *CrService) ListCrEeNamespaces(instanceId string, pageNo int, pageSize int) (*cr_ee.ListNamespaceResponse, error) {
 	response := &cr_ee.ListNamespaceResponse{}
 	request := cr_ee.CreateListNamespaceRequest()
 	c.client.InitRpcRequest(*request.RpcRequest)
@@ -137,7 +137,7 @@ func (c *CrService) ListCrEENamespaces(instanceId string, pageNo int, pageSize i
 	resource := c.GenResourceId(instanceId)
 	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.ListNamespace(request)
 	})
 	response, ok := raw.(*cr_ee.ListNamespaceResponse)
@@ -156,7 +156,7 @@ func (c *CrService) ListCrEENamespaces(instanceId string, pageNo int, pageSize i
 	return response, nil
 }
 
-func (c *CrService) DescribeCrEENamespace(id string) (*cr_ee.GetNamespaceResponse, error) {
+func (c *CrService) DescribeCrEeNamespace(id string) (*cr_ee.GetNamespaceResponse, error) {
 	strRet := c.ParseResourceId(id)
 	instanceId := strRet[0]
 	namespaceName := strRet[1]
@@ -168,7 +168,7 @@ func (c *CrService) DescribeCrEENamespace(id string) (*cr_ee.GetNamespaceRespons
 	resource := c.GenResourceId(instanceId, namespaceName)
 	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.GetNamespace(request)
 	})
 	response, ok := raw.(*cr_ee.GetNamespaceResponse)
@@ -190,7 +190,7 @@ func (c *CrService) DescribeCrEENamespace(id string) (*cr_ee.GetNamespaceRespons
 	return response, nil
 }
 
-func (c *CrService) DeleteCrEENamespace(instanceId string, namespaceName string) (*cr_ee.DeleteNamespaceResponse, error) {
+func (c *CrService) DeleteCrEeNamespace(instanceId string, namespaceName string) (*cr_ee.DeleteNamespaceResponse, error) {
 	response := &cr_ee.DeleteNamespaceResponse{}
 	request := cr_ee.CreateDeleteNamespaceRequest()
 	c.client.InitRpcRequest(*request.RpcRequest)
@@ -199,7 +199,7 @@ func (c *CrService) DeleteCrEENamespace(instanceId string, namespaceName string)
 	resource := c.GenResourceId(instanceId, namespaceName)
 	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.DeleteNamespace(request)
 	})
 	response, ok := raw.(*cr_ee.DeleteNamespaceResponse)
@@ -222,12 +222,12 @@ func (c *CrService) DeleteCrEENamespace(instanceId string, namespaceName string)
 	return response, nil
 }
 
-func (c *CrService) WaitForCrEENamespace(instanceId string, namespaceName string, status Status, timeout int) error {
+func (c *CrService) WaitForCrEeNamespace(instanceId string, namespaceName string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	resource := c.GenResourceId(instanceId, namespaceName)
 
 	for {
-		resp, err := c.DescribeCrEENamespace(c.GenResourceId(instanceId, namespaceName))
+		resp, err := c.DescribeCrEeNamespace(c.GenResourceId(instanceId, namespaceName))
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
@@ -248,7 +248,7 @@ func (c *CrService) WaitForCrEENamespace(instanceId string, namespaceName string
 	}
 }
 
-func (c *CrService) ListCrEERepos(instanceId string, namespace string, pageNo int, pageSize int) (*cr_ee.ListRepositoryResponse, error) {
+func (c *CrService) ListCrEeRepos(instanceId string, namespace string, pageNo int, pageSize int) (*cr_ee.ListRepositoryResponse, error) {
 	response := &cr_ee.ListRepositoryResponse{}
 	request := cr_ee.CreateListRepositoryRequest()
 	c.client.InitRpcRequest(*request.RpcRequest)
@@ -260,7 +260,7 @@ func (c *CrService) ListCrEERepos(instanceId string, namespace string, pageNo in
 	resource := c.GenResourceId(instanceId, namespace)
 	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.ListRepository(request)
 	})
 	response, ok := raw.(*cr_ee.ListRepositoryResponse)
@@ -280,7 +280,7 @@ func (c *CrService) ListCrEERepos(instanceId string, namespace string, pageNo in
 	return response, nil
 }
 
-func (c *CrService) DescribeCrEERepo(id string) (*cr_ee.GetRepositoryResponse, error) {
+func (c *CrService) DescribeCrEeRepo(id string) (*cr_ee.GetRepositoryResponse, error) {
 	strRet := c.ParseResourceId(id)
 	instanceId := strRet[0]
 	namespace := strRet[1]
@@ -294,7 +294,7 @@ func (c *CrService) DescribeCrEERepo(id string) (*cr_ee.GetRepositoryResponse, e
 	resource := c.GenResourceId(instanceId, namespace, repo)
 	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.GetRepository(request)
 	})
 	response, ok := raw.(*cr_ee.GetRepositoryResponse)
@@ -318,7 +318,7 @@ func (c *CrService) DescribeCrEERepo(id string) (*cr_ee.GetRepositoryResponse, e
 	return response, nil
 }
 
-func (c *CrService) DeleteCrEERepo(instanceId, namespace, repo, repoId string) (*cr_ee.DeleteRepositoryResponse, error) {
+func (c *CrService) DeleteCrEeRepo(instanceId, namespace, repo, repoId string) (*cr_ee.DeleteRepositoryResponse, error) {
 	response := &cr_ee.DeleteRepositoryResponse{}
 	request := cr_ee.CreateDeleteRepositoryRequest()
 	c.client.InitRpcRequest(*request.RpcRequest)
@@ -327,7 +327,7 @@ func (c *CrService) DeleteCrEERepo(instanceId, namespace, repo, repoId string) (
 	resource := c.GenResourceId(instanceId, namespace, repo)
 	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.DeleteRepository(request)
 	})
 	response, ok := raw.(*cr_ee.DeleteRepositoryResponse)
@@ -349,12 +349,12 @@ func (c *CrService) DeleteCrEERepo(instanceId, namespace, repo, repoId string) (
 	return response, nil
 }
 
-func (c *CrService) WaitForCrEERepo(instanceId string, namespace string, repo string, status Status, timeout int) error {
+func (c *CrService) WaitForCrEeRepo(instanceId string, namespace string, repo string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	resource := c.GenResourceId(instanceId, namespace, repo)
 
 	for {
-		resp, err := c.DescribeCrEERepo(c.GenResourceId(instanceId, namespace, repo))
+		resp, err := c.DescribeCrEeRepo(c.GenResourceId(instanceId, namespace, repo))
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
@@ -374,7 +374,7 @@ func (c *CrService) WaitForCrEERepo(instanceId string, namespace string, repo st
 	}
 }
 
-func (c *CrService) ListCrEERepoTags(instanceId string, repoId string, pageNo int, pageSize int) (*cr_ee.ListRepoTagResponse, error) {
+func (c *CrService) ListCrEeRepoTags(instanceId string, repoId string, pageNo int, pageSize int) (*cr_ee.ListRepoTagResponse, error) {
 	response := &cr_ee.ListRepoTagResponse{}
 	request := cr_ee.CreateListRepoTagRequest()
 	c.client.InitRpcRequest(*request.RpcRequest)
@@ -385,7 +385,7 @@ func (c *CrService) ListCrEERepoTags(instanceId string, repoId string, pageNo in
 	resource := c.GenResourceId(instanceId, repoId)
 	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.ListRepoTag(request)
 	})
 	response, ok := raw.(*cr_ee.ListRepoTagResponse)
@@ -404,7 +404,7 @@ func (c *CrService) ListCrEERepoTags(instanceId string, repoId string, pageNo in
 	return response, nil
 }
 
-func (c *CrService) DescribeCrEESyncRule(id string) (*cr_ee.SyncRulesItem, error) {
+func (c *CrService) DescribeCrEeSyncRule(id string) (*cr_ee.SyncRulesItem, error) {
 	strRet := c.ParseResourceId(id)
 	instanceId := strRet[0]
 	namespace := strRet[1]
@@ -419,7 +419,7 @@ func (c *CrService) DescribeCrEESyncRule(id string) (*cr_ee.SyncRulesItem, error
 		request.NamespaceName = namespace
 		request.PageNo = requests.NewInteger(pageNo)
 		request.PageSize = requests.NewInteger(PageSizeLarge)
-		raw, err := c.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+		raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 			return creeClient.ListRepoSyncRule(request)
 		})
 		response, ok := raw.(*cr_ee.ListRepoSyncRuleResponse)

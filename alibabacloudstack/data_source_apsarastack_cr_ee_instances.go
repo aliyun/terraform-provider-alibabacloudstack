@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackCrEEInstances() *schema.Resource {
+func dataSourceAlibabacloudStackCrEeInstances() *schema.Resource {
 	return &schema.Resource{
-		Read:	dataSourceAlibabacloudStackCrEEInstancesRead,
+		Read:	dataSourceAlibabacloudStackCrEeInstancesRead,
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
 				Type:		schema.TypeString,
@@ -91,7 +91,7 @@ func dataSourceAlibabacloudStackCrEEInstances() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackCrEEInstancesRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackCrEeInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
 	pageNo := 1
@@ -99,7 +99,7 @@ func dataSourceAlibabacloudStackCrEEInstancesRead(d *schema.ResourceData, meta i
 
 	var instances []cr_ee.InstancesItem
 	for {
-		resp, err := crService.ListCrEEInstances(pageNo, pageSize)
+		resp, err := crService.ListCrEeInstances(pageNo, pageSize)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -149,11 +149,11 @@ func dataSourceAlibabacloudStackCrEEInstancesRead(d *schema.ResourceData, meta i
 	)
 
 	for _, instance := range instances {
-		usageResp, err := crService.GetCrEEInstanceUsage(instance.InstanceId)
+		usageResp, err := crService.GetCrEeInstanceUsage(instance.InstanceId)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		endpointResp, err := crService.ListCrEEInstanceEndpoint(instance.InstanceId)
+		endpointResp, err := crService.ListCrEeInstanceEndpoint(instance.InstanceId)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}

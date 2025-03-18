@@ -7,13 +7,13 @@ package alibabacloudstack
 //	
 //)
 //
-//func TestAccAlibabacloudStackCrEENamespacesDataSource(t *testing.T) {
+//func TestAccAlibabacloudStackCrEeNamespacesDataSource(t *testing.T) {
 //	rand := getAccTestRandInt(1000000, 9999999)
 //	namespaceName := fmt.Sprintf("tf-testacc-cr-ee-ns-%d", rand)
 //	resourceId := "data.alibabacloudstack_cr_ee_namespaces.default"
 //
 //	testAccConfig := dataSourceTestAccConfigFunc(resourceId, namespaceName,
-//		dataSourceCrEENamespacesConfigDependence)
+//		dataSourceCrEeNamespacesConfigDependence)
 //
 //	nameRegexConf := dataSourceTestAccConfig{
 //		existConfig: testAccConfig(map[string]interface{}{
@@ -48,7 +48,7 @@ package alibabacloudstack
 //		}),
 //	}
 //
-//	var existCrEENamespacesMapFunc = func(rand int) map[string]string {
+//	var existCrEeNamespacesMapFunc = func(rand int) map[string]string {
 //		return map[string]string{
 //			"ids.#":                           "1",
 //			"ids.0":                           CHECKSET,
@@ -62,7 +62,7 @@ package alibabacloudstack
 //		}
 //	}
 //
-//	var fakeCrEENamespacesMapFunc = func(rand int) map[string]string {
+//	var fakeCrEeNamespacesMapFunc = func(rand int) map[string]string {
 //		return map[string]string{
 //			"ids.#":        "0",
 //			"names.#":      "0",
@@ -72,16 +72,16 @@ package alibabacloudstack
 //
 //	var crEENamespacesCheckInfo = dataSourceAttr{
 //		resourceId:   resourceId,
-//		existMapFunc: existCrEENamespacesMapFunc,
-//		fakeMapFunc:  fakeCrEENamespacesMapFunc,
+//		existMapFunc: existCrEeNamespacesMapFunc,
+//		fakeMapFunc:  fakeCrEeNamespacesMapFunc,
 //	}
 //	preCheck := func() {
-//		testAccPreCheckWithCrEE(t)
+//		testAccPreCheckWithCrEe(t)
 //	}
 //	crEENamespacesCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, idsConf, allConf)
 //}
 //
-//func dataSourceCrEENamespacesConfigDependence(name string) string {
+//func dataSourceCrEeNamespacesConfigDependence(name string) string {
 //	return fmt.Sprintf(`
 //	variable "name" {
 //		default = "%s"

@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackCrEENamespaces() *schema.Resource {
+func dataSourceAlibabacloudStackCrEeNamespaces() *schema.Resource {
 	return &schema.Resource{
-		Read:	dataSourceAlibabacloudStackCrEENamespacesRead,
+		Read:	dataSourceAlibabacloudStackCrEeNamespacesRead,
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:		schema.TypeString,
@@ -74,7 +74,7 @@ func dataSourceAlibabacloudStackCrEENamespaces() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackCrEENamespacesRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackCrEeNamespacesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
 	pageNo := 1
@@ -83,7 +83,7 @@ func dataSourceAlibabacloudStackCrEENamespacesRead(d *schema.ResourceData, meta 
 
 	var namespaces []cr_ee.NamespacesItem
 	for {
-		resp, err := crService.ListCrEENamespaces(instanceId, pageNo, pageSize)
+		resp, err := crService.ListCrEeNamespaces(instanceId, pageNo, pageSize)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}

@@ -7,14 +7,14 @@ package alibabacloudstack
 //	
 //)
 //
-//func TestAccAlibabacloudStackCrEEReposDataSource(t *testing.T) {
+//func TestAccAlibabacloudStackCrEeReposDataSource(t *testing.T) {
 //	rand := getAccTestRandInt(1000000, 9999999)
 //	repoName := fmt.Sprintf("tf-testacc-cr-ee-repo-%d", rand)
 //	namespaceName := fmt.Sprintf("tf-testacc-cr-ee-ns-%d", rand)
 //	resourceId := "data.alibabacloudstack_cr_ee_repos.default"
 //
 //	testAccConfig := dataSourceTestAccConfigFunc(resourceId, fmt.Sprint(rand),
-//		dataSourceCrEEReposConfigDependence)
+//		dataSourceCrEeReposConfigDependence)
 //
 //	nameRegexConf := dataSourceTestAccConfig{
 //		existConfig: testAccConfig(map[string]interface{}{
@@ -57,7 +57,7 @@ package alibabacloudstack
 //		}),
 //	}
 //
-//	var existCrEEReposMapFunc = func(rand int) map[string]string {
+//	var existCrEeReposMapFunc = func(rand int) map[string]string {
 //		return map[string]string{
 //			"ids.#":               "1",
 //			"ids.0":               CHECKSET,
@@ -73,7 +73,7 @@ package alibabacloudstack
 //		}
 //	}
 //
-//	var fakeCrEEReposMapFunc = func(rand int) map[string]string {
+//	var fakeCrEeReposMapFunc = func(rand int) map[string]string {
 //		return map[string]string{
 //			"ids.#":   "0",
 //			"names.#": "0",
@@ -83,16 +83,16 @@ package alibabacloudstack
 //
 //	var crEEReposCheckInfo = dataSourceAttr{
 //		resourceId:   resourceId,
-//		existMapFunc: existCrEEReposMapFunc,
-//		fakeMapFunc:  fakeCrEEReposMapFunc,
+//		existMapFunc: existCrEeReposMapFunc,
+//		fakeMapFunc:  fakeCrEeReposMapFunc,
 //	}
 //	preCheck := func() {
-//		testAccPreCheckWithCrEE(t)
+//		testAccPreCheckWithCrEe(t)
 //	}
 //	crEEReposCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, idsConf, allConf)
 //}
 //
-//func dataSourceCrEEReposConfigDependence(name string) string {
+//func dataSourceCrEeReposConfigDependence(name string) string {
 //	return fmt.Sprintf(`
 //	variable "name" {
 //		default = "tf-testacc-cr-ee-repo-%s"

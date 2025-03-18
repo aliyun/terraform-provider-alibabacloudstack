@@ -10,9 +10,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackCrEERepos() *schema.Resource {
+func dataSourceAlibabacloudStackCrEeRepos() *schema.Resource {
 	return &schema.Resource{
-		Read:	dataSourceAlibabacloudStackCrEEReposRead,
+		Read:	dataSourceAlibabacloudStackCrEeReposRead,
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:		schema.TypeString,
@@ -127,7 +127,7 @@ func dataSourceAlibabacloudStackCrEERepos() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackCrEEReposRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackCrEeReposRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
 	pageNo := 1
@@ -139,7 +139,7 @@ func dataSourceAlibabacloudStackCrEEReposRead(d *schema.ResourceData, meta inter
 		namespaces = append(namespaces, namespace.(string))
 	} else {
 		for {
-			resp, err := crService.ListCrEENamespaces(instanceId, pageNo, pageSize)
+			resp, err := crService.ListCrEeNamespaces(instanceId, pageNo, pageSize)
 			if err != nil {
 				return errmsgs.WrapError(err)
 			}
@@ -175,7 +175,7 @@ func dataSourceAlibabacloudStackCrEEReposRead(d *schema.ResourceData, meta inter
 	for _, namespace := range namespaces {
 		pageNo = 1
 		for {
-			resp, err := crService.ListCrEERepos(instanceId, namespace, pageNo, pageSize)
+			resp, err := crService.ListCrEeRepos(instanceId, namespace, pageNo, pageSize)
 			if err != nil {
 				return errmsgs.WrapError(err)
 			}
@@ -203,7 +203,7 @@ func dataSourceAlibabacloudStackCrEEReposRead(d *schema.ResourceData, meta inter
 			pageNo = 1
 			var images []cr_ee.ImagesItem
 			for {
-				resp, err := crService.ListCrEERepoTags(instanceId, repo.RepoId, pageNo, pageSize)
+				resp, err := crService.ListCrEeRepoTags(instanceId, repo.RepoId, pageNo, pageSize)
 				if err != nil {
 					return errmsgs.WrapError(err)
 				}

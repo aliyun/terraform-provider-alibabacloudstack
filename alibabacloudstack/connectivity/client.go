@@ -871,7 +871,7 @@ func (client *AlibabacloudStackClient) WithEdasClient(do func(*edas.Client) (int
 	return do(client.edasconn)
 }
 
-func (client *AlibabacloudStackClient) WithCrEEClient(do func(*cr_ee.Client) (interface{}, error)) (interface{}, error) {
+func (client *AlibabacloudStackClient) WithCrEeClient(do func(*cr_ee.Client) (interface{}, error)) (interface{}, error) {
 	if client.creeconn == nil {
 		conn, error := client.WithProductSDKClient(CREECode)
 		if error != nil {
