@@ -34,6 +34,7 @@ const (
 	ONSCode             = ServiceCode("ONS")
 	CONTAINCode         = ServiceCode("CS")
 	CRCode              = ServiceCode("CR")
+	CREECode            = ServiceCode("CR-EE")
 	CDNCode             = ServiceCode("CDN")
 	CMSCode             = ServiceCode("CMS")
 	OTSCode             = ServiceCode("OTS")
@@ -170,6 +171,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	CRCode: PopEndpoint{
 		"cr-biz.{{.region}}.{{.domain}}",
 		"cr-biz.{{.region}}.{{.domain}}",
+	},
+	//cr endpoint
+	CREECode: PopEndpoint{
+		"cr-ee-biz.{{.region}}.{{.domain}}",
+		"cr-ee-biz.{{.region}}.{{.domain}}",
 	},
 	//csb endpoint
 	CSBCode: PopEndpoint{
