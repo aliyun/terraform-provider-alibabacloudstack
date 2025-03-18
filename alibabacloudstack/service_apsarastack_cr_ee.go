@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 	"time"
+	"encoding/json"
+	"fmt"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
@@ -280,42 +282,55 @@ func (c *CrService) ListCrEeRepos(instanceId string, namespace string, pageNo in
 	return response, nil
 }
 
-func (c *CrService) DescribeCrEeRepo(id string) (*cr_ee.GetRepositoryResponse, error) {
+func (c *CrService) DescribeCrEeRepo(id string) (map[string]interface{}, error) {
 	strRet := c.ParseResourceId(id)
 	instanceId := strRet[0]
 	namespace := strRet[1]
-	repo := strRet[2]
-	response := &cr_ee.GetRepositoryResponse{}
-	request := cr_ee.CreateGetRepositoryRequest()
-	c.client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceId = instanceId
-	request.RepoNamespaceName = namespace
-	request.RepoName = repo
-	resource := c.GenResourceId(instanceId, namespace, repo)
-	action := request.GetActionName()
-
-	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
-		return creeClient.GetRepository(request)
+	repoName := strRet[2]
+	
+	request := c.client.NewCommonRequest("POST", "cr-ee", "2018-12-01", "ListRepository", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"InstanceId":        instanceId,
+		"RepoNamespaceName": namespace,
+		"RepoName":          repoName,
 	})
-	response, ok := raw.(*cr_ee.GetRepositoryResponse)
+	
+	bresponse, err := c.client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"REPO_NOT_EXIST"}) {
-			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(action, raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.GetRepositoryResponse)
-	if !response.GetRepositoryIsSuccess {
-		return response, c.wrapCrServiceError(resource, action, response.Code)
+	response := make(map[string]interface{})
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
 	}
+	if !response["asapiSuccess"].(bool) {
+		return nil, fmt.Errorf("read ee repo failed, %s", response["asapiErrorMessage"].(string))
+	}
+	repoList := response["Repositories"].([]interface{})
+	if len(repoList) == 0 {
+		return nil, errmsgs.WrapError(fmt.Errorf("repo %s not found", repoList))
+	}
+
+	repositories := make([]interface{}, 0)
+	for _, repo := range(repoList){
+		item := repo.(map[string]interface{})
+		if item["RepoName"].(string) != repoName{
+			continue
+		}
+		repositories = append(repositories, repo)
+	}
+	response["Repositories"] = repositories
 
 	return response, nil
+
 }
 
 func (c *CrService) DeleteCrEeRepo(instanceId, namespace, repo, repoId string) (*cr_ee.DeleteRepositoryResponse, error) {
@@ -364,11 +379,17 @@ func (c *CrService) WaitForCrEeRepo(instanceId string, namespace string, repo st
 				return errmsgs.WrapError(err)
 			}
 		}
-		if resp.RepoName == repo && status != Deleted {
+		repoList := resp["Repositories"].([]interface{})
+		if len(repoList) < 1 {
+			return nil
+		}
+		item := repoList[0].(map[string]interface{})
+		repoName := item["RepoName"].(string)
+		if repoName == repo && status != Deleted {
 			return nil
 		}
 		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, resource, GetFunc(1), timeout, resp.RepoName, repo, errmsgs.ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, resource, GetFunc(1), timeout, repoName, repo, errmsgs.ProviderERROR)
 		}
 		time.Sleep(3 * time.Second)
 	}

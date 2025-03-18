@@ -1089,7 +1089,7 @@ func init() {
 func endpointsSchema() *schema.Schema {
 	schemas := make(map[string]*schema.Schema)
 	for popcode := range connectivity.PopEndpoints {
-		popcodeStr := strings.ReplaceAll(strings.ToLower(string(popcode)), "-","_")
+		popcodeStr := strings.ToLower(string(popcode))
 		schemas[popcodeStr] = &schema.Schema{
 			Type:        schema.TypeString,
 			Optional:    true,

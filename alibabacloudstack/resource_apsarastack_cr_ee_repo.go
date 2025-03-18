@@ -4,20 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlibabacloudStackCrEERepo() *schema.Resource {
+func resourceAlibabacloudStackCrEeRepo() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAlibabacloudStackCrEERepoCreate,
-		Read:   resourceAlibabacloudStackCrEERepoRead,
-		Update: resourceAlibabacloudStackCrEERepoUpdate,
-		Delete: resourceAlibabacloudStackCrEERepoDelete,
+		Create: resourceAlibabacloudStackCrEeRepoCreate,
+		Read:   resourceAlibabacloudStackCrEeRepoRead,
+		Update: resourceAlibabacloudStackCrEeRepoUpdate,
+		Delete: resourceAlibabacloudStackCrEeRepoDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -65,7 +63,7 @@ func resourceAlibabacloudStackCrEERepo() *schema.Resource {
 	}
 }
 
-func resourceAlibabacloudStackCrEERepoCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCrEeRepoCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
 	instanceId := d.Get("instance_id").(string)
@@ -86,20 +84,17 @@ func resourceAlibabacloudStackCrEERepoCreate(d *schema.ResourceData, meta interf
 		request.QueryParams["Detail"] = detail.(string)
 	}
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	response := make(map[string]interface{})
-	addDebug(request.GetActionName(), raw, request, request.QueryParams)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
@@ -111,53 +106,26 @@ func resourceAlibabacloudStackCrEERepoCreate(d *schema.ResourceData, meta interf
 
 	d.SetId(crService.GenResourceId(instanceId, namespace, repoName))
 
-	return resourceAlibabacloudStackCrEERepoRead(d, meta)
+	return resourceAlibabacloudStackCrEeRepoRead(d, meta)
 }
 
-func resourceAlibabacloudStackCrEERepoRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCrEeRepoRead(d *schema.ResourceData, meta interface{}) error {
 	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
-	strRet := crService.ParseResourceId(d.Id())
-	instanceId := strRet[0]
-	namespace := strRet[1]
-	repo := strRet[2]
+	
+	response, err := crService.DescribeCrEeRepo(d.Id())
 
-	request := client.NewCommonRequest("POST", "cr-ee", "2018-12-01", "ListRepository", "")
-	mergeMaps(request.QueryParams, map[string]string{
-		"InstanceId":        instanceId,
-		"RepoNamespaceName": namespace,
-		"RepoName":          repo,
-	})
-
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	response := make(map[string]interface{})
-	addDebug(request.GetActionName(), raw, request, request.QueryParams)
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if !response["asapiSuccess"].(bool) {
-		return fmt.Errorf("read ee repo failed, %s", response["asapiErrorMessage"].(string))
 	}
 	repoList := response["Repositories"].([]interface{})
 	if len(repoList) == 0 {
 		return errmsgs.WrapError(fmt.Errorf("repo %s not found", repoList))
 	}
-	item := repoList[0].(map[string]interface{})
 
+
+	item := repoList[0].(map[string]interface{})
 	d.Set("instance_id", item["InstanceId"].(string))
 	d.Set("namespace", item["RepoNamespaceName"].(string))
 	d.Set("name", item["RepoName"].(string))
@@ -165,10 +133,11 @@ func resourceAlibabacloudStackCrEERepoRead(d *schema.ResourceData, meta interfac
 	d.Set("summary", item["Summary"].(string))
 	d.Set("repo_id", item["RepoId"].(string))
 
+
 	return nil
 }
 
-func resourceAlibabacloudStackCrEERepoUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCrEeRepoUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	instanceId := d.Get("instance_id").(string)
 	if d.HasChanges("repo_type", "summary", "detail") {
@@ -184,20 +153,17 @@ func resourceAlibabacloudStackCrEERepoUpdate(d *schema.ResourceData, meta interf
 			request.QueryParams["Detail"] = d.Get("detail").(string)
 		}
 
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(request)
-		})
-		bresponse, ok := raw.(*responses.CommonResponse)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
+	bresponse, err := client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		response := make(map[string]interface{})
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {
@@ -209,10 +175,10 @@ func resourceAlibabacloudStackCrEERepoUpdate(d *schema.ResourceData, meta interf
 
 	}
 
-	return resourceAlibabacloudStackCrEERepoRead(d, meta)
+	return resourceAlibabacloudStackCrEeRepoRead(d, meta)
 }
 
-func resourceAlibabacloudStackCrEERepoDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCrEeRepoDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	instanceId := d.Get("instance_id").(string)
 	repoId := d.Get("repo_id").(string)
@@ -221,20 +187,17 @@ func resourceAlibabacloudStackCrEERepoDelete(d *schema.ResourceData, meta interf
 	request.QueryParams["InstanceId"] = instanceId
 	request.QueryParams["RepoId"] = repoId
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
+	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	response := make(map[string]interface{})
-	addDebug(request.GetActionName(), raw, request, request.QueryParams)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {

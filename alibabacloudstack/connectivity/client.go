@@ -1300,7 +1300,7 @@ func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*s
 }
 
 func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.CommonRequest) (*responses.CommonResponse, error) {
-	popcode := ServiceCode(strings.ToUpper(request.Product))
+	popcode := ServiceCode(strings.ReplaceAll(strings.ToUpper(request.Product),"-","_"))
 
 	conn, err := client.getConnectClient(popcode)
 	if err != nil {

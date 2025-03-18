@@ -34,7 +34,7 @@ const (
 	ONSCode             = ServiceCode("ONS")
 	CONTAINCode         = ServiceCode("CS")
 	CRCode              = ServiceCode("CR")
-	CREECode            = ServiceCode("CR-EE")
+	CREECode            = ServiceCode("CR_EE")
 	CDNCode             = ServiceCode("CDN")
 	CMSCode             = ServiceCode("CMS")
 	OTSCode             = ServiceCode("OTS")
