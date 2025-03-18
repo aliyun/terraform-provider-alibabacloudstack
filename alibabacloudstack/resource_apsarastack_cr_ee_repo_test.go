@@ -52,7 +52,7 @@ func TestAccAlibabacloudStackCREERepo_Basic(t *testing.T) {
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
-			testAccPreCheck(t)
+			testAccPreCheckWithCrEe(t)
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -157,8 +157,11 @@ variable "name" {
 	default = "%s"
 }
 
+data "alibabacloudstack_cr_ee_instances" "default" {
+}
+
 resource "alibabacloudstack_cr_ee_namespace" "default" {
-	instance_id = "cri-private"
+	instance_id = data.alibabacloudstack_cr_ee_instances.default.instances.0.id
 	name = "${var.name}"
 	auto_create = false
 	default_visibility = "PRIVATE"

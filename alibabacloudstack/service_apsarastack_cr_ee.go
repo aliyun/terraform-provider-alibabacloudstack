@@ -4,7 +4,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"errors"
 	"strings"
-	"time"
 	"encoding/json"
 	"fmt"
 
@@ -197,38 +196,6 @@ func (c *CrService) DescribeCrEeNamespace(id string) (map[string]interface{}, er
 	return response, nil
 }
 
-func (c *CrService) DeleteCrEeNamespace(instanceId string, namespaceName string) (*cr_ee.DeleteNamespaceResponse, error) {
-	response := &cr_ee.DeleteNamespaceResponse{}
-	request := cr_ee.CreateDeleteNamespaceRequest()
-	c.client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceId = instanceId
-	request.NamespaceName = namespaceName
-	resource := c.GenResourceId(instanceId, namespaceName)
-	action := request.GetActionName()
-
-	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
-		return creeClient.DeleteNamespace(request)
-	})
-	response, ok := raw.(*cr_ee.DeleteNamespaceResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		if errmsgs.IsExpectedErrors(err, []string{"NAMESPACE_NOT_EXIST"}) {
-			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(action, raw, request.RpcRequest, request)
-
-	response, _ = raw.(*cr_ee.DeleteNamespaceResponse)
-	if !response.DeleteNamespaceIsSuccess {
-		return response, c.wrapCrServiceError(resource, action, response.Code)
-	}
-	return response, nil
-}
-
 func (c *CrService) ListCrEeRepos(instanceId string, namespace string, pageNo int, pageSize int) (*cr_ee.ListRepositoryResponse, error) {
 	response := &cr_ee.ListRepositoryResponse{}
 	request := cr_ee.CreateListRepositoryRequest()
@@ -267,7 +234,7 @@ func (c *CrService) DescribeCrEeRepo(id string) (map[string]interface{}, error) 
 	namespace := strRet[1]
 	repoName := strRet[2]
 	
-	request := c.client.NewCommonRequest("POST", "cr-ee", "2018-12-01", "ListRepository", "")
+	request := c.client.NewCommonRequest("POST", "cr-ee", "2018-12-01", "GetRepository", "")
 	mergeMaps(request.QueryParams, map[string]string{
 		"InstanceId":        instanceId,
 		"RepoNamespaceName": namespace,
@@ -291,87 +258,14 @@ func (c *CrService) DescribeCrEeRepo(id string) (map[string]interface{}, error) 
 		return nil, errmsgs.WrapError(err)
 	}
 	if !response["asapiSuccess"].(bool) {
-		return nil, fmt.Errorf("read ee repo failed, %s", response["asapiErrorMessage"].(string))
-	}
-	repoList := response["Repositories"].([]interface{})
-	if len(repoList) == 0 {
-		return nil, errmsgs.WrapError(fmt.Errorf("repo %s not found", repoList))
-	}
-
-	repositories := make([]interface{}, 0)
-	for _, repo := range(repoList){
-		item := repo.(map[string]interface{})
-		if item["RepoName"].(string) != repoName{
-			continue
+		if response["errorMessage"].(string) == "Repo is not exist."{
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		repositories = append(repositories, repo)
+		return nil, fmt.Errorf("read ee repo failed, %s", response["errorMessage"].(string))
 	}
-	response["Repositories"] = repositories
 
 	return response, nil
 
-}
-
-func (c *CrService) DeleteCrEeRepo(instanceId, namespace, repo, repoId string) (*cr_ee.DeleteRepositoryResponse, error) {
-	response := &cr_ee.DeleteRepositoryResponse{}
-	request := cr_ee.CreateDeleteRepositoryRequest()
-	c.client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceId = instanceId
-	request.RepoId = repoId
-	resource := c.GenResourceId(instanceId, namespace, repo)
-	action := request.GetActionName()
-
-	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
-		return creeClient.DeleteRepository(request)
-	})
-	response, ok := raw.(*cr_ee.DeleteRepositoryResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-		}
-		if errmsgs.IsExpectedErrors(err, []string{"REPO_NOT_EXIST"}) {
-			return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(action, raw, request.RpcRequest, request)
-
-	if !response.DeleteRepositoryIsSuccess {
-		return response, c.wrapCrServiceError(resource, action, response.Code)
-	}
-	return response, nil
-}
-
-func (c *CrService) WaitForCrEeRepo(instanceId string, namespace string, repo string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-	resource := c.GenResourceId(instanceId, namespace, repo)
-
-	for {
-		resp, err := c.DescribeCrEeRepo(c.GenResourceId(instanceId, namespace, repo))
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
-			}
-		}
-		repoList := resp["Repositories"].([]interface{})
-		if len(repoList) < 1 {
-			return nil
-		}
-		item := repoList[0].(map[string]interface{})
-		repoName := item["RepoName"].(string)
-		if repoName == repo && status != Deleted {
-			return nil
-		}
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, resource, GetFunc(1), timeout, repoName, repo, errmsgs.ProviderERROR)
-		}
-		time.Sleep(3 * time.Second)
-	}
 }
 
 func (c *CrService) ListCrEeRepoTags(instanceId string, repoId string, pageNo int, pageSize int) (*cr_ee.ListRepoTagResponse, error) {

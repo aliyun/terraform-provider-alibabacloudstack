@@ -119,19 +119,14 @@ func resourceAlibabacloudStackCrEeRepoRead(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	repoList := response["Repositories"].([]interface{})
-	if len(repoList) == 0 {
-		return errmsgs.WrapError(fmt.Errorf("repo %s not found", repoList))
-	}
 
 
-	item := repoList[0].(map[string]interface{})
-	d.Set("instance_id", item["InstanceId"].(string))
-	d.Set("namespace", item["RepoNamespaceName"].(string))
-	d.Set("name", item["RepoName"].(string))
-	d.Set("repo_type", item["RepoType"])
-	d.Set("summary", item["Summary"].(string))
-	d.Set("repo_id", item["RepoId"].(string))
+	d.Set("instance_id", response["InstanceId"].(string))
+	d.Set("namespace", response["RepoNamespaceName"].(string))
+	d.Set("name", response["RepoName"].(string))
+	d.Set("repo_type", response["RepoType"])
+	d.Set("summary", response["Summary"].(string))
+	d.Set("repo_id", response["RepoId"].(string))
 
 
 	return nil
