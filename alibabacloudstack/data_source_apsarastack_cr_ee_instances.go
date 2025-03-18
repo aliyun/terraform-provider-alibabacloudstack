@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 	"strconv"
+	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -104,10 +105,13 @@ func dataSourceAlibabacloudStackCrEeInstancesRead(d *schema.ResourceData, meta i
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		respInstanceList := resp["Instances"].([]interface{})
-		instances = append(instances, respInstanceList ...)
-		if len(respInstanceList) < pageSize {
-			break
+		if respInstances, ok := resp["Instances"].([]interface{}); ok {
+			instances = append(instances, respInstances...)
+			if len(respInstances) < pageSize {
+				break
+			}
+		} else {
+			return fmt.Errorf("unexpected type for Instances")
 		}
 		pageNo++
 	}
@@ -180,7 +184,7 @@ func dataSourceAlibabacloudStackCrEeInstancesRead(d *schema.ResourceData, meta i
 			} else if endpoint["EndpointType"].(string) == "vpc" {
 				for _, domainItem := range domains {
 					domain := domainItem.(map[string]interface{})
-					vpcDomains = append(publicDomains, domain["Domain"].(string))
+					vpcDomains = append(vpcDomains, domain["Domain"].(string))
 				}
 			}
 		}

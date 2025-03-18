@@ -71,7 +71,7 @@ func resourceAlibabacloudStackCrEeNamespaceCreate(d *schema.ResourceData, meta i
 	}
 
 	response := make(map[string]interface{})
-	addDebug(request.GetActionName(), response, request, request.QueryParams)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
