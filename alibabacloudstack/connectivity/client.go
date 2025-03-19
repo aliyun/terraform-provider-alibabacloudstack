@@ -871,9 +871,9 @@ func (client *AlibabacloudStackClient) WithEdasClient(do func(*edas.Client) (int
 	return do(client.edasconn)
 }
 
-func (client *AlibabacloudStackClient) WithCrEEClient(do func(*cr_ee.Client) (interface{}, error)) (interface{}, error) {
+func (client *AlibabacloudStackClient) WithCrEeClient(do func(*cr_ee.Client) (interface{}, error)) (interface{}, error) {
 	if client.creeconn == nil {
-		conn, error := client.WithProductSDKClient(CRCode)
+		conn, error := client.WithProductSDKClient(CREECode)
 		if error != nil {
 			return nil, error
 		}
@@ -1300,7 +1300,7 @@ func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*s
 }
 
 func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.CommonRequest) (*responses.CommonResponse, error) {
-	popcode := ServiceCode(strings.ToUpper(request.Product))
+	popcode := ServiceCode(strings.ReplaceAll(strings.ToUpper(request.Product),"-","_"))
 
 	conn, err := client.getConnectClient(popcode)
 	if err != nil {

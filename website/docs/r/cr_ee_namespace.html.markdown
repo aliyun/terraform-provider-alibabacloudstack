@@ -15,7 +15,7 @@ For information about Container Registry Enterprise Edition namespaces and how t
 
 
 
--> **NOTE:** You need to set your registry password in Container Registry Enterprise Edition console before use this resource.
+> **NOTE:** You need to set your registry password in Container Registry Enterprise Edition console before use this resource.
 
 ## Example Usage
 

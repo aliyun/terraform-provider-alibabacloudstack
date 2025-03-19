@@ -8,11 +8,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlibabacloudStackCrEESyncRule() *schema.Resource {
+func resourceAlibabacloudStackCrEeSyncRule() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAlibabacloudStackCrEESyncRuleCreate,
-		Read:   resourceAlibabacloudStackCrEESyncRuleRead,
-		Delete: resourceAlibabacloudStackCrEESyncRuleDelete,
+		Create: resourceAlibabacloudStackCrEeSyncRuleCreate,
+		Read:   resourceAlibabacloudStackCrEeSyncRuleRead,
+		Delete: resourceAlibabacloudStackCrEeSyncRuleDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -84,7 +84,7 @@ func resourceAlibabacloudStackCrEESyncRule() *schema.Resource {
 	}
 }
 
-func resourceAlibabacloudStackCrEESyncRuleCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCrEeSyncRuleCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
 	syncRuleName := d.Get("name").(string)
@@ -125,7 +125,7 @@ func resourceAlibabacloudStackCrEESyncRuleCreate(d *schema.ResourceData, meta in
 		request.SyncScope = "NAMESPACE"
 	}
 
-	raw, err := crService.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := crService.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.CreateRepoSyncRule(request)
 	})
 	bresponse, ok := raw.(*cr_ee.CreateRepoSyncRuleResponse)
@@ -144,14 +144,14 @@ func resourceAlibabacloudStackCrEESyncRuleCreate(d *schema.ResourceData, meta in
 
 	d.SetId(crService.GenResourceId(instanceId, namespaceName, bresponse.SyncRuleId))
 
-	return resourceAlibabacloudStackCrEESyncRuleRead(d, meta)
+	return resourceAlibabacloudStackCrEeSyncRuleRead(d, meta)
 }
 
-func resourceAlibabacloudStackCrEESyncRuleRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCrEeSyncRuleRead(d *schema.ResourceData, meta interface{}) error {
 	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
-	resp, err := crService.DescribeCrEESyncRule(d.Id())
+	resp, err := crService.DescribeCrEeSyncRule(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -176,7 +176,7 @@ func resourceAlibabacloudStackCrEESyncRuleRead(d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceAlibabacloudStackCrEESyncRuleDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCrEeSyncRuleDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
 	instanceId := d.Get("instance_id").(string)
@@ -192,7 +192,7 @@ func resourceAlibabacloudStackCrEESyncRuleDelete(d *schema.ResourceData, meta in
 	request.InstanceId = instanceId
 	request.SyncRuleId = syncRuleId
 
-	raw, err := crService.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+	raw, err := crService.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 		return creeClient.DeleteRepoSyncRule(request)
 	})
 	bresponse, ok := raw.(*cr_ee.DeleteRepoSyncRuleResponse)
