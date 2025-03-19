@@ -143,10 +143,12 @@ func dataSourceAlibabacloudStackCrEeReposRead(d *schema.ResourceData, meta inter
 			if err != nil {
 				return errmsgs.WrapError(err)
 			}
-			for _, n := range resp.Namespaces {
-				namespaces = append(namespaces, n.NamespaceName)
+			respNamespaces := resp["Namespaces"].([]interface{})
+			for _, namespaceItems := range respNamespaces {
+				namespace := namespaceItems.(map[string]interface{})
+				namespaces = append(namespaces, namespace["NamespaceName"].(string))
 			}
-			if len(resp.Namespaces) < pageSize {
+			if len(respNamespaces) < pageSize {
 				break
 			}
 			pageNo++
@@ -171,7 +173,7 @@ func dataSourceAlibabacloudStackCrEeReposRead(d *schema.ResourceData, meta inter
 		enableDetails = v.(bool)
 	}
 
-	var repos []cr_ee.RepositoriesItem
+	var repos []map[string]interface{}
 	for _, namespace := range namespaces {
 		pageNo = 1
 		for {
@@ -179,18 +181,20 @@ func dataSourceAlibabacloudStackCrEeReposRead(d *schema.ResourceData, meta inter
 			if err != nil {
 				return errmsgs.WrapError(err)
 			}
-			for _, r := range resp.Repositories {
-				if nameRegex != nil && !nameRegex.MatchString(r.RepoName) {
+			repositories := resp["Repositories"].([]interface{})
+			for _, r := range repositories {
+				repository := r.(map[string]interface{})
+				if nameRegex != nil && !nameRegex.MatchString(repository["RepoName"].(string)) {
 					continue
 				}
-				if idsMap != nil && idsMap[r.RepoId] == "" {
+				if idsMap != nil && idsMap[repository["RepoId"].(string)] == "" {
 					continue
 				}
 
-				repos = append(repos, r)
+				repos = append(repos, repository)
 			}
 
-			if len(resp.Repositories) < pageSize {
+			if len(repositories) < pageSize {
 				break
 			}
 			pageNo++
@@ -203,7 +207,7 @@ func dataSourceAlibabacloudStackCrEeReposRead(d *schema.ResourceData, meta inter
 			pageNo = 1
 			var images []cr_ee.ImagesItem
 			for {
-				resp, err := crService.ListCrEeRepoTags(instanceId, repo.RepoId, pageNo, pageSize)
+				resp, err := crService.ListCrEeRepoTags(instanceId, repo["RepoId"].(string), pageNo, pageSize)
 				if err != nil {
 					return errmsgs.WrapError(err)
 				}
@@ -235,15 +239,15 @@ func dataSourceAlibabacloudStackCrEeReposRead(d *schema.ResourceData, meta inter
 	names := make([]string, len(repos))
 	reposMaps := make([]map[string]interface{}, len(repos))
 	for i, r := range repos {
-		ids[i] = r.RepoId
-		names[i] = r.RepoName
+		ids[i] = r["RepoId"].(string)
+		names[i] = r["RepoName"].(string)
 		m := make(map[string]interface{})
-		m["instance_id"] = r.InstanceId
-		m["namespace"] = r.RepoNamespaceName
-		m["id"] = r.RepoId
-		m["name"] = r.RepoName
-		m["summary"] = r.Summary
-		m["repo_type"] = r.RepoType
+		m["instance_id"] = r["InstanceId"].(string)
+		m["namespace"] = r["RepoNamespaceName"].(string)
+		m["id"] = r["RepoId"].(string)
+		m["name"] = r["RepoName"].(string)
+		m["summary"] = r["Summary"].(string)
+		m["repo_type"] = r["RepoType"].(string)
 		if enableDetails {
 			m["tags"] = tags[i]
 		}

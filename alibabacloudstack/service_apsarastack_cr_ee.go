@@ -196,36 +196,36 @@ func (c *CrService) DescribeCrEeNamespace(id string) (map[string]interface{}, er
 	return response, nil
 }
 
-func (c *CrService) ListCrEeRepos(instanceId string, namespace string, pageNo int, pageSize int) (*cr_ee.ListRepositoryResponse, error) {
-	response := &cr_ee.ListRepositoryResponse{}
-	request := cr_ee.CreateListRepositoryRequest()
-	c.client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceId = instanceId
-	request.RepoNamespaceName = namespace
-	request.RepoStatus = "ALL"
-	request.PageNo = requests.NewInteger(pageNo)
-	request.PageSize = requests.NewInteger(pageSize)
+func (c *CrService) ListCrEeRepos(instanceId string, namespace string, pageNo int, pageSize int) (map[string]interface{}, error) {
+	request := c.client.NewCommonRequest("POST", "cr-ee", "2018-12-01", "ListRepository", "")
+	request.QueryParams["InstanceId"] = instanceId
+	request.QueryParams["RepoNamespaceName"] = namespace
+	request.QueryParams["RepoStatus"] = "ALL"
+	request.QueryParams["PageNo"] = strconv.Itoa(pageNo)
+	request.QueryParams["PageSize"] =  strconv.Itoa(pageSize)
 	resource := c.GenResourceId(instanceId, namespace)
-	action := request.GetActionName()
 
-	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
-		return creeClient.ListRepository(request)
-	})
-	response, ok := raw.(*cr_ee.ListRepositoryResponse)
+	bresponse, err := c.client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, "ListRepository", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(action, raw, request.RpcRequest, request)
 
-	response, _ = raw.(*cr_ee.ListRepositoryResponse)
-	if !response.ListRepositoryIsSuccess {
-		return response, errmsgs.WrapErrorf(errors.New(response.Code), errmsgs.DataDefaultErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR)
+	response := make(map[string]interface{})
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil,  errmsgs.WrapError(err)
+	}
+	if !response["asapiSuccess"].(bool) {
+		return nil, fmt.Errorf("read ee repo failed, %s", response["errorMessage"].(string))
 	}
 	return response, nil
+
 }
 
 func (c *CrService) DescribeCrEeRepo(id string) (map[string]interface{}, error) {
