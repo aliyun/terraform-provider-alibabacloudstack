@@ -4,6 +4,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"errors"
 	"strings"
+	"strconv"
 	"encoding/json"
 	"fmt"
 
@@ -132,31 +133,30 @@ func (c *CrService) ListCrEeInstanceEndpoint(instanceId string) (map[string]inte
 	return response, nil
 }
 
-func (c *CrService) ListCrEeNamespaces(instanceId string, pageNo int, pageSize int) (*cr_ee.ListNamespaceResponse, error) {
-	response := &cr_ee.ListNamespaceResponse{}
-	request := cr_ee.CreateListNamespaceRequest()
-	c.client.InitRpcRequest(*request.RpcRequest)
-	request.InstanceId = instanceId
-	request.PageNo = requests.NewInteger(pageNo)
-	request.PageSize = requests.NewInteger(pageSize)
-	resource := c.GenResourceId(instanceId)
-	action := request.GetActionName()
+func (c *CrService) ListCrEeNamespaces(instanceId string, pageNo int, pageSize int) (map[string]interface{}, error) {
+	request := c.client.NewCommonRequest("POST", "cr-ee", "2018-12-01", "ListNamespace", "")
+	request.QueryParams["InstanceId"] = instanceId
+	request.QueryParams["PageNo"] = strconv.Itoa(pageNo)
+	request.QueryParams["PageSize"] =  strconv.Itoa(pageSize)
 
-	raw, err := c.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
-		return creeClient.ListNamespace(request)
-	})
-	response, ok := raw.(*cr_ee.ListNamespaceResponse)
+	bresponse, err := c.client.ProcessCommonRequest(request)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil,  errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(action, raw, request.RpcRequest, request)
 
-	if !response.ListNamespaceIsSuccess && response.Code != "success"{
-		return response, errmsgs.WrapErrorf(errors.New(response.Code), errmsgs.DataDefaultErrorMsg, resource, action, errmsgs.AlibabacloudStackSdkGoERROR)
+	response := make(map[string]interface{})
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil,  errmsgs.WrapError(err)
+	}
+	if !response["asapiSuccess"].(bool) {
+		return nil, fmt.Errorf("read ee namespace failed, %s", response["errorMessage"].(string))
 	}
 	return response, nil
 }

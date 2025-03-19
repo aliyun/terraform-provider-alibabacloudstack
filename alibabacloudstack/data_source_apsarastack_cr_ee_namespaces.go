@@ -4,7 +4,6 @@ import (
 	"regexp"
 	"sort"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/cr_ee"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -81,14 +80,15 @@ func dataSourceAlibabacloudStackCrEeNamespacesRead(d *schema.ResourceData, meta 
 	pageSize := 50
 	instanceId := d.Get("instance_id").(string)
 
-	var namespaces []cr_ee.NamespacesItem
+	var namespaces []interface{}
 	for {
 		resp, err := crService.ListCrEeNamespaces(instanceId, pageNo, pageSize)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		namespaces = append(namespaces, resp.Namespaces...)
-		if len(resp.Namespaces) < pageSize {
+		respNamespaces := resp["Namespaces"].([]interface{})
+		namespaces = append(namespaces, respNamespaces...)
+		if len(respNamespaces) < pageSize {
 			break
 		}
 		pageNo++
@@ -107,23 +107,23 @@ func dataSourceAlibabacloudStackCrEeNamespacesRead(d *schema.ResourceData, meta 
 		}
 	}
 
-	var targetNamespaces []cr_ee.NamespacesItem
-	for _, namespace := range namespaces {
-		if nameRegex != nil && !nameRegex.MatchString(namespace.NamespaceName) {
+	var targetNamespaces []map[string]interface{}
+	for _, namespaceItem := range namespaces {
+		namespace := namespaceItem.(map[string]interface{})
+		if nameRegex != nil && !nameRegex.MatchString(namespace["NamespaceName"].(string)) {
 			continue
 		}
 
-		if idsMap != nil && idsMap[namespace.NamespaceId] == "" {
+		namespaceId := crService.GenResourceId(namespace["InstanceId"].(string), namespace["NamespaceName"].(string))
+		if idsMap != nil && idsMap[namespaceId] == "" {
 			continue
 		}
 
 		targetNamespaces = append(targetNamespaces, namespace)
 	}
 
-	namespaces = targetNamespaces
-
-	sort.SliceStable(namespaces, func(i, j int) bool {
-		return namespaces[i].NamespaceName < namespaces[j].NamespaceName
+	sort.SliceStable(targetNamespaces, func(i, j int) bool {
+		return targetNamespaces[i]["NamespaceName"].(string) < targetNamespaces[j]["NamespaceName"].(string)
 	})
 
 	var (
@@ -132,16 +132,16 @@ func dataSourceAlibabacloudStackCrEeNamespacesRead(d *schema.ResourceData, meta 
 		namespaceMaps	[]map[string]interface{}
 	)
 
-	for _, namespace := range namespaces {
+	for _, namespace := range targetNamespaces {
 		mapping := make(map[string]interface{})
-		mapping["instance_id"] = namespace.InstanceId
-		mapping["id"] = namespace.NamespaceId
-		mapping["name"] = namespace.NamespaceName
-		mapping["auto_create"] = namespace.AutoCreateRepo
-		mapping["default_visibility"] = namespace.DefaultRepoType
+		mapping["instance_id"] = namespace["InstanceId"].(string)
+		mapping["id"] = crService.GenResourceId(namespace["InstanceId"].(string), namespace["NamespaceName"].(string))
+		mapping["name"] = namespace["NamespaceName"].(string)
+		mapping["auto_create"] = namespace["AutoCreateRepo"].(bool)
+		mapping["default_visibility"] = namespace["DefaultRepoType"].(string)
 
-		ids = append(ids, namespace.NamespaceId)
-		names = append(names, namespace.NamespaceName)
+		ids = append(ids, mapping["id"].(string))
+		names = append(names, namespace["NamespaceName"].(string))
 		namespaceMaps = append(namespaceMaps, mapping)
 	}
 
