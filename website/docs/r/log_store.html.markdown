@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack log store resource.
 ---
 
-# alibabacloudstack\_log\_store
+# alibabacloudstack_log_store
 
 The log store is a unit in Log Service to collect, store, and query the log data. Each log store belongs to a project,
 and each project can create multiple Logstores. [Refer to details](https://help.aliyun.com/apsara/enterprise/v_3_16_0_20220117/sls/enterprise-ascm-developer-guide/CreateLogstore.html?spm=a2c4g.14484438.10001.307)
@@ -73,7 +73,7 @@ The following arguments are supported:
 * `project` - (Required, ForceNew) The project name to the log store belongs.
 * `name` - (Required, ForceNew) The log store, which is unique in the same project.
 * `retention_period` - (Optional) The data retention time (in days). Valid values: [1-3650]. Default to `30`. Log store data will be stored permanently when the value is `3650`.
-* `shard_count` - (Optional) The number of shards in this log store. Default to 2. You can modify it by "Split" or "Merge" operations. [Refer to details](https://www.alibabacloud.com/help/doc-detail/28976.htm)
+* `shard_count` - (Required) The number of shards in this log store. 
 * `auto_split` - (Optional) Determines whether to automatically split a shard. Default to `false`.
 * `max_split_shard_count` - (Optional) The maximum number of shards for automatic split, which is in the range of 1 to 64. You must specify this parameter when autoSplit is true.
 * `append_meta` - (Optional) Determines whether to append log meta automatically. The meta includes log receive time and client IP address. Default to `true`.
@@ -96,7 +96,7 @@ The following attributes are exported:
 * `max_split_shard_count` - The maximum number of shards for automatic split.
 * `append_meta` - Determines whether to append log meta automatically.
 * `enable_web_tracking` - Determines whether to enable Web Tracking.
-* `shards` - The shard attribute.
+* `shards` - The shard attribute. 
   * `id` - The ID of the shard.
   * `status` - Shard status, only two status of readwrite and readonly.
   * `begin_key` - The begin value of the shard range(MD5), included in the shard range.

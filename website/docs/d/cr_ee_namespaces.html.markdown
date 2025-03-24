@@ -7,7 +7,7 @@ description: |-
   Provides a list of Container Registry Enterprise Edition namespaces.
 ---
 
-# alibabacloudstack\_cr\_ee\_namespaces
+# alibabacloudstack_cr_ee_namespaces
 
 This data source provides a list Container Registry Enterprise Edition namespaces on Alibaba Cloud.
 
@@ -35,7 +35,6 @@ The following arguments are supported:
 * `instance_id` - (Required) ID of Container Registry Enterprise Edition instance.
 * `ids` - (Optional) A list of ids to filter results by namespace id.
 * `name_regex` - (Optional) A regex string to filter results by namespace name.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -49,4 +48,5 @@ The following attributes are exported in addition to the arguments listed above:
   * `name` - Name of Container Registry Enterprise Edition namespace.
   * `auto_create` - Boolean, when it set to true, repositories are automatically created when pushing new images. If it set to false, you create repository for images before pushing.
   * `default_visibility` - `PUBLIC` or `PRIVATE`, default repository visibility in this namespace.
-
+  * `name_regex` - A regex string to filter results by namespace name.
+  * `output_file` - File name where to save data source results (after running `terraform plan`).

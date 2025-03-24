@@ -7,7 +7,7 @@ description: |-
     Provides a random password  to the create ecs.
 ---
 
-# alibabacloudstack\_random_password
+# alibabacloudstack_random_password
 
 This resource does use a cryptographic random number generator.provides a random password for creating ECS instances
 

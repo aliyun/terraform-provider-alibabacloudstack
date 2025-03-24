@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack maxcompute user resource.
 ---
 
-# alibabacloudstack\_maxcompute\_user
+# alibabacloudstack_maxcompute_user
 
 The user is the basic unit of operation in maxcompute. It is similar to the concept of Database or Schema in traditional databases, and sets the boundary for maxcompute multi-user isolation and access control.
 ->**NOTE:** Available in 1.0.18+.
@@ -31,7 +31,7 @@ resource "alibabacloudstack_maxcompute_user" "example" {
 
 The following arguments are supported:
 * `user_name` - (Required, ForceNew) The name of the user that you want to create.
-* `description` - (Required, ForceNew) The description of the user that you want to create.
+* `description` - (Required, ForceNew) The description of the user that you want to create. 
 * `organization_id` - (Optional) The id of the organization. 
 * `organization_name` - (Optional) The name of the organization. 
 
@@ -41,6 +41,7 @@ The following arguments are supported:
 * `user_id` - Alias of the key `id`.
 * `user_pk` - The PK of the user.
 * `user_type` - The type of the user.
+* `organization_name` - The name of the organization. 
 
 ## Import
 

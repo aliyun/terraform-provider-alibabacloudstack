@@ -7,7 +7,7 @@ description: |-
   Provides a DNS Record resource.
 ---
 
-# alibabacloudstack\_dns\_record
+# alibabacloudstack_dns_record
 
 Provides a DNS Record resource.
 
@@ -42,6 +42,7 @@ The following arguments are supported:
 * `zone_id` - (Required) ID of the Dns Domain where this record belongs.
 * `name` - (Required) name for the domain record. This host_record can have at most 253 characters, and each part split with "." can have at most 63 characters, and must contain only alphanumeric characters or hyphens, such as "-",".","*","@",  and must not begin or end with "-".
 * `type` - (Required) The type of domain record. Valid values are `A`,`NS`,`MX`,`TXT`,`CNAME`,`SRV`,`AAAA`,`CAA`, `REDIRECT_URL` and `FORWORD_URL`.
+* `lba_strategy` - (Required)  The load balancing strategy for the domain record. Valid values are `ALL_RR` and `RATIO`.
 * `rr_set` - (Optional) The value of domain record, When the `type` is `MX`,`NS`,`CNAME`,`SRV`, the server will treat the `value` as a fully qualified domain name, so it's no need to add a `.` at the end.
 * `ttl` - (Optional) The effective time of domain record. Its scope depends on the edition of the cloud resolution. Free is `[600, 86400]`, Basic is `[120, 86400]`, Standard is `[60, 86400]`, Ultimate is `[10, 86400]`, Exclusive is `[1, 86400]`. Default value is `300`.
 * `remark` - (Optional) The effective time of domain record. Its scope depends on the edition of the cloud resolution. Free is `[600, 86400]`, Basic is `[120, 86400]`, Standard is `[60, 86400]`, Ultimate is `[10, 86400]`, Exclusive is `[1, 86400]`. Default value is `300`.
@@ -57,3 +58,4 @@ The following attributes are exported:
 * `ttl` - The record effective time.
 * `zone_id` - ID of the Dns Domain where this record belongs.
 * `lba_strategy` - The record strategy.
+* `line_ids` -  The line IDs associated with the DNS record.

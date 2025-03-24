@@ -1,38 +1,49 @@
 ---
-subcategory: "Datahub Service"
+subcategory: "DataHub"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_datahub_topic"
-sidebar_current: "docs-alibabacloudstack-resource-datahub-topic"
-description: |-
-  Provides a Alibabacloudstack datahub topic resource.
+sidebar_current: "docs-Alibabacloudstack-datahub-topic"
+description: |- 
+  Provides a datahub Topic resource.
 ---
 
-# alibabacloudstack\_datahub\_topic
+# alibabacloudstack_datahub_topic
 
-The topic is the basic unit of Datahub data source and is used to define one kind of data or stream. It contains a set of subscriptions. You can manage the datahub source of an application by using topics. [Refer to details](https://help.aliyun.com/document_detail/47440.html).
+Provides a datahub Topic resource.
 
 ## Example Usage
 
-Basic Usage
+### Basic Usage
 
-- BLob Topic
+- **BLOB Topic**
 
-```
-resource "alibabacloudstack_datahub_topic" "example" {
-  name         = "tf_datahub_topic"
-  project_name = "tf_datahub_project"
+```hcl
+resource "alibabacloudstack_datahub_project" "default" {
+    comment = "test"
+    name = "tf_testacc_datahub_project"
+}
+
+resource "alibabacloudstack_datahub_topic" "blob_example" {
+  name         = "tf_testacc_datahub_blob_topic"
+  project_name = alibabacloudstack_datahub_project.default.name
   record_type  = "BLOB"
   shard_count  = 3
   life_cycle   = 7
   comment      = "created by terraform"
 }
 ```
-- Tuple Topic
 
-```
-resource "alibabacloudstack_datahub_topic" "example" {
-  name         = "tf_datahub_topic"
-  project_name = "tf_datahub_project"
+- **TUPLE Topic**
+
+```hcl
+resource "alibabacloudstack_datahub_project" "default" {
+    comment = "test"
+    name = "tf_testacc_datahub_project"
+}
+
+resource "alibabacloudstack_datahub_topic" "tuple_example" {
+  name         = "tf_testacc_datahub_tuple_topic"
+  project_name = alibabacloudstack_datahub_project.default.name
   record_type  = "TUPLE"
   record_schema = {
     bigint_field    = "BIGINT"
@@ -51,33 +62,33 @@ resource "alibabacloudstack_datahub_topic" "example" {
 
 The following arguments are supported:
 
-* `name` - (Required, ForceNew) The name of the datahub topic. Its length is limited to 1-128 and only characters such as letters, digits and '_' are allowed. It is case-insensitive.
-* `project_name` - (Required, ForceNew) The name of the datahub project that this topic belongs to. It is case-insensitive.
+* `project_name` - (Required, ForceNew) The name of the DataHub project that this topic belongs to. It is case-insensitive and cannot exceed 128 characters.
+* `name` - (Required, ForceNew) The name of the DataHub topic. Its length is limited to 1-128 characters and only letters, digits, and underscores (`_`) are allowed. It is case-insensitive.
 * `shard_count` - (Optional, ForceNew) The number of shards this topic contains. The permitted range of values is [1, 10]. The default value is 1.
-* `life_cycle` - (Optional) How many days this topic lives. The permitted range of values is [1, 7]. The default value is 3.
-* `record_type` - (Optional, ForceNew) The type of this topic. Its value must be one of {BLOB, TUPLE}. For BLOB topic, data will be organized as binary and encoded by BASE64. For TUPLE topic, data has fixed schema. The default value is "TUPLE" with a schema {STRING}.
-* `record_schema` - (Optional, ForceNew) Schema of this topic, required only for TUPLE topic. Supported data types (case-insensitive) are:
-  - BIGINT
-  - STRING
-  - BOOLEAN
-  - DOUBLE
-  - TIMESTAMP
-* `comment` - (Optional) Comment of the datahub topic. It cannot be longer than 255 characters.
+* `life_cycle` - (Optional) The retention period for the topic's data in days. The permitted range of values is [1, 7]. The default value is 3.
+* `record_type` - (Optional, ForceNew) The type of the topic. It must be one of `BLOB` or `TUPLE`. For `BLOB` topics, data will be organized as binary and encoded by BASE64. For `TUPLE` topics, data has a fixed schema. The default value is `TUPLE` with a schema `{STRING}`.
+* `record_schema` - (Optional, ForceNew) Schema of this topic, required only for `TUPLE` topics. Supported data types (case-insensitive) are:
+  - `BIGINT`
+  - `STRING`
+  - `BOOLEAN`
+  - `DOUBLE`
+  - `TIMESTAMP`
+* `comment` - (Optional) Comment for the DataHub topic. It cannot exceed 255 characters.
 
-**Notes:** Currently `life_cycle` can not be modified and it will be supported in the next future.
+**Note:** Currently, the `life_cycle` field cannot be modified and will be supported in the future.
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the datahub topic. It was composed of project name and its name, and formats to `<project_name>:<name>`.
-* `create_time` - Create time of the datahub topic. It is a human-readable string rather than 64-bits UTC.
-* `last_modify_time` - Last modify time of the datahub topic. It is the same as *create_time* at the beginning. It is also a human-readable string rather than 64-bits UTC.
+* `id` - The ID of the DataHub topic. It is composed of the project name and the topic name, formatted as `<project_name>:<name>`.
+* `create_time` - The creation time of the DataHub topic. It is a human-readable string rather than a 64-bit UTC timestamp.
+* `last_modify_time` - The last modification time of the DataHub topic. Initially, it is the same as the `create_time`. It is also a human-readable string rather than a 64-bit UTC timestamp.
 
 ## Import
 
-Datahub topic can be imported using the ID, e.g.
+DataHub topics can be imported using the ID, e.g.
 
-```
-$ terraform import alibabacloudstack_datahub_topic.example tf_datahub_project:tf_datahub_topic
+```bash
+$ terraform import alibabacloudstack_datahub_topic.example <project_name>:<topic_name>
 ```

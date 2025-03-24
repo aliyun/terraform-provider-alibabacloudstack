@@ -7,7 +7,7 @@ description: |-
   Provides a list of Container Registry namespaces.
 ---
 
-# alibabacloudstack\_cr\_namespaces
+# alibabacloudstack_cr_namespaces
 
 This data source provides a list Container Registry namespaces on Alibabacloudstack Cloud.
 
@@ -32,7 +32,6 @@ output "output" {
 The following arguments are supported:
 
 * `name_regex` - (Optional) A regex string to filter results by namespace name.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -44,4 +43,3 @@ The following attributes are exported in addition to the arguments listed above:
   * `name` - Name of Container Registry namespace.
   * `auto_create` - Boolean, when it set to true, repositories are automatically created when pushing new images. If it set to false, you create repository for images before pushing.
   * `default_visibility` - `PUBLIC` or `PRIVATE`, default repository visibility in this namespace.
-

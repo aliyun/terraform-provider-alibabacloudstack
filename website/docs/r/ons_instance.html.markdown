@@ -7,7 +7,7 @@ description: |-
   Provides a alibabacloudstack ONS Instance resource.
 ---
 
-# alibabacloudstack\_ons\_instance
+# alibabacloudstack_ons_instance
 
 Provides an ONS instance resource.
 
@@ -43,6 +43,8 @@ The following arguments are supported:
 * `independent_naming` - (Required)This attribute is used to define an independent name or not. It takes only bool value.
 * `cluster` - (Required)This attribute is a used to add cluster name.
 * `remark` - (Optional)This attribute is a concise description of instance. The length cannot exceed 128.
+* `instance_type` - (Required)  This attribute specifies the type of the instance.
+* `instance_status` - (Required)  This attribute specifies the status of the instance.
 
 ## Attributes Reference
 
@@ -52,4 +54,10 @@ The following attributes are exported:
 * `instance_type` - The edition of instance. 1 represents the postPaid edition, and 2 represents the platinum edition.
 * `instance_status` - The status of instance. 1 represents the platinum edition instance is in deployment. 2 represents the postpaid edition instance are overdue. 5 represents the postpaid or platinum edition instance is in service. 7 represents the platinum version instance is in upgrade and the service is available.
 * `create_time` - The create time of the reousrce.
-
+* `name` -  This attribute indicates the name of the instance.
+* `tps_receive_max` -  This attribute indicates the maximum receive TPS of the instance.
+* `tps_send_max` -  This attribute indicates the maximum send TPS of the instance.
+* `topic_capacity` -  This attribute indicates the topic capacity of the instance.
+* `independent_naming` -  This attribute indicates whether the instance has independent naming.
+* `cluster` -  This attribute indicates the cluster associated with the instance.
+* `remark` -  This attribute indicates the remark of the instance.

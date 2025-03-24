@@ -7,7 +7,7 @@ description: |-
     Provides a collection of Security Group Rules available to the user.
 ---
 
-# alibabacloudstack\_security\_group\_rules
+# alibabacloudstack_security_group_rules
 
 The `alibabacloudstack_security_group_rules` data source provides a collection of security permissions of a specific security group.
 Each collection item represents a single `ingress` or `egress` permission rule.
@@ -50,7 +50,8 @@ The following arguments are supported:
 * `direction` - (Optional) Authorization direction. Valid values are: `ingress` or `egress`.
 * `ip_protocol` - (Optional) The IP protocol. Valid values are: `tcp`, `udp`, `icmp`, `gre` and `all`.
 * `policy` - (Optional) Authorization policy. Can be either `accept` or `drop`. The default value is `accept`.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `group_name` - (Optional) The name of the security group that owns the rules.
+* `group_desc` - (Optional) The description of the security group that owns the rules.
 
 ## Attributes Reference
 
@@ -71,3 +72,5 @@ The following attributes are exported in addition to the arguments listed above:
   * `direction` - Authorization direction, `ingress` or `egress`.
   * `dest_group_id` - Target security group id for ingress authorization.
   * `source_group_id` - Source security group ID for ingress authorization.
+  * `group_id` - The ID of the security group that owns the rules.
+  * `output_file` - File name where to save data source results (after running `terraform plan`).

@@ -1,58 +1,32 @@
 ---
-subcategory: "AnalyticDB for MySQL (ADB)"
+subcategory: "ADB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_adb_account"
-sidebar_current: "docs-alibabacloudstack-resource-adb-account"
-description: |-
-  Provides a ADB account resource.
+sidebar_current: "docs-Alibabacloudstack-adb-account"
+description: |- 
+  Provides a adb Account resource.
 ---
 
-# alibabacloudstack\_adb\_account
+# alibabacloudstack_adb_account
 
-Provides a [ADB](https://www.alibabacloud.com/help/product/92664.htm) account resource and used to manage databases.
+Provides a adb Account resource.
 
 ## Example Usage
 
-```
-variable "creation" {
-  default = "ADB"
-}
-
+```hcl
 variable "name" {
-  default = "adbaccountmysql"
+    default = "tf-testaccadbaccount96136"
 }
 
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = var.creation
+variable "password" {
+  description = "The password of adb account."
 }
 
-resource "alibabacloudstack_vpc" "default" {
-  name       = var.name
-  cidr_block = "172.16.0.0/16"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = alibabacloudstack_vpc.default.id
-  cidr_block        = "172.16.0.0/24"
-  zone_id           = data.alibabacloudstack_zones.default.zones[0].id
-  name              = var.name
-}
-
-resource "alibabacloudstack_adb_db_cluster" "cluster" {
-  db_cluster_version  = "3.0"
-  db_cluster_category = "Cluster"
-  db_node_class       = "C8"
-  db_node_count       = 2
-  db_node_storage     = 200
-  pay_type            = "PostPaid"
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  description         = var.name
-}
-
-resource "alibabacloudstack_adb_account" "account" {
-  db_cluster_id       = alibabacloudstack_adb_db_cluster.cluster.id
-  account_name        = "tftestnormal"
-  account_password    = "Test12345"
+resource "alibabacloudstack_adb_account" "default" {
+  db_cluster_id       = "am-bp1j43v9c35ef2cvf"
+  account_name        = "nametest123"
+  account_password    = var.password
+  account_type        = "Normal"
   account_description = var.name
 }
 ```
@@ -61,26 +35,18 @@ resource "alibabacloudstack_adb_account" "account" {
 
 The following arguments are supported:
 
-* `account_type` - (Optional, ForceNew) The type of the database account. Default Value: Super. Valid values:
-  * Normal: standard account. Up to 256 standard accounts can be created for a cluster.
-  * Super: privileged account. Only a single privileged account can be created for a cluster.
-* `db_cluster_id` - (Required, ForceNew) The Id of cluster in which account belongs.
-* `account_name` - (Required, ForceNew) Operation account requiring a uniqueness check. It may consist of lower case letters, numbers, and underlines, and must start with a letter and have no more than 16 characters.
-* `account_password` - (Optional) Operation password. It may consist of letters, digits, or underlines, with a length of 6 to 32 characters. You have to specify one of `account_password` and `kms_encrypted_password` fields.
-* `kms_encrypted_password` - (Optional) An KMS encrypts password used to a db account. If the `account_password` is filled in, this field will be ignored.
-* `kms_encryption_context` - (Optional) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating a db account with `kms_encrypted_password`. See [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm). It is valid when `kms_encrypted_password` is set.
-* `account_description` - (Optional) Account description. It cannot begin with https://. It must start with a Chinese character or English letter. It can include Chinese and English characters, underlines (_), hyphens (-), and numbers. The length may be 2-256 characters.
+* `db_cluster_id` - (Required, ForceNew) The ID of the ADB cluster where the account belongs. Once set, it cannot be changed.
+* `account_name` - (Required, ForceNew) The name of the account. It must start with a letter and can consist of lowercase letters, numbers, and underscores (_). The length should not exceed 16 characters.
+* `account_password` - (Optional) The password for the account. It must consist of letters, digits, or underscores, with a length between 6 and 32 characters. You must specify either `account_password` or `kms_encrypted_password`.
+* `kms_encrypted_password` - (Optional) An KMS encrypted password used to create or update the database account. If `account_password` is provided, this field will be ignored.
+* `kms_encryption_context` - (Optional) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating the database account. This is valid only when `kms_encrypted_password` is set.
+* `account_type` - (Optional, ForceNew) The type of the database account. Default value: `Normal`. Valid values:
+  * `Normal`: Standard account. Up to 256 standard accounts can be created for a cluster.
+  * `Super`: Privileged account. Only one privileged account can be created for a cluster.
+* `account_description` - (Optional) The description of the account. It must start with a Chinese character or an English letter and can include Chinese characters, English letters, underscores (_), hyphens (-), and numbers. The length should be between 2 and 256 characters.
 
 ## Attributes Reference
 
-The following attributes are exported:
+The following attributes are exported in addition to the arguments listed above:
 
-* `id` - The current account resource ID. Composed of instance ID and account name with format `<instance_id>:<name>`.
-
-## Import
-
-ADB account can be imported using the id, e.g.
-
-```
-$ terraform import alibabacloudstack_adb_account.example "am-12345:tf_account"
-```
+* `id` - The unique identifier of the account. It is composed of the instance ID and the account name in the format `<instance_id>:<account_name>`.

@@ -7,7 +7,7 @@ description: |-
   Provides an ECS image copy resource.
 ---
 
-# alibabacloudstack\_image\_copy
+# alibabacloudstack_image_copy
 
 Copies a custom image from one region to another. You can use copied images to perform operations in the target region, such as creating instances (RunInstances) and replacing system disks (ReplaceSystemDisk).
 
@@ -40,9 +40,13 @@ The following arguments are supported:
 * `name` - (Optional,Deprecated) Field 'name' has been deprecated. New field 'image_name' instead.
 * `image_name` - (Optional) The image name. It must be 2 to 128 characters in length, and must begin with a letter or Chinese character (beginning with http:// or https:// is not allowed). It can contain digits, colons (:), underscores (_), or hyphens (-). Default value: null.
 * `description` - (Optional) The description of the image. It must be 2 to 256 characters in length and must not start with http:// or https://. Default value: null.
+* `kms_key_id` - (Optional, ForceNew) The KMS key ID used for encryption. 
+* `encrypted` - (Optional, ForceNew) Indicates whether the image is encrypted. 
 
-## Attributes Reference0
+## Attributes Reference
  
- The following attributes are exported:
+The following attributes are exported:
  
 * `id` - ID of the image.
+* `name` - The name of the image. 
+* `image_name` - The name of the image. 

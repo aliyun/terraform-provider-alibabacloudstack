@@ -7,7 +7,7 @@ description: |-
     Provides a list of bucket objects to the user.
 ---
 
-# alibabacloudstack\_oss_bucket_objects
+# alibabacloudstack_oss_bucket_objects
 
 This data source provides the objects of an OSS bucket.
 
@@ -31,7 +31,6 @@ The following arguments are supported:
 * `bucket_name` - Name of the bucket that contains the objects to find.
 * `key_regex` - (Optional) A regex string to filter results by key.
 * `key_prefix` - (Optional) Filter results by the given key prefix (such as "path/to/folder/logs-").
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -50,3 +49,5 @@ The following attributes are exported in addition to the arguments listed above:
   * `sse_kms_key_id` - If present, specifies the ID of the Key Management Service(KMS) master encryption key that was used for the object.
   * `storage_class` - Object storage type. Possible values: `Standard`, `IA` and `Archive`.
   * `last_modification_time` - Last modification time of the object.
+
+  * `computed_attribute` - Description for computed attribute. 

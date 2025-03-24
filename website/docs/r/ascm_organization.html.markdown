@@ -7,7 +7,7 @@ description: |-
   Provides an Ascm organization resource.
 ---
 
-# alibabacloudstack\_ascm_organization
+# alibabacloudstack_ascm_organization
 
 Provides an Ascm organization resource.
 

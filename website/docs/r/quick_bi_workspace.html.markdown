@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack Quick BI Workspace resource.
 ---
 
-# alibabacloudstack\_quick\_bi\_workspace
+# alibabacloudstack_quick_bi_workspace
 
 Provides a Quick BI Workspace resource.
 
@@ -36,6 +36,7 @@ The following arguments are supported:
 * `use_comment` - (Optional) Do you want to use table comments when creating data sets (corresponding to preferences). Valid values: `true` and `false`.
 * `allow_share` - (Optional) Whether the report is allowed to be shared (corresponding function permission-works can be authorized). Valid values: `false`, `true`.
 * `allow_publish` - (Optional) Whether the report is allowed to be made public (corresponding function permission-works can be made public).Valid values: `false`, `true`.
+* `allow_publish` - (Optional)  Whether the report is allowed to be made public (corresponding function permission-works can be made public). Valid values: `false`, `true`.
 
 ## Attributes Reference
 

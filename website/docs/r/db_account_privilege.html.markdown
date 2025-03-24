@@ -7,7 +7,7 @@ description: |-
   Provides an RDS account privilege resource.
 ---
 
-# alibabacloudstack\_db\_account\_privilege
+# alibabacloudstack_db_account_privilege
 
 Provides an RDS account privilege resource and used to grant several database some access privilege. A database can be granted by multiple account.
 
@@ -20,6 +20,9 @@ variable "creation" {
 
 variable "name" {
   default = "dbaccountprivilegebasic"
+}
+
+variable "password" {
 }
 
 data "alibabacloudstack_zones" "default" {
@@ -57,7 +60,7 @@ resource "alibabacloudstack_db_database" "db" {
 resource "alibabacloudstack_db_account" "account" {
   instance_id = "${alibabacloudstack_db_instance.instance.id}"
   name        = "tftestprivilege"
-  password    = "Test12345"
+  password    = var.password
   description = "from terraform"
 }
 
@@ -81,9 +84,12 @@ The following arguments are supported:
      
    Default to "ReadOnly". 
 * `db_names` - (Required) List of specified database name.
+* `data_base_instance_id` - (Optional, ForceNew) The ID of the database instance. 
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The current account resource ID. Composed of instance ID, account name and privilege with format `<instance_id>:<name>:<privilege>`.
+* `instance_id` - The ID of the instance where the account belongs. 
+* `data_base_instance_id` - The ID of the database instance. 

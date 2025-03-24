@@ -7,7 +7,7 @@ description: |-
     Provides a list of Route Entries owned by an Alibabacloudstack Cloud account.
 ---
 
-# alibabacloudstack\_route\_entries
+# alibabacloudstack_route_entries
 
 This data source provides a list of Route Entries owned by an Alibabacloudstack Cloud account.
 
@@ -101,7 +101,6 @@ The following arguments are supported:
 * `instance_id` - (Optional) The instance ID of the next hop.
 * `type` - (Optional) The type of the route entry.
 * `cidr_block` - (Optional) The destination CIDR block of the route entry.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -114,4 +113,3 @@ The following attributes are exported in addition to the arguments listed above:
   * `instance_id` - The instance ID of the next hop.
   * `route_table_id` - The ID of the router table to which the route entry belongs.
   * `cidr_block` - The destination CIDR block of the route entry.
-

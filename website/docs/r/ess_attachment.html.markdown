@@ -7,7 +7,7 @@ description: |-
   Provides an ESS Attachment resource to attach or remove ECS instances.
 ---
 
-# alibabacloudstack\_ess\_attachment
+# alibabacloudstack_ess_attachment
 
 Attaches several ECS instances to a specified scaling group or remove them from it.
 
@@ -112,7 +112,7 @@ resource "alibabacloudstack_ess_attachment" "default" {
 
 The following arguments are supported:
 
-* `scaling_group_id` - (Required) ID of the scaling group of a scaling configuration.
+* `scaling_group_id` - (Required) ID of the scaling group of a scaling configuration. 
 * `instance_ids` - (Required) ID of the ECS instance to be attached to the scaling group. You can input up to 20 IDs.
 * `force` - (Optional) Whether to remove forcibly "AutoCreated" ECS instances in order to release scaling group
   capacity "MaxSize" for attaching ECS instances. Default to false.

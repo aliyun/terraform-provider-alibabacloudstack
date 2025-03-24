@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack resource to manage Container Registry repositories.
 ---
 
-# alibabacloudstack\_cr\_repo
+# alibabacloudstack_cr_repo
 
 This resource will help you to manager Container Registry repositories.
 
@@ -41,6 +41,7 @@ The following arguments are supported:
 * `summary` - (Required) The repository general information. It can contain 1 to 80 characters.
 * `repo_type` - (Required) `PUBLIC` or `PRIVATE`, repo's visibility.
 * `detail` - (Optional) The repository specific information. MarkDown format is supported, and the length limit is 2000.
+* `summary` - (Required)  The repository general information. It can contain 1 to 100 characters.
 
 ## Attributes Reference
 
@@ -48,7 +49,6 @@ The following attributes are exported:
 
 * `id` - The id of Container Registry repository. The value is in format `namespace/repository`.
 * `domain_list` - The repository domain list.
-  * `public` - Domain of public endpoint.
-  * `internal` - Domain of internal endpoint, only in some regions.
-  * `vpc` - Domain of vpc endpoint.
-
+  * `public` -  Domain of public endpoint.
+  * `internal` -  Domain of internal endpoint, only in some regions.
+  * `vpc` -  Domain of vpc endpoint.

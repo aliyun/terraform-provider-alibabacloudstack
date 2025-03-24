@@ -7,7 +7,7 @@ description: |-
     Provides Ascm ram policy for role resource.
 ---
 
-# alibabacloudstack\_ascm_ram_policy_for_role
+# alibabacloudstack_ascm_ram_policy_for_role
 
 Provides a Ascm ram policy for role.
 
@@ -43,3 +43,6 @@ The following arguments are supported:
 * `ram_policy_id` - (Required) ID of the ram_policy_id which will be used to bind.
 * `role_id` - (Required, ForceNew) ID of the role which will be used to bind.
 
+## Attributes Reference
+
+No attributes are currently defined for this resource.

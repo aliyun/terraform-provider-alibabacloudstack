@@ -7,7 +7,7 @@ description: |-
     Provides a list of roles to the user.
 ---
 
-# alibabacloudstack\_ascm_roles
+# alibabacloudstack_ascm_roles
 
 This data source provides the roles of the current Apsara Stack Cloud user.
 
@@ -39,9 +39,6 @@ The following arguments are supported:
 
 * `id` - (Optional) It is used to filter results by role ID.
 * `name_regex` - (Optional) A regex string to filter results by role name.
-* `description` - Description about the role.
-* `role_type` - (Optional) It is used to filter results by Role Type. Valid Values - "ROLETYPE_RAM", "ROLETYPE_ASCM".
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -61,4 +58,3 @@ The following attributes are exported in addition to the arguments listed above:
     * `active` - Role status.
     * `owner_organization_id` - ID of the owner organization where role belongs.
     * `code` - role code.
-     

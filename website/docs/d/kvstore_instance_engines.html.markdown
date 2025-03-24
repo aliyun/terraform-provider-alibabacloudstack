@@ -7,7 +7,7 @@ description: |-
     Provides a list of KVStore instacne engines info.
 ---
 
-# alibabacloudstack\_kvstore\_instance\_engines
+# alibabacloudstack_kvstore_instance_engines
 
 This data source provides the KVStore instance engines resource available info of Apsara Stack Cloud.
 
@@ -39,7 +39,8 @@ The following arguments are supported:
 * `instance_charge_type` - (Optional) Filter the results by charge type. Valid values: `PrePaid` and `PostPaid`. Default to `PrePaid`.
 * `engine` - (Optional) Database type. Options are `Redis`, `Memcache`. Default to `Redis`.
 * `engine_version` - (Optional) Database version required by the user. Value options of Redis can refer to the latest docs [detail info](https://www.alibabacloud.com/help/doc-detail/60873.htm) `EngineVersion`. Value of Memcache should be empty.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform apply`).
+* `engine` - (Optional) Specifies the engine type for the KVStore instance.
+* `engine_version` - (Optional) Specifies the engine version for the KVStore instance.
 
 ## Attributes Reference
 

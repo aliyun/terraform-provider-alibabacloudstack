@@ -7,7 +7,7 @@ description: |-
     Provides a list of environment services to the user.
 ---
 
-# alibabacloudstack\_ascm_environment_services_by_product
+# alibabacloudstack_ascm_environment_services_by_product
 
 This data source provides the environment services of the current Apsara Stack Cloud user.
 
@@ -26,11 +26,11 @@ output "envser" {
 
 The following arguments are supported:
 
-* `ids` - (Optional) A list of environment service IDs.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `ids` - (Optional) A list of environment service IDs. 
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
 
 * `result` - A list of environment services. Each element contains the following attributes:  
+  

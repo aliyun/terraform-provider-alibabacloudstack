@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack Ehpc Job Template resource.
 ---
 
-# alibabacloudstack\_ehpc\_job\_template
+# alibabacloudstack_ehpc_job_template
 
 Provides a Ehpc Job Template resource.
 
@@ -24,14 +24,13 @@ resource "alibabacloudstack_ehpc_job_template" "default" {
   job_template_name = "example_value"
   command_line      = "./LammpsTest/lammps.pbs"
 }
-
 ```
 
 ## Argument Reference
 
 The following arguments are supported:
 
-* `array_request` - (Optional) Queue Jobs, Is of the Form: 1-10:2.
+* `array_request` - (Optional) Queue Jobs, Is of the Form: 1-10:2. 
 * `clock_time` - (Optional) Job Maximum Run Time.
 * `command_line` - (Required) Job Commands.
 * `gpu` - (Optional) A Single Compute Node Using the GPU Number.Possible Values: 1~20000.
@@ -54,6 +53,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The resource ID in terraform of Job Template.
+* `re_runable` - Whether the job supports re-running. 
 
 ## Import
 

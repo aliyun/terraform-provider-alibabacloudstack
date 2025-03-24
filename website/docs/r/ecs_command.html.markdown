@@ -2,56 +2,55 @@
 subcategory: "ECS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ecs_command"
-sidebar_current: "docs-alibabacloudstack-resource-ecs-command"
-description: |-
-  Provides a Alibabacloudstack ECS Command resource.
+sidebar_current: "docs-Alibabacloudstack-ecs-command"
+description: |- 
+  Provides a ecs Command resource.
 ---
 
-# alibabacloudstack\_ecs\_command
+# alibabacloudstack_ecs_command
 
 Provides a ECS Command resource.
 
 For information about ECS Command and how to use it, see [What is Command](https://www.alibabacloud.com/help/en/doc-detail/64844.htm).
-
-
 
 ## Example Usage
 
 Basic Usage
 
 ```terraform
-resource "alibabacloudstack_ecs_command" "example" {
-  name            = "tf-testAcc"
-  command_content = "bHMK"
-  description     = "For Terraform Test"
-  type            = "RunShellScript"
-  working_dir     = "/root"
+variable "name" {
+    default = "tf-testaccecscommand49325"
 }
 
+resource "alibabacloudstack_ecs_command" "default" {
+  command_name      = var.name
+  command_content   = "bHMK" # Base64-encoded content: "ls\n"
+  type              = "RunShellScript"
+  description       = "Command for listing files in the root directory"
+  enable_parameter  = false
+  timeout           = 120
+  working_dir       = "/root"
+}
 ```
 
 ## Argument Reference
 
 The following arguments are supported:
 
-* `command_content` - (Required, ForceNew) The Base64-encoded content of the command.
-* `description` - (Optional, ForceNew) The description of command.
-* `enable_parameter` - (Optional, ForceNew) Specifies whether to use custom parameters in the command to be created. Default to: false.                                                                                                                  
-* `name` - (Required, ForceNew) The name of the command, which supports all character sets. It can be up to 128 characters in length.
-* `timeout` - (Optional, ForceNew) The timeout period that is specified for the command to be run on ECS instances. Unit: seconds. Default to: `60`.
-* `type` - (Required, ForceNew) The command type. Valid Values: `RunBatScript`, `RunPowerShellScript` and `RunShellScript`.
-* `working_dir` - (Optional, ForceNew) The execution path of the command in the ECS instance.
+* `command_name` - (Required, ForceNew) The name of the command. It must be unique and can contain up to 128 characters.
+* `command_content` - (Required, ForceNew) The Base64-encoded content of the command. This is the actual script or command that will be executed on the ECS instances.
+* `type` - (Required, ForceNew) The type of the command. Valid values:
+  * `RunShellScript`: For Linux systems, executes shell scripts.
+  * `RunBatScript`: For Windows systems, executes batch scripts.
+  * `RunPowerShellScript`: For Windows systems, executes PowerShell scripts.
+* `description` - (Optional, ForceNew) A brief description of the command. It helps identify the purpose of the command.
+* `enable_parameter` - (Optional, ForceNew) Specifies whether the command supports custom parameters. Default value is `false`. If set to `true`, you can pass parameters when invoking the command.
+* `timeout` - (Optional, ForceNew) The timeout period for the command execution on ECS instances. Unit: seconds. Default value is `60`.
+* `working_dir` - (Optional, ForceNew) The working directory where the command will be executed on the ECS instance. Default value is `/root` for Linux systems and `C:\Windows\system32` for Windows systems.
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `id` - The resource ID in terraform of Command.
-
-## Import
-
-ECS Command can be imported using the id, e.g.
-
-```
-$ terraform import alibabacloudstack_ecs_command.example <id>
-```
+* `id` - The unique identifier of the ECS Command resource.
+* `command_id` - The ID of the created ECS Command.

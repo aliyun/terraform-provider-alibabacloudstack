@@ -7,7 +7,7 @@ description: |-
     Provides a list of availability zones for RDS that can be used by an Alibabacloudstack Cloud account.
 ---
 
-# alibabacloudstack\_db\_zones
+# alibabacloudstack_db_zones
 
 This data source provides availability zones for RDS that can be accessed by an Alibabacloudstack Cloud account within the region configured in the provider.
 
@@ -29,7 +29,8 @@ output "db_zones" {
 The following arguments are supported:
 
 * `multi` - (Optional) Indicate whether the zones can be used in a multi AZ configuration. Default to `false`. Multi AZ is usually used to launch RDS instances.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+
+* `ids` - (Optional) A list of zone IDs. 
 
 ## Attributes Reference
 
@@ -39,3 +40,5 @@ The following attributes are exported in addition to the arguments listed above:
 * `zones` - A list of availability zones. Each element contains the following attributes:
   * `id` - ID of the zone.
   * `multi_zone_ids` - A list of zone ids in which the multi zone.
+
+* `multi` - Indicates if the zones can be used in a multi AZ configuration. 

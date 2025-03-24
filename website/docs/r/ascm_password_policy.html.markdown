@@ -6,7 +6,7 @@ sidebar_current: "docs-alibabacloudstack-resource-ascm-password-policy"
 description: |-
    Provides a Ascm password policy configuration.
 ---
-# alibabacloudstack\_ascm_password_policy
+# alibabacloudstack_ascm_password_policy
 
 Provides an Ascm Password Policy resource.
 
@@ -18,8 +18,8 @@ resource "alibabacloudstack_ascm_password_policy" "default"{
   max_login_attempts      = 8
   hard_expiry             = true
 }
-
 ```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -32,5 +32,8 @@ The following arguments are supported:
 * `max_login_attempts` - (Optional) The maximum number of allowed logon attempts
 * `max_password_age` - (Optional) The validity period of the password.
 * `minimum_password_length` - (Optional) The minimum length of the password.Valid value range: [8-32].
-* `password_reuse_prevention` - (Optional) The maximum number of allowed password reuse attempts.
+* `password_reuse_prevention` - (Optional) The maximum number of allowed password reuse attempts
 
+## Attributes Reference
+
+The following attributes are exported:

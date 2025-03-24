@@ -7,7 +7,7 @@ description: |-
     Provides a list of password policies to the user.
 ---
 
-# alibabacloudstack\_ascm_password_policies
+# alibabacloudstack_ascm_password_policies
 
 This data source provides the password policies of the current Apsara Stack Cloud user.
 
@@ -26,7 +26,6 @@ output "families" {
 The following arguments are supported:
 
 * `ids` - (Optional) A list of instance family IDs.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `hard_expiry` - Specifies whether to disable logon after the password expires.
 * `require_numbers` - Specifies whether digits are required.
 * `require_symbols` - Specifies whether special characters are required.
@@ -36,11 +35,13 @@ The following arguments are supported:
 * `max_password_age` - The validity period of the password. Unit: days.
 * `minimum_password_length` - The minimum length of the password.
 * `password_reuse_prevention` - The maximum number of allowed password reuse attempts.
-    
+* `policies` - (Optional) A list of password policies.
+
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
 
+* `ids` - A list of instance family IDs.
 * `policies` - A list of password policies. Each element contains the following attributes:
   * `hard_expiry` - Specifies whether to disable logon after the password expires.
   * `require_numbers` - Specifies whether digits are required.

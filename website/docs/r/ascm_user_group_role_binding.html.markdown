@@ -7,7 +7,7 @@ description: |-
   Provides Ascm User Role Binding.
 ---
 
-# alibabacloudstack\_ascm_user_group_role_binding
+# alibabacloudstack_ascm_user_group_role_binding
 
 ## Example Usage
 
@@ -36,7 +36,7 @@ output "binder" {
 The following arguments are supported:
 
 * `user_group_id` - (Required) ID of user group.
-* `role_ids` - (Required) User Role Id.
+* `role_ids` - (Optional) User Role Id.
 
 ## Attributes Reference
 

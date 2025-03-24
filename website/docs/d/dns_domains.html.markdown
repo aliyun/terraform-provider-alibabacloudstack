@@ -7,7 +7,7 @@ description: |-
     Provides a list of domains available to the user.
 ---
 
-# alibabacloudstack\_dns\_domains
+# alibabacloudstack_dns_domains
 
 This data source provides a list of DNS Domains in an Alibabacloudstack Cloud account according to the specified filters.
 
@@ -33,7 +33,8 @@ The following arguments are supported:
 * `domain_name` - (Optional) A regex string to filter results by the domain name. 
 * `ids` (Optional) - A list of domain IDs.
 * `resource_group_id` - (Optional, ForceNew) The ID of resource group which the dns belongs.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+
+* `dns_servers` - (Optional) DNS list of the domain in the analysis system. 
 
 ## Attributes Reference
 

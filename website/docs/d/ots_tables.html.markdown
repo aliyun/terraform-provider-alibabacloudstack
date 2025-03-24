@@ -7,7 +7,7 @@ description: |-
     Provides a list of ots tables to the user.
 ---
 
-# alibabacloudstack\_ots\_tables
+# alibabacloudstack_ots_tables
 
 This data source provides the ots tables of the current Alibaba Cloud user.
 
@@ -33,7 +33,6 @@ The following arguments are supported:
 * `instance_name` - The name of OTS instance.
 * `ids` - (Optional) A list of table IDs.
 * `name_regex` - (Optional) A regex string to filter results by table name.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -50,4 +49,3 @@ The following attributes are exported in addition to the arguments listed above:
     * `type` - Type of the property. Availably value is {1 for int, 2 for string, 3 for binary}
   * `time_to_live` - The retention time of data stored in this table.
   * `max_version` - The maximum number of versions stored in this table.
-	

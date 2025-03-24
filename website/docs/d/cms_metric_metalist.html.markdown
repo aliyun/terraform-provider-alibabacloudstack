@@ -5,9 +5,10 @@ page_title: "Alibabacloudstack: alibabacloudstack_cms_metric_metalist"
 sidebar_current: "docs-alibabacloudstack-datasource-cms-metric-metalist"
 description: |-
     Provides a Metalist owned by an Alibabacloudstack Cloud account.
+
 ---
 
-# alibabacloudstack\_cms\_metric\_metalist
+# alibabacloudstack_cms_metric_metalist
 
 Provides a Metalist of project  owned by an Alibabacloudstack Cloud account.
 
@@ -30,6 +31,7 @@ output "metric_metalist" {
 The following arguments are supported:
 
 * `namespace` - (Required, ForceNew) The namespace of the service. You can call the  operation to obtain namespaces. 
+* `resources` - (Optional) A list of cms metriclist.
 
 ## Attributes Reference
 
@@ -46,5 +48,3 @@ The following attributes are exported:
     * `unit` - The unit of the metric. 
     * `statistics` - The statistical method of the metric. Multiple statistical methods are separated with commas (,), for example, Average,Minimum,Maximum.
     * `namespace` - The namespace of the monitored service.
-
-  

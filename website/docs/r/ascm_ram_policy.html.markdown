@@ -7,7 +7,7 @@ description: |-
   Provides Ascm ram policy.
 ---
 
-# alibabacloudstack\_ascm_ram_policy
+# alibabacloudstack_ascm_ram_policy
 
 Provides Ascm ram policy.
 
@@ -30,10 +30,12 @@ The following arguments are supported:
 * `name` - (Required) Ram Policy name. 
 * `policy_document` - (Required) Policy document of the policy.
 * `description` - (Optional) Description for the ram policy.
+* `name` - (Required)  Ram Policy name with length between 3 and 64 characters.
+* `policy_document` - (Required)  Policy document of the policy.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - Ram policy Name of the user.
-* `ram_id` - The ID of the ram policy.
+* `ram_id` - The ID of the ram policy.  Exported attribute indicating the unique identifier for the RAM policy.

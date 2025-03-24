@@ -7,7 +7,7 @@ description: |-
   Provides a AlibabacloudStack KMS Alias resource.
 ---
 
-# alibabacloudstack\_kms_alias
+# alibabacloudstack_kms_alias
 
 Create an alias for the master key (CMK).
 
@@ -33,6 +33,7 @@ The following arguments are supported:
 * `alias_name` - (Required, ForceNew) The alias of CMK. `Encrypt`、`GenerateDataKey`、`DescribeKey` can be called using aliases. Length of characters other than prefixes: minimum length of 1 character and maximum length of 255 characters. Must contain prefix `alias/`.
 * `key_id` - (Required) The id of the key.
 
+
 -> **NOTE:** Each alias represents only one master key(CMK).
 
 -> **NOTE:** Within an area of the same user, alias is not reproducible.
@@ -43,4 +44,3 @@ The following arguments are supported:
 ## Attributes Reference
 
 * `id` - The ID of the alias.
-

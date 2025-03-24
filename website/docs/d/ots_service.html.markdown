@@ -7,7 +7,7 @@ description: |-
     Provides a datasource to open the Table Staore service automatically.
 ---
 
-# alibabacloudstack\_ots\_service
+# alibabacloudstack_ots_service
 
 Using this data source can enable Table Staore service automatically. If the service has been enabled, it will return `Opened`.
 
@@ -34,4 +34,4 @@ The following arguments are supported:
 
 The following attributes are exported in addition to the arguments listed above:
 
-* `status` - The current service enable status. 
+* `status` - The current service enable status.

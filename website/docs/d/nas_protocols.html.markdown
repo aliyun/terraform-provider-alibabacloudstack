@@ -7,7 +7,7 @@ description: |-
     Provides a list of FileType owned by an Alibaba Cloud account.
 ---
 
-# alibabacloudstack\_nas_protocols
+# alibabacloudstack_nas_protocols
 
 Provide  a data source to retrieve the type of protocol used to create NAS file system.
 
@@ -32,7 +32,7 @@ The following arguments are supported:
 
 * `type` - (Required) The file system type. Valid Values: `Performance` and `Capacity`.  
 * `zone_id` - (Optional) String to filter results by zone id. 
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `protocols` - (Optional) A list of supported protocol type.
 
 ## Attributes Reference
 

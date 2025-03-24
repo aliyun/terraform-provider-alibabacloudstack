@@ -7,7 +7,7 @@ description: |-
     Provides a list of availability zones for SLB that can be used by an AlibabacloudStack Cloud account.
 ---
 
-# alibabacloudstack\_slb\_zones
+# alibabacloudstack_slb_zones
 
 This data source provides availability zones for SLB that can be accessed by an AlibabacloudStack Cloud account within the region configured in the provider.
 
@@ -27,7 +27,6 @@ output "slb_zones" {
 
 The following arguments are supported:
 
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `enable_details` - (Optional) Default to false and only output `id` in the `zones` block. Set it to true can output more details.
 
 ## Attributes Reference

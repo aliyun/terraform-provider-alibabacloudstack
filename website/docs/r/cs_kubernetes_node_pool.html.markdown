@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack resource to manage container kubernetes node pool.
 ---
 
-# alibabacloudstack\_cs\_kubernetes\_node\_pool
+# alibabacloudstack_cs_kubernetes_node_pool
 
 This resource will help you to manage node pool in Kubernetes Cluster. 
 
@@ -21,7 +21,7 @@ This resource will help you to manage node pool in Kubernetes Cluster.
 
 -> **NOTE:** ACK adds a new RamRole (AliyunCSManagedAutoScalerRole) for the permission control of the node pool with auto-scaling enabled. If you are using a node pool with auto scaling, please click [AliyunCSManagedAutoScalerRole](https://ram.console.aliyun.com/role/authorization?request=%7B%22Services%22%3A%5B%7B%22Service%22%3A%22CS%22%2C%22Roles%22%3A%5B%7B%22RoleName%22%3A%22AliyunCSManagedAutoScalerRole%22%2C%22TemplateId%22%3A%22AliyunCSManagedAutoScalerRole%22%7D%5D%7D%5D%2C%22ReturnUrl%22%3A%22https%3A%2F%2Fcs.console.aliyun.com%2F%22%7D) to complete the authorization. 
 
--> **NOTE:** ACK adds a new RamRole（AliyunCSManagedNlcRole） for the permission control of the management node pool. If you use the management node pool, please click [AliyunCSManagedNlcRole](https://ram.console.aliyun.com/role/authorization?spm=5176.2020520152.0.0.387f16ddEOZxMv&request=%7B%22Services%22%3A%5B%7B%22Service%22%3A%22CS%22%2C%22Roles%22%3A%5B%7B%22RoleName%22%3A%22AliyunCSManagedNlcRole%22%2C%22TemplateId%22%3A%22AliyunCSManagedNlcRole%22%7D%5D%7D%5D%2C%22ReturnUrl%22%3A%22https%3A%2F%2Fcs.console.aliyun.com%2F%22%7D) to complete the authorization.
+-> **NOTE:** ACK adds a new RamRole(AliyunCSManagedNlcRole) for the permission control of the management node pool. If you use the management node pool, please click [AliyunCSManagedNlcRole](https://ram.console.aliyun.com/role/authorization?spm=5176.2020520152.0.0.387f16ddEOZxMv&request=%7B%22Services%22%3A%5B%7B%22Service%22%3A%22CS%22%2C%22Roles%22%3A%5B%7B%22RoleName%22%3A%22AliyunCSManagedNlcRole%22%2C%22TemplateId%22%3A%22AliyunCSManagedNlcRole%22%7D%5D%7D%5D%2C%22ReturnUrl%22%3A%22https%3A%2F%2Fcs.console.aliyun.com%2F%22%7D) to complete the authorization.
 
 -> **NOTE:** From version 1.123.1, supports the creation of a node pool of spot instance.
 
@@ -36,6 +36,8 @@ The managed cluster configuration,
 ```terraform
 variable "name" {
   default = "tf-test"
+}
+variable "password" {
 }
 data "alibabacloudstack_zones" default {
   available_resource_creation = "VSwitch"
@@ -65,7 +67,7 @@ resource "alibabacloudstack_cs_managed_kubernetes" "default" {
   cluster_spec                 = "ack.pro.small"
   is_enterprise_security_group = true
   worker_number                = 2
-  password                     = "Hello1234"
+  password                     = var.password
   pod_cidr                     = "172.20.0.0/16"
   service_cidr                 = "172.21.0.0/20"
   worker_vswitch_ids           = [alibabacloudstack_vswitch.default.id]
@@ -252,6 +254,10 @@ resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
 
 Create a node pool with platform as Windows 
 ```terraform
+
+variable "password" {
+}
+
 resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   name                 = "windows-np"
   cluster_id           = alibabacloudstack_cs_managed_kubernetes.default.0.id
@@ -263,7 +269,7 @@ resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
   node_count           = 1
 
   // if the instance platform is windows, the password is requered.
-  password = "Hello1234"
+  password = var.password
   platform = "Windows"
   image_id = "${window_image_id}"
 }
@@ -348,6 +354,8 @@ The following arguments are supported:
 * `instances` - (Optional) The instance list. Add existing nodes under the same cluster VPC to the node pool. 
 * `keep_instance_name` - (Optional) Add an existing instance to the node pool, whether to keep the original instance name. It is recommended to set to `true`.
 * `format_disk` - (Optional,) After you select this, if data disks have been attached to the specified ECS instances and the file system of the last data disk is uninitialized, the system automatically formats the last data disk to ext4 and mounts the data disk to /var/lib/docker and /var/lib/kubelet. The original data on the disk will be cleared. Make sure that you back up data in advance. If no data disk is mounted on the ECS instance, no new data disk will be purchased. Default is `false`.
+* `security_group_id` - (Optional ) The ID of security group where the current cluster worker node is located.
+* `system_disk_size` - (Optional) The system disk size of worker node. Its valid value range [20~32768] in GB. Default to `40`.
 
 #### tags
 
@@ -371,3 +379,10 @@ The following attributes are exported:
 * `image_id` - The image used by node pool workers.
 * `security_group_id` - The ID of security group where the current cluster worker node is located.
 * `scaling_group_id` - (Available in 1.105.0+) Id of the Scaling Group.
+* `system_disk_performance_level` - The performance level (PL) of the system disk that you want to use for the node. This parameter takes effect only for ESSDs. Its valid value is one of {"PL0", "PL1", "PL2", "PL3"}.
+* `platform` - The platform. One of `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`.
+* `instance_charge_type` - Node payment type. Valid values: `PostPaid`, `PrePaid`.
+* `resource_group_id` - The ID of the resource group.
+* `internet_charge_type` - The billing method for network usage. Valid values `PayByBandwidth` and `PayByTraffic`.
+* `internet_max_bandwidth_out` - The maximum outbound bandwidth for the public network. Unit: Mbit/s. Valid values: 0 to 100.
+* `spot_strategy` - The preemption policy for the pay-as-you-go instance. Valid value `SpotWithPriceLimit`.

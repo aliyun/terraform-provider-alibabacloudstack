@@ -6,7 +6,7 @@ sidebar_current: "docs-alibabacloudstack_ascm_logon_policy"
 description: |-
   Provides a Alibabacloudstack Logon Policy resource.
 ---
-# alibabacloudstack\_ascm_logon_policy
+# alibabacloudstack_ascm_logon_policy
 
 Provides a Alibabacloudstack Logon Policy resource.
 

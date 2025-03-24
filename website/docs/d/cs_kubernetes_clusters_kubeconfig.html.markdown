@@ -7,7 +7,8 @@ description: |-
   Provides a list of Container Service Kubernetes Clusters to be used by the alibabacloudstack_cs_kubernetes_cluster resource.
 ---
 
-# alibabacloudstack\_cs\_kubernetes\_clusters
+# alibabacloudstack_cs_kubernetes_clusters
+-> **NOTE:** Alias name has: `alibabacloudstack_ack_clusters`
 
 This data source provides a list Container Service Kubernetes Clusters on AlibabacloudStack.
 
@@ -33,6 +34,8 @@ The following arguments are supported:
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
+
+* `kubeconfig` - The kubeconfig content for the Kubernetes cluster.
 
 Clusters
 name: The name of the cluster, referenced in contexts.

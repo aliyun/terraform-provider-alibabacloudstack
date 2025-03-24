@@ -7,7 +7,7 @@ description: |-
     Provides a list of users to the user.
 ---
 
-# alibabacloudstack\_ascm_users
+# alibabacloudstack_ascm_users
 
 This data source provides the users of the current Apsara Stack Cloud user.
 
@@ -45,7 +45,13 @@ The following arguments are supported:
 * `ids` - (Optional) A list of users IDs.
 * `name_regex` - (Optional) A regex string to filter results by user login name.
 * `organization_id` - (Optional) Filter the results by the specified user Organization ID.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `login_name` - (Optional) User login name for filtering.
+* `role_id` - (Optional) Filter the results by the specified user role ID.
+* `login_policy_id` - (Optional) Filter the results by the specified user login policy ID.
+* `current_page` - (Optional) Current page number for pagination.
+* `page_size` - (Optional) Number of items per page for pagination.
+* `status` - (Optional) Filter the results by the specified user status.
+* `mark` - (Optional) Marker for filtering users.
 
 ## Attributes Reference
 
@@ -61,5 +67,15 @@ The following attributes are exported in addition to the arguments listed above:
   * `organization_id` - User Organization ID.
   * `login_policy_id` - User login policy ID.
   * `role_ids` - A list of the user owned roles.
-  * `default_role_id` - ID of the default role used by the user when logging in
+  * `default_role_id` - ID of the default role used by the user when logging in.
+  * `cellphone_num` - Cellphone number of the user.
+  * `default` - Indicates if the user is the default user.
+  * `deleted` - Indicates if the user has been deleted.
+  * `enable_ding_talk` - Indicates if DingTalk notifications are enabled for the user.
+  * `enable_email` - Indicates if email notifications are enabled for the user.
+  * `enable_short_message` - Indicates if short message notifications are enabled for the user.
+  * `last_login_time` - Timestamp of the last login time for the user.
+  * `parent_pk` - Parent primary key of the user.
+  * `primary_key` - Primary key of the user.
+  * `status` - Status of the user.
 * `role_ids` - A list of all user owned roles.

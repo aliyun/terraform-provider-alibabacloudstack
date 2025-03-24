@@ -7,7 +7,7 @@ description: |-
     Provides a list of ecs instance families to the user.
 ---
 
-# alibabacloudstack\_ascm_ecs_instance_families
+# alibabacloudstack_ascm_ecs_instance_families
 
 This data source provides the ecs instance families of the current Apsara Stack Cloud user.
 
@@ -27,9 +27,8 @@ output "ecs_instance" {
 
 The following arguments are supported:
 
-* `ids` - (Optional) A list of ecs instance family IDs.
+* `ids` - (Optional) A list of ecs instance family IDs. 
 * `status` - (Required) Filter the results by specifying the status of ecs instance families.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 

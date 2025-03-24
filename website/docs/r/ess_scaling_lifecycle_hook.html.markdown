@@ -7,7 +7,8 @@ description: |-
   Provides a ESS lifecycle hook resource.
 ---
 
-# alibabacloudstack\_ess\_lifecycle\_hook
+# alibabacloudstack_ess_lifecycle_hook
+-> **NOTE:** Alias name has: `alibabacloudstack_autoscaling_lifecyclehook`
 
 Provides a ESS lifecycle hook resource.
 

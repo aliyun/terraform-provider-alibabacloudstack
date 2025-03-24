@@ -7,63 +7,9 @@ description: |-
   Provides an RDS readonly instance resource.
 ---
 
-# alibabacloudstack\_db\_readonly\_instance
+# alibabacloudstack_db_readonly_instance
+Provides an RDS readonly instance resource.
 
-Provides an RDS readonly instance resource. 
-
-## Example Usage
-
-```
-variable "creation" {
-  default = "Rds"
-}
-
-variable "name" {
-  default = "dbInstancevpc"
-}
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = var.creation
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name       = var.name
-  cidr_block = "172.16.0.0/16"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = alibabacloudstack_vpc.default.id
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-  name              = var.name
-}
-
-resource "alibabacloudstack_db_instance" "default" {
-  engine               = "MySQL"
-  engine_version       = "5.6"
-  instance_type        = "rds.mysql.t1.small"
-  instance_storage     = "20"
-  instance_name        = var.name
-  vswitch_id           = alibabacloudstack_vswitch.default.id
-}
-
-resource "alibabacloudstack_db_connection" "connection" {
-  instance_id       = alibabacloudstack_db_instance.default.id
-  connection_prefix = var.connection_prefix
-}
-
-resource "alibabacloudstack_db_readonly_instance" "default" {
-  master_db_instance_id = alibabacloudstack_db_instance.default.id
-  zone_id               = alibabacloudstack_db_instance.default.zone_id
-  engine_version        = alibabacloudstack_db_instance.default.engine_version
-  instance_type         = alibabacloudstack_db_instance.default.instance_type
-  instance_storage      = "30"
-  instance_name         = "${var.name}ro"
-  vswitch_id            = alibabacloudstack_vswitch.default.id
-  db_instance_storage_type= "local_ssd"
-  depends_on = [alibabacloudstack_db_connection.connection]
-}
-```
 
 ## Argument Reference
 
@@ -86,11 +32,15 @@ The following arguments are supported:
     cloud_essd: specifies to use enhanced SSDs (ESSDs).
     cloud_essd2: specifies to use enhanced SSDs (ESSDs).
     cloud_essd3: specifies to use enhanced SSDs (ESSDs).
-    
+* `db_instance_class` - (Optional) DB Instance class .
+* `db_instance_storage` - (Optional) DB Instance storage .
+* `master_instance_id` - (Optional, ForceNew) ID of the master instance .
+
 -> **NOTE:** Because of data backup and migration, change DB instance type and storage would cost 15~20 minutes. Please make full preparation before changing them.
 * `parameters` - (Optional) Set of parameters needs to be set after DB instance was launched. Available parameters can refer to the latest docs View database parameter templates.
   * `name` - (Required) The parameter name.
   * `value` - (Required) The parameter value.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -99,11 +49,5 @@ The following attributes are exported:
 * `engine` - Database type.
 * `port` - RDS database connection port.
 * `connection_string` - RDS database connection string.
-
-## Import
-
-RDS readonly instance can be imported using the id, e.g.
-
-```
-$ terraform import alibabacloudstack_db_readonly_instance.example rm-abc12345678
-```
+* `db_instance_description` - The description of the DB instance .
+* `engine` - Database engine type .

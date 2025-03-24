@@ -7,7 +7,7 @@ description: |-
     Provides a list of instance families to the user.
 ---
 
-# alibabacloudstack\_ascm_instance_families
+# alibabacloudstack_ascm_instance_families
 
 This data source provides the instance families of the current Apsara Stack Cloud user.
 
@@ -33,7 +33,7 @@ The following arguments are supported:
 * `name_regex` - (Optional) A regex string to filter results by trail name.
 * `status` - (Optional) Specify Status to filter the resulting instance families by their availability.
 * `resource_type` - (Optional) Filter the results by the specified resource type.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `families` - (Optional) A list of instance families. Each element contains the following attributes:
 
 ## Attributes Reference
 
@@ -45,5 +45,5 @@ The following attributes are exported in addition to the arguments listed above:
     * `series_name` - Series name for instance families.
     * `modifier` - Modifier name.
     * `series_name_label` - label of Series name for instance families.
-    * `resource_type` - Specified resource type.
     * `is_deleted` - Specify the state in "Y" or "N" form.
+    * `resource_type` - Specified resource type.

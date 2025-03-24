@@ -1,5 +1,5 @@
 ---
-subcategory: "POLARDB"
+subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_backuppolicy"
 sidebar_current: "docs-Alibabacloudstack-polardb-backuppolicy"

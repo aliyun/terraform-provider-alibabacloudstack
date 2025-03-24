@@ -1,10 +1,10 @@
-## User Guide （中文）
+## User Guide (中文)
 
 [README  in English](https://github.com/aliyun/aliyun-log-go-sdk/blob/master/README_EN.md)
 
 ### 基本介绍
 
-本项目是阿里云日志服务 （Log Service，简称SLS）API的Golang编程接口，提供了对于Log Service Rest API的封装和实现，帮助Golang开发人员更快编程使用阿里云日志服务。
+本项目是阿里云日志服务 (Log Service，简称SLS)API的Golang编程接口，提供了对于Log Service Rest API的封装和实现，帮助Golang开发人员更快编程使用阿里云日志服务。
 
 本项目主要由3个部分组成：
 

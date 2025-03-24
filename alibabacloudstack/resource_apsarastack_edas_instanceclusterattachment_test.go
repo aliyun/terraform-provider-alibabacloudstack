@@ -6,7 +6,6 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 
-	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
@@ -22,7 +21,7 @@ func TestAccAlibabacloudStackEdasinstanceClusterAttachment_basic(t *testing.T) {
 	}
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testacc-edasicattachment%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasICAttachmentDependence)
@@ -40,7 +39,7 @@ func TestAccAlibabacloudStackEdasinstanceClusterAttachment_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"cluster_id":   "${alibabacloudstack_edas_cluster.default.id}",
 					"instance_ids": []string{"${alibabacloudstack_instance.default.id}"},
-					"pass_word":    "Li65272237###",
+					"pass_word":    "${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
@@ -62,6 +61,8 @@ func resourceEdasICAttachmentDependence(name string) string {
 	return fmt.Sprintf(`
 		variable "name" {
 		  default = "%v"
+		}
+		variable "password" {
 		}
 		data "alibabacloudstack_zones" "default" {
 			available_resource_creation= "VSwitch"

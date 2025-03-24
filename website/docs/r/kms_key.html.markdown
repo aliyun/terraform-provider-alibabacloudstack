@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstackms key resource.
 ---
 
-# alibabacloudstack\_kms\_key
+# alibabacloudstack_kms_key
 
 A kms key can help user to protect data security in the transmission process.
 
@@ -38,7 +38,8 @@ The following arguments are supported:
 * `pending_window_in_days` - (Optional) Duration in days after which the key is deleted after destruction of the resource, must be between 7 and 30 days. Defaults to 30 days.
 * `protection_level` - (Optional, ForceNew) The protection level of the CMK. Defaults to "SOFTWARE".
 * `rotation_interval` - (Optional) The period of automatic key rotation. Unit: seconds. 
-                                           
+* `rotation_interval` - (Optional) The period of automatic key rotation. Unit: seconds.
+
 -> **NOTE:** When the pre-deletion days elapses, the key is permanently deleted and cannot be recovered.
 
 
@@ -52,7 +53,4 @@ The following arguments are supported:
 * `last_rotation_date` - The date and time the last rotation was performed. The time is displayed in UTC. 
 * `material_expire_time` - The time and date the key material for the CMK expires. The time is displayed in UTC. If the value is empty, the key material for the CMK does not expire.
 * `next_rotation_date` - The time the next rotation is scheduled for execution. 
-* `primary_key_version` - The ID of the current primary key version of the symmetric CMK. 
-
-
-
+* `primary_key_version` - The ID of the current primary key version of the symmetric CMK.

@@ -7,7 +7,7 @@ description: |-
   Provides an EDAS K8s cluster resource.
 ---
 
-# alibabacloudstack\_edas\_k8s\_application
+# alibabacloudstack_edas_k8s_application
 
 Create an EDAS k8s application.For information about EDAS K8s Application and how to use it, see [What is EDAS K8s Application](https://www.alibabacloud.com/help/doc-detail/85029.htm). 
 
@@ -115,6 +115,11 @@ The following arguments are supported:
   * `node_path` - (Required) The path on the host machine.
   * `mount_path` - (Required) The path within the container.
   * `type` - (Optional) The type of mount.
+* `update_type` - (Optional)  Deployment type. You can set this parameter when using batch deployment or grayscale deployment. Optional Values: `BatchUpdate` and `GrayBatchUpdate`.
+* `update_batch` - (Optional)  Number of deployment batches.When using batch deployment, you need to set the batch number of deployments.
+* `update_release_type` - (Optional)  Release type of batch deployment. Optional Values: `auto` and `manual`.
+* `update_batch_wait_time` - (Optional)  Automatic release time for batch deployment. When the update_release_type is set to `auto`, You need to set an automatic release time.
+* `update_gray` - (Optional)  Number of batches for grayscale deployment.
 
 ## Attributes Reference
 
@@ -125,11 +130,11 @@ The following attributes are exported:
 * `replicas` - Number of application instances.
 * `package_type` -  Application package type. Optional parameter values include: FatJar, WAR and Image.
 * `image_url` - Mirror address. When the package_type is set to 'Image', this parameter item is available.
-* `update_type` - Deployment type. You can set this parameter when using batch deployment or grayscale deployment. Optional Values: `BatchUpdate` and `GrayBatchUpdate`.
-* `update_batch` - Number of deployment batches.When using batch deployment, you need to set the batch number of deployments.
-* `update_release_type` - Release type of batch deployment. Optional Values: `auto` and `manual`.
-* `update_batch_wait_time` - Automatic release time for batch deployment. When the update_release_type is set to `auto`, You need to set an automatic release time.
-* `update_gray` - Number of batches for grayscale deployment.
+* `update_type` - (Optional) Deployment type. You can set this parameter when using batch deployment or grayscale deployment. Optional Values: `BatchUpdate` and `GrayBatchUpdate`. 
+* `update_batch` - (Optional) Number of deployment batches.When using batch deployment, you need to set the batch number of deployments. 
+* `update_release_type` - (Optional) Release type of batch deployment. Optional Values: `auto` and `manual`. 
+* `update_batch_wait_time` - (Optional) Automatic release time for batch deployment. When the update_release_type is set to `auto`, You need to set an automatic release time. 
+* `update_gray` - (Optional) Number of batches for grayscale deployment. 
 * `config_mount_descs` - Configuring K8s ConfigMap and Secret Mounts, supporting the mounting of ConfigMaps and Secrets to specified container directories. The configuration parameters for ConfigMountDescs are as follows:
   * `name` - The name of the ConfigMap or Secret.
   * `type` - The configuration type, supporting ConfigMap and Secret types.
@@ -144,6 +149,7 @@ The following attributes are exported:
   * `node_path`: The path on the host machine.
   * `mount_path`: The path within the container.
   * `type`: The type of mount.
+* `package_version` - The version number of the deployment package. 
 
 ## Import
 

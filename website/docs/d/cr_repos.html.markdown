@@ -7,7 +7,7 @@ description: |-
   Provides a list of Container Registry repositories.
 ---
 
-# alibabacloudstack\_cr\_repos
+# alibabacloudstack_cr_repos
 
 This data source provides a list Container Registry repositories on Alibabacloudstack Cloud.
 
@@ -33,8 +33,9 @@ The following arguments are supported:
 
 * `namespace` - (Optional) Name of container registry namespace where the repositories are located in.
 * `name_regex` - (Optional) A regex string to filter results by repository name.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `enable_details` - (Optional) Boolean, false by default, only repository attributes are exported. Set to true if domain list and tags belong to this repository are needed. See `tags` in attributes.
+
+* `ids` - (Optional) A list of matched Container Registry Repositories. Its element is set to `names`. 
 
 ## Attributes Reference
 
@@ -53,6 +54,10 @@ The following attributes are exported in addition to the arguments listed above:
     * `vpc` - Domain of vpc endpoint.
   * `tags` - A list of image tags belong to this repository. Each contains several attributes, see `Block Tag`.
 
+  * `summary` - The repository general information. 
+  * `repo_type` - `PUBLIC` or `PRIVATE`, repository's visibility. 
+  * `domain_list` - The repository domain list. 
+
 ### Block Tag
 
 * `tag` - Tag of this image.
@@ -62,4 +67,3 @@ The following attributes are exported in addition to the arguments listed above:
 * `image_size` - Status of this image, in bytes.
 * `image_update` - Last update time of this image, unix time in nanoseconds.
 * `image_create` - Create time of this image, unix time in nanoseconds.
-

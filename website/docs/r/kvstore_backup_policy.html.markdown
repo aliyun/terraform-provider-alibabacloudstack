@@ -7,7 +7,7 @@ description: |-
   Provides a backup policy for ApsaraDB Redis / Memcache instance resource.
 ---
 
-# alibabacloudstack\_kvstore\_backup\_policy
+# alibabacloudstack_kvstore_backup_policy
 
 Provides a backup policy for ApsaraDB Redis / Memcache instance resource. 
 
@@ -52,6 +52,7 @@ resource "alibabacloudstack_kvstore_backup_policy" "default" {
   backup_period = ["Tuesday", "Wednesday"]
   backup_time   = "10:00Z-11:00Z"
 }
+
 ```
 
 ## Argument Reference
@@ -59,8 +60,10 @@ resource "alibabacloudstack_kvstore_backup_policy" "default" {
 The following arguments are supported:
 
 * `instance_id` - (Required, ForceNew) The id of ApsaraDB for Redis or Memcache intance.
-* `backup_time` - (Optional) Backup time, in the format of HH:mmZ- HH:mm Z
+* `backup_time` - (Optional) Backup time, in the format of HH:mmZ- HH:mm Z 
+* `preferred_backup_time` - (Optional) Preferred backup time, in the format of HH:mmZ- HH:mm Z 
 * `backup_period` - (Optional) Backup Cycle. Allowed values: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
+* `preferred_backup_period` - (Optional) Preferred backup cycle. Allowed values: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday 
 
 ## Attributes Reference
 
@@ -69,7 +72,9 @@ The following attributes are exported:
 * `id` - The id of the backup policy.
 * `instance_id` - The id of ApsaraDB for Redis or Memcache intance.
 * `backup_time` - Backup time, in the format of HH:mmZ- HH:mm Z
+* `preferred_backup_time` - Preferred backup time, in the format of HH:mmZ- HH:mm Z 
 * `backup_period` - Backup Cycle. Allowed values: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
+* `preferred_backup_period` - Preferred backup cycle. Allowed values: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday 
 
 ## Import
 

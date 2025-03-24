@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack maxcompute project resource.
 ---
 
-# alibabacloudstack\_maxcompute\_project
+# alibabacloudstack_maxcompute_project
 
 The project is the basic unit of operation in maxcompute. 
 
@@ -28,12 +28,15 @@ resource "alibabacloudstack_maxcompute_project" "example" {
 
 The following arguments are supported:
 * `name` - (Required, ForceNew) It has been deprecated from provider version 1.110.0 and `project_name` instead.
+* `quota_id` - (Required) The quota ID of the maxcompute project. 
+* `disk` - (Required) The disk size of the maxcompute project. 
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The ID of the maxcompute project. It is the same as its name.
+* `name` - The name of the maxcompute project. 
 
 ## Import
 

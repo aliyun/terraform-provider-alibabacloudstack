@@ -1,5 +1,5 @@
 ---
-subcategory: "Data Works"
+subcategory: "DataWorks"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_data_works_user_role_binding"
 sidebar_current: "docs-alibabacloudstack-resource-data-works-user-role-binding"
@@ -7,7 +7,7 @@ description: |-
   Provides a AlibabacloudStack Data Works UserRoleBinding resource.
 ---
 
-# alibabacloudstack\_data\_works\_connection
+# alibabacloudstack_data_works_connection
 
 Provides a Data Works UserRoleBinding resource.
 
@@ -32,4 +32,12 @@ The following arguments are supported:
 
 * `project_id` - (Required) The ID of the project.
 * `user_id` - (Required) Alibaba Cloud Account ID.
-* `role_code` - (Required) Code of DataWorks workspace role.
+* `role_code` - (Required) Code of DataWorks workspace role. 
+
+## Attributes Reference
+
+The following attributes are exported:
+
+
+* `project_id` - The ID of the project.
+* `user_id` - Alibaba Cloud Account ID.

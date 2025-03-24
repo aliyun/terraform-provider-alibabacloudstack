@@ -7,7 +7,7 @@ description: |-
   Provides a resource to create an oss bucket.
 ---
 
-# alibabacloudstack\_oss\_bucket
+# alibabacloudstack_oss_bucket
 
 Provides a resource to create an oss bucket and set its attribution.
 
@@ -39,8 +39,7 @@ The following arguments are supported:
 * `storage_capacity` - (Optional) Sets a capacity limit on the bucket. If the capacity limit is reached, write operations. unit GB
 * `sse_algorithm` - (Optional) Encrypts files uploaded to OSS. It Can be "", "AES256", "SM4", and "KMS". Defaults to "private".
 * `kms_key_id` - (Optional) Required when sse_algorithm is KMS.
-
-
+* `bucket_sync` - (Optional)  Enables or disables bucket synchronization. Defaults to `true`.
 
 ## Attributes Reference
 
@@ -53,4 +52,5 @@ The following attributes are exported:
 * `intranet_endpoint` - The intranet access endpoint of the bucket.
 * `location` - The location of the bucket.
 * `owner` - The bucket owner.
-
+* `storage_class` -  The storage class of the bucket.
+* `vpclist` -  The list of accessible VPCs for the bucket.

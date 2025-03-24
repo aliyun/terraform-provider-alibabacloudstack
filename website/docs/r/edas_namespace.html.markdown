@@ -2,14 +2,14 @@
 subcategory: "EDAS"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_edas_namespace"
-sidebar_current: "docs-alibabacloudstack-resource-edas-namespace"
-description: |-
-  Provides a AlibabacloudStack EDAS Namespace resource.
+sidebar_current: "docs-Alibabacloudstack-edas-namespace"
+description: |- 
+  使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Namespace resource.
 ---
 
 # alibabacloudstack_edas_namespace
 
-Provides a EDAS Namespace resource.
+使用Provider配置的凭证在指定的资源集下编排企业级分布式应用服务（Edas） Namespace resource.
 
 For information about EDAS Namespace and how to use it, see [What is Namespace](https://www.alibabacloud.com/help/en/enterprise-distributed-application-service/latest/insertorupdateregion).
 
@@ -49,22 +49,22 @@ resource "alibabacloudstack_edas_namespace" "default" {
 
 The following arguments are supported:
 
-* `description` - (Optional) The description of the namespace, The description can be up to `128` characters in length.
-* `namespace_logical_id` - (Required, ForceNew) The ID of the namespace.
-  - The ID of a custom namespace is in the `region ID:namespace identifier` format. An example is `cn-beijing:tdy218`.
-  - The ID of the default namespace is in the `region ID` format. An example is cn-beijing.
-* `namespace_name` - (Required) The name of the namespace, The name can be up to `63` characters in length.
+* `description` - (Optional) The description of the namespace. It can be up to `128` characters in length.
+* `namespace_logical_id` - (Required, ForceNew) The ID of the namespace.  
+  - For custom namespaces, the format is `region ID:namespace identifier`, e.g., `cn-beijing:tdy218`.
+  - For default namespaces, the format is just the `region ID`, e.g., `cn-beijing`.
+* `namespace_name` - (Required) The name of the namespace. It can be up to `63` characters in length.
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `id` - The resource ID in terraform of Namespace.
+* `id` - The unique identifier (ID) of the namespace in Terraform.
 
 ## Timeouts
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 
-* `create` - (Defaults to 1 mins) Used when create the Namespace.
-* `delete` - (Defaults to 1 mins) Used when delete the Namespace.
-* `update` - (Defaults to 1 mins) Used when update the Namespace.
+* `create` - (Default to 1 minute) Used when creating the Namespace.
+* `delete` - (Default to 1 minute) Used when deleting the Namespace.
+* `update` - (Default to 1 minute) Used when updating the Namespace.

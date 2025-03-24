@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack DTS Synchronization Job resource.
 ---
 
-# alibabacloudstack\_dts\_synchronization\_job
+# alibabacloudstack_dts_synchronization_job
 
 Provides a DTS Synchronization Job resource.
 
@@ -20,6 +20,9 @@ For information about DTS Synchronization Job and how to use it, see [What is Sy
 Basic Usage
 
 ```terraform
+variable "password" {
+}
+
 resource "alibabacloudstack_dts_synchronization_instance" "default" {
   payment_type                     = "PayAsYouGo"
   source_endpoint_engine_name      = "PolarDB"
@@ -39,14 +42,14 @@ resource "alibabacloudstack_dts_synchronization_job" "default" {
   source_endpoint_region             = "cn-hangzhou"
   source_endpoint_database_name      = "tf-testacc"
   source_endpoint_user_name          = "root"
-  source_endpoint_password           = "password"
+  source_endpoint_password           = var.password
   destination_endpoint_instance_type = "ads"
   destination_endpoint_instance_id   = "am-xxxxxxxx"
   destination_endpoint_engine_name   = "ADB30"
   destination_endpoint_region        = "cn-hangzhou"
   destination_endpoint_database_name = "tf-testacc"
   destination_endpoint_user_name     = "root"
-  destination_endpoint_password      = "password"
+  destination_endpoint_password      = var.password
   db_list                            = "{\"tf-testacc\":{\"name\":\"tf-test\",\"all\":true,\"state\":\"normal\"}}"
   structure_initialization           = "true"
   data_initialization                = "true"
@@ -61,9 +64,9 @@ The following arguments supported:
 
 * `dts_instance_id` - (Required, ForceNew) Synchronizing instance ID. The ID of `alibabacloudstack_dts_synchronization_instance`.
 * `synchronization_direction` - (Optional, ForceNew) Synchronization direction. Valid values: `Forward`, `Reverse`. Only when the property `sync_architecture` of the `alibabacloudstack_dts_synchronization_instance` was `bidirectional` this parameter should be passed, otherwise this parameter should not be specified.
-* `dts_job_name` - (Optional, Computed) The name of synchronization job.
+* `dts_job_name` - (Optional) The name of synchronization job.
 * `dts_job_id` - (Optional, ForceNew)The job ID of Synchronization Instance.
-* `instance_class` - (Optional, Computed) The instance class. Valid values: `large`, `medium`, `micro`, `small`, `xlarge`, `xxlarge`. You can only upgrade the configuration, not downgrade the configuration. If you downgrade the instance, you need to [submit a ticket](https://selfservice.console.aliyun.com/ticket/category/dts/today).
+* `instance_class` - (Optional) The instance class. Valid values: `large`, `medium`, `micro`, `small`, `xlarge`, `xxlarge`. You can only upgrade the configuration, not downgrade the configuration. If you downgrade the instance, you need to [submit a ticket](https://selfservice.console.aliyun.com/ticket/category/dts/today).
 * `checkpoint` - (Optional, Computed, ForceNew) Start time in Unix timestamp format.
 * `data_initialization` - (Required, ForceNew) Whether or not to execute DTS supports schema migration, full data migration, or full-data initialization values include:
 * `data_synchronization` - (Required, ForceNew) Whether to perform incremental data migration for migration types or synchronization values include:
@@ -97,7 +100,9 @@ The following arguments supported:
 * `delay_rule_time` - (Optional, ForceNew) The delay rule time. When `delay_notice` is set to `true`, this parameter must be passed in. The threshold for triggering the delay alarm. The unit is second and needs to be an integer. The threshold can be set according to business needs. It is recommended to set it above 10 seconds to avoid delay fluctuations caused by network and database load.
 * `error_notice` - (Optional, ForceNew) The error notice. Valid values: `true`, `false`.
 * `error_phone` - (Optional, ForceNew) The error phone. The mobile phone number of the contact who error the alarm. Multiple mobile phone numbers separated by English commas `,`. This parameter currently only supports China stations, and only supports mainland mobile phone numbers, and up to 10 mobile phone numbers can be passed in.
-* `status` - (Optional, Computed) The status of the resource. Valid values: `Synchronizing`, `Suspending`. You can stop the task by specifying `Suspending` and start the task by specifying `Synchronizing`.
+* `status` - (Optional) The status of the resource. Valid values: `Synchronizing`, `Suspending`. You can stop the task by specifying `Suspending` and start the task by specifying `Synchronizing`.
+* `source_endpoint_password` - (Optional, ForceNew)  The password of the source database account.
+* `destination_endpoint_password` - (Optional, ForceNew)  The password of the destination database account.
 
 -> **NOTE:** From the status of `NotStarted` to `Synchronizing`, the resource goes through the `Prechecking` and `Initializing` phases. Because of the `Initializing` phase takes too long, and once the resource passes to the status of `Prechecking`, it can be considered that the task can be executed normally. Therefore, we treat the status of `Initializing` as an equivalent to `Synchronizing`.
 
@@ -117,6 +122,10 @@ The following arguments supported:
 The following attributes are exported:
 
 * `id` - The resource ID in terraform of Synchronization Job.
+* `dts_job_name` -  The name of the synchronization job.
+* `checkpoint` -  Start time in Unix timestamp format.
+* `instance_class` -  The instance class.
+* `status` - The status of the resource. Valid values: `Synchronizing`, `Suspending`.
 
 ## Import
 

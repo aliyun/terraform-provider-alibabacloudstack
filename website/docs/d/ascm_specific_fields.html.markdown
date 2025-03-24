@@ -7,7 +7,7 @@ description: |-
     Provides a list of specific fields to the user.
 ---
 
-# alibabacloudstack\_ascm_specific_fields
+# alibabacloudstack_ascm_specific_fields
 
 This data source provides the specific fields of the current Apsara Stack Cloud user.
 
@@ -32,7 +32,6 @@ The following arguments are supported:
 * `group_filed` - (Required) The field for which to query valid values.
 * `resource_type` - (Required) Filter the results by the specified resource type. Valid values: OSS, ADB, DRDS, SLB, NAT, MAXCOMPUTE, POSTGRESQL, ECS, RDS, IPSIX, REDIS, MONGODB, and HITSDB.
 * `label` - (Optional) Specifies whether to internationalize the field. Valid values: true and false.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 

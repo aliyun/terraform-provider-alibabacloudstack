@@ -12,7 +12,7 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -104,7 +104,7 @@ func testSweepCmsMetricRuleTemplate(region string) error {
 	return nil
 }
 
-func TestAccalibabacloudstackCmsMetricRuleTemplate_basic0(t *testing.T) {
+func TestAccAlibabacloudStackCmsMetricRuleTemplate_basic0(t *testing.T) {
 	var v map[string]interface{}
 	resourceId := "alibabacloudstack_cms_metric_rule_template.default"
 	ra := resourceAttrInit(resourceId, alibabacloudstackCloudMonitorServiceMetricRuleTemplateMap0)

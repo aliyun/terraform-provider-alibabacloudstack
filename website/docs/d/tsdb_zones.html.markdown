@@ -7,7 +7,7 @@ description: |-
   Provides a list of Time Series Database (TSDB) instance available zones to the user.
 ---
 
-# alibabacloudstack\_tsdb\_zones
+# alibabacloudstack_tsdb_zones
 
 This data source provides the available zones with the Time Series Database (TSDB) Instance of the current Alibaba Cloud user.
 
@@ -28,7 +28,7 @@ output "first_tsdb_zones_id" {
 
 The following arguments are supported:
 
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `ids` - (Required) A list of TSDB instance zone IDs.
 
 ## Argument Reference
 
@@ -39,3 +39,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `id` - The ID of zone.
   * `zone_id` - The zone ID.
   * `local_name` - The local name.
+  * `computed_attribute` - This is a computed attribute.
