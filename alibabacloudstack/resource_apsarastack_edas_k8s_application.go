@@ -203,6 +203,10 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 			},
+			"cr_ee_repo_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"update_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -317,6 +321,13 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 			return errmsgs.WrapError(errmsgs.Error("image_url is needed for creating image k8s application"))
 		} else {
 			request.QueryParams["ImageUrl"] = v.(string)
+			if strings.HasPrefix(v.(string), "cr-ee.registry") {
+				if crid, ok := d.GetOk("cr_ee_repo_id"); ok && crid.(string) != "" {
+					request.QueryParams["crInstanceId"] = crid.(string)
+				} else {
+					return errmsgs.WrapError(errmsgs.Error("`cr_ee_repo_id` is needed for the image repo is enterprise-edition"))
+				}
+			}
 		}
 	} else {
 		if v, ok := d.GetOk("package_url"); !ok {
