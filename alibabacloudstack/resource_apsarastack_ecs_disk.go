@@ -16,15 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackDisk() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDiskCreate,
-		Read:   resourceAlibabacloudStackDiskRead,
-		Update: resourceAlibabacloudStackDiskUpdate,
-		Delete: resourceAlibabacloudStackDiskDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"availability_zone": {
 				Type:          schema.TypeString,
@@ -145,6 +137,8 @@ func resourceAlibabacloudStackDisk() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDiskCreate, resourceAlibabacloudStackDiskRead, resourceAlibabacloudStackDiskUpdate, resourceAlibabacloudStackDiskDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDiskCreate(d *schema.ResourceData, meta interface{}) error {
@@ -226,8 +220,8 @@ func resourceAlibabacloudStackDiskCreate(d *schema.ResourceData, meta interface{
 	if err := ecsService.WaitForDisk(d.Id(), Available, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
-
-	return resourceAlibabacloudStackDiskUpdate(d, meta)
+	
+	return nil
 }
 
 func resourceAlibabacloudStackDiskRead(d *schema.ResourceData, meta interface{}) error {
@@ -365,7 +359,7 @@ func resourceAlibabacloudStackDiskUpdate(d *schema.ResourceData, meta interface{
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackDiskRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDiskDelete(d *schema.ResourceData, meta interface{}) error {
