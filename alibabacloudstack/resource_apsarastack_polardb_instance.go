@@ -394,6 +394,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 			request.QueryParams["EncryptionKey"] = EncryptionKey
 		}
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("ModifyDBInstanceTDE", bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -408,9 +409,9 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceTDE", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-
-		if err := PolardbService.WaitForDBInstance(d, client, Running, DefaultLongTimeout); err != nil {
-			return errmsgs.WrapError(err)
+		stateConf := BuildStateConf([]string{"Disabled"}, []string{"Enabled"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceTdeStateRefreshFunc(d, client, d.Id(), []string{}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 
 		log.Print("enabled TDE")
@@ -424,6 +425,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		request.QueryParams["SSLEnabled"] = "1"
 		request.QueryParams["ConnectionString"] = d.Get("connection_string").(string)
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("ModifyDBInstanceSSL", bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -438,9 +440,9 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSSL", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-
-		if err := PolardbService.WaitForDBInstance(d, client, Running, DefaultLongTimeout); err != nil {
-			return errmsgs.WrapError(err)
+		stateConf := BuildStateConf([]string{"No"}, []string{"Yes"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceSslStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 		log.Print("enabled SSL")
 	}

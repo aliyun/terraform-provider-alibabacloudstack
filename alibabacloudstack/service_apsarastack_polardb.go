@@ -1017,6 +1017,80 @@ func (s *PolardbService) PolardbDBInstanceStateRefreshFunc(d *schema.ResourceDat
 	}
 }
 
+func (s *PolardbService) PolardbDBInstanceTdeStateRefreshFunc(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeDBInstanceTDE(d.Id())
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object["TDEStatus"].(string) == failState {
+				return object, object["TDEStatus"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["TDEStatus"].(string)))
+			}
+		}
+		return object, object["TDEStatus"].(string), nil
+	}
+}
+
+func (s *PolardbService) DescribeDBInstanceTDE(id string) (map[string]interface{}, error) {
+	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceTDE", "")
+	request.QueryParams["DBInstanceId"] = id
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDBInstanceTDE", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	result := make(map[string]interface{})
+	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &result)
+	return result, nil
+}
+
+func (s *PolardbService) PolardbDBInstanceSslStateRefreshFunc(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeDBInstanceSSL(d.Id())
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object["SSLEnabled"].(string) == failState {
+				return object, object["SSLEnabled"].(string), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object["SSLEnabled"].(string)))
+			}
+		}
+		return object, object["SSLEnabled"].(string), nil
+	}
+}
+
+func (s *PolardbService) DescribeDBInstanceSSL(id string) (map[string]interface{}, error) {
+	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceSSL", "")
+	request.QueryParams["DBInstanceId"] = id
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDBInstanceSSL", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	result := make(map[string]interface{})
+	_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &result)
+	return result, nil
+}
+
 func (s *PolardbService) WaitForDBConnection(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
@@ -1070,6 +1144,7 @@ func (s *PolardbService) DoPolardbDescribedbinstancesRequest(id string, client *
 	PolardbDescribedbinstancesResponse := &PolardbDescribedbinstancesResponse{}
 	request.QueryParams["DBInstanceId"] = id
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
 			return PolardbDescribedbinstancesResponse, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
