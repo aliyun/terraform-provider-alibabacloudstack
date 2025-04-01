@@ -139,7 +139,7 @@ const Provider = "Terraform-Provider"
 
 const Module = "Terraform-Module"
 
-var providerVersion = "3.18.3"
+var providerVersion = "3.18.4"
 var terraformVersion = strings.TrimSuffix(schema.Provider{}.TerraformVersion, "-dev")
 
 type ApiVersion string
@@ -711,6 +711,20 @@ func (client *AlibabacloudStackClient) WithRdsClient(do func(*rds.Client) (inter
 	return do(client.rdsconn)
 }
 
+func (client *AlibabacloudStackClient) WithPolardbClient(do func(*polardb.Client) (interface{}, error)) (interface{}, error) {
+	if client.rdsconn == nil {
+		conn, error := client.WithProductSDKClient(RDSCode)
+		if error != nil {
+			return nil, error
+		}
+		client.rdsconn = &rds.Client{
+			Client: *conn,
+		}
+	}
+
+	return do(client.polarDBconn)
+}
+
 func (client *AlibabacloudStackClient) WithCdnClient(do func(*cdn.Client) (interface{}, error)) (interface{}, error) {
 	if client.cdnconn == nil {
 		conn, error := client.WithProductSDKClient(CDNCode)
@@ -873,9 +887,9 @@ func (client *AlibabacloudStackClient) WithEdasClient(do func(*edas.Client) (int
 	return do(client.edasconn)
 }
 
-func (client *AlibabacloudStackClient) WithCrEEClient(do func(*cr_ee.Client) (interface{}, error)) (interface{}, error) {
+func (client *AlibabacloudStackClient) WithCrEeClient(do func(*cr_ee.Client) (interface{}, error)) (interface{}, error) {
 	if client.creeconn == nil {
-		conn, error := client.WithProductSDKClient(CRCode)
+		conn, error := client.WithProductSDKClient(CREECode)
 		if error != nil {
 			return nil, error
 		}
@@ -1306,7 +1320,7 @@ func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*s
 }
 
 func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.CommonRequest) (*responses.CommonResponse, error) {
-	popcode := ServiceCode(strings.ToUpper(request.Product))
+	popcode := ServiceCode(strings.ReplaceAll(strings.ToUpper(request.Product),"-","_"))
 
 	conn, err := client.getConnectClient(popcode)
 	if err != nil {

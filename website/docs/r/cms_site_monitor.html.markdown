@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Monitor Service"
+subcategory: "Cloud Monitor"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cms_site_monitor"
 sidebar_current: "docs-alibabacloudstack-resource-cms-site-monitor"

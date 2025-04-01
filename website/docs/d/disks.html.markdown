@@ -4,7 +4,7 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_disks"
 sidebar_current: "docs-alibabacloudstack-datasource-disks"
 description: |-
-Provides a list of disks to the user.
+  Provides a list of disks to the user.
 ---
 
 # alibabacloudstack\_disks

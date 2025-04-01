@@ -13,7 +13,7 @@ Provides a ECS Hpc Cluster resource.
 
 For information about ECS Hpc Cluster and how to use it, see [What is Hpc Cluster](https://www.alibabacloud.com/help/en/doc-detail/109138.htm).
 
--> **NOTE:** Available in v1.116.0+.
+
 
 ## Example Usage
 

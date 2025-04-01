@@ -79,7 +79,7 @@ The following arguments are supported:
 
 ### Timeouts
 
--> **NOTE:** Available in 1.48.0+.
+
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 

@@ -9,6 +9,8 @@ description: |-
 
 # alibabacloudstack\_edas\_k8s\_service
 
+-> **NOTE:** Available since v3.16.5
+
 ## Example Usage
 
 Basic Usage
@@ -58,10 +60,10 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
 
 resource "alibabacloudstack_edas_k8s_service" "default" {
   app_id = alibabacloudstack_edas_k8s_application.default.id
-  name = "tf-testAccEdasK8sService"
-  type = "ClusterIP"
+  service_name = "tf-testAccEdasK8sService"
+  type = "NodePort"
   external_traffic_policy = "Local"
-  service_ports {
+  port_mappings {
     protocol = "TCP"
     service_port = 80
     target_port = 8080
@@ -75,20 +77,24 @@ resource "alibabacloudstack_edas_k8s_service" "default" {
 The following arguments are supported:
 
 * `app_id` - (Required, ForceNew) The id of the Edas k8s application
-* `name` - (Required, ForceNew) The name of the Edas k8s service
+* `service_name` - (Required, ForceNew) The name of the Edas k8s service
 * `type` - (Required, ForceNew) Edas K8s service types, Valid values are `ClusterIP`, `NodePort`, `LoadBalancer`
-* `service_ports` - (Optional) K8s Service port mapping table, which needs to conform to the JsonArray format. The supported parameters are as follows:
+* `port_mappings` - (Optional) K8s Service port mapping table, which needs to conform to the JsonArray format. The supported parameters are as follows:
   * `protocol` - (Required) the service protocol, supporting TCP and UDP.
   * `service_port` - (Required) the frontend service port, with a value range of 1~65535.
   * `target_port` - (Required) the backend container port, with a value range of 1~65535.
-* `external_traffic_policy` - (Optional) Set the external traffic management policy. Valid values are `Local`, `Cluster`, Default to `Local`.
-* `annotations` - (Optional) The annotations map of the application
-* `labels` - (Optional) The labels map of the application
+* `external_traffic_policy` - (Optional) When the service type is `NodePort` or `LoadBalancer`, set the external traffic management policy. Valid values are `Local`, `Cluster`, Default to `Local`.
+* `annotations` - (Optional) The annotations map of the service
+* `labels` - (Optional) The labels map of the service
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `cluster_ip` - The cluster ip of the application
+* `cluster_ip` - The cluster ip of the kubernetes
+* `inner_endpointer` - The inner endpointer of the service
+* `namespace` - The namespace of the K8s cluster
+* `nodeip_list` - The node ip list of the service
+
 
 ## Import
 

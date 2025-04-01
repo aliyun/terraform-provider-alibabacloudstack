@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Monitor Service"
+subcategory: "Cloud Monitor"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cms_alarm_contact_group"
 sidebar_current: "docs-alibabacloudstack-resource-cms-alarm-contact-group"
@@ -13,7 +13,7 @@ Provides a CMS Alarm Contact Group resource.
 
 For information about CMS Alarm Contact Group and how to use it, see [What is Alarm Contact Group](https://www.alibabacloud.com/help/en/doc-detail/114929.htm).
 
--> **NOTE:** Available in v1.101.0+.
+
 
 ## Example Usage
 

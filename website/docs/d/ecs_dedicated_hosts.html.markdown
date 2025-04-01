@@ -11,7 +11,7 @@ description: |-
 
 This data source provides a list of ECS Dedicated Hosts in an Apsara Stack Cloud account according to the specified filters.
  
--> **NOTE:** Available in v1.91.0+.
+
 
 ## Example Usage
 

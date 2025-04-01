@@ -149,7 +149,7 @@ func Provider() *schema.Provider {
 			"is_center_region": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_CENTER_REGION", "true"),
 				Description: descriptions["is_center_region"],
 			},
 			"popgw_domain": {
@@ -303,11 +303,11 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ascm_ram_policies_for_user":             dataSourceAlibabacloudStackAscmRamPoliciesForUser(),
 		"alibabacloudstack_common_bandwidth_packages":              dataSourceAlibabacloudStackCommonBandwidthPackages(),
 		"alibabacloudstack_cbwp_commonbandwidthpackages":           dataSourceAlibabacloudStackCommonBandwidthPackages(),
-		"alibabacloudstack_cr_ee_instances":                        dataSourceAlibabacloudStackCrEEInstances(),
-		"alibabacloudstack_cr_ee_namespaces":                       dataSourceAlibabacloudStackCrEENamespaces(),
-		"alibabacloudstack_cr_ee_repos":                            dataSourceAlibabacloudStackCrEERepos(),
-		"alibabacloudstack_cr_repositories":                        dataSourceAlibabacloudStackCrEERepos(),
-		"alibabacloudstack_cr_ee_sync_rules":                       dataSourceAlibabacloudStackCrEESyncRules(),
+		"alibabacloudstack_cr_ee_instances":                        dataSourceAlibabacloudStackCrEeInstances(),
+		"alibabacloudstack_cr_ee_namespaces":                       dataSourceAlibabacloudStackCrEeNamespaces(),
+		"alibabacloudstack_cr_ee_repos":                            dataSourceAlibabacloudStackCrEeRepos(),
+		"alibabacloudstack_cr_repositories":                        dataSourceAlibabacloudStackCrEeRepos(),
+		"alibabacloudstack_cr_ee_sync_rules":                       dataSourceAlibabacloudStackCrEeSyncRules(),
 		"alibabacloudstack_cr_namespaces":                          dataSourceAlibabacloudStackCRNamespaces(),
 		"alibabacloudstack_cr_repos":                               dataSourceAlibabacloudStackCRRepos(),
 		"alibabacloudstack_cs_kubernetes_clusters":                 dataSourceAlibabacloudStackCSKubernetesClusters(),
@@ -479,6 +479,10 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ecs_ebs_storage_sets":                   dataSourceAlibabacloudStackEcsEbsStorageSets(),
 		"alibabacloudstack_bastionhost_instances":                  dataSourceAlibabacloudStackBastionhostInstances(),
 		"alibabacloudstack_waf_instances":                          dataSourceAlibabacloudStackWafInstances(),
+		"alibabacloudstack_polardb_zones":                          dataSourceAlibabacloudStackPolardbZones(),
+		//	"alibabacloudstack_polardb_databases":                      dataSourceAlibabacloudStackPolardbDatabases(),
+		"alibabacloudstack_polardb_instances": dataSourceAlibabacloudStackPolardbDbInstances(),
+		//	"alibabacloudstack_polardb_accounts":                       dataSourceAlibabacloudStackPolardbAccounts(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -545,12 +549,12 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cbwp_commonbandwidthpackage":           resourceAlibabacloudStackCommonBandwidthPackage(),
 		"alibabacloudstack_common_bandwidth_package_attachment":   resourceAlibabacloudStackCommonBandwidthPackageAttachment(),
 		"alibabacloudstack_cbwp_commonbandwidthpackageattachment": resourceAlibabacloudStackCommonBandwidthPackageAttachment(),
-		"alibabacloudstack_cr_ee_namespace":                       resourceAlibabacloudStackCrEENamespace(),
-		"alibabacloudstack_cr_ee_repo":                            resourceAlibabacloudStackCrEERepo(),
-		"alibabacloudstack_cr_repository":                         resourceAlibabacloudStackCrEERepo(),
-		"alibabacloudstack_cr_ee_sync_rule":                       resourceAlibabacloudStackCrEESyncRule(),
+		"alibabacloudstack_cr_ee_namespace":                       resourceAlibabacloudStackCrEeNamespace(),
+		"alibabacloudstack_cr_ee_repo":                            resourceAlibabacloudStackCrEeRepo(),
+		"alibabacloudstack_cr_ee_sync_rule":                       resourceAlibabacloudStackCrEeSyncRule(),
 		"alibabacloudstack_cr_namespace":                          resourceAlibabacloudStackCRNamespace(),
 		"alibabacloudstack_cr_repo":                               resourceAlibabacloudStackCRRepo(),
+		"alibabacloudstack_cr_repository":                         resourceAlibabacloudStackCRRepo(),
 		"alibabacloudstack_cs_kubernetes":                         resourceAlibabacloudStackCSKubernetes(),
 		"alibabacloudstack_ack_cluster":                           resourceAlibabacloudStackCSKubernetes(),
 		"alibabacloudstack_cs_kubernetes_node_pool":               resourceAlibabacloudStackCSKubernetesNodePool(),
@@ -794,6 +798,13 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_graphdatabase_dbinstance":              resourceAlibabacloudStackGraphDatabaseDbInstance(),
 		"alibabacloudstack_bastionhost_instance":                  resourceAlibabacloudStackBastionhostInstance(),
 		"alibabacloudstack_waf_instance":                          resourceAlibabacloudstackWafInstance(),
+		"alibabacloudstack_polardb_account":                       resourceAlibabacloudStackPolardbAccount(),
+		"alibabacloudstack_polardb_database":                      resourceAlibabacloudStackPolardbDatabase(),
+		"alibabacloudstack_polardb_backuppolicy":                  resourceAlibabacloudStackPolardbBackuppolicy(),
+		"alibabacloudstack_polardb_dbconnection":                  resourceAlibabacloudStackPolardbConnection(),
+		"alibabacloudstack_polardb_instance":                      resourceAlibabacloudStackPolardbInstance(),
+		//"alibabacloudstack_polardb_readonly_instance":              resourceAlibabacloudStackPolardbReadonlyInstance(),
+		//"alibabacloudstack_polardb_readwrite_splitting_connection": resourceAlibabacloudStackPolardbReadWriteSplittingConnection(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

@@ -11,7 +11,7 @@ description: |-
 
 This data source provides the Ecs Commands of the current Apsara Stack Cloud user.
 
--> **NOTE:** Available in v1.116.0+.
+
 
 ## Example Usage
 

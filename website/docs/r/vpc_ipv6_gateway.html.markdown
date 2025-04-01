@@ -13,7 +13,7 @@ Provides a VPC Ipv6 Gateway resource.
 
 For information about VPC Ipv6 Gateway and how to use it, see [What is Ipv6 Gateway](https://www.alibabacloud.com/help/doc-detail/102214.htm).
 
--> **NOTE:** Available in v1.142.0+.
+
 
 ## Example Usage
 

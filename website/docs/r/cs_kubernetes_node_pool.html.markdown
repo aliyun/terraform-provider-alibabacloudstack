@@ -11,7 +11,7 @@ description: |-
 
 This resource will help you to manage node pool in Kubernetes Cluster. 
 
--> **NOTE:** Available in 1.97.0+.
+
 
 -> **NOTE:** From version 1.109.1, support managed node pools, but only for the professional managed clusters.
 

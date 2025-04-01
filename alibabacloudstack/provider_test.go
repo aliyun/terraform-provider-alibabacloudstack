@@ -60,9 +60,6 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ALIBABACLOUDSTACK_INSECURE"); v == "" {
 		t.Fatal("ALIBABACLOUDSTACK_INSECURE must be set for acceptance tests")
 	}
-	if v := os.Getenv("ALIBABACLOUDSTACK_PROXY"); v == "" {
-		//t.Fatal("ALIBABACLOUDSTACK_PROXY must be set for acceptance tests")
-	}
 	if v := os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN"); v == "" {
 		t.Fatal("ALIBABACLOUDSTACK_POPGW_DOMAIN must be set for acceptance tests")
 	}
@@ -292,6 +289,27 @@ func testAccPreCheckWithEnvVariable(t *testing.T, envVariableName string) {
 	if v := strings.TrimSpace(os.Getenv(envVariableName)); v == "" {
 		t.Skipf("Skipping the test case with no env variable %s", envVariableName)
 		t.Skipped()
+	}
+}
+
+
+func testAccPreCheckWithCrEe(t *testing.T){
+	testAccPreCheck(t)
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	rawClient, err := sharedClientForRegion(region)
+	if err != nil {
+		t.Skipf("Skipping cr ee test case with err: %s", err)
+	}
+	client := rawClient.(*connectivity.AlibabacloudStackClient)
+	crService := &CrService{client}
+	resp, err := crService.ListCrEeInstances(1, 10)
+	if err != nil {
+		//Maybe crEE has not opened int the region
+		t.Skipf("Skipping cr ee test case with err: %s", err)
+	}
+	instances := resp["Instances"].([]interface{})
+	if len(instances) == 0 {
+		t.Skipf("Skipping cr ee test case without default instances")
 	}
 }
 

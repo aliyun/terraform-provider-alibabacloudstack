@@ -173,7 +173,7 @@ The config_server_list supports the following:
 
 ### Timeouts
 
--> **NOTE:** Available in 1.126.0+.
+
 
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 

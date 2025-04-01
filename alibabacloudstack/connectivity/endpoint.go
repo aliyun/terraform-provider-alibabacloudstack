@@ -34,6 +34,7 @@ const (
 	ONSCode             = ServiceCode("ONS")
 	CONTAINCode         = ServiceCode("CS")
 	CRCode              = ServiceCode("CR")
+	CREECode            = ServiceCode("CR_EE")
 	CDNCode             = ServiceCode("CDN")
 	CMSCode             = ServiceCode("CMS")
 	OTSCode             = ServiceCode("OTS")
@@ -179,6 +180,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"cr-biz.{{.region}}.{{.domain}}",
 		"cr-biz.{{.region}}.{{.domain}}",
 	},
+	//cr endpoint
+	CREECode: PopEndpoint{
+		"cr-ee-biz.{{.region}}.{{.domain}}",
+		"cr-ee-biz.{{.region}}.{{.domain}}",
+	},
 	//csb endpoint
 	CSBCode: PopEndpoint{
 		"csb.{{.domain}}",
@@ -238,6 +244,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	STSCode: PopEndpoint{
 		"sts-vpc.{{.domain}}",
 		"sts-vpc.{{.region}}.{{.domain}}",
+	},
+
+	POLARDBCode: PopEndpoint{
+		"polardb-vpc.{{.domain}}",
+		"polardb-vpc.{{.region}}.{{.domain}}",
 	},
 
 	SlSDataCode: PopEndpoint{

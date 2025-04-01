@@ -15,7 +15,7 @@ After activating NAS, you can create a file system and purchase a storage packag
 
 For information about NAS file system and how to use it, see [Manage file systems](https://www.alibabacloud.com/help/doc-detail/27530.htm)
 
--> **NOTE:** Available in v1.33.0+.
+
 
 ## Example Usage
 

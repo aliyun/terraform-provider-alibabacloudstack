@@ -11,7 +11,7 @@ description: |-
 
 Provides an EDAS cluster resource.
 
--> **NOTE:** Available in 1.82.0+
+
 
 ## Example Usage
 

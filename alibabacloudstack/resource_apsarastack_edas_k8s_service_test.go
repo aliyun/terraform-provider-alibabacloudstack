@@ -34,10 +34,79 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"app_id": "${alibabacloudstack_edas_k8s_application.default.id}",
-					"name":   "${var.name}",
-					"type":   "ClusterIP",
-					"service_ports": []map[string]interface{}{
+					"app_id":       "${alibabacloudstack_edas_k8s_application.default.id}",
+					"service_name": "${var.service_name}",
+					"type":         "ClusterIP",
+					"port_mappings": []map[string]interface{}{
+						{
+							"service_port": "80",
+							"target_port":  "8080",
+							"protocol":     "TCP",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"service_name": name,
+						"type":         "ClusterIP",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"port_mappings": []map[string]interface{}{
+						{
+							"service_port": "8000",
+							"target_port":  "8800",
+							"protocol":     "TCP",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"port_mappings.0.service_port": "8000",
+						"port_mappings.0.target_port":  "8800",
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackEdasK8sSerice_NodePort(t *testing.T) {
+	var v *EdasK8sService
+	resourceId := "alibabacloudstack_edas_k8s_service.default"
+	ra := resourceAttrInit(resourceId, nil)
+	serviceFunc := func() interface{} {
+		return &EdasService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeEdasK8sService")
+	rac := resourceAttrCheckInit(rc, ra)
+	rand := getAccTestRandInt(0, 1000)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := fmt.Sprintf("tftestacc%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sSericeDependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckEdasK8sServicDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"app_id":       "${alibabacloudstack_edas_k8s_application.default.id}",
+					"service_name": "${var.service_name}",
+					"type":         "NodePort",
+					"port_mappings": []map[string]interface{}{
 						{
 							"service_port": "80",
 							"target_port":  "8080",
@@ -48,26 +117,24 @@ func TestAccAlibabacloudStackEdasK8sSerice_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":                    name,
-						"type":                    "ClusterIP",
+						"service_name":            name,
+						"type":                    "NodePort",
 						"external_traffic_policy": "Local",
 					}),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"external_traffic_policy"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
 var testAccCheckEdasK8sServicCheckMap = map[string]string{
-	"name":                    CHECKSET,
-	"type":                    CHECKSET,
-	"external_traffic_policy": CHECKSET,
+	"service_name": CHECKSET,
+	"type":         CHECKSET,
 }
 
 func testAccCheckEdasK8sServicDestroy(s *terraform.State) error {
@@ -77,7 +144,7 @@ func testAccCheckEdasK8sServicDestroy(s *terraform.State) error {
 func resourceEdasK8sSericeDependence(name string) string {
 
 	return fmt.Sprintf(`
-		variable "name" {
+		variable "service_name" {
 		  default = "%v"
 		}
 

@@ -12,7 +12,6 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/denverdino/aliyungo/cs"
@@ -1044,7 +1043,6 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 	d.Partial(true)
-	var raw interface{}
 	invoker := NewInvoker()
 
 	nodepool, err := csService.DescribeClusterNodePools(d.Id())
@@ -1144,20 +1142,19 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 			request.Headers["x-acs-content-type"] = "application/json"
 			//var err error
 			err = nil
+			var resp *responses.CommonResponse
 			if err = invoker.Run(func() error {
-				raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-					return ecsClient.ProcessCommonRequest(request)
-				})
+				resp, err = client.ProcessCommonRequest(request)
 				return err
 			}); err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", raw)
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cs_kubernetes", "CreateKubernetesCluster", resp)
 			}
 
 			if debugOn() {
 				resizeRequestMap := make(map[string]interface{})
 				resizeRequestMap["ClusterId"] = d.Id()
 				resizeRequestMap["Args"] = request.GetQueryParams()
-				addDebug("ResizeKubernetesCluster", raw, resizeRequestMap)
+				addDebug("ResizeKubernetesCluster", resp, resizeRequestMap)
 			}
 
 			stateConf := BuildStateConf([]string{"scaling"}, []string{"running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))

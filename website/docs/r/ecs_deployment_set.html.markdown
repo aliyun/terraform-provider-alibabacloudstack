@@ -13,7 +13,7 @@ Provides a ECS Deployment Set resource.
 
 For information about ECS Deployment Set and how to use it, see [What is Deployment Set](https://www.alibabacloud.com/help/en/doc-detail/91269.htm).
 
--> **NOTE:** Available in v1.140.0+.
+
 
 ## Example Usage
 

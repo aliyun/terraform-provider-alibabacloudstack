@@ -11,7 +11,7 @@ description: |-
 
 This data source provides a list Container Registry Enterprise Edition repositories on Alibaba Cloud.
 
--> **NOTE:** Available in v1.87.0+
+
 
 ## Example Usage
 

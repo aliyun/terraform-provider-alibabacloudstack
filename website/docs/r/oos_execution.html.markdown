@@ -11,7 +11,7 @@ description: |-
 
 Provides a OOS Execution resource. For information about AlibabacloudStack OOS Execution and how to use it, see [What is Resource alibabacloudstack OOS Execution](https://www.alibabacloud.com/help/doc-detail/120771.htm).
 
--> **NOTE:** Available in 1.93.0+.
+
 
 ## Example Usage
 

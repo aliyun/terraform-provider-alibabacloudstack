@@ -8,15 +8,15 @@ package alibabacloudstack
 	
 )
 
-func TestAccAlibabacloudStackCrEESyncRulesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackCrEeSyncRulesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	name := fmt.Sprintf("tf-testacc-cr-ee-sr-%d", rand)
 	resourceId := "data.alibabacloudstack_cr_ee_sync_rules.default"
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
-	sourceInstanceId, targetInstanceId := getCrEESyncRuleTestEnv(t)
+	sourceInstanceId, targetInstanceId := getCrEeSyncRuleTestEnv(t)
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name,
-		dataSourceCrEESyncRulesConfigDependence)
+		dataSourceCrEeSyncRulesConfigDependence)
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -92,7 +92,7 @@ func TestAccAlibabacloudStackCrEESyncRulesDataSource(t *testing.T) {
 		}),
 	}
 
-	var existCrEESyncRulesMapFunc = func(rand int) map[string]string {
+	var existCrEeSyncRulesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                         "1",
 			"ids.0":                         CHECKSET,
@@ -116,7 +116,7 @@ func TestAccAlibabacloudStackCrEESyncRulesDataSource(t *testing.T) {
 		}
 	}
 
-	var fakeCrEESyncRulesMapFunc = func(rand int) map[string]string {
+	var fakeCrEeSyncRulesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":   "0",
 			"names.#": "0",
@@ -126,18 +126,18 @@ func TestAccAlibabacloudStackCrEESyncRulesDataSource(t *testing.T) {
 
 	var crEESyncRulesCheckInfo = dataSourceAttr{
 		resourceId:   resourceId,
-		existMapFunc: existCrEESyncRulesMapFunc,
-		fakeMapFunc:  fakeCrEESyncRulesMapFunc,
+		existMapFunc: existCrEeSyncRulesMapFunc,
+		fakeMapFunc:  fakeCrEeSyncRulesMapFunc,
 	}
 	preCheck := func() {
 		testAccPreCheck(t)
-		getCrEESyncRuleTestEnv(t)
+		getCrEeSyncRuleTestEnv(t)
 	}
 	crEESyncRulesCheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, nameRegexConf, idsConf, namespaceConf,
 		repoConf, targetInstanceIdConf, allConf)
 }
 
-func dataSourceCrEESyncRulesConfigDependence(name string) string {
+func dataSourceCrEeSyncRulesConfigDependence(name string) string {
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	sourceInstanceId := os.Getenv("CR_EE_TEST_SOURCE_INSTANCE_ID")
 	targetInstanceId := os.Getenv("CR_EE_TEST_TARGET_INSTANCE_ID")

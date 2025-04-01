@@ -11,26 +11,26 @@ package alibabacloudstack
 //	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 //)
 //
-//func TestAccAlibabacloudStackCrEESyncRule_Basic(t *testing.T) {
+//func TestAccAlibabacloudStackCrEeSyncRule_Basic(t *testing.T) {
 //	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
-//	sourceInstanceId, targetInstanceId := getCrEESyncRuleTestEnv(t)
+//	sourceInstanceId, targetInstanceId := getCrEeSyncRuleTestEnv(t)
 //	resourceId := "alibabacloudstack_cr_ee_sync_rule.default"
 //	ra := resourceAttrInit(resourceId, nil)
 //	serviceFunc := func() interface{} {
 //		return &CrService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 //	}
 //	var v *cr_ee.SyncRulesItem
-//	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeCrEESyncRule")
+//	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeCrEeSyncRule")
 //	rac := resourceAttrCheckInit(rc, ra)
 //	testAccCheck := rac.resourceAttrMapUpdateSet()
 //	rand := getAccTestRandInt(1000000, 9999999)
 //	name := fmt.Sprintf("tf-testacc-cr-sync-%d", rand)
-//	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEESyncRuleConfigDependence)
+//	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEeSyncRuleConfigDependence)
 //
 //	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
-//			getCrEESyncRuleTestEnv(t)
+//			getCrEeSyncRuleTestEnv(t)
 //		},
 //		IDRefreshName: resourceId,
 //		Providers:     testAccProviders,
@@ -76,7 +76,7 @@ package alibabacloudstack
 //	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
-//			getCrEESyncRuleTestEnv(t)
+//			getCrEeSyncRuleTestEnv(t)
 //		},
 //		IDRefreshName: resourceId,
 //		Providers:     testAccProviders,
@@ -124,9 +124,9 @@ package alibabacloudstack
 //	})
 //}
 //
-//func TestAccAlibabacloudStackCrEESyncRule_Multi(t *testing.T) {
+//func TestAccAlibabacloudStackCrEeSyncRule_Multi(t *testing.T) {
 //	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
-//	sourceInstanceId, targetInstanceId := getCrEESyncRuleTestEnv(t)
+//	sourceInstanceId, targetInstanceId := getCrEeSyncRuleTestEnv(t)
 //	resourceId := "alibabacloudstack_cr_ee_sync_rule.rule2"
 //	ra := resourceAttrInit(resourceId, nil)
 //	serviceFunc := func() interface{} {
@@ -134,17 +134,17 @@ package alibabacloudstack
 //	}
 //
 //	var v *cr_ee.SyncRulesItem
-//	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeCrEESyncRule")
+//	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeCrEeSyncRule")
 //	rac := resourceAttrCheckInit(rc, ra)
 //	testAccCheck := rac.resourceAttrMapUpdateSet()
 //	rand := getAccTestRandInt(1000000, 9999999)
 //	name := fmt.Sprintf("tf-testacc-cr-sync-%d", rand)
-//	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEESyncRuleConfigMultiDependence)
+//	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceCrEeSyncRuleConfigMultiDependence)
 //
 //	ResourceTest(t, resource.TestCase{
 //		PreCheck: func() {
 //			testAccPreCheck(t)
-//			getCrEESyncRuleTestEnv(t)
+//			getCrEeSyncRuleTestEnv(t)
 //		},
 //		IDRefreshName: resourceId,
 //		Providers:     testAccProviders,
@@ -189,7 +189,7 @@ package alibabacloudstack
 //	})
 //}
 //
-//func resourceCrEESyncRuleConfigDependence(name string) string {
+//func resourceCrEeSyncRuleConfigDependence(name string) string {
 //	sourceInstanceId := os.Getenv("CR_EE_TEST_SOURCE_INSTANCE_ID")
 //	targetInstanceId := os.Getenv("CR_EE_TEST_TARGET_INSTANCE_ID")
 //	configTemplate := `
@@ -232,7 +232,7 @@ package alibabacloudstack
 //	return fmt.Sprintf(configTemplate, name, sourceInstanceId, targetInstanceId)
 //}
 //
-//func resourceCrEESyncRuleConfigMultiDependence(name string) string {
+//func resourceCrEeSyncRuleConfigMultiDependence(name string) string {
 //	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 //	sourceInstanceId := os.Getenv("CR_EE_TEST_SOURCE_INSTANCE_ID")
 //	targetInstanceId := os.Getenv("CR_EE_TEST_TARGET_INSTANCE_ID")
@@ -315,7 +315,7 @@ package alibabacloudstack
 //	return fmt.Sprintf(configTemplate, region, name, sourceInstanceId, targetInstanceId)
 //}
 //
-//func getCrEESyncRuleTestEnv(t *testing.T) (string, string) {
+//func getCrEeSyncRuleTestEnv(t *testing.T) (string, string) {
 //	sourceInstanceId := os.Getenv("CR_EE_TEST_SOURCE_INSTANCE_ID")
 //	targetInstanceId := os.Getenv("CR_EE_TEST_TARGET_INSTANCE_ID")
 //	if sourceInstanceId == "" || targetInstanceId == "" {

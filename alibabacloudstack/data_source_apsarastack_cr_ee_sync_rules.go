@@ -12,9 +12,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackCrEESyncRules() *schema.Resource {
+func dataSourceAlibabacloudStackCrEeSyncRules() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackCrEESyncRulesRead,
+		Read: dataSourceAlibabacloudStackCrEeSyncRulesRead,
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -127,7 +127,7 @@ func dataSourceAlibabacloudStackCrEESyncRules() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackCrEESyncRulesRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackCrEeSyncRulesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
 	instanceId := d.Get("instance_id").(string)
@@ -181,7 +181,7 @@ func dataSourceAlibabacloudStackCrEESyncRulesRead(d *schema.ResourceData, meta i
 
 		request.PageNo = requests.NewInteger(pageNo)
 		request.PageSize = requests.NewInteger(pageSize)
-		raw, err := crService.client.WithCrEEClient(func(creeClient *cr_ee.Client) (interface{}, error) {
+		raw, err := crService.client.WithCrEeClient(func(creeClient *cr_ee.Client) (interface{}, error) {
 			return creeClient.ListRepoSyncRule(request)
 		})
 		bresponse, ok := raw.(*cr_ee.ListRepoSyncRuleResponse)

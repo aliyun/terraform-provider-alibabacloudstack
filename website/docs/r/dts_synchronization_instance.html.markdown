@@ -13,7 +13,7 @@ Provides a DTS Synchronization Instance resource.
 
 For information about DTS Synchronization Instance and how to use it, see [What is Synchronization Instance](https://help.aliyun.com/document_detail/211599.html).
 
--> **NOTE:** Available in v1.138.0+.
+
 
 ## Example Usage
 

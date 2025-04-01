@@ -11,7 +11,7 @@ description: |-
 
 Provides a OOS Template resource. For information about Alicloud OOS Template and how to use it, see [What is Resource Alicloud OOS Template](https://www.alibabacloud.com/help/doc-detail/120761.htm).
 
--> **NOTE:** Available in 1.92.0+.
+
 
 ## Example Usage
 

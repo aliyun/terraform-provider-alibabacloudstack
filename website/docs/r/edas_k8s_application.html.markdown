@@ -11,7 +11,7 @@ description: |-
 
 Create an EDAS k8s application.For information about EDAS K8s Application and how to use it, see [What is EDAS K8s Application](https://www.alibabacloud.com/help/doc-detail/85029.htm). 
 
--> **NOTE:** Available in 1.105.0+
+
 
 ## Example Usage
 

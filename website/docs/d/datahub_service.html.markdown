@@ -13,7 +13,7 @@ Using this data source can open DataHub service automatically. If the service ha
 
 For information about DataHub and how to use it, see [What is DataHub](https://help.aliyun.com/product/53345.html).
 
--> **NOTE:** Available in v1.111.0+
+
 
 ## Example Usage
 

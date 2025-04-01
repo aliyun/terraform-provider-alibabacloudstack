@@ -13,7 +13,7 @@ Provides a Nas Access Rule resource.
 
 When NAS is activated, the Default VPC Permission Group is automatically generated. It allows all IP addresses in a VPC to access the mount point with full permissions. Full permissions include Read/Write permission with no restriction on root users.
 
--> **NOTE:** Available in v1.34.0+.
+
 
 ## Example Usage
 
