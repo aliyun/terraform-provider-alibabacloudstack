@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"os"
 	"testing"
 	"time"
 
@@ -111,7 +110,6 @@ func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
 	}
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
-	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rand := getAccTestRandInt(0, 1000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testacc-edask8sclusterbasic%v", rand)
@@ -129,8 +127,8 @@ func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					// "cs_cluster_id": "${alibabacloudstack_cs_kubernetes.default.id}",
-					"cs_cluster_id": "c89eeac401e7b43d985c6ac2b94ceee66",
-					"namespace_id":  region,
+					"cs_cluster_id": "c600b5dc0b6c74ec7a94fef502def0006",
+					"namespace_id":  "cn-wulan-env17e-d01:testtf123",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{

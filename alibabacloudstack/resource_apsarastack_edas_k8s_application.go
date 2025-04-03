@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -506,7 +505,9 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 	d.Set("cluster_id", response.App.ClusterId)
 	d.Set("replicas", response.App.Instances)
 	d.Set("package_type", response.App.ApplicationType)
-	d.Set("image_url", response.ImageInfo.ImageUrl)
+	if d.Get("package_type").(string) == "docker" {
+		d.Set("image_url", response.ImageInfo.ImageUrl)
+	}
 	envs := make(map[string]string)
 	for _, e := range response.App.EnvList.Env {
 		envs[e.Name] = e.Value
@@ -514,23 +515,15 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 	d.Set("envs", envs)
 	d.Set("command", response.App.Cmd)
 	d.Set("command_args", response.App.CmdArgs.CmdArg)
+	d.Set("requests_m_cpu", response.App.RequestCpuM)
+	d.Set("limit_m_cpu", response.App.LimitCpuM)
+	d.Set("limit_mem", response.App.LimitMem)
+	d.Set("requests_mem", response.App.RequestMem)
 
 	allDeploy := response.DeployGroups.DeployGroup
 	for _, v := range allDeploy {
 		if len(v.PackageVersion) > 0 {
 			d.Set("package_version", v.PackageVersion)
-		}
-		limit_mem, err := strconv.Atoi(v.MemoryLimit)
-		if err != nil {
-			d.Set("limit_mem", limit_mem)
-		}
-		requests_mem, err := strconv.Atoi(v.MemoryRequest)
-		if err != nil {
-			d.Set("requests_mem", requests_mem)
-		}
-		requests_m_cpu, err := strconv.Atoi(v.CpuRequest)
-		if err != nil {
-			d.Set("requests_m_cpu", requests_m_cpu*1000)
 		}
 
 		for _, c := range v.Components.ComponentsItem {
@@ -555,7 +548,7 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 	if len(response.Conf.Readiness) > 0 {
 		d.Set("readiness", response.Conf.Readiness)
 	}
-	d.Set("namespace", response.DeployGroups.DeployGroup[0].NameSpace)
+	d.Set("namespace", response.App.K8sNamespace)
 	if len(response.Conf.K8sVolumeInfo) > 0 {
 		k8sVolumeInfo := make(map[string]interface{})
 		err = json.Unmarshal([]byte(response.Conf.K8sVolumeInfo), &k8sVolumeInfo)
@@ -604,24 +597,31 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 			d.Set("pvc_mount_descs", pvc_mount_descs)
 		}
 	}
-	if len(response.Conf.K8sLocalvolumeInfo) > 0 {
+	if response.Conf.K8sLocalvolumeInfo != "" {
 		K8sLocalvolumeInfo := make(map[string]interface{})
 		err = json.Unmarshal([]byte(response.Conf.K8sLocalvolumeInfo), &K8sLocalvolumeInfo)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		localVolumes := make([]LocalVolume, 0)
-		err = json.Unmarshal([]byte(response.Conf.K8sLocalvolumeInfo), &K8sLocalvolumeInfo)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		local_volumes := make([]map[string]interface{}, 0)
-		for _, v := range localVolumes {
-			local_volumes = append(local_volumes, map[string]interface{}{
-				"mount_path": v.MountPath,
-				"node_path":  v.NodePath,
-				"type":       v.Type,
-			})
+		localVolumeDOs, ok := K8sLocalvolumeInfo["localVolumeDOs"]
+		local_volumes := make([]map[string]string, 0)
+		if ok {
+			localVolumes := localVolumeDOs.([]interface{})
+			for _, lv := range localVolumes {
+				v := lv.(map[string]interface{})
+				local_volume := map[string]string{
+					"mount_path": v["mountPath"].(string),
+					"node_path":  v["nodePath"].(string),
+				}
+				lv_type, ok := v["type"]
+				if ok {
+					local_volume["type"] = lv_type.(string)
+
+				} else {
+					local_volume["type"] = ""
+				}
+				local_volumes = append(local_volumes, local_volume)
+			}
 		}
 		d.Set("local_volume", local_volumes)
 	}

@@ -81,7 +81,6 @@ type EdasGetChangeOrderInfoResponse struct {
 	Message         string              `json:"Message"`
 	ChangeOrderInfo EdasChangeOrderInfo `json:"ChangeOrderInfo"`
 	Success         bool                `json:"success"`
-	Code            int                 `json:"Code"`
 }
 
 func (e *EdasService) GetChangeOrderStatus(id string) (info *EdasChangeOrderInfo, err error) {
@@ -105,9 +104,6 @@ func (e *EdasService) GetChangeOrderStatus(id string) (info *EdasChangeOrderInfo
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
 		return &order, errmsgs.WrapError(err)
-	}
-	if response.Code != 200 {
-		return &order, errmsgs.Error("Get change order info failed for " + response.Message)
 	}
 	order = response.ChangeOrderInfo
 	return &order, nil
@@ -435,7 +431,7 @@ func (e *EdasService) DescribeEdasK8sCluster(clusterId string) (*EdasK8sCluster,
 	}
 	ClusterList := response.ClusterPage.ClusterList
 	if len(ClusterList) == 0 {
-		return &cluster, errmsgs.Error(errmsgs.NotFoundMsg, " Edas K8s cluster")
+		return &cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg)
 	} else {
 		cluster = ClusterList[0]
 	}
