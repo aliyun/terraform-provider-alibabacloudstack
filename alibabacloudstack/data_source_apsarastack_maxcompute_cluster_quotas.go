@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceAlibabacloudStackMaxcomputeClusterQutaos() *schema.Resource {
+func dataSourceAlibabacloudStackMaxcomputeClusterQuotas() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackMaxcomputeClusterQutaosRead,
 		Schema: map[string]*schema.Schema{

@@ -1,11 +1,12 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackAscmMaxcomputeClusterQutaoDataSource(t *testing.T) {
+func TestAccAlibabacloudStackAscmMaxcomputeClusterQuotasDataSource(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)

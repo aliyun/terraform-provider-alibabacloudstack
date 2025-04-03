@@ -10,11 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAliyunApigatewayAppAttachment() *schema.Resource {
+func resourceAlibabacloudStackApigatewayAppAttachment() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAliyunApigatewayAppAttachmentCreate,
-		Read:   resourceAliyunApigatewayAppAttachmentRead,
-		Delete: resourceAliyunApigatewayAppAttachmentDelete,
+		Create: resourceAlibabacloudStackApigatewayAppAttachmentCreate,
+		Read:   resourceAlibabacloudStackApigatewayAppAttachmentRead,
+		Delete: resourceAlibabacloudStackApigatewayAppAttachmentDelete,
 
 		Schema: map[string]*schema.Schema{
 
@@ -46,7 +46,7 @@ func resourceAliyunApigatewayAppAttachment() *schema.Resource {
 	}
 }
 
-func resourceAliyunApigatewayAppAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackApigatewayAppAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cloudApiService := CloudApiService{client}
 
@@ -86,10 +86,10 @@ func resourceAliyunApigatewayAppAttachmentCreate(d *schema.ResourceData, meta in
 	}
 
 	d.SetId(id)
-	return resourceAliyunApigatewayAppAttachmentRead(d, meta)
+	return resourceAlibabacloudStackApigatewayAppAttachmentRead(d, meta)
 }
 
-func resourceAliyunApigatewayAppAttachmentRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackApigatewayAppAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cloudApiService := CloudApiService{client}
 
@@ -110,7 +110,7 @@ func resourceAliyunApigatewayAppAttachmentRead(d *schema.ResourceData, meta inte
 	return nil
 }
 
-func resourceAliyunApigatewayAppAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackApigatewayAppAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cloudApiService := CloudApiService{client}
 

@@ -126,9 +126,8 @@ func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					// "cs_cluster_id": "${alibabacloudstack_cs_kubernetes.default.id}",
-					"cs_cluster_id": "c600b5dc0b6c74ec7a94fef502def0006",
-					"namespace_id":  "cn-wulan-env17e-d01:testtf123",
+					"cs_cluster_id": "${alibabacloudstack_cs_kubernetes.default.id}",
+					"namespace_id":  "${alibabacloudstack_edas_namespace.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -198,28 +197,39 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 		  default = "%v"
 		}
 
+		variable "regionid" {
+		  default = "%v"
+		}
 
-		// resource "alibabacloudstack_cs_kubernetes" "default" {
-		//  name = var.name
-		//  version 					= "1.20.11-aliyun.1"
-		//  os_type 					= "linux"
-		//  platform 					= "AliyunLinux"
-		//  num_of_nodes 				= "1"
-		//  master_count				= "3"
-		//  master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
-		//  master_instance_types 		= ["ecs.n4v2.large","ecs.n4v2.large","ecs.n4v2.large"]
-		//  master_disk_category 		= "cloud_ssd"
-		//  vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
-		//  worker_instance_types 		= ["ecs.n4v2.large"]
-		//  worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
-		//  worker_disk_category 		= "cloud_ssd"
-		//  password 					= "Test12345"
-		//  pod_cidr 					= "172.20.0.0/16"
-		//  service_cidr 				= "172.21.0.0/20"
-		//  worker_disk_size 			= "40"
-		//  master_disk_size 			= "40"
-		//  slb_internet_enabled 		= "true"
-		// }
+		resource "alibabacloudstack_edas_namespace" "default" {
+		  	description =      "${var.name}"
+			namespace_name =       "${var.name}"
+			namespace_logical_id = "${var.regionid}:${var.name}",
+		}
+	}
+
+
+		resource "alibabacloudstack_cs_kubernetes" "default" {
+		 name = var.name
+		 version 					= "1.20.11-aliyun.1"
+		 os_type 					= "linux"
+		 platform 					= "AliyunLinux"
+		 num_of_nodes 				= "1"
+		 master_count				= "3"
+		 master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
+		 master_instance_types 		= ["ecs.n4v2.large","ecs.n4v2.large","ecs.n4v2.large"]
+		 master_disk_category 		= "cloud_ssd"
+		 vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
+		 worker_instance_types 		= ["ecs.n4v2.large"]
+		 worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
+		 worker_disk_category 		= "cloud_ssd"
+		 password 					= "Test12345"
+		 pod_cidr 					= "172.20.0.0/16"
+		 service_cidr 				= "172.21.0.0/20"
+		 worker_disk_size 			= "40"
+		 master_disk_size 			= "40"
+		 slb_internet_enabled 		= "true"
+		}
 
 		`, name)
 }
