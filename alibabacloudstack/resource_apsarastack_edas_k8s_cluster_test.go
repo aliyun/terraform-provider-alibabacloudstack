@@ -127,8 +127,7 @@ func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"cs_cluster_id": "${alibabacloudstack_cs_kubernetes.default.id}",
-					// "cs_cluster_id": "c89eeac401e7b43d985c6ac2b94ceee66",
-					"namespace_id": region,
+					"namespace_id":  "${alibabacloudstack_edas_namespace.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -198,13 +197,51 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 		  default = "%s"
 		}
 
+<<<<<<< HEAD
 		variable "cluster_addons" {
 			description = "Addon components in kubernetes cluster"
+=======
+		variable "regionid" {
+		  default = "%v"
+		}
+>>>>>>> refs/heads/v3.16xR
 
+<<<<<<< HEAD
 			type = list(object({
 				name   = string
 				config = string
 			}))
+=======
+		resource "alibabacloudstack_edas_namespace" "default" {
+		  	description =      "${var.name}"
+			namespace_name =       "${var.name}"
+			namespace_logical_id = "${var.regionid}:${var.name}",
+		}
+	}
+
+
+		resource "alibabacloudstack_cs_kubernetes" "default" {
+		 name = var.name
+		 version 					= "1.20.11-aliyun.1"
+		 os_type 					= "linux"
+		 platform 					= "AliyunLinux"
+		 num_of_nodes 				= "1"
+		 master_count				= "3"
+		 master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
+		 master_instance_types 		= ["ecs.n4v2.large","ecs.n4v2.large","ecs.n4v2.large"]
+		 master_disk_category 		= "cloud_ssd"
+		 vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
+		 worker_instance_types 		= ["ecs.n4v2.large"]
+		 worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
+		 worker_disk_category 		= "cloud_ssd"
+		 password 					= "Test12345"
+		 pod_cidr 					= "172.20.0.0/16"
+		 service_cidr 				= "172.21.0.0/20"
+		 worker_disk_size 			= "40"
+		 master_disk_size 			= "40"
+		 slb_internet_enabled 		= "true"
+		}
+>>>>>>> refs/heads/v3.16xR
 
 			default = [
 					{
