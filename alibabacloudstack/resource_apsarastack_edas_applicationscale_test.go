@@ -6,7 +6,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/edas"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -63,6 +63,8 @@ func resourceEdasIAAttachmentDependence(name string) string {
 		variable "name" {
 		  default = "%v"
 		}
+		variable "password" {
+		}
 
 		data "alibabacloudstack_zones" "default" {
 			available_resource_creation= "VSwitch"
@@ -112,7 +114,7 @@ func resourceEdasIAAttachmentDependence(name string) string {
 		resource "alibabacloudstack_edas_instance_cluster_attachment" "default" {
 		  cluster_id = "${alibabacloudstack_edas_cluster.default.id}"
 		  instance_ids = ["${alibabacloudstack_instance.default.id}"]
-		  pass_word = "Li65272237###"
+		  pass_word = var.password
 		}
 	
 		resource "alibabacloudstack_edas_application" "default" {

@@ -7,7 +7,7 @@ description: |-
   Provides a ESS scaling group resource.
 ---
 
-# alibabacloudstack\_ess\_scaling\_group
+# alibabacloudstack_ess_scaling_group
 
 Provides a ESS scaling group resource which is a collection of ECS instances with the same application scenarios.
 

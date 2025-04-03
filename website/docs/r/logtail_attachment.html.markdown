@@ -1,4 +1,3 @@
----
 subcategory: "Log Service (SLS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_logtail_attachment"
@@ -7,7 +6,7 @@ description: |-
   Provides a Alibabacloudstack logtail attachment resource.
 ---
 
-# alibabacloudstack\_logtail\_attachment
+# alibabacloudstack_logtail_attachment
 
 The Logtail access service is a log collection agent provided by Log Service.
 You can use Logtail to collect logs from servers such as Alibaba Cloud Elastic
@@ -78,16 +77,16 @@ resource "alibabacloudstack_logtail_attachment" "test" {
 
 The following arguments are supported:
 
-* `project` - (Required, ForceNew) The project name to the log store belongs.
-* `logtail_config_name` - (Required, ForceNew) The Logtail configuration name, which is unique in the same project.
-* `machine_group_name` - (Required, ForceNew) The machine group name, which is unique in the same project.
+* `project` - (Required, ForceNew) The project name to the log store belongs. 
+* `logtail_config_name` - (Required, ForceNew) The Logtail configuration name, which is unique in the same project. 
+* `machine_group_name` - (Required, ForceNew) The machine group name, which is unique in the same project. 
 
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `id` - The ID of the logtail to machine group. It formats of `<project>:<logtail_config_name>:<machine_group_name>`.
+* `id` - The ID of the logtail to machine group. It formats of `<project>:<logtail_config_name>:<machine_group_name>`. 
 
 ## Import
 

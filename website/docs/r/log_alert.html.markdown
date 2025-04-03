@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack log alert resource.
 ---
 
-# alibabacloudstack\_log\_alert
+# alibabacloudstack_log_alert
 
 Log alert is a unit of log service, which is used to monitor and alert the user's logstore status information. 
 Log Service enables you to configure alerts based on the charts in a dashboard to monitor the service status in real time.
@@ -89,13 +89,15 @@ The following arguments are supported:
     * `mobile_list` - (Optional) SMS sending mobile number.
     * `email_list` - (Optional) Email address list.   
 * `schedule_interval` - (Optional) Execution interval. 60 seconds minimum, such as 60s, 1h.
-* `schedule_type` - (Optional)  Default FixedRate. No need to configure this parameter.
+* `schedule_type` - (Optional) Default FixedRate. No need to configure this parameter.
+* `mute_until` - (Optional)  Timestamp, notifications before closing again. This attribute allows values that are greater than or equal to 0. 
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-*  `id` - The ID of the log alert. It formats of `<project>:<alert_name>`.
+* `id` - The ID of the log alert. It formats of `<project>:<alert_name>`.
+* `mute_until` -  Timestamp, notifications before closing again.
 
 ## Import
 

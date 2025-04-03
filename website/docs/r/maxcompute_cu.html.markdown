@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack maxcompute cu resource.
 ---
 
-# alibabacloudstack\_maxcompute\_cu
+# alibabacloudstack_maxcompute_cu
 
 The cu is the basic unit of operation in maxcompute. 
 
@@ -28,10 +28,14 @@ resource "alibabacloudstack_maxcompute_cu" "example" {
 
 The following arguments are supported:
 * `id` - (Required, ForceNew) The id of the maxcompute cu.
-* `cu_name` - (Required, ForceNew, Available in 1.110.0+) The name of the maxcompute cu.
-* `cu_num` - (Required, ForceNew) The name of the maxcompute cu.
+* `cu_name` - (Required, ForceNew, Available in 1.110.0+) The name of the maxcompute cu. 
+* `cu_num` - (Required, ForceNew) The number of CUs for the maxcompute cu. Must be at least 1. 
 * `cluster_name` - (Required, ForceNew) The cluster name of the maxcompute cu.
 
+## Attributes Reference
+
+The following attributes are exported:
+* `id` - The ID of the maxcompute cu. 
 
 ## Import
 

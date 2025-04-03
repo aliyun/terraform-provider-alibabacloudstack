@@ -1033,7 +1033,8 @@ resource "alibabacloudstack_ram_role" "default" {
     description = "this is a role test."
     force = true
 }
-
+variable "password" {
+}
 resource "alibabacloudstack_emr_cluster" "default" {
     name = "${var.name}"
 
@@ -1073,7 +1074,7 @@ resource "alibabacloudstack_emr_cluster" "default" {
     vswitch_id = alibabacloudstack_vswitch.default.id
     user_defined_emr_ecs_role = alibabacloudstack_ram_role.default.name
     ssh_enable = true
-    master_pwd = "ABCtest1234!"
+    master_pwd = var.password
 }
 `
 const EmrLocalStorageTestCase = `

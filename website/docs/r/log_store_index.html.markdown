@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack log store index resource.
 ---
 
-# alibabacloudstack\_log\_store\_index
+# alibabacloudstack_log_store_index
 
 Log Service provides the LogSearch/Analytics function to query and analyze large amounts of logs in real time.
 You can use this function by enabling the index and field statistics. [Refer to details](https://www.alibabacloud.com/help/doc-detail/43772.htm)
@@ -74,6 +74,9 @@ The following arguments are supported:
         * `type` - (Optional) The type of one field. Valid values: ["long", "text", "double"]. Default to "long"
         * `alias` - (Optional) The alias of one field.
         * `doc_value` - (Optional) Whether to enable statistics. default to true.
+    
+    
+    * `enable_analytics` - (Optional) Whether to enable field analytics. Default to true.
 
 -> **Note:** At least one of the "full_text" and "field_search" should be specified.
 
@@ -82,6 +85,8 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The ID of the log store index. It formats of `<project>:<logstore>`.
+* `project` - (ForceNew, Required) The project name to the log store belongs.
+* `logstore` - (ForceNew, Required) The log store name to the query index belongs.
 
 ## Import
 

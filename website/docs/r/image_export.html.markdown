@@ -7,7 +7,7 @@ description: |-
   Provides an ECS image export resource.
 ---
 
-# alibabacloudstack\_image\_export
+# alibabacloudstack_image_export
 
 Export a custom image to the OSS bucket in the same region as the custom image.
 
@@ -33,7 +33,7 @@ The following arguments are supported:
 
 * `image_id` - (Required, ForceNew) The source image ID.
 * `oss_bucket` - (Required, ForceNew) Save the exported OSS bucket.
-* `oss_prefix` - (Optional, ForceNew) The prefix of your OSS Object. It can be composed of numbers or letters, and the character length is 1 ~ 30.
+* `oss_prefix` - (Optional, ForceNew) The prefix of your OSS Object. It can be composed of numbers or letters, and the character length is 1 ~ 30. 
    
 ## Timeouts
 
@@ -42,8 +42,8 @@ The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/d
 * `create` - (Defaults to 20 mins) Used when exporting the image (until it reaches the initial `Available` status). 
    
    
-## Attributes Reference0
+## Attributes Reference
  
  The following attributes are exported:
  
-* `id` - ID of the image.
+* `id` - ID of the image. 

@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack resource to manage Container Registry Enterprise Edition repositories.
 ---
 
-# alibabacloudstack\_cr\_ee\_repo
+# alibabacloudstack_cr_ee_repo
 
 This resource will help you to manager Container Registry Enterprise Edition repositories.
 
@@ -15,7 +15,7 @@ For information about Container Registry Enterprise Edition repository and how t
 
 
 
-> **NOTE:** You need to set your registry password in Container Registry Enterprise Edition console before use this resource.
+-> **NOTE:** You need to set your registry password in Container Registry Enterprise Edition console before use this resource.
 
 ## Example Usage
 

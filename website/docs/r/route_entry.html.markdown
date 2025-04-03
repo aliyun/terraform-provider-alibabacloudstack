@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack Route Entry resource.
 ---
 
-# alibabacloudstack\_route\_entry
+# alibabacloudstack_route_entry
 
 Provides a route entry resource. A route entry represents a route item of one VPC route table.
 
@@ -98,6 +98,7 @@ The following arguments are supported:
 
 * `nexthop_id` - (ForceNew) The route entry's next hop. ECS instance ID or VPC router interface ID.
 * `name` - (Optional, ForceNew, Available in 1.55.1+) The name of the route entry. This name can have a string of 2 to 128 characters, must contain only alphanumeric characters or hyphens, such as "-",".","_", and must not begin or end with a hyphen, and must not begin with http:// or https://.
+* `router_id` - (Optional ) This argument has been deprecated. Please remove it from your template.
 
 ## Attributes Reference
 
@@ -108,5 +109,4 @@ The following attributes are exported:
 * `destination_cidrblock` - The RouteEntry's target network segment.
 * `nexthop_type` - The next hop type.
 * `nexthop_id` - The route entry's next hop.
-
-
+* `router_id` - (Computed ) The ID of the router associated with the route entry.

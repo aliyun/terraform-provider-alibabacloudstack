@@ -7,7 +7,7 @@ description: |-
     Provides a list of records available to the dns.
 ---
 
-# alibabacloudstack\_dns\_records
+# alibabacloudstack_dns_records
 
 This data source provides a list of DNS Domain Records in an AlibabacloudStack Cloud account according to the specified filters.
 
@@ -47,8 +47,7 @@ The following arguments are supported:
 * `host_record_regex` - (Optional, ForceNew) Host record regex.
 * `type` - (Optional) Record type. Valid items are `A`, `NS`, `MX`, `TXT`, `CNAME`, `SRV`, `AAAA`, `REDIRECT_URL`, `FORWORD_URL` .
 * `ids` - (Optional) A list of record IDs.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
-
+* `name` - (Optional,) Name of the DNS record.
 
 ## Attributes Reference
 

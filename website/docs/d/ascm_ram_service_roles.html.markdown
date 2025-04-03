@@ -7,7 +7,7 @@ description: |-
     Provides a list of RAM Service roles to the user.
 ---
 
-# alibabacloudstack\_ascm_ram_service_roles
+# alibabacloudstack_ascm_ram_service_roles
 
 This data source provides the ram roles of the current Apsara Stack Cloud user.
 
@@ -29,7 +29,6 @@ The following arguments are supported:
 * `ids` - (Optional) A list of ram roles IDs.
 * `product` - (Optional) A regex string to filter results by their product. valid values - "ECS".
 * `description` - (Optional) Description about the ram role.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -43,4 +42,3 @@ The following attributes are exported in addition to the arguments listed above:
     * `product` - types of role.
     * `organization_name` - Name of an Organization.
     * `aliyun_user_id` - Aliyun User Id.
-     

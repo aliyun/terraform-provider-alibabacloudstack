@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack Alikafka Sasl User resource.
 ---
 
-# alibabacloudstack\_alikafka\_sasl\_user
+# alibabacloudstack_alikafka_sasl_user
 
 Provides an Alikafka sasl user resource.
 
@@ -21,7 +21,6 @@ variable "username" {
 }
 
 variable "password" {
-  default = "testpassword"
 }
 
 data "alibabacloudstack_zones" "default" {
@@ -65,18 +64,19 @@ The following arguments are supported:
 * `kms_encrypted_password` - (Optional) An KMS encrypts password used to a db account. You have to specify one of `password` and `kms_encrypted_password` fields.
 * `kms_encryption_context` - (Optional, MapString) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating a user with `kms_encrypted_password`. See [Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm). It is valid when `kms_encrypted_password` is set.
 * `type` - (Optional, ForceNew, Available in 1.159.0+) The authentication mechanism. Valid values: `plain`, `scram`. Default value: `plain`.
+* `kms_encrypted_password` - (Optional) An KMS encrypts password used to a db account.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The ID of the resource. The value is formate as `<instance_id>:<username>`.
+* `type` - (Computed, Available in 1.159.0+) The authentication mechanism. Valid values: `plain`, `scram`.
 
 ## Import
 
 Alikafka Sasl User can be imported using the id, e.g.
 
+```bash
+$ terraform import alibabacloudstack_alikafka_sasl_user.example <instance_id>:<username>
 ```
-terraform import alibabacloudstack_alikafka_sasl_user.example <instance_id>:<username>
-```
-

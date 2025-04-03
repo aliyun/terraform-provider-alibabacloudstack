@@ -7,7 +7,7 @@ description: |-
   Provides a Ascm user resource.
 ---
 
-# alibabacloudstack\_ascm_user
+# alibabacloudstack_ascm_user
 
 Provides a Ascm user resource.
 
@@ -43,6 +43,7 @@ The following arguments are supported:
 * `organization_id` - (Required) User Organization ID.
 * `login_policy_id` - (Optional) User login policy ID.
 * `role_ids` - A list of the user owned roles.
+* `telephone_number` - (Optional) Telephone number of a user.
 
 ## Attributes Reference
 
@@ -51,3 +52,4 @@ The following attributes are exported:
 * `id` - Login Name of the user.
 * `user_id` - The ID of the user.
 * `init_password` - Init Password of the user.
+* `role_ids` - A list of the user owned roles.

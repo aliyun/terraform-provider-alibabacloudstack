@@ -7,7 +7,7 @@ description: |-
     Provides a list of FileType owned by an Alibaba Cloud account.
 ---
 
-# alibabacloudstack\_nas_zones
+# alibabacloudstack_nas_zones
 
 Provide  a data source to retrieve the type of zone used to create NAS file system.
 
@@ -27,7 +27,6 @@ output "alibabacloudstack_nas_zones_id" {
 The following arguments are supported:
 
 * `file_system_type` - (Optional, ForceNew, Available in v1.152.0+) The type of the file system.  Valid values: `standard`, `extreme`, `cpfs`.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -44,4 +43,3 @@ The following attributes are exported in addition to the arguments listed above:
           * `standard` - When FileSystemType is standard. Valid values: `NFS` and `SMB`.
           * `extreme` - When FileSystemType is extreme. Valid values: `NFS`.
           * `cpfs` - When FileSystemType is cpfs. Valid values: `cpfs`.
-          

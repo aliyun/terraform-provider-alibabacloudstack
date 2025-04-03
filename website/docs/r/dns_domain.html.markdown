@@ -7,7 +7,7 @@ description: |-
   Provides a DNS domain resource.
 ---
 
-# alibabacloudstack\_dns\_domain
+# alibabacloudstack_dns_domain
 
 Provides a DNS domain resource.
 
@@ -34,6 +34,7 @@ The following arguments are supported:
 * `resource_group_id` - (Optional, ForceNew) The Id of resource group which the dns domain belongs.
 * `lang` - (Optional) User language.
 * `remark` - (Optional) Remarks information for your domain name.
+* `domain_name` - (Required) Name of the domain. 
 
 ## Attributes Reference
 
@@ -42,5 +43,4 @@ The following attributes are exported:
 * `id` - This ID of this resource. The value is set to `domain_name`.
 * `domain_id` - The domain ID.
 * `dns_servers` - A list of the dns server name.
-
-
+* `domain_name` - The name of the domain. 

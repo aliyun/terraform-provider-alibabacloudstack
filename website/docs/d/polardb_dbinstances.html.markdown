@@ -1,5 +1,5 @@
 ---
-subcategory: "POLARDB"
+subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_dbinstances"
 sidebar_current: "docs-Alibabacloudstack-datasource-polardb-dbinstances"
@@ -8,6 +8,7 @@ description: |-
 ---
 
 # alibabacloudstack_polardb_dbinstances
+-> **NOTE:** Alias name has: `alibabacloudstack_polardb_instances`
 
 This data source provides a list of polardb dbinstances in an alibabacloudstack account according to the specified filters.
 
@@ -57,8 +58,7 @@ The following arguments are supported:
   * `resource_group_id` - (Optional) - The ID of the resource group.
   * `region_id` - (Required) - The region ID of the resource
   * `engine` - (Optional) - Database type. Valid value:* MySQL* PostgreSQL* SQLServer* MariaDB
-  * `output_file` - (Optional) - The file name where the result will be saved.
-
+  
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:

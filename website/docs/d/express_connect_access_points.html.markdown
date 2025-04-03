@@ -7,7 +7,8 @@ description: |-
   Provides a list of Express Connect Access Points to the user.
 ---
 
-# alibabacloudstack\_express\_connect\_access\_points
+# alibabacloudstack_express_connect_access_points
+-> **NOTE:** Alias name has: `alibabacloudstack_expressconnect_accesspoints`
 
 This data source provides the Express Connect Access Points of the current Alibaba Cloud user.
 
@@ -37,10 +38,10 @@ output "express_connect_access_point_id_2" {
 
 The following arguments are supported:
 
-* `ids` - (Optional, ForceNew, Computed)  A list of Access Point IDs.
+* `ids` - (Optional, ForceNew)  A list of Access Point IDs.
 * `name_regex` - (Optional, ForceNew) A regex string to filter results by Access Point name.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `status` - (Optional, ForceNew) The Physical Connection to Which the Access Point State. Valid values: `disabled`, `full`, `hot`, `recommended`.
+* `names` - (Optional, ForceNew) A list of Access Point names.
 
 ## Argument Reference
 

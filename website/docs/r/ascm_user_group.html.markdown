@@ -2,12 +2,12 @@
 subcategory: "ASCM"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ascm_user_group"
-sidebar_current: "docs-alibabacloudstack-resource-ascm-user_group"
+sidebar_current: "docs-alibabacloudstack-resource-ascm-user-group"
 description: |-
   Provides a Ascm user group resource.
 ---
 
-# alibabacloudstack\_ascm_user_group
+# alibabacloudstack_ascm_user_group
 
 Provides a Ascm user group resource.
 
@@ -36,6 +36,8 @@ The following arguments are supported:
 * `organization_id` - (Required) User Organization ID.
 * `role_in_ids` - (Deprecated). Field 'role_in_ids' has been deprecated. New field 'role_ids' instead.
 * `role_ids` - (Optional) ascm role id.
+* `group_name` - (Required) group name.
+* `role_in_ids` - (Optional) ascm role id.
 
 ## Attributes Reference
 
@@ -43,3 +45,5 @@ The following attributes are exported:
 
 * `id` - Login Name of the user group.
 * `user_group_id` - ID of the user group.
+* `organization_id` - User Organization ID.
+* `role_ids` - ascm role id.

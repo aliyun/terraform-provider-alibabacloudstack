@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack Quick BI UserGroup resource.
 ---
 
-# alibabacloudstack\_quick\_bi\_user\_group
+# alibabacloudstack_quick_bi_user_group
 
 Provides a Quick BI UserGroup resource.
 
@@ -33,12 +33,13 @@ The following arguments are supported:
 * `user_group_name` - (Required) User group name.
 * `user_group_description` - (Required) User group description.
 * `parent_user_group_id` - (Required) Parent user group ID. You can add a new user group to this grouping.When you enter -1, the newly created user group will be added to the root directory.
+* `user_group_id` - (Optional)  User group ID.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `user_group_id` - The resource ID in terraform of UserGroup.
+* `user_group_id` -  The resource ID in terraform of UserGroup.
 
 ## Import
 

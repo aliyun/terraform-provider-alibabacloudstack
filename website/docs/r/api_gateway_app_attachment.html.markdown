@@ -8,6 +8,7 @@ description: |-
 ---
 
 # alibabacloudstack_api_gateway_app_attachment
+-> **NOTE:** Alias name has: `alibabacloudstack_apigateway_app`
 
 Provides an app attachment resource.It is used for authorizing a specific api to an app accessing. 
 

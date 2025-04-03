@@ -60,8 +60,8 @@ enum TableStatus {
     ACTIVE = 1; // 表处于可服务状态。
     INACTIVE = 2; // 用户通过UnloadTable将表禁用。
     LOADING = 3; // 表正在被创建，partition还未全部加载完毕；或者表刚从INACTIVE状态被Enable。
-    UNLOADING = 4; // 表正在被删除（从delete table到partition完全unload的这段期间）或者表从ACTIVE状态被Unload。
-    UPDATING = 5; // 表正在被更新（table属性变更、预留吞吐量变更）。
+    UNLOADING = 4; // 表正在被删除(从delete table到partition完全unload的这段期间)或者表从ACTIVE状态被Unload。
+    UPDATING = 5; // 表正在被更新(table属性变更、预留吞吐量变更)。
 }
 
 enum RowExistenceExpectation {
@@ -400,7 +400,7 @@ enum Direction {
 /**
  * HBase支持以下参数：
  *     1. TimeRange或指定time
- *     2. Filter（根据列值或列名来过滤）
+ *     2. Filter(根据列值或列名来过滤)
  * 我们只支持给同版本的选择条件。
  */
 message GetRangeRequest {

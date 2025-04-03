@@ -1,4 +1,3 @@
----
 subcategory: "Quick BI"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_quick_bi_users"
@@ -7,7 +6,7 @@ description: |-
   Provides a list of Quick BI Users to the user.
 ---
 
-# alibabacloudstack\_quick\_bi\_users
+# alibabacloudstack_quick_bi_users
 
 This data source provides the Quick BI Users of the current Alibaba Cloud user.
 
@@ -30,9 +29,8 @@ output "quick_bi_user_id_1" {
 The following arguments are supported:
 
 * `enable_details` - (Optional) Default to `false`. Set it to `true` can output more details about resource attributes.
-* `ids` - (Optional, ForceNew, Computed)  A list of User IDs.
+* `ids` - (Optional, ForceNew)  A list of User IDs.
 * `keyword` - (Optional, ForceNew) The keywords of the nicknames or usernames of the members of the organization.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Argument Reference
 

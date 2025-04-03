@@ -7,7 +7,7 @@ description: |-
   Provides a list of Container Registry Enterprise Edition instances.
 ---
 
-# alibabacloudstack\_cr\_ee\_instances
+# alibabacloudstack_cr_ee_instances
 
 This data source provides a list Container Registry Enterprise Edition instances on Alibaba Cloud.
 
@@ -33,7 +33,6 @@ The following arguments are supported:
 
 * `ids` - (Optional) A list of ids to filter results by instance id.
 * `name_regex` - (Optional) A regex string to filter results by instance name.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `enable_details` - (Optional, Available in 1.132.0+) Default to `true`. Set it to true can output instance authorization token.
 
 ## Attributes Reference
@@ -42,7 +41,7 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `ids` - A list of matched Container Registry Enterprise Edition instances. Its element is an instance uuid.
 * `names` - A list of instance names.
-* `instances` - A list of matched Container Registry Enterprise Editioninstances. Each element contains the following attributes:
+* `instances` - A list of matched Container Registry Enterprise Edition instances. Each element contains the following attributes:
   * `id` - ID of Container Registry Enterprise Edition instance.
   * `name` - Name of Container Registry Enterprise Edition instance.
   * `region` - Region of Container Registry Enterprise Edition instance.
@@ -55,4 +54,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `public_endpoints` - A list of domains for access on internet network.
   * `authorization_token` - The password that was used to log on to the registry.
   * `temp_username` - The username that was used to log on to the registry.
-  
+  * `output_file` - File name where to save data source results (after running `terraform plan`).

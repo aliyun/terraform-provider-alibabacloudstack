@@ -7,7 +7,7 @@ description: |-
     Provides a datasource to open the DataHub service automatically.
 ---
 
-# alibabacloudstack\_datahub\_service
+# alibabacloudstack_datahub_service
 
 Using this data source can open DataHub service automatically. If the service has been opened, it will return opened.
 
@@ -35,4 +35,4 @@ The following arguments are supported:
 
 The following attributes are exported in addition to the arguments listed above:
 
-* `status` - The current service enable status. 
+* `status` - The current service enable status.

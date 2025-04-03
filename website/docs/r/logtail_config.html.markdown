@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack logtail config resource.
 ---
 
-# alibabacloudstack\_logtail\_config
+# alibabacloudstack_logtail_config
 
 The Logtail access service is a log collection agent provided by Log Service. 
 You can use Logtail to collect logs from servers such as Alibaba Cloud Elastic
@@ -53,10 +53,11 @@ The following arguments are supported:
 * `project` - (Required, ForceNew) The project name to the log store belongs.
 * `logstore` - (Required, ForceNew) The log store name to the query index belongs.
 * `input_type` - (Required) The input type. Currently only two types of files and plugin are supported.
-* `log_sample` - （Optional）The log sample of the Logtail configuration. The log size cannot exceed 1,000 bytes.
+* `log_sample` - (Optional)The log sample of the Logtail configuration. The log size cannot exceed 1,000 bytes.
 * `name` - (Required, ForceNew) The Logtail configuration name, which is unique in the same project.
 * `output_type` - (Required) The output type. Currently, only LogService is supported.
 * `input_detail` - (Required) The logtail configure the required JSON files. ([Refer to details](https://www.alibabacloud.com/help/doc-detail/29058.htm))
+  
 
 ## Attributes Reference
 

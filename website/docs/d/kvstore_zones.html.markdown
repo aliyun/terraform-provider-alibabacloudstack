@@ -7,7 +7,7 @@ description: |-
     Provides a list of availability zones for KVStore that can be used by an Apsara Stack Cloud account.
 ---
 
-# alibabacloudstack\_kvstore\_zones
+# alibabacloudstack_kvstore_zones
 
 This data source provides availability zones for KVStore that can be accessed by an Apsara Stack Cloud account within the region configured in the provider.
 
@@ -29,7 +29,7 @@ The following arguments are supported:
 
 * `multi` - (Optional) Indicate whether the zones can be used in a multi AZ configuration. Default to `false`. Multi AZ is usually used to launch KVStore instances.
 * `instance_charge_type` - (Optional) Filter the results by a specific instance charge type. Valid values: `PrePaid` and `PostPaid`. Default to `PostPaid`.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `ids` - (Optional) A list of zone IDs.
 
 ## Attributes Reference
 
@@ -39,3 +39,4 @@ The following attributes are exported in addition to the arguments listed above:
 * `zones` - A list of availability zones. Each element contains the following attributes:
   * `id` - ID of the zone.
   * `multi_zone_ids` - A list of zone ids in which the multi zone.
+  * `zones` - A list of availability zones.

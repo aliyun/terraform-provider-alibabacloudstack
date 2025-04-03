@@ -7,7 +7,7 @@ description: |-
     Provides a list of ons instances available to the user.
 ---
 
-# alibabacloudstack\_ons\_instances
+# alibabacloudstack_ons_instances
 
 This data source provides a list of ONS Instances in an Apsara Stack Cloud account according to the specified filters.
 
@@ -45,7 +45,6 @@ The following arguments are supported:
 
 * `ids` - (Optional) A list of instance IDs to filter results.
 * `name_regex` - (Optional) A regex string to filter results by the instance name. 
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -65,3 +64,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `topic_capacity` - This attribute is used to set the topic capacity.
   * `cluster` - This attribute is a used to add cluster name.
   * `create_time` - Create time of the instance.
+  * `computed_property_example` - An example of a computed property.

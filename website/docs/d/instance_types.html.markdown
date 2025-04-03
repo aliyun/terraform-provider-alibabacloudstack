@@ -7,7 +7,7 @@ description: |-
     Provides a list of ECS Instance Types to be used by the alibabacloudstack_instance resource.
 ---
 
-# alibabacloudstack\_instance\_types
+# alibabacloudstack_instance_types
 
 This data source provides the ECS instance types of ApsarStack.
 
@@ -39,7 +39,7 @@ The following arguments are supported:
 * `instance_type_family` - (Optional) Filter the results based on their family name. For example: 'ecs.n4'.
 * `eni_amount` - (Optional) Filter the result whose network interface number is no more than `eni_amount`.
 * `kubernetes_node_role` - (Optional) Filter the result which is used to create a kubernetes cluster Optional Values: `Master` and `Worker`.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `ids` - (Optional) A list of instance type IDs.
 
 ## Attributes Reference
 
@@ -61,3 +61,4 @@ The following attributes are exported in addition to the arguments listed above:
     * `capacity` - The capacity of a local storage in GB.
     * `amount` - The number of local storage devices that an instance has been attached to.
     * `category` - The category of local storage that an instance has been attached to.
+  * `cpu_type` - Type of CPU.

@@ -7,7 +7,7 @@ description: |-
     Provides a list of organizations to the user.
 ---
 
-# alibabacloudstack\_ascm_organizations
+# alibabacloudstack_ascm_organizations
 
 This data source provides the organizations of the current Apsara Stack Cloud user.
 
@@ -36,7 +36,7 @@ The following arguments are supported:
 * `ids` - (Optional) A list of organizations IDs.
 * `name_regex` - (Optional) A regex string to filter results by organization name.
 * `parent_id` - (Optional) Filter the results by the specified organization parent ID.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `organizations` - (Optional) A list of organizations. Each element contains the following attributes:
 
 ## Attributes Reference
 
@@ -50,4 +50,5 @@ The following attributes are exported in addition to the arguments listed above:
   * `alias` - alias for the Organization.
   * `parent_id` - Parent id of an Organization.
   * `internal` - Organization type, is internal or not.
- 
+  * `name_regex` - A regex string to filter results by organization name.
+  

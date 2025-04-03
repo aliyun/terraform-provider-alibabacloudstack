@@ -7,7 +7,7 @@ description: |-
   Provides an EDAS K8s cluster resource.
 ---
 
-# alibabacloudstack\_edas\_k8s\_cluster
+# alibabacloudstack_edas_k8s_cluster
 
 Provides an EDAS K8s cluster resource. For information about EDAS K8s Cluster and how to use it, see[What is EDAS K8s Cluster](https://www.alibabacloud.com/help/en/doc-detail/85108.htm).
 
@@ -35,16 +35,16 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `cluster_name` - The name of the cluster that you want to create.
+* `cluster_name` - The name of the cluster that you want to create. 
 * `cluster_type` - The type of the cluster that you want to create. Valid values only: 5: K8s cluster. 
-* `network_mode` - The network type of the cluster that you want to create. Valid values: 1: classic network. 2: VPC.
+* `network_mode` - The network type of the cluster that you want to create. Valid values: 1: classic network. 2: VPC. 
 * `region_id` - The ID of the region.
-* `vpc_id` - The ID of the Virtual Private Cloud (VPC) for the cluster.
+* `vpc_id` - The ID of the Virtual Private Cloud (VPC) for the cluster. 
 * `cluster_import_status` - The import status of cluster: 
     `1`: success.
     `2`: failed.
     `3`: importing. 
-    `4`: deleted.
+    `4`: deleted. 
 
 ## Import
 

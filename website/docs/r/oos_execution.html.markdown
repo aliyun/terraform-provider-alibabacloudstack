@@ -1,17 +1,15 @@
 ---
-subcategory: "Operation Orchestration Service (OOS)"
+subcategory: "OOS"
 layout: "alibabacloudstack"
-page_title: "AlibabacloudStack: alibabacloudstack_oos_execution"
-sidebar_current: "docs-alibabacloudstack-resource-oos-execution"
-description: |-
-  Provides a OOS Execution resource.
+page_title: "Alibabacloudstack: alibabacloudstack_oos_execution"
+sidebar_current: "docs-Alibabacloudstack-oos-execution"
+description: |- 
+  Provides a oos Execution resource.
 ---
 
-# alibabacloudstack\_oos\_execution
+# alibabacloudstack_oos_execution
 
 Provides a OOS Execution resource. For information about AlibabacloudStack OOS Execution and how to use it, see [What is Resource alibabacloudstack OOS Execution](https://www.alibabacloud.com/help/doc-detail/120771.htm).
-
-
 
 ## Example Usage
 
@@ -21,16 +19,16 @@ resource "alibabacloudstack_oos_template" "default" {
   {
     "FormatVersion": "OOS-2019-06-01",
     "Description": "Update Describe instances of given status",
-    "Parameters":{
-      "Status":{
+    "Parameters": {
+      "Status": {
         "Type": "String",
         "Description": "(Required) The status of the Ecs instance."
       }
     },
     "Tasks": [
       {
-        "Properties" :{
-          "Parameters":{
+        "Properties": {
+          "Parameters": {
             "Status": "{{ Status }}"
           },
           "API": "DescribeInstances",
@@ -38,13 +36,14 @@ resource "alibabacloudstack_oos_template" "default" {
         },
         "Name": "foo",
         "Action": "ACS::ExecuteApi"
-      }]
+      }
+    ]
   }
   EOF
   template_name = "test-name"
   version_name  = "test"
   tags = {
-    "Created" = "TF",
+    "Created" = "TF"
     "For"     = "acceptance Test"
   }
 }
@@ -52,9 +51,9 @@ resource "alibabacloudstack_oos_template" "default" {
 resource "alibabacloudstack_oos_execution" "example" {
   template_name = alibabacloudstack_oos_template.default.template_name
   description   = "From TF Test"
-  parameters    = <<EOF
-				{"Status":"Running"}
-		  	EOF
+  parameters    = "{\"Status\":\"Running\"}"
+  mode          = "Automatic"
+  template_version = "test"
 }
 ```
 
@@ -62,45 +61,49 @@ resource "alibabacloudstack_oos_execution" "example" {
 
 The following arguments are supported:
 
-* `description` - (Optional, ForceNew) The description of OOS Execution.
-* `loop_mode` - (Optional, ForceNew) The loop mode of OOS Execution.
-* `mode` - (Optional, ForceNew) The mode of OOS Execution. Valid: `Automatic`, `Debug`. Default to `Automatic`.
-* `parameters` - (Optional, ForceNew) The parameters required by the template. Default to `{}`.
-* `parent_execution_id` - (Optional, ForceNew) The id of parent execution.
-* `safety_check` - (Optional, ForceNew) The mode of safety check.
-* `template_name` - (Required, ForceNew) The name of execution template.
-* `template_version` - (Optional, ForceNew) The version of execution template.
-* `template_content` - (Optional, ForceNew, Available in v1.114.0+) The content of template. When the user selects an existing template to create and execute a task, it is not necessary to pass in this field.
-                    
+* `template_name` - (Required, ForceNew) The name of the execution template. This is the identifier for the OOS template that you want to execute.
+* `description` - (Optional, ForceNew) A brief description of the OOS Execution. This can help identify the purpose or context of the execution.
+* `loop_mode` - (Optional, ForceNew) Specifies the loop mode for the execution. This determines whether tasks in the template will be executed in parallel or sequentially.
+* `mode` - (Optional, ForceNew) Specifies the execution mode. Valid values include:
+  * `Automatic`: Automatically executes all tasks without manual intervention.
+  * `Debug`: Executes tasks in debug mode, allowing step-by-step execution.
+  
+  Default value is `Automatic`.
+
+* `parameters` - (Optional, ForceNew) JSON-formatted string containing the parameters required by the OOS template. These parameters are used to customize the behavior of the template during execution. Default value is `{}`.
+* `parent_execution_id` - (Optional, ForceNew) The ID of the parent execution if this execution is part of a larger workflow or subtask.
+* `safety_check` - (Optional, ForceNew) Specifies the safety check mode for the execution. This ensures that certain conditions are met before proceeding with the execution.
+* `template_version` - (Optional, ForceNew) The version of the OOS template being executed. If not specified, the latest version of the template will be used.
+* `template_content` - (Optional, ForceNew) The raw content of the OOS template. This is useful when creating an execution from a custom template instead of an existing one.
+
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `id` - The id of OOS Execution.
-* `counters` - The counters of OOS Execution.
-* `create_date` - The time when the execution was created.
-* `end_date` - The time when the execution was ended.
-* `executed_by` - The user who execute the template.
-* `is_parent` - Whether to include subtasks.
-* `outputs` - The outputs of OOS Execution.
-* `ram_role` - The role that executes the current template.
-* `start_date` - The time when the execution was started.
-* `status` - The status of OOS Execution.
-* `status_message` - The message of status.
-* `template_id` - The id of template.
-* `update_date` - The time when the execution was updated.
+* `id` - The unique identifier of the OOS Execution.
+* `counters` - A summary of counters related to the execution, such as the number of tasks executed, succeeded, or failed.
+* `create_date` - The timestamp indicating when the execution was created.
+* `end_date` - The timestamp indicating when the execution was completed.
+* `executed_by` - The user or system that initiated the execution.
+* `is_parent` - Indicates whether the execution includes subtasks or child executions.
+* `outputs` - JSON-formatted string containing the outputs generated by the execution. These outputs can be used for further processing or reporting.
+* `ram_role` - The RAM role associated with the execution, which grants permissions for the tasks to be performed.
+* `start_date` - The timestamp indicating when the execution started.
+* `status` - The current status of the execution. Possible values include `Pending`, `Running`, `Success`, `Failed`, etc.
+* `status_message` - A detailed message describing the current status of the execution.
+* `template_id` - The unique identifier of the OOS template used for the execution.
+* `update_date` - The timestamp indicating when the execution was last updated.
 
 ### Timeouts
 
-
 The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
 
-* `create` - (Defaults to 11 mins) Used when creating the alibabacloudstack_oos_execution (until it reaches the initial `Running` status).
+* `create` - (Defaults to 11 mins) Used when creating the `alibabacloudstack_oos_execution` (until it reaches the initial `Running` status).
 
 ## Import
 
 OOS Execution can be imported using the id, e.g.
 
-```
+```bash
 $ terraform import alibabacloudstack_oos_execution.example exec-ef6xxxx
 ```

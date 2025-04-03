@@ -7,7 +7,7 @@ description: |-
   Provides a resource to create a oss bucket object.
 ---
 
-# alibabacloudstack\_oss\_bucket\_object
+# alibabacloudstack_oss_bucket_object
 
 Provides a resource to put a object(content or file) to a oss bucket.
 
@@ -78,6 +78,7 @@ The following arguments are supported:
 * `expires` - (Optional) Specifies expire date for the the request/response. Read [RFC2616 Expires](https://www.ietf.org/rfc/rfc2616.txt) for further details.
 * `server_side_encryption` - (Optional) Specifies server-side encryption of the object in OSS. Valid values are `AES256`, `KMS`. Default value is `AES256`.
 * `kms_key_id` - (Optional, Available in 1.62.1+) Specifies the primary key managed by KMS. This parameter is valid when the value of `server_side_encryption` is set to KMS.
+* `version_id` - (Optional)  A unique version ID value for the object, if bucket versioning is enabled.
 
 Either `source` or `content` must be provided to specify the bucket content.
 These two arguments are mutually-exclusive.
@@ -87,4 +88,4 @@ These two arguments are mutually-exclusive.
 The following attributes are exported
 
 * `id` - the `key` of the resource supplied above.
-* `version_id` - A unique version ID value for the object, if bucket versioning is enabled.
+* `version_id` -  A unique version ID value for the object, if bucket versioning is enabled.

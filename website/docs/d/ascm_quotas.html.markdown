@@ -7,7 +7,7 @@ description: |-
     Provides a list of quota to the user.
 ---
 
-# alibabacloudstack\_ascm_quotas
+# alibabacloudstack_ascm_quotas
 
 This data source provides the quota of the current Apsara Stack Cloud user.
 
@@ -44,13 +44,12 @@ output "quota" {
 
 The following arguments are supported:
 
-  * `ids` - (Optional, ForceNew, Computed)  A list of Quotas IDs.
+  * `ids` - (Optional, ForceNew)  A list of Quotas IDs.
   * `product_name` - (Required) The name of the service. Valid values: ECS, OSS, VPC, RDS, SLB, ODPS, GPDB, DDS, R-KVSTORE, and EIP.
   * `quota_type` - (Required) The type of the quota. Valid values: organization and resourceGroup.
   * `quota_type_id` - (Required) The ID of the quota type. Specify an organization ID when the QuotaType parameter is set to organization. Specify a resource set ID when the QuotaType parameter is set to resourceGroup.
   * `target_type` - (Optional) This reserved parameter is optional and can be left empty. It will be used only for some products. Products where target_type are required with their values - RDS ("MySql"), R-KVSTORE ("redis") and DDS ("mongodb").
-  * `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
-
+  
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
@@ -80,4 +79,3 @@ The following attributes are exported in addition to the arguments listed above:
   * `allocate_vip_public` - The number of allocated public VIP addresses.
   * `allocate_vip_internal` - The number of allocated internal VIP addresses.
   * `used_vip_public` - The number of used publics VIP addresses.
-  

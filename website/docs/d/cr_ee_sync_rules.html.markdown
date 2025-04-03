@@ -7,7 +7,7 @@ description: |-
   Provides a list of Container Registry Enterprise Edition sync rules.
 ---
 
-# alibabacloudstack\_cr\_ee\_sync\_rules
+# alibabacloudstack_cr_ee_sync_rules
 
 This data source provides a list Container Registry Enterprise Edition sync rules on Alibaba Cloud.
 
@@ -40,7 +40,7 @@ The following arguments are supported:
 * `target_instance_id` - (Optional) ID of Container Registry Enterprise Edition target instance.
 * `name_regex` - (Optional) A regex string to filter results by sync rule name.
 * `ids` - (Optional) A list of ids to filter results by sync rule id.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `names` - (Optional) A list of names to filter results by sync rule name.
 
 ## Attributes Reference
 

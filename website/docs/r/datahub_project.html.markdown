@@ -1,47 +1,50 @@
 ---
-subcategory: "Datahub Service"
+subcategory: "DataHub"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_datahub_project"
-sidebar_current: "docs-alibabacloudstack-resource-datahub-project"
-description: |-
-  Provides a Alibabacloudstack datahub project resource.
+sidebar_current: "docs-Alibabacloudstack-datahub-project"
+description: |- 
+  Provides a datahub Project resource.
 ---
 
-# alibabacloudstack\_datahub\_project
+# alibabacloudstack_datahub_project
 
-The project is the basic unit of resource management in Datahub Service and is used to isolate and control resources. It contains a set of Topics. You can manage the datahub sources of an application by using projects. [Refer to details](https://help.aliyun.com/document_detail/47440.html).
-
--> **NOTE:** Currently Datahub service only can be supported in the regions: cn-beijing, cn-hangzhou, cn-shanghai, cn-shenzhen,  ap-southeast-1.
+Provides a datahub Project resource.
 
 ## Example Usage
 
-Basic Usage
+Basic Usage:
 
-```
-resource "alibabacloudstack_datahub_project" "example" {
-  name    = "tf_datahub_project"
-  comment = "created by terraform"
+```hcl
+variable "name" {
+    default = "tf_testacc_datahub_project"
+}
+
+resource "alibabacloudstack_datahub_project" "default" {
+  name    = var.name
+  comment = "This project is created using Terraform for testing purposes."
 }
 ```
+
 ## Argument Reference
 
 The following arguments are supported:
 
-* `name` - (Required, ForceNew) The name of the datahub project. Its length is limited to 3-32 and only characters such as letters, digits and '_' are allowed. It is case-insensitive.
-* `comment` - (Optional) Comment of the datahub project. It cannot be longer than 255 characters.
+* `name` - (Required, ForceNew) The name of the DataHub project. Its length must be between 3 and 32 characters. Only letters, digits, and underscores (`_`) are allowed. It is case-insensitive.
+* `comment` - (Optional, ForceNew) A brief description or comment about the DataHub project. The maximum length is 255 characters.
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID of the datahub project. It is the same as its name.
-* `create_time` - Create time of the datahub project. It is a human-readable string rather than 64-bits UTC.
-* `last_modify_time` - Last modify time of the datahub project. It is the same as *create_time* at the beginning. It is also a human-readable string rather than 64-bits UTC.
+* `id` - The ID of the DataHub project. It is the same as its `name`.
+* `create_time` - The creation time of the DataHub project. This is a human-readable string in the format `YYYY-MM-DD HH:mm:ss`.
+* `last_modify_time` - The last modification time of the DataHub project. Initially, this value is the same as `create_time`. Like `create_time`, it is also a human-readable string in the format `YYYY-MM-DD HH:mm:ss`.
 
 ## Import
 
-Datahub project can be imported using the *name* or ID, e.g.
+DataHub projects can be imported using their `name` or ID. For example:
 
-```
-$ terraform import alibabacloudstack_datahub_project.example tf_datahub_project
+```bash
+$ terraform import alibabacloudstack_datahub_project.example tf_testacc_datahub_project
 ```

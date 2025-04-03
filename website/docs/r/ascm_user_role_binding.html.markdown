@@ -7,13 +7,13 @@ description: |-
   Provides Ascm User Role Binding.
 ---
 
-# alibabacloudstack\_ascm_user_role_binding
+# alibabacloudstack_ascm_user_role_binding
 
 ## Example Usage
 
 ```
 resource "alibabacloudstack_ascm_user_role_binding" "default" {
-  role_id = 5
+  role_ids = ["5"]
   login_name = "testUser"
 }
 
@@ -21,6 +21,7 @@ output "binder" {
   value = alibabacloudstack_ascm_user_role_binding.default.*
 }
 ```
+
 ## Argument Reference
 
 The following arguments are supported:

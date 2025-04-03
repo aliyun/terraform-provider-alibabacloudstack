@@ -1,5 +1,5 @@
 ---
-subcategory: "POLARDB"
+subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_zones"
 sidebar_current: "docs-Alibabacloudstack-datasource-polardb-zones"
@@ -27,7 +27,6 @@ output "zones" {
 The following arguments are supported:
 
 * `multi` - (Optional) Indicates whether to retrieve multi-zone IDs. Default is false.
-* `output_file` - (Optional) The file path to save the output of the data source.
 
 ## Attributes Reference
 The following attributes are exported:

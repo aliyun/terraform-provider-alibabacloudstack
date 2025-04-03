@@ -2,10 +2,9 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"testing"
 
-	
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
@@ -112,7 +111,7 @@ func TestAccAlibabacloudStackDRDSInstance_Vpc(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-testacc%sDrdsdatabase-%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDRDSInstanceConfigDependence)
 
@@ -184,7 +183,7 @@ func TestAccAlibabacloudStackDRDSInstance_Multi(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-testacc%sDrdsdatabase-%d", defaultRegionToTest, rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDRDSInstanceConfigDependence)
 
@@ -220,9 +219,7 @@ func TestAccAlibabacloudStackDRDSInstance_Multi(t *testing.T) {
 
 func resourceDRDSInstanceConfigDependence(name string) string {
 	return fmt.Sprintf(`
-provider "apsarastack" {
-	assume_role {}
-}
+
 	variable "name" {
 		default = "%s"
 	}

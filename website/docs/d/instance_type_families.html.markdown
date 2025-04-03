@@ -7,7 +7,7 @@ description: |-
     Provides a list of ECS Instance Type Families to be used by the alibabacloudstack_instance resource.
 ---
 
-# alibabacloudstack\_instance\_type\_families
+# alibabacloudstack_instance_type_families
 
 This data source provides the ECS instance type families of AlibabacloudStack.
 
@@ -33,7 +33,6 @@ The following arguments are supported:
 
 * `zone_id` - (Optional, ForceNew) The Zone to launch the instance.
 * `generation` - (Optional) The generation of the instance type family,
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -44,4 +43,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `id` - ID of the instance type family.
   * `generation` - The generation of the instance type family.
   * `zone_ids` - A list of Zone to launch the instance.
- 
+* `families.zone_ids` - A list of Zone to launch the instance.

@@ -1,25 +1,25 @@
 ---
-subcategory: "Table Store (OTS)"
+subcategory: "OTS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_instance"
-sidebar_current: "docs-alibabacloudstack-resource-ots-instance"
-description: |-
-  Provides an OTS (Open Table Service) instance resource.
+sidebar_current: "docs-Alibabacloudstack-ots-instance"
+description: |- 
+  Provides a ots Instance resource.
 ---
 
-# alibabacloudstack\_ots\_instance
+# alibabacloudstack_ots_instance
 
-This resource will help you to manager a [Table Store](https://www.alibabacloud.com/help/doc-detail/27280.htm) Instance.
-It is foundation of creating data table.
+Provides a ots Instance resource.
 
 ## Example Usage
 
-```
+```hcl
 # Create an OTS instance
 resource "alibabacloudstack_ots_instance" "foo" {
-  name        = "my-ots-instance"
-  description = "for table"
-  accessed_by = "Vpc"
+  name          = "my-ots-instance"
+  description   = "This is a test OTS instance"
+  accessed_by   = "Vpc" # Options: Any, Vpc, ConsoleOrVpc. Default: Any
+  instance_type = "Capacity" # Options: Capacity, HighPerformance. Default: HighPerformance
   tags = {
     Created = "TF"
     For     = "Building table"
@@ -31,33 +31,38 @@ resource "alibabacloudstack_ots_instance" "foo" {
 
 The following arguments are supported:
 
-* `name` - (Required, ForceNew) The name of the instance.
-* `accessed_by` - The network limitation of accessing instance. Valid values:
-    * `Any` - Allow all network to access the instance.
-    * `Vpc` - Only can the attached VPC allow to access the instance.
-    * `ConsoleOrVpc` - Allow web console or the attached VPC to access the instance.
+* `name` - (Required, ForceNew) The name of the OTS instance. Changing this forces a new resource to be created.
+* `accessed_by` - (Optional) The network limitation for accessing the OTS instance. Valid values:
+  * `Any` - Allows all networks to access the instance.
+  * `Vpc` - Only allows access from the attached VPC.
+  * `ConsoleOrVpc` - Allows access from the web console or the attached VPC.
+  
+  Default value: `Any`.
 
-    Default to "Any".
-* `instance_type` - (ForceNew) The type of instance. Valid values are "Capacity" and "HighPerformance". Default to "HighPerformance".
-* `description` - (Optional, ForceNew) The description of the instance. Currently, it does not support modifying.
-* `tags` - A mapping of tags to assign to the instance.
+* `instance_type` - (Optional, ForceNew) The type of the OTS instance. Valid values:
+  * `Capacity` - Suitable for scenarios with large data volumes and high throughput requirements.
+  * `HighPerformance` - Suitable for scenarios requiring lower latency and higher performance.
+  
+  Default value: `HighPerformance`. Changing this forces a new resource to be created.
+
+* `description` - (Optional, ForceNew) A brief description of the OTS instance. This field cannot be modified after creation. Changing this forces a new resource to be created.
+* `tags` - (Optional) A mapping of tags to assign to the OTS instance.
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
-* `id` - The resource ID. The value is same as the "name".
-* `name` - The instance name.
-* `description` - The instance description.
-* `accessed_by` - TThe network limitation of accessing instance.
-* `instance_type` - The instance type.
-* `tags` - The instance tags.
+* `id` - The ID of the OTS instance. It has the same value as the `name`.
+* `name` - The name of the OTS instance.
+* `description` - The description of the OTS instance.
+* `accessed_by` - The network limitation for accessing the OTS instance.
+* `instance_type` - The type of the OTS instance.
+* `tags` - A mapping of tags assigned to the OTS instance.
 
 ## Import
 
-OTS instance can be imported using instance id or name, e.g.
+OTS instance can be imported using the instance id or name, e.g.
 
-```
+```bash
 $ terraform import alibabacloudstack_ots_instance.foo "my-ots-instance"
 ```
-

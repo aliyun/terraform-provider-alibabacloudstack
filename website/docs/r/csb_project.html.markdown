@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack resource to manage CSB Project .
 ---
 
-# alibabacloudstack\_csb\_project
+# alibabacloudstack_csb_project
 
 This resource will help you to manager CSB Project.
 
@@ -34,7 +34,7 @@ resource "alibabacloudstack_csb_project" "project" {
 
 The following arguments are supported:
 
-* `data` - (Required, ForceNew) Infomation of CSB Project.
+* `data` - (Optional) Infomation of CSB Project. 
 * `csb_id` - (Required, ForceNew) id of  CSB instance  where repository is created. 
 * `project_name` - (Required, ForceNew) Name of CSB Project. It can contain 2 to 64 characters.
 
@@ -54,6 +54,4 @@ The following attributes are exported:
 * `delete_flag` - The delete flag of CSB Project.
 * `cs_id` - The project id of CSB Project.
 * `status` - The project status of CSB Project.
-
-
-
+* `data` - Infomation of CSB Project. 

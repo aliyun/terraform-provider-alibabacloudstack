@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack log tail machine group resource.
 ---
 
-# alibabacloudstack\_log\_machine\_group
+# alibabacloudstack_log_machine_group
 
 Log Service manages all the ECS instances whose logs need to be collected by using the Logtail client in the form of machine groups.
  [Refer to details](https://www.alibabacloud.com/help/doc-detail/28966.htm)
@@ -36,11 +36,8 @@ resource "alibabacloudstack_log_machine_group" "example" {
 
 The following arguments are supported:
 
-* `project` - (Required, ForceNew) The project name to the machine group belongs.
-* `name` - (Required, ForceNew) The machine group name, which is unique in the same project.
-* `identify_type` - (Optional) The machine identification type, including IP and user-defined identity. Valid values are "ip" and "userdefined". Default to "ip".
-* `identify_list`- (Required) The specific machine identification, which can be an IP address or user-defined identity.
-* `topic` - (Optional) The topic of a machine group.
+* `project` - (Required, ForceNew) The project name to the machine group belongs. 
+* `name` - (Required, ForceNew) The machine group name, which is unique in the same project. 
 
 ## Attributes Reference
 

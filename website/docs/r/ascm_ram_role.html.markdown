@@ -7,7 +7,7 @@ description: |-
   Provides Ascm ram role.
 ---
 
-# alibabacloudstack\_ascm_ram_role
+# alibabacloudstack_ascm_ram_role
 
 Provides Ascm ram role.
 
@@ -23,6 +23,7 @@ output "ramrole" {
   value = alibabacloudstack_ascm_ram_role.default.*
 }
 ```
+
 ## Argument Reference
 
 The following arguments are supported:

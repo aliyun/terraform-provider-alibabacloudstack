@@ -7,7 +7,7 @@ description: |-
     Encrypt data with KMS.
 ---
 
-# alibabacloudstack\_kms\_ciphertext
+# alibabacloudstack_kms_ciphertext
 
 Encrypt a given plaintext with KMS. 
 
@@ -35,10 +35,9 @@ output "alibabacloudstack_kms_ciphertext" {
 
 The following arguments are supported:
 
-* `plaintext` - The plaintext to be encrypted which must be encoded in Base64.
-* `key_id` - The globally unique ID of the CMK.
-* `encryption_context` -
-  (Optional) The Encryption context. If you specify this parameter here, it is also required when you call the Decrypt API operation. 
+* `plaintext` - (Required, ForceNew) The plaintext to be encrypted which must be encoded in Base64.
+* `key_id` - (Required, ForceNew) The globally unique ID of the CMK.
+* `encryption_context` - (Optional, ForceNew) The Encryption context. If you specify this parameter here, it is also required when you call the Decrypt API operation.
 
 ## Attributes Reference
 

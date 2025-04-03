@@ -7,7 +7,7 @@ description: |-
     Provides a list of OSS buckets to the user.
 ---
 
-# alibabacloudstack\_oss_buckets
+# alibabacloudstack_oss_buckets
 
 This data source provides the OSS buckets of the current AlibabacloudStack Cloud user.
 
@@ -28,7 +28,7 @@ output "first_oss_bucket_name" {
 The following arguments are supported:
 
 * `name_regex` - (Optional) A regex string to filter results by bucket name.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `ids` - (Optional) A list of Bucket IDs.
 
 ## Attributes Reference
 
@@ -44,3 +44,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `owner` - Bucket owner.
   * `storage_class` - Object storage type. Possible values: `Standard`, `IA` and `Archive`.
   * `creation_date` - Bucket creation date.
+  * `id` - Bucket ID.

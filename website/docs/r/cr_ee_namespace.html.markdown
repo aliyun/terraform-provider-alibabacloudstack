@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack resource to manage Container Registry Enterprise Edition namespaces.
 ---
 
-# alibabacloudstack\_cr\_ee\_namespace
+# alibabacloudstack_cr_ee_namespace
 
 This resource will help you to manager Container Registry Enterprise Edition namespaces.
 
@@ -15,7 +15,7 @@ For information about Container Registry Enterprise Edition namespaces and how t
 
 
 
-> **NOTE:** You need to set your registry password in Container Registry Enterprise Edition console before use this resource.
+-> **NOTE:** You need to set your registry password in Container Registry Enterprise Edition console before use this resource.
 
 ## Example Usage
 
@@ -38,6 +38,7 @@ The following arguments are supported:
 * `name` - (Required, ForceNew) Name of Container Registry Enterprise Edition namespace. It can contain 2 to 30 characters.
 * `auto_create` - (Required) Boolean, when it set to true, repositories are automatically created when pushing new images. If it set to false, you create repository for images before pushing.
 * `default_visibility` - (Required) `PUBLIC` or `PRIVATE`, default repository visibility in this namespace.
+* `default_visibility` - (Required) The default visibility setting for repositories within the namespace. Valid values are `PUBLIC` or `PRIVATE`.
 
 ## Attributes Reference
 

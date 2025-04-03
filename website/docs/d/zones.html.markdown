@@ -5,9 +5,10 @@ page_title: "Alibabacloudstack: alibabacloudstack"
 sidebar_current: "docs-alibabacloudstack-datasource-zones"
 description: |-
   Provides a list of availability zones that can be used by an Alibabacloudstack Cloud account.
+
 ---
 
-# alibabacloudstack\_zones
+# alibabacloudstack_zones
 
 This data source provides availability zones that can be accessed by an Alibabacloudstack Cloud account within the region configured in the provider.
 
@@ -40,10 +41,10 @@ Valid values: `Instance`, `Disk`, `VSwitch`, `Rds`, `KVStore`, `Slb`.
 * `instance_charge_type` - (Optional) Filter the results by a specific ECS instance charge type. Valid values: `PrePaid` and `PostPaid`. Default to `PostPaid`.
 * `network_type` - (Optional) Filter the results by a specific network type. Valid values: `Classic` and `Vpc`.
 * `spot_strategy` - - (Optional) Filter the results by a specific ECS spot type. Valid values: `NoSpot`, `SpotWithPriceLimit` and `SpotAsPriceGo`. Default to `NoSpot`.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 * `enable_details` - (Optional) Default to false and only output `id` in the `zones` block. Set it to true can output more details.
-* `available_slb_address_type` - Filter the results by a slb instance address type. Can be either `Vpc`, `classic_internet` or `classic_intranet`
-* `available_slb_address_ip_version` - Filter the results by a slb instance address version. Can be either `ipv4`, or `ipv6`.
+* `available_slb_address_type` - (Optional) Filter the results by a slb instance address type. Can be either `Vpc`, `classic_internet` or `classic_intranet`.
+* `available_slb_address_ip_version` - (Optional) Filter the results by a slb instance address version. Can be either `ipv4`, or `ipv6`.
+
 -> **NOTE:** The disk category `cloud` has been outdated and can only be used by non-I/O Optimized ECS instances. Many availability zones don't support it. It is recommended to use `cloud_efficiency` or `cloud_ssd`.
 
 ## Attributes Reference

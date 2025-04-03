@@ -5,14 +5,15 @@ import (
 	"crypto/md5"
 	"encoding/base64"
 	"fmt"
-	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore/otsprotocol"
-	"github.com/golang/protobuf/proto"
+	"io"
 	"math/rand"
 	"net"
 	"net/http"
-	"time"
-	"io"
 	"strings"
+	"time"
+
+	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore/otsprotocol"
+	"github.com/golang/protobuf/proto"
 )
 
 const (
@@ -41,12 +42,12 @@ const (
 	deleteSearchIndexUri               = "/DeleteSearchIndex"
 	describeSearchIndexUri             = "/DescribeSearchIndex"
 
-	createIndexUri                     = "/CreateIndex"
-	dropIndexUri                       = "/DropIndex"
+	createIndexUri = "/CreateIndex"
+	dropIndexUri   = "/DropIndex"
 
-	createlocaltransactionuri          = "/StartLocalTransaction"
-	committransactionuri               = "/CommitTransaction"
-	aborttransactionuri                = "/AbortTransaction"
+	createlocaltransactionuri = "/StartLocalTransaction"
+	committransactionuri      = "/CommitTransaction"
+	aborttransactionuri       = "/AbortTransaction"
 )
 
 // Constructor: to create the client of TableStore service.
@@ -177,7 +178,7 @@ func getNextPause(tableStoreClient *TableStoreClient, err error, count uint, end
 	if retry {
 		value := lastInterval*2 + tableStoreClient.random.Int63n(DefaultRetryInterval-1) + 1
 		if value > MaxRetryInterval {
-			value =  MaxRetryInterval
+			value = MaxRetryInterval
 		}
 
 		return value
@@ -211,7 +212,7 @@ func isIdempotent(action string) bool {
 	if action == batchGetRowUri || action == describeTableUri ||
 		action == getRangeUri || action == getRowUri ||
 		action == listTableUri || action == listStreamUri ||
-			action == getStreamRecordUri || action == describeStreamUri {
+		action == getStreamRecordUri || action == describeStreamUri {
 		return true
 	} else {
 		return false
@@ -284,7 +285,7 @@ func (tableStoreClient *TableStoreClient) CreateTable(request *CreateTableReques
 
 	if len(request.TableMeta.DefinedColumns) > 0 {
 		for _, value := range request.TableMeta.DefinedColumns {
-			req.TableMeta.DefinedColumn = append(req.TableMeta.DefinedColumn, &otsprotocol.DefinedColumnSchema{Name: &value.Name, Type: value.ColumnType.ConvertToPbDefinedColumnType().Enum() })
+			req.TableMeta.DefinedColumn = append(req.TableMeta.DefinedColumn, &otsprotocol.DefinedColumnSchema{Name: &value.Name, Type: value.ColumnType.ConvertToPbDefinedColumnType().Enum()})
 		}
 	}
 
@@ -510,7 +511,7 @@ func (tableStoreClient *TableStoreClient) UpdateTable(request *UpdateTableReques
 // Put or update a row in a table. The operation is determined by CheckingType,
 // which has three options: NO, UPDATE, INSERT. The transaction id is optional.
 // 插入或更新行数据。操作针对数据的存在性包含三种检查类型：NO(不检查)，UPDATE
-// （更新，数据必须存在）和INSERT（插入，数据必须不存在）。事务ID是可选项。
+// (更新，数据必须存在)和INSERT(插入，数据必须不存在)。事务ID是可选项。
 //
 // @param builder The builder for putting a row. 插入或更新数据的Builder。
 // @return Void. 无返回值。

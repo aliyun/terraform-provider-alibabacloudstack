@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack resource to manage Container Registry Enterprise Edition sync rules.
 ---
 
-# alibabacloudstack\_cr\_ee\_sync\_rule
+# alibabacloudstack_cr_ee_sync_rule
 
 This resource will help you to manager Container Registry Enterprise Edition sync rules.
 
@@ -15,7 +15,7 @@ For information about Container Registry Enterprise Edition sync rules and how t
 
 
 
-> **NOTE:** You need to set your registry password in Container Registry Enterprise Edition console before use this resource.
+-> **NOTE:** You need to set your registry password in Container Registry Enterprise Edition console before use this resource.
 
 ## Example Usage
 
@@ -41,7 +41,7 @@ The following arguments are supported:
 
 * `instance_id` - (Required, ForceNew) ID of Container Registry Enterprise Edition source instance.
 * `namespace_name` - (Required, ForceNew) Name of Container Registry Enterprise Edition source namespace. It can contain 2 to 30 characters.
-* `name` - (Required, ForceNew) Name of Container Registry Enterprise Edition sync rule.
+* `name` - (Required, ForceNew) Name of Container Registry Enterprise Edition sync rule. 
 * `target_region_id` - (Required, ForceNew) The target region to be synchronized.
 * `target_instance_id` - (Required, ForceNew) ID of Container Registry Enterprise Edition target instance to be synchronized.
 * `target_namespace_name` - (Required, ForceNew) Name of Container Registry Enterprise Edition target namespace to be synchronized. It can contain 2 to 30 characters.
@@ -54,7 +54,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The resource id of Container Registry Enterprise Edition sync rule. The value is in format `{instance_id}:{namespace_name}:{rule_id}`.
-* `rule_id` - The uuid of Container Registry Enterprise Edition sync rule.
+* `rule_id` - The uuid of Container Registry Enterprise Edition sync rule. 
 * `sync_direction` - `FROM` or `TO`, the direction of synchronization. `FROM` means source instance, `TO` means target instance.
 * `sync_scope` - `REPO` or `NAMESPACE`,the scope that the synchronization rule applies.
 

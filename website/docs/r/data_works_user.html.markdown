@@ -1,5 +1,5 @@
 ---
-subcategory: "Data Works"
+subcategory: "DataWorks"
 layout: "alibabacloudstack"
 page_title: "AlibabacloudStack: alibabacloudstack_data_works_user"
 sidebar_current: "docs-alibabacloudstack-resource-data-works-user"
@@ -7,7 +7,7 @@ description: |-
   Provides a AlibabacloudStack Data Works User resource.
 ---
 
-# alibabacloudstack\_data\_works\_user
+# alibabacloudstack_data_works_user
 
 Provides a Data Works User resource.
 
@@ -31,5 +31,8 @@ The following arguments are supported:
 
 * `project_id` - (Required) The ID of the project.
 * `user_id` - (Required) User ID to be added.
-* `role_code` - (Optional) If it is not blank, the user will be added to this role.
+* `role_code` - (Optional) If it is not blank, the user will be added to this role. 
 
+## Attributes Reference
+
+No attributes are currently listed for this resource. If there are any computed attributes in the map that need to be added, they can be included here with the appropriate description and marked as ``.

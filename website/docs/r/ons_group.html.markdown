@@ -7,7 +7,7 @@ description: |-
   Provides a alibabacloudstack ONS Group resource.
 ---
 
-# alibabacloudstack\_ons\_group
+# alibabacloudstack_ons_group
 
 Provides an ONS group resource.
 
@@ -48,7 +48,7 @@ The following arguments are supported:
 
 * `instance_id` - (Required) ID of the ONS Instance that owns the groups.
 * `group_id` - (Required) Name of the group. Two groups on a single instance cannot have the same name. A `group_id` starts with "GID_" or "GID-", and contains letters, numbers, hyphens (-), and underscores (_).
-* `remark` - (Required) This attribute is a concise description of group. The length cannot exceed 256.
+* `remark` - (Optional) This attribute is a concise description of group. The length cannot exceed 256. 
 * `read_enable` - (Optional) This attribute is used to set the message reading enabled or disabled. It can only be set after the group is used by the client.
 
 ## Attributes Reference

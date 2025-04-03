@@ -7,7 +7,7 @@ description: |-
     Provides a list of available KMS Aliases.
 ---
 
-# alibabacloudstack\_kms\_aliases
+# alibabacloudstack_kms_aliases
 
 This data source provides a list of KMS aliases in an Alibabacloudstack Cloud account according to the specified filters.
  
@@ -31,7 +31,6 @@ The following arguments are supported:
 
 * `ids` - (Optional) A list of KMS aliases IDs. The value is same as KMS alias_name.
 * `name_regex` - (Optional) A regex string to filter the results by the KMS alias name.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -43,4 +42,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `id` - ID of the alias. The value is same as KMS alias_name.
   * `key_id` - ID of the key.
   * `alias_name` - The unique identifier of the alias.
-
+  * `name_regex` - A regex string used for filtering the results by the KMS alias name. 

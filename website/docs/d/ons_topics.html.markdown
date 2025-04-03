@@ -7,7 +7,7 @@ description: |-
     Provides a list of ons topics available to the user.
 ---
 
-# alibabacloudstack\_ons\_topics
+# alibabacloudstack_ons_topics
 
 This data source provides a list of ONS Topics in an Apsara Stack Cloud account according to the specified filters.
 
@@ -49,7 +49,6 @@ data "alibabacloudstack_ons_topics" "topics_ds" {
 output "first_topic_name" {
    value = data.alibabacloudstack_ons_topics.topics_ds.*
 }
-
 ```
 
 ## Argument Reference
@@ -58,7 +57,7 @@ The following arguments are supported:
 
 * `instance_id` - (Required) ID of the ONS Instance that owns the topics.
 * `name_regex` - (Optional) A regex string to filter results by the topic name. 
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `names` - (Optional) A list of topic names.
 
 ## Attributes Reference
 
@@ -76,3 +75,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `independent_naming` - Indicates whether namespaces are available. 
   * `create_time` - Time of creation.
   * `remark` - Remark of the topic.
+  * `computed_attribute` - Description of the computed attribute.

@@ -7,7 +7,7 @@ description: |-
     Provides a list of ons groups available to the user.
 ---
 
-# alibabacloudstack\_ons\_groups
+# alibabacloudstack_ons_groups
 
 This data source provides a list of ONS Groups in an Apsara Stack Cloud account according to the specified filters.
 
@@ -54,7 +54,6 @@ The following arguments are supported:
 
 * `instance_id` - (Required) ID of the ONS Instance that owns the groups.
 * `group_id_regex` - (Optional) A regex string to filter results by the group name. 
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 

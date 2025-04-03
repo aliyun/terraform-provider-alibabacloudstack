@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack Network Acl Attachment resource.
 ---
 
-# alibabacloudstack\_network_acl_attachment
+# alibabacloudstack_network_acl_attachment
 
 Provides a network acl attachment resource to associate network acls to vswitches.
 
@@ -63,11 +63,11 @@ The following arguments are supported:
 * `resources` - (Required) List of the resources associated with the network acl. The details see Block Resources. The resources mapping supports the following:
   * `resource_id` - (Required) The resource id that the network acl will associate with.
   * `resource_type` - (Required) The resource id that the network acl will associate with. Only support `VSwitch` now.
+* `network_acl_id` - (Required, ForceNew) The ID of the Network ACL. 
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The ID of the network acl attachment. It is formatted as `<network_acl_id>:<a unique id>`.
-
-
+* `resources` - List of the resources associated with the network acl.  

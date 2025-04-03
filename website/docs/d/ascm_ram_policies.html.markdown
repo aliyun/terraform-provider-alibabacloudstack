@@ -7,7 +7,7 @@ description: |-
     Provides a list of ram policies to the user.
 ---
 
-# alibabacloudstack\_ascm_ram_policies
+# alibabacloudstack_ascm_ram_policies
 
 This data source provides the ram policies of the current Apsara Stack Cloud user.
 
@@ -36,7 +36,7 @@ The following arguments are supported:
 
 * `ids` - (Optional) A list of ram policy IDs.
 * `name_regex` - (Optional) A regex string to filter results by ram policy name.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `region` - (Optional) Name of the region where policy belongs.
 
 ## Attributes Reference
 
@@ -50,4 +50,4 @@ The following attributes are exported in addition to the arguments listed above:
     * `cuser_id` - ID of the policy creator.
     * `region` - Name of the region where policy belongs.
     * `policy_document` - Policy Document.
-     
+    * `output_file` - File name where to save data source results (after running `terraform plan`).

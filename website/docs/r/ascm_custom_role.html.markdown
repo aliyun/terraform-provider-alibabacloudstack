@@ -7,7 +7,7 @@ description: |-
   Provides Ascm custom role.
 ---
 
-# alibabacloudstack\_ascm_custom_role
+# alibabacloudstack_ascm_custom_role
 
 Provides Ascm custom role.
 

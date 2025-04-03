@@ -1,15 +1,15 @@
 ---
-subcategory: "Alikafka"
+subcategory: "AliKafka"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_topic"
-sidebar_current: "docs-alibabacloudstack-resource-alikafka-topic"
-description: |-
-  Provides a Alibabacloudstack ALIKAFKA Topic resource.
+sidebar_current: "docs-Alibabacloudstack-alikafka-topic"
+description: |- 
+  Provides a alikafka Topic resource.
 ---
 
-# alibabacloudstack\_alikafka\_topic
+# alibabacloudstack_alikafka_topic
 
-Provides an ALIKAFKA topic resource.
+Provides a ALIKAFKA topic resource.
 
 
 
@@ -18,11 +18,9 @@ Provides an ALIKAFKA topic resource.
 
 ## Example Usage
 
-Basic Usage
-
-```
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "VSwitch"
+```hcl
+variable "name" {
+  default = "tf-testacc-alikafkatopicbasic12916"
 }
 
 resource "alibabacloudstack_vpc" "default" {
@@ -45,17 +43,13 @@ resource "alibabacloudstack_alikafka_instance" "default" {
   vswitch_id  = alibabacloudstack_vswitch.default.id
 }
 
-variable "topic" {
-  default = "alikafkaTopicName"
-}
-
 resource "alibabacloudstack_alikafka_topic" "default" {
+  remark        = "alibabacloudstack_alikafka_topic_remark"
   instance_id   = alibabacloudstack_alikafka_instance.default.id
-  topic         = var.topic
-  local_topic   = "false"
-  compact_topic = "false"
-  partition_num = "12"
-  remark        = "dafault_kafka_topic_remark"
+  topic         = var.name
+  local_topic   = true
+  compact_topic = false
+  partition_num = 12
 }
 ```
 
@@ -63,32 +57,30 @@ resource "alibabacloudstack_alikafka_topic" "default" {
 
 The following arguments are supported:
 
-* `instance_id` - (Required, ForceNew) InstanceId of your Kafka resource, the topic will create in this instance.
+* `instance_id` - (Required, ForceNew) Resource id of your Kafka resource, the topic will be created in this instance.
 * `topic` - (Required, ForceNew) Name of the topic. Two topics on a single instance cannot have the same name. The length cannot exceed 64 characters.
-* `local_topic` - (Optional, ForceNew) Whether the topic is localTopic or not.
-* `compact_topic` - (Optional, ForceNew) Whether the topic is compactTopic or not. Compact topic must be a localTopic.
-* `partition_num` - (Optional) The number of partitions of the topic. The number should between 1 and 48.
-* `remark` - (Required) This attribute is a concise description of topic. The length cannot exceed 64.
+* `local_topic` - (Optional, ForceNew) Indicates whether the topic is a local topic or not. Default value is `false`.
+* `compact_topic` - (Optional, ForceNew) Indicates whether the topic is a compact topic or not. Compact topic must be a local topic. Default value is `false`.
+* `partition_num` - (Optional) The number of partitions of the topic. The number should be between 1 and 48. Default value is `1`.
+* `remark` - (Required) A concise description of the topic. The length cannot exceed 64 characters.
 * `tags` - (Optional, Available in v1.63.0+) A mapping of tags to assign to the resource.
 
 ## Attributes Reference
 
-The following attributes are exported:
+The following attributes are exported in addition to the arguments listed above:
 
-* `id` - The `key` of the resource supplied above. The value is formulated as `<instance_id>:<topic>`.
+* `id` - The unique identifier of the resource. The value is formulated as `<instance_id>:<topic>`.
+
+### Timeouts
+
+The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
+
+* `create` - (Defaults to 10 mins) Used when creating the topic (until it reaches the initial `Running` status).
 
 ## Import
 
 ALIKAFKA TOPIC can be imported using the id, e.g.
 
-```
+```bash
 $ terraform import alibabacloudstack_alikafka_topic.topic alikafka_post-cn-123455abc:topicName
 ```
-
-### Timeouts
-
-
-
-The `timeouts` block allows you to specify [timeouts](https://www.terraform.io/docs/configuration-0-11/resources.html#timeouts) for certain actions:
-
-* `create` - (Defaults to 10 mins) Used when creating the topic (until it reaches the initial `Running` status). 

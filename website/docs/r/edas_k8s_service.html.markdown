@@ -7,7 +7,7 @@ description: |-
   Provides an EDAS K8s cluster resource.
 ---
 
-# alibabacloudstack\_edas\_k8s\_service
+# alibabacloudstack_edas_k8s_service
 
 -> **NOTE:** Available since v3.16.5
 
@@ -80,12 +80,13 @@ The following arguments are supported:
 * `service_name` - (Required, ForceNew) The name of the Edas k8s service
 * `type` - (Required, ForceNew) Edas K8s service types, Valid values are `ClusterIP`, `NodePort`, `LoadBalancer`
 * `port_mappings` - (Optional) K8s Service port mapping table, which needs to conform to the JsonArray format. The supported parameters are as follows:
-  * `protocol` - (Required) the service protocol, supporting TCP and UDP.
-  * `service_port` - (Required) the frontend service port, with a value range of 1~65535.
-  * `target_port` - (Required) the backend container port, with a value range of 1~65535.
+  * `protocol` - (Required) the service protocol, supporting TCP and UDP. 
+  * `service_port` - (Required) the frontend service port, with a value range of 1~65535. 
+  * `target_port` - (Required) the backend container port, with a value range of 1~65535. 
 * `external_traffic_policy` - (Optional) When the service type is `NodePort` or `LoadBalancer`, set the external traffic management policy. Valid values are `Local`, `Cluster`, Default to `Local`.
 * `annotations` - (Optional) The annotations map of the service
 * `labels` - (Optional) The labels map of the service
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -94,7 +95,7 @@ The following attributes are exported:
 * `inner_endpointer` - The inner endpointer of the service
 * `namespace` - The namespace of the K8s cluster
 * `nodeip_list` - The node ip list of the service
-
+* `allow_edit` - Indicates whether editing is allowed for the service. 
 
 ## Import
 

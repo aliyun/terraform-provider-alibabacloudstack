@@ -7,7 +7,7 @@ description: |-
     Provides a list of Resource Groups owned by an Alibabacloudstack Cloud account.
 ---
 
-# alibabacloudstack\_ascm\_resource\_groups
+# alibabacloudstack_ascm_resource_groups
 
 This data source provides a list of Resource Groups owned by an Alibabacloudstack Cloud account.
 
@@ -31,7 +31,6 @@ The following arguments are supported:
 * `ids` - (Optional) A list of Resource Groups IDs.
 * `name_regex` - (Optional) A regex string to filter results by name of Resource Group.
 * `organization_id` - (Optional) Organization ID Alibabacloudstack Cloud account.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 
@@ -49,4 +48,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `resource_group_type` - Resource set type. Available values and meanings:
     * 1: Default resource set.
     * 0: Non default resource set.
-  
+* `computed_organization_id` - The computed organization ID associated with the Resource Groups.

@@ -7,7 +7,7 @@ description: |-
     Provides a list of regions to the user.
 ---
 
-# alibabacloudstack\_ascm_regions_by_product
+# alibabacloudstack_ascm_regions_by_product
 
 This data source provides the regions of the current Apsara Stack Cloud user.
 
@@ -30,7 +30,6 @@ The following arguments are supported:
 * `ids` - (Optional) A list of regions IDs.
 * `product_name` - (Required) Filter the results by specified The name of the service.
 * `organization` - (Optional) Filter the results by the specified name of the organization.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 

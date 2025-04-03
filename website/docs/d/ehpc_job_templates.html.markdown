@@ -7,7 +7,7 @@ description: |-
   Provides a list of Ehpc Job Templates to the user.
 ---
 
-# alibabacloudstack\_ehpc\_job\_templates
+# alibabacloudstack_ehpc_job_templates
 
 This data source provides the Ehpc Job Templates of the current Alibaba Cloud user.
 
@@ -36,8 +36,7 @@ output "ehpc_job_template_id_1" {
 
 The following arguments are supported:
 
-* `ids` - (Optional, ForceNew, Computed)  A list of Job Template IDs.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `ids` - (Optional, ForceNew)  A list of Job Template IDs.
 
 ## Argument Reference
 
@@ -50,7 +49,7 @@ The following attributes are exported in addition to the arguments listed above:
   * `gpu` - A Single Compute Node Using the GPU Number.Possible Values: 1~20000.
   * `id` - The ID of the Job Template.
   * `job_template_id` - The first ID of the resource.
-  *  `job_template_name` - A Job Template Name.
+  * `job_template_name` - A Job Template Name.
   * `mem` - A Single Compute Node Maximum Memory.
   * `node` - Submit a Task Is Required for Computing the Number of Data Nodes to Be. Possible Values: 1~5000 .
   * `package_path` - Job Commands the Directory.

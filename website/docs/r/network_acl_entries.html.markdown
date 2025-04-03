@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack Network Acl Entries resource.
 ---
 
-# alibabacloudstack\_network_acl_entries
+# alibabacloudstack_network_acl_entries
 
 Provides a network acl entries resource to create ingress and egress entries.
 
@@ -101,11 +101,18 @@ The following arguments are supported:
   * `policy` - (Optional) The policy of the egress entry. It must be `accept` or `drop`.
   * `port` - (Optional) The port of the egress entry.
   * `protocol` - (Optional) The protocol of the egress entry.
+* `network_acl_id` - (Required, ForceNew)  The id of the network acl, the field can't be changed.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The ID of the network acl entries. It is formatted as `<network_acl_id>:<a unique id>`.
-
-
+* `description` -  The description of the ingress or egress entry.
+* `source_cidr_ip` -  The source ip of the ingress entry.
+* `entry_type` -  The entry type of the ingress or egress entry.
+* `name` -  The name of the ingress or egress entry.
+* `policy` -  The policy of the ingress or egress entry.
+* `port` -  The port of the ingress or egress entry.
+* `protocol` -  The protocol of the ingress or egress entry.
+* `destination_cidr_ip` -  The destination ip of the egress entry.

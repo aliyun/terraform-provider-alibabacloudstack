@@ -6,11 +6,11 @@ sidebar_current: "docs-alibabacloudstack-ascm-logon-policies"
 description: |-
   Provides a list of Logon Policies.
 ---
-# alibabacloudstack\_ascm\_logon\_policies
+# alibabacloudstack_ascm_logon_policies
 
 Provides a list of Logon Policies.
 
-Basic Usage
+## Example Usage
 
 ```
 resource "alibabacloudstack_ascm_logon_policy" "default" {
@@ -38,7 +38,7 @@ The following arguments are supported:
 * `description` - (Optional) The Logon Policies description.
 * `rule` - (Optional) The Rule for the Logon Policies.
 * `ip_ranges` - (Optional) The IP Ranges for the Logon Policies.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
+* `ids` - (Optional) The IDs of the Logon Policies.
 
 ## Attributes Reference
 
@@ -54,4 +54,4 @@ The following attributes are exported:
     * `end_time` - The end time of the Logon Policy.
     * `start_time` - The start time of the Logon Policy.
     * `login_policy_id` - The login policy id of the Logon Policy.
-
+    * `ip_ranges` - The IP Ranges for the Logon Policies.

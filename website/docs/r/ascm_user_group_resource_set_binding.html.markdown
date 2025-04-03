@@ -7,7 +7,7 @@ description: |-
   Provides Ascm User Role Binding.
 ---
 
-# alibabacloudstack\_ascm_user_group_resource_set_binding
+# alibabacloudstack_ascm_user_group_resource_set_binding
 
 ## Example Usage
 
@@ -38,6 +38,7 @@ output "binder" {
   value = alibabacloudstack_ascm_user_group_resource_set_binding.default.*
 }
 ```
+
 ## Argument Reference
 
 The following arguments are supported:

@@ -1,5 +1,5 @@
 ---
-subcategory: "POLARDB"
+subcategory: "PolarDB"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardb_dbinstance"
 sidebar_current: "docs-Alibabacloudstack-polardb-dbinstance"
@@ -45,7 +45,7 @@ resource "alibabacloudstack_security_group" "default" {
 }
 
 
-resource "alibabacloudstack_polardb_instance" "default" {
+resource "alibabacloudstack_polardb_dbinstance" "default" {
   instance_storage = "5"
   instance_name = "${var.name}"
   vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"

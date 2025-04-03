@@ -7,7 +7,7 @@ description: |-
     Provides a list of KVStore instacne classes info.
 ---
 
-# alibabacloudstack\_kvstore\_instance\_classes
+# alibabacloudstack_kvstore_instance_classes
 
 This data source provides the KVStore instance classes resource available info of Apsara Stack Cloud.
 
@@ -42,10 +42,10 @@ The following arguments are supported:
 * `engine_version` - (Optional) Database version required by the user. Value options of Redis can refer to the latest docs [detail info](https://www.alibabacloud.com/help/doc-detail/60873.htm) `EngineVersion`. Value of Memcache should be empty.
 * `architecture` - (Optional) The KVStore instance system architecture required by the user. Valid values: `standard`, `cluster` and `rwsplit`.
 * `node_type` - (Optional) The KVStore instance node type required by the user. Valid values: `double`, `single`, `readone`, `readthree` and `readfive`.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform apply`).
 * `edition_type` - (Optional) The KVStore instance edition type required by the user. Valid values: `Community` and `Enterprise`.
 * `series_type` - (Optional) The KVStore instance series type required by the user. Valid values: `enhanced_performance_type` and `hybrid_storage`.
 * `shard_number` - (Optional) The number of shard.Valid values: `1`, `2`, `4`, `8`, `16`, `32`, `64`, `128`, `256`.
+* `architecture` - (Optional) The KVStore instance system architecture required by the user. Valid values: `standard`, `cluster` and `rwsplit`.
 
 ## Attributes Reference
 
@@ -55,4 +55,3 @@ The following attributes are exported in addition to the arguments listed above:
 * `classes` - A list of KVStore available instance classes when the `sorted_by` is "Price". include:
   * `price` - The price of instance type.
   * `instance_class` - KVStore available instance class.
-    

@@ -7,7 +7,7 @@ description: |-
     Provides a list of availability zones for Elasticsearch that can be used by an Alibaba Cloud account.
 ---
 
-# alibabacloudstack\_elasticsearch\_zones
+# alibabacloudstack_elasticsearch_zones
 
 This data source provides availability zones for Elasticsearch that can be accessed by an Alibaba Cloud account within the region configured in the provider.
 
@@ -25,7 +25,6 @@ data "alibabacloudstack_elasticsearch_zones" "zones_ids" {}
 The following arguments are supported:
 
 * `multi` - (Optional) Indicate whether the zones can be used in a multi AZ configuration. Default to `false`. Multi AZ is usually used to launch Elasticsearch instances.
-* `output_file` - (Optional) File name where to save data source results (after running `terraform plan`).
 
 ## Attributes Reference
 

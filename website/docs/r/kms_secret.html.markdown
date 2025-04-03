@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack Cloud kms secret resource.
 ---
 
-# alibabacloudstack\_kms\_secret
+# alibabacloudstack_kms_secret
 
 This resouce used to create a secret and store its initial version.
 
@@ -41,10 +41,10 @@ The following arguments are supported:
 * `version_id` - (Required) The version number of the initial version. Version numbers are unique in each secret object.
 * `version_stages` - (Optional, List(string)) The stage labels that mark the new secret version. If you do not specify this parameter, Secrets Manager marks it with "ACSCurrent".
 * `tags` - (Optional) A mapping of tags to assign to the resource.
+* `encryption_key_id` - (Optional, ForceNew) The ID of the KMS CMK that is used to encrypt the secret value. If you do not specify this parameter, Secrets Manager automatically creates an encryption key to encrypt the secret. 
 
 ## Attributes Reference
 
 * `id` - The ID of the secret. It same with `secret_name`.
 * `arn` - The Alibabacloudstack Resource Name (ARN) of the secret.
 * `planned_delete_time` - The time when the secret is scheduled to be deleted.
-

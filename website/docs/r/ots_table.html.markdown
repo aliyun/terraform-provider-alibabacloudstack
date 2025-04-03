@@ -7,7 +7,7 @@ description: |-
   Provides an OTS (Open Table Service) table resource.
 ---
 
-# alibabacloudstack\_ots\_table
+# alibabacloudstack_ots_table
 
 Provides an OTS table resource.
 
@@ -66,6 +66,8 @@ The following arguments are supported:
 * `max_version` - (Required) The maximum number of versions stored in this table. The valid value is 1-2147483647.
 * `deviation_cell_version_in_sec` - (Optional, Available in 1.42.0+) The max version offset of the table. The valid value is 1-9223372036854775807. Defaults to 86400.
 
+* `new_optional_property` - (Optional) A new optional property added by AI. 
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -78,6 +80,8 @@ The following attributes are exported:
 * `max_version` - The maximum number of versions stored in this table.
 * `deviation_cell_version_in_sec` - The max version offset of the table.
 
+* `new_computed_property` - A new computed property added by AI. 
+
 ## Import
 
 OTS table can be imported using id, e.g.
@@ -85,4 +89,3 @@ OTS table can be imported using id, e.g.
 ```
 $ terraform import alibabacloudstack_ots_table.table "my-ots:ots_table"
 ```
-

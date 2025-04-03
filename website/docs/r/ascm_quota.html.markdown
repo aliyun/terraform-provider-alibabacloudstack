@@ -7,7 +7,7 @@ description: |-
   Provides a Ascm quota resource.
 ---
 
-# alibabacloudstack\_ascm_quota
+# alibabacloudstack_ascm_quota
 
 Provides a Ascm quota resource.
 
@@ -57,6 +57,8 @@ The following arguments are supported:
 * `total_disk` - (Optional) This reserved parameter is optional and can be left empty.
 * `total_cu` - (Optional) This reserved parameter is optional and can be left empty.
 * `target_type` - (Optional) This reserved parameter is optional and can be left empty. It will be used only for some products. Products where target_type are required with their values - RDS ("MySql"), R-KVSTORE ("redis") and DDS ("mongodb").
+* `region_name` - (Optional)  The name of the region to apply the quota.
+* `cluster_name` - (Optional)  The name of the cluster associated with the quota.
 
 You can call this operation to create a quota. Use parameters according to the product name.
  Sample for the product.
@@ -106,5 +108,5 @@ ApsaraDB for MongoDB (DDS)
 
 The following attributes are exported in addition to the arguments listed above:
 
-* `quota_id` - ID of the quota.
+* `quota_id` - ID of the quota. 
 * `id` - ProductName, QuotaType and QuotaTypeId of the Service. The value is in format `ProductName:QuotaType:QuotaTypeId`.

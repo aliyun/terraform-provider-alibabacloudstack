@@ -2002,7 +2002,7 @@ func (m *BatchWriteRowResponse) GetTables() []*TableInBatchWriteRowResponse {
 // *
 // HBase支持以下参数：
 //     1. TimeRange或指定time
-//     2. Filter（根据列值或列名来过滤）
+//     2. Filter(根据列值或列名来过滤)
 // 我们只支持给同版本的选择条件。
 type GetRangeRequest struct {
 	TableName                *string    `protobuf:"bytes,1,req,name=table_name" json:"table_name,omitempty"`

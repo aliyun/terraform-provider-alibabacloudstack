@@ -7,7 +7,7 @@ description: |-
   Provides a Alibabacloudstack Quick BI User resource.
 ---
 
-# alibabacloudstack\_quick\_bi\_user
+# alibabacloudstack_quick_bi_user
 
 Provides a Quick BI User resource.
 
@@ -32,7 +32,7 @@ resource "alibabacloudstack_quick_bi_user" "example" {
 
 The following arguments are supported:
 
-* `account_id` - (Optional, ForceNew) Alibaba Cloud account ID.
+* `account_id` - (Optional, ForceNew) Alibaba Cloud account ID. 
 * `account_name` - (Required) An Alibaba Cloud account, Alibaba Cloud name.
 * `admin_user` - (Required) Whether it is the administrator. Valid values: `true` and `false`.
 * `auth_admin_user` - (Required) Whether this is a permissions administrator. Valid values: `false`, `true`.
