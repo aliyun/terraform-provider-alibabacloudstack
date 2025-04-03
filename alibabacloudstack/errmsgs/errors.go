@@ -115,7 +115,7 @@ func NotFoundError(err error) bool {
 	}
 
 	if e, ok := err.(oss.ServiceError); ok {
-		return e.StatusCode == 404 || strings.HasPrefix(e.Code, "NoSuch") || strings.HasPrefix(e.Message, "No Row found")
+		return e.StatusCode == 404 || strings.HasPrefix(e.Code, "NoSuch") || strings.HasPrefix(e.Message, "No Row found") || strings.HasPrefix(e.Message, "ResourceNotfound")
 	}
 
 	if e, ok := err.(*tea.SDKError); ok {

@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -119,17 +118,11 @@ func resourceAlibabacloudStackEdasK8sClusterRead(d *schema.ResourceData, meta in
 		}
 		return errmsgs.WrapError(err)
 	}
-	region := object.RegionId
-	pos := strings.Index(region, ":")
-	// get ":", should intercept the string
-	if pos != -1 {
-		region = region[0:pos]
-	}
 	d.Set("cluster_name", object.ClusterName)
 	d.Set("cluster_type", object.ClusterType)
 	d.Set("network_mode", object.NetworkMode)
 	d.Set("vpc_id", object.VpcId)
-	d.Set("namespace_id", region)
+	d.Set("namespace_id", object.RegionId)
 	d.Set("cluster_import_status", object.ClusterImportStatus)
 	d.Set("cs_cluster_id", object.CsClusterId)
 
@@ -166,11 +159,11 @@ func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta 
 	edasService := EdasService{client}
 	stateConf := BuildStateConf([]string{"4"}, []string{"0"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, edasService.ClusterImportK8sStateRefreshFunc(d.Id(), []string{"1", "2", "3"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		if errmsgs.NotFoundError(err) {
-			return nil
-		}
-		return err
+		return nil
+		// if errmsgs.NotFoundError(err) {
+		// 	return nil
+		// }
+		// return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-
 	return nil
 }

@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"os"
 	"testing"
 	"time"
 
@@ -111,7 +110,6 @@ func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
 	}
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
-	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rand := getAccTestRandInt(0, 1000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testacc-edask8sclusterbasic%v", rand)
