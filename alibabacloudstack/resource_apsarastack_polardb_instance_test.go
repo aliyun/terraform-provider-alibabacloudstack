@@ -14,7 +14,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 	var instance *PolardbDescribedbinstancesResponse
 	var ips []map[string]interface{}
 
-	resourceId := "alibabacloudstack_polardb_instance.default"
+	resourceId := "alibabacloudstack_polardb_dbinstance.default"
 	ra := resourceAttrInit(resourceId, PolardbinstanceBasicMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
 		return &PolardbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -37,20 +37,20 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"engine":           "MySQL",
-					"engine_version":   "5.7",
-					"instance_type":    "rds.mysql.t1.small",
-					"instance_storage": "5",
-					"instance_name":    "${var.name}",
-					"vswitch_id":       "${alibabacloudstack_vpc_vswitch.default.id}",
-					"storage_type":     "local_ssd",
+					"engine":                   "MySQL",
+					"engine_version":           "5.7",
+					"db_instance_class":        "rds.mysql.t1.small",
+					"db_instance_storage":      "5",
+					"instance_name":            "${var.name}",
+					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
+					"db_instance_storage_type": "local_ssd",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine":           "MySQL",
-						"engine_version":   "5.7",
-						"instance_type":    CHECKSET,
-						"instance_storage": CHECKSET,
+						"engine":              "MySQL",
+						"engine_version":      "5.7",
+						"db_instance_class":   CHECKSET,
+						"db_instance_storage": CHECKSET,
 					}),
 				),
 			},
@@ -72,11 +72,11 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_storage": "10",
+					"db_instance_storage": "10",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"instance_storage": "10",
+						"db_instance_storage": "10",
 					}),
 				),
 			},
@@ -163,7 +163,7 @@ resource "alibabacloudstack_security_group" "default" {
 func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 	var instance *PolardbDescribedbinstancesResponse
 
-	resourceId := "alibabacloudstack_polardb_instance.default"
+	resourceId := "alibabacloudstack_polardb_dbinstance.default"
 	ra := resourceAttrInit(resourceId, PolardbinstanceBasicMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
 		return &PolardbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -186,16 +186,34 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"engine":           "MySQL",
-					"engine_version":   "5.7",
-					"instance_type":    "rds.mysql.t1.small",
-					"instance_storage": "5",
-					"zone_id":          "${data.alibabacloudstack_zones.default.zones[0].id}",
-					"instance_name":    "${var.name}",
-					"storage_type":     "local_ssd",
+					"engine":                   "MySQL",
+					"engine_version":           "8.0",
+					"db_instance_class":        "rds.mysql.t1.small",
+					"db_instance_storage":      "10",
+					"zone_id":                  "cn-wulan-env205-amtest205001-a",
+					"instance_name":            "${var.name}",
+					"db_instance_storage_type": "local_ssd",
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"instance_name": name,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable_ssl":               "true",
+					"tde_status":               "true",
+					"encryption":               "true",
+					"encryption_key":           "ae14de55-fdf8-4ea9-b0ec-5b05ff4d5340",
+					"zone_id":                  "cn-wulan-env205-amtest205001-a",
+					"instance_name":            "${var.name}",
+					"db_instance_storage_type": "local_ssd",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"encryption": "true",
+					}),
 				),
 			},
 		},
@@ -216,12 +234,12 @@ variable "name" {
 }
 
 var PolardbinstanceBasicMap = map[string]string{
-	"engine":            "MySQL",
-	"engine_version":    "5.7",
-	"instance_type":     CHECKSET,
-	"instance_storage":  "5",
-	"instance_name":     "tf-testaccdbinstanceconfig",
-	"zone_id":           CHECKSET,
-	"connection_string": CHECKSET,
-	"port":              CHECKSET,
+	"engine":              "MySQL",
+	"engine_version":      "8.0",
+	"db_instance_class":   CHECKSET,
+	"db_instance_storage": "10",
+	"instance_name":       "tf-testaccdbinstanceconfig",
+	"zone_id":             CHECKSET,
+	"connection_string":   CHECKSET,
+	"port":                CHECKSET,
 }

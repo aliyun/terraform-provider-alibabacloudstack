@@ -65,15 +65,15 @@ The following arguments are supported:
   * `zone_id_slave2` - (Optional) - The ID of the availability zone for the second slave instance.
   * `tde_status` - (Optional) - The Transparent Data Encryption (TDE) status of the instance.
   * `enable_ssl` - (Optional, ForceNew) - Whether SSL is enabled for the instance.
-  * `storage_type` - (Optional, ForceNew) - The storage type of the instance. Valid values: Valid values:* **local_ssd**, **ephemeral_ssd**: local SSD disk.* **cloud_ssd**:SSD disk.* **cloud_essd**:ESSD cloud disk.
+  * `storage_type` - (Optional, ForceNew) - Field `storage_type` is deprecated and will be removed in a future release. Please use new field `db_instance_storage_type` instead.
   * `db_instance_storage_type` - (Optional, ForceNew) - The storage type of the instance. Valid values:* **local_ssd**, **ephemeral_ssd**: local SSD disk.* **cloud_ssd**:SSD disk.* **cloud_essd**:ESSD cloud disk.
   * `encryption_key` - (Optional) - The key ID of the disk encryption in the same region. This parameter indicates that cloud disk encryption is enabled and cannot be turned off after it is enabled, and **RoleARN** is required * *.You can view the key ID in the key management service console or create a new key. For more information, see [Create Key](~~ 181610 ~~).
   * `encryption` - (Optional, ForceNew) -  Whether encryption is enabled for the instance.
-  * `instance_type` - (Optional) - The type of the instance.
+  * `instance_type` - (Optional) - Field `instance_type` is deprecated and will be removed in a future release. Please use new field `db_instance_class` instead.
   * `db_instance_class` - (Optional) - Instance type. For more information, see [instance type table](~~ 26312 ~~).
-  * `instance_storage` - (Optional) - The storage capacity of the instance.
+  * `instance_storage` - (Optional) - Field `instance_storage` is deprecated and will be removed in a future release. Please use new field `db_instance_storage` instead.
   * `db_instance_storage` - (Optional) - The storage capacity of the database instance.
-  * `instance_charge_type` - (Optional) - The charge type of the instance.
+  * `instance_charge_type` - (Optional) - Field `instance_charge_type` is deprecated and will be removed in a future release. Please use new field `payment_type` instead.
   * `payment_type` - (Optional) - The instance payment method. Valid values:**PayAsYouGo**: PayAsYouGo.**Subscription**: Subscription.**Serverless**:Serverless paid type, which only supports MySQL instances.
   * `period` - (Optional) - Specify the subscription instance as the year or month type. Valid values:Year: Year of Package.Month: monthly.
   * `monitoring_period` - (Optional) - The monitoring period for the instance.
@@ -81,7 +81,7 @@ The following arguments are supported:
   * `auto_renew_period` - (Optional) - The auto-renewal period for the instance.
   * `zone_id` - (Optional, ForceNew) - The ID of the availability zone for the instance.
   * `vswitch_id` - (Optional, ForceNew) - The ID of the VSwitch for the instance.
-  * `instance_name` - (Optional) - The name of the instance.
+  * `instance_name` - (Optional) - Field `instance_name` is deprecated and will be removed in a future release. Please use new field `db_instance_description` instead.
   * `db_instance_description` - (Optional) - The description of the database instance.
   * `security_ip_mode` - (Optional) - The security IP mode for the instance.
   * `maintain_time` - (Optional) - Instance maintenance time period, which is the UTC time, +8 hours is the maintenance time period displayed on the console.

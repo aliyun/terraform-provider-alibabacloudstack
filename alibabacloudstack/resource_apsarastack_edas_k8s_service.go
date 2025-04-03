@@ -174,7 +174,9 @@ func resourceAlibabacloudStackEdasK8sServiceRead(d *schema.ResourceData, meta in
 	d.Set("inner_endpointer", service.InnerEndpointer)
 	d.Set("namespace", service.Namespace)
 	d.Set("nodeip_list", service.NodeIpList)
-	d.Set("external_traffic_policy", service.ExternalTrafficPolicy)
+	if service.ExternalTrafficPolicy != "" {
+		d.Set("external_traffic_policy", service.ExternalTrafficPolicy)
+	}
 	port_mappings := make([]map[string]interface{}, 0)
 	for _, portMappings := range service.PortMappings {
 		service_port, _ := strconv.Atoi(portMappings.ServicePort)
