@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
@@ -60,12 +60,12 @@ func TestAccAlibabacloudStackCREERepo_Basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id" : "${alibabacloudstack_cr_ee_namespace.default.instance_id}",
-					"namespace": "${alibabacloudstack_cr_ee_namespace.default.name}",
-					"name":      "${var.name}",
-					"summary":   "summary",
-					"repo_type": "PUBLIC",
-					"depends_on" : []string{"alibabacloudstack_cr_ee_repo.fake",},
+					"instance_id": "${alibabacloudstack_cr_ee_namespace.default.instance_id}",
+					"namespace":   "${alibabacloudstack_cr_ee_namespace.default.name}",
+					"name":        "${var.name}",
+					"summary":     "summary",
+					"repo_type":   "PUBLIC",
+					"depends_on":  []string{"alibabacloudstack_cr_ee_repo.fake"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{

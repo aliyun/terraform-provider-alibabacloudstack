@@ -95,7 +95,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 					"security_ips": []string{"10.168.1.12", "100.69.7.112"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					resource.ComposeTestCheckFunc(testPolardbAccCheckSecurityIpExists("alibabacloudstack_polardb_instance.default", ips)),
+					resource.ComposeTestCheckFunc(testPolardbAccCheckSecurityIpExists("alibabacloudstack_polardb_dbinstance.default", ips)),
 				),
 			},
 		},

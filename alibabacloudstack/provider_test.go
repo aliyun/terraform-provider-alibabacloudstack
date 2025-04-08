@@ -13,10 +13,10 @@ import (
 	"testing"
 	"time"
 
+	"io/ioutil"
+	"path/filepath"
 	"strconv"
 	"strings"
-	"path/filepath"
-	"io/ioutil"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
@@ -75,7 +75,7 @@ func testAccPreCheck(t *testing.T) {
 
 }
 
-func testAccPreYunCheck(t *testing.T){
+func testAccPreYunCheck(t *testing.T) {
 	if v := os.Getenv("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY"); v == "" {
 		t.Skipf("ALIBABACLOUDSTACK_YUNDUN_ACCESS_KEY must be set for acceptance tests")
 		t.Skipped()
@@ -292,8 +292,7 @@ func testAccPreCheckWithEnvVariable(t *testing.T, envVariableName string) {
 	}
 }
 
-
-func testAccPreCheckWithCrEe(t *testing.T){
+func testAccPreCheckWithCrEe(t *testing.T) {
 	testAccPreCheck(t)
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rawClient, err := sharedClientForRegion(region)
@@ -393,7 +392,7 @@ func getAccTestRandInt(min, max int) int {
 
 func ResourceTest(t *testing.T, c resource.TestCase) {
 	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err == nil && v {
-		dateFolderName := "dryrun_" + time.Now().Format("2006_01_02") 
+		dateFolderName := "dryrun_" + time.Now().Format("2006_01_02")
 		err := os.MkdirAll(dateFolderName, 0755)
 		if err != nil {
 			t.Skipf("Failed to create date folder: %v", err)
@@ -403,7 +402,7 @@ func ResourceTest(t *testing.T, c resource.TestCase) {
 		if err != nil {
 			t.Skipf("Failed to create sub folder: %v", err)
 		}
-		for index, step := range c.Steps{
+		for index, step := range c.Steps {
 			filePath := filepath.Join(subFolderPath, fmt.Sprintf("Step%d.tf", index))
 			err = ioutil.WriteFile(filePath, []byte(step.Config), 0644)
 			if err != nil {

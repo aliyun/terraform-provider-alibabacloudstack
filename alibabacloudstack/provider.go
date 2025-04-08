@@ -490,8 +490,8 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		//	"alibabacloudstack_polardb_databases":                      dataSourceAlibabacloudStackPolardbDatabases(),
 		"alibabacloudstack_polardb_dbinstances": dataSourceAlibabacloudStackPolardbDbInstances(),
 		//	"alibabacloudstack_polardb_accounts":                       dataSourceAlibabacloudStackPolardbAccounts(),
-		"alibabacloudstack_bastionhost_instances":                  dataSourceAlibabacloudStackBastionhostInstances(),
-		"alibabacloudstack_waf_instances":                          dataSourceAlibabacloudStackWafInstances(),
+		"alibabacloudstack_bastionhost_instances": dataSourceAlibabacloudStackBastionhostInstances(),
+		"alibabacloudstack_waf_instances":         dataSourceAlibabacloudStackWafInstances(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -819,8 +819,8 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardb_dbinstance":                     resourceAlibabacloudStackPolardbInstance(),
 		//"alibabacloudstack_polardb_readonly_instance":              resourceAlibabacloudStackPolardbReadonlyInstance(),
 		//"alibabacloudstack_polardb_readwrite_splitting_connection": resourceAlibabacloudStackPolardbReadWriteSplittingConnection(),
-		"alibabacloudstack_bastionhost_instance":                  resourceAlibabacloudStackBastionhostInstance(),
-		"alibabacloudstack_waf_instance":                          resourceAlibabacloudstackWafInstance(),
+		"alibabacloudstack_bastionhost_instance": resourceAlibabacloudStackBastionhostInstance(),
+		"alibabacloudstack_waf_instance":         resourceAlibabacloudstackWafInstance(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

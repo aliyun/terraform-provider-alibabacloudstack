@@ -85,6 +85,7 @@ func resourceAlibabacloudStackCrEeRepoCreate(d *schema.ResourceData, meta interf
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -113,13 +114,12 @@ func resourceAlibabacloudStackCrEeRepoRead(d *schema.ResourceData, meta interfac
 	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
-	
+
 	response, err := crService.DescribeCrEeRepo(d.Id())
 
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-
 
 	d.Set("instance_id", response["InstanceId"].(string))
 	d.Set("namespace", response["RepoNamespaceName"].(string))
@@ -127,7 +127,6 @@ func resourceAlibabacloudStackCrEeRepoRead(d *schema.ResourceData, meta interfac
 	d.Set("repo_type", response["RepoType"])
 	d.Set("summary", response["Summary"].(string))
 	d.Set("repo_id", response["RepoId"].(string))
-
 
 	return nil
 }
@@ -148,12 +147,12 @@ func resourceAlibabacloudStackCrEeRepoUpdate(d *schema.ResourceData, meta interf
 			request.QueryParams["Detail"] = d.Get("detail").(string)
 		}
 
-	bresponse, err := client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
