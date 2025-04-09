@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackKVstoreAccount() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackKVStoreAccountCreate,
-		Read:   resourceAlibabacloudStackKVStoreAccountRead,
-		Update: resourceAlibabacloudStackKVStoreAccountUpdate,
-		Delete: resourceAlibabacloudStackKVStoreAccountDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -83,6 +75,8 @@ func resourceAlibabacloudStackKVstoreAccount() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackKVStoreAccountCreate, resourceAlibabacloudStackKVStoreAccountRead, resourceAlibabacloudStackKVStoreAccountUpdate, resourceAlibabacloudStackKVStoreAccountDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackKVStoreAccountCreate(d *schema.ResourceData, meta interface{}) error {
@@ -149,7 +143,7 @@ func resourceAlibabacloudStackKVStoreAccountCreate(d *schema.ResourceData, meta 
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackKVStoreAccountRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKVStoreAccountRead(d *schema.ResourceData, meta interface{}) error {
@@ -279,7 +273,7 @@ func resourceAlibabacloudStackKVStoreAccountUpdate(d *schema.ResourceData, meta 
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackKVStoreAccountRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKVStoreAccountDelete(d *schema.ResourceData, meta interface{}) error {

@@ -13,11 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackEipAssociation() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEipAssociationCreate,
-		Read:   resourceAlibabacloudStackEipAssociationRead,
-		Delete: resourceAlibabacloudStackEipAssociationDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"allocation_id": {
 				Type:     schema.TypeString,
@@ -45,6 +41,8 @@ func resourceAlibabacloudStackEipAssociation() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEipAssociationCreate, resourceAlibabacloudStackEipAssociationRead, nil, resourceAlibabacloudStackEipAssociationDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEipAssociationCreate(d *schema.ResourceData, meta interface{}) error {
@@ -102,7 +100,7 @@ func resourceAlibabacloudStackEipAssociationCreate(d *schema.ResourceData, meta 
 
 	d.SetId(request.AllocationId + ":" + request.InstanceId)
 
-	return resourceAlibabacloudStackEipAssociationRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEipAssociationRead(d *schema.ResourceData, meta interface{}) error {

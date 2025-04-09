@@ -19,14 +19,7 @@ import (
 )
 
 func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCmsAlarmCreate,
-		Read:   resourceAlibabacloudStackCmsAlarmRead,
-		Update: resourceAlibabacloudStackCmsAlarmUpdate,
-		Delete: resourceAlibabacloudStackCmsAlarmDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"rule_name": {
 				Type:          schema.TypeString,
@@ -235,6 +228,8 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCmsAlarmCreate, resourceAlibabacloudStackCmsAlarmRead, nil, resourceAlibabacloudStackCmsAlarmDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interface{}) error {
@@ -438,7 +433,7 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 
 	d.Partial(false)
 
-	return resourceAlibabacloudStackCmsAlarmUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interface{}) error {
@@ -522,10 +517,6 @@ func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interfac
 	// }
 
 	return nil
-}
-
-func resourceAlibabacloudStackCmsAlarmUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackCmsAlarmRead(d, meta)
 }
 
 func resourceAlibabacloudStackCmsAlarmDelete(d *schema.ResourceData, meta interface{}) error {

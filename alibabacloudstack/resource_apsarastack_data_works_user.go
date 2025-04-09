@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackDataWorksUser() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDataWorksUserCreate,
-		Read:   resourceAlibabacloudStackDataWorksUserRead,
-		Update: resourceAlibabacloudStackDataWorksUserUpdate,
-		Delete: resourceAlibabacloudStackDataWorksUserDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Type:     schema.TypeString,
@@ -37,6 +30,8 @@ func resourceAlibabacloudStackDataWorksUser() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDataWorksUserCreate, resourceAlibabacloudStackDataWorksUserRead, nil, resourceAlibabacloudStackDataWorksUserDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDataWorksUserCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -67,7 +62,7 @@ func resourceAlibabacloudStackDataWorksUserCreate(d *schema.ResourceData, meta i
 
 	d.SetId(fmt.Sprint(response["RequestId"], ":", request["ProjectId"], ":", request["UserId"]))
 
-	return resourceAlibabacloudStackDataWorksUserRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDataWorksUserRead(d *schema.ResourceData, meta interface{}) error {
@@ -91,11 +86,6 @@ func resourceAlibabacloudStackDataWorksUserRead(d *schema.ResourceData, meta int
 	d.Set("project_id", parts[1])
 
 	return nil
-}
-
-func resourceAlibabacloudStackDataWorksUserUpdate(d *schema.ResourceData, meta interface{}) error {
-	// 没有对应 API
-	return resourceAlibabacloudStackDataWorksUserRead(d, meta)
 }
 
 func resourceAlibabacloudStackDataWorksUserDelete(d *schema.ResourceData, meta interface{}) error {

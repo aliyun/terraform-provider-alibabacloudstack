@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackDataWorksUserRoleBinding() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDataWorksUserRoleBindingCreate,
-		Read:   resourceAlibabacloudStackDataWorksUserRoleBindingRead,
-		Update: resourceAlibabacloudStackDataWorksUserRoleBindingUpdate,
-		Delete: resourceAlibabacloudStackDataWorksUserRoleBindingDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Type:     schema.TypeString,
@@ -37,6 +30,11 @@ func resourceAlibabacloudStackDataWorksUserRoleBinding() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDataWorksUserRoleBindingCreate, 
+		resourceAlibabacloudStackDataWorksUserRoleBindingRead, 
+		nil, 
+		resourceAlibabacloudStackDataWorksUserRoleBindingDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDataWorksUserRoleBindingCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -64,7 +62,7 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingCreate(d *schema.ResourceD
 
 	d.SetId(fmt.Sprint(request["RoleCode"], ":", request["ProjectId"], ":", request["UserId"]))
 
-	return resourceAlibabacloudStackDataWorksUserRoleBindingRead(d, meta)
+	return
 }
 
 func resourceAlibabacloudStackDataWorksUserRoleBindingRead(d *schema.ResourceData, meta interface{}) error {
@@ -89,11 +87,6 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingRead(d *schema.ResourceDat
 	d.Set("role_code", parts[0])
 
 	return nil
-}
-
-func resourceAlibabacloudStackDataWorksUserRoleBindingUpdate(d *schema.ResourceData, meta interface{}) error {
-	// 没有对应 API
-	return resourceAlibabacloudStackDataWorksUserRoleBindingRead(d, meta)
 }
 
 func resourceAlibabacloudStackDataWorksUserRoleBindingDelete(d *schema.ResourceData, meta interface{}) error {

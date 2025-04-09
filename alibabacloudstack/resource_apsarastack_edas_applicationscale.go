@@ -12,13 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackEdasInstanceApplicationAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEdasInstanceApplicationAttachmentCreate,
-		Read:   resourceAlibabacloudStackEdasInstanceApplicationAttachmentRead,
-		Delete: resourceAlibabacloudStackEdasInstanceApplicationAttachmentDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"ecc_info": {
 				Type:     schema.TypeString,
@@ -48,6 +42,8 @@ func resourceAlibabacloudStackEdasInstanceApplicationAttachment() *schema.Resour
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEdasInstanceApplicationAttachmentCreate, resourceAlibabacloudStackEdasInstanceApplicationAttachmentRead, nil, resourceAlibabacloudStackEdasInstanceApplicationAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEdasInstanceApplicationAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -98,7 +94,7 @@ func resourceAlibabacloudStackEdasInstanceApplicationAttachmentCreate(d *schema.
 		}
 	}
 
-	return resourceAlibabacloudStackEdasInstanceApplicationAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasInstanceApplicationAttachmentRead(d *schema.ResourceData, meta interface{}) error {

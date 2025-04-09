@@ -11,14 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackRosTemplate() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackRosTemplateCreate,
-		Read:   resourceAlibabacloudStackRosTemplateRead,
-		Update: resourceAlibabacloudStackRosTemplateUpdate,
-		Delete: resourceAlibabacloudStackRosTemplateDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"description": {
 				Type:     schema.TypeString,
@@ -44,6 +37,8 @@ func resourceAlibabacloudStackRosTemplate() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackRosTemplateCreate, resourceAlibabacloudStackRosTemplateRead, resourceAlibabacloudStackRosTemplateUpdate, resourceAlibabacloudStackRosTemplateDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackRosTemplateCreate(d *schema.ResourceData, meta interface{}) error {
@@ -76,7 +71,7 @@ func resourceAlibabacloudStackRosTemplateCreate(d *schema.ResourceData, meta int
 
 	d.SetId(fmt.Sprint(response["TemplateId"]))
 
-	return resourceAlibabacloudStackRosTemplateRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackRosTemplateRead(d *schema.ResourceData, meta interface{}) error {
@@ -131,7 +126,7 @@ func resourceAlibabacloudStackRosTemplateUpdate(d *schema.ResourceData, meta int
 		addDebug(action, response, request)
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackRosTemplateRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackRosTemplateDelete(d *schema.ResourceData, meta interface{}) error {

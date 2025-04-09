@@ -17,14 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackMongoDBInstanceCreate,
-		Read:   resourceAlibabacloudStackMongoDBInstanceRead,
-		Update: resourceAlibabacloudStackMongoDBInstanceUpdate,
-		Delete: resourceAlibabacloudStackMongoDBInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -196,6 +189,8 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackMongoDBInstanceCreate, resourceAlibabacloudStackMongoDBInstanceRead, resourceAlibabacloudStackMongoDBInstanceUpdate, resourceAlibabacloudStackMongoDBInstanceDelete)
+	return resource
 }
 
 func buildMongoDBCreateRequest(d *schema.ResourceData, meta interface{}) (*dds.CreateDBInstanceRequest, error) {
@@ -297,7 +292,7 @@ func resourceAlibabacloudStackMongoDBInstanceCreate(d *schema.ResourceData, meta
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackMongoDBInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta interface{}) error {
@@ -478,7 +473,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackMongoDBInstanceRead(d, meta)
+		return nil
 	}
 
 	if d.HasChanges("db_instance_description", "name"){
@@ -603,7 +598,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackMongoDBInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackMongoDBInstanceDelete(d *schema.ResourceData, meta interface{}) error {

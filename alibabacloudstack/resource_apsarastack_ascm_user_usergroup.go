@@ -12,11 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmUserGroupUser() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmUserGroupUserCreate,
-		Read:   resourceAlibabacloudStackAscmUserGroupUserRead,
-		Update: resourceAlibabacloudStackAscmUserGroupUserUpdate,
-		Delete: resourceAlibabacloudStackAscmUserGroupUserDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"user_group_id": {
 				Type:     schema.TypeInt,
@@ -30,6 +26,8 @@ func resourceAlibabacloudStackAscmUserGroupUser() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmUserGroupUserCreate, resourceAlibabacloudStackAscmUserGroupUserRead, resourceAlibabacloudStackAscmUserGroupUserUpdate, resourceAlibabacloudStackAscmUserGroupUserDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmUserGroupUserCreate(d *schema.ResourceData, meta interface{}) error {
@@ -75,7 +73,7 @@ func resourceAlibabacloudStackAscmUserGroupUserCreate(d *schema.ResourceData, me
 
 	d.SetId(strconv.Itoa(userGroupId))
 
-	return resourceAlibabacloudStackAscmUserGroupUserRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserGroupUserRead(d *schema.ResourceData, meta interface{}) error {
@@ -178,7 +176,7 @@ func resourceAlibabacloudStackAscmUserGroupUserUpdate(d *schema.ResourceData, me
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_usergroup_user", "AddUsersToUserGroup", errmsg)
 	}
 
-	return resourceAlibabacloudStackAscmUserGroupUserRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserGroupUserDelete(d *schema.ResourceData, meta interface{}) error {

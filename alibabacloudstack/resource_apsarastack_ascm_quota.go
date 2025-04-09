@@ -16,11 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmQuota() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmQuotaCreate,
-		Read:   resourceAlibabacloudStackAscmQuotaRead,
-		Update: resourceAlibabacloudStackAscmQuotaUpdate,
-		Delete: resourceAlibabacloudStackAscmQuotaDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"product_name": {
 				Type:         schema.TypeString,
@@ -103,6 +99,8 @@ func resourceAlibabacloudStackAscmQuota() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmQuotaCreate, resourceAlibabacloudStackAscmQuotaRead, resourceAlibabacloudStackAscmQuotaUpdate, resourceAlibabacloudStackAscmQuotaDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta interface{}) error {
@@ -198,7 +196,7 @@ func resourceAlibabacloudStackAscmQuotaCreate(d *schema.ResourceData, meta inter
 
 	d.SetId(productName + COLON_SEPARATED + quotaType + COLON_SEPARATED + quotaTypeId)
 
-	return resourceAlibabacloudStackAscmQuotaUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmQuotaUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -426,7 +424,7 @@ func resourceAlibabacloudStackAscmQuotaUpdate(d *schema.ResourceData, meta inter
 		addDebug(request.GetActionName(), raw, nil, request)
 	}
 
-	return resourceAlibabacloudStackAscmQuotaRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmQuotaRead(d *schema.ResourceData, meta interface{}) error {

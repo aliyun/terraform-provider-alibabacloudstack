@@ -11,15 +11,7 @@ import (
 )
 
 func resourceAlibabacloudstackEssAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudstackEssAttachmentCreate,
-		Read:   resourceAlibabacloudstackEssAttachmentRead,
-		Update: resourceAlibabacloudstackEssAttachmentUpdate,
-		Delete: resourceAlibabacloudstackEssAttachmentDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"scaling_group_id": {
 				Type:     schema.TypeString,
@@ -42,6 +34,12 @@ func resourceAlibabacloudstackEssAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudstackEssAttachmentCreate,
+		resourceAlibabacloudstackEssAttachmentRead,
+		resourceAlibabacloudstackEssAttachmentUpdate,
+		resourceAlibabacloudstackEssAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudstackEssAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -171,7 +169,7 @@ func resourceAlibabacloudstackEssAttachmentUpdate(d *schema.ResourceData, meta i
 
 	d.Partial(false)
 
-	return resourceAlibabacloudstackEssAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudstackEssAttachmentRead(d *schema.ResourceData, meta interface{}) error {

@@ -15,11 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmUser() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmUserCreate,
-		Read:   resourceAlibabacloudStackAscmUserRead,
-		Update: resourceAlibabacloudStackAscmUserUpdate,
-		Delete: resourceAlibabacloudStackAscmUserDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"cellphone_number": {
 				Type:     schema.TypeString,
@@ -71,6 +67,8 @@ func resourceAlibabacloudStackAscmUser() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmUserCreate, resourceAlibabacloudStackAscmUserRead, resourceAlibabacloudStackAscmUserUpdate, resourceAlibabacloudStackAscmUserDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interface{}) error {
@@ -129,7 +127,7 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 	}
 	log.Printf("response of bresponse ExportInitPasswordByLoginName is : %s", init_password)
 
-	return resourceAlibabacloudStackAscmUserUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -207,7 +205,7 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 
 		addDebug("ResetRolesForUserByLoginName", bresponse, request)
 	}
-	return resourceAlibabacloudStackAscmUserRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserRead(d *schema.ResourceData, meta interface{}) error {

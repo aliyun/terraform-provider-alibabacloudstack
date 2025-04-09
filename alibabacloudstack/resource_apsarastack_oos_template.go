@@ -11,14 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackOosTemplate() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackOosTemplateCreate,
-		Read:   resourceAlibabacloudStackOosTemplateRead,
-		Update: resourceAlibabacloudStackOosTemplateUpdate,
-		Delete: resourceAlibabacloudStackOosTemplateDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"auto_delete_executions": {
 				Type:     schema.TypeBool,
@@ -90,6 +83,8 @@ func resourceAlibabacloudStackOosTemplate() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackOosTemplateCreate, resourceAlibabacloudStackOosTemplateRead, resourceAlibabacloudStackOosTemplateUpdate, resourceAlibabacloudStackOosTemplateDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackOosTemplateCreate(d *schema.ResourceData, meta interface{}) error {
@@ -118,8 +113,7 @@ func resourceAlibabacloudStackOosTemplateCreate(d *schema.ResourceData, meta int
 	}
 	responseTemplate := response["Template"].(map[string]interface{})
 	d.SetId(fmt.Sprint(responseTemplate["TemplateName"]))
-
-	return resourceAlibabacloudStackOosTemplateRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOosTemplateRead(d *schema.ResourceData, meta interface{}) error {
@@ -185,7 +179,7 @@ func resourceAlibabacloudStackOosTemplateUpdate(d *schema.ResourceData, meta int
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
-	return resourceAlibabacloudStackOosTemplateRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOosTemplateDelete(d *schema.ResourceData, meta interface{}) error {

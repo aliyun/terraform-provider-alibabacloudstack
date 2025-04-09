@@ -12,13 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmUserGroupResourceSetBinding() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate,
-		Read:   resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead,
-		Delete: resourceAlibabacloudStackAscmUserGroupResourceSetBindingDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"resource_set_id": {
 				Type:     schema.TypeString,
@@ -37,6 +31,12 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBinding() *schema.Resource
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate,
+		resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead,
+		nil,
+		resourceAlibabacloudStackAscmUserGroupResourceSetBindingDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate(d *schema.ResourceData, meta interface{}) error {
@@ -71,7 +71,7 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate(d *schema.Re
 	}
 	addDebug("AddResourceSetToUserGroup", bresponse, requestInfo, bresponse.GetHttpContentString())
 	d.SetId(resourceSetId)
-	return resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead(d *schema.ResourceData, meta interface{}) error {

@@ -12,13 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackEdasK8sCluster() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEdasK8sClusterCreate,
-		Read:   resourceAlibabacloudStackEdasK8sClusterRead,
-		Delete: resourceAlibabacloudStackEdasK8sClusterDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
@@ -56,6 +50,8 @@ func resourceAlibabacloudStackEdasK8sCluster() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEdasK8sClusterCreate, resourceAlibabacloudStackEdasK8sClusterRead, nil, resourceAlibabacloudStackEdasK8sClusterDelete)
+	return resource
 }
 
 type ImportK8sClusterResponse struct {
@@ -103,7 +99,7 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackEdasK8sClusterRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasK8sClusterRead(d *schema.ResourceData, meta interface{}) error {
@@ -160,10 +156,6 @@ func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta 
 	stateConf := BuildStateConf([]string{"4"}, []string{"0"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, edasService.ClusterImportK8sStateRefreshFunc(d.Id(), []string{"1", "2", "3"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return nil
-		// if errmsgs.NotFoundError(err) {
-		// 	return nil
-		// }
-		// return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return nil
 }

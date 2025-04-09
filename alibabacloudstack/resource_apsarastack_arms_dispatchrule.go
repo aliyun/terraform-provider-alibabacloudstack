@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackArmsDispatchRule() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackArmsDispatchRuleCreate,
-		Read:   resourceAlibabacloudStackArmsDispatchRuleRead,
-		Update: resourceAlibabacloudStackArmsDispatchRuleUpdate,
-		Delete: resourceAlibabacloudStackArmsDispatchRuleDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"is_recover": {
 				Type:     schema.TypeBool,
@@ -146,6 +139,8 @@ func resourceAlibabacloudStackArmsDispatchRule() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackArmsDispatchRuleCreate, resourceAlibabacloudStackArmsDispatchRuleRead, resourceAlibabacloudStackArmsDispatchRuleUpdate, resourceAlibabacloudStackArmsDispatchRuleDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackArmsDispatchRuleCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -240,7 +235,7 @@ func resourceAlibabacloudStackArmsDispatchRuleCreate(d *schema.ResourceData, met
 
 	d.SetId(fmt.Sprint(response["DispatchRuleId"]))
 
-	return resourceAlibabacloudStackArmsDispatchRuleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackArmsDispatchRuleRead(d *schema.ResourceData, meta interface{}) error {
@@ -422,7 +417,7 @@ func resourceAlibabacloudStackArmsDispatchRuleUpdate(d *schema.ResourceData, met
 		return err
 	}
 
-	return resourceAlibabacloudStackArmsDispatchRuleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackArmsDispatchRuleDelete(d *schema.ResourceData, meta interface{}) (err error) {

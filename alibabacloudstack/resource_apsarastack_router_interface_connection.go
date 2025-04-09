@@ -14,14 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackRouterInterfaceConnection() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackRouterInterfaceConnectionCreate,
-		Read:   resourceAlibabacloudStackRouterInterfaceConnectionRead,
-		Delete: resourceAlibabacloudStackRouterInterfaceConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"interface_id": {
 				Type:     schema.TypeString,
@@ -60,6 +53,11 @@ func resourceAlibabacloudStackRouterInterfaceConnection() *schema.Resource {
 			},
 		},
 	}
+
+	setResourceFunc(resource, resourceAlibabacloudStackRouterInterfaceConnectionCreate, 
+		resourceAlibabacloudStackRouterInterfaceConnectionRead, nil, resourceAlibabacloudStackRouterInterfaceConnectionDelete)
+
+	return resource
 }
 
 func resourceAlibabacloudStackRouterInterfaceConnectionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -87,7 +85,7 @@ func resourceAlibabacloudStackRouterInterfaceConnectionCreate(d *schema.Resource
 			if err = vpcService.WaitForRouterInterfaceConnection(d.Id(), client.RegionId, Active, DefaultTimeout); err != nil {
 				return errmsgs.WrapError(err)
 			}
-			return resourceAlibabacloudStackRouterInterfaceConnectionRead(d, meta)
+			return nil
 		}
 	}
 
@@ -177,7 +175,7 @@ func resourceAlibabacloudStackRouterInterfaceConnectionCreate(d *schema.Resource
 		}
 	}
 
-	return resourceAlibabacloudStackRouterInterfaceConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackRouterInterfaceConnectionRead(d *schema.ResourceData, meta interface{}) error {
@@ -209,7 +207,6 @@ func resourceAlibabacloudStackRouterInterfaceConnectionRead(d *schema.ResourceDa
 	d.Set("opposite_interface_owner_id", object.OppositeInterfaceOwnerId)
 
 	return nil
-
 }
 
 func resourceAlibabacloudStackRouterInterfaceConnectionDelete(d *schema.ResourceData, meta interface{}) error {

@@ -14,14 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackDataWorksRemind() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDataWorksRemindCreate,
-		Read:   resourceAlibabacloudStackDataWorksRemindRead,
-		Update: resourceAlibabacloudStackDataWorksRemindUpdate,
-		Delete: resourceAlibabacloudStackDataWorksRemindDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"remind_id": {
 				Type:     schema.TypeString,
@@ -105,6 +98,8 @@ func resourceAlibabacloudStackDataWorksRemind() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDataWorksRemindCreate, resourceAlibabacloudStackDataWorksRemindRead, resourceAlibabacloudStackDataWorksRemindUpdate, resourceAlibabacloudStackDataWorksRemindDelete)
+	return resource
 }
 
 var RemindUnit string
@@ -122,7 +117,7 @@ func resourceAlibabacloudStackDataWorksRemindCreate(d *schema.ResourceData, meta
 
 	d.SetId(fmt.Sprint(response["Data"]))
 
-	return resourceAlibabacloudStackDataWorksRemindRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDataWorksRemindRead(d *schema.ResourceData, meta interface{}) error {
@@ -236,7 +231,7 @@ func resourceAlibabacloudStackDataWorksRemindUpdate(d *schema.ResourceData, meta
 	if err != nil {
 		return err
 	}
-	return resourceAlibabacloudStackDataWorksRemindRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDataWorksRemindDelete(d *schema.ResourceData, meta interface{}) (err error) {

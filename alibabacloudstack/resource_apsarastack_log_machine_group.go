@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackLogMachineGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackLogMachineGroupCreate,
-		Read:   resourceAlibabacloudStackLogMachineGroupRead,
-		Update: resourceAlibabacloudStackLogMachineGroupUpdate,
-		Delete: resourceAlibabacloudStackLogMachineGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:     schema.TypeString,
@@ -52,6 +44,8 @@ func resourceAlibabacloudStackLogMachineGroup() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackLogMachineGroupCreate, resourceAlibabacloudStackLogMachineGroupRead, resourceAlibabacloudStackLogMachineGroupUpdate, resourceAlibabacloudStackLogMachineGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackLogMachineGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -91,7 +85,7 @@ func resourceAlibabacloudStackLogMachineGroupCreate(d *schema.ResourceData, meta
 
 	d.SetId(fmt.Sprintf("%s%s%s", d.Get("project").(string), COLON_SEPARATED, d.Get("name").(string)))
 
-	return resourceAlibabacloudStackLogMachineGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogMachineGroupRead(d *schema.ResourceData, meta interface{}) error {
@@ -161,7 +155,7 @@ func resourceAlibabacloudStackLogMachineGroupUpdate(d *schema.ResourceData, meta
 		}
 	}
 
-	return resourceAlibabacloudStackLogMachineGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogMachineGroupDelete(d *schema.ResourceData, meta interface{}) error {

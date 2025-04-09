@@ -319,7 +319,7 @@ func resourceAlibabacloudStackDiskUpdate(d *schema.ResourceData, meta interface{
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackDiskRead(d, meta)
+		return nil
 	}
 
 	err := setTags(client, TagResourceDisk, d)

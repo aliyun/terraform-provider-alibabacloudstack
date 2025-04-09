@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackKmsKey() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackKmsKeyCreate,
-		Read:   resourceAlibabacloudStackKmsKeyRead,
-		Update: resourceAlibabacloudStackKmsKeyUpdate,
-		Delete: resourceAlibabacloudStackKmsKeyDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"arn": {
 				Type:     schema.TypeString,
@@ -113,6 +106,9 @@ func resourceAlibabacloudStackKmsKey() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackKmsKeyCreate,
+		resourceAlibabacloudStackKmsKeyRead, resourceAlibabacloudStackKmsKeyUpdate, resourceAlibabacloudStackKmsKeyDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackKmsKeyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -152,7 +148,7 @@ func resourceAlibabacloudStackKmsKeyCreate(d *schema.ResourceData, meta interfac
 	addDebug(request.GetActionName(), raw)
 	d.SetId(fmt.Sprintf("%v", bresponse.KeyMetadata.KeyId))
 
-	return resourceAlibabacloudStackKmsKeyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKmsKeyRead(d *schema.ResourceData, meta interface{}) error {
@@ -293,7 +289,7 @@ func resourceAlibabacloudStackKmsKeyUpdate(d *schema.ResourceData, meta interfac
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackKmsKeyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKmsKeyDelete(d *schema.ResourceData, meta interface{}) error {

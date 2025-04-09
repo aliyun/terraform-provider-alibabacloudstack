@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackRouteEntry() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackRouteEntryCreate,
-		Read:   resourceAlibabacloudStackRouteEntryRead,
-		Delete: resourceAlibabacloudStackRouteEntryDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"router_id": {
 				Type:        schema.TypeString,
@@ -56,6 +49,8 @@ func resourceAlibabacloudStackRouteEntry() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackRouteEntryCreate, resourceAlibabacloudStackRouteEntryRead, nil, resourceAlibabacloudStackRouteEntryDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackRouteEntryCreate(d *schema.ResourceData, meta interface{}) error {
@@ -119,7 +114,7 @@ func resourceAlibabacloudStackRouteEntryCreate(d *schema.ResourceData, meta inte
 	if err := vpcService.WaitForRouteEntry(d.Id(), Available, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackRouteEntryRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackRouteEntryRead(d *schema.ResourceData, meta interface{}) error {

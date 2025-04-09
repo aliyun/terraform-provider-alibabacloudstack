@@ -18,15 +18,7 @@ import (
 )
 
 func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEssScalingConfigurationCreate,
-		Read:   resourceAlibabacloudStackEssScalingConfigurationRead,
-		Update: resourceAlibabacloudStackEssScalingConfigurationUpdate,
-		Delete: resourceAlibabacloudStackEssScalingConfigurationDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"status": {
 				Type:          schema.TypeBool,
@@ -224,6 +216,9 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEssScalingConfigurationCreate,
+		resourceAlibabacloudStackEssScalingConfigurationRead, resourceAlibabacloudStackEssScalingConfigurationUpdate, resourceAlibabacloudStackEssScalingConfigurationDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEssScalingConfigurationCreate(d *schema.ResourceData, meta interface{}) error {
@@ -262,7 +257,7 @@ func resourceAlibabacloudStackEssScalingConfigurationCreate(d *schema.ResourceDa
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ess_scalingconfiguration", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	return resourceAlibabacloudStackEssScalingConfigurationUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssScalingConfigurationUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -310,7 +305,7 @@ func resourceAlibabacloudStackEssScalingConfigurationUpdate(d *schema.ResourceDa
 
 	d.Partial(false)
 
-	return resourceAlibabacloudStackEssScalingConfigurationRead(d, meta)
+	return nil
 }
 
 func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) error {

@@ -14,12 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackDnsGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDnsGroupCreate,
-		Read:   resourceAlibabacloudStackDnsGroupRead,
-		Update: resourceAlibabacloudStackDnsGroupUpdate,
-		Delete: resourceAlibabacloudStackDnsGroupDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -27,6 +22,8 @@ func resourceAlibabacloudStackDnsGroup() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDnsGroupCreate, resourceAlibabacloudStackDnsGroupRead, resourceAlibabacloudStackDnsGroupUpdate, resourceAlibabacloudStackDnsGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDnsGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -48,7 +45,7 @@ func resourceAlibabacloudStackDnsGroupCreate(d *schema.ResourceData, meta interf
 	addDebug(request.GetActionName(), raw, request)
 	response, _ := raw.(*alidns.AddDomainGroupResponse)
 	d.SetId(response.GroupId)
-	return resourceAlibabacloudStackDnsGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDnsGroupUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -74,7 +71,7 @@ func resourceAlibabacloudStackDnsGroupUpdate(d *schema.ResourceData, meta interf
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	return resourceAlibabacloudStackDnsGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDnsGroupRead(d *schema.ResourceData, meta interface{}) error {

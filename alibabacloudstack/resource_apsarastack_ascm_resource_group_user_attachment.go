@@ -14,13 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmResourceGroupUserAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate,
-		Read:   resourceAlibabacloudStackAscmResourceGroupUserAttachmentRead,
-		Delete: resourceAlibabacloudStackAscmResourceGroupUserAttachmentDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"rg_id": {
 				Type:     schema.TypeString,
@@ -34,6 +28,8 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachment() *schema.Resource
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate, resourceAlibabacloudStackAscmResourceGroupUserAttachmentRead, nil, resourceAlibabacloudStackAscmResourceGroupUserAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -69,7 +65,7 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate(d *schema.Re
 	}
 	addDebug("BindAscmUserAndResourceGroup", raw, requestInfo, bresponse.GetHttpContentString())
 	d.SetId(RgId)
-	return resourceAlibabacloudStackAscmResourceGroupUserAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmResourceGroupUserAttachmentRead(d *schema.ResourceData, meta interface{}) error {

@@ -14,13 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackEdasInstanceClusterAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEdasInstanceClusterAttachmentCreate,
-		Read:   resourceAlibabacloudStackEdasInstanceClusterAttachmentRead,
-		Delete: resourceAlibabacloudStackEdasInstanceClusterAttachmentDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
 				Type:     schema.TypeString,
@@ -64,6 +58,12 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackEdasInstanceClusterAttachmentCreate,
+		resourceAlibabacloudStackEdasInstanceClusterAttachmentRead,
+		nil,
+		resourceAlibabacloudStackEdasInstanceClusterAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEdasInstanceClusterAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -175,7 +175,7 @@ func resourceAlibabacloudStackEdasInstanceClusterAttachmentCreate(d *schema.Reso
 		time.Sleep(30 * time.Second)
 		cnt++
 	}
-	return resourceAlibabacloudStackEdasInstanceClusterAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasInstanceClusterAttachmentRead(d *schema.ResourceData, meta interface{}) error {

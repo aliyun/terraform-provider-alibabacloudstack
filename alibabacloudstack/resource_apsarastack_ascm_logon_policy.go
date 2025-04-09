@@ -16,15 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackLogonPolicy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackLogonPolicyCreate,
-		Read:   resourceAlibabacloudStackLogonPolicyRead,
-		Update: resourceAlibabacloudStackLogonPolicyUpdate,
-		Delete: resourceAlibabacloudStackLogonPolicyDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"policy_id": {
 				Type:     schema.TypeInt,
@@ -47,6 +39,11 @@ func resourceAlibabacloudStackLogonPolicy() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackLogonPolicyCreate, 
+		resourceAlibabacloudStackLogonPolicyRead, 
+		resourceAlibabacloudStackLogonPolicyUpdate, 
+		resourceAlibabacloudStackLogonPolicyDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -112,7 +109,7 @@ func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta int
 
 	d.SetId(object.Data[0].Name)
 
-	return resourceAlibabacloudStackLogonPolicyUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogonPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -167,7 +164,7 @@ func resourceAlibabacloudStackLogonPolicyUpdate(d *schema.ResourceData, meta int
 
 	d.SetId(object.Data[0].Name)
 
-	return resourceAlibabacloudStackLogonPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogonPolicyRead(d *schema.ResourceData, meta interface{}) error {

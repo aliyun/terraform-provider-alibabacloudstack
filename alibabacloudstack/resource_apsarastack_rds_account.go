@@ -15,28 +15,20 @@ import (
 )
 
 func resourceAlibabacloudStackDBAccount() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDBAccountCreate,
-		Read:   resourceAlibabacloudStackDBAccountRead,
-		Update: resourceAlibabacloudStackDBAccountUpdate,
-		Delete: resourceAlibabacloudStackDBAccountDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"data_base_instance_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Optional:true,
-				Computed:true,
+				Optional: true,
+				Computed: true,
 				ConflictsWith: []string{"instance_id"},
 			},
 			"account_name": {
 				Type:     schema.TypeString,
 				ForceNew: true,
-				Optional:true,
-				Computed:true,
+				Optional: true,
+				Computed: true,
 				ConflictsWith: []string{"name"},
 			},
 
@@ -77,17 +69,17 @@ func resourceAlibabacloudStackDBAccount() *schema.Resource {
 			"instance_id": {
 				Type:         schema.TypeString,
 				ForceNew:     true,
-				Optional:true,
-				Computed:true,
-				Deprecated:  "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'data_base_instance_id' instead.",
+				Optional:     true,
+				Computed:     true,
+				Deprecated:   "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'data_base_instance_id' instead.",
 				ConflictsWith: []string{"data_base_instance_id"},
 			},
 			"name": {
 				Type:         schema.TypeString,
 				ForceNew:     true,
-				Optional:true,
-				Computed:true,
-				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use new field 'account_name' instead.",
+				Optional:     true,
+				Computed:     true,
+				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'account_name' instead.",
 				ConflictsWith: []string{"account_name"},
 			},
 			"type": {
@@ -96,18 +88,20 @@ func resourceAlibabacloudStackDBAccount() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Normal", "Super"}, false),
 				ForceNew:     true,
 				Computed:     true,
-				Deprecated:  "Field 'type' is deprecated and will be removed in a future release. Please use new field 'account_type' instead.",
+				Deprecated:   "Field 'type' is deprecated and will be removed in a future release. Please use new field 'account_type' instead.",
 				ConflictsWith: []string{"account_type"},
 			},
 			"description": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				Deprecated:  "Field 'description' is deprecated and will be removed in a future release. Please use new field 'account_description' instead.",
+				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use new field 'account_description' instead.",
 				ConflictsWith: []string{"account_description"},
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDBAccountCreate, resourceAlibabacloudStackDBAccountRead, resourceAlibabacloudStackDBAccountUpdate, resourceAlibabacloudStackDBAccountDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDBAccountCreate(d *schema.ResourceData, meta interface{}) error {
@@ -180,7 +174,7 @@ func resourceAlibabacloudStackDBAccountCreate(d *schema.ResourceData, meta inter
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackDBAccountRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBAccountRead(d *schema.ResourceData, meta interface{}) error {
@@ -234,7 +228,6 @@ func resourceAlibabacloudStackDBAccountUpdate(d *schema.ResourceData, meta inter
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("account_description")
 	}
 
 	if d.HasChanges("password", "kms_encrypted_password") {
@@ -254,7 +247,6 @@ func resourceAlibabacloudStackDBAccountUpdate(d *schema.ResourceData, meta inter
 		}
 
 		if password != "" {
-			//d.SetPartial("password")
 			request.AccountPassword = password
 		} else {
 			kmsService := KmsService{meta.(*connectivity.AlibabacloudStackClient)}
@@ -263,8 +255,6 @@ func resourceAlibabacloudStackDBAccountUpdate(d *schema.ResourceData, meta inter
 				return errmsgs.WrapError(err)
 			}
 			request.AccountPassword = decryptResp.Plaintext
-			//d.SetPartial("kms_encrypted_password")
-			//d.SetPartial("kms_encryption_context")
 		}
 
 		raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
@@ -279,11 +269,10 @@ func resourceAlibabacloudStackDBAccountUpdate(d *schema.ResourceData, meta inter
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("password")
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackDBAccountRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBAccountDelete(d *schema.ResourceData, meta interface{}) error {

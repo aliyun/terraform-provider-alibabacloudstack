@@ -11,10 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackOssBucketKms() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackOssBucketKmsCreate,
-		Read:   resourceAlibabacloudStackOssBucketKmsRead,
-		Delete: resourceAlibabacloudStackOssBucketKmsDelete,
+	resource := &schema.Resource{
 		DeprecationMessage: "oss_bucket already includes corresponding functions",
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -58,6 +55,8 @@ func resourceAlibabacloudStackOssBucketKms() *schema.Resource {
 			// 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackOssBucketKmsCreate, resourceAlibabacloudStackOssBucketKmsRead, nil, resourceAlibabacloudStackOssBucketKmsDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta interface{}) error {
@@ -110,7 +109,7 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 	}
 	d.SetId(bucketName)
 
-	return resourceAlibabacloudStackOssBucketKmsRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta interface{}) error {

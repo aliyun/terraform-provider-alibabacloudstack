@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackCRNamespace() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCRNamespaceCreate,
-		Read:   resourceAlibabacloudStackCRNamespaceRead,
-		Update: resourceAlibabacloudStackCRNamespaceUpdate,
-		Delete: resourceAlibabacloudStackCRNamespaceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -41,6 +33,8 @@ func resourceAlibabacloudStackCRNamespace() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCRNamespaceCreate, resourceAlibabacloudStackCRNamespaceRead, resourceAlibabacloudStackCRNamespaceUpdate, resourceAlibabacloudStackCRNamespaceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -111,7 +105,7 @@ func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta int
 
 	d.SetId(namespaceName)
 
-	return resourceAlibabacloudStackCRNamespaceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -144,7 +138,7 @@ func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta int
 		addDebug(request.GetActionName(), uresponse, request)
 	}
 
-	return resourceAlibabacloudStackCRNamespaceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCRNamespaceRead(d *schema.ResourceData, meta interface{}) error {

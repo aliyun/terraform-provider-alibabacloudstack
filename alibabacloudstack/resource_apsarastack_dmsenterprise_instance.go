@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackDmsEnterpriseInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDmsEnterpriseInstanceCreate,
-		Read:   resourceAlibabacloudStackDmsEnterpriseInstanceRead,
-		Update: resourceAlibabacloudStackDmsEnterpriseInstanceUpdate,
-		Delete: resourceAlibabacloudStackDmsEnterpriseInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
 		},
@@ -160,6 +153,9 @@ func resourceAlibabacloudStackDmsEnterpriseInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDmsEnterpriseInstanceCreate,
+		resourceAlibabacloudStackDmsEnterpriseInstanceRead, resourceAlibabacloudStackDmsEnterpriseInstanceUpdate, resourceAlibabacloudStackDmsEnterpriseInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDmsEnterpriseInstanceCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -218,7 +214,7 @@ func resourceAlibabacloudStackDmsEnterpriseInstanceCreate(d *schema.ResourceData
 
 	d.SetId(fmt.Sprint(request["Host"], ":", request["Port"]))
 
-	return resourceAlibabacloudStackDmsEnterpriseInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDmsEnterpriseInstanceRead(d *schema.ResourceData, meta interface{}) error {
@@ -362,7 +358,7 @@ func resourceAlibabacloudStackDmsEnterpriseInstanceUpdate(d *schema.ResourceData
 			return err
 		}
 	}
-	return resourceAlibabacloudStackDmsEnterpriseInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDmsEnterpriseInstanceDelete(d *schema.ResourceData, meta interface{}) error {

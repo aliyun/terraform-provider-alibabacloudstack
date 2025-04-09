@@ -18,15 +18,7 @@ import (
 )
 
 func resourceAlibabacloudStackSlbRule() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSlbRuleCreate,
-		Read:   resourceAlibabacloudStackSlbRuleRead,
-		Update: resourceAlibabacloudStackSlbRuleUpdate,
-		Delete: resourceAlibabacloudStackSlbRuleDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"load_balancer_id": {
 				Type:     schema.TypeString,
@@ -182,6 +174,8 @@ func resourceAlibabacloudStackSlbRule() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSlbRuleCreate, resourceAlibabacloudStackSlbRuleRead, resourceAlibabacloudStackSlbRuleUpdate, resourceAlibabacloudStackSlbRuleDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interface{}) error {
@@ -246,7 +240,7 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 	response, _ := raw.(*slb.CreateRulesResponse)
 	d.SetId(response.Rules.Rule[0].RuleId)
 
-	return resourceAlibabacloudStackSlbRuleUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbRuleRead(d *schema.ResourceData, meta interface{}) error {
@@ -383,7 +377,7 @@ func resourceAlibabacloudStackSlbRuleUpdate(d *schema.ResourceData, meta interfa
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	return resourceAlibabacloudStackSlbRuleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbRuleDelete(d *schema.ResourceData, meta interface{}) error {

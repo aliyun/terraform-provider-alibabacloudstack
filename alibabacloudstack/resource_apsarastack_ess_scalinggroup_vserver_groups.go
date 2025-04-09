@@ -15,14 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackEssScalingGroupVserverGroups() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEssVserverGroupsCreate,
-		Read:   resourceAlibabacloudStackEssVserverGroupsRead,
-		Update: resourceAlibabacloudStackEssVserverGroupsUpdate,
-		Delete: resourceAlibabacloudStackEssVserverGroupsDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"scaling_group_id": {
 				Type:     schema.TypeString,
@@ -82,6 +75,8 @@ func resourceAlibabacloudStackEssScalingGroupVserverGroups() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEssVserverGroupsCreate, resourceAlibabacloudStackEssVserverGroupsRead, resourceAlibabacloudStackEssVserverGroupsUpdate, resourceAlibabacloudStackEssVserverGroupsDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEssVserverGroupsCreate(d *schema.ResourceData, meta interface{}) error {
@@ -133,7 +128,7 @@ func resourceAlibabacloudStackEssVserverGroupsUpdate(d *schema.ResourceData, met
 		return errmsgs.WrapError(err)
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackEssVserverGroupsRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssVserverGroupsDelete(d *schema.ResourceData, meta interface{}) error {

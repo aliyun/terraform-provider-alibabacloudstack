@@ -13,15 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackLogAlert() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackLogAlertCreate,
-		Read:   resourceAlibabacloudStackLogAlertRead,
-		Update: resourceAlibabacloudStackLogAlertUpdate,
-		Delete: resourceAlibabacloudStackLogAlertDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project_name": {
 				Type:     schema.TypeString,
@@ -148,6 +140,10 @@ func resourceAlibabacloudStackLogAlert() *schema.Resource {
 			},
 		},
 	}
+
+	setResourceFunc(resource, resourceAlibabacloudStackLogAlertCreate, resourceAlibabacloudStackLogAlertRead, resourceAlibabacloudStackLogAlertUpdate, resourceAlibabacloudStackLogAlertDelete)
+
+	return resource
 }
 
 func resourceAlibabacloudStackLogAlertCreate(d *schema.ResourceData, meta interface{}) error {
@@ -189,7 +185,7 @@ func resourceAlibabacloudStackLogAlertCreate(d *schema.ResourceData, meta interf
 	}
 
 	d.SetId(fmt.Sprintf("%s%s%s", project_name, COLON_SEPARATED, alert_name))
-	return resourceAlibabacloudStackLogAlertRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogAlertRead(d *schema.ResourceData, meta interface{}) error {
@@ -243,11 +239,9 @@ func resourceAlibabacloudStackLogAlertRead(d *schema.ResourceData, meta interfac
 	d.Set("query_list", queryList)
 
 	return nil
-
 }
 
 func resourceAlibabacloudStackLogAlertUpdate(d *schema.ResourceData, meta interface{}) error {
-
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
 		return errmsgs.WrapError(err)
@@ -288,7 +282,7 @@ func resourceAlibabacloudStackLogAlertUpdate(d *schema.ResourceData, meta interf
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateAlert", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	return resourceAlibabacloudStackLogAlertRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogAlertDelete(d *schema.ResourceData, meta interface{}) error {

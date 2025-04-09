@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackNetworkAclEntries() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackNetworkAclEntriesCreate,
-		Read:   resourceAlibabacloudStackNetworkAclEntriesRead,
-		Update: resourceAlibabacloudStackNetworkAclEntriesUpdate,
-		Delete: resourceAlibabacloudStackNetworkAclEntriesDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 
 			"network_acl_id": {
@@ -116,6 +109,8 @@ func resourceAlibabacloudStackNetworkAclEntries() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackNetworkAclEntriesCreate, resourceAlibabacloudStackNetworkAclEntriesRead, resourceAlibabacloudStackNetworkAclEntriesUpdate, resourceAlibabacloudStackNetworkAclEntriesDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackNetworkAclEntriesCreate(d *schema.ResourceData, meta interface{}) error {

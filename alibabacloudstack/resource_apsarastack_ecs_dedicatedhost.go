@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackEcsDedicatedHost() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEcsDedicatedHostCreate,
-		Read:   resourceAlibabacloudStackEcsDedicatedHostRead,
-		Update: resourceAlibabacloudStackEcsDedicatedHostUpdate,
-		Delete: resourceAlibabacloudStackEcsDedicatedHostDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(11 * time.Minute),
 			Delete: schema.DefaultTimeout(1 * time.Minute),
@@ -137,6 +130,8 @@ func resourceAlibabacloudStackEcsDedicatedHost() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEcsDedicatedHostCreate, resourceAlibabacloudStackEcsDedicatedHostRead, resourceAlibabacloudStackEcsDedicatedHostUpdate, resourceAlibabacloudStackEcsDedicatedHostDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEcsDedicatedHostCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -238,7 +233,7 @@ func resourceAlibabacloudStackEcsDedicatedHostCreate(d *schema.ResourceData, met
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackEcsDedicatedHostRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEcsDedicatedHostRead(d *schema.ResourceData, meta interface{}) error {
@@ -431,7 +426,7 @@ func resourceAlibabacloudStackEcsDedicatedHostUpdate(d *schema.ResourceData, met
 		// d.SetPartial("network_attributes")
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackEcsDedicatedHostRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEcsDedicatedHostDelete(d *schema.ResourceData, meta interface{}) error {

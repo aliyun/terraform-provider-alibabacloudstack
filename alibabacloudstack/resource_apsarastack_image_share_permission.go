@@ -8,13 +8,7 @@ import (
 )
 
 func resourceAlibabacloudStackImageSharePermission() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackImageSharePermissionCreate,
-		Read:   resourceAlibabacloudStackImageSharePermissionRead,
-		Delete: resourceAlibabacloudStackImageSharePermissionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"image_id": {
 				Type:     schema.TypeString,
@@ -28,6 +22,9 @@ func resourceAlibabacloudStackImageSharePermission() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackImageSharePermissionCreate,
+		resourceAlibabacloudStackImageSharePermissionRead, nil, resourceAlibabacloudStackImageSharePermissionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackImageSharePermissionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -53,7 +50,7 @@ func resourceAlibabacloudStackImageSharePermissionCreate(d *schema.ResourceData,
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	d.SetId(imageId + ":" + accountId)
-	return resourceAlibabacloudStackImageSharePermissionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackImageSharePermissionRead(d *schema.ResourceData, meta interface{}) error {

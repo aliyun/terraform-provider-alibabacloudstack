@@ -13,13 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackVpcIpv6EgressRule() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackVpcIpv6EgressRuleCreate,
-		Read:   resourceAlibabacloudStackVpcIpv6EgressRuleRead,
-		Delete: resourceAlibabacloudStackVpcIpv6EgressRuleDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
 			Delete: schema.DefaultTimeout(1 * time.Minute),
@@ -60,6 +54,8 @@ func resourceAlibabacloudStackVpcIpv6EgressRule() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackVpcIpv6EgressRuleCreate, resourceAlibabacloudStackVpcIpv6EgressRuleRead, nil, resourceAlibabacloudStackVpcIpv6EgressRuleDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackVpcIpv6EgressRuleCreate(d *schema.ResourceData, meta interface{}) error {
@@ -91,7 +87,7 @@ func resourceAlibabacloudStackVpcIpv6EgressRuleCreate(d *schema.ResourceData, me
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackVpcIpv6EgressRuleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpcIpv6EgressRuleRead(d *schema.ResourceData, meta interface{}) error {

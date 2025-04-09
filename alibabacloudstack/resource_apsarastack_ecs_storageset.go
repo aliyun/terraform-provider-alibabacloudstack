@@ -17,13 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackEcsEbsStorageSets() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEcsEbsStorageSetsCreate,
-		Read:   resourceAlibabacloudStackEcsEbsStorageSetsRead,
-		Delete: resourceAlibabacloudStackEcsEbsStorageSetsDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"storage_set_name": {
 				Type:     schema.TypeString,
@@ -47,6 +41,8 @@ func resourceAlibabacloudStackEcsEbsStorageSets() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEcsEbsStorageSetsCreate, resourceAlibabacloudStackEcsEbsStorageSetsRead, nil, resourceAlibabacloudStackEcsEbsStorageSetsDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEcsEbsStorageSetsCreate(d *schema.ResourceData, meta interface{}) error {
@@ -89,7 +85,7 @@ func resourceAlibabacloudStackEcsEbsStorageSetsCreate(d *schema.ResourceData, me
 		return err
 	}
 
-	return resourceAlibabacloudStackEcsEbsStorageSetsRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEcsEbsStorageSetsRead(d *schema.ResourceData, meta interface{}) error {

@@ -9,14 +9,7 @@ import (
 )
 
 func resourceAlibabacloudStackCrEeSyncRule() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCrEeSyncRuleCreate,
-		Read:   resourceAlibabacloudStackCrEeSyncRuleRead,
-		Delete: resourceAlibabacloudStackCrEeSyncRuleDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -82,6 +75,8 @@ func resourceAlibabacloudStackCrEeSyncRule() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCrEeSyncRuleCreate, resourceAlibabacloudStackCrEeSyncRuleRead, nil, resourceAlibabacloudStackCrEeSyncRuleDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackCrEeSyncRuleCreate(d *schema.ResourceData, meta interface{}) error {
@@ -144,7 +139,7 @@ func resourceAlibabacloudStackCrEeSyncRuleCreate(d *schema.ResourceData, meta in
 
 	d.SetId(crService.GenResourceId(instanceId, namespaceName, bresponse.SyncRuleId))
 
-	return resourceAlibabacloudStackCrEeSyncRuleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCrEeSyncRuleRead(d *schema.ResourceData, meta interface{}) error {

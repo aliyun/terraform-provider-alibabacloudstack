@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackDataWorksConnection() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDataWorksConnectionCreate,
-		Read:   resourceAlibabacloudStackDataWorksConnectionRead,
-		Update: resourceAlibabacloudStackDataWorksConnectionUpdate,
-		Delete: resourceAlibabacloudStackDataWorksConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"connection_id": {
 				Type:     schema.TypeString,
@@ -62,6 +55,9 @@ func resourceAlibabacloudStackDataWorksConnection() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDataWorksConnectionCreate,
+		resourceAlibabacloudStackDataWorksConnectionRead, resourceAlibabacloudStackDataWorksConnectionUpdate, resourceAlibabacloudStackDataWorksConnectionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDataWorksConnectionCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -104,8 +100,7 @@ func resourceAlibabacloudStackDataWorksConnectionCreate(d *schema.ResourceData, 
 		return err
 	}
 	d.SetId(fmt.Sprint(response["Data"], ":", request["ProjectId"], ":", request["Name"]))
-
-	return resourceAlibabacloudStackDataWorksConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDataWorksConnectionRead(d *schema.ResourceData, meta interface{}) error {
@@ -166,7 +161,7 @@ func resourceAlibabacloudStackDataWorksConnectionUpdate(d *schema.ResourceData, 
 	if err != nil {
 		return err
 	}
-	return resourceAlibabacloudStackDataWorksConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDataWorksConnectionDelete(d *schema.ResourceData, meta interface{}) error {
@@ -179,7 +174,7 @@ func resourceAlibabacloudStackDataWorksConnectionDelete(d *schema.ResourceData, 
 	request := map[string]interface{}{
 		"ConnectionId": parts[0],
 	}
-	
+
 	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
 		return err

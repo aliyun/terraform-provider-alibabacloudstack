@@ -22,15 +22,7 @@ const dbConnectionIdWithSuffixRegex = "^([a-zA-Z0-9\\-_]+:[a-zA-Z0-9\\-_]+)" + d
 var dbConnectionIdWithSuffixRegexp = regexp.MustCompile(dbConnectionIdWithSuffixRegex)
 
 func resourceAlibabacloudStackDBConnection() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDBConnectionCreate,
-		Read:   resourceAlibabacloudStackDBConnectionRead,
-		Update: resourceAlibabacloudStackDBConnectionUpdate,
-		Delete: resourceAlibabacloudStackDBConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -60,6 +52,8 @@ func resourceAlibabacloudStackDBConnection() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDBConnectionCreate, resourceAlibabacloudStackDBConnectionRead, resourceAlibabacloudStackDBConnectionUpdate, resourceAlibabacloudStackDBConnectionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDBConnectionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -114,7 +108,7 @@ func resourceAlibabacloudStackDBConnectionCreate(d *schema.ResourceData, meta in
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackDBConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBConnectionRead(d *schema.ResourceData, meta interface{}) error {
@@ -203,7 +197,7 @@ func resourceAlibabacloudStackDBConnectionUpdate(d *schema.ResourceData, meta in
 			return errmsgs.WrapError(err)
 		}
 	}
-	return resourceAlibabacloudStackDBConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBConnectionDelete(d *schema.ResourceData, meta interface{}) error {

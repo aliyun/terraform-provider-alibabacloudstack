@@ -19,14 +19,7 @@ import (
 )
 
 func resourceAlibabacloudStackEcsDeploymentSet() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEcsDeploymentSetCreate,
-		Read:   resourceAlibabacloudStackEcsDeploymentSetRead,
-		Update: resourceAlibabacloudStackEcsDeploymentSetUpdate,
-		Delete: resourceAlibabacloudStackEcsDeploymentSetDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"deployment_set_name": {
 				Type:         schema.TypeString,
@@ -65,6 +58,8 @@ func resourceAlibabacloudStackEcsDeploymentSet() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEcsDeploymentSetCreate, resourceAlibabacloudStackEcsDeploymentSetRead, resourceAlibabacloudStackEcsDeploymentSetUpdate, resourceAlibabacloudStackEcsDeploymentSetDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEcsDeploymentSetCreate(d *schema.ResourceData, meta interface{}) error {
@@ -120,7 +115,7 @@ func resourceAlibabacloudStackEcsDeploymentSetCreate(d *schema.ResourceData, met
 	}
 	d.SetId(fmt.Sprint(resp.DeploymentSetId))
 
-	return resourceAlibabacloudStackEcsDeploymentSetRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEcsDeploymentSetRead(d *schema.ResourceData, meta interface{}) error {
@@ -184,7 +179,7 @@ func resourceAlibabacloudStackEcsDeploymentSetUpdate(d *schema.ResourceData, met
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
-	return resourceAlibabacloudStackEcsDeploymentSetRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEcsDeploymentSetDelete(d *schema.ResourceData, meta interface{}) error {

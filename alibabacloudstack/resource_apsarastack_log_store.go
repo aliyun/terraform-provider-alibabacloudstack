@@ -15,15 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackLogStore() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackLogStoreCreate,
-		Read:   resourceAlibabacloudStackLogStoreRead,
-		Update: resourceAlibabacloudStackLogStoreUpdate,
-		Delete: resourceAlibabacloudStackLogStoreDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:     schema.TypeString,
@@ -117,6 +109,8 @@ func resourceAlibabacloudStackLogStore() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackLogStoreCreate, resourceAlibabacloudStackLogStoreRead, resourceAlibabacloudStackLogStoreUpdate, resourceAlibabacloudStackLogStoreDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interface{}) error {
@@ -177,7 +171,7 @@ func resourceAlibabacloudStackLogStoreCreate(d *schema.ResourceData, meta interf
 		return err
 	}
 	d.SetId(fmt.Sprintf("%s%s%s", d.Get("project").(string), COLON_SEPARATED, d.Get("name").(string)))
-	return resourceAlibabacloudStackLogStoreUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogStoreRead(d *schema.ResourceData, meta interface{}) error {
@@ -241,7 +235,7 @@ func resourceAlibabacloudStackLogStoreUpdate(d *schema.ResourceData, meta interf
 	logService := LogService{client}
 
 	if d.IsNewResource() {
-		return resourceAlibabacloudStackLogStoreRead(d, meta)
+		return nil
 	}
 
 	parts, err := ParseResourceId(d.Id(), 2)
@@ -300,7 +294,7 @@ func resourceAlibabacloudStackLogStoreUpdate(d *schema.ResourceData, meta interf
 	}
 	d.Partial(false)
 
-	return resourceAlibabacloudStackLogStoreRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogStoreDelete(d *schema.ResourceData, meta interface{}) error {

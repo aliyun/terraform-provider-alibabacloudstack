@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackEssLifecycleHook() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEssLifeCycleHookCreate,
-		Read:   resourceAlibabacloudStackEssLifeCycleHookRead,
-		Update: resourceAlibabacloudStackEssLifeCycleHookUpdate,
-		Delete: resourceAlibabacloudStackEssLifeCycleHookDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"scaling_group_id": {
 				Type:     schema.TypeString,
@@ -74,6 +66,8 @@ func resourceAlibabacloudStackEssLifecycleHook() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEssLifeCycleHookCreate, resourceAlibabacloudStackEssLifeCycleHookRead, resourceAlibabacloudStackEssLifeCycleHookUpdate, resourceAlibabacloudStackEssLifeCycleHookDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEssLifeCycleHookCreate(d *schema.ResourceData, meta interface{}) error {
@@ -103,7 +97,7 @@ func resourceAlibabacloudStackEssLifeCycleHookCreate(d *schema.ResourceData, met
 		return err
 	}
 
-	return resourceAlibabacloudStackEssLifeCycleHookRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssLifeCycleHookRead(d *schema.ResourceData, meta interface{}) error {
@@ -169,7 +163,7 @@ func resourceAlibabacloudStackEssLifeCycleHookUpdate(d *schema.ResourceData, met
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	return resourceAlibabacloudStackEssLifeCycleHookRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssLifeCycleHookDelete(d *schema.ResourceData, meta interface{}) error {

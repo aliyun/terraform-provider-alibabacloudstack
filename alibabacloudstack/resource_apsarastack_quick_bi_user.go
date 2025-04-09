@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackQuickBiUser() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackQuickBiUserCreate,
-		Read:   resourceAlibabacloudStackQuickBiUserRead,
-		Update: resourceAlibabacloudStackQuickBiUserUpdate,
-		Delete: resourceAlibabacloudStackQuickBiUserDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"account_id": {
 				Type:     schema.TypeString,
@@ -57,6 +50,8 @@ func resourceAlibabacloudStackQuickBiUser() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackQuickBiUserCreate, resourceAlibabacloudStackQuickBiUserRead, resourceAlibabacloudStackQuickBiUserUpdate, resourceAlibabacloudStackQuickBiUserDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackQuickBiUserCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -80,7 +75,7 @@ func resourceAlibabacloudStackQuickBiUserCreate(d *schema.ResourceData, meta int
 	responseResult := response["Result"].(map[string]interface{})
 	d.SetId(fmt.Sprint(responseResult["UserId"]))
 
-	return resourceAlibabacloudStackQuickBiUserRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackQuickBiUserRead(d *schema.ResourceData, meta interface{}) error {
@@ -132,7 +127,7 @@ func resourceAlibabacloudStackQuickBiUserUpdate(d *schema.ResourceData, meta int
 			return err
 		}
 	}
-	return resourceAlibabacloudStackQuickBiUserRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackQuickBiUserDelete(d *schema.ResourceData, meta interface{}) (err error) {

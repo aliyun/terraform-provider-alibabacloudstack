@@ -17,14 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackPolardbInstanceCreate,
-		Read:   resourceAlibabacloudStackPolardbInstanceRead,
-		Update: resourceAlibabacloudStackPolardbInstanceUpdate,
-		Delete: resourceAlibabacloudStackPolardbInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(40 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -228,12 +221,9 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackPolardbInstanceCreate, resourceAlibabacloudStackPolardbInstanceRead, resourceAlibabacloudStackPolardbInstanceUpdate, resourceAlibabacloudStackPolardbInstanceDelete)
+	return resource
 }
-
-// func parameterToHash(v interface{}) int {
-// 	m := v.(map[string]interface{})
-// 	return hashcode.String(m["name"].(string) + "|" + m["value"].(string))
-// }
 
 func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
@@ -446,7 +436,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		}
 		log.Print("enabled SSL")
 	}
-	return resourceAlibabacloudStackPolardbInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -580,7 +570,7 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackPolardbInstanceRead(d, meta)
+		return nil
 	}
 
 	if d.HasChanges("instance_name", "db_instance_description") {
@@ -746,7 +736,7 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 			log.Print("Updated SSL to false")
 		}
 	}
-	return resourceAlibabacloudStackPolardbInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta interface{}) error {

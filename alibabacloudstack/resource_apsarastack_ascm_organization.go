@@ -15,11 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmOrganization() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmOrganizationCreate,
-		Read:   resourceAlibabacloudStackAscmOrganizationRead,
-		Update: resourceAlibabacloudStackAscmOrganizationUpdate,
-		Delete: resourceAlibabacloudStackAscmOrganizationDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"org_id": {
 				Type:     schema.TypeString,
@@ -45,6 +41,8 @@ func resourceAlibabacloudStackAscmOrganization() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmOrganizationCreate, resourceAlibabacloudStackAscmOrganizationRead, resourceAlibabacloudStackAscmOrganizationUpdate, resourceAlibabacloudStackAscmOrganizationDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, meta interface{}) error {
@@ -95,7 +93,7 @@ func resourceAlibabacloudStackAscmOrganizationCreate(d *schema.ResourceData, met
 
 	d.SetId(fmt.Sprint(check.Data[0].ID))
 
-	return resourceAlibabacloudStackAscmOrganizationUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmOrganizationUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -140,7 +138,7 @@ func resourceAlibabacloudStackAscmOrganizationUpdate(d *schema.ResourceData, met
 
 	d.SetId(fmt.Sprint(check.Data[0].ID))
 
-	return resourceAlibabacloudStackAscmOrganizationRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmOrganizationRead(d *schema.ResourceData, meta interface{}) error {

@@ -7,14 +7,7 @@ import (
 )
 
 func resourceAlibabacloudStackQuickBiUserGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackQuickBiUserGroupCreate,
-		Read:   resourceAlibabacloudStackQuickBiUserGroupRead,
-		Update: resourceAlibabacloudStackQuickBiUserGroupUpdate,
-		Delete: resourceAlibabacloudStackQuickBiUserGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"user_group_id": {
 				Type:     schema.TypeString,
@@ -36,6 +29,9 @@ func resourceAlibabacloudStackQuickBiUserGroup() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackQuickBiUserGroupCreate, 
+		resourceAlibabacloudStackQuickBiUserGroupRead, resourceAlibabacloudStackQuickBiUserGroupUpdate, resourceAlibabacloudStackQuickBiUserGroupDelete)
+	return resource
 }
 
 var UserGroupName string
@@ -69,7 +65,7 @@ func resourceAlibabacloudStackQuickBiUserGroupCreate(d *schema.ResourceData, met
 	UserGroupId = responseResult
 	d.SetId(responseResult)
 
-	return resourceAlibabacloudStackQuickBiUserGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackQuickBiUserGroupRead(d *schema.ResourceData, meta interface{}) error {
@@ -111,7 +107,7 @@ func resourceAlibabacloudStackQuickBiUserGroupUpdate(d *schema.ResourceData, met
 		}
 	}
 
-	return resourceAlibabacloudStackQuickBiUserGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackQuickBiUserGroupDelete(d *schema.ResourceData, meta interface{}) (err error) {

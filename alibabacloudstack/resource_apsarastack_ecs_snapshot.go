@@ -12,16 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackSnapshot() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSnapshotCreate,
-		Read:   resourceAlibabacloudStackSnapshotRead,
-		Update: resourceAlibabacloudStackSnapshotUpdate,
-		Delete: resourceAlibabacloudStackSnapshotDelete,
-
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(DefaultTimeout * time.Second),
@@ -36,7 +27,7 @@ func resourceAlibabacloudStackSnapshot() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:true,
+				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'snapshot_name' instead.",
@@ -45,7 +36,7 @@ func resourceAlibabacloudStackSnapshot() *schema.Resource {
 			"snapshot_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:true,
+				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
@@ -58,6 +49,8 @@ func resourceAlibabacloudStackSnapshot() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSnapshotCreate, resourceAlibabacloudStackSnapshotRead, resourceAlibabacloudStackSnapshotUpdate, resourceAlibabacloudStackSnapshotDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
@@ -99,7 +92,7 @@ func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interf
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackSnapshotUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSnapshotRead(d *schema.ResourceData, meta interface{}) error {
@@ -135,7 +128,8 @@ func resourceAlibabacloudStackSnapshotUpdate(d *schema.ResourceData, meta interf
 	if err := setTags(client, TagResourceSnapshot, d); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackSnapshotRead(d, meta)
+
+	return nil
 }
 
 func resourceAlibabacloudStackSnapshotDelete(d *schema.ResourceData, meta interface{}) error {

@@ -16,11 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmPasswordPolicy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmPasswordPolicyCreate,
-		Read:   resourceAlibabacloudStackAscmPasswordPolicyRead,
-		Update: resourceAlibabacloudStackAscmPasswordPolicyUpdate,
-		Delete: resourceAlibabacloudStackAscmPasswordPolicyDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"hard_expiry": {
 				Type:     schema.TypeBool,
@@ -61,6 +57,8 @@ func resourceAlibabacloudStackAscmPasswordPolicy() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmPasswordPolicyCreate, resourceAlibabacloudStackAscmPasswordPolicyRead, nil, resourceAlibabacloudStackAscmPasswordPolicyDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmPasswordPolicyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -97,7 +95,7 @@ func resourceAlibabacloudStackAscmPasswordPolicyCreate(d *schema.ResourceData, m
 
 	d.SetId(fmt.Sprint(response.Data.ID))
 
-	return resourceAlibabacloudStackAscmPasswordPolicyUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmPasswordPolicyRead(d *schema.ResourceData, meta interface{}) error {
@@ -123,10 +121,6 @@ func resourceAlibabacloudStackAscmPasswordPolicyRead(d *schema.ResourceData, met
 	d.Set("password_reuse_prevention", object.Data.PasswordReusePrevention)
 
 	return nil
-}
-
-func resourceAlibabacloudStackAscmPasswordPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackAscmPasswordPolicyRead(d, meta)
 }
 
 func resourceAlibabacloudStackAscmPasswordPolicyDelete(d *schema.ResourceData, meta interface{}) error {

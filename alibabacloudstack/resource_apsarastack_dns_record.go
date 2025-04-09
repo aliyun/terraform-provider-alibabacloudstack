@@ -13,15 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackDnsRecord() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDnsRecordCreate,
-		Read:   resourceAlibabacloudStackDnsRecordRead,
-		Update: resourceAlibabacloudStackDnsRecordUpdate,
-		Delete: resourceAlibabacloudStackDnsRecordDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
 				Type:     schema.TypeString,
@@ -67,6 +59,8 @@ func resourceAlibabacloudStackDnsRecord() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDnsRecordCreate, resourceAlibabacloudStackDnsRecordRead, resourceAlibabacloudStackDnsRecordUpdate, resourceAlibabacloudStackDnsRecordDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -95,7 +89,6 @@ func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta inter
 		rrsets = expandStringList(v.(*schema.Set).List())
 		for i, key := range rrsets {
 			request.QueryParams[fmt.Sprintf("RDatas.%d.Value", i+1)] = key
-
 		}
 	}
 	bresponse, err := client.ProcessCommonRequest(request)
@@ -117,14 +110,12 @@ func resourceAlibabacloudStackDnsRecordCreate(d *schema.ResourceData, meta inter
 		d.Set("record_id", recordId)
 		d.SetId(fmt.Sprintf("%s:%s", ZoneId, recordId))
 	}
-
-	return resourceAlibabacloudStackDnsRecordUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interface{}) error {
 	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
 	dnsService := &DnsService{client: client}
 	object, err := dnsService.DescribeDnsRecord(d.Id())
 	if err != nil {
@@ -145,7 +136,6 @@ func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interfa
 	d.Set("type", object.Data[0].Type)
 	d.Set("remark", object.Data[0].Remark)
 	d.Set("lba_strategy", object.Data[0].LbaStrategy)
-
 	return nil
 }
 
@@ -161,9 +151,7 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsRecordExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	attributeUpdate := false
-
 	var desc string
-
 	if d.HasChange("remark") {
 		if v, ok := d.GetOk("remark"); ok {
 			desc = v.(string)
@@ -189,10 +177,8 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		}
 		check.Data[0].Remark = desc
 	}
-
 	var Type string
 	var Ttl int
-
 	if d.HasChange("type") {
 		if v, ok := d.GetOk("type"); ok {
 			Type = v.(string)
@@ -217,11 +203,9 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		}
 		check.Data[0].TTL = Ttl
 	}
-
 	if d.HasChange("rr_set") {
 		attributeUpdate = true
 	}
-
 	if !d.IsNewResource() && attributeUpdate {
 		request := make(map[string]interface{})
 		var rrsets []string
@@ -240,27 +224,23 @@ func resourceAlibabacloudStackDnsRecordUpdate(d *schema.ResourceData, meta inter
 		request["Name"] = Name
 		request["Remark"] = check.Data[0].Remark
 		request["ClientToken"] = buildClientToken(action)
-
 		_, err := client.DoTeaRequest("POST", "CloudDns", "2021-06-24", action, "", nil, nil, request)
 		if err != nil {
 			return err
 		}
 	}
-
-	return resourceAlibabacloudStackDnsRecordRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDnsRecordDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ID := d.Get("record_id").(string)
 	ZoneId := SplitDnsZone(d.Get("zone_id").(string))
-
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DeleteGlobalZoneRecord", "")
 	request.Scheme = "HTTP" // CloudDns不支持HTTPS
 	request.QueryParams["Id"] = ID
 	request.QueryParams["ZoneId"] = ZoneId
 	bresponse, err := client.ProcessCommonRequest(request)
-
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"DomainRecordNotBelongToUser"}) {
 			return nil

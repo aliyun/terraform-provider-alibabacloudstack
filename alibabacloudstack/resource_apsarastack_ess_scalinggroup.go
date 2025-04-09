@@ -17,15 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackEssScalingGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEssScalingGroupCreate,
-		Read:   resourceAlibabacloudStackEssScalingGroupRead,
-		Update: resourceAlibabacloudStackEssScalingGroupUpdate,
-		Delete: resourceAlibabacloudStackEssScalingGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"min_size": {
 				Type:         schema.TypeInt,
@@ -81,6 +73,8 @@ func resourceAlibabacloudStackEssScalingGroup() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEssScalingGroupCreate, resourceAlibabacloudStackEssScalingGroupRead, resourceAlibabacloudStackEssScalingGroupUpdate, resourceAlibabacloudStackEssScalingGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEssScalingGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -120,7 +114,7 @@ func resourceAlibabacloudStackEssScalingGroupCreate(d *schema.ResourceData, meta
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackEssScalingGroupUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssScalingGroupRead(d *schema.ResourceData, meta interface{}) error {
@@ -230,7 +224,7 @@ func resourceAlibabacloudStackEssScalingGroupUpdate(d *schema.ResourceData, meta
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	d.Partial(false)
-	return resourceAlibabacloudStackEssScalingGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssScalingGroupDelete(d *schema.ResourceData, meta interface{}) error {

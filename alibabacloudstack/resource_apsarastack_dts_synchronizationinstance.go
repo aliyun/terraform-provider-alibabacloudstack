@@ -16,14 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackDtsSynchronizationInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDtsSynchronizationInstanceCreate,
-		Read:   resourceAlibabacloudStackDtsSynchronizationInstanceRead,
-		Update: resourceAlibabacloudStackSynchronizationInstanceUpdate,
-		Delete: resourceAlibabacloudStackDtsSynchronizationInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"compute_unit": {
 				Type:     schema.TypeInt,
@@ -96,6 +89,11 @@ func resourceAlibabacloudStackDtsSynchronizationInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDtsSynchronizationInstanceCreate, 
+		resourceAlibabacloudStackDtsSynchronizationInstanceRead, 
+		nil, 
+		resourceAlibabacloudStackDtsSynchronizationInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDtsSynchronizationInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -184,11 +182,7 @@ func resourceAlibabacloudStackDtsSynchronizationInstanceCreate(d *schema.Resourc
 	}
 	d.SetId(fmt.Sprint(response["InstanceId"]))
 
-	return resourceAlibabacloudStackDtsSynchronizationInstanceRead(d, meta)
-}
-
-func resourceAlibabacloudStackSynchronizationInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackDtsSynchronizationInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDtsSynchronizationInstanceRead(d *schema.ResourceData, meta interface{}) error {
@@ -207,10 +201,6 @@ func resourceAlibabacloudStackDtsSynchronizationInstanceRead(d *schema.ResourceD
 	d.Set("payment_type", convertDtsSyncPaymentTypeResponse(object["PayType"]))
 	d.Set("dts_job_id", object["SynchronizationJobId"])
 	return nil
-}
-func resourceAlibabacloudStackDtsSynchronizationInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
-	log.Println(fmt.Sprintf("[WARNING] The resouce has not update operation."))
-	return resourceAlibabacloudStackDtsSynchronizationInstanceRead(d, meta)
 }
 
 func resourceAlibabacloudStackDtsSynchronizationInstanceDelete(d *schema.ResourceData, meta interface{}) error {

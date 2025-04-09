@@ -20,15 +20,7 @@ const dbConnectionPrefixWithSuffixRegex = "^([a-zA-Z0-9\\-_]+)" + dbConnectionSu
 var dbConnectionPrefixWithSuffixRegexp = regexp.MustCompile(dbConnectionPrefixWithSuffixRegex)
 
 func resourceAlibabacloudStackDBReadWriteSplittingConnection() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDBReadWriteSplittingConnectionCreate,
-		Read:   resourceAlibabacloudStackDBReadWriteSplittingConnectionRead,
-		Update: resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate,
-		Delete: resourceAlibabacloudStackDBReadWriteSplittingConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -66,6 +58,11 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnection() *schema.Resource 
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDBReadWriteSplittingConnectionCreate, 
+		resourceAlibabacloudStackDBReadWriteSplittingConnectionRead, 
+		resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate, 
+		resourceAlibabacloudStackDBReadWriteSplittingConnectionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDBReadWriteSplittingConnectionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -125,7 +122,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionCreate(d *schema.Res
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBReadWriteSplittingConnectionRead(d *schema.ResourceData, meta interface{}) error {
@@ -192,7 +189,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate(d *schema.Res
 	}
 
 	if !update && d.IsNewResource() {
-		return resourceAlibabacloudStackDBReadWriteSplittingConnectionRead(d, meta)
+		return nil
 	}
 
 	if d.HasChange("weight") {
@@ -243,7 +240,7 @@ func resourceAlibabacloudStackDBReadWriteSplittingConnectionUpdate(d *schema.Res
 		}
 	}
 
-	return resourceAlibabacloudStackDBReadWriteSplittingConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBReadWriteSplittingConnectionDelete(d *schema.ResourceData, meta interface{}) error {

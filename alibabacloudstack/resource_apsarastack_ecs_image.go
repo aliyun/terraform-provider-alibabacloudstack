@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackImage() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackImageCreate,
-		Read:   resourceAlibabacloudStackImageRead,
-		Update: resourceAlibabacloudStackImageUpdate,
-		Delete: resourceAlibabacloudStackImageDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
@@ -81,6 +74,8 @@ func resourceAlibabacloudStackImage() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackImageCreate, resourceAlibabacloudStackImageRead, resourceAlibabacloudStackImageUpdate, resourceAlibabacloudStackImageDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackImageCreate(d *schema.ResourceData, meta interface{}) error {
@@ -188,7 +183,7 @@ func resourceAlibabacloudStackImageCreate(d *schema.ResourceData, meta interface
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-	return resourceAlibabacloudStackImageRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackImageUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -198,7 +193,7 @@ func resourceAlibabacloudStackImageUpdate(d *schema.ResourceData, meta interface
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackImageRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackImageRead(d *schema.ResourceData, meta interface{}) error {

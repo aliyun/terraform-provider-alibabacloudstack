@@ -11,15 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackCrEeRepo() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCrEeRepoCreate,
-		Read:   resourceAlibabacloudStackCrEeRepoRead,
-		Update: resourceAlibabacloudStackCrEeRepoUpdate,
-		Delete: resourceAlibabacloudStackCrEeRepoDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -61,6 +53,8 @@ func resourceAlibabacloudStackCrEeRepo() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCrEeRepoCreate, resourceAlibabacloudStackCrEeRepoRead, resourceAlibabacloudStackCrEeRepoUpdate, resourceAlibabacloudStackCrEeRepoDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackCrEeRepoCreate(d *schema.ResourceData, meta interface{}) error {
@@ -106,7 +100,7 @@ func resourceAlibabacloudStackCrEeRepoCreate(d *schema.ResourceData, meta interf
 
 	d.SetId(crService.GenResourceId(instanceId, namespace, repoName))
 
-	return resourceAlibabacloudStackCrEeRepoRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCrEeRepoRead(d *schema.ResourceData, meta interface{}) error {
@@ -170,7 +164,7 @@ func resourceAlibabacloudStackCrEeRepoUpdate(d *schema.ResourceData, meta interf
 
 	}
 
-	return resourceAlibabacloudStackCrEeRepoRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCrEeRepoDelete(d *schema.ResourceData, meta interface{}) error {

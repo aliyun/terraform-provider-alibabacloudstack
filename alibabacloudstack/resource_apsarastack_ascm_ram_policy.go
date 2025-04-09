@@ -16,14 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmRamPolicy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmRamPolicyCreate,
-		Read:   resourceAlibabacloudStackAscmRamPolicyRead,
-		Update: resourceAlibabacloudStackAscmRamPolicyUpdate,
-		Delete: resourceAlibabacloudStackAscmRamPolicyDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -45,6 +38,8 @@ func resourceAlibabacloudStackAscmRamPolicy() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmRamPolicyCreate, resourceAlibabacloudStackAscmRamPolicyRead, resourceAlibabacloudStackAscmRamPolicyUpdate, resourceAlibabacloudStackAscmRamPolicyDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmRamPolicyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -98,7 +93,7 @@ func resourceAlibabacloudStackAscmRamPolicyCreate(d *schema.ResourceData, meta i
 	})
 	d.SetId(check.Data[0].PolicyName + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
 
-	return resourceAlibabacloudStackAscmRamPolicyUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmRamPolicyRead(d *schema.ResourceData, meta interface{}) error {
@@ -203,7 +198,7 @@ func resourceAlibabacloudStackAscmRamPolicyUpdate(d *schema.ResourceData, meta i
 	}
 	d.SetId(name + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
 
-	return resourceAlibabacloudStackAscmRamPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmRamPolicyDelete(d *schema.ResourceData, meta interface{}) error {

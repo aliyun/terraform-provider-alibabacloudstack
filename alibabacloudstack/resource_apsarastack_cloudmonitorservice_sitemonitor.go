@@ -18,15 +18,7 @@ import (
 )
 
 func resourceAlibabacloudStackCmsSiteMonitor() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCmsSiteMonitorCreate,
-		Read:   resourceAlibabacloudStackCmsSiteMonitorRead,
-		Update: resourceAlibabacloudStackCmsSiteMonitorUpdate,
-		Delete: resourceAlibabacloudStackCmsSiteMonitorDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"address": {
 				Type:     schema.TypeString,
@@ -87,6 +79,8 @@ func resourceAlibabacloudStackCmsSiteMonitor() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCmsSiteMonitorCreate, resourceAlibabacloudStackCmsSiteMonitorRead, resourceAlibabacloudStackCmsSiteMonitorUpdate, resourceAlibabacloudStackCmsSiteMonitorDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackCmsSiteMonitorCreate(d *schema.ResourceData, meta interface{}) error {
@@ -141,7 +135,7 @@ func resourceAlibabacloudStackCmsSiteMonitorCreate(d *schema.ResourceData, meta 
 
 	d.SetId(siteMonitor.TaskId)
 
-	return resourceAlibabacloudStackCmsSiteMonitorRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCmsSiteMonitorRead(d *schema.ResourceData, meta interface{}) error {
@@ -224,7 +218,7 @@ func resourceAlibabacloudStackCmsSiteMonitorUpdate(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms_site_monitor", "ModifySiteMonitor", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	return resourceAlibabacloudStackCmsSiteMonitorRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCmsSiteMonitorDelete(d *schema.ResourceData, meta interface{}) error {

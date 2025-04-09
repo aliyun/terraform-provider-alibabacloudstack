@@ -14,12 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackOssBucketQuota() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackOssBucketQuotaCreate,
-		Read:   resourceAlibabacloudStackOssBucketQuotaRead,
-		//Update: resourceAlibabacloudStackOssBucketQuotaCreate,
-		Delete: resourceAlibabacloudStackOssBucketQuotaDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"bucket": {
 				Type:     schema.TypeString,
@@ -33,6 +28,8 @@ func resourceAlibabacloudStackOssBucketQuota() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackOssBucketQuotaCreate, resourceAlibabacloudStackOssBucketQuotaRead, nil, resourceAlibabacloudStackOssBucketQuotaDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta interface{}) error {
@@ -90,7 +87,7 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 	}
 	d.SetId(bucketName)
 
-	return resourceAlibabacloudStackOssBucketKmsRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOssBucketQuotaRead(d *schema.ResourceData, meta interface{}) error {
@@ -199,5 +196,5 @@ func resourceAlibabacloudStackOssBucketQuotaDelete(d *schema.ResourceData, meta 
 	}
 	d.SetId(bucketName)
 
-	return resourceAlibabacloudStackOssBucketKmsRead(d, meta)
+	return nil
 }

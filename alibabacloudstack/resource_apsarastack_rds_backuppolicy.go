@@ -17,15 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackDBBackupPolicy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDBBackupPolicyCreate,
-		Read:   resourceAlibabacloudStackDBBackupPolicyRead,
-		Update: resourceAlibabacloudStackDBBackupPolicyUpdate,
-		Delete: resourceAlibabacloudStackDBBackupPolicyDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -128,6 +120,10 @@ func resourceAlibabacloudStackDBBackupPolicy() *schema.Resource {
 			},
 		},
 	}
+	// XXX: 逻辑特殊，不建议合并
+	setResourceFunc(resource, resourceAlibabacloudStackDBBackupPolicyCreate,
+		resourceAlibabacloudStackDBBackupPolicyRead, resourceAlibabacloudStackDBBackupPolicyUpdate, resourceAlibabacloudStackDBBackupPolicyDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDBBackupPolicyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -154,7 +150,7 @@ func resourceAlibabacloudStackDBBackupPolicyRead(d *schema.ResourceData, meta in
 	d.Set("enable_backup_log", object.EnableBackupLog == "1")
 	d.Set("log_backup_retention_period", object.LogBackupRetentionPeriod)
 	d.Set("local_log_retention_hours", object.LocalLogRetentionHours)
-	if localLogRetentionSpaceInt, err := strconv.Atoi(object.LocalLogRetentionSpace) ; err != nil {
+	if localLogRetentionSpaceInt, err := strconv.Atoi(object.LocalLogRetentionSpace); err != nil {
 		return errmsgs.WrapError(fmt.Errorf("failed to convert LocalLogRetentionSpace to integer: %v", err))
 	} else {
 		d.Set("local_log_retention_space", localLogRetentionSpaceInt)
@@ -174,12 +170,12 @@ func resourceAlibabacloudStackDBBackupPolicyRead(d *schema.ResourceData, meta in
 	}
 	d.Set("log_backup_frequency", object.LogBackupFrequency)
 	d.Set("compress_type", object.CompressType)
-	if archiveBackupRetentionPeriodInt, err := strconv.Atoi(object.ArchiveBackupRetentionPeriod) ; err != nil {
+	if archiveBackupRetentionPeriodInt, err := strconv.Atoi(object.ArchiveBackupRetentionPeriod); err != nil {
 		return errmsgs.WrapError(fmt.Errorf("failed to convert ArchiveBackupRetentionPeriod to integer: %v", err))
 	} else {
 		d.Set("archive_backup_retention_period", archiveBackupRetentionPeriodInt)
 	}
-	if archiveBackupKeepCountdInt, err := strconv.Atoi(object.ArchiveBackupKeepCount) ; err != nil {
+	if archiveBackupKeepCountdInt, err := strconv.Atoi(object.ArchiveBackupKeepCount); err != nil {
 		return errmsgs.WrapError(fmt.Errorf("failed to convert ArchiveBackupRetentionPeriod to integer: %v", err))
 	} else {
 		d.Set("archive_backup_keep_count", archiveBackupKeepCountdInt)
@@ -194,14 +190,14 @@ func resourceAlibabacloudStackDBBackupPolicyUpdate(d *schema.ResourceData, meta 
 
 	updateForData := false
 	updateForLog := false
-	if d.HasChanges("preferred_backup_period","preferred_backup_time", "backup_retention_period",
-			"compress_type","log_backup_frequency", "archive_backup_retention_period", 
-			"archive_backup_keep_count", "archive_backup_keep_policy") {
+	if d.HasChanges("preferred_backup_period", "preferred_backup_time", "backup_retention_period",
+		"compress_type", "log_backup_frequency", "archive_backup_retention_period",
+		"archive_backup_keep_count", "archive_backup_keep_policy") {
 		updateForData = true
 	}
 
 	if d.HasChanges("enable_backup_log", "log_backup_retention_period", "local_log_retention_hours",
-			"local_log_retention_space", "high_space_usage_protection") {
+		"local_log_retention_space", "high_space_usage_protection") {
 		updateForLog = true
 	}
 
@@ -222,7 +218,7 @@ func resourceAlibabacloudStackDBBackupPolicyUpdate(d *schema.ResourceData, meta 
 		}
 	}
 
-	return resourceAlibabacloudStackDBBackupPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBBackupPolicyDelete(d *schema.ResourceData, meta interface{}) error {

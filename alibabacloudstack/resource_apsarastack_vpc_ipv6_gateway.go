@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackVpcIpv6Gateway() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackVpcIpv6GatewayCreate,
-		Read:   resourceAlibabacloudStackVpcIpv6GatewayRead,
-		Update: resourceAlibabacloudStackVpcIpv6GatewayUpdate,
-		Delete: resourceAlibabacloudStackVpcIpv6GatewayDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
 			Update: schema.DefaultTimeout(1 * time.Minute),
@@ -54,6 +47,8 @@ func resourceAlibabacloudStackVpcIpv6Gateway() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackVpcIpv6GatewayCreate, resourceAlibabacloudStackVpcIpv6GatewayRead, resourceAlibabacloudStackVpcIpv6GatewayUpdate, resourceAlibabacloudStackVpcIpv6GatewayDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackVpcIpv6GatewayCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -84,7 +79,7 @@ func resourceAlibabacloudStackVpcIpv6GatewayCreate(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackVpcIpv6GatewayRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpcIpv6GatewayRead(d *schema.ResourceData, meta interface{}) error {
@@ -166,7 +161,7 @@ func resourceAlibabacloudStackVpcIpv6GatewayUpdate(d *schema.ResourceData, meta 
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackVpcIpv6GatewayRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpcIpv6GatewayDelete(d *schema.ResourceData, meta interface{}) (err error) {

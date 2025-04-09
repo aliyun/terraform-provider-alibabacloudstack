@@ -11,14 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackEhpcJobTemplate() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEhpcJobTemplateCreate,
-		Read:   resourceAlibabacloudStackEhpcJobTemplateRead,
-		Update: resourceAlibabacloudStackEhpcJobTemplateUpdate,
-		Delete: resourceAlibabacloudStackEhpcJobTemplateDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"array_request": {
 				Type:     schema.TypeString,
@@ -91,6 +84,8 @@ func resourceAlibabacloudStackEhpcJobTemplate() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEhpcJobTemplateCreate, resourceAlibabacloudStackEhpcJobTemplateRead, resourceAlibabacloudStackEhpcJobTemplateUpdate, resourceAlibabacloudStackEhpcJobTemplateDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEhpcJobTemplateCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -154,7 +149,7 @@ func resourceAlibabacloudStackEhpcJobTemplateCreate(d *schema.ResourceData, meta
 
 	d.SetId(fmt.Sprint(response["TemplateId"]))
 
-	return resourceAlibabacloudStackEhpcJobTemplateRead(d, meta)
+	return
 }
 
 func resourceAlibabacloudStackEhpcJobTemplateRead(d *schema.ResourceData, meta interface{}) error {
@@ -265,7 +260,7 @@ func resourceAlibabacloudStackEhpcJobTemplateUpdate(d *schema.ResourceData, meta
 		return err
 	}
 
-	return resourceAlibabacloudStackEhpcJobTemplateRead(d, meta)
+	return
 }
 
 func resourceAlibabacloudStackEhpcJobTemplateDelete(d *schema.ResourceData, meta interface{}) (err error) {

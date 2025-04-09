@@ -17,12 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackOssBucketObject() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackOssBucketObjectPut,
-		Read:   resourceAlibabacloudStackOssBucketObjectRead,
-		Update: resourceAlibabacloudStackOssBucketObjectPut,
-		Delete: resourceAlibabacloudStackOssBucketObjectDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"bucket": {
 				Type:     schema.TypeString,
@@ -107,6 +102,11 @@ func resourceAlibabacloudStackOssBucketObject() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackOssBucketObjectPut, 
+		resourceAlibabacloudStackOssBucketObjectRead, 
+		resourceAlibabacloudStackOssBucketObjectPut, 
+		resourceAlibabacloudStackOssBucketObjectDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta interface{}) error {
@@ -167,7 +167,7 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 	}
 
 	d.SetId(key)
-	return resourceAlibabacloudStackOssBucketObjectRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta interface{}) error {

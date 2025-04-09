@@ -12,13 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackOosExecution() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackOosExecutionCreate,
-		Read:   resourceAlibabacloudStackOosExecutionRead,
-		Delete: resourceAlibabacloudStackOosExecutionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(11 * time.Minute),
 		},
@@ -127,6 +121,8 @@ func resourceAlibabacloudStackOosExecution() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackOosExecutionCreate, resourceAlibabacloudStackOosExecutionRead, nil, resourceAlibabacloudStackOosExecutionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackOosExecutionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -180,7 +176,7 @@ func resourceAlibabacloudStackOosExecutionCreate(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackOosExecutionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOosExecutionRead(d *schema.ResourceData, meta interface{}) error {

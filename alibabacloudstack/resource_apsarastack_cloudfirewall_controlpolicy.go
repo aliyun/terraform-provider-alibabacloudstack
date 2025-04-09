@@ -10,14 +10,7 @@ import (
 )
 
 func resourceAlibabacloudStackCloudFirewallControlPolicy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCloudFirewallControlPolicyCreate,
-		Read:   resourceAlibabacloudStackCloudFirewallControlPolicyRead,
-		Update: resourceAlibabacloudStackCloudFirewallControlPolicyUpdate,
-		Delete: resourceAlibabacloudStackCloudFirewallControlPolicyDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"acl_action": {
 				Type:         schema.TypeString,
@@ -106,6 +99,11 @@ func resourceAlibabacloudStackCloudFirewallControlPolicy() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCloudFirewallControlPolicyCreate,
+		resourceAlibabacloudStackCloudFirewallControlPolicyRead, 
+		resourceAlibabacloudStackCloudFirewallControlPolicyUpdate, 
+		resourceAlibabacloudStackCloudFirewallControlPolicyDelete)
+	return resource
 }
 
 func suppressIfDestPortTypeIsNotPort(k, old, new string, d *schema.ResourceData) bool {
@@ -163,7 +161,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyCreate(d *schema.Resourc
 
 	d.SetId(fmt.Sprint(response["AclUuid"], ":", request["Direction"]))
 
-	return resourceAlibabacloudStackCloudFirewallControlPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCloudFirewallControlPolicyRead(d *schema.ResourceData, meta interface{}) error {
@@ -244,7 +242,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyUpdate(d *schema.Resourc
 			return err
 		}
 	}
-	return resourceAlibabacloudStackCloudFirewallControlPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCloudFirewallControlPolicyDelete(d *schema.ResourceData, meta interface{}) (err error) {

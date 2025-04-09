@@ -12,11 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackRamRoleAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackInstanceRoleAttachmentCreate,
-		Read:   resourceAlibabacloudStackInstanceRoleAttachmentRead,
-		Delete: resourceAlibabacloudStackInstanceRoleAttachmentDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"role_name": {
 				Type:     schema.TypeString,
@@ -31,6 +27,12 @@ func resourceAlibabacloudStackRamRoleAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackInstanceRoleAttachmentCreate,
+		resourceAlibabacloudStackInstanceRoleAttachmentRead,
+		nil,
+		resourceAlibabacloudStackInstanceRoleAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackInstanceRoleAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -77,7 +79,7 @@ func resourceAlibabacloudStackInstanceRoleAttachmentCreate(d *schema.ResourceDat
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ram_role_attachment", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	return resourceAlibabacloudStackInstanceRoleAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackInstanceRoleAttachmentRead(d *schema.ResourceData, meta interface{}) error {

@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackPolardbConnection() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackPolardbConnectionCreate,
-		Read:   resourceAlibabacloudStackPolardbConnectionRead,
-		Update: resourceAlibabacloudStackPolardbConnectionUpdate,
-		Delete: resourceAlibabacloudStackPolardbConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -52,6 +44,12 @@ func resourceAlibabacloudStackPolardbConnection() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackPolardbConnectionCreate,
+		resourceAlibabacloudStackPolardbConnectionRead,
+		resourceAlibabacloudStackPolardbConnectionUpdate,
+		resourceAlibabacloudStackPolardbConnectionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackPolardbConnectionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -89,7 +87,7 @@ func resourceAlibabacloudStackPolardbConnectionCreate(d *schema.ResourceData, me
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackPolardbConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbConnectionRead(d *schema.ResourceData, meta interface{}) error {
@@ -171,7 +169,7 @@ func resourceAlibabacloudStackPolardbConnectionUpdate(d *schema.ResourceData, me
 			return errmsgs.WrapError(err)
 		}
 	}
-	return resourceAlibabacloudStackPolardbConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbConnectionDelete(d *schema.ResourceData, meta interface{}) error {

@@ -11,15 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackCrEeNamespace() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCrEeNamespaceCreate,
-		Read:   resourceAlibabacloudStackCrEeNamespaceRead,
-		Update: resourceAlibabacloudStackCrEeNamespaceUpdate,
-		Delete: resourceAlibabacloudStackCrEeNamespaceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -43,6 +35,8 @@ func resourceAlibabacloudStackCrEeNamespace() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCrEeNamespaceCreate, resourceAlibabacloudStackCrEeNamespaceRead, resourceAlibabacloudStackCrEeNamespaceUpdate, resourceAlibabacloudStackCrEeNamespaceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackCrEeNamespaceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -82,7 +76,7 @@ func resourceAlibabacloudStackCrEeNamespaceCreate(d *schema.ResourceData, meta i
 	}
 	d.SetId(crService.GenResourceId(instanceId, namespace))
 
-	return resourceAlibabacloudStackCrEeNamespaceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCrEeNamespaceRead(d *schema.ResourceData, meta interface{}) error {
@@ -122,12 +116,12 @@ func resourceAlibabacloudStackCrEeNamespaceUpdate(d *schema.ResourceData, meta i
 			"DefaultRepoType": visibility,
 		})
 
-	bresponse, err := client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
@@ -143,7 +137,7 @@ func resourceAlibabacloudStackCrEeNamespaceUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	return resourceAlibabacloudStackCrEeNamespaceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCrEeNamespaceDelete(d *schema.ResourceData, meta interface{}) error {

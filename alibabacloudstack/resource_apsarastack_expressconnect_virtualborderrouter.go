@@ -16,14 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackExpressConnectVirtualBorderRouter() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackExpressConnectVirtualBorderRouterCreate,
-		Read:   resourceAlibabacloudStackExpressConnectVirtualBorderRouterRead,
-		Update: resourceAlibabacloudStackExpressConnectVirtualBorderRouterUpdate,
-		Delete: resourceAlibabacloudStackExpressConnectVirtualBorderRouterDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Update: schema.DefaultTimeout(2 * time.Minute),
 		},
@@ -121,6 +114,8 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouter() *schema.Resour
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackExpressConnectVirtualBorderRouterCreate, resourceAlibabacloudStackExpressConnectVirtualBorderRouterRead, resourceAlibabacloudStackExpressConnectVirtualBorderRouterUpdate, resourceAlibabacloudStackExpressConnectVirtualBorderRouterDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackExpressConnectVirtualBorderRouterCreate(d *schema.ResourceData, meta interface{}) error {
@@ -189,7 +184,7 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterCreate(d *schema.
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_express_connect_virtual_border_router", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	return resourceAlibabacloudStackExpressConnectVirtualBorderRouterUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackExpressConnectVirtualBorderRouterRead(d *schema.ResourceData, meta interface{}) error {
@@ -432,7 +427,7 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterUpdate(d *schema.
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackExpressConnectVirtualBorderRouterRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackExpressConnectVirtualBorderRouterDelete(d *schema.ResourceData, meta interface{}) error {

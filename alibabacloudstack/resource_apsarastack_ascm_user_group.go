@@ -13,11 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmUserGroupCreate,
-		Read:   resourceAlibabacloudStackAscmUserGroupRead,
-		Update: resourceAlibabacloudStackAscmUserGroupUpdate,
-		Delete: resourceAlibabacloudStackAscmUserGroupDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"group_name": {
 				Type:     schema.TypeString,
@@ -40,11 +36,15 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 			},
 			"role_ids": {
 				Type:     schema.TypeSet,
+				Optional:   true,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmUserGroupCreate,
+		resourceAlibabacloudStackAscmUserGroupRead, nil, resourceAlibabacloudStackAscmUserGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -92,11 +92,7 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 
 	d.SetId(groupName)
 
-	return resourceAlibabacloudStackAscmUserGroupUpdate(d, meta)
-}
-
-func resourceAlibabacloudStackAscmUserGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackAscmUserGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserGroupRead(d *schema.ResourceData, meta interface{}) error {

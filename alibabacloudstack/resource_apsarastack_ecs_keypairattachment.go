@@ -16,14 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackKeyPairAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackKeyPairAttachmentCreate,
-		Read:   resourceAlibabacloudStackKeyPairAttachmentRead,
-		Delete: resourceAlibabacloudStackKeyPairAttachmentDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"key_name": {
 				Type:         schema.TypeString,
@@ -44,6 +37,8 @@ func resourceAlibabacloudStackKeyPairAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackKeyPairAttachmentCreate, resourceAlibabacloudStackKeyPairAttachmentRead, nil, resourceAlibabacloudStackKeyPairAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackKeyPairAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -101,7 +96,7 @@ func resourceAlibabacloudStackKeyPairAttachmentCreate(d *schema.ResourceData, me
 
 	d.SetId(keyName + ":" + convertListToJsonString(instanceIds))
 
-	return resourceAlibabacloudStackKeyPairAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKeyPairAttachmentRead(d *schema.ResourceData, meta interface{}) error {

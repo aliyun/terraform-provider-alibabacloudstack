@@ -13,15 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackSnatEntry() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSnatEntryCreate,
-		Read:   resourceAlibabacloudStackSnatEntryRead,
-		Update: resourceAlibabacloudStackSnatEntryUpdate,
-		Delete: resourceAlibabacloudStackSnatEntryDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"snat_table_id": {
 				Type:     schema.TypeString,
@@ -50,6 +42,12 @@ func resourceAlibabacloudStackSnatEntry() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackSnatEntryCreate,
+		resourceAlibabacloudStackSnatEntryRead,
+		resourceAlibabacloudStackSnatEntryUpdate,
+		resourceAlibabacloudStackSnatEntryDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSnatEntryCreate(d *schema.ResourceData, meta interface{}) error {
@@ -92,7 +90,7 @@ func resourceAlibabacloudStackSnatEntryCreate(d *schema.ResourceData, meta inter
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackSnatEntryRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSnatEntryRead(d *schema.ResourceData, meta interface{}) error {
@@ -165,7 +163,7 @@ func resourceAlibabacloudStackSnatEntryUpdate(d *schema.ResourceData, meta inter
 			return errmsgs.WrapError(err)
 		}
 	}
-	return resourceAlibabacloudStackSnatEntryRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSnatEntryDelete(d *schema.ResourceData, meta interface{}) error {

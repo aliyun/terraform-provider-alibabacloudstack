@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackEssScalingRule() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEssScalingRuleCreate,
-		Read:   resourceAlibabacloudStackEssScalingRuleRead,
-		Update: resourceAlibabacloudStackEssScalingRuleUpdate,
-		Delete: resourceAlibabacloudStackEssScalingRuleDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"scaling_group_id": {
 				Type:     schema.TypeString,
@@ -58,6 +51,8 @@ func resourceAlibabacloudStackEssScalingRule() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEssScalingRuleCreate, resourceAlibabacloudStackEssScalingRuleRead, resourceAlibabacloudStackEssScalingRuleUpdate, resourceAlibabacloudStackEssScalingRuleDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEssScalingRuleCreate(d *schema.ResourceData, meta interface{}) error {
@@ -83,7 +78,7 @@ func resourceAlibabacloudStackEssScalingRuleCreate(d *schema.ResourceData, meta 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	d.SetId(bresponse.ScalingRuleId)
 
-	return resourceAlibabacloudStackEssScalingRuleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssScalingRuleRead(d *schema.ResourceData, meta interface{}) error {
@@ -184,7 +179,7 @@ func resourceAlibabacloudStackEssScalingRuleUpdate(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	return resourceAlibabacloudStackEssScalingRuleRead(d, meta)
+	return nil
 }
 
 func buildAlibabacloudStackEssScalingRuleArgs(d *schema.ResourceData, meta interface{}) (*ess.CreateScalingRuleRequest, error) {

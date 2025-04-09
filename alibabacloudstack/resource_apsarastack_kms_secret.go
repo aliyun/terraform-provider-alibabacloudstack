@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackKmsSecret() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackKmsSecretCreate,
-		Read:   resourceAlibabacloudStackKmsSecretRead,
-		Update: resourceAlibabacloudStackKmsSecretUpdate,
-		Delete: resourceAlibabacloudStackKmsSecretDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"arn": {
 				Type:     schema.TypeString,
@@ -82,6 +75,8 @@ func resourceAlibabacloudStackKmsSecret() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackKmsSecretCreate, resourceAlibabacloudStackKmsSecretRead, resourceAlibabacloudStackKmsSecretUpdate, resourceAlibabacloudStackKmsSecretDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackKmsSecretCreate(d *schema.ResourceData, meta interface{}) error {
@@ -130,7 +125,7 @@ func resourceAlibabacloudStackKmsSecretCreate(d *schema.ResourceData, meta inter
 	response, _ := raw.(*kms.CreateSecretResponse)
 	d.SetId(response.SecretName)
 
-	return resourceAlibabacloudStackKmsSecretRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKmsSecretRead(d *schema.ResourceData, meta interface{}) error {
@@ -178,7 +173,6 @@ func resourceAlibabacloudStackKmsSecretUpdate(d *schema.ResourceData, meta inter
 		if err := kmsService.setResourceTags(d, "secret"); err != nil {
 			return errmsgs.WrapError(err)
 		}
-		//d.SetPartial("tags")
 	}
 	if d.HasChange("description") {
 		request := kms.CreateUpdateSecretRequest()
@@ -197,7 +191,6 @@ func resourceAlibabacloudStackKmsSecretUpdate(d *schema.ResourceData, meta inter
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		//d.SetPartial("description")
 	}
 	update := false
 	request := kms.CreatePutSecretValueRequest()
@@ -232,13 +225,9 @@ func resourceAlibabacloudStackKmsSecretUpdate(d *schema.ResourceData, meta inter
 			}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		//d.SetPartial("secret_data")
-		//d.SetPartial("version_id")
-		//d.SetPartial("secret_data_type")
-		//d.SetPartial("version_stages")
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackKmsSecretRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKmsSecretDelete(d *schema.ResourceData, meta interface{}) error {

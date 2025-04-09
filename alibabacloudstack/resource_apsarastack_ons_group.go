@@ -18,15 +18,7 @@ import (
 )
 
 func resourceAlibabacloudStackOnsGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackOnsGroupCreate,
-		Read:   resourceAlibabacloudStackOnsGroupRead,
-		Update: resourceAlibabacloudStackOnsGroupUpdate,
-		Delete: resourceAlibabacloudStackOnsGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -50,6 +42,9 @@ func resourceAlibabacloudStackOnsGroup() *schema.Resource {
 			},
 		},
 	}
+
+	setResourceFunc(resource, resourceAlibabacloudStackOnsGroupCreate, resourceAlibabacloudStackOnsGroupRead, resourceAlibabacloudStackOnsGroupUpdate, resourceAlibabacloudStackOnsGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackOnsGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -104,7 +99,7 @@ func resourceAlibabacloudStackOnsGroupCreate(d *schema.ResourceData, meta interf
 	log.Printf("groupid and instanceid %s %s", groupId, instanceId)
 	d.SetId(groupId + COLON_SEPARATED + instanceId)
 
-	return resourceAlibabacloudStackOnsGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOnsGroupRead(d *schema.ResourceData, meta interface{}) error {
@@ -130,7 +125,7 @@ func resourceAlibabacloudStackOnsGroupRead(d *schema.ResourceData, meta interfac
 }
 
 func resourceAlibabacloudStackOnsGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackOnsGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOnsGroupDelete(d *schema.ResourceData, meta interface{}) error {

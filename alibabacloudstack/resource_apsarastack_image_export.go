@@ -11,10 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackImageExport() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackImageExportCreate,
-		Read:   resourceAlibabacloudStackImageExportRead,
-		Delete: resourceAlibabacloudStackImageExportDelete,
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 		},
@@ -36,6 +33,8 @@ func resourceAlibabacloudStackImageExport() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackImageExportCreate, resourceAlibabacloudStackImageExportRead, nil, resourceAlibabacloudStackImageExportDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackImageExportCreate(d *schema.ResourceData, meta interface{}) error {
@@ -69,7 +68,7 @@ func resourceAlibabacloudStackImageExportCreate(d *schema.ResourceData, meta int
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-	return resourceAlibabacloudStackImageExportRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackImageExportRead(d *schema.ResourceData, meta interface{}) error {
@@ -86,7 +85,7 @@ func resourceAlibabacloudStackImageExportRead(d *schema.ResourceData, meta inter
 		return errmsgs.WrapError(err)
 	}
 	d.Set("image_id", object.ImageId)
-	return errmsgs.WrapError(err)
+	return nil
 }
 
 func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta interface{}) error {
@@ -116,51 +115,4 @@ func resourceAlibabacloudStackImageExportDelete(d *schema.ResourceData, meta int
 	}
 
 	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucket, objectName, Deleted, DefaultTimeoutMedium))
-
 }
-
-// 	request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoApi", "")
-// 	request.QueryParams["AppAction"] = "DeleteObjects"
-// 	request.QueryParams["AppName"] = "one-console-app-oss"
-// 	request.QueryParams["Params"] = "{\"region\":\"" + client.RegionId + "\",\"params\":{\"bucketName\":\"" + d.Get("oss_bucket").(string) + "\",\"objects\":[\"" + objectName + "\"]}}"
-// 	// mergeMaps(request.QueryParams, map[string]string{
-// 	// 	"AppAction": "DeleteObjects",
-// 	// 	"AppName":   "one-console-app-oss",
-// 	// 	"Params":    "{\"region\":\"" + client.RegionId + "\",\"params\":{\"bucketName\":\"" + d.Get("oss_bucket").(string) + "\",\"objects\":[\"" + objectName + "\"]}}",
-// 	// })
-// 	log.Printf("--------------image export check %v------------", request.QueryParams)
-// 	raw, err = client.WithOssNewClient(func(ecsClient *ecs.Client) (interface{}, error) {
-// 		return ecsClient.ProcessCommonRequest(request)
-// 	})
-
-// 	if err != nil {
-// 		errmsg := ""
-// 		if raw != nil {
-// 			response, ok := raw.(*responses.CommonResponse)
-// 			if ok {
-// 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-// 			}
-// 		}
-// 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteObject", raw, errmsg)
-// 	}
-
-// 	addDebug("DeleteObjects", raw, requestInfo, request)
-
-// 	bresponse, ok := raw.(*responses.CommonResponse)
-// 	if !ok {
-// 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteObject", raw, "Invalid response type")
-// 	}
-// 	if bresponse.GetHttpStatus() != 200 {
-// 		errmsg := ""
-// 		if raw != nil {
-// 			response, ok := raw.(*responses.CommonResponse)
-// 			if ok {
-// 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-// 			}
-// 		}
-// 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteObject", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
-// 	}
-// 	addDebug("DeleteObjects", raw, requestInfo, bresponse.GetHttpContentString())
-
-// 	return errmsgs.WrapError(ossService.WaitForOssBucketObject(bucket, d.Id(), Deleted, DefaultTimeoutMedium))
-// }

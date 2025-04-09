@@ -17,15 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackOnsTopic() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackOnsTopicCreate,
-		Read:   resourceAlibabacloudStackOnsTopicRead,
-		Update: resourceAlibabacloudStackOnsTopicUpdate,
-		Delete: resourceAlibabacloudStackOnsTopicDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -53,6 +45,8 @@ func resourceAlibabacloudStackOnsTopic() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackOnsTopicCreate, resourceAlibabacloudStackOnsTopicRead, resourceAlibabacloudStackOnsTopicUpdate, resourceAlibabacloudStackOnsTopicDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackOnsTopicCreate(d *schema.ResourceData, meta interface{}) error {
@@ -102,7 +96,7 @@ func resourceAlibabacloudStackOnsTopicCreate(d *schema.ResourceData, meta interf
 	}
 	d.SetId(topic + COLON_SEPARATED + instanceId)
 
-	return resourceAlibabacloudStackOnsTopicRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOnsTopicRead(d *schema.ResourceData, meta interface{}) error {
@@ -129,7 +123,7 @@ func resourceAlibabacloudStackOnsTopicRead(d *schema.ResourceData, meta interfac
 }
 
 func resourceAlibabacloudStackOnsTopicUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackOnsTopicRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOnsTopicDelete(d *schema.ResourceData, meta interface{}) error {

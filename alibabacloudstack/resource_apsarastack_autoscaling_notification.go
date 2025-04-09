@@ -11,14 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackEssNotification() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEssNotificationCreate,
-		Read:   resourceAlibabacloudStackEssNotificationRead,
-		Update: resourceAlibabacloudStackEssNotificationUpdate,
-		Delete: resourceAlibabacloudStackEssNotificationDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"notification_arn": {
 				Type:     schema.TypeString,
@@ -38,6 +31,9 @@ func resourceAlibabacloudStackEssNotification() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEssNotificationCreate,
+		resourceAlibabacloudStackEssNotificationRead, resourceAlibabacloudStackEssNotificationUpdate, resourceAlibabacloudStackEssNotificationDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEssNotificationCreate(d *schema.ResourceData, meta interface{}) error {
@@ -73,7 +69,7 @@ func resourceAlibabacloudStackEssNotificationCreate(d *schema.ResourceData, meta
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ess_notification", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	d.SetId(fmt.Sprintf("%s:%s", request.ScalingGroupId, request.NotificationArn))
-	return resourceAlibabacloudStackEssNotificationRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssNotificationRead(d *schema.ResourceData, meta interface{}) error {
@@ -126,7 +122,7 @@ func resourceAlibabacloudStackEssNotificationUpdate(d *schema.ResourceData, meta
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	return resourceAlibabacloudStackEssNotificationRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssNotificationDelete(d *schema.ResourceData, meta interface{}) error {

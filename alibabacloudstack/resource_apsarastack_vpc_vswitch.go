@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackSwitch() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSwitchCreate,
-		Read:   resourceAlibabacloudStackSwitchRead,
-		Update: resourceAlibabacloudStackSwitchUpdate,
-		Delete: resourceAlibabacloudStackSwitchDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
@@ -77,6 +70,8 @@ func resourceAlibabacloudStackSwitch() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSwitchCreate, resourceAlibabacloudStackSwitchRead, resourceAlibabacloudStackSwitchUpdate, resourceAlibabacloudStackSwitchDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interface{}) error {
@@ -137,7 +132,7 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-	return resourceAlibabacloudStackSwitchUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSwitchRead(d *schema.ResourceData, meta interface{}) error {
@@ -177,8 +172,7 @@ func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interfac
 	}
 
 	if d.IsNewResource() {
-		d.Partial(false)
-		return resourceAlibabacloudStackSwitchRead(d, meta)
+		return nil
 	}
 
 	update := false
@@ -214,7 +208,7 @@ func resourceAlibabacloudStackSwitchUpdate(d *schema.ResourceData, meta interfac
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
-	return resourceAlibabacloudStackSwitchRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSwitchDelete(d *schema.ResourceData, meta interface{}) error {

@@ -16,11 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmRole() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmRoleCreate,
-		Read:   resourceAlibabacloudStackAscmRoleRead,
-		Update: resourceAlibabacloudStackAscmRoleUpdate,
-		Delete: resourceAlibabacloudStackAscmRoleDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"role_name": {
 				Type:         schema.TypeString,
@@ -51,6 +47,8 @@ func resourceAlibabacloudStackAscmRole() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmRoleCreate, resourceAlibabacloudStackAscmRoleRead, resourceAlibabacloudStackAscmRoleUpdate, resourceAlibabacloudStackAscmRoleDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmRoleCreate(d *schema.ResourceData, meta interface{}) error {
@@ -117,11 +115,11 @@ func resourceAlibabacloudStackAscmRoleCreate(d *schema.ResourceData, meta interf
 		return resource.RetryableError(err)
 	})
 	d.SetId(name + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
-	return resourceAlibabacloudStackAscmRoleUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmRoleUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackAscmRoleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmRoleRead(d *schema.ResourceData, meta interface{}) error {

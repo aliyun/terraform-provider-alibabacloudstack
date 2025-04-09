@@ -15,15 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackEssAlarm() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEssAlarmCreate,
-		Read:   resourceAlibabacloudStackEssAlarmRead,
-		Update: resourceAlibabacloudStackEssAlarmUpdate,
-		Delete: resourceAlibabacloudStackEssAlarmDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -131,6 +123,9 @@ func resourceAlibabacloudStackEssAlarm() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEssAlarmCreate,
+		resourceAlibabacloudStackEssAlarmRead, resourceAlibabacloudStackEssAlarmUpdate, resourceAlibabacloudStackEssAlarmDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEssAlarmCreate(d *schema.ResourceData, meta interface{}) error {
@@ -195,7 +190,7 @@ func resourceAlibabacloudStackEssAlarmCreate(d *schema.ResourceData, meta interf
 		}
 		addDebug(disableAlarmRequest.GetActionName(), raw, disableAlarmRequest.RpcRequest, disableAlarmRequest)
 	}
-	return resourceAlibabacloudStackEssAlarmRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssAlarmRead(d *schema.ResourceData, meta interface{}) error {
@@ -364,7 +359,7 @@ func resourceAlibabacloudStackEssAlarmUpdate(d *schema.ResourceData, meta interf
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackEssAlarmRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssAlarmDelete(d *schema.ResourceData, meta interface{}) error {

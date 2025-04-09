@@ -15,14 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackEcsHpcCluster() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEcsHpcClusterCreate,
-		Read:   resourceAlibabacloudStackEcsHpcClusterRead,
-		Update: resourceAlibabacloudStackEcsHpcClusterUpdate,
-		Delete: resourceAlibabacloudStackEcsHpcClusterDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"description": {
 				Type:     schema.TypeString,
@@ -34,6 +27,8 @@ func resourceAlibabacloudStackEcsHpcCluster() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEcsHpcClusterCreate, resourceAlibabacloudStackEcsHpcClusterRead, resourceAlibabacloudStackEcsHpcClusterUpdate, resourceAlibabacloudStackEcsHpcClusterDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEcsHpcClusterCreate(d *schema.ResourceData, meta interface{}) error {
@@ -69,7 +64,7 @@ func resourceAlibabacloudStackEcsHpcClusterCreate(d *schema.ResourceData, meta i
 	resp := &ecs.CreateHpcClusterResponse{}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	d.SetId(fmt.Sprint(resp.HpcClusterId))
-	return resourceAlibabacloudStackEcsHpcClusterRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEcsHpcClusterRead(d *schema.ResourceData, meta interface{}) error {
@@ -126,7 +121,7 @@ func resourceAlibabacloudStackEcsHpcClusterUpdate(d *schema.ResourceData, meta i
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
-	return resourceAlibabacloudStackEcsHpcClusterRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEcsHpcClusterDelete(d *schema.ResourceData, meta interface{}) error {

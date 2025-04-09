@@ -13,15 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackRouterInterface() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackRouterInterfaceCreate,
-		Read:   resourceAlibabacloudStackRouterInterfaceRead,
-		Update: resourceAlibabacloudStackRouterInterfaceUpdate,
-		Delete: resourceAlibabacloudStackRouterInterfaceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"opposite_region": {
 				Type:     schema.TypeString,
@@ -102,6 +94,8 @@ func resourceAlibabacloudStackRouterInterface() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackRouterInterfaceCreate, resourceAlibabacloudStackRouterInterfaceRead, resourceAlibabacloudStackRouterInterfaceUpdate, resourceAlibabacloudStackRouterInterfaceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackRouterInterfaceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -135,7 +129,7 @@ func resourceAlibabacloudStackRouterInterfaceCreate(d *schema.ResourceData, meta
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackRouterInterfaceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackRouterInterfaceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -189,7 +183,7 @@ func resourceAlibabacloudStackRouterInterfaceUpdate(d *schema.ResourceData, meta
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackRouterInterfaceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackRouterInterfaceRead(d *schema.ResourceData, meta interface{}) error {

@@ -15,22 +15,22 @@ import (
 )
 
 func resourceAlibabacloudStackAscmRamPolicyForRole() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmRamPolicyForRoleCreate,
-		Read:   resourceAlibabacloudStackAscmRamPolicyForRoleRead,
-		Update: resourceAlibabacloudStackAscmRamPolicyForRoleUpdate,
-		Delete: resourceAlibabacloudStackAscmRamPolicyForRoleDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"ram_policy_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"role_id": {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmRamPolicyForRoleCreate, resourceAlibabacloudStackAscmRamPolicyForRoleRead, nil, resourceAlibabacloudStackAscmRamPolicyForRoleDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmRamPolicyForRoleCreate(d *schema.ResourceData, meta interface{}) error {
@@ -66,7 +66,7 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleCreate(d *schema.ResourceData,
 
 	d.SetId(ram_id + COLON_SEPARATED + fmt.Sprint(roleid))
 
-	return resourceAlibabacloudStackAscmRamPolicyForRoleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmRamPolicyForRoleRead(d *schema.ResourceData, meta interface{}) error {
@@ -88,10 +88,6 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleRead(d *schema.ResourceData, m
 	d.Set("role_id", role_id)
 
 	return nil
-}
-
-func resourceAlibabacloudStackAscmRamPolicyForRoleUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackAscmRamPolicyForRoleCreate(d, meta)
 }
 
 func resourceAlibabacloudStackAscmRamPolicyForRoleDelete(d *schema.ResourceData, meta interface{}) error {

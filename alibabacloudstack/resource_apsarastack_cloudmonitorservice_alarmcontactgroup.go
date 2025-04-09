@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudstackCmsAlarmContactGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudstackCmsAlarmContactGroupCreate,
-		Read:   resourceAlibabacloudstackCmsAlarmContactGroupRead,
-		Update: resourceAlibabacloudstackCmsAlarmContactGroupUpdate,
-		Delete: resourceAlibabacloudstackCmsAlarmContactGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"alarm_contact_group_name": {
 				Type:     schema.TypeString,
@@ -44,6 +37,8 @@ func resourceAlibabacloudstackCmsAlarmContactGroup() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudstackCmsAlarmContactGroupCreate, resourceAlibabacloudstackCmsAlarmContactGroupRead, resourceAlibabacloudstackCmsAlarmContactGroupUpdate, resourceAlibabacloudstackCmsAlarmContactGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudstackCmsAlarmContactGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -83,7 +78,7 @@ func resourceAlibabacloudstackCmsAlarmContactGroupCreate(d *schema.ResourceData,
 	}
 	d.SetId(fmt.Sprintf("%v", request.ContactGroupName))
 
-	return resourceAlibabacloudstackCmsAlarmContactGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudstackCmsAlarmContactGroupRead(d *schema.ResourceData, meta interface{}) error {
@@ -144,7 +139,7 @@ func resourceAlibabacloudstackCmsAlarmContactGroupUpdate(d *schema.ResourceData,
 			return errmsgs.WrapError(errmsgs.Error("PutContactGroup failed for " + response.Message))
 		}
 	}
-	return resourceAlibabacloudstackCmsAlarmContactGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudstackCmsAlarmContactGroupDelete(d *schema.ResourceData, meta interface{}) error {

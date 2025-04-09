@@ -15,15 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
-	return &schema.Resource{
-		Read:   resourceAlibabacloudStackGpdbInstanceRead,
-		Create: resourceAlibabacloudStackGpdbInstanceCreate,
-		Update: resourceAlibabacloudStackGpdbInstanceUpdate,
-		Delete: resourceAlibabacloudStackGpdbInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 		},
@@ -166,6 +158,8 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackGpdbInstanceCreate, resourceAlibabacloudStackGpdbInstanceRead, resourceAlibabacloudStackGpdbInstanceUpdate, resourceAlibabacloudStackGpdbInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackGpdbInstanceRead(d *schema.ResourceData, meta interface{}) error {
@@ -244,7 +238,7 @@ func resourceAlibabacloudStackGpdbInstanceCreate(d *schema.ResourceData, meta in
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-	return resourceAlibabacloudStackGpdbInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackGpdbInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -296,7 +290,7 @@ func resourceAlibabacloudStackGpdbInstanceUpdate(d *schema.ResourceData, meta in
 	// Finish Update
 	d.Partial(false)
 
-	return resourceAlibabacloudStackGpdbInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackGpdbInstanceDelete(d *schema.ResourceData, meta interface{}) error {

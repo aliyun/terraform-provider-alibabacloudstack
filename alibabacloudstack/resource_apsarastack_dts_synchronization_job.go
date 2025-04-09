@@ -15,14 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackDtsSynchronizationJob() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDtsSynchronizationJobCreate,
-		Read:   resourceAlibabacloudStackDtsSynchronizationJobRead,
-		Update: resourceAlibabacloudStackDtsSynchronizationJobUpdate,
-		Delete: resourceAlibabacloudStackDtsSynchronizationJobDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Update: schema.DefaultTimeout(10 * time.Minute),
 		},
@@ -231,6 +224,8 @@ func resourceAlibabacloudStackDtsSynchronizationJob() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDtsSynchronizationJobCreate, resourceAlibabacloudStackDtsSynchronizationJobRead, resourceAlibabacloudStackDtsSynchronizationJobUpdate, resourceAlibabacloudStackDtsSynchronizationJobDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDtsSynchronizationJobCreate(d *schema.ResourceData, meta interface{}) error {
@@ -386,7 +381,7 @@ func resourceAlibabacloudStackDtsSynchronizationJobCreate(d *schema.ResourceData
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackDtsSynchronizationJobUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDtsSynchronizationJobRead(d *schema.ResourceData, meta interface{}) error {
@@ -670,7 +665,7 @@ func resourceAlibabacloudStackDtsSynchronizationJobUpdate(d *schema.ResourceData
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackDtsSynchronizationJobRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDtsSynchronizationJobDelete(d *schema.ResourceData, meta interface{}) error {

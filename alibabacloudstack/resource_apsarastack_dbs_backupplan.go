@@ -16,14 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackDbsBackupPlan() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDbsBackupPlanCreate,
-		Read:   resourceAlibabacloudStackDbsBackupPlanRead,
-		Update: resourceAlibabacloudStackDbsBackupPlanUpdate,
-		Delete: resourceAlibabacloudStackDbsBackupPlanDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"backup_plan_id": {
 				Type:     schema.TypeString,
@@ -70,6 +63,8 @@ func resourceAlibabacloudStackDbsBackupPlan() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDbsBackupPlanCreate, resourceAlibabacloudStackDbsBackupPlanRead, resourceAlibabacloudStackDbsBackupPlanUpdate, resourceAlibabacloudStackDbsBackupPlanDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDbsBackupPlanCreate(d *schema.ResourceData, meta interface{}) error {
@@ -148,7 +143,7 @@ func resourceAlibabacloudStackDbsBackupPlanCreate(d *schema.ResourceData, meta i
 
 	d.SetId(fmt.Sprint(response["BackupPlanId"]))
 
-	return resourceAlibabacloudStackDbsBackupPlanRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDbsBackupPlanRead(d *schema.ResourceData, meta interface{}) error {
@@ -191,7 +186,8 @@ func resourceAlibabacloudStackDbsBackupPlanUpdate(d *schema.ResourceData, meta i
 	if err != nil {
 		return err
 	}
-	return resourceAlibabacloudStackDbsBackupPlanRead(d, meta)
+
+	return nil
 }
 
 func resourceAlibabacloudStackDbsBackupPlanDelete(d *schema.ResourceData, meta interface{}) error {

@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackSlbMasterSlaveServerGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSlbMasterSlaveServerGroupCreate,
-		Read:   resourceAlibabacloudStackSlbMasterSlaveServerGroupRead,
-		Update: resourceAlibabacloudStackSlbMasterSlaveServerGroupUpdate,
-		Delete: resourceAlibabacloudStackSlbMasterSlaveServerGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"load_balancer_id": {
 				Type:     schema.TypeString,
@@ -33,17 +25,17 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroup() *schema.Resource {
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:true,
+				Computed:     true,
 				ForceNew:     true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'master_slave_server_group_name' instead.",
 				ConflictsWith: []string{"master_slave_server_group_name"},
 			},
 
 			"master_slave_server_group_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed:true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
 				ConflictsWith: []string{"name"},
 			},
 
@@ -84,6 +76,12 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroup() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackSlbMasterSlaveServerGroupCreate,
+		resourceAlibabacloudStackSlbMasterSlaveServerGroupRead,
+		nil,
+		resourceAlibabacloudStackSlbMasterSlaveServerGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSlbMasterSlaveServerGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -111,7 +109,7 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupCreate(d *schema.Resource
 	response, _ := raw.(*slb.CreateMasterSlaveServerGroupResponse)
 	d.SetId(response.MasterSlaveServerGroupId)
 
-	return resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d *schema.ResourceData, meta interface{}) error {
@@ -150,10 +148,6 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d *schema.ResourceDa
 		return errmsgs.WrapError(err)
 	}
 
-	return nil
-}
-
-func resourceAlibabacloudStackSlbMasterSlaveServerGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 

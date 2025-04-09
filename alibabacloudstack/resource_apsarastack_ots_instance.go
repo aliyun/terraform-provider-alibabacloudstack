@@ -13,15 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackOtsInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAliyunOtsInstanceCreate,
-		Read:   resourceAliyunOtsInstanceRead,
-		Update: resourceAliyunOtsInstanceUpdate,
-		Delete: resourceAliyunOtsInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -55,6 +47,8 @@ func resourceAlibabacloudStackOtsInstance() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAliyunOtsInstanceCreate, resourceAliyunOtsInstanceRead, resourceAliyunOtsInstanceUpdate, resourceAliyunOtsInstanceDelete)
+	return resource
 }
 
 func resourceAliyunOtsInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -101,7 +95,7 @@ func resourceAliyunOtsInstanceCreate(d *schema.ResourceData, meta interface{}) e
 	if err := otsService.WaitForOtsInstance(request.InstanceName, Running, DefaultTimeout/3); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAliyunOtsInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAliyunOtsInstanceRead(d *schema.ResourceData, meta interface{}) error {
@@ -212,7 +206,7 @@ func resourceAliyunOtsInstanceUpdate(d *schema.ResourceData, meta interface{}) e
 		return errmsgs.WrapError(err)
 	}
 	d.Partial(false)
-	return resourceAliyunOtsInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAliyunOtsInstanceDelete(d *schema.ResourceData, meta interface{}) error {

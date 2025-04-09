@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackGraphDatabaseDbInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackGraphDatabaseDbInstanceCreate,
-		Read:   resourceAlibabacloudStackGraphDatabaseDbInstanceRead,
-		Update: resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate,
-		Delete: resourceAlibabacloudStackGraphDatabaseDbInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(1 * time.Minute),
@@ -68,12 +61,10 @@ func resourceAlibabacloudStackGraphDatabaseDbInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				// ValidateFunc: validation.StringInSlice([]string{"cloud_essd", "cloud_ssd"}, false),
 			},
 			"db_node_class": {
 				Type:     schema.TypeString,
 				Required: true,
-				// ValidateFunc: validation.StringInSlice([]string{"gdb.r.xlarge", "gdb.r.2xlarge", "gdb.r.4xlarge", "gdb.r.8xlarge", "gdb.r.16xlarge"}, false),
 			},
 			"db_node_storage": {
 				Type:         schema.TypeInt,
@@ -84,7 +75,6 @@ func resourceAlibabacloudStackGraphDatabaseDbInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-				// ValidateFunc: validation.StringInSlice([]string{"1.0", "1.0-OpenCypher"}, false),
 			},
 			"payment_type": {
 				Type:         schema.TypeString,
@@ -117,6 +107,8 @@ func resourceAlibabacloudStackGraphDatabaseDbInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackGraphDatabaseDbInstanceCreate, resourceAlibabacloudStackGraphDatabaseDbInstanceRead, resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate, resourceAlibabacloudStackGraphDatabaseDbInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackGraphDatabaseDbInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -155,7 +147,7 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceCreate(d *schema.ResourceDa
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackGraphDatabaseDbInstanceRead(d *schema.ResourceData, meta interface{}) error {
@@ -302,7 +294,7 @@ func resourceAlibabacloudStackGraphDatabaseDbInstanceUpdate(d *schema.ResourceDa
 		// d.SetPartial("db_node_storage")
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackGraphDatabaseDbInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackGraphDatabaseDbInstanceDelete(d *schema.ResourceData, meta interface{}) error {

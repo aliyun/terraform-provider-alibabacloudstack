@@ -12,79 +12,73 @@ import (
 )
 
 func resourceAlibabacloudStackDBDatabase() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDBDatabaseCreate,
-		Read:   resourceAlibabacloudStackDBDatabaseRead,
-		Update: resourceAlibabacloudStackDBDatabaseUpdate,
-		Delete: resourceAlibabacloudStackDBDatabaseDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"data_base_instance_id": {
 				Type:         schema.TypeString,
 				ForceNew:     true,
-				Optional:true,
-				Computed:true,
+				Optional:     true,
+				Computed:     true,
 				ConflictsWith: []string{"instance_id"},
 			},
 			"instance_id": {
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Optional:true,
-				Computed:true,
-				Deprecated:   "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'data_base_instance_id' instead.",
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'data_base_instance_id' instead.",
 				ConflictsWith: []string{"data_base_instance_id"},
 			},
 
 			"data_base_name": {
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Optional:true,
-				Computed:true,
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"name"},
 			},
 			"name": {
-				Type:         schema.TypeString,
-				ForceNew:     true,
-				Optional:true,
-				Computed:true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'data_base_name' instead.",
+				Type:          schema.TypeString,
+				ForceNew:      true,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'data_base_name' instead.",
 				ConflictsWith: []string{"data_base_name"},
 			},
 
 			"character_set_name": {
-				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ForceNew:     true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"character_set"},
 			},
 			"character_set": {
-				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
-				ForceNew:     true,
-				Deprecated:   "Field 'character_set' is deprecated and will be removed in a future release. Please use new field 'character_set_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'character_set' is deprecated and will be removed in a future release. Please use new field 'character_set_name' instead.",
 				ConflictsWith: []string{"character_set_name"},
 			},
 
 			"data_base_description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"description"},
 			},
 			"description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use new field 'data_base_description' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'description' is deprecated and will be removed in a future release. Please use new field 'data_base_description' instead.",
 				ConflictsWith: []string{"data_base_description"},
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDBDatabaseCreate, resourceAlibabacloudStackDBDatabaseRead, resourceAlibabacloudStackDBDatabaseUpdate, resourceAlibabacloudStackDBDatabaseDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDBDatabaseCreate(d *schema.ResourceData, meta interface{}) error {
@@ -92,7 +86,7 @@ func resourceAlibabacloudStackDBDatabaseCreate(d *schema.ResourceData, meta inte
 	request := rds.CreateCreateDatabaseRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 
-	request.DBInstanceId =connectivity.GetResourceData(d, "data_base_instance_id", "instance_id").(string)
+	request.DBInstanceId = connectivity.GetResourceData(d, "data_base_instance_id", "instance_id").(string)
 	if err := errmsgs.CheckEmpty(request.DBInstanceId, schema.TypeString, "data_base_instance_id", "instance_id"); err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -135,7 +129,7 @@ func resourceAlibabacloudStackDBDatabaseCreate(d *schema.ResourceData, meta inte
 
 	d.SetId(fmt.Sprintf("%s%s%s", request.DBInstanceId, COLON_SEPARATED, request.DBName))
 
-	return resourceAlibabacloudStackDBDatabaseRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBDatabaseRead(d *schema.ResourceData, meta interface{}) error {
@@ -188,7 +182,7 @@ func resourceAlibabacloudStackDBDatabaseUpdate(d *schema.ResourceData, meta inte
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
-	return resourceAlibabacloudStackDBDatabaseRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBDatabaseDelete(d *schema.ResourceData, meta interface{}) error {

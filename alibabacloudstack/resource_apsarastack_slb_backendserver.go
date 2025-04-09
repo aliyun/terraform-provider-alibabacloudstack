@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackSlbBackendServer() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSlbBackendServersCreate,
-		Read:   resourceAlibabacloudStackSlbBackendServersRead,
-		Update: resourceAlibabacloudStackSlbBackendServersUpdate,
-		Delete: resourceAlibabacloudStackSlbBackendServersDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"load_balancer_id": {
 				Type:     schema.TypeString,
@@ -55,6 +47,8 @@ func resourceAlibabacloudStackSlbBackendServer() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSlbBackendServersCreate, resourceAlibabacloudStackSlbBackendServersRead, resourceAlibabacloudStackSlbBackendServersUpdate, resourceAlibabacloudStackSlbBackendServersDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSlbBackendServersCreate(d *schema.ResourceData, meta interface{}) error {
@@ -79,7 +73,7 @@ func resourceAlibabacloudStackSlbBackendServersCreate(d *schema.ResourceData, me
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	d.SetId(bresponse.LoadBalancerId)
 
-	return resourceAlibabacloudStackSlbBackendServersRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbBackendServersRead(d *schema.ResourceData, meta interface{}) error {
@@ -255,7 +249,7 @@ func resourceAlibabacloudStackSlbBackendServersUpdate(d *schema.ResourceData, me
 	}
 	d.Partial(false)
 
-	return resourceAlibabacloudStackSlbBackendServersRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbBackendServersDelete(d *schema.ResourceData, meta interface{}) error {

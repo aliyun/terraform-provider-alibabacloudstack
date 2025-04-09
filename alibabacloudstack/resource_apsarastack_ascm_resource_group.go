@@ -16,11 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmResourceGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmResourceGroupCreate,
-		Read:   resourceAlibabacloudStackAscmResourceGroupRead,
-		Update: resourceAlibabacloudStackAscmResourceGroupUpdate,
-		Delete: resourceAlibabacloudStackAscmResourceGroupDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -37,6 +33,8 @@ func resourceAlibabacloudStackAscmResourceGroup() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmResourceGroupCreate, resourceAlibabacloudStackAscmResourceGroupRead, resourceAlibabacloudStackAscmResourceGroupUpdate, resourceAlibabacloudStackAscmResourceGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmResourceGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -84,7 +82,7 @@ func resourceAlibabacloudStackAscmResourceGroupCreate(d *schema.ResourceData, me
 	})
 	d.SetId(check.Data[0].ResourceGroupName + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
 
-	return resourceAlibabacloudStackAscmResourceGroupUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmResourceGroupUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -133,7 +131,7 @@ func resourceAlibabacloudStackAscmResourceGroupUpdate(d *schema.ResourceData, me
 	}
 	d.SetId(name + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
 
-	return resourceAlibabacloudStackAscmResourceGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmResourceGroupRead(d *schema.ResourceData, meta interface{}) error {

@@ -16,29 +16,21 @@ import (
 )
 
 func resourceAlibabacloudStackDBAccountPrivilege() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDBAccountPrivilegeCreate,
-		Read:   resourceAlibabacloudStackDBAccountPrivilegeRead,
-		Update: resourceAlibabacloudStackDBAccountPrivilegeUpdate,
-		Delete: resourceAlibabacloudStackDBAccountPrivilegeDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:          schema.TypeString,
 				ForceNew:      true,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				Deprecated:    "Field 'instance_id' is deprecated and will be removed in a future release. Please use new field 'data_base_instance_id' instead.",
 				ConflictsWith: []string{"data_base_instance_id"},
 			},
 			"data_base_instance_id": {
 				Type:          schema.TypeString,
 				ForceNew:      true,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"instance_id"},
 			},
 
@@ -63,6 +55,8 @@ func resourceAlibabacloudStackDBAccountPrivilege() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDBAccountPrivilegeCreate, resourceAlibabacloudStackDBAccountPrivilegeRead, resourceAlibabacloudStackDBAccountPrivilegeUpdate, resourceAlibabacloudStackDBAccountPrivilegeDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDBAccountPrivilegeCreate(d *schema.ResourceData, meta interface{}) error {
@@ -97,7 +91,7 @@ func resourceAlibabacloudStackDBAccountPrivilegeCreate(d *schema.ResourceData, m
 		}
 	}
 
-	return resourceAlibabacloudStackDBAccountPrivilegeRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBAccountPrivilegeRead(d *schema.ResourceData, meta interface{}) error {
@@ -220,7 +214,7 @@ func resourceAlibabacloudStackDBAccountPrivilegeUpdate(d *schema.ResourceData, m
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackDBAccountPrivilegeRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBAccountPrivilegeDelete(d *schema.ResourceData, meta interface{}) error {
