@@ -47,3 +47,4 @@ The following attributes are exported in addition to the arguments listed above:
     * `series_name_label` - label of Series name for instance families.
     * `is_deleted` - Specify the state in "Y" or "N" form.
     * `resource_type` - Specified resource type.
+    * `computed_attribute` - An example computed attribute that is automatically generated.

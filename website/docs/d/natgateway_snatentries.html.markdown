@@ -83,4 +83,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `id` - The ID of the Snat Entry.
   * `snat_ip` - The public IP of the SNAT entry.
   * `source_cidr` - The source network segment of the SNAT entry.
-  * `status` - The status of the SNAT entry. Possible values include `available`, `pending`, and `inactive`.
+  * `status` - The status of the SNAT entry. Possible values include `available`, `pending`, and `inactive`. 

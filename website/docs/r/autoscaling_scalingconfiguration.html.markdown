@@ -161,6 +161,8 @@ The following arguments are supported:
 * `host_name` - (Optional) The hostname of the server. Restrictions vary based on the operating system:
   * Windows: Hostname length is 2~15 characters, can include uppercase letters, digits, and hyphens (`-`). Cannot start or end with a period (`.`) or hyphen (`-`).
   * Linux: Hostname length is 2~64 characters, can include multiple dots (`.`). Each segment between dots can include uppercase letters, digits, and hyphens (`-`).
+* `role_name` - (Optional) The name of the RAM role for the ECS instance.
+* `key_name` - (Optional) The name of the key pair used to log in to the ECS instance.
 
 ### Block datadisk
 
@@ -215,3 +217,5 @@ In addition to all arguments above, the following attributes are exported:
 * `role_name` - The name of the RAM role for the ECS instance.
   
 * `key_pair_name` - The name of the key pair used to log in to the ECS instance.
+* `is_outdated` - Whether to use outdated instance types.
+* `key_name` - The name of the key pair used to log in to the ECS instance.

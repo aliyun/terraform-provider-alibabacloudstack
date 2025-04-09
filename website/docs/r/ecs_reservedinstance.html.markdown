@@ -61,6 +61,7 @@ The following arguments are supported:
 * `description` - (Optional) Description of the RI. 2 to 256 English or Chinese characters. It cannot start with `http://` or `https://`.
 * `resource_group_id` - (Optional, ForceNew) Resource group ID.
 * `reserved_instance_id` - (Optional, ForceNew) The ID of the reserved instance.
+* `name` - (Optional, Deprecated) Name of the Reserved Instance.
 
 ### Removing alibabacloudstack_ecs_reservedinstance from your configuration
 

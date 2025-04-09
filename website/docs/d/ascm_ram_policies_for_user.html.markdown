@@ -30,6 +30,7 @@ The following arguments are supported:
 * `ids` - (Optional) A list of ram policy IDs.
 * `login_name` - (Required, ForceNew) Login name of the user.
 
+
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:

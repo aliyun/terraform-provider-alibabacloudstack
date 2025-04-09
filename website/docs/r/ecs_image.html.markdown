@@ -133,6 +133,7 @@ The following arguments are supported:
 * `force` - (Optional) Indicates whether to force delete the custom image. Default is `false`.
   - `true`: Force deletes the custom image, regardless of whether the image is currently being used by other instances.
   - `false`: Verifies that the image is not currently in use by any other instances before deleting the image.
+* `tags` - (Optional) A mapping of tags to assign to the resource.
 
 ### Timeouts
 

@@ -39,6 +39,8 @@ The following arguments are supported:
 
 * `id` - (Optional) It is used to filter results by role ID.
 * `name_regex` - (Optional) A regex string to filter results by role name.
+* `description` - (Optional) Description about the role.
+* `role_type` - (Optional) Types of role.
 
 ## Attributes Reference
 
@@ -46,15 +48,15 @@ The following attributes are exported in addition to the arguments listed above:
 
 * `roles` - A list of roles. Each element contains the following attributes:
     * `id` - ID of the role.
-    * `name` - role name.
+    * `name` - Role name.
     * `description` - Description about the role.
-    * `role_level` - role level.
-    * `role_type` - types of role.
-    * `ram_role` - ram authorized role.
-    * `role_range` - specific range for a role.
-    * `user_count` - user count.
-    * `enable` - enable.
-    * `default` - default role.
+    * `role_level` - Role level.
+    * `role_type` - Types of role.
+    * `ram_role` - RAM authorized role.
+    * `role_range` - Specific range for a role.
+    * `user_count` - User count.
+    * `enable` - Enable status.
+    * `default` - Default role.
     * `active` - Role status.
     * `owner_organization_id` - ID of the owner organization where role belongs.
-    * `code` - role code.
+    * `code` - Role code.

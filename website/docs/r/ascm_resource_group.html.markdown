@@ -39,9 +39,13 @@ The following arguments are supported:
 * `name` - (Required) The name of the resource group. This name can have a string of 2 to 128 characters, must contain only alphanumeric characters or hyphens, such as "-",".","_", and must not begin or end with a hyphen, and must not begin with http:// or https://. Default value is null. 
 * `organization_id` - (Required) ID of an Organization.
 
+* `rg_id` - (Optional) The ID of the resource group. 
+
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - Name and ID of the resource group. The value is in format `Name:ID`
-* `rg_id` - The ID of the resource group. 
+
+* `name` - The name of the resource group. 
+* `rg_id` - The ID of the resource group.

@@ -54,4 +54,3 @@ The following attributes are exported in addition to the arguments listed above:
   * `public_endpoints` - A list of domains for access on internet network.
   * `authorization_token` - The password that was used to log on to the registry.
   * `temp_username` - The username that was used to log on to the registry.
-  * `output_file` - File name where to save data source results (after running `terraform plan`).

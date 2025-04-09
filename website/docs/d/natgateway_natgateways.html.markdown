@@ -67,3 +67,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `status` - The status of the NAT Gateway (e.g., Available, Pending, Deleting).
   * `snat_table_id` - The ID of the SNAT table associated with the NAT Gateway.
   * `forward_table_id` - The ID of the forward table associated with the NAT Gateway.
+  * `vpc_id` - The ID of the VPC where the NAT gateway is deployed. 

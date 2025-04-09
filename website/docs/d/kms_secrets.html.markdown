@@ -39,6 +39,7 @@ The following arguments are supported:
 * `name_regex` - (Optional) A regex string to filter the results by the KMS secret_name.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 * `names` - (Optional) A list of KMS Secret names.
+<!--  AI CREATE  -->
 
 ## Attributes Reference
 
@@ -51,3 +52,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `secret_name` - Name of the KMS Secret.
   * `planned_delete_time` - Schedule deletion time.
   * `tags` - A mapping of tags to assign to the resource.
+  * `tags` - A mapping of tags associated with the secret (Computed). <!--  AI CREATE  -->

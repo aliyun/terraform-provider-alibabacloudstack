@@ -35,6 +35,7 @@ The following arguments are supported:
 * `name_regex` - (Optional, ForceNew) A regex string to filter results by alarm contact name.
 * `chanel_type` - (Optional, ForceNew) The alarm notification method. Alarm notifications can be sent by using `Email`, `DingWebHook`, or other methods.
 * `chanel_value` - (Optional, ForceNew) The alarm notification target, such as email address or webhook URL.
+* `names` - (Optional) A list of alarm contact names.
 
 -> **NOTE:** Specify at least one of the following alarm notification targets: phone number, email address, webhook URL of the DingTalk chatbot, and TradeManager ID.
 

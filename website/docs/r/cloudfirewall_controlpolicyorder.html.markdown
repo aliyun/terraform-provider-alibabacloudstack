@@ -48,7 +48,7 @@ The following arguments are supported:
 
 * `acl_uuid` - (Required, ForceNew) The unique identifier of the security access control policy. This is the ID assigned to the policy when it is created.
 * `direction` - (Required, ForceNew) The direction of the traffic flow for which the access control policy applies. Valid values: `in`, `out`. Specifies whether the policy controls inbound or outbound traffic.
-* `order` - (Required, Int) The priority level of the security access control policy. The priority value starts from 1, with smaller numbers indicating higher priority. A value of `-1` indicates the lowest priority. **NOTE:** From version 1.227.1, this field must be set.
+* `order` - (Optional, Int) <!--  AI CREATE  --> The priority level of the security access control policy. The priority value starts from 1, with smaller numbers indicating higher priority. A value of `-1` indicates the lowest priority. **NOTE:** From version 1.227.1, this field must be set.
 
 ## Attributes Reference
 

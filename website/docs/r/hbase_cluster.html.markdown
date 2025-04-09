@@ -111,6 +111,7 @@ The following arguments are supported:
 * `password` - (Optional) The password for the cluster web UI account. Length must be between `0-128` characters.
 * `ip_white` - (Optional) The whitelist of IP addresses for the cluster.
 * `security_groups` - (Optional) The list of security group IDs associated with the cluster.
+* `master_instance_quantity` - (Optional, Computed) The number of master nodes in the cluster.
 
 ## Attributes Reference
 
@@ -136,7 +137,11 @@ In addition to all arguments above, the following attributes are exported:
     - `2`: Intranet access.
     - `0`: Public network access.
   * `conn_addr` - The connection address.
-  * `conn_addr_port` - The connection port. 
+  * `conn_addr_port` - The connection port.
+* `maintain_start_time` - (Computed) The start time of the maintenance period in UTC format `HH:mmZ`.
+* `maintain_end_time` - (Computed) The end time of the maintenance period in UTC format `HH:mmZ`.
+* `ip_white` - (Computed) The whitelist of IP addresses for the cluster.
+* `security_groups` - (Computed) The list of security group IDs associated with the cluster.
 
 ## Import
 

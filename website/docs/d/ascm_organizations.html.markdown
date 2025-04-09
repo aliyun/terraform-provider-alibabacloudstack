@@ -36,7 +36,7 @@ The following arguments are supported:
 * `ids` - (Optional) A list of organizations IDs.
 * `name_regex` - (Optional) A regex string to filter results by organization name.
 * `parent_id` - (Optional) Filter the results by the specified organization parent ID.
-* `organizations` - (Optional) A list of organizations. Each element contains the following attributes:
+
 
 ## Attributes Reference
 
@@ -50,5 +50,3 @@ The following attributes are exported in addition to the arguments listed above:
   * `alias` - alias for the Organization.
   * `parent_id` - Parent id of an Organization.
   * `internal` - Organization type, is internal or not.
-  * `name_regex` - A regex string to filter results by organization name.
-  

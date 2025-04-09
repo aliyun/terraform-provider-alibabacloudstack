@@ -210,6 +210,7 @@ The following arguments are supported:
   * `name` - (Optional) Name of the ACK add-on. The name must match one of the names returned by DescribeAddons.
   * `config` - (Optional) The ACK add-on configurations. For more config information, see [cs_kubernetes_addon_metadata](https://registry.terraform.io/providers/aliyun/alicloud/latest/docs/data-sources/cs_kubernetes_addon_metadata).
 * `cloud_monitor_flags` - (Optional) Whether to install cloud monitoring plugin.
+* `node_port_range` - (Optional) Specifies the range of ports used for NodePort services.
 
 ### Network
 
@@ -271,3 +272,7 @@ The following attributes are exported:
 * `client_cert` - The path of client certificate, like `~/.kube/client-cert.pem`.
 * `client_key` - The path of client key, like `~/.kube/client-key.pem`.
 * `cluster_ca_cert` - The path of cluster CA certificate, like `~/.kube/cluster-ca-cert.pem`.
+* `master_system_disk_performance_level` - The performance level of the master node's system disk.
+* `worker_system_disk_performance_level` - The performance level of the worker node's system disk.
+* `is_enterprise_security_group` - Indicates whether an enterprise-level security group is used.
+* `cloud_monitor_flags` - Indicates whether cloud monitoring is enabled.

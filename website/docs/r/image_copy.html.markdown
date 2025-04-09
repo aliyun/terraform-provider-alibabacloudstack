@@ -42,6 +42,7 @@ The following arguments are supported:
 * `description` - (Optional) The description of the image. It must be 2 to 256 characters in length and must not start with http:// or https://. Default value: null.
 * `kms_key_id` - (Optional, ForceNew) The KMS key ID used for encryption. 
 * `encrypted` - (Optional, ForceNew) Indicates whether the image is encrypted. 
+* `tags` - (Optional) A mapping of tags to assign to the resource.
 
 ## Attributes Reference
  
@@ -50,3 +51,4 @@ The following attributes are exported:
 * `id` - ID of the image.
 * `name` - The name of the image. 
 * `image_name` - The name of the image. 
+* `description` - The description of the image.

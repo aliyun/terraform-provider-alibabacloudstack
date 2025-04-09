@@ -50,4 +50,5 @@ In addition to all arguments above, the following attributes are exported:
   - **InUse**
   - **Available**
   - **Releasing**
-* `ip_address` - The elastic IP address assigned to the EIP.
+* `ip_address` - The elastic IP address assigned to the EIP.  
+* `name` - The name of the EIP instance. This name can have a string of 2 to 128 characters, must contain only alphanumeric characters or hyphens, such as "-", ".", "_", and must not begin or end with a hyphen, and must not begin with `http://` or `https://`.

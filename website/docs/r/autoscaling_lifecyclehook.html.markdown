@@ -141,9 +141,7 @@ The following arguments are supported:
   * `lifecycle_transition` - (Required) - Life cycle linked to the corresponding expansion and contraction type of activity.
   * `heartbeat_timeout` - (Optional) - Life cycle linked to set the wait time for the FLEX group activities, will be the next step after the Timeout waiting for State action.
   * `default_result` - (Optional) - When scaling group contractile activity of elastic ( scale_in ) and multiple linked to the life cycle is triggered, defaultresult to abandon linked to the life cycle of trigger the end of the wait state, will end early will wait for the other early States.In other cases, the next
-  * `notification_arn` - (Optional) - Life cycle linked to the notification object identifier.
-  * `notification_metadata` - (Optional) - Fixed string information for the expansion of the activities of the wait state.
-
+  
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
@@ -151,3 +149,5 @@ The following attributes are exported in addition to the arguments listed above:
   * `lifecycle_hook_name` - Linked to the life cycle a name.
   * `notification_arn` - Life cycle linked to the notification object identifier.
   * `notification_metadata` - Fixed string information for the expansion of the activities of the wait state.
+  * `heartbeat_timeout` - Life cycle linked to set the wait time for the FLEX group activities, will be the next step after the Timeout waiting for State action.
+  * `default_result` - When scaling group contractile activity of elastic ( scale_in ) and multiple linked to the life cycle is triggered, defaultresult to abandon linked to the life cycle of trigger the end of the wait state, will end early will wait for the other early States.In other cases, the next

@@ -49,27 +49,17 @@ resource "alibabacloudstack_edas_deploy_group" "default" {
 
 The following arguments are supported:
 
-* `app_id` - (Required, ForceNew) The ID of the application that you want to deploy. This is the unique identifier for the application in EDAS.
-* `group_name` - (Required, ForceNew) The name of the instance group that you want to create. It must be unique within the application and cannot be modified after creation.
-* `group_type` - (Optional, ForceNew) The type of the instance group that you want to create. Valid values:
-  - `0`: Default Grouping.
-  - `1`: Grayscale is not enabled for traffic management.
-  - `2`: Traffic Management Enable Grayscale. This allows phased release and traffic management features.
+* `app_id` - (Required, ForceNew) The ID of the application that you want to deploy. This is the unique identifier for the application in EDAS. 
+* `group_name` - (Required, ForceNew) The name of the instance group that you want to create. It must be unique within the application and cannot be modified after creation. 
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The unique identifier of the resource. It is formulated as `<app_id>:<group_name>:<group_id>`.
-* `group_type` - The type of the instance group. This attribute reflects the value set during creation and indicates the grouping behavior:
+* `group_type` - The type of the instance group. This attribute reflects the value set during creation and indicates the grouping behavior: 
   - `0`: Default Grouping.
   - `1`: Grayscale is not enabled for traffic management.
   - `2`: Traffic Management Enable Grayscale.
-  
+
 This attribute helps identify the configuration of the deploy group and its capabilities within the EDAS environment.
-
-
-### Explanation of Changes:
-- **Example Usage**: Updated the example to include more context by adding resources such as `alibabacloudstack_vpc`, `alibabacloudstack_edas_cluster`, and `alibabacloudstack_edas_application`. This provides a complete workflow for creating an EDAS deploy group.
-- **Argument Reference**: Enhanced descriptions for `app_id`, `group_name`, and `group_type` to clarify their purpose and constraints. Added valid values for `group_type` with detailed explanations.
-- **Attributes Reference**: Clarified the `id` attribute's structure and added a note about how `group_type` reflects the configuration of the deploy group.

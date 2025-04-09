@@ -61,6 +61,7 @@ The following arguments are supported:
 * `group_id` - (Optional) The ID of the instance group where the application will be deployed. Set this parameter to `all` if you want to deploy the application to all groups.
 * `package_version` - (Optional) The version of the application that you want to deploy. It must be unique for every application. The length cannot exceed 64 characters. We recommend using a timestamp.
 * `war_url` - (Optional) The address to store the uploaded web application (WAR) package for application deployment. This parameter is required when the `deployType` parameter is set as `url`.
+* `ecu_info` - (Optional) Information about the Elastic Compute Unit (ECU) associated with the application.
 
 ## Attributes Reference
 

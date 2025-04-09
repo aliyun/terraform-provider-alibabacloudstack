@@ -39,8 +39,6 @@ The following arguments are supported:
 * `instance_charge_type` - (Optional) Filter the results by charge type. Valid values: `PrePaid` and `PostPaid`. Default to `PrePaid`.
 * `engine` - (Optional) Database type. Options are `Redis`, `Memcache`. Default to `Redis`.
 * `engine_version` - (Optional) Database version required by the user. Value options of Redis can refer to the latest docs [detail info](https://www.alibabacloud.com/help/doc-detail/60873.htm) `EngineVersion`. Value of Memcache should be empty.
-* `engine` - (Optional) Specifies the engine type for the KVStore instance.
-* `engine_version` - (Optional) Specifies the engine version for the KVStore instance.
 
 ## Attributes Reference
 

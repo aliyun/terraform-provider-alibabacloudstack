@@ -59,3 +59,4 @@ The following attributes are exported:
 * `zone_id` - ID of the Dns Domain where this record belongs.
 * `lba_strategy` - The record strategy.
 * `line_ids` -  The line IDs associated with the DNS record.
+* `remark` - The remark associated with the DNS record.

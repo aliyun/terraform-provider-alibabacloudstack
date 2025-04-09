@@ -82,12 +82,15 @@ The following arguments are supported:
 * `cluster_id` - (Required, ForceNew) The ID of the cluster that you want to attach instances to.
 * `instance_ids` - (Required, ForceNew) A list of ECS instance IDs that will be attached to the specified cluster.
 * `pass_word` - (Required, ForceNew) The login password for the ECS instances in the cluster. This is required during the attachment process to ensure secure access.
+* `status_map` -  (Optional) A map indicating the status of each instance in the cluster. The keys are instance IDs, and the values represent the status: `1` (Running), `0` (Converting), `-1` (Failed), and `-2` (Offline).
+* `ecu_map` -  (Optional) A map linking each instance to its corresponding ECU (Elastic Compute Unit). The keys are instance IDs, and the values are ECU IDs.
+* `cluster_member_ids` -  (Optional) A map of cluster member IDs associated with each instance. The keys are instance IDs, and the values are the cluster member IDs.
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The unique identifier of the resource, which combines `<cluster_id>:<instance_id1,instance_id2,...>`.
-* `status_map` - A map indicating the status of each instance in the cluster. The keys are instance IDs, and the values represent the status: `1` (Running), `0` (Converting), `-1` (Failed), and `-2` (Offline).
-* `ecu_map` - A map linking each instance to its corresponding ECU (Elastic Compute Unit). The keys are instance IDs, and the values are ECU IDs.
-* `cluster_member_ids` - A map of cluster member IDs associated with each instance. The keys are instance IDs, and the values are the cluster member IDs.
+* `status_map` -  A map indicating the status of each instance in the cluster. The keys are instance IDs, and the values represent the status: `1` (Running), `0` (Converting), `-1` (Failed), and `-2` (Offline).
+* `ecu_map` -  A map linking each instance to its corresponding ECU (Elastic Compute Unit). The keys are instance IDs, and the values are ECU IDs.
+* `cluster_member_ids` -  A map of cluster member IDs associated with each instance. The keys are instance IDs, and the values are the cluster member IDs.

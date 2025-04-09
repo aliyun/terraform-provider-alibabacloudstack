@@ -39,6 +39,7 @@ The following arguments are supported:
   * `2`: VPC.
 * `logical_region_id` - (Optional, ForceNew) The ID of the logical region where the cluster is located. You can call the `ListUserDefineRegion` operation to query the logical region ID.
 * `vpc_id` - (Optional, ForceNew) The ID of the Virtual Private Cloud (VPC) for the cluster. This parameter is required if `network_mode` is set to `2` (VPC).
+* `region_id` - (Optional, ForceNew) The ID of the region where the cluster is located.
 
 ## Attributes Reference
 

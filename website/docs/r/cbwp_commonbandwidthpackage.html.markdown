@@ -38,6 +38,7 @@ The following arguments are supported:
 * `ratio` - (Optional, ForceNew) The percentage of the minimum bandwidth commitment. Set the parameter to **20**. > This parameter is available only on the Alibaba Cloud China site.
 * `name` - (Optional) The name of the Internet Shared Bandwidth instance. The name must be 2 to 128 characters in length, and can contain letters, digits, underscores (`_`), and hyphens (`-`). The name must start with a letter.
 * `description` - (Optional) The description of the Internet Shared Bandwidth instance. The description must be 2 to 256 characters in length and start with a letter. The description cannot start with `http://` or `https://`.
+* `bandwidth_package_name` - (Optional) The name of the Internet Shared Bandwidth instance. The name must be 2 to 128 characters in length, and can contain letters, digits, underscores (`_`), and hyphens (`-`). The name must start with a letter.
 
 ## Attributes Reference
 
@@ -45,3 +46,4 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the common bandwidth package instance.
 * `bandwidth_package_name` - The name of the Internet Shared Bandwidth instance. The name must be 2 to 128 characters in length, and can contain letters, digits, underscores (`_`), and hyphens (`-`). The name must start with a letter.
+* `name` - The name of the Internet Shared Bandwidth instance. The name must be 2 to 128 characters in length, and can contain letters, digits, underscores (`_`), and hyphens (`-`). The name must start with a letter.

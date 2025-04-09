@@ -55,6 +55,7 @@ The following arguments are supported:
 
 * `db_cluster_id` - (Required, ForceNew) The ID of the ADB cluster that can run the database. This field is immutable and cannot be changed after creation.
 * `connection_prefix` - (Optional, ForceNew) Prefix of the cluster's public endpoint. The prefix must be 6 to 30 characters in length and can contain lowercase letters, digits, and hyphens (-). It must start with a letter and end with a digit or letter. If not specified, it defaults to `<db_cluster_id> + tf`.
+* `port` - (Optional, Computed) The port number used for connecting to the ADB cluster.
 
 ## Attributes Reference
 

@@ -86,6 +86,7 @@ The following arguments are supported:
 * `external_traffic_policy` - (Optional) When the service type is `NodePort` or `LoadBalancer`, set the external traffic management policy. Valid values are `Local`, `Cluster`, Default to `Local`.
 * `annotations` - (Optional) The annotations map of the service
 * `labels` - (Optional) The labels map of the service
+* `allow_edit` - (Optional) Indicates whether editing is allowed for the service.
 
 ## Attributes Reference
 
@@ -95,7 +96,7 @@ The following attributes are exported:
 * `inner_endpointer` - The inner endpointer of the service
 * `namespace` - The namespace of the K8s cluster
 * `nodeip_list` - The node ip list of the service
-* `allow_edit` - Indicates whether editing is allowed for the service. 
+* `allow_edit` - Indicates whether editing is allowed for the service.
 
 ## Import
 

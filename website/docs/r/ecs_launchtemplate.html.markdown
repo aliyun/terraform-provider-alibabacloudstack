@@ -208,6 +208,8 @@ The following arguments are supported:
 * `tags` - (Optional) A mapping of tags to assign to the resource.
   - Key: Up to 64 characters in length. Cannot start with "aliyun", "acs:", "http://", or "https://".
   - Value: Up to 128 characters in length. Can be a null string.
+* `auto_release_time` - (Optional) Scheduled release time for the instance.
+* `user_data` - (Optional) User-defined data of the instance, Base64-encoded. Raw data size cannot exceed 16 KB.
 
 ## Attributes Reference
 
@@ -217,3 +219,4 @@ In addition to all arguments above, the following attributes are exported:
 * `launch_template_name` - The name of the launch template.
 * `internet_max_bandwidth_in` - The maximum public inbound bandwidth, in Mbit/s.
 * `internet_max_bandwidth_out` - The maximum public outbound bandwidth, in Mbit/s.
+* `name` - (Computed) The name of the launch template.

@@ -85,7 +85,7 @@ resource "alibabacloudstack_ecs_instance" "default" {
   security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
   instance_name        = "${var.name}_ecs"
   vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
-  zone_id    = data.alibabacloudstack_zones.default.zones.0.id
+  zone_id    = data.alibabacloudstack_zones.default.zones[0].id
   is_outdated          = false
   lifecycle {
     ignore_changes = [
@@ -149,6 +149,7 @@ The following arguments are supported:
   * `TotalCapacity`: [0, 1000]
 * `scaling_rule_name` - (Optional) Name shown for the scaling rule. It must be 2-64 characters (English or Chinese), starting with numbers, English letters or Chinese characters, and can contain numbers, underscores `_`, hyphens `-`, and decimal points `.`. If this parameter is not specified, the default value will be the `ScalingRuleId`.
 * `cooldown` - (Optional) The cooldown time of the scaling rule. This parameter is applicable only to simple scaling rules. Value range: [0, 86400], in seconds. Default value is 0.
+* `ari` - (Optional)  Field 'ari' is deprecated and will be removed in a future release. Please use new field 'scaling_rule_aris' instead.
 
 ## Attributes Reference
 

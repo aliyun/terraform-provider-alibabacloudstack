@@ -59,6 +59,7 @@ The following arguments are supported:
 * `private_ips_count` - (Optional) Number of secondary private IPs to assign to the ENI. Do not use both `private_ips` and `private_ips_count` in the same ENI resource block.
 * `description` - (Optional) Description of the ENI. This description can have a string of 2 to 256 characters, It cannot begin with http:// or https://. Default value is null.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
+* `mac_address` - (Optional) The MAC address of the ENI.
 
 ## Attributes Reference
 

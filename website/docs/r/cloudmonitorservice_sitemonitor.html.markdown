@@ -78,6 +78,7 @@ The following arguments are supported:
     "Pingnum": 10         // Number of PING packets sent (for PING tasks)
   }
   ```
+* `task_state` - (Optional) The current state of the site monitoring task.
 
 ## Attributes Reference
 
@@ -87,10 +88,3 @@ In addition to all arguments above, the following attributes are exported:
 * `task_state` - The current state of the site monitoring task.
 * `create_time` - The timestamp indicating when the site monitoring task was created.
 * `update_time` - The timestamp indicating when the site monitoring task was last updated.
-```
-
-### Explanation of Changes
-
-1. **Example Usage**: Provided a more complete and realistic example with variables and JSON formatting for `options_json`.
-2. **Argument Reference**: Added detailed descriptions for each argument, including valid values, data types, and examples where applicable.
-3. **Attributes Reference**: Clarified the attributes exported by the resource, ensuring they align with the expected outputs.

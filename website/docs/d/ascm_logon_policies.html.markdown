@@ -38,7 +38,7 @@ The following arguments are supported:
 * `description` - (Optional) The Logon Policies description.
 * `rule` - (Optional) The Rule for the Logon Policies.
 * `ip_ranges` - (Optional) The IP Ranges for the Logon Policies.
-* `ids` - (Optional) The IDs of the Logon Policies.
+
 
 ## Attributes Reference
 

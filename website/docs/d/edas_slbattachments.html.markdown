@@ -113,3 +113,9 @@ The following attributes are exported in addition to the arguments listed above:
     - `vserver_group_id` - The ID of the VServer group associated with the SLB.
     - `slb_status` - The status of the SLB.
     - `vswitch_id` - The ID of the VSwitch associated with the SLB.
+    - `app_name` - The name of the application.
+    - `application_type` - The type of the application.
+    - `build_package_id` - The build package ID of the application.
+    - `cluster_id` - The ID of the cluster associated with the application.
+    - `cluster_type` - The type of the cluster associated with the application.
+    - `region_id` - The ID of the region where the application resides.

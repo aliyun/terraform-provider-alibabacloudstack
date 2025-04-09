@@ -34,6 +34,7 @@ The following arguments are supported:
 * `ids` - (Optional) A list of cluster IDs to filter the results by specific cluster IDs.
 * `name_regex` - (Optional, ForceNew) A regex string to filter results by the cluster name.
 
+
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
@@ -59,3 +60,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `node_num` - The number of Elastic Compute Service (ECS) instances deployed to the cluster.
   * `vpc_id` - The ID of the virtual private cloud (VPC) where the cluster is located.
   * `region_id` - The ID of the logical zone where the cluster is located.
+  * `logical_region_id` - The ID of the logical region where the cluster resides.

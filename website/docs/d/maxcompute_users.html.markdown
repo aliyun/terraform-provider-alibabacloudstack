@@ -28,6 +28,7 @@ The following arguments are supported:
 
 * `ids` - (Optional) A list of user IDs to filter the results.
 * `name_regex` - (Optional) A regex pattern to filter users by name.
+* `user_name` - (Required) The name of the user. 
 
 
 ## Attributes Reference

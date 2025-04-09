@@ -42,6 +42,8 @@ The following arguments are supported:
 
 The following attributes are exported in addition to the arguments listed above:
 
+* `description` - (Computed) The description of the ECS Hpc Cluster.
+
 * `id` - The ID of the ECS Hpc Cluster. This attribute is the same as the `name` argument and can be used for referencing this resource in other parts of your Terraform configuration.
 
 ## Import

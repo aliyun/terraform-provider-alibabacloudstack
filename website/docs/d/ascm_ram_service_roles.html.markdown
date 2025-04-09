@@ -42,3 +42,4 @@ The following attributes are exported in addition to the arguments listed above:
     * `product` - types of role.
     * `organization_name` - Name of an Organization.
     * `aliyun_user_id` - Aliyun User Id.
+    * `computed_property_example` - (Computed) Example of a computed property that is automatically generated based on the provided schema.

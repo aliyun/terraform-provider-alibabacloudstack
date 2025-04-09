@@ -50,6 +50,7 @@ The following attributes are exported in addition to the arguments listed above:
   * `id` - The ID of the vSwitch.
   * `vpc_id` - The ID of the VPC to which the vSwitch belongs.
   * `zone_id` - The ID of the availability zone where the vSwitch is located.
+  * `name` - The name of the vSwitch. **Deprecated**: Field 'name' is deprecated and will be removed in a future release. Please use 'vswitch_name' instead.
   * `vswitch_name` - The name of the vSwitch.
   * `instance_ids` - A list of ECS instance IDs that are associated with the vSwitch.
   * `cidr_block` - The CIDR block of the vSwitch.
