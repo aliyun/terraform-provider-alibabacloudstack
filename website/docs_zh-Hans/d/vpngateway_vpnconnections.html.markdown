@@ -86,16 +86,16 @@ data "alibabacloudstack_vpn_connections" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
-* `ids` - (可选) 要查询的 IPsec-VPN 连接的 ID 列表。如果指定了此参数，仅返回指定的资源。
-* `vpn_gateway_id` - (可选，变更时重建) 与 IPsec-VPN 连接关联的 VPN 网关的 ID。如果要按 VPN 网关过滤连接，这是必填的参数。
-* `customer_gateway_id` - (可选，变更时重建) 与 IPsec-VPN 连接关联的客户网关的 ID。如果要按客户网关过滤连接，这是必填的参数。
-* `name_regex` - (可选，变更时重建) 用于基于 IPsec-VPN 连接名称过滤结果的正则表达式。
+* `ids` - （可选）要查询的 IPsec-VPN 连接的 ID 列表。如果指定了此参数，仅返回指定的资源。
+* `vpn_gateway_id` - （可选，变更时重建）与 IPsec-VPN 连接关联的 VPN 网关的 ID。如果要按 VPN 网关过滤连接，这是必填的参数。
+* `customer_gateway_id` - （可选，变更时重建）与 IPsec-VPN 连接关联的客户网关的 ID。如果要按客户网关过滤连接，这是必填的参数。
+* `name_regex` - （可选，变更时重建）用于基于 IPsec-VPN 连接名称过滤结果的正则表达式。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 
@@ -106,12 +106,12 @@ data "alibabacloudstack_vpn_connections" "default" {
   * `customer_gateway_id` - 与此 IPsec-VPN 连接关联的客户网关的 ID。
   * `vpn_gateway_id` - 与此 IPsec-VPN 连接关联的 VPN 网关的 ID。
   * `name` - IPsec-VPN 连接的名称。
-  * `local_subnet` - 此 IPsec-VPN 连接附加到的虚拟私有云(VPC)的 CIDR 块。
+  * `local_subnet` - 此 IPsec-VPN 连接附加到的虚拟私有云 (VPC) 的 CIDR 块。
   * `remote_subnet` - 通过此 IPsec-VPN 连接连接的本地数据中心或其他网络的 CIDR 块。
   * `create_time` - 创建 IPsec-VPN 连接的时间。
   * `effect_immediately` - 表示在更新配置后是否立即启动 IPsec-VPN 协商。有效值：`true` 或 `false`。
   * `status` - 当前的 IPsec-VPN 连接状态。可能的值包括：
-    * `ike_sa_not_established` - IKE 安全关联(SA)尚未建立。
+    * `ike_sa_not_established` - IKE 安全关联 (SA) 尚未建立。
     * `ike_sa_established` - IKE SA 已建立。
     * `ipsec_sa_not_established` - IPsec SA 尚未建立。
     * `ipsec_sa_established` - IPsec SA 已建立。
@@ -122,11 +122,11 @@ data "alibabacloudstack_vpn_connections" "default" {
     * `ike_enc_alg` - IKE 第一阶段协商中使用的加密算法。例如，`aes-128-cbc`、`aes-256-cbc`。
     * `ike_auth_alg` - IKE 第一阶段协商中使用的身份验证算法。例如，`sha1`、`sha256`。
     * `ike_pfs` - IKE 第一阶段协商中使用的 Diffie-Hellman 密钥交换算法。例如，`group2`、`group14`。
-    * `ike_lifetime` - IKE 第一阶段协商结果的安全关联(SA)的生命周期。以秒为单位测量。
-    * `ike_local_id` - 本地(VPN 网关)端点的身份识别。
-    * `ike_remote_id` - 远程(客户网关)端点的身份识别。
+    * `ike_lifetime` - IKE 第一阶段协商结果的安全关联 (SA) 的生命周期。以秒为单位测量。
+    * `ike_local_id` - 本地 (VPN 网关) 端点的身份识别。
+    * `ike_remote_id` - 远程 (客户网关) 端点的身份识别。
   * `ipsec_config` - 第二阶段协商的配置。它包括以下属性：
     * `ipsec_enc_alg` - IPsec 第二阶段协商中使用的加密算法。例如，`aes-128-cbc`、`aes-256-cbc`。
     * `ipsec_auth_alg` - IPsec 第二阶段协商中使用的身份验证算法。例如，`hmac-sha1-96`、`hmac-sha256-128`。
     * `ipsec_pfs` - IPsec 第二阶段协商中使用的 Diffie-Hellman 密钥交换算法。例如，`group2`、`group14`。
-    * `ipsec_lifetime` - IPsec 第二阶段协商结果的安全关联(SA)的生命周期。以秒为单位测量。
+    * `ipsec_lifetime` - IPsec 第二阶段协商结果的安全关联 (SA) 的生命周期。以秒为单位测量。

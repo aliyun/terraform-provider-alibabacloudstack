@@ -51,16 +51,16 @@ output "dbinstance_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
-* `name_regex` - (选填) - 用于按名称筛选 GPDB 数据库实例的正则表达式字符串。
-* `availability_zone` - (选填) - 实例所在的可用区。通过 `data "alibabacloudstack_zones"` 获取可用区信息。
-* `vswitch_id` - (选填) - 用于检索属于指定 VSwitch 资源的实例。VSwitch 的 ID 可以通过 `alibabacloudstack_vswitch` 资源获取。
-* `ids` - (选填) - GPDB 数据库实例 ID 列表，用于精确匹配特定实例。
+* `name_regex` - (选填) 用于按名称筛选 GPDB 数据库实例的正则表达式字符串。
+* `availability_zone` - (选填) 实例所在的可用区。可以通过 `data "alibabacloudstack_zones"` 获取可用区信息。
+* `vswitch_id` - (选填) 用于检索属于指定 VSwitch 资源的实例。VSwitch 的 ID 可以通过 `alibabacloudstack_vswitch` 资源获取。
+* `ids` - (选填) GPDB 数据库实例 ID 列表，用于精确匹配特定实例。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -71,11 +71,11 @@ output "dbinstance_id" {
   * `description` - GPDB 数据库实例的描述。
   * `region_id` - GPDB 数据库实例所在的区域 ID。
   * `availability_zone` - GPDB 数据库实例所在的可用区。
-  * `creation_time` - GPDB 数据库实例的创建时间(UTC 格式：YYYY-MM-DDThh:mm:ssZ)。
+  * `creation_time` - GPDB 数据库实例的创建时间（UTC 格式：YYYY-MM-DDThh:mm:ssZ）。
   * `status` - GPDB 数据库实例的当前状态。
   * `engine` - 数据库引擎类型。支持值为 `gpdb`。
   * `engine_version` - 数据库引擎版本。支持值包括 `6.0` 和 `7.0`。
-  * `instance_class` - GPDB 数据库实例的类。
-  * `instance_group_count` - GPDB 数据库实例中的组数。
+  * `instance_class` - GPDB 数据库实例的规格。
+  * `instance_group_count` - GPDB 数据库实例中的分组数量。
   * `instance_network_type` - GPDB 数据库实例的网络类型。支持值为 `VPC`。
-  * `charge_type` - GPDB 数据库实例的计费方式。可能的值为 `PrePaid`(包年包月)和 `PostPaid`(按量付费)。
+  * `charge_type` - GPDB 数据库实例的计费方式。可能的值为 `PrePaid`（包年包月）和 `PostPaid`（按量付费）。

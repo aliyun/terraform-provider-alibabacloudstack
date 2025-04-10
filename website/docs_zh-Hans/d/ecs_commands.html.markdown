@@ -50,7 +50,7 @@ output "command_ids" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -59,16 +59,16 @@ output "command_ids" {
 * `content_encoding` - （可选，变更时重建）命令内容（CommandContent）的编码方式。取值范围：
   * `PlainText`：不编码，采用明文传输。
   * `Base64`：Base64编码。
-  默认值：`Base64`。错填该取值会当作`Base64`处理。
+  默认值：`Base64`。如果提供无效值，则会将其视为`Base64`处理。
 * `description` - （可选，变更时重建）命令的描述。
 * `name` - （可选，变更时重建）命令的名称。
 * `command_provider` - （可选，变更时重建）命令的提供者。
 * `type` - （可选，变更时重建）命令的类型。取值范围：
-  * `RunBatScript`
-  * `RunPowerShellScript`
-  * `RunShellScript`
+  * `RunBatScript`：运行批处理脚本。
+  * `RunPowerShellScript`：运行PowerShell脚本。
+  * `RunShellScript`：运行Shell脚本。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -76,11 +76,11 @@ output "command_ids" {
 * `commands` - ECS命令列表。每个元素包含以下属性：
   * `command_content` - 命令内容，以 Base64 编码后传输。
   * `command_id` - 命令 ID。
-  * `description` - 命令的描述。
-  * `enable_parameter` - 是否在命令中使用自定义参数。
-  * `id` - 命令的 ID（与`command_id`相同）。
+  * `description` - 命令的描述信息。
+  * `enable_parameter` - 是否在命令中使用自定义参数。如果为`true`，表示命令支持自定义参数。
+  * `id` - 命令的唯一标识符（与`command_id`相同）。
   * `name` - 命令的名称。
   * `parameter_names` - 在创建命令时从命令内容中解析出的自定义参数名称列表。
-  * `timeout` - 命令在ECS实例上运行的超时时间（以秒为单位）。
-  * `type` - 命令的类型。
-  * `working_dir` - 命令在ECS实例中的执行路径。
+  * `timeout` - 命令在ECS实例上运行的超时时间（以秒为单位）。如果命令执行时间超过此值，将被终止。
+  * `type` - 命令的类型，取值范围与`type`参数一致。
+  * `working_dir` - 命令在ECS实例中的执行路径。如果未指定，默认为系统默认路径。

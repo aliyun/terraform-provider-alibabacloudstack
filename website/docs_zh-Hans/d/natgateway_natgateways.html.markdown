@@ -64,11 +64,12 @@ output "nat_gateways" {
   * `name` - NAT 网关的名称。
   * `description` - NAT 网关的描述。
   * `creation_time` - NAT 网关创建的时间。
-  * `spec` - NAT 网关的规格(例如，Small, Medium)。
-  * `status` - NAT 网关的状态，取值：
+  * `spec` - NAT 网关的规格（例如，Small, Medium）。
+  * `status` - NAT 网关的状态，取值范围及含义如下：
     - `Initiating`：初始化中
     - `Available`：可用
     - `Pending`：配置中
     - `Deleting`：删除中
   * `snat_table_id` - 与 NAT 网关关联的 SNAT 表的 ID。
   * `forward_table_id` - 与 NAT 网关关联的转发表的 ID。
+  * `vpc_id` - NAT 网关所属的 VPC ID。

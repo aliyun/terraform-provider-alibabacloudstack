@@ -137,36 +137,36 @@ output "first_scaling_configuration_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
-* `scaling_group_id` - (可选，变更时重建) 伸缩配置所属伸缩组的ID。
-* `name_regex` - (可选，变更时重建) 按名称筛选结果的正则表达式字符串。
+* `scaling_group_id` - (可选，变更时重建) 伸缩配置所属伸缩组的ID。  
+* `name_regex` - (可选，变更时重建) 按名称筛选结果的正则表达式字符串。  
 * `ids` - (可选) 用于过滤结果的伸缩配置ID列表。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
-* `ids` - 伸缩配置ID列表。
-* `names` - 伸缩配置名称列表。
-* `configurations` - 伸缩配置列表。每个元素包含以下属性：
-  * `id` - 伸缩配置的ID。
-  * `name` - 伸缩配置的名称。
-  * `scaling_group_id` - 该伸缩配置所属的伸缩组的ID。
-  * `image_id` - 使用此伸缩配置创建ECS实例时使用的镜像文件ID。
-  * `instance_type` - 使用此伸缩配置创建的ECS实例的规格。
-  * `security_group_id` - ECS实例所属的安全组ID。同一安全组内的实例可以互相访问。
-  * `internet_max_bandwidth_in` - ECS实例的互联网入方向带宽值，单位为Mbps(Mega bit per second)，取值范围为1~200。如果不指定，默认设置为200Mbps。
-  * `internet_max_bandwidth_out` - ECS实例的互联网出方向带宽值，单位为Mbps。
-  * `system_disk_category` - 伸缩配置中使用的系统盘类别。
-  * `system_disk_size` - 系统盘大小，单位为GB。
-  * `data_disks` - 伸缩配置中配置的数据盘列表。每个数据盘具有以下属性：
-    * `size` - 数据盘大小，单位为GB。
-    * `category` - 数据盘类别。
-    * `snapshot_id` - 用于创建数据盘的快照ID。
-    * `device` - 数据盘的设备属性。
-    * `delete_with_instance` - 实例释放时是否删除数据盘。
-  * `lifecycle_state` - 伸缩配置的生命周期状态。
+* `ids` - 伸缩配置ID列表。  
+* `names` - 伸缩配置名称列表。  
+* `configurations` - 伸缩配置列表。每个元素包含以下属性：  
+  * `id` - 伸缩配置的ID。  
+  * `name` - 伸缩配置的名称。  
+  * `scaling_group_id` - 该伸缩配置所属的伸缩组的ID。  
+  * `image_id` - 使用此伸缩配置创建ECS实例时使用的镜像文件ID。  
+  * `instance_type` - 使用此伸缩配置创建的ECS实例的规格。  
+  * `security_group_id` - ECS实例所属的安全组ID。同一安全组内的实例可以互相访问。  
+  * `internet_max_bandwidth_in` - ECS实例的互联网入方向带宽值，单位为Mbps(Mega bit per second)，取值范围为1~200。如果不指定，默认设置为200Mbps。  
+  * `internet_max_bandwidth_out` - ECS实例的互联网出方向带宽值，单位为Mbps。  
+  * `system_disk_category` - 伸缩配置中使用的系统盘类别。  
+  * `system_disk_size` - 系统盘大小，单位为GB。  
+  * `data_disks` - 伸缩配置中配置的数据盘列表。每个数据盘具有以下属性：  
+    * `size` - 数据盘大小，单位为GB。  
+    * `category` - 数据盘类别。  
+    * `snapshot_id` - 用于创建数据盘的快照ID。  
+    * `device` - 数据盘的设备属性。  
+    * `delete_with_instance` - 实例释放时是否删除数据盘。  
+  * `lifecycle_state` - 伸缩配置的生命周期状态。  
   * `creation_time` - 伸缩配置的创建时间。

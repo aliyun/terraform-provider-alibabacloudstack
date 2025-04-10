@@ -76,8 +76,8 @@ data "alibabacloudstack_polardb_instances" "default" {
   * `resource_group_id` - (选填) - 资源组ID。
   * `region_id` - (必填) - 代表region的资源属性字段。
   * `engine` - (选填) - 数据库类型。返回值：* MySQL* PostgreSQL* SQLServer* MariaDB。
-  
-## 属性参考
+
+## 属性说明
 除了上述参数外，还导出以下属性：
   * `db_instances` - 数据库实例列表。列表中的每个元素是一个包含以下键的映射：
     * `id` - 数据库实例的 ID。
@@ -105,6 +105,7 @@ data "alibabacloudstack_polardb_instances" "default" {
     * `engine` - 数据库类型。返回值：* MySQL* PostgreSQL* SQLServer* MariaDB。
     * `engine_version` - 数据库版本。
     * `expire_time` - 到期时间。<i>yyyy-MM-dd</i>T<i>HH:mm:ss</i>Z(UTC时间)。> 按量付费实例无到期时间。
+    * `guard_db_instance_id` - 守护DB实例的ID。
     * `lock_mode` - 实例锁定模式，取值：* **Unlock**：正常。* **ManualLock**：手动触发锁定。* **LockByExpiration**：实例过期自动锁定。* **LockByRestoration**：实例回滚前的自动锁定。* **LockByDiskQuota**：实例空间满自动锁定。* **LockReadInstanceByDiskQuota**：只读实例空间满自动锁定。
     * `lock_reason` - 锁定原因。
     * `maintain_time` - 实例可维护时间段，是UTC时间，+8小时才是控制台上显示的可维护时间段。

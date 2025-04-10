@@ -50,24 +50,14 @@ output "vswitch_names" {
 
 以下参数是支持的：
 
-* `cidr_block` - (可选) 交换机的网段。交换机网段要求如下：
-  * 交换机的网段的掩码长度范围为16～29位。
-  * 交换机的网段必须从属于所在VPC的网段。
-  * 交换机的网段不能与所在VPC中路由条目的目标网段相同，但可以是目标网段的子集。
-  * 交换机的网段不能是100.64.0.0/10及其子网网段。
-
+* `cidr_block` - (可选) 交换机的网段。用于筛选具有特定CIDR块的vSwitch。
 * `name_regex` - (可选) 用于通过正则表达式筛选vSwitch名称的结果。
-
-* `is_default` - (可选，类型：bool)指定是否查询指定区域中的默认vSwitch。有效值：
+* `is_default` - (可选，类型：bool) 指定是否查询指定区域中的默认vSwitch。有效值：
   * **true** - 仅查询默认vSwitch。
   * **false** - 从查询中排除默认vSwitch。
   如果不设置此参数，默认情况下系统将查询指定区域中的所有vSwitch。
-
 * `vpc_id` - (可选) vSwitch所属虚拟私有云(VPC)的ID。至少需要指定`vpc_id`或`zone_id`中的一个。
-
 * `zone_id` - (可选) vSwitch所在可用区的ID。您可以调用[DescribeZones](https://help.aliyun.com/document_detail/36064.html)操作来查询最新的可用区列表。
-
-
 * `ids` - (可选) 用于过滤结果的vSwitch ID列表。
 
 ## 属性参考
@@ -75,9 +65,7 @@ output "vswitch_names" {
 除了上述参数外，还导出以下属性：
 
 * `ids` - vSwitch ID列表。
-
 * `names` - vSwitch名称列表。
-
 * `vswitches` - vSwitch详细信息列表。每个元素包含以下属性：
   * `id` - vSwitch的ID。
   * `vpc_id` - vSwitch所属VPC的ID。

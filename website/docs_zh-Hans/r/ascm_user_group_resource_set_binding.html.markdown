@@ -41,17 +41,17 @@ output "binder" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
-支持以下参数：
+以下参数被支持：
 
-* `resource_set_id` - (必填) 资源集ID列表。
-* `user_group_id` - (必填) 用户组ID。
-* `ascm_role_id` - (可选) ASCM角色ID。
+* `resource_set_id` - (必填) 资源集ID列表。该参数用于指定需要绑定的资源集，必须是一个有效的资源集ID。
+* `user_group_id` - (必填) 用户组ID。该参数用于指定需要绑定的用户组，必须是一个有效的用户组ID。
+* `ascm_role_id` - (可选) ASCM角色ID。该参数用于指定用户组在资源集中所拥有的角色权限，默认值为空。
 
-## 属性参考
+## 属性说明
 
-导出以下属性：
+以下属性将被导出：
 
-* `resource_set_id` - 资源集ID列表。
-* `user_group_id` - 用户组ID。
+* `resource_set_id` - 资源集ID列表。表示当前绑定关系所关联的资源集。
+* `user_group_id` - 用户组ID。表示当前绑定关系所关联的用户组。

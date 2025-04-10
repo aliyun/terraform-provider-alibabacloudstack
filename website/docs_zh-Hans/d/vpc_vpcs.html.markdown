@@ -57,7 +57,7 @@ output "first_vpc_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -84,7 +84,6 @@ output "first_vpc_id" {
 
 * `vswitch_id` - (选填, 变更时重建) 通过指定的交换机过滤结果。
 
-
 * `ids` - (选填, 变更时重建) VPC ID列表。
 
 * `dhcp_options_set_id` - (选填, 变更时重建) DHCP选项集的ID。
@@ -101,7 +100,7 @@ output "first_vpc_id" {
 
 * `enable_details` - (选填) 默认为 `true`。将其设置为 `true` 以输出 `route_table_id`。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

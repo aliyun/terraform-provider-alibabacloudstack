@@ -76,12 +76,16 @@ resource "alibabacloudstack_cloudmonitorservice_metricalarmrule" "default" {
 * `silence_time` - (可选) 在报警状态下的通知静默期，单位为秒。有效范围：[300, 86400]。默认为`86400`。
 * `enabled` - (可选) 是否启用报警规则。默认为`true`。
 * `webhook` - (可选) 当报警触发时应调用的Webhook。目前仅支持HTTP协议。默认为空字符串。
+* `resources` - (可选，变更时重建) 与报警规则关联的资源列表。
 
 > **注意**：每个资源支持创建以下三个级别之一：关键、警告或信息。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 
 * `rule_id` - 报警规则的唯一ID。
 * `status` - 报警规则的当前状态(`true`表示启用，`false`表示禁用)。
+* `name` - 报警规则的名称（已弃用，请改用`rule_name`）。
+* `project` - 报警规则关联的项目（已弃用，请改用`namespace`）。
+* `metric` - 报警规则关联的指标（已弃用，请改用`metric_name`）。

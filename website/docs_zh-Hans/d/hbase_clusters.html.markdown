@@ -85,7 +85,7 @@ data "alibabacloudstack_hbase_clusters" "hbase" {
 * `ids` - (选填) HBase 集群的 ID 列表。可以使用此参数通过唯一标识符过滤集群。
 * `availability_zone` - (选填) HBase 集群所在的可用区。使用此参数可以过滤特定区域内的集群。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -96,21 +96,21 @@ data "alibabacloudstack_hbase_clusters" "hbase" {
   * `name` - HBase 集群的名称。
   * `region_id` - 集群所在区域的 ID。
   * `zone_id` - 集群所在可用区的 ID。
-  * `engine` - 集群的引擎类型(例如 HBase)。
+  * `engine` - 集群的引擎类型（例如 HBase）。
   * `engine_version` - 集群使用的引擎版本。
   * `network_type` - 集群的网络类型，如 `Classic` 或 `VPC`。
-  * `master_instance_type` - 主节点的实例类型(例如 `hbase.sn2.2xlarge`)。
+  * `master_instance_type` - 主节点的实例类型（例如 `hbase.sn2.2xlarge`）。
   * `master_node_count` - 集群中的主节点数量。
-  * `core_instance_type` - 核心节点的实例类型(例如 `hbase.sn2.4xlarge`)。
+  * `core_instance_type` - 核心节点的实例类型（例如 `hbase.sn2.4xlarge`）。
   * `core_node_count` - 集群中的核心节点数量。
   * `core_disk_type` - 核心节点的磁盘类型，如 `Cloud_SSD` 或 `Cloud_Efficiency`。
-  * `core_disk_size` - 核心节点的磁盘大小(以 GB 为单位)。
+  * `core_disk_size` - 核心节点的磁盘大小（以 GB 为单位）。
   * `vpc_id` - 与集群关联的 VPC ID。
   * `vswitch_id` - 与集群关联的 VSwitch ID。
-  * `pay_type` - 集群的计费方式。可能的值包括 `PostPaid`(按量付费)和 `PrePaid`(包年包月订阅)。
+  * `pay_type` - 集群的计费方式。可能的值包括 `PostPaid`（按量付费）和 `PrePaid`（包年包月订阅）。
+  * `created_time` - 集群的创建时间。
+  * `expire_time` - 集群的过期时间（如果适用）。
   * `status` - 集群的当前状态。
   * `backup_status` - 集群的备份状态。
-  * `created_time` - 集群的创建时间。
-  * `expire_time` - 集群的过期时间(如果适用)。
   * `deletion_protection` - 指示是否为集群启用了删除保护。
   * `tags` - 分配给集群的标签映射。

@@ -173,7 +173,7 @@ resource "alibabacloudstack_cs_kubernetes" "k8s" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -209,6 +209,7 @@ resource "alibabacloudstack_cs_kubernetes" "k8s" {
   * `name` - (选填) ACK 插件的名称。名称必须与 DescribeAddons 返回的名称之一匹配。
   * `config` - (选填) ACK 插件配置。有关更多配置信息，请参阅 [cs_kubernetes_addon_metadata](https://registry.terraform.io/providers/aliyun/alicloud/latest/docs/data-sources/cs_kubernetes_addon_metadata)。
 * `cloud_monitor_flags` - (选填) 是否安装云监控插件。
+* `node_port_range` - (选填) 指定 NodePort 服务使用的端口范围。
 
 ### 网络
 
@@ -241,7 +242,7 @@ resource "alibabacloudstack_cs_kubernetes" "k8s" {
 * `worker_instance_types` - (必填) 工作节点的实例类型。对于单 AZ 集群，指定一种类型；对于多 AZ 集群，指定三种类型。
 * `worker_system_disk_performance_level` - (选填) 工作节点系统盘的性能级别。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
@@ -267,3 +268,7 @@ resource "alibabacloudstack_cs_kubernetes" "k8s" {
 * `client_cert` - 客户端证书的路径，例如 `~/.kube/client-cert.pem`。
 * `client_key` - 客户端密钥的路径，例如 `~/.kube/client-key.pem`。
 * `cluster_ca_cert` - 集群 CA 证书的路径，例如 `~/.kube/cluster-ca-cert.pem`。
+* `master_system_disk_performance_level` - 主节点系统盘的性能级别。
+* `worker_system_disk_performance_level` - 工作节点系统盘的性能级别。
+* `is_enterprise_security_group` - 是否使用企业级安全组。
+* `cloud_monitor_flags` - 是否启用云监控。

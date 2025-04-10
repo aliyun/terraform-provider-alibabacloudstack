@@ -93,23 +93,23 @@ output "route_entries" {
 
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `route_table_id` - (必填，变更时重建) 路由表的 ID。
-* `instance_id` - (可选) 下一跳的实例 ID。
-* `type` - (可选) 路由条目的类型。
-* `cidr_block` - (可选) 路由条目的目标 CIDR 块。
+* `route_table_id` - (必填，变更时重建) 路由表的 ID。用于指定需要查询的路由表。
+* `instance_id` - (可选) 下一跳的实例 ID。用于过滤特定实例作为下一跳的路由条目。
+* `type` - (可选) 路由条目的类型。例如，系统路由或自定义路由。
+* `cidr_block` - (可选) 路由条目的目标 CIDR 块。用于过滤具有特定目标 CIDR 的路由条目。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
 * `entries` - 路由条目列表。每个元素包含以下属性：
-  * `type` - 路由条目的类型。
-  * `next_hop_type` - 下一跳的类型。
-  * `status` - 路由条目的状态。
-  * `instance_id` - 下一跳的实例 ID。
-  * `route_table_id` - 路由条所属的路由表的 ID。
-  * `cidr_block` - 路由条目的目标 CIDR 块。
+  * `type` - 路由条目的类型，例如系统路由或用户定义路由。
+  * `next_hop_type` - 下一跳的类型，例如实例、路由器接口等。
+  * `status` - 路由条目的状态，例如 Active 或 Inactive。
+  * `instance_id` - 下一跳的实例 ID，如果下一跳为实例类型，则此字段有效。
+  * `route_table_id` - 路由条目所属的路由表的 ID。
+  * `cidr_block` - 路由条目的目标 CIDR 块，表示该路由条目适用的网络范围。

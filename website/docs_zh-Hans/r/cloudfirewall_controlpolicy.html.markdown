@@ -62,7 +62,7 @@ resource "alibabacloudstack_cloudfirewall_controlpolicy" "example" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -73,52 +73,33 @@ resource "alibabacloudstack_cloudfirewall_controlpolicy" "example" {
 
 * `acl_uuid` - (强制新建, 可选) - 安全访问控制策略的唯一标识ID。如果未指定，Terraform将自动生成一个。
 
-* `application_name` - (必填) - 安全访问控制策略支持的应用类型有以下几种:
-  - **ANY**
-  - **HTTP**
-  - **HTTPS**
-  - **MySQL**
-  - **SMTP**
-  - **SMTPS**
-  - **RDP**
-  - **VNC**
-  - **SSH**
-  - **Redis**
-  - **MQTT**
-  - **MongoDB**
-  - **Memcache**
-  - **SSL**
-  > **ANY** 表示策略应用在所有类型的应用中。
+* `application_name` - (必填) - 安全访问控制策略支持的应用类型。
+  - 如果 `direction` 为 `in`，有效值为 `ANY`。
+  - 如果 `direction` 为 `out`，有效值为 `ANY`, `HTTP`, `HTTPS`, `MQTT`, `Memcache`, `MongoDB`, `MySQL`, `RDP`, `Redis`, `SMTP`, `SMTPS`, `SSH`, `SSL`, `VNC`。
 
 * `description` - (必填) - 安全访问控制策略的描述信息。
 
-* `dest_port` - (选填) - 安全访问控制策略中流量访问的目的端口。如果 `dest_port_type` 设置为 `port`，则需要此参数。
+* `dest_port` - (可选) - 安全访问控制策略中流量访问的目的端口。如果 `dest_port_type` 设置为 `port`，则需要此参数。
 
-* `dest_port_group` - (选填) - 安全访问控制策略中流量访问的目的端口地址簿名称。如果 `dest_port_type` 设置为 `group`，则需要此参数。
+* `dest_port_group` - (可选) - 安全访问控制策略中流量访问的目的端口地址簿名称。如果 `dest_port_type` 设置为 `group`，则需要此参数。
 
-* `dest_port_type` - (选填) - 安全访问控制策略中流量访问的目的端口类型。
+* `dest_port_type` - (可选) - 安全访问控制策略中流量访问的目的端口类型。
   - **port**：端口
   - **group**：端口地址簿
 
 * `destination` - (必填) - 安全访问控制策略中的目的地址。
-  - 当 `destination_type` 为 `net` 时，`destination` 为目的CIDR。例如：`1.2.3.4/24`
-  - 当 `destination_type` 为 `group` 时，`destination` 为目的地址簿名称。例如：`db_group`
-  - 当 `destination_type` 为 `domain` 时，`destination` 为目的域名。例如：`*.aliyuncs.com`
-  - 当 `destination_type` 为 `location` 时，`destination` 为目的区域(具体区域位置编码见后文)。例如：`["BJ11", "ZB"]`
 
 * `destination_type` - (必填) - 安全访问控制策略中的目的地址类型。
-  - **net**：目的网段(CIDR)
-  - **group**：目的地址簿
-  - **domain**：目的域名
-  - **location**：目的区域
+  - 如果 `direction` 为 `in`，有效值为 `net`, `group`。
+  - 如果 `direction` 为 `out`，有效值为 `net`, `group`, `domain`, `location`。
 
-* `direction` - (必填, 变更时重建) - 安全访问控制策略的流量方向。
+* `direction` - (必填, 强制新建) - 安全访问控制策略的流量方向。
   - **in**：外对内流量访问控制
   - **out**：内对外流量访问控制
 
-* `ip_version` - (选填) - IP版本。有效值：`ipv4`, `ipv6`。
+* `ip_version` - (可选) - IP版本。有效值：`ipv4`, `ipv6`。
 
-* `lang` - (选填) - 请求和接收消息的语言类型。有效值：`en`, `zh`。
+* `lang` - (可选) - 请求和接收消息的语言类型。有效值：`en`, `zh`。
 
 * `proto` - (必填) - 安全访问控制策略中流量访问的安全协议类型。
   - **ANY**
@@ -126,21 +107,17 @@ resource "alibabacloudstack_cloudfirewall_controlpolicy" "example" {
   - **UDP**
   - **ICMP**
 
-* `release` - (选填) - 指定安全访问控制策略是否生效。默认情况下，创建后访问控制策略是启用的。有效值：`true`, `false`。
+* `release` - (可选) - 指定安全访问控制策略是否生效。默认情况下，创建后访问控制策略是启用的。有效值：`true`, `false`。
 
 * `source` - (必填) - 安全访问控制策略中的源地址。
-  - 当 `source_type` 为 `net` 时，`source` 为源CIDR。例如：`1.2.3.0/24`
-  - 当 `source_type` 为 `group` 时，`source` 为源地址簿名称。例如：`db_group`
-  - 当 `source_type` 为 `location` 时，`source` 为源区域(具体区域位置编码见后文)。例如：`["BJ11", "ZB"]`
 
-* `source_ip` - (选填) - 源IP地址。
+* `source_ip` - (可选) - 源IP地址。
 
 * `source_type` - (必填) - 安全访问控制策略中的源地址类型。
-  - **net**：源网段(CIDR)
-  - **group**：源地址簿
-  - **location**：源区域
+  - 如果 `direction` 为 `in`，有效值为 `net`, `group`, `location`。
+  - 如果 `direction` 为 `out`，有效值为 `net`, `group`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
@@ -152,4 +129,4 @@ resource "alibabacloudstack_cloudfirewall_controlpolicy" "example" {
   - **port**：端口
   - **group**：端口地址簿
 * `release` - 指定安全访问控制策略是否生效。
-* `source_ip` - 源IP地址。
+* `source_ip` - 源IP地址。 

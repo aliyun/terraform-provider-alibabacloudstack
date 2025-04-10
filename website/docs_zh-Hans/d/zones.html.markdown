@@ -28,15 +28,14 @@ output "zones" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `available_instance_type` - (可选) 通过特定实例类型过滤结果。
-* `available_resource_creation` - (可选) 通过特定资源类型过滤结果。
-有效值：`Instance`, `Disk`, `VSwitch`, `Rds`, `KVStore`, `Slb`。
+* `available_resource_creation` - (可选) 通过特定资源类型过滤结果。有效值：`Instance`, `Disk`, `VSwitch`, `Rds`, `KVStore`, `Slb`。
 * `available_disk_category` - (可选) 通过特定磁盘类别过滤结果。可以是 `cloud`, `cloud_efficiency`, `cloud_ssd`, `ephemeral_ssd`。
-* `multi` - (可选，类型：bool)指示这些可用区是否可以在多AZ配置中使用。默认为 `false`。多AZ通常用于启动RDS实例。
+* `multi` - (可选，类型：bool) 指示这些可用区是否可以在多AZ配置中使用。默认为 `false`。多AZ通常用于启动RDS实例。
 * `instance_charge_type` - (可选) 通过特定ECS实例计费类型过滤结果。有效值：`PrePaid` 和 `PostPaid`。默认为 `PostPaid`。
 * `network_type` - (可选) 通过特定网络类型过滤结果。有效值：`Classic` 和 `Vpc`。
 * `spot_strategy` - (可选) 通过特定ECS竞价实例类型过滤结果。有效值：`NoSpot`, `SpotWithPriceLimit` 和 `SpotAsPriceGo`。默认为 `NoSpot`。
@@ -46,7 +45,7 @@ output "zones" {
 
 -> **注意:** 磁盘类别 `cloud` 已过时，只能由非I/O优化型ECS实例使用。许多可用区不再支持它。建议使用 `cloud_efficiency` 或 `cloud_ssd`。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -54,8 +53,8 @@ output "zones" {
 * `zones` - 可用区列表。每个元素包含以下属性：
   * `id` - 可用区的ID。
   * `local_name` - 本地语言中的可用区名称。
-  * `available_instance_types` - 允许的实例类型。
-  * `available_resource_creation` - 可以创建的资源类型。
-  * `available_disk_categories` - 支持的磁盘类别集合。
-  * `multi_zone_ids` - 多可用区中的可用区ID列表。
-  * `slb_slave_zone_ids` - 负载均衡主可用区中的从可用区ID列表。
+  * `available_instance_types` - 允许的实例类型集合。
+  * `available_resource_creation` - 可以创建的资源类型集合。可能的值包括：`Instance`, `Disk`, `VSwitch`, `Rds`, `KVStore`, `Slb`。
+  * `available_disk_categories` - 支持的磁盘类别集合。可能的值包括：`cloud`, `cloud_efficiency`, `cloud_ssd`, `ephemeral_ssd`。
+  * `multi_zone_ids` - 多可用区配置中使用的可用区ID列表。
+  * `slb_slave_zone_ids` - 负载均衡主可用区中对应的从可用区ID列表。

@@ -64,15 +64,16 @@ resource "alibabacloudstack_adb_backup_policy" "policy" {
 
 `alibabacloudstack_adb_backup_policy` 资源允许您管理 ADB 集群的备份策略，但 Terraform 无法销毁它。从配置中移除此资源将从状态文件和管理中移除它，但不会销毁集群策略。您可以继续通过 ADB 控制台管理集群。
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `db_cluster_id` - (必填，变更时重建) 需要配置备份策略的 ADB 集群的 ID。
 * `preferred_backup_period` - (必填) 应进行 ADB 集群备份的天数。有效值包括：`Monday`、`Tuesday`、`Wednesday`、`Thursday`、`Friday`、`Saturday`、`Sunday`。
 * `preferred_backup_time` - (必填) 应进行 ADB 集群备份的时间窗口，格式为 `HH:mmZ-HH:mmZ`。开始和结束时间之间的间隔为一小时。请注意，指定的时间是以 UTC 为准。
+* `backup_retention_period` - (可选) 数据备份文件保留的天数。此值固定为 7 天，无法修改。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 

@@ -45,7 +45,7 @@ output "first_instance_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -59,7 +59,7 @@ output "first_instance_id" {
   }
   ```
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -68,13 +68,13 @@ output "first_instance_id" {
 * `instances` - 实例列表。每个元素包含以下属性：
   * `id` - 实例的 ID。
   * `name` - 实例名称。
-  * `status` - 实例状态。可能的值：`Running`、`Disabled`、`Deleting`。
-  * `write_capacity` - 预留写吞吐量。单位为 CU(Capacity Unit)。只有高性能实例有此返回值。
-  * `read_capacity` - 预留读吞吐量。单位为 CU(Capacity Unit)。只有高性能实例有此返回值。
-  * `cluster_type` - 实例的集群类型。可能的值：`SSD`、`HYBRID`。
+  * `status` - 实例状态。可能的值：`Running`（运行中）、`Disabled`（已禁用）、`Deleting`（删除中）。
+  * `write_capacity` - 预留写吞吐量。单位为 CU（Capacity Unit）。只有高性能实例会返回此值。
+  * `read_capacity` - 预留读吞吐量。单位为 CU（Capacity Unit）。只有高性能实例会返回此值。
+  * `cluster_type` - 实例的集群类型。可能的值：`SSD`（固态硬盘存储）、`HYBRID`（混合存储）。
   * `create_time` - 实例的创建时间。
   * `user_id` - 与实例关联的用户 ID。
-  * `network` - 实例的网络类型。可能的值：`NORMAL`、`VPC`、`VPC_CONSOLE`。
-  * `description` - 实例的描述。
+  * `network` - 实例的网络类型。可能的值：`NORMAL`（普通网络）、`VPC`（专有网络）、`VPC_CONSOLE`（控制台配置的专有网络）。
+  * `description` - 实例的描述信息。
   * `entity_quota` - 实例配额，表示在此实例内可以创建的最大表数。
   * `tags` - 分配给实例的标签。

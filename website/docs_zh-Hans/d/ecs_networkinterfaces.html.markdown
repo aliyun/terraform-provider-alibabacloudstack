@@ -80,7 +80,7 @@ output "eni_name" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -93,7 +93,7 @@ output "eni_name" {
 * `type` - (可选) ENI 类型，仅支持 "Primary" 或 "Secondary"。
 * `instance_id` - (可选) ENI 所附加的 ECS 实例 ID。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

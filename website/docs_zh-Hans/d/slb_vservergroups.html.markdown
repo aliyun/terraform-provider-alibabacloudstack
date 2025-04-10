@@ -28,24 +28,24 @@ output "first_slb_vserver_group_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
 * `load_balancer_id` - (必填) 负载均衡实例的ID。
-* `ids` - (可选) 用于过滤结果的SLB VServer组ID列表。
-* `name_regex` - (可选，变更时重建) 用于通过VServer组名称过滤结果的正则表达式字符串。
+* `ids` - (可选) 用于过滤结果的SLB VServer组ID列表。此参数允许用户通过指定的VServer组ID来筛选结果。
+* `name_regex` - (可选，变更时重建) 用于通过VServer组名称过滤结果的正则表达式字符串。此参数允许用户通过名称模式匹配来筛选VServer组。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
-* `ids` - SLB VServer组ID列表。
-* `names` - SLB VServer组名称列表。
+* `ids` - SLB VServer组ID列表。此属性包含所有符合条件的VServer组的ID。
+* `names` - SLB VServer组名称列表。此属性包含所有符合条件的VServer组的名称。
 * `slb_server_groups` - SLB VServer组列表。每个元素包含以下属性：
-  * `id` - VServer组ID。
-  * `name` - VServer组名称。
-  * `servers` - 与该组关联的ECS实例。每个元素包含以下属性：
-    * `instance_id` - 附加ECS实例的ID。
-    * `port` - 后端服务器使用的端口号。
-    * `weight` - 与ECS实例关联的权重。
+  * `id` - VServer组ID。此属性标识唯一的VServer组。
+  * `name` - VServer组名称。此属性表示VServer组的名称。
+  * `servers` - 与该组关联的ECS实例列表。每个元素包含以下属性：
+    * `instance_id` - ECS实例的ID。此属性标识附加到VServer组的ECS实例。
+    * `port` - 后端服务器使用的端口号。此属性表示ECS实例在VServer组中使用的端口。
+    * `weight` - ECS实例的权重。此属性表示ECS实例在负载均衡中的权重值。

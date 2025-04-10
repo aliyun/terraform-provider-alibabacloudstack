@@ -51,31 +51,29 @@ output "first_cluster_name" {
 * `ids` - （选填）集群ID列表，用于按特定集群ID过滤结果。
 * `name_regex` - （选填，变更时重建）用于通过集群名称过滤结果的正则表达式字符串。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
 * `names` - 集群名称列表。
 * `ids` - 集群ID列表。
 * `clusters` - 集群列表。每个集群包含以下属性：
-  * `cluster_id` - 集群ID。
-  * `cluster_name` - 集群名称。
-  * `cluster_type` - 集群类型。有效值：
-    * `0`: 普通Docker集群。
+  * `cluster_id` - 查询到的集群ID。
+  * `cluster_name` - 查询到的集群名称。
+  * `cluster_type` - 查询到的集群类型。有效值：
     * `1`: Swarm集群。
     * `2`: ECS集群。
-    * `3`: EDAS自建K8s集群。
-    * `4`: Pandora自动注册应用集群类型。
-    * `5`: 容器服务K8s集群。
+    * `3`: Kubernetes集群。
   * `create_time` - 集群创建时间的时间戳。
-  * `update_time` - 最后变更时间的时间戳。
-  * `cpu` - CPU总核数。
-  * `cpu_used` - 已使用CPU核数。
-  * `mem` - 内存总量，单位为MB。
-  * `mem_used` - 已使用内存量，单位为MB。
-  * `network_mode` - 网络类型。有效值：
+  * `update_time` - 最后更新时间的时间戳。
+  * `cpu` - 集群中的CPU总核数。
+  * `cpu_used` - 集群中已使用的CPU核数。
+  * `mem` - 集群中的内存总量，单位为MB。
+  * `mem_used` - 集群中已使用的内存量，单位为MB。
+  * `network_mode` - 集群所在的网络类型。有效值：
     * `1`: 经典网络。
     * `2`: VPC。
-  * `node_num` - ECS数量。
-  * `vpc_id` - VPC网络ID。
-  * `region_id` - 地域ID。
+  * `node_num` - 部署到该集群的弹性计算服务（ECS）实例数量。
+  * `vpc_id` - 集群所在的虚拟私有云（VPC）的ID。
+  * `region_id` - 集群所在的逻辑区域的地域ID。
+  * `logical_region_id` - 集群所在的逻辑区域ID。

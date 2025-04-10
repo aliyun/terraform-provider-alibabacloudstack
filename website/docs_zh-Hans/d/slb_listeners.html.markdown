@@ -63,7 +63,7 @@ output "first_slb_listener_protocol" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -72,7 +72,7 @@ output "first_slb_listener_protocol" {
 * `frontend_port` - (可选) 按指定前端端口过滤监听器。
 * `description_regex` - (可选) 用于通过SLB监听器描述筛选结果的正则表达式字符串。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

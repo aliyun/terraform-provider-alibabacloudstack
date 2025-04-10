@@ -135,16 +135,16 @@ output "first_slb_rule_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
 * `load_balancer_id` - (必填) 负载均衡实例ID。
 * `frontend_port` - (必填) SLB监听器的前端端口号。
 * `ids` - (可选) 用于过滤结果的规则ID列表。
-* `name_regex` - (可选，变更时重建) 用于按规则名称过滤结果的正则表达式字符串。
+* `name_regex` - (可选) 用于按规则名称过滤结果的正则表达式字符串。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -153,6 +153,6 @@ output "first_slb_rule_id" {
 * `slb_rules` - SLB监听器规则列表。每个元素包含以下属性：
   * `id` - 规则的ID。
   * `name` - 规则的名称。
-  * `domain` - 规则适用的HTTP请求中的域名(例如，`"*.aliyun.com"`)。
-  * `url` - 规则适用的HTTP请求中的路径(例如，`"/image"`)。
+  * `domain` - 规则适用的HTTP请求中的域名(例如，`"*.aliyun.com"`).
+  * `url` - 规则适用的HTTP请求中的路径(例如，`"/image"`).
   * `server_group_id` - 链接的VServer组的ID。

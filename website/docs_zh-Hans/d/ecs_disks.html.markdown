@@ -61,11 +61,11 @@ output "first_disk_id" {
 以下参数是支持的：
 
 * `ids` - (可选) 磁盘ID列表。用于精确筛选磁盘。
-* `name_regex` - (可选，强制更新)用于通过磁盘名称筛选结果的正则表达式字符串。
-* `type` - (可选，强制更新)扩容磁盘的方式。有效值：
-  * `offline`(默认)：离线扩容。扩容后，您必须在控制台[重启实例](https://help.aliyun.com/document_detail/25440.html)或者调用API [RebootInstance](https://help.aliyun.com/document_detail/25502.html)使操作生效。
+* `name_regex` - (可选，强制更新) 用于通过磁盘名称筛选结果的正则表达式字符串。
+* `type` - (可选，强制更新) 扩容磁盘的方式。有效值：
+  * `offline` (默认)：离线扩容。扩容后，您必须在控制台[重启实例](https://help.aliyun.com/document_detail/25440.html) 或者调用API [RebootInstance](https://help.aliyun.com/document_detail/25502.html) 使操作生效。
   * `online`：在线扩容，无需重启实例即可完成扩容。磁盘类型支持高效云盘、SSD云盘、ESSD云盘和弹性临时盘。
-* `category` - (可选，强制更新)磁盘种类。有效值：
+* `category` - (可选，强制更新) 磁盘种类。有效值：
   * `all`：所有云盘以及本地盘。
   * `cloud`：普通云盘。
   * `cloud_efficiency`：高效云盘。
@@ -80,7 +80,7 @@ output "first_disk_id" {
   * `ephemeral`：(已停售)本地盘。
   * `ephemeral_ssd`：(已停售)本地SSD盘。
   默认值：`all`。
-* `instance_id` - (可选，强制更新)创建一块包年包月磁盘，并自动挂载到指定的包年包月实例(InstanceId)上。
+* `instance_id` - (可选，强制更新) 创建一块包年包月磁盘，并自动挂载到指定的包年包月实例(InstanceId)上。
   * 设置实例ID后，会忽略您设置的ResourceGroupId、Tag.N.Key、Tag.N.Value、ClientToken和KMSKeyId参数。
   * 您不能同时指定ZoneId和InstanceId。
   默认值：空，代表创建的是按量付费云盘，云盘所属地由RegionId和ZoneId确定。
@@ -103,12 +103,11 @@ output "first_disk_id" {
     * `Detaching`：卸载中。
     * `Creating`：创建中。
     * `ReIniting`：初始化中。
-    * `All`：所有状态。默认值：`All`。
   * `type` - 扩容磁盘的方式。取值范围：
-    * `offline`(默认)：离线扩容。扩容后，您必须在控制台[重启实例](https://help.aliyun.com/document_detail/25440.html)或者调用API [RebootInstance](https://help.aliyun.com/document_detail/25502.html)使操作生效。
+    * `offline` (默认)：离线扩容。扩容后，您必须在控制台[重启实例](https://help.aliyun.com/document_detail/25440.html) 或者调用API [RebootInstance](https://help.aliyun.com/document_detail/25502.html) 使操作生效。
     * `online`：在线扩容，无需重启实例即可完成扩容。磁盘类型支持高效云盘、SSD云盘、ESSD云盘和弹性临时盘。
   * `category` - 磁盘种类。取值范围同`category`参数的有效值。
-  * `size` - 磁盘的大小(单位为GiB)。具体取值范围如下：
+  * `size` - 磁盘的大小（单位为GiB）。具体取值范围如下：
     * 系统盘：
       * 普通云盘：20~500。
       * ESSD云盘：
@@ -116,7 +115,7 @@ output "first_disk_id" {
         * PL1：20~2048。
         * PL2：461~2048。
         * PL3：1261~2048。
-      * ESSD AutoPL 云盘：1~2048。
+      * ESSD AutoPL云盘：1~2048。
       * 其他云盘类型：20~2048。
     * 数据盘：
       * 高效云盘(cloud_efficiency)：20~32768。

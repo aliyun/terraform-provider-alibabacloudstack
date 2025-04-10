@@ -71,19 +71,24 @@ output "Custom_role" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `role_name` - (必填) 自定义角色名称。
-* `organization_visibility` - (必填) 组织可见性。有效值为 - "organizationVisibility.organization", "organizationVisibility.orgAndSubOrgs" 和 "organizationVisibility.global"。
-* `description` - (可选) 自定义角色的描述。注意 - 它不应包含任何空格。
-* `role_range` - (必填) 自定义角色的角色范围。
-* `privileges` - (必填) 分配给该角色的权限。
+* `organization_visibility` - (必填) 组织可见性。有效值为：  
+  - `"organizationVisibility.organization"`：仅当前组织可见。  
+  - `"organizationVisibility.orgAndSubOrgs"`：当前组织及其子组织可见。  
+  - `"organizationVisibility.global"`：全局可见。
+* `description` - (可选) 自定义角色的描述。注意：不应包含任何空格。
+* `role_range` - (必填) 自定义角色的作用范围。有效值为：  
+  - `"roleRange.currentOrganization"`：当前组织。  
+  - `"roleRange.allOrganizations"`：所有组织。
+* `privileges` - (必填) 分配给该角色的权限列表。每个权限以字符串形式表示。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
-* `id` - 自定义角色名称和用户ID。
-* `role_id` - 自定义角色的ID。
+* `id` - 自定义角色的唯一标识符，由角色名称和用户ID组成。
+* `role_id` - 自定义角色的内部ID，用于唯一标识该角色。

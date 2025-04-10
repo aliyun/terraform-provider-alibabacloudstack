@@ -64,7 +64,7 @@ output "vpc_ipv6_gateway_id_4" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -74,14 +74,14 @@ output "vpc_ipv6_gateway_id_4" {
 * `status` - (可选，变更时重建) 资源的状态。有效值：`Available`(可用)、`Pending`(等待中)和`Deleting`(删除中)。
 * `vpc_id` - (可选，变更时重建) IPv6网关所属虚拟私有云(VPC)的ID。用于筛选特定VPC下的IPv6网关。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
 * `gateways` - VPC IPv6网关列表。每个元素包含以下属性：
-  * `business_status` - IPv6网关的状态。有效值：`Normal`(正常)、`FinancialLocked`(因逾期付款被锁定)和`SecurityLocked`(因安全原因被锁定)。
-  * `create_time` - 资源的创建时间。
-  * `description` - IPv6网关的描述。描述必须是2到256个字符长度，且不能以`http://`或`https://`开头。
+  * `business_status` - IPv6网关的业务状态。有效值：`Normal`(正常运行)、`FinancialLocked`(因欠费被锁定)和`SecurityLocked`(因安全原因被锁定)。
+  * `create_time` - IPv6网关的创建时间。
+  * `description` - IPv6网关的描述信息。描述必须是2到256个字符长度，且不能以`http://`或`https://`开头。
   * `expired_time` - IPv6网关的过期时间。
   * `instance_charge_type` - IPv6网关的计费类型。有效值：`PayAsYouGo`(按量付费)。
   * `id` - IPv6网关的唯一标识符(ID)。

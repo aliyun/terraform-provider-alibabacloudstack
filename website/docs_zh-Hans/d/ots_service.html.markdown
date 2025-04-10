@@ -22,7 +22,7 @@ data "alibabacloudstack_ots_service" "open" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -30,8 +30,8 @@ data "alibabacloudstack_ots_service" "open" {
 
 -> **注意：** 将 `enable = "On"` 设置为开启 Table Staore 服务，这意味着您已阅读并同意 [Table Staore 服务条款](https://help.aliyun.com/document_detail/34908.html)。一旦服务开启，便无法关闭。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
-* `status` - 当前服务的启用状态。
+* `status` - 当前服务的启用状态。有效值为 "Opened" 或 "Closed"，分别表示服务已启用或未启用。

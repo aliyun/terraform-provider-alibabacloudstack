@@ -39,14 +39,14 @@ output "first_instance_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `ids` - (可选) 用于过滤结果的实例ID列表。
 * `name_regex` - (可选) 用于通过实例名称过滤结果的正则表达式字符串。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -58,10 +58,10 @@ output "first_instance_id" {
   * `instance_name` - 实例名称。
   * `instance_type` - 实例类型。
   * `instance_status` - 实例状态。
-  * `independent_naming` - 指示是否可用命名空间。
-  * `tps_receive_max` - 此属性用于设置主题在某段时间内的消息接收每秒事务数(TPS)。
-  * `tps_send_max` - 此属性用于设置主题在某段时间内的消息发送每秒事务数(TPS)。
-  * `topic_capacity` - 此属性用于设置主题容量。
-  * `cluster` - 此属性用于添加集群名称。
-  * `create_time` - 实例创建时间。
-  * `computed_property_example` - 计算属性示例。
+  * `independent_naming` - 指示是否启用独立命名空间。
+  * `tps_receive_max` - 设置主题在某段时间内的最大消息接收吞吐量（TPS）。
+  * `tps_send_max` - 设置主题在某段时间内的最大消息发送吞吐量（TPS）。
+  * `topic_capacity` - 主题容量，表示该实例支持的主题数量上限。
+  * `cluster` - 集群名称，表示该实例所属的集群。
+  * `create_time` - 实例创建时间，格式为标准时间戳。
+  * `computed_property_example` - 计算属性示例，表示某些动态计算的结果（如果存在）。

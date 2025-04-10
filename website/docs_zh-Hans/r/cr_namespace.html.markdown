@@ -24,7 +24,7 @@ resource "alibabacloudstack_cr_namespace" "my-namespace" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -32,8 +32,9 @@ resource "alibabacloudstack_cr_namespace" "my-namespace" {
 * `auto_create` - (必填) 布尔值，当设置为 true 时，在推送新镜像时会自动创建仓库。如果设置为 false，则在推送之前需要先创建仓库。
 * `default_visibility` - (必填) `PUBLIC` 或 `PRIVATE`，此命名空间中默认的仓库可见性。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
-* `id` - 容器镜像仓库命名空间的 id。其值与名称相同。
+* `id` - 容器镜像仓库命名空间的唯一标识符。其值与 `name` 参数相同。
+```

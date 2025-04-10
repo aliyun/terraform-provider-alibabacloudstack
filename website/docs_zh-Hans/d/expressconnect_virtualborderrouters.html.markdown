@@ -69,18 +69,18 @@ output "filtered_virtual_border_router_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
 * `filter` - (可选，变更时重建) 自定义过滤器块，用于筛选 VBR 资源。每个过滤器包含以下字段：
   * `key` - (必填) 要过滤的字段的键。
   * `values` - (必填) 给定字段接受的值集。
-* `status` - (可选，变更时重建) 代表资源状态的资源属性字段。有效值：`active`, `deleting`, `recovering`, `terminated`, `terminating`, `unconfirmed`。
 * `ids` - (可选，变更时重建) 虚拟边界路由器 ID 列表，用于筛选特定的 VBR 资源。
 * `name_regex` - (可选，变更时重建) 用于按虚拟边界路由器名称筛选结果的正则表达式字符串。
+* `status` - (可选，变更时重建) 代表资源状态的资源属性字段。有效值：`active`, `deleting`, `recovering`, `terminated`, `terminating`, `unconfirmed`。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

@@ -35,23 +35,23 @@ output "first_eip_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
 * `ids` - (可选) 弹性公网 IP 的 ID 列表。如果指定，数据源将仅返回与提供的 ID 匹配的弹性公网 IP。
 * `ip_addresses` - (可选) 弹性公网 IP 的公共 IP 地址列表。如果指定，数据源将仅返回与提供的 IP 地址匹配的弹性公网 IP。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
 * `ids` - 匹配指定过滤条件的弹性公网 IP 的 ID 列表。
 * `names` - 与过滤后的弹性公网 IP 对应的名称列表。
 * `eips` - 弹性公网 IP 列表。每个元素包含以下属性：
-  * `id` - 弹性公网 IP 的 ID。
-  * `status` - 弹性公网 IP 的状态。可能的值包括：`Associating`、`Unassociating`、`InUse` 和 `Available`。
+  * `id` - 弹性公网 IP 的唯一标识符。
+  * `status` - 弹性公网 IP 的当前状态。可能的状态值包括：`Associating`（正在绑定）、`Unassociating`（正在解绑）、`InUse`（已使用）和 `Available`（可用）。
   * `ip_address` - 弹性公网 IP 的公共 IP 地址。
-  * `bandwidth` - 弹性公网 IP 的最大互联网带宽(以 Mbps 为单位)。
-  * `instance_id` - 当前绑定到该弹性公网 IP 的实例的 ID。
-  * `instance_type` - 绑定到该弹性公网 IP 的实例类型。
+  * `bandwidth` - 弹性公网 IP 的最大互联网带宽，单位为 Mbps。
+  * `instance_id` - 当前绑定到该弹性公网 IP 的实例的 ID。如果没有绑定实例，则此字段为空。
+  * `instance_type` - 绑定到该弹性公网 IP 的实例类型。例如，`ECS` 表示绑定到云服务器实例。

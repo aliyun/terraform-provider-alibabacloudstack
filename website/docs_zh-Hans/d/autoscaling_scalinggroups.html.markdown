@@ -116,14 +116,14 @@ output "scaling_group_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
 * `name_regex` - (可选) 用于按名称过滤结果伸缩组的正则表达式字符串。
 * `ids` - (可选) 伸缩组 ID 列表，用于精确匹配特定伸缩组。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -146,4 +146,4 @@ output "scaling_group_id" {
   * `active_capacity` - 已成功加入伸缩组并正常运行的 ECS 实例数量。
   * `pending_capacity` - 正在加入伸缩组但尚未完成相关配置的 ECS 实例数量。
   * `removing_capacity` - 正在从伸缩组中移除的 ECS 实例数量。
-  * `creation_time` - 伸缩组的创建时间，格式为 ISO 8601。
+  * `creation_time` - 伸缩组的创建时间，格式为 ISO 8601。 

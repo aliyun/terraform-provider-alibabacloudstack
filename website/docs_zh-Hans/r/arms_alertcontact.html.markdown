@@ -28,7 +28,7 @@ resource "alibabacloudstack_arms_alertcontact" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -40,9 +40,9 @@ resource "alibabacloudstack_arms_alertcontact" "default" {
   * `true`: 警报联系人接收系统通知。
   * `false`: 警报联系人不接收系统通知。默认值：`false`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 警报联系人的ID。它由阿里云自动生成，并唯一标识该警报联系人。
-```
+* `alert_contact_name` - 警报联系人的名称。这是您阿里巴巴云账户内警报联系人的唯一标识符。

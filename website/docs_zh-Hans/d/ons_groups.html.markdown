@@ -48,23 +48,23 @@ output "onsgroups" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下支持以下参数：
 
 * `instance_id` - (必填) 拥有这些组的 ONS 实例 ID。
-* `group_id_regex` - (可选) 用于通过组名筛选结果的正则表达式字符串。
+* `group_id_regex` - (可选) 用于通过组名筛选结果的正则表达式字符串。此参数允许用户根据组名的部分匹配来过滤结果。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
-* `ids` - 组名称列表。
+* `ids` - 组名称列表。此列表包含所有符合条件的组名称。
 * `groups` - 组列表。每个元素包含以下属性：
-  * `id` - 组的名称。
-  * `group_id` - 组的 ID。
-  * `owner` - 组所有者的 ID，即 Apsara Stack Cloud UID。
-  * `instance_id` - 命名空间的 Id。
-  * `independent_naming` - 表示命名空间是否可用。
-  * `remark` - 组的备注。
-  * `create_time` - 组的创建时间。
+  * `id` - 组的名称。这是组的唯一标识符。
+  * `group_id` - 组的 ID。此字段与 `id` 类似，但可能包含额外的命名空间信息。
+  * `owner` - 组所有者的 ID，即 Apsara Stack Cloud UID。此字段标识了该组的创建者或拥有者。
+  * `instance_id` - 命名空间的 Id。此字段表示该组所属的 ONS 实例 ID。
+  * `independent_naming` - 表示命名空间是否可用。如果值为 `true`，则表示该组使用独立命名空间；否则，表示共享命名空间。
+  * `remark` - 组的备注。此字段提供了关于该组的额外描述信息。
+  * `create_time` - 组的创建时间。此字段以时间戳或日期格式表示该组的创建时间。

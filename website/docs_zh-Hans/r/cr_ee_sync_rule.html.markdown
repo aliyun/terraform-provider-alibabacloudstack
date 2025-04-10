@@ -35,7 +35,7 @@ resource "alibabacloudstack_cr_ee_sync_rule" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -49,14 +49,14 @@ resource "alibabacloudstack_cr_ee_sync_rule" "default" {
 * `repo_name` - (可选，变更时重建) 源仓库的名称，应与 `target_repo_name` 一起设置，如果为空表示同步范围为整个命名空间级别。
 * `target_repo_name` - (可选，变更时重建) 目标仓库的名称。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
 * `id` - 容器镜像企业版同步规则的资源 ID。格式为 `{instance_id}:{namespace_name}:{rule_id}`。
-* `rule_id` - 容器镜像企业版同步规则的 uuid。
-* `sync_direction` - `FROM` 或 `TO`，同步的方向。`FROM` 表示源实例，`TO` 表示目标实例。
-* `sync_scope` - `REPO` 或 `NAMESPACE`，同步规则应用的范围。
+* `rule_id` - 容器镜像企业版同步规则的唯一标识符（UUID）。
+* `sync_direction` - 同步的方向，值为 `FROM` 或 `TO`。`FROM` 表示从源实例同步，`TO` 表示同步到目标实例。
+* `sync_scope` - 同步规则应用的范围，值为 `REPO` 或 `NAMESPACE`。`REPO` 表示同步范围为单个仓库，`NAMESPACE` 表示同步范围为整个命名空间。
 
 ## 导入
 

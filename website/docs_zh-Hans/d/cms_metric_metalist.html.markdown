@@ -30,7 +30,7 @@ output "metric_metalist" {
 以下参数被支持：
 
 * `namespace` - (必填，变更时重建) 服务的命名空间。您可以调用操作以获取命名空间。
-* `resources` - (可选) cms metriclist 列表。
+* `resources` - (可选) cms metriclist 列表。此参数用于进一步筛选符合条件的指标资源。
 
 ## 属性参考
 
@@ -38,12 +38,21 @@ output "metric_metalist" {
 
 * `resources` - 云监控指标列表。每个元素包含以下属性：
     * `metric_name` - 指标的名称。
-    * `periods` -     指标的统计周期。
-    * `description` - 指标的描述。
-    * `dimensions` - 指标的维度。多个维度用逗号分隔。
-    * `labels` - 指标的标签。值为 JSON 数组字符串。数组可以包括重复的标签名。示例值：[{"name":"Tag name","value":"Tag value"}]。
-                 可用的标签名如下：metricCategory：
-          指标类别。alertEnable：指示是否启用告警。alertUnit：告警中的指标单位。unitFactor：指标单位转换因子。minAlertPeriod：触发新告警的最短时间间隔。productCategory：服务类别。
-    * `unit` - 指标的单位。
-    * `statistics` - 指标的统计方法。多个统计方法用逗号(,)分隔，例如，Average,Minimum,Maximum。
-    * `namespace` - 监控服务的命名空间。
+    * `periods` - 指标的统计周期（单位为秒）。例如，60 表示 1 分钟，300 表示 5 分钟。
+    * `description` - 指标的描述信息，通常用于解释该指标的具体含义。
+    * `dimensions` - 指标的维度。多个维度用逗号分隔。维度是用于区分不同实例或资源的关键字，例如 `instanceId` 或 `deviceName`。
+    * `labels` - 指标的标签。值为 JSON 数组字符串。数组可以包括重复的标签名。示例值：`[{"name":"Tag name","value":"Tag value"}]`。可用的标签名如下：
+        * `metricCategory`：指标类别。
+        * `alertEnable`：指示是否启用告警。
+        * `alertUnit`：告警中的指标单位。
+        * `unitFactor`：指标单位转换因子。
+        * `minAlertPeriod`：触发新告警的最短时间间隔。
+        * `productCategory`：服务类别。
+    * `unit` - 指标的单位，例如 `Bytes`, `Percent`, `Count` 等。
+    * `statistics` - 指标的统计方法。多个统计方法用逗号(,)分隔，例如，`Average,Minimum,Maximum`。常见的统计方法包括：
+        * `Average`：平均值。
+        * `Minimum`：最小值。
+        * `Maximum`：最大值。
+        * `Sum`：总和。
+        * `SampleCount`：样本数量。
+    * `namespace` - 监控服务的命名空间，用于标识该指标所属的服务或产品。

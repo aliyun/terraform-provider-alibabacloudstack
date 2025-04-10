@@ -60,13 +60,12 @@ output "file_system_id" {
 
 * `ids` - (选填) 文件系统 ID 列表。
 
-
 * `file_system_type` - (选填) 文件系统类型：
   * `standard`(默认值)：通用 NAS。
   * `extreme`：极速 NAS。
   * `cpfs`：文件存储 CPFS。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

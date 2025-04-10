@@ -73,21 +73,19 @@ resource "alibabacloudstack_api_gateway_app_attachment" "default" {
   group_id = "${alibabacloudstack_api_gateway_group.default.id}"
   stage_name = "PRE"
 }
-
-
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `app_id` - (必填，变更时重建) 申请授权的应用。
-* `api_id` - (必填，变更时重建) 应用申请访问的API ID。
-* `group_id` - (必填，变更时重建) 该API所属的分组。
-* `stage_name` - (必填，变更时重建) 应用申请访问的阶段。
+* `app_id` - (必填，变更时重建) 需要授权的应用ID。
+* `api_id` - (必填，变更时重建) 授权应用访问的目标API ID。
+* `group_id` - (必填，变更时重建) 目标API所属的分组ID。
+* `stage_name` - (必填，变更时重建) 应用申请访问的阶段名称。通常包括开发环境（`TEST`）、预发布环境（`PRE`）和生产环境（`RELEASE`）。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
-* `id` - API网关的应用绑定ID，格式为 `<group_id>:<api_id>:<app_id>:<stage_name>`。
+* `id` - API网关应用绑定的唯一标识符，格式为 `<group_id>:<api_id>:<app_id>:<stage_name>`。此ID可用于后续资源的引用或查询。

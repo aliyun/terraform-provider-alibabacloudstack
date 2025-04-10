@@ -31,7 +31,7 @@ data "alibabacloudstack_cloud_firewall_control_policies" "example" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -63,18 +63,17 @@ data "alibabacloudstack_cloud_firewall_control_policies" "example" {
   * **zh**：中文
 
 * `proto` - (选填, 变更时重建) - 安全访问控制策略中流量访问的安全协议类型。有效值：
-  * **ANY**
-  * **TCP**
-  * **UDP**
-  * **ICMP**
+  * 如果`direction`为`in`，则有效值为`ANY`。
+  * 如果`direction`为`out`，则有效值为`ANY`, `TCP`, `UDP`, `ICMP`。
 
 * `source` - (选填, 变更时重建) - 安全访问控制策略中的源地址。具体值取决于`source_type`：
   * 当`source_type`为`net`时，`source`为源CIDR(例如：`1.2.3.0/24`)。
   * 当`source_type`为`group`时，`source`为源地址簿名称(例如：`db_group`)。
   * 当`source_type`为`location`时，`source`为源区域(例如：`["BJ11", "ZB"]`)。
 
+* `source_ip` - （已移除自 v1.213.0）- 请求的源IP地址。**注意**：从版本 1.213.0 开始，字段 `source_ip` 已被移除。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -127,9 +126,6 @@ data "alibabacloudstack_cloud_firewall_control_policies" "example" {
     * **group**：目的地址簿
     * **domain**：目的域名
     * **location**：目的区域
-  * `direction` - 安全访问控制策略的流量方向。有效值：
-    * **in**：外对内流量访问控制
-    * **out**：内对外流量访问控制
   * `dns_result` - DNS解析结果。
   * `dns_result_time` - DNS解析时间。
   * `hit_times` - 安全访问控制策略命中次数统计。

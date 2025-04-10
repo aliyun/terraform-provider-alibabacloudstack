@@ -45,7 +45,7 @@ resource "alibabacloudstack_apigateway_apigroup" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -63,12 +63,22 @@ resource "alibabacloudstack_apigateway_apigroup" "default" {
   * `responseHeaders` - (可选) 要记录的响应头。
   * `jwtClaims` - (可选) 要记录的 JWT 声明。
 * `passthrough_headers` - (可选) 应传递到后端服务的标头。这是一个以逗号分隔的标头名称列表。
+* `name` - (可选) 已废弃字段，表示 API 网关组的名称。请改用 `api_group_name`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - API 网关组的 ID。
-* `api_group_name` - API 网关组的名称。
 * `sub_domain` - 系统为 API 分组分配的二级域名，用于 API 调用测试。
 * `vpc_domain` - 内网二级域名，用于内部网络通信。
+* `api_group_name` - API 网关组的名称。
+* `name` - 已废弃字段，表示 API 网关组的名称。请改用 `api_group_name`。
+
+## 导入
+
+API 网关组可以通过 ID 导入，例如：
+
+```shell
+$ terraform import alibabacloudstack_apigateway_apigroup.example "ab2351f2ce904edaa8d92a0510832b91"
+``` 

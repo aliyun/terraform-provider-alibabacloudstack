@@ -55,17 +55,17 @@ data "alibabacloudstack_vpngateway_vpngateways" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
 * `ids` - (可选) VPN网关ID列表。这将作为过滤条件使用。
 * `vpc_id` - (可选，变更时重建) VPN网关所属的VPC的ID。
 * `name_regex` - (可选，变更时重建) 用于按名称筛选结果的正则表达式字符串。
-* `status` - (可选，变更时重建) 资源状态。有效值包括："Init"、"Provisioning"、"Active"、"Updating"、"Deleting"。
-* `business_status` - (可选，变更时重建) VPN网关的支付状态。有效值包括："Normal"、"FinancialLocked"。
+* `status` - (可选，变更时重建) 资源状态。有效值包括："Init"（初始化）、"Provisioning"（配置中）、"Active"（活动）、"Updating"（更新中）、"Deleting"（删除中）。
+* `business_status` - (可选，变更时重建) VPN网关的支付状态。有效值包括："Normal"（正常）、"FinancialLocked"（财务锁定）。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -76,12 +76,12 @@ data "alibabacloudstack_vpngateway_vpngateways" "default" {
   * `internet_ip` - 公共IP地址。
   * `create_time` - 创建时间。
   * `end_time` - 到期时间。
-  * `specification` - 规格。
+  * `specification` - 规格，例如带宽或性能等级。
   * `name` - 名称。
   * `description` - 描述。
-  * `status` - 状态。
-  * `business_status` - 支付状态。
-  * `instance_charge_type` - 计费类型。可能的值为："PrePaid"(预付费)、"PostPaid"(后付费)。
-  * `enable_ipsec` - 是否启用IPsec-VPN功能。
-  * `enable_ssl` - 是否启用SSL-VPN功能。
+  * `status` - 状态。可能的值为："Init"（初始化）、"Provisioning"（配置中）、"Active"（活动）、"Updating"（更新中）、"Deleting"（删除中）。
+  * `business_status` - 支付状态。可能的值为："Normal"（正常）、"FinancialLocked"（财务锁定）。
+  * `instance_charge_type` - 计费类型。可能的值为："PrePaid"（预付费）、"PostPaid"（后付费）。
+  * `enable_ipsec` - 是否启用IPsec-VPN功能。返回布尔值。
+  * `enable_ssl` - 是否启用SSL-VPN功能。返回布尔值。
   * `ssl_connections` - 允许的最大SSL-VPN客户端连接数。

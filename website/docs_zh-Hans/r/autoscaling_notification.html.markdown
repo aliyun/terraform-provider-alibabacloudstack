@@ -65,7 +65,7 @@ resource "alibabacloudstack_autoscaling_notification" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -87,7 +87,7 @@ resource "alibabacloudstack_autoscaling_notification" "default" {
   * `AUTOSCALING:SCALE_IN_START`
   * `AUTOSCALING:SCHEDULE_TASK_EXPIRING`
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 

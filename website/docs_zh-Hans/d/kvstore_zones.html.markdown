@@ -23,20 +23,20 @@ output "kvstore_zones" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `multi` - (可选) 指示这些可用区是否可以在多AZ配置中使用。默认为`false`。多AZ通常用于启动KVStore实例。
-* `instance_charge_type` - (可选) 通过特定的实例计费类型过滤结果。有效值：`PrePaid`和`PostPaid`。默认为`PostPaid`。
-* `ids` - (可选) 可用区ID列表。
+* `multi` - (可选) 指示这些可用区是否可以在多AZ配置中使用。默认值为`false`。多AZ通常用于启动KVStore实例。
+* `instance_charge_type` - (可选) 通过特定的实例计费类型过滤结果。有效值为`PrePaid`（包年包月）和`PostPaid`（按量付费）。默认值为`PostPaid`。
+* `ids` - (可选) 可用区ID列表，用于精确匹配指定的可用区。
 
-## 属性参考
+## 属性说明
 
 除了上述列出的参数外，还导出以下属性：
 
-* `ids` - 可用区ID列表。
+* `ids` - 匹配的可用区ID列表。
 * `zones` - 可用区列表。每个元素包含以下属性：
-  * `id` - 可用区的ID。
-  * `multi_zone_ids` - 多可用区中的可用区ID列表。
-  * `zones` - 可用区列表。
+  * `id` - 可用区的唯一标识符。
+  * `multi_zone_ids` - 当`multi`参数设置为`true`时，返回的多可用区配置中的可用区ID列表。
+  * `zones` - 可用区的详细信息列表，包含与该可用区相关的其他元数据。

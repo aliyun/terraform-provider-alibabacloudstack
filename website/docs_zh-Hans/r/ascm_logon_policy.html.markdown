@@ -24,18 +24,18 @@ resource "alibabacloudstack_ascm_logon_policy" "login" {
 
 支持以下参数：
 
-* `name` - (必填) 登录策略的名称。
-
-* `description` - (可选) 登录策略的描述。
-
-* `rule` - (可选) 登录策略的规则。有效值：Allow 和 Deny。
+* `name` - (必填) 登录策略的名称。  
+* `description` - (可选) 登录策略的描述信息，用于说明该策略的具体用途或规则。  
+* `rule` - (可选) 登录策略的规则。有效值为：  
+  * `ALLOW`：允许登录。
+  * `DENY`：拒绝登录。
 
 
 ## 属性参考
 
 导出以下属性：
 
-* `name` - 登录策略的名称。
-* `description` - 登录策略的描述。
-* `rule` - 登录策略的规则。
-* `policy_id` - 创建的登录策略的ID。
+* `name` - 登录策略的名称。  
+* `description` - 登录策略的描述信息。  
+* `rule` - 登录策略的规则，表示该策略是允许 (`ALLOW`) 还是拒绝 (`DENY`) 登录。  
+* `policy_id` - 创建的登录策略的唯一标识符（ID），可用于后续管理和引用该策略。

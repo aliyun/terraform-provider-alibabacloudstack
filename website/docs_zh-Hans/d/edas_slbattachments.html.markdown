@@ -65,12 +65,13 @@ data "alibabacloudstack_edas_slbattachments" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 以下参数是支持的：
   * `ids` - （可选，变更时重建）SLB挂载ID列表。用于通过特定的SLB挂载ID筛选结果。
+  * `names` - （可选，变更时重建）SLB挂载名称列表。用于通过特定的SLB挂载名称筛选结果。
   * `name_regex` - （可选，变更时重建）用于按名称筛选结果的正则表达式字符串。当您想查找符合特定命名模式的SLB挂载时，这可能非常有用。
-  
-## 属性参考
+
+## 属性说明
 除了上述参数外，还导出以下属性：
   * `names` - SLB挂载名称列表。
   * `applications` - 与SLB挂载关联的应用程序列表。列表中的每个元素都是一个包含以下键的映射：
@@ -82,3 +83,9 @@ data "alibabacloudstack_edas_slbattachments" "default" {
     - `vserver_group_id` - 与SLB关联的VServer组的ID。
     - `slb_status` - SLB的状态。
     - `vswitch_id` - 与SLB关联的VSwitch的ID。
+    - `app_name` - 应用程序的名称。
+    - `application_type` - 应用程序的类型。
+    - `build_package_id` - 应用程序的构建包ID。
+    - `cluster_id` - 与应用程序关联的集群ID。
+    - `cluster_type` - 与应用程序关联的集群类型。
+    - `region_id` - 应用程序所在的区域ID。

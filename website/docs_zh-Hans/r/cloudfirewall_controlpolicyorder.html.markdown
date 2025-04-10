@@ -42,7 +42,7 @@ resource "alibabacloudstack_cloudfirewall_controlpolicyorder" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -50,11 +50,10 @@ resource "alibabacloudstack_cloudfirewall_controlpolicyorder" "default" {
 * `direction` - (必填, 变更时重建) 安全访问控制策略适用的流量方向。有效值为：
   * `in`：表示入站流量。
   * `out`：表示出站流量。
-* `order` - (必填) 安全访问控制策略生效的优先级。优先级数字从1开始顺序递增，优先级数字越小，优先级越高。值为 `-1` 表示优先级最低。**注意：** 从版本1.227.1起，此字段必须设置。
+* `order` - (可选, 整数类型) 安全访问控制策略生效的优先级。优先级数字从1开始顺序递增，优先级数字越小，优先级越高。值为 `-1` 表示优先级最低。**注意：** 从版本1.227.1起，此字段必须设置。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - Terraform中的资源唯一标识符。它格式化为 `<acl_uuid>:<direction>`。
-```

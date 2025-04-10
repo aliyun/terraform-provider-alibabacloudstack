@@ -45,14 +45,14 @@ output "certificate_region_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
 * `ids` - (可选) CA证书ID列表，用于过滤结果。  
 * `name_regex` - (可选，变更时重建) 用于通过CA证书名称过滤结果的正则表达式字符串。  
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -62,5 +62,4 @@ output "certificate_region_id" {
   * `name` - CA证书的名称。  
   * `fingerprint` - CA证书的指纹。  
   * `created_timestamp` - CA证书创建的时间戳。  
-  * `region_id` - CA证书所在的区域ID。  
-```
+  * `region_id` - CA证书所在的区域ID。

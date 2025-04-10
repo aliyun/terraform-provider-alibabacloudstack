@@ -24,19 +24,19 @@ output "first_tsdb_zones_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `ids` - (必填) TSDB 实例区域 ID 列表。
+* `ids` - (必填) 需要查询的 TSDB 实例区域 ID 列表。此参数用于筛选特定的区域。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
-* `ids` - TSDB 实例区域 ID 列表。
-* `zones` - TSDB 实例区域列表。每个元素包含以下属性：
-  * `id` - 区域的 ID。
-  * `zone_id` - 区域 ID。
-  * `local_name` - 区域的本地名称。
-  * `computed_attribute` - 这是一个计算属性。
+* `ids` - 筛选后返回的 TSDB 实例区域 ID 列表。
+* `zones` - 筛选后返回的 TSDB 实例区域列表。每个元素包含以下属性：
+  * `id` - 区域的唯一标识符，与 `zone_id` 相同。
+  * `zone_id` - 区域 ID，表示该区域的唯一标识。
+  * `local_name` - 区域的本地名称，通常为该区域的中文或英文描述。
+  * `computed_attribute` - 计算属性，表示由系统计算得出的额外信息。

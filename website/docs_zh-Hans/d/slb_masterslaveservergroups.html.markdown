@@ -146,7 +146,7 @@ data "alibabacloudstack_slb_master_slave_server_groups" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -154,7 +154,7 @@ data "alibabacloudstack_slb_master_slave_server_groups" "default" {
 * `ids` - (可选) 用于过滤结果的主备服务器组ID列表。
 * `name_regex` - (可选，变更时重建) 用于通过主备服务器组名称过滤结果的正则表达式字符串。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -162,7 +162,7 @@ data "alibabacloudstack_slb_master_slave_server_groups" "default" {
 * `groups` - SLB主备服务器组列表。每个元素包含以下属性：
   * `id` - 主备服务器组的ID。
   * `name` - 主备服务器组的名称。
-  * `servers` - 与此组关联的ECS实例。每个元素包含以下属性：
+  * `servers` - 与此组关联的ECS实例列表。每个元素包含以下属性：
     * `instance_id` - 已附加ECS实例的ID。
     * `weight` - 与ECS实例关联的权重。
     * `port` - 主备服务器组使用的端口。

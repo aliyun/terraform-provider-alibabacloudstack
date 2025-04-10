@@ -84,21 +84,20 @@ resource "alibabacloudstack_autoscaling_alarmtask" "foo" {
 
 支持以下参数：
 
-* `name` - (选填) - 报警任务的名称，与 `alarm_task_name` 功能相同。
-* `alarm_task_name` - (选填) - 报警任务的名称。
-* `description` - (选填) - 报警任务的描述。
-* `enable` - (选填) - 是否启用特定的报警任务。默认为 `true`。
-* `status` - (选填) - 报警任务的状态。
-* `scaling_group_id` - (必填, 变更时重建) - 报警任务关联的伸缩组的 ID。
-* `metric_type` - (选填, 变更时重建) - 监控项类型。支持值：`system`、`custom`。`"system"` 表示指标数据由阿里云监控服务(CMS)收集，`"custom"` 表示指标数据由用户上传到 CMS。默认为 `system`。
-* `metric_name` - (必填) - 监控项名称。详见下方 [Block_metricNames_and_dimensions](#block-metricnames_and_dimensions)。
-* `period` - (选填, 变更时重建) - 指定统计量应用的时间段(秒)。支持值：`60`、`120`、`300`、`900`。默认为 `300`。
-* `statistics` - (选填) - 要应用于报警关联指标的统计量。支持值：`Average`、`Minimum`、`Maximum`。默认为 `Average`。
-* `threshold` - (必填) - 要比较的指定统计量的值。
-* `comparison_operator` - (选填) - 比较指定统计量和阈值时使用的算术运算符。指定的统计量值用作第一个操作数。支持值：`>=`、`<=`、`>`、`<`。默认为 `>=`。
-* `evaluation_count` - (选填) - 在进入 ALARM 状态之前需要满足比较条件的次数。默认为 `3`。
-* `cloud_monitor_group_id` - (选填) - CMS 定义的应用程序组 ID，在您将自定义指标上传到 CMS 时分配，仅适用于自定义指标。
-* `dimensions` - (选填) - 报警关联指标的维度映射。对于所有指标，不能将维度键设置为 `scaling_group` 或 `userId`，这是默认设置的。某些指标的第二个维度(如 `PackagesNetIn` 的 `device`)需要由用户设置。
+* `alarm_task_name` - (选填) 报警任务的名称。
+* `description` - (选填) 报警任务的描述。
+* `enable` - (选填) 是否启用特定的报警任务。默认值为 `true`。
+* `status` - (选填) 报警任务的状态。
+* `scaling_group_id` - (必填, 变更时重建) 报警任务关联的伸缩组的 ID。
+* `metric_type` - (选填, 变更时重建) 监控项类型。支持值：`system`、`custom`。`"system"` 表示指标数据由阿里云监控服务(CMS)收集，`"custom"` 表示指标数据由用户上传到 CMS。默认为 `system`。
+* `metric_name` - (必填) 监控项名称。详见下方 [Block_metricNames_and_dimensions](#block-metricnames_and_dimensions)。
+* `period` - (选填, 变更时重建) 指定统计量应用的时间段(秒)。支持值：`60`、`120`、`300`、`900`。默认为 `300`。
+* `statistics` - (选填) 要应用于报警关联指标的统计量。支持值：`Average`、`Minimum`、`Maximum`。默认为 `Average`。
+* `threshold` - (必填) 要比较的指定统计量的值。
+* `comparison_operator` - (选填) 比较指定统计量和阈值时使用的算术运算符。指定的统计量值用作第一个操作数。支持值：`>=`、`<=`、`>`、`<`。默认为 `>=`。
+* `evaluation_count` - (选填) 在进入 ALARM 状态之前需要满足比较条件的次数。默认为 `3`。
+* `cloud_monitor_group_id` - (选填) CMS 定义的应用程序组 ID，在您将自定义指标上传到 CMS 时分配，仅适用于自定义指标。
+* `dimensions` - (选填) 报警关联指标的维度映射。对于所有指标，不能将维度键设置为 `scaling_group` 或 `userId`，这是默认设置的。某些指标的第二个维度(如 `PackagesNetIn` 的 `device`)需要由用户设置。
 
 ### Block metricNames_and_dimensions
 
@@ -129,9 +128,7 @@ resource "alibabacloudstack_autoscaling_alarmtask" "foo" {
 
 除了上述所有参数外，还导出了以下属性：
 
-* `name` - 报警任务的名称，与 `alarm_task_name` 功能相同。
 * `alarm_task_name` - 报警任务的名称。
-* `enable` - 是否启用特定的报警任务。
 * `status` - 报警任务的状态。
 * `dimensions` - 报警关联指标的维度。
 * `state` - 指定报警的状态。

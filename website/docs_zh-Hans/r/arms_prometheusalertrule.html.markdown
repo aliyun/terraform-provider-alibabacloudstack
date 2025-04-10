@@ -91,7 +91,7 @@ resource "alibabacloudstack_arms_prometheus_alert_rule" "example" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -100,22 +100,22 @@ resource "alibabacloudstack_arms_prometheus_alert_rule" "example" {
   * `value` - (可选) 注解的值。
 * `cluster_id` - (必填, 变更时重建) 集群的 ID。
 * `dispatch_rule_id` - (可选) 通知策略的 ID。当 `notify_type` 参数设置为 `DISPATCH_RULE` 时，此参数是必填的。
-* `duration` - (必填, 变更时重建) 告警的持续时间。
+* `duration` - (必填, 变更时重建) 告警的持续时间（单位：分钟）。
 * `expression` - (必填, 变更时重建) 符合 PromQL 语法的告警规则表达式。
 * `labels` - (可选) 资源的标签。详见 [`labels`](#labels) 下面。
   * `name` - (可选) 标签的名称。
   * `value` - (可选) 标签的值。
-* `message` - (必填, 变更时重建) 告警通知的消息。
+* `message` - (必填, 变更时重建) 告警通知的消息内容。
 * `notify_type` - (可选) 发送告警通知的方法。有效值：`ALERT_MANAGER`, `DISPATCH_RULE`。
-* `prometheus_alert_rule_name` - (必填, 变更时重建) 资源的名称。
-* `status` - (可选, 变更时重建) 资源的状态。
+* `prometheus_alert_rule_name` - (必填, 变更时重建) 告警规则的名称。
+* `status` - (可选, 变更时重建) 告警规则的状态。有效值：`0`（禁用），`1`（启用）。
 * `type` - (可选, 变更时重建) 告警规则的类型。
 
 
-## 属性参考
+## 属性说明
 
 以下属性被导出：
 
 * `id` - Prometheus 告警规则的资源 ID。格式为 `<cluster_id>:<prometheus_alert_rule_id>`。
-* `prometheus_alert_rule_id` - 资源的第一个 ID。
-* `status` - 资源的状态。有效值：`0`, `1`。
+* `prometheus_alert_rule_id` - 告警规则的唯一标识符。
+* `status` - 告警规则的状态。有效值：`0`（禁用），`1`（启用）。

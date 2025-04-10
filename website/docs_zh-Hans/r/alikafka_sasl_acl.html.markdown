@@ -50,7 +50,7 @@ resource "alibabacloudstack_alikafka_sasl_acl" "default" {
 
 
 
-## 参数参考
+## 参数说明
 
 以下参数被支持：
 
@@ -60,11 +60,11 @@ resource "alibabacloudstack_alikafka_sasl_acl" "default" {
 * `acl_resource_name` - (必填，变更时重建) 此ACL的资源名称。资源名称应为一个主题或消费者组名称。
 * `acl_resource_pattern_type` - (必填，变更时重建) 此ACL的资源模式类型。资源模式支持两种类型"LITERAL"和"PREFIXED"。"LITERAL": 字面名称定义了资源的完整名称。特殊通配符"*"可以用来表示任何名称的资源。"PREFIXED": 前缀名称定义了一个资源的前缀。
 * `acl_operation_type` - (必填，变更时重建) 此ACL的操作类型。操作类型只能是"Write"和"Read"。
-* `host` - (可选，变更时重建) ACL的主机。
+* `host` - (可选，变更时重建) ACL的主机。如果未指定，则默认值为"*"，表示允许所有主机访问。
 
-## 属性参考
+## 属性说明
 
 以下属性被导出：
 
 * `id` - 资源提供的`key`。其值由 `<instance_id>:<username>:<acl_resource_type>:<acl_resource_name>:<acl_resource_pattern_type>:<acl_operation_type>` 组成。
-* `host` - ACL的主机。
+* `host` - ACL的主机。此属性显示在创建ACL时指定的主机值。

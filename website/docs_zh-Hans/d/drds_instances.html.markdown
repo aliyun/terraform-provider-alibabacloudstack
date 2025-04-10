@@ -58,7 +58,7 @@ output "first_db_instance_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -66,18 +66,18 @@ output "first_db_instance_id" {
 * `description_regex` - (可选) 用于按实例描述筛选结果的正则表达式字符串。通过该参数，可以匹配符合特定描述规则的 DRDS 实例。
 * `ids` - (可选) DRDS 实例 ID 列表。通过该参数，可以限制查询结果为指定的 DRDS 实例。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
 * `ids` - DRDS 实例 ID 列表。该列表包含所有符合条件的 DRDS 实例的 ID。
 * `descriptions` - DRDS 实例描述列表。该列表包含所有符合条件的 DRDS 实例的描述。
 * `instances` - DRDS 实例列表。每个实例包含以下属性：
-  * `id` - DRDS 实例的 ID。
-  * `description` - DRDS 实例的描述。
-  * `status` - DRDS 实例的状态，例如“Running”或“Stopped”。
-  * `type` - DRDS 实例的类型，表示实例的规格或系列。
-  * `create_time` - DRDS 实例的创建时间，格式为标准时间戳。
-  * `network_type` - DRDS 实例的网络类型，可以是 `Classic` 表示公共经典网络或 `VPC` 表示私有网络。
+  * `id` - DRDS 实例的唯一标识符。
+  * `description` - DRDS 实例的描述信息。
+  * `status` - DRDS 实例的当前状态，例如“Running”表示运行中，“Stopped”表示已停止。
+  * `type` - DRDS 实例的类型或规格，表示实例的计算资源配置。
+  * `create_time` - DRDS 实例的创建时间，格式为标准时间戳（ISO 8601 格式）。
+  * `network_type` - DRDS 实例的网络类型，`Classic` 表示公共经典网络，`VPC` 表示私有网络。
   * `zone_id` - DRDS 实例所在的可用区 ID。
-  * `version` - DRDS 实例的版本，表示实例的功能版本号。
+  * `version` - DRDS 实例的功能版本号，表示实例支持的功能集。

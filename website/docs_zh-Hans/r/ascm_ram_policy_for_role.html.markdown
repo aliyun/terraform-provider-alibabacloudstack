@@ -6,6 +6,7 @@ sidebar_current: "docs-alibabacloudstack-resource-ascm-ram-policy-for-role"
 description: |-
     编排绑定ASCM的RAM策略和RAM角色
 ---
+
 # alibabacloudstack_ascm_ram_policy_for_role
 
 使用Provider配置的凭证在指定的资源集下编排绑定ASCM的RAM策略和RAM角色。
@@ -35,13 +36,14 @@ output "ramrolebinder" {
 }
 
 ```
-## 参数参考
+
+## 参数说明
 
 支持以下参数：
 
-* `ram_policy_id` - (必填) 将用于绑定的ram_policy_id。
-* `role_id` - (必填，变更时重建) 将用于绑定的角色ID。
+* `ram_policy_id` - (必填) 要绑定的RAM策略的ID。
+* `role_id` - (必填，变更时重建) 要绑定的角色ID。
 
-## 属性参考
+## 属性说明
 
-此资源目前未定义任何属性。
+此资源目前未定义任何输出属性。

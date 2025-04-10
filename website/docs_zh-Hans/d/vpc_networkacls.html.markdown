@@ -46,7 +46,7 @@ output "first_network_acl_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -58,7 +58,7 @@ output "first_network_acl_id" {
 * `status` - (选填, 变更时重建) 网络 ACL 的状态。有效值：`Available`、`Modifying`。
 * `vpc_id` - (选填, 变更时重建) 关联 VPC 的 ID。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -69,18 +69,18 @@ output "first_network_acl_id" {
     * `description` - 出方向规则的描述。
     * `destination_cidr_ip` - 目标 CIDR 块。
     * `network_acl_entry_name` - 出方向规则条目的名称。
-    * `policy` - 授权策略(例如，`Allow`、`Deny`)。
+    * `policy` - 授权策略（例如，`Allow`、`Deny`）。
     * `port` - 目标端口范围。
-    * `protocol` - 传输层协议(例如，`tcp`、`udp`)。
+    * `protocol` - 传输层协议（例如，`tcp`、`udp`）。
   * `id` - 网络 ACL 的 ID。
   * `ingress_acl_entries` - 入方向规则信息。每个条目包含：
     * `source_cidr_ip` - 源 CIDR 块。
     * `description` - 入方向规则的描述。
     * `network_acl_entry_name` - 入方向规则条目的名称。
-    * `policy` - 授权策略(例如，`Allow`、`Deny`)。
+    * `policy` - 授权策略（例如，`Allow`、`Deny`）。
     * `port` - 源端口范围。
-    * `protocol` - 传输层协议(例如，`tcp`、`udp`)。
-  * `network_acl_id` - 资源的第一个 ID。
+    * `protocol` - 传输层协议（例如，`tcp`、`udp`）。
+  * `network_acl_id` - 网络 ACL 的 ID。
   * `network_acl_name` - 网络 ACL 的名称。名称长度为 1～128 个字符，不能以 `http://` 或 `https://` 开头。
   * `resources` - 关联的资源。每个条目包含：
     * `resource_id` - 关联资源的 ID。
