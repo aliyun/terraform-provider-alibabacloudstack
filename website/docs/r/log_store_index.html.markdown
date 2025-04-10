@@ -87,6 +87,8 @@ The following attributes are exported:
 * `id` - The ID of the log store index. It formats of `<project>:<logstore>`.
 * `project` - (ForceNew, Required) The project name to the log store belongs.
 * `logstore` - (ForceNew, Required) The log store name to the query index belongs.
+* `full_text` - The configuration of full text index.
+* `field_search` - List configurations of field search index.
 
 ## Import
 

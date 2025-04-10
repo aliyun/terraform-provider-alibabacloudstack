@@ -51,6 +51,8 @@ The following arguments are supported:
   * `comment` - (Optional) The comment for the entry.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 * `resource_group_id` - (Optional, ForceNew) The ID of the resource group.
+* `name` - (Optional) The deprecated name field. Field 'name' is deprecated and will be removed in a future release. Please use new field 'acl_name' instead.
+* `ip_version` - (Optional, ForceNew) The deprecated IP version field. Field 'ip_version' is deprecated and will be removed in a future release. Please use new field 'address_ip_version' instead.
 
 ## Attributes Reference
 
@@ -59,3 +61,5 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The ID of the access control list.
 * `acl_name` - The name of the access control list.
 * `address_ip_version` - The IP version. Valid values: `ipv4` and `ipv6`.
+* `name` - The deprecated name field.
+* `ip_version` - The deprecated IP version field.

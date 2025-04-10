@@ -104,6 +104,7 @@ The following arguments are supported:
   * `ipsec_auth_alg` - (Optional) The authentication algorithm of phase-two negotiation. Valid value: `md5` | `sha1` | `sha256` | `sha384` | `sha512`. Default value: `sha1`.
   * `ipsec_pfs` - (Optional) The Diffie-Hellman key exchange algorithm used by phase-two negotiation. Valid value: `group1` | `group2` | `group5` | `group14` | `group24` | `disabled`. Default value: `group2`.
   * `ipsec_lifetime` - (Optional) The SA lifecycle as the result of phase-two negotiation. The valid value is [0, 86400], the unit is second and the default value is 86400.
+* `name` - (Optional) The name of the IPsec-VPN connection.
 
 ## Attributes Reference
 
@@ -114,6 +115,7 @@ The following attributes are exported in addition to the arguments listed above:
 * `ike_config` - The configuration of Phase 1 negotiations.
 * `ipsec_config` - IPsec configuration.
 * `vpn_connection_name` - The name of the IPsec-VPN connection.
+* `name` - The name of the IPsec-VPN connection.
 
 ## Import
 

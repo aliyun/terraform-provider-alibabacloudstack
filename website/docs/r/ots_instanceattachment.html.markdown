@@ -56,6 +56,7 @@ The following arguments are supported:
 * `instance_name` - (Required, ForceNew) The name of the OTS instance. This must match the name of an existing OTS instance.
 * `vpc_name` - (Required, ForceNew) The name of the VPC being attached to the OTS instance. This is used for identification purposes.
 * `vswitch_id` - (Required, ForceNew) The ID of the VSwitch being attached to the OTS instance. This must be within the same VPC as specified by `vpc_name`.
+* `vpc_id` - (Optional, ForceNew) The ID of the VPC being attached to the OTS instance.
 
 ## Attributes Reference
 

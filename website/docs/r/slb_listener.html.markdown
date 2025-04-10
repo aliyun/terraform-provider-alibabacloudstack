@@ -102,6 +102,9 @@ The following arguments are supported:
 * `forward_port` - (Optional, ForceNew) The port that HTTP redirects to HTTPS.
 * `tls_cipher_policy` - (Optional) The Transport Layer Security (TLS) security policy. Default value: tls_cipher_policy_1_0. Valid values: tls_cipher_policy_1_0, tls_cipher_policy_1_1, tls_cipher_policy_1_2, tls_cipher_policy_1_2_strict.
 * `delete_protection_validation` - (Optional) Checking DeleteProtection of SLB instance before deleting. If true, this resource will not be deleted when its SLB instance enabled DeleteProtection. Default to false.
+* `logs_download_attributes` - (Optional) Attributes related to logs download configuration. 
+  * `log_project` - (Required) Name of the log project.
+  * `log_store` - (Required) Name of the log store.
 
 ## Attributes Reference
 

@@ -47,6 +47,7 @@ The following arguments are supported:
 
 * `description` - (Optional, ForceNew) A brief description of the OTS instance. This field cannot be modified after creation. Changing this forces a new resource to be created.
 * `tags` - (Optional) A mapping of tags to assign to the OTS instance.
+* `propreties` - (Optional) Additional properties for the OTS instance. 
 
 ## Attributes Reference
 
@@ -58,6 +59,7 @@ In addition to all arguments above, the following attributes are exported:
 * `accessed_by` - The network limitation for accessing the OTS instance.
 * `instance_type` - The type of the OTS instance.
 * `tags` - A mapping of tags assigned to the OTS instance.
+* `propreties` - The computed properties of the OTS instance.
 
 ## Import
 

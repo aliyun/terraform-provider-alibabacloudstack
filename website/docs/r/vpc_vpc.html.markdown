@@ -53,6 +53,7 @@ The following arguments are supported:
 * `status` - The status of the VPC. Valid values:
   * `Pending`: The VPC is being configured.
   * `Available`: The VPC is available.
+* `tags` - (Optional)  A mapping of tags to assign to the resource.
 
 ## Attributes Reference
 

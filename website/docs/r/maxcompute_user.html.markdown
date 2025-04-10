@@ -41,6 +41,8 @@ The following arguments are supported:
 * `user_id` - Alias of the key `id`.
 * `user_pk` - The PK of the user.
 * `user_type` - The type of the user.
+* `user_name` - (Computed) The name of the user.
+* `description` - (Computed) The description of the user.
 * `organization_name` - The name of the organization. 
 
 ## Import

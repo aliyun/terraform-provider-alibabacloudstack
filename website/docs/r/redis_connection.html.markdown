@@ -35,6 +35,7 @@ The following arguments are supported:
 * `connection_string_prefix` - (Required) The prefix of the connection string. The prefix can be 8 to 64 characters in length, and can contain lowercase letters and digits. It must start with a lowercase letter.
 * `instance_id` - (Required, ForceNew) The ID of the Redis instance. Once set, this value cannot be changed.
 * `port` - (Required) The service port number of the Redis instance. The valid range is from `1024` to `65535`.
+* `connection_string` - (Optional) The connection string of the Redis instance.
 
 ## Attributes Reference
 

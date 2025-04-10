@@ -75,6 +75,7 @@ The following arguments are supported:
 * `safety_check` - (Optional, ForceNew) Specifies the safety check mode for the execution. This ensures that certain conditions are met before proceeding with the execution.
 * `template_version` - (Optional, ForceNew) The version of the OOS template being executed. If not specified, the latest version of the template will be used.
 * `template_content` - (Optional, ForceNew) The raw content of the OOS template. This is useful when creating an execution from a custom template instead of an existing one.
+* `ram_role` - (Optional, ForceNew) Specifies the RAM role associated with the execution, which grants permissions for the tasks to be performed.
 
 ## Attributes Reference
 
@@ -93,6 +94,7 @@ In addition to all arguments above, the following attributes are exported:
 * `status_message` - A detailed message describing the current status of the execution.
 * `template_id` - The unique identifier of the OOS template used for the execution.
 * `update_date` - The timestamp indicating when the execution was last updated.
+* `safety_check` - Specifies the safety check mode for the execution. This ensures that certain conditions are met before proceeding with the execution.
 
 ### Timeouts
 

@@ -101,7 +101,8 @@ The following arguments are supported:
 * `detector_specs` - (Required)  The Detection Engine Specifications provide detailed information about the capabilities, configuration, and performance characteristics of a detection engine
 * `detector_version` - (Required) The Detection Engine level
 * `detector_nodenum` - (Required) Number of Detection Engines in a Single Availability Zone
-
+* `name` - (Required, ForceNew) Name of the WAF instance.
+* `vpc_vswitch` - (Required, ForceNew) Configuration block for VPC vswitch settings.
 
 
 ## Attributes Reference
@@ -115,5 +116,8 @@ The following attributes are exported:
 * `vpc_id` - The VPC ID.
 * `name` - The name of the switch.
 * `description` - The description of the switch.
-
-
+* `arch` - Architecture associated with the WAF instance.
+* `cpu_type` - CPU type associated with the WAF instance.
+* `wafinstance_id` - ID of the WAF instance.
+* `instance_status` - Status of the WAF instance.
+* `instance_make_status` - Make status of the WAF instance.

@@ -99,6 +99,7 @@ The following arguments are supported:
   * **ByMonth**: Month.
   * **ByWeek**: Week.
   * **KeepAll**: Keep all. Default to `KeepAll`.
+* `preferred_backup_period` - (Optional) Preferred backup period.
 
 ## Attributes Reference
 
@@ -128,3 +129,4 @@ The following attributes are exported in addition to the arguments listed above:
   * **ByMonth**: Month.
   * **ByWeek**: Week.
   * **KeepAll**: Keep all.
+* `preferred_backup_period` - Preferred backup period.

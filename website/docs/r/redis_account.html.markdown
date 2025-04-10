@@ -104,6 +104,7 @@ The following arguments are supported:
   * `RoleRepl`: Read, write, and replication commands (`SYNC` / `PSYNC`) access. This is only applicable to Redis instances with an engine version of 4.0 or higher and a standard architecture type.
   Default value is `RoleReadWrite`.
 * `description` - (Optional) A description of the account. It must start with a Chinese character or an English letter and can include Chinese characters, English letters, underscores (`_`), hyphens (`-`), and numbers. The length must be between 2 and 256 characters.
+* `account_description` - (Optional) The description of the account (same as `description`). 
 
 ## Attributes Reference
 
@@ -111,4 +112,4 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The unique identifier of the account. It is composed of the instance ID and the account name in the format `<instance_id>:<account_name>`.
 * `description` - The description of the account.
-* `account_description` - The description of the account (same as `description`).
+* `account_description` - The description of the account (same as `description`). 

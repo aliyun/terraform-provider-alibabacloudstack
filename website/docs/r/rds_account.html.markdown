@@ -85,6 +85,10 @@ The following arguments are supported:
   - **Note**: Before creating a database account with SA permissions, check whether the instance meets the prerequisites. For more information, see [create a database account with SA permissions](https://www.alibabacloud.com/help/doc-detail/122334.htm).
 * `account_description` - (Optional) Account description. It can be 2 to 256 characters in length. It starts with a Chinese or English letter and can contain numbers, Chinese, English, underscores (`_`), and hyphens (`-`).  
   - **Note**: Cannot start with `http://` or `https://`.
+* `instance_id` - (Optional, ForceNew) Deprecated field, use `data_base_instance_id` instead.
+* `name` - (Optional, ForceNew) Deprecated field, use `account_name` instead.
+* `type` - (Optional, ForceNew) Deprecated field, use `account_type` instead.
+* `description` - (Optional) Deprecated field, use `account_description` instead.
 
 ## Attributes Reference
 
@@ -95,3 +99,7 @@ In addition to all arguments above, the following attributes are exported:
 * `account_name` - Database account name. Consists of lowercase letters, numbers, or underscores. For MySQL, uppercase letters are also supported. It must start with a letter and end with a letter or number.
 * `account_type` - Account type. Valid values: `Normal`, `Super`, or `Sysadmin`.
 * `account_description` - Account description. It can be 2 to 256 characters in length. It starts with a Chinese or English letter and can contain numbers, Chinese, English, underscores (`_`), and hyphens (`-`).
+* `instance_id` - Deprecated field, use `data_base_instance_id` instead.
+* `name` - Deprecated field, use `account_name` instead.
+* `type` - Deprecated field, use `account_type` instead.
+* `description` - Deprecated field, use `account_description` instead.

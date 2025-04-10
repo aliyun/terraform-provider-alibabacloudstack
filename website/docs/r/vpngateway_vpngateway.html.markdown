@@ -70,6 +70,9 @@ The following arguments are supported:
 * `description` - (Optional) The description of the VPN gateway.
 * `vswitch_id` - (Optional, ForceNew) The ID of the vSwitch to which the VPN gateway belongs.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
+* `ipsec_vpn` - (Optional) Specifies whether to enable the IPsec-VPN feature. 
+* `ssl_vpn` - (Optional) Specifies whether to enable the SSL-VPN feature. 
+* `ssl_max_connections` - (Optional) The maximum number of concurrent SSL-VPN connections. 
 
 ## Attributes Reference
 
@@ -85,3 +88,4 @@ The following attributes are exported in addition to the arguments listed above:
   * **Normal**: The resource is normal.
   * **Expired**: The resource has expired.
   * **LockDown**: The resource has been locked.
+* `name` - The name of the VPN gateway. 

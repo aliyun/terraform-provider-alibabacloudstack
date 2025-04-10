@@ -44,10 +44,11 @@ The following arguments are supported:
 * `name` - (Optional) The name of the route table. If not specified, Terraform will automatically generate a unique name.
 * `description` - (Optional) A detailed description of the route table. This helps in identifying the purpose or usage of the route table.
 * `tags` - (Optional) A mapping of tags to assign to the route table. These tags can be used for categorization and cost allocation.
+* `route_table_name` - (Optional) The name of the route table. Conflicts with `name`. Please use this field instead of the deprecated `name` field. 
 
 ## Attributes Reference
 
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the route table instance.
-* `route_table_name` - The name of the route table as specified by the `name` argument or auto-generated if not provided.
+* `route_table_name` - The name of the route table as specified by the `name` argument or auto-generated if not provided. 

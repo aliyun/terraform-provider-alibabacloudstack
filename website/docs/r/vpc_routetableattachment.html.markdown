@@ -59,4 +59,6 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The unique identifier of the route table attachment. It is formatted as `<route_table_id>:<vswitch_id>`.
+* `id` - The unique identifier of the route table attachment. It is formatted as `<route_table_id>:<vswitch_id>`.  
+* `route_table_id` - (Computed) The ID of the route table associated with the attachment. 
+* `vswitch_id` - (Computed) The ID of the VSwitch associated with the attachment. 

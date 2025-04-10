@@ -78,10 +78,8 @@ The following arguments are supported:
 * `max_split_shard_count` - (Optional) The maximum number of shards for automatic split, which is in the range of 1 to 64. You must specify this parameter when autoSplit is true.
 * `append_meta` - (Optional) Determines whether to append log meta automatically. The meta includes log receive time and client IP address. Default to `true`.
 * `enable_web_tracking` - (Optional) Determines whether to enable Web Tracking. Default `false`.
-* `encryption`(Optional) enable encryption. Default `false`
-* `encrypt_type` (Optional) Supported encryption type, only supports `default(sm4_gcm)`,` aes_gcm`
-* `cmk_key_id` (Optional) User master key id.
-* `arn`   (Optional) role arn.
+* `encryption` - (Optional) Enable encryption. Default `false`. 
+* `encrypt_type` - (Optional, ForceNew) Supported encryption type, only supports `default(sm4_gcm)`, `aes_gcm`.
 
 ## Attributes Reference
 

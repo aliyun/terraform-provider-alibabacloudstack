@@ -50,4 +50,6 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported in addition to the arguments listed above:
+The following attributes are exported in addition to the arguments listed above: 
+
+  * `backup_log` - (Computed) Log backup switch. Value: **Enable | Disabled **

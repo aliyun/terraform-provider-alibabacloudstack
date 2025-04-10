@@ -48,6 +48,8 @@ The following arguments are supported:
 * `file_system_type` - (Optional, ForceNew) The type of file system. Valid values: `standard` and `extreme`. Default to `standard`. Note that the `extreme` type only supports the `Vpc` network.
 * `access_group_type` - (Required, ForceNew) Permission group types. Valid values: `Vpc` and `Classic`.
 * `description` - (Optional) Permission group description information. This provides additional details about the permission group for better identification.
+* `name` - (Optional, ForceNew) - The deprecated field for the name of the permission group. It will be removed in a future release. Use `access_group_name` instead.
+* `type` - (Optional, ForceNew) - The deprecated field for the type of permission group. It will be removed in a future release. Use `access_group_type` instead.
 
 ### Deprecated Arguments
 
@@ -64,6 +66,8 @@ In addition to all arguments above, the following attributes are exported:
 * `access_group_name` - The name of the permission group.
 * `access_group_type` - Permission group types, including `Vpc` and `Classic`.
 * `file_system_type` - File system type. Valid values: `standard` and `extreme`.
+* `name` - - The deprecated field for the name of the permission group. It will be removed in a future release. Use `access_group_name` instead.
+* `type` - - The deprecated field for the type of permission group. It will be removed in a future release. Use `access_group_type` instead.
 
 ## Import
 
