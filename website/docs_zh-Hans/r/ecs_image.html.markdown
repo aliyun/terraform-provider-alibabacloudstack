@@ -118,7 +118,7 @@ resource "alibabacloudstack_image_share_permission" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 

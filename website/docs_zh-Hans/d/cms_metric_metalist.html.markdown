@@ -32,7 +32,7 @@ output "metric_metalist" {
 * `namespace` - (必填，变更时重建) 服务的命名空间。您可以调用操作以获取命名空间。
 * `resources` - (可选) cms metriclist 列表。此参数用于进一步筛选符合条件的指标资源。
 
-## 属性参考
+## 属性说明
 
 以下属性被导出：
 

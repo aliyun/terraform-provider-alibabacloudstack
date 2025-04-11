@@ -72,7 +72,7 @@ resource "alibabacloudstack_hbase_instance" "default" {
 
 此示例展示了如何通过各种配置(如网络设置、安全组和存储选项)创建一个 HBase 实例。
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -113,7 +113,7 @@ resource "alibabacloudstack_hbase_instance" "default" {
 * `security_groups` - (可选) 与集群关联的安全组 ID 列表。
 * `master_instance_quantity` - (可选，计算) 集群中的主节点数量。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

@@ -80,7 +80,7 @@ resource "alibabacloudstack_autoscaling_alarmtask" "foo" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -124,7 +124,7 @@ resource "alibabacloudstack_autoscaling_alarmtask" "foo" {
 
 **注意:** 维度 `user_id` 和 `scaling_group` 是自动填充的，这意味着您只需要关心在需要时设置维度 `device` 和 `state`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

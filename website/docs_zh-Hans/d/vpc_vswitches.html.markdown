@@ -46,7 +46,7 @@ output "vswitch_names" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -60,7 +60,7 @@ output "vswitch_names" {
 * `zone_id` - (可选) vSwitch所在可用区的ID。您可以调用[DescribeZones](https://help.aliyun.com/document_detail/36064.html)操作来查询最新的可用区列表。
 * `ids` - (可选) 用于过滤结果的vSwitch ID列表。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

@@ -52,7 +52,7 @@ resource "alibabacloudstack_vpngateway_vpngateway" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -74,7 +74,7 @@ resource "alibabacloudstack_vpngateway_vpngateway" "default" {
 * `ssl_vpn` - (可选) 是否开启 SSL-VPN 功能。
 * `ssl_max_connections` - (可选) 最大 SSL-VPN 并发连接用户数的规格。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

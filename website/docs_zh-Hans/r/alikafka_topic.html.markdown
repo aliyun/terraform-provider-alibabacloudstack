@@ -48,7 +48,7 @@ resource "alibabacloudstack_alikafka_topic" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 

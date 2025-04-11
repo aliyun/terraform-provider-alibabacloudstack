@@ -65,7 +65,7 @@ resource "alibabacloudstack_rds_backuppolicy" "policy" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -101,7 +101,7 @@ resource "alibabacloudstack_rds_backuppolicy" "policy" {
   * **KeepAll**：保留所有。默认为 `KeepAll`。
 * `preferred_backup_period` - (选填) - 优选备份周期。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

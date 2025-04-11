@@ -31,7 +31,7 @@ output "ehpc_job_template_id_1" {
 
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 

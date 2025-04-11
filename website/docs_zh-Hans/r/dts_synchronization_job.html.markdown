@@ -57,7 +57,7 @@ resource "alibabacloudstack_dts_synchronization_job" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数受支持：
 
@@ -116,7 +116,7 @@ resource "alibabacloudstack_dts_synchronization_job" "default" {
 5. 在任务暂停期间，费用将继续产生。如果需要停止计费，请释放实例。
 6. 当 DTS 实例暂停超过 7 天，实例无法恢复，状态将从暂停变为失败。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 

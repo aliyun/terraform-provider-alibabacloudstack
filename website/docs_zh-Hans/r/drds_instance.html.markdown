@@ -52,7 +52,7 @@ resource "alibabacloudstack_drds_instance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 

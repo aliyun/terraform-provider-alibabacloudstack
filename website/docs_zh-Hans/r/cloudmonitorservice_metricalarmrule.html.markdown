@@ -47,7 +47,7 @@ resource "alibabacloudstack_cloudmonitorservice_metricalarmrule" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 

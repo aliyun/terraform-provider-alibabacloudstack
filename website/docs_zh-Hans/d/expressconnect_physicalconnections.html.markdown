@@ -38,7 +38,7 @@ output "express_connect_physical_connection_id_2" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 

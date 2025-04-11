@@ -117,7 +117,7 @@ resource "alibabacloudstack_ecs_instance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 * `availability_zone` - (选填, 变更时重建) - 启动实例所在的可用区。必须与指定的交换机的区域匹配。
@@ -164,7 +164,7 @@ resource "alibabacloudstack_ecs_instance" "default" {
 * `system_disk_tags` - (选填) - 要分配给系统盘的标签映射。
 * `data_disk_tags` - (选填) - 要分配给数据盘的标签映射。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 * `availability_zone` - 实例所在的可用区。

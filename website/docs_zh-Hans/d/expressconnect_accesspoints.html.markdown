@@ -27,7 +27,7 @@ data "alibabacloudstack_expressconnect_accesspoints" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
   * `ids` - (可选，变更时重建) - 用于过滤的接入点 ID 列表。此参数可以帮助您快速定位特定的接入点。

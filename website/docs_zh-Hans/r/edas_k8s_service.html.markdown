@@ -70,7 +70,7 @@ resource "alibabacloudstack_edas_k8s_service" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 

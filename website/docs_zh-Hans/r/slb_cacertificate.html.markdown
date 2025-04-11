@@ -36,7 +36,7 @@ resource "alibabacloudstack_slb_cacertificate" "file_example" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -50,7 +50,7 @@ resource "alibabacloudstack_slb_cacertificate" "file_example" {
 - **ca_certificate_name**: (可选) 用于标识CA证书的名称。与`name`类似，但更具体地用于某些引用场景。如果同时指定了`name`和`ca_certificate_name`，建议确保两者的值一致以避免混淆。
 - **ca_certificate**: (必填) PEM格式的CA证书内容。此字段必须在资源创建时提供，并且一旦创建后无法更改。请确保提供的证书内容符合PEM格式要求。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 

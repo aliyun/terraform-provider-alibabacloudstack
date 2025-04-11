@@ -80,7 +80,7 @@ resource "alibabacloudstack_redis_account" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 * `instance_id` - (必填, 变更时重建) - 实例ID，该账户所属的实例。
@@ -99,7 +99,7 @@ resource "alibabacloudstack_redis_account" "default" {
 * `description` - (选填) - 账号备注信息。它必须以中文字符或英文字母开头，并且可以包括中文字符、英文字母、下划线 (`_`)、连字符 (`-`) 和数字。长度必须在 2 到 256 个字符之间。
 * `account_description` - (选填) - 账号备注信息（与 `description` 相同）。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 * `id` - 账户的唯一标识符。它由实例 ID 和账户名称组成，格式为 `<instance_id>:<account_name>`。

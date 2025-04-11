@@ -33,7 +33,7 @@ resource "alibabacloudstack_disk" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -105,7 +105,7 @@ resource "alibabacloudstack_disk" "default" {
   - false：关闭。
   默认值：无，表示不改变当前的值。> 创建后的云盘默认启用自动快照策略功能。您只需要为云盘绑定自动快照策略即可正常使用。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

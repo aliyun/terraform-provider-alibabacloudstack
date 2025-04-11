@@ -61,7 +61,7 @@ data "alibabacloudstack_polardb_instances" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 以下参数是支持的：
   * `ids` - (选填) - 用于过滤的数据库实例 ID 列表。
   * `network_type` - (选填) - 实例的网络类型，取值：* **Classic**：经典网络。* **VPC**：专有网络。

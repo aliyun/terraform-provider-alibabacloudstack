@@ -45,7 +45,7 @@ output "ipv6_address_name_1" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -55,7 +55,7 @@ output "ipv6_address_name_1" {
 * `vswitch_id` - (可选，变更时重建) 分配给该 IPv6 地址的交换机 ID。
 * `vpc_id` - (可选，变更时重建) 分配给该 IPv6 地址的 VPC ID。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

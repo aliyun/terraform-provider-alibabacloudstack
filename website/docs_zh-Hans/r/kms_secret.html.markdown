@@ -27,7 +27,7 @@ resource "alibabacloudstack_kms_secret" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数受支持：
 
@@ -43,7 +43,7 @@ resource "alibabacloudstack_kms_secret" "default" {
 * `tags` - (可选) 分配给资源的标签映射。
 * `encryption_key_id` - (可选，变更时重建) 用于加密密钥值的 KMS CMK 的 ID。如果您不指定此参数，密钥管理器将自动创建一个加密密钥来加密密钥。
 
-## 属性参考
+## 属性说明
 
 * `id` - 密钥的 ID。它与 `secret_name` 相同。
 * `arn` - 密钥的 Alibabacloudstack 资源名称 (ARN)。

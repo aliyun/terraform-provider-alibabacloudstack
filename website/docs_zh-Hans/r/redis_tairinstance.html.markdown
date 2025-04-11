@@ -72,7 +72,7 @@ resource "alibabacloudstack_redis_tairinstance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 

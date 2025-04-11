@@ -27,7 +27,7 @@ resource "alibabacloudstack_quick_bi_workspace" "default" {
 
 ```
 
-## 参数参考
+## 参数说明
 
 以下是支持的参数：
 
@@ -37,7 +37,7 @@ resource "alibabacloudstack_quick_bi_workspace" "default" {
 * `allow_share` - (可选) 是否允许报告共享（对应功能权限 - 作品可以授权）。有效值：`false`、`true`。
 * `allow_publish` - (可选) 是否允许报告公开（对应功能权限 - 作品可以公开）。有效值：`false`、`true`。
 
-## 属性参考
+## 属性说明
 
 以下属性将导出：
 

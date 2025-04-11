@@ -79,7 +79,7 @@ resource "alibabacloudstack_vpn_connection" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
   * `customer_gateway_id` - (必填, 变更时重建) - 客户网关的 ID。
@@ -107,7 +107,7 @@ resource "alibabacloudstack_vpn_connection" "default" {
     * `ipsec_pfs` - (选填) - 第二阶段协商使用的 Diffie-Hellman 密钥交换算法。有效值：`group1` | `group2` | `group5` | `group14` | `group24` | `disabled`。默认值：`group2`。
     * `ipsec_lifetime` - (选填) - 第二阶段协商结果的 SA 生命周期。有效值范围为 [0, 86400]，单位为秒，默认值为 86400。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
   * `id` - VPN 连接的 ID。

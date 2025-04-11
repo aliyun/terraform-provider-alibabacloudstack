@@ -65,7 +65,7 @@ resource "alibabacloudstack_arms_dispatch_rule" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -102,7 +102,7 @@ resource "alibabacloudstack_arms_dispatch_rule" "default" {
   * `notify_channels` - (必填，List<String>) 通知方法。有效值：`dingTalk`、`sms`、`webhook`、`email` 和 `wechat`。
 
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 

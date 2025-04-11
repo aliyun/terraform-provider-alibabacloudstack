@@ -64,7 +64,7 @@ resource "alibabacloudstack_mongodb_sharding_instance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -90,7 +90,7 @@ resource "alibabacloudstack_mongodb_sharding_instance" "default" {
 * `mongo_list` - (必填) Mongo 节点列表。每个 Mongo 节点具有以下属性：
   * `node_class` - (必填) 节点规格。参见 [实例规格](https://www.alibabacloud.com/help/doc-detail/57141.htm)。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

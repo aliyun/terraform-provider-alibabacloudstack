@@ -31,7 +31,7 @@ resource "alibabacloudstack_polardb_backuppolicy" "example" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
   * `backup_log` - (选填) - 日志备份开关，取值：**Enable | Disabled**
@@ -73,7 +73,7 @@ resource "alibabacloudstack_polardb_backuppolicy" "example" {
     * **Lastest**：保留最后一个
     * **All**：全部保留
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
   * `id` - 资源的唯一标识符。

@@ -34,7 +34,7 @@ resource "alibabacloudstack_expressconnect_physicalconnection" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -76,7 +76,7 @@ resource "alibabacloudstack_expressconnect_physicalconnection" "default" {
   * Terminated：已终止
 * `type` - (选填，变更时重建) 物理专线的类型。默认值为 `VPC`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

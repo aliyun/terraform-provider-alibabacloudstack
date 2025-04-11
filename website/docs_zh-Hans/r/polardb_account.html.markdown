@@ -67,7 +67,7 @@ resource "alibabacloudstack_polardb_account" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
   * `account_description` - (可选) - 账号备注说明，需满足如下要求：不能以`http://`或`https://`开头；长度为2~256个字符。
@@ -83,7 +83,7 @@ resource "alibabacloudstack_polardb_account" "default" {
   * `priv_exceeded` - (可选) - 表示权限是否超出允许的限制。如果设置为`true`，表示权限超出限制。
   * `status` - (可选) - 代表资源状态的资源属性字段。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
   * `account_description` - 账号备注说明，需满足如下要求：不能以`http://`或`https://`开头；长度为2~256个字符。

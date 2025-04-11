@@ -20,7 +20,7 @@ resource "alibabacloudstack_ascm_logon_policy" "login" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -31,7 +31,7 @@ resource "alibabacloudstack_ascm_logon_policy" "login" {
   * `DENY`：拒绝登录。
 
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 

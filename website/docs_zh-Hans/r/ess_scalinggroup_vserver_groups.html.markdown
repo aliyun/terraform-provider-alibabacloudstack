@@ -52,7 +52,7 @@ resource "alibabacloudstack_ess_scalinggroup_vserver_groups" "default" {
 }
 ```
 
-### 参数参考
+## 参数说明
 以下是支持的参数：
 
 * `scaling_group_id` - (必填，变更时重建) - 缩放组的 ID。

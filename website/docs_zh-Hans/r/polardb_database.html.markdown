@@ -61,7 +61,7 @@ resource "alibabacloudstack_polardb_database" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 

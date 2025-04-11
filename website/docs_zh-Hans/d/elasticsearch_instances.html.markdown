@@ -20,7 +20,7 @@ data "alibabacloudstack_elasticsearch_instances" "instances" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下是支持的参数：
 
@@ -29,7 +29,7 @@ data "alibabacloudstack_elasticsearch_instances" "instances" {
 * `version` - (可选) Elasticsearch版本。选项包括 `5.5.3_with_X-Pack`, `6.3.2_with_X-Pack` 和 `6.7.0_with_X-Pack`。如果不指定值，则返回所有版本。
 * `tags` - (可选, 1.74.0+可用) 分配给实例的标签映射。
 
-## 属性参考
+## 属性说明
 
 除了上述列出的参数外，还导出以下属性：
 

@@ -54,7 +54,7 @@ resource "alibabacloudstack_cms_metric_rule_template" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -98,7 +98,7 @@ resource "alibabacloudstack_cms_metric_rule_template" "default" {
 * `webhook` - (可选) 当发生警报时，指定的URL地址被回调，并发送POST请求。
 * `overwrite` - (可选) 是否覆盖警报模板。有效值：`true` 或 `false`。默认值：`true`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

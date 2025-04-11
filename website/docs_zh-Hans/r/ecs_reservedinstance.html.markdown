@@ -34,7 +34,7 @@ resource "alibabacloudstack_ecs_reservedinstance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -70,7 +70,7 @@ resource "alibabacloudstack_ecs_reservedinstance" "default" {
 
 alibabacloudstack_ecs_reservedinstance 资源允许您管理您的预留实例，但 Terraform 无法销毁它。将此资源从您的配置中移除会将其从您的状态文件和管理中移除，但不会销毁预留实例。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

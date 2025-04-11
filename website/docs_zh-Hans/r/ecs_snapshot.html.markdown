@@ -106,7 +106,7 @@ resource "alibabacloudstack_ecs_snapshot" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 

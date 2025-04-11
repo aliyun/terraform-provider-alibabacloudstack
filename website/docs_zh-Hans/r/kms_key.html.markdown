@@ -23,7 +23,7 @@ resource "alibabacloudstack_kms_key" "key" {
   key_state               = "Enabled"
 }
 ```
-## 参数参考
+## 参数说明
 
 支持以下参数：
 

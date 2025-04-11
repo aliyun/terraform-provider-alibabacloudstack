@@ -33,7 +33,7 @@ resource "alibabacloudstack_dbs_backup_plan" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -61,7 +61,7 @@ resource "alibabacloudstack_dbs_backup_plan" "default" {
   * `Other`: 其他类型。
 * `from_app` - (Optional) - 表示请求的来源。默认值为 `OpenAPI`。通常无需手动设置。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
