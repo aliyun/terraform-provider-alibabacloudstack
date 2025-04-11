@@ -27,17 +27,18 @@ resource "alibabacloudstack_image_share_permission" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `image_id` - (Required, ForceNew) 源镜像ID。
-* `account_id` - (Required, ForceNew) 阿里云账号ID。用于共享镜像。
+* `image_id` - (Required, ForceNew) 源镜像ID。这是需要共享的镜像的唯一标识符。
+* `account_id` - (Required, ForceNew) 阿里云账号ID。用于指定要与之共享镜像的目标阿里云账户。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
-* `id` - 镜像ID。格式为 `<image_id>:<account_id>`
-* `image_id` - 源镜像ID。 
-* `account_id` - 阿里云账号ID。用于共享镜像。
+* `id` - 镜像ID。格式为 `<image_id>:<account_id>`，表示共享关系的唯一标识。
+* `image_id` - 源镜像ID。这是共享的镜像的唯一标识符。
+* `account_id` - 阿里云账号ID。表示与之共享镜像的目标阿里云账户。
+* `optional_key` - (Computed) 可选键，由AI添加。此属性为计算字段，可能包含额外的信息（如果适用）。

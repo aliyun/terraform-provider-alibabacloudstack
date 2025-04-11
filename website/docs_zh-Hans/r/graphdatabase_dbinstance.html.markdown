@@ -42,7 +42,7 @@ resource "alibabacloudstack_graphdatabase_dbinstance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -63,13 +63,13 @@ resource "alibabacloudstack_graphdatabase_dbinstance" "default" {
 * `vpc_id` - (选填, 变更时重建) - 创建DB实例所在的专有网络ID。
 * `zone_id` - (选填, 变更时重建) - 创建DB实例所在的可用区ID。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
-* `id` - 资源的ID。
-* `status` - DB实例的状态。可能的值包括：`Creating`、`Running`、`Deleting`、`Rebooting`、`DBInstanceClassChanging`、`NetAddressCreating` 和 `NetAddressDeleting`。
+* `id` - 资源的唯一标识符。
+* `status` - DB实例的状态。可能的值包括：`Creating`（创建中）、`Running`（运行中）、`Deleting`（删除中）、`Rebooting`（重启中）、`DBInstanceClassChanging`（规格变更中）、`NetAddressCreating`（网络地址创建中）和 `NetAddressDeleting`（网络地址删除中）。
 * `vswitch_id` - 与DB实例关联的交换机ID。
 * `vpc_id` - 与DB实例关联的专有网络ID。
 * `zone_id` - DB实例所在的可用区ID。
-* `db_instance_ip_array` - 实例的IP白名单配置信息。
+* `db_instance_ip_array` - 实例的IP白名单配置信息，包含白名单组的属性、名称及具体的IP地址或CIDR块列表。

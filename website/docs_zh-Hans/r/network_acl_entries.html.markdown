@@ -80,39 +80,38 @@ resource "alibabacloudstack_network_acl_entries" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `network_acl_id` - (必填，变更时重建) 网络 ACL 的 ID，此字段不能更改。
 * `ingress` - (可选) 网络 ACL 的入站条目列表。入站条目的顺序决定了优先级。详细信息请参阅 Block Ingress。资源映射支持以下内容：
   * `description` - (可选) 入站条目的描述。
-  * `source_cidr_ip` - (可选) 入站条目的源 IP。
+  * `source_cidr_ip` - (可选) 入站条目的源 IP 地址。
   * `entry_type` - (可选) 入站条目的条目类型。必须为 `custom` 或 `system`。默认值为 `custom`。
   * `name` - (可选) 入站条目的名称。
   * `policy` - (可选) 入站条目的策略。必须为 `accept` 或 `drop`。
-  * `port` - (可选) 入站条目的端口。
-  * `protocol` - (可选) 入站条目的协议。
+  * `port` - (可选) 入站条目的端口范围，格式为 `<起始端口>/<结束端口>`。
+  * `protocol` - (可选) 入站条目的协议。可以是具体协议（如 TCP、UDP）或 `all` 表示所有协议。
 * `egress` - (可选) 网络 ACL 的出站条目列表。出站条目的顺序决定了优先级。详细信息请参阅 Block Egress。资源映射支持以下内容：
   * `description` - (可选) 出站条目的描述。
-  * `destination_cidr_ip` - (可选) 出站条目的目标 IP。
+  * `destination_cidr_ip` - (可选) 出站条目的目标 IP 地址。
   * `entry_type` - (可选) 出站条目的条目类型。必须为 `custom` 或 `system`。默认值为 `custom`。
   * `name` - (可选) 出站条目的名称。
   * `policy` - (可选) 出站条目的策略。必须为 `accept` 或 `drop`。
-  * `port` - (可选) 出站条目的端口。
-  * `protocol` - (可选) 出站条目的协议。
-* `network_acl_id` - (必填，变更时重建) 网络 ACL 的 ID，此字段不能更改。
+  * `port` - (可选) 出站条目的端口范围，格式为 `<起始端口>/<结束端口>`。
+  * `protocol` - (可选) 出站条目的协议。可以是具体协议（如 TCP、UDP）或 `all` 表示所有协议。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
 * `id` - 网络 ACL 条目的 ID。格式为 `<network_acl_id>:<a unique id>`。
 * `description` - 入站或出站条目的描述。
-* `source_cidr_ip` - 入站条目的源 IP。
+* `source_cidr_ip` - 入站条目的源 IP 地址。
 * `entry_type` - 入站或出站条目的条目类型。
 * `name` - 入站或出站条目的名称。
-* `policy` - 入站或出站条目的策略。
-* `port` - 入站或出站条目的端口。
+* `policy` - 入站或出站条目的策略。可以是 `accept` 或 `drop`。
+* `port` - 入站或出站条目的端口范围。
 * `protocol` - 入站或出站条目的协议。
-* `destination_cidr_ip` - 出站条目的目标 IP。
+* `destination_cidr_ip` - 出站条目的目标 IP 地址。

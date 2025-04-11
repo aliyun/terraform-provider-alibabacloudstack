@@ -52,7 +52,7 @@ resource "alibabacloudstack_slb_servercertificate" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -61,10 +61,12 @@ resource "alibabacloudstack_slb_servercertificate" "default" {
 * `server_certificate` - (必填, 变更时重建) - 需要上传的公钥证书。如果不使用阿里云托管的证书，则此参数是必填的。
 * `private_key` - (必填, 变更时重建) - 对应于`server_certificate`中指定的公钥证书的私钥。如果不使用阿里云托管的证书，则此参数是必填的。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 服务器证书(SSL Certificate)的ID。
 * `name` - 服务器证书的名称。
 * `server_certificate_name` - 创建时指定的服务器证书的名称。
+* `server_certificate` - 已上传的公钥证书的内容。
+* `private_key` - 与已上传的公钥证书对应的私钥内容。

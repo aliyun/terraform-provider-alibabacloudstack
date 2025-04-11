@@ -84,7 +84,7 @@ resource "alibabacloudstack_ess_scaling_group" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下是支持的参数：
 
@@ -111,8 +111,7 @@ resource "alibabacloudstack_ess_scaling_group" "default" {
 
 -> **注意：** 当分离数据库实例时，组中实例的私有IP将从数据库实例的`白名单`中移除；相反，当附加数据库实例时，组中实例的私有IP将被添加到数据库实例的`白名单`中。
 
-
-## 属性参考
+## 属性说明
 
 以下属性将导出：
 

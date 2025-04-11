@@ -156,7 +156,7 @@ resource "alibabacloudstack_slb_backend_server" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -165,8 +165,9 @@ resource "alibabacloudstack_slb_backend_server" "default" {
   * `server_id` - (必填) 后端服务器的ID(ECS实例或ENI实例)。
   * `weight` - (可选) 后端服务器的权重。有效值范围为`0`到`100`。值为`0`表示该后端服务器已禁用。
 * `delete_protection_validation` - (可选) 在删除此资源之前是否检查SLB实例的`DeleteProtection`属性。如果设置为`true`，当SLB实例启用了`DeleteProtection`时，资源将不会被删除。默认值为`false`。
+* `force_new_validation` - (可选) 指定当某些属性发生变化时是否重新创建负载均衡器。默认值为`true`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 

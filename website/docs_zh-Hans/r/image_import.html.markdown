@@ -33,7 +33,7 @@ resource "alibabacloudstack_image_import" "this" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下是支持的参数：
 
@@ -59,7 +59,7 @@ resource "alibabacloudstack_image_import" "this" {
 * `create` - (默认为20分钟) 用于复制镜像(直到它达到初始 `Available` 状态)。
 * `delete` - (默认为20分钟) 用于终止镜像。
 
-## 属性参考
+## 属性说明
 
 以下属性将会导出：
 

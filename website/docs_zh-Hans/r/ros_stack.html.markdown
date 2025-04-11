@@ -103,8 +103,8 @@ resource "alibabacloudstack_ros_stack" "example" {
 * `notification_urls` - (可选) 接收堆栈事件通知的回调 URL 列表。仅支持 HTTP POST。最多可以指定 5 个 URL。
 
 * `parameters` - (可选) 参数列表。每个参数支持以下内容：
-  * `parameter_key` - (必填)  参数的键。
-  * `parameter_value` - (必填)  参数的值。
+  * `parameter_key` - (必填) 参数的键。
+  * `parameter_value` - (必填) 参数的值。
 
 * `ram_role_name` - (可选) RAM 角色的名称。ROS 假设指定的 RAM 角色来创建堆栈并使用角色的凭据调用 API 操作。RAM 角色名称最大长度为 64 个字符。
 
@@ -142,7 +142,7 @@ resource "alibabacloudstack_ros_stack" "example" {
 
 * `tags` - (可选) 要分配给资源的标签映射。
 
-## 属性参考
+## 属性说明
 
 除了上述参数列出的内容外，还导出以下属性：
 

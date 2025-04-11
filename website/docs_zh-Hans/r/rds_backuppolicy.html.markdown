@@ -99,6 +99,7 @@ resource "alibabacloudstack_rds_backuppolicy" "policy" {
   * **ByMonth**：按月。
   * **ByWeek**：按周。
   * **KeepAll**：保留所有。默认为 `KeepAll`。
+* `preferred_backup_period` - (选填) - 优选备份周期。
 
 ## 属性参考
 
@@ -128,3 +129,4 @@ resource "alibabacloudstack_rds_backuppolicy" "policy" {
   * **ByMonth**：按月。
   * **ByWeek**：按周。
   * **KeepAll**：保留所有。
+* `preferred_backup_period` - 优选备份周期。

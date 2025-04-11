@@ -55,19 +55,18 @@ resource "alibabacloudstack_network_acl_attachment" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `network_acl_id` - (必填，变更时重建) 网络ACL的ID，该字段不可更改。
-* `resources` - (必填) 与网络ACL关联的资源列表。详细信息见 Block Resources。支持以下映射：
+* `resources` - (必填) 与网络ACL关联的资源列表。详细信息见以下描述：
   * `resource_id` - (必填) 要与网络ACL关联的资源ID。
   * `resource_type` - (必填) 要与网络ACL关联的资源类型。目前仅支持 `VSwitch`。
-* `network_acl_id` - (必填，变更时重建) 网络ACL的ID。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
-* `id` - 网络ACL关联的ID。格式为 `<network_acl_id>:<一个唯一ID>`。
-* `resources` - 与网络ACL关联的资源列表。
+* `id` - 网络ACL关联的唯一标识符。格式为 `<network_acl_id>:<一个唯一ID>`。
+* `resources` - 与网络ACL关联的资源列表。该列表包含所有成功绑定到网络ACL的资源信息。

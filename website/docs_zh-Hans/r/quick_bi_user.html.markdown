@@ -28,22 +28,25 @@ resource "alibabacloudstack_quick_bi_user" "example" {
 
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `account_id` - (可选，变更时重建) 阿里巴巴云账户 ID。 
-* `account_name` - (必填) 一个阿里巴巴云账户，阿里巴巴云名称。
-* `admin_user` - (必填) 是否为管理员。有效值：`true` 和 `false`。
-* `auth_admin_user` - (必填) 此用户是否为权限管理员。有效值：`false`，`true`。
-* `nick_name` - (必填，变更时重建) 用户的昵称。
-* `user_type` - (必填) 组织成员的类型角色分别。有效值：`Analyst`，`Developer` 和 `Visitor`。
+* `account_id` - (可选，ForceNew) 阿里巴巴云账户 ID。如果未提供，则使用当前账户。
+* `account_name` - (必填) 阿里巴巴云账户名称。这是用户的登录名。
+* `admin_user` - (必填) 是否为管理员用户。有效值：`true` 和 `false`。如果设置为 `true`，则该用户将拥有管理员权限。
+* `auth_admin_user` - (必填) 是否为权限管理员用户。有效值：`true` 和 `false`。如果设置为 `true`，则该用户将能够管理权限。
+* `nick_name` - (必填，ForceNew) 用户的昵称。这是显示在系统中的用户名。
+* `user_type` - (必填) 用户的角色类型。有效值：
+  * `Analyst` - 分析师角色，主要用于数据分析和报表制作。
+  * `Developer` - 开发者角色，主要用于开发和集成。
+  * `Visitor` - 访客角色，仅具有查看权限。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
-* `id` - Terraform 中的 User 资源 ID。
+* `id` - Terraform 中的 User 资源 ID。此 ID 是用户在系统中的唯一标识符。
 
 ## 导入
 

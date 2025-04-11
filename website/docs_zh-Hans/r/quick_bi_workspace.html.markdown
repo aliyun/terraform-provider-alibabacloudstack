@@ -33,10 +33,9 @@ resource "alibabacloudstack_quick_bi_workspace" "default" {
 
 * `workspace_name` - (必填) 工作区名称。
 * `workspace_desc` - (可选) 工作区描述。
-* `use_comment` - (可选) 在创建数据集时是否使用表注释(对应偏好设置)。有效值：`true` 和 `false`。
-* `allow_share` - (可选) 报告是否允许共享(对应功能权限-作品可以授权)。有效值：`false`、`true`。
-* `allow_publish` - (可选) 报告是否允许公开(对应功能权限-作品可以公开)。有效值：`false`、`true`。
-* `allow_publish` - (可选) 报告是否允许公开(对应功能权限-作品可以公开)。有效值：`false`、`true`。
+* `use_comment` - (可选) 在创建数据集时是否使用表注释（对应偏好设置）。有效值：`true` 和 `false`。
+* `allow_share` - (可选) 是否允许报告共享（对应功能权限 - 作品可以授权）。有效值：`false`、`true`。
+* `allow_publish` - (可选) 是否允许报告公开（对应功能权限 - 作品可以公开）。有效值：`false`、`true`。
 
 ## 属性参考
 

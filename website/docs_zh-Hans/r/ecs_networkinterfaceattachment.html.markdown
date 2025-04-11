@@ -84,7 +84,7 @@ resource "alibabacloudstack_network_interface_attachment" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -95,11 +95,13 @@ resource "alibabacloudstack_network_interface_attachment" "default" {
 > - `instance_id` 和 `network_interface_id` 是必填参数，且更改它们中的任何一个都会导致创建一个新的资源实例。
 > - 弹性网卡(ENI)只能附加到与之位于同一可用区和VPC中的实例。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 
 * `id` - ENI附件资源的唯一标识符。它格式化为 `<network_interface_id>:<instance_id>`。
+* `instance_id` - (计算得出) - 已附加弹性网卡(ENI)的ECS实例ID。
+* `network_interface_id` - (计算得出) - 已附加到指定实例的弹性网络接口(ENI)的ID。
 
 > **说明**: 
 > - `id` 是该资源的唯一标识符，用于在Terraform中引用该资源。

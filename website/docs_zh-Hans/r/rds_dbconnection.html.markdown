@@ -55,21 +55,21 @@ resource "alibabacloudstack_db_connection" "foo" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数被支持：
 
 * `instance_id` - (必填，变更时重建) 可以运行数据库的实例Id。
-* `connection_prefix` - (变更时重建) 互联网连接字符串的前缀。它必须检查唯一性。它可以由小写字母、数字和下划线组成，并且必须以字母开头，长度不超过30个字符。默认为<instance_id> + 'tf'。
-* `port` - (可选) 互联网连接端口。有效值范围：[3001-3999]。默认为3306。
+* `connection_prefix` - (变更时重建) 互联网连接字符串的前缀。它必须检查唯一性。它可以由小写字母、数字和下划线组成，并且必须以字母开头，长度不超过30个字符。默认值为 `<instance_id> + 'tf'`。
+* `port` - (可选) 互联网连接端口。有效值范围：[3001-3999]。默认值为 `3306`。
 * `ip_address` - (可选) 连接字符串的IP地址。
 
-## 属性参考
+## 属性说明
 
 以下属性被导出：
 
 * `id` - 当前实例连接资源ID。由实例ID和连接字符串组成，格式为 `<instance_id>:<connection_prefix>`。
 * `connection_prefix` - 连接字符串的前缀。
 * `port` - 连接实例端口。
-* `connection_string` - 连接实例字符串。
-* `ip_address` - 连接字符串的IP地址。
+* `connection_string` - 连接实例字符串，包含完整的连接信息。
+* `ip_address` - 连接字符串的IP地址，表示该连接对应的公网IP。

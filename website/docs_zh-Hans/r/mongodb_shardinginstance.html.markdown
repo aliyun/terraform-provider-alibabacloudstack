@@ -71,22 +71,22 @@ resource "alibabacloudstack_mongodb_sharding_instance" "default" {
 * `engine_version` - (必填，变更时重建) 数据库版本。值选项可以参考最新文档 [CreateDBInstance](https://www.alibabacloud.com/help/zh/doc-detail/61884.htm) 的 `EngineVersion`。
 * `storage_engine` - (选填，变更时重建) 实例的存储引擎类型。有效值：`WiredTiger`、`RocksDB`。默认值：`WiredTiger`。
 * `instance_charge_type` - (选填，变更时重建) 有效的值为 `PrePaid` 和 `PostPaid`。系统默认值为 `PostPaid`。**注意**：从 v1.141.0 版本开始，可以从 `PostPaid` 修改为 `PrePaid`。
-* `period` - (选填)购买 DB 实例的时长(以月为单位)。当 `instance_charge_type` 为 `PrePaid` 时有效。有效值：[1~9]、12、24、36。系统默认值为 1。
+* `period` - (选填) 购买 DB 实例的时长(以月为单位)。当 `instance_charge_type` 为 `PrePaid` 时有效。有效值：[1~9]、12、24、36。系统默认值为 1。
 * `zone_id` - (选填，变更时重建) 启动 DB 实例的可用区。MongoDB 分片实例不支持多可用区。如果它是多可用区并且指定了 `vswitch_id`，交换机必须在其中一个可用区内。
 * `vswitch_id` - (选填，变更时重建) 用于在 VPC 中启动 DB 实例的虚拟交换机 ID。
-* `name` - (选填)DB 实例的名称。它是一个长度为 2 到 256 个字符的字符串。
-* `db_instance_description` - (选填)DB 实例的描述。它是一个长度为 2 到 256 个字符的字符串。
-* `security_group_id` - (选填)ECS 的安全组 ID。
-* `account_password` - (选填，敏感)root 账户的密码。它是一个长度为 6 到 32 个字符的字符串，由字母、数字和下划线组成。
-* `kms_encrypted_password` - (选填)用于创建实例的 KMS 加密密码。如果填写了 `account_password`，此字段将被忽略。
-* `kms_encryption_context` - (选填)用于在使用 `kms_encrypted_password` 创建或更新实例之前解密 `kms_encrypted_password` 的 KMS 加密上下文。参见 [加密上下文](https://www.alibabacloud.com/help/doc-detail/42975.htm)。当设置了 `kms_encrypted_password` 时有效。
+* `name` - (选填) DB 实例的名称。它是一个长度为 2 到 256 个字符的字符串。
+* `db_instance_description` - (选填) DB 实例的描述。它是一个长度为 2 到 256 个字符的字符串。
+* `security_group_id` - (选填) ECS 的安全组 ID。
+* `account_password` - (选填，敏感) root 账户的密码。它是一个长度为 6 到 32 个字符的字符串，由字母、数字和下划线组成。
+* `kms_encrypted_password` - (选填) 用于创建实例的 KMS 加密密码。如果填写了 `account_password`，此字段将被忽略。
+* `kms_encryption_context` - (选填) 用于在使用 `kms_encrypted_password` 创建或更新实例之前解密 `kms_encrypted_password` 的 KMS 加密上下文。参见 [加密上下文](https://www.alibabacloud.com/help/doc-detail/42975.htm)。当设置了 `kms_encrypted_password` 时有效。
 * `tde_status` - (选填，变更时重建) 透明数据加密 (TDE) 状态。有效值：`Enabled`、`Disabled`。
-* `backup_time` - (选填)MongoDB 实例备份时间。格式为 HH:mmZ- HH:mmZ。时间设置间隔为一小时。如果不设置，系统将返回默认值，例如 "23:00Z-24:00Z"。
-* `preferred_backup_time` - (选填)备份时间，格式为 HH:mmZ-HH:mmZ(UTC 时间)。
+* `backup_time` - (选填) MongoDB 实例备份时间。格式为 HH:mmZ- HH:mmZ。时间设置间隔为一小时。如果不设置，系统将返回默认值，例如 "23:00Z-24:00Z"。
+* `preferred_backup_time` - (选填) 备份时间，格式为 HH:mmZ-HH:mmZ(UTC 时间)。
 * `shard_list` - (必填) 分片节点列表。每个分片节点具有以下属性：
   * `node_class` - (必填) 节点规格。参见 [实例规格](https://www.alibabacloud.com/help/doc-detail/57141.htm)。
   * `node_storage` - (必填) 自定义存储空间；范围：[10, 1,000]，以 10 GB 为增量。单位：GB。
-  * `readonly_replicas` - (选填)分片节点中的只读节点数量。有效值：0 到 5。默认值：0。
+  * `readonly_replicas` - (选填) 分片节点中的只读节点数量。有效值：0 到 5。默认值：0。
 * `mongo_list` - (必填) Mongo 节点列表。每个 Mongo 节点具有以下属性：
   * `node_class` - (必填) 节点规格。参见 [实例规格](https://www.alibabacloud.com/help/doc-detail/57141.htm)。
 
@@ -111,3 +111,13 @@ resource "alibabacloudstack_mongodb_sharding_instance" "default" {
   * `node_description` - Config Server 节点的描述。
   * `node_id` - Config Server 节点的 ID。
   * `node_storage` - Config Server 节点的存储容量。
+* `storage_engine` - 实例的存储引擎类型。
+* `instance_charge_type` - 实例的计费类型。
+* `period` - 预付费实例的订阅时长。
+* `zone_id` - 实例所在的可用区。
+* `vswitch_id` - 实例所在的 VPC 内的虚拟交换机 ID。
+* `name` - DB 实例的名称。
+* `db_instance_description` - DB 实例的描述。
+* `security_group_id` - 与实例关联的安全组 ID。
+* `tde_status` - 实例的透明数据加密状态。
+* `preferred_backup_time` - 实例的首选备份时间窗口。

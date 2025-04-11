@@ -282,36 +282,36 @@ resource "alibabacloudstack_cs_kubernetes_node_pool" "default" {
 
 支持以下参数：
 
-* `cluster_id` - (必填)  Kubernetes 集群的 ID。
-* `name` - (必填)  节点池的名称。
-* `vswitch_ids` - (必填)  节点池工作者使用的交换机。
-* `instance_types` (必填)  工作节点的实例类型。
+* `cluster_id` - (必填) Kubernetes 集群的 ID。
+* `name` - (必填) 节点池的名称。
+* `vswitch_ids` - (必填) 节点池工作者使用的交换机。
+* `instance_types` (必填) 工作节点的实例类型。
 * `node_count` (可选) 节点池的工作节点数量。
-* `password` - (必填, 敏感) SSH 登录集群节点的密码。您必须指定 `password` `key_name` `kms_encrypted_password` 字段之一。
-* `key_name` - (必填)  SSH 登录集群节点的密钥对，您必须先创建它。您必须指定 `password` `key_name` `kms_encrypted_password` 字段之一。只有托管节点池支持 `key_name`。
-* `kms_encrypted_password` - (必填)  用于加密 cs kubernetes 密码的 KMS。您必须指定 `password` `key_name` `kms_encrypted_password` 字段之一。
+* `password` - (必填, 敏感) SSH 登录集群节点的密码。您必须指定 `password`、`key_name` 或 `kms_encrypted_password` 字段之一。
+* `key_name` - (必填) SSH 登录集群节点的密钥对，您必须先创建它。您必须指定 `password`、`key_name` 或 `kms_encrypted_password` 字段之一。只有托管节点池支持 `key_name`。
+* `kms_encrypted_password` - (必填) 用于加密 cs kubernetes 密码的 KMS。您必须指定 `password`、`key_name` 或 `kms_encrypted_password` 字段之一。
 * `system_disk_category` - (可选) 工作节点的系统磁盘类别。其有效值为 `cloud_ssd` 和 `cloud_efficiency`。默认为 `cloud_efficiency`。
 * `system_disk_size` - (可选) 工作节点的系统磁盘大小。其有效值范围 [40~500] GB。默认为 `120`。
 * `data_disks` - (可选) 工作节点的数据磁盘配置，例如磁盘类型和磁盘大小。 
   * `category` - 数据磁盘的类型。有效值：`cloud`, `cloud_efficiency`, `cloud_ssd` 和 `cloud_essd`。
   * `size` - 数据磁盘的大小，其有效值范围 [40~32768] GB。默认为 `40`。
   * `encrypted` - 指定是否加密数据磁盘。有效值：true 和 false。默认为 `false`。
-* `platform` - (可选) 平台。其中之一 `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`。如果您选择 `Windows` 或 `WindowsCore`，则需要提供 `passord`。
+* `platform` - (可选) 平台。其中之一 `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`。如果您选择 `Windows` 或 `WindowsCore`，则需要提供 `password`。
 * `image_id` - (可选) 自定义镜像支持。必须基于 CentOS7 或 AliyunLinux2。
 * `node_name_mode` - (可选) 每个节点名由前缀、IP 子串和后缀组成。例如 "customized,aliyun.com,5,test"，如果节点 IP 地址是 192.168.0.55，前缀是 aliyun.com，IP 子串长度是 5，后缀是 test，那么节点名将是 aliyun.com00055test。
 * `user_data` - (可选) Windows 实例支持批处理和 PowerShell 脚本。如果您的脚本文件大于 1 KB，我们建议您将脚本上传到对象存储服务 (OSS)，并通过您的 OSS 存储桶的内部端点拉取它。
 * `tags` - (可选) 分配给资源的标签映射。最终将应用于 ECS 实例。
-* `labels` - (可选) 分配给节点的 Kubernetes 标签列表。仅通过 ACK API 应用的标签由该参数管理。
+* `labels` - (可选) 分配给节点的 Kubernetes 标签列表。仅通过 ACK API 庻用的标签由该参数管理。
   * `key` - 标签键。
   * `value` - 标签值。
 * `taints` - (可选) 分配给节点的 Kubernetes 污点列表。
   * `effect` - (可选) 调度策略。
-  * `key` - (必填)  污点的键。
+  * `key` - (必填) 污点的键。
   * `value` - (可选) 污点的值。
 * `scaling_policy` - (可选) 缩放模式。有效值：`release`, `recycle`，默认为 `release`。标准模式(release): 基于请求创建和释放 ECS 实例。Swift 模式(recycle): 基于需求创建、停止和重新启动 ECS 实例。当没有可用的已停止 ECS 实例时，才会创建新的 ECS 实例。此模式进一步加速了缩放过程。除了使用本地存储的 ECS 实例外，当 ECS 实例停止时，您只需支付存储空间费用。
 * `scaling_config` - (可选) 自动扩展节点池配置。启用自动扩展后，节点池中的节点将被标记为 `k8s.aliyun.com=true`，以防止诸如 coredns、metrics-servers 等系统 Pod 被调度到弹性节点上，并防止节点缩减导致业务异常。
-  * `min_size` - (必填)  自动伸缩组中的最小实例数，其有效值范围 [0~1000]。
-  * `max_size` - (必填)  自动伸缩组中的最大实例数，其有效值范围 [0~1000]。`max_size` 必须大于 `min_size`。
+  * `min_size` - (必填) 自动伸缩组中的最小实例数，其有效值范围 [0~1000]。
+  * `max_size` - (必填) 自动伸缩组中的最大实例数，其有效值范围 [0~1000]。`max_size` 必须大于 `min_size`。
   * `type` - (可选) 实例分类，非必填。有效值：`cpu`, `gpu`, `gpushare` 和 `spot`。默认值为 `cpu`。实际实例类型由 `instance_types` 决定。
   * `is_bond_eip` - (可选) 是否为实例绑定 EIP，默认为 `false`。
   * `eip_internet_charge_type` - (可选) EIP 计费类型。`PayByBandwidth`: 按固定带宽计费。`PayByTraffic`: 按使用流量计费。默认为 `PayByBandwidth`。与 `internet_charge_type` 冲突，EIP 和公网 IP 只能选择一个。 
@@ -348,7 +348,7 @@ tags {
 }
 ```
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
@@ -358,7 +358,7 @@ tags {
 * `vswitch_ids` - 节点池工作者使用的交换机。
 * `image_id` - 节点池工作者使用的镜像。
 * `security_group_id` - 当前集群工作节点所在的安全组 ID。
-* `scaling_group_id` - (从 1.105.0 开始可用) 伸缩组 ID。
+* `scaling_group_id` - 伸缩组 ID。
 * `system_disk_performance_level` - 节点要使用的系统磁盘的性能级别 (PL)。此参数仅对 ESSD 生效。其有效值为 {"PL0", "PL1", "PL2", "PL3"}。
 * `platform` - 平台。其中之一 `AliyunLinux`, `Windows`, `CentOS`, `WindowsCore`。
 * `instance_charge_type` - 节点支付类型。有效值：`PostPaid`, `PrePaid`。
@@ -366,3 +366,4 @@ tags {
 * `internet_charge_type` - 网络使用计费方式。有效值 `PayByBandwidth` 和 `PayByTraffic`。
 * `internet_max_bandwidth_out` - 公网最大出带宽。单位：Mbit/s。有效值：0 到 100。
 * `spot_strategy` - 按量付费实例的抢占策略。有效值 `SpotWithPriceLimit`。
+* `node_count` - 节点池的工作节点数量。

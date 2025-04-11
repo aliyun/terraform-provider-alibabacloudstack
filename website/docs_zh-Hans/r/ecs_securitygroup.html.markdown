@@ -74,7 +74,7 @@ resource "alibabacloudstack_security_group" "tagged_group" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -82,9 +82,9 @@ resource "alibabacloudstack_security_group" "tagged_group" {
   
 * `description` - (可选) 安全组的描述。长度必须为2到256个字符，不能以 `http://` 或 `https://` 开头。默认情况下，此参数为空。
 
-* `vpc_id` - (可选，强制更新)要创建安全组的VPC的ID。如果要创建VPC类型的安全组，则此参数是必填的。在支持经典网络的区域中，您可以不指定 `vpc_id` 来创建经典网络类型的安全组。
+* `vpc_id` - (可选，强制更新) 要创建安全组的VPC的ID。如果要创建VPC类型的安全组，则此参数是必填的。在支持经典网络的区域中，您可以不指定 `vpc_id` 来创建经典网络类型的安全组。
 
-* `type` - (可选，强制更新)安全组的类型。有效值：
+* `type` - (可选，强制更新) 安全组的类型。有效值：
   * `normal`: 标准安全组(默认)。
   * `enterprise`: 企业级安全组。
 
@@ -95,7 +95,7 @@ resource "alibabacloudstack_security_group" "tagged_group" {
 
 * `tags` - (可选) 要分配给资源的标签映射。每个标签由键值对组成。标签键必须在资源内唯一。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 

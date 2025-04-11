@@ -49,18 +49,19 @@ resource "alibabacloudstack_ots_instance_attachment" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
-  * `instance_name` - (必填, 变更时重建) OTS实例的名称。这必须与现有的OTS实例名称匹配。
-  * `vpc_name` - (必填, 变更时重建) 要附加到OTS实例的VPC的名称。这用于标识目的。
-  * `vswitch_id` - (必填, 变更时重建) 要附加到OTS实例的交换机的ID。这必须在与`vpc_name`指定的相同VPC内。
+* `instance_name` - (必填, 变更时重建) OTS实例的名称。这必须与现有的OTS实例名称匹配。
+* `vpc_name` - (必填, 变更时重建) 要附加到OTS实例的VPC的名称。这用于标识目的。
+* `vswitch_id` - (必填, 变更时重建) 要附加到OTS实例的交换机的ID。这必须在与`vpc_name`指定的相同VPC内。
+* `vpc_id` - (可选, 变更时重建) 要附加到OTS实例的VPC的ID。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
-  * `id` - 资源ID。其值与`instance_name`相同。
-  * `instance_name` - OTS实例的名称。
-  * `vpc_name` - 附加到OTS实例的VPC的名称。
-  * `vswitch_id` - 附加到OTS实例的交换机的ID。
-  * `vpc_id` - 附加到OTS实例的VPC的ID。此属性是从`vswitch_id`自动派生的。
+* `id` - 资源ID。其值与`instance_name`相同。
+* `instance_name` - OTS实例的名称。
+* `vpc_name` - 附加到OTS实例的VPC的名称。
+* `vswitch_id` - 附加到OTS实例的交换机的ID。
+* `vpc_id` - 附加到OTS实例的VPC的ID。此属性是从`vswitch_id`自动派生的。

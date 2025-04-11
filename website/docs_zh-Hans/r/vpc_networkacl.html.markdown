@@ -123,6 +123,8 @@ resource "alibabacloudstack_network_acl" "default" {
 
 * `id` - 网络ACL实例的ID。
 * `status` - 网络ACL的状态。
-* `egress_acl_entries` - 出方向规则信息。
-* `ingress_acl_entries` - 入方向规则信息。
+* `egress_acl_entries` - 出方向规则信息。包含出站规则的具体配置和优先级。
+* `ingress_acl_entries` - 入方向规则信息。包含入站规则的具体配置和优先级。
 * `network_acl_name` - 网络ACL的名称。
+* `name` - 已废弃字段，建议使用`network_acl_name`代替。
+* `vpc_id` - (计算得出) - 关联的VPC的ID。

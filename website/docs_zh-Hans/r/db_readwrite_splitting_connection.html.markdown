@@ -69,7 +69,7 @@ resource "alibabacloudstack_db_read_write_splitting_connection" "default" {
 
 -> **注意:** 资源 `alibabacloudstack_db_read_write_splitting_connection` 应该在 `alibabacloudstack_db_readonly_instance` 创建之后创建，因此需要使用 `depends_on` 语句。
 
-## 参数参考
+## 参数说明
 
 以下是支持的参数：
 
@@ -81,7 +81,7 @@ resource "alibabacloudstack_db_read_write_splitting_connection" "default" {
 * `weight` - (可选) 读权重分配。读权重以100为步长递增，最大为10,000。格式如下：{"Instanceid":"Weight","Instanceid":"Weight"}。当 `distribution_type` 设置为 Custom 时，此参数必须设置。
 * `connection_string` - (可选) 连接实例字符串。
 
-## 属性参考
+## 属性说明
 
 以下属性将被导出：
 

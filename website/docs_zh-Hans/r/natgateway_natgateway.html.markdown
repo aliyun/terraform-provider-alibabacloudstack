@@ -84,3 +84,4 @@ resource "alibabacloudstack_nat_gateway" "default" {
   * `bandwidth_package_ids` - 带宽包ID的列表，以逗号分隔。
   * `snat_table_ids` - NAT网关自动创建的SNAT表的ID。
   * `forward_table_ids` - NAT网关自动创建的目的地网络地址转换(DNAT)表的ID。
+  * `bandwidth_packages` - 与NAT网关关联的带宽包详细信息。

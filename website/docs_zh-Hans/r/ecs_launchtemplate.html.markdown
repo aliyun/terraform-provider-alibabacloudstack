@@ -136,18 +136,18 @@ resource "alibabacloudstack_launch_template" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `name` - (选填, 变更时重建) - 模板的名称。必须以英文字母(大写或小写)开头，并可以包含数字、句点 (.)、冒号 (:)、下划线 (_) 和连字符 (-)。长度应在 2 到 128 个字符之间。不能以 "http://" 或 "https://" 开头。
-* `launch_template_name` - (选填, 变更时重建) - 模板名称。
-* `description` - (选填) - 实例描述。长度为2~256个英文或中文字符，不能以`http://`或`https://`开头。
-* `host_name` - (选填) - 云服务器的主机名。
-  - 半角句号(.)和短划线(-)不能作为首尾字符，更不能连续使用。
-  - Windows实例：字符长度为2~15，不支持半角句号(.)，不能全是数字。允许大小写英文字母、数字和短划线(-)。
-  - 其他类型实例(Linux等)：字符长度为2~64，支持多个半角句号(.)，半角句号之间为一段，每段允许大小写英文字母、数字和短划线(-)。
-* `image_id` - (选填) - 镜像ID。
+* `launch_template_name` - (选填, 变更时重建) - 启动模板的名称。
+* `description` - (选填) - 启动模板版本1的描述。长度为2~256个英文或中文字符，不能以`http://`或`https://`开头。默认值为空。
+* `host_name` - (选填) - 实例的主机名。
+  - 半角句号 (.) 和短划线 (-) 不能作为首尾字符，更不能连续使用。
+  - Windows 实例：字符长度为 2~15，不支持半角句号 (.)，不能全是数字。允许大小写英文字母、数字和短划线 (-)。
+  - 其他类型实例 (Linux 等)：字符长度为 2~64，支持多个半角句号 (.)，半角句号之间为一段，每段允许大小写英文字母、数字和短划线 (-)。
+* `image_id` - (选填) - 创建实例所使用的镜像 ID。
 * `image_owner_alias` - (选填) - 镜像来源。有效值：
   - `system`: 阿里云提供的公共镜像。
   - `self`: 您创建的自定义镜像。
@@ -156,24 +156,22 @@ resource "alibabacloudstack_launch_template" "default" {
 * `instance_charge_type` - (选填) - 实例的计费方式。有效值：
   - `PrePaid`: 包年包月。
   - `PostPaid`: 按量付费。
-* `instance_name` - (选填) - 实例名称。长度为2~128个英文或中文字符。必须以大小字母或中文开头，不能以`http://`或`https://`开头。可以包含数字、半角冒号(:)、下划线(_)或者短划线(-)。
+* `instance_name` - (选填) - 实例名称。长度为 2~128 个英文或中文字符。必须以大小写字母或中文开头，不能以 `http://` 或 `https://` 开头。可以包含数字、半角冒号 (:)、下划线 (_) 或者短划线 (-)。
 * `instance_type` - (选填) - 实例规格。您可以使用 `data alibabacloudstack_instance_types` 数据源来获取最新的实例类型列表。
 * `internet_charge_type` - (选填) - 网络计费方式。有效值：
   - `PayByBandwidth`: 按固定带宽计费。
   - `PayByTraffic`: 按使用流量计费。
-* `internet_max_bandwidth_in` - (选填) - 最大入网带宽，单位为 Mbit/s。取值范围：
-  - 当所购公网出带宽小于等于10 Mbit/s时：1~10，默认为10。
-  - 当所购公网出带宽大于10 Mbit/s时：1~`InternetMaxBandwidthOut`的取值，默认为`InternetMaxBandwidthOut`的取值。
-* `internet_max_bandwidth_out` - (选填) - 最大出网带宽，单位为 Mbit/s。取值范围为0~100。
-* `io_optimized` - (选填) - 是否为I/O优化实例。有效值：
-  - `none`: 非I/O优化。
-  - `optimized`: I/O优化。
-* `key_pair_name` - (选填) - 密钥对名称。对于Windows实例将被忽略。
+* `internet_max_bandwidth_in` - (选填) - 最大入网带宽，单位为 Mbit/s。取值范围为 [1, 200]。
+* `internet_max_bandwidth_out` - (选填) - 最大出网带宽，单位为 Mbit/s。取值范围为 [0, 100]。
+* `io_optimized` - (选填) - 是否为 I/O 优化实例。有效值：
+  - `none`: 非 I/O 优化。
+  - `optimized`: I/O 优化。
+* `key_pair_name` - (选填) - 密钥对名称。对于 Windows 实例将被忽略。
 * `network_type` - (选填) - 实例的网络类型。有效值：`Classic`, `VPC`。
-* `ram_role_name` - (选填) - 分配给实例的RAM角色名称。
-* `resource_group_id` - (选填) - 实例所属的资源组ID。
+* `ram_role_name` - (选填) - 分配给实例的 RAM 角色名称。
+* `resource_group_id` - (选填) - 实例所属的资源组 ID。
 * `security_enhancement_strategy` - (选填) - 是否激活安全增强功能。有效值：`Active`, `Deactive`。
-* `security_group_id` - (选填) - 安全组ID。
+* `security_group_id` - (选填) - 安全组 ID。
 * `spot_price_limit` - (选填) - 竞价实例的最大小时价格。支持最多三位小数。
 * `spot_strategy` - (选填) - 按量付费实例的竞价策略。有效值：
   - `NoSpot`: 普通按量付费实例。
@@ -182,13 +180,13 @@ resource "alibabacloudstack_launch_template" "default" {
 * `system_disk_category` - (选填) - 系统盘的类别。有效值：
   - `cloud`: 普通云盘。
   - `cloud_efficiency`: 高效云盘。
-  - `cloud_ssd`: SSD云盘。
-  - `ephemeral_ssd`: 本地SSD盘。
-  - `cloud_essd`: ESSD云盘。
+  - `cloud_ssd`: SSD 云盘。
+  - `ephemeral_ssd`: 本地 SSD 盘。
+  - `cloud_essd`: ESSD 云盘。
 * `system_disk_description` - (选填) - 系统盘的描述。
 * `system_disk_name` - (选填) - 系统盘的名称。
-* `system_disk_size` - (选填) - 系统盘大小，单位为 GB。取值范围：[20, 500]。
-* `userdata` - (选填) - 实例的用户数据，Base64编码。原始数据大小不能超过 16 KB。
+* `system_disk_size` - (选填) - 系统盘大小，单位为 GB。取值范围为 [20, 500]。
+* `userdata` - (选填) - 实例的用户数据，Base64 编码。原始数据大小不能超过 16 KB。
 * `vswitch_id` - (选填) - 创建 VPC 类型实例时的交换机 ID。
 * `vpc_id` - (选填) - VPC ID。
 * `zone_id` - (选填) - 实例所在的可用区 ID。
@@ -200,7 +198,7 @@ resource "alibabacloudstack_launch_template" "default" {
   * `vswitch_id` - (选填) - 网络接口的交换机 ID。
 * `data_disks` - (选填) - 随实例一起创建的数据盘列表。
   * `name` - (选填) - 数据盘的名称。
-  * `size` - (必填)  - 数据盘的大小，单位为 GB。
+  * `size` - (必填) - 数据盘的大小，单位为 GB。
     - `cloud`: [5, 2000]
     - `cloud_efficiency`: [20, 32768]
     - `cloud_ssd`: [20, 32768]
@@ -214,8 +212,10 @@ resource "alibabacloudstack_launch_template" "default" {
 * `tags` - (选填) - 要分配给资源的标签映射。
   - Key: 最多 64 个字符长度。不能以 "aliyun", "acs:", "http://", 或 "https://" 开头。
   - Value: 最多 128 个字符长度。可以是空字符串。
+* `auto_release_time` - (选填) - 实例的定时释放时间。
+* `user_data` - (选填) - 实例的用户数据，Base64 编码。原始数据大小不能超过 16 KB。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
@@ -223,3 +223,4 @@ resource "alibabacloudstack_launch_template" "default" {
 * `launch_template_name` - 启动模板的名称。
 * `internet_max_bandwidth_in` - 最大公网入方向带宽，单位为 Mbit/s。
 * `internet_max_bandwidth_out` - 最大公网出方向带宽，单位为 Mbit/s。
+* `name` - (计算后返回) 启动模板的名称。

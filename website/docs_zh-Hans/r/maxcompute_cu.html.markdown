@@ -23,18 +23,18 @@ resource "alibabacloudstack_maxcompute_cu" "example" {
    cluster_name = "HYBRIDODPSCLUSTER-A-20210520-07B0"
 }
 ```
-## 参数参考
+
+## 参数说明
 
 支持以下参数：
-* `id` - (必填，变更时重建) MaxCompute CU 的 ID。
-* `cu_name` - (必填，变更时重建) MaxCompute CU 的名称。 
-* `cu_num` - (必填，变更时重建) MaxCompute CU 的 CU 数量。必须至少为 1。 
-* `cluster_name` - (必填，变更时重建) MaxCompute CU 的集群名称。
+* `cu_name` - (必填，变更时重建，1.110.0+可用) MaxCompute CU 的名称。必须为 3 到 27 个字符。
+* `cu_num` - (必填，变更时重建) MaxCompute CU 的 CU 数量。必须至少为 1。
+* `cluster_name` - (必填，变更时重建) MaxCompute CU 所属的集群名称。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
-* `id` - MaxCompute CU 的 ID。 
+* `id` - MaxCompute CU 的 ID。
 
 ## 导入
 

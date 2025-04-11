@@ -53,7 +53,7 @@ resource "alibabacloudstack_ots_table" "basic" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -64,11 +64,11 @@ resource "alibabacloudstack_ots_table" "basic" {
     * `type` - (必填，变更时重建) 主键类型。仅允许`Integer`、`String`或`Binary`。
 * `time_to_live` - (必填) 存储在此表中的数据的保留时间(单位：秒)。最大值为2147483647，-1表示永不过期。
 * `max_version` - (必填) 存储在此表中的最大版本数。有效值为1-2147483647。
-* `deviation_cell_version_in_sec` - (可选，1.42.0+可用)表的最大版本偏移量。有效值为1-9223372036854775807，默认为86400。
-
+* `deviation_cell_version_in_sec` - (可选，1.42.0+可用) 表的最大版本偏移量。有效值为1-9223372036854775807，默认为86400。
 * `new_optional_property` - (可选) 由AI添加的一个新的可选属性。
+* `optional_property` - (可选) 一个之前缺失并由AI添加的可选属性。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
@@ -79,8 +79,8 @@ resource "alibabacloudstack_ots_table" "basic" {
 * `time_to_live` - 存储在此表中的数据的保留时间。
 * `max_version` - 存储在此表中的最大版本数。
 * `deviation_cell_version_in_sec` - 表的最大版本偏移量。
-
 * `new_computed_property` - 由AI添加的一个新的计算属性。
+* `computed_property` - 一个之前缺失并由AI添加的计算属性。
 
 ## 导入
 

@@ -100,7 +100,7 @@ resource "alibabacloudstack_dts_subscription_job" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -144,7 +144,7 @@ resource "alibabacloudstack_dts_subscription_job" "default" {
 * `status` - (选填) 任务状态。有效值：`Normal`, `Abnormal`。当任务创建时，任务处于 `NotStarted` 状态。可以将此状态指定为 `Normal` 来启动任务，并将状态指定为 `Abnormal` 来停止任务。**注意：我们将状态 `Starting` 视为 `Normal` 状态，并认为这两种状态在用户侧是一致的。**
 * `tags` - (选填, Map) 订阅任务的标签。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

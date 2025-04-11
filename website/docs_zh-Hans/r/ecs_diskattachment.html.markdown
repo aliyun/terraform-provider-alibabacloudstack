@@ -119,13 +119,15 @@ resource "alibabacloudstack_ecs_diskattachment" "default" {
 ## 参数参考
 
 支持以下参数：
-  * `instance_id` - (必填, 变更时重建) - 目标 ECS 实例的 ID。
-  * `disk_id` - (必填, 变更时重建) - 待挂载的云盘 ID。云盘(`DiskId`)和实例(`InstanceId`)必须在同一个可用区中。支持挂载数据盘和系统盘，相关约束条件请参见上文接口说明章节。
-  * `device_name` - (选填, 变更时重建) - 暴露给实例的设备名称。它将由系统根据默认顺序从 `/dev/xvdb` 到 `/dev/xvdz` 自动分配。如果指定，则必须与实例上的可用设备名称之一匹配。
 
-## 属性参考
+* `instance_id` - (必填, 变更时重建) - 目标 ECS 实例的 ID。
+* `disk_id` - (必填, 变更时重建) - 待挂载的云盘 ID。云盘 (`DiskId`) 和实例 (`InstanceId`) 必须位于同一可用区。支持挂载数据盘和系统盘，相关约束条件请参见上文接口说明章节。
+* `device_name` - (选填, 变更时重建) - 暴露给实例的设备名称。系统会根据默认顺序从 `/dev/xvdb` 到 `/dev/xvdz` 自动分配设备名称。如果指定，则必须与实例上的可用设备名称之一匹配。
+
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
-  * `instance_id` - 实例的 ID。
-  * `disk_id` - 磁盘的 ID。
-  * `device_name` - 暴露给实例的设备名称。这是实际分配给实例的设备名称，可能与配置中的 `device_name` 参数一致或由系统自动分配。
+
+* `instance_id` - 实例的 ID。
+* `disk_id` - 磁盘的 ID。
+* `device_name` - 暴露给实例的设备名称。这是实际分配给实例的设备名称，可能与配置中的 `device_name` 参数一致，也可能由系统自动分配。

@@ -31,16 +31,18 @@ output "alibabacloudstack_kms_ciphertext" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `plaintext` - (必选, 变更时重建) 要加密的明文，必须以 Base64 编码。
-* `key_id` - (必选, 变更时重建) CMK 的全局唯一 ID。
+* `plaintext` - (必选) 要加密的明文，必须以 Base64 编码。
+* `key_id` - (必选) CMK 的全局唯一 ID。
 * `encryption_context` - (可选) 加密上下文。如果你在此处指定此参数，则在调用 Decrypt API 操作时也需要提供它。
+* `sensitive` - (必选) 表示该属性是否为敏感信息。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
 * `ciphertext_blob` - 使用主 CMK 版本加密的数据密钥的密文。
+* `sensitive` - 自动计算的属性，表示该属性是否为敏感信息。

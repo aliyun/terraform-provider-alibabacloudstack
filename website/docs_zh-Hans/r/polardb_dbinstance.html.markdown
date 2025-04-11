@@ -64,15 +64,15 @@ resource "alibabacloudstack_polardb_dbinstance" "default" {
   * `zone_id_slave2` - (选填) - 第二从实例所在的可用区ID。
   * `tde_status` - (选填) - 实例的透明数据加密(TDE)状态。
   * `enable_ssl` - (选填, 变更时重建) - 是否为实例启用SSL。
-  * `storage_type` - (选填, 变更时重建) - 实例的存储类型。有效值：* **local_ssd**, **ephemeral_ssd**: 本地SSD磁盘.* **cloud_ssd**: SSD磁盘.* **cloud_essd**: ESSD云盘。
+  * `storage_type` - (选填, 变更时重建) - 字段`storage_type`已被废弃，将在未来的版本中移除，请改用新字段`db_instance_storage_type`。
   * `db_instance_storage_type` - (选填, 变更时重建) - 实例储存类型，取值：* **local_ssd**、**ephemeral_ssd**：本地SSD盘。* **cloud_ssd**：SSD云盘。* **cloud_essd**：ESSD云盘。
   * `encryption_key` - (选填) - 同地域内的云盘加密的密钥ID。传入此参数表示开启云盘加密(开启后无法关闭)，并且需要传入**RoleARN**。您可以在密钥管理服务控制台查看密钥ID，也可以创建新的密钥。详情请参见[创建密钥](~~181610~~)。
   * `encryption` - (选填, 变更时重建) - 是否为实例启用加密。
-  * `instance_type` - (选填) - 实例类型。
+  * `instance_type` - (选填) - 字段`instance_type`已被废弃，将在未来的版本中移除，请改用新字段`db_instance_class`。
   * `db_instance_class` - (选填) - 实例规格，详情请参见[实例规格表](~~26312~~)。
-  * `instance_storage` - (选填) - 实例的存储容量。
+  * `instance_storage` - (选填) - 字段`instance_storage`已被废弃，将在未来的版本中移除，请改用新字段`db_instance_storage`。
   * `db_instance_storage` - (选填) - 数据库实例的存储容量。
-  * `instance_charge_type` - (选填) - 实例的计费类型。
+  * `instance_charge_type` - (选填) - 字段`instance_charge_type`已被废弃，将在未来的版本中移除，请改用新字段`payment_type`。
   * `payment_type` - (选填) - 实例付费方式，取值：**PayAsYouGo**：按量付费。**Subscription**：包年包月。**Serverless**：Serverless付费类型，仅支持MySQL实例。
   * `period` - (选填) - 指定预付费实例为包年或者包月类型，取值：Year：包年。Month：包月。
   * `monitoring_period` - (选填) - 实例的监控周期。
@@ -80,7 +80,7 @@ resource "alibabacloudstack_polardb_dbinstance" "default" {
   * `auto_renew_period` - (选填) - 实例的自动续费周期。
   * `zone_id` - (选填, 变更时重建) - 实例所在的可用区ID。
   * `vswitch_id` - (选填, 变更时重建) - 实例的VSwitch ID。
-  * `instance_name` - (选填) - 实例名称。
+  * `instance_name` - (选填) - 字段`instance_name`已被废弃，将在未来的版本中移除，请改用新字段`db_instance_description`。
   * `db_instance_description` - (选填) - 数据库实例的描述。
   * `security_ip_mode` - (选填) - 实例的安全IP模式。
   * `maintain_time` - (选填) - 实例可维护时间段，是UTC时间，+8小时才是控制台上显示的可维护时间段。

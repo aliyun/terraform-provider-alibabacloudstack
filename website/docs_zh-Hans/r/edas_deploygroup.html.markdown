@@ -45,7 +45,7 @@ resource "alibabacloudstack_edas_deploy_group" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -56,7 +56,7 @@ resource "alibabacloudstack_edas_deploy_group" "default" {
   - `1`：流量管理未启用灰度。
   - `2`：流量管理启用灰度。此选项允许使用分阶段发布和流量管理功能。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

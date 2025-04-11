@@ -106,13 +106,13 @@ resource "alibabacloudstack_ess_attachment" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `scaling_group_id` - (必填) 伸缩组ID。
-* `instance_ids` - (必填) 要附加到伸缩组的ECS实例ID。最多可以输入20个ID。
-* `force` - (可选) 是否强制删除“AutoCreated”ECS实例以释放伸缩组容量“MaxSize”，以便附加ECS实例。默认为false。
+* `instance_ids` - (必填) 要附加到伸缩组的ECS实例ID列表。最多可以输入20个ID。
+* `force` - (可选) 是否强制删除“AutoCreated”ECS实例以释放伸缩组容量“MaxSize”，以便附加ECS实例。默认为`false`。
 
 -> **NOTE:** “AutoCreated”ECS实例在从伸缩组中移除后将被删除，但“Attached”不会被删除。
 
@@ -124,13 +124,13 @@ resource "alibabacloudstack_ess_attachment" "default" {
 - 要附加的ECS实例尚未附加到其他伸缩组。
 - 要附加的ECS实例支持包年包月和按量付费两种计费方式。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
-* `id` - (必填，ForceNew)ESS附件资源ID。
-* `instance_ids` - (必填) “Attached”ECS实例的ID列表。
-* `force` - 是否删除“AutoCreated”ECS实例。
+* `id` - (必填，ForceNew) ESS附件资源ID。
+* `instance_ids` - (必填) 已附加到伸缩组的“Attached”ECS实例的ID列表。
+* `force` - 是否强制删除“AutoCreated”ECS实例以释放伸缩组容量“MaxSize”。
 
 ## 导入
 

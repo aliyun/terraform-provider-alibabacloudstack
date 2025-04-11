@@ -48,15 +48,17 @@ resource "alibabacloudstack_vpc_routetableattachment" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `route_table_id` - (必填，变更时重建) 要绑定到交换机的路由表的ID。此字段创建后无法修改。
 * `vswitch_id` - (必填，变更时重建) 要绑定路由表的交换机的ID。此字段创建后无法修改。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 路由表绑定的唯一标识符。格式为 `<route_table_id>:<vswitch_id>`。
+* `route_table_id` - (计算得出) 与绑定关联的路由表的ID。
+* `vswitch_id` - (计算得出) 与绑定关联的交换机的ID。

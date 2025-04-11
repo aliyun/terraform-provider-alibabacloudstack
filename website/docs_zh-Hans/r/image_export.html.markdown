@@ -27,13 +27,13 @@ resource "alibabacloudstack_image_export" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下是支持的参数：
 
 * `image_id` - (必填，变更时重建) 源镜像ID。
 * `oss_bucket` - (必填，变更时重建) 保存导出文件的OSS Bucket名称。
-* `oss_prefix` - (可选，变更时重建) OSS Object的前缀。可以由数字或字母组成，字符长度为1 ~ 30。 
+* `oss_prefix` - (可选，变更时重建) OSS Object的前缀。可以由数字或字母组成，字符长度为1 ~ 30。
 
 ## 超时时间
 
@@ -41,8 +41,7 @@ resource "alibabacloudstack_image_export" "default" {
 
 * `create` - (默认20分钟)用于导出镜像(直到其达到初始 `Available` 状态)。
 
-
-## 属性参考
+## 属性说明
 
 以下属性将会被导出：
 

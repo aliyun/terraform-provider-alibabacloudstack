@@ -94,7 +94,7 @@ resource "alibabacloudstack_edas_application_scale" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
   * `ecu_info` - (强制更新) - 应用程序实例的ECU(弹性计算单元)信息列表。此参数指定将用于扩展应用程序的ECUs。
@@ -102,7 +102,7 @@ resource "alibabacloudstack_edas_application_scale" "default" {
   * `deploy_group` - (必填，强制更新) - 需要扩容的应用实例分组。获取应用实例分组，请参见 [QueryApplicationStatus](~~149394~~)。
   * `force_status` - (选填，强制更新) - 强制状态更新标志。此参数可用于在扩展操作期间强制执行特定的状态更改。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
   * `ecu_info` - 应用程序实例的ECU(弹性计算单元)信息列表。此参数指定将用于扩展应用程序的ECUs。

@@ -61,10 +61,11 @@ resource "alibabacloudstack_oos_execution" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
+* `template_name` - (必填, 变更时重建) 执行模板的名称。这是要执行的OOS模板的标识符。
 * `description` - (选填, 变更时重建) OOS Execution的简要描述。这有助于识别执行的目的或上下文。
 * `loop_mode` - (选填, 变更时重建) 指定执行的循环模式。这决定了模板中的任务是并行还是顺序执行。
 * `mode` - (选填, 变更时重建) 指定执行模式。有效值包括：
@@ -75,14 +76,15 @@ resource "alibabacloudstack_oos_execution" "default" {
 * `parameters` - (选填, 变更时重建) JSON格式的字符串，包含OOS模板所需的参数。这些参数用于自定义模板在执行期间的行为。默认值为 `{}`。
 * `parent_execution_id` - (选填, 变更时重建) 如果此执行是较大工作流或子任务的一部分，则为父执行的ID。
 * `safety_check` - (选填, 变更时重建) 指定执行的安全检查模式。这确保在继续执行之前满足某些条件。
-* `template_content` - (选填, 变更时重建) OOS模板的原始内容。当从自定义模板而不是现有模板创建执行时，这非常有用。
-* `template_name` - (必填, 变更时重建) 执行模板的名称。这是要执行的OOS模板的标识符。
 * `template_version` - (选填, 变更时重建) 正在执行的OOS模板的版本。如果不指定，将使用模板的最新版本。
+* `template_content` - (选填, 变更时重建) OOS模板的原始内容。当从自定义模板而不是现有模板创建执行时，这非常有用。
+* `ram_role` - (选填, 变更时重建) 指定与执行关联的RAM角色，该角色授予任务执行所需的权限。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
+* `id` - OOS Execution的唯一标识符。
 * `counters` - 与执行相关的计数器摘要，例如已执行、成功或失败的任务数量。
 * `create_date` - 表示执行创建时间的时间戳。
 * `end_date` - 表示执行完成时间的时间戳。
@@ -96,3 +98,4 @@ resource "alibabacloudstack_oos_execution" "default" {
 * `template_id` - 用于执行的OOS模板的唯一标识符。
 * `template_version` - 用于执行的OOS模板的具体版本号。
 * `update_date` - 表示执行最后一次更新时间的时间戳。
+* `safety_check` - 指定执行的安全检查模式。这确保在继续执行之前满足某些条件。

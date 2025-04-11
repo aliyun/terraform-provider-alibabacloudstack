@@ -59,7 +59,7 @@ resource "alibabacloudstack_ros_template" "from_url" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -69,7 +69,7 @@ resource "alibabacloudstack_ros_template" "from_url" {
 * `template_url` - (可选) 包含模板主体的文件的URL。该URL必须指向位于Web服务器(HTTP或HTTPS)或阿里云OSS上的存储空间(例如，`oss://ros/stack-policy/demo`，`oss://ros/stack-policy/demo?RegionId=cn-hangzhou`)。模板的最大长度为524,288字节。如果未指定OSS区域，则默认使用接口的 `RegionId`。只能指定 `template_body` 或 `template_url` 中的一个。
 * `tags` - (可选) 要分配给资源的标签映射。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 

@@ -64,6 +64,7 @@ resource "alibabacloudstack_ecs_reservedinstance" "default" {
 * `description` - (选填) - 预留实例描述。长度为 2 到 256 个英文或中文字符。不能以 `http://` 或 `https://` 开头。
 * `resource_group_id` - (选填, 变更时重建) - 资源组 ID。
 * `reserved_instance_id` - (选填, 变更时重建) - 预留实例的 ID。
+* `name` - (选填, 已弃用) - 预留实例的名称。
 
 ### 从配置中移除 alibabacloudstack_ecs_reservedinstance
 

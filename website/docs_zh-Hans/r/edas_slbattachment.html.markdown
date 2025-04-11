@@ -29,29 +29,29 @@ resource "alibabacloudstack_edas_slbattachment" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `app_id` - (必填，变更时重建) 应用的ID。
-* `slb_id` - (必填，变更时重建) SLB的ID。
-* `slb_ip` - (必填，变更时重建) 分配给绑定负载均衡实例的IP地址。
-* `type` - (必填，变更时重建) SLB网络类型。有效值：
+* `slb_id` - (必填，变更时重建) SLB实例的ID。
+* `slb_ip` - (必填，变更时重建) 分配给绑定SLB实例的IP地址。
+* `type` - (必填，变更时重建) SLB实例的网络类型。有效值：
   * `internet`: 外网实例。
   * `intranet`: 内网实例。
-* `listener_port` - (选填，变更时重建) 绑定负载均衡实例的监听端口。
-* `vserver_group_id` - (选填，变更时重建) 与内网负载均衡实例关联的虚拟服务器(VServer)组的ID。
-* `slb_status` - (变更时重建) 负载均衡实例的运行状态。可能的值包括：
+* `listener_port` - (选填，变更时重建) 绑定SLB实例的监听端口。
+* `vserver_group_id` - (选填，变更时重建) 与内网SLB实例关联的虚拟服务器(VServer)组的ID。
+* `slb_status` - (变更时重建) SLB实例的运行状态。可能的值包括：
   * `Inactive`: 实例已停止，监听器将不监控或转发流量。
   * `Active`: 实例正在运行。实例创建后，默认状态为活动状态。
   * `Locked`: 实例被锁定，通常是由于欠费或被阿里云锁定。
   * `Expired`: 实例已过期。
-* `vswitch_id` - (变更时重建) 负载均衡实例所属的 VPC 中的交换机 ID。
+* `vswitch_id` - (变更时重建) SLB实例所属的VPC中的交换机ID。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 资源的唯一标识符，格式为 `<app_id>:<slb_id>`。
-* `slb_status` - 负载均衡实例的当前运行状态。
-* `vswitch_id` - 与负载均衡实例关联的 VPC 中的交换机 ID。
+* `slb_status` - 当前SLB实例的运行状态。
+* `vswitch_id` - 与SLB实例关联的VPC中的交换机ID。

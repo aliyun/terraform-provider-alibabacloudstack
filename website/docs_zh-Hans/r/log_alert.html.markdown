@@ -9,8 +9,8 @@ description: |-
 
 # alibabacloudstack_log_alert
 
-使用Provider配置的凭证在指定的资源集编排日志告警。
-日志告警是日志服务的一个单元，用于监控和告警用户logstore的状态信息。
+使用Provider配置的凭证在指定的资源集编排日志告警。  
+日志告警是日志服务的一个单元，用于监控和告警用户logstore的状态信息。  
 日志服务允许您基于仪表盘中的图表配置告警，实时监控服务状态。
 
 ## 示例用法
@@ -64,7 +64,7 @@ resource "alibabacloudstack_log_alert" "example" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下是支持的参数：
 
@@ -72,29 +72,29 @@ resource "alibabacloudstack_log_alert" "example" {
 * `alert_name` - (必填，变更时重建) 配置告警服务的日志存储名称。
 * `alert_displayname` - (必填) 告警显示名称。
 * `alert_description` - (可选) 告警描述。
-* `condition` - (必填) 条件表达式，例如：count> 100。
+* `condition` - (必填) 条件表达式，例如：`count > 100`。
 * `dashboard` - (必填) 与告警关联的仪表盘名称。如果不存在这样的仪表盘，Terraform 将帮助您创建一个空的仪表盘。
 * `mute_until` - (可选) 时间戳，在此之前关闭通知。
-* `throttling` - (可选) 通知间隔，默认为无间隔。支持数字+单位类型，例如60s, 1h。
-* `notify_threshold` - (可选) 通知阈值，达到触发次数后才进行通知，默认为1。
+* `throttling` - (可选) 通知间隔，默认为无间隔。支持数字+单位类型，例如 `60s`、`1h`。
+* `notify_threshold` - (可选) 通知阈值，达到触发次数后才进行通知，默认为 `1`。
 * `query_list` - (必填) 配置告警查询的多个条件。
-    * `chart_title` - (必填) 图表标题。
-    * `logstore` - (必填) 查询日志存储。
-    * `query` - (必填) 与图表对应的查询。示例：* AND aliyun。
-    * `start` - (必填) 开始时间。示例：-60s。
-    * `end` - (必填) 结束时间。示例：20s。
-    * `time_span_type` - (可选) 默认自定义。无需配置此参数。
+  * `chart_title` - (必填) 图表标题。
+  * `logstore` - (必填) 查询日志存储。
+  * `query` - (必填) 与图表对应的查询。示例：`* AND aliyun`。
+  * `start` - (必填) 开始时间。示例：`-60s`。
+  * `end` - (必填) 结束时间。示例：`20s`。
+  * `time_span_type` - (可选) 默认为 `Custom`。无需配置此参数。
 * `notification_list` - (必填) 告警通知列表。
-    * `type` - (必填) 通知类型。支持 Email, SMS, DingTalk, MessageCenter。
-    * `content` - (必填) 告警通知内容。
-    * `service_uri` - (可选) 请求地址。
-    * `mobile_list` - (可选) 短信发送的手机号码。
-    * `email_list` - (可选) 电子邮件地址列表。
-* `schedule_interval` - (可选) 执行间隔。最小60秒，例如60s, 1h。
-* `schedule_type` - (可选) 默认 FixedRate。无需配置此参数。
-* `mute_until` - (可选) 时间戳，在此之前关闭通知。此属性允许大于或等于0的值。
+  * `type` - (必填) 通知类型。支持 `Email`、`SMS`、`DingTalk`、`MessageCenter`。
+  * `content` - (必填) 告警通知内容。
+  * `service_uri` - (可选) 请求地址。
+  * `mobile_list` - (可选) 短信发送的手机号码。
+  * `email_list` - (可选) 电子邮件地址列表。
+* `schedule_interval` - (可选) 执行间隔。最小为 `60` 秒，例如 `60s`、`1h`。
+* `schedule_type` - (可选) 默认为 `FixedRate`。无需配置此参数。
+* `mute_until` - (可选) 时间戳，在此之前关闭通知。此属性允许大于或等于 `0` 的值。
 
-## 属性参考
+## 属性说明
 
 以下属性将被导出：
 

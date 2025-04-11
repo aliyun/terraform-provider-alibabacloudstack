@@ -98,25 +98,25 @@ resource "alibabacloudstack_eip_association" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `allocation_id` - (必填，变更时重建) 弹性公网IP实例的ID。
 * `instance_id` - (必填，变更时重建) 要绑定弹性公网IP的实例ID。可以输入NAT网关、传统型负载均衡CLB实例、云服务器ECS实例、辅助弹性网卡实例、高可用虚拟IP实例或IP地址的ID。
 * `force` - (选填，变更时重建) 当弹性公网IP绑定了NAT网关，且NAT网关添加了DNAT或SNAT条目时，是否强制解绑弹性公网IP。取值范围：
-  * **false**(默认值)：不强制解绑弹性公网IP。
+  * **false** (默认值)：不强制解绑弹性公网IP。
   * **true**：强制解绑弹性公网IP。
 * `instance_type` - (选填，变更时重建) 要绑定弹性公网IP的实例类型。取值范围：
   * **Nat**：NAT网关。
   * **SlbInstance**：传统型负载均衡CLB。
-  * **EcsInstance**(默认值)：云服务器ECS。
+  * **EcsInstance** (默认值)：云服务器ECS。
   * **NetworkInterface**：辅助弹性网卡。
   * **HaVip**：高可用虚拟IP。
   * **IpAddress**：IP地址。
   > 默认要绑定弹性公网IP的实例类型为**EcsInstance**，如果您需要绑定弹性公网IP的实例类型不为**EcsInstance**，则该值必填。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
@@ -125,7 +125,7 @@ resource "alibabacloudstack_eip_association" "default" {
 * `instance_type` - 与弹性公网IP关联的实例类型。取值范围：
   * **Nat**：NAT网关。
   * **SlbInstance**：传统型负载均衡CLB。
-  * **EcsInstance**(默认值)：云服务器ECS。
+  * **EcsInstance** (默认值)：云服务器ECS。
   * **NetworkInterface**：辅助弹性网卡。
   * **HaVip**：高可用虚拟IP。
   * **IpAddress**：IP地址。

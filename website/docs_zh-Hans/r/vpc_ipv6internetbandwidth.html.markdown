@@ -49,7 +49,7 @@ resource "alibabacloudstack_vpc_ipv6_internet_bandwidth" "default" {
    - `ipv6_address_id` 和 `ipv6_gateway_id` 分别从 `data "alibabacloudstack_vpc_ipv6_addresses"` 中获取。
    - 配置 `internet_charge_type` 为 `PayByBandwidth`，并设置带宽为 `20 Mbps`。
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -72,7 +72,7 @@ resource "alibabacloudstack_vpc_ipv6_internet_bandwidth" "default" {
 - **`ipv6_address_id`**：指定要绑定带宽的 IPv6 地址实例的唯一标识符。
 - **`ipv6_gateway_id`**：指定与 IPv6 地址关联的网关实例的唯一标识符。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
@@ -88,6 +88,3 @@ resource "alibabacloudstack_vpc_ipv6_internet_bandwidth" "default" {
   - `FinancialLocked`：由于财务问题(如欠费)，资源被锁定。
   - `SecurityLocked`：由于安全原因，资源被锁定。
 - **`internet_charge_type`**：再次确认资源的计费方式，确保配置的一致性。
-
-此文档提供了更详细的参数和属性描述，帮助用户更好地理解和使用 `alibabacloudstack_vpc_ipv6internetbandwidth` 资源。
-```

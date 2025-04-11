@@ -114,5 +114,18 @@ resource "alibabacloudstack_vpn_connection" "default" {
   * `name` - IPsec 连接的名称。
   * `vpn_connection_name` - IPsec 连接的名称。
   * `ike_config` - 第一阶段协商的配置。
+    * `psk` - 预共享密钥。
+    * `ike_version` - IKE 协议版本。
+    * `ike_mode` - IKE 模式。
+    * `ike_enc_alg` - 加密算法。
+    * `ike_auth_alg` - 认证算法。
+    * `ike_pfs` - Diffie-Hellman 组。
+    * `ike_lifetime` - SA 生命周期。
+    * `ike_local_id` - 本地标识符。
+    * `ike_remote_id` - 远程标识符。
   * `ipsec_config` - 第二阶段协商的配置。
+    * `ipsec_enc_alg` - 加密算法。
+    * `ipsec_auth_alg` - 认证算法。
+    * `ipsec_pfs` - Diffie-Hellman 组。
+    * `ipsec_lifetime` - SA 生命周期。
   * `status` - 资源的状态。

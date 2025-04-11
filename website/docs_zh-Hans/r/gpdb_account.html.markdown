@@ -57,7 +57,7 @@ resource "alibabacloudstack_gpdb_account" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -77,12 +77,12 @@ resource "alibabacloudstack_gpdb_account" "default" {
 
 * `db_instance_id` - (必填，变更时重建) 实例的ID。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 
 * `id` - 账户的资源ID。格式为 `<db_instance_id>:<account_name>`。
-* `status` - 账户的状态。有效值为：`Active`，`Creating` 和 `Deleting`。
+* `status` - 账户的状态。有效值为：`Active`（活跃）、`Creating`（创建中）和 `Deleting`（删除中）。
 
 ### 超时时间
 

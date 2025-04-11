@@ -77,16 +77,16 @@ resource "alibabacloudstack_hbase_instance" "default" {
 支持以下参数：
 
 * `name` - (必填) HBase 集群的名称。长度必须在 2-128 个字符之间，可以包含中文字符、英文字母、数字、点 (`.`)、下划线 (`_`) 或短横线 (`-`)。
-* `zone_id` - (可选，强制新值)HBase 实例将启动的可用区 ID。如果指定了 `vswitch_id`，则此字段可以为空或与 VSwitch 的可用区一致。
-* `engine` - (可选，强制新值)集群的引擎类型。有效值为 `hbase`、`hbaseue` 或 `bds`。
-* `engine_version` - (必填，强制新值)HBase 的主要版本。有效值：
+* `zone_id` - (可选，强制新值) HBase 实例将启动的可用区 ID。如果指定了 `vswitch_id`，则此字段可以为空或与 VSwitch 的可用区一致。
+* `engine` - (可选，强制新值) 集群的引擎类型。有效值为 `hbase`、`hbaseue` 或 `bds`。
+* `engine_version` - (必填，强制新值) HBase 的主要版本。有效值：
   - 对于 `hbase`：`1.1` 或 `2.0`
   - 对于 `hbaseue`：`2.0`
   - 对于 `bds`：`1.0`
-* `master_instance_type` - (必填，强制新值)主节点的规格。请参阅 [实例规格](https://help.aliyun.com/document_detail/53532.html) 或使用 `describeInstanceType` API。
-* `core_instance_type` - (必填，强制新值)核心节点的规格。请参阅 [实例规格](https://help.aliyun.com/document_detail/53532.html) 或使用 `describeInstanceType` API。
+* `master_instance_type` - (必填，强制新值) 主节点的规格。请参阅 [实例规格](https://help.aliyun.com/document_detail/53532.html) 或使用 `describeInstanceType` API。
+* `core_instance_type` - (必填，强制新值) 核心节点的规格。请参阅 [实例规格](https://help.aliyun.com/document_detail/53532.html) 或使用 `describeInstanceType` API。
 * `core_instance_quantity` - (可选) 核心节点的数量。默认值为 `2`，范围是 `[1-200]`。
-* `core_disk_type` - (可选，强制新值)核心节点的磁盘类型。有效值：
+* `core_disk_type` - (可选，强制新值) 核心节点的磁盘类型。有效值：
   - `cloud_ssd`
   - `cloud_essd_pl1`
   - `cloud_efficiency`
@@ -98,10 +98,10 @@ resource "alibabacloudstack_hbase_instance" "default" {
   - 集群：`[400, 64000]`，按 40GB 增加。
   - 单独：`[20-500]`，按 1GB 增加。
 * `pay_type` - (可选) 付款类型。有效值为 `PrePaid` 或 `PostPaid`。默认为 `PostPaid`。
-* `duration` - (可选，强制新值)订阅时长(以月为单位)。有效值：`1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36`。仅当 `pay_type=PrePaid` 时有效。值 `12, 24, 36` 分别表示 1 年、2 年和 3 年。
-* `auto_renew` - (可选，强制新值)是否启用自动续费。有效值为 `true` 或 `false`。默认为 `false`。仅当 `pay_type=PrePaid` 时有效。
-* `vswitch_id` - (可选，强制新值)VSwitch 的 ID。如果指定，则网络类型为 `vpc`。如果不指定，则网络类型为 `classic`。国际站点不支持经典网络。
-* `cold_storage_size` - (可选，强制新值)冷存储大小(以 GB 为单位)。有效值：`0` 或 `[800, 1000000]`，按 10GB 增加。`0` 表示禁用冷存储。
+* `duration` - (可选，强制新值) 订阅时长(以月为单位)。有效值：`1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36`。仅当 `pay_type=PrePaid` 时有效。值 `12, 24, 36` 分别表示 1 年、2 年和 3 年。
+* `auto_renew` - (可选，强制新值) 是否启用自动续费。有效值为 `true` 或 `false`。默认为 `false`。仅当 `pay_type=PrePaid` 时有效。
+* `vswitch_id` - (可选，强制新值) VSwitch 的 ID。如果指定，则网络类型为 `vpc`。如果不指定，则网络类型为 `classic`。国际站点不支持经典网络。
+* `cold_storage_size` - (可选，强制新值) 冷存储大小(以 GB 为单位)。有效值：`0` 或 `[800, 1000000]`，按 10GB 增加。`0` 表示禁用冷存储。
 * `maintain_start_time` - (可选) 维护时间段的开始时间(UTC 格式 `HH:mmZ`)。例如：`02:00Z`。
 * `maintain_end_time` - (可选) 维护时间段的结束时间(UTC 格式 `HH:mmZ`)。例如：`04:00Z`。
 * `deletion_protection` - (可选) 是否启用删除保护。有效值为 `true` 或 `false`。默认为 `false`。
@@ -111,6 +111,7 @@ resource "alibabacloudstack_hbase_instance" "default" {
 * `password` - (可选) 集群 Web UI 帐户的密码。长度必须在 `0-128` 个字符之间。
 * `ip_white` - (可选) 集群的 IP 白名单。
 * `security_groups` - (可选) 与集群关联的安全组 ID 列表。
+* `master_instance_quantity` - (可选，计算) 集群中的主节点数量。
 
 ## 属性参考
 
@@ -137,3 +138,7 @@ resource "alibabacloudstack_hbase_instance" "default" {
     - `0`: 公网访问。
   * `conn_addr` - 连接地址。
   * `conn_addr_port` - 连接端口。
+* `maintain_start_time` - (计算) 维护时间段的开始时间(UTC 格式 `HH:mmZ`)。
+* `maintain_end_time` - (计算) 维护时间段的结束时间(UTC 格式 `HH:mmZ`)。
+* `ip_white` - (计算) 集群的 IP 白名单。
+* `security_groups` - (计算) 与集群关联的安全组 ID 列表。

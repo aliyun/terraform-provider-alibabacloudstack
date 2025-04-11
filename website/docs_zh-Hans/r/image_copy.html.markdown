@@ -32,22 +32,24 @@ resource "alibabacloudstack_image_copy" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `source_image_id` - (必填，强制新值)源镜像ID。
-* `destination_region_id` - (必填，强制新值)目标区域ID。
-* `name` - (可选，已弃用)字段'name'已被弃用，改为使用新字段'image_name'。
-* `image_name` - (可选) 镜像名称。它必须是2到128个字符长度，并且必须以字母或中文字符开头(不能以http://或https://开头)。它可以包含数字、冒号(:)、下划线(_)或连字符(-)。默认值：null。
-* `description` - (可选) 镜像描述。它必须是2到256个字符长度，并且不能以http://或https://开头。默认值：null。
-* `kms_key_id` - (可选，强制新值)用于加密的KMS密钥ID。
-* `encrypted` - (可选，强制新值)指示镜像是否加密。
+* `source_image_id` - (必填，强制新值) 源镜像ID。
+* `destination_region_id` - (必填，强制新值) 目标区域ID。
+* `name` - (可选，已弃用) 字段'name'已被弃用，请改用新字段'image_name'。
+* `image_name` - (可选) 镜像名称。它必须是2到128个字符长度，并且必须以字母或中文字符开头（不能以`http://`或`https://`开头）。它可以包含数字、冒号(`:`)、下划线(`_`)或连字符(`-`)。默认值：`null`。
+* `description` - (可选) 镜像描述。它必须是2到256个字符长度，并且不能以`http://`或`https://`开头。默认值：`null`。
+* `kms_key_id` - (可选，强制新值) 用于加密的KMS密钥ID。
+* `encrypted` - (可选，强制新值) 指示镜像是否加密。
+* `tags` - (可选) 分配给资源的标签映射。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
 * `id` - 镜像的ID。
-* `name` - 镜像名称。
+* `name` - 镜像名称（此字段为兼容性保留，建议使用`image_name`）。
 * `image_name` - 镜像名称。
+* `description` - 镜像描述。
