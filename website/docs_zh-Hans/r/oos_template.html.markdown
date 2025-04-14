@@ -53,7 +53,7 @@ resource "alibabacloudstack_oos_template" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -62,8 +62,9 @@ resource "alibabacloudstack_oos_template" "default" {
 * `template_name` - (必填，变更时重建) 模板名称。模板名称最多可以包含 200 个字符，名称可以包含字母、数字、连字符(-)和下划线(_)。不能以 `ALIYUN`、`ACS`、`ALIBABA` 或 `ALICLOUD` 开头。
 * `version_name` - (可选) 模板版本名称。这允许您管理同一模板的不同版本。
 * `tags` - (可选) 要分配给资源的标签映射。标签有助于组织和分类您的资源。
+* `description` - (必填) 模板的描述。提供了模板功能的简要概述。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
@@ -79,3 +80,4 @@ resource "alibabacloudstack_oos_template" "default" {
 * `template_version` - OOS 模板的版本。有助于管理同一模板的不同迭代。
 * `updated_by` - 最后更新模板的用户。这对审计目的很有用。
 * `updated_date` - 模板最后一次更新的时间。这有助于跟踪随时间对模板所做的更改。
+* `template_name` - (计算得出) 模板的名称。

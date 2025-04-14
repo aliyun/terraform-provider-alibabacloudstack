@@ -91,6 +91,9 @@ The following arguments are supported:
 * `vswitch_id` - (Optional, ForceNew) The vswitch id.
 * `zone_id` - (Optional, Computed, ForceNew) The zone ID of the resource.
 
+* `instance_inner_connection` - (Optional, Deprecated) Field `instance_inner_connection` is deprecated and will be removed in a future release. Please use new field `connection_string` instead.
+* `instance_inner_port` - (Optional, Deprecated) Field `instance_inner_port` is deprecated and will be removed in a future release. Please use new field `port` instead.
+
 ### Removing `alibabacloudstack_adb_cluster` from your configuration
 
 The `alibabacloudstack_adb_cluster` resource allows you to manage your ADB cluster, but Terraform cannot destroy it if your cluster type is pre-paid (post-paid type can destroy normally). Removing this resource from your configuration will remove it from your statefile and management, but will not destroy the cluster. You can resume managing the cluster via the ADB Console.

@@ -67,3 +67,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `usage` - Specifies whether to check the validity of the request without actually making the request.
   * `is_support_io_optimized` - Indicates whether the image can be used on I/O optimized instances.
   * `tags` - The tags of the resource.
+  * `name` - Name of the image.

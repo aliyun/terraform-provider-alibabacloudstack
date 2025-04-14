@@ -29,7 +29,7 @@ The following arguments are supported:
 
 * `cs_cluster_id` - (Required, ForceNew) The ID of the alibabacloudstack container service kubernetes cluster that you want to import.
 * `namespace_id` - (Optional, ForceNew) The ID of the namespace where you want to import. You can call the [ListUserDefineRegion](https://www.alibabacloud.com/help/en/doc-detail/149377.htm?spm=a2c63.p38356.879954.34.331054faK2yNvC#doc-api-Edas-ListUserDefineRegion) operation to query the namespace ID.
-
+* `vpc_id` - (Optional, ForceNew) The ID of the Virtual Private Cloud (VPC) for the cluster.
 
 ## Attributes Reference
 
@@ -45,6 +45,8 @@ The following attributes are exported:
     `2`: failed.
     `3`: importing. 
     `4`: deleted. 
+* `cs_cluster_id` - The ID of the alibabacloudstack container service kubernetes cluster that you want to import.
+* `namespace_id` - The ID of the namespace where you want to import.
 
 ## Import
 

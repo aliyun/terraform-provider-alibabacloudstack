@@ -54,19 +54,19 @@ resource "alibabacloudstack_ess_lifecycle_hook" "foo" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `scaling_group_id` - (必填，变更时重建) 要为其分配生命周期挂钩的弹性伸缩组的ID。
 * `name` - (可选，变更时重建) 生命周期挂钩的名称，必须包含2-64个字符(英文或中文)，以数字、英文字母或中文字符开头，可以包含数字、下划线 `_`、连字符 `-` 和小数点 `.`。如果不指定此参数值，默认值为生命周期挂钩的ID。
-* `lifecycle_transition` - (必填) 与生命周期挂钩关联的伸缩活动类型。支持的值：SCALE_OUT, SCALE_IN。
+* `lifecycle_transition` - (必填) 与生命周期挂钩关联的伸缩活动类型。支持的值：`SCALE_OUT`, `SCALE_IN`。
 * `heartbeat_timeout` - (可选) 定义生命周期挂钩超时之前可以经过的时间量(以秒为单位)。当生命周期挂钩超时时，弹性伸缩将执行默认结果参数中定义的操作。默认值：600。
-* `default_result` - (可选) 定义当生命周期挂钩超时后，弹性伸缩组应采取的操作。适用值：CONTINUE, ABANDON，默认值：CONTINUE。
+* `default_result` - (可选) 定义当生命周期挂钩超时后，弹性伸缩组应采取的操作。适用值：`CONTINUE`, `ABANDON`，默认值：`CONTINUE`。
 * `notification_arn` - (可选) 通知目标的Arn。
 * `notification_metadata` - (可选) 当弹性伸缩向通知目标发送消息时，您希望包含的其他信息。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 

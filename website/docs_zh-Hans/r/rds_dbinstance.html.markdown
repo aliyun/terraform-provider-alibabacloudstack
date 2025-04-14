@@ -97,7 +97,7 @@ resource "alibabacloudstack_rds_dbinstance" "default2" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -178,7 +178,7 @@ resource "alibabacloudstack_rds_dbinstance" "default2" {
 
 * `tags` - (可选) 要分配给资源的标签映射。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 

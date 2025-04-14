@@ -80,28 +80,28 @@ resource "alibabacloudstack_redis_account" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
-  * `instance_id` - (必填, 变更时重建) - 实例ID，该账户所属的实例。
-  * `account_name` - (必填, 变更时重建) - 账号名称。它必须以字母开头，并且可以包含小写字母、数字和下划线 (`_`)。最大长度为 16 个字符。
-  * `account_password` - (选填) - 账户密码。它必须在 6 到 32 个字符之间，并且可以包括大写和小写字母、数字以及特殊字符如 `_`, `@`, 和 `!`。必须指定 `account_password` 或 `kms_encrypted_password`。
-  * `kms_encrypted_password` - (选填) - 使用 KMS 加密的账户密码。如果提供了 `account_password`，此字段将被忽略。
-  * `kms_encryption_context` - (选填) - 用于在创建或更新账户之前解密 `kms_encrypted_password` 的加密上下文。仅当设置了 `kms_encrypted_password` 时有效。
-  * `account_type` - (选填, 变更时重建) - 账号类型。有效值：
-    * `Normal`: 普通权限。
-    * `Super`: 超级权限(具有所有操作权限)。
-    默认值为 `Normal`。
-  * `account_privilege` - (选填) - 数据库权限列表。有效值：
-    * `RoleReadOnly`: 只读访问。
-    * `RoleReadWrite`: 读写访问。
-    * `RoleRepl`: 读、写和复制命令(`SYNC` / `PSYNC`)访问。仅适用于引擎版本为 4.0 或更高版本且架构类型为标准的 Redis 实例。
-    默认值为 `RoleReadWrite`。
-  * `description` - (选填) - 账号备注信息。它必须以中文字符或英文字母开头，并且可以包括中文字符、英文字母、下划线 (`_`)、连字符 (`-`) 和数字。长度必须在 2 到 256 个字符之间。
+* `instance_id` - (必填, 变更时重建) - 实例ID，该账户所属的实例。
+* `account_name` - (必填, 变更时重建) - 账号名称。它必须以字母开头，并且可以包含小写字母、数字和下划线 (`_`)。最大长度为 16 个字符。
+* `account_password` - (选填, 敏感信息) - 账户密码。它必须在 6 到 32 个字符之间，并且可以包括大写和小写字母、数字以及特殊字符如 `_`, `@`, 和 `!`。必须指定 `account_password` 或 `kms_encrypted_password`。
+* `kms_encrypted_password` - (选填) - 使用 KMS 加密的账户密码。如果提供了 `account_password`，此字段将被忽略。
+* `kms_encryption_context` - (选填) - 用于在创建或更新账户之前解密 `kms_encrypted_password` 的加密上下文。仅当设置了 `kms_encrypted_password` 时有效。
+* `account_type` - (选填, 变更时重建) - 账号类型。有效值：
+  * `Normal`: 普通权限。
+  默认值为 `Normal`。
+* `account_privilege` - (选填) - 数据库权限列表。有效值：
+  * `RoleReadOnly`: 只读访问。
+  * `RoleReadWrite`: 读写访问。
+  * `RoleRepl`: 读、写和复制命令(`SYNC` / `PSYNC`)访问。仅适用于引擎版本为 4.0 或更高版本且架构类型为标准的 Redis 实例。
+  默认值为 `RoleReadWrite`。
+* `description` - (选填) - 账号备注信息。它必须以中文字符或英文字母开头，并且可以包括中文字符、英文字母、下划线 (`_`)、连字符 (`-`) 和数字。长度必须在 2 到 256 个字符之间。
+* `account_description` - (选填) - 账号备注信息（与 `description` 相同）。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
-  * `id` - 账户的唯一标识符。它由实例 ID 和账户名称组成，格式为 `<instance_id>:<account_name>`。
-  * `description` - 账号备注信息。
-  * `account_description` - 账号备注信息(与 `description` 相同)。
+* `id` - 账户的唯一标识符。它由实例 ID 和账户名称组成，格式为 `<instance_id>:<account_name>`。
+* `description` - 账号备注信息。
+* `account_description` - 账号备注信息（与 `description` 相同）。

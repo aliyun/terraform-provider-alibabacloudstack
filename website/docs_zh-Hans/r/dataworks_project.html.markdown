@@ -26,17 +26,17 @@ resource "alibabacloudstack_data_works_project" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `project_name` - (必填) data_works项目的名称，也被称为工作区名称。必须是唯一的，并遵循命名约定。
-* `task_auth_type` - (可选) data_works项目的任务授权类型。有效值包括：
+* `project_name` - (必填) DataWorks项目的名称，也被称为工作区名称。必须在您的阿里云账号内唯一，并遵循命名规范。
+* `task_auth_type` - (可选) DataWorks项目的任务授权类型。有效值包括：
   * `PROJECT`: 授权范围为整个项目。
   * `CUSTOM`: 可以应用自定义授权设置。如果不指定，默认值为 `PROJECT`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 
-* `project_id` - data_works项目的唯一标识符(ID)。此属性是在项目创建后自动生成的，可以用于在其他资源中引用该项目。
+* `project_id` - DataWorks项目的唯一标识符（ID）。此属性是在项目创建后自动生成的，可以用于在其他资源中引用该项目。

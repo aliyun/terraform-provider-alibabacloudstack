@@ -92,21 +92,21 @@ resource "alibabacloudstack_slb_vservergroup" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `load_balancer_id` - (必填, 变更时重建) - 负载均衡实例的ID。
-* `name` - (选填) - 虚拟服务器组的名称。如果未指定，则默认为资源名称。
-* `vserver_group_name` - (选填) - VServer组的名称。如果未指定，将使用`name`字段的值。
-* `servers` - (选填) - 要添加的ECS实例列表。一个资源中最多可以支持20个ECS实例。它包含以下几个子字段：
+* `load_balancer_id` - (必填, 变更时重建) 负载均衡实例的ID。
+* `name` - (选填) 虚拟服务器组的名称。如果未指定，则默认为资源名称。
+* `vserver_group_name` - (选填) VServer组的名称。如果未指定，将使用`name`字段的值。
+* `servers` - (选填) 要添加的ECS实例列表。一个资源中最多可以支持20个ECS实例。它包含以下几个子字段：
   * `server_ids` - (必填) 后端服务器ID(ECS实例ID)列表。
   * `port` - (必填) 后端服务器使用的端口。有效值范围：[1-65535]。
-  * `weight` - (可选) 后端服务器的权重。有效值范围：[0-100]。默认为100。
-  * `type` - (可选) 后端服务器类型。有效值：`ecs`，`eni`。默认为`ecs`。
-* `delete_protection_validation` - (选填) - 在删除之前检查SLB实例的DeleteProtection。如果为true，则当其SLB实例启用了DeleteProtection时，此资源将不会被删除。默认为false。
+  * `weight` - (选填) 后端服务器的权重。有效值范围：[0-100]。默认值为100。
+  * `type` - (选填) 后端服务器类型。有效值：`ecs`、`eni`。默认值为`ecs`。
+* `delete_protection_validation` - (选填) 在删除之前检查SLB实例的DeleteProtection。如果为true，则当其SLB实例启用了DeleteProtection时，此资源将不会被删除。默认值为false。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

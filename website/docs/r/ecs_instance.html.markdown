@@ -163,6 +163,7 @@ The following arguments are supported:
 * `ipv6_address_list` - (Optional, ForceNew) A list of IPv6 addresses to be assigned to the primary ENI. Supports up to 10 addresses.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 * `system_disk_tags` - (Optional) A mapping of tags to assign to the system disk.
+* `data_disk_tags` - (Optional) A mapping of tags to assign to the data disk.
 
 ## Attributes Reference
 
@@ -181,3 +182,4 @@ The following attributes are exported in addition to the arguments listed above:
 * `key_name` - The name of the key pair used for the instance.
 * `storage_set_id` - The ID of the storage set.
 * `storage_set_partition_number` - The number of partitions in the storage set.
+* `data_disks` - A list of data disks associated with the instance. Each item contains details about a specific data disk.

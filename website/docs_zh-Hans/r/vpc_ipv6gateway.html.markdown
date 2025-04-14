@@ -33,13 +33,13 @@ resource "alibabacloudstack_vpc_ipv6_gateway" "example" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `description` - (可选) IPv6 网关的描述。描述必须是 **2 到 256** 个字符长度，不能以 `http://` 或 `https://` 开头。
 * `ipv6_gateway_name` - (可选) IPv6 网关的名称。名称必须是 **2 到 128** 个字符长度，可以包含字母、数字、下划线 (`_`) 和连字符 (`-`)。名称必须以字母开头，但不能以 `http://` 或 `https://` 开头。
-* `spec` - (可选) IPv6 网关的版本。尽管该参数在早期版本中用于区分规格，但现在已不再使用，所有 IPv6 网关均采用统一规格。有效值包括：`Small`(默认值)，表示免费版；`Medium`，表示企业版；`Large`，表示增强企业版。需要注意的是，虽然参数仍然存在，但其实际功能已被废弃。
+* `spec` - (可选) IPv6 网关的版本。有效值包括：`Small`(默认值)，表示免费版；`Medium`，表示企业版；`Large`，表示增强企业版。需要注意的是，不同版本的 IPv6 网关具有不同的吞吐能力，具体请参见 [IPv6 网关版本](https://www.alibabacloud.com/help/doc-detail/98926.htm)。
 * `vpc_id` - (必填，变更时重建) 要为其创建 IPv6 网关的虚拟私有云 (VPC) 的 ID。
 
 ### 超时时间
@@ -50,13 +50,13 @@ resource "alibabacloudstack_vpc_ipv6_gateway" "example" {
 * `update` - (默认为 1 分钟)用于更新 IPv6 网关时。
 * `delete` - (默认为 5 分钟)用于删除 IPv6 网关时。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
 * `id` - Terraform 中的 IPv6 网关资源 ID。
 * `status` - 资源的状态。有效值：`Available`(可用)、`Pending`(等待中)和 `Deleting`(删除中)。
-* `spec` - IPv6 网关不区分规格，该参数不再使用，但为了兼容性仍保留。
+* `spec` - 实际上当前所有 IPv6 网关均采用统一规格，尽管参数仍然保留，但其功能已被废弃。
 
 ### 导入
 

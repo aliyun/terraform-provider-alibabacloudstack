@@ -60,7 +60,7 @@ output "stack_ids" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -73,7 +73,7 @@ output "stack_ids" {
 * `status` - (可选，强制更新) 堆栈的状态。有效值：`CREATE_COMPLETE`, `CREATE_FAILED`, `CREATE_IN_PROGRESS`, `DELETE_COMPLETE`, `DELETE_FAILED`, `DELETE_IN_PROGRESS`, `ROLLBACK_COMPLETE`, `ROLLBACK_FAILED`, `ROLLBACK_IN_PROGRESS`。
 * `tags` - (可选) 查询绑定到标签的实例。传入值的格式为 `json` 字符串，包括 `TagKey` 和 `TagValue`。`TagKey` 不可以为空，而 `TagValue` 可以为空。格式示例 `{"key1":"value1"}`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 

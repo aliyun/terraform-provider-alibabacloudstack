@@ -119,6 +119,7 @@ The following arguments are supported:
 * `zone_id` - (Optional, ForceNew) The zone ID of the dedicated host. This parameter is empty by default. If you do not specify this parameter, the system automatically selects a zone.
 
 * `tags` - (Optional) A mapping of tags to assign to the resource.
+* `detail_fee` - (Optional) Indicates whether detailed fee information is provided. Default value: `false`.
 
 ## Attributes Reference
 
@@ -132,6 +133,8 @@ In addition to all arguments above, the following attributes are exported:
   * `TempUnavailable`: The dedicated host is temporarily unavailable.
   * `Redeploying`: The dedicated host is being restored.
   Default value: `Available`.
+* `resource_group_id` - The ID of the resource group to which the dedicated host belongs.
+* `sale_cycle` - The unit of the subscription period of the dedicated host.
 
 ### Timeouts
 

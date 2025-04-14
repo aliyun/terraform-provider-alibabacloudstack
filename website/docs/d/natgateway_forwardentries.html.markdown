@@ -97,3 +97,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `internal_port` - The internal port that is mapped to the external port in the DNAT entry.
   * `ip_protocol` - The type of the protocol.
   * `status` - The state of the DNAT entry.
+  * `forward_table_id` -  The ID of the DNAT table to which the DNAT entry belongs.

@@ -41,7 +41,7 @@ resource "alibabacloudstack_data_works_folder" "advanced" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -53,11 +53,11 @@ resource "alibabacloudstack_data_works_folder" "advanced" {
 
 * `project_id` - (必填，变更时重建) 要创建文件夹的数据工坊项目的ID。
 
-* `project_identifier` - (选填)数据工坊项目的标识符(名称)。如果提供了 `project_id`，则此参数不是强制性的，但可以提供额外的清晰度。
+* `project_identifier` - (选填) 数据工坊项目的标识符(名称)。如果提供了 `project_id`，则此参数不是强制性的，但可以提供额外的清晰度。
 
 * `folder_id` - (选填，变更时重建) 文件夹的唯一标识符。如果不指定，Terraform 将在创建期间自动生成一个。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

@@ -51,20 +51,18 @@ resource "alibabacloudstack_log_store_index" "example" {
 ```
 
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `project` - (必填，变更时重建) 日志库所属的项目名称。
 * `logstore` - (必填，变更时重建) 查询索引所属的日志库名称。
 * `full_text` - 全文索引的配置。有效项如下：
-
     * `case_sensitive` - (可选) 是否区分大小写。默认为 false。
     * `include_chinese` - (可选) 是否包含中文。默认为 false。
     * `token` - (可选) 多个分隔词的字符串，例如 "\r", "#"
 
 * `field_search` - 字段搜索索引的列表配置。有效项如下：
-
     * `name` - (必填) 字段名称，在同一个日志库中是唯一的。
     * `type` - (可选) 字段类型。有效值：["long", "text", "double", "json"]。默认为 "long"。
     * `alias` - (可选) 字段的别名
@@ -72,24 +70,23 @@ resource "alibabacloudstack_log_store_index" "example" {
     * `include_chinese` - (可选) 字段是否包含中文。默认为 false。当 "type" 为 "text" 或 "json" 时有效。
     * `token` - (可选) 多个分隔词的字符串，例如 "\r", "#"。当 "type" 为 "text" 或 "json" 时有效。
     * `enable_analytics` - (可选) 是否启用字段分析。默认为 true。
-    * `json_keys` - (可选，1.66.0+版本可用)当类型为 json 时使用嵌套索引
+    * `json_keys` - (可选，1.66.0+版本可用) 当类型为 json 时使用嵌套索引
         * `name` - (必填) 使用 json_keys 字段时，此字段为必填项。
         * `type` - (可选) 字段类型。有效值：["long", "text", "double"]。默认为 "long"。
         * `alias` - (可选) 字段的别名。
         * `doc_value` - (可选) 是否启用统计。默认为 true。
-    
-    
-    * `enable_analytics` - (可选) 是否启用字段分析。默认为 true。
 
 -> **注意:** 至少需要指定 "full_text" 和 "field_search" 中的一个。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
 * `id` - 日志库索引的 ID。格式为 `<project>:<logstore>`。
-* `project` - (强制新，必填)日志库所属的项目名称。
-* `logstore` - (强制新，必填)查询索引所属的日志库名称。
+* `project` - (强制新，必填) 日志库所属的项目名称。
+* `logstore` - (强制新，必填) 查询索引所属的日志库名称。
+* `full_text` - 全文索引的配置。
+* `field_search` - 字段搜索索引的列表配置。
 
 ## 导入
 

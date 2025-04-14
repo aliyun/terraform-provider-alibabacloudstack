@@ -63,7 +63,7 @@ resource "alibabacloudstack_forward_entry" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -76,7 +76,7 @@ resource "alibabacloudstack_forward_entry" "default" {
 * `internal_ip` - (必填) 私网 IP 地址。它必须是 VPC 内的有效私有 IP 地址。
 * `internal_port` - (必填) 目标私网端口。有效值为 1 到 65535 或 "any"。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

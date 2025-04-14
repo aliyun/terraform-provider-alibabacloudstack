@@ -42,7 +42,7 @@ resource "alibabacloudstack_router_interface" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -61,7 +61,7 @@ resource "alibabacloudstack_router_interface" "default" {
 * `opposite_interface_id` - (选填) - 对端路由器接口的 ID。
 * `opposite_interface_owner_id` - (选填) - 对端路由器接口的所有者账户 ID。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

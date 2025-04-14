@@ -32,25 +32,27 @@ output "org" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `login_name` - (必填) 用户登录名。 
+* `login_name` - (必填) 用户登录名。
 * `cellphone_number` - (必填) 用户的手机号码。
 * `display_name` - (必填) 用户的显示名称。
 * `email` - (必填) 用户的电子邮件地址。
-* `mobile_nation_code` - (必填) 用户所属的移动国家代码。
-* `organization_id` - (必填) 用户组织ID。
-* `login_policy_id` - (可选) 用户登录策略ID。
-* `role_ids` - 用户拥有的角色列表。
-* `telephone_number` - (可选) 用户的电话号码。
+* `mobile_nation_code` - (必填) 用户所属的移动国家代码（例如：中国为“86”）。
+* `organization_id` - (必填) 用户所属的组织ID。
+* `login_policy_id` - (可选) 用户登录策略ID。用于定义用户的登录策略。
+* `role_ids` - (可选) 用户拥有的角色ID列表。可以通过此参数为用户分配多个角色。
+* `telephone_number` - (可选) 用户的固定电话号码。
+* `init_password` - (可选) 用户的初始密码。如果未提供，系统将自动生成一个初始密码。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
-* `id` - 用户的登录名。
-* `user_id` - 用户的ID。
-* `init_password` - 用户的初始密码。
-* `role_ids` - 用户拥有的角色列表。
+* `id` - 用户的登录名（与`login_name`相同）。
+* `user_id` - 用户的唯一标识符（UUID）。
+* `init_password` - 用户的初始密码。如果在创建时未指定，则返回系统生成的初始密码。
+* `role_ids` - 用户当前拥有的角色ID列表。
+* `organization_id` - 用户所属的组织ID。注意：从1.0.32版本开始，该字段已被废弃，建议使用其他方式获取组织信息。

@@ -166,3 +166,5 @@ The following attributes are exported in addition to the arguments listed above:
 * `name` - Name of the forwarding rule.
 * `rule_name` - Name of the forwarding rule.
 * `health_check_connect_port` - Health check the port of the backend server.
+* `healthy_threshold` - Indicates the threshold determining the result of the health check as success.
+* `unhealthy_threshold` - Indicates the threshold determining the result of the health check as fail.

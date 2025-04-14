@@ -47,7 +47,7 @@ resource "alibabacloudstack_ecs_networkinterface" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -59,8 +59,9 @@ resource "alibabacloudstack_ecs_networkinterface" "default" {
 * `private_ips_count` - (可选) 要分配给弹性网卡的次要私有IP地址数量。不要在同一弹性网卡资源块中同时使用`private_ips`和`private_ips_count`。
 * `description` - (可选) 弹性网卡的描述。该描述可以包含2到256个字符，不能以http://或https://开头。默认值为null。
 * `tags` - (可选) 要分配给资源的标签映射。
+* `mac_address` - (可选) 弹性网卡的MAC地址。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

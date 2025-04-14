@@ -62,3 +62,4 @@ The following attributes are exported in addition to the arguments listed above:
     * `amount` - The number of local storage devices that an instance has been attached to.
     * `category` - The category of local storage that an instance has been attached to.
   * `cpu_type` - Type of CPU.
+  * `instance_type_family` - The instance type family.

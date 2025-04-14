@@ -67,7 +67,7 @@ output "first_scheduled_task_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -76,7 +76,7 @@ output "first_scheduled_task_id" {
 * `name_regex` - (可选) 用于通过名称过滤定时任务的正则表达式字符串。
 * `ids` - (可选) 用于过滤结果的定时任务ID列表。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -95,3 +95,4 @@ output "first_scheduled_task_id" {
   * `recurrence_value` - 指定定时任务的重复频率。
   * `recurrence_end_time` - 指定定时任务不再重复的结束时间。
   * `task_enabled` - 是否启动定时任务。默认值为 `true`。
+  * `description` - (计算属性) 定时任务的描述信息。

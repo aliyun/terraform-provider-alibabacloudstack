@@ -72,16 +72,15 @@ resource "alibabacloudstack_redis_tairinstance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `tair_instance_name` - (可选) 资源的名称。它必须是2到256个字符长，并以字母或数字开头。它可以包含下划线、字母和数字。
-* `instance_name` - (可选) 实例名称。与 `tair_instance_name` 类似，用于标识实例。
 * `password` - (可选) 用于连接实例的密码。密码必须为8到32个字符长，并至少包含以下三种字符类型：大写字母、小写字母、数字和特殊字符(! @ # $ % ^ & * ( ) _ + - =)。
 * `kms_encrypted_password` - (可选) KMS加密的实例密码。如果指定了`password`，此字段将被忽略。
 * `kms_encryption_context` - (可选) 用于解密`kms_encrypted_password`的加密上下文。仅当设置了`kms_encrypted_password`时有效。
-* `instance_class` - (必填)  资源的实例类型。更多信息，请参见 [实例类型](https://www.alibabacloud.com/help/en/apsaradb-for-redis/latest/instance-types)。
+* `instance_class` - (必填) 资源的实例类型。更多信息，请参见 [实例类型](https://www.alibabacloud.com/help/en/apsaradb-for-redis/latest/instance-types)。
 * `engine_version` - (可选，变更时重建) 数据库版本。默认值为`5.0`。不同Tair产品类型的参数传递规则：
   - `tair_rdb`: 内存型兼容Redis 5.0和Redis 6.0协议，传入为`5.0`或`6.0`。
   - `tair_scm`: 持久内存兼容Redis 6.0协议，传入为`1.0`。
@@ -107,7 +106,7 @@ resource "alibabacloudstack_redis_tairinstance" "default" {
 * `encryption_key` - (可选) 用于加密实例数据的加密密钥。
 * `role_arn` - (可选) RAM角色的ARN。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

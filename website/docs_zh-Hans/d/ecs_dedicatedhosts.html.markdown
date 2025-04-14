@@ -47,7 +47,7 @@ output "first_dedicated_host_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -68,7 +68,7 @@ output "first_dedicated_host_id" {
 * `zone_id` - (选填, 变更时重建) - 可用区ID。您可以调用[DescribeZones](https://help.aliyun.com/document_detail/25610.html)查看最新的阿里云可用区列表。
 * `tags` - (选填) - 要分配给资源的标签映射。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

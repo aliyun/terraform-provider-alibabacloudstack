@@ -118,7 +118,7 @@ resource "alibabacloudstack_image_share_permission" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -139,11 +139,17 @@ resource "alibabacloudstack_image_share_permission" "default" {
 * `create` - (默认为10分钟)用于创建镜像(直到达到初始“可用”状态)。
 * `delete` - (默认为10分钟)用于终止镜像。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 
 * `id` - 镜像的ID。
 * `image_name` - 镜像名称。
 * `description` - 镜像描述。
-* `disk_device_mapping` - 与镜像关联的磁盘设备映射。
+* `disk_device_mapping` - 与镜像关联的磁盘设备映射。此属性包含以下信息：
+  * `size` - 磁盘的大小（以GiB为单位）。
+  * `snapshot_id` - 创建镜像时使用的快照ID。
+  * `device` - 磁盘设备的挂载点。
+  * `format` - 磁盘的文件系统格式。
+  * `import_oss_bucket` - 如果镜像是通过OSS导入的，则显示对应的OSS存储桶名称。
+  * `import_oss_object` - 如果镜像是通过OSS导入的，则显示对应的OSS对象名称。

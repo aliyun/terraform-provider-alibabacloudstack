@@ -61,21 +61,22 @@ resource "alibabacloudstack_slb_domainextension" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `load_balancer_id` - (必填, 变更时重建) SLB实例的ID。
 * `frontend_port` - (选填, 变更时重建) SLB实例使用的HTTPS监听器的前端端口。有效值：1–65535。
+* `listener_port` - (选填, 变更时重建) SLB实例使用的HTTPS监听器的监听端口。有效值：1–65535。
 * `domain` - (必填, 变更时重建) 为该证书配置的域名。
 * `server_certificate_id` - (必填) 要与域关联的服务器证书的ID。
 * `delete_protection_validation` - (选填) 在删除前检查SLB实例的DeleteProtection。如果为true，当其SLB实例启用DeleteProtection时，此资源将不会被删除。默认为false。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 域扩展的ID。
 * `frontend_port` - SLB实例使用的HTTPS监听器的前端端口。
-* `listener_port` - 监听器的前端端口，与`frontend_port`相同。
+* `listener_port` - SLB实例使用的HTTPS监听器的监听端口，与`frontend_port`相同。
 * `domain_extension_id` - 域扩展的唯一标识符。

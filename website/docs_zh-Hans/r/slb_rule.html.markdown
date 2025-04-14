@@ -129,7 +129,7 @@ resource "alibabacloudstack_slb_rule" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -161,10 +161,12 @@ resource "alibabacloudstack_slb_rule" "default" {
 * `sticky_session_type` - (选填) 处理Cookie的模式。如果 `sticky_session` 是 `"on"`，它是必填项。否则将被忽略。有效值：`insert` 和 `server`。`insert` 表示从负载均衡器插入；`server` 表示负载均衡器从后端服务器学习。
 * `delete_protection_validation` - (选填) 删除前检查SLB实例的删除保护。如果为true，则当其SLB实例启用了DeleteProtection时，此资源不会被删除。默认值：`false`。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出了以下属性：
 
 * `name` - 转发规则的名称。
 * `rule_name` - 转发规则的名称。
 * `health_check_connect_port` - 后端服务器的健康检查端口。有效范围：[1-65535]。若为空且 `HealthCheck` 为 `on`，表明默认使用监听后端端口配置。
+* `healthy_threshold` - 表示健康检查成功的结果阈值。
+* `unhealthy_threshold` - 表示健康检查失败的结果阈值。

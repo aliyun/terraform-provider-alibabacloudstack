@@ -49,13 +49,14 @@ The following arguments are supported:
 * `summary` - (Required) The repository general information. It can contain 1 to 100 characters.
 * `repo_type` - (Required) `PUBLIC` or `PRIVATE`, repo's visibility.
 * `detail` - (Optional) The repository specific information. MarkDown format is supported, and the length limit is 2000.
+* `repo_id` - (Optional)  The uuid of Container Registry Enterprise Edition repository.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The resource id of Container Registry Enterprise Edition repository. The value is in format `{instance_id}:{namespace}:{repository}`.
-* `repo_id` - The uuid of Container Registry Enterprise Edition repository.
+* `repo_id` -  The uuid of Container Registry Enterprise Edition repository.
 
 ## Import
 

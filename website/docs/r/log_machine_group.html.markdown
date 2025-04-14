@@ -38,6 +38,8 @@ The following arguments are supported:
 
 * `project` - (Required, ForceNew) The project name to the machine group belongs. 
 * `name` - (Required, ForceNew) The machine group name, which is unique in the same project. 
+* `identify_type` - (Optional) The machine identification type.
+* `topic` - (Optional) The machine group topic.
 
 ## Attributes Reference
 

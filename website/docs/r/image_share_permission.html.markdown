@@ -40,3 +40,4 @@ The following attributes are exported:
 * `id` - ID of the image. It formats as `<image_id>:<account_id>`
 * `image_id` - The source image ID. 
 * `account_id` - Alibabacloudstack Account ID. It is used to share images. 
+* `optional_key` - (Computed) An optional key added by AI.

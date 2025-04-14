@@ -80,43 +80,42 @@ resource "alibabacloudstack_dms_enterprise_instance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
-  * `data_link_name` - (选填) 实例datalink名称。
-  * `database_password` - (必填) 实例登录账号密码。
-  * `database_user` - (必填) 实例登录用户名。
-  * `dba_id` - (选填) 实例dba id，与ListUsers中的id对应。
-  * `dba_uid` - (必填, 变更时重建) 实例的DBA UID，必须为已注册用户的UID。
-  * `ddl_online` - (选填) 实例onlineddl配置。有效值：`0`(不使用)，`1`(原生在线DDL优先)，`2`(DMS无锁表结构变更优先)。
-  * `ecs_instance_id` - (选填) 实例EcsInstanceId。当`instance_source`为`ECS_OWN`时，必须传递此值。
-  * `ecs_region` - (选填) 实例所属Region。当`instance_source`为`RDS`, `ECS_OWN`, 或`VPC_IDC`时，必须传递此值。
-  * `env_type` - (必填) 实例所属环境。有效值：`product`(生产环境)，`dev`(开发环境)，`pre`(预发布环境)，`test`(测试环境)，`sit`(SIT环境)，`uat`(UAT环境)，`pet`(压力测试环境)，`stag`(STAG环境)。
-  * `export_timeout` - (必填) 实例导出超时时间，单位：秒。
-  * `host` - (必填, 变更时重建) 实例连接地址。
-  * `instance_id` - (选填) 实例ID。
-  * `instance_alias` - (选填) 实例别名，帮助用户快速区分定位。
-  * `instance_source` - (必填) 实例来源。有效值：`PUBLIC_OWN`, `RDS`, `ECS_OWN`, `VPC_IDC`。
-  * `instance_type` - (必填) 实例DB类型。有效值：`MySQL`, `SQLServer`, `PostgreSQL`, `Oracle`, `DRDS`, `OceanBase`, `Mongo`, `Redis`。
-  * `network_type` - (必填, 变更时重建) 网络类型。有效值：`CLASSIC`, `VPC`。
-  * `port` - (必填, 变更时重建) 实例连接端口。
-  * `query_timeout` - (必填) 实例查询超时时间，单位：秒。
-  * `safe_rule` - (必填, 变更时重建) 实例的安全规则名称。
-  * `safe_rule_id` - (选填) 实例所对应安全规则id。
-  * `sid` - (选填) 实例sid。当`instance_type`为`PostgreSQL`或`Oracle`时，必须传递此值。
-  * `skip_test` - (选填) 是否忽略测试连通性。有效值：`true`, `false`。
-  * `tid` - (选填) 租户ID。
-  * `use_dsql` - (选填) 是否开启跨库查询。有效值：`0`(未开启)，`1`(开启)。
-  * `vpc_id` - (选填) 实例所属VPC ID。当`instance_source`为`VPC_IDC`时，必须传递此值。
 
-## 属性参考
+* `tid` - (可选) 租户ID。
+* `instance_type` - (必填) 数据库类型。有效值：`MySQL`, `SQLServer`, `PostgreSQL`, `Oracle`, `DRDS`, `OceanBase`, `Mongo`, `Redis`。
+* `instance_source` - (必填) 数据库实例来源。有效值：`PUBLIC_OWN`, `RDS`, `ECS_OWN`, `VPC_IDC`。
+* `network_type` - (必填, 变更时重建) 网络类型。有效值：`CLASSIC`, `VPC`。
+* `env_type` - (必填) 环境类型。有效值：`product`（生产环境），`dev`（开发环境），`pre`（预发布环境），`test`（测试环境），`sit`（SIT环境），`uat`（UAT环境），`pet`（压力测试环境），`stag`（STAG环境）。
+* `host` - (必填, 变更时重建) 目标数据库主机地址。
+* `port` - (必填, 变更时重建) 目标数据库访问端口。
+* `database_user` - (必填) 数据库访问账号。
+* `database_password` - (必填) 数据库访问密码。
+* `instance_name` - (必填) 实例名称，帮助用户快速区分定位。
+* `dba_uid` - (必填, 变更时重建) 实例DBA的UID，必须为已注册用户的UID。
+* `safe_rule` - (必填, 变更时重建) 实例的安全规则名称。
+* `query_timeout` - (必填) 查询超时时间，单位：秒。
+* `export_timeout` - (必填) 导出超时时间，单位：秒。
+* `ecs_instance_id` - (可选) ECS实例ID。当`instance_source`为`ECS_OWN`时，必须传递此值。
+* `vpc_id` - (可选) VPC ID。当`instance_source`为`VPC_IDC`时，必须传递此值。
+* `ecs_region` - (可选) 实例所属区域。当`instance_source`为`RDS`, `ECS_OWN`, 或`VPC_IDC`时，必须传递此值。
+* `sid` - (可选) SID。当`instance_type`为`PostgreSQL`或`Oracle`时，必须传递此值。
+* `data_link_name` - (可选) 跨数据库查询datalink名称。
+* `ddl_online` - (可选) 是否使用在线服务，目前仅支持MySQL和PolarDB。有效值：`0`（不使用），`1`（原生在线DDL优先），`2`（DMS无锁表结构变更优先）。
+* `use_dsql` - (可选) 是否开启跨实例查询。有效值：`0`（未开启），`1`（开启）。
+* `skip_test` - (可选) 是否忽略实例连通性测试。有效值：`true`, `false`。
+
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
-  * `dba_id` - 实例dba id，与ListUsers中的id对应。
-  * `dba_nick_name` - 实例dba昵称。
-  * `ecs_instance_id` - 实例EcsInstanceId。
-  * `instance_id` - 实例ID。
-  * `instance_name` - 实例别名。
-  * `instance_alias` - 实例别名。
-  * `safe_rule_id` - 实例所对应安全规则id。
-  * `status` - 实例状态。
+
+* `id` - DMS企业实例的ID，格式为 `<host>:<port>`。
+* `dba_nick_name` - 实例DBA的昵称。
+* `status` - 实例状态。
+* `dba_id` - 数据库实例的DBA ID。
+* `safe_rule_id` - 数据库实例的安全规则ID。
+* `instance_id` - 数据库实例的ID。
+* `skip_test` - 是否忽略实例连通性测试。有效值：`true`, `false`。
+* `instance_alias` - 数据库实例的别名。字段`instance_alias`从版本1.100.0起已被废弃，建议使用`instance_name`替代。

@@ -52,7 +52,7 @@ output "deployment_set_id_by_name_regex" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -60,8 +60,9 @@ output "deployment_set_id_by_name_regex" {
 * `name_regex` - （可选，变更时重建）用于通过部署集名称筛选结果的正则表达式字符串。
 * `deployment_set_name` - （可选，变更时重建）部署集的名称。用于精确匹配部署集名称。
 * `strategy` - （可选，变更时重建）部署策略。有效值为`Availability`，表示可用性策略。
+* `names` - （可选）部署集名称列表。用于通过名称列表筛选部署集。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -71,8 +72,8 @@ output "deployment_set_id_by_name_regex" {
   * `deployment_set_id` - 部署集ID。
   * `deployment_set_name` - 部署集的名称。
   * `description` - 部署集的描述信息。
-  * `domain` - 部署域。
+  * `domain` - 部署域。例如`Default`表示默认域。
   * `granularity` - 部署粒度。有效值为`Host`，表示主机级部署。
   * `instance_amount` - 部署集内的实例数量。
   * `instance_ids` - 部署集内的实例ID列表。
-  * `strategy` - 部署策略。有效值为`Availability`。
+  * `strategy` - 部署策略。有效值为`Availability`，表示可用性策略。

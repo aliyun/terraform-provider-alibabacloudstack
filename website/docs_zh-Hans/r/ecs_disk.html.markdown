@@ -33,20 +33,19 @@ resource "alibabacloudstack_disk" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `availability_zone` - (选填, 变更时重建) - 磁盘创建时所隶属的可用区。如果未指定 `InstanceId`，则必须指定 `ZoneId`。
 * `zone_id` - (选填, 变更时重建) - 创建按量付费磁盘的可用区 ID。如果您不设置 `InstanceId`，则 `ZoneId` 为必填参数。您不能同时指定 `ZoneId` 和 `InstanceId`。
-* `name` - (选填) - 磁盘名称。默认值为空。
-* `disk_name` - (选填) - 磁盘名称。长度为2~128个字符，支持Unicode中letter分类下的字符(其中包括英文、中文和数字等)。可以包含半角冒号(:)、下划线(_)、半角句号(.)或者短划线(-)。默认值：空。
-* `description` - (选填) - 磁盘描述。长度为2~256个英文或中文字符，不能以 `http://` 和 `https://` 开头。默认值为空。
+* `name` - (选填) - 磁盘名称。长度为2~128个字符，必须包含字母或数字，可以包含短划线(-)、点(.)、下划线(_)。不能以短划线、点或下划线开头或结尾，且不能以 `http://` 或 `https://` 开头。默认值为空。
+* `disk_name` - (选填) - 磁盘名称。长度为2~128个字符，支持Unicode中letter分类下的字符(其中包括英文、中文和数字等)。可以包含冒号(:)、下划线(_)、句号(.)或者短划线(-)。
+* `description` - (选填) - 磁盘描述。长度为2~256个字符，不能以 `http://` 或 `https://` 开头。默认值为空。
 * `category` - (选填, 变更时重建) - 磁盘种类。取值范围：
   - all：所有云盘以及本地盘。
   - cloud：普通云盘。
   - cloud_efficiency：高效云盘。
-  - cloud_ssd：SSD盘。
+  - cloud_ssd：SSD云盘。
   - cloud_essd：ESSD云盘。
   - cloud_auto：ESSD AutoPL云盘。
   - local_ssd_pro：I/O密集型本地盘。
@@ -71,12 +70,12 @@ resource "alibabacloudstack_disk" "default" {
     - 高效云盘(cloud_efficiency)：20~32768。
     - SSD云盘(cloud_ssd)：20~32768。
     - ESSD云盘(cloud_essd)：具体取值范围与 `PerformanceLevel` 的取值有关。可以调用 [DescribeDisks](https://help.aliyun.com/document_detail/25514.html) 查询云盘信息，再根据查询结果中的 `PerformanceLevel` 参数查看取值。
-      - PL0：1~65536。
-      - PL1：20~65536。
-      - PL2：461~65536。
-      - PL3：1261~65536。
+      - PL0：1~32768。
+      - PL1：20~32768。
+      - PL2：461~32768。
+      - PL3：1261~32768。
     - 普通云盘(cloud)：5~2000。
-    - ESSD AutoPL云盘(cloud_auto)：1~65536。
+    - ESSD AutoPL云盘(cloud_auto)：1~32768。
     - ESSD Entry云盘(cloud_essd_entry)：10~32768。
     - 弹性临时盘-标准版(elastic_ephemeral_disk_standard)：64～8,192。
     - 弹性临时盘-高级版(elastic_ephemeral_disk_premium)：64～8,192。
@@ -106,14 +105,14 @@ resource "alibabacloudstack_disk" "default" {
   - false：关闭。
   默认值：无，表示不改变当前的值。> 创建后的云盘默认启用自动快照策略功能。您只需要为云盘绑定自动快照策略即可正常使用。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `availability_zone` - 磁盘所隶属的可用区。
 * `zone_id` - 在指定可用区内创建一块按量付费磁盘。如果您不设置 `InstanceId`，则 `ZoneId` 为必填参数。您不能同时指定 `ZoneId` 和 `InstanceId`。
 * `name` - 磁盘名称。
-* `disk_name` - 磁盘名称。长度为2~128个字符，支持Unicode中letter分类下的字符(其中包括英文、中文和数字等)。可以包含半角冒号(:)、下划线(_)、半角句号(.)或者短划线(-)。默认值：空。
+* `disk_name` - 磁盘名称。长度为2~128个字符，支持Unicode中letter分类下的字符(其中包括英文、中文和数字等)。可以包含冒号(:)、下划线(_)、句号(.)或者短划线(-)。默认值：空。
 * `status` - 磁盘状态。更多信息，请参见[云盘状态](https://help.aliyun.com/document_detail/25689.html)。取值范围：
   - In_use：使用中。
   - Available：待挂载。

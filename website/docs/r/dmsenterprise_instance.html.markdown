@@ -104,6 +104,7 @@ The following arguments are supported:
 * `data_link_name` - (Optional) Cross-database query datalink name.
 * `ddl_online` - (Optional) Whether to use online services, currently only supports MySQL and PolarDB. Valid values: `0` (Not used), `1` (Native online DDL priority), `2` (DMS lock-free table structure change priority).
 * `use_dsql` - (Optional) Whether to enable cross-instance query. Valid values: `0` (not open), `1` (open).
+* `skip_test` - (Optional) Whether the instance ignores test connectivity. Valid values: `true`, `false`.
 
 ## Attributes Reference
 
@@ -112,10 +113,11 @@ The following attributes are exported in addition to the arguments listed above:
 * `id` - The ID of the DMS enterprise instance and format as `<host>:<port>`.
 * `dba_nick_name` - The instance DBA nickname.
 * `status` - The instance status.
-* `dba_id` - (Optional) The DBA ID of the database instance.
-* `safe_rule_id` - (Optional) The safe rule ID of the database instance.
+* `dba_id` - The DBA ID of the database instance.
+* `safe_rule_id` - The safe rule ID of the database instance.
 * `instance_id` - The ID of the database instance.
-* `skip_test` - (Optional) Whether the instance ignores test connectivity. Valid values: `true`, `false`.
+* `skip_test` - Whether the instance ignores test connectivity. Valid values: `true`, `false`.
+* `instance_alias` - The alias of the database instance. Field 'instance_alias' has been deprecated from version 1.100.0. Use 'instance_name' instead.
 
 ## Import
 

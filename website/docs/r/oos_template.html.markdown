@@ -62,6 +62,7 @@ The following arguments are supported:
 * `template_name` - (Required, ForceNew) The name of the template. The template name can be up to 200 characters in length. The name can contain letters, digits, hyphens (-), and underscores (_). It cannot start with `ALIYUN`, `ACS`, `ALIBABA`, or `ALICLOUD`.
 * `version_name` - (Optional) The name of the template version. This allows you to manage different versions of the same template.
 * `tags` - (Optional) A mapping of tags to assign to the resource. Tags help in organizing and categorizing your resources.
+* `description` - (Required) Description of the template.
 
 ## Attributes Reference
 
@@ -79,6 +80,4 @@ In addition to all arguments above, the following attributes are exported:
 * `template_version` - The version of the OOS Template. Helps in managing different iterations of the same template.
 * `updated_by` - The user who last updated the template. Useful for auditing purposes.
 * `updated_date` - The time when the template was last updated. This helps in tracking changes made to the template over time.
-
-
-This updated documentation provides a more comprehensive example and detailed descriptions of each argument and attribute, ensuring clarity and completeness for users implementing the `alibabacloudstack_oos_template` resource.
+* `template_name` - (Computed) Name of the template.

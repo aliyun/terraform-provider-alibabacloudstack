@@ -55,7 +55,7 @@ resource "alibabacloudstack_nat_gateway" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
   * `vpc_id` - (必填, 变更时重建) - 所属的VPC ID。
@@ -71,7 +71,7 @@ resource "alibabacloudstack_nat_gateway" "default" {
     * `public_ip_addresses` - (选填) - 带宽包的公共 IP 地址。公共 IP 的数量等于 `ip_count`，多个 IP 以逗号分隔，例如“10.0.0.1,10.0.0.2”。
   * `tags` - (选填, Map) - 要分配给资源的标签映射。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
   * `id` - NAT网关的ID。
@@ -84,3 +84,4 @@ resource "alibabacloudstack_nat_gateway" "default" {
   * `bandwidth_package_ids` - 带宽包ID的列表，以逗号分隔。
   * `snat_table_ids` - NAT网关自动创建的SNAT表的ID。
   * `forward_table_ids` - NAT网关自动创建的目的地网络地址转换(DNAT)表的ID。
+  * `bandwidth_packages` - 与NAT网关关联的带宽包详细信息。

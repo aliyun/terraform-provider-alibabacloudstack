@@ -73,6 +73,7 @@ The following arguments are supported:
 * `db_cluster_id` - (Required, ForceNew) The ID of the ADB cluster that needs to have its backup policy configured.
 * `preferred_backup_period` - (Required) The days on which the ADB cluster backup should occur. Valid values include: `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday`, `Sunday`.
 * `preferred_backup_time` - (Required) The time window during which the ADB cluster backup should occur, in the format `HH:mmZ-HH:mmZ`. The interval between start and end times is one hour. Note that the time is specified in UTC.
+* `backup_retention_period` - (Optional) The number of days for which data backup files are retained. This value is fixed at 7 days and cannot be modified.
 
 ## Attributes Reference
 

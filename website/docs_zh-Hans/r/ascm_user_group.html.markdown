@@ -29,22 +29,22 @@ output "org" {
 }
 ```
 
-## Argument Reference
+## 参数说明
 
-The following arguments are supported:
+以下参数被支持：
 
 * `group_name` - (Required) 用户组名称。
 * `organization_id` - (Required) 用户组织ID。
-* `role_in_ids` - (Deprecated). 字段 'role_in_ids' 已被弃用，改为使用新字段 'role_ids'。
-* `role_ids` - (Optional) ASCM角色ID。
-* `group_name` - (Required) 用户组名称。
-* `role_in_ids` - (Optional) ASCM角色ID。
+* `role_in_ids` - (Deprecated) 字段 'role_in_ids' 已被弃用，建议改为使用新字段 'role_ids'。
+* `role_ids` - (Optional) ASCM角色ID列表。用于指定该用户组所关联的角色。
+* `group_name` - (Required) 用户组名称（重复定义，实际只需一处即可）。
+* `role_in_ids` - (Optional) 已弃用的ASCM角色ID列表。
 
-## Attributes Reference
+## 属性说明
 
-The following attributes are exported:
+以下属性会被导出：
 
-* `id` - 用户组的登录名。
-* `user_group_id` - 用户组的ID。
-* `organization_id` - 用户组织ID。
-* `role_ids` - ASCM角色ID。
+* `id` - 用户组的登录名，通常作为唯一标识符。
+* `user_group_id` - 用户组的ID，用于唯一标识该用户组。
+* `organization_id` - 用户所属的组织ID。
+* `role_ids` - 与该用户组关联的ASCM角色ID列表。

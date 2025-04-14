@@ -70,7 +70,7 @@ resource "alibabacloudstack_edas_k8s_service" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -84,8 +84,9 @@ resource "alibabacloudstack_edas_k8s_service" "default" {
 * `external_traffic_policy` - (可选) 当服务类型为 `NodePort` 或 `LoadBalancer` 时，设置外部流量管理策略。有效值为 `Local`, `Cluster`，默认为 `Local`。
 * `annotations` - (可选) 服务的注解映射。
 * `labels` - (可选) 服务的标签映射。
+* `allow_edit` - (可选) 表示该服务是否允许编辑。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 

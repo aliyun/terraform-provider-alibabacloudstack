@@ -48,3 +48,5 @@ The following attributes are exported in addition to the arguments listed above:
     * `weight` - The weight associated with the ECS instance.
     * `port` - The port used by the master slave server group.
     * `server_type` - The server type of the attached ECS instance.
+* `ids` - A list of master slave server group IDs.
+* `name_regex` - Regex string used for filtering master slave server group names.

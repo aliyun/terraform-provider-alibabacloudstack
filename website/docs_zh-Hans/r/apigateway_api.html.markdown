@@ -65,7 +65,7 @@ resource "alibabacloudstack_api_gateway_api" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -138,7 +138,9 @@ resource "alibabacloudstack_api_gateway_api" "default" {
   * `result` - (必填) - 模拟服务返回的结果。
   * `aone_name` - (选填) - Aone 的名称。
 
-## 属性参考
+* `body_format` - (选填) - 指定 API 请求的主体格式。有效值为 `STREAM` 和 `FORM`。
+
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
@@ -147,3 +149,4 @@ resource "alibabacloudstack_api_gateway_api" "default" {
 * `name` - API 的名称。
 * `api_name` - API 的名称。
 * `force_nonce_check` - 是否为 API 启用了 nonce 检查。
+* `description` - API 的描述信息。

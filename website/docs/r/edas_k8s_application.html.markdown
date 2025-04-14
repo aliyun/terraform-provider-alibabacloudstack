@@ -120,6 +120,7 @@ The following arguments are supported:
 * `update_release_type` - (Optional)  Release type of batch deployment. Optional Values: `auto` and `manual`.
 * `update_batch_wait_time` - (Optional)  Automatic release time for batch deployment. When the update_release_type is set to `auto`, You need to set an automatic release time.
 * `update_gray` - (Optional)  Number of batches for grayscale deployment.
+* `cr_ee_repo_id` - (Optional) Repository ID for the Enterprise Edition Container Registry.
 
 ## Attributes Reference
 
@@ -149,7 +150,7 @@ The following attributes are exported:
   * `node_path`: The path on the host machine.
   * `mount_path`: The path within the container.
   * `type`: The type of mount.
-* `package_version` - The version number of the deployment package. 
+* `package_version` - The version number of the deployment package.
 
 ## Import
 

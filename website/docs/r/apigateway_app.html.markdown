@@ -84,6 +84,8 @@ The following arguments are supported:
 * `api_id` - (Required, ForceNew) The ID of the API that the app applies to access.
 * `group_id` - (Required, ForceNew) The ID of the API group that the API belongs to.
 * `stage_name` - (Required, ForceNew) The stage that the app applies to access. Valid values include `"RELEASE"`, `"TEST"`, `"PRE"`.
+* `name` - (Required) The name of the resource.
+* `description` - (Optional) The description of the resource.
 
 ## Attributes Reference
 

@@ -64,7 +64,7 @@ resource "alibabacloudstack_vpn_route_entry" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -74,7 +74,7 @@ resource "alibabacloudstack_vpn_route_entry" "default" {
 * `weight` - (必填) - 目的路由的权重值，取值为 **0** 或 **100**。较高的权重(100)表示优先级更高的路由。
 * `publish_vpc` - (必填) - 是否将目的路由发布到VPC。如果设置为`true`，则该路由条目将被传播到关联的VPC路由表中；如果设置为`false`，则不会传播。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

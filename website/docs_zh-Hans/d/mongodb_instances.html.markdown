@@ -66,7 +66,7 @@ output "mongodb_instance_names" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -77,7 +77,7 @@ output "mongodb_instance_names" {
 * `availability_zone` - (选填) 实例可用区。使用此参数通过特定可用区过滤结果。
 * `tags` - (选填, 可用版本 v1.66.0+) 分配给资源的标签映射。使用此参数通过标签过滤结果。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -85,13 +85,13 @@ output "mongodb_instance_names" {
 * `instances` - MongoDB 实例列表。每个元素包含以下属性：
   * `id` - MongoDB 实例的 ID。
   * `name` - MongoDB 实例的名称。
-  * `charge_type` - 计费方式。选项包括 `PostPaid`(按量付费)和 `PrePaid`(包年包月订阅)。
-  * `instance_type` - 实例类型。选项包括 `sharding`(分片集群)或 `replicate`(副本集)。
+  * `charge_type` - 计费方式。选项包括 `PostPaid`(按量付费) 和 `PrePaid`(包年包月订阅)。
+  * `instance_type` - 实例类型。选项包括 `sharding`(分片集群) 或 `replicate`(副本集)。
   * `region_id` - 实例所属的区域 ID。
   * `creation_time` - 实例创建时间，格式为 RFC3339。
   * `expiration_time` - 实例到期时间，格式为 RFC3339。按量付费实例不会过期。
   * `status` - 实例状态。
-  * `replication` - 副本因子，对应节点数量。选项包括 `1`(单节点)和 `3`(三节点副本集)。
+  * `replication` - 副本因子，对应节点数量。选项包括 `1`(单节点) 和 `3`(三节点副本集)。
   * `engine` - 数据库引擎类型。支持的选项是 `MongoDB`。
   * `engine_version` - 数据库引擎版本。
   * `network_type` - 网络类型。选项包括经典网络或 VPC。

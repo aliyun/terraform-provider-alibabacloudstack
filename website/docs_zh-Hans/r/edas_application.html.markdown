@@ -46,7 +46,7 @@ resource "alibabacloudstack_edas_application" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -61,8 +61,9 @@ resource "alibabacloudstack_edas_application" "default" {
 * `group_id` - (选填) - 应用程序将要部署的实例组 ID。如果希望将应用程序部署到所有组，请将此参数设置为 `all`。
 * `package_version` - (选填) - 您要部署的应用程序版本。它对于每个应用程序必须是唯一的。长度不得超过 64 个字符。我们建议使用时间戳。
 * `war_url` - (选填) - 用于应用程序部署的上传 Web 应用程序(WAR)包的存储地址。当 `deployType` 参数设置为 `url` 时，此参数是必填的。
+* `ecu_info` - (选填) - 与应用程序关联的弹性计算单元(ECU)的信息。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

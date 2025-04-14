@@ -61,7 +61,7 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数受支持：
 
@@ -93,7 +93,7 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
 * `limit_m_cpu` - (可选) 应用运行期间实例的 CPU 配额。单位：毫核，设置为 0 表示不限制，类似于 request_cpu。
 * `command` - (可选) 设置的命令，如果设置，将在镜像启动时替换镜像中的启动命令。
 * `command_args` - (可选) 与命令配合使用，命令的参数是一个 JsonArray 格式的字符串，格式为：`[{"argument":"-c"},{"argument":"test"}]`。其中，-c 和 test 是需要设置的两个参数。
-* `envs` - (可选，变更时重建) 部署环境变量，格式必须符合 JSON 对象数组，例如：`{"name":"x","value":"y"},{"name":"x2","value":"y2"}`。如果要取消配置，需要设置一个空的 JSON 数组 "" 来表示无配置。
+* `envs` - (可选，变更时重建) 部署环境变量，格式必须符合 JSON 对象数组，例如：`[{"name":"x","value":"y"},{"name":"x2","value":"y2"}]`。如果要取消配置，需要设置一个空的 JSON 数组 "[]" 来表示无配置。
 * `pre_stop` - (可选) 停止前执行脚本。
 * `post_start` - (可选) 启动后执行脚本。
 * `liveness` - (可选) 容器存活状态监控，格式如下：`{"failureThreshold": 3,"initialDelaySeconds": 5,"successThreshold": 1,"timeoutSeconds": 1,"tcpSocket":{"host":"","port":8080} }`。
@@ -103,25 +103,26 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
 * `namespace` - (可选) K8s 集群的命名空间，它将决定您的应用程序部署在哪一个 K8s 命名空间中。默认为 'default'。
 * `logical_region_id` - (可选) EDAS 命名空间对应的 ID，非默认命名空间必须填写。
 * `config_mount_descs` - (可选) 配置 K8s ConfigMap 和 Secret 挂载，支持将 ConfigMaps 和 Secrets 挂载到指定的容器目录。ConfigMountDescs 的配置参数如下：
-  * `name` - (必填)  ConfigMap 或 Secret 的名称。
-  * `type` - (必填)  配置类型，支持 ConfigMap 和 Secret 类型。
-  * `mount_path` - (必填)  挂载路径，容器内的绝对路径，以斜杠 (/) 开头。
+  * `name` - (必填) ConfigMap 或 Secret 的名称。
+  * `type` - (必填) 配置类型，支持 ConfigMap 和 Secret 类型。
+  * `mount_path` - (必填) 挂载路径，容器内的绝对路径，以斜杠 (/) 开头。
 * `pvc_mount_descs` - (可选) 配置 K8s PVC (PersistentVolumeClaim) 挂载，支持将 K8s PVC 卷挂载到指定的容器目录。PvcMountDescs 的配置参数如下：
-  * `pvc_name` - (必填)  PVC 卷的名称。PVC 卷必须已存在且处于 Bound 状态。
-  * `mount_paths` - (必填)  挂载目录列表，支持配置多个挂载目录。每个挂载目录支持两个配置参数：
-    * `mount_path` - (必填)  挂载路径，容器内的绝对路径，以斜杠 (/) 开头。
-    * `read_only` - (必填)  挂载模式，true 表示只读，false 表示读写，默认为 false。
+  * `pvc_name` - (必填) PVC 卷的名称。PVC 卷必须已存在且处于 Bound 状态。
+  * `mount_paths` - (必填) 挂载目录列表，支持配置多个挂载目录。每个挂载目录支持两个配置参数：
+    * `mount_path` - (必填) 挂载路径，容器内的绝对路径，以斜杠 (/) 开头。
+    * `read_only` - (必填) 挂载模式，true 表示只读，false 表示读写，默认为 false。
 * `local_volume` - (可选) 主机文件挂载到容器目录的配置。
-  * `node_path` - (必填)  主机上的路径。
-  * `mount_path` - (必填)  容器内的路径。
+  * `node_path` - (必填) 主机上的路径。
+  * `mount_path` - (必填) 容器内的路径。
   * `type` - (可选) 挂载类型。
 * `update_type` - (可选) 部署类型。在使用批量部署或灰度部署时可以设置此参数。可选值：`BatchUpdate` 和 `GrayBatchUpdate`。
 * `update_batch` - (可选) 部署批次数量。在使用批量部署时，需要设置部署的批次数量。
 * `update_release_type` - (可选) 批量部署的发布类型。可选值：`auto` 和 `manual`。
 * `update_batch_wait_time` - (可选) 批量部署的自动发布时间。当 `update_release_type` 设置为 `auto` 时，需要设置自动发布时间。
 * `update_gray` - (可选) 灰度部署的批次数量。
+* `cr_ee_repo_id` - (可选) 企业版容器镜像仓库的 Repository ID。
 
-## 属性参考
+## 属性说明
 
 以下属性被导出：
 

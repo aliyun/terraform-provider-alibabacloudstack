@@ -26,24 +26,23 @@ output "domains" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `domain_name` - （可选）按域名过滤结果的正则表达式字符串。
-* `ids` (Optional) - 域名ID列表。
-* `resource_group_id` - （可选，变更时重建）DNS所属的资源组ID。
+* `domain_name` - （可选）按域名过滤结果的正则表达式字符串。  
+* `ids` - （可选）域名ID列表，用于精确匹配特定域名。  
+* `resource_group_id` - （可选，变更时重建）DNS所属的资源组ID，用于筛选属于某个资源组的域名。  
+* `dns_servers` - （可选）分析系统中域名的DNS服务器列表，用于进一步过滤域名。
 
-* `dns_servers` - （可选）分析系统中域名的DNS列表。
-
-## 属性参考
+## 属性说明
 
 除了上述列出的参数外，还导出以下属性：
 
-* `ids` - 域名ID列表。
-* `names` - 域名名称列表。
-* `domains` - 域名列表。每个元素包含以下属性：
-  * `domain_id` - 域名的ID。
-  * `domain_name` - 域名的名称。
-  * `dns_servers` - 分析系统中域名的DNS列表。
-  * `resource_group_id` - DNS所属的资源组ID。
+* `ids` - 域名ID列表，包含所有符合条件的域名的唯一标识符。  
+* `names` - 域名名称列表，包含所有符合条件的域名的名称。  
+* `domains` - 域名详细信息列表，每个元素包含以下属性：  
+  * `domain_id` - 域名的唯一标识符（ID）。  
+  * `domain_name` - 域名的名称。  
+  * `dns_servers` - 分析系统中该域名对应的DNS服务器列表。  
+  * `resource_group_id` - 该域名所属的资源组ID。  

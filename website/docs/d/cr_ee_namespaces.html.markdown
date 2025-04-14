@@ -48,5 +48,3 @@ The following attributes are exported in addition to the arguments listed above:
   * `name` - Name of Container Registry Enterprise Edition namespace.
   * `auto_create` - Boolean, when it set to true, repositories are automatically created when pushing new images. If it set to false, you create repository for images before pushing.
   * `default_visibility` - `PUBLIC` or `PRIVATE`, default repository visibility in this namespace.
-  * `name_regex` - A regex string to filter results by namespace name.
-  * `output_file` - File name where to save data source results (after running `terraform plan`).

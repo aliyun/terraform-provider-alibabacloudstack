@@ -23,13 +23,13 @@ output "slb_zones" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `enable_details` - (可选) 默认为 false，仅在 `zones` 块中输出 `id`。将其设置为 true 可以输出更多详细信息。
+* `enable_details` - (可选) 默认为 `false`，仅在 `zones` 块中输出 `id`。将其设置为 `true` 可以输出更多详细信息。
 
-## 属性参考
+## 属性说明
 
 除了上述列出的参数外，还导出以下属性：
 
@@ -38,3 +38,4 @@ output "slb_zones" {
   * `id` - 区域的 ID。
   * `slb_slave_zone_ids` - SLB 主可用区中的从可用区 ID 列表。
   * `local_name` - 次要区域的名称。
+  * `computed_attribute_example` - 计算属性示例（如果适用）。

@@ -49,7 +49,7 @@ output "vpc_ipv6_internet_bandwidth_id_1" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -58,7 +58,7 @@ output "vpc_ipv6_internet_bandwidth_id_1" {
 * `ipv6_address_id` - (选填, 变更时重建) IPv6 地址实例的 ID。可以通过此参数筛选与特定 IPv6 地址关联的带宽资源。
 * `status` - (选填, 变更时重建) 资源的状态。有效值：`Normal`、`FinancialLocked` 和 `SecurityLocked`。可以通过此参数筛选处于特定状态的带宽资源。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

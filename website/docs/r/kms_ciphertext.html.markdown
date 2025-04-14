@@ -39,9 +39,11 @@ The following arguments are supported:
 * `key_id` - The globally unique ID of the CMK.
 * `encryption_context` - 
   (Optional) The Encryption context. If you specify this parameter here, it is also required when you call the Decrypt API operation. 
+* `sensitive` - (Required) Indicates whether the attribute is sensitive.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
 
-* `ciphertext_blob` - The ciphertext of the data key encrypted with the primary CMK version. 
+* `ciphertext_blob` - The ciphertext of the data key encrypted with the primary CMK version.  
+* `sensitive` - Indicates whether the attribute is sensitive. This attribute is computed automatically.

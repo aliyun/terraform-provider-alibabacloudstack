@@ -42,6 +42,7 @@ The following arguments are supported:
 * `max_execute_count` - (Optional) The maximum number of queries allowed for the user on the day.
 * `max_result_count` - (Optional) The maximum number of rows that can be queried by the user on the day.
 * `tid` - (Optional) The tenant ID. This is the ID of the tenant displayed in the upper right corner of the system. For more information, see [view tenant information](https://www.alibabacloud.com/help/doc-detail/181330.htm).
+* `nick_name` - (Optional) The deprecated nickname of the user. It is recommended to use `user_name` instead.
 
 ## Attributes Reference
 

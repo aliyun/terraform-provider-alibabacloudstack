@@ -54,24 +54,23 @@ resource "alibabacloudstack_alikafka_sasl_user" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `instance_id` - (必填，变更时重建) 拥有该组的ALIKAFKA实例的ID。
 * `username` - (必填，变更时重建) SASL用户的用户名。长度应在1到64个字符之间。字符只能包含'a'-'z'、'A'-'Z'、'0'-'9'、'_'和'-'。
-* `password` - (可选，敏感)操作密码。它可能由字母、数字或下划线组成，长度为1到64个字符。您必须指定`password`和`kms_encrypted_password`字段之一。
+* `password` - (可选，敏感) 操作密码。它可能由字母、数字或下划线组成，长度为1到64个字符。您必须指定`password`和`kms_encrypted_password`字段之一。
 * `kms_encrypted_password` - (可选) 用于数据库账户的KMS加密密码。您必须指定`password`和`kms_encrypted_password`字段之一。
-* `kms_encryption_context` - (可选，MapString)用于在使用`kms_encrypted_password`创建或更新用户之前解密`kms_encrypted_password`的KMS加密上下文。参见[Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm)。当设置了`kms_encrypted_password`时有效。
-* `type` - (可选，变更时重建，1.159.0版本及以上可用)认证机制。有效值：`plain`，`scram`。默认值：`plain`。
-* `kms_encrypted_password` - (可选) 用于数据库账户的KMS加密密码。
+* `kms_encryption_context` - (可选，MapString) 用于在使用`kms_encrypted_password`创建或更新用户之前解密`kms_encrypted_password`的KMS加密上下文。参见[Encryption Context](https://www.alibabacloud.com/help/doc-detail/42975.htm)。当设置了`kms_encrypted_password`时有效。
+* `type` - (可选，变更时重建，1.159.0版本及以上可用) 认证机制。有效值：`plain`，`scram`。默认值：`plain`。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
 * `id` - 资源的ID。格式为 `<instance_id>:<username>`。
-* `type` - (计算得出，1.159.0版本及以上可用)认证机制。有效值：`plain`，`scram`。
+* `type` - (计算得出，1.159.0版本及以上可用) 认证机制。有效值：`plain`，`scram`。
 
 ## 导入
 

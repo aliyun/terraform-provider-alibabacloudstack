@@ -91,6 +91,8 @@ The following arguments are supported:
 * `mongo_list` - (Required) The list of mongo nodes. Each mongo node has the following properties:
   * `node_class` - (Required) Node specification. See [Instance specifications](https://www.alibabacloud.com/help/doc-detail/57141.htm).
 
+* `security_ip_list` - (Optional) - List of IP addresses allowed to access all databases of an instance. The list contains up to 1,000 IP addresses, separated by commas. Supported formats include 0.0.0.0/0, 10.23.12.24 (IP), and 10.23.12.24/24 (CIDR mode). CIDR group mode can authorize a continuous segment of IP addresses, including private network types authorized by IP segments.
+
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
@@ -112,6 +114,17 @@ The following attributes are exported in addition to the arguments listed above:
   * `node_description` - The description of the Config Server node.
   * `node_id` - The ID of the Config Server node.
   * `node_storage` - The node storage of the Config Server node.
+
+* `storage_engine` - (Computed) - Storage engine type of the instance.
+* `instance_charge_type` - (Computed) - Charging type of the instance.
+* `period` - (Computed) - Duration of the subscription for prepaid instances.
+* `zone_id` - (Computed) - Zone where the instance resides.
+* `vswitch_id` - (Computed) - Virtual switch ID within a VPC.
+* `name` - (Computed) - Name of the DB instance.
+* `db_instance_description` - (Computed) - Description of the DB instance.
+* `security_group_id` - (Computed) - Security Group ID associated with the instance.
+* `tde_status` - (Computed) - Transparent Data Encryption status of the instance.
+* `preferred_backup_time` - (Computed) - Preferred backup time window.
 
 ### Timeouts
 

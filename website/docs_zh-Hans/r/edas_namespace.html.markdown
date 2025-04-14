@@ -40,7 +40,7 @@ resource "alibabacloudstack_edas_namespace" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -48,9 +48,9 @@ resource "alibabacloudstack_edas_namespace" "default" {
 * `namespace_logical_id` - (必填, 变更时重建) 命名空间的逻辑ID。  
   - 对于自定义命名空间，格式为 `区域ID:命名空间标识符`，例如 `cn-beijing:tdy218`。
   - 对于默认命名空间，格式仅为 `区域ID`，例如 `cn-beijing`。
-* `namespace_name` - (必填)  命名空间的名称。长度最多为63个字符。
+* `namespace_name` - (必填) 命名空间的名称。长度最多为63个字符。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

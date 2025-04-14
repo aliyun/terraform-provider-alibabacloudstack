@@ -55,7 +55,7 @@ resource "alibabacloudstack_elasticsearch_k8s_instance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下是支持的参数：
 
@@ -68,10 +68,10 @@ resource "alibabacloudstack_elasticsearch_k8s_instance" "default" {
 * `tags` - (可选) - 要分配给资源的标签映射。
 * `instance_charge_type` - (可选) - 实例的计费方式。有效值：PrePaid(包年包月)和 PostPaid(按量付费)。默认是 PostPaid。
 * `period` - (可选) - 实例的订阅周期。有效值：1、2、3、4、5、6、7、8、9、12、24、36。如果 instance_charge_type 是 PrePaid，则此参数是必填的。
-* `data_node_amount` - (必填)  - 数据节点的数量。有效范围：2 到 50。
-* `data_node_spec` - (必填)  - 数据节点的规格。
-* `data_node_disk_size` - (必填)  - 数据节点的磁盘大小，单位为 GB。
-* `data_node_disk_type` - (必填)  - 数据节点的磁盘类型。有效值：cloud_efficiency、cloud_ssd、cloud_essd。
+* `data_node_amount` - (必填) - 数据节点的数量。有效范围：2 到 50。
+* `data_node_spec` - (必填) - 数据节点的规格。
+* `data_node_disk_size` - (必填) - 数据节点的磁盘大小，单位为 GB。
+* `data_node_disk_type` - (必填) - 数据节点的磁盘类型。有效值：cloud_efficiency、cloud_ssd、cloud_essd。
 * `data_node_disk_encrypted` - (可选, 变更时重建) - 是否对数据节点磁盘进行加密。默认为 false。
 * `private_whitelist` - (可选) - Elasticsearch 实例的私有 IP 白名单集合。
 * `enable_public` - (可选) - 是否启用公网访问。默认为 false。
@@ -84,7 +84,7 @@ resource "alibabacloudstack_elasticsearch_k8s_instance" "default" {
 * `resource_group_id` - (可选, 变更时重建) - 资源组的 ID。
 * `setting_config` - (可选) - Elasticsearch 设置的映射。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

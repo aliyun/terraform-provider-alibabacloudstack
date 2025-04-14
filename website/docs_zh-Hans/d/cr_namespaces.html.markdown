@@ -27,13 +27,13 @@ output "output" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `name_regex` - (可选) 用于通过命名空间名称过滤结果的正则表达式字符串。
 
-## 属性参考
+## 属性说明
 
 除了上述列出的参数外，还导出以下属性：
 
@@ -42,4 +42,4 @@ output "output" {
 * `namespaces` - 匹配的容器镜像仓库命名空间列表。每个元素包含以下属性：
   * `name` - 容器镜像仓库命名空间的名称。
   * `auto_create` - 布尔值，当设置为 true 时，在推送新镜像时会自动创建仓库。如果设置为 false，则需要在推送之前创建镜像仓库。
-  * `default_visibility` - `PUBLIC` 或 `PRIVATE`，此命名空间中的默认仓库可见性。
+  * `default_visibility` - `PUBLIC` 或 `PRIVATE`，此命名空间中的默认仓库可见性。 

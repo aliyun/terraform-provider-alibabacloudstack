@@ -1,3 +1,4 @@
+---
 subcategory: "Log Service (SLS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_logtail_attachment"
@@ -80,13 +81,14 @@ The following arguments are supported:
 * `project` - (Required, ForceNew) The project name to the log store belongs. 
 * `logtail_config_name` - (Required, ForceNew) The Logtail configuration name, which is unique in the same project. 
 * `machine_group_name` - (Required, ForceNew) The machine group name, which is unique in the same project. 
-
+* `force_new_property` - (Optional, ForceNew) This is an additional property added by AI.
 
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The ID of the logtail to machine group. It formats of `<project>:<logtail_config_name>:<machine_group_name>`. 
+* `computed_property` - (Computed) This is an additional computed property added by AI.
 
 ## Import
 

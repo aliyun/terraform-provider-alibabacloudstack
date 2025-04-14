@@ -146,7 +146,7 @@ resource "alibabacloudstack_ess_scheduled_task" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
   * `scheduled_action` - (必填) - 定时任务触发时需要执行的操作。必须是伸缩规则的唯一标识符。
@@ -167,7 +167,7 @@ resource "alibabacloudstack_ess_scheduled_task" "default" {
   * `recurrence_end_time` - (选填) - 重复执行定时任务的结束时间。按照ISO 8601标准格式指定时间，格式为`YYYY-MM-DDThh:mm:ssZ`。时间必须为UTC。您不能输入创建计划任务日期之后365天以上的某个时间点。
   * `task_enabled` - (选填) - 是否启动定时任务。默认值：`true`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
   * `id` - 定时任务的ID。
@@ -175,4 +175,4 @@ resource "alibabacloudstack_ess_scheduled_task" "default" {
   * `recurrence_type` - 重复执行定时任务的类型。
   * `recurrence_value` - 重复执行定时任务的数值。
   * `recurrence_end_time` - 重复执行定时任务的结束时间。
-```
+  * `task_enabled` - 表明定时任务是否已启用。

@@ -31,6 +31,7 @@ The following arguments are supported:
 
 * `name_regex` - (Optional, ForceNew) A regex string to filter results by project meta description.
 * `resources` - (Optional) A list of cms project meta. Each element contains the following attributes:
+    * `namespace` - (Optional) The namespace of the service, which is used to distinguish between services. Generally, the value is in the format acs_Abbreviation of the service name .
 
 ## Attributes Reference
 
@@ -42,4 +43,3 @@ The following attributes are exported:
         * `name` - Name of the label.
         * `value` - Value of the label.
     * `namespace` - The namespace of the service, which is used to distinguish between services. Generally, the value is in the format acs_Abbreviation of the service name .
----

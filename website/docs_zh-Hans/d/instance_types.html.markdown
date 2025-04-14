@@ -27,7 +27,7 @@ output "instance_types"{
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -41,7 +41,7 @@ output "instance_types"{
 * `kubernetes_node_role` - (可选) 筛选用于创建Kubernetes集群的结果。可选值：`Master` 和 `Worker`。
 * `ids` - (可选) 实例类型ID列表。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -62,3 +62,4 @@ output "instance_types"{
     * `amount` - 实例已附加的本地存储设备数量。
     * `category` - 实例已附加的本地存储类别。
   * `cpu_type` - CPU类型。
+  * `instance_type_family` - 实例类型家族。

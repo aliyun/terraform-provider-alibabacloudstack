@@ -62,3 +62,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `bandwidth` - The bandwidth of the instance. Unit: Mbit/s.
   * `connections` - The connection quantity limit of the instance. Unit: count.
   * `connection_domain` - The internal endpoint of the instance.
+  * `tags` - A mapping of tags to assign to the resource.

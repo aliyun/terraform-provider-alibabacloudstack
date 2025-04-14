@@ -59,14 +59,14 @@ data "alibabacloudstack_ots_instance_attachments" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
 * `instance_name` - (必填) OTS实例名称，用于筛选与该实例相关的附件。
 * `name_regex` - (可选) 正则表达式字符串，用于通过VPC名称进一步过滤结果。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -80,4 +80,3 @@ data "alibabacloudstack_ots_instance_attachments" "default" {
   * `instance_name` - OTS实例的名称。
   * `vpc_name` - 绑定到OTS实例的VPC名称。
   * `vpc_id` - 绑定到OTS实例的VPC ID。
-```

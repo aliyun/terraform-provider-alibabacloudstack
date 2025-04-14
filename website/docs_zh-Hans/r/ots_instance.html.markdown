@@ -27,7 +27,7 @@ resource "alibabacloudstack_ots_instance" "foo" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -47,8 +47,9 @@ resource "alibabacloudstack_ots_instance" "foo" {
 
 * `description` - (可选，变更时重建) OTS 实例的简要描述。此字段在创建后无法修改。更改此参数将强制创建新资源。
 * `tags` - (可选) 分配给 OTS 实例的标签映射。
+* `propreties` - (可选) OTS 实例的其他属性配置。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 
@@ -58,3 +59,12 @@ resource "alibabacloudstack_ots_instance" "foo" {
 * `accessed_by` - 访问 OTS 实例的网络限制。
 * `instance_type` - OTS 实例的类型。
 * `tags` - 分配给 OTS 实例的标签映射。
+* `propreties` - OTS 实例的计算属性。
+
+## 导入
+
+OTS 实例可以使用实例 ID 或名称导入，例如：
+
+```bash
+$ terraform import alibabacloudstack_ots_instance.foo "my-ots-instance"
+``` 

@@ -88,3 +88,5 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The unique identifier for the ENI attachment resource. It is formatted as `<network_interface_id>:<instance_id>`.
+* `instance_id` - (Computed) The ID of the ECS instance to which the elastic network interface (ENI) is attached. 
+* `network_interface_id` - (Computed) The ID of the elastic network interface (ENI) attached to the specified instance. 

@@ -52,7 +52,7 @@ resource "alibabacloudstack_drds_instance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -82,7 +82,7 @@ resource "alibabacloudstack_drds_instance" "default" {
 * `create` - (默认为10分钟)用于创建DRDS实例(直到其达到运行状态)。
 * `delete` - (默认为10分钟)用于终止DRDS实例。
 
-## 属性参考
+## 属性说明
 
 除了上述列出的参数外，还导出以下属性：
 

@@ -54,7 +54,7 @@ data "alibabacloudstack_ros_templates" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -65,7 +65,7 @@ data "alibabacloudstack_ros_templates" "default" {
 * `enable_details` - (可选) 默认为 `false`。将其设置为 `true` 以输出更多关于资源属性的详细信息。
 * `tags` - (可选) 查询绑定到标签的资源。传入值的格式为 `json` 字符串，包括 `TagKey` 和 `TagValue`。`TagKey` 不能为 null，而 `TagValue` 可以为空。格式示例：`{"key1":"value1"}`。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -84,3 +84,4 @@ data "alibabacloudstack_ros_templates" "default" {
   * `template_id` - 模板的 ID。
   * `template_name` - 模板的名称。长度不超过255个字符，必须以数字或英文字母开头，可包含数字、英文字母、短划线(-)和下划线(_)。
   * `template_version` - 模板的版本。
+* `ids` - 模板 ID 列表。

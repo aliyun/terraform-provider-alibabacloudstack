@@ -38,7 +38,7 @@ output "express_connect_physical_connection_id_2" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -57,7 +57,7 @@ output "express_connect_physical_connection_id_2" {
   * `Allocation Failed`: 资源分配失败。
   * `Terminated`: 已终止。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -109,4 +109,4 @@ output "express_connect_physical_connection_id_2" {
   * `spec` - 物理专线的规格。单位：G 表示 Gbps。
   * `status` - 物理专线的状态。参见 `status` 参数的有效值。
   * `type` - 物理专线的类型。默认值为 `VPC`。
-```
+  * `reservation_order_type` - 预留订单的订单类型。

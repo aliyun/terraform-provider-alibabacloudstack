@@ -54,3 +54,6 @@ The following arguments are supported:
 * `material_expire_time` - The time and date the key material for the CMK expires. The time is displayed in UTC. If the value is empty, the key material for the CMK does not expire.
 * `next_rotation_date` - The time the next rotation is scheduled for execution. 
 * `primary_key_version` - The ID of the current primary key version of the symmetric CMK.
+
+* `automatic_rotation` - The attribute indicates whether automatic rotation is enabled for the key. 
+* `description` - The description of the key as viewed in Alibabacloudstack console. 

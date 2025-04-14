@@ -36,7 +36,7 @@ resource "alibabacloudstack_vpc_routetable" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -44,10 +44,11 @@ resource "alibabacloudstack_vpc_routetable" "default" {
 * `name` - (可选) 路由表的名称。如果不指定，Terraform将自动生成一个唯一名称。
 * `description` - (可选) 路由表的详细描述。这有助于识别路由表的目的或用途。
 * `tags` - (可选) 分配给路由表的标签映射。这些标签可用于分类和成本分配。
+* `route_table_name` - (可选) 路由表的名称。与`name`冲突，请改用此字段以替代已弃用的`name`字段。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 路由表实例的ID。
-* `route_table_name` - 由`name`参数指定或自动生成的路由表名称。
+* `route_table_name` - 由`name`参数指定或自动生成的路由表名称。如果未提供`name`参数，则会自动生成一个唯一的名称。

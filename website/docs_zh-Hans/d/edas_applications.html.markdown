@@ -49,14 +49,14 @@ output "application_names" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
 * `ids` - (可选) 应用程序ID列表，用于过滤结果。如果未提供，则会考虑所有应用程序。
 * `name_regex` - (可选) 用于按应用程序名称过滤结果的正则表达式字符串。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -66,14 +66,12 @@ output "application_names" {
   * `app_name` - EDAS应用程序的名称。仅允许字母、数字、'-'和'_'。长度不能超过36个字符。
   * `app_id` - 应用程序的ID。
   * `application_type` - 部署应用程序的包类型。有效值为：  
-    - `War`：表示WAR包部署。  
-    - `FatJar`：表示JAR包部署。  
-    - `Image`：表示镜像部署。  
-    - 空字符串：表示未部署。
-  * `build_package_id` - 容器版本ID。
+    - `WAR`：表示WAR包部署。  
+    - `JAR`：表示JAR包部署。
+  * `build_package_id` - 容器版本ID（即EDAS容器的包ID）。
   * `cluster_id` - 应用程序所属的集群ID。
   * `cluster_type` - 应用程序所属的集群类型。有效值为：  
+    - `1`：Swarm集群。  
     - `2`：ECS集群。  
-    - `3`：EDAS自带K8s集群。  
-    - `5`：容器服务K8s集群。
+    - `3`：Kubernetes集群。
   * `region_id` - 应用程序所在的区域ID。

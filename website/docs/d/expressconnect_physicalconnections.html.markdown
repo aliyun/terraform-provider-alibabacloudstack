@@ -105,3 +105,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `spec` - Specifications of the physical connection. Unit: G means Gbps.
   * `status` - The status of the physical connection. See the valid values for the `status` argument.
   * `type` - The type of the physical connection. The default value is `VPC`.
+  * `reservation_order_type` - The order type of the reservation.

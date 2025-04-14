@@ -26,7 +26,7 @@ resource "alibabacloudstack_data_works_user_role_binding" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -34,7 +34,7 @@ resource "alibabacloudstack_data_works_user_role_binding" "default" {
 * `user_id` - (必填) 阿里云账号ID。
 * `role_code` - (必填) DataWorks工作区角色代码。 
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 

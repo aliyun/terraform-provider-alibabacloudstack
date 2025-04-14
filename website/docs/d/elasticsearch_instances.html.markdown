@@ -50,4 +50,3 @@ The following attributes are exported in addition to the arguments listed above:
   * `updated_at` - The last modified time of the instance. It's a GMT format, such as: "2019-01-08T15:50:50.623Z".
   * `status` - Status of the instance. It includes `active`, `activating`, `inactive`
   * `tags` - A map of tags assigned to the instance.
-  * `output_file` - File name where to save data source results (after running `terraform plan`).

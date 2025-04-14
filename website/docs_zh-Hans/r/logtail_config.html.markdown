@@ -47,7 +47,7 @@ resource "alibabacloudstack_logtail_config" "example" {
 ```
 
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -57,10 +57,10 @@ resource "alibabacloudstack_logtail_config" "example" {
 * `log_sample` - (可选) Logtail配置的日志样本。日志大小不能超过1,000字节。
 * `name` - (必填，变更时重建) Logtail配置名称，在同一项目中必须唯一。
 * `output_type` - (必填) 输出类型。目前仅支持LogService。
-* `input_detail` - (必填) Logtail配置所需的JSON文件。([详情参考](https://www.alibabacloud.com/help/doc-detail/29058.htm))
-  
+* `input_detail` - (必填) Logtail配置所需的JSON文件。该JSON文件定义了具体的日志采集规则和配置细节。([详情参考](https://www.alibabacloud.com/help/doc-detail/29058.htm))
 
-## 属性参考
+
+## 属性说明
 
 导出以下属性：
 

@@ -58,7 +58,7 @@ resource "alibabacloudstack_natgateway_snatentry" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -66,8 +66,9 @@ resource "alibabacloudstack_natgateway_snatentry" "default" {
 * `source_vswitch_id` - (选填，变更时重建) 与SNAT条目关联的交换机ID。此参数与`source_cidr`参数互斥。
 * `snat_ip` - (必填) 用于SNAT条目的公网IP地址。此IP必须属于与NAT网关关联的弹性IP (EIP)。
 * `source_cidr` - (选填，变更时重建) ECS实例的私有网络段。此参数与`source_vswitch_id`参数互斥。
+* `snat_entry_id` - (必填) 服务器上的SNAT条目的唯一标识符。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

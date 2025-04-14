@@ -37,7 +37,7 @@ output "common_bandwidth_packages" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -45,7 +45,7 @@ output "common_bandwidth_packages" {
 * `name_regex` - (可选，变更时重建) 用于按名称筛选结果的正则表达式字符串。
 * `resource_group_id` - (可选，变更时重建) 您要将资源移动到的资源组的 ID。您可以使用资源组来方便地对资源进行分组和权限管理。有关更多信息，请参见 [什么是资源管理？](https://help.aliyun.com/document_detail/94475.html)
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 
@@ -64,6 +64,17 @@ output "common_bandwidth_packages" {
     - **Normal**: 正常。
     - **FinancialLocked**: 欠费。
     - **Unactivated**: 未激活。
+  * `isp` - 线路类型。有效值：
+    - **BGP**: 所有区域均支持 BGP（多线）。
+    - **BGP_PRO**: BGP（多线）Pro 线路在以下区域可用：中国（香港）、新加坡、日本（东京）、菲律宾（马尼拉）、马来西亚（吉隆坡）、印度尼西亚（雅加达）和泰国（曼谷）。
+    - 如果您允许使用单线带宽，还可以使用以下值之一：
+      - **ChinaTelecom**
+      - **ChinaUnicom**
+      - **ChinaMobile**
+      - **ChinaTelecom_L2**
+      - **ChinaUnicom_L2**
+      - **ChinaMobile_L2**
+    - 如果您的服务部署在中国东部 1 财经区域，则此参数是必需的，且必须设置为 **BGP_FinanceCloud**。
   * `creation_time` - 共享带宽包创建的时间。
   * `public_ip_addresses` - 属于共享带宽包的公共 IP 地址。每个元素包含以下属性：
     * `ip_address` - 弹性公网 IP 的地址。

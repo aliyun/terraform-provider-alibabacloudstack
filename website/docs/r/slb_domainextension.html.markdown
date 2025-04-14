@@ -66,6 +66,7 @@ The following arguments are supported:
 
 * `load_balancer_id` - (Required, ForceNew) The ID of the SLB instance.
 * `frontend_port` - (Optional, ForceNew) The frontend port used by the HTTPS listener of the SLB instance. Valid values: 1–65535.
+* `listener_port` - (Optional, ForceNew) The listener port used by the HTTPS listener of the SLB instance. Valid values: 1–65535. 
 * `domain` - (Required, ForceNew) The domain name for which the certificate is configured.
 * `server_certificate_id` - (Required) The ID of the server certificate to be associated with the domain.
 * `delete_protection_validation` - (Optional) Checking DeleteProtection of SLB instance before deleting. If true, this resource will not be deleted when its SLB instance enabled DeleteProtection. Default to false.
@@ -76,6 +77,5 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the domain extension.
 * `frontend_port` - The frontend port used by the HTTPS listener of the SLB instance.
+* `listener_port` - The listener port used by the HTTPS listener of the SLB instance. 
 * `domain_extension_id` - The unique identifier for the domain extension.
-```
-```

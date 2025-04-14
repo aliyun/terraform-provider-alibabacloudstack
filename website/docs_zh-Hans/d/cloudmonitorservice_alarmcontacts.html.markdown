@@ -26,18 +26,22 @@ output "first-contact" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
 * `ids` - (可选, 变更时重建) 报警联系人的ID列表。用于通过报警联系人ID进行精确过滤。
 * `name_regex` - (可选, 变更时重建) 用于通过报警联系人名称过滤结果的正则表达式字符串。例如，可以使用 `^test-` 来匹配所有以 `test-` 开头的报警联系人。
-* `chanel_type` - (可选, 变更时重建) 报警通知方式。可以通过 `Email`, `DingWebHook` 或其他方法发送报警通知。
-* `chanel_value` - (可选, 变更时重建) 报警通知目标，例如电子邮件地址或钉钉机器人的webhook URL。
+* `chanel_type` - (可选, 变更时重建) 报警通知方式。可以通过以下方法发送报警通知：
+    * `Email` - 使用电子邮件发送报警通知。
+    * `DingWebHook` - 使用钉钉群机器人的webhook URL发送报警通知。
+    * 其他支持的方法（如果适用）。
+* `chanel_value` - (可选, 变更时重建) 报警通知目标，例如电子邮件地址或钉钉群机器人的webhook URL。
+* `names` - (可选) 报警联系人名称列表，用于通过名称进行精确过滤。
 
 -> **注意：** 至少需要指定以下一个报警通知目标：电话号码、电子邮件地址、钉钉群机器人webhook URL 和 TradeManager ID。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -49,9 +53,9 @@ output "first-contact" {
     * `channels_mail` - 报警联系人的电子邮件地址。
     * `channels_sms` - 报警联系人的电话号码。
     * `describe` - 报警联系人的描述信息。
-    * `contact_groups` - 添加该报警联系人的告警组列表。
-    * `channels_state_aliim` - 表示TradeManager ID是否有效(布尔值)。
-    * `channels_state_ding_web_hook` - 表示钉钉群机器人是否正常(布尔值)。
-    * `channels_state_mail` - 电子邮件地址的状态(布尔值)。
-    * `channels_status_sms` - 电话号码的状态(布尔值)。
-    * `Lang` - 报警的语言类型(如 `zh` 表示中文，`en` 表示英文)。
+    * `contact_groups` - 包含该报警联系人的告警组列表。
+    * `channels_state_aliim` - 表示TradeManager ID是否有效（布尔值）。如果为 `true`，表示该ID有效；否则无效。
+    * `channels_state_ding_web_hook` - 表示钉钉群机器人是否正常（布尔值）。如果为 `true`，表示机器人状态正常；否则异常。
+    * `channels_state_mail` - 电子邮件地址的状态（布尔值）。如果为 `true`，表示邮件地址可用；否则不可用。
+    * `channels_status_sms` - 电话号码的状态（布尔值）。如果为 `true`，表示电话号码可用；否则不可用。
+    * `Lang` - 报警的语言类型（如 `zh` 表示中文，`en` 表示英文）。

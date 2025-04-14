@@ -58,3 +58,7 @@ The following attributes are exported in addition to the arguments listed above:
   * `location` - The Location of the Access Point.
   * `status` - The Physical Connection to Which the Access Point State.
   * `type` - The Physical Connection to Which the Network Type.
+  * `attached_region_no` - The region number where the access point is attached.
+  * `description` - The description of the access point.
+  * `host_operator` - The operator to which the access point belongs.
+  * `location` - The location of the access point.

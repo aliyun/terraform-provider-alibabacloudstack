@@ -50,7 +50,7 @@ resource "alibabacloudstack_cloudmonitorservice_sitemonitor" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -78,8 +78,9 @@ resource "alibabacloudstack_cloudmonitorservice_sitemonitor" "default" {
     "Pingnum": 10         // 发送的PING数据包数量(适用于PING任务)
   }
   ```
+* `task_state` - (选填) - 站点监控任务的当前状态。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

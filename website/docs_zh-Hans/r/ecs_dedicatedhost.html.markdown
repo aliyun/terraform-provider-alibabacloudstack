@@ -76,7 +76,7 @@ resource "alibabacloudstack_ecs_dedicated_host" "with_zone" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -103,7 +103,7 @@ resource "alibabacloudstack_ecs_dedicated_host" "with_zone" {
 * `auto_renew_period` - (选填) - 单次自动续费的周期。当参数**AutoRenew**为`true`时，**AutoRenewPeriod**参数方可生效，并为必选参数。取值范围：
   * PeriodUnit=Week时：1、2、3。
   * PeriodUnit=Month时：1、2、3、6、12。
-  
+
 * `cpu_over_commit_ratio` - (选填) - CPU超卖比。仅自定义规格g6s、c6s、r6s支持设置CPU超卖比。取值范围：1~5。CPU超卖比影响DDH的可用vCPU数，一台DDH的可用vCPU数=物理CPU核数*2*CPU超卖比。例如，g6s的物理CPU核数为52，如果设置CPU超卖比为4，则DDH创建完成后vCPU总数显示为416。
 
 * `dedicated_host_cluster_id` - (选填) - 专有宿主机所属的专有宿主机集群ID。
@@ -147,7 +147,7 @@ resource "alibabacloudstack_ecs_dedicated_host" "with_zone" {
 
 * `tags` - (选填) - 分配给资源的标签映射。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

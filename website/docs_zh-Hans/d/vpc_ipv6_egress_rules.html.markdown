@@ -87,7 +87,7 @@ data "alibabacloudstack_vpc_ipv6_egress_rules" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -98,7 +98,7 @@ data "alibabacloudstack_vpc_ipv6_egress_rules" "default" {
 * `ipv6_gateway_id` - (必填, 变更时重建) - IPv6网关的ID。
 * `status` - (选填, 变更时重建) - 资源的状态。有效值为：`Available`、`Deleting`、`Pending`。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

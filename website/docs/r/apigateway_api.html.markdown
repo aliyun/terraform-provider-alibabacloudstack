@@ -141,6 +141,8 @@ The following arguments are supported:
 
   * `result` - (Required) The result returned by the mock service.
   * `aone_name` - (Optional) The name of Aone.
+  
+* `body_format` - (Optional) Specifies the body format of the API request. Valid values are `STREAM` and `FORM`.
 
 ## Attributes Reference
 
@@ -151,3 +153,4 @@ In addition to all arguments above, the following attributes are exported:
 * `name` - The name of the API.
 * `api_name` - The name of the API.
 * `force_nonce_check` - Whether nonce check is enabled for the API.
+* `description` - The description of the API.

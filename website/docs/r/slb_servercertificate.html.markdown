@@ -52,3 +52,5 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The ID of the server certificate (SSL Certificate).
 * `name` - The name of the server certificate.
 * `server_certificate_name` - The name of the server certificate as specified during creation.
+* `server_certificate` -  Represents the public key certificate that was uploaded.
+* `private_key` -  Represents the private key corresponding to the uploaded public key certificate.

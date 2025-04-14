@@ -49,14 +49,15 @@ resource "alibabacloudstack_slb_loadbalancer" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `name` - (可选) SLB的名称。该名称必须在您的AlibabaCloudStack账户中是唯一的，最多可以包含80个字符，只能包含字母、数字或连字符(-)，并且不能以连字符开头或结尾。如果不指定，Terraform将自动生成一个以`tf-lb`开头的名称。
-* `address_type` - (可选，强制新资源)SLB实例的网络类型。有效值：["internet", "intranet"]。如果负载均衡器是在VPC中启动的，则此值必须为"intranet"。
+* `address_type` - (可选，强制新资源) SLB实例的网络类型。有效值：["internet", "intranet"]。如果负载均衡器是在VPC中启动的，则此值必须为"intranet"。
   * `internet`：创建Internet SLB实例后，系统会分配一个公共IP地址，以便实例可以从Internet转发请求。
   * `intranet`：创建内网SLB实例后，系统会分配一个内网IP地址，以便实例只能转发内网请求。
+* `vswitch_id` - (必填，对于VPC SLB，强制新资源) 启动SLB所在的交换机ID。如果`address_type`设置为"internet"，此字段将被忽略。
 * `specification` - (可选) 服务器负载均衡实例的规格。默认为空字符串，表示它是“共享性能”实例。有效值包括：
   * `slb.s1.small`
   * `slb.s2.small`
@@ -65,11 +66,10 @@ resource "alibabacloudstack_slb_loadbalancer" "default" {
   * `slb.s3.medium`
   * `slb.s3.large`
   * `slb.s4.large`
-* `vswitch_id` - (必填，对于VPC SLB，强制新资源)启动SLB所在的交换机ID。如果`address_type`设置为"internet"，此字段将被忽略。
 * `tags` - (可选) 要分配给资源的标签映射。
-* `address` - (可选，强制新资源)负载均衡实例的服务地址。此字段由系统根据`address_type`自动分配。
+* `address` - (可选，强制新资源) 负载均衡实例的服务地址。此字段由系统根据`address_type`自动分配。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

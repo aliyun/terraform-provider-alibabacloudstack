@@ -110,3 +110,4 @@ In addition to all arguments above, the following attributes are exported:
 * `ingress_acl_entries` - Inward direction rule information.
 * `network_acl_name` - The name of the network ACL.
 * `name` - Deprecated field, use `network_acl_name` instead.
+* `vpc_id` - (Computed) The ID of the associated VPC.

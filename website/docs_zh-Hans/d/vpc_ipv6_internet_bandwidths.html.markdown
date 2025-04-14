@@ -49,7 +49,7 @@ output "vpc_ipv6_internet_bandwidth_id_1" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -58,17 +58,17 @@ output "vpc_ipv6_internet_bandwidth_id_1" {
 * `ipv6_address_id` - (选填, 变更时重建) IPv6 地址实例的 ID。可以通过此参数筛选与特定 IPv6 地址关联的带宽资源。
 * `status` - (选填, 变更时重建) 资源的状态。有效值：`Normal`、`FinancialLocked` 和 `SecurityLocked`。可以通过此参数筛选处于特定状态的带宽资源。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
 * `names` - IPv6 Internet 带宽名称列表。
 * `bandwidths` - VPC IPv6 Internet 带宽列表。每个元素包含以下属性：
-  * `bandwidth` - IPv6 地址的独享公网带宽，单位 Mbps。有效值范围为 `1` 到 `5000` Mbit/s。
+  * `bandwidth` - IPv6 地址的独享公网带宽，单位 Mbps。有效值范围为 `1` 到 `5000` Mbit/s。**注意**：如果 `internet_charge_type` 设置为 `PayByTraffic`，则 IPv6 地址的公网带宽资源将受到 IPv6 网关规格的限制。`Small`（默认）：表示免费版，公网带宽范围为 `1` 到 `500` Mbit/s；`Medium`：表示标准版，公网带宽范围为 `1` 到 `1000` Mbit/s；`Large`：表示高级版，公网带宽范围为 `1` 到 `2000` Mbit/s。
   * `id` - IPv6 Internet 带宽的 ID。
-  * `internet_charge_type` - IPv6 网关的互联网带宽资源的计费方式。有效值：`PayByBandwidth`、`PayByTraffic`。
+  * `internet_charge_type` - IPv6 网关的互联网带宽资源的计费方式。有效值：`PayByBandwidth`（按固定带宽计费）、`PayByTraffic`（按流量计费）。
   * `ipv6_address_id` - IPv6 地址实例的 ID。
   * `ipv6_gateway_id` - IPv6 地址所属的 IPv6 网关的 ID。
   * `ipv6_internet_bandwidth_id` - IPv6 Internet 带宽的 ID。
   * `payment_type` - 资源的支付类型。
-  * `status` - 资源的状态。有效值：`Normal`、`FinancialLocked` 和 `SecurityLocked`。
+  * `status` - 资源的状态。有效值：`Normal`（正常）、`FinancialLocked`（财务锁定）和 `SecurityLocked`（安全锁定）。

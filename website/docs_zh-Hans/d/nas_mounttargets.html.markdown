@@ -76,7 +76,7 @@ output "first_mount_target_domain" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -88,9 +88,9 @@ output "first_mount_target_domain" {
 * `vswitch_id` - (选填, 变更时重建) 交换机 ID。
 * `file_system_id` - (必填, 变更时重建) 文件系统 ID。
 * `ids` - (选填, 强制新建, 自 1.53.0+ 版本起可用) 挂载目标域名 ID 列表。
-* `status` - (选填, 强制新建, 自 1.95.0+ 版本起可用) 挂载点当前状态，包括：`Active`、`Inactive` 和 `Pending`。当状态为 `Active` 时才可以进行文件系统挂载使用。
+* `status` - (选填, 强制新建, 自 1.95.0+ 版本起可用) 挂载点当前状态，包括：`Active`、`Inactive` 和 `Pending`。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -100,6 +100,7 @@ output "first_mount_target_domain" {
   * `mount_target_domain` - 挂载点域名。
   * `network_type` - 网络类型。
   * `type` - (已在 1.95.0+ 版本中弃用) 此字段自提供商版本 1.95.0 起已弃用，请改用 `network_type`。
-  * `status` - 挂载点当前状态，包括：`Active`、`Inactive` 和 `Pending`。当状态为 `Active` 时才可以进行文件系统挂载使用。
+  * `status` - 挂载点当前状态，包括：`Active`、`Inactive` 和 `Pending`。
   * `vpc_id` - VPC ID。
   * `vswitch_id` - 交换机 ID。
+  * `file_system_id` - 文件系统 ID。

@@ -69,6 +69,7 @@ The following arguments are supported:
   * `zone` - (Optional) The Availability Zone for the current bandwidth package. If this value is not specified, Terraform will set a random AZ.
   * `public_ip_addresses` - The public IP addresses for the bandwidth package. The count of public IPs equals `ip_count`, and multiple IPs are separated by commas, such as "10.0.0.1,10.0.0.2".
 * `tags` - (Optional, Map) A mapping of tags to assign to the resource.
+* `spec` - (Optional) The specification of the NAT gateway. Valid values are `Small`, `Middle`, and `Large`.  
 
 ## Attributes Reference
 
@@ -82,3 +83,4 @@ In addition to all arguments above, the following attributes are exported:
 * `bandwidth_package_ids` - A list of IDs of the bandwidth packages, separated by commas.
 * `snat_table_ids` - The ID of the SNAT table automatically created by the NAT gateway.
 * `forward_table_ids` - The ID of the Destination Network Address Translation (DNAT) table automatically created by the NAT gateway.
+* `bandwidth_packages` - The details of the bandwidth packages associated with the NAT gateway.  

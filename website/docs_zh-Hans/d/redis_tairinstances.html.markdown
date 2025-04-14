@@ -58,7 +58,7 @@ output "first_instance_name" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -67,7 +67,7 @@ output "first_instance_name" {
 * `status` - (可选) 资源的状态。有效值包括：`Creating`(创建中)、`Running`(运行中)、`Restarting`(重启中)、`ChangingConfig`(配置变更中)、`FlushingData`(数据刷盘中)、`Deleting`(删除中)、`NetworkChanging`(网络变更中)、`Abnormal`(异常)。
 * `instance_type` - (可选) 实例的存储介质类型。有效值包括：`tair_rdb`(内存型)、`tair_scm`(持久内存型)、`tair_essd`(云盘型)。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -93,3 +93,4 @@ output "first_instance_name" {
   * `bandwidth` - 实例的带宽，单位为 Mbit/s。
   * `connections` - 实例的连接数量限制，单位为个数。
   * `connection_domain` - 实例的内网连接地址。
+  * `tags` - 实例的标签映射。

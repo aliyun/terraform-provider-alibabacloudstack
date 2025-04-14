@@ -94,7 +94,7 @@ output "ack_cluster_names" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -104,7 +104,7 @@ output "ack_cluster_names" {
 * `enable_details` - (可选) 布尔值，默认为 `false`。将此参数设置为 `true` 将返回有关每个集群的更多详细信息，例如 `master_nodes`、`worker_nodes` 和 `connections`。
 * `kube_config` - (可选) 布尔值，如果要获取 `ids` 中指定的集群的 kubeconfig，请将其设置为 `true`。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

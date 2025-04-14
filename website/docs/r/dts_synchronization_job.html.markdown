@@ -126,6 +126,7 @@ The following attributes are exported:
 * `checkpoint` -  Start time in Unix timestamp format.
 * `instance_class` -  The instance class.
 * `status` - The status of the resource. Valid values: `Synchronizing`, `Suspending`.
+* `synchronization_direction` - Synchronization direction.、
 
 ## Import
 

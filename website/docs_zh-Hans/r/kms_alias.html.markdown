@@ -25,13 +25,12 @@ resource "alibabacloudstack_kms_alias" "alias" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `alias_name` - (必填，变更时重建) CMK 的别名。可以使用别名调用 `Encrypt`、`GenerateDataKey` 和 `DescribeKey`。字符长度(不包括前缀)：最小长度为 1 个字符，最大长度为 255 个字符。必须包含前缀 `alias/`。
 * `key_id` - (必填) 密钥的 ID。
-
 
 -> **注意：** 每个别名只能代表一个主密钥 (CMK)。
 
@@ -40,6 +39,6 @@ resource "alibabacloudstack_kms_alias" "alias" {
 -> **注意：** 可以使用 `UpdateAlias` 更新别名与主密钥 (CMK) 的映射关系。
 
 
-## 属性参考
+## 属性说明
 
-* `id` - 别名的 ID。
+* `id` - 别名的唯一标识符，用于标识该别名资源。

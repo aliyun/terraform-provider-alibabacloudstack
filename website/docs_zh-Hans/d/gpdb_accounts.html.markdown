@@ -81,16 +81,16 @@ output "gpdb_account_id_2" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
 * `db_instance_id` - (必填，变更时重建) ：GPDB 实例的 ID。这是查询 GPDB 账号时必须提供的参数。
 * `ids` - (选填，变更时重建) ：账号 ID 列表。其元素值与账号名称相同，用于通过账号 ID 筛选结果。
 * `name_regex` - (选填，变更时重建) ：用于通过账号名称筛选结果的正则表达式字符串。
-* `status` - (选填，变更时重建) ：账号的状态。有效值为 `Active`、`Creating` 和 `Deleting`。
+* `status` - (选填，变更时重建) ：账号的状态。有效值为 `Active`（活跃）、`Creating`（创建中）和 `Deleting`（删除中）。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -100,4 +100,4 @@ output "gpdb_account_id_2" {
   * `id` - 账号的 ID。其值与账号名称相同。
   * `account_name` - 账号的名称。
   * `db_instance_id` - GPDB 实例的 ID。
-  * `status` - 账号的状态。有效值为 `Active`、`Creating` 和 `Deleting`。
+  * `status` - 账号的状态。有效值为 `Active`（活跃）、`Creating`（创建中）和 `Deleting`（删除中）。

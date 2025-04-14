@@ -32,14 +32,16 @@ resource "alibabacloudstack_log_machine_group" "example" {
 ```
 
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `project` - (必填，变更时重建) 机器组所属的日志项目名称。
 * `name` - (必填，变更时重建) 机器组名称，在同一项目中必须唯一。
+* `identify_type` - (可选) 机器标识类型。例如，可以设置为 `ip` 表示通过 IP 地址标识机器。
+* `topic` - (可选) 机器组主题。用于对日志进行分类或标记。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
@@ -47,7 +49,7 @@ resource "alibabacloudstack_log_machine_group" "example" {
 * `project` - 项目名称。
 * `name` - 机器组名称。
 * `identify_type` - 机器标识类型。
-* `identify_list` - 机器标识列表。
+* `identify_list` - 机器标识列表。例如，当 `identify_type` 设置为 `ip` 时，该列表包含具体的 IP 地址。
 * `topic` - 机器组主题。
 
 ## 导入

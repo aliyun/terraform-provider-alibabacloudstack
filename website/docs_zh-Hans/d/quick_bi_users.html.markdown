@@ -25,7 +25,7 @@ output "quick_bi_user_id_1" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数受支持：
 
@@ -33,7 +33,7 @@ output "quick_bi_user_id_1" {
 * `ids` - (可选，强制更新) 用户 ID 列表。
 * `keyword` - (可选，强制更新) 组织成员昵称或用户名的关键词。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -47,4 +47,4 @@ output "quick_bi_user_id_1" {
     * `nick_name` - 用户的昵称。
     * `phone` - 用户的电话号码。
     * `user_id` - 用户的 ID。
-    * `user_type` - 组织成员的角色类型。有效值：`Analyst`、`Developer` 和 `Visitor`。
+    * `user_type` - 组织成员的角色类型。有效值：`Analyst`（分析师）、`Developer`（开发者）和 `Visitor`（访客）。

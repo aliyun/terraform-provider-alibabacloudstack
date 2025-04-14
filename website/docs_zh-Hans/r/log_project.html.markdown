@@ -32,18 +32,18 @@ resource "alibabacloudstack_log_project" "example" {
 ```
 
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `name` - (必填，变更时重建) 日志项目的名称。在一个 Alibabacloudstack 账户中唯一。
-* `description` - (可选) 日志项目的描述。
+* `name` - (必填，变更时重建) 日志项目的名称。在一个 Alibabacloudstack 账户中唯一。  
+* `description` - (可选) 日志项目的描述信息。用于提供关于该项目的详细说明。
 
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
-* `id` - 日志项目的 ID。它与名称相同。
-* `name` - 日志项目名称。
-* `description` - 日志项目描述。
+* `id` - 日志项目的唯一标识符。其值与 `name` 相同。  
+* `name` - 日志项目的名称。  
+* `description` - 日志项目的描述信息。与创建或更新时提供的 `description` 参数一致。

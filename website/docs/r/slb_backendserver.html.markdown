@@ -318,14 +318,11 @@ The following arguments are supported:
 
 
 * `load_balancer_id` - (Required, ForceNew) The ID of the traditional server load balancer instance.
-
 * `backend_servers` - (Optional) A list of backend servers to be added to the SLB. Each `backend_servers` block supports the following:
-
   * `server_id` - (Required) The ID of the backend server (ECS instance or ENI instance).
-
   * `weight` - (Optional) The weight of the backend server. Valid values range from `0` to `100`. A value of `0` indicates that the backend server is disabled.
-
 * `delete_protection_validation` - (Optional) Specifies whether to check the `DeleteProtection` attribute of the SLB instance before deleting this resource. If set to `true`, the resource will not be deleted when the SLB instance has `DeleteProtection` enabled. Default value is `false`.
+* `force_new_validation` - (Optional) This argument specifies if the load balancer should be recreated when certain properties change. Default value is `true`.
 
 
 

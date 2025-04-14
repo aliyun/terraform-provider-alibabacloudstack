@@ -30,7 +30,7 @@ output "metric_metalist" {
 
 The following arguments are supported:
 
-* `namespace` - (Required, ForceNew) The namespace of the service. You can call the  operation to obtain namespaces. 
+* `namespace` - (Required, ForceNew) The namespace of the service. You can call the  operation to obtain namespaces.
 * `resources` - (Optional) A list of cms metriclist.
 
 ## Attributes Reference

@@ -55,3 +55,4 @@ In addition to all arguments above, the following attributes are exported:
   * `recurrence_value` - Specifies how often a scheduled task recurs.
   * `recurrence_end_time` - Specifies the end time after which the scheduled task is no longer repeated.
   * `task_enabled` - Specifies whether to start the scheduled task. Default to `true`.
+  * `description` - (Computed) Description of the scheduled task.

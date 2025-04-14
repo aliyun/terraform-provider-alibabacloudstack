@@ -48,7 +48,7 @@ resource "alibabacloudstack_alikafka_topic" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -58,9 +58,9 @@ resource "alibabacloudstack_alikafka_topic" "default" {
 * `compact_topic` - (可选，变更时重建) 指示该主题是否为紧凑主题。紧凑主题必须是本地主题。默认值为 `false`。
 * `partition_num` - (可选) 主题的分区数。数量应在 1 到 48 之间。默认值为 `1`。
 * `remark` - (必填) 主题的简要描述。长度不得超过 64 个字符。
-* `tags` - (可选，v1.63.0+可用)分配给资源的标签映射。
+* `tags` - (可选，v1.63.0+可用) 分配给资源的标签映射。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

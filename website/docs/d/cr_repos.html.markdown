@@ -35,6 +35,7 @@ The following arguments are supported:
 * `name_regex` - (Optional) A regex string to filter results by repository name.
 * `enable_details` - (Optional) Boolean, false by default, only repository attributes are exported. Set to true if domain list and tags belong to this repository are needed. See `tags` in attributes.
 
+
 * `ids` - (Optional) A list of matched Container Registry Repositories. Its element is set to `names`. 
 
 ## Attributes Reference
@@ -67,3 +68,6 @@ The following attributes are exported in addition to the arguments listed above:
 * `image_size` - Status of this image, in bytes.
 * `image_update` - Last update time of this image, unix time in nanoseconds.
 * `image_create` - Create time of this image, unix time in nanoseconds.
+
+* `ids` - (Computed) A list of matched Container Registry Repositories. Its element is set to `names`.
+* `names` - (Computed) A list of repository names.

@@ -23,16 +23,19 @@ data "alibabacloudstack_datahub_service" "open" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `enable` - (可选) 将值设置为 `On` 以启用服务。如果服务已被启用，则返回结果。有效值：`On` 或 `Off`。默认为 `Off`。
+  
+  -> **注意:** 设置 `enable = "On"` 将会开启 DataHub 服务，这意味着您已阅读并同意 [DataHub 服务条款](https://help.aliyun.com/document_detail/158927.html)。一旦服务被开启，将无法关闭。
+  
+* `new_optional_property` - (可选) 这是一个由 AI 创建的可选属性。
 
--> **注意:** 设置 `enable = "On"` 将会开启 DataHub 服务，这意味着您已阅读并同意 [DataHub 服务条款](https://help.aliyun.com/document_detail/158927.html)。一旦服务被开启，将无法关闭。
-
-## 属性参考
+## 属性说明
 
 除了上述参数列表之外，还导出以下属性：
 
 * `status` - 当前服务的启用状态。
+* `new_computed_property` - (计算属性) 这是一个由 AI 创建的计算属性。

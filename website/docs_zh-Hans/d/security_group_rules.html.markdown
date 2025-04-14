@@ -41,7 +41,7 @@ output "security_group_rules" {
 
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -53,24 +53,23 @@ output "security_group_rules" {
 * `group_name` - (可选) 拥有规则的安全组的名称。
 * `group_desc` - (可选) 拥有规则的安全组的描述。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
 * `group_name` - 拥有规则的安全组的名称。
 * `group_desc` - 拥有规则的安全组的描述。
 * `rules` - 安全组规则列表。每个元素包含以下属性：
-  * `ip_protocol` - 协议。可以是 `tcp`、`udp`、`icmp`、`gre` 或 `all`。
-  * `port_range` - 端口号范围。
-  * `source_cidr_ip` - 入站授权的源 IP 地址段。
-  * `source_group_owner_account` - 源安全组的阿里云账户。
-  * `dest_cidr_ip` - 出站授权的目标 IP 地址段。
-  * `dest_group_owner_account` - 目标安全组的阿里云账户。
-  * `policy` - 授权策略。可以是 `accept` 或 `drop`。
-  * `nic_type` - 网络类型，`internet` 或 `intranet`。
-  * `priority` - 规则优先级。
-  * `direction` - 授权方向，`ingress` 或 `egress`。
-  * `dest_group_id` - 入站授权的目标安全组 id。
-  * `source_group_id` - 入站授权的源安全组 ID。
-  * `group_id` - 拥有规则的安全组的 ID。
-  * `output_file` - 保存数据源结果的文件名(运行 `terraform plan` 后)。
+  * `ip_protocol` - 规则所使用的协议类型，可为 `tcp`、`udp`、`icmp`、`gre` 或 `all`。
+  * `port_range` - 端口范围，格式为“起始端口/结束端口”。
+  * `source_cidr_ip` - 入站规则的源 IP 地址段。
+  * `source_group_owner_account` - 入站规则中源安全组所属的阿里云账户。
+  * `dest_cidr_ip` - 出站规则的目标 IP 地址段。
+  * `dest_group_owner_account` - 出站规则中目标安全组所属的阿里云账户。
+  * `policy` - 授权策略，可为 `accept`（允许）或 `drop`（拒绝）。
+  * `nic_type` - 网络类型，可为 `internet`（公网）或 `intranet`（内网）。
+  * `priority` - 规则优先级，数值越小优先级越高。
+  * `direction` - 授权方向，可为 `ingress`（入站）或 `egress`（出站）。
+  * `dest_group_id` - 出站规则中的目标安全组 ID。
+  * `source_group_id` - 入站规则中的源安全组 ID。
+  * `group_id` - 拥有该规则的安全组 ID。

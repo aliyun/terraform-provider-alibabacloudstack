@@ -57,7 +57,7 @@ The following arguments are supported:
 
 * `instance_id` - (Required) ID of the ONS Instance that owns the topics.
 * `name_regex` - (Optional) A regex string to filter results by the topic name. 
-* `names` - (Optional) A list of topic names.
+
 
 ## Attributes Reference
 

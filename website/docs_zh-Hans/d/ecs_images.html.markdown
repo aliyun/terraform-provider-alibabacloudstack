@@ -26,7 +26,7 @@ output "first_image_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -40,7 +40,7 @@ output "first_image_id" {
 
 -> **注意:** 至少需要设置 `name_regex`、`most_recent` 和 `owners` 中的一个。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -82,3 +82,4 @@ output "first_image_id" {
     * `none` - 表示该镜像未被任何资源引用。
   * `is_support_io_optimized` - 镜像是否可以在I/O优化实例上使用。
   * `tags` - 资源的标签。
+  * `name` - 镜像的名称。 

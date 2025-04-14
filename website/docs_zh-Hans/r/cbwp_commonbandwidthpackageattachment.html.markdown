@@ -84,18 +84,17 @@ resource "alibabacloudstack_common_bandwidth_package_attachment" "eip2_attachmen
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `bandwidth_package_id` - (必填，变更时重建) 共享带宽实例的ID。此字段在创建后无法修改。
 * `instance_id` - (必填，变更时重建) 要与共享带宽包关联的弹性公网IP(EIP)的ID。此字段在创建后无法修改。您可以指定多达50个EIP ID进行关联。如果需要，可以用逗号(,)分隔多个ID。如果同时传入**EipAddress**和**AllocationId**参数，**AllocationId**可输入50个EIP的实例ID，**EipAddress**也可同时输入50个EIP的IP地址。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 附件的唯一标识符。格式为 `<bandwidth_package_id>:<instance_id>`。
-* `status` - 附件的状态。可能的值包括 `Attached` 和 `Detached`。
+* `status` - 附件的状态。可能的值包括 `Attached`（已绑定） 和 `Detached`（未绑定）。
 * `creation_time` - 附件创建的时间。这对于跟踪附件的生命周期非常有用。
-```

@@ -74,6 +74,8 @@ The following arguments are supported:
   - `DOUBLE`
   - `TIMESTAMP`
 * `comment` - (Optional) Comment for the DataHub topic. It cannot exceed 255 characters.
+* `create_time` - (Optional, Computed) The creation time of the DataHub topic.
+* `last_modify_time` - (Optional, Computed) The last modification time of the DataHub topic. Initially, it is the same as the `create_time`.
 
 **Note:** Currently, the `life_cycle` field cannot be modified and will be supported in the future.
 
@@ -84,11 +86,3 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The ID of the DataHub topic. It is composed of the project name and the topic name, formatted as `<project_name>:<name>`.
 * `create_time` - The creation time of the DataHub topic. It is a human-readable string rather than a 64-bit UTC timestamp.
 * `last_modify_time` - The last modification time of the DataHub topic. Initially, it is the same as the `create_time`. It is also a human-readable string rather than a 64-bit UTC timestamp.
-
-## Import
-
-DataHub topics can be imported using the ID, e.g.
-
-```bash
-$ terraform import alibabacloudstack_datahub_topic.example <project_name>:<topic_name>
-```

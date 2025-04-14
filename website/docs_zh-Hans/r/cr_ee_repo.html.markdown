@@ -40,7 +40,7 @@ resource "alibabacloudstack_cr_ee_repo" "my-repo" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -52,12 +52,12 @@ resource "alibabacloudstack_cr_ee_repo" "my-repo" {
 * `detail` - (可选) 仓库的具体信息。支持 MarkDown 格式，长度限制为 2000。
 * `repo_id` - (可选) 容器镜像企业版仓库的 uuid。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
 * `id` - 容器镜像企业版仓库的资源 ID。格式为 `{instance_id}:{namespace}:{repository}`。
-* `repo_id` - 容器镜像企业版仓库的 uuid。
+* `repo_id` - 容器镜像企业版仓库的唯一标识符（UUID）。
 
 ## 导入
 

@@ -67,6 +67,7 @@ The following arguments are supported:
   * `responseHeaders` - (Optional) Response headers to log.
   * `jwtClaims` - (Optional) JWT claims to log.
 * `passthrough_headers` - (Optional) Headers that should be passed through to the backend service. This is a comma-separated list of header names.
+* `name` - (Optional) Deprecated field representing the name of the API Gateway Group. Use `api_group_name` instead.
 
 ## Attributes Reference
 
@@ -78,6 +79,7 @@ In addition to all arguments above, the following attributes are exported:
 * `api_group_name` - The name of the API Gateway Group.
 * `sub_domain` - Second-level domain name bound to the API Gateway Group, which is used for API call testing.
 * `vpc_domain` - Inner sub domain.
+* `name` - Deprecated field representing the name of the API Gateway Group. Use `api_group_name` instead.
 
 ## Import
 

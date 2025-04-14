@@ -72,7 +72,7 @@ resource "alibabacloudstack_api_gateway_app_attachment" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -80,6 +80,8 @@ resource "alibabacloudstack_api_gateway_app_attachment" "default" {
 * `group_id` - (必填，变更时重建) API所属的API组的ID。此字段是必填项，并且创建后无法修改(`ForceNew`)。
 * `api_id` - (必填，变更时重建) 应用需要访问的API的ID。此字段是必填项，并且创建后无法修改(`ForceNew`)。
 * `stage_name` - (必填，变更时重建) 应用需要访问的阶段。有效值包括 `"RELEASE"`，`"TEST"` 和 `"PRE"`。此字段是必填项，并且创建后无法修改(`ForceNew`)。
+* `name` - (必填) 资源名称。
+* `description` - (可选) 资源描述。
 
 ### 详细字段描述
 
@@ -95,7 +97,7 @@ resource "alibabacloudstack_api_gateway_app_attachment" "default" {
 #### `stage_name`
 这指定了应用程序被授权访问API的阶段。有效值为 `"RELEASE"`，`"TEST"` 和 `"PRE"`。此字段是必填项，并且创建后无法修改(`ForceNew`)。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

@@ -61,7 +61,7 @@ resource "alibabacloudstack_polardb_database" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -91,18 +91,20 @@ resource "alibabacloudstack_polardb_database" "default" {
     * **Oracle**
     * **PostgreSQL**
 
-## 属性参考
+  * `status` - (选填) - 资源状态。
+
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
   * `accounts` - 数据库账号信息详情。当集群为PolarDB MySQL引擎时，不含高权限账号。
     * `account` - 数据库账户名称。
     * `account_privilege` - 账号权限，取值范围如下：
-      * **ReadWrite**：读写
-      * **ReadOnly**：只读
-      * **DMLOnly**：仅允许DML
-      * **DDLOnly**：仅允许DDL
-      * **ReadIndex**：只读+索引
+      * **ReadWrite**: 读写
+      * **ReadOnly**: 只读
+      * **DMLOnly**: 仅允许DML
+      * **DDLOnly**: 仅允许DDL
+      * **ReadIndex**: 只读+索引
     * `account_privilege_detail` - 账户权限详细信息。
 
   * `data_base_description` - 数据库的描述。
@@ -112,4 +114,5 @@ resource "alibabacloudstack_polardb_database" "default" {
     * **Oracle**
     * **PostgreSQL**
 
-  * `status` - 代表资源状态的资源属性字段。
+  * `status` - 资源状态。
+  * `data_base_instance_id` - 关联的PolarDB实例ID。

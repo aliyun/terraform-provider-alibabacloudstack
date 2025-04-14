@@ -54,7 +54,7 @@ resource "alibabacloudstack_cms_metric_rule_template" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -88,7 +88,7 @@ resource "alibabacloudstack_cms_metric_rule_template" "default" {
 * `enable_end_time` - (可选) 警报生效的结束时间。取值范围：`00`~`23`，表示`00:59`到`23:59`。
 * `enable_start_time` - (可选) 警报生效的开始时间。取值范围：`00`~`23`，表示`00:00`到`23:00`。
 * `group_id` - (可选) 应用组ID。
-* `metric_rule_template_name` - (必填，强制更新)警报模板名称。
+* `metric_rule_template_name` - (必填，强制更新) 警报模板名称。
 * `notify_level` - (可选) 报警通知模式。有效值：
   * `2`: 电话 + 短信 + 邮件 + 王旺 + 钉钉机器人。
   * `3`: 短信 + 邮件 + 王旺 + 钉钉机器人。
@@ -98,7 +98,7 @@ resource "alibabacloudstack_cms_metric_rule_template" "default" {
 * `webhook` - (可选) 当发生警报时，指定的URL地址被回调，并发送POST请求。
 * `overwrite` - (可选) 是否覆盖警报模板。有效值：`true` 或 `false`。默认值：`true`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

@@ -7,8 +7,8 @@ description: |-
   查询接口网关应用
 ---
 
-# alibabacloudstack_apigateway_apps
--> **NOTE:** 该资源等效别名有: `alibabacloudstack_api_gateway_apps`
+# alibabacloudstack_apigateway_apps  
+-> **NOTE:** 该资源等效别名有: `alibabacloudstack_api_gateway_apps`  
 
 根据指定过滤条件列出当前凭证权限可以访问的接口网关应用列表。
 
@@ -43,7 +43,7 @@ output "first_app_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -51,7 +51,7 @@ output "first_app_id" {
 * `ids` - (可选) 一个应用ID列表，用于过滤结果。如果提供了此参数，则仅返回与这些ID匹配的应用。
 * `tags` - (可选) 标签映射，每个标签由键值对组成。可以通过这些标签筛选应用。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -61,6 +61,13 @@ output "first_app_id" {
   * `id` - 应用ID，由系统生成并全局唯一。
   * `name` - 应用名称。
   * `description` - 应用描述。
-  * `created_time` - 创建时间(UTC时间)。表示应用创建的时间戳。
-  * `modified_time` - 最后修改时间(UTC时间)。表示应用最后一次被修改的时间戳。
+  * `created_time` - 创建时间（UTC时间）。表示应用创建的时间戳。
+  * `modified_time` - 最后修改时间（UTC时间）。表示应用最后一次被修改的时间戳。
   * `app_code` - 应用简单认证密码。这是应用的唯一标识符，用于简单的身份验证。
+
+**补充说明：**
+
+- `name_regex` 支持通过正则表达式筛选应用名称，例如匹配以特定前缀或模式命名的应用。
+- `ids` 参数允许用户直接指定需要查询的应用ID列表，从而快速定位目标应用。
+- `tags` 参数允许用户通过标签键值对筛选应用，适用于基于标签管理的应用场景。
+- 返回的 `apps` 列表中，每个应用对象都包含了详细的元数据信息（如创建时间、修改时间等），便于用户进一步处理和分析。

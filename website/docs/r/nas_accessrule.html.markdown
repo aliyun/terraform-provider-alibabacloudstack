@@ -50,6 +50,7 @@ The following arguments are supported:
   * `root_squash`: Restricts root users from having full privileges.
   * `all_squash`: Restricts all users from having full privileges.
 * `priority` - (Optional) The priority level of the rule. Valid range is 1-100. Lower numbers indicate higher priority. Default value is `1`.
+* `access_rule_id` - (Optional) - The unique identifier for the NAS access rule.
 
 ## Attributes Reference
 

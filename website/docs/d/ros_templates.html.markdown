@@ -72,3 +72,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `template_id` - The ID of the template.
   * `template_name` - The name of the template. The name can be up to 255 characters in length and can contain digits, letters, hyphens (-), and underscores (_). It must start with a digit or letter.
   * `template_version` - The version of the template.
+  * `ids` - A list of Template IDs.

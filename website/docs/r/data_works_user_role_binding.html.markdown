@@ -37,7 +37,6 @@ The following arguments are supported:
 ## Attributes Reference
 
 The following attributes are exported:
-
-
 * `project_id` - The ID of the project.
 * `user_id` - Alibaba Cloud Account ID.
+* `role_code` - Code of DataWorks workspace role.

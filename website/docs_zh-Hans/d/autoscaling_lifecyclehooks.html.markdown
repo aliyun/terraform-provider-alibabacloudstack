@@ -58,7 +58,7 @@ output "lifecycle_hooks_info" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -66,7 +66,7 @@ output "lifecycle_hooks_info" {
 * `name_regex` - (可选) 正则表达式字符串，用于通过生命周期钩子名称筛选结果。
 * `ids` - (可选) 生命周期钩子ID列表，用于进一步筛选结果。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -75,8 +75,8 @@ output "lifecycle_hooks_info" {
   * `name` - 生命周期钩子的名称。
   * `scaling_group_id` - 生命周期钩子所属的伸缩组的ID。
   * `default_result` - 定义当生命周期钩子超时后，伸缩组应采取的操作。它可以是 `CONTINUE` 或 `ABANDON`。
-  * `heartbeat_timeout` - 定义在生命周期钩子超时之前可以经过的时间量(以秒为单位)。当生命周期钩子超时时，弹性伸缩执行 `default_result` 参数中定义的操作。
-  * `lifecycle_transition` - 与生命周期钩子关联的伸缩活动类型。可能的值包括 `SCALE_OUT` 和 `SCALE_IN`。
+  * `heartbeat_timeout` - 定义在生命周期钩子超时之前可以经过的时间量（以秒为单位）。当生命周期钩子超时时，弹性伸缩执行 `default_result` 参数中定义的操作。
+  * `lifecycle_transition` - 与生命周期钩子关联的伸缩活动类型。可能的值包括 `INSTANCE_LAUNCHING` 和 `INSTANCE_TERMINATING` 等。
   * `notification_arn` - 弹性伸缩在实例因生命周期钩子进入等待状态时将通知的ARN通知目标。
   * `notification_metadata` - 您希望弹性伸缩在向通知目标发送消息时包含的其他信息。
 

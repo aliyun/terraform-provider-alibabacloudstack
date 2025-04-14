@@ -79,6 +79,7 @@ In addition to all arguments above, the following attributes are exported:
 * `min_rx_interval` - Configure the receiving interval of BFD packets. Values: **200 to 1000**, in ms.
 * `min_tx_interval` - Configure the sending interval of BFD packets. Value: **200~1000**, unit: ms.
 * `status` - The status of the resource.
+* `route_table_id` - The ID of the route table of the VBR.
 
 ### Timeouts
 

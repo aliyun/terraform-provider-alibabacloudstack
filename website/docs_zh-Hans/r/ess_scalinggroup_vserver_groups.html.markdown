@@ -52,7 +52,7 @@ resource "alibabacloudstack_ess_scalinggroup_vserver_groups" "default" {
 }
 ```
 
-### 参数参考
+## 参数说明
 以下是支持的参数：
 
 * `scaling_group_id` - (必填，变更时重建) - 缩放组的 ID。
@@ -61,11 +61,11 @@ resource "alibabacloudstack_ess_scalinggroup_vserver_groups" "default" {
   * `vserver_attributes` - (必填) - 一组 VServer 属性。
     * `vserver_group_id` - (必填) - VServer 组的 ID。
     * `port` - (必填) - VServer 组的端口号。
-    * `weight` - (必填) - VServer 组的权重。
-* `force` - (可选) - 是否强制绑定或解除绑定 VServer 组。默认值为 true。
+    * `weight` - (必填) - VServer 组的权重。修改此属性将导致先解除绑定，然后以新的权重重新绑定。
+* `force` - (可选) - 是否强制绑定或解除绑定 VServer 组。默认值为 `true`。如果设置为 `true`，即使存在依赖关系，也会强制执行绑定或解除绑定操作。
 
+## 属性说明
 
-### 属性参考
 除了上述列出的参数外，还导出以下属性：
 
-* `id` - (必填，变更时重建) ESS vserver 组绑定资源 ID。
+* `id` - (必填，变更时重建) - ESS vserver 组绑定资源的唯一标识符（ID）。该 ID 唯一标识了绑定关系，并在创建时生成。

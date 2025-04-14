@@ -73,6 +73,7 @@ The following arguments are supported:
   * `data_base_instance_id` - (Required) -  The ID of the PolarDB instance to which the database will be associated.
   * `data_base_name` - (Required) - The name of the database.
   * `engine` - (Optional) - The database engine type. The value range is as follows:* **MySQL*** **Oracle*** **PostgreSQL**
+  * `status` - (Optional) - The status of the resource.
 
 ## Attributes Reference
 
@@ -84,3 +85,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `data_base_description` - The description of the database.
   * `engine` - The database engine type. The value range is as follows:* **MySQL*** **Oracle*** **PostgreSQL**
   * `status` - The status of the resource
+  * `data_base_instance_id` - The ID of the PolarDB instance to which the database will be associated.

@@ -135,7 +135,7 @@ resource "alibabacloudstack_autoscaling_scalingrule" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -150,8 +150,9 @@ resource "alibabacloudstack_autoscaling_scalingrule" "default" {
   * `TotalCapacity`：[0, 1000]
 * `scaling_rule_name` - (选填) - 伸缩规则的名称，2~64个英文或中文字符，以数字、大小字母或中文开头，可包含数字、下划线(_)、连字符(-)或点号(.)。同一用户账号同一地域同一伸缩组内唯一。如果没有指定该参数，默认为`ScalingRuleId`的值。
 * `cooldown` - (选填) - 伸缩规则的冷却时间，仅适用于简单伸缩规则。取值范围：0~86400，单位：秒。默认值为0。
+* `ari` - (选填) - 字段`ari`已废弃，并将在未来的版本中移除，请改用新字段`scaling_rule_aris`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
@@ -159,4 +160,3 @@ resource "alibabacloudstack_autoscaling_scalingrule" "default" {
 * `ari` - 伸缩规则的唯一标识符。
 * `scaling_rule_aris` - 伸缩规则的唯一标识符列表。
 * `scaling_rule_name` - 伸缩规则的名称，2~64个英文或中文字符，以数字、大小字母或中文开头，可包含数字、下划线(_)、连字符(-)或点号(.)。同一用户账号同一地域同一伸缩组内唯一。如果没有指定该参数，默认为`ScalingRuleId`的值。
-```

@@ -25,9 +25,10 @@ data "alibabacloudstack_hbase_clusters" "hbase" {
 
 The following arguments are supported:
 
-* `name_regex` - (Optional) A regex string to apply to the cluster name. This allows filtering clusters based on their names using regular expressions.
+* `name_regex` - (Optional) A regex string to apply to the cluster name. This allows filtering clusters based on their names using regular expressions. 
 * `ids` - (Optional) The IDs list of HBase clusters. This can be used to filter clusters by their unique identifiers.
 * `availability_zone` - (Optional) The availability zone where the HBase clusters reside. Use this parameter to filter clusters within a specific zone.
+
 
 ## Attributes Reference
 
@@ -52,9 +53,9 @@ The following attributes are exported in addition to the arguments listed above:
   * `vpc_id` - The VPC ID associated with the cluster.
   * `vswitch_id` - The VSwitch ID associated with the cluster.
   * `pay_type` - The billing method of the cluster. Possible values include `PostPaid` (Pay-As-You-Go) and `PrePaid` (yearly or monthly subscription).
+  * `created_time` - The creation time of the cluster. 
+  * `expire_time` - The expiration time of the cluster (if applicable). 
   * `status` - The current status of the cluster.
   * `backup_status` - The backup status of the cluster.
-  * `created_time` - The creation time of the cluster.
-  * `expire_time` - The expiration time of the cluster (if applicable).
   * `deletion_protection` - Indicates whether deletion protection is enabled for the cluster.
   * `tags` - A mapping of tags assigned to the cluster.

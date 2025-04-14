@@ -57,7 +57,7 @@ resource "alibabacloudstack_dts_synchronization_job" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数受支持：
 
@@ -67,9 +67,9 @@ resource "alibabacloudstack_dts_synchronization_job" "default" {
 * `dts_job_id` - (可选，变更时重建) 同步实例的作业 ID。
 * `instance_class` - (可选) 实例类。有效值：`large`，`medium`，`micro`，`small`，`xlarge`，`xxlarge`。您只能升级配置，不能降级配置。如果您要降级实例，请[提交工单](https://selfservice.console.aliyun.com/ticket/category/dts/today)。
 * `checkpoint` - (可选，计算，变更时重建) 以 Unix 时间戳格式表示的开始时间。
-* `data_initialization` - (必填，变更时重建) 是否执行 DTS 支持的架构迁移、全量数据迁移或全量数据初始化。值包括：
-* `data_synchronization` - (必填，变更时重建) 是否对迁移类型或同步执行增量数据迁移。值包括：
-* `structure_initialization` - (必填，变更时重建) 是否对数据库表结构进行迁移或初始化。值包括：
+* `data_initialization` - (必填，变更时重建) 是否执行 DTS 支持的架构迁移、全量数据迁移或全量数据初始化。值包括：`true` 表示执行，`false` 表示不执行。
+* `data_synchronization` - (必填，变更时重建) 是否对迁移类型或同步执行增量数据迁移。值包括：`true` 表示执行，`false` 表示不执行。
+* `structure_initialization` - (必填，变更时重建) 是否对数据库表结构进行迁移或初始化。值包括：`true` 表示执行，`false` 表示不执行。
 * `db_list` - (必填，变更时重建) 迁移对象，JSON 字符串格式。有关详细定义说明，请参阅 [迁移、同步或订阅对象的描述](https://help.aliyun.com/document_detail/209545.html)。
 * `reserve` - (可选，变更时重建) DTS 预留参数，格式为 JSON 字符串，您可以在此参数中完成源和目标数据库信息(例如目标 Kafka 数据库的数据存储格式、云企业网 CEN 实例 ID)。有关更多说明，请参阅参数 [Reserve 参数的描述](https://help.aliyun.com/document_detail/273111.html)。
 * `source_endpoint_instance_type` - (必填，变更时重建) 源实例类型。有效值：`CEN`，`DG`，`DISTRIBUTED_DMSLOGICDB`，`ECS`，`EXPRESS`，`MONGODB`，`OTHER`，`PolarDB`，`POLARDBX20`，`RDS`。
@@ -116,7 +116,7 @@ resource "alibabacloudstack_dts_synchronization_job" "default" {
 5. 在任务暂停期间，费用将继续产生。如果需要停止计费，请释放实例。
 6. 当 DTS 实例暂停超过 7 天，实例无法恢复，状态将从暂停变为失败。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
@@ -125,6 +125,7 @@ resource "alibabacloudstack_dts_synchronization_job" "default" {
 * `checkpoint` - 以 Unix 时间戳格式表示的开始时间。
 * `instance_class` - 实例类。
 * `status` - 资源状态。有效值：`Synchronizing`，`Suspending`。
+* `synchronization_direction` - 同步方向。
 
 ## 导入
 

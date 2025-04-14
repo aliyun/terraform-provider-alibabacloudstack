@@ -71,24 +71,24 @@ resource "alibabacloudstack_db_account_privilege" "privilege" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `instance_id` - (必填，变更时重建) 账户所属实例的ID。
 * `account_name` - (必填，变更时重建) 指定的账户名称。
 * `privilege` - 一个账户访问数据库的权限。有效值为：
-    - ReadOnly: 此值仅适用于 MySQL、MariaDB 和 SQL Server
-    - ReadWrite: 此值仅适用于 MySQL、MariaDB 和 SQL Server
-     
-   默认为 "ReadOnly"。
+    - ReadOnly: 此值仅适用于 MySQL、MariaDB 和 SQL Server。
+    - ReadWrite: 此值仅适用于 MySQL、MariaDB 和 SQL Server。
+    
+   默认值为 "ReadOnly"。
 * `db_names` - (必填) 指定的数据库名称列表。
-* `data_base_instance_id` - (可选，变更时重建) 数据库实例的ID。
+* `data_base_instance_id` - (可选，变更时重建) 数据库实例的ID。此参数与 `instance_id` 类似，但在某些场景下可能需要单独指定。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
 * `id` - 当前账户资源ID。由实例ID、账户名称和权限组成，格式为 `<instance_id>:<name>:<privilege>`。
 * `instance_id` - 账户所属实例的ID。
-* `data_base_instance_id` - 数据库实例的ID。
+* `data_base_instance_id` - 数据库实例的ID。此属性与 `instance_id` 类似，但可能在某些情况下提供额外的信息。

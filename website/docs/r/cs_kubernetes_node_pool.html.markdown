@@ -356,6 +356,7 @@ The following arguments are supported:
 * `format_disk` - (Optional,) After you select this, if data disks have been attached to the specified ECS instances and the file system of the last data disk is uninitialized, the system automatically formats the last data disk to ext4 and mounts the data disk to /var/lib/docker and /var/lib/kubelet. The original data on the disk will be cleared. Make sure that you back up data in advance. If no data disk is mounted on the ECS instance, no new data disk will be purchased. Default is `false`.
 * `security_group_id` - (Optional ) The ID of security group where the current cluster worker node is located.
 * `system_disk_size` - (Optional) The system disk size of worker node. Its valid value range [20~32768] in GB. Default to `40`.
+* `node_count` - (Optional) The worker node number of the node pool. From version 1.111.0, `node_count` is not required.
 
 #### tags
 
@@ -386,3 +387,4 @@ The following attributes are exported:
 * `internet_charge_type` - The billing method for network usage. Valid values `PayByBandwidth` and `PayByTraffic`.
 * `internet_max_bandwidth_out` - The maximum outbound bandwidth for the public network. Unit: Mbit/s. Valid values: 0 to 100.
 * `spot_strategy` - The preemption policy for the pay-as-you-go instance. Valid value `SpotWithPriceLimit`.
+* `node_count` - The worker node number of the node pool.

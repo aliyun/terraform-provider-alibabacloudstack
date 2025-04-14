@@ -31,22 +31,21 @@ output "first_kvstore_instance_class" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下是支持的参数：
 
 * `zone_id` - (必填) 启动KVStore实例的可用区。
-* `instance_charge_type` - (可选) 通过付费类型过滤结果。有效值：`PrePaid` 和 `PostPaid`。默认为 `PrePaid`。
+* `instance_charge_type` - (可选) 通过付费类型过滤结果。有效值：`PrePaid`（预付费）和 `PostPaid`（按量付费）。默认为 `PrePaid`。
 * `engine` - (可选) 数据库类型。选项为 `Redis` 和 `Memcache`。默认为 `Redis`。
-* `engine_version` - (可选) 用户所需的数据库版本。Redis的可选项可以参考最新文档[详细信息](https://www.alibabacloud.com/help/doc-detail/60873.htm)中的`EngineVersion`。Memcache的值应为空。
-* `engine` - (可选) 指定KVStore实例的引擎类型。
-* `engine_version` - (可选) 指定KVStore实例的引擎版本。
+* `engine_version` - (可选) 用户所需的数据库版本。Redis 的可选项可以参考最新文档 [详细信息](https://www.alibabacloud.com/help/doc-detail/60873.htm) 中的 `EngineVersion`。对于 `Memcache`，该值应为空。
+* `output_file` - (可选) 将查询结果保存到本地文件的路径。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
-* `instance_engines` - KVStore可用实例引擎的列表。每个元素包含以下属性：
-    * `zone_id` - 启动KVStore实例的可用区。
-    * `engine` - 数据库类型。
-    * `engine_version` - KVStore实例版本。
+* `instance_engines` - KVStore 可用实例引擎的列表。每个元素包含以下属性：
+    * `zone_id` - 启动 KVStore 实例的可用区 ID。
+    * `engine` - 数据库类型，例如 `Redis` 或 `Memcache`。
+    * `engine_version` - KVStore 实例的版本号，例如 Redis 的 `5.0` 或其他支持的版本。

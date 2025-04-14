@@ -159,7 +159,7 @@ resource "alibabacloudstack_slb_master_slave_server_group" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -173,7 +173,7 @@ resource "alibabacloudstack_slb_master_slave_server_group" "default" {
   * `server_type` - (可选) 后端服务器的类型。有效值：`Master`，`Slave`。默认为`Master`。
 * `delete_protection_validation` - (可选) 删除前检查负载均衡实例的删除保护。如果设置为`true`，当其负载均衡实例启用了删除保护时，此资源将不会被删除。默认为`false`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

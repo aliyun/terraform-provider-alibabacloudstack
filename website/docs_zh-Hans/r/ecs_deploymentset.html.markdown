@@ -36,7 +36,7 @@ resource "alibabacloudstack_ecs_deployment_set" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -50,7 +50,7 @@ resource "alibabacloudstack_ecs_deployment_set" "default" {
 * `strategy` - (可选，变更时重建) 部署策略。有效值：`Availability`。
 * `tags` - (可选，映射) 分配给资源的标签映射。每个标签由键值对组成。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

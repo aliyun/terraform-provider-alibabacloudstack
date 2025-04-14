@@ -46,7 +46,7 @@ output "cloudmonitorservice_metricruletemplate_id_4" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -57,9 +57,9 @@ output "cloudmonitorservice_metricruletemplate_id_4" {
 * `is_default` - (可选) 是否过滤默认的告警模板。设置为`true`以仅包括默认模板。
 * `history` - (可选) 是否显示应用到应用组的告警模板的历史记录。有效值：
   * `true`: 显示历史记录。
-  * `false`(默认)：不显示历史记录。
+  * `false`(默认): 不显示历史记录。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -68,4 +68,4 @@ output "cloudmonitorservice_metricruletemplate_id_4" {
   * `description` - 告警模板的描述信息。
   * `id` - 告警模板的ID。
   * `name` - 告警模板的名称。
-  * `rest_version` - 告警模板的版本。
+  * `rest_version` - 告警模板的版本号。

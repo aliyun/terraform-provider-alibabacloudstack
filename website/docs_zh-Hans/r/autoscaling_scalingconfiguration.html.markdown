@@ -101,7 +101,7 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -115,13 +115,13 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 
 * `scaling_group_id` - (必填, 强制更新) 伸缩配置所属的伸缩组ID。
 
-* `image_id` - (必填)  创建ECS实例时使用的镜像文件ID。
+* `image_id` - (必填) 创建ECS实例时使用的镜像文件ID。
 
-* `instance_type` - (必填)  ECS实例的规格。
+* `instance_type` - (必填) ECS实例的规格。
 
-* `security_group_ids` - (必填)  ECS实例所属的安全组ID列表。
+* `security_group_ids` - (必填) ECS实例所属的安全组ID列表。
 
-* `deployment_set_id` - (必填)  ECS实例所属的部署集ID。
+* `deployment_set_id` - (必填) ECS实例所属的部署集ID。
 
 * `zone_id` - (可选) ECS实例所属的可用区ID。
 
@@ -190,7 +190,7 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 
 * `auto_snapshot_policy_id` - (可选) 数据盘的自动快照策略ID。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
@@ -215,3 +215,7 @@ resource "alibabacloudstack_ess_scaling_configuration" "default" {
 * `role_name` - ECS实例的RAM角色名称。
 
 * `key_pair_name` - 用于登录ECS实例的密钥对名称。
+
+* `is_outdated` - 是否使用过时的实例类型。
+
+* `key_name` - 用于登录ECS实例的密钥对名称。

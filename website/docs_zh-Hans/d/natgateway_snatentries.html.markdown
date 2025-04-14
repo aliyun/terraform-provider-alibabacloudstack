@@ -68,21 +68,25 @@ output "snat_entries" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
-* `snat_table_id` - (必填，变更时重建) SNAT条目所属的SNAT表ID。
-* `source_cidr` - (选填)SNAT条目的源网段。
-* `ids` - (选填)SNAT条目ID的列表。这可以用于过滤结果。
+* `snat_table_id` - (必填，变更时重建) SNAT条目所属的SNAT表ID。这是查询SNAT条目的核心标识。
+* `source_cidr` - (选填) SNAT条目的源网段。通过指定此参数，可以筛选出与特定源网段相关的SNAT条目。
+* `ids` - (选填) SNAT条目ID的列表。通过提供此参数，可以进一步限制返回的SNAT条目范围。
+* `output_file` - (选填) 将查询结果保存到本地文件的路径。如果未指定，则不会生成文件。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
-* `ids` - SNAT条目ID列表。
-* `entries` - SNAT条目列表。每个元素包含以下属性：
-  * `id` - SNAT条目的ID。
-  * `snat_ip` - SNAT条目的公网IP。
-  * `source_cidr` - SNAT条目的源网段。
-  * `status` - SNAT条目的状态。可能的值包括 `available`、`pending` 和 `inactive`。
+* `ids` - 返回的SNAT条目ID列表，与查询条件匹配的所有SNAT条目ID。
+* `entries` - 匹配条件的SNAT条目详细信息列表。每个元素包含以下属性：
+  * `id` - SNAT条目的唯一标识符。
+  * `snat_ip` - SNAT条目绑定的公网IP地址，用于源地址转换。
+  * `source_cidr` - SNAT条目所适用的源网段，定义了哪些内部IP地址会被转换。
+  * `status` - SNAT条目的状态，表示当前条目的可用性或生命周期状态。可能的值包括：
+    * `available` - 条目已创建并处于可用状态。
+    * `pending` - 条目正在创建中。
+    * `inactive` - 条目已被禁用或不可用。

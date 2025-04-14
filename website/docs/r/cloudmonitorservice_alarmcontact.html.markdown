@@ -72,6 +72,7 @@ In addition to all arguments above, the following attributes are exported:
 * `channels_ding_web_hook` - The webhook URL of the DingTalk chatbot.
 * `channels_mail` - The email address of the alarm contact.
 * `channels_sms` - The phone number of the alarm contact.
+* `describe` - A brief description of the alarm contact.
 
 ## Import
 

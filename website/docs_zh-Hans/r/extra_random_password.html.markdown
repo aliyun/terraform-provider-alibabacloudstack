@@ -49,14 +49,14 @@ resource "alibabacloudstack_instance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数被支持：
 * `length` - (必填) 期望的字符串长度。length 的最小值为 1，并且 length 必须也 >= (min_upper + min_lower + min_numeric + min_special)。
 * `keepers` - (可选) 任意值映射，当其更改时，将触发资源的重新创建。有关更多信息，请参阅主提供商文档。
 * `lower` - (可选) 在结果中包含小写字母字符。默认值为 true。
 * `min_lower` - (可选) 结果中的最小小写字母字符数。默认值为 0。
-* `min_numeric` - (可选) 结果中的最小小写数字字符数。默认值为 0。
+* `min_numeric` - (可选) 结果中的最小数字字符数。默认值为 0。
 * `min_special` - (可选) 结果中的最小特殊字符数。默认值为 0。
 * `min_upper` - (可选) 结果中的最小大写字母字符数。默认值为 0。
 * `number` - (可选) 在结果中包含数字字符。默认值为 true。注意：此参数已弃用，改用 numeric。
@@ -65,13 +65,12 @@ resource "alibabacloudstack_instance" "default" {
 * `special` - (可选) 在结果中包含特殊字符。这些是 !@#$%&*()-_=+[]{}<>:?。默认值为 true。
 * `upper` - (可选) 在结果中包含大写字母字符。默认值为 true。
 
-## 属性参考
+## 属性说明
 
 以下属性被导出：
-
-* `bcrypt_hash` - 生成的随机字符串的 bcrypt 哈希。
+* `bcrypt_hash` - 生成的随机字符串的 bcrypt 哈希值。该值可用于安全存储密码。
 * `id` - Terraform 内部使用的静态值，不应在配置中引用。
-* `result` - 生成的随机字符串。
+* `result` - 生成的随机字符串，可以直接用作 ECS 实例的密码。
 
 ## 导入
 

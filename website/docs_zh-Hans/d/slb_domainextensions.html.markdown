@@ -70,7 +70,7 @@ output "slb_domain_extension_ids" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -78,7 +78,7 @@ output "slb_domain_extension_ids" {
 * `load_balancer_id` - (必填) 服务器负载均衡器实例的ID。这用于筛选与指定SLB实例关联的域名扩展。
 * `frontend_port` - (必填) SLB实例使用的HTTPS监听器的前端端口。有效值范围为1到65535。这用于筛选指定监听器端口的域名扩展。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 

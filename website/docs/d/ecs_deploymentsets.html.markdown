@@ -42,6 +42,7 @@ The following arguments are supported:
 * `name_regex` - (Optional, ForceNew) A regex string used to filter results by Deployment Set name.  
 * `deployment_set_name` - (Optional, ForceNew) The name of the deployment set.  
 * `strategy` - (Optional, ForceNew) The deployment strategy. Valid values: `Availability`.  
+* `names` - (Optional) A list of Deployment Set names.
 
 ## Attributes Reference
 

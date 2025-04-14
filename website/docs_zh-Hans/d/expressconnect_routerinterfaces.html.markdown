@@ -80,21 +80,21 @@ output "first_router_interface_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
-* `status` - (可选，变更时重建) - 路由器接口的状态。可能的值为：`Active`、`Inactive` 和 `Idle`。
+* `status` - (可选，变更时重建) - 路由器接口的状态。可能的值为：`Active`（活动）、`Inactive`（非活动）和 `Idle`（空闲）。
 * `name_regex` - (可选，变更时重建) - 用于按路由器接口名称筛选的正则表达式字符串。
-* `specification` - (可选，变更时重建) - 链路规格，例如 `Small.1`(10Mb)、`Middle.1`(100Mb)、`Large.2`(2Gb)等。
+* `specification` - (可选，变更时重建) - 链路规格，例如 `Small.1`（10Mb）、`Middle.1`（100Mb）、`Large.2`（2Gb）等。
 * `router_id` - (可选，变更时重建) - 位于本地区域的 VRouter 的 ID。
-* `router_type` - (可选，变更时重建) - 本地区域中的路由器类型。可能的值为：`VRouter` 和 `VBR`(物理连接)。
-* `role` - (可选，变更时重建) - 路由器接口的角色。可能的值为：`InitiatingSide`(连接发起方)和 `AcceptingSide`(连接接收方)。如果将 `router_type` 设置为 `VBR`，则此参数的值必须为 `InitiatingSide`。
+* `router_type` - (可选，变更时重建) - 本地区域中的路由器类型。可能的值为：`VRouter` 和 `VBR`（物理连接）。
+* `role` - (可选，变更时重建) - 路由器接口的角色。可能的值为：`InitiatingSide`（连接发起方）和 `AcceptingSide`（连接接收方）。如果将 `router_type` 设置为 `VBR`，则此参数的值必须为 `InitiatingSide`。
 * `opposite_interface_id` - (可选，变更时重建) - 对等路由器接口的 ID。
 * `opposite_interface_owner_id` - (可选，变更时重建) - 对等路由器接口所有者的帐户 ID。
 * `ids` - (可选) - 路由器接口 ID 列表。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -102,10 +102,10 @@ output "first_router_interface_id" {
 * `names` - 路由器接口名称列表。
 * `interfaces` - 路由器接口列表。每个元素包含以下属性：
   * `id` - 路由器接口 ID。
-  * `status` - 路由器接口状态。可能的值为：`Active`、`Inactive` 和 `Idle`。
+  * `status` - 路由器接口状态。可能的值为：`Active`（活动）、`Inactive`（非活动）和 `Idle`（空闲）。
   * `name` - 路由器接口名称。
   * `description` - 路由器接口描述。
-  * `role` - 路由器接口角色。可能的值为：`InitiatingSide` 和 `AcceptingSide`。
+  * `role` - 路由器接口角色。可能的值为：`InitiatingSide`（连接发起方）和 `AcceptingSide`（连接接收方）。
   * `specification` - 路由器接口规格。可能的值为：`Small.1`、`Middle.1`、`Large.2` 等。
   * `router_id` - 位于本地区域的 VRouter 的 ID。
   * `router_type` - 本地区域中的路由器类型。可能的值为：`VRouter` 和 `VBR`。

@@ -87,16 +87,16 @@ resource "alibabacloudstack_application_deployment" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
-  * `app_id` - (必填，变更时重建) - 应用程序的ID。您可以查询ListApplication接口。有关更多信息，请参见[ListApplication](~~ 149390 ~~)。
-  * `group_id` - (必填，变更时重建) - 部署组的ID。您可以查询ListDeployGroup操作。有关更多信息，请参见[ListDeployGroup](~~ 62077 ~~)。<note> 如果要部署到所有组，参数为' all '。</note>
-  * `package_version` - (可选，变更时重建) - 部署包的版本。最大长度为64个字符。我们建议您使用时间戳。
-  * `war_url` - (必填，变更时重建) - 应用程序部署包(WAR或JAR)的URL。**Deployytype**在它是'url'时是必填的。我们建议您使用OSS应用程序部署包路径。
-  * `last_package_version` - (变更时重建) - 最后部署包的版本。这对于跟踪和验证部署版本历史记录很有用。
+  * `app_id` - (必填，变更时重建) - 应用程序的ID。您可以查询ListApplication接口以获取应用程序列表。有关更多信息，请参见[ListApplication](~~ 149390 ~~)。
+  * `group_id` - (必填，变更时重建) - 部署组的ID。您可以查询ListDeployGroup操作以获取部署组列表。有关更多信息，请参见[ListDeployGroup](~~ 62077 ~~)。<note> 如果要部署到所有组，参数为' all '。</note>
+  * `package_version` - (可选，变更时重建) - 部署包的版本号。最大长度为64个字符。建议使用时间戳作为版本号。
+  * `war_url` - (必填，变更时重建) - 应用程序部署包(WAR或JAR)的URL。当部署类型为'url'时，此参数为必填项。建议使用OSS路径作为部署包地址。
+  * `last_package_version` - (变更时重建) - 上一次部署包的版本号。此参数可用于跟踪和验证部署的历史版本。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
-  * `last_package_version` - 最后部署包的版本。这对于跟踪和验证部署版本历史记录很有用。
+  * `last_package_version` - 最后一次成功部署的应用程序包版本号。此属性可用于跟踪和验证部署的历史版本信息。

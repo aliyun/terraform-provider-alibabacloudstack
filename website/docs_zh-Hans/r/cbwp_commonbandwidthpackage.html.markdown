@@ -45,7 +45,7 @@ resource "alibabacloudstack_common_bandwidth_package" "advanced" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -70,9 +70,12 @@ resource "alibabacloudstack_common_bandwidth_package" "advanced" {
 
 * `description` - (可选) 共享带宽实例的描述。长度为 2~256 个字符，并以字母开头。描述不能以 `http://` 或 `https://` 开头。
 
-## 属性参考
+* `bandwidth_package_name` - (可选) 共享带宽实例的名称。长度为 2~128 个字符，可以包含字母、数字、下划线 (`_`) 和连字符 (`-`)。名称必须以字母开头。
+
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 
 * `id` - 共享带宽包实例的 ID。
-* `bandwidth_package_name` - 共享带宽实例的名称。长度为 2~128 个字符，必须以字母或中文开头，可包含数字、半角句点(.)、下划线(_)和短划线(-)。但不能以 `http://` 或 `https://` 开头。
+* `bandwidth_package_name` - 共享带宽实例的名称。长度为 2~128 个字符，必须以字母或中文开头，可包含数字、半角句点 (`.`)、下划线 (`_`) 和短划线 (`-`)。但不能以 `http://` 或 `https://` 开头。
+* `name` - 共享带宽实例的名称。长度为 2~128 个字符，可以包含字母、数字、下划线 (`_`) 和连字符 (`-`)。名称必须以字母开头。

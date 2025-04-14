@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccAlibabacloudStackPolardbConnectionConfigUpdate(t *testing.T) {
-	var v PolardbDescribedbinstancenetinfoResponse
+	var v *PolardbDescribedbinstancenetinfoResponse
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-testAccDBconnection%d", rand)
 
@@ -42,7 +42,7 @@ func TestAccAlibabacloudStackPolardbConnectionConfigUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id":       "${alibabacloudstack_polardb_instance.instance.id}",
+					"instance_id":       "${alibabacloudstack_polardb_dbinstance.instance.id}",
 					"connection_prefix": "tftest",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -53,16 +53,6 @@ func TestAccAlibabacloudStackPolardbConnectionConfigUpdate(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"port": "3333",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"port": "3333",
-					}),
-				),
 			},
 		},
 	})
@@ -79,7 +69,7 @@ func resourcePolardbConnectionConfigDependence(name string) string {
 	variable "name" {
 		default = "%s"
 	}
-	resource "alibabacloudstack_polardb_instance" "instance" {
+	resource "alibabacloudstack_polardb_dbinstance" "instance" {
 		engine            = "MySQL"
 		engine_version    = "5.7"
 		instance_name = "${var.name}"

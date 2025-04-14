@@ -22,7 +22,6 @@ description: |-
 ### 基础用法
 
 ```
-
 resource "alibabacloudstack_csb_project" "project" {
  "data":         "{\\\"projectName\\\":\\\"test17\\\",\\\"projectOwnerName\\\":\\\"test17\\\",\\\"projectOwnerEmail\\\":\\\"\\\",\\\"projectOwnerPhoneNum\\\":\\\"\\\",\\\"description\\\":\\\"\\\"}",
  "csb_id":       "134",
@@ -30,28 +29,34 @@ resource "alibabacloudstack_csb_project" "project" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `data` - (可选) CSB 项目的详细信息。
-* `csb_id` - (必填，变更时重建) 创建存储库的 CSB 实例的 id。
+* `data` - (可选) CSB 项目的详细信息。该字段是一个 JSON 格式的字符串，包含以下子字段：
+  * `projectName` - 项目的名称。
+  * `projectOwnerName` - 项目所有者的名称。
+  * `projectOwnerEmail` - 项目所有者的电子邮件地址（可选）。
+  * `projectOwnerPhoneNum` - 项目所有者的电话号码（可选）。
+  * `description` - 项目的描述信息（可选）。
+* `csb_id` - (必填，变更时重建) 创建存储库的 CSB 实例的 ID。这是 CSB 实例的唯一标识符。
 * `project_name` - (必填，变更时重建) CSB 项目的名称。它可以包含 2 到 64 个字符。
 
-
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
-* `csb_id` - CSB 实例的 id。
+* `csb_id` - CSB 实例的 ID。
 * `project_name` - CSB 项目的项目名称。
 * `project_owner_name` - CSB 项目的项目所有者名称。
-* `gmt_modified` - CSB 项目的项目修改时间。
-* `gmt_create` - CSB 项目的项目创建时间。
-* `owner_id` - CSB 项目的拥有者 id。
-* `api_num` - CSB 项目的 API 数量。
-* `user_id` - CSB 项目的用户 id。
-* `delete_flag` - CSB 项目的删除标志。
-* `cs_id` - CSB 项目的项目 id。
-* `status` - CSB 项目的项目状态。
-* `data` - CSB 项目的详细信息。
+* `gmt_modified` - CSB 项目的最后修改时间，格式为 UTC 时间戳。
+* `gmt_create` - CSB 项目的创建时间，格式为 UTC 时间戳。
+* `owner_id` - CSB 项目的拥有者 ID。
+* `api_num` - CSB 项目中已发布的 API 数量。
+* `user_id` - CSB 项目的用户 ID。
+* `delete_flag` - CSB 项目的删除标志。如果值为 `true`，表示该项目已被标记为删除。
+* `cs_id` - CSB 项目的项目 ID。
+* `status` - CSB 项目的当前状态。可能的值包括但不限于：
+  * `NORMAL` - 正常状态。
+  * `DELETING` - 删除中。
+* `data` - CSB 项目的详细信息。与输入参数中的 `data` 字段类似，但可能是系统生成或更新后的版本。

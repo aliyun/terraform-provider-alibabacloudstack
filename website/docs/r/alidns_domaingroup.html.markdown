@@ -29,11 +29,12 @@ The following arguments are supported:
 
 * `child` - (Optional) The child property of the domain group. 
 
+* `propreties` - (Required) The properties of the domain group.
+
 ## Attributes Reference
 
 The following attributes are exported:
 
 * `id` - The group id.
 * `name` - The group name.
-
-* `propreties` - The properties of the domain group. 
+* `propreties` - The properties of the domain group.

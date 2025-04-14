@@ -56,3 +56,4 @@ The following attributes are exported in addition to the arguments listed above:
   * `status` - The current status of the Mount point. Valid values: `Active`, `Inactive`, and `Pending`.
   * `vpc_id` - VPC ID.
   * `vswitch_id` - VSwitch ID.
+  * `file_system_id` - The ID of the file system. 

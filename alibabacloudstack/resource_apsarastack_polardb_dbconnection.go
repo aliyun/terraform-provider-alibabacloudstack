@@ -105,7 +105,7 @@ func resourceAlibabacloudStackPolardbConnectionRead(d *schema.ResourceData, meta
 		PolardbService{client}
 	response, err := polardbdb_instanceservice.DescribeDBConnection(d.Id())
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_instance", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_dbinstance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
@@ -193,8 +193,8 @@ func resourceAlibabacloudStackPolardbConnectionDelete(d *schema.ResourceData, me
 			return resource.NonRetryableError(errmsgs.WrapError(err))
 		}
 		request.QueryParams["CurrentConnectionString"] = response.DBInstanceNetInfos.DBInstanceNetInfo[0].ConnectionString
-		_, err = client.ProcessCommonRequest(request)
-
+		rsp, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), rsp, request, request.QueryParams)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{"OperationDenied.DBInstanceStatus"}) {
 				return resource.RetryableError(err)

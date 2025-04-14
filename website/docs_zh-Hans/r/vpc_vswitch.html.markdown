@@ -59,7 +59,7 @@ resource "alibabacloudstack_vpc_vswitch" "ipv6_vswitch" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -75,15 +75,15 @@ resource "alibabacloudstack_vpc_vswitch" "ipv6_vswitch" {
   * `true`：启用IPv6 CIDR块。如果 `enable_ipv6` 为 `true`，则通过 `vpc_id` 指向的VPC也必须启用IPv6。系统将自动为您创建免费版本的IPv6网关，并分配一个/56的IPv6网络段。
 * `vswitch_name` - (可选) 交换机的名称。默认为null。
 * `description` - (可选) 交换机的描述。描述必须是1到256个字符的长度，并且不能以 `http://` 或 `https://` 开头。
-* `tags` - (可选，映射)交换机的标签。
+* `tags` - (可选，映射) 交换机的标签。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 交换机的ID。
-* `availability_zone` - 交换机的可用区。
 * `zone_id` - 交换机所属的可用区ID。
+* `availability_zone` - 交换机的可用区。
 * `cidr_block` - 交换机的CIDR块。
 * `ipv6_cidr_block` - 交换机的IPv6 CIDR块。
 * `vpc_id` - VPC ID。

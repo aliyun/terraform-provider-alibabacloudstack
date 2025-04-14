@@ -44,6 +44,7 @@ The following arguments are supported:
 * `login_policy_id` - (Optional) User login policy ID.
 * `role_ids` - A list of the user owned roles.
 * `telephone_number` - (Optional) Telephone number of a user.
+* `init_password` - (Optional) Init password for the user.
 
 ## Attributes Reference
 
@@ -53,3 +54,4 @@ The following attributes are exported:
 * `user_id` - The ID of the user.
 * `init_password` - Init Password of the user.
 * `role_ids` - A list of the user owned roles.
+* `organization_id` - Organization ID to which the current user belongs. Field 'organization_id' has been deprecated from provider version 1.0.32.

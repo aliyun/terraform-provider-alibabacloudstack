@@ -46,7 +46,7 @@ output "nat_gateways" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -54,7 +54,7 @@ output "nat_gateways" {
 * `ids` - (可选) NAT 网关 ID 列表。如果指定，数据源将仅返回与此 ID 匹配的结果。
 * `name_regex` - (可选，变更时重建) 用于通过名称筛选 NAT 网关的正则表达式字符串。这允许基于命名约定进行更灵活的过滤。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -64,11 +64,12 @@ output "nat_gateways" {
   * `name` - NAT 网关的名称。
   * `description` - NAT 网关的描述。
   * `creation_time` - NAT 网关创建的时间。
-  * `spec` - NAT 网关的规格(例如，Small, Medium)。
-  * `status` - NAT 网关的状态，取值：
+  * `spec` - NAT 网关的规格（例如，Small, Medium）。
+  * `status` - NAT 网关的状态，取值范围及含义如下：
     - `Initiating`：初始化中
     - `Available`：可用
     - `Pending`：配置中
     - `Deleting`：删除中
   * `snat_table_id` - 与 NAT 网关关联的 SNAT 表的 ID。
   * `forward_table_id` - 与 NAT 网关关联的转发表的 ID。
+  * `vpc_id` - NAT 网关所属的 VPC ID。

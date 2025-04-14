@@ -68,7 +68,7 @@ resource "alibabacloudstack_log_store" "example" {
 ```
 
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -80,29 +80,29 @@ resource "alibabacloudstack_log_store" "example" {
 * `max_split_shard_count` - (可选) 自动拆分的最大分片数，范围为 1 到 64。当 `auto_split` 为 true 时必须指定此参数。
 * `append_meta` - (可选) 是否自动附加日志元数据。元数据包括日志接收时间和客户端 IP 地址。默认为 `true`。
 * `enable_web_tracking` - (可选) 是否启用 Web 跟踪功能。默认为 `false`。
-* `encryption`(可选) 启用加密。默认为 `false`
-* `encrypt_type` (可选) 支持的加密类型，仅支持 `default(sm4_gcm)` 和 `aes_gcm`
-* `cmk_key_id` (可选) 用户主密钥 ID。
-* `arn`   (可选) 角色 ARN。
+* `encryption` - (可选) 启用加密功能。默认为 `false`。
+* `encrypt_type` - (可选，变更时重建) 支持的加密类型，仅支持 `default(sm4_gcm)` 和 `aes_gcm`。
+* `arn` - (可选) 角色 ARN，用于指定加密时的角色权限。
+* `cmk_key_id` - (可选) 用户主密钥 ID，用于指定加密时使用的密钥。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
 * `id` - 日志项目的 ID。格式为 `<project>:<name>`。
 * `project` - 项目名称。
 * `name` - 日志库名称。
-* `retention_period` - 数据保留时间。
+* `retention_period` - 数据保留时间（以天为单位）。
 * `shard_count` - 分片数量。
 * `auto_split` - 是否自动拆分分片。
 * `max_split_shard_count` - 自动拆分的最大分片数。
 * `append_meta` - 是否自动附加日志元数据。
-* `enable_web_tracking` - 是否启用 Web 跟踪。
-* `shards` - 分片属性。
-  * `id` - 分片的 ID。
-  * `status` - 分片状态，只有两个状态：`readwrite` 和 `readonly`。
-  * `begin_key` - 分片范围的起始值(MD5)，包含在分片范围内。
-  * `end_key` - 分片范围的结束值(MD5)，不包含在分片范围内。
+* `enable_web_tracking` - 是否启用 Web 跟踪功能。
+* `shards` - 分片属性列表，包含以下子属性：
+  * `id` - 分片的唯一标识符。
+  * `status` - 分片状态，可能的值为 `readwrite`（读写）或 `readonly`（只读）。
+  * `begin_key` - 分片范围的起始键值（MD5），包含在分片范围内。
+  * `end_key` - 分片范围的结束键值（MD5），不包含在分片范围内。
 
 ## 导入
 

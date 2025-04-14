@@ -49,13 +49,14 @@ resource "alibabacloudstack_adb_connection" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
   * `db_cluster_id` - (必填, 变更时重建) ADB集群的ID。此字段是不可变的，创建后无法更改。
   * `connection_prefix` - (选填, 变更时重建) 集群公共端点的前缀。该前缀必须为6到30个字符长度，并且可以包含小写字母、数字和连字符(-)。它必须以字母开头并以数字或字母结尾。如果不指定，默认为`<db_cluster_id> + tf`。
+  * `port` - (选填, 计算后返回) 用于连接到ADB集群的端口号。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
   * `id` - ADB连接资源的唯一标识符。它由集群ID和连接字符串组成，格式为`<db_cluster_id>:<connection_prefix>`。
@@ -63,4 +64,11 @@ resource "alibabacloudstack_adb_connection" "default" {
   * `port` - 用于连接到ADB集群的端口号。
   * `connection_string` - 用于访问ADB集群的完整连接字符串。
   * `ip_address` - 与连接字符串关联的IP地址。
+
+## 导入
+
+ADB连接可以通过id导入，例如：
+
+```bash
+$ terraform import alibabacloudstack_adb_connection.example am-12345678
 ```

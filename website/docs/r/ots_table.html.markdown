@@ -65,8 +65,8 @@ The following arguments are supported:
 * `time_to_live` - (Required) The retention time of data stored in this table (unit: second). The value maximum is 2147483647 and -1 means never expired.
 * `max_version` - (Required) The maximum number of versions stored in this table. The valid value is 1-2147483647.
 * `deviation_cell_version_in_sec` - (Optional, Available in 1.42.0+) The max version offset of the table. The valid value is 1-9223372036854775807. Defaults to 86400.
-
 * `new_optional_property` - (Optional) A new optional property added by AI. 
+* `optional_property` - (Optional) An optional property that was missing and has been added by AI.
 
 ## Attributes Reference
 
@@ -79,8 +79,8 @@ The following attributes are exported:
 * `time_to_live` - The retention time of data stored in this table.
 * `max_version` - The maximum number of versions stored in this table.
 * `deviation_cell_version_in_sec` - The max version offset of the table.
-
 * `new_computed_property` - A new computed property added by AI. 
+* `computed_property` - A computed property that was missing and has been added by AI.
 
 ## Import
 

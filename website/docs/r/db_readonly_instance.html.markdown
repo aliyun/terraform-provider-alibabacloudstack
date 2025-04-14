@@ -35,6 +35,7 @@ The following arguments are supported:
 * `db_instance_class` - (Optional) DB Instance class .
 * `db_instance_storage` - (Optional) DB Instance storage .
 * `master_instance_id` - (Optional, ForceNew) ID of the master instance .
+* `db_instance_description` - (Optional) The description of the DB instance.
 
 -> **NOTE:** Because of data backup and migration, change DB instance type and storage would cost 15~20 minutes. Please make full preparation before changing them.
 * `parameters` - (Optional) Set of parameters needs to be set after DB instance was launched. Available parameters can refer to the latest docs View database parameter templates.

@@ -35,7 +35,7 @@ output "key_pairs" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -44,7 +44,7 @@ output "key_pairs" {
 * `finger_print` - (可选) 密钥对的指纹。基于 RFC 4716 中定义的公钥指纹格式使用消息摘要算法 5 (MD5)。有关更多信息，请参见 [RFC 4716](https://tools.ietf.org/html/rfc4716)。
 * `tags` - (可选) 要分配给资源的标签映射。可以通过标签进一步筛选密钥对。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -61,3 +61,4 @@ output "key_pairs" {
     * `public_ip` - ECS 实例的公网 IP 地址或 EIP。
     * `private_ip` - ECS 实例的私网 IP 地址。
   * `tags` - (可选) 分配给密钥对的标签映射。
+  * `finger_print` - (计算后返回) 密钥对的指纹。基于 RFC 4716 中定义的公钥指纹格式使用消息摘要算法 5 (MD5)。有关更多信息，请参见 [RFC 4716](https://tools.ietf.org/html/rfc4716)。

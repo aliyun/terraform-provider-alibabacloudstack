@@ -81,26 +81,25 @@ resource "alibabacloudstack_route_entry" "foo" {
 ```
 
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
-* `route_table_id` - (必填，强制更新)路由表的 ID。
-* `router_id` - (已弃用)此参数已被弃用，请使用其他参数创建自定义路由条目。
-* `destination_cidrblock` - (强制更新)目标网络段。
-* `nexthop_type` - (强制更新)下一跳类型。可用值：
-    - `Instance`(默认值)：将目标 CIDR 块的流量路由到 VPC 中的 ECS 实例。
-    - `RouterInterface`：将目标 CIDR 块的流量路由到路由器接口。
-    - `VpnGateway`：将目标 CIDR 块的流量路由到 VPN 网关。
-    - `HaVip`：将目标 CIDR 块的流量路由到 HAVIP。
-    - `NetworkInterface`：将目标 CIDR 块的流量路由到 NetworkInterface。
-    - `NatGateway`：将目标 CIDR 块的流量路由到 Nat Gateway。
-
-* `nexthop_id` - (强制更新)路由条目的下一跳。ECS 实例 ID 或 VPC 路由器接口 ID。
-* `name` - (可选，强制更新，1.55.1+ 版本中可用)路由条目的名称。该名称可以包含 2 到 128 个字符，必须仅包含字母数字字符或连字符，例如 "-"、"."、"_"，并且不能以连字符开头或结尾，也不能以 http:// 或 https:// 开头。
+* `route_table_id` - (必填，强制更新) 路由表的 ID。
+* `router_id` - (已弃用) 此参数已被弃用，请使用其他参数创建自定义路由条目。
+* `destination_cidrblock` - (强制更新) 目标网络段。
+* `nexthop_type` - (强制更新) 下一跳类型。可用值：
+    - `Instance` (默认值): 将目标 CIDR 块的流量路由到 VPC 中的 ECS 实例。
+    - `RouterInterface`: 将目标 CIDR 块的流量路由到路由器接口。
+    - `VpnGateway`: 将目标 CIDR 块的流量路由到 VPN 网关。
+    - `HaVip`: 将目标 CIDR 块的流量路由到 HAVIP。
+    - `NetworkInterface`: 将目标 CIDR 块的流量路由到 NetworkInterface。
+    - `NatGateway`: 将目标 CIDR 块的流量路由到 Nat Gateway。
+* `nexthop_id` - (强制更新) 路由条目的下一跳。ECS 实例 ID 或 VPC 路由器接口 ID。
+* `name` - (可选，强制更新，1.55.1+ 版本中可用) 路由条目的名称。该名称可以包含 2 到 128 个字符，必须仅包含字母数字字符或连字符（例如 `-`、`.`、`_`），并且不能以连字符开头或结尾，也不能以 `http://` 或 `https://` 开头。
 * `router_id` - (可选) 此参数已被弃用，请从模板中移除。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
@@ -109,4 +108,4 @@ resource "alibabacloudstack_route_entry" "foo" {
 * `destination_cidrblock` - 目标网络段。
 * `nexthop_type` - 下一跳类型。
 * `nexthop_id` - 路由条目的下一跳。
-* `router_id` - (计算)与路由条目关联的路由器 ID。
+* `router_id` - (计算) 与路由条目关联的路由器 ID。

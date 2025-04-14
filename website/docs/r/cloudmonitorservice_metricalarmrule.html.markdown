@@ -72,6 +72,7 @@ The following arguments are supported:
 * `silence_time` - (Optional) Notification silence period in the alarm state, in seconds. Valid value range: [300, 86400]. Default to `86400`.
 * `enabled` - (Optional) Whether to enable the alarm rule. Default to `true`.
 * `webhook` - (Optional) The webhook that should be called when the alarm is triggered. Currently, only HTTP protocol is supported. Default is an empty string.
+* `resources` - (Optional, ForceNew) List of resources associated with the alarm rule. 
 
 -> **NOTE:** Each resource supports the creation of one of the following three levels: critical, warning, or informational.
 
@@ -80,4 +81,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `rule_id` - The unique ID of the alarm rule.
-* `status` - The current status of the alarm rule (`true` means enabled, `false` means disabled).
+* `status` - The current status of the alarm rule (`true` means enabled, `false` means disabled). 
+* `name` - Name of the alarm rule (deprecated, use `rule_name` instead).
+* `project` - Project associated with the alarm rule (deprecated, use `namespace` instead).
+* `metric` - Metric associated with the alarm rule (deprecated, use `metric_name` instead).

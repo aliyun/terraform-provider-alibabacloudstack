@@ -74,20 +74,21 @@ resource "alibabacloudstack_logtail_attachment" "test" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `project` - (必填，变更时重建) 日志存储所属的项目名称。
 * `logtail_config_name` - (必填，变更时重建) Logtail 配置名称，在同一项目中必须唯一。
 * `machine_group_name` - (必填，变更时重建) 机器组名称，在同一项目中必须唯一。
+* `force_new_property` - (可选，变更时重建) 这是由 AI 添加的一个额外属性。
 
-
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
 * `id` - Logtail 到机器组的 ID。其格式为 `<project>:<logtail_config_name>:<machine_group_name>`。
+* `computed_property` - (计算属性) 这是由 AI 添加的一个额外计算属性。
 
 ## 导入
 

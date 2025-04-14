@@ -29,6 +29,22 @@ output "metricalarmrules_list" {
 The following arguments are supported:
 
 * `name_regex` - (Optional) A regex string to filter CloudMonitorService Metric Alarm Rules by Rule name.
+* `contact_groups` - (Optional) List of contact groups of the alarm rule, which must have been created on the console.
+* `mail_subject` - (Optional) The subject of the alert notification email.
+* `source_type` - (Optional) The type of the alert rule. Valid values:
+    - `METRIC`: the alert rule for time series metrics.
+    - `EVENT`: the alert rule for event-type metrics. This type was used in earlier versions and has been discarded.
+* `rule_id` - (Optional) The ID of the alarm rule.
+* `period` - (Optional) Index query cycle, which must be consistent with that defined for metrics. Default to 300, in seconds.
+* `dimensions` - (Optional) Map of the resources associated with the alarm rule, such as "instanceId", "device" and "port". Each key's value is a string and it uses comma to split multiple items. For more information, see [Metrics Reference](https://www.alibabacloud.com/help/doc-detail/28619.htm).
+* `effective_interval` - (Optional) The interval of effecting alarm rule. It format as "hh:mm-hh:mm", like "0:00-4:00". Default to "00:00-23:59".
+* `namespace` - (Optional) The namespace of the monitored service.
+* `enable_state` - (Optional) Indicates whether the alert rule was enabled. Valid values:
+    - `true`: indicates that the alert rule was enabled.
+    - `false`: indicates that the alert rule was disabled. This parameter is not specified in the request by default. In this case, both enabled and disabled rules are returned.
+* `webhook` - (Optional) The callback URL.
+* `resources` - (Optional) The resources associated with the alert rule.
+* `rule_name` - (Optional) The alarm rule name.
 
 ## Attributes Reference
 

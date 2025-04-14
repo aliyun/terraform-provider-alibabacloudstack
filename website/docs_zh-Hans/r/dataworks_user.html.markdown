@@ -25,7 +25,7 @@ resource "alibabacloudstack_data_works_user" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -33,6 +33,6 @@ resource "alibabacloudstack_data_works_user" "default" {
 * `user_id` - (必填) 要添加的用户 ID。
 * `role_code` - (可选) 如果不为空，用户将被添加到此角色。 
 
-## 属性参考
+## 属性说明
 
 目前该资源没有列出任何属性。如果有需要添加的计算属性，可以在此处包含它们，并附上适当的描述和标记为 ``。

@@ -43,17 +43,17 @@ resource "alibabacloudstack_ons_group" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `instance_id` - (必填) 拥有该组的ONS实例的ID。
-* `group_id` - (必填) 组的名称。单个实例上的两个组不能具有相同的名称。 `group_id`以"GID_"或"GID-"开头，并包含字母、数字、连字符(-)和下划线(_)。
+* `group_id` - (必填) 组的名称。单个实例上的两个组不能具有相同的名称。`group_id`以"GID_"或"GID-"开头，并包含字母、数字、连字符(-)和下划线(_)。
 * `remark` - (可选) 此属性是对组的简要描述。长度不得超过256。
-* `read_enable` - (可选) 此属性用于设置消息读取是否启用或禁用。只有在组被客户端使用后才能设置。
+* `read_enable` - (可选) 此属性用于设置消息读取是否启用或禁用。只有在组被客户端使用后才能设置。默认值为`true`，表示启用消息读取功能。如果设置为`false`，则禁用消息读取功能。
 
-## 属性参考
+## 属性说明
 
 导出以下属性：
 
-* `id` - ONS组的GroupID和InstanceID。格式为`GroupID:InstanceID`。
+* `id` - ONS组的唯一标识符，由GroupID和InstanceID组成。格式为`GroupID:InstanceID`，其中`GroupID`是组的ID，`InstanceID`是所属ONS实例的ID。

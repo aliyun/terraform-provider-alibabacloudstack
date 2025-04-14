@@ -62,7 +62,7 @@ resource "alibabacloudstack_rds_account" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -77,7 +77,7 @@ resource "alibabacloudstack_rds_account" "default" {
     - MariaDB：2 到 16 个字符。
   - **注意**：普通账号名和高权限账号名不能相似。例如，如果高权限账号名为 `Test1`，那么普通账号名不能为 `test1`。
 * `password` - (必填) 操作密码。可以包含字母、数字或下划线，长度为 6 到 32 个字符。
-* `kms_encrypted_password` - (可选) 用于加密数据库账号密码的 KMS 加密密码。如果设置了 `password`，此字段将被忽略。
+* `kms_encrypted_password` - (可选) 使用 KMS 加密的数据库账号密码。如果设置了 `password`，此字段将被忽略。
 * `kms_encryption_context` - (可选) 用于在创建或更新数据库账号时解密 `kms_encrypted_password` 的 KMS 加密上下文。详见 [加密上下文](https://www.alibabacloud.com/help/doc-detail/42975.htm)。当设置了 `kms_encrypted_password` 时有效。
 * `account_type` - (可选，变更时重建) 账号类型。有效值：
   - `Normal`：普通账号(默认)。
@@ -86,8 +86,12 @@ resource "alibabacloudstack_rds_account" "default" {
   - **注意**：在创建具有 SA 权限的数据库账号之前，请检查实例是否满足先决条件。更多信息，请参阅 [创建具有 SA 权限的数据库账号](https://www.alibabacloud.com/help/doc-detail/122334.htm)。
 * `account_description` - (可选) 账号描述。长度可以为 2 到 256 个字符。它以中文或英文字母开头，可以包含数字、中文、英文、下划线 (`_`) 和连字符 (`-`)。
   - **注意**：不能以 `http://` 或 `https://` 开头。
+* `instance_id` - (可选，变更时重建) 已废弃字段，建议使用 `data_base_instance_id` 替代。
+* `name` - (可选，变更时重建) 已废弃字段，建议使用 `account_name` 替代。
+* `type` - (可选，变更时重建) 已废弃字段，建议使用 `account_type` 替代。
+* `description` - (可选) 已废弃字段，建议使用 `account_description` 替代。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
@@ -96,3 +100,7 @@ resource "alibabacloudstack_rds_account" "default" {
 * `account_name` - 数据库账号名称。由小写字母、数字或下划线组成。对于 MySQL，还支持大写字母。它必须以字母开头，并以字母或数字结尾。
 * `account_type` - 账号类型。有效值：`Normal`、`Super` 或 `Sysadmin`。
 * `account_description` - 账号描述。长度可以为 2 到 256 个字符。它以中文或英文字母开头，可以包含数字、中文、英文、下划线 (`_`) 和连字符 (`-`)。
+* `instance_id` - 已废弃字段，建议使用 `data_base_instance_id` 替代。
+* `name` - 已废弃字段，建议使用 `account_name` 替代。
+* `type` - 已废弃字段，建议使用 `account_type` 替代。
+* `description` - 已废弃字段，建议使用 `account_description` 替代。

@@ -37,17 +37,19 @@ resource "alibabacloudstack_datahub_subscription" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
   * `project_name` - (必填, 变更时重建) 订阅所属的DataHub项目的名称。其长度限制为3-32个字符，仅允许字母、数字和下划线(`_`)，不区分大小写。
   * `topic_name` - (必填, 变更时重建) 订阅所属的DataHub主题的名称。其长度限制为1-128个字符，仅允许字母、数字和下划线(`_`)，不区分大小写。
   * `comment` - (选填, 变更时重建) DataHub订阅的注释。最大长度为255个字符。
+  * `sub_id` - (选填) 订阅的身份标识，由服务器端生成。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
   * `id` - 作为Terraform资源的DataHub订阅的唯一标识符。它以 `<project_name>:<topic_name>:<sub_id>` 的格式组成。
-  * `sub_id` - 订阅的身份，由服务器端生成。
+  * `sub_id` - 订阅的身份标识，由服务器端生成。
   * `create_time` - DataHub订阅的创建时间。这是一个人类可读的字符串，而不是64位UTC时间戳。
   * `last_modify_time` - DataHub订阅的最后修改时间。最初，它与 `create_time` 相同。像 `create_time` 一样，它也是一个人类可读的字符串，而不是64位UTC时间戳。
+  * `comment` - DataHub订阅的注释。最大长度为255个字符。 

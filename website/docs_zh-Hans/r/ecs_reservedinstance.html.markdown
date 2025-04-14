@@ -34,7 +34,7 @@ resource "alibabacloudstack_ecs_reservedinstance" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -64,12 +64,13 @@ resource "alibabacloudstack_ecs_reservedinstance" "default" {
 * `description` - (选填) - 预留实例描述。长度为 2 到 256 个英文或中文字符。不能以 `http://` 或 `https://` 开头。
 * `resource_group_id` - (选填, 变更时重建) - 资源组 ID。
 * `reserved_instance_id` - (选填, 变更时重建) - 预留实例的 ID。
+* `name` - (选填, 已弃用) - 预留实例的名称。
 
 ### 从配置中移除 alibabacloudstack_ecs_reservedinstance
 
 alibabacloudstack_ecs_reservedinstance 资源允许您管理您的预留实例，但 Terraform 无法销毁它。将此资源从您的配置中移除会将其从您的状态文件和管理中移除，但不会销毁预留实例。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

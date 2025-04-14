@@ -52,7 +52,7 @@ resource "alibabacloudstack_nas_file_system" "foo" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -77,7 +77,7 @@ resource "alibabacloudstack_nas_file_system" "foo" {
   * 当 `file_system_type = cpfs` 时，值为：
     * `cpfs`
 
-* `description` - (选填)文件系统描述。限制：
+* `description` - (选填) 文件系统描述。限制：
   * 长度为2~128个英文或中文字符。
   * 必须以大小写字母或中文开头，不能以 `http://` 或 `https://` 开头。
   * 可以包含数字、冒号(:)、下划线(_)或短横线(-)。
@@ -94,15 +94,15 @@ resource "alibabacloudstack_nas_file_system" "foo" {
     * `extreme`：极速型NAS
     * `cpfs`：文件存储CPFS
 
-* `capacity` - (选填)文件系统的容量。当 `file_system_type = extreme` 时为必填项。单位：GiB。**注意**：最小值为100。
+* `capacity` - (选填) 文件系统的容量。当 `file_system_type = extreme` 时为必填项。单位：GiB。**注意**：最小值为100。
 
 * `zone_id` - (选填，变更时重建) 可用区ID。可用区是指在同一地域内电力和网络互相独立的物理区域。
   * 当 `file_system_type = standard` 时，此参数为可选项。默认情况下，会根据 `protocol_type` 和 `storage_type` 配置随机选择一个符合条件的可用区。
   * 当 `file_system_type = extreme` 或 `file_system_type = cpfs` 时，此参数为必填项。
 
-* `kms_key_id` - (选填)KMS密钥ID。当 `encrypt_type = 2` 时为必填项。
+* `kms_key_id` - (选填) KMS密钥ID。当 `encrypt_type = 2` 时为必填项。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

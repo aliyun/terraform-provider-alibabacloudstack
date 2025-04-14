@@ -28,7 +28,7 @@ resource "alibabacloudstack_vpngateway_customergateway" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -38,7 +38,7 @@ resource "alibabacloudstack_vpngateway_customergateway" "default" {
 
 > **注意**：如果未提供 `customer_gateway_name`，系统将生成一个默认名称。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出以下属性：
 

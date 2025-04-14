@@ -33,7 +33,7 @@ resource "alibabacloudstack_ecs_keypair" "publickey" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -45,9 +45,10 @@ resource "alibabacloudstack_ecs_keypair" "publickey" {
 
 > **注意：** 如果既未设置`key_pair_name`也未设置`key_name_prefix`，Terraform将生成一个唯一ID来替换它们。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
-* `key_pair_name` - 密钥对的名称。长度为2~128个英文或中文字符。必须以字母或中文开头，不能以`http://`或`https://`开头。可以包含数字、半角冒号(`:`)、下划线(`_`)或者短划线(`-`)。
+* `key_pair_name` - 密钥对的名称。
 * `finger_print` - 密钥对的指纹。根据RFC 4716定义的公钥指纹格式，采用MD5信息摘要算法。更多详情，请参见[RFC 4716](https://tools.ietf.org/html/rfc4716)。
+* `key_name` - 密钥对的名称。

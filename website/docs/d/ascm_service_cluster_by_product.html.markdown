@@ -36,3 +36,5 @@ The following attributes are exported:
 * `region_list` - A list of regions. Each element contains the following attributes:
     * `region_id` - The unique identifier of the region.
     * `region_type` - The type of the region.
+* `cluster_list` - A list of clusters grouped by certain criteria.
+    * `cluster_by_region` - A list of clusters grouped by region.

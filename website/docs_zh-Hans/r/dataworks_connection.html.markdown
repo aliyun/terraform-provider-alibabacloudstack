@@ -42,12 +42,12 @@ resource "alibabacloudstack_data_works_connection" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
   * `connection_id` - (变更时重建) - 连接的ID。这是自动生成的，创建后无法修改。
-  * `project_id` - (必填) - 要创建连接的项目的ID(工作空间ID)。
+  * `project_id` - (必填) - 要创建连接的项目的ID（工作空间ID）。
   * `connection_type` - (必填) - 连接类型。目前支持`rds`。
   * `content` - (必填) - 数据源的详细信息。这是一个包含以下键的映射：
     * `username` - (必填) - 用于连接到数据源的用户名。
@@ -66,8 +66,8 @@ resource "alibabacloudstack_data_works_connection" "default" {
   * `name` - (必填, 变更时重建) - 连接的名称。此值在项目内必须唯一。
   * `description` - (选填) - 连接的描述。这提供了有关连接的附加信息。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
-  * `connection_id` - 连接的唯一标识符。此值格式为 `<connection_id>:<$.ProjectId>`。
+  * `connection_id` - 连接的唯一标识符。此值格式为 `<connection_id>:<$.ProjectId>`，其中 `<connection_id>` 是系统自动生成的唯一连接ID，而 `<$.ProjectId>` 是对应的项目ID。

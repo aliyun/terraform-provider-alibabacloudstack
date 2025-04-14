@@ -34,16 +34,15 @@ resource "alibabacloudstack_arms_alert_contact_group" "default" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `alert_contact_group_name` - (必填) 告警联系组的名称。它在指定的阿里云账户和区域中必须唯一。
 * `contact_ids` - (可选) 属于此组的告警联系人的 ID 列表。这些 ID 可以从 `alibabacloudstack_arms_alert_contact` 资源的 `id` 属性或在 ARMS 控制台中手动创建获取。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
-* `id` - 告警联系组的 ID。这是在创建时自动生成的，可以用于将资源导入 Terraform。
-```
+* `id` - 告警联系组的唯一标识符（ID）。此 ID 在创建时自动生成，并可用于将资源导入 Terraform。

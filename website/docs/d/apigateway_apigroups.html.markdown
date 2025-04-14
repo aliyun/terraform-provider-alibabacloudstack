@@ -30,8 +30,9 @@ output "first_group_id" {
 
 The following arguments are supported:
 
-* `name_regex` - (Optional) A regex string used to filter API Gateway groups by their names.
+* `name_regex` - (Optional) A regex string used to filter API Gateway groups by their names. 
 * `ids` - (Optional) A list of API Gateway group IDs to filter results.
+
 
 ## Attributes Reference
 
@@ -52,4 +53,4 @@ In addition to all arguments above, the following attributes are exported:
     - `LOCKED`: Locked due to outstanding payment.
   * `illegal_status` - The illegal status of the API Gateway group. Possible values include:
     - `NORMAL`: The API Gateway group is normal.
-    - `LOCKED`: Locked due to illegality.
+    - `LOCKED`: Locked due to illegality. 

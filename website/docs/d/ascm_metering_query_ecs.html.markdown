@@ -31,10 +31,10 @@ The following arguments are supported:
 * `end_time` - (Required) The end time for the metering query in ISO 8601 format (e.g., "2023-01-31T23:59:59Z").
 * `org_id` - (Optional) The organization ID for which to retrieve metering data.
 * `product_name` - (Required) The name of the product for which to retrieve metering data (e.g., "ECS").
-* `is_parent_id` - (Optional) Indicates whether the organization ID is a parent ID.
-* `ins_id` - (Optional) The instance ID for which to retrieve metering data.
-* `region` - (Optional) The region for which to retrieve metering data.
-* `resource_group_id` - (Optional) The resource group ID for which to retrieve metering data.
+* `is_parent_id` - (Optional) Indicates whether the organization ID is a parent ID. 
+* `ins_id` - (Optional) The instance ID for which to retrieve metering data. 
+* `region` - (Optional) The region for which to retrieve metering data. 
+* `resource_group_id` - (Optional) The resource group ID for which to retrieve metering data. 
 * `name_regex` - (Optional) A regex pattern to filter the results by instance name.
 
 ## Attributes Reference
@@ -60,3 +60,7 @@ The following attributes are exported:
     * `end_time` - The end time of the metering data.
     * `create_time` - The creation time of the ECS instance.
     * `data_disk_size` - The data disk size of the ECS instance in GB.
+    * `is_parent_id` - Indicates whether the organization ID is a parent ID. 
+    * `ins_id` - The instance ID for which to retrieve metering data. 
+    * `region` - The region for which to retrieve metering data. 
+    * `resource_group_id` - The resource group ID for which to retrieve metering data. 

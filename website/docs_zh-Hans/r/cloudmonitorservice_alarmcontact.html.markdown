@@ -48,21 +48,21 @@ resource "alibabacloudstack_cloudmonitorservice_alarmcontact" "example" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
 * `alarm_contact_name` - (必填，变更时重建) 报警联系人的名称。该名称在您的阿里云账户内必须唯一，并且创建后无法修改。
 * `describe` - (必填) 报警联系人的简要描述。这有助于识别联系人的目的或所有者。
-* `channels_ali_im` - (选填)报警联系人的TradeManager ID。用于通过TradeManager接收通知。
-* `channels_ding_web_hook` - (选填)钉钉群机器人的webhook URL。允许将通知发送到钉钉群。
-* `channels_mail` - (选填)报警联系人的电子邮件地址。添加或修改电子邮件地址后，接收方会收到一封包含激活链接的电子邮件。只有在接收方激活电子邮件地址后，系统才会将其添加到报警联系人列表中。
-* `channels_sms` - (选填)报警联系人的电话号码。通知将通过短信发送到此号码。与电子邮件类似，在联系人被添加之前可能需要激活链接。
-* `lang` - (选填)报警的语言类型。有效值：`en`、`zh-cn`。默认为`zh-cn`。
+* `channels_ali_im` - (选填) 报警联系人的TradeManager ID。用于通过TradeManager接收通知。
+* `channels_ding_web_hook` - (选填) 钉钉群机器人的webhook URL。允许将通知发送到钉钉群。
+* `channels_mail` - (选填) 报警联系人的电子邮件地址。添加或修改电子邮件地址后，接收方会收到一封包含激活链接的电子邮件。只有在接收方激活电子邮件地址后，系统才会将其添加到报警联系人列表中。
+* `channels_sms` - (选填) 报警联系人的电话号码。通知将通过短信发送到此号码。与电子邮件类似，在联系人被添加之前可能需要激活链接。
+* `lang` - (选填) 报警的语言类型。有效值：`en`、`zh-cn`。默认为`zh-cn`。
 
 -> **注意：** 至少需要指定以下报警通知目标之一：`channels_ali_im`、`channels_ding_web_hook`、`channels_mail`、`channels_sms`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 
@@ -72,6 +72,7 @@ resource "alibabacloudstack_cloudmonitorservice_alarmcontact" "example" {
 * `channels_ding_web_hook` - 钉钉群机器人的webhook URL。
 * `channels_mail` - 报警联系人的电子邮件地址。
 * `channels_sms` - 报警联系人的电话号码。
+* `describe` - 报警联系人的简要描述。
 
 ## 导入
 

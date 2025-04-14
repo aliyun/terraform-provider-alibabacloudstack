@@ -147,7 +147,7 @@ output "first_scaling_rule_id" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数是支持的：
 
@@ -159,7 +159,7 @@ output "first_scaling_rule_id" {
   - `TargetTrackingConfiguration`: 目标跟踪伸缩规则。
   - `StepScalingConfiguration`: 阶梯伸缩规则。
 
-## 属性参考
+## 属性说明
 
 除了上述参数外，还导出以下属性：
 
@@ -176,4 +176,4 @@ output "first_scaling_rule_id" {
     - `TotalCapacity`: 将伸缩组中的ECS实例总数设置为指定值。
   * `adjustment_value` - 伸缩规则中使用的调整值。这指定了基于 `adjustment_type` 的调整幅度。
   * `min_adjustment_magnitude` - 伸缩规则的最小调整幅度。这确保任何伸缩活动都达到最低阈值。
-  * `scaling_rule_ari` - 伸缩规则的唯一ARN（Aliyun资源名称）。
+  * `scaling_rule_ari` - 伸缩规则的唯一ARN（Aliyun资源名称）。 

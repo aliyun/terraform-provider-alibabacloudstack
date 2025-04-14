@@ -82,6 +82,7 @@ The following arguments are supported:
 * `vpc_id` - (Required, ForceNew) The ID of the VPC that you want to authorize the API Gateway to access.
 * `instance_id` - (Required, ForceNew) The ID of the ECS or Server Load Balancer instance in the VPC that you want to authorize the API Gateway to access.
 * `port` - (Required, ForceNew) The port number on the instance that the API Gateway should connect to. Valid values range from 1 to 65535.
+* `child` - (Optional, ForceNew) A placeholder argument for future child configurations.
 
 ## Attributes Reference
 

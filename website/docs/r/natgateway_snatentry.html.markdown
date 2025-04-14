@@ -66,6 +66,7 @@ The following arguments are supported:
 * `source_vswitch_id` - (Optional, ForceNew) The ID of the VSwitch associated with the SNAT entry. This parameter is mutually exclusive with the `source_cidr` parameter.
 * `snat_ip` - (Required) The public IP address used for the SNAT entry. This IP must belong to the Elastic IP (EIP) associated with the NAT Gateway.
 * `source_cidr` - (Optional, ForceNew) The private network segment of the ECS instances. This parameter is mutually exclusive with the `source_vswitch_id` parameter.
+* `snat_entry_id` - (Required) The unique identifier of the SNAT entry on the server.
 
 ## Attributes Reference
 

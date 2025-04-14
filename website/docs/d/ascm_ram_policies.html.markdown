@@ -50,4 +50,3 @@ The following attributes are exported in addition to the arguments listed above:
     * `cuser_id` - ID of the policy creator.
     * `region` - Name of the region where policy belongs.
     * `policy_document` - Policy Document.
-    * `output_file` - File name where to save data source results (after running `terraform plan`).

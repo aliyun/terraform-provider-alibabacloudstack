@@ -81,7 +81,7 @@ resource "alibabacloudstack_ecs_keypairattachment" "attachment" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -89,7 +89,7 @@ resource "alibabacloudstack_ecs_keypairattachment" "attachment" {
 * `instance_ids` - (必填，变更时重建) 需要附加密钥对的 ECS 实例 ID 列表。每个实例都会与指定的密钥对进行绑定。
 * `force` - (选填，变更时重建) 如果设置为 `true`，在附加密钥对后，实例将自动重启以确保密钥对生效。默认值为 `false`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

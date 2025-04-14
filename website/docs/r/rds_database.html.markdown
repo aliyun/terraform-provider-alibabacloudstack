@@ -66,6 +66,10 @@ The following arguments are supported:
   - **PostgreSQL**: `KOI8U`, `UTF8`, `WIN866`, `WIN874`, `WIN1250`, `WIN1251`, `WIN1252`, `WIN1253`, `WIN1254`, `WIN1255`, `WIN1256`, `WIN1257`, `WIN1258`, `EUC_CN`, `EUC_KR`, `EUC_TW`, `EUC_JP`, `EUC_JIS_2004`, `KOI8R`, `MULE_INTERNAL`, `LATIN1`, `LATIN2`, `LATIN3`, `LATIN4`, `LATIN5`, `LATIN6`, `LATIN7`, `LATIN8`, `LATIN9`, `LATIN10`, `ISO_8859_5`, `ISO_8859_6`, `ISO_8859_7`, `ISO_8859_8`, `SQL_ASCII`.
   Refer to the [API Docs](https://www.alibabacloud.com/help/zh/doc-detail/26258.htm) for more details.
 * `description` - (Optional) A description of the database. It cannot start with `https://`. It must start with a Chinese character or an English letter and can include Chinese and English characters, underscores (`_`), hyphens (`-`), and numbers. The length should be between 2 and 256 characters.
+* `data_base_instance_id` - (Optional, ForceNew) The ID of the RDS instance where the database will be created. 
+* `data_base_name` - (Optional, ForceNew) The name of the database. It must start with a letter and can consist of lowercase letters, numbers, and underscores. The length should not exceed 64 characters. 
+* `character_set_name` - (Optional, ForceNew) The character set of the database. Supported values depend on the database engine. 
+* `data_base_description` - (Optional) A description of the database. It cannot start with `https://`. It must start with a Chinese character or an English letter and can include Chinese and English characters, underscores (`_`), hyphens (`-`), and numbers. The length should be between 2 and 256 characters. 
 
 **NOTE:** The `name` and `character_set` fields do not support modification after creation.
 
@@ -78,3 +82,7 @@ In addition to all arguments above, the following attributes are exported:
 * `name` - The name of the database.
 * `character_set` - The character set of the database.
 * `description` - The description of the database.
+* `data_base_instance_id` - The ID of the RDS instance where the database is created. 
+* `data_base_name` - The name of the database. 
+* `character_set_name` - The character set of the database. 
+* `data_base_description` - The description of the database. 

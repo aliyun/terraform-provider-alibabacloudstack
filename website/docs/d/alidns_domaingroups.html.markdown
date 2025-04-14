@@ -41,4 +41,3 @@ The following attributes are exported in addition to the arguments listed above:
 * `groups` - A list of groups. Each element contains the following attributes:
   * `group_id` - Id of the group.
   * `group_name` - Name of the group.
-* `name_regex` - A regex string to filter results by group name. 

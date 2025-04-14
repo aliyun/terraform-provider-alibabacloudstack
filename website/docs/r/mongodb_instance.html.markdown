@@ -69,6 +69,7 @@ The following arguments are supported:
 * `maintain_start_time` - (Optional) The start time of the maintenance window. Specify the time in the `HH:mmZ` format. The time must be in UTC.
 * `maintain_end_time` - (Optional) The end time of the maintenance window. Specify the time in the `HH:mmZ` format. The time must be in UTC.
 * `tags` - (Optional, Map) A mapping of tags to assign to the resource.
+* `db_instance_description` - (Optional) The description of the DB instance.
 
 ## Attributes Reference
 

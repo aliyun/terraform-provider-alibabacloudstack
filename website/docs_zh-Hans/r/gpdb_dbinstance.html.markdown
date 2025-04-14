@@ -46,7 +46,7 @@ resource "alibabacloudstack_gpdb_dbinstance" "example" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -54,18 +54,18 @@ resource "alibabacloudstack_gpdb_dbinstance" "example" {
 * `instance_class` - (必填, 变更时重建) - GPDB实例的规格。例如，`gpdb.group.segsdx2`。更多详情请参阅 [实例规格](https://www.alibabacloud.com/help/doc-detail/86942.htm)。
 * `db_instance_class` - (已废弃, 变更时重建) - 已废弃，请改用 `instance_class`。
 * `instance_group_count` - (必填) - GPDB实例中的组数。有效值为 `[2, 4, 8, 16, 32]`。
-* `instance_charge_type` - (选填, 变更时重建) - 实例的计费方式。有效值为 `PrePaid`(包年包月)和 `PostPaid`(按量付费)。默认值为 `PostPaid`。
+* `instance_charge_type` - (选填, 变更时重建) - 实例的计费方式。有效值为 `PrePaid`(包年包月) 和 `PostPaid`(按量付费)。默认值为 `PostPaid`。
 * `payment_type` - (选填, 变更时重建) - `instance_charge_type` 的别名。指定实例的支付类型。
 * `description` - (选填) - GPDB实例的简要描述。最多可以是256个字符。
 * `db_instance_description` - (选填) - `description` 的别名。提供GPDB实例的详细描述。
 * `vswitch_id` - (选填, 变更时重建) - 将启动GPDB实例的交换机ID。如果要在VPC中启动实例，则此参数是必填的。
 * `instance_inner_connection` - (选填, 变更时重建) - GPDB实例的内部连接端点。
-* `instance_inner_port` - (变更时重建) - GPDB实例的内部端口。
-* `port` - (变更时重建) - GPDB实例的公网端口号。默认值为 `5432`。
+* `instance_inner_port` - (选填, 变更时重建) - GPDB实例的内部端口。
+* `port` - (选填, 变更时重建) - GPDB实例的公网端口号。默认值为 `5432`。
 * `engine` - (必填, 变更时重建) - 数据库引擎。目前仅支持 `gpdb`。
 * `engine_version` - (必填, 变更时重建) - GPDB引擎的版本。有效值包括 `4.3`、`6.0` 和 `7.0`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

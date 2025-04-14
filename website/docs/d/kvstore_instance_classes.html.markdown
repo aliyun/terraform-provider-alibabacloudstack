@@ -45,7 +45,6 @@ The following arguments are supported:
 * `edition_type` - (Optional) The KVStore instance edition type required by the user. Valid values: `Community` and `Enterprise`.
 * `series_type` - (Optional) The KVStore instance series type required by the user. Valid values: `enhanced_performance_type` and `hybrid_storage`.
 * `shard_number` - (Optional) The number of shard.Valid values: `1`, `2`, `4`, `8`, `16`, `32`, `64`, `128`, `256`.
-* `architecture` - (Optional) The KVStore instance system architecture required by the user. Valid values: `standard`, `cluster` and `rwsplit`.
 
 ## Attributes Reference
 

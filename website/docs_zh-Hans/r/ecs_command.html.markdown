@@ -36,7 +36,7 @@ resource "alibabacloudstack_ecs_command" "default" {
 ```terraform
 resource "alibabacloudstack_ecs_command" "complex" {
   command_name      = "StopKubeletAndRemoveK8S"
-  command_content   = "c3lzdGVtY3RscyBzdG9wIGt1YmVsZXQuc2VydmljZTsgc3lzdGVtY3QgcXVldWUga3ViZWxldC5zZXJ2aWNlOyBzeXN0ZW1jdGxzIGRlbW9uLXJlbG9hZDsgeXVtIC15IHJlbW92ZSBrdWJlYWRtIGt1YmVsZXQga3VibGV0IGt1YnVsZXRjIg=="
+  command_content   = "c3lzdGVtY3RscyBzdG9wIGt1YmVsZXQuc2VydmljZTsgc3lzdGVtY3QgcXVldWUga3ViZWxldC5zZXJ2aWNlOyBzeXN0ZW1jdGxzIGRlbW9uLXJlbG9hZDsgeXVtIC15IHJlbW92ZSBrdWJlYWRtIGt1YmVsZXQga3VidWxldGM="
   # Base64-encoded content: "systemctl stop kubelet.service; systemctl disable kubelet.service; systemctl daemon-reload; yum -y remove kubeadm kubelet kubectl;"
   type              = "RunShellScript"
   description       = "Stops and removes K8S components from the system."
@@ -46,7 +46,7 @@ resource "alibabacloudstack_ecs_command" "complex" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 支持以下参数：
 
@@ -61,7 +61,7 @@ resource "alibabacloudstack_ecs_command" "complex" {
 * `timeout` - (可选，变更时重建) 命令在 ECS 实例上执行的超时期间。单位：秒。默认值为 `60`。
 * `working_dir` - (可选，变更时重建) 命令将在 ECS 实例上执行的工作目录。默认值为 Linux 系统的 `/root` 和 Windows 系统的 `C:\Windows\system32`。
 
-## 属性参考
+## 属性说明
 
 除了上述所有参数外，还导出了以下属性：
 

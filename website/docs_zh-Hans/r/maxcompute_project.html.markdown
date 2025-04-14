@@ -24,19 +24,23 @@ resource "alibabacloudstack_maxcompute_project" "example" {
 }
 ```
 
-## 参数参考
+## 参数说明
 
 以下参数被支持：
-* `name` - (必填，变更时重建) 已从提供程序版本 1.110.0 开始弃用，取而代之的是 `project_name`。
+* `project_name` - (必填，变更时重建) MaxCompute 项目的名称。
 * `quota_id` - (必填) MaxCompute 项目的配额 ID。
 * `disk` - (必填) MaxCompute 项目的磁盘大小。
+* `specification_type` - (必填) MaxCompute 项目的规格类型，例如 `OdpsStandard`。
+* `order_type` - (必填) MaxCompute 项目的计费类型，例如 `PayAsYouGo`（按量付费）。
 
-## 属性参考
+## 属性说明
 
 以下属性会被导出：
 
-* `id` - MaxCompute 项目的 ID。它与名称相同。
-* `name` - MaxCompute 项目的名称。
+* `id` - MaxCompute 项目的唯一标识符。它与 `project_name` 相同。
+* `project_name` - MaxCompute 项目的名称。
+* `quota_id` - MaxCompute 项目的配额 ID。
+* `disk` - MaxCompute 项目的磁盘大小。
 
 ## 导入
 
