@@ -139,13 +139,10 @@ const Provider = "Terraform-Provider"
 
 const Module = "Terraform-Module"
 
-var providerVersion = "3.18.4"
-var terraformVersion = strings.TrimSuffix(schema.Provider{}.TerraformVersion, "-dev")
-
 type ApiVersion string
 
 // The main version number that is being run at the moment.
-var ProviderVersion = providerVersion
+var ProviderVersion = "0.0.99"
 var TerraformVersion = strings.TrimSuffix(schema.Provider{}.TerraformVersion, "-dev")
 var goSdkMutex = sync.RWMutex{} // The Go SDK is not thread-safe
 var loadSdkfromRemoteMutex = sync.Mutex{}
@@ -874,8 +871,8 @@ func (client *AlibabacloudStackClient) WithEdasClient(do func(*edas.Client) (int
 		edasconn.SourceIp = client.Config.SourceIp
 		edasconn.SecureTransport = client.Config.SecureTransport
 		edasconn.Domain = endpoint
-		edasconn.AppendUserAgent(Terraform, terraformVersion)
-		edasconn.AppendUserAgent(Provider, providerVersion)
+		edasconn.AppendUserAgent(Terraform, TerraformVersion)
+		edasconn.AppendUserAgent(Provider, ProviderVersion)
 		edasconn.AppendUserAgent(Module, client.Config.ConfigurationSource)
 		if client.Config.Proxy != "" {
 			edasconn.SetHttpsProxy(client.Config.Proxy)
