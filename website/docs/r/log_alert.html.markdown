@@ -52,7 +52,7 @@ resource "alibabacloudstack_log_alert" "example" {
   }
   notification_list {
     type       = "Email"
-    email_list = ["aliyun@alibaba-inc.com", "tf-test@123.com"]
+    email_list = ["aliyun@example.com", "tf-test@123.com"]
     content    = "alert content"
   }
   notification_list {

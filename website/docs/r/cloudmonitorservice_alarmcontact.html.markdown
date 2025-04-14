@@ -25,7 +25,7 @@ resource "alibabacloudstack_cloudmonitorservice_alarmcontact" "default" {
   alarm_contact_name = "Alice122"
   describe           = "报警联系人信息"
   channels_ali_im   = "leo"
-  channels_ding_web_hook = "https://oapi.dingtalk.com/robot/send?access_token=7d49515e8ebf21106a80a9cc4bb3d2"
+  channels_ding_web_hook = "https://oapi.dingtalk.com/robot/send?access_token=abcde12345"
   channels_mail      = "alice@example.com"
   channels_sms       = "+1234567890"
 }
