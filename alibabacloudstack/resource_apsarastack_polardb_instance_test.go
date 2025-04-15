@@ -218,7 +218,56 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 			},
 		},
 	})
+}
 
+func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
+	var instance *PolardbDescribedbinstancesResponse
+
+	resourceId := "alibabacloudstack_polardb_dbinstance.default"
+	ra := resourceAttrInit(resourceId, PolardbinstancePGSqlMap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
+		return &PolardbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "Describedbinstances")
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := "tf-testaccdbinstanceconfig"
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceClassicConfigDependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		// module name
+		IDRefreshName: resourceId,
+
+		Providers:    testAccProviders,
+		CheckDestroy: rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"engine":                   "PolarDB_PG",
+					"engine_version":           "14",
+					"db_instance_class":        "polardb.x4.medium.2",
+					"db_instance_storage":      "10",
+					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
+					"instance_name":            "${var.name}",
+					"db_instance_storage_type": "local_ssd",
+					"enable_ssl":               "true",
+					"tde_status":               "true",
+					"encryption":               "true",
+					"encryption_key":           "b7e7fc57-bbdd-4fa7-af27-badf233332d4",
+					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"instance_name": name,
+						"encryption":    "true",
+					}),
+				),
+			},
+		},
+	})
 }
 
 func resourcePolardbInstanceClassicConfigDependence(name string) string {
@@ -228,6 +277,12 @@ variable "name" {
 	default = "%s"
 }
 
+// resource "alibabacloudstack_kms_key" "key" {
+//   description             = "Hello KMS"
+//   pending_window_in_days  = "7"
+//   key_state               = "Enabled"
+// }
+
 %s
 
 `, name, VSwitchCommonTestCase)
@@ -236,6 +291,17 @@ variable "name" {
 var PolardbinstanceBasicMap = map[string]string{
 	"engine":              "MySQL",
 	"engine_version":      "8.0",
+	"db_instance_class":   CHECKSET,
+	"db_instance_storage": "10",
+	"instance_name":       "tf-testaccdbinstanceconfig",
+	"zone_id":             CHECKSET,
+	"connection_string":   CHECKSET,
+	"port":                CHECKSET,
+}
+
+var PolardbinstancePGSqlMap = map[string]string{
+	"engine":              "PolarDB_PG",
+	"engine_version":      "14",
 	"db_instance_class":   CHECKSET,
 	"db_instance_storage": "10",
 	"instance_name":       "tf-testaccdbinstanceconfig",
