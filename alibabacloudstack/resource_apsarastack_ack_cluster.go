@@ -142,6 +142,32 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 					},
 				},
 			},
+			"master_storage_set_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"master_storage_set_partition_number": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1, 2000),
+			},
+			"worker_storage_set_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+			},
+			"worker_storage_set_partition_number": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1, 2000),
+			},
 			// 			"exclude_autoscaler_nodes": {
 			// 				Type:     schema.TypeBool,
 			// 				Default:  false,
@@ -619,6 +645,10 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	msysdisksize := d.Get("master_disk_size").(int)
 	wsysdisksize := d.Get("worker_disk_size").(int)
 	wsysdiskcat := d.Get("worker_disk_category").(string)
+	masterstoragesetid := d.Get("master_storage_set_id").(string)
+	masterstoragesetnumber := d.Get("master_storage_set_partition_number").(int)
+	workerstoragesetid := d.Get("worker_storage_set_id").(string)
+	workerstoragesetnumber := d.Get("worker_storage_set_partition_number").(int)
 	delete_pro := d.Get("delete_protection").(bool)
 	KubernetesVersion := d.Get("version").(string)
 	addons := make([]cs.Addon, 0)
@@ -919,7 +949,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		}
 	} else {
 		if pod == 0 {
-			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%s,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":%s}",
+			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%s,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":%s,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d}",
 				"Product", "Cs",
 				"os_type", OsType,
 				"platform", Platform,
@@ -961,9 +991,13 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 				"worker_data_disks", workerdisks,
 				"image_id", ImageId,
 				"tags", tags,
+				"master_storage_set_id", masterstoragesetid,
+				"master_storage_set_partition_number", masterstoragesetnumber,
+				"worker_storage_set_id", workerstoragesetid,
+				"worker_storage_set_partition_number", workerstoragesetnumber,
 			)
 		} else {
-			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%s,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%s}",
+			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%s,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%s,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d}",
 				"Product", "Cs",
 				"os_type", OsType,
 				"platform", Platform,
@@ -1006,6 +1040,10 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 				"pod_vswitch_ids", podid,
 				"image_id", ImageId,
 				"tags", tags,
+				"master_storage_set_id", masterstoragesetid,
+				"master_storage_set_partition_number", masterstoragesetnumber,
+				"worker_storage_set_id", workerstoragesetid,
+				"worker_storage_set_partition_number", workerstoragesetnumber,
 			)
 		}
 	}
