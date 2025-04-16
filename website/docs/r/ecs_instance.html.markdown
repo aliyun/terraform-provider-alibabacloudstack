@@ -163,6 +163,7 @@ The following arguments are supported:
 * `ipv6_address_list` - (Optional, ForceNew) A list of IPv6 addresses to be assigned to the primary ENI. Supports up to 10 addresses.
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 * `system_disk_tags` - (Optional) A mapping of tags to assign to the system disk.
+* `data_disk_tags` - (Optional) A mapping of tags to assign to the data disk.
 
 ## Attributes Reference
 

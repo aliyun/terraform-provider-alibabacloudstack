@@ -102,6 +102,9 @@ resource "alibabacloudstack_slb_listener" "default" {
   * `forward_port` - (选填, 变更时重建) HTTP重定向到HTTPS的端口。
   * `tls_cipher_policy` - (选填) 传输层安全(TLS)加密策略。默认值：tls_cipher_policy_1_0。有效值：tls_cipher_policy_1_0, tls_cipher_policy_1_1, tls_cipher_policy_1_2, tls_cipher_policy_1_2_strict。
   * `delete_protection_validation` - (选填) 删除前检查SLB实例的DeleteProtection。如果为true，当SLB实例启用了DeleteProtection时，此资源不会被删除。默认值为 false。
+  * `logs_download_attributes` - (可选) 用于定义 SLS 日志的映射。
+    * `log_project`: (必填) SLS 日志服务器项目名称。
+    * `log_store`: (必填) SLS 日志服务器日志存储名称。
 
 ## 属性参考
 

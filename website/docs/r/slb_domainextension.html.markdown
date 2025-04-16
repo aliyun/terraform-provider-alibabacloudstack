@@ -77,5 +77,3 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The ID of the domain extension.
 * `frontend_port` - The frontend port used by the HTTPS listener of the SLB instance.
 * `domain_extension_id` - The unique identifier for the domain extension.
-```
-```
