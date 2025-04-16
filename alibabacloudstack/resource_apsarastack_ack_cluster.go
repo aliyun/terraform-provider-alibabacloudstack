@@ -1226,6 +1226,8 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		return errmsgs.WrapError(err)
 	}
 	nodepoolid := d.Get("nodepool_id").(string)
+	tags := d.Get("tags").(string)
+	d.Set("tags", tags) // 刷新本地缓存值
 	clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
 	if err != nil {
 		return errmsgs.WrapError(err)
