@@ -712,16 +712,16 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		index := 0
 		for key, value := range v.(map[string]interface{}) {
 			if index == 0 {
-				tags = fmt.Sprintf("{\"key\" : \"%s\",\"value\": \"%s\"}", key, value.(string))
+				tags = fmt.Sprintf("{\"key\": \"%s\",\"value\": \"%s\"}", key, value.(string))
 			} else {
-				tags = fmt.Sprintf("%s,{\"name\" : \"%s\",\"config\": %q}", tags, key, value.(string))
+				tags = fmt.Sprintf("%s,{\"key\": \"%s\",\"value\":\"%s\"}", tags, key, value.(string))
 			}
 			index += 1
 		}
-		tags = fmt.Sprintf("[%s]", tags)
+		// tags = fmt.Sprintf("[%s]", tags)
 	}
 	// tagsBytes, _ := json.Marshal(tagss)
-	// tags = fmt.Sprintf("[%s]", tags)
+	tags = fmt.Sprintf("[%s]", tags)
 	log.Printf("checking tags %v", tags)
 	proxy_mode := d.Get("proxy_mode").(string)
 	VpcId := d.Get("vpc_id").(string)
