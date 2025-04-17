@@ -89,9 +89,9 @@ func resourceAlibabacloudStackDtsSynchronizationInstance() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackDtsSynchronizationInstanceCreate, 
-		resourceAlibabacloudStackDtsSynchronizationInstanceRead, 
-		nil, 
+	setResourceFunc(resource, resourceAlibabacloudStackDtsSynchronizationInstanceCreate,
+		resourceAlibabacloudStackDtsSynchronizationInstanceRead,
+		resourceAlibabacloudStackDtsSynchronizationInstanceUpdate,
 		resourceAlibabacloudStackDtsSynchronizationInstanceDelete)
 	return resource
 }
@@ -201,6 +201,11 @@ func resourceAlibabacloudStackDtsSynchronizationInstanceRead(d *schema.ResourceD
 	d.Set("payment_type", convertDtsSyncPaymentTypeResponse(object["PayType"]))
 	d.Set("dts_job_id", object["SynchronizationJobId"])
 	return nil
+}
+
+func resourceAlibabacloudStackDtsSynchronizationInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdateAllowedFields := []string{"database_count", "payment_duration", "compute_unit", "payment_duration_unit", "quantity"}
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackDtsSynchronizationInstanceDelete(d *schema.ResourceData, meta interface{}) error {

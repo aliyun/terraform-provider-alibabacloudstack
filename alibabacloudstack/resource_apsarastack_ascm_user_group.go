@@ -36,14 +36,14 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 			},
 			"role_ids": {
 				Type:     schema.TypeSet,
-				Optional:   true,
+				Optional: true,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackAscmUserGroupCreate,
-		resourceAlibabacloudStackAscmUserGroupRead, nil, resourceAlibabacloudStackAscmUserGroupDelete)
+		resourceAlibabacloudStackAscmUserGroupRead, resourceAlibabacloudStackAscmUserGroupUpdate, resourceAlibabacloudStackAscmUserGroupDelete)
 	return resource
 }
 
@@ -126,6 +126,12 @@ func resourceAlibabacloudStackAscmUserGroupRead(d *schema.ResourceData, meta int
 	d.Set("role_ids", roleIds)
 
 	return nil
+}
+
+func resourceAlibabacloudStackAscmUserGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdateAllowedFields := []string{"role_in_ids", "group_name"}
+
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackAscmUserGroupDelete(d *schema.ResourceData, meta interface{}) error {

@@ -23,19 +23,19 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroup() *schema.Resource {
 			},
 
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'master_slave_server_group_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'master_slave_server_group_name' instead.",
 				ConflictsWith: []string{"master_slave_server_group_name"},
 			},
 
 			"master_slave_server_group_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"name"},
 			},
 
@@ -76,10 +76,10 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroup() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, 
+	setResourceFunc(resource,
 		resourceAlibabacloudStackSlbMasterSlaveServerGroupCreate,
 		resourceAlibabacloudStackSlbMasterSlaveServerGroupRead,
-		nil,
+		resourceAlibabacloudStackSlbMasterSlaveServerGroupUpdate,
 		resourceAlibabacloudStackSlbMasterSlaveServerGroupDelete)
 	return resource
 }
@@ -136,9 +136,9 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d *schema.ResourceDa
 
 	for _, server := range object.MasterSlaveBackendServers.MasterSlaveBackendServer {
 		s := map[string]interface{}{
-			"server_id": server.ServerId,
-			"port":      server.Port,
-			"weight":    server.Weight,
+			"server_id":   server.ServerId,
+			"port":        server.Port,
+			"weight":      server.Weight,
 			"server_type": server.ServerType,
 		}
 		servers = append(servers, s)
@@ -149,6 +149,11 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d *schema.ResourceDa
 	}
 
 	return nil
+}
+
+func resourceAlibabacloudStackSlbMasterSlaveServerGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdateAllowedFields := []string{"delete_protection_validation"}
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackSlbMasterSlaveServerGroupDelete(d *schema.ResourceData, meta interface{}) error {

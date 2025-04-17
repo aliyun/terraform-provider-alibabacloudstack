@@ -86,7 +86,8 @@ func resourceAlibabacloudStackDatahubTopic() *schema.Resource {
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackDatahubTopicCreate,
-		resourceAlibabacloudStackDatahubTopicRead, nil,
+		resourceAlibabacloudStackDatahubTopicRead,
+		resourceAlibabacloudStackDatahubTopicUpdate,
 		resourceAlibabacloudStackDatahubTopicDelete)
 	return resource
 }
@@ -182,6 +183,12 @@ func resourceAlibabacloudStackDatahubTopicRead(d *schema.ResourceData, meta inte
 	d.Set("create_time", strconv.FormatInt(object.CreateTime, 10))
 	d.Set("last_modify_time", strconv.FormatInt(object.LastModifyTime, 10))
 	return nil
+}
+
+func resourceAlibabacloudStackDatahubTopicUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdateAllowedFields := []string{"life_cycle", "comment"}
+
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackDatahubTopicDelete(d *schema.ResourceData, meta interface{}) error {

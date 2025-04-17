@@ -1054,6 +1054,9 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 }
 
 func noUpdatesAllowedCheck(d *schema.ResourceData, fields []string) error {
+	if d.IsNewResource() {
+		return nil
+	}
 	updatefields := make([]string, 0)
 	for _, field := range fields {
 		if d.HasChange(field) {

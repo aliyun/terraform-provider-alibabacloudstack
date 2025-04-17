@@ -42,7 +42,8 @@ func resourceAlibabacloudStackQuickBiWorkspace() *schema.Resource {
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackQuickBiWorkspaceCreate,
-		resourceAlibabacloudStackQuickBiWorkspaceRead, nil, 
+		resourceAlibabacloudStackQuickBiWorkspaceRead,
+		resourceAlibabacloudStackQuickBiWorkspaceUpdate,
 		resourceAlibabacloudStackQuickBiWorkspaceDelete)
 	return resource
 }
@@ -118,6 +119,11 @@ func resourceAlibabacloudStackQuickBiWorkspaceRead(d *schema.ResourceData, meta 
 	d.Set("allow_publish", AllowPublish)
 
 	return nil
+}
+
+func resourceAlibabacloudStackQuickBiWorkspaceUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdateAllowedFields := []string{"workspace_name", "workspace_desc", "use_comment", "allow_share", "allow_publish"}
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackQuickBiWorkspaceDelete(d *schema.ResourceData, meta interface{}) (err error) {

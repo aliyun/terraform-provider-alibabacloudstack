@@ -57,7 +57,7 @@ func resourceAlibabacloudStackAscmPasswordPolicy() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackAscmPasswordPolicyCreate, resourceAlibabacloudStackAscmPasswordPolicyRead, nil, resourceAlibabacloudStackAscmPasswordPolicyDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackAscmPasswordPolicyCreate, resourceAlibabacloudStackAscmPasswordPolicyRead, resourceAlibabacloudStackAscmPasswordPolicyUpdate, resourceAlibabacloudStackAscmPasswordPolicyDelete)
 	return resource
 }
 
@@ -121,6 +121,11 @@ func resourceAlibabacloudStackAscmPasswordPolicyRead(d *schema.ResourceData, met
 	d.Set("password_reuse_prevention", object.Data.PasswordReusePrevention)
 
 	return nil
+}
+
+func resourceAlibabacloudStackAscmPasswordPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdateAllowedFields := []string{"hard_expiry", "require_numbers", "require_lowercase_characters", "require_uppercase_characters", "max_login_attempts", "password_reuse_prevention", "require_symbols", "max_password_age", "minimum_password_length"}
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackAscmPasswordPolicyDelete(d *schema.ResourceData, meta interface{}) error {

@@ -520,9 +520,6 @@ func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interfac
 }
 
 func resourceAlibabacloudStackCmsAlarmUpdate(d *schema.ResourceData, meta interface{}) error {
-	if d.IsNewResource() {
-		return nil
-	}
 	noUpdateAllowedFields := []string{"period", "effective_interval", "enabled", "escalations_warn",
 		"contact_groups", "escalations_info", "silence_time", "webhook", "escalations_critical"}
 	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)

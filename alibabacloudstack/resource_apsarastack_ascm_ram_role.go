@@ -42,7 +42,7 @@ func resourceAlibabacloudStackAscmRamRole() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackAscmRamRoleCreate, resourceAlibabacloudStackAscmRamRoleRead, nil, resourceAlibabacloudStackAscmRamRoleDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackAscmRamRoleCreate, resourceAlibabacloudStackAscmRamRoleRead, resourceAlibabacloudStackAscmRamRoleUpdate, resourceAlibabacloudStackAscmRamRoleDelete)
 	return resource
 }
 
@@ -141,6 +141,12 @@ func resourceAlibabacloudStackAscmRamRoleRead(d *schema.ResourceData, meta inter
 	d.Set("role_id", object.Data[0].ID)
 	d.Set("description", object.Data[0].Description)
 	return nil
+}
+
+func resourceAlibabacloudStackAscmRamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdateAllowedFields := []string{"role_name", "description", "organization_visibility", "role_range"}
+
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackAscmRamRoleDelete(d *schema.ResourceData, meta interface{}) error {
