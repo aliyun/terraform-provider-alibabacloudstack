@@ -1024,12 +1024,12 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 			return nil
 		}
 	}
-	
+
 	resource.ReadContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		err := readFunc(d, meta)
 		return diag.FromErr(err)
 	}
-	
+
 	if updateFunc != nil {
 		resource.UpdateContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 			update_err := updateFunc(d, meta)
@@ -1040,15 +1040,29 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 			return diag.FromErr(read_err)
 		}
 	}
-	
+
 	resource.DeleteContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 		err := deleteFunc(d, meta)
 		return diag.FromErr(err)
 	}
-	
+
 	if resource.Importer == nil {
 		resource.Importer = &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		}
 	}
+}
+
+func noUpdatesAllowedCheck(d *schema.ResourceData, fields []string) error {
+	updatefields := make([]string, 0)
+	for _, field := range fields {
+		if d.HasChange(field) {
+			updatefields = append(updatefields, field)
+		}
+	}
+	if len(updatefields) > 0 {
+		updatefieldsstr := fmt.Sprintf("%s", strings.Join(updatefields, ","))
+		return errmsgs.Error(errmsgs.UpdateFailedErrorMsg, d.Id(), updatefieldsstr, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	return nil
 }
