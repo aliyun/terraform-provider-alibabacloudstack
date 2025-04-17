@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -192,6 +193,7 @@ func testAccCheckEdasK8sClusterDestroy(s *terraform.State) error {
 }
 
 func resourceEdasK8sClusterConfigDependence(name string) string {
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	return fmt.Sprintf(`
 		variable "name" {
 		  default = "%v"
@@ -206,8 +208,6 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 			namespace_name =       "${var.name}"
 			namespace_logical_id = "${var.regionid}:${var.name}",
 		}
-	}
-
 
 		resource "alibabacloudstack_cs_kubernetes" "default" {
 		 name = var.name
@@ -231,5 +231,5 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 		 slb_internet_enabled 		= "true"
 		}
 
-		`, name)
+		`, name, region)
 }

@@ -584,9 +584,9 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackCSKubernetesCreate, 
-	resourceAlibabacloudStackCSKubernetesRead, resourceAlibabacloudStackCSKubernetesUpdate, 
-	resourceAlibabacloudStackCSKubernetesDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackCSKubernetesCreate,
+		resourceAlibabacloudStackCSKubernetesRead, resourceAlibabacloudStackCSKubernetesUpdate,
+		resourceAlibabacloudStackCSKubernetesDelete)
 	return resource
 }
 
