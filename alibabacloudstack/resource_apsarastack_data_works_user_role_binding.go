@@ -30,9 +30,9 @@ func resourceAlibabacloudStackDataWorksUserRoleBinding() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackDataWorksUserRoleBindingCreate, 
-		resourceAlibabacloudStackDataWorksUserRoleBindingRead, 
-		nil, 
+	setResourceFunc(resource, resourceAlibabacloudStackDataWorksUserRoleBindingCreate,
+		resourceAlibabacloudStackDataWorksUserRoleBindingRead,
+		resourceAlibabacloudStackDataWorksUserRoleBindingUpdate,
 		resourceAlibabacloudStackDataWorksUserRoleBindingDelete)
 	return resource
 }
@@ -52,7 +52,6 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingCreate(d *schema.ResourceD
 	if v, ok := d.GetOk("role_code"); ok {
 		request["RoleCode"] = v.(string)
 	}
-
 
 	request["ClientToken"] = fmt.Sprint(uuid.NewRandom())
 	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
@@ -87,6 +86,11 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingRead(d *schema.ResourceDat
 	d.Set("role_code", parts[0])
 
 	return nil
+}
+
+func resourceAlibabacloudStackDataWorksUserRoleBindingUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdateAllowedFields := []string{"role_code", "project_id", "user_id"}
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackDataWorksUserRoleBindingDelete(d *schema.ResourceData, meta interface{}) error {

@@ -28,7 +28,7 @@ func resourceAlibabacloudStackDataWorksProject() *schema.Resource {
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackDataWorksProjectCreate,
-		resourceAlibabacloudStackDataWorksProjectRead, nil, resourceAlibabacloudStackDataWorksProjectDelete)
+		resourceAlibabacloudStackDataWorksProjectRead, resourceAlibabacloudStackDataWorksProjectUpdate, resourceAlibabacloudStackDataWorksProjectDelete)
 	return resource
 }
 
@@ -84,6 +84,12 @@ func resourceAlibabacloudStackDataWorksProjectRead(d *schema.ResourceData, meta 
 	d.Set("project_id", parts[1])
 
 	return nil
+}
+
+func resourceAlibabacloudStackDataWorksProjectUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdateAllowedFields := []string{"project_name", "task_auth_type"}
+
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackDataWorksProjectDelete(d *schema.ResourceData, meta interface{}) error {

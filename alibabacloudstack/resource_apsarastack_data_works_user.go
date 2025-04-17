@@ -30,7 +30,7 @@ func resourceAlibabacloudStackDataWorksUser() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackDataWorksUserCreate, resourceAlibabacloudStackDataWorksUserRead, nil, resourceAlibabacloudStackDataWorksUserDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackDataWorksUserCreate, resourceAlibabacloudStackDataWorksUserRead, resourceAlibabacloudStackDataWorksUserUpdate, resourceAlibabacloudStackDataWorksUserDelete)
 	return resource
 }
 
@@ -55,7 +55,7 @@ func resourceAlibabacloudStackDataWorksUserCreate(d *schema.ResourceData, meta i
 	request["ClientToken"] = fmt.Sprint(uuid.NewRandom())
 
 	response, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
-	
+
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_data_works_folder", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -86,6 +86,11 @@ func resourceAlibabacloudStackDataWorksUserRead(d *schema.ResourceData, meta int
 	d.Set("project_id", parts[1])
 
 	return nil
+}
+
+func resourceAlibabacloudStackDataWorksUserUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdateAllowedFields := []string{"project_id", "user_id", "role_code"}
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackDataWorksUserDelete(d *schema.ResourceData, meta interface{}) error {
