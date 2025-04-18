@@ -162,6 +162,7 @@ resource "alibabacloudstack_ecs_instance" "default" {
   * `ipv6_address_list` - (选填, 变更时重建) - 要分配给主 ENI 的 IPv6 地址列表。支持最多 10 个地址。
   * `tags` - (选填) - 要分配给资源的标签映射。
   * `system_disk_tags` - (选填) - 要分配给系统盘的标签映射。
+  * `data_disk_tags` - (选填) - 要分配给数据盘的标签映射。
 
 ## 属性参考
 

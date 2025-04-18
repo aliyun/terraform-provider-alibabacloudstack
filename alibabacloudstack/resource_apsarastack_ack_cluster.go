@@ -687,7 +687,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 				if i == 0 {
 					workerdisks = fmt.Sprintf("{\"size\" : \"%d\",\"encrypted\": \"%t\",\"performance_level\": \"%s\",\"auto_snapshot_policy_id\": \"%s\",\"category\": \"%s\"}", disk["size"].(int), disk["encrypted"].(bool), disk["performance_level"].(string), disk["auto_snapshot_policy_id"].(string), disk["category"].(string))
 				} else {
-					workerdisks = fmt.Sprintf("%s,{\"size\" : \"%d\",\"encrypted\": \"%t\",\"performance_level\": \"%s\",\"auto_snapshot_policy_id\": \"%s\",\"category\": \"%s\"}", req, disk["size"].(int), disk["encrypted"].(bool), disk["performance_level"].(string), disk["auto_snapshot_policy_id"].(string), disk["category"].(string))
+					workerdisks = fmt.Sprintf("%s,{\"size\" : \"%d\",\"encrypted\": \"%t\",\"performance_level\": \"%s\",\"auto_snapshot_policy_id\": \"%s\",\"category\": \"%s\"}", workerdisks, disk["size"].(int), disk["encrypted"].(bool), disk["performance_level"].(string), disk["auto_snapshot_policy_id"].(string), disk["category"].(string))
 				}
 				log.Printf("checking workerdatadisks %v", workerdisks)
 
@@ -707,6 +707,20 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	}
 	log.Printf("checking runtime %v", runtime)
 	var tags string
+	// if v, ok := d.GetOk("tags"); ok && len(v.(map[string]interface{})) > 0 {
+	// 	index := 0
+	// 	for key, value := range v.(map[string]interface{}) {
+	// 		if index == 0 {
+	// 			tags = fmt.Sprintf("{\"key\": \"%s\",\"value\": \"%s\"}", key, value.(string))
+	// 		} else {
+	// 			tags = fmt.Sprintf("%s,{\"key\": \"%s\",\"value\":\"%s\"}", tags, key, value.(string))
+	// 		}
+	// 		index += 1
+	// 	}
+	// 	// tags = fmt.Sprintf("[%s]", tags)
+	// }
+	// // tagsBytes, _ := json.Marshal(tagss)
+	// tags = fmt.Sprintf("[%s]", tags)
 	tagss := make([]interface{}, 0)
 	if v, ok := d.GetOk("tags"); ok && len(v.(map[string]interface{})) > 0 {
 		for key, value := range v.(map[string]interface{}) {

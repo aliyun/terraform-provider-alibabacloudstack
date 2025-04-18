@@ -1143,6 +1143,9 @@ func (s *PolardbService) DoPolardbDescribedbinstancesRequest(id string, client *
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstances", "")
 	PolardbDescribedbinstancesResponse := &PolardbDescribedbinstancesResponse{}
 	request.QueryParams["DBInstanceId"] = id
+	request.QueryParams["InstanceLevel"] = "1"
+	request.QueryParams["PageNumber"] = "1"
+	request.QueryParams["PageSize"] = "1"
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {

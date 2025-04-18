@@ -32,9 +32,10 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"engine": {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"MySQL", "PolarDB_PPAS", "PolarDB_PG"}, false),
 			},
 			"engine_version": {
 				Type:     schema.TypeString,
@@ -252,6 +253,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		req.QueryParams["TargetRegionId"] = client.RegionId
 		var arnresp RoleARN
 		bresponse, err := client.ProcessCommonRequest(req)
+		addDebug(req.GetActionName(), bresponse, req, req.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -359,7 +361,14 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		"VPCId":                 VPCId,
 		"RoleARN":               arnrole,
 	})
-
+	if tde := d.Get("tde_status"); tde == true {
+		request.QueryParams["TDEStatus"] = "Enabled"
+		request.QueryParams["DBInstanceId"] = d.Id()
+		request.QueryParams["RoleARN"] = arnrole
+		if EncryptionKey != "" {
+			request.QueryParams["EncryptionKey"] = EncryptionKey
+		}
+	}
 	log.Printf("request245 %v", request.QueryParams)
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
@@ -369,7 +378,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "CreateDBInstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
+	addDebug("CreateDBInstance", bresponse, request, request.QueryParams)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbCreatedbinstanceResponse)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
@@ -383,7 +392,9 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-	if tde := d.Get("tde_status"); tde == true {
+	tde := d.Get("tde_status").(bool)
+	log.Printf(" ============================================= tde:%t, engine:%s", tde, engine)
+	if tde == true && engine == "MySQL" {
 		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceTDE", "")
 		PolardbModifydbinstancetdeResponse := PolardbModifydbinstancetdeResponse{}
 		request.QueryParams["TDEStatus"] = "Enabled"
@@ -440,7 +451,15 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSSL", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		stateConf := BuildStateConf([]string{"No"}, []string{"Yes"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
+		var target, process string
+		if engine == "MySQL" {
+			target = "Yes"
+			process = "No"
+		} else {
+			target = "on"
+			process = "off"
+		}
+		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -715,14 +734,26 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 		ssl_req.QueryParams["DBInstanceId"] = d.Id()
 		ssl_req.QueryParams["ConnectionString"] = d.Get("connection_string").(string)
 		var target, process string
+		engine := Trim(d.Get("engine").(string))
 		if ssl == true {
 			ssl_req.QueryParams["SSLEnabled"] = "1"
-			target = "Yes"
-			process = "No"
+			if engine == "MySQL" {
+				target = "Yes"
+				process = "No"
+			} else {
+				target = "on"
+				process = "off"
+			}
+
 		} else {
 			ssl_req.QueryParams["SSLEnabled"] = "0"
-			target = "No"
-			process = "Yes"
+			if engine == "MySQL" {
+				target = "off"
+				process = "on"
+			} else {
+				target = "No"
+				process = "Yes"
+			}
 		}
 		bresponse, err := client.ProcessCommonRequest(ssl_req)
 		if err != nil {

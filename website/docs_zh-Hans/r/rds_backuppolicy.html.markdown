@@ -72,7 +72,7 @@ resource "alibabacloudstack_rds_backuppolicy" "policy" {
 * `instance_id` - (必填, 变更时重建) - 要配置备份策略的 RDS 实例的 ID。
 * `preferred_backup_time` - (选填) - 数据备份时间，格式：`HH:mmZ-HH:mmZ`(UTC 时间)。默认为 `"02:00Z-03:00Z"`。
 * `backup_retention_period` - (选填) - 数据备份保留天数。取值范围：7~730。默认为 `7`。对于使用本地磁盘的 MySQL 实例，没有上限。
-* `enable_backup_log` - (选填) - 是否开启日志备份：
+* `enable_backup_log` - (选填) - 是否开启日志备份：(曾用属性名：`backup_log, 已废弃`)
   * **true**：表示已启用。
   * **false**：表示未启用。默认为 `true`。注意：“基础版”类别的 RDS 实例不支持设置日志备份。
 * `log_backup_retention_period` - (选填) - 日志备份保留天数。取值范围：7~730，且不大于数据备份保留天数。仅适用于运行 MySQL 和 PostgreSQL 的实例。此参数仅在 `enable_backup_log` 设置为 `true` 时生效。

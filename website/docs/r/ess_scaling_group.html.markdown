@@ -107,7 +107,7 @@ The following arguments are supported:
       targeting your `alibabacloudstack_slb_listener` in order to make sure the listener with its HealthCheck configuration is ready before creating your scaling group).
     - The Server Load Balancer instance attached with VPC-type ECS instances cannot be attached to the scaling group.
     - The default weight of an ECS instance attached to the Server Load Balancer instance is 50.
-
+* `multi_az_policy` - (Optional, ForceNew) Multi-AZ scaling group ECS instance expansion and contraction strategy. PRIORITY, BALANCE or COST_OPTIMIZED
 -> **NOTE:** When detach loadbalancers, instances in group will be remove from loadbalancer's `Default Server Group`; On the contrary, When attach loadbalancers, instances in group will be added to loadbalancer's `Default Server Group`.
 
 -> **NOTE:** When detach dbInstances, private ip of instances in group will be remove from dbInstance's `WhiteList`; On the contrary, When attach dbInstances, private ip of instances in group will be added to dbInstance's `WhiteList`.
