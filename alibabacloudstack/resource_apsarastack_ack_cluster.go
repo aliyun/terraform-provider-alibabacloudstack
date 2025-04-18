@@ -707,21 +707,31 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	}
 	log.Printf("checking runtime %v", runtime)
 	var tags string
-	// tagss := make([]interface{}, 0)
+	// if v, ok := d.GetOk("tags"); ok && len(v.(map[string]interface{})) > 0 {
+	// 	index := 0
+	// 	for key, value := range v.(map[string]interface{}) {
+	// 		if index == 0 {
+	// 			tags = fmt.Sprintf("{\"key\": \"%s\",\"value\": \"%s\"}", key, value.(string))
+	// 		} else {
+	// 			tags = fmt.Sprintf("%s,{\"key\": \"%s\",\"value\":\"%s\"}", tags, key, value.(string))
+	// 		}
+	// 		index += 1
+	// 	}
+	// 	// tags = fmt.Sprintf("[%s]", tags)
+	// }
+	// // tagsBytes, _ := json.Marshal(tagss)
+	// tags = fmt.Sprintf("[%s]", tags)
+	tagss := make([]interface{}, 0)
 	if v, ok := d.GetOk("tags"); ok && len(v.(map[string]interface{})) > 0 {
-		index := 0
 		for key, value := range v.(map[string]interface{}) {
-			if index == 0 {
-				tags = fmt.Sprintf("{\"key\": \"%s\",\"value\": \"%s\"}", key, value.(string))
-			} else {
-				tags = fmt.Sprintf("%s,{\"key\": \"%s\",\"value\":\"%s\"}", tags, key, value.(string))
-			}
-			index += 1
+			tagss = append(tagss, cs.Tag{
+				Key:   key,
+				Value: value.(string),
+			})
 		}
-		// tags = fmt.Sprintf("[%s]", tags)
 	}
-	// tagsBytes, _ := json.Marshal(tagss)
-	tags = fmt.Sprintf("[%s]", tags)
+	tagsBytes, _ := json.Marshal(tagss)
+	tags = string(tagsBytes)
 	log.Printf("checking tags %v", tags)
 	proxy_mode := d.Get("proxy_mode").(string)
 	VpcId := d.Get("vpc_id").(string)
@@ -1226,8 +1236,6 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		return errmsgs.WrapError(err)
 	}
 	nodepoolid := d.Get("nodepool_id").(string)
-	tags := d.Get("tags").(string)
-	d.Set("tags", tags) // 刷新本地缓存值
 	clusternode, err := csService.DescribeClusterNodes(d.Id(), nodepoolid)
 	if err != nil {
 		return errmsgs.WrapError(err)
