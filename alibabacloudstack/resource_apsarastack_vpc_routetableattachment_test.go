@@ -53,6 +53,11 @@ func TestAccAlibabacloudStackVpcRoutetableattachment0(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
 		},
 	})
 }

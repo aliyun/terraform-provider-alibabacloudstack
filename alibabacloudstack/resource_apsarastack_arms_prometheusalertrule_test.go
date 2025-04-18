@@ -2,10 +2,12 @@ package alibabacloudstack
 
 import (
 	"fmt"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackARMSPrometheusAlertRule_basic0(t *testing.T) {
@@ -47,6 +49,11 @@ func TestAccAlibabacloudStackARMSPrometheusAlertRule_basic0(t *testing.T) {
 						"type":                       name,
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

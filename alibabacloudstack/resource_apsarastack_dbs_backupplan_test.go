@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -53,6 +53,11 @@ func TestAccAlibabacloudStackDbsBackupPlan_basic0(t *testing.T) {
 						"backup_plan_name": name,
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

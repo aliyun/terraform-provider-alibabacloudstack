@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/elasticsearch"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -147,7 +145,7 @@ func TestAccAlibabacloudStackElasticsearchK8sInstance_multi(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
 	if len(name) > 30 {
 		name = name[:30]
@@ -181,6 +179,11 @@ func TestAccAlibabacloudStackElasticsearchK8sInstance_multi(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

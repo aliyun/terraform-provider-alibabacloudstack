@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -92,7 +92,11 @@ func TestAccAlibabacloudStackCloudfirewallControlpolicy0(t *testing.T) {
 					}),
 				),
 			},
-
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 

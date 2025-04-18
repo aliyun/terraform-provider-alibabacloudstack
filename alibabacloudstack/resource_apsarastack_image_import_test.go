@@ -7,7 +7,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -63,6 +63,11 @@ func TestAccAlibabacloudStackImportImage(t *testing.T) {
 						"disk_device_mapping.0.oss_object": CHECKSET,
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

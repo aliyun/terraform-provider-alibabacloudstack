@@ -56,7 +56,11 @@ func TestAccAlibabacloudStackVpcIpv6Internetbandwidth0(t *testing.T) {
 					}),
 				),
 			},
-
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
 			{
 				Config: testAccConfig(map[string]interface{}{}),
 				Check: resource.ComposeTestCheckFunc(

@@ -59,11 +59,11 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 					}),
 				),
 			},
-			// {
-			// 	ResourceName:      resourceId,
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"retention_period": "3000",

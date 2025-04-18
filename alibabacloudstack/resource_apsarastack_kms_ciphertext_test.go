@@ -20,6 +20,11 @@ func TestAccAlibabacloudStackKmsCiphertext_basic(t *testing.T) {
 						"alibabacloudstack_kms_ciphertext.default", "ciphertext_blob"),
 				),
 			},
+			// {
+			// 	ResourceName:      resourceId,
+			// 	ImportState:       true,
+			// 	ImportStateVerify: true,
+			// },
 		},
 	})
 }

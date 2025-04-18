@@ -1,13 +1,14 @@
 package alibabacloudstack
 
 import (
+	"fmt"
+	"testing"
+
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cms"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"testing"
-	"fmt"
 )
 
 func TestAccAlibabacloudStackCmsAlarmBasic(t *testing.T) {
@@ -38,6 +39,11 @@ func TestAccAlibabacloudStackCmsAlarmBasic(t *testing.T) {
 				),
 				ExpectNonEmptyPlan: true,
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 
@@ -66,7 +72,7 @@ func testAccCheckCmsAlarm_Destroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccCheckCmsAlarm() string { 
+func testAccCheckCmsAlarm() string {
 	return fmt.Sprintf(`
 variable "name" {
  default = "tf_testacc_cmsalarm%d"
@@ -92,7 +98,7 @@ resource "alibabacloudstack_cms_alarm" "default" {
   contact_groups     = ["test-group"]
   effective_interval = "0:00-2:00"
 }
-`,  getAccTestRandInt(1000000, 9999999) )
+`, getAccTestRandInt(1000000, 9999999))
 }
 
 var testAccCheckAlarm = map[string]string{

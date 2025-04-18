@@ -44,6 +44,11 @@ func TestAccAlibabacloudStackAscm_User_Group_Basic(t *testing.T) {
 					testAccCheck(nil),
 				),
 			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
 		},
 	})
 

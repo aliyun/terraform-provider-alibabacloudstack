@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -51,7 +49,7 @@ func TestAccAlibabacloudStackEipAssociationBasic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	ResourceTest(t, resource.TestCase{
@@ -71,6 +69,11 @@ func TestAccAlibabacloudStackEipAssociationBasic(t *testing.T) {
 					testAccCheck(nil),
 				),
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -85,7 +88,7 @@ func TestAccAlibabacloudStackEipAssociationMulti(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	ResourceTest(t, resource.TestCase{
@@ -119,7 +122,7 @@ func TestAccAlibabacloudStackEipAssociationEni(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	ResourceTest(t, resource.TestCase{

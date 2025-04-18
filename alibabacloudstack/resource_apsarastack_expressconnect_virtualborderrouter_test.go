@@ -13,7 +13,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -169,6 +169,11 @@ func TestAccAlicloudExpressConnectVirtualBorderRouter_basic0(t *testing.T) {
 						"peering_subnet_mask":        "255.255.255.252",
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

@@ -2,7 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	
+
 	"testing"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -53,6 +53,11 @@ func TestAccAlibabacloudStackImageBasic(t *testing.T) {
 						"tags.For":     "acceptance test123",
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

@@ -58,7 +58,6 @@ func TestAccAlibabacloudStackSlbServercertificate0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 
 					"server_certificate_name": "test-cert-name-2",
-
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -66,6 +65,11 @@ func TestAccAlibabacloudStackSlbServercertificate0(t *testing.T) {
 						"server_certificate_name": "test-cert-name-2",
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -40,6 +40,11 @@ func TestAccAlibabacloudStackDataWorksUser_basic0(t *testing.T) {
 						"user_id":    "5247087457099176824",
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

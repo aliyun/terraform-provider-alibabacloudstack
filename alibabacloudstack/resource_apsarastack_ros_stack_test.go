@@ -2,18 +2,19 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"log"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
 	"github.com/PaesslerAG/jsonpath"
 	util "github.com/alibabacloud-go/tea-utils/service"
 	"github.com/alibabacloud-go/tea/tea"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 

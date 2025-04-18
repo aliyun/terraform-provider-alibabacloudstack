@@ -80,6 +80,11 @@ func TestAccAlibabacloudStackImageCopyBasic(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 
 			{
 				Config: testAccConfig(map[string]interface{}{

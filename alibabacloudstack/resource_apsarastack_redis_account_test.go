@@ -6,8 +6,8 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	r_kvstore "github.com/aliyun/alibaba-cloud-sdk-go/services/r-kvstore"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
@@ -45,7 +45,7 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 					"instance_id": "${alibabacloudstack_kvstore_instance.default.id}",
 
 					"account_name": "rdk_test_name_01",
-					
+
 					"account_password": "1qaz@WSX",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -54,10 +54,15 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 						"description": "rdk_test_description",
 
 						"account_name": "rdk_test_name_01",
-						
+
 						"account_password": "1qaz@WSX",
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 
 			{

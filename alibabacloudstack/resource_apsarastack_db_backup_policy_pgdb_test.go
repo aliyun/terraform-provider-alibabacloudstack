@@ -45,6 +45,11 @@ func TestAccAlibabacloudStackDBBackupPolicy_pgdb(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
