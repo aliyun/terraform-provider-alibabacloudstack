@@ -227,14 +227,12 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 
 func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 	var instance *PolardbDescribedbinstancesResponse
-
 	resourceId := "alibabacloudstack_polardb_dbinstance.default"
 	ra := resourceAttrInit(resourceId, PolardbinstancePGSqlMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
 		return &PolardbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "Describedbinstances")
 	rac := resourceAttrCheckInit(rc, ra)
-
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := "tf-testaccdbinstanceconfig"
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceClassicConfigDependence)
@@ -261,7 +259,7 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 					"enable_ssl":               "true",
 					"tde_status":               "true",
 					"encryption":               "true",
-					"encryption_key":           "",
+					"encryption_key":           "${alibabacloudstack_kms_key.key.key_id}",
 					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -287,6 +285,7 @@ resource "alibabacloudstack_kms_key" "key" {
   pending_window_in_days  = "7"
   key_state               = "Enabled"
 }
+
 
 %s
 

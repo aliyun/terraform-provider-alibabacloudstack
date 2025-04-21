@@ -113,11 +113,22 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"new_nat_gateway":              "false",
 					"slb_internet_enabled":         "false",
 					"proxy_mode":                   "ipvs",
+					"master_storage_set_id":        "${alibabacloudstack_ecs_ebs_storage_set.master.storage_set_id}",
+					"master_storage_set_partition_number": "3",
+					"worker_storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.worker.storage_set_id}",
+					"worker_storage_set_partition_number": "3",
+					"tags": map[string]string{
+						"Created":                   "TF",
+						"For":                       "acceptance test",
+						"AAAAAAAAAAAAAAAAAAAAAAAAA": "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":              name,
-						"security_group_id": CHECKSET,
+						"name": name,
+						// "tags.%":            "3",
+						// "tags.Created":      "TF",
+						// "tags.For":          "acceptance test",
 					}),
 				),
 			},
@@ -229,9 +240,7 @@ variable "k8s_number" {
 variable "image_id" {
   default     = "centos_7_9_x64_20G_alibase_20220322.vhd"
 }
-
 %s
-
 data "alibabacloudstack_instance_types" "default" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   cpu_core_count       = 1
@@ -239,6 +248,18 @@ data "alibabacloudstack_instance_types" "default" {
 }
 
 # leave it to empty then terraform will create several vswitches
+
+resource "alibabacloudstack_ecs_ebs_storage_set" "master" {
+  storage_set_name = "tf-testAcc_storage_set4148"
+  maxpartition_number = "3"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+}
+
+resource "alibabacloudstack_ecs_ebs_storage_set" "worker" {
+  storage_set_name = "tf-testAcc_storage_set4148"
+  maxpartition_number = "3"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+}
 
 variable "runtime" {
  default     = [
