@@ -9,7 +9,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
 
-func TestAccAlibabacloudStackVpcVpc0(t *testing.T) {
+func TestAccAlibabacloudStackVpcVpc_basic(t *testing.T) {
 
 	var v map[string]interface{}
 
@@ -43,11 +43,13 @@ func TestAccAlibabacloudStackVpcVpc0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 
 					"description": "RDK更新",
+					"cidr_block":  "192.168.0.0/16",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"description": "RDK更新",
+						"cidr_block":  "192.168.0.0/16",
 					}),
 				),
 			},
@@ -80,9 +82,9 @@ func TestAccAlibabacloudStackVpcVpc0(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
