@@ -58,6 +58,11 @@ func TestAccAlibabacloudStackDiskAttachment_basic(t *testing.T) {
 						"alibabacloudstack_ecs_disk.default", "size", "30"),
 				),
 			},
+			{
+				ResourceName:      "alibabacloudstack_ecs_diskattachment.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 
@@ -95,11 +100,6 @@ func TestAccAlibabacloudStackDiskAttachment_multi(t *testing.T) {
 					resource.TestCheckResourceAttrSet(
 						"alibabacloudstack_ecs_diskattachment.default.1", "device_name"),
 				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})
