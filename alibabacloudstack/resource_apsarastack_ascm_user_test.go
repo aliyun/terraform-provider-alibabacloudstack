@@ -62,12 +62,12 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 					}),
 				),
 			},
-			// {
-			// 	ResourceName:            resourceId,
-			// 	ImportState:             true,
-			// 	ImportStateVerify:       true,
-			// 	ImportStateVerifyIgnore: []string{"compact_topic", "partition_num", "remark"},
-			// },
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				//ImportStateVerifyIgnore: []string{"compact_topic", "partition_num", "remark"},
+			},
 		},
 	})
 
