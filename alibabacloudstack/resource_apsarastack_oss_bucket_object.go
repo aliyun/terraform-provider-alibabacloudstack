@@ -171,7 +171,6 @@ func resourceAlibabacloudStackOssBucketObjectPut(d *schema.ResourceData, meta in
 }
 
 func resourceAlibabacloudStackOssBucketObjectRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(3)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *oss.Client
 	raw, err := client.WithOssDataClient(func(ossClient *oss.Client) (interface{}, error) {

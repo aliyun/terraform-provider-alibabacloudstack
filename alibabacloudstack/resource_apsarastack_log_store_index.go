@@ -190,7 +190,6 @@ func resourceAlibabacloudStackLogStoreIndexCreate(d *schema.ResourceData, meta i
 }
 
 func resourceAlibabacloudStackLogStoreIndexRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 	parts, err := ParseResourceId(d.Id(), 2)

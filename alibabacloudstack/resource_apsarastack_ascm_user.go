@@ -209,7 +209,6 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackAscmUserRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}

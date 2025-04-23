@@ -187,7 +187,6 @@ func resourceAlibabacloudStackRouterInterfaceUpdate(d *schema.ResourceData, meta
 }
 
 func resourceAlibabacloudStackRouterInterfaceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 

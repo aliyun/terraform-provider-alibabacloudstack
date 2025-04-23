@@ -85,7 +85,6 @@ func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta inter
 }
 
 func resourceAlibabacloudStackDnsDomainRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	dnsService := DnsService{client}
 	object, err := dnsService.DescribeDnsDomain(d.Id())

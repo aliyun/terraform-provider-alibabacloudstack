@@ -100,7 +100,6 @@ func resourceAlibabacloudStackOnsTopicCreate(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackOnsTopicRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	onsService := OnsService{client}
 

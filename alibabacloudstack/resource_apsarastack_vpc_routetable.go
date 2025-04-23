@@ -86,7 +86,6 @@ func resourceAliyunRouteTableCreate(d *schema.ResourceData, meta interface{}) er
 }
 
 func resourceAliyunRouteTableRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}

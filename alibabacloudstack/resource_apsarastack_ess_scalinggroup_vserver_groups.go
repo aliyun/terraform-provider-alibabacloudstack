@@ -85,7 +85,6 @@ func resourceAlibabacloudStackEssVserverGroupsCreate(d *schema.ResourceData, met
 }
 
 func resourceAlibabacloudStackEssVserverGroupsRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}
 	object, err := essService.DescribeEssScalingGroup(d.Id())

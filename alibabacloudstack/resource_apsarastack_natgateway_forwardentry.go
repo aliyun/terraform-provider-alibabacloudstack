@@ -117,7 +117,6 @@ func resourceAlibabacloudStackForwardEntryCreate(d *schema.ResourceData, meta in
 }
 
 func resourceAlibabacloudStackForwardEntryRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	if !strings.Contains(d.Id(), COLON_SEPARATED) {
@@ -145,7 +144,6 @@ func resourceAlibabacloudStackForwardEntryRead(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackForwardEntryUpdate(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	if !strings.Contains(d.Id(), COLON_SEPARATED) {
@@ -205,7 +203,6 @@ func resourceAlibabacloudStackForwardEntryUpdate(d *schema.ResourceData, meta in
 }
 
 func resourceAlibabacloudStackForwardEntryDelete(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	if !strings.Contains(d.Id(), COLON_SEPARATED) {
 		d.SetId(d.Get("forward_table_id").(string) + COLON_SEPARATED + d.Id())
 	}

@@ -89,7 +89,6 @@ func resourceAlibabacloudStackSlbServerCertificateCreate(d *schema.ResourceData,
 }
 
 func resourceAlibabacloudStackSlbServerCertificateRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 	serverCertificate, err := slbService.DescribeSlbServerCertificate(d.Id())

@@ -80,7 +80,6 @@ func resourceAlibabacloudStackCrEeNamespaceCreate(d *schema.ResourceData, meta i
 }
 
 func resourceAlibabacloudStackCrEeNamespaceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := &CrService{client}
 	response, err := crService.DescribeCrEeNamespace(d.Id())

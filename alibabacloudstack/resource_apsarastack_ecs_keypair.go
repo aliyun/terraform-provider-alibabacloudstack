@@ -141,7 +141,6 @@ func resourceAlibabacloudStackKeyPairUpdate(d *schema.ResourceData, meta interfa
 }
 
 func resourceAlibabacloudStackKeyPairRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 

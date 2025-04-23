@@ -104,7 +104,6 @@ func resourceAlibabacloudStackEipAssociationCreate(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackEipAssociationRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 

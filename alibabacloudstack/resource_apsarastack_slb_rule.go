@@ -244,7 +244,6 @@ func resourceAlibabacloudStackSlbRuleCreate(d *schema.ResourceData, meta interfa
 }
 
 func resourceAlibabacloudStackSlbRuleRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 	object, err := slbService.DescribeSlbRule(d.Id())

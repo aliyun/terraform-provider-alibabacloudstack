@@ -437,7 +437,6 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cmsService := CmsService{client}
 

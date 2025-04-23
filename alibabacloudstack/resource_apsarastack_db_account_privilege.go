@@ -95,7 +95,6 @@ func resourceAlibabacloudStackDBAccountPrivilegeCreate(d *schema.ResourceData, m
 }
 
 func resourceAlibabacloudStackDBAccountPrivilegeRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rsdService := RdsService{client}
 	parts, err := ParseResourceId(d.Id(), 3)

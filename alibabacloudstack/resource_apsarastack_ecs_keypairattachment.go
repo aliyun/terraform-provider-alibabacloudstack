@@ -100,7 +100,6 @@ func resourceAlibabacloudStackKeyPairAttachmentCreate(d *schema.ResourceData, me
 }
 
 func resourceAlibabacloudStackKeyPairAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	keyName := strings.Split(d.Id(), ":")[0]

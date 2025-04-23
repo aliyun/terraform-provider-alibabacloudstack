@@ -91,7 +91,6 @@ func resourceAlibabacloudStackPolardbConnectionCreate(d *schema.ResourceData, me
 }
 
 func resourceAlibabacloudStackPolardbConnectionRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	submatch := dbConnectionIdWithSuffixRegexp.FindStringSubmatch(d.Id())
 	if len(submatch) > 1 {
 		d.SetId(submatch[1])
