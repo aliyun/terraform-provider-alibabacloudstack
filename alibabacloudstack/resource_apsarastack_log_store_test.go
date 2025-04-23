@@ -60,9 +60,11 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				//4.23 新增
+				ImportStateVerifyIgnore: []string{"encrypt_type"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
