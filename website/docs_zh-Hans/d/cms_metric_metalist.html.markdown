@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Monitor"
+subcategory: "Cloud Monitor Service (CMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cms_metric_metalist"
 sidebar_current: "docs-alibabacloudstack-datasource-cms-metric-metalist"

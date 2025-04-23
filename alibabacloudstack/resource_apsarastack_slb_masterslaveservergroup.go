@@ -152,8 +152,10 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d *schema.ResourceDa
 }
 
 func resourceAlibabacloudStackSlbMasterSlaveServerGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-	noUpdateAllowedFields := []string{"delete_protection_validation"}
-	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
+	// XXX: delete_protection_validation是一个本地保护属性，允许修改
+	//noUpdateAllowedFields := []string{"delete_protection_validation"}
+	//return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbMasterSlaveServerGroupDelete(d *schema.ResourceData, meta interface{}) error {

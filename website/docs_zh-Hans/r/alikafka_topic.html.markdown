@@ -1,5 +1,5 @@
 ---
-subcategory: "AliKafka"
+subcategory: "Alikafka"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_alikafka_topic"
 sidebar_current: "docs-Alibabacloudstack-alikafka-topic"

@@ -1,5 +1,5 @@
 ---
-subcategory: "Auto Scaling(ESS)"
+subcategory: "Auto Scaling (ESS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_attachment"
 sidebar_current: "docs-alibabacloudstack-resource-ess-attachment"

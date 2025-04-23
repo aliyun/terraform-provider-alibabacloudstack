@@ -62,12 +62,13 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 					}),
 				),
 			},
-			// {
-			// 	ResourceName:            resourceId,
-			// 	ImportState:             true,
-			// 	ImportStateVerify:       true,
-			// 	ImportStateVerifyIgnore: []string{"compact_topic", "partition_num", "remark"},
-			// },
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// init_password只会在创建时返回一次，后续import不会返回
+				ImportStateVerifyIgnore: []string{"init_password"},
+			},
 		},
 	})
 
