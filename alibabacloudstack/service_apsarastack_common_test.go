@@ -812,11 +812,11 @@ data  "alibabacloudstack_zones" "default" {
 }
 resource "alibabacloudstack_vpc" "default" {
   name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
+  cidr_block = "192.168.0.0/16"
 }
 resource "alibabacloudstack_vswitch" "default" {
   vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
+  cidr_block        = "192.168.0.0/16"
   availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
   name              = "${var.name}"
 }
@@ -833,7 +833,7 @@ data "alibabacloudstack_vswitches" "default" {
 const AdbCommonTestCase = `
 resource "alibabacloudstack_vpc" "default" {
  name = "${var.name}"
- cidr_block = "172.16.0.0/16"
+ cidr_block = "192.168.0.0/16"
 }
 data "alibabacloudstack_zones" "default" {
  available_resource_creation = "ADB"
@@ -848,7 +848,7 @@ resource "alibabacloudstack_vswitch" "default" {
  name = "tf_testAccAdb_vpc"
  vpc_id = "${alibabacloudstack_vpc.default.id}"
  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
- cidr_block = "172.16.0.0/24"
+ cidr_block = "192.168.0.0/16"
 }
 `
 
@@ -859,11 +859,11 @@ data "alibabacloudstack_zones" "default" {
 }
 resource "alibabacloudstack_vpc" "default" {
   name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
+  cidr_block = "192.168.0.0/16"
 }
 resource "alibabacloudstack_vswitch" "default" {
   vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
+  cidr_block        = "192.168.0.0/16"
   availability_zone = "${data.alibabacloudstack_zones.default.zones.0.multi_zone_ids[0]}"
   name              = "${var.name}"
 }
@@ -1209,7 +1209,7 @@ const VpcCommonTestCase = `
 
 resource "alibabacloudstack_vpc_vpc" "default" {
   vpc_name = "${var.name}_vpc"
-  cidr_block = "172.16.0.0/16"
+  cidr_block = "192.168.0.0/16"
 }
 `
 
@@ -1218,7 +1218,7 @@ const VSwitchCommonTestCase = DataZoneCommonTestCase + VpcCommonTestCase + `
 resource "alibabacloudstack_vpc_vswitch" "default" {
   name = "${var.name}_vsw"
   vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  cidr_block = "172.16.0.0/24"
+  cidr_block = "192.168.0.0/16"
   zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
 
@@ -1262,7 +1262,7 @@ resource "alibabacloudstack_security_group_rule" "default" {
   	port_range = "22/22"
   	priority = 1
   	security_group_id = "${alibabacloudstack_ecs_securitygroup.default.id}"
-  	cidr_ip = "172.16.0.0/24"
+  	cidr_ip = "192.168.0.0/16"
 }
 
 `
@@ -1279,7 +1279,7 @@ resource "alibabacloudstack_ecs_instance" "default" {
   security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
   instance_name        = "${var.name}_ecs"
   vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
-  zone_id    = data.alibabacloudstack_zones.default.zones.0.id
+  zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
   is_outdated          = false
   lifecycle {
     ignore_changes = [
