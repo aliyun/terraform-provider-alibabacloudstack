@@ -1,5 +1,5 @@
 ---
-subcategory: "SLB"
+subcategory: "Server Load Balancer (SLB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_slb_domainextensions"
 sidebar_current: "docs-Alibabacloudstack-datasource-slb-domainextensions"

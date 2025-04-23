@@ -1,5 +1,5 @@
 ---
-subcategory: "GPDB"
+subcategory: "GraphDatabase(GPDB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_dbinstance"
 sidebar_current: "docs-Alibabacloudstack-gpdb-dbinstance"
