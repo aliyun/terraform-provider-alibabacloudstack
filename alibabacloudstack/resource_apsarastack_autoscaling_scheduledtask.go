@@ -72,6 +72,7 @@ func resourceAlibabacloudStackEssScheduledTaskCreate(d *schema.ResourceData, met
 		return essClient.CreateScheduledTask(request)
 	})
 	bresponse, ok := raw.(*ess.CreateScheduledTaskResponse)
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err != nil {
 		errmsg := ""
 		if ok {
@@ -79,7 +80,6 @@ func resourceAlibabacloudStackEssScheduledTaskCreate(d *schema.ResourceData, met
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ess_scheduled_task", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	d.SetId(bresponse.ScheduledTaskId)
 
 	return nil
@@ -152,6 +152,7 @@ func resourceAlibabacloudStackEssScheduledTaskUpdate(d *schema.ResourceData, met
 		return essClient.ModifyScheduledTask(request)
 	})
 	bresponse, ok := raw.(*ess.ModifyScheduledTaskResponse)
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err != nil {
 		errmsg := ""
 		if ok {
@@ -159,7 +160,6 @@ func resourceAlibabacloudStackEssScheduledTaskUpdate(d *schema.ResourceData, met
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	return nil
 }
 

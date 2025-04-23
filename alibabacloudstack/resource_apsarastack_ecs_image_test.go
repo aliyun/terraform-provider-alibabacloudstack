@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackImageBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id": "${alibabacloudstack_instance.default.id}",
+					"instance_id": "i-n9x02eqruj54061cl5lu",
 					"description": fmt.Sprintf("tf-testAccEcsImageConfigBasic%ddescription", rand),
 					"image_name":  name,
 					"tags": map[string]string{
@@ -107,36 +107,9 @@ var testAccImageCheckMap = map[string]string{}
 func resourceImageBasicConfigDependence(name string) string {
 	return fmt.Sprintf(`
 
-%s
-
-%s
-
-%s
-
 variable "name" {
 	default = "%s"
 }
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-resource "alibabacloudstack_security_group" "default" {
-  name   = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-resource "alibabacloudstack_instance" "default" {
-  image_id         = "${data.alibabacloudstack_images.default.ids[0]}"
-  instance_type    = "${data.alibabacloudstack_instance_types.default.ids[0]}"
-  security_groups  = "${[alibabacloudstack_security_group.default.id]}"
-  vswitch_id       = "${alibabacloudstack_vswitch.default.id}"
-  instance_name    = "${var.name}"
-  system_disk_size = 20
-}
-`, DataAlibabacloudstackVswitchZones, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, name)
+
+`, name)
 }

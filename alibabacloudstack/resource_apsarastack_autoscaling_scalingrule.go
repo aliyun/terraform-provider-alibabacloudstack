@@ -36,9 +36,9 @@ func resourceAlibabacloudStackEssScalingRule() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(2, 40),
 			},
 			"ari": {
-				Type:         schema.TypeString,
-				Computed:     true,
-				Deprecated:   "Field 'ari' is deprecated and will be removed in a future release. Please use new field 'scaling_rule_aris' instead.",
+				Type:       schema.TypeString,
+				Computed:   true,
+				Deprecated: "Field 'ari' is deprecated and will be removed in a future release. Please use new field 'scaling_rule_aris' instead.",
 			},
 			"scaling_rule_aris": {
 				Type:     schema.TypeString,
@@ -68,6 +68,7 @@ func resourceAlibabacloudStackEssScalingRuleCreate(d *schema.ResourceData, meta 
 		return essClient.CreateScalingRule(request)
 	})
 	bresponse, ok := raw.(*ess.CreateScalingRuleResponse)
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err != nil {
 		errmsg := ""
 		if ok {
@@ -75,7 +76,6 @@ func resourceAlibabacloudStackEssScalingRuleCreate(d *schema.ResourceData, meta 
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ess_scalingrule", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	d.SetId(bresponse.ScalingRuleId)
 
 	return nil
@@ -153,7 +153,7 @@ func resourceAlibabacloudStackEssScalingRuleUpdate(d *schema.ResourceData, meta 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := ess.CreateModifyScalingRuleRequest()
 	client.InitRpcRequest(*request.RpcRequest)
-
+	request.ScalingRuleId = d.Id()
 	if d.HasChange("scaling_rule_name") {
 		request.ScalingRuleName = d.Get("scaling_rule_name").(string)
 	}
@@ -171,6 +171,7 @@ func resourceAlibabacloudStackEssScalingRuleUpdate(d *schema.ResourceData, meta 
 		return essClient.ModifyScalingRule(request)
 	})
 	bresponse, ok := raw.(*ess.ModifyScalingRuleResponse)
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err != nil {
 		errmsg := ""
 		if ok {
@@ -178,7 +179,6 @@ func resourceAlibabacloudStackEssScalingRuleUpdate(d *schema.ResourceData, meta 
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	return nil
 }
 
