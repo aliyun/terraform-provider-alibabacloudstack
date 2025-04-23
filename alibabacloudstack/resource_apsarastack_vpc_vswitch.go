@@ -136,7 +136,6 @@ func resourceAlibabacloudStackSwitchCreate(d *schema.ResourceData, meta interfac
 }
 
 func resourceAlibabacloudStackSwitchRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	vswitch, err := vpcService.DescribeVSwitch(d.Id())

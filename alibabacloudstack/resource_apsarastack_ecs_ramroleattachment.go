@@ -83,7 +83,6 @@ func resourceAlibabacloudStackInstanceRoleAttachmentCreate(d *schema.ResourceDat
 }
 
 func resourceAlibabacloudStackInstanceRoleAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
 		return errmsgs.WrapError(err)

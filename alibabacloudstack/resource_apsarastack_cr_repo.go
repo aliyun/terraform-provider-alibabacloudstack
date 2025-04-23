@@ -172,7 +172,6 @@ func resourceAlibabacloudStackCRRepoUpdate(d *schema.ResourceData, meta interfac
 }
 
 func resourceAlibabacloudStackCRRepoRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := CrService{client}
 

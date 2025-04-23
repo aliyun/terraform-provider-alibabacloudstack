@@ -86,7 +86,6 @@ func resourceAlibabacloudStackEssScheduledTaskCreate(d *schema.ResourceData, met
 }
 
 func resourceAlibabacloudStackEssScheduledTaskRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}

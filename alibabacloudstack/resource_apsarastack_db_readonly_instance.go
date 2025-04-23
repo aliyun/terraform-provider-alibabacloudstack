@@ -321,7 +321,6 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 }
 
 func resourceAlibabacloudStackDBReadonlyInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
 
@@ -413,7 +412,6 @@ func resourceAlibabacloudStackDBReadonlyInstanceDelete(d *schema.ResourceData, m
 		}
 		return err
 	}
-	waitSecondsIfWithTest(600)
 	return nil
 }
 

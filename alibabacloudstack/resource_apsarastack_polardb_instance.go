@@ -771,7 +771,6 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 }
 
 func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	PolardbService := PolardbService{client}
 

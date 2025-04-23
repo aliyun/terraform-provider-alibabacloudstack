@@ -121,7 +121,6 @@ func resourceAlibabacloudStackOnsInstanceCreate(d *schema.ResourceData, meta int
 }
 
 func resourceAlibabacloudStackOnsInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	onsService := OnsService{client}
 

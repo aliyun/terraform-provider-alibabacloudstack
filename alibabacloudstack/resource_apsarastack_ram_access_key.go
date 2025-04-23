@@ -95,7 +95,6 @@ func resourceAlibabacloudstackAscmAccessKeyCreate(d *schema.ResourceData, meta i
 }
 
 func resourceAlibabacloudstackAscmAccessKeyRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmKeypolicy(d.Id())

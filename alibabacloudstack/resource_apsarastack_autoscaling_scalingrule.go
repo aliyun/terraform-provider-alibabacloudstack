@@ -82,7 +82,6 @@ func resourceAlibabacloudStackEssScalingRuleCreate(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackEssScalingRuleRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 
 	//Compatible with older versions id
 	if strings.Contains(d.Id(), COLON_SEPARATED) {

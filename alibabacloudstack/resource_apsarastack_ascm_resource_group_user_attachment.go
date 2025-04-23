@@ -69,7 +69,6 @@ func resourceAlibabacloudStackAscmResourceGroupUserAttachmentCreate(d *schema.Re
 }
 
 func resourceAlibabacloudStackAscmResourceGroupUserAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	ascmService := &AscmService{client: client}

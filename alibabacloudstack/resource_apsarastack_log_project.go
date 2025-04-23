@@ -63,7 +63,6 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackLogProjectRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 	object, err := logService.DescribeLogProject(d.Id())

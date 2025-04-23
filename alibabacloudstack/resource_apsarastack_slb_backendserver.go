@@ -77,7 +77,6 @@ func resourceAlibabacloudStackSlbBackendServersCreate(d *schema.ResourceData, me
 }
 
 func resourceAlibabacloudStackSlbBackendServersRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 	resource_id := d.Id()

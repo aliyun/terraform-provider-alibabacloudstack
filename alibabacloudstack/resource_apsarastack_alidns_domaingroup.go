@@ -75,7 +75,6 @@ func resourceAlibabacloudStackDnsGroupUpdate(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackDnsGroupRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	dnsService := &DnsService{client: client}
 	object, err := dnsService.DescribeDnsGroup(d.Id())

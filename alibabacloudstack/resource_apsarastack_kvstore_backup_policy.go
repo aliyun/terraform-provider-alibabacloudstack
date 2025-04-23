@@ -62,7 +62,6 @@ func resourceAlibabacloudStackKVStoreBackupPolicyCreate(d *schema.ResourceData, 
 }
 
 func resourceAlibabacloudStackKVStoreBackupPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kvstoreService := KvstoreService{client}
 

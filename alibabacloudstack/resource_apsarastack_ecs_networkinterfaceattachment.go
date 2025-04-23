@@ -72,7 +72,6 @@ func resourceAlibabacloudStackNetworkInterfaceAttachmentCreate(d *schema.Resourc
 }
 
 func resourceAlibabacloudStackNetworkInterfaceAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 

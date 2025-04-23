@@ -54,7 +54,6 @@ func resourceAlibabacloudStackImageSharePermissionCreate(d *schema.ResourceData,
 }
 
 func resourceAlibabacloudStackImageSharePermissionRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client: client}
 	object, err := ecsService.DescribeImageShareByImageId(d.Id())

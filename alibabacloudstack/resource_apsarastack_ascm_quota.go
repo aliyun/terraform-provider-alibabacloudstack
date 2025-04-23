@@ -428,7 +428,6 @@ func resourceAlibabacloudStackAscmQuotaUpdate(d *schema.ResourceData, meta inter
 }
 
 func resourceAlibabacloudStackAscmQuotaRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmQuota(d.Id())

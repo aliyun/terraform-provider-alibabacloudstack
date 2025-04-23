@@ -83,7 +83,6 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingCreate(d *schema.ResourceD
 }
 
 func resourceAlibabacloudStackAscmUserGroupRoleBindingRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmUserGroupRoleBinding(d.Id())

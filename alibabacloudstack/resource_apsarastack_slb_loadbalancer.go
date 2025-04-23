@@ -120,7 +120,6 @@ func resourceAlibabacloudStackSlbCreate(d *schema.ResourceData, meta interface{}
 }
 
 func resourceAlibabacloudStackSlbRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 	object, err := slbService.DescribeSlb(d.Id())

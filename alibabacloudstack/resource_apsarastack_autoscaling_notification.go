@@ -73,7 +73,6 @@ func resourceAlibabacloudStackEssNotificationCreate(d *schema.ResourceData, meta
 }
 
 func resourceAlibabacloudStackEssNotificationRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}
 	object, err := essService.DescribeEssNotification(d.Id())

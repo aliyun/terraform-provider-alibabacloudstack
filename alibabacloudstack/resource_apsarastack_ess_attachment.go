@@ -173,7 +173,6 @@ func resourceAlibabacloudstackEssAttachmentUpdate(d *schema.ResourceData, meta i
 }
 
 func resourceAlibabacloudstackEssAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}
 	object, err := essService.DescribeEssAttachment(d.Id(), make([]string, 0))

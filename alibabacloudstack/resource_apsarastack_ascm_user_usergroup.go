@@ -77,7 +77,6 @@ func resourceAlibabacloudStackAscmUserGroupUserCreate(d *schema.ResourceData, me
 }
 
 func resourceAlibabacloudStackAscmUserGroupUserRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
@@ -105,7 +104,6 @@ func resourceAlibabacloudStackAscmUserGroupUserRead(d *schema.ResourceData, meta
 }
 
 func resourceAlibabacloudStackAscmUserGroupUserUpdate(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}

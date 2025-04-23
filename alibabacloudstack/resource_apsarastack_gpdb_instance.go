@@ -163,7 +163,6 @@ func resourceAlibabacloudStackGpdbInstance() *schema.Resource {
 }
 
 func resourceAlibabacloudStackGpdbInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	gpdbService := GpdbService{client}
 

@@ -70,7 +70,6 @@ func resourceAlibabacloudStackAscmRamPolicyForRoleCreate(d *schema.ResourceData,
 }
 
 func resourceAlibabacloudStackAscmRamPolicyForRoleRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	_, err := ascmService.DescribeAscmRamPolicyForRole(d.Id())

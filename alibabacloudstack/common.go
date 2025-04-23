@@ -1002,6 +1002,7 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 			return diag.FromErr(err)
 		}
 
+		waitSecondsIfWithTest(1)
 		retry := 5
 		for retry > 0 {
 			// 大批量触发时asapi侧的资源同步会有一定的延迟，如果失败则重试
@@ -1033,6 +1034,7 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 	if updateFunc != nil {
 		resource.UpdateContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 			update_err := updateFunc(d, meta)
+			waitSecondsIfWithTest(1)
 			read_err := readFunc(d, meta)
 			if update_err != nil {
 				return diag.FromErr(update_err)

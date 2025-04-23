@@ -96,7 +96,6 @@ func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackSnapshotRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	snapshot, err := ecsService.DescribeSnapshot(d.Id())
