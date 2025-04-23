@@ -78,9 +78,11 @@ func TestAccAlibabacloudStackDBBackupPolicy_mysql(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// 4.22新增
+				ImportStateVerifyIgnore: []string{"force_restart", "encryption", "period", "auto_renew"},
 			},
 		},
 	})

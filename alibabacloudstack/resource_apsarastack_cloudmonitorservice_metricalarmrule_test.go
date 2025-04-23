@@ -40,9 +40,11 @@ func TestAccAlibabacloudStackCmsAlarmBasic(t *testing.T) {
 				ExpectNonEmptyPlan: true,
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// 4.22新增
+				ImportStateVerifyIgnore: []string{"resources", "dimensions"},
 			},
 		},
 	})
