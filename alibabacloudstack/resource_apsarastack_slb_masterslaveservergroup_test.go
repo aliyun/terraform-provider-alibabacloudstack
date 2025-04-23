@@ -66,7 +66,8 @@ func TestAccAlibabacloudStackSlbMasterSlaveServerGroup_vpc(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				// delete_protection_validation是本地属性，无法从远端加载
-				ImportStateVerifyIgnore: []string{"delete_protection_validation"},
+				// load_balancer_id专有云侧暂时无法回读
+				ImportStateVerifyIgnore: []string{"delete_protection_validation", "load_balancer_id"},
 			},
 		},
 	})
