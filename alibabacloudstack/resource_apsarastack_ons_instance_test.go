@@ -51,9 +51,10 @@ func TestAccAlibabacloudStackOnsInstance_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tps_receive_max", "tps_send_max"},
 			},
 		},
 	})

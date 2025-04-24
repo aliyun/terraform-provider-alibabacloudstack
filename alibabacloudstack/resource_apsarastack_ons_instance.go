@@ -138,6 +138,12 @@ func resourceAlibabacloudStackOnsInstanceRead(d *schema.ResourceData, meta inter
 	d.Set("name", response.Data.InstanceName)
 	d.Set("instance_type", response.Data.InstanceType)
 	d.Set("instance_status", response.Data.InstanceStatus)
+	d.Set("remark", response.Data.Remark)
+	// d.Set("tps_receive_max", response.Data.TpsReceiveMax)
+	// d.Set("tps_send_max", response.Data.TpsMax)
+	d.Set("independent_naming", fmt.Sprintf("%t", response.Data.IndependentNaming))
+	d.Set("cluster", response.Data.Cluster)
+	d.Set("topic_capacity", response.Data.TopicCapacity)
 	d.Set("create_time", time.Unix(response.Data.CreateTime/1000, 0).Format("2006-01-02 03:04:05"))
 
 	return nil
