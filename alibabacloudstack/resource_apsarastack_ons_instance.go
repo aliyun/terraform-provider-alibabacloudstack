@@ -99,6 +99,7 @@ func resourceAlibabacloudStackOnsInstanceCreate(d *schema.ResourceData, meta int
 		return onsClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
+	addDebug("ConsoleInstanceCreate", raw, request, request.QueryParams)
 	if err != nil {
 		errmsg := ""
 		if ok {
@@ -106,7 +107,6 @@ func resourceAlibabacloudStackOnsInstanceCreate(d *schema.ResourceData, meta int
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_instance", "ConsoleInstanceCreate", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ConsoleInstanceCreate", raw, request)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &ins_resp)
 	if ins_resp.Success != true {
 		return errmsgs.WrapErrorf(errors.New(ins_resp.Message), errmsgs.DefaultErrorMsg, "alibabacloudstack_ons_instance", "ConsoleInstanceCreate", errmsgs.AlibabacloudStackSdkGoERROR)

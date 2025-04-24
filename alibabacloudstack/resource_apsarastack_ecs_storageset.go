@@ -91,20 +91,31 @@ func resourceAlibabacloudStackEcsEbsStorageSetsCreate(d *schema.ResourceData, me
 func resourceAlibabacloudStackEcsEbsStorageSetsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
-	object, err := ecsService.DescribeEcsEbsStorageSet(d.Id())
+	storageset_id := d.Id()
+	object, err := ecsService.DescribeEcsEbsStorageSet(storageset_id)
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
-			log.Printf("[DEBUG] Resource alibabacloudstack_ecs_command ecsService.DescribeEcsCommand Failed!!! %s", err)
+			log.Printf("[DEBUG] Resource alibabacloudstack_ecs_ebs_storage_set ecsService.DescribeEcsEbsStorageSet Failed!!! %s", err)
 			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
 	}
-
-	d.Set("storage_set_name", object.StorageSets.StorageSet[0].StorageSetName)
-	d.Set("zone_id", object.StorageSets.StorageSet[0].ZoneId)
-	d.Set("maxpartition_number", strconv.Itoa(object.StorageSets.StorageSet[0].StorageSetPartitionNumber))
-	d.Set("storage_set_id", object.StorageSets.StorageSet[0].StorageSetId)
+	var index = -1
+	if len(object.StorageSets.StorageSet) > 0 {
+		for i, storageset := range object.StorageSets.StorageSet {
+			if storageset.StorageSetId == storageset_id {
+				index = i
+			}
+		}
+	}
+	if index < 0 {
+		return fmt.Errorf("Resource alibabacloudstack_ecs_ebs_storage_set ReadFunc Failed!!! resource not found!!!")
+	}
+	d.Set("storage_set_name", object.StorageSets.StorageSet[index].StorageSetName)
+	d.Set("zone_id", object.StorageSets.StorageSet[index].ZoneId)
+	d.Set("maxpartition_number", strconv.Itoa(object.StorageSets.StorageSet[index].StorageSetPartitionNumber))
+	d.Set("storage_set_id", object.StorageSets.StorageSet[index].StorageSetId)
 	return nil
 }
 

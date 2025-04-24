@@ -1,8 +1,9 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -25,20 +26,20 @@ func resourceAlibabacloudStackSnapshot() *schema.Resource {
 				ForceNew: true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'snapshot_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'snapshot_name' instead.",
 				ConflictsWith: []string{"snapshot_name"},
 			},
 			"snapshot_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 			"description": {
@@ -72,6 +73,7 @@ func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interf
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.CreateSnapshot(request)
 	})
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err != nil {
 		errmsg := ""
 		if response, ok := raw.(*ecs.CreateSnapshotResponse); ok {
@@ -79,7 +81,6 @@ func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interf
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_snapshot", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response := raw.(*ecs.CreateSnapshotResponse)
 	d.SetId(response.SnapshotId)
 

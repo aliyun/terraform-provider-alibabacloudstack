@@ -134,7 +134,7 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	ossService := OssService{client}
 	bucketName := d.Get("bucket").(string)
 	det, err := ossService.DescribeOssBucket(bucketName)
-	log.Printf("======================== det:%v", det)
+	log.Printf("======================== det:%#v", det)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "IsBucketExist", errmsgs.AlibabacloudStackOssGoSdk)
 	}

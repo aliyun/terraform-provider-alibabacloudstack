@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackImageBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id": "i-n9x02eqruj54061cl5lu",
+					"instance_id": "${alibabacloudstack_ecs_instance.default.id}",
 					"description": fmt.Sprintf("tf-testAccEcsImageConfigBasic%ddescription", rand),
 					"image_name":  name,
 					"tags": map[string]string{
@@ -55,9 +55,10 @@ func TestAccAlibabacloudStackImageBasic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force", "instance_id"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -111,5 +112,7 @@ variable "name" {
 	default = "%s"
 }
 
-`, name)
+%s
+
+`, name, ECSInstanceCommonTestCase)
 }
