@@ -36,10 +36,6 @@ func resourceAlibabacloudStackOnsGroup() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(1, 256),
 			},
-			"read_enable": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
 		},
 	}
 

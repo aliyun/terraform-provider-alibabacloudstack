@@ -85,9 +85,9 @@ func TestAccAlibabacloudStackOnsTopic_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerifyIgnore: []string{"perm"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

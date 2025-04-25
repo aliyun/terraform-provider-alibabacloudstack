@@ -38,11 +38,6 @@ func resourceAlibabacloudStackOnsTopic() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringLenBetween(1, 128),
 			},
-			"perm": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ValidateFunc: validation.IntInSlice([]int{2, 4, 6}),
-			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackOnsTopicCreate, resourceAlibabacloudStackOnsTopicRead, resourceAlibabacloudStackOnsTopicUpdate, resourceAlibabacloudStackOnsTopicDelete)
