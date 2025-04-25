@@ -58,7 +58,8 @@ func TestAccAlibabacloudStackImageBasic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force", "instance_id"},
+				// instance_id 是ForceNew参数，不支持回显和修改
+				ImportStateVerifyIgnore: []string{"instance_id"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

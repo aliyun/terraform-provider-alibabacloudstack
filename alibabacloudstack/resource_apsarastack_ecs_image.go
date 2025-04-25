@@ -66,11 +66,6 @@ func resourceAlibabacloudStackImage() *schema.Resource {
 					},
 				},
 			},
-			"force": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
 			"tags": tagsSchema(),
 		},
 	}

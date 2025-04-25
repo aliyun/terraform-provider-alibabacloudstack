@@ -53,6 +53,7 @@ func TestAccAlibabacloudStackDBAccountUpdate(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
+				// password敏感字段设置后不回显
 				ImportStateVerifyIgnore: []string{"password"},
 			},
 			{

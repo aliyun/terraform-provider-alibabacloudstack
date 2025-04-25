@@ -63,7 +63,7 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				//4.23 新增
+				// Read时不返回这个参数，只能从数据库查询
 				ImportStateVerifyIgnore: []string{"encrypt_type"},
 			},
 			{
