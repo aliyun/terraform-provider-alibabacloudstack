@@ -97,7 +97,8 @@ func resourceAlibabacloudStackAscmUserGroupUserRead(d *schema.ResourceData, meta
 	for _, data := range object.Data {
 		loginNames = append(loginNames, data.LoginName)
 	}
-
+	user_group_id, _ := strconv.Atoi(d.Id())
+	d.Set("user_group_id", user_group_id)
 	d.Set("login_names", loginNames)
 
 	return nil

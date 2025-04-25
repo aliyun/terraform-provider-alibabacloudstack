@@ -150,46 +150,11 @@ func TestAccAlibabacloudStackEipAssociationEni(t *testing.T) {
 
 func testAccEIPAssociationConfigBaisc(rand int) string {
 	return fmt.Sprintf(`
-%s
-
-%s
-
-%s
 variable "name" {
 	default = "tf-testAccEipAssociation%d"
 }
 
-resource "alibabacloudstack_vpc" "default" {
-  name = "${var.name}"
-  cidr_block = "10.1.0.0/21"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "10.1.1.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name = "${var.name}"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-  name = "${var.name}"
-  description = "New security group"
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-}
-
-resource "alibabacloudstack_instance" "default" {
-  vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-  image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  system_disk_category = "cloud_ssd"
-  instance_type = "${local.default_instance_type_id}"
-
-  security_groups = ["${alibabacloudstack_security_group.default.id}"]
-  instance_name = "${var.name}"
-  tags = {
-    Name = "TerraformTest-instance"
-  }
-}
+%s
 
 resource "alibabacloudstack_eip" "default" {
 	name = "${var.name}"
@@ -197,9 +162,9 @@ resource "alibabacloudstack_eip" "default" {
 
 resource "alibabacloudstack_eip_association" "default" {
   allocation_id = "${alibabacloudstack_eip.default.id}"
-  instance_id = "${alibabacloudstack_instance.default.id}"
+  instance_id = "${alibabacloudstack_ecs_instance.default.id}"
 }
-`, DataAlibabacloudstackVswitchZones, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackImages, rand)
+`, rand, ECSInstanceCommonTestCase)
 }
 
 func testAccEIPAssociationConfigMulti(rand int) string {
