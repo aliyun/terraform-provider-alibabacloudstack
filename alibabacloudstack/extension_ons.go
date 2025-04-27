@@ -36,7 +36,6 @@ type OnsInstance struct {
 		Cluster            string `json:"cluster"`
 		InstanceName       string `json:"instanceName"`
 		NamespaceRulesType bool   `json:"namespaceRulesType"`
-		TpsReceiveMax      int    `json:"tpsReceiveMax"`
 		InstanceType       int    `json:"instanceType"`
 		IndependentNaming  bool   `json:"independentNaming"`
 		InstanceStatus     int    `json:"instanceStatus"`
@@ -46,7 +45,8 @@ type OnsInstance struct {
 		CreateTime         int64  `json:"createTime"`
 		RegionID           string `json:"regionId"`
 		DepartmentName     string `json:"DepartmentName"`
-		TpsMax             int    `json:"tpsMax"`
+		TpsReceiveMax      int    `json:"maxReceiveTps"`
+		TpsSendMax         int    `json:"maxSendTps"`
 		Remark             string `json:"remark"`
 		SpInstanceID       string `json:"spInstanceId"`
 		ResourceGroup      int    `json:"ResourceGroup"`
