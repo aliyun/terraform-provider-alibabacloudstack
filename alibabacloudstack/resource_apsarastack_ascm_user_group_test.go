@@ -83,5 +83,5 @@ variable name{
 
 var ascmusergroupBasicMap = map[string]string{
 	"group_name":      CHECKSET,
-	"organization_id": CHECKSET,
+	//"organization_id": CHECKSET,
 }
