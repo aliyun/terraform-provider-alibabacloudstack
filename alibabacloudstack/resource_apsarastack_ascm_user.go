@@ -45,6 +45,7 @@ func resourceAlibabacloudStackAscmUser() *schema.Resource {
 				Type:       schema.TypeString,
 				Optional:   true,
 				Computed:   true,
+				ForceNew:   true,
 				Deprecated: "Field 'organization_id' has been deprecated. Use the organization to which the current user belongs",
 			},
 			"user_id": {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 	"time"
+	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -21,9 +22,10 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 				Required: true,
 			},
 			"organization_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Computed:   true,
+				ForceNew:   true,
 				Deprecated: "Field 'organization_id' has been deprecated. Use the organization to which the current user belongs",
 			},
 			"user_group_id": {
@@ -48,7 +50,8 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackAscmUserGroupCreate,
-		resourceAlibabacloudStackAscmUserGroupRead, nil, resourceAlibabacloudStackAscmUserGroupDelete)
+		resourceAlibabacloudStackAscmUserGroupRead, resourceAlibabacloudStackAscmUserGroupUpdate,
+		resourceAlibabacloudStackAscmUserGroupDelete)
 	return resource
 }
 
@@ -56,19 +59,24 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	groupName := d.Get("group_name").(string)
-	organizationId := d.Get("organization_id").(string)
+	var organizationId string
+	if _, ok:= d.GetOk("organizationId"); ok {
+		organizationId = d.Get("organizationId").(string)
+	} else {
+		organizationId = client.Department
+	}
 
-	var loginNamesList []string
+	var roleIdList []string
 
 	if v, ok := connectivity.GetResourceDataOk(d, "role_in_ids", "role_ids"); ok {
-		loginNames := expandStringList(v.(*schema.Set).List())
+		roleIds := expandStringList(v.(*schema.Set).List())
 
-		for _, loginName := range loginNames {
-			loginNamesList = append(loginNamesList, loginName)
+		for _, roleId := range roleIds {
+			roleIdList = append(roleIdList, roleId)
 		}
 	}
 
-	requeststring, err := json.Marshal(map[string]interface{}{"roleIdList": loginNamesList})
+	requeststring, err := json.Marshal(map[string]interface{}{"roleIdList": roleIdList})
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateUserGroup", "/ascm/auth/user/createUserGroup")
 
 	request.QueryParams["groupName"] = groupName
@@ -90,6 +98,63 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 
 	d.SetId(groupName)
 
+	return nil
+}
+
+func resourceAlibabacloudStackAscmUserGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	userGroupId := d.Get("user_group_id").(string)
+	if _, ok := d.GetOk("role_ids"); ok && !d.IsNewResource(){
+		oldV, newV := d.GetChange("role_ids")
+
+		// 转换新旧值（确保类型安全）
+		newSet, okNew   := newV.(*schema.Set)
+		if !okNew {
+			return fmt.Errorf("unexpected type for new role_ids")
+		}
+		oldSet, okOld := oldV.(*schema.Set)
+		if !okOld {
+			return fmt.Errorf("unexpected type for old role_ids")
+		}
+		remove := oldSet.Difference(newSet).List()
+		create := newSet.Difference(oldSet).List()
+
+		for _, roleId := range(create) {
+			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddRoleToUserGroup", "/ascm/auth/user/addRoleToUserGroup")
+			request.QueryParams["userGroupId"] = userGroupId
+			request.QueryParams["roleId"] = roleId.(string)
+
+			bresponse, err := client.ProcessCommonRequest(request)
+			if err != nil || bresponse.GetHttpStatus() != 200 {
+				errmsg := ""
+				if bresponse != nil {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group", "AddRoleToUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+
+			addDebug("AddRoleToUser", bresponse, request, request.QueryParams)
+			log.Printf("response of queryparams AddRoleToUser is : %s", request.QueryParams)
+		}
+		
+		for _, roleId := range(remove) {
+			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUserGroup", "/ascm/auth/user/removeRoleFromUserGroup")
+			request.QueryParams["userGroupId"] = userGroupId
+			request.QueryParams["roleId"] = roleId.(string)
+
+			bresponse, err := client.ProcessCommonRequest(request)
+			if err != nil || bresponse.GetHttpStatus() != 200 {
+				errmsg := ""
+				if bresponse != nil {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group", "RemoveRoleFromUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+
+			addDebug("AddRoleToUser", bresponse, request, request.QueryParams)
+			log.Printf("response of queryparams AddRoleToUser is : %s", request.QueryParams)
+		}
+	}
 	return nil
 }
 

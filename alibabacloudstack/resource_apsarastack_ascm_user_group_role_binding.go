@@ -27,6 +27,7 @@ func resourceAlibabacloudStackAscmUserGroupRoleBinding() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeInt},
 			},
 		},
+		DeprecationMessage: "ascm_user_group already includes corresponding functions",
 	}
 	setResourceFunc(resource, 
 		resourceAlibabacloudStackAscmUserGroupRoleBindingCreate,
