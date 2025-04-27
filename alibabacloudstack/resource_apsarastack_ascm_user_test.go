@@ -48,7 +48,7 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 					"mobile_nation_code": "86",
 					"login_name":         name,
 					"login_policy_id":    "1",
-					// "role_ids":           []string{"8", "9"},
+					"role_ids":           []string{"8", "9"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -58,7 +58,7 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 						"mobile_nation_code": "86",
 						"login_name":         name,
 						"login_policy_id":    "1",
-						// "role_ids.#":         "2",
+						"role_ids.#":         "2",
 					}),
 				),
 			},

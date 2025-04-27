@@ -27,6 +27,7 @@ func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
+		DeprecationMessage: "ascm_user already includes corresponding functions",
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackAscmUserRoleBindingCreate, resourceAlibabacloudStackAscmUserRoleBindingRead, resourceAlibabacloudStackAscmUserRoleBindingUpdate, resourceAlibabacloudStackAscmUserRoleBindingDelete)
 	return resource
