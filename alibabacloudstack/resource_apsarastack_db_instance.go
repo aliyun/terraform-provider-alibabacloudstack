@@ -224,11 +224,6 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"force_restart": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Deprecated:    "Field 'force_restart' is deprecated and will be removed in a future release, and not for any use now.",
-			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackDBInstanceCreate, resourceAlibabacloudStackDBInstanceRead, resourceAlibabacloudStackDBInstanceUpdate, resourceAlibabacloudStackDBInstanceDelete)
