@@ -17,6 +17,7 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"group_name": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"organization_id": {
@@ -31,19 +32,22 @@ func resourceAlibabacloudStackAscmUserGroup() *schema.Resource {
 			"role_in_ids": {
 				Type:       schema.TypeSet,
 				Optional:   true,
+				Computed:   true,
 				Elem:       &schema.Schema{Type: schema.TypeString},
-				Deprecated: "Attribute role_in_ids has been deprecated and replaced with role_ids.",
+				Deprecated: "Field 'role_in_ids' is deprecated and will be removed in a future release. Please use 'role_ids' instead.",
+				ConflictsWith: []string{"role_ids"},
 			},
 			"role_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				ConflictsWith: []string{"role_in_ids"},
 			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackAscmUserGroupCreate,
-		resourceAlibabacloudStackAscmUserGroupRead, resourceAlibabacloudStackAscmUserGroupUpdate, resourceAlibabacloudStackAscmUserGroupDelete)
+		resourceAlibabacloudStackAscmUserGroupRead, nil, resourceAlibabacloudStackAscmUserGroupDelete)
 	return resource
 }
 
@@ -55,7 +59,7 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 
 	var loginNamesList []string
 
-	if v, ok := d.GetOk("role_in_ids"); ok {
+	if v, ok := connectivity.GetResourceDataOk(d, "role_in_ids", "role_ids"); ok {
 		loginNames := expandStringList(v.(*schema.Set).List())
 
 		for _, loginName := range loginNames {
@@ -63,13 +67,6 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 		}
 	}
 
-	if v, ok := d.GetOk("role_ids"); ok {
-		loginNames := expandStringList(v.(*schema.Set).List())
-
-		for _, loginName := range loginNames {
-			loginNamesList = append(loginNamesList, loginName)
-		}
-	}
 	requeststring, err := json.Marshal(map[string]interface{}{"roleIdList": loginNamesList})
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "CreateUserGroup", "/ascm/auth/user/createUserGroup")
 
@@ -122,15 +119,9 @@ func resourceAlibabacloudStackAscmUserGroupRead(d *schema.ResourceData, meta int
 			roleIds = append(roleIds, strconv.Itoa(role.Id))
 		}
 	}
-	d.Set("role_ids", roleIds)
+	connectivity.SetResourceData(d, roleIds, "role_ids", "role_in_ids")
 
 	return nil
-}
-
-func resourceAlibabacloudStackAscmUserGroupUpdate(d *schema.ResourceData, meta interface{}) error {
-	noUpdateAllowedFields := []string{"role_in_ids", "group_name"}
-
-	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackAscmUserGroupDelete(d *schema.ResourceData, meta interface{}) error {
