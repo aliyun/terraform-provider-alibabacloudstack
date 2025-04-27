@@ -57,6 +57,7 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Optional: true,
+				Computed: true,
 				MaxItems: int(MaxScalingConfigurationInstanceTypes),
 			},
 			"security_group_ids": {
@@ -70,8 +71,8 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 			},
 			"zone_id": {
 				Type:     schema.TypeString,
-				Optional:     true,
-				Computed:     true,
+				Optional: true,
+				Computed: true,
 			},
 			"scaling_configuration_name": {
 				Type:         schema.TypeString,
@@ -318,7 +319,7 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("override") {
 		request.Override = requests.NewBoolean(d.Get("override").(bool))
 	}
-	
+
 	if d.HasChange("zone_id") && d.Get("zone_id").(string) != "" {
 		request.ZoneId = d.Get("zone_id").(string)
 	}
@@ -564,12 +565,18 @@ func resourceAlibabacloudStackEssScalingConfigurationRead(d *schema.ResourceData
 	}
 	if sg, ok := d.GetOk("security_group_ids"); ok && len(sg.([]interface{})) >= 0 {
 		d.Set("security_group_ids", object.SecurityGroupIds.SecurityGroupId)
+	} else if len(object.SecurityGroupIds.SecurityGroupId) > 0 {
+		d.Set("security_group_ids", object.SecurityGroupIds.SecurityGroupId)
 	}
 
 	if instanceType, ok := d.GetOk("instance_type"); ok && instanceType.(string) != "" {
 		d.Set("instance_type", object.InstanceType)
+	} else if object.InstanceType != "" {
+		d.Set("instance_type", object.InstanceType)
 	}
 	if instanceTypes, ok := d.GetOk("instance_types"); ok && len(instanceTypes.([]interface{})) > 0 {
+		d.Set("instance_types", object.InstanceTypes.InstanceType)
+	} else if len(object.InstanceTypes.InstanceType) > 0 {
 		d.Set("instance_types", object.InstanceTypes.InstanceType)
 	}
 	userData := d.Get("user_data")
