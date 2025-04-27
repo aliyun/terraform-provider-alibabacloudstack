@@ -87,11 +87,9 @@ func TestAccAlibabacloudStackDnsRecord_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				// 4.22新增
-				ImportStateVerifyIgnore: []string{"rr_set", "line_ids", "zone_id"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

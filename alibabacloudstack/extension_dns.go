@@ -15,13 +15,17 @@ type DnsRecord struct {
 		Name       string    `json:"Name"`
 		Type       string    `json:"Type"`
 		CreateTime time.Time `json:"CreateTime"`
-		//RDatas          string    `json:"RDatas"`
-		Id              string `json:"Id"`
-		UpdateTimestamp int64  `json:"UpdateTimestamp"`
-		TTL             int    `json:"Ttl"`
-		CreateTimestamp int64  `json:"CreateTimestamp"`
-		Remark          string `json:"Remark"`
-		LbaStrategy     string `json:"LbaStrategy"`
+		RDatas     []struct {
+			LbaWeight int    `json:"LbaWeight"`
+			Value     string `json:"Value"`
+		} `json:"RDatas"`
+		LineIds         []string `json:"LineIds"`
+		Id              string   `json:"Id"`
+		UpdateTimestamp int64    `json:"UpdateTimestamp"`
+		TTL             int      `json:"Ttl"`
+		CreateTimestamp int64    `json:"CreateTimestamp"`
+		Remark          string   `json:"Remark"`
+		LbaStrategy     string   `json:"LbaStrategy"`
 	} `json:"Data"`
 }
 

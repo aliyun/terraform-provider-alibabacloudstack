@@ -135,6 +135,13 @@ func resourceAlibabacloudStackDnsRecordRead(d *schema.ResourceData, meta interfa
 	d.Set("type", object.Data[0].Type)
 	d.Set("remark", object.Data[0].Remark)
 	d.Set("lba_strategy", object.Data[0].LbaStrategy)
+	d.Set("line_ids", object.Data[0].LineIds)
+	rr_set := make([]string, 0)
+	for _, v := range object.Data[0].RDatas {
+		rr_set = append(rr_set, v.Value)
+	}
+	d.Set("rr_set", rr_set)
+	d.Set("zone_id", object.Data[0].ZoneId)
 	return nil
 }
 
