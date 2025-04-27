@@ -12,7 +12,7 @@ import (
 )
 
 func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding(t *testing.T) {
-	var v *ListResourceGroup
+	var v *MembersInsideResourceSet
 	resourceId := "alibabacloudstack_ascm_user_group_resource_set_binding.default"
 	ra := resourceAttrInit(resourceId, testAccCheckUserGroupResourceSetBinding)
 	serviceFunc := func() interface{} {
@@ -81,21 +81,25 @@ variable org_id {
  default = "%s"
 }
 
+variable name {
+ default = "%s"
+}
+
 resource "alibabacloudstack_ascm_user_group" "default" {
- group_name =      "%s"
+ group_name =      "${var.name}"
  organization_id = "${var.org_id}"
 }
 
 
 resource "alibabacloudstack_ascm_resource_group" "default" {
   organization_id = "${var.org_id}"
-  name = "alibabacloudstack-terraform-resourceGroup"
+  name = "${var.name}"
 }
 
 resource "alibabacloudstack_ascm_user_group_resource_set_binding" "default" {
-  resource_set_id = alibabacloudstack_ascm_resource_group.default.rg_id
-  user_group_id = alibabacloudstack_ascm_user_group.default.user_group_id
-ascm_role_id="2"
+  resource_set_id = "${alibabacloudstack_ascm_resource_group.default.rg_id}"
+  user_group_id = "${alibabacloudstack_ascm_user_group.default.user_group_id}"
+  ascm_role_id="2"
 }
 `
 
