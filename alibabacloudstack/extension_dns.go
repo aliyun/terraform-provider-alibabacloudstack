@@ -15,7 +15,11 @@ type DnsRecord struct {
 		Name       string    `json:"Name"`
 		Type       string    `json:"Type"`
 		CreateTime time.Time `json:"CreateTime"`
-		//RDatas          string    `json:"RDatas"`
+		RDatas     []struct {
+			LbaWeight int    `json:"LbaWeight"`
+			Value     string `json:"Value"`
+		} `json:"RDatas"`
+		LineIds 		string 	`json:"LineIds"`
 		Id              string `json:"Id"`
 		UpdateTimestamp int64  `json:"UpdateTimestamp"`
 		TTL             int    `json:"Ttl"`
