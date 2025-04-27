@@ -77,11 +77,11 @@ func resourceAlibabacloudStackCmsAlarm() *schema.Resource {
 				ConflictsWith: []string{"resources"},
 			},
 			"resources": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
 				Elem: &schema.Schema{
-					Type: schema.TypeMap,
+					Type: schema.TypeString,
 					Elem: &schema.Schema{
 						Type: schema.TypeString,
 					},
@@ -303,7 +303,7 @@ func resourceAlibabacloudStackCmsAlarmCreate(d *schema.ResourceData, meta interf
 	var instanceId string
 	var dimList []map[string]string
 
-	if dimensions, ok := d.GetOk("dimensions"); ok {
+	if dimensions, ok := connectivity.GetResourceDataOk(d, "dimensions", "resource"); ok {
 		for k, v := range dimensions.(map[string]interface{}) {
 			values := strings.Split(v.(string), COMMA_SEPARATED)
 			if len(values) > 0 {
@@ -505,16 +505,24 @@ func resourceAlibabacloudStackCmsAlarmRead(d *schema.ResourceData, meta interfac
 	d.Set("status", alarm.AlertState)
 	d.Set("enabled", alarm.EnableState)
 	d.Set("contact_groups", strings.Split(alarm.ContactGroups, ","))
+	if alarm.Resources != "" {
+		var res []interface{}
+		resources := make(map[string]string)
+		if err := json.Unmarshal([]byte(alarm.Resources), &res); err != nil {
+			return fmt.Errorf("Unmarshaling Resources got an error: %#v.", err)
+		}
+		for _, resource := range res {
+			for k, v := range resource.(map[string]interface{}) {
+				if vv, ok := resources[k]; ok {
+					resources[k] = vv + "," + v.(string)
+				} else {
+					resources[k] = v.(string)
+				}
+			}
+		}
 
-	//var dims map[string]interface{}
-	// TODO: 当前接口无法正常返回Dimensions
-	// if alarm.Dimensions != "" {
-	// 	if err := json.Unmarshal([]byte(alarm.Dimensions), &dims); err != nil {
-	// 		return fmt.Errorf("Unmarshaling Dimensions got an error: %#v.", err)
-	// 	}
-	// 	d.Set("dimensions", dims)
-	// }
-
+		connectivity.SetResourceData(d, resources, "dimensions", "resources")
+	}
 	return nil
 }
 
