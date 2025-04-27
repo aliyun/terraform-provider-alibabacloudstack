@@ -1006,8 +1006,8 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 		retry := 5
 		for retry > 0 {
 			// 大批量触发时asapi侧的资源同步会有一定的延迟，如果失败则重试
+			err = readFunc(d, meta)
 			if err != nil {
-				err = readFunc(d, meta)
 				time.Sleep(time.Second * 5)
 				retry--
 				continue

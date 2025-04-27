@@ -261,10 +261,22 @@ func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *Lis
 	return resp, nil
 }
 
-func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (response *ListResourceGroup, err error) {
-	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListResourceGroup", "/ascm/auth/resource_group/list_resource_group")
-	request.QueryParams["pageSize"] = "1000"
-	var resp = &ListResourceGroup{}
+func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*MembersInsideResourceSet, error) {
+
+	var err error
+	var resourceSetId, userGroupId string 
+	id_infos := strings.Split(id, ":")
+	if len(id_infos) == 3 {
+		resourceSetId = id_infos[0]
+		userGroupId = id_infos[1]
+	} else {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListMembersInsideResourceSet", "/ascm/auth/user/listMembersInsideResourceGroup")
+	request.QueryParams["resourceSetId"] = resourceSetId
+	
+	var resp = &MembersInsideResourceSet{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 
 	if err != nil {
@@ -272,34 +284,37 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (respon
 		if bresponse != nil {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		} else {
-			return nil, err
+			return nil,err
 		}
-		if errmsgs.IsExpectedErrors(err, []string{"ErrorListResourceGroupNotFound"}) {
-			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserGroupNotFound"}) {
+			return nil,errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListResourceGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return nil,errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUserGroups", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ListResourceGroup", response, request, request.QueryParams)
+	addDebug("ListUserGroups", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return resp, errmsgs.WrapError(err)
+		return nil,errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code != "200" {
-		return resp, errmsgs.WrapError(err)
+		return nil,errmsgs.WrapError(err)
 	}
 
-	var rgname string
-	for i := range resp.Data {
-		if strconv.Itoa(resp.Data[i].Id) == id {
-			rgname = resp.Data[i].ResourceGroupName
-			break
+	for _, data := range(resp.Data) {
+		if data.AuthorizedType != "UserGroup" {
+			continue
 		}
+		if strconv.Itoa(data.AuthorizedId) != userGroupId {
+			continue
+		}
+		
+		resp.Data = []MembersInsideResourceData{data}
+		
+		return resp, nil
 	}
-	res, err := s.DescribeAscmUserGroupResourceSet(rgname)
-
-	return res, nil
+	return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 }
 
 func (s *AscmService) DescribeAscmUser(id string) (response *User, err error) {
