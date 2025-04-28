@@ -63,6 +63,8 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				// 敏感信息不回读
+				ImportStateVerifyIgnore: []string{"account_password"},
 			},
 
 			{

@@ -220,6 +220,24 @@ func testAccEssAttachmentConfigInstance(rand int) string {
 		description         = "example_value"
 	}
 	
+	resource "alibabacloudstack_ecs_instance" "new" {
+		image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type        = "${local.default_instance_type_id}"
+		system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+		system_disk_size     = 20
+		system_disk_name     = "test_sys_disk"
+		security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
+		instance_name        = "${var.name}_ecs"
+		vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
+		zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
+		is_outdated          = false
+		lifecycle {
+			ignore_changes = [
+				instance_type
+			]
+		}
+	}
+	
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
@@ -235,7 +253,7 @@ func testAccEssAttachmentConfigInstance(rand int) string {
 
 	resource "alibabacloudstack_ess_attachment" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		instance_ids = [alibabacloudstack_ecs_instance.default.id]
+		instance_ids = [alibabacloudstack_ecs_instance.default.id, alibabacloudstack_ecs_instance.new.id]
 		force = true
 	}
 	`, rand, ECSInstanceCommonTestCase)

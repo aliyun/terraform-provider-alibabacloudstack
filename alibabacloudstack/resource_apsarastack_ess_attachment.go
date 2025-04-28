@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ess"
@@ -34,7 +35,7 @@ func resourceAlibabacloudstackEssAttachment() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, 
+	setResourceFunc(resource,
 		resourceAlibabacloudstackEssAttachmentCreate,
 		resourceAlibabacloudstackEssAttachmentRead,
 		resourceAlibabacloudstackEssAttachmentUpdate,
@@ -75,9 +76,7 @@ func resourceAlibabacloudstackEssAttachmentUpdate(d *schema.ResourceData, meta i
 			client.InitRpcRequest(*request.RpcRequest)
 			request.ScalingGroupId = d.Id()
 			request.InstanceId = &add
-
 			err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-
 				raw, err := client.WithEssClient(func(essClient *ess.Client) (interface{}, error) {
 					return essClient.AttachInstances(request)
 				})
@@ -231,12 +230,16 @@ func resourceAlibabacloudstackEssAttachmentDelete(d *schema.ResourceData, meta i
 			return essClient.RemoveInstances(request)
 		})
 		response, ok := raw.(*ess.RemoveInstancesResponse)
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		if err != nil {
+			raw_data := make(map[string]interface{})
+			err := json.Unmarshal(response.BaseResponse.GetHttpContentBytes(), &raw_data)
 			errmsg := ""
-			if ok {
+			if err != nil && ok {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"IncorrectCapacity.MinSize"}) {
+			errCode := raw_data["errorCode"].(string)
+			if errCode == "IncorrectCapacity.MinSize" {
 				instances, err := essService.DescribeEssAttachment(d.Id(), removed)
 				if len(instances) > 0 {
 					if object.MinSize == 0 {
@@ -246,16 +249,17 @@ func resourceAlibabacloudstackEssAttachmentDelete(d *schema.ResourceData, meta i
 						"Please shorten scaling group min size and try again.", len(removed), object.MinSize)))
 				}
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"ScalingActivityInProgress", "IncorrectScalingGroupStatus"}) {
+			if errCode == "ScalingActivityInProgress" || errCode == "IncorrectScalingGroupStatus" {
 				time.Sleep(5)
 				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ess_attachment", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 			}
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidScalingGroupId.NotFound"}) {
+			if errCode == "InvalidScalingGroupId.NotFound" {
 				return nil
 			}
-			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ess_attachment", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			if err != nil {
+				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ess_attachment", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			}
 		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 		time.Sleep(3 * time.Second)
 		instances, err := essService.DescribeEssAttachment(d.Id(), removed)
 		if err != nil {
