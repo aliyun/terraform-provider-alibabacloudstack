@@ -1003,6 +1003,19 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 		}
 
 		waitSecondsIfWithTest(1)
+
+		if updateFunc != nil {
+			err = updateFunc(d, meta)
+		}
+		
+		if err != nil {
+			waitSecondsIfWithTest(3)
+			// 如果创建成功但读取加载失败，tf不会终态，为方式残留资源，触发删除
+			resource.DeleteContext(ctx, d, meta)
+			return diag.FromErr(err)
+		}
+		
+		waitSecondsIfWithTest(1)
 		retry := 5
 		for retry > 0 {
 			// 大批量触发时asapi侧的资源同步会有一定的延迟，如果失败则重试
@@ -1016,14 +1029,12 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 		}
 		if err != nil {
 			// 如果创建成功但读取加载失败，tf不会终态，为方式残留资源，触发删除
-			return resource.DeleteContext(ctx, d, meta)
+			waitSecondsIfWithTest(3)
+			resource.DeleteContext(ctx, d, meta)
+			return diag.FromErr(err)
 		}
-
-		if updateFunc != nil {
-			return resource.UpdateContext(ctx, d, meta)
-		} else {
-			return nil
-		}
+		
+		return nil
 	}
 
 	resource.ReadContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {

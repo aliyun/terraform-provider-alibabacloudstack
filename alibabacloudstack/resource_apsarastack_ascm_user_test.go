@@ -63,6 +63,17 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccConfig(map[string]interface{}{
+					"role_ids":           []string{"2"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"role_ids.#":         "1",
+						"role_ids.0":         "2",
+					}),
+				),
+			},
+			{
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
