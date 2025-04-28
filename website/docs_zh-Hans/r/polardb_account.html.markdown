@@ -41,7 +41,7 @@ resource "alibabacloudstack_vswitch" "default" {
   name              = "${var.name}"
 }
 
-resource "alibabacloudstack_polardb_instance" "instance" {
+resource "alibabacloudstack_polardb_dbinstance" "instance" {
   engine                  = "MySQL"
   engine_version          = "5.7"
   instance_name           = "${var.name}"
@@ -53,7 +53,7 @@ resource "alibabacloudstack_polardb_instance" "instance" {
 }
 
 resource "alibabacloudstack_polardb_account" "default" {
-  data_base_instance_id = "${alibabacloudstack_polardb_instance.instance.id}"
+  data_base_instance_id = "${alibabacloudstack_polardb_dbinstance.instance.id}"
   account_name          = "tftestnormal"
   account_password      = var.password
   account_description   = "This is a test account for PolarDB."
