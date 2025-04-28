@@ -15,6 +15,7 @@ import (
 
 func resourceAlibabacloudStackOssBucketQuota() *schema.Resource {
 	resource := &schema.Resource{
+		DeprecationMessage: "oss_bucket already includes corresponding functions",
 		Schema: map[string]*schema.Schema{
 			"bucket": {
 				Type:     schema.TypeString,
