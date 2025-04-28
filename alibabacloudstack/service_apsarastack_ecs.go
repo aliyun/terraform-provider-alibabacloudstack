@@ -1037,7 +1037,7 @@ func (s *EcsService) WaitForDisk(id string, status Status, timeout int) error {
 		if time.Now().After(deadline) {
 			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Status, string(status), errmsgs.ProviderERROR)
 		}
-
+		time.Sleep(time.Duration(1) * time.Second)
 	}
 }
 
@@ -1102,7 +1102,7 @@ func (s *EcsService) WaitForDiskAttachment(id string, status Status, timeout int
 		if time.Now().After(deadline) {
 			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Status, string(status), errmsgs.ProviderERROR)
 		}
-
+		time.Sleep(time.Duration(1) * time.Second)
 	}
 }
 
