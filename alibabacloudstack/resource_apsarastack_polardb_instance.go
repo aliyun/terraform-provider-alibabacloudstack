@@ -827,8 +827,14 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 		ssl = true
 	}
 	d.Set("enable_ssl", ssl)
-	tde_object, err := PolardbService.DescribeDBInstanceTDE(d.Id())
-	d.Set("tde_status", tde_object["TDEStatus"].(string) == "Enabled")
+	if engine == "MySQL" {
+		tde_object, err := PolardbService.DescribeDBInstanceTDE(d.Id())
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		d.Set("tde_status", tde_object["TDEStatus"].(string) == "Enabled")
+	}
+	
 	if err = PolardbService.RefreshParameters(d, client, "parameters"); err != nil {
 		return errmsgs.WrapError(err)
 	}
