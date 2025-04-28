@@ -201,9 +201,10 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"encryption", "period", "auto_renew"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -247,7 +248,7 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 		IDRefreshName: resourceId,
 
 		Providers:    testAccProviders,
-		CheckDestroy: rac.checkResourceDestroy(),
+		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{

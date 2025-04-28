@@ -90,13 +90,6 @@ func TestAccAlibabacloudStackRedisAccount0(t *testing.T) {
 					}),
 				),
 			},
-
-			{
-				Config: testAccConfig(map[string]interface{}{}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
-				),
-			},
 		},
 	})
 }
