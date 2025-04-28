@@ -60,9 +60,6 @@ func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta int
 	if len(object.Data) == 0 {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddLoginPolicy", "/ascm/auth/loginPolicy/addLoginPolicy")
 		mergeMaps(request.QueryParams, map[string]string{
-			"AccountInfo":            "123456",
-			"SignatureVersion":       "1.0",
-			"ProductName":            "ascm",
 			"name":                   name,
 			"description":            descr,
 			"rule":                   rule,
@@ -201,9 +198,6 @@ func resourceAlibabacloudStackLogonPolicyDelete(d *schema.ResourceData, meta int
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveLoginPolicyByName", "/ascm/auth/loginPolicy/removeLoginPolicyByName")
 		mergeMaps(request.QueryParams, map[string]string{
-			"AccountInfo":      "123456",
-			"SignatureVersion": "1.0",
-			"ProductName":      "ascm",
 			"name":             name,
 		})
 		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {
