@@ -83,8 +83,8 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 	mobnationcode := d.Get("mobile_nation_code").(string)
 	loginpolicyid := d.Get("login_policy_id").(int)
 	var organizationId string
-	if _, ok:= d.GetOk("organizationId"); ok {
-		organizationId = d.Get("organizationId").(string)
+	if _, ok:= d.GetOk("organization_id"); ok {
+		organizationId = d.Get("organization_id").(string)
 	} else {
 		organizationId = client.Department
 	}

@@ -60,8 +60,8 @@ func resourceAlibabacloudStackAscmUserGroupCreate(d *schema.ResourceData, meta i
 
 	groupName := d.Get("group_name").(string)
 	var organizationId string
-	if _, ok:= d.GetOk("organizationId"); ok {
-		organizationId = d.Get("organizationId").(string)
+	if _, ok:= d.GetOk("organization_id"); ok {
+		organizationId = d.Get("organization_id").(string)
 	} else {
 		organizationId = client.Department
 	}
