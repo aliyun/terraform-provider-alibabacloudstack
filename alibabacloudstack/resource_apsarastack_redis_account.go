@@ -34,8 +34,8 @@ func resourceAlibabacloudStackKVstoreAccount() *schema.Resource {
 				Sensitive: true,
 			},
 			"kms_encrypted_password": {
-				Type:            schema.TypeString,
-				Optional:        true,
+				Type:             schema.TypeString,
+				Optional:         true,
 				DiffSuppressFunc: kmsDiffSuppressFunc,
 			},
 			"kms_encryption_context": {
@@ -60,17 +60,17 @@ func resourceAlibabacloudStackKVstoreAccount() *schema.Resource {
 				Default:      "RoleReadWrite",
 			},
 			"description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				Deprecated:   "Field 'description' is deprecated and will be removed in a future release. Please use new field 'account_description' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'description' is deprecated and will be removed in a future release. Please use new field 'account_description' instead.",
 				ConflictsWith: []string{"account_description"},
 			},
 			"account_description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"description"},
 			},
 		},
@@ -227,7 +227,7 @@ func resourceAlibabacloudStackKVStoreAccountUpdate(d *schema.ResourceData, meta 
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	if d.HasChanges("account_password", "kms_encrypted_password") {
+	if !d.IsNewResource() && d.HasChanges("account_password", "kms_encrypted_password") {
 		if err := kvstoreService.WaitForKVstoreAccount(d.Id(), Available, DefaultTimeoutMedium); err != nil {
 			return errmsgs.WrapError(err)
 		}
