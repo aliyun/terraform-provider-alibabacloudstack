@@ -40,7 +40,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 }
 
 
-	resource "alibabacloudstack_polardb_instance" "instance" {
+	resource "alibabacloudstack_polardb_dbinstance" "instance" {
 		engine            = "MySQL"
 		engine_version    = "5.7"
 		instance_name = "${var.name}"
@@ -54,7 +54,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 resource "alibabacloudstack_polardb_database" "default" {
   data_base_name = "tf-testaccdbdatabase_basic"
   character_set_name = "utf8"
-  data_base_instance_id = "${alibabacloudstack_polardb_instance.instance.id}"
+  data_base_instance_id = "${alibabacloudstack_polardb_dbinstance.instance.id}"
 }
 ```
 
