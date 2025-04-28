@@ -47,6 +47,12 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 			},
+			"encrypt_algorithm": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "aes-256",
+				ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
+			},
 			"enable_ssl": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -236,6 +242,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	var encryption bool
 	EncryptionKey := d.Get("encryption_key").(string)
 	encryption = d.Get("encryption").(bool)
+	EncryptAlgorithm := d.Get("encrypt_algorithm").(string)
 	log.Print("Encryption key input")
 	if EncryptionKey != "" && encryption == true {
 		log.Print("Encryption key condition passed")
@@ -352,7 +359,8 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		"RoleARN":               arnrole,
 	})
 	if tde := d.Get("tde_status"); tde == true && engine != "MySQL" {
-		request.QueryParams["TDEStatus"] = "1"
+		request.QueryParams["TdeStatus"] = "1"
+		request.QueryParams["EncryptAlgorithm"] = EncryptAlgorithm
 		request.QueryParams["RoleARN"] = arnrole
 		if EncryptionKey != "" {
 			request.QueryParams["EncryptionKey"] = EncryptionKey
@@ -388,6 +396,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		PolardbModifydbinstancetdeResponse := PolardbModifydbinstancetdeResponse{}
 		request.QueryParams["TDEStatus"] = "Enabled"
 		request.QueryParams["RoleARN"] = arnrole
+		request.QueryParams["EncryptAlgorithm"] = EncryptAlgorithm
 
 		if EncryptionKey != "" {
 			request.QueryParams["EncryptionKey"] = EncryptionKey
@@ -827,14 +836,12 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 		ssl = true
 	}
 	d.Set("enable_ssl", ssl)
-	if engine == "MySQL" {
-		tde_object, err := PolardbService.DescribeDBInstanceTDE(d.Id())
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		d.Set("tde_status", tde_object["TDEStatus"].(string) == "Enabled")
+	tde_object, err := PolardbService.DescribeDBInstanceTDE(d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
 	}
-	
+	d.Set("tde_status", tde_object["TDEStatus"].(string) == "Enabled")
+	d.Set("encrypt_algorithm", tde_object["EncryptAlgorithm"].(string))
 	if err = PolardbService.RefreshParameters(d, client, "parameters"); err != nil {
 		return errmsgs.WrapError(err)
 	}
