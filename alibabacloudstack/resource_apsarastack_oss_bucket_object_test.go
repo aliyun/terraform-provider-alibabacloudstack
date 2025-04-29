@@ -71,6 +71,9 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				// source是本地属性，无法从远端加载
+				// acl需要特殊权限，当前无法在测试时调整
+				ImportStateVerifyIgnore: []string{"source", "acl"},
 			},
 			/*
 				{
@@ -185,7 +188,9 @@ func testAccCheckOssBucketObjectExistsWithProviders(n string, bucket string, obj
 			if err != nil {
 				return fmt.Errorf("Error getting bucket: %#v", err)
 			}
-			object, err := buck.GetObjectMeta(rs.Primary.ID)
+			id_info := strings.SplitN(rs.Primary.ID, ":", 2)
+			key := id_info[1]
+			object, err := buck.GetObjectMeta(key)
 			log.Printf("[WARN]get oss bucket object %#v", bucket)
 			if err == nil {
 				if object != nil {
