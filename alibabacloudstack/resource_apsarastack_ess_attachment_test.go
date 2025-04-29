@@ -253,6 +253,7 @@ func testAccEssAttachmentConfigInstance(rand int) string {
 	resource "alibabacloudstack_ess_attachment" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		instance_ids = [alibabacloudstack_ecs_instance.default.id, alibabacloudstack_ecs_instance.new.id]
+		// 没有就绪的alibabacloudstack_ess_scaling_configuration会导致 ess_scaling_group 状态非活跃， 无法正常操作
 		depends_on = ["alibabacloudstack_ess_scaling_configuration.default"]
 		force = true
 	}
@@ -297,9 +298,11 @@ func testAccEssAttachmentConfigRemoveInstance(rand int) string {
 
 	resource "alibabacloudstack_ess_attachment" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		instance_ids = ["i-w6w01gwofsximnvedpgp"]
+		instance_ids = [alibabacloudstack_ecs_instance.default.id]
+		// 没有就绪的alibabacloudstack_ess_scaling_configuration会导致 ess_scaling_group 状态非活跃， 无法正常操作
 		depends_on = ["alibabacloudstack_ess_scaling_configuration.default"]
 		force = true
 	}
+
 	`, rand, ECSInstanceCommonTestCase)
 }
