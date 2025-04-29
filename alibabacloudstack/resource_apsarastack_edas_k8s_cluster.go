@@ -67,11 +67,10 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "ImportK8sCluster", "/pop/v5/import_k8s_cluster")
 	request.QueryParams["ClusterId"] = d.Get("cs_cluster_id").(string)
 	if v, ok := d.GetOk("namespace_id"); ok {
-		request.QueryParams["NamespaceId"] = v.(string)
+		request.QueryParams["RegionId"] = v.(string)
 	}
-	request.Headers["x-acs-content-type"] = "application/json"
-	request.Headers["Content-Type"] = "application/json"
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -79,7 +78,6 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), bresponse, request)
 	response := ImportK8sClusterResponse{}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {

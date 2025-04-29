@@ -45,7 +45,7 @@ func resourceAlibabacloudstackEssAttachment() *schema.Resource {
 
 func resourceAlibabacloudstackEssAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(d.Get("scaling_group_id").(string))
-	return resourceAlibabacloudstackEssAttachmentUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudstackEssAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -86,7 +86,10 @@ func resourceAlibabacloudstackEssAttachmentUpdate(d *schema.ResourceData, meta i
 					if ok {
 						errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 					}
-					if errmsgs.IsExpectedErrors(err, []string{"IncorrectCapacity.MaxSize"}) {
+					raw_data := make(map[string]interface{})
+					err := json.Unmarshal(response.BaseResponse.GetHttpContentBytes(), &raw_data)
+					errCode := raw_data["errorCode"].(string)
+					if errCode == "IncorrectCapacity.MaxSize" {
 						instances, err := essService.DescribeEssAttachment(d.Id(), make([]string, 0))
 						if !errmsgs.NotFoundError(err) {
 							return resource.NonRetryableError(err)
@@ -124,7 +127,7 @@ func resourceAlibabacloudstackEssAttachmentUpdate(d *schema.ResourceData, meta i
 								"Please enlarge scaling group max size or remove already attached instances: %#v.", object.MaxSize, attached)))
 						}
 					}
-					if errmsgs.IsExpectedErrors(err, []string{"ScalingActivityInProgress"}) {
+					if errCode == "ScalingActivityInProgress" {
 						time.Sleep(5)
 						return resource.RetryableError(errmsgs.WrapError(err))
 					}

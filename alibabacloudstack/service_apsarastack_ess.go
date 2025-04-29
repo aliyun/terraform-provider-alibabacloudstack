@@ -174,6 +174,7 @@ func (s *EssService) DescribeEssScalingGroup(id string) (group ess.ScalingGroup,
 	raw, e := s.client.WithEssClient(func(essClient *ess.Client) (interface{}, error) {
 		return essClient.DescribeScalingGroups(request)
 	})
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, ok := raw.(*ess.DescribeScalingGroupsResponse)
 	if e != nil {
 		errmsg := ""
@@ -182,7 +183,6 @@ func (s *EssService) DescribeEssScalingGroup(id string) (group ess.ScalingGroup,
 		}
 		return group, errmsgs.WrapErrorf(e, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	for _, v := range response.ScalingGroups.ScalingGroup {
 		if v.ScalingGroupId == id {

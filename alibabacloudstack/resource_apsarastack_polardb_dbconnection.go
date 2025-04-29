@@ -102,7 +102,7 @@ func resourceAlibabacloudStackPolardbConnectionRead(d *schema.ResourceData, meta
 		PolardbService{client}
 	response, err := polardbdb_instanceservice.DescribeDBConnection(d.Id())
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_instance", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_dbinstance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
