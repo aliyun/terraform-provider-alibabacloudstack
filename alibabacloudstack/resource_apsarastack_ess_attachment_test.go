@@ -293,6 +293,8 @@ func testAccEssAttachmentConfigRemoveInstance(rand int) string {
 		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
 	}
 
+	%s
+
 	resource "alibabacloudstack_ess_attachment" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		instance_ids = ["i-w6w01gwofsximnvedpgp"]
