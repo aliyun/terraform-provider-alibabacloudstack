@@ -1,8 +1,10 @@
 package alibabacloudstack
 
 import (
-	"strconv"
 	"time"
+	"fmt"
+	"strings"
+	"strconv"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -12,13 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmUserGroupResourceSetBinding() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate,
-		Read:   resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead,
-		Delete: resourceAlibabacloudStackAscmUserGroupResourceSetBindingDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"resource_set_id": {
 				Type:     schema.TypeString,
@@ -37,6 +33,12 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBinding() *schema.Resource
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate,
+		resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead,
+		nil,
+		resourceAlibabacloudStackAscmUserGroupResourceSetBindingDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate(d *schema.ResourceData, meta interface{}) error {
@@ -70,16 +72,21 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingCreate(d *schema.Re
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user_group_resource_set_binding", "AddResourceSetToUserGroup", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug("AddResourceSetToUserGroup", bresponse, requestInfo, bresponse.GetHttpContentString())
-	d.SetId(resourceSetId)
-	return resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead(d, meta)
+	d.SetId(fmt.Sprintf("%s:%s:%s",resourceSetId, userGroupId, ascmRoleId))
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	
+	id_infos := strings.Split(d.Id(), ":")
+	if len(id_infos) == 1 {
+		// 此时为老数据d.SetId(resourceSetId)， 强制修改一次数据的格式
+		d.SetId(fmt.Sprintf("%s:%s:%s",d.Get("resource_set_id").(string), d.Get("user_group_id").(string), d.Get("ascm_role_id").(string)))
+	}
 
 	ascmService := &AscmService{client: client}
-	obj, err := ascmService.DescribeAscmUserGroupResourceSetBinding(d.Id())
+	resp, err := ascmService.DescribeAscmUserGroupResourceSetBinding(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -87,7 +94,11 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingRead(d *schema.Reso
 		}
 		return errmsgs.WrapError(err)
 	}
-	d.Set("resource_set_id", strconv.Itoa(obj.Data[0].Id))
+	// 确保import动作时可以正常加载
+	id_infos = strings.Split(d.Id(), ":")
+	d.Set("resource_set_id", id_infos[0])
+	d.Set("user_group_id", id_infos[1])
+	d.Set("ascm_role_id", strconv.Itoa(resp.Data[0].AuthorizedRoleId))
 
 	return nil
 }
@@ -96,18 +107,22 @@ func resourceAlibabacloudStackAscmUserGroupResourceSetBindingDelete(d *schema.Re
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	var requestInfo *ecs.Client
-	check, err := ascmService.DescribeAscmUserGroupResourceSetBinding(d.Id())
+	_, err := ascmService.DescribeAscmUserGroupResourceSetBinding(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "IsBindingExist", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	addDebug("IsBindingExist", check, requestInfo, map[string]string{"resourceGroupId": d.Id()})
-	userGroupId := d.Get("user_group_id").(string)
+	addDebug("IsBindingExist", requestInfo, map[string]string{"resourceGroupId": d.Id()})
+	var resourceSetId, userGroupId string 
+	id_infos := strings.Split(d.Id(), ":")
+	resourceSetId = id_infos[0]
+	userGroupId = id_infos[1]
+	
 	err = resource.Retry(1*time.Minute, func() *resource.RetryError {
 
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveResourceSetFromUserGroup", "/ascm/auth/user/removeResourceSetFromUserGroup")
 		request.QueryParams["ProductName"] = "ascm"
 		request.QueryParams["userGroupId"] = userGroupId
-		request.QueryParams["resourceSetId"] = d.Id()
+		request.QueryParams["resourceSetId"] = resourceSetId
 
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {

@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackQuickBiWorkspace() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackQuickBiWorkspaceCreate,
-		Read:   resourceAlibabacloudStackQuickBiWorkspaceRead,
-		Update: resourceAlibabacloudStackQuickBiWorkspaceUpdate,
-		Delete: resourceAlibabacloudStackQuickBiWorkspaceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"workspace_id": {
 				Type:     schema.TypeString,
@@ -48,6 +41,11 @@ func resourceAlibabacloudStackQuickBiWorkspace() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackQuickBiWorkspaceCreate,
+		resourceAlibabacloudStackQuickBiWorkspaceRead,
+		resourceAlibabacloudStackQuickBiWorkspaceUpdate,
+		resourceAlibabacloudStackQuickBiWorkspaceDelete)
+	return resource
 }
 
 var WorkspaceId string
@@ -109,7 +107,7 @@ func resourceAlibabacloudStackQuickBiWorkspaceCreate(d *schema.ResourceData, met
 	WorkspaceId = response["Result"].(string)
 	d.SetId(fmt.Sprint(WorkspaceId))
 
-	return resourceAlibabacloudStackQuickBiWorkspaceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackQuickBiWorkspaceRead(d *schema.ResourceData, meta interface{}) error {
@@ -124,7 +122,8 @@ func resourceAlibabacloudStackQuickBiWorkspaceRead(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackQuickBiWorkspaceUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackQuickBiWorkspaceRead(d, meta)
+	noUpdateAllowedFields := []string{"workspace_name", "workspace_desc", "use_comment", "allow_share", "allow_publish"}
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackQuickBiWorkspaceDelete(d *schema.ResourceData, meta interface{}) (err error) {

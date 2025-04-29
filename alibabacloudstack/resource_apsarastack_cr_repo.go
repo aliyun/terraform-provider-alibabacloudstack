@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackCRRepo() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCRRepoCreate,
-		Read:   resourceAlibabacloudStackCRRepoRead,
-		Update: resourceAlibabacloudStackCRRepoUpdate,
-		Delete: resourceAlibabacloudStackCRRepoDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"namespace": {
 				Type:         schema.TypeString,
@@ -74,6 +66,8 @@ func resourceAlibabacloudStackCRRepo() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCRRepoCreate, resourceAlibabacloudStackCRRepoRead, resourceAlibabacloudStackCRRepoUpdate, resourceAlibabacloudStackCRRepoDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackCRRepoCreate(d *schema.ResourceData, meta interface{}) error {
@@ -119,7 +113,7 @@ func resourceAlibabacloudStackCRRepoCreate(d *schema.ResourceData, meta interfac
 	log.Printf("repo create unmarshalled response %v", &resp)
 	d.SetId(fmt.Sprintf("%s%s%s", repoNamespace, SLASH_SEPARATED, repoName))
 
-	return resourceAlibabacloudStackCRRepoRead(d, meta)
+	return nil
 }
 
 type ResponseCr struct {
@@ -174,11 +168,10 @@ func resourceAlibabacloudStackCRRepoUpdate(d *schema.ResourceData, meta interfac
 		}
 		log.Printf("repo update unmarshalled response %v", &resp)
 	}
-	return resourceAlibabacloudStackCRRepoRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCRRepoRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	crService := CrService{client}
 

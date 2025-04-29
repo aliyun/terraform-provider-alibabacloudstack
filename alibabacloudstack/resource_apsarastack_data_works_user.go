@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackDataWorksUser() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDataWorksUserCreate,
-		Read:   resourceAlibabacloudStackDataWorksUserRead,
-		Update: resourceAlibabacloudStackDataWorksUserUpdate,
-		Delete: resourceAlibabacloudStackDataWorksUserDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Type:     schema.TypeString,
@@ -37,6 +30,8 @@ func resourceAlibabacloudStackDataWorksUser() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDataWorksUserCreate, resourceAlibabacloudStackDataWorksUserRead, resourceAlibabacloudStackDataWorksUserUpdate, resourceAlibabacloudStackDataWorksUserDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDataWorksUserCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -60,14 +55,14 @@ func resourceAlibabacloudStackDataWorksUserCreate(d *schema.ResourceData, meta i
 	request["ClientToken"] = fmt.Sprint(uuid.NewRandom())
 
 	response, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
-	
+
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_data_works_folder", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	d.SetId(fmt.Sprint(response["RequestId"], ":", request["ProjectId"], ":", request["UserId"]))
 
-	return resourceAlibabacloudStackDataWorksUserRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDataWorksUserRead(d *schema.ResourceData, meta interface{}) error {
@@ -94,8 +89,8 @@ func resourceAlibabacloudStackDataWorksUserRead(d *schema.ResourceData, meta int
 }
 
 func resourceAlibabacloudStackDataWorksUserUpdate(d *schema.ResourceData, meta interface{}) error {
-	// 没有对应 API
-	return resourceAlibabacloudStackDataWorksUserRead(d, meta)
+	noUpdateAllowedFields := []string{"project_id", "user_id", "role_code"}
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackDataWorksUserDelete(d *schema.ResourceData, meta interface{}) error {

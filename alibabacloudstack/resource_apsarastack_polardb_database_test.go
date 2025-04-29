@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackPolardbDBDatabaseUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"data_base_instance_id": "${alibabacloudstack_polardb_instance.instance.id}",
+					"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
 					"data_base_name":        name,
 					"character_set_name":    "utf8",
 				}),
@@ -75,7 +75,7 @@ func resourcePolardbDatabaseConfigDependence(name string) string {
 	}
 
 	%s
-	resource "alibabacloudstack_polardb_instance" "instance" {
+	resource "alibabacloudstack_polardb_dbinstance" "instance" {
 		engine            = "MySQL"
 		engine_version    = "5.7"
 		instance_name = "${var.name}"

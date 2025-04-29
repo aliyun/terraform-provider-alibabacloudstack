@@ -15,15 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackGpdbConnection() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackGpdbConnectionCreate,
-		Read:   resourceAlibabacloudStackGpdbConnectionRead,
-		Update: resourceAlibabacloudStackGpdbConnectionUpdate,
-		Delete: resourceAlibabacloudStackGpdbConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Update: schema.DefaultTimeout(10 * time.Minute),
@@ -59,6 +51,8 @@ func resourceAlibabacloudStackGpdbConnection() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackGpdbConnectionCreate, resourceAlibabacloudStackGpdbConnectionRead, resourceAlibabacloudStackGpdbConnectionUpdate, resourceAlibabacloudStackGpdbConnectionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackGpdbConnectionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -108,11 +102,10 @@ func resourceAlibabacloudStackGpdbConnectionCreate(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackGpdbConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackGpdbConnectionRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
 		return errmsgs.WrapError(err)
@@ -190,7 +183,7 @@ func resourceAlibabacloudStackGpdbConnectionUpdate(d *schema.ResourceData, meta 
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
-	return resourceAlibabacloudStackGpdbConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackGpdbConnectionDelete(d *schema.ResourceData, meta interface{}) error {

@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackApigatewayVpc() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackApigatewayVpcAccessCreate,
-		Read:   resourceAlibabacloudStackApigatewayVpcAccessRead,
-		Delete: resourceAlibabacloudStackApigatewayVpcAccessDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -43,6 +36,8 @@ func resourceAlibabacloudStackApigatewayVpc() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackApigatewayVpcAccessCreate, resourceAlibabacloudStackApigatewayVpcAccessRead, nil, resourceAlibabacloudStackApigatewayVpcAccessDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackApigatewayVpcAccessCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -56,7 +51,7 @@ func resourceAlibabacloudStackApigatewayVpcAccessCreate(d *schema.ResourceData, 
 
 	_, err = client.DoTeaRequest("POST", "CloudAPI", "2016-07-14", "SetVpcAccess", "", nil, nil, request)
 	d.SetId(fmt.Sprintf("%s%s%s%s%s%s%s", request["Name"], COLON_SEPARATED, request["VpcId"], COLON_SEPARATED, request["InstanceId"], COLON_SEPARATED, request["Port"]))
-	return resourceAlibabacloudStackApigatewayVpcAccessRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackApigatewayVpcAccessRead(d *schema.ResourceData, meta interface{}) error {

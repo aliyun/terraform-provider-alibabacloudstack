@@ -1,5 +1,5 @@
 ---
-subcategory: "Datahub Service"
+subcategory: "DataHub"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_datahub_service"
 sidebar_current: "docs-alibabacloudstack-datasource-datahub-service"

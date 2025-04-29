@@ -8,7 +8,7 @@ description: |-
 ---
 
 # alibabacloudstack_polardb_dbinstances
--> **NOTE:** Alias name has: `alibabacloudstack_polardb_instances`
+-> **NOTE:** Alias name has: `alibabacloudstack_polardb_dbinstances`
 
 This data source provides a list of polardb dbinstances in an alibabacloudstack account according to the specified filters.
 
@@ -22,7 +22,7 @@ variable "creation" {
 		default = "PolarDB"
 }
 
-resource "alibabacloudstack_polardb_instance" "default" {
+resource "alibabacloudstack_polardb_dbinstance" "default" {
 	engine            = "MySQL"
 	engine_version    = "5.7"
 	instance_name = "${var.name}"
@@ -33,9 +33,9 @@ resource "alibabacloudstack_polardb_instance" "default" {
 	vswitch_id = "${alibabacloudstack_vswitch.default.id}"
 }
 
-data "alibabacloudstack_polardb_instances" "default" {
-  db_instance_id        = "${alibabacloudstack_polardb_instance.default.id}"
-  db_instance_class = "${alibabacloudstack_polardb_instance.default.db_instance_class}"
+data "alibabacloudstack_polardb_dbinstances" "default" {
+  db_instance_id        = "${alibabacloudstack_polardb_dbinstance.default.id}"
+  db_instance_class = "${alibabacloudstack_polardb_dbinstance.default.db_instance_class}"
   status     = "Running"
   region_id  = "zhe env region id"
 }

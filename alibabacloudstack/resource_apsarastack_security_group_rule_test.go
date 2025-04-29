@@ -167,7 +167,7 @@ variable "name" {
 
 resource "alibabacloudstack_vpc" "default" {
   name = "${var.name}"
-  cidr_block = "172.16.0.0/24"
+  cidr_block = "192.168.0.0/16"
 }
 
 resource "alibabacloudstack_security_group" "default" {
@@ -196,7 +196,7 @@ variable "name" {
 
 resource "alibabacloudstack_vpc" "default" {
   name = "${var.name}"
-  cidr_block = "172.16.0.0/24"
+  cidr_block = "192.168.0.0/16"
 }
 
 resource "alibabacloudstack_security_group" "default" {
@@ -226,7 +226,7 @@ variable "name" {
 
 resource "alibabacloudstack_vpc" "default" {
   name = "${var.name}"
-  cidr_block = "172.16.0.0/24"
+  cidr_block = "192.168.0.0/16"
 }
 
 resource "alibabacloudstack_security_group" "default" {
@@ -256,7 +256,7 @@ variable "name" {
 
 resource "alibabacloudstack_vpc" "default" {
   name = "${var.name}"
-  cidr_block = "172.16.0.0/24"
+  cidr_block = "192.168.0.0/16"
 }
 
 resource "alibabacloudstack_security_group" "default" {
@@ -349,7 +349,7 @@ variable "name" {
 
 resource "alibabacloudstack_vpc" "default" {
   name = "${var.name}"
-  cidr_block = "172.16.0.0/24"
+  cidr_block = "192.168.0.0/16"
 }
 
 resource "alibabacloudstack_security_group" "default" {
@@ -377,7 +377,7 @@ variable "name" {
 
 resource "alibabacloudstack_vpc" "default" {
   name = "${var.name}"
-  cidr_block = "172.16.0.0/24"
+  cidr_block = "192.168.0.0/16"
 }
 
 resource "alibabacloudstack_security_group" "default" {

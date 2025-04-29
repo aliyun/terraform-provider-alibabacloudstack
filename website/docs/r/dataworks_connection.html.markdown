@@ -1,5 +1,5 @@
 ---
-subcategory: "data_works"
+subcategory: "DataWorks"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_data_works_connection"
 sidebar_current: "docs-Alibabacloudstack-data-works-connection"

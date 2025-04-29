@@ -257,7 +257,6 @@ func (s *OssService) HeadOssBucketObject(bucketName string, objectName string) e
 		"AppAction":   "HeadObject",
 		"AppName":     "one-console-app-oss",
 		"Params":      "{\"region\":\"" + s.client.RegionId + "\",\"params\":{\"bucketName\":\"" + bucketName + "\",\"objectName\":\"" + objectName + "\"}}",
-		"AccountInfo": "",
 	})
 	request.Headers["x-acs-instanceid"] = bucketName
 

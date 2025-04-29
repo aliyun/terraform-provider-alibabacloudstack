@@ -17,14 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackElasticsearch() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackElasticsearchCreate,
-		Read:   resourceAlibabacloudStackElasticsearchRead,
-		Update: resourceAlibabacloudStackElasticsearchUpdate,
-		Delete: resourceAlibabacloudStackElasticsearchDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(120 * time.Minute),
 			Update: schema.DefaultTimeout(120 * time.Minute),
@@ -235,6 +228,9 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackElasticsearchCreate,
+		resourceAlibabacloudStackElasticsearchRead, resourceAlibabacloudStackElasticsearchUpdate, resourceAlibabacloudStackElasticsearchDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackElasticsearchCreate(d *schema.ResourceData, meta interface{}) error {
@@ -264,7 +260,7 @@ func resourceAlibabacloudStackElasticsearchCreate(d *schema.ResourceData, meta i
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackElasticsearchUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta interface{}) error {
@@ -479,7 +475,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackElasticsearchRead(d, meta)
+		return nil
 	}
 
 	if d.HasChange("instance_charge_type") {
@@ -529,7 +525,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackElasticsearchRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackElasticsearchDelete(d *schema.ResourceData, meta interface{}) error {

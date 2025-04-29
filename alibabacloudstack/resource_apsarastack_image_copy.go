@@ -12,15 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackImageCopy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackImageCopyCreate,
-		Read:   resourceAlibabacloudStackImageCopyRead,
-		Update: resourceAlibabacloudStackImageCopyUpdate,
-		Delete: resourceAlibabacloudStackImageCopyDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(60 * time.Minute),
 			Delete: schema.DefaultTimeout(60 * time.Minute),
@@ -65,6 +57,9 @@ func resourceAlibabacloudStackImageCopy() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackImageCopyCreate, 
+		resourceAlibabacloudStackImageCopyRead, resourceAlibabacloudStackImageCopyUpdate, resourceAlibabacloudStackImageCopyDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackImageCopyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -104,7 +99,7 @@ func resourceAlibabacloudStackImageCopyCreate(d *schema.ResourceData, meta inter
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-	return resourceAlibabacloudStackImageCopyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackImageCopyUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -114,11 +109,10 @@ func resourceAlibabacloudStackImageCopyUpdate(d *schema.ResourceData, meta inter
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackImageRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackImageCopyRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	ecsService := EcsService{client}
@@ -134,7 +128,7 @@ func resourceAlibabacloudStackImageCopyRead(d *schema.ResourceData, meta interfa
 	connectivity.SetResourceData(d, object.ImageName, "image_name", "name")
 	d.Set("description", object.Description)
 
-	return errmsgs.WrapError(err)
+	return nil
 }
 
 func resourceAlibabacloudStackImageCopyDelete(d *schema.ResourceData, meta interface{}) error {

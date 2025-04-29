@@ -44,7 +44,7 @@ func TestAccAlibabacloudStackNatgatewaySnatentry0(t *testing.T) {
 
 					"snat_table_id": "${alibabacloudstack_nat_gateway.default.snat_table_ids}",
 
-					"source_cidr": "${alibabacloudstack_vswitch.default.cidr_block}",
+					"source_cidr": "${alibabacloudstack_vpc_vswitch.default.cidr_block}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -56,6 +56,11 @@ func TestAccAlibabacloudStackNatgatewaySnatentry0(t *testing.T) {
 						"source_cidr": CHECKSET,
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -84,24 +89,10 @@ variable "name" {
     default = "%s"
 }
 
-data "alibabacloudstack_zones" "default" {
-	available_resource_creation = "VSwitch"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
-
-resource "alibabacloudstack_vswitch" "default" {
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
-	cidr_block = "172.16.0.0/21"
-	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	name = "${var.name}"
-}
+%s
 
 resource "alibabacloudstack_nat_gateway" "default" {
-	vpc_id = "${alibabacloudstack_vpc.default.id}"
+	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
 	specification = "Small"
 	name = "${var.name}"
 }
@@ -115,5 +106,5 @@ resource "alibabacloudstack_eip_association" "default" {
 	instance_id = "${alibabacloudstack_nat_gateway.default.id}"
 }
 
-`, name)
+`, name, VSwitchCommonTestCase)
 }

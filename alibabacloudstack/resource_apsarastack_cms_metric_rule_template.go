@@ -17,14 +17,7 @@ import (
 )
 
 func resourceAlibabacloudCmsMetricRuleTemplate() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudCmsMetricRuleTemplateCreate,
-		Read:   resourceAlibabacloudCmsMetricRuleTemplateRead,
-		Update: resourceAlibabacloudCmsMetricRuleTemplateUpdate,
-		Delete: resourceAlibabacloudCmsMetricRuleTemplateDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"alert_templates": {
 				Type:     schema.TypeSet,
@@ -196,6 +189,10 @@ func resourceAlibabacloudCmsMetricRuleTemplate() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudCmsMetricRuleTemplateCreate,
+		resourceAlibabacloudCmsMetricRuleTemplateRead, resourceAlibabacloudCmsMetricRuleTemplateUpdate,
+		resourceAlibabacloudCmsMetricRuleTemplateDelete)
+	return resource
 }
 
 func resourceAlibabacloudCmsMetricRuleTemplateCreate(d *schema.ResourceData, meta interface{}) error {
@@ -264,7 +261,7 @@ func resourceAlibabacloudCmsMetricRuleTemplateCreate(d *schema.ResourceData, met
 	response, _ := raw.(*cms.CreateMetricRuleTemplateResponse)
 	d.SetId(fmt.Sprint(response.Id))
 
-	return resourceAlibabacloudCmsMetricRuleTemplateUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudCmsMetricRuleTemplateRead(d *schema.ResourceData, meta interface{}) error {
@@ -472,7 +469,7 @@ func resourceAlibabacloudCmsMetricRuleTemplateUpdate(d *schema.ResourceData, met
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudCmsMetricRuleTemplateRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudCmsMetricRuleTemplateDelete(d *schema.ResourceData, meta interface{}) error {

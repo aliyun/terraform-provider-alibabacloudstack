@@ -11,14 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackDnsDomain() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDnsDomainCreate,
-		Read:   resourceAlibabacloudStackDnsDomainRead,
-		Update: resourceAlibabacloudStackDnsDomainUpdate,
-		Delete: resourceAlibabacloudStackDnsDomainDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"dns_servers": {
 				Type:     schema.TypeSet,
@@ -54,6 +47,8 @@ func resourceAlibabacloudStackDnsDomain() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDnsDomainCreate, resourceAlibabacloudStackDnsDomainRead, resourceAlibabacloudStackDnsDomainUpdate, resourceAlibabacloudStackDnsDomainDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta interface{}) error {
@@ -86,11 +81,10 @@ func resourceAlibabacloudStackDnsDomainCreate(d *schema.ResourceData, meta inter
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_dns_domain", "DescribeDnsDomain")
 	}
 	d.SetId(check.Data[0].Name + COLON_SEPARATED + fmt.Sprint(check.Data[0].Id))
-	return resourceAlibabacloudStackDnsDomainUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDnsDomainRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	dnsService := DnsService{client}
 	object, err := dnsService.DescribeDnsDomain(d.Id())
@@ -153,7 +147,7 @@ func resourceAlibabacloudStackDnsDomainUpdate(d *schema.ResourceData, meta inter
 		addDebug(request.GetActionName(), response, request)
 	}
 	d.SetId(check.Data[0].Name + COLON_SEPARATED + fmt.Sprint(check.Data[0].Id))
-	return resourceAlibabacloudStackDnsDomainRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDnsDomainDelete(d *schema.ResourceData, meta interface{}) error {

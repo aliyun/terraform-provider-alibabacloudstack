@@ -13,15 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackEdasK8sService() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEdasK8sServiceCreate,
-		Update: resourceAlibabacloudStackEdasK8sServiceUpdate,
-		Read:   resourceAlibabacloudStackEdasK8sServiceRead,
-		Delete: resourceAlibabacloudStackEdasK8sServiceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"app_id": {
 				Type:     schema.TypeString,
@@ -100,6 +92,8 @@ func resourceAlibabacloudStackEdasK8sService() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEdasK8sServiceCreate, resourceAlibabacloudStackEdasK8sServiceRead, resourceAlibabacloudStackEdasK8sServiceUpdate, resourceAlibabacloudStackEdasK8sServiceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEdasK8sServiceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -151,7 +145,7 @@ func resourceAlibabacloudStackEdasK8sServiceCreate(d *schema.ResourceData, meta 
 	}
 
 	d.SetId(d.Get("app_id").(string) + ":" + d.Get("service_name").(string))
-	return resourceAlibabacloudStackEdasK8sServiceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasK8sServiceRead(d *schema.ResourceData, meta interface{}) error {
@@ -273,7 +267,7 @@ func resourceAlibabacloudStackEdasK8sServiceUpdate(d *schema.ResourceData, meta 
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackEdasK8sServiceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasK8sServiceDelete(d *schema.ResourceData, meta interface{}) error {

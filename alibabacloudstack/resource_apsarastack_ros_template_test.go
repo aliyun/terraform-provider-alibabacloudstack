@@ -124,6 +124,11 @@ func TestAccAlibabacloudStackRosTemplate0(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
 		},
 	})
 }

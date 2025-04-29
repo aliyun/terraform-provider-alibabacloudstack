@@ -51,6 +51,13 @@ func TestAccAlibabacloudStackSlbCacertificate0(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// ca_certificate上传设置后不回显
+				ImportStateVerifyIgnore: []string{"ca_certificate",},
+			},
 		},
 	})
 }

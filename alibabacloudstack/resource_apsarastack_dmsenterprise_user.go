@@ -11,14 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackDmsEnterpriseUser() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDmsEnterpriseUserCreate,
-		Read:   resourceAlibabacloudStackDmsEnterpriseUserRead,
-		Update: resourceAlibabacloudStackDmsEnterpriseUserUpdate,
-		Delete: resourceAlibabacloudStackDmsEnterpriseUserDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"max_execute_count": {
 				Type:     schema.TypeInt,
@@ -69,6 +62,8 @@ func resourceAlibabacloudStackDmsEnterpriseUser() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDmsEnterpriseUserCreate, resourceAlibabacloudStackDmsEnterpriseUserRead, resourceAlibabacloudStackDmsEnterpriseUserUpdate, resourceAlibabacloudStackDmsEnterpriseUserDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDmsEnterpriseUserCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -98,7 +93,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserCreate(d *schema.ResourceData, me
 
 	d.SetId(fmt.Sprint(request["Uid"]))
 
-	return resourceAlibabacloudStackDmsEnterpriseUserUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDmsEnterpriseUserRead(d *schema.ResourceData, meta interface{}) error {
@@ -118,7 +113,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserRead(d *schema.ResourceData, meta
 	d.Set("mobile", object["Mobile"])
 	d.Set("role_names", object["RoleNameList"].(map[string]interface{})["RoleNames"])
 	d.Set("status", object["State"])
-	connectivity.SetResourceData(d, object["NickName"] ,"user_name", "nick_name")
+	connectivity.SetResourceData(d, object["NickName"], "user_name", "nick_name")
 	return nil
 }
 
@@ -139,7 +134,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserUpdate(d *schema.ResourceData, me
 		update = true
 		request["RoleNames"] = convertListToCommaSeparate(d.Get("role_names").(*schema.Set).List())
 	}
-	if !d.IsNewResource() && d.HasChanges("user_name","nick_name") {
+	if !d.IsNewResource() && d.HasChanges("user_name", "nick_name") {
 		update = true
 		request["UserNick"] = connectivity.GetResourceData(d, "user_name", "nick_name").(string)
 	}
@@ -196,7 +191,7 @@ func resourceAlibabacloudStackDmsEnterpriseUserUpdate(d *schema.ResourceData, me
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackDmsEnterpriseUserRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDmsEnterpriseUserDelete(d *schema.ResourceData, meta interface{}) error {

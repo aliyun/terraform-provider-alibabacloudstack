@@ -23,15 +23,7 @@ import (
 const ResourceName = "resource_alibabacloudstack_cs_kubernetes_permissions"
 
 func resourceAlibabacloudStackCSKubernetesNodePool() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCSKubernetesNodePoolCreate,
-		Read:   resourceAlibabacloudStackCSNodePoolRead,
-		Update: resourceAlibabacloudStackCSKubernetesNodePoolUpdate,
-		Delete: resourceAlibabacloudStackCSNodePoolDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(90 * time.Minute),
 			Update: schema.DefaultTimeout(60 * time.Minute),
@@ -350,6 +342,8 @@ func resourceAlibabacloudStackCSKubernetesNodePool() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCSKubernetesNodePoolCreate, resourceAlibabacloudStackCSNodePoolRead, resourceAlibabacloudStackCSKubernetesNodePoolUpdate, resourceAlibabacloudStackCSNodePoolDelete)
+	return resource
 }
 
 type NodePoolCommonResponse struct {
@@ -472,7 +466,7 @@ func resourceAlibabacloudStackCSKubernetesNodePoolCreate(d *schema.ResourceData,
 		attachExistingInstance(d, meta)
 	}
 
-	return resourceAlibabacloudStackCSNodePoolRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -512,7 +506,7 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 
 			// The removal of a node is logically independent.
 			// The removal of a node should not involve parameter changes.
-			return resourceAlibabacloudStackCSNodePoolRead(d, meta)
+			return nil
 
 		}
 		//update = true
@@ -524,7 +518,7 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 
 			// The removal of a node is logically independent.
 			// The removal of a node should not involve parameter changes.
-			return resourceAlibabacloudStackCSNodePoolRead(d, meta)
+			return nil
 
 		}
 	}
@@ -683,7 +677,7 @@ func resourceAlibabacloudStackCSKubernetesNodePoolUpdate(d *schema.ResourceData,
 
 	update = false
 	d.Partial(false)
-	return resourceAlibabacloudStackCSNodePoolRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCSNodePoolRead(d *schema.ResourceData, meta interface{}) error {

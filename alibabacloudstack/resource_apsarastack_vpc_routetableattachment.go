@@ -11,13 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackRouteTableAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAliyunRouteTableAttachmentCreate,
-		Read:   resourceAliyunRouteTableAttachmentRead,
-		Delete: resourceAliyunRouteTableAttachmentDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"route_table_id": {
 				Type:     schema.TypeString,
@@ -32,6 +26,8 @@ func resourceAlibabacloudStackRouteTableAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAliyunRouteTableAttachmentCreate, resourceAliyunRouteTableAttachmentRead, nil, resourceAliyunRouteTableAttachmentDelete)
+	return resource
 }
 
 func resourceAliyunRouteTableAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -74,7 +70,7 @@ func resourceAliyunRouteTableAttachmentCreate(d *schema.ResourceData, meta inter
 	if err := vpcService.WaitForVSwitch(request.VSwitchId, Available, DefaultTimeoutMedium); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAliyunRouteTableAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAliyunRouteTableAttachmentRead(d *schema.ResourceData, meta interface{}) error {

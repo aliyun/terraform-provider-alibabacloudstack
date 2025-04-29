@@ -16,14 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackSlbServerGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSlbServerGroupCreate,
-		Read:   resourceAlibabacloudStackSlbServerGroupRead,
-		Update: resourceAlibabacloudStackSlbServerGroupUpdate,
-		Delete: resourceAlibabacloudStackSlbServerGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"load_balancer_id": {
 				Type:     schema.TypeString,
@@ -83,6 +76,8 @@ func resourceAlibabacloudStackSlbServerGroup() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSlbServerGroupCreate, resourceAlibabacloudStackSlbServerGroupRead, resourceAlibabacloudStackSlbServerGroupUpdate, resourceAlibabacloudStackSlbServerGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSlbServerGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -106,12 +101,10 @@ func resourceAlibabacloudStackSlbServerGroupCreate(d *schema.ResourceData, meta 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response := raw.(*slb.CreateVServerGroupResponse)
 	d.SetId(response.VServerGroupId)
-	// d.Set("load_balancer_id", d.Get("load_balancer_id").(string))
-	return resourceAlibabacloudStackSlbServerGroupUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbServerGroupRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 	object, err := slbService.DescribeSlbServerGroup(d.Id())
@@ -345,7 +338,7 @@ func resourceAlibabacloudStackSlbServerGroupUpdate(d *schema.ResourceData, meta 
 	}
 	d.Partial(false)
 
-	return resourceAlibabacloudStackSlbServerGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbServerGroupDelete(d *schema.ResourceData, meta interface{}) error {

@@ -15,14 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackEssScalingGroupVserverGroups() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEssVserverGroupsCreate,
-		Read:   resourceAlibabacloudStackEssVserverGroupsRead,
-		Update: resourceAlibabacloudStackEssVserverGroupsUpdate,
-		Delete: resourceAlibabacloudStackEssVserverGroupsDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"scaling_group_id": {
 				Type:     schema.TypeString,
@@ -82,6 +75,8 @@ func resourceAlibabacloudStackEssScalingGroupVserverGroups() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEssVserverGroupsCreate, resourceAlibabacloudStackEssVserverGroupsRead, resourceAlibabacloudStackEssVserverGroupsUpdate, resourceAlibabacloudStackEssVserverGroupsDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEssVserverGroupsCreate(d *schema.ResourceData, meta interface{}) error {
@@ -90,7 +85,6 @@ func resourceAlibabacloudStackEssVserverGroupsCreate(d *schema.ResourceData, met
 }
 
 func resourceAlibabacloudStackEssVserverGroupsRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}
 	object, err := essService.DescribeEssScalingGroup(d.Id())
@@ -133,7 +127,7 @@ func resourceAlibabacloudStackEssVserverGroupsUpdate(d *schema.ResourceData, met
 		return errmsgs.WrapError(err)
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackEssVserverGroupsRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssVserverGroupsDelete(d *schema.ResourceData, meta interface{}) error {

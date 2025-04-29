@@ -17,14 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEdasK8sApplicationCreate,
-		Read:   resourceAlibabacloudStackEdasK8sApplicationRead,
-		Update: resourceAlibabacloudStackEdasK8sApplicationUpdate,
-		Delete: resourceAlibabacloudStackEdasK8sApplicationDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
@@ -302,6 +295,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEdasK8sApplicationCreate, resourceAlibabacloudStackEdasK8sApplicationRead, resourceAlibabacloudStackEdasK8sApplicationUpdate, resourceAlibabacloudStackEdasK8sApplicationDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, meta interface{}) error {
@@ -485,7 +480,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	if bind_slb_err != nil {
 		return errmsgs.WrapError(bind_slb_err)
 	}
-	return resourceAlibabacloudStackEdasK8sApplicationUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, meta interface{}) error {
@@ -850,7 +845,7 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 		//}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackEdasK8sApplicationRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasK8sApplicationDelete(d *schema.ResourceData, meta interface{}) error {

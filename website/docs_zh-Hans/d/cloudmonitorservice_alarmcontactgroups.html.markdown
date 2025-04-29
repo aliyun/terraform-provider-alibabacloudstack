@@ -1,5 +1,5 @@
 ---
-subcategory: "CloudMonitorService"
+subcategory: "Cloud Monitor Service (CMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_cloudmonitorservice_alarmcontactgroups"
 sidebar_current: "docs-Alibabacloudstack-datasource-cloudmonitorservice-alarmcontactgroups"

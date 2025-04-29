@@ -12,15 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackNasFileSystemCreate,
-		Read:   resourceAlibabacloudStackNasFileSystemRead,
-		Update: resourceAlibabacloudStackNasFileSystemUpdate,
-		Delete: resourceAlibabacloudStackNasFileSystemDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"storage_type": {
 				Type:         schema.TypeString,
@@ -71,6 +63,9 @@ func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackNasFileSystemCreate, 
+		resourceAlibabacloudStackNasFileSystemRead, resourceAlibabacloudStackNasFileSystemUpdate, resourceAlibabacloudStackNasFileSystemDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -109,7 +104,7 @@ func resourceAlibabacloudStackNasFileSystemCreate(d *schema.ResourceData, meta i
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	//}
-	return resourceAlibabacloudStackNasFileSystemUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -126,7 +121,7 @@ func resourceAlibabacloudStackNasFileSystemUpdate(d *schema.ResourceData, meta i
 			return err
 		}
 	}
-	return resourceAlibabacloudStackNasFileSystemRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNasFileSystemRead(d *schema.ResourceData, meta interface{}) error {

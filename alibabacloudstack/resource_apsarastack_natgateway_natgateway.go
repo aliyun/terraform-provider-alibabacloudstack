@@ -16,15 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackNatGateway() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackNatGatewayCreate,
-		Read:   resourceAlibabacloudStackNatGatewayRead,
-		Update: resourceAlibabacloudStackNatGatewayUpdate,
-		Delete: resourceAlibabacloudStackNatGatewayDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"vpc_id": {
 				Type:     schema.TypeString,
@@ -109,6 +101,8 @@ func resourceAlibabacloudStackNatGateway() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackNatGatewayCreate, resourceAlibabacloudStackNatGatewayRead, resourceAlibabacloudStackNatGatewayUpdate, resourceAlibabacloudStackNatGatewayDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackNatGatewayCreate(d *schema.ResourceData, meta interface{}) error {
@@ -172,11 +166,10 @@ func resourceAlibabacloudStackNatGatewayCreate(d *schema.ResourceData, meta inte
 	if err := vpcService.WaitForNatGateway(d.Id(), Available, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackNatGatewayRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNatGatewayRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 
@@ -212,7 +205,6 @@ func resourceAlibabacloudStackNatGatewayRead(d *schema.ResourceData, meta interf
 }
 
 func resourceAlibabacloudStackNatGatewayUpdate(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 
@@ -278,7 +270,6 @@ func resourceAlibabacloudStackNatGatewayUpdate(d *schema.ResourceData, meta inte
 		modifyNatGatewaySpecRequest.NatGatewayId = natGateway.NatGatewayId
 		modifyNatGatewaySpecRequest.Spec = connectivity.GetResourceData(d, "spec", "specification").(string)
 		if modifyNatGatewaySpecRequest.Spec == "" {
-			// modifyNatGatewaySpecRequest.Spec
 			modifyNatGatewaySpecRequest.Spec = "Small"
 		}
 
@@ -298,7 +289,7 @@ func resourceAlibabacloudStackNatGatewayUpdate(d *schema.ResourceData, meta inte
 	if err := vpcService.WaitForNatGateway(d.Id(), Available, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackNatGatewayRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNatGatewayDelete(d *schema.ResourceData, meta interface{}) error {

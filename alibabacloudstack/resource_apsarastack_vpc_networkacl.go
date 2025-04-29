@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackNetworkAcl() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackNetworkAclCreate,
-		Read:   resourceAlibabacloudStackNetworkAclRead,
-		Update: resourceAlibabacloudStackNetworkAclUpdate,
-		Delete: resourceAlibabacloudStackNetworkAclDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
@@ -143,6 +136,8 @@ func resourceAlibabacloudStackNetworkAcl() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackNetworkAclCreate, resourceAlibabacloudStackNetworkAclRead, resourceAlibabacloudStackNetworkAclUpdate, resourceAlibabacloudStackNetworkAclDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackNetworkAclCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -170,7 +165,7 @@ func resourceAlibabacloudStackNetworkAclCreate(d *schema.ResourceData, meta inte
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackNetworkAclUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNetworkAclRead(d *schema.ResourceData, meta interface{}) error {
@@ -276,9 +271,6 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-		//d.SetPartial("description")
-		//d.SetPartial("name")
-		//d.SetPartial("network_acl_name")
 	}
 	update = false
 	updateNetworkAclEntriesReq := map[string]interface{}{
@@ -327,8 +319,6 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-		//d.SetPartial("egress_acl_entries")
-		//d.SetPartial("ingress_acl_entries")
 	}
 	d.Partial(false)
 	if d.HasChange("resources") {
@@ -363,7 +353,6 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
-			//d.SetPartial("resources")
 		}
 		if removed.Len() > 0 {
 			unassociatenetworkaclrequest := map[string]interface{}{
@@ -389,10 +378,9 @@ func resourceAlibabacloudStackNetworkAclUpdate(d *schema.ResourceData, meta inte
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
-			//d.SetPartial("resources")
 		}
 	}
-	return resourceAlibabacloudStackNetworkAclRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNetworkAclDelete(d *schema.ResourceData, meta interface{}) error {

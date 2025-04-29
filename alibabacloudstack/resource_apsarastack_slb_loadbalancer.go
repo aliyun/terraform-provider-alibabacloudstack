@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackSlb() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSlbCreate,
-		Read:   resourceAlibabacloudStackSlbRead,
-		Update: resourceAlibabacloudStackSlbUpdate,
-		Delete: resourceAlibabacloudStackSlbDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -64,6 +56,8 @@ func resourceAlibabacloudStackSlb() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSlbCreate, resourceAlibabacloudStackSlbRead, resourceAlibabacloudStackSlbUpdate, resourceAlibabacloudStackSlbDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSlbCreate(d *schema.ResourceData, meta interface{}) error {
@@ -122,11 +116,10 @@ func resourceAlibabacloudStackSlbCreate(d *schema.ResourceData, meta interface{}
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackSlbUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 	object, err := slbService.DescribeSlb(d.Id())
@@ -164,7 +157,7 @@ func resourceAlibabacloudStackSlbUpdate(d *schema.ResourceData, meta interface{}
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackSlbRead(d, meta)
+		return nil
 	}
 
 	if d.HasChange("specification") {
@@ -252,7 +245,7 @@ func resourceAlibabacloudStackSlbUpdate(d *schema.ResourceData, meta interface{}
 	}
 	d.Partial(false)
 
-	return resourceAlibabacloudStackSlbRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbDelete(d *schema.ResourceData, meta interface{}) error {

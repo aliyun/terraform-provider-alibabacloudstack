@@ -11,15 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackCloudFirewallControlPolicyOrder() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCloudFirewallControlPolicyOrderCreate,
-		Read:   resourceAlibabacloudStackCloudFirewallControlPolicyOrderRead,
-		Update: resourceAlibabacloudStackCloudFirewallControlPolicyOrderUpdate,
-		Delete: resourceAlibabacloudStackCloudFirewallControlPolicyOrderDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"acl_uuid": {
 				Type:     schema.TypeString,
@@ -38,6 +30,12 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyOrder() *schema.Resource
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackCloudFirewallControlPolicyOrderCreate,
+		resourceAlibabacloudStackCloudFirewallControlPolicyOrderRead,
+		resourceAlibabacloudStackCloudFirewallControlPolicyOrderUpdate,
+		resourceAlibabacloudStackCloudFirewallControlPolicyOrderDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackCloudFirewallControlPolicyOrderCreate(d *schema.ResourceData, meta interface{}) error {
@@ -57,7 +55,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyOrderCreate(d *schema.Re
 
 	d.SetId(fmt.Sprint(request["AclUuid"], ":", request["Direction"]))
 
-	return resourceAlibabacloudStackCloudFirewallControlPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCloudFirewallControlPolicyOrderUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -85,7 +83,7 @@ func resourceAlibabacloudStackCloudFirewallControlPolicyOrderUpdate(d *schema.Re
 
 	d.SetId(fmt.Sprint(request["AclUuid"], ":", request["Direction"]))
 
-	return resourceAlibabacloudStackCloudFirewallControlPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCloudFirewallControlPolicyOrderRead(d *schema.ResourceData, meta interface{}) error {

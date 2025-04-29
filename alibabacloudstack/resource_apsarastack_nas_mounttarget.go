@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackNasMountTarget() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackNasMountTargetCreate,
-		Read:   resourceAlibabacloudStackNasMountTargetRead,
-		Update: resourceAlibabacloudStackNasMountTargetUpdate,
-		Delete: resourceAlibabacloudStackNasMountTargetDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
 		},
@@ -52,6 +45,8 @@ func resourceAlibabacloudStackNasMountTarget() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackNasMountTargetCreate, resourceAlibabacloudStackNasMountTargetRead, resourceAlibabacloudStackNasMountTargetUpdate, resourceAlibabacloudStackNasMountTargetDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackNasMountTargetCreate(d *schema.ResourceData, meta interface{}) error {
@@ -92,7 +87,7 @@ func resourceAlibabacloudStackNasMountTargetCreate(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackNasMountTargetUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNasMountTargetRead(d *schema.ResourceData, meta interface{}) error {
@@ -150,7 +145,7 @@ func resourceAlibabacloudStackNasMountTargetUpdate(d *schema.ResourceData, meta 
 			return err
 		}
 	}
-	return resourceAlibabacloudStackNasMountTargetRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNasMountTargetDelete(d *schema.ResourceData, meta interface{}) error {

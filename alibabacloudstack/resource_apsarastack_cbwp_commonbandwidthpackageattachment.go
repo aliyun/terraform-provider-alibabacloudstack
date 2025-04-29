@@ -11,13 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackCommonBandwidthPackageAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCommonBandwidthPackageAttachmentCreate,
-		Read:   resourceAlibabacloudStackCommonBandwidthPackageAttachmentRead,
-		Delete: resourceAlibabacloudStackCommonBandwidthPackageAttachmentDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"bandwidth_package_id": {
 				Type:     schema.TypeString,
@@ -32,6 +26,10 @@ func resourceAlibabacloudStackCommonBandwidthPackageAttachment() *schema.Resourc
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCommonBandwidthPackageAttachmentCreate, 
+		resourceAlibabacloudStackCommonBandwidthPackageAttachmentRead, nil, 
+		resourceAlibabacloudStackCommonBandwidthPackageAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackCommonBandwidthPackageAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -65,11 +63,10 @@ func resourceAlibabacloudStackCommonBandwidthPackageAttachmentCreate(d *schema.R
 	if err := vpcService.WaitForCommonBandwidthPackageAttachment(d.Id(), Available, 5*DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackCommonBandwidthPackageAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCommonBandwidthPackageAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 

@@ -220,6 +220,11 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

@@ -11,15 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackRouteTable() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAliyunRouteTableCreate,
-		Read:   resourceAliyunRouteTableRead,
-		Update: resourceAliyunRouteTableUpdate,
-		Delete: resourceAliyunRouteTableDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"description": {
 				Type:         schema.TypeString,
@@ -49,6 +41,8 @@ func resourceAlibabacloudStackRouteTable() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAliyunRouteTableCreate, resourceAliyunRouteTableRead, resourceAliyunRouteTableUpdate, resourceAliyunRouteTableDelete)
+	return resource
 }
 
 func resourceAliyunRouteTableCreate(d *schema.ResourceData, meta interface{}) error {
@@ -88,11 +82,10 @@ func resourceAliyunRouteTableCreate(d *schema.ResourceData, meta interface{}) er
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAliyunRouteTableUpdate(d, meta)
+	return nil
 }
 
 func resourceAliyunRouteTableRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
@@ -119,7 +112,7 @@ func resourceAliyunRouteTableUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAliyunRouteTableRead(d, meta)
+		return nil
 	}
 	request := vpc.CreateModifyRouteTableAttributesRequest()
 	client.InitRpcRequest(*request.RpcRequest)
@@ -146,7 +139,7 @@ func resourceAliyunRouteTableUpdate(d *schema.ResourceData, meta interface{}) er
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	return resourceAliyunRouteTableRead(d, meta)
+	return nil
 }
 
 func resourceAliyunRouteTableDelete(d *schema.ResourceData, meta interface{}) error {

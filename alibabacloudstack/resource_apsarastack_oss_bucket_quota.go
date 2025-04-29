@@ -14,12 +14,8 @@ import (
 )
 
 func resourceAlibabacloudStackOssBucketQuota() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackOssBucketQuotaCreate,
-		Read:   resourceAlibabacloudStackOssBucketQuotaRead,
-		//Update: resourceAlibabacloudStackOssBucketQuotaCreate,
-		Delete: resourceAlibabacloudStackOssBucketQuotaDelete,
-
+	resource := &schema.Resource{
+		DeprecationMessage: "oss_bucket already includes corresponding functions",
 		Schema: map[string]*schema.Schema{
 			"bucket": {
 				Type:     schema.TypeString,
@@ -33,6 +29,8 @@ func resourceAlibabacloudStackOssBucketQuota() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackOssBucketQuotaCreate, resourceAlibabacloudStackOssBucketQuotaRead, nil, resourceAlibabacloudStackOssBucketQuotaDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta interface{}) error {
@@ -48,8 +46,6 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 
 	if det.BucketInfo.Name == bucketName {
 		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		request.QueryParams["AccountInfo"] = "123456"
-		request.QueryParams["SignatureVersion"] = "1.0"
 		request.QueryParams["OpenApiAction"] = "SetBucketStorageCapacity"
 		request.QueryParams["ProductName"] = "oss"
 		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":%d}", "BucketName", bucketName, "StorageCapacity", quota)
@@ -90,7 +86,7 @@ func resourceAlibabacloudStackOssBucketQuotaCreate(d *schema.ResourceData, meta 
 	}
 	d.SetId(bucketName)
 
-	return resourceAlibabacloudStackOssBucketKmsRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOssBucketQuotaRead(d *schema.ResourceData, meta interface{}) error {
@@ -104,8 +100,6 @@ func resourceAlibabacloudStackOssBucketQuotaRead(d *schema.ResourceData, meta in
 	}
 	if det.BucketInfo.Name == bucketName {
 		request := client.NewCommonRequest("GET", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		request.QueryParams["AccountInfo"] = "123456"
-		request.QueryParams["SignatureVersion"] = "1.0"
 		request.QueryParams["OpenApiAction"] = "GetBucketStorageCapacity"
 		request.QueryParams["ProductName"] = "oss"
 		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\"}", "BucketName", bucketName)
@@ -157,8 +151,6 @@ func resourceAlibabacloudStackOssBucketQuotaDelete(d *schema.ResourceData, meta 
 
 	if det.BucketInfo.Name == bucketName {
 		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
-		request.QueryParams["AccountInfo"] = "123456"
-		request.QueryParams["SignatureVersion"] = "1.0"
 		request.QueryParams["OpenApiAction"] = "SetBucketStorageCapacity"
 		request.QueryParams["ProductName"] = "oss"
 		request.QueryParams["Params"] = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":%d}", "BucketName", bucketName, "StorageCapacity", -1)
@@ -199,5 +191,5 @@ func resourceAlibabacloudStackOssBucketQuotaDelete(d *schema.ResourceData, meta 
 	}
 	d.SetId(bucketName)
 
-	return resourceAlibabacloudStackOssBucketKmsRead(d, meta)
+	return nil
 }

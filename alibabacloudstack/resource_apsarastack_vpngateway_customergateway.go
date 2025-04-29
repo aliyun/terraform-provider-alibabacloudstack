@@ -13,15 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackVpnCustomerGateway() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackVpnCustomerGatewayCreate,
-		Read:   resourceAlibabacloudStackVpnCustomerGatewayRead,
-		Update: resourceAlibabacloudStackVpnCustomerGatewayUpdate,
-		Delete: resourceAlibabacloudStackVpnCustomerGatewayDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"ip_address": {
 				Type:         schema.TypeString,
@@ -51,6 +43,8 @@ func resourceAlibabacloudStackVpnCustomerGateway() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackVpnCustomerGatewayCreate, resourceAlibabacloudStackVpnCustomerGatewayRead, resourceAlibabacloudStackVpnCustomerGatewayUpdate, resourceAlibabacloudStackVpnCustomerGatewayDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackVpnCustomerGatewayCreate(d *schema.ResourceData, meta interface{}) error {
@@ -107,7 +101,7 @@ func resourceAlibabacloudStackVpnCustomerGatewayCreate(d *schema.ResourceData, m
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackVpnCustomerGatewayRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpnCustomerGatewayRead(d *schema.ResourceData, meta interface{}) error {
@@ -162,7 +156,7 @@ func resourceAlibabacloudStackVpnCustomerGatewayUpdate(d *schema.ResourceData, m
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	return resourceAlibabacloudStackVpnCustomerGatewayRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpnCustomerGatewayDelete(d *schema.ResourceData, meta interface{}) error {

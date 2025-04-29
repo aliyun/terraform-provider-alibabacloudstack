@@ -8,6 +8,7 @@ import (
 )
 
 func TestAccAlibabacloudStackKmsCiphertext_basic(t *testing.T) {
+	resourceId := "alibabacloudstack_kms_ciphertext.default"
 	ResourceTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -16,9 +17,13 @@ func TestAccAlibabacloudStackKmsCiphertext_basic(t *testing.T) {
 			{
 				Config: testAccAlibabacloudStackKmsCiphertextConfig_basic(getAccTestRandInt(1000000, 9999999)),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet(
-						"alibabacloudstack_kms_ciphertext.default", "ciphertext_blob"),
+					resource.TestCheckResourceAttrSet(resourceId, "ciphertext_blob"),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

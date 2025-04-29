@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackDatahubProject() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDatahubProjectCreate,
-		Read:   resourceAlibabacloudStackDatahubProjectRead,
-		//Update: resourceAlibabacloudStackDatahubProjectUpdate,
-		Delete: resourceAlibabacloudStackDatahubProjectDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -53,6 +45,12 @@ func resourceAlibabacloudStackDatahubProject() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackDatahubProjectCreate,
+		resourceAlibabacloudStackDatahubProjectRead,
+		nil,
+		resourceAlibabacloudStackDatahubProjectDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDatahubProjectCreate(d *schema.ResourceData, meta interface{}) error {
@@ -80,10 +78,8 @@ func resourceAlibabacloudStackDatahubProjectCreate(d *schema.ResourceData, meta 
 	}
 
 	d.SetId(strings.ToLower(projectName))
-	return resourceAlibabacloudStackDatahubProjectRead(d, meta)
+	return nil
 }
-
-
 
 func resourceAlibabacloudStackDatahubProjectRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
@@ -103,42 +99,6 @@ func resourceAlibabacloudStackDatahubProjectRead(d *schema.ResourceData, meta in
 	d.Set("create_time", strconv.FormatInt(object.CreateTime, 10))
 	d.Set("last_modify_time", strconv.FormatInt(object.LastModifyTime, 10))
 	return nil
-}
-
-func resourceAlibabacloudStackDatahubProjectUpdate(d *schema.ResourceData, meta interface{}) error {
-	/*
-		client := meta.(*connectivity.AlibabacloudStackClient)
-
-		if d.HasChange("comment") {
-
-			projectName := d.Id()
-			projectComment := d.Get("comment").(string)
-
-			var requestInfo *datahub.DataHub
-
-			raw, err := client.WithDataHubClient(func(dataHubClient datahub.DataHubApi) (interface{}, error) {
-				requestInfo = dataHubClient.(*datahub.DataHub)
-				return dataHubClient.UpdateProject(projectName, projectComment)
-			})
-			response, ok := raw.(*datahub.UpdateProjectResponse)
-			if err != nil {
-				errmsg := ""
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "UpdateProject", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
-			}
-			if debugOn() {
-				requestMap := make(map[string]string)
-				requestMap["ProjectName"] = projectName
-				requestMap["ProjectComment"] = projectComment
-				addDebug("UpdateProject", raw, requestInfo, requestMap)
-			}
-		}
-
-	*/
-
-	return resourceAlibabacloudStackDatahubProjectRead(d, meta)
 }
 
 func resourceAlibabacloudStackDatahubProjectDelete(d *schema.ResourceData, meta interface{}) error {

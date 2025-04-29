@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackDatahubSubscription0(t *testing.T) {
@@ -56,6 +56,11 @@ func TestAccAlibabacloudStackDatahubSubscription0(t *testing.T) {
 						"topic_name": name,
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

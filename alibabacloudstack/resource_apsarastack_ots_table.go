@@ -19,15 +19,7 @@ import (
 )
 
 func resourceAlibabacloudStackOtsTable() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAliyunOtsTableCreate,
-		Read:   resourceAliyunOtsTableRead,
-		Update: resourceAliyunOtsTableUpdate,
-		Delete: resourceAliyunOtsTableDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_name": {
 				Type:     schema.TypeString,
@@ -79,6 +71,8 @@ func resourceAlibabacloudStackOtsTable() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAliyunOtsTableCreate, resourceAliyunOtsTableRead, resourceAliyunOtsTableUpdate, resourceAliyunOtsTableDelete)
+	return resource
 }
 
 func resourceAliyunOtsTableCreate(d *schema.ResourceData, meta interface{}) error {
@@ -136,7 +130,7 @@ func resourceAliyunOtsTableCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	d.SetId(fmt.Sprintf("%s%s%s", instanceName, COLON_SEPARATED, tableName))
-	return resourceAliyunOtsTableRead(d, meta)
+	return nil
 }
 
 func resourceAliyunOtsTableRead(d *schema.ResourceData, meta interface{}) error {
@@ -212,7 +206,7 @@ func resourceAliyunOtsTableUpdate(d *schema.ResourceData, meta interface{}) erro
 			return err
 		}
 	}
-	return resourceAliyunOtsTableRead(d, meta)
+	return nil
 }
 
 func resourceAliyunOtsTableDelete(d *schema.ResourceData, meta interface{}) error {

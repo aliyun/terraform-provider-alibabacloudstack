@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackKVStoreBackupPolicy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackKVStoreBackupPolicyCreate,
-		Read:   resourceAlibabacloudStackKVStoreBackupPolicyRead,
-		Update: resourceAlibabacloudStackKVStoreBackupPolicyUpdate,
-		Delete: resourceAlibabacloudStackKVStoreBackupPolicyDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -58,6 +51,9 @@ func resourceAlibabacloudStackKVStoreBackupPolicy() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackKVStoreBackupPolicyCreate,
+		resourceAlibabacloudStackKVStoreBackupPolicyRead, resourceAlibabacloudStackKVStoreBackupPolicyUpdate, resourceAlibabacloudStackKVStoreBackupPolicyDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackKVStoreBackupPolicyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -66,7 +62,6 @@ func resourceAlibabacloudStackKVStoreBackupPolicyCreate(d *schema.ResourceData, 
 }
 
 func resourceAlibabacloudStackKVStoreBackupPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kvstoreService := KvstoreService{client}
 
@@ -80,7 +75,7 @@ func resourceAlibabacloudStackKVStoreBackupPolicyRead(d *schema.ResourceData, me
 	}
 
 	d.Set("instance_id", d.Id())
-	connectivity.SetResourceData(d, object.PreferredBackupTime, "preferred_backup_time", "backup_time");
+	connectivity.SetResourceData(d, object.PreferredBackupTime, "preferred_backup_time", "backup_time")
 	connectivity.SetResourceData(d, strings.Split(object.PreferredBackupPeriod, ","), "preferred_backup_period", "backup_period")
 
 	return nil
@@ -122,7 +117,7 @@ func resourceAlibabacloudStackKVStoreBackupPolicyUpdate(d *schema.ResourceData, 
 		}
 	}
 
-	return resourceAlibabacloudStackKVStoreBackupPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKVStoreBackupPolicyDelete(d *schema.ResourceData, meta interface{}) error {

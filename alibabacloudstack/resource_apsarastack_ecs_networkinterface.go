@@ -13,28 +13,19 @@ import (
 )
 
 func resourceAlibabacloudStackNetworkInterface() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceNetworkInterfaceCreate,
-		Read:   resourceNetworkInterfaceRead,
-		Update: resourceNetworkInterfaceUpdate,
-		Delete: resourceNetworkInterfaceDelete,
-
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:          schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'network_interface_name' instead.",
 				ConflictsWith: []string{"network_interface_name"},
 			},
 			"network_interface_name": {
 				Type:          schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"name"},
 			},
 			"vswitch_id": {
@@ -98,6 +89,8 @@ func resourceAlibabacloudStackNetworkInterface() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceNetworkInterfaceCreate, resourceNetworkInterfaceRead, resourceNetworkInterfaceUpdate, resourceNetworkInterfaceDelete)
+	return resource
 }
 
 func resourceNetworkInterfaceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -139,7 +132,7 @@ func resourceNetworkInterfaceCreate(d *schema.ResourceData, meta interface{}) er
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceNetworkInterfaceUpdate(d, meta)
+	return nil
 }
 
 func resourceNetworkInterfaceRead(d *schema.ResourceData, meta interface{}) error {
@@ -367,7 +360,7 @@ func resourceNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) er
 
 	d.Partial(false)
 
-	return resourceNetworkInterfaceRead(d, meta)
+	return nil
 }
 
 func resourceNetworkInterfaceDelete(d *schema.ResourceData, meta interface{}) error {

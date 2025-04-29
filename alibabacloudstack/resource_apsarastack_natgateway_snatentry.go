@@ -13,15 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackSnatEntry() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSnatEntryCreate,
-		Read:   resourceAlibabacloudStackSnatEntryRead,
-		Update: resourceAlibabacloudStackSnatEntryUpdate,
-		Delete: resourceAlibabacloudStackSnatEntryDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"snat_table_id": {
 				Type:     schema.TypeString,
@@ -32,6 +24,7 @@ func resourceAlibabacloudStackSnatEntry() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
+				Computed:      true,
 				ConflictsWith: strings.Fields("source_cidr"),
 			},
 			"snat_ip": {
@@ -42,6 +35,7 @@ func resourceAlibabacloudStackSnatEntry() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ForceNew:      true,
+				Computed:      true,
 				ConflictsWith: strings.Fields("source_vswitch_id"),
 			},
 			"snat_entry_id": {
@@ -50,6 +44,12 @@ func resourceAlibabacloudStackSnatEntry() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackSnatEntryCreate,
+		resourceAlibabacloudStackSnatEntryRead,
+		resourceAlibabacloudStackSnatEntryUpdate,
+		resourceAlibabacloudStackSnatEntryDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSnatEntryCreate(d *schema.ResourceData, meta interface{}) error {
@@ -92,11 +92,10 @@ func resourceAlibabacloudStackSnatEntryCreate(d *schema.ResourceData, meta inter
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackSnatEntryRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSnatEntryRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	if strings.HasPrefix(d.Id(), "snat-") {
@@ -114,11 +113,8 @@ func resourceAlibabacloudStackSnatEntryRead(d *schema.ResourceData, meta interfa
 	}
 
 	d.Set("snat_table_id", object.SnatTableId)
-	if _, ok := d.GetOk("source_cidr"); ok {
-		d.Set("source_cidr", object.SourceCIDR)
-	} else {
-		d.Set("source_vswitch_id", object.SourceVSwitchId)
-	}
+	d.Set("source_cidr", object.SourceCIDR)
+	d.Set("source_vswitch_id", object.SourceVSwitchId)
 	d.Set("snat_ip", object.SnatIp)
 	d.Set("snat_entry_id", object.SnatEntryId)
 
@@ -165,7 +161,7 @@ func resourceAlibabacloudStackSnatEntryUpdate(d *schema.ResourceData, meta inter
 			return errmsgs.WrapError(err)
 		}
 	}
-	return resourceAlibabacloudStackSnatEntryRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSnatEntryDelete(d *schema.ResourceData, meta interface{}) error {

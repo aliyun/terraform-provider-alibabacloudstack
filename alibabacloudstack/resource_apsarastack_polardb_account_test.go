@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackPolardbAccountUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"data_base_instance_id": "${alibabacloudstack_polardb_instance.instance.id}",
+					"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
 					"account_name":          "tftestnormal",
 					"account_password":      "inputYourCodeHere",
 				}),
@@ -52,6 +52,7 @@ func TestAccAlibabacloudStackPolardbAccountUpdate(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
+				// password敏感字段设置后不回显
 				ImportStateVerifyIgnore: []string{"account_password"},
 			},
 			{
@@ -99,7 +100,7 @@ func resourcePolardbAccountConfigDependence(name string) string {
 	variable "creation" {
 		default = "PolarDB"
 	}
-	resource "alibabacloudstack_polardb_instance" "instance" {
+	resource "alibabacloudstack_polardb_dbinstance" "instance" {
 		engine            = "MySQL"
 		engine_version    = "5.7"
 		instance_name = "${var.name}"

@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackDatahubTopic() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDatahubTopicCreate,
-		Read:   resourceAlibabacloudStackDatahubTopicRead,
-		Update: resourceAlibabacloudStackDatahubTopicUpdate,
-		Delete: resourceAlibabacloudStackDatahubTopicDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project_name": {
 				Type:         schema.TypeString,
@@ -93,6 +85,11 @@ func resourceAlibabacloudStackDatahubTopic() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDatahubTopicCreate,
+		resourceAlibabacloudStackDatahubTopicRead,
+		resourceAlibabacloudStackDatahubTopicUpdate,
+		resourceAlibabacloudStackDatahubTopicDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta interface{}) error {
@@ -155,7 +152,7 @@ func resourceAlibabacloudStackDatahubTopicCreate(d *schema.ResourceData, meta in
 	addDebug("CreateTopic", bresponse, request.Content, t)
 
 	d.SetId(strings.ToLower(fmt.Sprintf("%s%s%s", t.ProjectName, COLON_SEPARATED, t.TopicName)))
-	return resourceAlibabacloudStackDatahubTopicRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDatahubTopicRead(d *schema.ResourceData, meta interface{}) error {
@@ -189,7 +186,9 @@ func resourceAlibabacloudStackDatahubTopicRead(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackDatahubTopicUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackDatahubTopicRead(d, meta)
+	noUpdateAllowedFields := []string{"life_cycle", "comment"}
+
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackDatahubTopicDelete(d *schema.ResourceData, meta interface{}) error {

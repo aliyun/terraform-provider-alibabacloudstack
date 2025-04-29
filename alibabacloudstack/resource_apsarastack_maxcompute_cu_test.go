@@ -2,9 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackMaxcomputeCu(t *testing.T) {
@@ -31,6 +32,11 @@ func TestAccAlibabacloudStackMaxcomputeCu(t *testing.T) {
 						"cluster_name": CHECKSET,
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

@@ -18,15 +18,7 @@ import (
 )
 
 func resourceAlibabacloudStackVpnConnection() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackVpnConnectionCreate,
-		Read:   resourceAlibabacloudStackVpnConnectionRead,
-		Update: resourceAlibabacloudStackVpnConnectionUpdate,
-		Delete: resourceAlibabacloudStackVpnConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"customer_gateway_id": {
 				Type:     schema.TypeString,
@@ -185,6 +177,8 @@ func resourceAlibabacloudStackVpnConnection() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackVpnConnectionCreate, resourceAlibabacloudStackVpnConnectionRead, resourceAlibabacloudStackVpnConnectionUpdate, resourceAlibabacloudStackVpnConnectionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackVpnConnectionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -227,7 +221,7 @@ func resourceAlibabacloudStackVpnConnectionCreate(d *schema.ResourceData, meta i
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackVpnConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpnConnectionRead(d *schema.ResourceData, meta interface{}) error {
@@ -313,7 +307,7 @@ func resourceAlibabacloudStackVpnConnectionUpdate(d *schema.ResourceData, meta i
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	return resourceAlibabacloudStackVpnConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpnConnectionDelete(d *schema.ResourceData, meta interface{}) error {

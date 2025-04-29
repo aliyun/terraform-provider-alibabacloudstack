@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackNasAccessGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackNasAccessGroupCreate,
-		Read:   resourceAlibabacloudStackNasAccessGroupRead,
-		Update: resourceAlibabacloudStackNasAccessGroupUpdate,
-		Delete: resourceAlibabacloudStackNasAccessGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
 		},
@@ -70,6 +63,8 @@ func resourceAlibabacloudStackNasAccessGroup() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackNasAccessGroupCreate, resourceAlibabacloudStackNasAccessGroupRead, resourceAlibabacloudStackNasAccessGroupUpdate, resourceAlibabacloudStackNasAccessGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackNasAccessGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -102,7 +97,7 @@ func resourceAlibabacloudStackNasAccessGroupCreate(d *schema.ResourceData, meta 
 
 	d.SetId(fmt.Sprint(response["AccessGroupName"], ":", request["FileSystemType"]))
 
-	return resourceAlibabacloudStackNasAccessGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNasAccessGroupRead(d *schema.ResourceData, meta interface{}) error {
@@ -124,8 +119,8 @@ func resourceAlibabacloudStackNasAccessGroupRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	connectivity.SetResourceData(d, parts[0] ,"access_group_name", "name")
-	connectivity.SetResourceData(d, object["AccessGroupType"] ,"access_group_type", "name")
+	connectivity.SetResourceData(d, parts[0], "access_group_name", "name")
+	connectivity.SetResourceData(d, object["AccessGroupType"], "access_group_type", "name")
 	d.Set("file_system_type", parts[1])
 	d.Set("description", object["Description"])
 	return nil
@@ -149,12 +144,12 @@ func resourceAlibabacloudStackNasAccessGroupUpdate(d *schema.ResourceData, meta 
 		action := "ModifyAccessGroup"
 
 		_, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", action, "", nil, nil, request)
-		
+
 		if err != nil {
 			return err
 		}
 	}
-	return resourceAlibabacloudStackNasAccessGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNasAccessGroupDelete(d *schema.ResourceData, meta interface{}) error {

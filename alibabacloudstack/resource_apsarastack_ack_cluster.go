@@ -38,15 +38,7 @@ var (
 )
 
 func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCSKubernetesCreate,
-		Read:   resourceAlibabacloudStackCSKubernetesRead,
-		Update: resourceAlibabacloudStackCSKubernetesUpdate,
-		Delete: resourceAlibabacloudStackCSKubernetesDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(90 * time.Minute),
 			Update: schema.DefaultTimeout(60 * time.Minute),
@@ -618,6 +610,10 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCSKubernetesCreate,
+		resourceAlibabacloudStackCSKubernetesRead, resourceAlibabacloudStackCSKubernetesUpdate,
+		resourceAlibabacloudStackCSKubernetesDelete)
+	return resource
 }
 
 type Response struct {
@@ -1085,8 +1081,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-
-	return resourceAlibabacloudStackCSKubernetesUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -1218,12 +1213,10 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackCSKubernetesRead(d, meta)
-
+	return nil
 }
 
 func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}

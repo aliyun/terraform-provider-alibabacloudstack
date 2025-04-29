@@ -19,15 +19,7 @@ import (
 )
 
 func resourceAlibabacloudStackApigatewayApi() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackApigatewayApiCreate,
-		Read:   resourceAlibabacloudStackApigatewayApiRead,
-		Update: resourceAlibabacloudStackApigatewayApiUpdate,
-		Delete: resourceAlibabacloudStackApigatewayApiDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"group_id": {
 				Type:     schema.TypeString,
@@ -312,6 +304,8 @@ func resourceAlibabacloudStackApigatewayApi() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackApigatewayApiCreate, resourceAlibabacloudStackApigatewayApiRead, resourceAlibabacloudStackApigatewayApiUpdate, resourceAlibabacloudStackApigatewayApiDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackApigatewayApiCreate(d *schema.ResourceData, meta interface{}) error {
@@ -345,7 +339,7 @@ func resourceAlibabacloudStackApigatewayApiCreate(d *schema.ResourceData, meta i
 		}
 	}
 
-	return resourceAlibabacloudStackApigatewayApiRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackApigatewayApiRead(d *schema.ResourceData, meta interface{}) error {
@@ -604,7 +598,7 @@ func resourceAlibabacloudStackApigatewayApiUpdate(d *schema.ResourceData, meta i
 
 	d.Partial(false)
 
-	return resourceAlibabacloudStackApigatewayApiRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackApigatewayApiDelete(d *schema.ResourceData, meta interface{}) error {

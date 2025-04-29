@@ -18,20 +18,12 @@ import (
 )
 
 func resourceAlibabacloudStackKeyPair() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackKeyPairCreate,
-		Read:   resourceAlibabacloudStackKeyPairRead,
-		Update: resourceAlibabacloudStackKeyPairUpdate,
-		Delete: resourceAlibabacloudStackKeyPairDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"key_name": {
 				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				Deprecated:   "Field 'key_name' is deprecated and will be removed in a future release. Please use new field 'key_pair_name' instead.",
@@ -39,8 +31,8 @@ func resourceAlibabacloudStackKeyPair() *schema.Resource {
 			},
 			"key_pair_name": {
 				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"key_name"},
@@ -76,6 +68,8 @@ func resourceAlibabacloudStackKeyPair() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackKeyPairCreate, resourceAlibabacloudStackKeyPairRead, resourceAlibabacloudStackKeyPairUpdate, resourceAlibabacloudStackKeyPairDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackKeyPairCreate(d *schema.ResourceData, meta interface{}) error {
@@ -134,7 +128,7 @@ func resourceAlibabacloudStackKeyPairCreate(d *schema.ResourceData, meta interfa
 		}
 	}
 
-	return resourceAlibabacloudStackKeyPairUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKeyPairUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -143,11 +137,10 @@ func resourceAlibabacloudStackKeyPairUpdate(d *schema.ResourceData, meta interfa
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackKeyPairRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKeyPairRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 

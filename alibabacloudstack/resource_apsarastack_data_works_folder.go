@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackDataWorksFolder() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDataWorksFolderCreate,
-		Read:   resourceAlibabacloudStackDataWorksFolderRead,
-		Update: resourceAlibabacloudStackDataWorksFolderUpdate,
-		Delete: resourceAlibabacloudStackDataWorksFolderDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"folder_id": {
 				Type:     schema.TypeString,
@@ -41,6 +34,8 @@ func resourceAlibabacloudStackDataWorksFolder() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDataWorksFolderCreate, resourceAlibabacloudStackDataWorksFolderRead, resourceAlibabacloudStackDataWorksFolderUpdate, resourceAlibabacloudStackDataWorksFolderDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDataWorksFolderCreate(d *schema.ResourceData, meta interface{}) error {
@@ -63,8 +58,7 @@ func resourceAlibabacloudStackDataWorksFolderCreate(d *schema.ResourceData, meta
 		return err
 	}
 	d.SetId(fmt.Sprint(response["Data"], ":", request["ProjectId"]))
-
-	return resourceAlibabacloudStackDataWorksFolderRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDataWorksFolderRead(d *schema.ResourceData, meta interface{}) error {
@@ -115,7 +109,7 @@ func resourceAlibabacloudStackDataWorksFolderUpdate(d *schema.ResourceData, meta
 	if err != nil {
 		return err
 	}
-	return resourceAlibabacloudStackDataWorksFolderRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDataWorksFolderDelete(d *schema.ResourceData, meta interface{}) error {

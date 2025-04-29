@@ -22,15 +22,7 @@ import (
 )
 
 func resourceAlibabacloudStackInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackInstanceCreate,
-		Read:   resourceAlibabacloudStackInstanceRead,
-		Update: resourceAlibabacloudStackInstanceUpdate,
-		Delete: resourceAlibabacloudStackInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Update: schema.DefaultTimeout(20 * time.Minute),
@@ -302,6 +294,8 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 			"data_disk_tags":   tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackInstanceCreate, resourceAlibabacloudStackInstanceRead, resourceAlibabacloudStackInstanceUpdate, resourceAlibabacloudStackInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -362,11 +356,10 @@ func resourceAlibabacloudStackInstanceCreate(d *schema.ResourceData, meta interf
 			return errmsgs.WrapError(err)
 		}
 	}
-	return resourceAlibabacloudStackInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 
@@ -694,7 +687,7 @@ func resourceAlibabacloudStackInstanceUpdate(d *schema.ResourceData, meta interf
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackInstanceDelete(d *schema.ResourceData, meta interface{}) error {

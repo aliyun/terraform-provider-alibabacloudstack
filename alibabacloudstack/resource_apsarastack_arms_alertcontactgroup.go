@@ -10,14 +10,7 @@ import (
 )
 
 func resourceAlibabacloudStackArmsAlertContactGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackArmsAlertContactGroupCreate,
-		Read:   resourceAlibabacloudStackArmsAlertContactGroupRead,
-		Update: resourceAlibabacloudStackArmsAlertContactGroupUpdate,
-		Delete: resourceAlibabacloudStackArmsAlertContactGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"alert_contact_group_name": {
 				Type:     schema.TypeString,
@@ -30,6 +23,9 @@ func resourceAlibabacloudStackArmsAlertContactGroup() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackArmsAlertContactGroupCreate,
+		resourceAlibabacloudStackArmsAlertContactGroupRead, resourceAlibabacloudStackArmsAlertContactGroupUpdate, resourceAlibabacloudStackArmsAlertContactGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackArmsAlertContactGroupCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -48,7 +44,7 @@ func resourceAlibabacloudStackArmsAlertContactGroupCreate(d *schema.ResourceData
 
 	d.SetId(fmt.Sprint(response["ContactGroupId"]))
 
-	return resourceAlibabacloudStackArmsAlertContactGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackArmsAlertContactGroupRead(d *schema.ResourceData, meta interface{}) error {
@@ -99,7 +95,7 @@ func resourceAlibabacloudStackArmsAlertContactGroupUpdate(d *schema.ResourceData
 			return err
 		}
 	}
-	return resourceAlibabacloudStackArmsAlertContactGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackArmsAlertContactGroupDelete(d *schema.ResourceData, meta interface{}) (err error) {
@@ -110,6 +106,7 @@ func resourceAlibabacloudStackArmsAlertContactGroupDelete(d *schema.ResourceData
 	}
 	_, err = client.DoTeaRequest("POST", "ARMS", "2019-08-08", action, "", nil, nil, request)
 	if err != nil {
-		return err	}
+		return err
+	}
 	return nil
 }

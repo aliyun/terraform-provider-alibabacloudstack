@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackDataWorksUserRoleBinding() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDataWorksUserRoleBindingCreate,
-		Read:   resourceAlibabacloudStackDataWorksUserRoleBindingRead,
-		Update: resourceAlibabacloudStackDataWorksUserRoleBindingUpdate,
-		Delete: resourceAlibabacloudStackDataWorksUserRoleBindingDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Type:     schema.TypeString,
@@ -37,6 +30,11 @@ func resourceAlibabacloudStackDataWorksUserRoleBinding() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDataWorksUserRoleBindingCreate,
+		resourceAlibabacloudStackDataWorksUserRoleBindingRead,
+		resourceAlibabacloudStackDataWorksUserRoleBindingUpdate,
+		resourceAlibabacloudStackDataWorksUserRoleBindingDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDataWorksUserRoleBindingCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -55,7 +53,6 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingCreate(d *schema.ResourceD
 		request["RoleCode"] = v.(string)
 	}
 
-
 	request["ClientToken"] = fmt.Sprint(uuid.NewRandom())
 	_, err = client.DoTeaRequest("POST", "dataworks-public", "2020-05-18", action, "", nil, nil, request)
 	if err != nil {
@@ -64,7 +61,7 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingCreate(d *schema.ResourceD
 
 	d.SetId(fmt.Sprint(request["RoleCode"], ":", request["ProjectId"], ":", request["UserId"]))
 
-	return resourceAlibabacloudStackDataWorksUserRoleBindingRead(d, meta)
+	return
 }
 
 func resourceAlibabacloudStackDataWorksUserRoleBindingRead(d *schema.ResourceData, meta interface{}) error {
@@ -92,8 +89,8 @@ func resourceAlibabacloudStackDataWorksUserRoleBindingRead(d *schema.ResourceDat
 }
 
 func resourceAlibabacloudStackDataWorksUserRoleBindingUpdate(d *schema.ResourceData, meta interface{}) error {
-	// 没有对应 API
-	return resourceAlibabacloudStackDataWorksUserRoleBindingRead(d, meta)
+	noUpdateAllowedFields := []string{"role_code", "project_id", "user_id"}
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackDataWorksUserRoleBindingDelete(d *schema.ResourceData, meta interface{}) error {

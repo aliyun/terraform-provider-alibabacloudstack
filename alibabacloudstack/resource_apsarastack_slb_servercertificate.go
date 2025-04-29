@@ -12,27 +12,19 @@ import (
 )
 
 func resourceAlibabacloudStackSlbServerCertificate() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSlbServerCertificateCreate,
-		Read:   resourceAlibabacloudStackSlbServerCertificateRead,
-		Update: resourceAlibabacloudStackSlbServerCertificateUpdate,
-		Delete: resourceAlibabacloudStackSlbServerCertificateDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:true,
+				Computed:     true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'server_certificate_name' instead.",
 				ConflictsWith: []string{"server_certificate_name"},
 			},
 			"server_certificate_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:true,
+				Computed:     true,
 				ConflictsWith: []string{"name"},
 			},
 			"server_certificate": {
@@ -47,6 +39,8 @@ func resourceAlibabacloudStackSlbServerCertificate() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSlbServerCertificateCreate, resourceAlibabacloudStackSlbServerCertificateRead, resourceAlibabacloudStackSlbServerCertificateUpdate, resourceAlibabacloudStackSlbServerCertificateDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSlbServerCertificateCreate(d *schema.ResourceData, meta interface{}) error {
@@ -55,7 +49,7 @@ func resourceAlibabacloudStackSlbServerCertificateCreate(d *schema.ResourceData,
 	request := slb.CreateUploadServerCertificateRequest()
 	client.InitRpcRequest(*request.RpcRequest)
 
-	if val, ok :=  connectivity.GetResourceDataOk(d, "server_certificate_name", "name"); ok && val != "" {
+	if val, ok := connectivity.GetResourceDataOk(d, "server_certificate_name", "name"); ok && val != "" {
 		request.ServerCertificateName = val.(string)
 	}
 
@@ -91,11 +85,10 @@ func resourceAlibabacloudStackSlbServerCertificateCreate(d *schema.ResourceData,
 	response, _ := raw.(*slb.UploadServerCertificateResponse)
 	d.SetId(response.ServerCertificateId)
 
-	return resourceAlibabacloudStackSlbServerCertificateUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbServerCertificateRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 	serverCertificate, err := slbService.DescribeSlbServerCertificate(d.Id())
@@ -116,8 +109,7 @@ func resourceAlibabacloudStackSlbServerCertificateRead(d *schema.ResourceData, m
 func resourceAlibabacloudStackSlbServerCertificateUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	if d.IsNewResource() {
-		d.Partial(false)
-		return resourceAlibabacloudStackSlbServerCertificateRead(d, meta)
+		return nil
 	}
 	if !d.IsNewResource() && d.HasChanges("name", "server_certificate_name") {
 		request := slb.CreateSetServerCertificateNameRequest()
@@ -137,7 +129,7 @@ func resourceAlibabacloudStackSlbServerCertificateUpdate(d *schema.ResourceData,
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
-	return resourceAlibabacloudStackSlbServerCertificateRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbServerCertificateDelete(d *schema.ResourceData, meta interface{}) error {

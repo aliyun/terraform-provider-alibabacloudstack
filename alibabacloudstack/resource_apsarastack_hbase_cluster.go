@@ -15,14 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackHBaseInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackHBaseInstanceCreate,
-		Read:   resourceAlibabacloudStackHBaseInstanceRead,
-		Update: resourceAlibabacloudStackHBaseInstanceUpdate,
-		Delete: resourceAlibabacloudStackHBaseInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -221,6 +214,8 @@ func resourceAlibabacloudStackHBaseInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackHBaseInstanceCreate, resourceAlibabacloudStackHBaseInstanceRead, resourceAlibabacloudStackHBaseInstanceUpdate, resourceAlibabacloudStackHBaseInstanceDelete)
+	return resource
 }
 
 func checkParams(request *hbase.CreateClusterRequest) error {
@@ -323,7 +318,7 @@ func resourceAlibabacloudStackHBaseInstanceCreate(d *schema.ResourceData, meta i
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackHBaseInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackHBaseInstanceRead(d *schema.ResourceData, meta interface{}) error {
@@ -583,7 +578,7 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackHBaseInstanceRead(d, meta)
+		return nil
 	}
 
 	if d.HasChange("name") {
@@ -733,7 +728,7 @@ func resourceAlibabacloudStackHBaseInstanceUpdate(d *schema.ResourceData, meta i
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackHBaseInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackHBaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {

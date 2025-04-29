@@ -15,34 +15,26 @@ import (
 )
 
 func resourceAlibabacloudStackSlbAcl() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSlbAclCreate,
-		Read:   resourceAlibabacloudStackSlbAclRead,
-		Update: resourceAlibabacloudStackSlbAclUpdate,
-		Delete: resourceAlibabacloudStackSlbAclDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:     true,
+				Computed:     true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'acl_name' instead.",
 				ConflictsWith: []string{"acl_name"},
 			},
 			"acl_name": {
 				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 			"ip_version": {
 				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
 				Deprecated:   "Field 'ip_version' is deprecated and will be removed in a future release. Please use new field 'address_ip_version' instead.",
@@ -50,8 +42,8 @@ func resourceAlibabacloudStackSlbAcl() *schema.Resource {
 			},
 			"address_ip_version": {
 				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
 				ConflictsWith: []string{"ip_version"},
@@ -77,6 +69,8 @@ func resourceAlibabacloudStackSlbAcl() *schema.Resource {
 			//"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSlbAclCreate, resourceAlibabacloudStackSlbAclRead, resourceAlibabacloudStackSlbAclUpdate, resourceAlibabacloudStackSlbAclDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSlbAclCreate(d *schema.ResourceData, meta interface{}) error {
@@ -89,7 +83,7 @@ func resourceAlibabacloudStackSlbAclCreate(d *schema.ResourceData, meta interfac
 		return errmsgs.WrapError(err)
 	}
 	if v, ok := connectivity.GetResourceDataOk(d, "address_ip_version", "ip_version"); ok {
-		request.AddressIPVersion= v.(string)
+		request.AddressIPVersion = v.(string)
 	} else {
 		request.AddressIPVersion = "ipv4"
 	}
@@ -111,11 +105,10 @@ func resourceAlibabacloudStackSlbAclCreate(d *schema.ResourceData, meta interfac
 	response, _ := raw.(*slb.CreateAccessControlListResponse)
 
 	d.SetId(response.AclId)
-	return resourceAlibabacloudStackSlbAclUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbAclRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 
@@ -196,7 +189,7 @@ func resourceAlibabacloudStackSlbAclUpdate(d *schema.ResourceData, meta interfac
 
 	d.Partial(false)
 
-	return resourceAlibabacloudStackSlbAclRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbAclDelete(d *schema.ResourceData, meta interface{}) error {

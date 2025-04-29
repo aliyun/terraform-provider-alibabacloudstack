@@ -16,11 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmPasswordPolicy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmPasswordPolicyCreate,
-		Read:   resourceAlibabacloudStackAscmPasswordPolicyRead,
-		Update: resourceAlibabacloudStackAscmPasswordPolicyUpdate,
-		Delete: resourceAlibabacloudStackAscmPasswordPolicyDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"hard_expiry": {
 				Type:     schema.TypeBool,
@@ -61,6 +57,8 @@ func resourceAlibabacloudStackAscmPasswordPolicy() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmPasswordPolicyCreate, resourceAlibabacloudStackAscmPasswordPolicyRead, resourceAlibabacloudStackAscmPasswordPolicyUpdate, resourceAlibabacloudStackAscmPasswordPolicyDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmPasswordPolicyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -97,11 +95,10 @@ func resourceAlibabacloudStackAscmPasswordPolicyCreate(d *schema.ResourceData, m
 
 	d.SetId(fmt.Sprint(response.Data.ID))
 
-	return resourceAlibabacloudStackAscmPasswordPolicyUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmPasswordPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmPasswordPolicy(d.Id())
@@ -126,7 +123,8 @@ func resourceAlibabacloudStackAscmPasswordPolicyRead(d *schema.ResourceData, met
 }
 
 func resourceAlibabacloudStackAscmPasswordPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackAscmPasswordPolicyRead(d, meta)
+	noUpdateAllowedFields := []string{"hard_expiry", "require_numbers", "require_lowercase_characters", "require_uppercase_characters", "max_login_attempts", "password_reuse_prevention", "require_symbols", "max_password_age", "minimum_password_length"}
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackAscmPasswordPolicyDelete(d *schema.ResourceData, meta interface{}) error {

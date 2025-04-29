@@ -18,14 +18,7 @@ import (
 )
 
 func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAdbDbClusterCreate,
-		Read:   resourceAlibabacloudStackAdbDbClusterRead,
-		Update: resourceAlibabacloudStackAdbDbClusterUpdate,
-		Delete: resourceAlibabacloudStackAdbDbClusterDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(50 * time.Minute),
 			Delete: schema.DefaultTimeout(50 * time.Minute),
@@ -224,6 +217,11 @@ func resourceAlibabacloudStackAdbDbCluster() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAdbDbClusterCreate, 
+		resourceAlibabacloudStackAdbDbClusterRead,
+		resourceAlibabacloudStackAdbDbClusterUpdate,
+		resourceAlibabacloudStackAdbDbClusterDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta interface{}) error {
@@ -334,7 +332,7 @@ func resourceAlibabacloudStackAdbDbClusterCreate(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackAdbDbClusterUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAdbDbClusterRead(d *schema.ResourceData, meta interface{}) error {
@@ -606,7 +604,7 @@ func resourceAlibabacloudStackAdbDbClusterUpdate(d *schema.ResourceData, meta in
 		//d.SetPartial("elastic_io_resource")
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackAdbDbClusterRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAdbDbClusterDelete(d *schema.ResourceData, meta interface{}) error {

@@ -14,14 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackMaxcomputeProjectCreate,
-		Read:   resourceAlibabacloudStackMaxcomputeProjectRead,
-		Update: resourceAlibabacloudStackMaxcomputeProjectUpdate,
-		Delete: resourceAlibabacloudStackMaxcomputeProjectDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
@@ -45,6 +38,8 @@ func resourceAlibabacloudStackMaxcomputeProject() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackMaxcomputeProjectCreate, resourceAlibabacloudStackMaxcomputeProjectRead, resourceAlibabacloudStackMaxcomputeProjectUpdate, resourceAlibabacloudStackMaxcomputeProjectDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackMaxcomputeProjectCreate(d *schema.ResourceData, meta interface{}) error {
@@ -80,19 +75,19 @@ func resourceAlibabacloudStackMaxcomputeProjectCreate(d *schema.ResourceData, me
 	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", "CreateCalcEngineForAscm", "")
 	mergeMaps(request.QueryParams, map[string]string{
 		"KmsRegion":       string(client.Region),
-		"ResourceGroupId": client.ResourceGroup,
-		"Product":         "dataworks-private-cloud",
-		"CalcEngineType":  "ODPS",
-		"OrganizationId":  client.Department,
-		"EnvType":         "PRD",
-		"Name":            name,
-		"EngineInfo":      "{\"taskAk\":{\"kp\":\"" + pk + "\",\"aliyunAccount\":\"ascm-dw-1637809230710\"},\"clusters\":[{\"name\":\"" + cluster_name + "\",\"quota\":" + d.Get("quota_id").(string) + ",\"disk\":" + fmt.Sprintf("%f", float64(disk_size)/1024) + ",\"isDefault\":1,\"projectQuota\":{\"fileLength\":" + strconv.Itoa(disk_size*1024*1024*1024) + ",\"fileNumber\":null}}],\"odpsProjectName\":\"" + name + "\",\"needToCreateOdpsProject\":true,\"defaultClusterArch\":\"" + cluster["core_arch"].(string) + "\",\"isOdpsDev\":false}",
-		"Department":      client.Department,
-		"Version":         "2019-01-17",
-		"ClusterItem":     "{\"cluster\":\"" + cluster_name + "\",\"core_arch\":\"" + cluster["core_arch"].(string) + "\",\"project\":\"" + cluster["project"].(string) + "\",\"region\":\"" + cluster["region"].(string) + "\"}",
-		"ClusterName":     cluster_name,
-		"ResourceGroup":   client.ResourceGroup,
-		"ExternalTable":   strconv.FormatBool(d.Get("external_table").(bool)),
+		"ResourceGroupId":  client.ResourceGroup,
+		"Product":          "dataworks-private-cloud",
+		"CalcEngineType":   "ODPS",
+		"OrganizationId":   client.Department,
+		"EnvType":          "PRD",
+		"Name":             name,
+		"EngineInfo":       "{\"taskAk\":{\"kp\":\"" + pk + "\",\"aliyunAccount\":\"ascm-dw-1637809230710\"},\"clusters\":[{\"name\":\"" + cluster_name + "\",\"quota\":" + d.Get("quota_id").(string) + ",\"disk\":" + fmt.Sprintf("%f", float64(disk_size)/1024) + ",\"isDefault\":1,\"projectQuota\":{\"fileLength\":" + strconv.Itoa(disk_size*1024*1024*1024) + ",\"fileNumber\":null}}],\"odpsProjectName\":\"" + name + "\",\"needToCreateOdpsProject\":true,\"defaultClusterArch\":\"" + cluster["core_arch"].(string) + "\",\"isOdpsDev\":false}",
+		"Department":       client.Department,
+		"Version":          "2019-01-17",
+		"ClusterItem":      "{\"cluster\":\"" + cluster_name + "\",\"core_arch\":\"" + cluster["core_arch"].(string) + "\",\"project\":\"" + cluster["project"].(string) + "\",\"region\":\"" + cluster["region"].(string) + "\"}",
+		"ClusterName":      cluster_name,
+		"ResourceGroup":    client.ResourceGroup,
+		"ExternalTable":    strconv.FormatBool(d.Get("external_table").(bool)),
 		"TaskPk":          pk,
 		"OdpsName":        name,
 		"RegionId":        client.RegionId,
@@ -146,7 +141,7 @@ func resourceAlibabacloudStackMaxcomputeProjectCreate(d *schema.ResourceData, me
 	}
 	addDebug("MaxcomputeProjectCreate", raw, request, bresponse.GetHttpContentString())
 
-	return resourceAlibabacloudStackMaxcomputeProjectRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeProjectRead(d *schema.ResourceData, meta interface{}) error {
@@ -208,7 +203,7 @@ func resourceAlibabacloudStackMaxcomputeProjectUpdate(d *schema.ResourceData, me
 		addDebug("UpdateOdpsQuota", raw, request)
 	}
 
-	return resourceAlibabacloudStackMaxcomputeProjectRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeProjectDelete(d *schema.ResourceData, meta interface{}) error {

@@ -505,8 +505,8 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ecs_ebs_storage_sets":                    dataSourceAlibabacloudStackEcsEbsStorageSets(),
 		"alibabacloudstack_polardb_zones":                           dataSourceAlibabacloudStackPolardbZones(),
 		//	"alibabacloudstack_polardb_databases":                      dataSourceAlibabacloudStackPolardbDatabases(),
-		"alibabacloudstack_polardb_instances":   dataSourceAlibabacloudStackPolardbDbInstances(),
-		"alibabacloudstack_polardb_dbinstances": dataSourceAlibabacloudStackPolardbDbInstances(),
+		"alibabacloudstack_polardb_dbinstances":   dataSourceAlibabacloudStackPolardbDbInstances(),
+		"alibabacloudstack_polardb_instances": dataSourceAlibabacloudStackPolardbDbInstances(),
 		//	"alibabacloudstack_polardb_accounts":                       dataSourceAlibabacloudStackPolardbAccounts(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
@@ -952,10 +952,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		log.Printf("[ERROR] Assume role failed: %s", err)
 		return nil, err
 	}
-	ossServicedomain := d.Get("ossservice_domain").(string)
-	if ossServicedomain != "" {
-		config.Endpoints[connectivity.OssDataCode] = ossServicedomain
-	}
 
 	domain := d.Get("domain").(string)
 	if domain != "" {
@@ -1006,6 +1002,10 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 				}
 			}
 		}
+	}
+	ossServicedomain := d.Get("ossservice_domain").(string)
+	if ossServicedomain != "" {
+		config.Endpoints[connectivity.OssDataCode] = ossServicedomain
 	}
 	DbsEndpoint := d.Get("dbs_endpoint").(string)
 	if DbsEndpoint != "" {

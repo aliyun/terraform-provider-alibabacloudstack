@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -11,10 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackOssBucketKms() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackOssBucketKmsCreate,
-		Read:   resourceAlibabacloudStackOssBucketKmsRead,
-		Delete: resourceAlibabacloudStackOssBucketKmsDelete,
+	resource := &schema.Resource{
 		DeprecationMessage: "oss_bucket already includes corresponding functions",
 		Schema: map[string]*schema.Schema{
 			"bucket": {
@@ -58,6 +56,8 @@ func resourceAlibabacloudStackOssBucketKms() *schema.Resource {
 			// 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackOssBucketKmsCreate, resourceAlibabacloudStackOssBucketKmsRead, nil, resourceAlibabacloudStackOssBucketKmsDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta interface{}) error {
@@ -110,11 +110,10 @@ func resourceAlibabacloudStackOssBucketKmsCreate(d *schema.ResourceData, meta in
 	}
 	d.SetId(bucketName)
 
-	return resourceAlibabacloudStackOssBucketKmsRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	var requestInfo *oss.Client
@@ -154,6 +153,13 @@ func resourceAlibabacloudStackOssBucketKmsRead(d *schema.ResourceData, meta inte
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_oss_bucket", "GetBucketEncryption", errmsgs.AlibabacloudStackLogGoSdkERROR, errmsg)
 		}
 		log.Printf("Enter for logging")
+		encryption_data, err := jsonpath.Get("$.Data.ServerSideEncryptionRule.ApplyServerSideEncryptionByDefault", bresponse)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", errmsgs.AlibabacloudStackLogGoSdkERROR)
+		}
+		encryption := encryption_data.(map[string]interface{})
+		d.Set("sse_algorithm", encryption["SSEAlgorithm"].(string))
+		d.Set("kms_data_encryption", encryption["KMSDataEncryption"].(string))
 	}
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_oss_bucket", "Bucket Not Found", errmsgs.AlibabacloudStackLogGoSdkERROR)

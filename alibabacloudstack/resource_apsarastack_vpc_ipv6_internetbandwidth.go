@@ -11,14 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackVpcIpv6InternetBandwidth() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackVpcIpv6InternetBandwidthCreate,
-		Read:   resourceAlibabacloudStackVpcIpv6InternetBandwidthRead,
-		Update: resourceAlibabacloudStackVpcIpv6InternetBandwidthUpdate,
-		Delete: resourceAlibabacloudStackVpcIpv6InternetBandwidthDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"bandwidth": {
 				Type:         schema.TypeInt,
@@ -48,6 +41,9 @@ func resourceAlibabacloudStackVpcIpv6InternetBandwidth() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackVpcIpv6InternetBandwidthCreate,
+		resourceAlibabacloudStackVpcIpv6InternetBandwidthRead, resourceAlibabacloudStackVpcIpv6InternetBandwidthUpdate, resourceAlibabacloudStackVpcIpv6InternetBandwidthDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackVpcIpv6InternetBandwidthCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -70,7 +66,7 @@ func resourceAlibabacloudStackVpcIpv6InternetBandwidthCreate(d *schema.ResourceD
 
 	d.SetId(fmt.Sprint(response["InternetBandwidthId"]))
 
-	return resourceAlibabacloudStackVpcIpv6InternetBandwidthRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpcIpv6InternetBandwidthRead(d *schema.ResourceData, meta interface{}) error {
@@ -114,7 +110,7 @@ func resourceAlibabacloudStackVpcIpv6InternetBandwidthUpdate(d *schema.ResourceD
 	if err != nil {
 		return err
 	}
-	return resourceAlibabacloudStackVpcIpv6InternetBandwidthRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpcIpv6InternetBandwidthDelete(d *schema.ResourceData, meta interface{}) (err error) {

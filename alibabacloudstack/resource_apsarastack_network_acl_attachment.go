@@ -11,12 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackNetworkAclAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackNetworkAclAttachmentCreate,
-		Read:   resourceAlibabacloudStackNetworkAclAttachmentRead,
-		Update: resourceAlibabacloudStackNetworkAclAttachmentUpdate,
-		Delete: resourceAlibabacloudStackNetworkAclAttachmentDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 
 			"network_acl_id": {
@@ -42,17 +37,17 @@ func resourceAlibabacloudStackNetworkAclAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackNetworkAclAttachmentCreate,
+		resourceAlibabacloudStackNetworkAclAttachmentRead, resourceAlibabacloudStackNetworkAclAttachmentUpdate, resourceAlibabacloudStackNetworkAclAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackNetworkAclAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
-
 	d.SetId(d.Get("network_acl_id").(string) + COLON_SEPARATED + resource.UniqueId())
-
 	return resourceAlibabacloudStackNetworkAclAttachmentUpdate(d, meta)
 }
 
 func resourceAlibabacloudStackNetworkAclAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	parts, err := ParseResourceId(d.Id(), 2)
@@ -85,7 +80,6 @@ func resourceAlibabacloudStackNetworkAclAttachmentRead(d *schema.ResourceData, m
 func resourceAlibabacloudStackNetworkAclAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
 		return errmsgs.WrapError(err)
@@ -183,22 +177,18 @@ func resourceAlibabacloudStackNetworkAclAttachmentUpdate(d *schema.ResourceData,
 				return errmsgs.WrapError(err)
 			}
 		}
-		//d.SetPartial("resources")
 	}
-
-	return resourceAlibabacloudStackNetworkAclAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNetworkAclAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
 	networkAclId := parts[0]
-
 	resources := []vpc.UnassociateNetworkAclResource{}
 	object, err := vpcService.DescribeNetworkAcl(networkAclId)
 	vpcResource := []vpc.Resource{}

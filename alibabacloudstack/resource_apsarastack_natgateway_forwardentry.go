@@ -13,12 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackForwardEntry() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackForwardEntryCreate,
-		Read:   resourceAlibabacloudStackForwardEntryRead,
-		Update: resourceAlibabacloudStackForwardEntryUpdate,
-		Delete: resourceAlibabacloudStackForwardEntryDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"forward_table_id": {
 				Type:     schema.TypeString,
@@ -68,6 +63,8 @@ func resourceAlibabacloudStackForwardEntry() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackForwardEntryCreate, resourceAlibabacloudStackForwardEntryRead, resourceAlibabacloudStackForwardEntryUpdate, resourceAlibabacloudStackForwardEntryDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackForwardEntryCreate(d *schema.ResourceData, meta interface{}) error {
@@ -116,11 +113,10 @@ func resourceAlibabacloudStackForwardEntryCreate(d *schema.ResourceData, meta in
 	if err := vpcService.WaitForForwardEntry(d.Id(), Available, DefaultTimeoutMedium); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackForwardEntryRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackForwardEntryRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	if !strings.Contains(d.Id(), COLON_SEPARATED) {
@@ -148,7 +144,6 @@ func resourceAlibabacloudStackForwardEntryRead(d *schema.ResourceData, meta inte
 }
 
 func resourceAlibabacloudStackForwardEntryUpdate(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	if !strings.Contains(d.Id(), COLON_SEPARATED) {
@@ -204,11 +199,10 @@ func resourceAlibabacloudStackForwardEntryUpdate(d *schema.ResourceData, meta in
 	if err := vpcService.WaitForForwardEntry(d.Id(), Available, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackForwardEntryRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackForwardEntryDelete(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	if !strings.Contains(d.Id(), COLON_SEPARATED) {
 		d.SetId(d.Get("forward_table_id").(string) + COLON_SEPARATED + d.Id())
 	}

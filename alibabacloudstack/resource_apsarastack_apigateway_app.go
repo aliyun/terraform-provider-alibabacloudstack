@@ -15,15 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackApigatewayApp() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackApigatewayAppCreate,
-		Read:   resourceAlibabacloudStackApigatewayAppRead,
-		Update: resourceAlibabacloudStackApigatewayAppUpdate,
-		Delete: resourceAlibabacloudStackApigatewayAppDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -37,6 +29,9 @@ func resourceAlibabacloudStackApigatewayApp() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackApigatewayAppCreate,
+		resourceAlibabacloudStackApigatewayAppRead, resourceAlibabacloudStackApigatewayAppUpdate, resourceAlibabacloudStackApigatewayAppDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackApigatewayAppCreate(d *schema.ResourceData, meta interface{}) error {
@@ -74,7 +69,7 @@ func resourceAlibabacloudStackApigatewayAppCreate(d *schema.ResourceData, meta i
 	}); err != nil {
 		return err
 	}
-	return resourceAlibabacloudStackApigatewayAppUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackApigatewayAppRead(d *schema.ResourceData, meta interface{}) error {
@@ -122,8 +117,7 @@ func resourceAlibabacloudStackApigatewayAppUpdate(d *schema.ResourceData, meta i
 		return errmsgs.WrapError(err)
 	}
 	if d.IsNewResource() {
-		d.Partial(false)
-		return resourceAlibabacloudStackApigatewayAppRead(d, meta)
+		return nil
 	}
 	if d.HasChanges("name","description") {
 		request := cloudapi.CreateModifyAppRequest()
@@ -151,7 +145,7 @@ func resourceAlibabacloudStackApigatewayAppUpdate(d *schema.ResourceData, meta i
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 	time.Sleep(3 * time.Second)
-	return resourceAlibabacloudStackApigatewayAppRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackApigatewayAppDelete(d *schema.ResourceData, meta interface{}) error {

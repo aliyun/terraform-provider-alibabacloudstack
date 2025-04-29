@@ -13,11 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackEipAssociation() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEipAssociationCreate,
-		Read:   resourceAlibabacloudStackEipAssociationRead,
-		Delete: resourceAlibabacloudStackEipAssociationDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"allocation_id": {
 				Type:     schema.TypeString,
@@ -30,11 +26,10 @@ func resourceAlibabacloudStackEipAssociation() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			
 			"force": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
-				ForceNew: true,
 			},
 
 			"instance_type": {
@@ -45,6 +40,8 @@ func resourceAlibabacloudStackEipAssociation() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEipAssociationCreate, resourceAlibabacloudStackEipAssociationRead, resourceAlibabacloudStackEipAssociationUpdate, resourceAlibabacloudStackEipAssociationDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEipAssociationCreate(d *schema.ResourceData, meta interface{}) error {
@@ -102,11 +99,15 @@ func resourceAlibabacloudStackEipAssociationCreate(d *schema.ResourceData, meta 
 
 	d.SetId(request.AllocationId + ":" + request.InstanceId)
 
-	return resourceAlibabacloudStackEipAssociationRead(d, meta)
+	return nil
+}
+
+func resourceAlibabacloudStackEipAssociationUpdate(d *schema.ResourceData, meta interface{}) error {
+	// force是个删除时的动作参数，允许修改
+	return nil
 }
 
 func resourceAlibabacloudStackEipAssociationRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 
@@ -121,7 +122,6 @@ func resourceAlibabacloudStackEipAssociationRead(d *schema.ResourceData, meta in
 	d.Set("instance_id", object.InstanceId)
 	d.Set("allocation_id", object.AllocationId)
 	d.Set("instance_type", object.InstanceType)
-	d.Set("force", d.Get("force").(bool))
 	return nil
 }
 
@@ -138,7 +138,9 @@ func resourceAlibabacloudStackEipAssociationDelete(d *schema.ResourceData, meta 
 	client.InitRpcRequest(*request.RpcRequest)
 	request.AllocationId = allocationId
 	request.InstanceId = instanceId
-	request.Force = requests.NewBoolean(d.Get("force").(bool))
+	if force, ok := d.GetOk("force"); ok {
+		request.Force = requests.NewBoolean(force.(bool))
+	}
 	request.InstanceType = EcsInstance
 	request.ClientToken = buildClientToken(request.GetActionName())
 

@@ -10,14 +10,7 @@ import (
 )
 
 func resourceAlibabacloudStackArmsAlertContact() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackArmsAlertContactCreate,
-		Read:   resourceAlibabacloudStackArmsAlertContactRead,
-		Update: resourceAlibabacloudStackArmsAlertContactUpdate,
-		Delete: resourceAlibabacloudStackArmsAlertContactDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"alert_contact_name": {
 				Type:     schema.TypeString,
@@ -41,6 +34,8 @@ func resourceAlibabacloudStackArmsAlertContact() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackArmsAlertContactCreate, resourceAlibabacloudStackArmsAlertContactRead, resourceAlibabacloudStackArmsAlertContactUpdate, resourceAlibabacloudStackArmsAlertContactDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackArmsAlertContactCreate(d *schema.ResourceData, meta interface{}) error {
@@ -84,7 +79,7 @@ func resourceAlibabacloudStackArmsAlertContactCreate(d *schema.ResourceData, met
 
 	d.SetId(fmt.Sprint(response["ContactId"]))
 
-	return resourceAlibabacloudStackArmsAlertContactRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackArmsAlertContactRead(d *schema.ResourceData, meta interface{}) error {
@@ -162,7 +157,7 @@ func resourceAlibabacloudStackArmsAlertContactUpdate(d *schema.ResourceData, met
 			return err
 		}
 	}
-	return resourceAlibabacloudStackArmsAlertContactRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackArmsAlertContactDelete(d *schema.ResourceData, meta interface{}) error {

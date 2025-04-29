@@ -10,7 +10,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alidns"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -21,8 +20,6 @@ type DnsService struct {
 }
 
 func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err error) {
-	var requestInfo *ecs.Client
-
 	var zoneId, recordId string
 	if v := strings.SplitN(id, ":", 2); len(v) > 1 {
 		zoneId = v[0]
@@ -36,6 +33,7 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 	request.QueryParams["ZoneId"] = zoneId
 	var resp = &DnsRecord{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("DescribeGlobalZoneRecords", bresponse, request, request.QueryParams)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorRecordNotFound"}) {
 			return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -46,8 +44,6 @@ func (s *DnsService) DescribeDnsRecord(id string) (response *DnsRecord, err erro
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return resp, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeGlobalZoneRecords", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("DescribeGlobalZoneRecords", response, requestInfo, request)
-
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
 		return resp, errmsgs.WrapError(err)

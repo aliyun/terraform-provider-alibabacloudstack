@@ -20,15 +20,7 @@ var component_ids map[string]interface{}
 var component_id int
 
 func resourceAlibabacloudStackEdasApplication() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEdasApplicationCreate,
-		Update: resourceAlibabacloudStackEdasApplicationUpdate,
-		Read:   resourceAlibabacloudStackEdasApplicationRead,
-		Delete: resourceAlibabacloudStackEdasApplicationDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"application_name": {
 				Type:     schema.TypeString,
@@ -84,6 +76,11 @@ func resourceAlibabacloudStackEdasApplication() *schema.Resource {
 			},
 		},
 	}
+
+	setResourceFunc(resource, resourceAlibabacloudStackEdasApplicationCreate,
+		resourceAlibabacloudStackEdasApplicationRead, resourceAlibabacloudStackEdasApplicationUpdate, resourceAlibabacloudStackEdasApplicationDelete)
+
+	return resource
 }
 
 func resourceAlibabacloudStackEdasApplicationCreate(d *schema.ResourceData, meta interface{}) error {
@@ -221,7 +218,7 @@ func resourceAlibabacloudStackEdasApplicationCreate(d *schema.ResourceData, meta
 		}
 	}
 
-	return resourceAlibabacloudStackEdasApplicationRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasApplicationUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -254,7 +251,7 @@ func resourceAlibabacloudStackEdasApplicationUpdate(d *schema.ResourceData, meta
 	}
 
 	time.Sleep(3 * time.Second)
-	return resourceAlibabacloudStackEdasApplicationRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasApplicationRead(d *schema.ResourceData, meta interface{}) error {

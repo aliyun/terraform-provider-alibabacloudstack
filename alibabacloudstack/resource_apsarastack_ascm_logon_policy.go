@@ -16,15 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackLogonPolicy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackLogonPolicyCreate,
-		Read:   resourceAlibabacloudStackLogonPolicyRead,
-		Update: resourceAlibabacloudStackLogonPolicyUpdate,
-		Delete: resourceAlibabacloudStackLogonPolicyDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"policy_id": {
 				Type:     schema.TypeInt,
@@ -47,6 +39,11 @@ func resourceAlibabacloudStackLogonPolicy() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackLogonPolicyCreate, 
+		resourceAlibabacloudStackLogonPolicyRead, 
+		resourceAlibabacloudStackLogonPolicyUpdate, 
+		resourceAlibabacloudStackLogonPolicyDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -63,9 +60,6 @@ func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta int
 	if len(object.Data) == 0 {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddLoginPolicy", "/ascm/auth/loginPolicy/addLoginPolicy")
 		mergeMaps(request.QueryParams, map[string]string{
-			"AccountInfo":            "123456",
-			"SignatureVersion":       "1.0",
-			"ProductName":            "ascm",
 			"name":                   name,
 			"description":            descr,
 			"rule":                   rule,
@@ -112,7 +106,7 @@ func resourceAlibabacloudStackLogonPolicyCreate(d *schema.ResourceData, meta int
 
 	d.SetId(object.Data[0].Name)
 
-	return resourceAlibabacloudStackLogonPolicyUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogonPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -167,11 +161,10 @@ func resourceAlibabacloudStackLogonPolicyUpdate(d *schema.ResourceData, meta int
 
 	d.SetId(object.Data[0].Name)
 
-	return resourceAlibabacloudStackLogonPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogonPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmLogonPolicy(d.Id())
@@ -205,9 +198,6 @@ func resourceAlibabacloudStackLogonPolicyDelete(d *schema.ResourceData, meta int
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
 		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveLoginPolicyByName", "/ascm/auth/loginPolicy/removeLoginPolicyByName")
 		mergeMaps(request.QueryParams, map[string]string{
-			"AccountInfo":      "123456",
-			"SignatureVersion": "1.0",
-			"ProductName":      "ascm",
 			"name":             name,
 		})
 		raw, err := client.WithEcsClient(func(csClient *ecs.Client) (interface{}, error) {

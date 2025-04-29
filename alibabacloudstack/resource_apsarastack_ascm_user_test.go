@@ -48,7 +48,7 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 					"mobile_nation_code": "86",
 					"login_name":         name,
 					"login_policy_id":    "1",
-					// "role_ids":           []string{"8", "9"},
+					"role_ids":           []string{"8", "9"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -58,16 +58,28 @@ func TestAccAlibabacloudStackAscm_UserBasic(t *testing.T) {
 						"mobile_nation_code": "86",
 						"login_name":         name,
 						"login_policy_id":    "1",
-						// "role_ids.#":         "2",
+						"role_ids.#":         "2",
 					}),
 				),
 			},
-			// {
-			// 	ResourceName:            resourceId,
-			// 	ImportState:             true,
-			// 	ImportStateVerify:       true,
-			// 	ImportStateVerifyIgnore: []string{"compact_topic", "partition_num", "remark"},
-			// },
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"role_ids":           []string{"2"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"role_ids.#":         "1",
+						"role_ids.0":         "2",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// init_password只会在创建时返回一次，后续import不会返回
+				ImportStateVerifyIgnore: []string{"init_password"},
+			},
 		},
 	})
 

@@ -13,14 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackRosStack() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackRosStackCreate,
-		Read:   resourceAlibabacloudStackRosStackRead,
-		Update: resourceAlibabacloudStackRosStackUpdate,
-		Delete: resourceAlibabacloudStackRosStackDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(11 * time.Minute),
 			Delete: schema.DefaultTimeout(6 * time.Minute),
@@ -146,6 +139,9 @@ func resourceAlibabacloudStackRosStack() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackRosStackCreate,
+		resourceAlibabacloudStackRosStackRead, resourceAlibabacloudStackRosStackUpdate, resourceAlibabacloudStackRosStackDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackRosStackCreate(d *schema.ResourceData, meta interface{}) error {
@@ -220,7 +216,7 @@ func resourceAlibabacloudStackRosStackCreate(d *schema.ResourceData, meta interf
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackRosStackRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackRosStackRead(d *schema.ResourceData, meta interface{}) error {
@@ -335,7 +331,7 @@ func resourceAlibabacloudStackRosStackUpdate(d *schema.ResourceData, meta interf
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackRosStackRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackRosStackDelete(d *schema.ResourceData, meta interface{}) error {

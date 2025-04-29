@@ -309,6 +309,9 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 			},
 		},
 	}
+	// XXX: 逻辑特殊，不建议合并
+	//setResourceFunc(resource, resourceAlibabacloudStackSlbListenerCreate, resourceAlibabacloudStackSlbListenerRead, resourceAlibabacloudStackSlbListenerUpdate, resourceAlibabacloudStackSlbListenerDelete)
+	//return resource
 }
 
 func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta interface{}) error {
@@ -411,7 +414,6 @@ func resourceAlibabacloudStackSlbListenerCreate(d *schema.ResourceData, meta int
 }
 
 func resourceAlibabacloudStackSlbListenerRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 

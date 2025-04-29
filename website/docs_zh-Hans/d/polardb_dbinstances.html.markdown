@@ -8,7 +8,7 @@ description: |-
 ---
 
 # alibabacloudstack_polardb_dbinstances
--> **NOTE:** 该资源等效别名有: `alibabacloudstack_polardb_instances`
+-> **NOTE:** 该资源等效别名有: `alibabacloudstack_polardb_dbinstances`
 
 根据指定过滤条件列出当前凭证权限可以访问的polardb数据库实例列表。
 
@@ -38,7 +38,7 @@ variable "creation" {
   default = "PolarDB"
 }
 
-resource "alibabacloudstack_polardb_instance" "default" {
+resource "alibabacloudstack_polardb_dbinstance" "default" {
   engine                 = "MySQL"
   engine_version         = "5.7"
   instance_name          = "${var.name}"
@@ -49,10 +49,10 @@ resource "alibabacloudstack_polardb_instance" "default" {
   vswitch_id            = "${alibabacloudstack_vswitch.default.id}"
 }
 
-data "alibabacloudstack_polardb_instances" "default" {
-  ids                   = ["${alibabacloudstack_polardb_instance.default.id}"]
+data "alibabacloudstack_polardb_dbinstances" "default" {
+  ids                   = ["${alibabacloudstack_polardb_dbinstance.default.id}"]
   network_type          = "VPC"
-  db_instance_class     = "${alibabacloudstack_polardb_instance.default.db_instance_class}"
+  db_instance_class     = "${alibabacloudstack_polardb_dbinstance.default.db_instance_class}"
   status               = "Running"
   region_id            = "${data.alibabacloudstack_zones.default.zones.0.region_id}"
   payment_type         = "PayAsYouGo"

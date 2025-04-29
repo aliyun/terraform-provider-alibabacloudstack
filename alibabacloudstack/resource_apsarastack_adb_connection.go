@@ -17,14 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackAdbConnection() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAdbConnectionCreate,
-		Read:   resourceAlibabacloudStackAdbConnectionRead,
-		Delete: resourceAlibabacloudStackAdbConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"db_cluster_id": {
 				Type:     schema.TypeString,
@@ -52,6 +45,8 @@ func resourceAlibabacloudStackAdbConnection() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAdbConnectionCreate, resourceAlibabacloudStackAdbConnectionRead, nil, resourceAlibabacloudStackAdbConnectionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAdbConnectionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -103,7 +98,7 @@ func resourceAlibabacloudStackAdbConnectionCreate(d *schema.ResourceData, meta i
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackAdbConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAdbConnectionRead(d *schema.ResourceData, meta interface{}) error {

@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackCsbProject() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCsbProjectCreate,
-		Read:   resourceAlibabacloudStackCsbProjectRead,
-		Update: resourceAlibabacloudStackCsbProjectUpdate,
-		Delete: resourceAlibabacloudStackCsbProjectDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Update: schema.DefaultTimeout(5 * time.Minute),
 		},
@@ -78,6 +71,9 @@ func resourceAlibabacloudStackCsbProject() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCsbProjectCreate, 
+		resourceAlibabacloudStackCsbProjectRead, resourceAlibabacloudStackCsbProjectUpdate, resourceAlibabacloudStackCsbProjectDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackCsbProjectCreate(d *schema.ResourceData, meta interface{}) error {
@@ -103,7 +99,7 @@ func resourceAlibabacloudStackCsbProjectCreate(d *schema.ResourceData, meta inte
 		request1["ProjectName"] = v
 	}
 	d.SetId(fmt.Sprint(request["CsbId"], ":", request1["ProjectName"]))
-	return resourceAlibabacloudStackCsbProjectRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCsbProjectRead(d *schema.ResourceData, meta interface{}) error {
@@ -148,7 +144,7 @@ func resourceAlibabacloudStackCsbProjectUpdate(d *schema.ResourceData, meta inte
 			return err
 		}
 	}
-	return resourceAlibabacloudStackCsbProjectRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCsbProjectDelete(d *schema.ResourceData, meta interface{}) error {

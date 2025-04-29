@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	
+
 	"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 )
 
@@ -54,19 +54,24 @@ func TestAccAlibabacloudStackDatahubProject0(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 
-// 			{
-// 				Config: testAccConfig(map[string]interface{}{
-// 
-// 					"comment": "update_test",
-// 				}),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheck(map[string]string{
-// 
-// 						"comment": "update_test",
-// 					}),
-// 				),
-// 			},
+			// 			{
+			// 				Config: testAccConfig(map[string]interface{}{
+			//
+			// 					"comment": "update_test",
+			// 				}),
+			// 				Check: resource.ComposeTestCheckFunc(
+			// 					testAccCheck(map[string]string{
+			//
+			// 						"comment": "update_test",
+			// 					}),
+			// 				),
+			// 			},
 		},
 	})
 }
@@ -78,7 +83,6 @@ var AlibabacloudTestAccDatahubProjectCheckmap = map[string]string{
 	"name": CHECKSET,
 
 	"create_time": CHECKSET,
-
 }
 
 func AlibabacloudTestAccDatahubProjectBasicdependence(name string) string {

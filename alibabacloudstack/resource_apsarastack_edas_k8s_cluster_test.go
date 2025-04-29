@@ -113,7 +113,7 @@ func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 	rand := getAccTestRandInt(0, 1000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testacc-edask8sclusterbasic%v", rand)
+	name := fmt.Sprintf("tftest%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sClusterConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -128,7 +128,7 @@ func TestAccAlibabacloudStackEdasK8sCluster_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"cs_cluster_id": "${alibabacloudstack_cs_kubernetes.default.id}",
-					"namespace_id":  "${alibabacloudstack_edas_namespace.default.id}",
+					"namespace_id":  "${alibabacloudstack_edas_namespace.default.namespace_logical_id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -194,21 +194,21 @@ func testAccCheckEdasK8sClusterDestroy(s *terraform.State) error {
 
 func resourceEdasK8sClusterConfigDependence(name string) string {
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
+	namespace_logical_id := fmt.Sprintf("%s:%s", region, name)
 	return fmt.Sprintf(`
 		variable "name" {
-		  default = "%v"
+		  default = "%s"
 		}
 
-		variable "regionid" {
-		  default = "%v"
+		variable "namespace_logical_id" {
+		  default = "%s"
 		}
 
 		resource "alibabacloudstack_edas_namespace" "default" {
 		  	description =      "${var.name}"
 			namespace_name =       "${var.name}"
-			namespace_logical_id = "${var.regionid}:${var.name}",
+			namespace_logical_id = "${var.namespace_logical_id}"
 		}
-
 
 		resource "alibabacloudstack_cs_kubernetes" "default" {
 		 name = var.name
@@ -232,5 +232,5 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 		 slb_internet_enabled 		= "true"
 		}
 
-		`, name, region)
+		`, name, namespace_logical_id)
 }

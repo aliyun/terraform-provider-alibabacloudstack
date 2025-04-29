@@ -6,11 +6,11 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
+func TestAccAlibabacloudStackVpcVswitch_basic(t *testing.T) {
 
 	var v vpc.DescribeVSwitchAttributesResponse
 
@@ -48,7 +48,7 @@ func TestAccAlibabacloudStackVpcVswitch0(t *testing.T) {
 
 					"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}",
 
-					"cidr_block": "172.16.0.0/24",
+					"cidr_block": "192.168.0.0/16",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -173,7 +173,7 @@ func TestAccAlibabacloudStackVpcVswitch1(t *testing.T) {
 
 					"vpc_id": "${alibabacloudstack_vpc.vpc.id}",
 
-					"cidr_block": "172.16.0.0/24",
+					"cidr_block": "192.168.0.0/16",
 
 					"enable_ipv6": "true",
 				}),

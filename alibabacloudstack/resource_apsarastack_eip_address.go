@@ -13,15 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackEip() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEipCreate,
-		Read:   resourceAlibabacloudStackEipRead,
-		Update: resourceAlibabacloudStackEipUpdate,
-		Delete: resourceAlibabacloudStackEipDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -50,6 +42,8 @@ func resourceAlibabacloudStackEip() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEipCreate, resourceAlibabacloudStackEipRead, resourceAlibabacloudStackEipUpdate, resourceAlibabacloudStackEipDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEipCreate(d *schema.ResourceData, meta interface{}) error {
@@ -83,11 +77,10 @@ func resourceAlibabacloudStackEipCreate(d *schema.ResourceData, meta interface{}
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackEipUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEipRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 
@@ -101,9 +94,6 @@ func resourceAlibabacloudStackEipRead(d *schema.ResourceData, meta interface{}) 
 	}
 
 	d.Set("name", object.Name)
-	// 314 版本API字段名称 Descritpion
-	//d.Set("description", object.Descritpion)
-	// 316版本API字段名称 Description
 	d.Set("description", object.Description)
 	bandwidth, _ := strconv.Atoi(object.Bandwidth)
 	d.Set("bandwidth", bandwidth)
@@ -158,7 +148,7 @@ func resourceAlibabacloudStackEipUpdate(d *schema.ResourceData, meta interface{}
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
-	return resourceAlibabacloudStackEipRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEipDelete(d *schema.ResourceData, meta interface{}) error {

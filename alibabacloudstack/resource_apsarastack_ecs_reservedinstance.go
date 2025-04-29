@@ -11,14 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackReservedInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackReservedInstanceCreate,
-		Read:   resourceAlibabacloudStackReservedInstanceRead,
-		Update: resourceAlibabacloudStackReservedInstanceUpdate,
-		Delete: resourceAlibabacloudStackReservedInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_type": {
 				Type:     schema.TypeString,
@@ -106,6 +99,8 @@ func resourceAlibabacloudStackReservedInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackReservedInstanceCreate, resourceAlibabacloudStackReservedInstanceRead, resourceAlibabacloudStackReservedInstanceUpdate, resourceAlibabacloudStackReservedInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackReservedInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -170,7 +165,7 @@ func resourceAlibabacloudStackReservedInstanceCreate(d *schema.ResourceData, met
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackReservedInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackReservedInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -198,11 +193,10 @@ func resourceAlibabacloudStackReservedInstanceUpdate(d *schema.ResourceData, met
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	return resourceAlibabacloudStackReservedInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackReservedInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	reservedInstances, err := ecsService.DescribeReservedInstance(d.Id())
@@ -219,7 +213,7 @@ func resourceAlibabacloudStackReservedInstanceRead(d *schema.ResourceData, meta 
 	d.Set("description", reservedInstances.Description)
 	connectivity.SetResourceData(d, reservedInstances.ReservedInstanceId, "reserved_instance_id", "resource_group_id")
 
-	return errmsgs.WrapError(err)
+	return nil
 }
 
 func resourceAlibabacloudStackReservedInstanceDelete(d *schema.ResourceData, meta interface{}) error {

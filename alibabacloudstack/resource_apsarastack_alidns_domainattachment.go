@@ -10,14 +10,7 @@ import (
 )
 
 func resourceAlibabacloudStackDnsDomainAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDnsDomainAttachmentCreate,
-		Read:   resourceApasaraStackDnsDomainAttachmentRead,
-		Update: resourceAlibabacloudStackDnsDomainAttachmentUpdate,
-		Delete: resourceAlibabacloudStackDnsdomainAttachmentDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -31,6 +24,9 @@ func resourceAlibabacloudStackDnsDomainAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDnsDomainAttachmentCreate,
+		resourceApasaraStackDnsDomainAttachmentRead, resourceAlibabacloudStackDnsDomainAttachmentUpdate, resourceAlibabacloudStackDnsdomainAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDnsDomainAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -120,7 +116,7 @@ func resourceAlibabacloudStackDnsDomainAttachmentUpdate(d *schema.ResourceData, 
 	if err := dnsService.WaitForAlidnsDomainAttachment(d.Id(), map[string]interface{}{"Domain": d.Get("domain_names").(*schema.Set).List()}, false, DefaultTimeoutMedium); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceApasaraStackDnsDomainAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDnsdomainAttachmentDelete(d *schema.ResourceData, meta interface{}) error {

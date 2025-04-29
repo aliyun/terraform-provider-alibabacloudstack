@@ -16,7 +16,7 @@ func TestAccalibabacloudstackdEssAttachment_update(t *testing.T) {
 	var v ess.ScalingGroup
 	resourceId := "alibabacloudstack_ess_attachment.default"
 	basicMap := map[string]string{
-		"instance_ids.#":   "1",
+		"instance_ids.#":   "2",
 		"scaling_group_id": CHECKSET,
 	}
 	ra := resourceAttrInit(resourceId, basicMap)
@@ -48,7 +48,7 @@ func TestAccalibabacloudstackdEssAttachment_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force"},
 			},
 			{
-				Config: testAccEssAttachmentConfig(rand),
+				Config: testAccEssAttachmentConfigInstance(rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEssAttachmentExists(
 						"alibabacloudstack_ess_attachment.default", &v),
@@ -58,7 +58,7 @@ func TestAccalibabacloudstackdEssAttachment_update(t *testing.T) {
 				),
 			},
 			{
-				Config: testAccEssAttachmentConfigInstance(rand),
+				Config: testAccEssAttachmentConfigRemoveInstance(rand),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckEssAttachmentExists(
 						"alibabacloudstack_ess_attachment.default", &v),
@@ -160,24 +160,23 @@ func testAccEssAttachmentConfig(rand int) string {
 
 	%s
 
-
 	resource "alibabacloudstack_ecs_instance" "new" {
 		image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
 		instance_type        = "${local.default_instance_type_id}"
 		system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-		system_disk_size     = 40
+		system_disk_size     = 20
 		system_disk_name     = "test_sys_disk"
 		security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
 		instance_name        = "${var.name}_ecs"
 		vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
-		zone_id    = data.alibabacloudstack_zones.default.zones.0.id
+		zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
 		is_outdated          = false
 		lifecycle {
-		  ignore_changes = [
-			instance_type
-		  ]
+			ignore_changes = [
+				instance_type
+			]
 		}
-	  }
+	}
 	
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
@@ -201,12 +200,11 @@ func testAccEssAttachmentConfig(rand int) string {
 func testAccEssAttachmentConfigInstance(rand int) string {
 	return fmt.Sprintf(`
 	variable "name" {
-		default = "tf-testAccEssAttachmentConfig-%d"
+		default = "tftestAcc%d"
 	}
-
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 0
-		max_size = 2
+		max_size = 20
 		default_cooldown = 20
 		removal_policies = ["OldestInstance", "NewestInstance"]
 		scaling_group_name = "${var.name}"
@@ -221,10 +219,28 @@ func testAccEssAttachmentConfigInstance(rand int) string {
 		description         = "example_value"
 	}
 	
+	resource "alibabacloudstack_ecs_instance" "new" {
+		image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type        = "${local.default_instance_type_id}"
+		system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+		system_disk_size     = 20
+		system_disk_name     = "test_sys_disk"
+		security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
+		instance_name        = "${var.name}_ecs"
+		vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
+		zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
+		is_outdated          = false
+		lifecycle {
+			ignore_changes = [
+				instance_type
+			]
+		}
+	}
+	
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "ecs.e4.small"
+		instance_type = "${local.default_instance_type_id}"
 		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 		force_delete = true
 		active = true
@@ -236,8 +252,57 @@ func testAccEssAttachmentConfigInstance(rand int) string {
 
 	resource "alibabacloudstack_ess_attachment" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		instance_ids = [alibabacloudstack_ecs_instance.default.id]
+		instance_ids = [alibabacloudstack_ecs_instance.default.id, alibabacloudstack_ecs_instance.new.id]
+		// 没有就绪的alibabacloudstack_ess_scaling_configuration会导致 ess_scaling_group 状态非活跃， 无法正常操作
+		depends_on = ["alibabacloudstack_ess_scaling_configuration.default"]
 		force = true
 	}
+	`, rand, ECSInstanceCommonTestCase)
+}
+
+func testAccEssAttachmentConfigRemoveInstance(rand int) string {
+	return fmt.Sprintf(`
+	variable "name" {
+		default = "tftestAcc%d"
+	}
+	resource "alibabacloudstack_ess_scaling_group" "default" {
+		min_size = 0
+		max_size = 20
+		default_cooldown = 20
+		removal_policies = ["OldestInstance", "NewestInstance"]
+		scaling_group_name = "${var.name}"
+		vswitch_ids = ["vsw-w6wwljy9dnxt77sm9zvef"]
+	}
+	
+	resource "alibabacloudstack_ecs_deployment_set" "default" {
+		strategy            = "Availability"
+		domain              = "Default"
+		granularity         = "Host"
+		deployment_set_name = "example_value"
+		description         = "example_value"
+	}
+
+	
+	resource "alibabacloudstack_ess_scaling_configuration" "default" {
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
+		image_id = "centos_7_9_x64_20G_alibase_20220208.vhd"
+		instance_type = "ecs.xn4.small"
+		security_group_ids = ["sg-w6w01hod6fqnpudt6vw6"]
+		force_delete = true
+		active = true
+		enable = true
+		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
+	}
+
+	%s
+
+	resource "alibabacloudstack_ess_attachment" "default" {
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
+		instance_ids = [alibabacloudstack_ecs_instance.default.id]
+		// 没有就绪的alibabacloudstack_ess_scaling_configuration会导致 ess_scaling_group 状态非活跃， 无法正常操作
+		depends_on = ["alibabacloudstack_ess_scaling_configuration.default"]
+		force = true
+	}
+
 	`, rand, ECSInstanceCommonTestCase)
 }

@@ -16,15 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackMongoDBShardingInstanceCreate,
-		Read:   resourceAlibabacloudStackMongoDBShardingInstanceRead,
-		Update: resourceAlibabacloudStackMongoDBShardingInstanceUpdate,
-		Delete: resourceAlibabacloudStackMongoDBShardingInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"engine_version": {
 				Type:     schema.TypeString,
@@ -204,6 +196,11 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 			},
 		},
 	}
+
+	setResourceFunc(resource, resourceAlibabacloudStackMongoDBShardingInstanceCreate,
+		resourceAlibabacloudStackMongoDBShardingInstanceRead, resourceAlibabacloudStackMongoDBShardingInstanceUpdate, resourceAlibabacloudStackMongoDBShardingInstanceDelete)
+
+	return resource
 }
 
 func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{}) (*dds.CreateShardingDBInstanceRequest, error) {
@@ -330,11 +327,10 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
 
@@ -484,7 +480,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackMongoDBShardingInstanceRead(d, meta)
+		return nil
 	}
 
 	if d.HasChange("shard_list") {
@@ -565,7 +561,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		//d.SetPartial("security_ip_list")
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackMongoDBShardingInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackMongoDBShardingInstanceDelete(d *schema.ResourceData, meta interface{}) error {
