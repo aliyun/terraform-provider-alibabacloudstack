@@ -1,5 +1,5 @@
 ---
-subcategory: "ADB"
+subcategory: "AnalyticDB for MySQL (ADB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_adb_account"
 sidebar_current: "docs-Alibabacloudstack-adb-account"
