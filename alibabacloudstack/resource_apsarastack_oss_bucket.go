@@ -112,6 +112,7 @@ func resourceAlibabacloudStackOssBucket() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"tags": tagsSchema(),
 		},
 		// 使用 CustomizeDiff 来添加条件验证
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, v interface{}) error {
@@ -366,7 +367,22 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 
 func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	ossService := OssService{client}
 	bucketName := d.Get("bucket").(string)
+	if d.HasChange("tags") {
+		tags := d.Get("tags").(map[string]interface{})
+		var tag_objs []OssTags
+		for k, v := range tags {
+			tag_objs = append(tag_objs, OssTags{
+				Key:   k,
+				Value: v.(string),
+			})
+		}
+		err := ossService.PutOssBucketTags(bucketName, tag_objs)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketTags", errmsgs.AlibabacloudStackOssGoSdk, err.Error()) // nolint
+		}
+	}
 
 	if (d.IsNewResource() && !d.Get("bucket_sync").(bool)) || (!d.IsNewResource() && d.HasChange("bucket_sync")) {
 		request := client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
@@ -794,4 +810,9 @@ type Logging struct {
 		} `json:"BucketLoggingStatus"`
 	} `json:"Data"`
 	API string `json:"api"`
+}
+
+type OssTags struct {
+	Value string `name:"Value"`
+	Key   string `name:"Key"`
 }

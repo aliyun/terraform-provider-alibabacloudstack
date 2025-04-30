@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -254,9 +255,9 @@ func (s *OssService) WaitForOssBucket(id string, status Status, timeout int) err
 func (s *OssService) HeadOssBucketObject(bucketName string, objectName string) error {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoApi", "")
 	mergeMaps(request.QueryParams, map[string]string{
-		"AppAction":   "HeadObject",
-		"AppName":     "one-console-app-oss",
-		"Params":      "{\"region\":\"" + s.client.RegionId + "\",\"params\":{\"bucketName\":\"" + bucketName + "\",\"objectName\":\"" + objectName + "\"}}",
+		"AppAction": "HeadObject",
+		"AppName":   "one-console-app-oss",
+		"Params":    "{\"region\":\"" + s.client.RegionId + "\",\"params\":{\"bucketName\":\"" + bucketName + "\",\"objectName\":\"" + objectName + "\"}}",
 	})
 	request.Headers["x-acs-instanceid"] = bucketName
 
@@ -301,3 +302,49 @@ func (s *OssService) WaitForOssBucketObject(bucket *oss.Bucket, id string, statu
 		}
 	}
 }
+
+func (s *OssService) PutOssBucketTags(bucketName string, tags []OssTags) error {
+	osstags := ""
+	for _, tag := range tags {
+		tag := fmt.Sprintf(`<Tag><Key>%s</Key><Value>%s</Value></Tag>`, tag.Key, tag.Value)
+		osstags = osstags + tag
+	}
+	content := fmt.Sprintf(`<Tagging><TagSet>%s</TagSet></Tagging>`, osstags)
+	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoApi", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"AppAction": "PutBucketTags",
+		"Product":   "oss",
+		"Content":   content,
+		"Params":    "{\"region\":\"" + s.client.RegionId + "\",\"params\":{\"bucketName\":\"" + bucketName + "\"}, \"content\": \"" + content + "\"}",
+	})
+	request.Headers["x-acs-instanceid"] = bucketName
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+
+	if err != nil || bresponse.GetHttpStatus() != 200 {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "PutBucketTags", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+	}
+
+	addDebug("PutBucketTags", bresponse, request, bresponse.GetHttpContentString())
+
+	resp := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	if resp["asapiSuccess"].(bool) == false {
+		return errmsgs.WrapError(errmsgs.Error(fmt.Sprintf("put bucket tags error %#v", resp)))
+	}
+
+	return nil
+}
+
+// func (s *OssService) GetBucketTags(bucketName string) tags map[string]interface{} {
+// 	tags := make(map[string]interface{})
+// 	return tags
+// }

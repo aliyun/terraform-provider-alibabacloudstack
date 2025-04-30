@@ -1,7 +1,7 @@
 package alibabacloudstack
 
 import (
-	"log"
+	"encoding/json"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -29,6 +29,13 @@ func resourceAlibabacloudStackSlb() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"internet", "intranet"}, false),
 			},
+			"network_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "vpc",
+				ValidateFunc: validation.StringInSlice([]string{"classic", "vpc"}, false),
+			},
 
 			"specification": {
 				Type:         schema.TypeString,
@@ -54,6 +61,12 @@ func resourceAlibabacloudStackSlb() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.IsIPAddress,
 			},
+			"ip_version": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+				Default:  "ipv4",
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackSlbCreate, resourceAlibabacloudStackSlbRead, resourceAlibabacloudStackSlbUpdate, resourceAlibabacloudStackSlbDelete)
@@ -63,53 +76,41 @@ func resourceAlibabacloudStackSlb() *schema.Resource {
 func resourceAlibabacloudStackSlbCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
-	request := slb.CreateCreateLoadBalancerRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.LoadBalancerName = d.Get("name").(string)
-	request.AddressType = strings.ToLower(string(Intranet))
-	request.ClientToken = buildClientToken(request.GetActionName())
+	request := client.NewCommonRequest("POST", "Slb", "2014-05-15", "CreateLoadBalancer", "")
+	network_type := d.Get("network_type").(string)
+	request.QueryParams["LoadBalancerName"] = d.Get("name").(string)
+	request.QueryParams["AddressType"] = strings.ToLower(string(Intranet))
+	request.QueryParams["AddressIPVersion"] = d.Get("ip_version").(string)
 
-	if v, ok := d.GetOk("name"); ok && v.(string) != "" {
-		request.LoadBalancerName = strings.ToLower(v.(string))
-	}
-	if v, ok := d.GetOk("address_type"); ok && v.(string) != "" {
-		request.AddressType = strings.ToLower(v.(string))
-	}
-
-	if v, ok := d.GetOk("vswitch_id"); ok && v.(string) != "" {
-		request.VSwitchId = v.(string)
+	if network_type == "VPC" {
+		if v, ok := d.GetOk("vswitch_id"); ok && v.(string) != "" {
+			request.QueryParams["VSwitchId"] = d.Get("vswitch_id").(string)
+		} else {
+			return errmsgs.WrapError(errmsgs.Error("VSwitchId is required when network_type is VPC"))
+		}
 	}
 
 	if v, ok := d.GetOk("specification"); ok && v.(string) != "" {
-		request.LoadBalancerSpec = v.(string)
+		request.QueryParams["LoadBalancerSpec"] = v.(string)
+	}
+	if v, ok := d.GetOk("address"); ok && v.(string) != "" {
+		request.QueryParams["Address"] = v.(string)
 	}
 
-	var raw interface{}
-
-	invoker := Invoker{}
-	invoker.AddCatcher(Catcher{"OperationFailed.TokenIsProcessing", 10, 5})
-	log.Printf("[DEBUG] slb request %v", request)
-	if err := invoker.Run(func() error {
-		resp, err := client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-			return slbClient.CreateLoadBalancer(request)
-		})
-		raw = resp
-		return err
-	}); err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"OrderFailed"}) {
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse != nil {
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if errmsg != "" {
+				return errmsgs.WrapError(errmsgs.Error(errmsg))
+			}
+		} else {
 			return errmsgs.WrapError(err)
 		}
-		errmsg := ""
-		if raw != nil {
-			response, ok := raw.(*slb.CreateLoadBalancerResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	response, _ := raw.(*slb.CreateLoadBalancerResponse)
+	response := slb.CreateLoadBalancerResponse{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	d.SetId(response.LoadBalancerId)
 
 	if err := slbService.WaitForSlb(response.LoadBalancerId, Active, DefaultTimeout); err != nil {
@@ -130,7 +131,7 @@ func resourceAlibabacloudStackSlbRead(d *schema.ResourceData, meta interface{}) 
 		}
 		return errmsgs.WrapError(err)
 	}
-
+	d.Set("network_type", object.NetworkType)
 	d.Set("name", object.LoadBalancerName)
 	d.Set("address_type", object.AddressType)
 	d.Set("vswitch_id", object.VSwitchId)
@@ -154,6 +155,8 @@ func resourceAlibabacloudStackSlbUpdate(d *schema.ResourceData, meta interface{}
 	if err := slbService.setInstanceTags(d, TagResourceInstance); err != nil {
 		return errmsgs.WrapError(err)
 	}
+
+	// Update Address
 
 	if d.IsNewResource() {
 		d.Partial(false)

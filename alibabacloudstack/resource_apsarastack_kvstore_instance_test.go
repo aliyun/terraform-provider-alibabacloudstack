@@ -67,7 +67,7 @@ func testSweepKVStoreInstances(region string) error {
 			page, err := getNextpageNumber(req.PageNumber)
 			if err != nil {
 				return err
-			}  
+			}
 			req.PageNumber = page
 		}
 	}
@@ -365,10 +365,10 @@ func testAccKVStoreInstanceTde_classic(instanceClass, engineVersion string) stri
 	return fmt.Sprintf(`
 	
 variable "name" {
-    default = "tf-testAccCheckApsaraStackRKVInstancesDataSource4"
+    default = "tf-testAccCheckApsaraStackRKVInstance4"
 }
-data "alibabacloudstack_zones"  "default" {
-}
+// data "alibabacloudstack_zones"  "default" {
+// }
 
 resource "alibabacloudstack_kms_key" "key" {
   description             = "Hello KMS"
@@ -383,7 +383,7 @@ resource "alibabacloudstack_vpc" "default" {
 resource "alibabacloudstack_vswitch" "default" {
 	vpc_id            = alibabacloudstack_vpc.default.id
 	cidr_block        = "172.16.0.0/24"
-	availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+	availability_zone = "cn-wulan-env205-amtest205001-a"
 	name              = var.name
 }
 
