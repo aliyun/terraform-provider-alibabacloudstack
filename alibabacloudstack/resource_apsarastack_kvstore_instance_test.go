@@ -67,7 +67,7 @@ func testSweepKVStoreInstances(region string) error {
 			page, err := getNextpageNumber(req.PageNumber)
 			if err != nil {
 				return err
-			}
+			}  
 			req.PageNumber = page
 		}
 	}
@@ -135,9 +135,9 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_classictest(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// password敏感字段设置后不回显
 				ImportStateVerifyIgnore: []string{"password", "cpu_type"},
 			},
@@ -174,9 +174,9 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// password敏感字段设置后不回显
 				ImportStateVerifyIgnore: []string{"password"},
 			},
@@ -270,7 +270,10 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_Tde(t *testing.T) {
 			{
 				Config: testAccKVStoreInstanceTde_classic(string(KVStoreRedis), string(KVStore5Dot0)),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"tde_status": "Enabled",
+						"enable_ssl": "Enabled",
+					}),
 				),
 			},
 		},
@@ -395,6 +398,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
     architecture_type = "cluster"
 
 	tde_status = "Enabled"
+	enable_ssl = "Enabled"
 	encryption_key = alibabacloudstack_kms_key.key.id
 }
 
