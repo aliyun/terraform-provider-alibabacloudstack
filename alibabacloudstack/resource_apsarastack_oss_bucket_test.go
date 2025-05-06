@@ -124,18 +124,20 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"bucket": name,
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "Test",
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"bucket":           name,
 						"storage_capacity": "-1",
+						"tags.%":           "2",
+						"tags.Created":     "TF",
+						"tags.For":         "Test",
 					}),
 				),
-			},
-			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -146,6 +148,12 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 						"acl": "public-read",
 					}),
 				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags.%", "tags.Created", "tags.For"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -160,12 +168,12 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"sse_algorithm": "KMS",
-					"kms_key_id": "${alibabacloudstack_kms_key.key.id}",
+					"kms_key_id":    "${alibabacloudstack_kms_key.key.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"sse_algorithm": "KMS",
-						"kms_key_id": CHECKSET,
+						"kms_key_id":    CHECKSET,
 					}),
 				),
 			},
@@ -186,6 +194,33 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"storage_capacity": "10",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF-update",
+						"For":     "Test-update",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "TF-update",
+						"tags.For":     "Test-update",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "0",
+						"tags.Created": REMOVEKEY,
+						"tags.For":     REMOVEKEY,
 					}),
 				),
 			},
@@ -225,14 +260,14 @@ func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"bucket":           name,
+						"bucket": name,
 					}),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -288,9 +323,9 @@ func TestAccAlibabacloudStackOssBucketVpc(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

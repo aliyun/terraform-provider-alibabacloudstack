@@ -68,6 +68,7 @@ The following arguments are supported:
   * `slb.s4.large`
 * `tags` - (Optional) A mapping of tags to assign to the resource.
 * `address` - (Optional, ForceNew) The service address of the load balancing instance. This field is automatically assigned by the system based on the `address_type`.
+* `network_type` - (Optional, ForceNew) The network type of the SLB instance. Valid values: ["classic", "vpc"]. Default value is `vpc`.
 
 ## Attributes Reference
 

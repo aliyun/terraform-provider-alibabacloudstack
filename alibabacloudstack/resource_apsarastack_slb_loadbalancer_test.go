@@ -155,7 +155,7 @@ func TestAccAlibabacloudStackSlbLoadbalancerClassic(t *testing.T) {
 
 					"name":          "rdk_test_name",
 					"specification": "slb.s1.small",
-					"network_type":  "Classic",
+					"network_type":  "classic",
 					"address_type":  "intranet",
 					"address":       "10.205.44.221",
 				}),
@@ -165,7 +165,7 @@ func TestAccAlibabacloudStackSlbLoadbalancerClassic(t *testing.T) {
 						"name":         "rdk_test_name",
 						"address":      "10.205.44.221",
 						"address_type": "intranet",
-						"network_type": "Classic",
+						"network_type": "classic",
 					}),
 				),
 			},

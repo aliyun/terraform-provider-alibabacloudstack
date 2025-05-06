@@ -101,9 +101,10 @@ The following arguments are supported:
   - `single`: Single copy
 * `architecture_type` - (Optional) The architecture type of the instance. Valid values: `cluster`, `standard`, `rwsplit`.
 * `series` - (Optional, ForceNew) The series of the instance.
-* `tde_status` - (Optional) The status of Transparent Data Encryption (TDE).
+* `tde_status` - (Optional) The status of Transparent Data Encryption (TDE). Valid values are `Disabled` or`Enabled`
 * `encryption_key` - (Optional) The encryption key used for encrypting the instance data.
 * `role_arn` - (Optional) The ARN of the RAM role.
+* `enable_ssl` - (Optional, ForceNew) - Whether SSL is enabled for the instance.Valid values are `Disabled` or`Enabled`
 
 ## Attributes Reference
 

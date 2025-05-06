@@ -76,17 +76,18 @@ func resourceAlibabacloudStackSlb() *schema.Resource {
 func resourceAlibabacloudStackSlbCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
-	request := client.NewCommonRequest("POST", "Slb", "2014-05-15", "CreateLoadBalancer", "")
+	request := client.NewCommonRequest("POST", "Slb", "2014-05-15", "CreateLoadBalancerPro", "")
 	network_type := d.Get("network_type").(string)
 	request.QueryParams["LoadBalancerName"] = d.Get("name").(string)
 	request.QueryParams["AddressType"] = strings.ToLower(string(Intranet))
 	request.QueryParams["AddressIPVersion"] = d.Get("ip_version").(string)
+	request.QueryParams["NetworkType"] = network_type
 
-	if network_type == "VPC" {
+	if network_type == "vpc" {
 		if v, ok := d.GetOk("vswitch_id"); ok && v.(string) != "" {
 			request.QueryParams["VSwitchId"] = d.Get("vswitch_id").(string)
 		} else {
-			return errmsgs.WrapError(errmsgs.Error("VSwitchId is required when network_type is VPC"))
+			return errmsgs.WrapError(errmsgs.Error("VSwitchId is required when network_type is vpc"))
 		}
 	}
 
@@ -137,6 +138,7 @@ func resourceAlibabacloudStackSlbRead(d *schema.ResourceData, meta interface{}) 
 	d.Set("vswitch_id", object.VSwitchId)
 	d.Set("address", object.Address)
 	d.Set("specification", object.LoadBalancerSpec)
+	d.Set("ip_version", object.AddressIPVersion)
 
 	tags, _ := slbService.DescribeTags(d.Id(), nil, TagResourceInstance)
 	if len(tags) > 0 {

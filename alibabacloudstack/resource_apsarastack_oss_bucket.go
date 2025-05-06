@@ -211,6 +211,20 @@ func resourceAlibabacloudStackOssBucketCreate(d *schema.ResourceData, meta inter
 	}
 	// Assign the bucket name as the resource ID
 	d.SetId(bucketName)
+	tags := d.Get("tags").(map[string]interface{})
+	if len(tags) > 0 {
+		var tag_objs []OssTags
+		for k, v := range tags {
+			tag_objs = append(tag_objs, OssTags{
+				Key:   k,
+				Value: v.(string),
+			})
+		}
+		err = ossService.PutOssBucketTags(bucketName, tag_objs)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketTags", errmsgs.AlibabacloudStackOssGoSdk, err.Error()) // nolint
+		}
+	}
 	return nil
 }
 
@@ -361,6 +375,15 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 			d.Set("kms_key_id", storageEncryption.Data.ServerSideEncryptionRule.ApplyServerSideEncryptionByDefault.KMSMasterKeyID)
 		}
 	}
+	tags, err := ossService.GetBucketTags(bucketName)
+	if len(tags) > 0 {
+		tags_map := make(map[string]string)
+		for _, tag := range tags {
+			tagmap := tag.(map[string]interface{})
+			tags_map[tagmap["Key"].(string)] = tagmap["Value"].(string)
+		}
+		d.Set("tags", tags_map)
+	}
 
 	return nil
 }
@@ -369,16 +392,21 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ossService := OssService{client}
 	bucketName := d.Get("bucket").(string)
-	if d.HasChange("tags") {
+	var err error
+	if !d.IsNewResource() && d.HasChange("tags") {
 		tags := d.Get("tags").(map[string]interface{})
-		var tag_objs []OssTags
-		for k, v := range tags {
-			tag_objs = append(tag_objs, OssTags{
-				Key:   k,
-				Value: v.(string),
-			})
+		if len(tags) == 0 {
+			err = ossService.DeleteBucketTags(bucketName)
+		} else {
+			var tag_objs []OssTags
+			for k, v := range tags {
+				tag_objs = append(tag_objs, OssTags{
+					Key:   k,
+					Value: v.(string),
+				})
+			}
+			err = ossService.PutOssBucketTags(bucketName, tag_objs)
 		}
-		err := ossService.PutOssBucketTags(bucketName, tag_objs)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, bucketName, "PutBucketTags", errmsgs.AlibabacloudStackOssGoSdk, err.Error()) // nolint
 		}
