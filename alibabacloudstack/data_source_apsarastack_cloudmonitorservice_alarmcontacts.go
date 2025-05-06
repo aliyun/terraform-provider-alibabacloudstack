@@ -13,9 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudstackCmsAlarmContacts() *schema.Resource {
+func dataSourceAlibabacloudStackCmsAlarmContacts() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudstackCmsAlarmContactsRead,
+		Read: dataSourceAlibabacloudStackCmsAlarmContactsRead,
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -69,7 +69,7 @@ func dataSourceAlibabacloudstackCmsAlarmContacts() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudstackCmsAlarmContactsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackCmsAlarmContactsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := client.NewCommonRequest("GET", "Cms", "2019-01-01", "ListCmsContacts", "")

@@ -11,9 +11,9 @@ import (
 	"regexp"
 )
 
-func dataSourceAlibabacloudstackAscmMeteringQueryEcs() *schema.Resource {
+func dataSourceAlibabacloudStackAscmMeteringQueryEcs() *schema.Resource {
 	return &schema.Resource{
-		Read:    dataSourceAlibabacloudstackAscmMeteringQueryEcsRead,
+		Read:    dataSourceAlibabacloudStackAscmMeteringQueryEcsRead,
 		Schema: map[string]*schema.Schema{
 			"start_time": {
 				Type:     schema.TypeString,
@@ -148,7 +148,7 @@ func dataSourceAlibabacloudstackAscmMeteringQueryEcs() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudstackAscmMeteringQueryEcsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackAscmMeteringQueryEcsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	starttime := d.Get("start_time").(string)
 	endtime := d.Get("end_time").(string)

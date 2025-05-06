@@ -11,9 +11,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudstackCmsAlarmContactGroups() *schema.Resource {
+func dataSourceAlibabacloudStackCmsAlarmContactGroups() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudstackCmsAlarmContactGroupsRead,
+		Read: dataSourceAlibabacloudStackCmsAlarmContactGroupsRead,
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -70,7 +70,7 @@ func dataSourceAlibabacloudstackCmsAlarmContactGroups() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudstackCmsAlarmContactGroupsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackCmsAlarmContactGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := cms.CreateDescribeContactGroupListRequest()

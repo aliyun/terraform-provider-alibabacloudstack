@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceAlibabacloudstackCmsAlarmContactGroup() *schema.Resource {
+func resourceAlibabacloudStackCmsAlarmContactGroup() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"alarm_contact_group_name": {
@@ -37,11 +37,11 @@ func resourceAlibabacloudstackCmsAlarmContactGroup() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudstackCmsAlarmContactGroupCreate, resourceAlibabacloudstackCmsAlarmContactGroupRead, resourceAlibabacloudstackCmsAlarmContactGroupUpdate, resourceAlibabacloudstackCmsAlarmContactGroupDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackCmsAlarmContactGroupCreate, resourceAlibabacloudStackCmsAlarmContactGroupRead, resourceAlibabacloudStackCmsAlarmContactGroupUpdate, resourceAlibabacloudStackCmsAlarmContactGroupDelete)
 	return resource
 }
 
-func resourceAlibabacloudstackCmsAlarmContactGroupCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsAlarmContactGroupCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := cms.CreatePutContactGroupRequest()
@@ -81,7 +81,7 @@ func resourceAlibabacloudstackCmsAlarmContactGroupCreate(d *schema.ResourceData,
 	return nil
 }
 
-func resourceAlibabacloudstackCmsAlarmContactGroupRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsAlarmContactGroupRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cmsService := CmsService{client}
 	object, err := cmsService.DescribeCmsAlarmContactGroup(d.Id())
@@ -101,7 +101,7 @@ func resourceAlibabacloudstackCmsAlarmContactGroupRead(d *schema.ResourceData, m
 	return nil
 }
 
-func resourceAlibabacloudstackCmsAlarmContactGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsAlarmContactGroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	update := false
 	request := cms.CreatePutContactGroupRequest()
@@ -141,7 +141,7 @@ func resourceAlibabacloudstackCmsAlarmContactGroupUpdate(d *schema.ResourceData,
 	return nil
 }
 
-func resourceAlibabacloudstackCmsAlarmContactGroupDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsAlarmContactGroupDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := cms.CreateDeleteContactGroupRequest()
 	client.InitRpcRequest(*request.RpcRequest)

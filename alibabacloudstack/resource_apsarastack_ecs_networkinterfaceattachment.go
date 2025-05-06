@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceNetworkInterfaceAttachment() *schema.Resource {
+func resourceAlibabacloudStackNetworkInterfaceAttachment() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {

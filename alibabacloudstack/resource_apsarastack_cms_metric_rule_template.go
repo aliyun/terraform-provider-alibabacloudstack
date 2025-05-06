@@ -16,7 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceAlibabacloudCmsMetricRuleTemplate() *schema.Resource {
+func resourceAlibabacloudStackCmsMetricRuleTemplate() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"alert_templates": {
@@ -189,13 +189,13 @@ func resourceAlibabacloudCmsMetricRuleTemplate() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudCmsMetricRuleTemplateCreate,
-		resourceAlibabacloudCmsMetricRuleTemplateRead, resourceAlibabacloudCmsMetricRuleTemplateUpdate,
-		resourceAlibabacloudCmsMetricRuleTemplateDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackCmsMetricRuleTemplateCreate,
+		resourceAlibabacloudStackCmsMetricRuleTemplateRead, resourceAlibabacloudStackCmsMetricRuleTemplateUpdate,
+		resourceAlibabacloudStackCmsMetricRuleTemplateDelete)
 	return resource
 }
 
-func resourceAlibabacloudCmsMetricRuleTemplateCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsMetricRuleTemplateCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := cms.CreateCreateMetricRuleTemplateRequest()
 	client.InitRpcRequest(*request.RpcRequest)
@@ -264,7 +264,7 @@ func resourceAlibabacloudCmsMetricRuleTemplateCreate(d *schema.ResourceData, met
 	return nil
 }
 
-func resourceAlibabacloudCmsMetricRuleTemplateRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsMetricRuleTemplateRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cmsService := CmsService{client}
 	templateattr, err := cmsService.DescribeMetricRuleTemplateAttribute(d.Id())
@@ -332,7 +332,7 @@ func resourceAlibabacloudCmsMetricRuleTemplateRead(d *schema.ResourceData, meta 
 	return nil
 }
 
-func resourceAlibabacloudCmsMetricRuleTemplateUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsMetricRuleTemplateUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	d.Partial(true)
 	update := false
@@ -472,7 +472,7 @@ func resourceAlibabacloudCmsMetricRuleTemplateUpdate(d *schema.ResourceData, met
 	return nil
 }
 
-func resourceAlibabacloudCmsMetricRuleTemplateDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsMetricRuleTemplateDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := cms.CreateDeleteMetricRuleTemplateRequest()
 	client.InitRpcRequest(*request.RpcRequest)

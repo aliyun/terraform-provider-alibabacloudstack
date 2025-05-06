@@ -13,9 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudstackRamServiceRoleProducts() *schema.Resource {
+func dataSourceAlibabacloudStackRamServiceRoleProducts() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudstackRamServiceRoleProductsRead,
+		Read: dataSourceAlibabacloudStackRamServiceRoleProductsRead,
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -50,7 +50,7 @@ func dataSourceAlibabacloudstackRamServiceRoleProducts() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudstackRamServiceRoleProductsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackRamServiceRoleProductsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoleProducts", "/ascm/auth/ramServiceRole/listRAMServiceRoleProducts")
