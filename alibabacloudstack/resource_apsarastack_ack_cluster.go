@@ -408,6 +408,7 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 			},
 			"runtime": {
 				Type:     schema.TypeList,
+				MaxItems: 1,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -632,107 +633,98 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	csService := CsService{client}
 	invoker := NewInvoker()
-	timeout := d.Get("timeout_mins").(int)
-	Name := d.Get("name").(string)
-	OsType := d.Get("os_type").(string)
-	Platform := d.Get("platform").(string)
-	mastercount := d.Get("master_count").(int)
-	msysdiskcat := d.Get("master_disk_category").(string)
-	msysdisksize := d.Get("master_disk_size").(int)
-	wsysdisksize := d.Get("worker_disk_size").(int)
-	wsysdiskcat := d.Get("worker_disk_category").(string)
-	masterstoragesetid := d.Get("master_storage_set_id").(string)
-	masterstoragesetnumber := d.Get("master_storage_set_partition_number").(int)
-	workerstoragesetid := d.Get("worker_storage_set_id").(string)
-	workerstoragesetnumber := d.Get("worker_storage_set_partition_number").(int)
-	delete_pro := d.Get("delete_protection").(bool)
-	KubernetesVersion := d.Get("version").(string)
-	addons := make([]cs.Addon, 0)
-	type WorkerData struct {
-		Size                 int
-		Encrypted            bool
-		AutoSnapshotPolicyId string
-		PerformanceLevel     string
-		Category             string
-	}
-	var req, workerdisks string
-	var pod, attachinst int
-	if v, ok := d.GetOk("addons"); ok {
-		all, ok := v.([]interface{})
-		if ok {
-			for i, a := range all {
-				addon, _ := a.(map[string]interface{})
-				log.Printf("check addon %v", addon)
-				if addon["name"] == "terway-eniip" {
-					pod = 1
-				}
-				log.Printf("check req id %v", i)
-				if i == 0 {
-					req = fmt.Sprintf("{\"name\" : \"%s\",\"config\": \"%s\"}", addon["name"].(string), addon["config"].(string))
-				} else {
-					req = fmt.Sprintf("%s,{\"name\" : \"%s\",\"config\": %q}", req, addon["name"].(string), addon["config"].(string))
-				}
-			}
-		}
-	}
-	if v, ok := d.GetOk("worker_data_disks"); ok {
-		all, ok := v.([]interface{})
-		if ok {
-			for i, a := range all {
-				disk, _ := a.(map[string]interface{})
-				if i == 0 {
-					workerdisks = fmt.Sprintf("{\"size\" : \"%d\",\"encrypted\": \"%t\",\"performance_level\": \"%s\",\"auto_snapshot_policy_id\": \"%s\",\"category\": \"%s\"}", disk["size"].(int), disk["encrypted"].(bool), disk["performance_level"].(string), disk["auto_snapshot_policy_id"].(string), disk["category"].(string))
-				} else {
-					workerdisks = fmt.Sprintf("%s,{\"size\" : \"%d\",\"encrypted\": \"%t\",\"performance_level\": \"%s\",\"auto_snapshot_policy_id\": \"%s\",\"category\": \"%s\"}", workerdisks, disk["size"].(int), disk["encrypted"].(bool), disk["performance_level"].(string), disk["auto_snapshot_policy_id"].(string), disk["category"].(string))
-				}
-				log.Printf("checking workerdatadisks %v", workerdisks)
 
+	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "CreateCluster", "/clusters")
+	request.SetContentType("application/json")
+	request.SetContent([]byte("{}")) // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
+
+	request.QueryParams = map[string]string{
+		"Action":    "CreateCluster",
+		"SNatEntry": "false",
+	}
+	
+	body := map[string]interface{}{
+		"Product":                              "Cs",
+		"os_type":                              d.Get("os_type").(string),
+		"platform":                             d.Get("platform").(string),
+		"cluster_type":                         d.Get("cluster_type").(string),
+		"region_id":                            client.RegionId,
+		"timeout_mins":                         d.Get("timeout_mins").(int),
+		"disable_rollback":                     true,
+		"kubernetes_version":                   d.Get("version").(string),
+		"container_cidr":                       d.Get("pod_cidr").(string),
+		"service_cidr":                         d.Get("service_cidr").(string),
+		"name":                                 d.Get("name").(string),
+		"master_instance_types":                d.Get("master_instance_types").([]interface{}),
+		"master_vswitch_ids":                   d.Get("master_vswitch_ids").([]interface{}),
+		"num_of_nodes":                         d.Get("num_of_nodes").(int),
+		"master_count":                         d.Get("master_count").(int),
+		"snat_entry":                           d.Get("new_nat_gateway").(bool),
+		"endpoint_public_access":               d.Get("slb_internet_enabled").(bool),
+		"ssh_flags":                            d.Get("enable_ssh").(bool),
+		"master_system_disk_category":          d.Get("master_disk_category").(string),
+		"master_system_disk_size":              d.Get("master_disk_size").(int),
+		"deletion_protection":                  d.Get("delete_protection").(bool),
+		"node_cidr_mask":                       d.Get("node_cidr_mask").(string),
+		"vpcid":                                d.Get("vpc_id").(string),
+		"proxy_mode":                           d.Get("proxy_mode").(string),
+		"user_data":                            d.Get("user_data").(string),
+		"node_port_range":                      d.Get("node_port_range").(string),
+		"cpu_policy":                           d.Get("cpu_policy").(string),
+		"cloud_monitor_flags":                  d.Get("cloud_monitor_flags").(bool),
+		"master_system_disk_performance_level": d.Get("master_system_disk_performance_level").(string),
+		"worker_system_disk_performance_level": d.Get("worker_system_disk_performance_level").(string),
+		"image_id":                             d.Get("image_id").(string),
+	}
+
+	pod := 0
+	if v, ok := d.GetOk("addons"); ok {
+		body["addons"] = v
+		if all, ok := v.([]interface{}); ok {
+			for _, a := range all {
+				log.Printf("check addon %v", a)
+				if addon, ok := a.(map[string]interface{}); ok && addon["name"] == "terway-eniip" {
+					pod = 1
+					log.Printf("pod request true")
+				}
 			}
 		}
 	}
-	udata := d.Get("user_data").(string)
-	log.Printf("checking addons %v", addons)
-	log.Printf("check req final %s", req)
-	var runtime string
-	if v, ok := d.GetOk("runtime"); ok {
-		all, _ := v.([]interface{})
-		for _, a := range all {
-			run, _ := a.(map[string]interface{})
-			runtime = fmt.Sprintf("\"name\": \"%s\", \"version\": \"%s\"", run["name"].(string), run["version"].(string))
-		}
+	if data, ok := d.GetOk("worker_data_disks"); ok {
+		body["worker_data_disks"] = data
 	}
-	log.Printf("checking runtime %v", runtime)
-	var tags string
-	// if v, ok := d.GetOk("tags"); ok && len(v.(map[string]interface{})) > 0 {
-	// 	index := 0
-	// 	for key, value := range v.(map[string]interface{}) {
-	// 		if index == 0 {
-	// 			tags = fmt.Sprintf("{\"key\": \"%s\",\"value\": \"%s\"}", key, value.(string))
-	// 		} else {
-	// 			tags = fmt.Sprintf("%s,{\"key\": \"%s\",\"value\":\"%s\"}", tags, key, value.(string))
-	// 		}
-	// 		index += 1
-	// 	}
-	// 	// tags = fmt.Sprintf("[%s]", tags)
-	// }
-	// // tagsBytes, _ := json.Marshal(tagss)
-	// tags = fmt.Sprintf("[%s]", tags)
-	tagss := make([]interface{}, 0)
-	if v, ok := d.GetOk("tags"); ok && len(v.(map[string]interface{})) > 0 {
+	if v, ok := d.GetOk("tags"); ok {
+		var tags = []map[string]interface{}{}
 		for key, value := range v.(map[string]interface{}) {
-			tagss = append(tagss, cs.Tag{
-				Key:   key,
-				Value: value.(string),
+			tags = append(tags, map[string]interface{}{
+				"key":   key,
+				"value": value.(string),
 			})
 		}
+		body["tags"] = tags
 	}
-	tagsBytes, _ := json.Marshal(tagss)
-	tags = string(tagsBytes)
-	log.Printf("checking tags %v", tags)
-	proxy_mode := d.Get("proxy_mode").(string)
-	VpcId := d.Get("vpc_id").(string)
-	ImageId := d.Get("image_id").(string)
-	var LoginPassword string
+	if v, ok := d.GetOk("runtime"); ok {
+		all, _ := v.([]interface{})
+		for _, runtime := range all {
+			body["runtime"] = runtime
+		}
+	}
+	if v, ok := d.GetOk("is_enterprise_security_group"); ok && v.(bool) {
+		if v, ok := d.GetOk("security_group_id"); ok && v.(string) != "" {
+			return fmt.Errorf("security_group_id must be `` or nil when is_enterprise_security_group is `true`")
+		}
+		body["is_enterprise_security_group"] = v.(bool)
+	} else {
+		if v, ok := d.GetOk("security_group_id"); ok && v.(string) != "" {
+			body["security_group_id"] = d.Get("security_group_id").(string)
+		} else {
+			return fmt.Errorf("security_group_id must be set when is_enterprise_security_group is `false` or not set")
+		}
+	}
+	if v, ok := d.GetOk("pod_vswitch_ids"); ok && pod == 1 {
+		body["pod_vswitch_ids"] = expandStringList(v.(*schema.Set).List())
+	}
+	
 	if password := d.Get("password").(string); password == "" {
 		if v := d.Get("kms_encrypted_password").(string); v != "" {
 			kmsService := KmsService{client}
@@ -742,318 +734,32 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 			}
 			password = decryptResp.Plaintext
 		}
-		LoginPassword = password
+		body["login_Password"] = password
 	} else {
-		LoginPassword = password
+		body["login_Password"] = password
 	}
-	nodecidr := d.Get("node_cidr_mask").(string)
-	enabSsh := d.Get("enable_ssh").(bool)
-	end := d.Get("slb_internet_enabled").(bool)
-	SnatEntry := d.Get("new_nat_gateway").(bool)
-	scdir := d.Get("service_cidr").(string)
-	pcidr := d.Get("pod_cidr").(string)
-	NumOfNodes := int64(d.Get("num_of_nodes").(int))
-	MasterSystemDiskPerformanceLevel := d.Get("master_system_disk_performance_level").(string)
-	WorkerSystemDiskPerformanceLevel := d.Get("worker_system_disk_performance_level").(string)
-	CloudMonitorFlags := d.Get("cloud_monitor_flags").(bool)
-	var secgroup string
-	var SecurityGroup string
-	if v, ok := d.GetOk("is_enterprise_security_group"); ok && v.(bool) {
-		if v, ok := d.GetOk("security_group_id"); ok && v.(string) != "" {
-			return fmt.Errorf("security_group_id must be `` or nil when is_enterprise_security_group is `true`")
-		}
-		secgroup = "is_enterprise_security_group"
-		is_enterprise_security_group := v.(bool)
-		SecurityGroup = fmt.Sprintf("%t", is_enterprise_security_group)
-	} else {
-		if v, ok := d.GetOk("security_group_id"); ok && v.(string) != "" {
-			secgroup = "security_group_id"
-			SecurityGroup = fmt.Sprintf("\"%s\"", d.Get("security_group_id").(string))
-		} else {
-			return fmt.Errorf("security_group_id must be set when is_enterprise_security_group is `false` or not set")
-		}
-	}
-	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "CreateCluster", "/clusters")
-	request.SetContentType("application/json")
-	request.SetContent([]byte("{}")) // 必须指定，否则SDK会将类型修改为www-form，最终导致cr有一定的随机概率失败
-	var wvid, mvid, winst, minst, podid, inst string
-	var formatDisk, retainIname bool
-
-	wvids := d.Get("worker_vswitch_ids").([]interface{})
-	for i, k := range wvids {
-		if i == 0 {
-			wvid = fmt.Sprintf("%s", k)
-		} else {
-			wvid = fmt.Sprintf("%s\",\"%s", wvid, k)
-		}
-	}
-	log.Printf("new worker vids %v ", wvid)
-	mvids := d.Get("master_vswitch_ids").([]interface{})
-	for i, k := range mvids {
-		if i == 0 {
-			mvid = fmt.Sprintf("%s", k)
-		} else {
-			mvid = fmt.Sprintf("%s\",\"%s", mvid, k)
-		}
-	}
-	log.Printf("master vswids %v", mvid)
-	winsts := d.Get("worker_instance_types").([]interface{})
-	for i, k := range winsts {
-		if i == 0 {
-			winst = fmt.Sprintf("%s", k)
-		} else {
-			winst = fmt.Sprintf("%s\",\"%s", winst, k)
-		}
-
-	}
-	log.Printf("new worker inst %v ", winst)
-	insrsas := d.Get("master_instance_types").([]interface{})
-	for i, k := range insrsas {
-		if i == 0 {
-			minst = fmt.Sprintf("%s", k)
-		} else {
-			minst = fmt.Sprintf("%s\",\"%s", minst, k)
-		}
-		log.Printf("instances %d %v", i, k)
-		//minst = fmt.Sprintf("%s\",\"%s", minst, k)
-	}
-	//log.Printf("new master inst %v ",insrsas)
-	log.Printf("new master inst %v ", minst)
-
-	var insts, podids []string
+	
+	
 	if v, ok := d.GetOk("instances"); ok {
-		attachinst = 1
-		formatDisk = d.Get("format_disk").(bool)
-		retainIname = d.Get("keep_instance_name").(bool)
-		insts = expandStringList(v.(*schema.Set).List())
-		fmt.Print("checking instances attached: ", insts)
-		for i, k := range insts {
-			if i != 0 {
-				inst = fmt.Sprintf("%s\",\"%s", inst, k)
-
-			} else {
-				inst = k
-			}
-		}
-	}
-	log.Printf("pod request %d", pod)
-	clustertype := d.Get("cluster_type").(string)
-	log.Printf("pod is %d", pod)
-	if pod == 1 {
-		if v, ok := d.GetOk("pod_vswitch_ids"); ok {
-			log.Printf("123123podid is %v\n", podid)
-			podids = expandStringList(v.(*schema.Set).List())
-			log.Print("checking pod vsw ids: ", podids)
-			for i, k := range podids {
-				if i != 0 {
-					podid = fmt.Sprintf("%s\",\"%s", podid, k)
-					//minst=strings.Join(minsts,",")
-
-				} else {
-					podid = k
-				}
-			}
-		}
-	}
-	nodeportrange := d.Get("node_port_range").(string)
-	cpuPolicy := d.Get("cpu_policy").(string)
-	log.Printf("wswitchids %v mswitchids %v", wvid, mvid)
-	log.Printf("winsts %v minsts %v", winst, minst)
-	request.QueryParams = map[string]string{
-		"Action":    "CreateCluster",
-		"SNatEntry": "false",
-	}
-	var body string
-	if attachinst == 1 {
-		if pod == 0 {
-			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%s,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%s}",
-				"Product", "Cs",
-				"os_type", OsType,
-				"platform", Platform,
-				"cluster_type", clustertype,
-				"region_id", client.RegionId,
-				"timeout_mins", timeout,
-				"disable_rollback", true,
-				"kubernetes_version", KubernetesVersion,
-				"container_cidr", pcidr,
-				"service_cidr", scdir,
-				"name", Name,
-				"master_instance_types", minst,
-				"master_vswitch_ids", mvid,
-				"login_Password", LoginPassword,
-				"num_of_nodes", NumOfNodes,
-				"master_count", mastercount,
-				"snat_entry", SnatEntry,
-				"endpoint_public_access", end,
-				"ssh_flags", enabSsh,
-				"master_system_disk_category", msysdiskcat,
-				"master_system_disk_size", msysdisksize,
-				"deletion_protection", delete_pro,
-				"node_cidr_mask", nodecidr,
-				"vpcid", VpcId,
-				"addons", req,
-				"proxy_mode", proxy_mode,
-				"instances", inst,
-				"format_disk", formatDisk,
-				"keep_instance_name", retainIname,
-				"user_data", udata,
-				"runtime", runtime,
-				"node_port_range", nodeportrange,
-				"cpu_policy", cpuPolicy,
-				"worker_data_disks", workerdisks,
-				secgroup, SecurityGroup,
-				"cloud_monitor_flags", CloudMonitorFlags,
-				"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
-				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
-				"image_id", ImageId,
-				"tags", tags,
-			)
-		} else {
-			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":%s,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%s}",
-				"Product", "Cs",
-				"os_type", OsType,
-				"platform", Platform,
-				"cluster_type", clustertype,
-				"region_id", client.RegionId,
-				"timeout_mins", timeout,
-				"disable_rollback", true,
-				"kubernetes_version", KubernetesVersion,
-				"container_cidr", pcidr,
-				"service_cidr", scdir,
-				"name", Name,
-				"master_instance_types", minst,
-				"master_vswitch_ids", mvid,
-				"login_Password", LoginPassword,
-				"num_of_nodes", NumOfNodes,
-				"master_count", mastercount,
-				"snat_entry", SnatEntry,
-				"endpoint_public_access", end,
-				"ssh_flags", enabSsh,
-				"master_system_disk_category", msysdiskcat,
-				"master_system_disk_size", msysdisksize,
-				"deletion_protection", delete_pro,
-				"node_cidr_mask", nodecidr,
-				"vpcid", VpcId,
-				"addons", req,
-				"pod_vswitch_ids", podid,
-				"proxy_mode", proxy_mode,
-				"instances", inst,
-				"format_disk", formatDisk,
-				"keep_instance_name", retainIname,
-				"user_data", udata,
-				"runtime", runtime,
-				"node_port_range", nodeportrange,
-				"cpu_policy", cpuPolicy,
-				"worker_data_disks", workerdisks,
-				secgroup, SecurityGroup,
-				"cloud_monitor_flags", CloudMonitorFlags,
-				"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
-				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
-				"image_id", ImageId,
-				"tags", tags,
-			)
-		}
+		body["format_disk"] = d.Get("format_disk").(bool)
+		body["keep_instance_name"] = d.Get("keep_instance_name").(bool)
+		body["instances"] = expandStringList(v.(*schema.Set).List())
 	} else {
-		if pod == 0 {
-			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%s,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":%s,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d}",
-				"Product", "Cs",
-				"os_type", OsType,
-				"platform", Platform,
-				"cluster_type", clustertype,
-				"region_id", client.RegionId,
-				"timeout_mins", timeout,
-				"disable_rollback", true,
-				"kubernetes_version", KubernetesVersion,
-				"container_cidr", pcidr,
-				"service_cidr", scdir,
-				"name", Name,
-				"master_instance_types", minst,
-				"worker_instance_types", winst,
-				"master_vswitch_ids", mvid,
-				"worker_vswitch_ids", wvid,
-				"login_Password", LoginPassword,
-				"num_of_nodes", NumOfNodes,
-				"master_count", mastercount,
-				"snat_entry", SnatEntry,
-				"endpoint_public_access", end,
-				"ssh_flags", enabSsh,
-				"master_system_disk_category", msysdiskcat,
-				"master_system_disk_size", msysdisksize,
-				"worker_system_disk_category", wsysdiskcat,
-				"worker_system_disk_size", wsysdisksize,
-				"deletion_protection", delete_pro,
-				"node_cidr_mask", nodecidr,
-				"vpcid", VpcId,
-				"addons", req,
-				"proxy_mode", proxy_mode,
-				"user_data", udata,
-				"runtime", runtime,
-				"node_port_range", nodeportrange,
-				"cpu_policy", cpuPolicy,
-				secgroup, SecurityGroup,
-				"cloud_monitor_flags", CloudMonitorFlags,
-				"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
-				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
-				"worker_data_disks", workerdisks,
-				"image_id", ImageId,
-				"tags", tags,
-				"master_storage_set_id", masterstoragesetid,
-				"master_storage_set_partition_number", masterstoragesetnumber,
-				"worker_storage_set_id", workerstoragesetid,
-				"worker_storage_set_partition_number", workerstoragesetnumber,
-			)
-		} else {
-			body = fmt.Sprintf("{\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%d,\"%s\":%d,\"%s\":%t,\"%s\":%t,\"%s\":%t,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":{%s},\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":%s,\"%s\":%t,\"%s\":\"%s\",\"%s\":\"%s\",\"%s\":[%s],\"%s\":[\"%s\"],\"%s\":\"%s\",\"%s\":%s,\"%s\":\"%s\",\"%s\":%d,\"%s\":\"%s\",\"%s\":%d}",
-				"Product", "Cs",
-				"os_type", OsType,
-				"platform", Platform,
-				"cluster_type", clustertype,
-				"region_id", client.RegionId,
-				"timeout_mins", timeout,
-				"disable_rollback", true,
-				"kubernetes_version", KubernetesVersion,
-				"container_cidr", pcidr,
-				"service_cidr", scdir,
-				"name", Name,
-				"master_instance_types", minst,
-				"worker_instance_types", winst,
-				"master_vswitch_ids", mvid,
-				"worker_vswitch_ids", wvid,
-				"login_Password", LoginPassword,
-				"num_of_nodes", NumOfNodes,
-				"master_count", mastercount,
-				"snat_entry", SnatEntry,
-				"endpoint_public_access", end,
-				"ssh_flags", enabSsh,
-				"master_system_disk_category", msysdiskcat,
-				"master_system_disk_size", msysdisksize,
-				"worker_system_disk_category", wsysdiskcat,
-				"worker_system_disk_size", wsysdisksize,
-				"deletion_protection", delete_pro,
-				"node_cidr_mask", nodecidr,
-				"vpcid", VpcId,
-				"addons", req,
-				"proxy_mode", proxy_mode,
-				"user_data", udata,
-				"runtime", runtime,
-				"node_port_range", nodeportrange,
-				"cpu_policy", cpuPolicy,
-				secgroup, SecurityGroup,
-				"cloud_monitor_flags", CloudMonitorFlags,
-				"master_system_disk_performance_level", MasterSystemDiskPerformanceLevel,
-				"worker_system_disk_performance_level", WorkerSystemDiskPerformanceLevel,
-				"worker_data_disks", workerdisks,
-				"pod_vswitch_ids", podid,
-				"image_id", ImageId,
-				"tags", tags,
-				"master_storage_set_id", masterstoragesetid,
-				"master_storage_set_partition_number", masterstoragesetnumber,
-				"worker_storage_set_id", workerstoragesetid,
-				"worker_storage_set_partition_number", workerstoragesetnumber,
-			)
-		}
+		body["worker_instance_types"] = d.Get("worker_instance_types").([]interface{})
+		body["worker_vswitch_ids"] = d.Get("worker_vswitch_ids").([]interface{})
+		body["worker_system_disk_category"] = d.Get("worker_disk_category").(string)
+		body["worker_system_disk_size"] = d.Get("worker_disk_size").(int)
+		body["master_storage_set_id"] = d.Get("master_storage_set_id").(string)
+		body["master_storage_set_partition_number"] = d.Get("master_storage_set_partition_number").(int)
+		body["worker_storage_set_id"] = d.Get("worker_storage_set_id").(string)
+		body["worker_storage_set_partition_number"] = d.Get("worker_storage_set_partition_number").(int)
 	}
-	request.SetContent([]byte(body))
+
+	if data, err := json.Marshal(body); err != nil {
+		return fmt.Errorf("failed to marshal JSON: %w", err)
+	} else {
+		request.SetContent(data)
+	}
 	var err error
 	err = nil
 	var cluster *responses.CommonResponse
