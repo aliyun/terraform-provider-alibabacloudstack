@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -61,7 +60,7 @@ func TestAccAlibabacloudStackOnsTopic_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-testacconstopicbasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccOnsTopicConfigBasic)
 
@@ -86,9 +85,9 @@ func TestAccAlibabacloudStackOnsTopic_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerifyIgnore: []string{"perm"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

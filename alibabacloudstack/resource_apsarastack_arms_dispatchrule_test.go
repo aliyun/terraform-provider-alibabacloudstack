@@ -12,7 +12,7 @@ import (
 	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -179,6 +179,11 @@ func TestAccAlibabacloudStackArmsDispatchRule_basic(t *testing.T) {
 						"notify_rules.#":                "1",
 					}),
 				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

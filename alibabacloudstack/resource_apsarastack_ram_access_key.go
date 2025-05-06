@@ -16,12 +16,7 @@ import (
 )
 
 func resourceAlibabacloudstackRamAccessKey() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudstackAscmAccessKeyCreate,
-		Read:   resourceAlibabacloudstackAscmAccessKeyRead,
-		Update: resourceAlibabacloudstackAscmAccessKeyUpdate,
-		Delete: resourceAlibabacloudstackAscmAccessKeyDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"user_name": {
 				Type:     schema.TypeString,
@@ -59,6 +54,8 @@ func resourceAlibabacloudstackRamAccessKey() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudstackAscmAccessKeyCreate, resourceAlibabacloudstackAscmAccessKeyRead, nil, resourceAlibabacloudstackAscmAccessKeyDelete)
+	return resource
 }
 
 func resourceAlibabacloudstackAscmAccessKeyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -94,15 +91,10 @@ func resourceAlibabacloudstackAscmAccessKeyCreate(d *schema.ResourceData, meta i
 
 	d.SetId(fmt.Sprint(response.AccessKeyId))
 
-	return resourceAlibabacloudstackAscmAccessKeyUpdate(d, meta)
-}
-
-func resourceAlibabacloudstackAscmAccessKeyUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudstackAscmAccessKeyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudstackAscmAccessKeyRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmKeypolicy(d.Id())
@@ -154,7 +146,6 @@ func resourceAlibabacloudstackAscmAccessKeyDelete(d *schema.ResourceData, meta i
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ram_access_key", "RamDeleteAccessKey", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil
-
 }
 
 func (s *AscmService) DescribeAscmKeypolicy(id string) (response *AccessKeyInCreateAccessKey, err error) {

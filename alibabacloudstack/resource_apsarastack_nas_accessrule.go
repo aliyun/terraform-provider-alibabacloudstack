@@ -12,15 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackNasAccessRule() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackNasAccessRuleCreate,
-		Read:   resourceAlibabacloudStackNasAccessRuleRead,
-		Update: resourceAlibabacloudStackNasAccessRuleUpdate,
-		Delete: resourceAlibabacloudStackNasAccessRuleDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"access_group_name": {
 				Type:     schema.TypeString,
@@ -55,6 +47,8 @@ func resourceAlibabacloudStackNasAccessRule() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackNasAccessRuleCreate, resourceAlibabacloudStackNasAccessRuleRead, resourceAlibabacloudStackNasAccessRuleUpdate, resourceAlibabacloudStackNasAccessRuleDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackNasAccessRuleCreate(d *schema.ResourceData, meta interface{}) error {
@@ -78,7 +72,7 @@ func resourceAlibabacloudStackNasAccessRuleCreate(d *schema.ResourceData, meta i
 		return err
 	}
 	d.SetId(fmt.Sprint(request["AccessGroupName"], ":", response["AccessRuleId"]))
-	return resourceAlibabacloudStackNasAccessRuleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNasAccessRuleUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -104,7 +98,7 @@ func resourceAlibabacloudStackNasAccessRuleUpdate(d *schema.ResourceData, meta i
 			return err
 		}
 	}
-	return resourceAlibabacloudStackNasAccessRuleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNasAccessRuleRead(d *schema.ResourceData, meta interface{}) error {

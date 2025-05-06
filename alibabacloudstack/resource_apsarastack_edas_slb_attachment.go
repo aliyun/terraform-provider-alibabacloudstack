@@ -10,14 +10,7 @@ import (
 )
 
 func resourceAlibabacloudStackEdasSlbAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEdasSlbAttachmentCreate,
-		Read:   resourceAlibabacloudStackEdasSlbAttachmentRead,
-		Delete: resourceAlibabacloudStackEdasSlbAttachmentDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"app_id": {
 				Type:     schema.TypeString,
@@ -64,6 +57,8 @@ func resourceAlibabacloudStackEdasSlbAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEdasSlbAttachmentCreate, resourceAlibabacloudStackEdasSlbAttachmentRead, nil, resourceAlibabacloudStackEdasSlbAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEdasSlbAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -109,7 +104,7 @@ func resourceAlibabacloudStackEdasSlbAttachmentCreate(d *schema.ResourceData, me
 		return errmsgs.WrapError(errmsgs.Error("bind slb failed for " + response.Message))
 	}
 	d.SetId(appId + ":" + slbId)
-	return resourceAlibabacloudStackEdasSlbAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasSlbAttachmentRead(d *schema.ResourceData, meta interface{}) error {

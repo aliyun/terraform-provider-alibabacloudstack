@@ -18,14 +18,7 @@ import (
 )
 
 func resourceAlibabacloudStackOnsInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackOnsInstanceCreate,
-		Read:   resourceAlibabacloudStackOnsInstanceRead,
-		Update: resourceAlibabacloudStackOnsInstanceUpdate,
-		Delete: resourceAlibabacloudStackOnsInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -76,6 +69,8 @@ func resourceAlibabacloudStackOnsInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackOnsInstanceCreate, resourceAlibabacloudStackOnsInstanceRead, resourceAlibabacloudStackOnsInstanceUpdate, resourceAlibabacloudStackOnsInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackOnsInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -104,6 +99,7 @@ func resourceAlibabacloudStackOnsInstanceCreate(d *schema.ResourceData, meta int
 		return onsClient.ProcessCommonRequest(request)
 	})
 	bresponse, ok := raw.(*responses.CommonResponse)
+	addDebug("ConsoleInstanceCreate", raw, request, request.QueryParams)
 	if err != nil {
 		errmsg := ""
 		if ok {
@@ -111,7 +107,6 @@ func resourceAlibabacloudStackOnsInstanceCreate(d *schema.ResourceData, meta int
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ons_instance", "ConsoleInstanceCreate", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug("ConsoleInstanceCreate", raw, request)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &ins_resp)
 	if ins_resp.Success != true {
 		return errmsgs.WrapErrorf(errors.New(ins_resp.Message), errmsgs.DefaultErrorMsg, "alibabacloudstack_ons_instance", "ConsoleInstanceCreate", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -122,11 +117,10 @@ func resourceAlibabacloudStackOnsInstanceCreate(d *schema.ResourceData, meta int
 	}
 	d.SetId(ins_resp.Data.InstanceID)
 
-	return resourceAlibabacloudStackOnsInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOnsInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	onsService := OnsService{client}
 
@@ -144,6 +138,12 @@ func resourceAlibabacloudStackOnsInstanceRead(d *schema.ResourceData, meta inter
 	d.Set("name", response.Data.InstanceName)
 	d.Set("instance_type", response.Data.InstanceType)
 	d.Set("instance_status", response.Data.InstanceStatus)
+	d.Set("remark", response.Data.Remark)
+	d.Set("tps_receive_max", response.Data.TpsReceiveMax)
+	d.Set("tps_send_max", response.Data.TpsSendMax)
+	d.Set("independent_naming", fmt.Sprintf("%t", response.Data.IndependentNaming))
+	d.Set("cluster", response.Data.Cluster)
+	d.Set("topic_capacity", response.Data.TopicCapacity)
 	d.Set("create_time", time.Unix(response.Data.CreateTime/1000, 0).Format("2006-01-02 03:04:05"))
 
 	return nil
@@ -191,13 +191,13 @@ func resourceAlibabacloudStackOnsInstanceUpdate(d *schema.ResourceData, meta int
 		if v, ok := d.GetOk("tps_send_max"); ok {
 			maxstps = v.(int)
 		}
-		check.Data.TpsMax = maxstps
+		check.Data.TpsSendMax = maxstps
 		attributeUpdate = true
 	} else {
 		if v, ok := d.GetOk("tps_send_max"); ok {
 			maxstps = v.(int)
 		}
-		check.Data.TpsMax = maxstps
+		check.Data.TpsSendMax = maxstps
 	}
 	if d.HasChange("topic_capacity") {
 		if v, ok := d.GetOk("topic_capacity"); ok {
@@ -261,7 +261,7 @@ func resourceAlibabacloudStackOnsInstanceUpdate(d *schema.ResourceData, meta int
 
 	}
 
-	return resourceAlibabacloudStackOnsInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOnsInstanceDelete(d *schema.ResourceData, meta interface{}) error {

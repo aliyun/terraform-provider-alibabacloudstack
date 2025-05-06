@@ -14,14 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackGpdbAccount() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackGpdbAccountCreate,
-		Read:   resourceAlibabacloudStackGpdbAccountRead,
-		Update: resourceAlibabacloudStackGpdbAccountUpdate,
-		Delete: resourceAlibabacloudStackGpdbAccountDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
 		},
@@ -54,6 +47,8 @@ func resourceAlibabacloudStackGpdbAccount() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackGpdbAccountCreate, resourceAlibabacloudStackGpdbAccountRead, resourceAlibabacloudStackGpdbAccountUpdate, resourceAlibabacloudStackGpdbAccountDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackGpdbAccountCreate(d *schema.ResourceData, meta interface{}) error {
@@ -79,7 +74,7 @@ func resourceAlibabacloudStackGpdbAccountCreate(d *schema.ResourceData, meta int
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackGpdbAccountRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackGpdbAccountRead(d *schema.ResourceData, meta interface{}) error {
@@ -133,7 +128,7 @@ func resourceAlibabacloudStackGpdbAccountUpdate(d *schema.ResourceData, meta int
 		}
 	}
 
-	return resourceAlibabacloudStackGpdbAccountRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackGpdbAccountDelete(d *schema.ResourceData, meta interface{}) error {

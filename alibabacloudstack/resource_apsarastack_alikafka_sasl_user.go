@@ -12,15 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackAlikafkaSaslUser() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAlikafkaSaslUserCreate,
-		Read:   resourceAlibabacloudStackAlikafkaSaslUserRead,
-		Update: resourceAlibabacloudStackAlikafkaSaslUserUpdate,
-		Delete: resourceAlibabacloudStackAlikafkaSaslUserDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -63,6 +55,8 @@ func resourceAlibabacloudStackAlikafkaSaslUser() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAlikafkaSaslUserCreate, resourceAlibabacloudStackAlikafkaSaslUserRead, resourceAlibabacloudStackAlikafkaSaslUserUpdate, resourceAlibabacloudStackAlikafkaSaslUserDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAlikafkaSaslUserCreate(d *schema.ResourceData, meta interface{}) error {
@@ -122,7 +116,7 @@ func resourceAlibabacloudStackAlikafkaSaslUserCreate(d *schema.ResourceData, met
 	// Server may have cache, sleep a while.
 	time.Sleep(2 * time.Second)
 	d.SetId(instanceId + ":" + username + ":" + usertype)
-	return resourceAlibabacloudStackAlikafkaSaslUserUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAlikafkaSaslUserRead(d *schema.ResourceData, meta interface{}) error {
@@ -214,7 +208,7 @@ func resourceAlibabacloudStackAlikafkaSaslUserUpdate(d *schema.ResourceData, met
 		// Server may have cache, sleep a while.
 		time.Sleep(1000)
 	}
-	return resourceAlibabacloudStackAlikafkaSaslUserRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAlikafkaSaslUserDelete(d *schema.ResourceData, meta interface{}) error {

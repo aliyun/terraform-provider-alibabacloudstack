@@ -16,14 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackDtsSubscriptionJob() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDtsSubscriptionJobCreate,
-		Read:   resourceAlibabacloudStackDtsSubscriptionJobRead,
-		Update: resourceAlibabacloudStackDtsSubscriptionJobUpdate,
-		Delete: resourceAlibabacloudStackDtsSubscriptionJobDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Update: schema.DefaultTimeout(5 * time.Minute),
 		},
@@ -200,6 +193,8 @@ func resourceAlibabacloudStackDtsSubscriptionJob() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDtsSubscriptionJobCreate, resourceAlibabacloudStackDtsSubscriptionJobRead, resourceAlibabacloudStackDtsSubscriptionJobUpdate, resourceAlibabacloudStackDtsSubscriptionJobDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDtsSubscriptionJobCreate(d *schema.ResourceData, meta interface{}) error {
@@ -394,7 +389,7 @@ func resourceAlibabacloudStackDtsSubscriptionJobCreate(d *schema.ResourceData, m
 	}
 	fmt.Printf("==================================  %s", fmt.Sprint(configureSubscriptionRsp["DtsJobId"]))
 	d.SetId(fmt.Sprint(configureSubscriptionRsp["DtsJobId"]))
-	return resourceAlibabacloudStackDtsSubscriptionJobUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDtsSubscriptionJobRead(d *schema.ResourceData, meta interface{}) error {
@@ -787,7 +782,7 @@ func resourceAlibabacloudStackDtsSubscriptionJobUpdate(d *schema.ResourceData, m
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackDtsSubscriptionJobRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDtsSubscriptionJobDelete(d *schema.ResourceData, meta interface{}) error {
@@ -1000,6 +995,7 @@ func convertDtsPaymentTypeResponse(source interface{}) interface{} {
 	}
 	return source
 }
+
 func convertDtsPaymentTypeRequest(source interface{}) interface{} {
 	switch source {
 	case "PayAsYouGo":

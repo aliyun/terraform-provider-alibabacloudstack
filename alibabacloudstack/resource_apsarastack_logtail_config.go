@@ -16,14 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackLogtailConfig() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackLogtailConfigCreate,
-		Read:   resourceAlibabacloudStackLogtailConfigRead,
-		Update: resourceAlibabacloudStackLogtailConfiglUpdate,
-		Delete: resourceAlibabacloudStackLogtailConfigDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 
 			"name": {
@@ -62,6 +55,9 @@ func resourceAlibabacloudStackLogtailConfig() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackLogtailConfigCreate,
+		resourceAlibabacloudStackLogtailConfigRead, resourceAlibabacloudStackLogtailConfiglUpdate, resourceAlibabacloudStackLogtailConfigDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackLogtailConfigCreate(d *schema.ResourceData, meta interface{}) error {
@@ -102,11 +98,10 @@ func resourceAlibabacloudStackLogtailConfigCreate(d *schema.ResourceData, meta i
 		})
 	}
 	d.SetId(fmt.Sprintf("%s%s%s%s%s", d.Get("project").(string), COLON_SEPARATED, d.Get("logstore").(string), COLON_SEPARATED, d.Get("name").(string)))
-	return resourceAlibabacloudStackLogtailConfigRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogtailConfigRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 	split := strings.Split(d.Id(), COLON_SEPARATED)
@@ -199,7 +194,7 @@ func resourceAlibabacloudStackLogtailConfiglUpdate(d *schema.ResourceData, meta 
 			})
 		}
 	}
-	return resourceAlibabacloudStackLogtailConfigRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogtailConfigDelete(d *schema.ResourceData, meta interface{}) error {

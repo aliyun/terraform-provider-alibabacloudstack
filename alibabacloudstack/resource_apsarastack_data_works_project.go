@@ -10,14 +10,7 @@ import (
 )
 
 func resourceAlibabacloudStackDataWorksProject() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDataWorksProjectCreate,
-		Read:   resourceAlibabacloudStackDataWorksProjectRead,
-		Update: resourceAlibabacloudStackDataWorksProjectUpdate,
-		Delete: resourceAlibabacloudStackDataWorksProjectDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Type:     schema.TypeString,
@@ -34,6 +27,9 @@ func resourceAlibabacloudStackDataWorksProject() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDataWorksProjectCreate,
+		resourceAlibabacloudStackDataWorksProjectRead, resourceAlibabacloudStackDataWorksProjectUpdate, resourceAlibabacloudStackDataWorksProjectDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDataWorksProjectCreate(d *schema.ResourceData, meta interface{}) error {
@@ -61,7 +57,7 @@ func resourceAlibabacloudStackDataWorksProjectCreate(d *schema.ResourceData, met
 
 	d.SetId(fmt.Sprint(response["RequestId"], ":", response["Data"]))
 
-	return resourceAlibabacloudStackDataWorksProjectRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDataWorksProjectRead(d *schema.ResourceData, meta interface{}) error {
@@ -91,8 +87,9 @@ func resourceAlibabacloudStackDataWorksProjectRead(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackDataWorksProjectUpdate(d *schema.ResourceData, meta interface{}) error {
-	// 没有对应 API
-	return resourceAlibabacloudStackDataWorksProjectRead(d, meta)
+	noUpdateAllowedFields := []string{"project_name", "task_auth_type"}
+
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackDataWorksProjectDelete(d *schema.ResourceData, meta interface{}) error {

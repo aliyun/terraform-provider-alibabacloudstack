@@ -14,14 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackMaxcomputeUser() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackMaxcomputeUserCreate,
-		Read:   resourceAlibabacloudStackMaxcomputeUserRead,
-		Update: resourceAlibabacloudStackMaxcomputeUserUpdate,
-		Delete: resourceAlibabacloudStackMaxcomputeUserDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
@@ -65,6 +58,8 @@ func resourceAlibabacloudStackMaxcomputeUser() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackMaxcomputeUserCreate, resourceAlibabacloudStackMaxcomputeUserRead, resourceAlibabacloudStackMaxcomputeUserUpdate, resourceAlibabacloudStackMaxcomputeUserDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackMaxcomputeUserCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -89,7 +84,7 @@ func resourceAlibabacloudStackMaxcomputeUserCreate(d *schema.ResourceData, meta 
 		return errmsgs.WrapError(errmsgs.Error("CreateUpdateOdpsUser failed for "))
 	}
 
-	return resourceAlibabacloudStackMaxcomputeUserRead(d, meta)
+	return
 }
 
 func resourceAlibabacloudStackMaxcomputeUserRead(d *schema.ResourceData, meta interface{}) error {
@@ -171,7 +166,7 @@ func resourceAlibabacloudStackMaxcomputeUserUpdate(d *schema.ResourceData, meta 
 		}
 		addDebug("UpdateOdpsUser", raw, requestInfo, commonRequest)
 	}
-	return resourceAlibabacloudStackMaxcomputeUserRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeUserDelete(d *schema.ResourceData, meta interface{}) error {

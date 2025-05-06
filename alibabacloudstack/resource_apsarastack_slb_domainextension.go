@@ -15,15 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackSlbDomainExtension() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSlbDomainExtensionCreate,
-		Read:   resourceAlibabacloudStackSlbDomainExtensionRead,
-		Update: resourceAlibabacloudStackSlbDomainExtensionUpdate,
-		Delete: resourceAlibabacloudStackSlbDomainExtensionDelete,
-
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"load_balancer_id": {
 				Type:     schema.TypeString,
@@ -72,6 +64,10 @@ func resourceAlibabacloudStackSlbDomainExtension() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSlbDomainExtensionCreate, 
+		resourceAlibabacloudStackSlbDomainExtensionRead, resourceAlibabacloudStackSlbDomainExtensionUpdate, 
+		resourceAlibabacloudStackSlbDomainExtensionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSlbDomainExtensionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -112,11 +108,10 @@ func resourceAlibabacloudStackSlbDomainExtensionCreate(d *schema.ResourceData, m
 	}
 
 	d.SetId(response.DomainExtensionId)
-	return resourceAlibabacloudStackSlbDomainExtensionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbDomainExtensionRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 
@@ -167,9 +162,8 @@ func resourceAlibabacloudStackSlbDomainExtensionUpdate(d *schema.ResourceData, m
 		if err != nil {
 			return err
 		}
-		//d.SetPartial("server_certificate_id")
 	}
-	return resourceAlibabacloudStackSlbDomainExtensionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbDomainExtensionDelete(d *schema.ResourceData, meta interface{}) error {

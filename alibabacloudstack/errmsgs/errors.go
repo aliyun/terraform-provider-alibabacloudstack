@@ -421,6 +421,7 @@ func CheckEmpty(value interface{}, schemaType schema.ValueType, keys ...string) 
 const IdMsg = "Resource id：%s "
 const DefaultErrorMsg = "Resource %s %s Failed!!! %s"
 const RequestV1ErrorMsg = "Resource %s %s Failed!!! %s%s"
+const UpdateFailedErrorMsg = "Resource %s fields: %s not update allowed!!! %s"
 const VPCErrorMsg = "Resource %s %s Failed!!! %s"
 const RequestIdMsg = "RequestId: %s"
 const NotFoundMsg = ResourceNotfound + "!!! %s"

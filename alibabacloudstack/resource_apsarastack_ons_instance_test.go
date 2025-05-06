@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackOnsInstance_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":               name,
 					"remark":             "Ons_Instance",
-					"tps_receive_max":    "500",
+					"tps_receive_max":    "400",
 					"tps_send_max":       "500",
 					"topic_capacity":     "50",
 					"cluster":            "cluster1",
@@ -49,6 +49,11 @@ func TestAccAlibabacloudStackOnsInstance_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
 			},
 		},
 	})

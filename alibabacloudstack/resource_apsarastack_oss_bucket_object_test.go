@@ -16,7 +16,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
-	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -67,6 +66,14 @@ func TestAccAlibabacloudStackOssBucketObject_basic(t *testing.T) {
 						"source": tmpFile.Name(),
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// source是本地属性，无法从远端加载
+				// acl需要特殊权限，当前无法在测试时调整
+				ImportStateVerifyIgnore: []string{"source", "acl"},
 			},
 			/*
 				{
@@ -181,7 +188,9 @@ func testAccCheckOssBucketObjectExistsWithProviders(n string, bucket string, obj
 			if err != nil {
 				return fmt.Errorf("Error getting bucket: %#v", err)
 			}
-			object, err := buck.GetObjectMeta(rs.Primary.ID)
+			id_info := strings.SplitN(rs.Primary.ID, ":", 2)
+			key := id_info[1]
+			object, err := buck.GetObjectMeta(key)
 			log.Printf("[WARN]get oss bucket object %#v", bucket)
 			if err == nil {
 				if object != nil {

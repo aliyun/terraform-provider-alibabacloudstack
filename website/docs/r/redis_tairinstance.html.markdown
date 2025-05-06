@@ -1,5 +1,5 @@
 ---
-subcategory: "Redis"
+subcategory: "Redis And Memcache (KVStore)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_redis_tairinstance"
 sidebar_current: "docs-Alibabacloudstack-redis-tairinstance"

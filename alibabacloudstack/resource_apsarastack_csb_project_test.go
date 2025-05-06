@@ -2,10 +2,12 @@ package alibabacloudstack
 
 import (
 	"fmt"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackCSBProject_basic1(t *testing.T) {
@@ -41,6 +43,11 @@ func TestAccAlibabacloudStackCSBProject_basic1(t *testing.T) {
 						"project_name": "test3",
 					}),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

@@ -19,9 +19,9 @@ func TestAccAlibabacloudStackDiskAttachment_basic(t *testing.T) {
 	serverFunc := func() interface{} {
 		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	
+
 	diskRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_disk.default", &v, serverFunc, "DescribeDisk")
-	
+
 	instanceRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_instance.default", &i, serverFunc, "DescribeInstance")
 
 	attachmentRc := resourceCheckInitWithDescribeMethod("alibabacloudstack_ecs_diskattachment.default", &attachment, serverFunc, "DescribeDiskAttachment")
@@ -57,6 +57,11 @@ func TestAccAlibabacloudStackDiskAttachment_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"alibabacloudstack_ecs_disk.default", "size", "30"),
 				),
+			},
+			{
+				ResourceName:      "alibabacloudstack_ecs_diskattachment.default",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

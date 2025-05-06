@@ -15,11 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmUserGroupRoleBinding() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmUserGroupRoleBindingCreate,
-		Read:   resourceAlibabacloudStackAscmUserGroupRoleBindingRead,
-		Update: resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate,
-		Delete: resourceAlibabacloudStackAscmUserGroupRoleBindingDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"user_group_id": {
 				Type:     schema.TypeInt,
@@ -31,7 +27,14 @@ func resourceAlibabacloudStackAscmUserGroupRoleBinding() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeInt},
 			},
 		},
+		DeprecationMessage: "ascm_user_group already includes corresponding functions",
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackAscmUserGroupRoleBindingCreate,
+		resourceAlibabacloudStackAscmUserGroupRoleBindingRead,
+		resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate,
+		resourceAlibabacloudStackAscmUserGroupRoleBindingDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmUserGroupRoleBindingCreate(d *schema.ResourceData, meta interface{}) error {
@@ -77,11 +80,10 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingCreate(d *schema.ResourceD
 
 	d.SetId(strconv.Itoa(userGroupId))
 
-	return resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserGroupRoleBindingRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmUserGroupRoleBinding(d.Id())
@@ -142,7 +144,7 @@ func resourceAlibabacloudStackAscmUserGroupRoleBindingUpdate(d *schema.ResourceD
 	}
 
 	addDebug("ResetRolesForUserGroup", bresponse, request)
-	return resourceAlibabacloudStackAscmUserGroupRoleBindingRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserGroupRoleBindingDelete(d *schema.ResourceData, meta interface{}) error {

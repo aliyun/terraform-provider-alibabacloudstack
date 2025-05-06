@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -24,6 +25,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -990,4 +992,120 @@ func newInstanceDiff(resourceName string, attributes, attributesDiff map[string]
 		}
 	}
 	return diff, nil
+}
+
+func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, readFunc schema.ReadFunc, updateFunc schema.UpdateFunc, deleteFunc schema.DeleteFunc) {
+	resource.CreateContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+		var err error
+		err = createFunc(d, meta)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		waitSecondsIfWithTest(1)
+
+		if updateFunc != nil {
+			err = updateFunc(d, meta)
+		}
+		
+		if err != nil {
+			waitSecondsIfWithTest(3)
+			// 如果创建成功但读取加载失败，tf不会终态，为方式残留资源，触发删除
+			resource.DeleteContext(ctx, d, meta)
+			return diag.FromErr(err)
+		}
+		
+		waitSecondsIfWithTest(1)
+		retry := 5
+		for retry > 0 {
+			// 大批量触发时asapi侧的资源同步会有一定的延迟，如果失败则重试
+			err = readFunc(d, meta)
+			if err != nil {
+				time.Sleep(time.Second * 5)
+				retry--
+				continue
+			}
+			break
+		}
+		if err != nil {
+			// 如果创建成功但读取加载失败，tf不会终态，为方式残留资源，触发删除
+			waitSecondsIfWithTest(3)
+			resource.DeleteContext(ctx, d, meta)
+			return diag.FromErr(err)
+		}
+		
+		return nil
+	}
+
+	resource.ReadContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+		err := readFunc(d, meta)
+		return diag.FromErr(err)
+	}
+
+	if updateFunc != nil {
+		resource.UpdateContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+			update_err := updateFunc(d, meta)
+			waitSecondsIfWithTest(1)
+			read_err := readFunc(d, meta)
+			if update_err != nil {
+				return diag.FromErr(update_err)
+			}
+			return diag.FromErr(read_err)
+		}
+	}
+
+	resource.DeleteContext = func(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+		err := deleteFunc(d, meta)
+		return diag.FromErr(err)
+	}
+
+	if resource.Importer == nil {
+		resource.Importer = &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		}
+	}
+}
+
+func getRoleIdsAsString(d *schema.ResourceData) (string, error) {
+    // 获取 role_ids 的值
+    roleIdsInterface := d.Get("role_ids")
+    
+    // 类型断言为 *schema.Set
+    roleSet, ok := roleIdsInterface.(*schema.Set)
+    if !ok {
+        return "", fmt.Errorf("Expected role_ids to be a *schema.Set, got %T", roleIdsInterface)
+    }
+
+    // 获取元素列表
+    roleList := roleSet.List()
+
+    // 转换为字符串切片
+    var stringRoleIds []string
+    for _, v := range roleList {
+        roleIdStr, ok := v.(string)
+        if !ok {
+            return "", fmt.Errorf("Invalid role_id type, expected string but got %T", v)
+        }
+        stringRoleIds = append(stringRoleIds, roleIdStr)
+    }
+
+    // 拼接字符串
+    return "["+strings.Join(stringRoleIds, ",")+"]", nil
+}
+
+func noUpdatesAllowedCheck(d *schema.ResourceData, fields []string) error {
+	if d.IsNewResource() {
+		return nil
+	}
+	updatefields := make([]string, 0)
+	for _, field := range fields {
+		if d.HasChange(field) {
+			updatefields = append(updatefields, field)
+		}
+	}
+	if len(updatefields) > 0 {
+		updatefieldsstr := fmt.Sprintf("%s", strings.Join(updatefields, ","))
+		return errmsgs.Error(errmsgs.UpdateFailedErrorMsg, d.Id(), updatefieldsstr, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	return nil
 }

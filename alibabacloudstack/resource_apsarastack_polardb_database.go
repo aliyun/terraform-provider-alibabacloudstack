@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackPolardbDatabase() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackPolardbDatabaseCreate,
-		Read:   resourceAlibabacloudStackPolardbDatabaseRead,
-		Update: resourceAlibabacloudStackPolardbDatabaseUpdate,
-		Delete: resourceAlibabacloudStackPolardbDatabaseDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 
 			"accounts": {
@@ -84,6 +77,9 @@ func resourceAlibabacloudStackPolardbDatabase() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackPolardbDatabaseCreate,
+		resourceAlibabacloudStackPolardbDatabaseRead, resourceAlibabacloudStackPolardbDatabaseUpdate, resourceAlibabacloudStackPolardbDatabaseDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackPolardbDatabaseCreate(d *schema.ResourceData, meta interface{}) error {
@@ -134,8 +130,7 @@ func resourceAlibabacloudStackPolardbDatabaseCreate(d *schema.ResourceData, meta
 	data_base_name := d.Get("data_base_name").(string)
 
 	d.SetId(fmt.Sprintf("%s", data_base_instance_id+":"+data_base_name))
-	return resourceAlibabacloudStackPolardbDatabaseUpdate(d, meta)
-
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbDatabaseUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -181,7 +176,7 @@ func resourceAlibabacloudStackPolardbDatabaseUpdate(d *schema.ResourceData, meta
 
 	}
 
-	return resourceAlibabacloudStackPolardbDatabaseRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbDatabaseRead(d *schema.ResourceData, meta interface{}) error {

@@ -15,27 +15,19 @@ import (
 )
 
 func resourceAlibabacloudStackEssAlarm() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEssAlarmCreate,
-		Read:   resourceAlibabacloudStackEssAlarmRead,
-		Update: resourceAlibabacloudStackEssAlarmUpdate,
-		Delete: resourceAlibabacloudStackEssAlarmDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'alarm_task_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'alarm_task_name' instead.",
 				ConflictsWith: []string{"alarm_task_name"},
 			},
 			"alarm_task_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"name"},
 			},
 			"description": {
@@ -43,16 +35,16 @@ func resourceAlibabacloudStackEssAlarm() *schema.Resource {
 				Optional: true,
 			},
 			"enable": {
-				Type:         schema.TypeBool,
-				Optional:     true,
-				Computed:     true,
-				Deprecated:   "Field 'enable' is deprecated and will be removed in a future release. Please use new field 'status' instead.",
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'enable' is deprecated and will be removed in a future release. Please use new field 'status' instead.",
 				ConflictsWith: []string{"status"},
 			},
 			"status": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed:     true,
+				Type:          schema.TypeBool,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"enable"},
 			},
 			"alarm_actions": {
@@ -121,9 +113,9 @@ func resourceAlibabacloudStackEssAlarm() *schema.Resource {
 				Computed: true,
 			},
 			"state": {
-				Type:         schema.TypeString,
-				Computed:     true,
-				Deprecated:   "Field 'state' is deprecated and will be removed in a future release. Please use new field 'alarm_trigger_state' instead.",
+				Type:       schema.TypeString,
+				Computed:   true,
+				Deprecated: "Field 'state' is deprecated and will be removed in a future release. Please use new field 'alarm_trigger_state' instead.",
 			},
 			"alarm_trigger_state": {
 				Type:     schema.TypeString,
@@ -131,6 +123,9 @@ func resourceAlibabacloudStackEssAlarm() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEssAlarmCreate,
+		resourceAlibabacloudStackEssAlarmRead, resourceAlibabacloudStackEssAlarmUpdate, resourceAlibabacloudStackEssAlarmDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEssAlarmCreate(d *schema.ResourceData, meta interface{}) error {
@@ -195,10 +190,11 @@ func resourceAlibabacloudStackEssAlarmCreate(d *schema.ResourceData, meta interf
 		}
 		addDebug(disableAlarmRequest.GetActionName(), raw, disableAlarmRequest.RpcRequest, disableAlarmRequest)
 	}
-	return resourceAlibabacloudStackEssAlarmRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssAlarmRead(d *schema.ResourceData, meta interface{}) error {
+	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}
 
@@ -252,7 +248,7 @@ func resourceAlibabacloudStackEssAlarmUpdate(d *schema.ResourceData, meta interf
 	if metricType, ok := d.GetOk("metric_type"); ok && metricType.(string) != "" {
 		request.MetricType = metricType.(string)
 	}
-	if d.HasChanges("alarm_task_name","name")  {
+	if d.HasChanges("alarm_task_name", "name") {
 		request.Name = connectivity.GetResourceData(d, "alarm_task_name", "name").(string)
 	}
 
@@ -318,7 +314,7 @@ func resourceAlibabacloudStackEssAlarmUpdate(d *schema.ResourceData, meta interf
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	if d.HasChanges("status", "enable"){
+	if d.HasChanges("status", "enable") {
 		var enable bool
 		if v, ok := connectivity.GetResourceDataOk(d, "status", "enable"); ok {
 			enable = v.(bool)
@@ -342,7 +338,7 @@ func resourceAlibabacloudStackEssAlarmUpdate(d *schema.ResourceData, meta interf
 				}
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), enableAlarmRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			addDebug(enableAlarmRequest.GetActionName(), raw)
+			addDebug(enableAlarmRequest.GetActionName(), raw, enableAlarmRequest.RpcRequest, enableAlarmRequest)
 		} else {
 			disableAlarmRequest := ess.CreateDisableAlarmRequest()
 			client.InitRpcRequest(*disableAlarmRequest.RpcRequest)
@@ -360,11 +356,11 @@ func resourceAlibabacloudStackEssAlarmUpdate(d *schema.ResourceData, meta interf
 				}
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), disableAlarmRequest.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			addDebug(disableAlarmRequest.GetActionName(), raw)
+			addDebug(disableAlarmRequest.GetActionName(), raw, disableAlarmRequest.RpcRequest, disableAlarmRequest)
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackEssAlarmRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssAlarmDelete(d *schema.ResourceData, meta interface{}) error {

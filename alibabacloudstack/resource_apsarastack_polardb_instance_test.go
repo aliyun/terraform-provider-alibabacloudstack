@@ -190,7 +190,7 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 					"engine_version":           "8.0",
 					"db_instance_class":        "rds.mysql.t1.small",
 					"db_instance_storage":      "10",
-					"zone_id":                  "cn-wulan-env205-amtest205001-a",
+					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            "${var.name}",
 					"db_instance_storage_type": "local_ssd",
 				}),
@@ -201,24 +201,81 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"encryption", "period", "auto_renew"},
+			},
+			{
 				Config: testAccConfig(map[string]interface{}{
 					"enable_ssl":               "true",
 					"tde_status":               "true",
 					"encryption":               "true",
-					"encryption_key":           "ae14de55-fdf8-4ea9-b0ec-5b05ff4d5340",
-					"zone_id":                  "cn-wulan-env205-amtest205001-a",
+					"encryption_key":           "${alibabacloudstack_kms_key.key.key_id}",
+					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            "${var.name}",
 					"db_instance_storage_type": "local_ssd",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"encryption": "true",
+						"tde_status": "true",
+						"enable_ssl": "true",
 					}),
 				),
 			},
 		},
 	})
+}
 
+func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
+	var instance *PolardbDescribedbinstancesResponse
+	resourceId := "alibabacloudstack_polardb_dbinstance.default"
+	ra := resourceAttrInit(resourceId, PolardbinstancePGSqlMap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &instance, func() interface{} {
+		return &PolardbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "Describedbinstances")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := "tf-testaccdbinstanceconfig"
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceClassicConfigDependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+
+		// module name
+		IDRefreshName: resourceId,
+
+		Providers:    testAccProviders,
+		CheckDestroy: nil,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"engine":                   "PolarDB_PG",
+					"engine_version":           "14",
+					"db_instance_class":        "polardb.x4.medium.2",
+					"db_instance_storage":      "10",
+					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
+					"instance_name":            "${var.name}",
+					"db_instance_storage_type": "local_ssd",
+					"enable_ssl":               "true",
+					"tde_status":               "true",
+					"encryption":               "true",
+					"encryption_key":           "${alibabacloudstack_kms_key.key.key_id}",
+					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"instance_name": name,
+						"encryption":    "true",
+						"tde_status":    "true",
+						"enable_ssl":    "true",
+					}),
+				),
+			},
+		},
+	})
 }
 
 func resourcePolardbInstanceClassicConfigDependence(name string) string {
@@ -228,6 +285,13 @@ variable "name" {
 	default = "%s"
 }
 
+resource "alibabacloudstack_kms_key" "key" {
+  description             = "Hello KMS"
+  pending_window_in_days  = "7"
+  key_state               = "Enabled"
+}
+
+
 %s
 
 `, name, VSwitchCommonTestCase)
@@ -236,6 +300,17 @@ variable "name" {
 var PolardbinstanceBasicMap = map[string]string{
 	"engine":              "MySQL",
 	"engine_version":      "8.0",
+	"db_instance_class":   CHECKSET,
+	"db_instance_storage": "10",
+	"instance_name":       "tf-testaccdbinstanceconfig",
+	"zone_id":             CHECKSET,
+	"connection_string":   CHECKSET,
+	"port":                CHECKSET,
+}
+
+var PolardbinstancePGSqlMap = map[string]string{
+	"engine":              "PolarDB_PG",
+	"engine_version":      "14",
 	"db_instance_class":   CHECKSET,
 	"db_instance_storage": "10",
 	"instance_name":       "tf-testaccdbinstanceconfig",

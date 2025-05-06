@@ -13,15 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackSecurityGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSecurityGroupCreate,
-		Read:   resourceAlibabacloudStackSecurityGroupRead,
-		Update: resourceAlibabacloudStackSecurityGroupUpdate,
-		Delete: resourceAlibabacloudStackSecurityGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
@@ -57,6 +49,8 @@ func resourceAlibabacloudStackSecurityGroup() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSecurityGroupCreate, resourceAlibabacloudStackSecurityGroupRead, resourceAlibabacloudStackSecurityGroupUpdate, resourceAlibabacloudStackSecurityGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSecurityGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -91,11 +85,10 @@ func resourceAlibabacloudStackSecurityGroupCreate(d *schema.ResourceData, meta i
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ := raw.(*ecs.CreateSecurityGroupResponse)
 	d.SetId(response.SecurityGroupId)
-	return resourceAlibabacloudStackSecurityGroupUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSecurityGroupRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 
@@ -175,7 +168,7 @@ func resourceAlibabacloudStackSecurityGroupUpdate(d *schema.ResourceData, meta i
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackSecurityGroupRead(d, meta)
+		return nil
 	}
 
 	update := false
@@ -209,7 +202,7 @@ func resourceAlibabacloudStackSecurityGroupUpdate(d *schema.ResourceData, meta i
 
 	d.Partial(false)
 
-	return resourceAlibabacloudStackSecurityGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSecurityGroupDelete(d *schema.ResourceData, meta interface{}) error {

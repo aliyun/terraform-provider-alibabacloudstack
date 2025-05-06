@@ -651,7 +651,7 @@ func (client *AlibabacloudStackClient) WithOssDataClient(do func(*oss.Client) (i
 
 	// Initialize the OSS client if necessary
 	if client.ossconn == nil {
-		schma := "http"
+		schma := strings.ToLower(client.Config.Protocol)
 		endpoint := client.Config.Endpoints[OssDataCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("unable to initialize the oss client: endpoint or domain is not provided for OSS service")
@@ -1341,7 +1341,7 @@ func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.Co
 			request.QueryParams["x-acs-body"] = string(request.Content)
 		}
 		if popcode == OneRouterCode {
-			request.QueryParams["AccountInfo"] = "123456" //TODO: 3162 ~ 3180 onerouter必传，后续版本移除
+			request.QueryParams["AccountInfo"] = "terraform-provider" //TODO: 3162 ~ 3180 onerouter必传，后续版本移除
 		}
 		request.Method = "POST"
 		if strings.HasPrefix(domain, "public.asapi.") {

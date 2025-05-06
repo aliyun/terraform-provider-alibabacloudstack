@@ -6,7 +6,7 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cloudapi"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -47,6 +47,11 @@ func TestAccAlibabacloudStackApigatewayAppAttachment(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
 			},
 		},
 	})

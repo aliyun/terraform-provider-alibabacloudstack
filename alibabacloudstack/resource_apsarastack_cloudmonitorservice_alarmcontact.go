@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudstackCmsAlarmContact() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudstackCmsAlarmContactCreate,
-		Read:   resourceAlibabacloudstackCmsAlarmContactRead,
-		Update: resourceAlibabacloudstackCmsAlarmContactUpdate,
-		Delete: resourceAlibabacloudstackCmsAlarmContactDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"alarm_contact_name": {
 				Type:     schema.TypeString,
@@ -62,6 +55,8 @@ func resourceAlibabacloudstackCmsAlarmContact() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudstackCmsAlarmContactCreate, resourceAlibabacloudstackCmsAlarmContactRead, resourceAlibabacloudstackCmsAlarmContactUpdate, resourceAlibabacloudstackCmsAlarmContactDelete)
+	return resource
 }
 
 func resourceAlibabacloudstackCmsAlarmContactCreate(d *schema.ResourceData, meta interface{}) error {
@@ -105,11 +100,10 @@ func resourceAlibabacloudstackCmsAlarmContactCreate(d *schema.ResourceData, meta
 	}
 	d.SetId(fmt.Sprintf("%v", d.Get("alarm_contact_name").(string)))
 
-	return resourceAlibabacloudstackCmsAlarmContactRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudstackCmsAlarmContactRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cmsService := CmsService{client}
 	object, err := cmsService.DescribeCmsAlarmContact(d.Id())
@@ -180,7 +174,7 @@ func resourceAlibabacloudstackCmsAlarmContactUpdate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
-	return resourceAlibabacloudstackCmsAlarmContactRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudstackCmsAlarmContactDelete(d *schema.ResourceData, meta interface{}) error {

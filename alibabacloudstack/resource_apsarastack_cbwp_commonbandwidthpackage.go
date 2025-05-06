@@ -15,15 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackCommonBandwidthPackage() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackCommonBandwidthPackageCreate,
-		Read:   resourceAlibabacloudStackCommonBandwidthPackageRead,
-		Update: resourceAlibabacloudStackCommonBandwidthPackageUpdate,
-		Delete: resourceAlibabacloudStackCommonBandwidthPackageDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"description": {
 				Type:         schema.TypeString,
@@ -71,6 +63,11 @@ func resourceAlibabacloudStackCommonBandwidthPackage() *schema.Resource {
 			//},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackCommonBandwidthPackageCreate, 
+		resourceAlibabacloudStackCommonBandwidthPackageRead, 
+		resourceAlibabacloudStackCommonBandwidthPackageUpdate, 
+		resourceAlibabacloudStackCommonBandwidthPackageDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackCommonBandwidthPackageCreate(d *schema.ResourceData, meta interface{}) error {
@@ -116,11 +113,10 @@ func resourceAlibabacloudStackCommonBandwidthPackageCreate(d *schema.ResourceDat
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackCommonBandwidthPackageRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCommonBandwidthPackageRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 	object, err := vpcService.DescribeCommonBandwidthPackage(d.Id())
@@ -196,7 +192,7 @@ func resourceAlibabacloudStackCommonBandwidthPackageUpdate(d *schema.ResourceDat
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackCommonBandwidthPackageRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackCommonBandwidthPackageDelete(d *schema.ResourceData, meta interface{}) error {

@@ -38,11 +38,29 @@ func TestAccAlibabacloudStackAscm_User_Group_Basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"group_name":      name,
-					"role_in_ids":     []string{"2", "6"},
+					"role_ids":     []string{"2", "6"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"role_ids.#":         "2",
+					}),
 				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"role_ids":           []string{"8"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"role_ids.#":         "1",
+						"role_ids.0":         "8",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
 			},
 		},
 	})
@@ -78,5 +96,5 @@ variable name{
 
 var ascmusergroupBasicMap = map[string]string{
 	"group_name":      CHECKSET,
-	"organization_id": CHECKSET,
+	//"organization_id": CHECKSET,
 }

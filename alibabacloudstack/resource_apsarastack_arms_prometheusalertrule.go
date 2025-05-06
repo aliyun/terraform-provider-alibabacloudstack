@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackArmsPrometheusAlertRule() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackArmsPrometheusAlertRuleCreate,
-		Read:   resourceAlibabacloudStackArmsPrometheusAlertRuleRead,
-		Update: resourceAlibabacloudStackArmsPrometheusAlertRuleUpdate,
-		Delete: resourceAlibabacloudStackArmsPrometheusAlertRuleDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"annotations": {
 				Type:     schema.TypeSet,
@@ -106,6 +99,8 @@ func resourceAlibabacloudStackArmsPrometheusAlertRule() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackArmsPrometheusAlertRuleCreate, resourceAlibabacloudStackArmsPrometheusAlertRuleRead, resourceAlibabacloudStackArmsPrometheusAlertRuleUpdate, resourceAlibabacloudStackArmsPrometheusAlertRuleDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackArmsPrometheusAlertRuleCreate(d *schema.ResourceData, meta interface{}) (err error) {
@@ -157,8 +152,7 @@ func resourceAlibabacloudStackArmsPrometheusAlertRuleCreate(d *schema.ResourceDa
 	}
 	responsePrometheusAlertRule := response["PrometheusAlertRule"].(map[string]interface{})
 	d.SetId(fmt.Sprint(request["ClusterId"], ":", responsePrometheusAlertRule["AlertId"]))
-
-	return resourceAlibabacloudStackArmsPrometheusAlertRuleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackArmsPrometheusAlertRuleRead(d *schema.ResourceData, meta interface{}) error {
@@ -302,7 +296,7 @@ func resourceAlibabacloudStackArmsPrometheusAlertRuleUpdate(d *schema.ResourceDa
 			return err
 		}
 	}
-	return resourceAlibabacloudStackArmsPrometheusAlertRuleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackArmsPrometheusAlertRuleDelete(d *schema.ResourceData, meta interface{}) error {

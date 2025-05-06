@@ -18,15 +18,7 @@ import (
 )
 
 func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEssScalingConfigurationCreate,
-		Read:   resourceAlibabacloudStackEssScalingConfigurationRead,
-		Update: resourceAlibabacloudStackEssScalingConfigurationUpdate,
-		Delete: resourceAlibabacloudStackEssScalingConfigurationDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"status": {
 				Type:          schema.TypeBool,
@@ -65,6 +57,7 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Optional: true,
+				Computed: true,
 				MaxItems: int(MaxScalingConfigurationInstanceTypes),
 			},
 			"security_group_ids": {
@@ -78,8 +71,8 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 			},
 			"zone_id": {
 				Type:     schema.TypeString,
-				Optional:     true,
-				Computed:     true,
+				Optional: true,
+				Computed: true,
 			},
 			"scaling_configuration_name": {
 				Type:         schema.TypeString,
@@ -224,6 +217,9 @@ func resourceAlibabacloudStackEssScalingConfiguration() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEssScalingConfigurationCreate,
+		resourceAlibabacloudStackEssScalingConfigurationRead, resourceAlibabacloudStackEssScalingConfigurationUpdate, resourceAlibabacloudStackEssScalingConfigurationDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEssScalingConfigurationCreate(d *schema.ResourceData, meta interface{}) error {
@@ -262,7 +258,7 @@ func resourceAlibabacloudStackEssScalingConfigurationCreate(d *schema.ResourceDa
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ess_scalingconfiguration", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	return resourceAlibabacloudStackEssScalingConfigurationUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEssScalingConfigurationUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -310,7 +306,7 @@ func resourceAlibabacloudStackEssScalingConfigurationUpdate(d *schema.ResourceDa
 
 	d.Partial(false)
 
-	return resourceAlibabacloudStackEssScalingConfigurationRead(d, meta)
+	return nil
 }
 
 func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) error {
@@ -323,7 +319,7 @@ func modifyEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 	if d.HasChange("override") {
 		request.Override = requests.NewBoolean(d.Get("override").(bool))
 	}
-	
+
 	if d.HasChange("zone_id") && d.Get("zone_id").(string) != "" {
 		request.ZoneId = d.Get("zone_id").(string)
 	}
@@ -530,7 +526,6 @@ func enableEssScalingConfiguration(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceAlibabacloudStackEssScalingConfigurationRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}
@@ -570,12 +565,18 @@ func resourceAlibabacloudStackEssScalingConfigurationRead(d *schema.ResourceData
 	}
 	if sg, ok := d.GetOk("security_group_ids"); ok && len(sg.([]interface{})) >= 0 {
 		d.Set("security_group_ids", object.SecurityGroupIds.SecurityGroupId)
+	} else if len(object.SecurityGroupIds.SecurityGroupId) > 0 {
+		d.Set("security_group_ids", object.SecurityGroupIds.SecurityGroupId)
 	}
 
 	if instanceType, ok := d.GetOk("instance_type"); ok && instanceType.(string) != "" {
 		d.Set("instance_type", object.InstanceType)
+	} else if object.InstanceType != "" {
+		d.Set("instance_type", object.InstanceType)
 	}
 	if instanceTypes, ok := d.GetOk("instance_types"); ok && len(instanceTypes.([]interface{})) > 0 {
+		d.Set("instance_types", object.InstanceTypes.InstanceType)
+	} else if len(object.InstanceTypes.InstanceType) > 0 {
 		d.Set("instance_types", object.InstanceTypes.InstanceType)
 	}
 	userData := d.Get("user_data")

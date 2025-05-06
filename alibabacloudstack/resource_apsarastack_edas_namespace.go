@@ -15,18 +15,11 @@ import (
 )
 
 func resourceAlibabacloudStackEdasNamespace() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEdasNamespaceCreate,
-		Read:   resourceAlibabacloudStackEdasNamespaceRead,
-		Update: resourceAlibabacloudStackEdasNamespaceUpdate,
-		Delete: resourceAlibabacloudStackEdasNamespaceDelete,
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
 			Update: schema.DefaultTimeout(1 * time.Minute),
 			Delete: schema.DefaultTimeout(1 * time.Minute),
-		},
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
 // FIXME: edas缺少查询接口
@@ -52,6 +45,8 @@ func resourceAlibabacloudStackEdasNamespace() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEdasNamespaceCreate, resourceAlibabacloudStackEdasNamespaceRead, resourceAlibabacloudStackEdasNamespaceUpdate, resourceAlibabacloudStackEdasNamespaceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEdasNamespaceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -96,8 +91,9 @@ func resourceAlibabacloudStackEdasNamespaceCreate(d *schema.ResourceData, meta i
 	responseUserDefineRegionEntity := response["UserDefineRegionEntity"].(map[string]interface{})
 	d.SetId(fmt.Sprint(responseUserDefineRegionEntity["Id"]))
 
-	return resourceAlibabacloudStackEdasNamespaceRead(d, meta)
+	return nil
 }
+
 func resourceAlibabacloudStackEdasNamespaceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	edasService := EdasService{client}
@@ -116,6 +112,7 @@ func resourceAlibabacloudStackEdasNamespaceRead(d *schema.ResourceData, meta int
 	d.Set("namespace_name", object["RegionName"])
 	return nil
 }
+
 func resourceAlibabacloudStackEdasNamespaceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var err error
@@ -161,8 +158,9 @@ func resourceAlibabacloudStackEdasNamespaceUpdate(d *schema.ResourceData, meta i
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
-	return resourceAlibabacloudStackEdasNamespaceRead(d, meta)
+	return nil
 }
+
 func resourceAlibabacloudStackEdasNamespaceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "/pop/v5/user_region_def"

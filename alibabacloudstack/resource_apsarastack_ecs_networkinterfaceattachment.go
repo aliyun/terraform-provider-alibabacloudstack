@@ -11,15 +11,7 @@ import (
 )
 
 func resourceNetworkInterfaceAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackNetworkInterfaceAttachmentCreate,
-		Read:   resourceAlibabacloudStackNetworkInterfaceAttachmentRead,
-		Delete: resourceAlibabacloudStackNetworkInterfaceAttachmentDelete,
-
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -33,6 +25,8 @@ func resourceNetworkInterfaceAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackNetworkInterfaceAttachmentCreate, resourceAlibabacloudStackNetworkInterfaceAttachmentRead, nil, resourceAlibabacloudStackNetworkInterfaceAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackNetworkInterfaceAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -74,11 +68,10 @@ func resourceAlibabacloudStackNetworkInterfaceAttachmentCreate(d *schema.Resourc
 	if err = ecsService.WaitForNetworkInterface(eniId, InUse, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackNetworkInterfaceAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackNetworkInterfaceAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 

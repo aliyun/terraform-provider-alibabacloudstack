@@ -122,6 +122,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	// Setting schedule time to more than one day
 	oneDay, _ := time.ParseDuration("24h")
+	twoDay, _ := time.ParseDuration("48h")
 	rand := getAccTestRandInt(1000, 999999)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -185,7 +186,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 			},
 			{
 				Config: providerCommon + testAccEssScheduleUpdateRecurrenceType(ECSInstanceCommonTestCase,
-					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
+					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), time.Now().Add(twoDay).Format("2006-01-02T15:04Z"), rand),
 
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -242,7 +243,7 @@ func TestAccAlibabacloudStackEssScheduledTask_multi(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 
-		Providers:    testAccProviders,
+		Providers: testAccProviders,
 		// CheckDestroy: testAccCheckEssScheduledTaskDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -481,7 +482,7 @@ func testAccEssScheduleUpdateLaunchExpirationTime(common, scheduleTime string, r
 	}
 	`, common, rand, scheduleTime)
 }
-func testAccEssScheduleUpdateRecurrenceType(common, scheduleTime string, rand int) string {
+func testAccEssScheduleUpdateRecurrenceType(common, scheduleTime string, endTime string, rand int) string {
 	return fmt.Sprintf(`
 	%s
 	variable "name" {
@@ -532,7 +533,7 @@ func testAccEssScheduleUpdateRecurrenceType(common, scheduleTime string, rand in
 		recurrence_value = "0,1,2"
 		recurrence_end_time = "%s"
 	}
-	`, common, rand, scheduleTime, scheduleTime)
+	`, common, rand, scheduleTime, endTime)
 }
 
 func testAccEssScheduleUpdateTaskEnabled(common, scheduleTime string, rand int) string {

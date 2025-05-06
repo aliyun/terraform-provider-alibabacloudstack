@@ -8,11 +8,7 @@ import (
 )
 
 func resourceAlibabacloudStackOtsInstanceAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAliyunOtsInstanceAttachmentCreate,
-		Read:   resourceAliyunOtsInstanceAttachmentRead,
-		Delete: resourceAliyunOtsInstanceAttachmentDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_name": {
 				Type:     schema.TypeString,
@@ -36,6 +32,8 @@ func resourceAlibabacloudStackOtsInstanceAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAliyunOtsInstanceAttachmentCreate, resourceAliyunOtsInstanceAttachmentRead, nil, resourceAliyunOtsInstanceAttachmentDelete)
+	return resource
 }
 
 func resourceAliyunOtsInstanceAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -67,7 +65,7 @@ func resourceAliyunOtsInstanceAttachmentCreate(d *schema.ResourceData, meta inte
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 	d.SetId(request.InstanceName)
-	return resourceAliyunOtsInstanceAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAliyunOtsInstanceAttachmentRead(d *schema.ResourceData, meta interface{}) error {

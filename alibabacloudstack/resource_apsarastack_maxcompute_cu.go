@@ -15,13 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackMaxcomputeCu() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackMaxcomputeCuCreate,
-		Read:   resourceAlibabacloudStackMaxcomputeCuRead,
-		Delete: resourceAlibabacloudStackMaxcomputeCuDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
@@ -50,6 +44,8 @@ func resourceAlibabacloudStackMaxcomputeCu() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackMaxcomputeCuCreate, resourceAlibabacloudStackMaxcomputeCuRead, nil, resourceAlibabacloudStackMaxcomputeCuDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackMaxcomputeCuCreate(d *schema.ResourceData, meta interface{}) error {
@@ -97,7 +93,7 @@ func resourceAlibabacloudStackMaxcomputeCuCreate(d *schema.ResourceData, meta in
 
 	d.Set("cu_name", d.Get("cu_name").(string))
 
-	return resourceAlibabacloudStackMaxcomputeCuRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeCuRead(d *schema.ResourceData, meta interface{}) error {

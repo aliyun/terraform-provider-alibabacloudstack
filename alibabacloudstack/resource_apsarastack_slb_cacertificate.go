@@ -11,27 +11,19 @@ import (
 )
 
 func resourceAlibabacloudStackSlbCACertificate() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSlbCACertificateCreate,
-		Read:   resourceAlibabacloudStackSlbCACertificateRead,
-		Update: resourceAlibabacloudStackSlbCACertificateUpdate,
-		Delete: resourceAlibabacloudStackSlbCACertificateDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:true,
+				Computed:     true,
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'ca_certificate_name' instead.",
 				ConflictsWith: []string{"ca_certificate_name"},
 			},
 			"ca_certificate_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:true,
+				Computed:     true,
 				ConflictsWith: []string{"name"},
 			},
 			"ca_certificate": {
@@ -41,6 +33,9 @@ func resourceAlibabacloudStackSlbCACertificate() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSlbCACertificateCreate,
+		resourceAlibabacloudStackSlbCACertificateRead, resourceAlibabacloudStackSlbCACertificateUpdate, resourceAlibabacloudStackSlbCACertificateDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSlbCACertificateCreate(d *schema.ResourceData, meta interface{}) error {
@@ -75,11 +70,10 @@ func resourceAlibabacloudStackSlbCACertificateCreate(d *schema.ResourceData, met
 
 	d.SetId(response.CACertificateId)
 
-	return resourceAlibabacloudStackSlbCACertificateUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbCACertificateRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 
@@ -122,7 +116,7 @@ func resourceAlibabacloudStackSlbCACertificateUpdate(d *schema.ResourceData, met
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	return resourceAlibabacloudStackSlbCACertificateRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbCACertificateDelete(d *schema.ResourceData, meta interface{}) error {

@@ -17,13 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackEcsCommand() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEcsCommandCreate,
-		Read:   resourceAlibabacloudStackEcsCommandRead,
-		Delete: resourceAlibabacloudStackEcsCommandDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"command_content": {
 				Type:     schema.TypeString,
@@ -65,6 +59,8 @@ func resourceAlibabacloudStackEcsCommand() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEcsCommandCreate, resourceAlibabacloudStackEcsCommandRead, nil, resourceAlibabacloudStackEcsCommandDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackEcsCommandCreate(d *schema.ResourceData, meta interface{}) error {
@@ -130,7 +126,7 @@ func resourceAlibabacloudStackEcsCommandCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	return resourceAlibabacloudStackEcsCommandRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEcsCommandRead(d *schema.ResourceData, meta interface{}) error {

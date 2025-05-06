@@ -15,14 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackVpc() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackVpcCreate,
-		Read:   resourceAlibabacloudStackVpcRead,
-		Update: resourceAlibabacloudStackVpcUpdate,
-		Delete: resourceAlibabacloudStackVpcDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
@@ -109,6 +102,8 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackVpcCreate, resourceAlibabacloudStackVpcRead, resourceAlibabacloudStackVpcUpdate, resourceAlibabacloudStackVpcDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackVpcCreate(d *schema.ResourceData, meta interface{}) error {
@@ -152,11 +147,10 @@ func resourceAlibabacloudStackVpcCreate(d *schema.ResourceData, meta interface{}
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackVpcUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 
@@ -253,7 +247,7 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackVpcRead(d, meta)
+		return nil
 	}
 
 	groupRequestUpdate := false
@@ -319,7 +313,7 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	return resourceAlibabacloudStackVpcRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpcDelete(d *schema.ResourceData, meta interface{}) error {

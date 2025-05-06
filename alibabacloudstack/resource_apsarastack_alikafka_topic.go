@@ -16,15 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackAlikafkaTopic() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAlikafkaTopicCreate,
-		Update: resourceAlibabacloudStackAlikafkaTopicUpdate,
-		Read:   resourceAlibabacloudStackAlikafkaTopicRead,
-		Delete: resourceAlibabacloudStackAlikafkaTopicDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 		},
@@ -67,6 +59,8 @@ func resourceAlibabacloudStackAlikafkaTopic() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAlikafkaTopicCreate, resourceAlibabacloudStackAlikafkaTopicRead, resourceAlibabacloudStackAlikafkaTopicUpdate, resourceAlibabacloudStackAlikafkaTopicDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAlikafkaTopicCreate(d *schema.ResourceData, meta interface{}) error {
@@ -118,7 +112,7 @@ func resourceAlibabacloudStackAlikafkaTopicCreate(d *schema.ResourceData, meta i
 
 	d.SetId(instanceId + ":" + topic)
 
-	return resourceAlibabacloudStackAlikafkaTopicUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -130,7 +124,7 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 	// }
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackAlikafkaTopicRead(d, meta)
+		return nil
 	}
 
 	instanceId := d.Get("instance_id").(string)
@@ -200,7 +194,7 @@ func resourceAlibabacloudStackAlikafkaTopicUpdate(d *schema.ResourceData, meta i
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackAlikafkaTopicRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAlikafkaTopicRead(d *schema.ResourceData, meta interface{}) error {

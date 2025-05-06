@@ -14,15 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackSlbMasterSlaveServerGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSlbMasterSlaveServerGroupCreate,
-		Read:   resourceAlibabacloudStackSlbMasterSlaveServerGroupRead,
-		Update: resourceAlibabacloudStackSlbMasterSlaveServerGroupUpdate,
-		Delete: resourceAlibabacloudStackSlbMasterSlaveServerGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"load_balancer_id": {
 				Type:     schema.TypeString,
@@ -31,19 +23,19 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroup() *schema.Resource {
 			},
 
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ForceNew:     true,
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'master_slave_server_group_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'master_slave_server_group_name' instead.",
 				ConflictsWith: []string{"master_slave_server_group_name"},
 			},
 
 			"master_slave_server_group_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed:true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
 				ConflictsWith: []string{"name"},
 			},
 
@@ -84,6 +76,12 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroup() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource,
+		resourceAlibabacloudStackSlbMasterSlaveServerGroupCreate,
+		resourceAlibabacloudStackSlbMasterSlaveServerGroupRead,
+		resourceAlibabacloudStackSlbMasterSlaveServerGroupUpdate,
+		resourceAlibabacloudStackSlbMasterSlaveServerGroupDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSlbMasterSlaveServerGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -111,11 +109,10 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupCreate(d *schema.Resource
 	response, _ := raw.(*slb.CreateMasterSlaveServerGroupResponse)
 	d.SetId(response.MasterSlaveServerGroupId)
 
-	return resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 	object, err := slbService.DescribeSlbMasterSlaveServerGroup(d.Id())
@@ -138,9 +135,9 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d *schema.ResourceDa
 
 	for _, server := range object.MasterSlaveBackendServers.MasterSlaveBackendServer {
 		s := map[string]interface{}{
-			"server_id": server.ServerId,
-			"port":      server.Port,
-			"weight":    server.Weight,
+			"server_id":   server.ServerId,
+			"port":        server.Port,
+			"weight":      server.Weight,
 			"server_type": server.ServerType,
 		}
 		servers = append(servers, s)
@@ -154,6 +151,9 @@ func resourceAlibabacloudStackSlbMasterSlaveServerGroupRead(d *schema.ResourceDa
 }
 
 func resourceAlibabacloudStackSlbMasterSlaveServerGroupUpdate(d *schema.ResourceData, meta interface{}) error {
+	// XXX: delete_protection_validation是一个本地保护属性，允许修改
+	//noUpdateAllowedFields := []string{"delete_protection_validation"}
+	//return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 	return nil
 }
 

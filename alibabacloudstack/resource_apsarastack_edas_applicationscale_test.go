@@ -45,6 +45,11 @@ func TestAccAlibabacloudStackEdasInstanceApplicationAttachment_basic(t *testing.
 					testAccCheck(nil),
 				),
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }

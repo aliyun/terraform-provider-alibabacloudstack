@@ -12,13 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackEdasK8sCluster() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEdasK8sClusterCreate,
-		Read:   resourceAlibabacloudStackEdasK8sClusterRead,
-		Delete: resourceAlibabacloudStackEdasK8sClusterDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
@@ -56,6 +50,8 @@ func resourceAlibabacloudStackEdasK8sCluster() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackEdasK8sClusterCreate, resourceAlibabacloudStackEdasK8sClusterRead, nil, resourceAlibabacloudStackEdasK8sClusterDelete)
+	return resource
 }
 
 type ImportK8sClusterResponse struct {
@@ -71,11 +67,10 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "ImportK8sCluster", "/pop/v5/import_k8s_cluster")
 	request.QueryParams["ClusterId"] = d.Get("cs_cluster_id").(string)
 	if v, ok := d.GetOk("namespace_id"); ok {
-		request.QueryParams["NamespaceId"] = v.(string)
+		request.QueryParams["RegionId"] = v.(string)
 	}
-	request.Headers["x-acs-content-type"] = "application/json"
-	request.Headers["Content-Type"] = "application/json"
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -83,7 +78,6 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), bresponse, request)
 	response := ImportK8sClusterResponse{}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
@@ -103,7 +97,7 @@ func resourceAlibabacloudStackEdasK8sClusterCreate(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackEdasK8sClusterRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasK8sClusterRead(d *schema.ResourceData, meta interface{}) error {
@@ -160,10 +154,6 @@ func resourceAlibabacloudStackEdasK8sClusterDelete(d *schema.ResourceData, meta 
 	stateConf := BuildStateConf([]string{"4"}, []string{"0"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, edasService.ClusterImportK8sStateRefreshFunc(d.Id(), []string{"1", "2", "3"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return nil
-		// if errmsgs.NotFoundError(err) {
-		// 	return nil
-		// }
-		// return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return nil
 }

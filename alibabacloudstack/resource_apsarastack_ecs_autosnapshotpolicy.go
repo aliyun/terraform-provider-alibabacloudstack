@@ -13,29 +13,20 @@ import (
 )
 
 func resourceAlibabacloudStackSnapshotPolicy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSnapshotPolicyCreate,
-		Read:   resourceAlibabacloudStackSnapshotPolicyRead,
-		Update: resourceAlibabacloudStackSnapshotPolicyUpdate,
-		Delete: resourceAlibabacloudStackSnapshotPolicyDelete,
-
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'auto_snapshot_policy_name' instead.",
 				ConflictsWith: []string{"auto_snapshot_policy_name"},
 			},
 			"auto_snapshot_policy_name": {
 				Type:         schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
@@ -56,6 +47,8 @@ func resourceAlibabacloudStackSnapshotPolicy() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSnapshotPolicyCreate, resourceAlibabacloudStackSnapshotPolicyRead, resourceAlibabacloudStackSnapshotPolicyUpdate, resourceAlibabacloudStackSnapshotPolicyDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSnapshotPolicyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -90,11 +83,10 @@ func resourceAlibabacloudStackSnapshotPolicyCreate(d *schema.ResourceData, meta 
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackSnapshotPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSnapshotPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	object, err := ecsService.DescribeSnapshotPolicy(d.Id())
@@ -164,7 +156,7 @@ func resourceAlibabacloudStackSnapshotPolicyUpdate(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	return resourceAlibabacloudStackSnapshotPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSnapshotPolicyDelete(d *schema.ResourceData, meta interface{}) error {

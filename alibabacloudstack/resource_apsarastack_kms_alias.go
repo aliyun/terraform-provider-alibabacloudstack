@@ -8,14 +8,7 @@ import (
 )
 
 func resourceAlibabacloudStackKmsAlias() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackKmsAliasCreate,
-		Read:   resourceAlibabacloudStackKmsAliasRead,
-		Update: resourceAlibabacloudStackKmsAliasUpdate,
-		Delete: resourceAlibabacloudStackKmsAliasDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"alias_name": {
 				Type:     schema.TypeString,
@@ -28,6 +21,9 @@ func resourceAlibabacloudStackKmsAlias() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackKmsAliasCreate,
+		resourceAlibabacloudStackKmsAliasRead, resourceAlibabacloudStackKmsAliasUpdate, resourceAlibabacloudStackKmsAliasDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackKmsAliasCreate(d *schema.ResourceData, meta interface{}) error {
@@ -52,11 +48,10 @@ func resourceAlibabacloudStackKmsAliasCreate(d *schema.ResourceData, meta interf
 	}
 	d.SetId(request.AliasName)
 
-	return resourceAlibabacloudStackKmsAliasRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKmsAliasRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kmsService := KmsService{client}
 	object, err := kmsService.DescribeKmsAlias(d.Id())
@@ -94,7 +89,7 @@ func resourceAlibabacloudStackKmsAliasUpdate(d *schema.ResourceData, meta interf
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
-	return resourceAlibabacloudStackKmsAliasRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKmsAliasDelete(d *schema.ResourceData, meta interface{}) error {

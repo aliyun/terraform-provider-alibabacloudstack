@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -60,6 +60,11 @@ func TestAccAlibabacloudStackDatahubTopic0(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -79,7 +84,6 @@ var AlibabacloudTestAccDatahubTopicCheckmap = map[string]string{
 	"name": CHECKSET,
 
 	"record_type": CHECKSET,
-
 }
 
 func AlibabacloudTestAccDatahubTopicBasicdependence(name string) string {

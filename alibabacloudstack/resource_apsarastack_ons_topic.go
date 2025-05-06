@@ -17,15 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackOnsTopic() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackOnsTopicCreate,
-		Read:   resourceAlibabacloudStackOnsTopicRead,
-		Update: resourceAlibabacloudStackOnsTopicUpdate,
-		Delete: resourceAlibabacloudStackOnsTopicDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -46,13 +38,10 @@ func resourceAlibabacloudStackOnsTopic() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringLenBetween(1, 128),
 			},
-			"perm": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ValidateFunc: validation.IntInSlice([]int{2, 4, 6}),
-			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackOnsTopicCreate, resourceAlibabacloudStackOnsTopicRead, resourceAlibabacloudStackOnsTopicUpdate, resourceAlibabacloudStackOnsTopicDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackOnsTopicCreate(d *schema.ResourceData, meta interface{}) error {
@@ -102,11 +91,10 @@ func resourceAlibabacloudStackOnsTopicCreate(d *schema.ResourceData, meta interf
 	}
 	d.SetId(topic + COLON_SEPARATED + instanceId)
 
-	return resourceAlibabacloudStackOnsTopicRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOnsTopicRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	onsService := OnsService{client}
 
@@ -129,7 +117,7 @@ func resourceAlibabacloudStackOnsTopicRead(d *schema.ResourceData, meta interfac
 }
 
 func resourceAlibabacloudStackOnsTopicUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackOnsTopicRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackOnsTopicDelete(d *schema.ResourceData, meta interface{}) error {

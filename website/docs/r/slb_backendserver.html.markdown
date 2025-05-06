@@ -1,6 +1,6 @@
 ---
 
-subcategory: "SLB"
+subcategory: "Server Load Balancer (SLB)"
 
 layout: "alibabacloudstack"
 

@@ -14,11 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmUserRoleBindingCreate,
-		Read:   resourceAlibabacloudStackAscmUserRoleBindingRead,
-		Update: resourceAlibabacloudStackAscmUserRoleBindingUpdate,
-		Delete: resourceAlibabacloudStackAscmUserRoleBindingDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"login_name": {
 				Type:     schema.TypeString,
@@ -31,7 +27,10 @@ func resourceAlibabacloudStackAscmUserRoleBinding() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
+		DeprecationMessage: "ascm_user already includes corresponding functions",
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmUserRoleBindingCreate, resourceAlibabacloudStackAscmUserRoleBindingRead, resourceAlibabacloudStackAscmUserRoleBindingUpdate, resourceAlibabacloudStackAscmUserRoleBindingDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, meta interface{}) error {
@@ -66,11 +65,10 @@ func resourceAlibabacloudStackAscmUserRoleBindingCreate(d *schema.ResourceData, 
 
 	d.SetId(lname)
 
-	return resourceAlibabacloudStackAscmUserRoleBindingRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserRoleBindingRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmUserRoleBinding(d.Id())
@@ -135,7 +133,7 @@ func resourceAlibabacloudStackAscmUserRoleBindingUpdate(d *schema.ResourceData, 
 	}
 
 	addDebug("ResetRolesForUserByLoginName", bresponse, request, request.QueryParams)
-	return resourceAlibabacloudStackAscmUserRoleBindingRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserRoleBindingDelete(d *schema.ResourceData, meta interface{}) error {

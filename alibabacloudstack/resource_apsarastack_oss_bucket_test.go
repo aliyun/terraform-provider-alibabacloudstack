@@ -136,7 +136,6 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -234,7 +233,6 @@ func TestAccAlibabacloudStackOssBucketSync(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -293,7 +291,6 @@ func TestAccAlibabacloudStackOssBucketVpc(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

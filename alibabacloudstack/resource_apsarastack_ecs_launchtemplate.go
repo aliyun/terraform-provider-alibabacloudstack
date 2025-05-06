@@ -17,20 +17,12 @@ import (
 )
 
 func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackLaunchTemplateCreate,
-		Read:   resourceAlibabacloudStackLaunchTemplateRead,
-		Update: resourceAlibabacloudStackLaunchTemplateUpdate,
-		Delete: resourceAlibabacloudStackLaunchTemplateDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:          schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringLenBetween(2, 256),
 				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'launch_template_name' instead.",
@@ -38,8 +30,8 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 			},
 			"launch_template_name": {
 				Type:          schema.TypeString,
-				Optional:true,
-				Computed:true,
+				Optional:      true,
+				Computed:      true,
 				ForceNew:      true,
 				ValidateFunc:  validation.StringLenBetween(2, 256),
 				ConflictsWith: []string{"name"},
@@ -260,6 +252,8 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackLaunchTemplateCreate, resourceAlibabacloudStackLaunchTemplateRead, resourceAlibabacloudStackLaunchTemplateUpdate, resourceAlibabacloudStackLaunchTemplateDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackLaunchTemplateCreate(d *schema.ResourceData, meta interface{}) error {
@@ -358,11 +352,10 @@ func resourceAlibabacloudStackLaunchTemplateCreate(d *schema.ResourceData, meta 
 
 	d.SetId(response.LaunchTemplateId)
 
-	return resourceAlibabacloudStackLaunchTemplateRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLaunchTemplateRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	object, err := ecsService.DescribeLaunchTemplate(d.Id())
@@ -470,7 +463,7 @@ func resourceAlibabacloudStackLaunchTemplateUpdate(d *schema.ResourceData, meta 
 			return errmsgs.WrapError(err)
 		}
 	}
-	return errmsgs.WrapError(createLaunchTemplateVersion(d, meta))
+	return nil
 
 }
 
@@ -496,7 +489,7 @@ func resourceAlibabacloudStackLaunchTemplateDelete(d *schema.ResourceData, meta 
 	if err := ecsService.WaitForLaunchTemplate(d.Id(), Deleted, DefaultTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackLaunchTemplateRead(d, meta)
+	return nil
 }
 
 func getLaunchTemplateVersions(id string, meta interface{}) ([]ecs.LaunchTemplateVersionSet, error) {

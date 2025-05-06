@@ -18,15 +18,7 @@ import (
 )
 
 func resourceAlibabacloudStackAdbBackupPolicy() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAdbBackupPolicyCreate,
-		Read:   resourceAlibabacloudStackAdbBackupPolicyRead,
-		Update: resourceAlibabacloudStackAdbBackupPolicyUpdate,
-		Delete: resourceAlibabacloudStackAdbBackupPolicyDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"db_cluster_id": {
 				Type:     schema.TypeString,
@@ -51,6 +43,8 @@ func resourceAlibabacloudStackAdbBackupPolicy() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAdbBackupPolicyCreate, resourceAlibabacloudStackAdbBackupPolicyRead, resourceAlibabacloudStackAdbBackupPolicyUpdate, resourceAlibabacloudStackAdbBackupPolicyDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAdbBackupPolicyCreate(d *schema.ResourceData, meta interface{}) error {
@@ -104,7 +98,7 @@ func resourceAlibabacloudStackAdbBackupPolicyUpdate(d *schema.ResourceData, meta
 		}
 	}
 
-	return resourceAlibabacloudStackAdbBackupPolicyRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAdbBackupPolicyDelete(d *schema.ResourceData, meta interface{}) error {

@@ -1,5 +1,5 @@
 ---
-subcategory: "NAS"
+subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_zones"
 sidebar_current: "docs-alibabacloudstack-datasource-nas-zones"

@@ -12,15 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackLogProject() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackLogProjectCreate,
-		Read:   resourceAlibabacloudStackLogProjectRead,
-		Update: resourceAlibabacloudStackLogProjectUpdate,
-		Delete: resourceAlibabacloudStackLogProjectDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -33,6 +25,9 @@ func resourceAlibabacloudStackLogProject() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackLogProjectCreate, 
+		resourceAlibabacloudStackLogProjectRead, resourceAlibabacloudStackLogProjectUpdate, resourceAlibabacloudStackLogProjectDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta interface{}) error {
@@ -64,11 +59,10 @@ func resourceAlibabacloudStackLogProjectCreate(d *schema.ResourceData, meta inte
 		return resource.RetryableError(errmsgs.Error("Failed to describe log project"))
 	})
 	d.SetId(name)
-	return resourceAlibabacloudStackLogProjectRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogProjectRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 	object, err := logService.DescribeLogProject(d.Id())
@@ -106,7 +100,7 @@ func resourceAlibabacloudStackLogProjectUpdate(d *schema.ResourceData, meta inte
 		addDebug("UpdateProject", bresponse, requestInfo, request)
 	}
 
-	return resourceAlibabacloudStackLogProjectRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogProjectDelete(d *schema.ResourceData, meta interface{}) error {

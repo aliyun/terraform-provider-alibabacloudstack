@@ -1,5 +1,5 @@
 ---
-subcategory: "OTS"
+subcategory: "Table Store (OTS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ots_instanceattachment"
 sidebar_current: "docs-Alibabacloudstack-ots-instanceattachment"

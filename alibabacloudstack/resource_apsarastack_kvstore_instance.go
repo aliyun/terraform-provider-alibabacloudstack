@@ -21,15 +21,7 @@ import (
 )
 
 func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackKVStoreInstanceCreate,
-		Read:   resourceAlibabacloudStackKVStoreInstanceRead,
-		Update: resourceAlibabacloudStackKVStoreInstanceUpdate,
-		Delete: resourceAlibabacloudStackKVStoreInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(40 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -95,13 +87,6 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Deprecated:    "Field 'availability_zone' is deprecated and will be removed in a future release. Please use new field 'zone_id' instead.",
 				ConflictsWith: []string{"zone_id"},
 			},
-			// 			"payment_type": {
-			// 				Type:          schema.TypeString,
-			// 				ValidateFunc:  validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
-			// 				Optional:      true,
-			// 				Computed:      true,
-			// 				ConflictsWith: []string{"instance_charge_type"},
-			// 			},
 			"instance_charge_type": {
 				Type:          schema.TypeString,
 				ValidateFunc:  validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
@@ -109,13 +94,6 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Computed:      true,
 				Deprecated:    "Field 'instance_charge_type' is deprecated and will be removed in a future release, and not for any use now.",
 			},
-			// 			"period": {
-			// 				Type:             schema.TypeInt,
-			// 				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
-			// 				Optional:         true,
-			// 				Default:          1,
-			// 				DiffSuppressFunc: PostPaidDiffSuppressFunc,
-			// 			},
 			"instance_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -235,6 +213,9 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackKVStoreInstanceCreate,
+		resourceAlibabacloudStackKVStoreInstanceRead, resourceAlibabacloudStackKVStoreInstanceUpdate, resourceAlibabacloudStackKVStoreInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -365,7 +346,7 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 
 		log.Print("enabled TDE")
 	}
-	return resourceAlibabacloudStackKVStoreInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -518,7 +499,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackKVStoreInstanceRead(d, meta)
+		return nil
 	}
 
 	if d.HasChange("instance_class") {
@@ -638,11 +619,10 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackKVStoreInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kvstoreService := KvstoreService{client}
 	object, err := kvstoreService.DescribeKVstoreInstance(d.Id())

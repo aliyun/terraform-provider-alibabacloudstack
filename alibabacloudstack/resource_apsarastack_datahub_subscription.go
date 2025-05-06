@@ -15,15 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackDatahubSubscription() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDatahubSubscriptionCreate,
-		Read:   resourceAlibabacloudStackDatahubSubscriptionRead,
-		//Update: resourceAlibabacloudStackDatahubSubscriptionUpdate,
-		Delete: resourceAlibabacloudStackDatahubSubscriptionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project_name": {
 				Type:         schema.TypeString,
@@ -66,6 +58,9 @@ func resourceAlibabacloudStackDatahubSubscription() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDatahubSubscriptionCreate, 
+		resourceAlibabacloudStackDatahubSubscriptionRead, nil, resourceAlibabacloudStackDatahubSubscriptionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDatahubSubscriptionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -99,7 +94,7 @@ func resourceAlibabacloudStackDatahubSubscriptionCreate(d *schema.ResourceData, 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &subscription)
 
 	d.SetId(fmt.Sprintf("%s%s%s%s%s", strings.ToLower(projectName), COLON_SEPARATED, strings.ToLower(topicName), COLON_SEPARATED, subscription.SubId))
-	return resourceAlibabacloudStackDatahubSubscriptionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDatahubSubscriptionRead(d *schema.ResourceData, meta interface{}) error {
@@ -161,8 +156,7 @@ func resourceAlibabacloudStackDatahubSubscriptionUpdate(d *schema.ResourceData, 
 	//		addDebug("UpdateSubscription", raw, requestInfo, requestMap)
 	//	}
 	//}
-
-	return resourceAlibabacloudStackDatahubSubscriptionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDatahubSubscriptionDelete(d *schema.ResourceData, meta interface{}) error {
@@ -198,7 +192,7 @@ func resourceAlibabacloudStackDatahubSubscriptionDelete(d *schema.ResourceData, 
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteSubscription", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), "DeleteSubscription", errmsgs.AlibabacloudStackDatahubSdkGo, errmsg)
 	}
 	return errmsgs.WrapError(datahubService.WaitForDatahubSubscription(d.Id(), Deleted, DefaultTimeout))
 }

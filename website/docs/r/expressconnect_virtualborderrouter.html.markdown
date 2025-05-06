@@ -1,5 +1,5 @@
 ---
-subcategory: "ExpressConnect"
+subcategory: "Express Connect"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_virtualborderrouter"
 sidebar_current: "docs-Alibabacloudstack-expressconnect-virtualborderrouter"

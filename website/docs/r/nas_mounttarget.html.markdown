@@ -1,10 +1,10 @@
-subcategory: "NAS"
+---
+subcategory: "Network Attached Storage (NAS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_nas_mounttarget"
 sidebar_current: "docs-Alibabacloudstack-nas-mounttarget"
 description: |- 
   Provides a nas Mounttarget resource.
-
 ---
 
 # alibabacloudstack_nas_mounttarget
@@ -73,7 +73,7 @@ resource "alibabacloudstack_nas_mounttarget" "default" {
 
 The following arguments are supported:
 
-* `access_group_name` - (Optional) <!--  AI CREATE  --> The name of the permission group that applies to the mount target.
+* `access_group_name` - (Optional) The name of the permission group that applies to the mount target.
 * `file_system_id` - (Required, ForceNew) The ID of the file system.
 * `vswitch_id` - (Optional, ForceNew) The ID of the VSwitch in the VPC where the mount target resides.
 * `status` - (Optional) The status of the mount target. Valid values: `Active` and `Inactive`. Default value is `Active`. Before you mount a file system, make sure that the mount target is in the Active state.
@@ -84,4 +84,4 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above:
 
 * `id` - This ID of this resource. It is formatted to `<file_system_id>:<mount_target_domain>`. Before version 1.95.0, the value is `<mount_target_domain>`.
-* `status` - (Computed) <!--  AI CREATE  --> The current status of the Mount point, including `Active` and `Inactive`. You can use the file system only when the status is `Active`.
+* `status` - The current status of the Mount point, including `Active` and `Inactive`. You can use the file system only when the status is `Active`.

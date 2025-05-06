@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -12,7 +11,7 @@ import (
 )
 
 func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding(t *testing.T) {
-	var v *ListResourceGroup
+	var v *MembersInsideResourceSet
 	resourceId := "alibabacloudstack_ascm_user_group_resource_set_binding.default"
 	ra := resourceAttrInit(resourceId, testAccCheckUserGroupResourceSetBinding)
 	serviceFunc := func() interface{} {
@@ -23,7 +22,6 @@ func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	org_id := os.Getenv("ALIBABACLOUDSTACK_DEPARTMENT")
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -36,12 +34,18 @@ func TestAccAlibabacloudStackAscmUserGroupResourceSetBinding(t *testing.T) {
 		CheckDestroy: testAccCheckAscmUserGroupResourceSetBindingDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccCheckAscmUserGroupResourceSetRoleBinding, org_id, name),
+				Config: fmt.Sprintf(testAccCheckAscmUserGroupResourceSetRoleBinding, name),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
 			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+			},
 		},
+
 	})
 
 }
@@ -71,25 +75,23 @@ func testAccCheckAscmUserGroupResourceSetBindingDestroy(s *terraform.State) erro
 
 const testAccCheckAscmUserGroupResourceSetRoleBinding = `
 
-variable org_id {
+variable name {
  default = "%s"
 }
 
 resource "alibabacloudstack_ascm_user_group" "default" {
- group_name =      "%s"
- organization_id = "${var.org_id}"
+ group_name =      "${var.name}"
 }
 
 
 resource "alibabacloudstack_ascm_resource_group" "default" {
-  organization_id = "${var.org_id}"
-  name = "alibabacloudstack-terraform-resourceGroup"
+  name = "${var.name}"
 }
 
 resource "alibabacloudstack_ascm_user_group_resource_set_binding" "default" {
-  resource_set_id = alibabacloudstack_ascm_resource_group.default.rg_id
-  user_group_id = alibabacloudstack_ascm_user_group.default.user_group_id
-ascm_role_id="2"
+  resource_set_id = "${alibabacloudstack_ascm_resource_group.default.rg_id}"
+  user_group_id = "${alibabacloudstack_ascm_user_group.default.user_group_id}"
+  ascm_role_id="2"
 }
 `
 

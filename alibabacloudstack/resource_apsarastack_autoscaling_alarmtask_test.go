@@ -620,16 +620,16 @@ func resourceEssAlarmConfigDependence(name string) string {
 	resource "alibabacloudstack_vpc_vswitch" "default" {
 		name = "${var.name}_vsw"
 		vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-		cidr_block = "172.16.0.0/25"
+		cidr_block = "192.168.0.0/16"
 		zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 	  }
 
-	resource "alibabacloudstack_vpc_vswitch" "default2" {
-		vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-		cidr_block = "172.16.0.128/25"
-		availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-		name = "${var.name}"
-  }
+// 	resource "alibabacloudstack_vpc_vswitch" "default2" {
+// 		vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+// 		cidr_block = "192.168.0.0/16"
+// 		availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
+// 		name = "${var.name}"
+//   }
 
 
 	resource "alibabacloudstack_ess_scaling_group" "default" {
@@ -637,7 +637,7 @@ func resourceEssAlarmConfigDependence(name string) string {
 		max_size = 1
 		scaling_group_name = "${var.name}"
 		removal_policies = ["OldestInstance", "NewestInstance"]
-		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default2.id}"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}",]
 	}
 
 	// resource "alibabacloudstack_ess_scaling_group" "new" {

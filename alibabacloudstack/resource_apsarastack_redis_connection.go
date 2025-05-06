@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackKvstoreConnection() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackKvstoreConnectionCreate,
-		Read:   resourceAlibabacloudStackKvstoreConnectionRead,
-		Update: resourceAlibabacloudStackKvstoreConnectionUpdate,
-		Delete: resourceAlibabacloudStackKvstoreConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
 			Delete: schema.DefaultTimeout(2 * time.Minute),
@@ -45,6 +38,8 @@ func resourceAlibabacloudStackKvstoreConnection() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackKvstoreConnectionCreate, resourceAlibabacloudStackKvstoreConnectionRead, resourceAlibabacloudStackKvstoreConnectionUpdate, resourceAlibabacloudStackKvstoreConnectionDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackKvstoreConnectionCreate(d *schema.ResourceData, meta interface{}) error {
@@ -75,7 +70,7 @@ func resourceAlibabacloudStackKvstoreConnectionCreate(d *schema.ResourceData, me
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackKvstoreConnectionUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKvstoreConnectionRead(d *schema.ResourceData, meta interface{}) error {
@@ -139,7 +134,7 @@ func resourceAlibabacloudStackKvstoreConnectionUpdate(d *schema.ResourceData, me
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
-	return resourceAlibabacloudStackKvstoreConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackKvstoreConnectionDelete(d *schema.ResourceData, meta interface{}) error {

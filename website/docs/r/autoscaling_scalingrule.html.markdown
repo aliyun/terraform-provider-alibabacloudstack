@@ -1,5 +1,5 @@
 ---
-subcategory: "AutoScaling"
+subcategory: "Auto Scaling (ESS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_autoscaling_scalingrule"
 sidebar_current: "docs-Alibabacloudstack-autoscaling-scalingrule"

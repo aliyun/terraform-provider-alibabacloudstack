@@ -1,8 +1,9 @@
 package alibabacloudstack
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -12,16 +13,7 @@ import (
 )
 
 func resourceAlibabacloudStackSnapshot() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSnapshotCreate,
-		Read:   resourceAlibabacloudStackSnapshotRead,
-		Update: resourceAlibabacloudStackSnapshotUpdate,
-		Delete: resourceAlibabacloudStackSnapshotDelete,
-
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Delete: schema.DefaultTimeout(DefaultTimeout * time.Second),
@@ -34,20 +26,20 @@ func resourceAlibabacloudStackSnapshot() *schema.Resource {
 				ForceNew: true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'snapshot_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'snapshot_name' instead.",
 				ConflictsWith: []string{"snapshot_name"},
 			},
 			"snapshot_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 			"description": {
@@ -58,6 +50,8 @@ func resourceAlibabacloudStackSnapshot() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSnapshotCreate, resourceAlibabacloudStackSnapshotRead, resourceAlibabacloudStackSnapshotUpdate, resourceAlibabacloudStackSnapshotDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interface{}) error {
@@ -79,6 +73,7 @@ func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interf
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.CreateSnapshot(request)
 	})
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err != nil {
 		errmsg := ""
 		if response, ok := raw.(*ecs.CreateSnapshotResponse); ok {
@@ -86,7 +81,6 @@ func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interf
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_snapshot", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response := raw.(*ecs.CreateSnapshotResponse)
 	d.SetId(response.SnapshotId)
 
@@ -99,11 +93,10 @@ func resourceAlibabacloudStackSnapshotCreate(d *schema.ResourceData, meta interf
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackSnapshotUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSnapshotRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	snapshot, err := ecsService.DescribeSnapshot(d.Id())
@@ -135,7 +128,8 @@ func resourceAlibabacloudStackSnapshotUpdate(d *schema.ResourceData, meta interf
 	if err := setTags(client, TagResourceSnapshot, d); err != nil {
 		return errmsgs.WrapError(err)
 	}
-	return resourceAlibabacloudStackSnapshotRead(d, meta)
+
+	return nil
 }
 
 func resourceAlibabacloudStackSnapshotDelete(d *schema.ResourceData, meta interface{}) error {

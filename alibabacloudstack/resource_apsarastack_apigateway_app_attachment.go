@@ -11,11 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackApigatewayAppAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackApigatewayAppAttachmentCreate,
-		Read:   resourceAlibabacloudStackApigatewayAppAttachmentRead,
-		Delete: resourceAlibabacloudStackApigatewayAppAttachmentDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 
 			"app_id": {
@@ -44,6 +40,12 @@ func resourceAlibabacloudStackApigatewayAppAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, 
+		resourceAlibabacloudStackApigatewayAppAttachmentCreate,
+		resourceAlibabacloudStackApigatewayAppAttachmentRead,
+		nil,
+		resourceAlibabacloudStackApigatewayAppAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackApigatewayAppAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -86,7 +88,7 @@ func resourceAlibabacloudStackApigatewayAppAttachmentCreate(d *schema.ResourceDa
 	}
 
 	d.SetId(id)
-	return resourceAlibabacloudStackApigatewayAppAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackApigatewayAppAttachmentRead(d *schema.ResourceData, meta interface{}) error {

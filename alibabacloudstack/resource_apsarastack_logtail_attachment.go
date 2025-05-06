@@ -10,13 +10,7 @@ import (
 )
 
 func resourceAlibabacloudStackLogtailAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackLogtailAttachmentCreate,
-		Read:   resourceAlibabacloudStackLogtailAttachmentRead,
-		Delete: resourceAlibabacloudStackLogtailAttachmentDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:     schema.TypeString,
@@ -35,6 +29,8 @@ func resourceAlibabacloudStackLogtailAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackLogtailAttachmentCreate, resourceAlibabacloudStackLogtailAttachmentRead, nil, resourceAlibabacloudStackLogtailAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackLogtailAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -59,11 +55,10 @@ func resourceAlibabacloudStackLogtailAttachmentCreate(d *schema.ResourceData, me
 		})
 	}
 	d.SetId(fmt.Sprintf("%s%s%s%s%s", project, COLON_SEPARATED, config_name, COLON_SEPARATED, group_name))
-	return resourceAlibabacloudStackLogtailAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogtailAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 	parts, err := ParseResourceId(d.Id(), 3)

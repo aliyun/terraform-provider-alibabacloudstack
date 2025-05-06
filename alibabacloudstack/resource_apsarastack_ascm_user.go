@@ -15,11 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmUser() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmUserCreate,
-		Read:   resourceAlibabacloudStackAscmUserRead,
-		Update: resourceAlibabacloudStackAscmUserUpdate,
-		Delete: resourceAlibabacloudStackAscmUserDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"cellphone_number": {
 				Type:     schema.TypeString,
@@ -49,7 +45,8 @@ func resourceAlibabacloudStackAscmUser() *schema.Resource {
 				Type:       schema.TypeString,
 				Optional:   true,
 				Computed:   true,
-				Deprecated: "Field 'organization_id' has been deprecated from provider version 1.0.32. Use the organization to which the current user belongs",
+				ForceNew:   true,
+				Deprecated: "Field 'organization_id' has been deprecated. Use the organization to which the current user belongs",
 			},
 			"user_id": {
 				Type:     schema.TypeInt,
@@ -68,9 +65,12 @@ func resourceAlibabacloudStackAscmUser() *schema.Resource {
 				Computed: true,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				MinItems: 1,
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmUserCreate, resourceAlibabacloudStackAscmUserRead, resourceAlibabacloudStackAscmUserUpdate, resourceAlibabacloudStackAscmUserDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interface{}) error {
@@ -82,7 +82,17 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 	cellnum := d.Get("cellphone_number").(string)
 	mobnationcode := d.Get("mobile_nation_code").(string)
 	loginpolicyid := d.Get("login_policy_id").(int)
+	var organizationId string
+	if _, ok:= d.GetOk("organization_id"); ok {
+		organizationId = d.Get("organization_id").(string)
+	} else {
+		organizationId = client.Department
+	}
 
+	roleIds, err:=getRoleIdsAsString(d)
+	if err != nil {
+		return err
+	}
 	check, err := ascmService.DescribeAscmDeletedUser(lname)
 	if check.Data != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm_resource_group", "\"Login Name already exist in Historical Users, try with a different name.\"", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -95,8 +105,9 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 			"cellphoneNum":     cellnum,
 			"mobileNationCode": mobnationcode,
 			"email":            email,
-			"organizationId":   client.Department,
+			"organizationId":   organizationId,
 			"loginPolicyId":    fmt.Sprint(loginpolicyid),
+			"roleIdList":       roleIds,
 		})
 		request.Headers["x-acs-content-type"] = "application/json"
 		request.Headers["Content-Type"] = "application/json"
@@ -129,7 +140,7 @@ func resourceAlibabacloudStackAscmUserCreate(d *schema.ResourceData, meta interf
 	}
 	log.Printf("response of bresponse ExportInitPasswordByLoginName is : %s", init_password)
 
-	return resourceAlibabacloudStackAscmUserUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -180,38 +191,61 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 			return errmsgs.WrapError(err)
 		}
 	}
-	if len(d.Get("role_ids").(*schema.Set).List()) > 0 {
-		role_ids := d.Get("role_ids").(*schema.Set).List()
-		roleIdList := make([]string, 0)
-		for _, role_id := range role_ids {
-			roleIdList = append(roleIdList, role_id.(string))
-		}
-		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "ResetRolesForUserByLoginName", "/ascm/auth/role/resetRolesForUserByLoginName")
-		requeststring, err := json.Marshal(roleIdList)
-		request.QueryParams["loginName"] = lname
-		request.QueryParams["roleIdList"] = fmt.Sprint(requeststring)
-		request.Headers["x-acs-content-type"] = "application/json"
-		request.Headers["Content-Type"] = "application/json"
-		bresponse, err := client.ProcessCommonRequest(request)
+	if _, ok := d.GetOk("role_ids"); ok && !d.IsNewResource(){
+		oldV, newV := d.GetChange("role_ids")
 
-		log.Printf("response of bresponse ResetRolesForUserByLoginName is : %s", bresponse)
-		if err != nil {
-			errmsg := ""
-			if bresponse != nil {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			} else {
-				return err
+		// 转换新旧值（确保类型安全）
+		newSet, okNew   := newV.(*schema.Set)
+		if !okNew {
+			return fmt.Errorf("unexpected type for new role_ids")
+		}
+		oldSet, okOld := oldV.(*schema.Set)
+		if !okOld {
+			return fmt.Errorf("unexpected type for old role_ids")
+		}
+		remove := oldSet.Difference(newSet).List()
+		create := newSet.Difference(oldSet).List()
+
+		for _, roleId := range(create) {
+			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddRoleToUser", "/ascm/auth/role/addRoleToUser")
+			request.QueryParams["loginName"] = lname
+			request.QueryParams["roleId"] = roleId.(string)
+
+			bresponse, err := client.ProcessCommonRequest(request)
+			if err != nil || bresponse.GetHttpStatus() != 200 {
+				errmsg := ""
+				if bresponse != nil {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "AddRoleToUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "ResetRolesForUserByLoginName", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
 
-		addDebug("ResetRolesForUserByLoginName", bresponse, request)
+			addDebug("AddRoleToUser", bresponse, request, request.QueryParams)
+			log.Printf("response of queryparams AddRoleToUser is : %s", request.QueryParams)
+		}
+		
+		for _, roleId := range(remove) {
+			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUser", "/ascm/auth/role/removeRoleFromUser")
+			request.QueryParams["loginName"] = lname
+			request.QueryParams["roleId"] = roleId.(string)
+
+			bresponse, err := client.ProcessCommonRequest(request)
+			if err != nil || bresponse.GetHttpStatus() != 200 {
+				errmsg := ""
+				if bresponse != nil {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ascm_user", "RemoveRoleFromUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+
+			addDebug("AddRoleToUser", bresponse, request, request.QueryParams)
+			log.Printf("response of queryparams AddRoleToUser is : %s", request.QueryParams)
+		}
 	}
-	return resourceAlibabacloudStackAscmUserRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmUserRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}

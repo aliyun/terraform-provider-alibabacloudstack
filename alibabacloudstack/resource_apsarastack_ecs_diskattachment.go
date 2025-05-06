@@ -14,11 +14,7 @@ import (
 )
 
 func resourceAlibabacloudStackDiskAttachment() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDiskAttachmentCreate,
-		Read:   resourceAlibabacloudStackDiskAttachmentRead,
-		Delete: resourceAlibabacloudStackDiskAttachmentDelete,
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:     schema.TypeString,
@@ -39,6 +35,9 @@ func resourceAlibabacloudStackDiskAttachment() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDiskAttachmentCreate,
+		resourceAlibabacloudStackDiskAttachmentRead, nil, resourceAlibabacloudStackDiskAttachmentDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDiskAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
@@ -109,11 +108,10 @@ func resourceAlibabacloudStackDiskAttachmentCreate(d *schema.ResourceData, meta 
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
-	return resourceAlibabacloudStackDiskAttachmentRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDiskAttachmentRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	disk, err := ecsService.DescribeDiskAttachment(d.Id())

@@ -59,11 +59,13 @@ func TestAccAlibabacloudStackLogStore_basic(t *testing.T) {
 					}),
 				),
 			},
-			// {
-			// 	ResourceName:      resourceId,
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				// Read时不返回这个参数，只能从数据库查询
+				ImportStateVerifyIgnore: []string{"encrypt_type"},
+			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"retention_period": "3000",

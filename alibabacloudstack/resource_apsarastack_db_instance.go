@@ -21,14 +21,7 @@ import (
 )
 
 func resourceAlibabacloudStackDBInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDBInstanceCreate,
-		Read:   resourceAlibabacloudStackDBInstanceRead,
-		Update: resourceAlibabacloudStackDBInstanceUpdate,
-		Delete: resourceAlibabacloudStackDBInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(40 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -231,13 +224,10 @@ func resourceAlibabacloudStackDBInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-			"force_restart": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Deprecated:    "Field 'force_restart' is deprecated and will be removed in a future release, and not for any use now.",
-			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDBInstanceCreate, resourceAlibabacloudStackDBInstanceRead, resourceAlibabacloudStackDBInstanceUpdate, resourceAlibabacloudStackDBInstanceDelete)
+	return resource
 }
 
 func parameterToHash(v interface{}) int {
@@ -459,7 +449,7 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 		log.Print("enabled SSL")
 		addDebug(ssl_req.GetActionName(), sslraw, ssl_req)
 	}
-	return resourceAlibabacloudStackDBInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -594,7 +584,7 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackDBInstanceRead(d, meta)
+		return nil
 	}
 
 	if d.HasChanges("instance_name", "db_instance_description") {
@@ -745,11 +735,10 @@ func resourceAlibabacloudStackDBInstanceUpdate(d *schema.ResourceData, meta inte
 		}
 		addDebug(ssl_req.GetActionName(), sslraw, ssl_req)
 	}
-	return resourceAlibabacloudStackDBInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
 

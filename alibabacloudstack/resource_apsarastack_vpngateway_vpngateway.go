@@ -19,15 +19,7 @@ import (
 )
 
 func resourceAlibabacloudStackVpnGateway() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackVpnGatewayCreate,
-		Read:   resourceAlibabacloudStackVpnGatewayRead,
-		Update: resourceAlibabacloudStackVpnGatewayUpdate,
-		Delete: resourceAlibabacloudStackVpnGatewayDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:          schema.TypeString,
@@ -146,6 +138,8 @@ func resourceAlibabacloudStackVpnGateway() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackVpnGatewayCreate, resourceAlibabacloudStackVpnGatewayRead, resourceAlibabacloudStackVpnGatewayUpdate, resourceAlibabacloudStackVpnGatewayDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackVpnGatewayCreate(d *schema.ResourceData, meta interface{}) error {
@@ -221,7 +215,7 @@ func resourceAlibabacloudStackVpnGatewayCreate(d *schema.ResourceData, meta inte
 		return errmsgs.WrapError(err)
 	}
 
-	return resourceAlibabacloudStackVpnGatewayUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpnGatewayRead(d *schema.ResourceData, meta interface{}) error {
@@ -318,7 +312,7 @@ func resourceAlibabacloudStackVpnGatewayUpdate(d *schema.ResourceData, meta inte
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackVpnGatewayRead(d, meta)
+		return nil
 	}
 
 	if d.HasChange("bandwidth") {
@@ -333,7 +327,7 @@ func resourceAlibabacloudStackVpnGatewayUpdate(d *schema.ResourceData, meta inte
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackVpnGatewayRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackVpnGatewayDelete(d *schema.ResourceData, meta interface{}) error {

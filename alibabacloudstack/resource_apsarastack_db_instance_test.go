@@ -185,10 +185,11 @@ func TestAccAlibabacloudStackDBInstanceMysql(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_restart", "encryption", "period", "auto_renew"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// 专有云不支持 period, auto_renew 参数 encryption参数不支持回读
+				ImportStateVerifyIgnore: []string{"encryption", "period", "auto_renew"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

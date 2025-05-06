@@ -51,6 +51,7 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDet
 	request.QueryParams["ProductName"] = "CS"
 
 	clusterdetails, err := s.client.ProcessCommonRequest(request)
+	addDebug("DescribeClustersV1", clusterdetails, request, request.QueryParams)
 	if err != nil {
 		if clusterdetails == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")

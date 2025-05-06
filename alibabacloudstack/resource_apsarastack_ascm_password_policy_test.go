@@ -1,9 +1,10 @@
 package alibabacloudstack
 
 import (
+	"testing"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"testing"
 )
 
 func TestAccAlibabacloudStackAscm_PasswordPolicy(t *testing.T) {
@@ -30,6 +31,11 @@ func TestAccAlibabacloudStackAscm_PasswordPolicy(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})

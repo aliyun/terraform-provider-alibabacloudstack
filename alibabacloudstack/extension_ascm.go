@@ -322,6 +322,36 @@ type UserGroup struct {
 	} `json:"data"`
 }
 
+type MembersInsideResourceData struct {
+	AuthorizedId       int    `json:"authorizedId"`
+	AuthorizedType     string `json:"authorizedType"`
+	AuthorizedName     string `json:"authorizedName"`
+	AuthorizedAlias    string `json:"authorizedAlias"`
+	AuthorizedTime     int    `json:"authorizedTime"`
+	AuthorizedRoleId   int    `json:"authorizedRoleId"`
+	AuthorizedRoleName string `json:"authorizedRoleName"`
+}
+
+type MembersInsideResourceSet struct {
+	SuccessResponse bool   `json:"successResponse"`
+	Code            string `json:"code"`
+	ErrorKey        string `json:"errorKey"`
+	Message         string `json:"message"`
+	ExtraMessage    string `json:"extraMessage"`
+	RequestId       string `json:"requestId"`
+	Action          string `json:"action"`
+	Cost            int    `json:"cost"`
+	Domain          string `json:"domain"`
+	ServerRole      string `json:"serverRole"`
+	Data []MembersInsideResourceData `json:"data"`
+	PageInfo     struct {
+		CurrentPage int `json:"currentPage"`
+		PageSize    int `json:"pageSize"`
+		Total       int `json:"total"`
+		TotalPage   int `json:"totalPage"`
+	} `json:"pageInfo"`
+}
+
 type ListResourceGroup struct {
 	Redirect     bool   `json:"redirect"`
 	Code         string `json:"code"`

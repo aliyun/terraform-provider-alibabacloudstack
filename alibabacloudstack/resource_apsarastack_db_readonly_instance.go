@@ -16,15 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDBReadonlyInstanceCreate,
-		Read:   resourceAlibabacloudStackDBReadonlyInstanceRead,
-		Update: resourceAlibabacloudStackDBReadonlyInstanceUpdate,
-		Delete: resourceAlibabacloudStackDBReadonlyInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(20 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -151,6 +143,10 @@ func resourceAlibabacloudStackDBReadonlyInstance() *schema.Resource {
 			"tags": tagsSchema(),
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDBReadonlyInstanceCreate, 
+	resourceAlibabacloudStackDBReadonlyInstanceRead, resourceAlibabacloudStackDBReadonlyInstanceUpdate, 
+	resourceAlibabacloudStackDBReadonlyInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDBReadonlyInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -189,7 +185,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceCreate(d *schema.ResourceData, m
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackDBReadonlyInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -209,7 +205,7 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackDBReadonlyInstanceRead(d, meta)
+		return nil
 	}
 
 	if d.HasChanges("db_instance_description", "instance_name") {
@@ -321,11 +317,10 @@ func resourceAlibabacloudStackDBReadonlyInstanceUpdate(d *schema.ResourceData, m
 	}
 
 	d.Partial(false)
-	return resourceAlibabacloudStackDBReadonlyInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDBReadonlyInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	rdsService := RdsService{client}
 
@@ -417,7 +412,6 @@ func resourceAlibabacloudStackDBReadonlyInstanceDelete(d *schema.ResourceData, m
 		}
 		return err
 	}
-	waitSecondsIfWithTest(600)
 	return nil
 }
 

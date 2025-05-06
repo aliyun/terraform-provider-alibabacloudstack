@@ -12,15 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackDRDSInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDRDSInstanceCreate,
-		Read:   resourceAlibabacloudStackDRDSInstanceRead,
-		Update: resourceAlibabacloudStackDRDSInstanceUpdate,
-		Delete: resourceAlibabacloudStackDRDSInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Update: schema.DefaultTimeout(5 * time.Minute),
@@ -63,6 +55,8 @@ func resourceAlibabacloudStackDRDSInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDRDSInstanceCreate, resourceAlibabacloudStackDRDSInstanceRead, resourceAlibabacloudStackDRDSInstanceUpdate, resourceAlibabacloudStackDRDSInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDRDSInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -120,7 +114,7 @@ func resourceAlibabacloudStackDRDSInstanceCreate(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackDRDSInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDRDSInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -158,7 +152,7 @@ func resourceAlibabacloudStackDRDSInstanceUpdate(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackDRDSInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDRDSInstanceRead(d *schema.ResourceData, meta interface{}) error {

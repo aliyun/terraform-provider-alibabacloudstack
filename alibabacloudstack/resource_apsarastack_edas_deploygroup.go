@@ -11,13 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackEdasDeployGroup() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackEdasDeployGroupCreate,
-		Read:   resourceAlibabacloudStackEdasDeployGroupRead,
-		Delete: resourceAlibabacloudStackEdasDeployGroupDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"app_id": {
 				Type:     schema.TypeString,
@@ -36,6 +30,10 @@ func resourceAlibabacloudStackEdasDeployGroup() *schema.Resource {
 			},
 		},
 	}
+
+	setResourceFunc(resource, resourceAlibabacloudStackEdasDeployGroupCreate, resourceAlibabacloudStackEdasDeployGroupRead, nil, resourceAlibabacloudStackEdasDeployGroupDelete)
+
+	return resource
 }
 
 func resourceAlibabacloudStackEdasDeployGroupCreate(d *schema.ResourceData, meta interface{}) error {
@@ -78,7 +76,7 @@ func resourceAlibabacloudStackEdasDeployGroupCreate(d *schema.ResourceData, meta
 		return err
 	}
 
-	return resourceAlibabacloudStackEdasDeployGroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEdasDeployGroupRead(d *schema.ResourceData, meta interface{}) error {

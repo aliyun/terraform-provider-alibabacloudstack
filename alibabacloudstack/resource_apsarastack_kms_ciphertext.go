@@ -11,15 +11,7 @@ import (
 )
 
 func resourceAlibabacloudStackKmsCiphertext() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackKmsCiphertextCreate,
-		Read:   schema.Noop,
-		Delete: resourceAlibabacloudStackKmsCiphertextDelete,
-
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"plaintext": {
 				Type:      schema.TypeString,
@@ -46,6 +38,8 @@ func resourceAlibabacloudStackKmsCiphertext() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackKmsCiphertextCreate, schema.Noop, nil, resourceAlibabacloudStackKmsCiphertextDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackKmsCiphertextCreate(d *schema.ResourceData, meta interface{}) error {

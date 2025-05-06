@@ -7,8 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -166,7 +164,7 @@ func TestAccAlibabacloudStackRouterInterfaceBasic(t *testing.T) {
 	resourceId := "alibabacloudstack_router_interface.default"
 	ra := resourceAttrInit(resourceId, testAccRouterInterfaceCheckMap)
 
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -199,6 +197,11 @@ func TestAccAlibabacloudStackRouterInterfaceBasic(t *testing.T) {
 					}),
 				),
 				//ExpectNonEmptyPlan: true,
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccRouterInterfaceConfig_specification(rand),
@@ -254,7 +257,7 @@ func TestAccAlibabacloudStackRouterInterfaceMulti(t *testing.T) {
 	resourceId := "alibabacloudstack_router_interface.default.2"
 	ra := resourceAttrInit(resourceId, testAccRouterInterfaceCheckMap)
 
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {

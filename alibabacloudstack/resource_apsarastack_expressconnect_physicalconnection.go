@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackExpressConnectPhysicalConnection() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackExpressConnectPhysicalConnectionCreate,
-		Read:   resourceAlibabacloudStackExpressConnectPhysicalConnectionRead,
-		Update: resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate,
-		Delete: resourceAlibabacloudStackExpressConnectPhysicalConnectionDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
 		},
@@ -81,6 +74,9 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnection() *schema.Resourc
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackExpressConnectPhysicalConnectionCreate,
+		resourceAlibabacloudStackExpressConnectPhysicalConnectionRead, resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate, resourceAlibabacloudStackExpressConnectPhysicalConnectionDelete)
+	return resource
 }
 
 var DeviceName interface{}
@@ -133,7 +129,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionCreate(d *schema.R
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackExpressConnectPhysicalConnectionRead(d *schema.ResourceData, meta interface{}) error {
@@ -269,7 +265,7 @@ func resourceAlibabacloudStackExpressConnectPhysicalConnectionUpdate(d *schema.R
 		}
 	}
 	d.Partial(false)
-	return resourceAlibabacloudStackExpressConnectPhysicalConnectionRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackExpressConnectPhysicalConnectionDelete(d *schema.ResourceData, meta interface{}) error {

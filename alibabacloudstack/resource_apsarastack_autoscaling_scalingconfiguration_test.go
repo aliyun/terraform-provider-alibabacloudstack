@@ -56,8 +56,9 @@ func TestAccAlibabacloudStackEssScalingConfigurationUpdate(t *testing.T) {
 				ResourceName: resourceId,
 				ImportState:  true,
 
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_delete", "instance_type", "security_group_id", "password", "kms_encrypted_password", "kms_encryption_context"},
+				ImportStateVerify: true,
+				// force_delete 代码逻辑参数，不存在回读情况
+				ImportStateVerifyIgnore: []string{"force_delete"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

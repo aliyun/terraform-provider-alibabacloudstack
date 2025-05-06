@@ -18,15 +18,7 @@ import (
 )
 
 func resourceAlibabacloudStackSecurityGroupRule() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackSecurityGroupRuleCreate,
-		Read:   resourceAlibabacloudStackSecurityGroupRuleRead,
-		Update: resourceAlibabacloudStackSecurityGroupRuleUpdate,
-		Delete: resourceAlibabacloudStackSecurityGroupRuleDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"type": {
 				Type:         schema.TypeString,
@@ -113,6 +105,8 @@ func resourceAlibabacloudStackSecurityGroupRule() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackSecurityGroupRuleCreate, resourceAlibabacloudStackSecurityGroupRuleRead, resourceAlibabacloudStackSecurityGroupRuleUpdate, deleteSecurityGroupRule)
+	return resource
 }
 
 func resourceAlibabacloudStackSecurityGroupRuleCreate(d *schema.ResourceData, meta interface{}) error {
@@ -175,11 +169,10 @@ func resourceAlibabacloudStackSecurityGroupRuleCreate(d *schema.ResourceData, me
 
 	d.SetId(sgId + ":" + direction + ":" + ptl + ":" + port + ":" + nicType + ":" + cidr_ip + ":" + policy + ":" + strconv.Itoa(priority))
 
-	return resourceAlibabacloudStackSecurityGroupRuleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackSecurityGroupRuleRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ecsService := EcsService{client}
 	parts := strings.Split(d.Id(), ":")
@@ -288,7 +281,7 @@ func resourceAlibabacloudStackSecurityGroupRuleUpdate(d *schema.ResourceData, me
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
-	return resourceAlibabacloudStackSecurityGroupRuleRead(d, meta)
+	return nil
 }
 
 func deleteSecurityGroupRule(d *schema.ResourceData, meta interface{}) error {

@@ -17,14 +17,7 @@ import (
 )
 
 func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackPolardbInstanceCreate,
-		Read:   resourceAlibabacloudStackPolardbInstanceRead,
-		Update: resourceAlibabacloudStackPolardbInstanceUpdate,
-		Delete: resourceAlibabacloudStackPolardbInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(40 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
@@ -32,9 +25,10 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"engine": {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:         schema.TypeString,
+				ForceNew:     true,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"MySQL", "PolarDB_PPAS", "PolarDB_PG"}, false),
 			},
 			"engine_version": {
 				Type:     schema.TypeString,
@@ -52,6 +46,12 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 			"tde_status": {
 				Type:     schema.TypeBool,
 				Optional: true,
+			},
+			"encrypt_algorithm": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "aes-256",
+				ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
 			},
 			"enable_ssl": {
 				Type:     schema.TypeBool,
@@ -228,12 +228,9 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackPolardbInstanceCreate, resourceAlibabacloudStackPolardbInstanceRead, resourceAlibabacloudStackPolardbInstanceUpdate, resourceAlibabacloudStackPolardbInstanceDelete)
+	return resource
 }
-
-// func parameterToHash(v interface{}) int {
-// 	m := v.(map[string]interface{})
-// 	return hashcode.String(m["name"].(string) + "|" + m["value"].(string))
-// }
 
 func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
@@ -245,6 +242,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	var encryption bool
 	EncryptionKey := d.Get("encryption_key").(string)
 	encryption = d.Get("encryption").(bool)
+	EncryptAlgorithm := d.Get("encrypt_algorithm").(string)
 	log.Print("Encryption key input")
 	if EncryptionKey != "" && encryption == true {
 		log.Print("Encryption key condition passed")
@@ -252,18 +250,19 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		req.QueryParams["TargetRegionId"] = client.RegionId
 		var arnresp RoleARN
 		bresponse, err := client.ProcessCommonRequest(req)
+		addDebug(req.GetActionName(), bresponse, req, req.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSSL", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_polardb_db_instance", "CheckCloudResourceAuthorized", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &arnresp)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceDescription", errmsgs.AlibabacloudStackSdkGoERROR)
+				"alibabacloudstack_polardb_db_instance", "CheckCloudResourceAuthorized", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "CheckCloudResourceAuthorized", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
@@ -359,7 +358,14 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		"VPCId":                 VPCId,
 		"RoleARN":               arnrole,
 	})
-
+	if tde := d.Get("tde_status"); tde == true && engine != "MySQL" {
+		request.QueryParams["TdeStatus"] = "1"
+		request.QueryParams["EncryptAlgorithm"] = EncryptAlgorithm
+		request.QueryParams["RoleARN"] = arnrole
+		if EncryptionKey != "" {
+			request.QueryParams["EncryptionKey"] = EncryptionKey
+		}
+	}
 	log.Printf("request245 %v", request.QueryParams)
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
@@ -369,7 +375,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "CreateDBInstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
+	addDebug("CreateDBInstance", bresponse, request, request.QueryParams)
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbCreatedbinstanceResponse)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
@@ -379,16 +385,18 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	d.SetId(PolardbCreatedbinstanceResponse.DBInstanceId)
 	d.Set("connection_string", PolardbCreatedbinstanceResponse.ConnectionString)
 
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
+	stateConf := BuildStateConfByTimes([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 5*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}), 100)
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-	if tde := d.Get("tde_status"); tde == true {
+	tde := d.Get("tde_status").(bool)
+	log.Printf(" ============================================= tde:%t, engine:%s", tde, engine)
+	if tde == true && engine == "MySQL" {
 		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceTDE", "")
 		PolardbModifydbinstancetdeResponse := PolardbModifydbinstancetdeResponse{}
 		request.QueryParams["TDEStatus"] = "Enabled"
-		request.QueryParams["DBInstanceId"] = d.Id()
 		request.QueryParams["RoleARN"] = arnrole
+		request.QueryParams["EncryptAlgorithm"] = EncryptAlgorithm
 
 		if EncryptionKey != "" {
 			request.QueryParams["EncryptionKey"] = EncryptionKey
@@ -440,13 +448,21 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSSL", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		stateConf := BuildStateConf([]string{"No"}, []string{"Yes"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
+		var target, process string
+		if engine == "MySQL" {
+			target = "Yes"
+			process = "No"
+		} else {
+			target = "on"
+			process = "off"
+		}
+		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 		log.Print("enabled SSL")
 	}
-	return resourceAlibabacloudStackPolardbInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -580,7 +596,7 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 
 	if d.IsNewResource() {
 		d.Partial(false)
-		return resourceAlibabacloudStackPolardbInstanceRead(d, meta)
+		return nil
 	}
 
 	if d.HasChanges("instance_name", "db_instance_description") {
@@ -689,7 +705,8 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 	}
 
 	d.Partial(false)
-	if d.HasChange("tde_status") && d.Get("tde_status").(bool) {
+	engine := Trim(d.Get("engine").(string))
+	if d.HasChange("tde_status") && d.Get("tde_status").(bool) && engine == "MySQL" {
 		tde_req := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceTDE", "")
 		tde_req.QueryParams["DBInstanceId"] = d.Id()
 		tde_req.QueryParams["TDEStatus"] = "Enabled"
@@ -715,14 +732,26 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 		ssl_req.QueryParams["DBInstanceId"] = d.Id()
 		ssl_req.QueryParams["ConnectionString"] = d.Get("connection_string").(string)
 		var target, process string
+		engine := Trim(d.Get("engine").(string))
 		if ssl == true {
 			ssl_req.QueryParams["SSLEnabled"] = "1"
-			target = "Yes"
-			process = "No"
+			if engine == "MySQL" {
+				target = "Yes"
+				process = "No"
+			} else {
+				target = "on"
+				process = "off"
+			}
+
 		} else {
 			ssl_req.QueryParams["SSLEnabled"] = "0"
-			target = "No"
-			process = "Yes"
+			if engine == "MySQL" {
+				target = "off"
+				process = "on"
+			} else {
+				target = "No"
+				process = "Yes"
+			}
 		}
 		bresponse, err := client.ProcessCommonRequest(ssl_req)
 		if err != nil {
@@ -746,11 +775,10 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 			log.Print("Updated SSL to false")
 		}
 	}
-	return resourceAlibabacloudStackPolardbInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	PolardbService := PolardbService{client}
 
@@ -801,7 +829,19 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 	connectivity.SetResourceData(d, instance.Items.DBInstanceAttribute[0].DBInstanceDescription, "db_instance_description", "instance_name")
 	d.Set("maintain_time", instance.Items.DBInstanceAttribute[0].MaintainTime)
 	connectivity.SetResourceData(d, instance.Items.DBInstanceAttribute[0].DBInstanceStorageType, "db_instance_storage_type", "storage_type")
-
+	engine := Trim(d.Get("engine").(string))
+	ssl_object, err := PolardbService.DescribeDBInstanceSSL(d.Id())
+	ssl := false
+	if (engine == "MySQL" && ssl_object["SSLEnabled"].(string) == "Yes") || (engine != "MySQL" && ssl_object["SSLEnabled"].(string) == "on") {
+		ssl = true
+	}
+	d.Set("enable_ssl", ssl)
+	tde_object, err := PolardbService.DescribeDBInstanceTDE(d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	d.Set("tde_status", tde_object["TDEStatus"].(string) == "Enabled")
+	d.Set("encrypt_algorithm", tde_object["EncryptAlgorithm"].(string))
 	if err = PolardbService.RefreshParameters(d, client, "parameters"); err != nil {
 		return errmsgs.WrapError(err)
 	}

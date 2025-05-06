@@ -15,15 +15,7 @@ import (
 )
 
 func resourceAlibabacloudStackLogStoreIndex() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackLogStoreIndexCreate,
-		Read:   resourceAlibabacloudStackLogStoreIndexRead,
-		Update: resourceAlibabacloudStackLogStoreIndexUpdate,
-		Delete: resourceAlibabacloudStackLogStoreIndexDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:     schema.TypeString,
@@ -130,6 +122,8 @@ func resourceAlibabacloudStackLogStoreIndex() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackLogStoreIndexCreate, resourceAlibabacloudStackLogStoreIndexRead, resourceAlibabacloudStackLogStoreIndexUpdate, resourceAlibabacloudStackLogStoreIndexDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackLogStoreIndexCreate(d *schema.ResourceData, meta interface{}) error {
@@ -192,11 +186,10 @@ func resourceAlibabacloudStackLogStoreIndexCreate(d *schema.ResourceData, meta i
 
 	d.SetId(fmt.Sprintf("%s%s%s", project, COLON_SEPARATED, store.Name))
 
-	return resourceAlibabacloudStackLogStoreIndexRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogStoreIndexRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	logService := LogService{client}
 	parts, err := ParseResourceId(d.Id(), 2)
@@ -309,7 +302,7 @@ func resourceAlibabacloudStackLogStoreIndexUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	return resourceAlibabacloudStackLogStoreIndexRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackLogStoreIndexDelete(d *schema.ResourceData, meta interface{}) error {

@@ -16,11 +16,7 @@ import (
 )
 
 func resourceAlibabacloudStackAscmRamRole() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackAscmRamRoleCreate,
-		Read:   resourceAlibabacloudStackAscmRamRoleRead,
-		Update: resourceAlibabacloudStackAscmRamRoleUpdate,
-		Delete: resourceAlibabacloudStackAscmRamRoleDelete,
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"role_name": {
 				Type:         schema.TypeString,
@@ -46,6 +42,8 @@ func resourceAlibabacloudStackAscmRamRole() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackAscmRamRoleCreate, resourceAlibabacloudStackAscmRamRoleRead, resourceAlibabacloudStackAscmRamRoleUpdate, resourceAlibabacloudStackAscmRamRoleDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta interface{}) error {
@@ -119,15 +117,10 @@ func resourceAlibabacloudStackAscmRamRoleCreate(d *schema.ResourceData, meta int
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DescribeAscmRamRole", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	d.SetId(name + COLON_SEPARATED + fmt.Sprint(check.Data[0].ID))
-	return resourceAlibabacloudStackAscmRamRoleUpdate(d, meta)
-}
-
-func resourceAlibabacloudStackAscmRamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackAscmRamRoleRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackAscmRamRoleRead(d *schema.ResourceData, meta interface{}) error {
-	waitSecondsIfWithTest(1)
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ascmService := AscmService{client}
 	object, err := ascmService.DescribeAscmRamRole(d.Id())
@@ -147,6 +140,12 @@ func resourceAlibabacloudStackAscmRamRoleRead(d *schema.ResourceData, meta inter
 	d.Set("role_id", object.Data[0].ID)
 	d.Set("description", object.Data[0].Description)
 	return nil
+}
+
+func resourceAlibabacloudStackAscmRamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
+	noUpdateAllowedFields := []string{"role_name", "description", "organization_visibility", "role_range"}
+
+	return noUpdatesAllowedCheck(d, noUpdateAllowedFields)
 }
 
 func resourceAlibabacloudStackAscmRamRoleDelete(d *schema.ResourceData, meta interface{}) error {

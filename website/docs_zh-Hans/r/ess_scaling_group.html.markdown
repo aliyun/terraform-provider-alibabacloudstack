@@ -1,5 +1,5 @@
 ---
-subcategory: "Auto Scaling(ESS)"
+subcategory: "Auto Scaling (ESS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_scaling_group"
 sidebar_current: "docs-alibabacloudstack-resource-ess-scaling-group"
@@ -106,6 +106,7 @@ resource "alibabacloudstack_ess_scaling_group" "default" {
     - 每个负载均衡实例至少必须配置一个监听器，并且其健康检查必须开启。否则，创建将失败(可能需要添加一个`depends_on`参数，目标是您的`alibabacloudstack_slb_listener`，以确保监听器及其健康检查配置就绪后再创建伸缩组)。
     - 附加VPC类型ECS实例的负载均衡实例不能附加到伸缩组。
     - 附加到负载均衡实例的ECS实例的默认权重为50。
+* `multi_az_policy` - (可选, 变更时重建) 多可用区伸缩组的ECS实例扩缩策略。可选值：PRIORITY（优先级）、BALANCE（平衡）或 COST_OPTIMIZED（成本优化）。
 
 -> **注意：** 当分离负载均衡器时，组中的实例将从负载均衡器的`默认服务器组`中移除；相反，当附加负载均衡器时，组中的实例将被添加到负载均衡器的`默认服务器组`。
 
