@@ -278,8 +278,7 @@ func resourceAlibabacloudStackPolardbBackuppolicyUpdate(d *schema.ResourceData, 
 
 func resourceAlibabacloudStackPolardbBackuppolicyRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbbackup_policyservice :=
-		PolardbService{client}
+	polardbbackup_policyservice := PolardbService{client}
 	response, err := polardbbackup_policyservice.DoPolardbDescribebackuppolicyRequest(d, client)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_backuppolicy", errmsgs.AlibabacloudStackSdkGoERROR)
