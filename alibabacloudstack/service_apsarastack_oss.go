@@ -371,7 +371,7 @@ func (s *OssService) GetBucketTags(bucketName string) (tags []interface{}, err e
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
-	tags_data, err := jsonpath.Get("$.data.Tagging.TagSet.Tag", response)
+	tags_data, err := jsonpath.Get("$.Data.Tagging.TagSet.Tag", response)
 	if tags_data != nil {
 		tags = tags_data.([]interface{})
 	}
@@ -388,7 +388,7 @@ func (s *OssService) DeleteBucketTags(bucketName string) error {
 	request.Headers["x-acs-instanceid"] = bucketName
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
-	addDebug("GetBucketTags", bresponse, request, bresponse.GetHttpContentString())
+	addDebug("DeleteBucketTags", bresponse, request, bresponse.GetHttpContentString())
 	if err != nil || bresponse.GetHttpStatus() != 200 {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")

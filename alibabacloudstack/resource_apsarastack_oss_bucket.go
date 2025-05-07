@@ -375,16 +375,15 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 			d.Set("kms_key_id", storageEncryption.Data.ServerSideEncryptionRule.ApplyServerSideEncryptionByDefault.KMSMasterKeyID)
 		}
 	}
+	tags_map := make(map[string]string)
 	tags, err := ossService.GetBucketTags(bucketName)
 	if len(tags) > 0 {
-		tags_map := make(map[string]string)
 		for _, tag := range tags {
 			tagmap := tag.(map[string]interface{})
 			tags_map[tagmap["Key"].(string)] = tagmap["Value"].(string)
 		}
-		d.Set("tags", tags_map)
 	}
-
+	d.Set("tags", tags_map)
 	return nil
 }
 
@@ -395,7 +394,14 @@ func resourceAlibabacloudStackOssBucketUpdate(d *schema.ResourceData, meta inter
 	var err error
 	if !d.IsNewResource() && d.HasChange("tags") {
 		tags := d.Get("tags").(map[string]interface{})
-		if len(tags) == 0 {
+		var tag_objs []OssTags
+		for k, v := range tags {
+			tag_objs = append(tag_objs, OssTags{
+				Key:   k,
+				Value: v.(string),
+			})
+		}
+		if len(tag_objs) <= 0 {
 			err = ossService.DeleteBucketTags(bucketName)
 		} else {
 			var tag_objs []OssTags

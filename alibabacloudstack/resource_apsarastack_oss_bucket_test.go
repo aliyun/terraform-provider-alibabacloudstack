@@ -140,6 +140,11 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 				),
 			},
 			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccConfig(map[string]interface{}{
 					"acl": "public-read",
 				}),
@@ -148,12 +153,6 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 						"acl": "public-read",
 					}),
 				),
-			},
-			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"tags.%", "tags.Created", "tags.For"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
