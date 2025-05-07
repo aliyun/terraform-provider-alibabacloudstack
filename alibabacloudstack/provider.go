@@ -165,13 +165,6 @@ func Provider() *schema.Provider {
 				Description: descriptions["ossservice_domain"],
 				Deprecated:  "Use schema endpoints replace ossservice_domain.",
 			},
-			"kafkaopenapi_domain": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_KAFKAOPENAPI_DOMAIN", nil),
-				Description: descriptions["kafkaopenapi_domain"],
-				Deprecated:  "Use schema endpoints replace kafkaopenapi_domain.",
-			},
 			"organization_accesskey": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -193,26 +186,12 @@ func Provider() *schema.Provider {
 				Description: descriptions["sls_openapi_endpoint"],
 				Deprecated:  "Use schema endpoints replace sls_openapi_endpoint.",
 			},
-			"ascm_openapi_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("APSARASTACK_ASCM_OPENAPI_ENDPOINT", nil),
-				Description: descriptions["ascm_openapi_endpoint"],
-				Deprecated:  "Use schema endpoints replace ascm_openapi_endpoint.",
-			},
 			"sts_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_STS_ENDPOINT", nil),
 				Description: descriptions["sts_endpoint"],
 				Deprecated:  "Use schema endpoints replace sts_endpoint.",
-			},
-			"quickbi_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_QUICKBI_ENDPOINT", nil),
-				Description: descriptions["quickbi_endpoint"],
-				Deprecated:  "Use schema endpoints replace quickbi_endpoint.",
 			},
 			"department": {
 				Type:        schema.TypeString,
@@ -232,19 +211,19 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_RESOURCE_GROUP_SET", nil),
 				Description: descriptions["resource_group_set_name"],
 			},
-			"dataworkspublic": {
+			"kms_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_DATAWORKS_PUBLIC_ENDPOINT", nil),
-				Description: descriptions["dataworkspublic_endpoint"],
-				Deprecated:  "Use schema endpoints replace dataworkspublic.",
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_KMS_ENDPOINT", nil),
+				Description: descriptions["kms_endpoint"],
+				Deprecated:  "Use schema endpoints replace kms_endpoint.",
 			},
-			"dbs_endpoint": {
+			"polardb_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_DBS_ENDPOINT", nil),
-				Description: descriptions["dbs_endpoint"],
-				Deprecated:  "Use schema endpoints replace dbs_endpoint.",
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_POLARDB_ENDPOINT", nil),
+				Description: descriptions["polardb_endpoint"],
+				Deprecated:  "Use schema endpoints replace polardb_endpoint.",
 			},
 		},
 		DataSourcesMap: getDataSourcesMap(),
@@ -488,11 +467,11 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ecs_ebs_storage_sets":                    dataSourceAlibabacloudStackEcsEbsStorageSets(),
 		"alibabacloudstack_polardb_zones":                           dataSourceAlibabacloudStackPolardbZones(),
 		//	"alibabacloudstack_polardb_databases":                      dataSourceAlibabacloudStackPolardbDatabases(),
-		"alibabacloudstack_polardb_dbinstances":                     dataSourceAlibabacloudStackPolardbDbInstances(),
-		"alibabacloudstack_polardb_instances":                       dataSourceAlibabacloudStackPolardbDbInstances(),
+		"alibabacloudstack_polardb_dbinstances": dataSourceAlibabacloudStackPolardbDbInstances(),
+		"alibabacloudstack_polardb_instances":   dataSourceAlibabacloudStackPolardbDbInstances(),
 		//	"alibabacloudstack_polardb_accounts":                       dataSourceAlibabacloudStackPolardbAccounts(),
-		"alibabacloudstack_bastionhost_instances":                   dataSourceAlibabacloudStackBastionhostInstances(),
-		"alibabacloudstack_waf_instances":                           dataSourceAlibabacloudStackWafInstances(),
+		"alibabacloudstack_bastionhost_instances": dataSourceAlibabacloudStackBastionhostInstances(),
+		"alibabacloudstack_waf_instances":         dataSourceAlibabacloudStackWafInstances(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -994,22 +973,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if ossServicedomain != "" {
 		config.Endpoints[connectivity.OssDataCode] = ossServicedomain
 	}
-	DbsEndpoint := d.Get("dbs_endpoint").(string)
-	if DbsEndpoint != "" {
-		config.Endpoints[connectivity.DDSCode] = DbsEndpoint
-	}
-	DataworkspublicEndpoint := d.Get("dataworkspublic").(string)
-	if DataworkspublicEndpoint != "" {
-		config.Endpoints[connectivity.DataworkspublicCode] = DataworkspublicEndpoint
-	}
-	QuickbiEndpoint := d.Get("quickbi_endpoint").(string)
-	if QuickbiEndpoint != "" {
-		config.Endpoints[connectivity.QuickbiCode] = QuickbiEndpoint
-	}
-	kafkaOpenApidomain := d.Get("kafkaopenapi_domain").(string)
-	if kafkaOpenApidomain != "" {
-		config.Endpoints[connectivity.ALIKAFKACode] = kafkaOpenApidomain
-	}
 	StsEndpoint := d.Get("sts_endpoint").(string)
 	if StsEndpoint != "" {
 		config.Endpoints[connectivity.STSCode] = StsEndpoint
@@ -1024,9 +987,14 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if slsOpenAPIEndpoint != "" {
 		config.Endpoints[connectivity.SlSDataCode] = slsOpenAPIEndpoint
 	}
-	ascmOpenAPIEndpoint := d.Get("ascm_openapi_endpoint").(string)
-	if ascmOpenAPIEndpoint != "" {
-		config.Endpoints[connectivity.ASCMCode] = ascmOpenAPIEndpoint
+	kmsEndpoint := d.Get("kms_endpoint").(string)
+	if kmsEndpoint != "" {
+		config.Endpoints[connectivity.KmsCode] = kmsEndpoint
+	}
+
+	polardbEndpoint := d.Get("polardb_endpoint").(string)
+	if polardbEndpoint != "" {
+		config.Endpoints[connectivity.POLARDBCode] = polardbEndpoint
 	}
 	if strings.ToLower(config.Protocol) == "https" {
 		config.Protocol = "HTTPS"

@@ -211,7 +211,7 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 					"enable_ssl":               "true",
 					"tde_status":               "true",
 					"encryption":               "true",
-					"encryption_key":           "${alibabacloudstack_kms_key.key.key_id}",
+					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            "${var.name}",
 					"db_instance_storage_type": "local_ssd",
@@ -262,7 +262,7 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 					"enable_ssl":               "true",
 					"tde_status":               "true",
 					"encryption":               "true",
-					"encryption_key":           "${alibabacloudstack_kms_key.key.key_id}",
+					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
 					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
