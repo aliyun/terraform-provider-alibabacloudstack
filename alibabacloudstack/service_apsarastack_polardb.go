@@ -312,26 +312,15 @@ type PolardbDescribebackuppolicyResponse struct {
 	} `json:"DuplicationLocation"`
 }
 
-func (s *PolardbService) DoPolardbDescribebackuppolicyRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbDescribebackuppolicyResponse, error) {
+func (s *PolardbService) DoPolardbDescribebackuppolicyRequest(id string) (*PolardbDescribebackuppolicyResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeBackupPolicy
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeBackupPolicy", "")
+	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeBackupPolicy", "")
 	PolardbDescribebackuppolicyResponse := &PolardbDescribebackuppolicyResponse{}
 
-	//调用request_params_handler
+	//调用requestin_handler
+	request.QueryParams["DBInstanceId"] = id
 
-	if v, ok := d.GetOk("backup_policy_mode"); ok {
-		//调用requestin_handler
-		request.QueryParams["BackupPolicyMode"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("db_instance_id"); ok {
-		//调用requestin_handler
-		request.QueryParams["DBInstanceId"] = v.(string)
-	} else {
-		return nil, fmt.Errorf("DBInstanceId is required")
-	}
-
-	bresponse, err := client.ProcessCommonRequest(request)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
