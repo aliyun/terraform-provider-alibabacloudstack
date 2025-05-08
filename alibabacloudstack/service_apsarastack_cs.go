@@ -51,10 +51,10 @@ func (s *CsService) GetCsK8sNodesCount(id string) (node_count int, err error) {
 			return node_count, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNotFound"}) {
-			return node_count, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.DenverdinoAlibabacloudStackgo)
+			return node_count, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(clusterdetails.BaseResponse)
-		return node_count, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.DenverdinoAlibabacloudStackgo, errmsg)
+		return node_count, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 
 	}
 
