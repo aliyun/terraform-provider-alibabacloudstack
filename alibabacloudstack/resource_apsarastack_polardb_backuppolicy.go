@@ -34,6 +34,7 @@ func resourceAlibabacloudStackPolardbBackuppolicy() *schema.Resource {
 			"compress_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"db_instance_id": {
@@ -44,21 +45,25 @@ func resourceAlibabacloudStackPolardbBackuppolicy() *schema.Resource {
 			"enable_backup_log": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"high_space_usage_protection": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"local_log_retention_hours": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"local_log_retention_space": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"log_backup_frequency": {
@@ -69,6 +74,7 @@ func resourceAlibabacloudStackPolardbBackuppolicy() *schema.Resource {
 			"log_backup_local_retention_number": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 
 			"log_backup_retention_period": {
@@ -89,6 +95,7 @@ func resourceAlibabacloudStackPolardbBackuppolicy() *schema.Resource {
 			"released_keep_policy": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 		},
 	}
@@ -278,13 +285,15 @@ func resourceAlibabacloudStackPolardbBackuppolicyUpdate(d *schema.ResourceData, 
 
 func resourceAlibabacloudStackPolardbBackuppolicyRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbbackup_policyservice :=
-		PolardbService{client}
-	response, err := polardbbackup_policyservice.DoPolardbDescribebackuppolicyRequest(d, client)
+	polardbbackup_policyservice := PolardbService{client}
+	response, err := polardbbackup_policyservice.DoPolardbDescribebackuppolicyRequest(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_backuppolicy", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	data := response
+	
+	d.Set("db_instance_id", d.Id())
+	
 	d.Set("backup_log", data.BackupLog)
 
 	d.Set("backup_retention_period", data.BackupRetentionPeriod)

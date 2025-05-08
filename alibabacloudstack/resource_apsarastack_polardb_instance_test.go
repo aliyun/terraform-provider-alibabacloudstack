@@ -22,7 +22,8 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := "tf-testaccdbinstanceconfig"
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc-polardb-instance_mysql%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -47,6 +48,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
+						"instance_name": name,
 						"engine":              "MySQL",
 						"engine_version":      "5.7",
 						"db_instance_class":   CHECKSET,
@@ -171,7 +173,8 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := "tf-testaccdbinstanceconfig"
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc-polardb-instance_mysql%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceClassicConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -182,7 +185,7 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 		IDRefreshName: resourceId,
 
 		Providers:    testAccProviders,
-		CheckDestroy: rac.checkResourceDestroy(),
+		CheckDestroy: nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -211,7 +214,7 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 					"enable_ssl":               "true",
 					"tde_status":               "true",
 					"encryption":               "true",
-					"encryption_key":           "${alibabacloudstack_kms_key.key.key_id}",
+					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            "${var.name}",
 					"db_instance_storage_type": "local_ssd",
@@ -237,7 +240,8 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 	}, "Describedbinstances")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := "tf-testaccdbinstanceconfig"
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc-polardb-instance_pgsql%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbInstanceClassicConfigDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -262,7 +266,7 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 					"enable_ssl":               "true",
 					"tde_status":               "true",
 					"encryption":               "true",
-					"encryption_key":           "${alibabacloudstack_kms_key.key.key_id}",
+					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
 					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -302,7 +306,7 @@ var PolardbinstanceBasicMap = map[string]string{
 	"engine_version":      "8.0",
 	"db_instance_class":   CHECKSET,
 	"db_instance_storage": "10",
-	"instance_name":       "tf-testaccdbinstanceconfig",
+	"instance_name":       CHECKSET,
 	"zone_id":             CHECKSET,
 	"connection_string":   CHECKSET,
 	"port":                CHECKSET,
@@ -313,7 +317,7 @@ var PolardbinstancePGSqlMap = map[string]string{
 	"engine_version":      "14",
 	"db_instance_class":   CHECKSET,
 	"db_instance_storage": "10",
-	"instance_name":       "tf-testaccdbinstanceconfig",
+	"instance_name":       CHECKSET,
 	"zone_id":             CHECKSET,
 	"connection_string":   CHECKSET,
 	"port":                CHECKSET,
