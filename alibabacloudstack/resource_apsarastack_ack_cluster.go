@@ -976,6 +976,31 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	if err := d.Set("tags", flattenTagsConfig(object.Tags)); err != nil {
 		return errmsgs.WrapError(err)
 	}
+	d.Set("enable_ssh", object.EnableSsh)
+	d.Set("addons", object.Addons)
+	d.Set("cluster_type", object.ClusterType)
+	d.Set("cpu_policy", object.CpuPolicy)
+	d.Set("image_id", object.ImageID)
+	d.Set("is_enterprise_security_group", object.IsEnterpriseSecurityGroup)
+	d.Set("key_name", object.KeyPair)
+	d.Set("master_count", object.MasterCount)
+	d.Set("master_disk_category", object.MasterDiskCategory)
+	d.Set("master_disk_size", object.MasterDiskSize)
+	d.Set("master_instance_types", object.MasterInstanceTypes)
+	d.Set("master_vswitch_ids", object.MasterVswitchIds)
+	d.Set("node_cidr_mask", object.NodeCidrMask)
+	d.Set("node_port_range", object.NodePortRange)
+	d.Set("os_type", object.OsType)
+	d.Set("platform", object.Platform)
+	d.Set("proxy_mode", object.ProxyMode)
+	d.Set("runtime", object.Runtime)
+	d.Set("security_group_id", object.SecurityGroupId)
+	d.Set("service_cidr", object.ServiceCidr)
+	d.Set("timeout_mins", object.TimeoutMins)
+	d.Set("worker_disk_category", object.WorkerDiskCategory)
+	d.Set("worker_disk_size", object.WorkerDiskSize)
+	d.Set("worker_instance_types", object.WorkerInstanceTypes)
+	d.Set("worker_vswitch_ids", object.WorkerVswitchIds)
 	return nil
 }
 
