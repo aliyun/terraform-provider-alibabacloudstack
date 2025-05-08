@@ -3,8 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 
-	"github.com/denverdino/aliyungo/cs"
-
 	"log"
 	"testing"
 
@@ -41,7 +39,7 @@ func testAccCheckCsK8sDestroy(s *terraform.State) error {
 }
 
 func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
-	var v *cs.KubernetesClusterDetail
+	var v *KubernetesClusterDetail
 	resourceId := "alibabacloudstack_cs_kubernetes.k8s"
 	ra := resourceAttrInit(resourceId, CsK8sMap)
 	serviceFunc := func() interface{} {
@@ -137,7 +135,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
-	var v *cs.KubernetesClusterDetail
+	var v *KubernetesClusterDetail
 	resourceId := "alibabacloudstack_cs_kubernetes.k8s"
 	ra := resourceAttrInit(resourceId, CsK8sMap)
 	serviceFunc := func() interface{} {
@@ -227,7 +225,7 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackCsK8sKeyName(t *testing.T) {
-	var v *cs.KubernetesClusterDetail
+	var v *KubernetesClusterDetail
 	resourceId := "alibabacloudstack_cs_kubernetes.k8s"
 	ra := resourceAttrInit(resourceId, CsK8sMap)
 	serviceFunc := func() interface{} {

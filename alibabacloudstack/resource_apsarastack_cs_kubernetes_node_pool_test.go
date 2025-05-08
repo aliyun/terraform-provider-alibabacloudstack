@@ -5,12 +5,11 @@ import (
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
-	var v *cs.NodePoolDetail
+	var v *NodePoolDetail
 
 	resourceId := "alibabacloudstack_cs_kubernetes_node_pool.default"
 	ra := resourceAttrInit(resourceId, csdKubernetesNodePoolBasicMap)
@@ -121,7 +120,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackCSKubernetesNodePool_autoScaling(t *testing.T) {
-	var v *cs.NodePoolDetail
+	var v *NodePoolDetail
 
 	resourceId := "alibabacloudstack_cs_kubernetes_node_pool.autocaling"
 	ra := resourceAttrInit(resourceId, csdKubernetesNodePoolBasicMap)
@@ -231,7 +230,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_autoScaling(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackCSKubernetesNodePool_PrePaid(t *testing.T) {
-	var v *cs.NodePoolDetail
+	var v *NodePoolDetail
 
 	resourceId := "alibabacloudstack_cs_kubernetes_node_pool.pre_paid_nodepool"
 	ra := resourceAttrInit(resourceId, csdKubernetesNodePoolBasicMap)
@@ -323,7 +322,7 @@ func TestAccAlibabacloudStackCSKubernetesNodePool_PrePaid(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackCSKubernetesNodePool_Spot(t *testing.T) {
-	var v *cs.NodePoolDetail
+	var v *NodePoolDetail
 
 	resourceId := "alibabacloudstack_cs_kubernetes_node_pool.spot_nodepool"
 	ra := resourceAttrInit(resourceId, csdKubernetesNodePoolBasicMap)

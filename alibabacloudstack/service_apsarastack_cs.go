@@ -9,8 +9,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/denverdino/aliyungo/common"
-	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
@@ -39,7 +37,7 @@ const (
 )
 
 func (s *CsService) GetCsK8sNodesCount(id string) (node_count int, err error) {
-	cluster := &cs.KubernetesClusterDetail{}
+	cluster := &KubernetesClusterDetail{}
 	cluster.ClusterId = ""
 
 	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClustersV1", "/api/v1/clusters")
@@ -77,12 +75,12 @@ func (s *CsService) GetCsK8sNodesCount(id string) (node_count int, err error) {
 	return node_count, nil
 }
 
-func (s *CsService) DoCsDescribeclusterdetailRequest(id string) (cl *cs.KubernetesClusterDetail, err error) {
+func (s *CsService) DoCsDescribeclusterdetailRequest(id string) (cl *KubernetesClusterDetail, err error) {
 	return s.DescribeCsKubernetes(id)
 }
 
-func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDetail, err error) {
-	cluster := &cs.KubernetesClusterDetail{}
+func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail, err error) {
+	cluster := &KubernetesClusterDetail{}
 	cluster.ClusterId = ""
 
 	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClustersV1", "/api/v1/clusters")
@@ -96,10 +94,10 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDet
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNotFound"}) {
-			return cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.DenverdinoAlibabacloudStackgo)
+			return cluster, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(clusterdetails.BaseResponse)
-		return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.DenverdinoAlibabacloudStackgo, errmsg)
+		return cluster, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 
 	}
 
@@ -111,20 +109,20 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDet
 	Cdetails := ClustersV1{}
 	_ = json.Unmarshal(clusterdetails.GetHttpContentBytes(), &Cdetails)
 
-	cluster = &cs.KubernetesClusterDetail{}
+	cluster = &KubernetesClusterDetail{}
 	for _, k := range Cdetails.Clusters {
 		if k.ClusterID == id {
 			cluster.Tags = k.Tags
 			cluster.Name = k.Name
 			cluster.State = k.State
 			cluster.ClusterId = k.ClusterID
-			cluster.ClusterType = cs.KubernetesClusterType(k.ClusterType)
+			cluster.ClusterType = KubernetesClusterType(k.ClusterType)
 			cluster.VpcId = k.VpcID
 			cluster.ResourceGroupId = k.ResourceGroupID
 			cluster.ContainerCIDR = k.SubnetCidr
 			cluster.CurrentVersion = k.CurrentVersion
 			cluster.DeletionProtection = k.DeletionProtection
-			cluster.RegionId = common.Region(k.RegionID)
+			cluster.RegionId = k.RegionID
 			cluster.Size = int64(k.Size)
 			cluster.IngressLoadbalancerId = k.ExternalLoadbalancerID
 			cluster.InitVersion = k.InitVersion
@@ -247,7 +245,7 @@ func (s *CsService) DescribeCsKubernetesNodePool(id, clusterid string) (*NodePoo
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"<QuerySeter> no row found"}) {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.DenverdinoAlibabacloudStackgo)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cs_nodepool", "DescribeNodePool", response, errmsg)
@@ -261,14 +259,16 @@ func (s *CsService) DescribeCsKubernetesNodePool(id, clusterid string) (*NodePoo
 	return node, nil
 }
 
-func (s *CsService) UpgradeCluster(clusterId string, args *cs.UpgradeClusterArgs) error {
+func (s *CsService) UpgradeCluster(clusterId string, args *UpgradeClusterArgs) error {
 	invoker := NewInvoker()
 	err := invoker.Run(func() error {
-		_, e := s.client.WithCsClient(func(csClient *cs.Client) (interface{}, error) {
-			return nil, csClient.UpgradeCluster(clusterId, args)
-		})
-		if e != nil {
-			return e
+		req := s.client.NewCommonRequest("POST", "CS", "2015-12-15", "UpgradeCluster", fmt.Sprintf("/api/v2/clusters/%s/upgrade", clusterId))
+		response, err := s.client.ProcessCommonRequest(req)
+		if err != nil || !response.IsSuccess() {
+			if response == nil {
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ack_cluster", "UpgradeCluster", response)
+			}
+			return err
 		}
 		return nil
 	})
@@ -278,17 +278,19 @@ func (s *CsService) UpgradeCluster(clusterId string, args *cs.UpgradeClusterArgs
 	}
 
 	state, upgradeError := s.WaitForUpgradeCluster(clusterId, "Upgrade")
-	if state == cs.Task_Status_Success && upgradeError == nil {
+	if state == Task_Status_Success && upgradeError == nil {
 		return nil
 	}
 
 	// if upgrade failed cancel the task
 	err = invoker.Run(func() error {
-		_, e := s.client.WithCsClient(func(csClient *cs.Client) (interface{}, error) {
-			return nil, csClient.CancelUpgradeCluster(clusterId)
-		})
-		if e != nil {
-			return e
+		req := s.client.NewCommonRequest("POST", "CS", "2015-12-15", "CancelClusterUpgrade", fmt.Sprintf("/api/v2/clusters/%s/upgrade/cancel", clusterId))
+		response, err := s.client.ProcessCommonRequest(req)
+		if err != nil || !response.IsSuccess() {
+			if response == nil {
+				errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ack_cluster", "CancelClusterUpgrade", response)
+			}
+			return err
 		}
 		return nil
 	})
@@ -296,7 +298,7 @@ func (s *CsService) UpgradeCluster(clusterId string, args *cs.UpgradeClusterArgs
 		return errmsgs.WrapError(upgradeError)
 	}
 
-	if state, err := s.WaitForUpgradeCluster(clusterId, "CancelUpgrade"); err != nil || state != cs.Task_Status_Success {
+	if state, err := s.WaitForUpgradeCluster(clusterId, "CancelUpgrade"); err != nil || state != Task_Status_Success {
 		log.Printf("[WARN] %s ACK Cluster cancel upgrade error: %#v", clusterId, err)
 	}
 
@@ -305,19 +307,26 @@ func (s *CsService) UpgradeCluster(clusterId string, args *cs.UpgradeClusterArgs
 
 func (s *CsService) WaitForUpgradeCluster(clusterId string, action string) (string, error) {
 	err := resource.Retry(UpgradeClusterTimeout, func() *resource.RetryError {
-		resp, err := s.client.WithCsClient(func(csClient *cs.Client) (interface{}, error) {
-			return csClient.QueryUpgradeClusterResult(clusterId)
-		})
-		if err != nil || resp == nil {
+		req := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "GetUpgradeStatus", fmt.Sprintf("/api/v2/clusters/%s/upgrade/status", clusterId))
+		response, err := s.client.ProcessCommonRequest(req)
+		if err != nil || !response.IsSuccess() {
+			if response == nil {
+				return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_ack_cluster", "GetUpgradeStatus", response))
+			}
 			return resource.RetryableError(err)
 		}
+		return nil
 
-		upgradeResult := resp.(*cs.UpgradeClusterResult)
-		if upgradeResult.UpgradeStep == cs.UpgradeStep_Success {
+		var upgradeResult UpgradeClusterResult
+		err = json.Unmarshal(response.GetHttpContentBytes(), &upgradeResult)
+		if err != nil {
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ack_cluster", "GetUpgradeStatus", response))
+		}
+		if upgradeResult.UpgradeStep == UpgradeStep_Success {
 			return nil
 		}
 
-		if upgradeResult.UpgradeStep == cs.UpgradeStep_Pause && upgradeResult.UpgradeStatus.Failed == "true" {
+		if upgradeResult.UpgradeStep == UpgradeStep_Pause && upgradeResult.UpgradeStatus.Failed == "true" {
 			msg := ""
 			events := upgradeResult.UpgradeStatus.Events
 			if len(events) > 0 {
@@ -330,10 +339,14 @@ func (s *CsService) WaitForUpgradeCluster(clusterId string, action string) (stri
 
 	if err == nil {
 		log.Printf("[INFO] %s ACK Cluster %s successed", action, clusterId)
-		return cs.Task_Status_Success, nil
+		return Task_Status_Success, nil
 	}
 
-	return cs.Task_Status_Failed, errmsgs.WrapError(err)
+	return Task_Status_Failed, errmsgs.WrapError(err)
+}
+
+type UpgradeClusterArgs struct {
+	Version string `json:"version"`
 }
 
 type Cluster struct {
@@ -522,46 +535,46 @@ type NodePoolAlone struct {
 		TeeType   string `json:"tee_type"`
 	} `json:"tee_config"`
 	ScalingGroup struct {
-		InstanceTypes                    []string              `json:"instance_types"`
-		PeriodUnit                       string                `json:"period_unit"`
-		SecurityGroupID                  string                `json:"security_group_id"`
-		MultiAzPolicy                    string                `json:"multi_az_policy"`
-		Platform                         string                `json:"platform"`
-		WorkerHpcClusterID               string                `json:"worker_hpc_cluster_id"`
-		DataDisks                        []cs.NodePoolDataDisk `json:"data_disks"`
-		RAMPolicy                        string                `json:"ram_policy"`
-		LoginPassword                    string                `json:"login_password"`
-		InstanceChargeType               string                `json:"instance_charge_type"`
-		VswitchIds                       []string              `json:"vswitch_ids"`
-		ScalingGroupID                   string                `json:"scaling_group_id"`
-		Period                           int                   `json:"period"`
-		AutoRenewPeriod                  int                   `json:"auto_renew_period"`
-		WorkerDeploymentsetID            string                `json:"worker_deploymentset_id"`
-		KeyPair                          string                `json:"key_pair"`
-		SpotStrategy                     string                `json:"spot_strategy"`
-		SystemDiskSize                   int                   `json:"system_disk_size"`
-		Tags                             []cs.Tag              `json:"tags"`
-		SpotPriceLimit                   []cs.SpotPrice        `json:"spot_price_limit"`
-		AutoRenew                        bool                  `json:"auto_renew"`
-		SystemDiskCategory               string                `json:"system_disk_category"`
-		RdsInstances                     []interface{}         `json:"rds_instances"`
-		WorkerSystemDiskSnapshotPolicyID string                `json:"worker_system_disk_snapshot_policy_id"`
-		ImageID                          string                `json:"image_id"`
-		ScalingPolicy                    string                `json:"scaling_policy"`
+		InstanceTypes                    []string           `json:"instance_types"`
+		PeriodUnit                       string             `json:"period_unit"`
+		SecurityGroupID                  string             `json:"security_group_id"`
+		MultiAzPolicy                    string             `json:"multi_az_policy"`
+		Platform                         string             `json:"platform"`
+		WorkerHpcClusterID               string             `json:"worker_hpc_cluster_id"`
+		DataDisks                        []NodePoolDataDisk `json:"data_disks"`
+		RAMPolicy                        string             `json:"ram_policy"`
+		LoginPassword                    string             `json:"login_password"`
+		InstanceChargeType               string             `json:"instance_charge_type"`
+		VswitchIds                       []string           `json:"vswitch_ids"`
+		ScalingGroupID                   string             `json:"scaling_group_id"`
+		Period                           int                `json:"period"`
+		AutoRenewPeriod                  int                `json:"auto_renew_period"`
+		WorkerDeploymentsetID            string             `json:"worker_deploymentset_id"`
+		KeyPair                          string             `json:"key_pair"`
+		SpotStrategy                     string             `json:"spot_strategy"`
+		SystemDiskSize                   int                `json:"system_disk_size"`
+		Tags                             []Tag              `json:"tags"`
+		SpotPriceLimit                   []SpotPrice        `json:"spot_price_limit"`
+		AutoRenew                        bool               `json:"auto_renew"`
+		SystemDiskCategory               string             `json:"system_disk_category"`
+		RdsInstances                     []interface{}      `json:"rds_instances"`
+		WorkerSystemDiskSnapshotPolicyID string             `json:"worker_system_disk_snapshot_policy_id"`
+		ImageID                          string             `json:"image_id"`
+		ScalingPolicy                    string             `json:"scaling_policy"`
 	} `json:"scaling_group"`
 	KubernetesConfig struct {
-		RuntimeVersion    string     `json:"runtime_version"`
-		CPUPolicy         string     `json:"cpu_policy"`
-		CmsEnabled        bool       `json:"cms_enabled"`
-		Runtime           string     `json:"runtime"`
-		OverwriteHostname bool       `json:"overwrite_hostname"`
-		UserData          string     `json:"user_data"`
-		NodeNameMode      string     `json:"node_name_mode"`
-		Unschedulable     bool       `json:"unschedulable"`
-		Taints            []cs.Taint `json:"taints"`
-		Labels            []cs.Label `json:"labels"`
+		RuntimeVersion    string  `json:"runtime_version"`
+		CPUPolicy         string  `json:"cpu_policy"`
+		CmsEnabled        bool    `json:"cms_enabled"`
+		Runtime           string  `json:"runtime"`
+		OverwriteHostname bool    `json:"overwrite_hostname"`
+		UserData          string  `json:"user_data"`
+		NodeNameMode      string  `json:"node_name_mode"`
+		Unschedulable     bool    `json:"unschedulable"`
+		Taints            []Taint `json:"taints"`
+		Labels            []Label `json:"labels"`
 	} `json:"kubernetes_config"`
-	AutoScaling  cs.AutoScaling `json:"auto_scaling"`
+	AutoScaling  AutoScaling `json:"auto_scaling"`
 	NodepoolInfo struct {
 		ResourceGroupID string    `json:"resource_group_id"`
 		Created         time.Time `json:"created"`
@@ -584,6 +597,47 @@ type NodePoolAlone struct {
 	} `json:"status"`
 }
 
+type NodePoolDataDisk struct {
+	Category             string `json:"category"`
+	KMSKeyId             string `json:"kms_key_id"`
+	Encrypted            string `json:"encrypted"` // true|false
+	Device               string `json:"device"`    //  could be /dev/xvd[a-z]. If not specification, will use default value.
+	Size                 int    `json:"size"`
+	DiskName             string `json:"name"`
+	AutoSnapshotPolicyId string `json:"auto_snapshot_policy_id"`
+	PerformanceLevel     string `json:"performance_Level"`
+}
+
+type SpotPrice struct {
+	InstanceType string `json:"instance_type"`
+	PriceLimit   string `json:"price_limit"`
+}
+
+// taint
+type Taint struct {
+	Key    string `json:"key"`
+	Value  string `json:"value"`
+	Effect Effect `json:"effect"`
+}
+
+type Label struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+type AutoScaling struct {
+	Enable       bool   `json:"enable"`
+	MaxInstances int64  `json:"max_instances"`
+	MinInstances int64  `json:"min_instances"`
+	Type         string `json:"type"`
+	// eip
+	IsBindEip *bool `json:"is_bond_eip"`
+	// value: PayByBandwidth / PayByTraffic
+	EipInternetChargeType string `json:"eip_internet_charge_type"`
+	// default 5
+	EipBandWidth int64 `json:"eip_bandwidth"`
+}
+
 type ClustersV1 struct {
 	Redirect        bool   `json:"redirect"`
 	EagleEyeTraceID string `json:"eagleEyeTraceId"`
@@ -603,7 +657,7 @@ type ClustersV1 struct {
 	PureListData bool   `json:"pureListData"`
 	API          string `json:"api"`
 	Clusters     []struct {
-		Tags                   []cs.Tag  `json:"tags"`
+		Tags                   []Tag     `json:"tags"`
 		ResourceGroupID        string    `json:"resource_group_id"`
 		PrivateZone            bool      `json:"private_zone"`
 		VpcID                  string    `json:"vpc_id"`
@@ -655,4 +709,91 @@ type ClustersV1 struct {
 			Count            int         `json:"count"`
 		} `json:"node_pools"`
 	} `json:"clusters"`
+}
+
+// Cluster Info
+type KubernetesClusterType string
+
+// Cluster definition
+type KubernetesClusterDetail struct {
+	RegionId string `json:"region_id"`
+
+	Name        string                `json:"name"`
+	ClusterId   string                `json:"cluster_id"`
+	Size        int64                 `json:"size"`
+	ClusterType KubernetesClusterType `json:"cluster_type"`
+	Profile     string                `json:"profile"`
+
+	VpcId                 string `json:"vpc_id"`
+	VSwitchIds            string `json:"vswitch_id"`
+	SecurityGroupId       string `json:"security_group_id"`
+	IngressLoadbalancerId string `json:"external_loadbalancer_id"`
+	ResourceGroupId       string `json:"resource_group_id"`
+	NetworkMode           string `json:"network_mode"`
+	ContainerCIDR         string `json:"subnet_cidr"`
+
+	Tags  []Tag  `json:"tags"`
+	State string `json:"state"`
+
+	InitVersion        string `json:"init_version"`
+	CurrentVersion     string `json:"current_version"`
+	PrivateZone        bool   `json:"private_zone"`
+	DeletionProtection bool   `json:"deletion_protection"`
+	MetaData           string `json:"meta_data"`
+
+	Created time.Time `json:"created"`
+	Updated time.Time `json:"updated"`
+
+	WorkerRamRoleName string `json:"worker_ram_role_name"`
+}
+
+type TaskState string
+
+const (
+	// task status
+	Task_Status_Running = "running"
+	Task_Status_Success = "Success"
+	Task_Status_Failed  = "Failed"
+
+	// upgrade state
+	UpgradeStep_NotStart    = "not_start"
+	UpgradeStep_Prechecking = "prechecking"
+	UpgradeStep_Upgrading   = "upgrading"
+	UpgradeStep_Pause       = "pause"
+	UpgradeStep_Success     = "success"
+)
+
+type UpgradeClusterResult struct {
+	Status           TaskState `json:"status"`
+	PrecheckReportId string    `json:"precheck_report_id"`
+	UpgradeStep      string    `json:"upgrade_step"`
+	ErrorMessage     string    `json:"error_message"`
+	*UpgradeTask     `json:"upgrade_task,omitempty"`
+}
+
+type UpgradeTask struct {
+	FieldRetries    int           `json:"retries,omitempty"`
+	FieldCreatedAt  time.Time     `json:"created_at"`
+	FieldMessage    string        `json:"message,omitempty"`
+	FieldStatus     string        `json:"status"` // empty|running|success|failed
+	FieldFinishedAt time.Time     `json:"finished_at,omitempty"`
+	UpgradeStatus   UpgradeStatus `json:"upgrade_status"`
+}
+
+type UpgradeStatus struct {
+	State      string  `json:"state"`
+	Phase      string  `json:"phase"` // {Master1, Master2, Master3, Nodes}
+	Total      int     `json:"total"`
+	Succeeded  int     `json:"succeeded"`
+	Failed     string  `json:"failed"`
+	Events     []Event `json:"events"`
+	IsCanceled bool    `json:"is_canceled"`
+}
+
+type Event struct {
+	Timestamp time.Time
+	Type      string
+	Reason    string
+	Message   string
+	Source    string
 }
