@@ -38,6 +38,45 @@ const (
 	UpgradeClusterTimeout = 30 * time.Minute
 )
 
+func (s *CsService) GetCsK8sNodesCount(id string) (node_count int, err error) {
+	cluster := &cs.KubernetesClusterDetail{}
+	cluster.ClusterId = ""
+
+	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClustersV1", "/api/v1/clusters")
+	request.QueryParams["SignatureVersion"] = "1.0"
+	request.QueryParams["ProductName"] = "CS"
+
+	clusterdetails, err := s.client.ProcessCommonRequest(request)
+	addDebug("DescribeClustersV1", clusterdetails, request, request.QueryParams)
+	if err != nil {
+		if clusterdetails == nil {
+			return node_count, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		if errmsgs.IsExpectedErrors(err, []string{"ErrorClusterNotFound"}) {
+			return node_count, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.DenverdinoAlibabacloudStackgo)
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(clusterdetails.BaseResponse)
+		return node_count, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeKubernetesCluster", errmsgs.DenverdinoAlibabacloudStackgo, errmsg)
+
+	}
+
+	if debugOn() {
+		requestMap := make(map[string]interface{})
+		requestMap["ClusterId"] = id
+		addDebug("DescribeKubernetesCluster", clusterdetails, request, requestMap)
+	}
+	Cdetails := ClustersV1{}
+	_ = json.Unmarshal(clusterdetails.GetHttpContentBytes(), &Cdetails)
+	for _, k := range Cdetails.Clusters {
+		if k.ClusterID == id {
+			for _, n := range k.NodePools {
+				node_count = node_count + n.Count
+			}
+		}
+	}
+	return node_count, nil
+}
+
 func (s *CsService) DoCsDescribeclusterdetailRequest(id string) (cl *cs.KubernetesClusterDetail, err error) {
 	return s.DescribeCsKubernetes(id)
 }
@@ -112,6 +151,7 @@ func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePool
 	})
 
 	response, err := s.client.ProcessCommonRequest(request)
+	addDebug("DescribeClusterNodes", response, request, request.QueryParams)
 	if err != nil {
 		if response == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -137,6 +177,7 @@ func (s *CsService) DescribeClusterNodePools(id string) (*NodePool, error) {
 	req.QueryParams["ClusterId"] = id
 	var nodePool *responses.CommonResponse
 	nodePool, err := s.client.ProcessCommonRequest(req)
+	addDebug(req.GetActionName(), nodePool, req, req.QueryParams)
 	if err != nil {
 		errmsg := ""
 		if nodePool != nil {
@@ -605,5 +646,13 @@ type ClustersV1 struct {
 		InstanceType           string    `json:"instance_type"`
 		WorkerRAMRoleName      string    `json:"worker_ram_role_name"`
 		ResourceGroupName      string    `json:"ResourceGroupName"`
+		NodePools              []struct {
+			NodepoolInfo     interface{} `json:"nodepool_info"`
+			ScalingGroup     interface{} `json:"scaling_group"`
+			KubernetesConfig interface{} `json:"kubernetes_config"`
+			AutoScaling      interface{} `json:"auto_scaling"`
+			TeeConfig        interface{} `json:"tee_config"`
+			Count            int         `json:"count"`
+		} `json:"node_pools"`
 	} `json:"clusters"`
 }

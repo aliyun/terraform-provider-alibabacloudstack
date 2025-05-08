@@ -209,19 +209,19 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Sensitive:        true,
-				ConflictsWith:    []string{"kms_encrypted_password"},
+				ConflictsWith:    []string{"kms_encrypted_password", "key_name"},
 				DiffSuppressFunc: csForceUpdateSuppressFunc,
 			},
-			// "key_name": {
-			// 	Type:             schema.TypeString,
-			// 	Optional:         true,
-			// 	ConflictsWith:    []string{"password", "kms_encrypted_password"},
-			// 	DiffSuppressFunc: csForceUpdateSuppressFunc,
-			// },
+			"key_name": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ConflictsWith:    []string{"password", "kms_encrypted_password"},
+				DiffSuppressFunc: csForceUpdateSuppressFunc,
+			},
 			"kms_encrypted_password": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ConflictsWith: []string{"password"},
+				ConflictsWith: []string{"password", "key_name"},
 			},
 			"kms_encryption_context": {
 				Type:     schema.TypeMap,
@@ -644,7 +644,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"Action":    "CreateCluster",
 		"SNatEntry": "false",
 	}
-	
+
 	body := map[string]interface{}{
 		"Product":                              "Cs",
 		"os_type":                              d.Get("os_type").(string),
@@ -726,7 +726,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	if v, ok := d.GetOk("pod_vswitch_ids"); ok && pod == 1 {
 		body["pod_vswitch_ids"] = expandStringList(v.(*schema.Set).List())
 	}
-	
+
 	if password := d.Get("password").(string); password == "" {
 		if v := d.Get("kms_encrypted_password").(string); v != "" {
 			kmsService := KmsService{client}
@@ -740,8 +740,10 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	} else {
 		body["login_Password"] = password
 	}
-	
-	
+	if key_name, ok := d.GetOk("key_name"); ok && key_name != "" {
+		body["key_pair"] = key_name.(string)
+	}
+
 	if v, ok := d.GetOk("instances"); ok {
 		body["format_disk"] = d.Get("format_disk").(bool)
 		body["keep_instance_name"] = d.Get("keep_instance_name").(bool)
@@ -756,7 +758,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		body["worker_storage_set_id"] = d.Get("worker_storage_set_id").(string)
 		body["worker_storage_set_partition_number"] = d.Get("worker_storage_set_partition_number").(int)
 	}
-
+	log.Printf("[DEBUG] Request body: %s", body)
 	if data, err := json.Marshal(body); err != nil {
 		return fmt.Errorf("failed to marshal JSON: %w", err)
 	} else {
@@ -937,6 +939,11 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 		return errmsgs.WrapError(err)
 	}
 	d.Set("name", object.Name)
+	// node_count, err := csService.GetCsK8sNodesCount(d.Id())
+	// if err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
+	d.Set("num_of_nodes", len(clusternode.Nodes))
 	//d.Set("id", object.ClusterId)
 	//d.Set("state", object.State)
 	d.Set("vpc_id", object.VpcId)
