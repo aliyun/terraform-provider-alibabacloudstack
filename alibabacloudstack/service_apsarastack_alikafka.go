@@ -5,6 +5,10 @@ import (
 	"log"
 	"regexp"
 	"time"
+	"fmt"
+	"reflect"
+	
+	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -765,4 +769,66 @@ func (s *AlikafkaService) tagsFromMap(m map[string]interface{}) []alikafka.TagRe
 	}
 
 	return result
+}
+
+func (s *AlikafkaService) AliKafkaInstanceStateRefreshFunc(id, attribute string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeAlikafkaInstance(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		
+		rv := reflect.ValueOf(object)
+		// 查找字段
+		field := rv.FieldByName(attribute)
+		if !field.IsValid() || !field.CanInterface(){
+			return nil, "", nil
+		}
+	
+		state := field.Interface().(string)
+		
+
+		for _, failState := range failStates {
+
+			if fmt.Sprint(state) == failState {
+				return object, fmt.Sprint(state), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(state)))
+			}
+		}
+		return object, fmt.Sprint(state), nil
+	}
+}
+
+func (s *AlikafkaService) GetQuotaTip(instanceId string) (object map[string]interface{}, err error) {
+	var response map[string]interface{}
+	client := s.client
+	action := "GetQuotaTip"
+	request := map[string]interface{}{
+		"RegionId":   s.client.RegionId,
+		"InstanceId": instanceId,
+	}
+	wait := incrementalWait(3*time.Second, 3*time.Second)
+	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
+		response, err = client.DoTeaRequest("POST", "alikafka", "2019-09-16", action, "", nil, nil, request)
+		if err != nil {
+			if errmsgs.NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+	addDebug(action, response, request)
+	if err != nil {
+		return object, errmsgs.WrapError(err)
+	}
+	v, err := jsonpath.Get("$.QuotaData", response)
+	if err != nil {
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, instanceId, "$.QuotaData", response)
+	}
+	return v.(map[string]interface{}), nil
 }

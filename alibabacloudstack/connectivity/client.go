@@ -1439,3 +1439,13 @@ func retryDo(do func() (interface{}, error)) (interface{}, error) {
 	})
 	return response, err
 }
+
+func (client *AlibabacloudStackClient) GetRetryTimeout(defaultTimeout time.Duration) time.Duration {
+
+	maxRetryTimeout := client.Config.MaxRetryTimeout
+	if maxRetryTimeout != 0 {
+		return time.Duration(maxRetryTimeout) * time.Second
+	}
+
+	return defaultTimeout
+}

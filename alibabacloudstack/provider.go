@@ -246,6 +246,12 @@ func Provider() *schema.Provider {
 				Description: descriptions["dbs_endpoint"],
 				Deprecated:  "Use schema endpoints replace dbs_endpoint.",
 			},
+			"max_retry_timeout": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("MAX_RETRY_TIMEOUT", 0),
+				Description: descriptions["max_retry_timeout"],
+			},
 		},
 		DataSourcesMap: getDataSourcesMap(),
 		ResourcesMap:   getResourcesMap(),
@@ -889,6 +895,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		SecureTransport:      strings.TrimSpace(d.Get("secure_transport").(string)),
 		Endpoints:            make(map[connectivity.ServiceCode]string),
 		Eagleeye:             eagleeye,
+		MaxRetryTimeout:      d.Get("max_retry_timeout").(int),
 	}
 	if v, ok := d.GetOk("security_transport"); config.SecureTransport == "" && ok && v.(string) != "" {
 		config.SecureTransport = v.(string)
