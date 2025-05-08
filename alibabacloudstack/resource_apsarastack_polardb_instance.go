@@ -66,7 +66,6 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 			"enable_ssl": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: false,
 			},
 			"storage_type": {
 				Type:          schema.TypeString,
