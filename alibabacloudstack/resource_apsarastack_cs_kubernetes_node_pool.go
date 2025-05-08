@@ -1165,7 +1165,7 @@ func flattenLabelsConfig(config []cs.Label) (m []map[string]interface{}) {
 	return m
 }
 
-func flattenTagsConfig(config []cs.Tag) map[string]string {
+func flattenTagsConfig(config []Tag) map[string]string {
 	m := make(map[string]string, len(config))
 	if len(config) < 0 {
 		return m

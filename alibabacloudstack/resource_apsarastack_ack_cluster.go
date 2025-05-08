@@ -14,7 +14,6 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -864,7 +863,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 				resp, err = client.ProcessCommonRequest(req)
 				return err
 			}); err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, nodepoolid, "DeleteKubernetesClusterNodes", errmsgs.DenverdinoAliyungo)
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, nodepoolid, "DeleteKubernetesClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR)
 			}
 			if resp.IsSuccess() == false {
 				//return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_ascm", "API Action", cluster.GetHttpContentString())
@@ -1045,7 +1044,7 @@ func updateKubernetesClusterTag(d *schema.ResourceData, meta interface{}) error 
 	tagss := make([]interface{}, 0)
 	if v, ok := d.GetOk("tags"); ok && len(v.(map[string]interface{})) > 0 {
 		for key, value := range v.(map[string]interface{}) {
-			tagss = append(tagss, cs.Tag{
+			tagss = append(tagss, Tag{
 				Key:   key,
 				Value: value.(string),
 			})

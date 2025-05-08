@@ -38,12 +38,12 @@ const (
 	UpgradeClusterTimeout = 30 * time.Minute
 )
 
-func (s *CsService) DoCsDescribeclusterdetailRequest(id string) (cl *cs.KubernetesClusterDetail, err error) {
+func (s *CsService) DoCsDescribeclusterdetailRequest(id string) (cl *KubernetesClusterDetail, err error) {
 	return s.DescribeCsKubernetes(id)
 }
 
-func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDetail, err error) {
-	cluster := &cs.KubernetesClusterDetail{}
+func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail, err error) {
+	cluster := &KubernetesClusterDetail{}
 	cluster.ClusterId = ""
 
 	request := s.client.NewCommonRequest("GET", "CS", "2015-12-15", "DescribeClustersV1", "/api/v1/clusters")
@@ -72,14 +72,14 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *cs.KubernetesClusterDet
 	Cdetails := ClustersV1{}
 	_ = json.Unmarshal(clusterdetails.GetHttpContentBytes(), &Cdetails)
 
-	cluster = &cs.KubernetesClusterDetail{}
+	cluster = &KubernetesClusterDetail{}
 	for _, k := range Cdetails.Clusters {
 		if k.ClusterID == id {
 			cluster.Tags = k.Tags
 			cluster.Name = k.Name
 			cluster.State = k.State
 			cluster.ClusterId = k.ClusterID
-			cluster.ClusterType = cs.KubernetesClusterType(k.ClusterType)
+			cluster.ClusterType = KubernetesClusterType(k.ClusterType)
 			cluster.VpcId = k.VpcID
 			cluster.ResourceGroupId = k.ResourceGroupID
 			cluster.ContainerCIDR = k.SubnetCidr
@@ -499,7 +499,7 @@ type NodePoolAlone struct {
 		KeyPair                          string                `json:"key_pair"`
 		SpotStrategy                     string                `json:"spot_strategy"`
 		SystemDiskSize                   int                   `json:"system_disk_size"`
-		Tags                             []cs.Tag              `json:"tags"`
+		Tags                             []Tag              `json:"tags"`
 		SpotPriceLimit                   []cs.SpotPrice        `json:"spot_price_limit"`
 		AutoRenew                        bool                  `json:"auto_renew"`
 		SystemDiskCategory               string                `json:"system_disk_category"`
@@ -562,7 +562,7 @@ type ClustersV1 struct {
 	PureListData bool   `json:"pureListData"`
 	API          string `json:"api"`
 	Clusters     []struct {
-		Tags                   []cs.Tag  `json:"tags"`
+		Tags                   []Tag  `json:"tags"`
 		ResourceGroupID        string    `json:"resource_group_id"`
 		PrivateZone            bool      `json:"private_zone"`
 		VpcID                  string    `json:"vpc_id"`
@@ -606,4 +606,40 @@ type ClustersV1 struct {
 		WorkerRAMRoleName      string    `json:"worker_ram_role_name"`
 		ResourceGroupName      string    `json:"ResourceGroupName"`
 	} `json:"clusters"`
+}
+
+//Cluster Info
+type KubernetesClusterType string
+
+//Cluster definition
+type KubernetesClusterDetail struct {
+	RegionId common.Region `json:"region_id"`
+
+	Name        string                `json:"name"`
+	ClusterId   string                `json:"cluster_id"`
+	Size        int64                 `json:"size"`
+	ClusterType KubernetesClusterType `json:"cluster_type"`
+	Profile     string                `json:"profile"`
+
+	VpcId                 string `json:"vpc_id"`
+	VSwitchIds            string `json:"vswitch_id"`
+	SecurityGroupId       string `json:"security_group_id"`
+	IngressLoadbalancerId string `json:"external_loadbalancer_id"`
+	ResourceGroupId       string `json:"resource_group_id"`
+	NetworkMode           string `json:"network_mode"`
+	ContainerCIDR         string `json:"subnet_cidr"`
+
+	Tags  []Tag  `json:"tags"`
+	State string `json:"state"`
+
+	InitVersion        string `json:"init_version"`
+	CurrentVersion     string `json:"current_version"`
+	PrivateZone        bool   `json:"private_zone"`
+	DeletionProtection bool   `json:"deletion_protection"`
+	MetaData           string `json:"meta_data"`
+
+	Created time.Time `json:"created"`
+	Updated time.Time `json:"updated"`
+
+	WorkerRamRoleName string `json:"worker_ram_role_name"`
 }
