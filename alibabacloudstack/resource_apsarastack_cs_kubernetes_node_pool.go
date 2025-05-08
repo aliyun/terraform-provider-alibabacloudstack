@@ -16,7 +16,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -366,8 +365,8 @@ type autoScaling struct {
 	Type         string `json:"type"`
 }
 type kubernetesConfig struct {
-	Taints []cs.Taint `json:"taints"`
-	Labels []cs.Label `json:"labels"`
+	Taints []Taint `json:"taints"`
+	Labels []Label `json:"labels"`
 
 	UserData string `json:"user_data"`
 
@@ -407,7 +406,7 @@ type scalingGroup struct {
 	SystemDiskSize     int64  `json:"system_disk_size"`
 
 	DataDisks []nodePoolDataDisk `json:"data_disks"` //支持多个数据盘
-	Tags      []cs.Tag           `json:"tags"`
+	Tags      []Tag              `json:"tags"`
 	ImageId   string             `json:"image_id"`
 	Platform  string             `json:"platform"`
 	// 支持包年包月
@@ -815,7 +814,7 @@ func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*requests.Comm
 			}
 			password = decryptResp
 		} else if v := d.Get("key_name").(string); v == "" {
-				return nil, errmsgs.WrapError(fmt.Errorf("password is require while kms_encrypted_password or key_name not set"))
+			return nil, errmsgs.WrapError(fmt.Errorf("password is require while kms_encrypted_password or key_name not set"))
 		}
 	}
 	request := client.NewCommonRequest("POST", "CS", "2015-12-15", "CreateClusterNodePool", fmt.Sprintf("/clusters/%s/nodepools", d.Get("cluster_id").(string)))
@@ -914,14 +913,14 @@ func buildNodePoolArgs(d *schema.ResourceData, meta interface{}) (*requests.Comm
 	return request, nil
 }
 
-func ConvertCsTags(d *schema.ResourceData) ([]cs.Tag, error) {
-	tags := make([]cs.Tag, 0)
+func ConvertCsTags(d *schema.ResourceData) ([]Tag, error) {
+	tags := make([]Tag, 0)
 	tagsMap, ok := d.Get("tags").(map[string]interface{})
 	if ok {
 		for key, value := range tagsMap {
 			if value != nil {
 				if v, ok := value.(string); ok {
-					tags = append(tags, cs.Tag{
+					tags = append(tags, Tag{
 						Key:   key,
 						Value: v,
 					})
@@ -946,10 +945,10 @@ func setNodePoolTags(scalingGroup *scalingGroup, d *schema.ResourceData) error {
 func setNodePoolLabels(config *kubernetesConfig, d *schema.ResourceData) error {
 	if v, ok := d.GetOk("labels"); ok && len(v.([]interface{})) > 0 {
 		vl := v.([]interface{})
-		labels := make([]cs.Label, 0)
+		labels := make([]Label, 0)
 		for _, i := range vl {
 			if m, ok := i.(map[string]interface{}); ok {
-				labels = append(labels, cs.Label{
+				labels = append(labels, Label{
 					Key:   m["key"].(string),
 					Value: m["value"].(string),
 				})
@@ -986,13 +985,13 @@ func setNodePoolDataDisks(scalingGroup *scalingGroup, d *schema.ResourceData) er
 func setNodePoolTaints(config *kubernetesConfig, d *schema.ResourceData) error {
 	if v, ok := d.GetOk("taints"); ok && len(v.([]interface{})) > 0 {
 		vl := v.([]interface{})
-		taints := make([]cs.Taint, 0)
+		taints := make([]Taint, 0)
 		for _, i := range vl {
 			if m, ok := i.(map[string]interface{}); ok {
-				taints = append(taints, cs.Taint{
+				taints = append(taints, Taint{
 					Key:    m["key"].(string),
 					Value:  m["value"].(string),
-					Effect: cs.Effect(m["effect"].(string)),
+					Effect: Effect(m["effect"].(string)),
 				})
 			}
 
@@ -1003,7 +1002,7 @@ func setNodePoolTaints(config *kubernetesConfig, d *schema.ResourceData) error {
 	return nil
 }
 
-func setManagedNodepoolConfig(l []interface{}) (config cs.Management) {
+func setManagedNodepoolConfig(l []interface{}) (config Management) {
 	if len(l) == 0 || l[0] == nil {
 		return config
 	}
@@ -1055,13 +1054,13 @@ func setAutoScalingConfig(l []interface{}) (config autoScaling) {
 	return config
 }
 
-func setSpotPriceLimit(l []interface{}) (config []cs.SpotPrice) {
+func setSpotPriceLimit(l []interface{}) (config []SpotPrice) {
 	if len(l) == 0 || l[0] == nil {
 		return config
 	}
 	for _, v := range l {
 		if m, ok := v.(map[string]interface{}); ok {
-			config = append(config, cs.SpotPrice{
+			config = append(config, SpotPrice{
 				InstanceType: m["instance_type"].(string),
 				PriceLimit:   m["price_limit"].(string),
 			})
@@ -1071,7 +1070,7 @@ func setSpotPriceLimit(l []interface{}) (config []cs.SpotPrice) {
 	return
 }
 
-func flattenSpotPriceLimit(config []cs.SpotPrice) (m []map[string]interface{}) {
+func flattenSpotPriceLimit(config []SpotPrice) (m []map[string]interface{}) {
 	if config == nil {
 		return []map[string]interface{}{}
 	}
@@ -1086,7 +1085,7 @@ func flattenSpotPriceLimit(config []cs.SpotPrice) (m []map[string]interface{}) {
 	return m
 }
 
-func flattenAutoScalingConfig(config *cs.AutoScaling) (m []map[string]interface{}) {
+func flattenAutoScalingConfig(config *AutoScaling) (m []map[string]interface{}) {
 	if config == nil {
 		return
 	}
@@ -1102,7 +1101,7 @@ func flattenAutoScalingConfig(config *cs.AutoScaling) (m []map[string]interface{
 	return
 }
 
-func flattenManagementNodepoolConfig(config *cs.Management) (m []map[string]interface{}) {
+func flattenManagementNodepoolConfig(config *Management) (m []map[string]interface{}) {
 	if config == nil {
 		return
 	}
@@ -1117,7 +1116,7 @@ func flattenManagementNodepoolConfig(config *cs.Management) (m []map[string]inte
 	return
 }
 
-func flattenNodeDataDisksConfig(config []cs.NodePoolDataDisk) (m []map[string]interface{}) {
+func flattenNodeDataDisksConfig(config []NodePoolDataDisk) (m []map[string]interface{}) {
 	if config == nil {
 		return []map[string]interface{}{}
 	}
@@ -1134,7 +1133,7 @@ func flattenNodeDataDisksConfig(config []cs.NodePoolDataDisk) (m []map[string]in
 	return m
 }
 
-func flattenTaintsConfig(config []cs.Taint) (m []map[string]interface{}) {
+func flattenTaintsConfig(config []Taint) (m []map[string]interface{}) {
 	if config == nil {
 		return []map[string]interface{}{}
 	}
@@ -1150,7 +1149,7 @@ func flattenTaintsConfig(config []cs.Taint) (m []map[string]interface{}) {
 	return m
 }
 
-func flattenLabelsConfig(config []cs.Label) (m []map[string]interface{}) {
+func flattenLabelsConfig(config []Label) (m []map[string]interface{}) {
 	if config == nil {
 		return []map[string]interface{}{}
 	}
@@ -1247,7 +1246,7 @@ func RemoveNodePoolNodes(d *schema.ResourceData, meta interface{}, clusterid, no
 			if resp == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteKubernetesClusterNodes", errmsgs.DenverdinoAliyungo)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "DeleteKubernetesClusterNodes", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		stateConf := BuildStateConf([]string{"removing"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 60*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(d.Id(), clusterid, []string{"deleting", "failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
@@ -1364,4 +1363,97 @@ func attachExistingInstance(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
+}
+
+type Management struct {
+	Enable      bool        `json:"enable"`
+	AutoRepair  bool        `json:"auto_repair"`
+	UpgradeConf UpgradeConf `json:"upgrade_config"`
+}
+
+type UpgradeConf struct {
+	AutoUpgrade       bool  `json:"auto_upgrade"`
+	Surge             int64 `json:"surge"`
+	SurgePercentage   int64 `json:"surge_percentage,omitempty"`
+	MaxUnavailable    int64 `json:"max_unavailable"`
+	KeepSurgeOnFailed bool  `json:"keep_surge_on_failed"`
+}
+
+type NodePoolDetail struct {
+	BasicNodePool
+	KubernetesConfig `json:"kubernetes_config"`
+	ScalingGroup     struct {
+		VpcId                      string             `json:"vpc_id"`
+		VswitchIds                 []string           `json:"vswitch_ids"`
+		InstanceTypes              []string           `json:"instance_types"`
+		LoginPassword              string             `json:"login_password"`
+		KeyPair                    string             `json:"key_pair"`
+		SecurityGroupId            string             `json:"security_group_id"`
+		SystemDiskCategory         string             `json:"system_disk_category"`
+		SystemDiskSize             int64              `json:"system_disk_size"`
+		SystemDiskPerformanceLevel string             `json:"system_disk_performance_level"`
+		DataDisks                  []NodePoolDataDisk `json:"data_disks"` //支持多个数据盘
+		Tags                       []Tag              `json:"tags"`
+		ImageId                    string             `json:"image_id"`
+		Platform                   string             `json:"platform"`
+		// 支持包年包月
+		InstanceChargeType string `json:"instance_charge_type"`
+		Period             int    `json:"period"`
+		PeriodUnit         string `json:"period_unit"`
+		AutoRenew          bool   `json:"auto_renew"`
+		AutoRenewPeriod    int    `json:"auto_renew_period"`
+		// spot实例
+		SpotStrategy   string      `json:"spot_strategy"`
+		SpotPriceLimit []SpotPrice `json:"spot_price_limit"`
+
+		RdsInstances   []string `json:"rds_instances"`
+		ScalingPolicy  string   `json:"scaling_policy"`
+		ScalingGroupId string   `json:"scaling_group_id"`
+
+		WorkerSnapshotPolicyId string `json:"worker_system_disk_snapshot_policy_id"`
+		// 公网ip
+		InternetChargeType      string `json:"internet_charge_type"`
+		InternetMaxBandwidthOut int    `json:"internet_max_bandwidth_out"`
+		// Operating system hardening
+		SocEnabled *bool `json:"soc_enabled"`
+		CisEnabled *bool `json:"cis_enabled"`
+	} `json:"scaling_group"`
+	AutoScaling `json:"auto_scaling"`
+	TEEConfig   `json:"tee_config"`
+	Management  `json:"management"`
+}
+
+type TEEConfig struct {
+	TEEType   string `json:"tee_type"`
+	TEEEnable bool   `json:"tee_enable"`
+}
+
+type BasicNodePool struct {
+	NodePoolInfo   `json:"nodepool_info"`
+	NodePoolStatus `json:"status"`
+}
+type NodePoolStatus struct {
+	TotalNodes   int `json:"total_nodes"`
+	OfflineNodes int `json:"offline_nodes"`
+	ServingNodes int `json:"serving_nodes"`
+	//DesiredNodes int  `json:"desired_nodes"`
+	RemovingNodes int    `json:"removing_nodes"`
+	FailedNodes   int    `json:"failed_nodes"`
+	InitialNodes  int    `json:"initial_nodes"`
+	HealthyNodes  int    `json:"healthy_nodes"`
+	State         string `json:"state"`
+}
+
+type KubernetesConfig struct {
+	NodeNameMode string  `json:"node_name_mode"`
+	Taints       []Taint `json:"taints"`
+	Labels       []Label `json:"labels"`
+	CpuPolicy    string  `json:"cpu_policy"`
+	UserData     string  `json:"user_data"`
+
+	Runtime           string `json:"runtime,omitempty"`
+	RuntimeVersion    string `json:"runtime_version"`
+	CmsEnabled        bool   `json:"cms_enabled"`
+	OverwriteHostname bool   `json:"overwrite_hostname"`
+	Unschedulable     bool   `json:"unschedulable"`
 }
