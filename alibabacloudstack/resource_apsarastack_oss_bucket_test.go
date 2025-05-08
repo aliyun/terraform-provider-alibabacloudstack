@@ -213,16 +213,31 @@ func TestAccAlibabacloudStackOssBucketBasic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
+					"tags": map[string]string{
+						"For": "Test-reset",
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"tags.%":       "0",
+						"tags.%":       "1",
+						"tags.For":     "Test-reset",
 						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
 					}),
 				),
 			},
+			// v3.16.2版本oss暂时不支持tags的delete方法，无法将tags删空
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"tags": REMOVEKEY,
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"tags.%":       "0",
+			// 			"tags.Created": REMOVEKEY,
+			// 			"tags.For":     REMOVEKEY,
+			// 		}),
+			// 	),
+			// },
 		},
 	})
 }

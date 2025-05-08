@@ -373,7 +373,15 @@ func (s *OssService) GetBucketTags(bucketName string) (tags []interface{}, err e
 	}
 	tags_data, err := jsonpath.Get("$.Data.Tagging.TagSet.Tag", response)
 	if tags_data != nil {
-		tags = tags_data.([]interface{})
+		ok := true
+		tags, ok = tags_data.([]interface{})
+		if !ok {
+			ts, ok := tags_data.(map[string]interface{})
+			if !ok {
+				return nil, errmsgs.WrapErrorf(err, "GetBucketTags", errmsgs.AlibabacloudStackOssGoSdk, fmt.Sprintf("GetBucketTags error : %#v", tags_data))
+			}
+			tags = []interface{}{ts}
+		}
 	}
 	return tags, err
 }
