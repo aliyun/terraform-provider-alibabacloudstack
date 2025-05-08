@@ -273,7 +273,7 @@ func resourceAlibabacloudStackPolardbAccountUpdate(d *schema.ResourceData, meta 
 		}
 	}
 
-	if d.HasChanges("account_description") {
+	if !d.IsNewResource() && d.HasChanges("account_description") {
 		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyAccountDescription", "")
 
 		if v, ok := d.GetOk("account_description"); ok {
@@ -306,7 +306,7 @@ func resourceAlibabacloudStackPolardbAccountUpdate(d *schema.ResourceData, meta 
 
 	}
 
-	if d.HasChanges("account_password") {
+	if !d.IsNewResource() && d.HasChanges("account_password") {
 		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ResetAccountPassword", "")
 
 		if v, ok := d.GetOk("account_name"); ok {

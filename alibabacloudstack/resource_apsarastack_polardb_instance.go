@@ -52,11 +52,20 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Optional:     true,
 				Default:      "aes-256",
 				ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if d.Get("engine").(string) == "MySQL" {
+						return true
+					}
+					if v,ok:= d.GetOk("tde_status"); ok && v.(bool) {
+						return old == new
+					}
+					return true
+				},
+
 			},
 			"enable_ssl": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: false,
 			},
 			"storage_type": {
 				Type:          schema.TypeString,
@@ -264,9 +273,6 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 				"alibabacloudstack_polardb_db_instance", "CheckCloudResourceAuthorized", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "CheckCloudResourceAuthorized", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-		}
 		arnrole = arnresp.RoleArn
 		d.Set("role_arn", arnrole)
 		log.Printf("check arnrole %v", arnrole)
@@ -394,9 +400,9 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	if tde == true && engine == "MySQL" {
 		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceTDE", "")
 		PolardbModifydbinstancetdeResponse := PolardbModifydbinstancetdeResponse{}
+		request.QueryParams["DBInstanceId"] = d.Id()
 		request.QueryParams["TDEStatus"] = "Enabled"
 		request.QueryParams["RoleARN"] = arnrole
-		request.QueryParams["EncryptAlgorithm"] = EncryptAlgorithm
 
 		if EncryptionKey != "" {
 			request.QueryParams["EncryptionKey"] = EncryptionKey
