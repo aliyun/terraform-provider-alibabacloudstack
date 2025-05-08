@@ -135,9 +135,9 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_classictest(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// password敏感字段设置后不回显
 				ImportStateVerifyIgnore: []string{"password", "cpu_type"},
 			},
@@ -174,9 +174,9 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_vpctest(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// password敏感字段设置后不回显
 				ImportStateVerifyIgnore: []string{"password"},
 			},
@@ -270,7 +270,10 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_Tde(t *testing.T) {
 			{
 				Config: testAccKVStoreInstanceTde_classic(string(KVStoreRedis), string(KVStore5Dot0)),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
+					testAccCheck(map[string]string{
+						"tde_status": "Enabled",
+						"enable_ssl": "Enabled",
+					}),
 				),
 			},
 		},
@@ -363,10 +366,10 @@ func testAccKVStoreInstanceTde_classic(instanceClass, engineVersion string) stri
 	return fmt.Sprintf(`
 	
 variable "name" {
-    default = "tf-testAccCheckApsaraStackRKVInstancesDataSource4"
+    default = "tf-testAccCheckApsaraStackRKVInstance4"
 }
-data "alibabacloudstack_zones"  "default" {
-}
+// data "alibabacloudstack_zones"  "default" {
+// }
 
 resource "alibabacloudstack_kms_key" "key" {
   description             = "Hello KMS"
@@ -381,7 +384,7 @@ resource "alibabacloudstack_vpc" "default" {
 resource "alibabacloudstack_vswitch" "default" {
 	vpc_id            = alibabacloudstack_vpc.default.id
 	cidr_block        = "172.16.0.0/24"
-	availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+	availability_zone = "cn-wulan-env205-amtest205001-a"
 	name              = var.name
 }
 
@@ -396,6 +399,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
     architecture_type = "cluster"
 
 	tde_status = "Enabled"
+	enable_ssl = "Enabled"
 	encryption_key = alibabacloudstack_kms_key.key.id
 }
 

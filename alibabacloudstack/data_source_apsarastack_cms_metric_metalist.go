@@ -13,9 +13,9 @@ import (
 	"regexp"
 )
 
-func dataSourceAlibabacloudstackCmsMetricMetalist() *schema.Resource {
+func dataSourceAlibabacloudStackCmsMetricMetalist() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudstackCmsMetricMetalistRead,
+		Read: dataSourceAlibabacloudStackCmsMetricMetalistRead,
 		Schema: map[string]*schema.Schema{
 			"namespace": {
 				Type:         schema.TypeString,
@@ -74,7 +74,7 @@ func dataSourceAlibabacloudstackCmsMetricMetalist() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudstackCmsMetricMetalistRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackCmsMetricMetalistRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	Namespace := d.Get("namespace").(string)
 

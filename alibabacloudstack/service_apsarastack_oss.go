@@ -2,9 +2,11 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 
@@ -86,6 +88,7 @@ func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoRes
 	request.QueryParams["OpenApiAction"] = "GetService"
 	request.QueryParams["ProductName"] = "oss"
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("GetBucketInfo", bresponse, request)
 	if err != nil {
 		if bresponse == nil {
 			return response, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -96,7 +99,6 @@ func (s *OssService) DescribeOssBucket(id string) (response oss.GetBucketInfoRes
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "GetBucketInfo", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
 	}
-	addDebug("GetBucketInfo", bresponse, request)
 
 	buckets, err := getBucketListResponseBuckets(bresponse)
 
@@ -254,9 +256,9 @@ func (s *OssService) WaitForOssBucket(id string, status Status, timeout int) err
 func (s *OssService) HeadOssBucketObject(bucketName string, objectName string) error {
 	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoApi", "")
 	mergeMaps(request.QueryParams, map[string]string{
-		"AppAction":   "HeadObject",
-		"AppName":     "one-console-app-oss",
-		"Params":      "{\"region\":\"" + s.client.RegionId + "\",\"params\":{\"bucketName\":\"" + bucketName + "\",\"objectName\":\"" + objectName + "\"}}",
+		"AppAction": "HeadObject",
+		"AppName":   "one-console-app-oss",
+		"Params":    "{\"region\":\"" + s.client.RegionId + "\",\"params\":{\"bucketName\":\"" + bucketName + "\",\"objectName\":\"" + objectName + "\"}}",
 	})
 	request.Headers["x-acs-instanceid"] = bucketName
 
@@ -300,4 +302,107 @@ func (s *OssService) WaitForOssBucketObject(bucket *oss.Bucket, id string, statu
 			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, strconv.FormatBool(true), status, errmsgs.ProviderERROR)
 		}
 	}
+}
+
+func (s *OssService) PutOssBucketTags(bucketName string, tags []OssTags) error {
+	osstags := ""
+	if len(tags) > 0 {
+		for _, tag := range tags {
+			tag := fmt.Sprintf(`<Tag><Key>%s</Key><Value>%s</Value></Tag>`, tag.Key, tag.Value)
+			osstags = osstags + tag
+		}
+	} else {
+		osstags = "<Tag></Tag>"
+	}
+
+	content := fmt.Sprintf(`<Tagging><TagSet>%s</TagSet></Tagging>`, osstags)
+	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"OpenApiAction": "PutBucketTags",
+		"ProductName":   "oss",
+		"Content":       content,
+		"Params":        "{\"BucketName\":\"" + bucketName + "\"}",
+	})
+	request.Headers["x-acs-instanceid"] = bucketName
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("PutBucketTags", bresponse, request, bresponse.GetHttpContentString())
+	if err != nil || bresponse.GetHttpStatus() != 200 {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "PutBucketTags", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+	}
+	resp := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	if resp["asapiSuccess"].(bool) == false {
+		return errmsgs.WrapError(errmsgs.Error(fmt.Sprintf("put bucket tags error %#v", resp)))
+	}
+
+	return nil
+}
+
+func (s *OssService) GetBucketTags(bucketName string) (tags []interface{}, err error) {
+	tags = make([]interface{}, 0)
+	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"OpenApiAction": "GetBucketTags",
+		"ProductName":   "oss",
+		"Params":        "{\"BucketName\":\"" + bucketName + "\"}",
+	})
+	request.Headers["x-acs-instanceid"] = bucketName
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("GetBucketTags", bresponse, request, bresponse.GetHttpContentString())
+	if err != nil || bresponse.GetHttpStatus() != 200 {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetBucketTags", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+	}
+	response := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	tags_data, err := jsonpath.Get("$.Data.Tagging.TagSet.Tag", response)
+	if tags_data != nil {
+		ok := true
+		tags, ok = tags_data.([]interface{})
+		if !ok {
+			ts, ok := tags_data.(map[string]interface{})
+			if !ok {
+				return nil, errmsgs.WrapErrorf(err, "GetBucketTags", errmsgs.AlibabacloudStackOssGoSdk, fmt.Sprintf("GetBucketTags error : %#v", tags_data))
+			}
+			tags = []interface{}{ts}
+		}
+	}
+	return tags, err
+}
+
+func (s *OssService) DeleteBucketTags(bucketName string) error {
+	request := s.client.NewCommonRequest("POST", "OneRouter", "2018-12-12", "DoOpenApi", "")
+	mergeMaps(request.QueryParams, map[string]string{
+		"OpenApiAction": "DeleteBucketTags",
+		"ProductName":   "oss",
+		"Params":        "{\"BucketName\":\"" + bucketName + "\"}",
+	})
+	request.Headers["x-acs-instanceid"] = bucketName
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("DeleteBucketTags", bresponse, request, bresponse.GetHttpContentString())
+	if err != nil || bresponse.GetHttpStatus() != 200 {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "GetBucketTags", errmsgs.AlibabacloudStackOssGoSdk, errmsg)
+	}
+	return nil
 }

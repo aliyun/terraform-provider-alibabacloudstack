@@ -1,5 +1,5 @@
 ---
-subcategory: "RocketMQ"
+subcategory: "RocketMQ (ONS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ons_group"
 sidebar_current: "docs-alibabacloudstack-resource-ons-group"

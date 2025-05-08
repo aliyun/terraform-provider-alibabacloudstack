@@ -1,5 +1,5 @@
 ---
-subcategory: "ADB"
+subcategory: "AnalyticDB for MySQL (ADB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_adb_dbclusters"
 sidebar_current: "docs-Alibabacloudstack-datasource-adb-dbclusters"

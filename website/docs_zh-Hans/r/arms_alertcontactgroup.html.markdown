@@ -1,5 +1,5 @@
 ---
-subcategory: "ARMS"
+subcategory: "Application Real-Time Monitoring Service (ARMS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_arms_alertcontactgroup"
 sidebar_current: "docs-Alibabacloudstack-arms-alertcontactgroup"

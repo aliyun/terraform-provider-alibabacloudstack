@@ -49,9 +49,8 @@ func TestAccAlibabacloudStackSlbLoadbalancer0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"name":       "rdk_test_name",
-						"vswitch_id": CHECKSET,
-
+						"name":         "rdk_test_name",
+						"vswitch_id":   CHECKSET,
 						"address_type": "intranet",
 					}),
 				),
@@ -64,10 +63,122 @@ func TestAccAlibabacloudStackSlbLoadbalancer0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"specification": "slb.s2.small",
+					"name":          "Rdk-test-name",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
 
-					"name": "Rdk-test-name",
+						"specification": "slb.s2.small",
+
+						"name": "Rdk-test-name",
+					}),
+				),
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "Test",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "TF",
+						"tags.For":     "Test",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF-update",
+						"For":     "Test-update",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "TF-update",
+						"tags.For":     "Test-update",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "0",
+						"tags.Created": REMOVEKEY,
+						"tags.For":     REMOVEKEY,
+					}),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackSlbLoadbalancerClassic(t *testing.T) {
+
+	var v *slb.DescribeLoadBalancerAttributeResponse
+
+	resourceId := "alibabacloudstack_slb_loadbalancer.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccSlbLoadbalancerCheckmap)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
+		return &SlbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DoSlbDescribeloadbalancerattributeRequest")
+	rac := resourceAttrCheckInit(rc, ra)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-testacc%sslbload_balancer%d", defaultRegionToTest, rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbLoadbalancerBasicdependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+
+		CheckDestroy: rac.checkResourceDestroy(),
+
+		Steps: []resource.TestStep{
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"name":          "rdk_test_name",
+					"specification": "slb.s1.small",
+					"network_type":  "classic",
+					"address_type":  "intranet",
+					"address":       "10.205.44.221",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"name":         "rdk_test_name",
+						"address":      "10.205.44.221",
+						"address_type": "intranet",
+						"network_type": "classic",
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"specification": "slb.s2.small",
+					"name":          "Rdk-test-name",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{

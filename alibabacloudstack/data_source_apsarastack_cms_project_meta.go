@@ -13,9 +13,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudstackCmsProjectMeta() *schema.Resource {
+func dataSourceAlibabacloudStackCmsProjectMeta() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudstackCmsProjectMetaRead,
+		Read: dataSourceAlibabacloudStackCmsProjectMetaRead,
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -61,7 +61,7 @@ func dataSourceAlibabacloudstackCmsProjectMeta() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudstackCmsProjectMetaRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackCmsProjectMetaRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := client.NewCommonRequest("POST", "Cms", "2019-01-01", "DescribeProjectMeta", "")

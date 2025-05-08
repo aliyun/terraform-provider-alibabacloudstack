@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceAlibabacloudstackEssAttachment() *schema.Resource {
+func resourceAlibabacloudStackEssAttachment() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"scaling_group_id": {
@@ -36,19 +36,19 @@ func resourceAlibabacloudstackEssAttachment() *schema.Resource {
 		},
 	}
 	setResourceFunc(resource,
-		resourceAlibabacloudstackEssAttachmentCreate,
-		resourceAlibabacloudstackEssAttachmentRead,
-		resourceAlibabacloudstackEssAttachmentUpdate,
-		resourceAlibabacloudstackEssAttachmentDelete)
+		resourceAlibabacloudStackEssAttachmentCreate,
+		resourceAlibabacloudStackEssAttachmentRead,
+		resourceAlibabacloudStackEssAttachmentUpdate,
+		resourceAlibabacloudStackEssAttachmentDelete)
 	return resource
 }
 
-func resourceAlibabacloudstackEssAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackEssAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	d.SetId(d.Get("scaling_group_id").(string))
 	return nil
 }
 
-func resourceAlibabacloudstackEssAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackEssAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}
 	d.Partial(true)
@@ -174,7 +174,7 @@ func resourceAlibabacloudstackEssAttachmentUpdate(d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceAlibabacloudstackEssAttachmentRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackEssAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}
 	object, err := essService.DescribeEssAttachment(d.Id(), make([]string, 0))
@@ -198,7 +198,7 @@ func resourceAlibabacloudstackEssAttachmentRead(d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceAlibabacloudstackEssAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackEssAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	essService := EssService{client}
 

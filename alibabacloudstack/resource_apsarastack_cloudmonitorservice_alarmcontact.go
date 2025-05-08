@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlibabacloudstackCmsAlarmContact() *schema.Resource {
+func resourceAlibabacloudStackCmsAlarmContact() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"alarm_contact_name": {
@@ -55,11 +55,11 @@ func resourceAlibabacloudstackCmsAlarmContact() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudstackCmsAlarmContactCreate, resourceAlibabacloudstackCmsAlarmContactRead, resourceAlibabacloudstackCmsAlarmContactUpdate, resourceAlibabacloudstackCmsAlarmContactDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackCmsAlarmContactCreate, resourceAlibabacloudStackCmsAlarmContactRead, resourceAlibabacloudStackCmsAlarmContactUpdate, resourceAlibabacloudStackCmsAlarmContactDelete)
 	return resource
 }
 
-func resourceAlibabacloudstackCmsAlarmContactCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsAlarmContactCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	request := client.NewCommonRequest("POST", "Cms", "2019-01-01", "PutContact", "")
@@ -103,7 +103,7 @@ func resourceAlibabacloudstackCmsAlarmContactCreate(d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceAlibabacloudstackCmsAlarmContactRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsAlarmContactRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cmsService := CmsService{client}
 	object, err := cmsService.DescribeCmsAlarmContact(d.Id())
@@ -126,7 +126,7 @@ func resourceAlibabacloudstackCmsAlarmContactRead(d *schema.ResourceData, meta i
 	return nil
 }
 
-func resourceAlibabacloudstackCmsAlarmContactUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsAlarmContactUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	update := false
 	request := cms.CreatePutContactRequest()
@@ -177,7 +177,7 @@ func resourceAlibabacloudstackCmsAlarmContactUpdate(d *schema.ResourceData, meta
 	return nil
 }
 
-func resourceAlibabacloudstackCmsAlarmContactDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackCmsAlarmContactDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := cms.CreateDeleteContactRequest()
 	client.InitRpcRequest(*request.RpcRequest)
