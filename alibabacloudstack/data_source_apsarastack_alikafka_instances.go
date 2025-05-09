@@ -274,6 +274,16 @@ func dataSourceAlicloudAlikafkaInstancesRead(d *schema.ResourceData, meta interf
 		mapping["spec"] = object.SpecName
 		mapping["replicas"] = object.Replicas
 		mapping["disk_num"] = object.DiskNum
+		if object.VSwitchId != "" {
+			mapping["vswitch_id"] = object.VSwitchId
+		} else if object.VipInfo.VswId != "" {
+			mapping["vswitch_id"] = object.VipInfo.VswId
+		}
+		if object.VpcId != "" {
+			mapping["vpc_id"] = object.VpcId
+		} else if object.VipInfo.VpcId != "" {
+			mapping["vpc_id"] = object.VipInfo.VpcId
+		}
 		mapping["vswitch_id"] = object.VSwitchId
 		mapping["vpc_id"] = object.VpcId
 		if object.VSwitchId != "" {
@@ -293,12 +303,18 @@ func dataSourceAlicloudAlikafkaInstancesRead(d *schema.ResourceData, meta interf
 		endPointMap := object.VipInfo.EndPointMap
 		if v, ok := endPointMap["SASL_SSL"]; ok {
 			mapping["sasl_ssl_endpoint"] = strings.Split(v, ",")
+		} else {
+			mapping["sasl_ssl_endpoint"] = []string{}
 		}
 		if v, ok := endPointMap["SASL_PLAINTEXT"]; ok {
 			mapping["sasl_plaintext_endpoint"] = strings.Split(v, ",")
+		} else {
+			mapping["sasl_plaintext_endpoint"] = []string{}
 		}
 		if v, ok := endPointMap["PLAINTEXT"]; ok {
 			mapping["plaintext_endpoint"] = strings.Split(v, ",")
+		} else {
+			mapping["plaintext_endpoint"] = []string{}
 		}
 
 		mapping["status"] = object.ServiceStatus

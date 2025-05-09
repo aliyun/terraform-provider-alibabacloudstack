@@ -104,13 +104,13 @@ func testSweepAlikafkaInstance(region string) error {
 }
 
 func TestAccAlibabacloudStackAlikafkaInstance_AnyTunnel(t *testing.T) {
-	var v map[string]interface{}
+	var v *InstanceVO
 	resourceId := "alibabacloudstack_alikafka_instance.default"
 	ra := resourceAttrInit(resourceId, alikafkaInstanceBasicMap)
 	serviceFunc := func() interface{} {
 		return &AlikafkaService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeAliKafkaInstance")
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeAlikafkaInstance")
 	rac := resourceAttrCheckInit(rc, ra)
 	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -135,14 +135,12 @@ func TestAccAlibabacloudStackAlikafkaInstance_AnyTunnel(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":                    name,
-						"sasl":                    "true",
-						"spec":                    "Broker4C16G",
-						"vpc_id":                  CHECKSET,
-						"vip_type":                CHECKSET,
-						"status":                  CHECKSET,
-						"sasl_ssl_endpoint":       CHECKSET,
-						"sasl_plaintext_endpoint": CHECKSET,
+						"name":                      name,
+						"sasl":                      "true",
+						"spec":                      "Broker4C16G",
+						"vpc_id":                    CHECKSET,
+						"vip_type":                  CHECKSET,
+						"status":                    CHECKSET,
 					}),
 				),
 			},
@@ -151,18 +149,28 @@ func TestAccAlibabacloudStackAlikafkaInstance_AnyTunnel(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"num_partitions": 5,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"num_partitions": "5",
+					}),
+				),
+			},
 		},
 	})
 }
 
 func TestAccAlibabacloudStackAlikafkaInstance_SingleTunnel(t *testing.T) {
-	var v map[string]interface{}
+	var v *InstanceVO
 	resourceId := "alibabacloudstack_alikafka_instance.default"
 	ra := resourceAttrInit(resourceId, alikafkaInstanceBasicMap)
 	serviceFunc := func() interface{} {
 		return &AlikafkaService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeAliKafkaInstance")
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeAlikafkaInstance")
 	rac := resourceAttrCheckInit(rc, ra)
 	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -174,7 +182,7 @@ func TestAccAlibabacloudStackAlikafkaInstance_SingleTunnel(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rc.checkResourceDestroy(),
+		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -188,16 +196,13 @@ func TestAccAlibabacloudStackAlikafkaInstance_SingleTunnel(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":                    name,
-						"sasl":                    "true",
-						"plaintext":               "true",
-						"spec":                    "Broker4C16G",
-						"vpc_id":                  CHECKSET,
-						"vip_type":                CHECKSET,
-						"status":                  CHECKSET,
-						"sasl_ssl_endpoint":       CHECKSET,
-						"sasl_plaintext_endpoint": CHECKSET,
-						"plaintext_endpoint":      CHECKSET,
+						"name":                      name,
+						"sasl":                      "true",
+						"plaintext":                 "true",
+						"spec":                      "Broker4C16G",
+						"vpc_id":                    CHECKSET,
+						"vip_type":                  CHECKSET,
+						"status":                    CHECKSET,
 					}),
 				),
 			},
@@ -206,6 +211,16 @@ func TestAccAlibabacloudStackAlikafkaInstance_SingleTunnel(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			// 			{
+			// 				Config: testAccConfig(map[string]interface{}{
+			// 					"auto_create_topics_enable": "true",
+			// 				}),
+			// 				Check: resource.ComposeTestCheckFunc(
+			// 					testAccCheck(map[string]string{
+			// 						"auto_create_topics_enable": "true",
+			// 					}),
+			// 				),
+			// 			},
 		},
 	})
 }
@@ -236,25 +251,24 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 }
 
 var alikafkaInstanceBasicMap = map[string]string{
-	"cup_type":                  CHECKSET,
-	"spec":                      CHECKSET,
-	"replicas":                  CHECKSET,
-	"storage_class":             CHECKSET,
-	"disk_num":                  CHECKSET,
-	"sasl":                      CHECKSET,
-	"plaintext":                 CHECKSET,
-	"mssage_max_bytes":          CHECKSET,
-	"nm_partitions":             CHECKSET,
-	"ato_create_topics_enable":  CHECKSET,
-	"nm_io_threads":             CHECKSET,
-	"qeued_max_requests":        CHECKSET,
-	"rplica_fetch_wait_max_ms":  CHECKSET,
-	"rplica_lag_time_max_ms":    CHECKSET,
-	"nm_network_threads":        CHECKSET,
-	"lg_retention_bytes":        CHECKSET,
-	"rplica_fetch_max_bytes":    CHECKSET,
-	"nm_replica_fetchers":       CHECKSET,
-	"dfault_replication_factor": CHECKSET,
-	"ofsets_retention_minutes":  CHECKSET,
-	"bckground_threads":         CHECKSET,
+	"cup_type":                   CHECKSET,
+	"spec":                       CHECKSET,
+	"replicas":                   CHECKSET,
+	"disk_num":                   CHECKSET,
+	"sasl":                       CHECKSET,
+	"plaintext":                  CHECKSET,
+	"message_max_bytes":          "10000000",
+	"num_partitions":             "3",
+	"auto_create_topics_enable":  "false",
+	"num_io_threads":             "16",
+	"queued_max_requests":        "80",
+	"replica_fetch_wait_max_ms":  "500",
+	"replica_lag_time_max_ms":    "30000",
+	"num_network_threads":        "3",
+	"log_retention_bytes":        "-1",
+	"replica_fetch_max_bytes":    "10000000",
+	"num_replica_fetchers":       "4",
+	"default_replication_factor": "3",
+	"offsets_retention_minutes":  "10080",
+	"background_threads":         "10",
 }

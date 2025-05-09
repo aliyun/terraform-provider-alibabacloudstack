@@ -124,7 +124,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstanceConfigMap(instan
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_alikafka_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	
+
 	return &instanceConfigResp.Data.ConfigMap, nil
 }
 
@@ -314,7 +314,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*AliKa
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_alikafka_topic", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	
+
 	for _, v := range topicListResp.TopicList {
 		if v.Topic == topic {
 			return &v, nil
@@ -900,7 +900,7 @@ func (s *AlikafkaService) GetQuotaTip(instanceId string) (object map[string]inte
 
 type GetInstanceListResponse struct {
 	*responses.BaseResponse
-	Code         string       `json:"Code"`
+	Code         any          `json:"Code"`
 	Message      string       `json:"Message"`
 	RequestId    string       `json:"RequestId"`
 	Success      bool         `json:"Success"`
@@ -955,12 +955,14 @@ type InstanceVO struct {
 		EnabledProtocols []string          `json:"EnabledProtocols" xml:"EnabledProtocols"`
 		EndPointMap      map[string]string `json:"EndPointMap" xml:"EndPointMap"`
 		VipMap           map[string]string `json:"VipMap" xml:"VipMap"`
+		VpcId            string            `json:"VpcId" xml:"VpcId"`
+		VswId            string            `json:"VswId" xml:"VswId"`
 	} `json:"VipInfo" xml:"VipInfo"`
 }
 
 type GetInstanceConfigResponse struct {
 	*responses.BaseResponse
-	Code            int    `json:"Code"`
+	Code            any    `json:"Code"`
 	Message         string `json:"Message"`
 	RequestId       string `json:"RequestId"`
 	Success         bool   `json:"Success"`

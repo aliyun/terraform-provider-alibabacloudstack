@@ -121,10 +121,12 @@ func resourceAlibabacloudStackAlikafkaInstance() *schema.Resource {
 			"message_max_bytes": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"num_partitions": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"auto_create_topics_enable": {
 				Type:     schema.TypeBool,
@@ -134,46 +136,57 @@ func resourceAlibabacloudStackAlikafkaInstance() *schema.Resource {
 			"num_io_threads": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"queued_max_requests": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
-			"replica_fetch_wait_max_msreplicas": {
+			"replica_fetch_wait_max_ms": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"replica_lag_time_max_ms": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"num_network_threads": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"log_retention_bytes": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"replica_fetch_max_bytes": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"num_replica_fetchers": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"default_replication_factor": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"offsets_retention_minutes": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"background_threads": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"plaintext_endpoint": {
 				Type:     schema.TypeList,
@@ -324,8 +337,18 @@ func resourceAlibabacloudStackAlikafkaInstanceRead(d *schema.ResourceData, meta 
 	d.Set("spec", object.SpecName)
 	d.Set("replicas", object.Replicas)
 	d.Set("disk_num", object.DiskNum)
-	d.Set("vswitch_id", object.VSwitchId)
-	d.Set("vpc_id", object.VpcId)
+
+	if object.VSwitchId != "" {
+		d.Set("vswitch_id", object.VSwitchId)
+	} else if object.VipInfo.VswId != "" {
+		d.Set("vswitch_id", object.VipInfo.VswId)
+	}
+	if object.VpcId != "" {
+		d.Set("vpc_id", object.VpcId)
+	} else if object.VipInfo.VpcId != "" {
+		d.Set("vpc_id", object.VipInfo.VpcId)
+	}
+
 	if object.VSwitchId != "" {
 		d.Set("vip_type", "SingleTunnel")
 	} else {
@@ -343,12 +366,18 @@ func resourceAlibabacloudStackAlikafkaInstanceRead(d *schema.ResourceData, meta 
 	endPointMap := object.VipInfo.EndPointMap
 	if v, ok := endPointMap["SASL_SSL"]; ok {
 		d.Set("sasl_ssl_endpoint", strings.Split(v, ","))
+	} else {
+		d.Set("sasl_ssl_endpoint", []string{})
 	}
 	if v, ok := endPointMap["SASL_PLAINTEXT"]; ok {
 		d.Set("sasl_plaintext_endpoint", strings.Split(v, ","))
+	} else {
+		d.Set("sasl_plaintext_endpoint", []string{})
 	}
 	if v, ok := endPointMap["PLAINTEXT"]; ok {
 		d.Set("plaintext_endpoint", strings.Split(v, ","))
+	} else {
+		d.Set("plaintext_endpoint", []string{})
 	}
 
 	d.Set("status", object.ServiceStatus)
@@ -363,44 +392,44 @@ func resourceAlibabacloudStackAlikafkaInstanceRead(d *schema.ResourceData, meta 
 		return errmsgs.WrapError(err)
 	}
 
-	if v, err := strconv.Atoi(configMap.MessageMaxBytes); err == nil{		
+	if v, err := strconv.Atoi(configMap.MessageMaxBytes); err == nil {
 		d.Set("message_max_bytes", v)
 	}
-	if v, err := strconv.Atoi(configMap.NumPartitions); err == nil{		
+	if v, err := strconv.Atoi(configMap.NumPartitions); err == nil {
 		d.Set("num_partitions", v)
 	}
 	d.Set("auto_create_topics_enable", string(configMap.AutoCreateTopicsEnable) == "true")
-	if v, err := strconv.Atoi(configMap.NumIoThreads); err == nil{		
+	if v, err := strconv.Atoi(configMap.NumIoThreads); err == nil {
 		d.Set("num_io_threads", v)
 	}
-	if v, err := strconv.Atoi(configMap.QueuedMaxRequests); err == nil{		
+	if v, err := strconv.Atoi(configMap.QueuedMaxRequests); err == nil {
 		d.Set("queued_max_requests", v)
 	}
-	if v, err := strconv.Atoi(configMap.ReplicaFetchWaitMaxMs); err == nil{		
+	if v, err := strconv.Atoi(configMap.ReplicaFetchWaitMaxMs); err == nil {
 		d.Set("replica_fetch_wait_max_ms", v)
 	}
-	if v, err := strconv.Atoi(configMap.ReplicaLagTimeMaxMs); err == nil{		
+	if v, err := strconv.Atoi(configMap.ReplicaLagTimeMaxMs); err == nil {
 		d.Set("replica_lag_time_max_ms", v)
 	}
-	if v, err := strconv.Atoi(configMap.NumNetworkThreads); err == nil{		
+	if v, err := strconv.Atoi(configMap.NumNetworkThreads); err == nil {
 		d.Set("num_network_threads", v)
 	}
-	if v, err := strconv.Atoi(configMap.LogRetentionBytes); err == nil{		
+	if v, err := strconv.Atoi(configMap.LogRetentionBytes); err == nil {
 		d.Set("log_retention_bytes", v)
 	}
-	if v, err := strconv.Atoi(configMap.ReplicaFetchMaxBytes); err == nil{		
+	if v, err := strconv.Atoi(configMap.ReplicaFetchMaxBytes); err == nil {
 		d.Set("replica_fetch_max_bytes", v)
 	}
-	if v, err := strconv.Atoi(configMap.NumReplicaFetchers); err == nil{		
+	if v, err := strconv.Atoi(configMap.NumReplicaFetchers); err == nil {
 		d.Set("num_replica_fetchers", v)
 	}
-	if v, err := strconv.Atoi(configMap.DefaultReplicationFactor); err == nil{		
+	if v, err := strconv.Atoi(configMap.DefaultReplicationFactor); err == nil {
 		d.Set("default_replication_factor", v)
 	}
-	if v, err := strconv.Atoi(configMap.OffsetsRetentionMinutes); err == nil{		
+	if v, err := strconv.Atoi(configMap.OffsetsRetentionMinutes); err == nil {
 		d.Set("offsets_retention_minutes", v)
 	}
-	if v, err := strconv.Atoi(configMap.BackgroundThreads); err == nil{		
+	if v, err := strconv.Atoi(configMap.BackgroundThreads); err == nil {
 		d.Set("background_threads", v)
 	}
 
@@ -485,7 +514,3 @@ func resourceAlibabacloudStackAlikafkaInstanceDelete(d *schema.ResourceData, met
 
 	return nil
 }
-
-
-
-
