@@ -81,10 +81,10 @@ const (
 	OneRouterCode       = ServiceCode("ONEROUTER")
 	BastionHostCode     = ServiceCode("BASTIONHOSTPRIVATE")
 	WAFONECSCode        = ServiceCode("WAF_ONECS")
+	ALIKAFKACode        = ServiceCode("ALIKAFKA")
 	//自建网关虚假Code
 	OssDataCode  = ServiceCode("OSSDATA")
 	SlSDataCode  = ServiceCode("SLSDATA")
-	ALIKAFKACode = ServiceCode("ALIKAFKADATA")
 	BssDataCode  = ServiceCode("BSSDATA")
 
 	// ASAPI

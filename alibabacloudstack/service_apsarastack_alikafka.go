@@ -2,12 +2,13 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"log"
-	"regexp"
-	"time"
 	"fmt"
+	"log"
 	"reflect"
-	
+	"regexp"
+	"strconv"
+	"time"
+
 	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -53,18 +54,18 @@ type AlikafkaService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
-func (alikafkaService *AlikafkaService) DescribeAlikafkaInstance(instanceId string) (*alikafka.InstanceVO, error) {
-	alikafkaInstance := &alikafka.InstanceVO{}
-	instanceListReq := alikafka.CreateGetInstanceListRequest()
-	alikafkaService.client.InitRpcRequest(*instanceListReq.RpcRequest)
-	instanceListReq.QueryParams["Product"] = "alikafka"
-	wait := incrementalWait(2*time.Second, 1*time.Second)
-	var raw interface{}
+func (alikafkaService *AlikafkaService) DescribeAlikafkaInstance(instanceId string) (*InstanceVO, error) {
+	alikafkaInstance := &InstanceVO{}
+	action := "GetInstanceList"
+	request := alikafkaService.client.NewCommonRequest("POST", "alikafka", "2019-09-16", action, "")
+	request.QueryParams["InstanceId"] = instanceId
+	wait := incrementalWait(3*time.Second, 5*time.Second)
+	var bresponse *responses.CommonResponse
 	var err error
-	err = resource.Retry(10*time.Minute, func() *resource.RetryError {
-		raw, err = alikafkaService.client.WithAlikafkaClient(func(client *alikafka.Client) (interface{}, error) {
-			return client.GetInstanceList(instanceListReq)
-		})
+
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		bresponse, err = alikafkaService.client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
 				wait()
@@ -72,21 +73,20 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstance(instanceId stri
 			}
 			return resource.NonRetryableError(err)
 		}
-		addDebug(instanceListReq.GetActionName(), raw, instanceListReq.RpcRequest, instanceListReq)
 		return nil
 	})
 
-	instanceListResp, ok := raw.(*alikafka.GetInstanceListResponse)
+	var instanceListResp GetInstanceListResponse
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &instanceListResp)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(instanceListResp.BaseResponse)
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		return alikafkaInstance, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceId, instanceListReq.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_alikafka_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(instanceListReq.GetActionName(), raw, instanceListReq.RpcRequest, instanceListReq)
 
-	for _, v := range instanceListResp.InstanceList.InstanceVO {
+	for _, v := range instanceListResp.InstanceList {
 		if v.InstanceId == instanceId && v.ServiceStatus != 10 {
 			return &v, nil
 		}
@@ -94,8 +94,42 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstance(instanceId stri
 	return alikafkaInstance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("AlikafkaInstance", instanceId)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
-func (alikafkaService *AlikafkaService) DescribeAlikafkaInstanceByOrderId(orderId string, timeout int) (*alikafka.InstanceVO, error) {
-	alikafkaInstance := &alikafka.InstanceVO{}
+func (alikafkaService *AlikafkaService) DescribeAlikafkaInstanceConfigMap(instanceId string) (*InstanceConfigMap, error) {
+	action := "GetInstanceConfig"
+	request := alikafkaService.client.NewCommonRequest("POST", "alikafka", "2019-09-16", action, "")
+	request.QueryParams["InstanceId"] = instanceId
+	wait := incrementalWait(3*time.Second, 5*time.Second)
+	var bresponse *responses.CommonResponse
+	var err error
+
+	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+		bresponse, err = alikafkaService.client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
+				wait()
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
+	})
+
+	var instanceConfigResp GetInstanceConfigResponse
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &instanceConfigResp)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_alikafka_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	
+	return &instanceConfigResp.Data.ConfigMap, nil
+}
+
+func (alikafkaService *AlikafkaService) DescribeAlikafkaInstanceByOrderId(orderId string, timeout int) (*InstanceVO, error) {
+	alikafkaInstance := &InstanceVO{}
 	instanceListReq := alikafka.CreateGetInstanceListRequest()
 	alikafkaService.client.InitRpcRequest(*instanceListReq.RpcRequest)
 	instanceListReq.OrderId = orderId
@@ -120,7 +154,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstanceByOrderId(orderI
 			return nil
 		})
 
-		instanceListResp, ok := raw.(*alikafka.GetInstanceListResponse)
+		instanceListResp, ok := raw.(*GetInstanceListResponse)
 		if err != nil {
 			errmsg := ""
 			if ok {
@@ -131,7 +165,7 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaInstanceByOrderId(orderI
 
 		addDebug(instanceListReq.GetActionName(), raw, instanceListReq.RpcRequest, instanceListReq)
 
-		for _, v := range instanceListResp.InstanceList.InstanceVO {
+		for _, v := range instanceListResp.InstanceList {
 			return &v, nil
 		}
 		if time.Now().After(deadline) {
@@ -256,13 +290,11 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*AliKa
 	request := alikafkaService.client.NewCommonRequest("POST", "alikafka", "2019-09-16", "GetTopicList", "")
 	request.QueryParams["InstanceId"] = instanceId
 	wait := incrementalWait(3*time.Second, 5*time.Second)
-	var raw interface{}
+	var bresponse *responses.CommonResponse
 
 	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
-		raw, err = alikafkaService.client.WithAlikafkaClient(func(alikafkaClient *alikafka.Client) (interface{}, error) {
-			return alikafkaClient.ProcessCommonRequest(request)
-		})
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
+		bresponse, err = alikafkaService.client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "ONS_SYSTEM_FLOW_CONTROL"}) {
 				wait()
@@ -272,14 +304,17 @@ func (alikafkaService *AlikafkaService) DescribeAlikafkaTopic(id string) (*AliKa
 		}
 		return nil
 	})
-	topicListResp := TopicListResponse{}
-	bresponse, ok := raw.(*responses.CommonResponse)
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &topicListResp)
-	if err != nil && !ok {
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return alikafkaTopic, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
 
+	var topicListResp TopicListResponse
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &topicListResp)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_alikafka_topic", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	
 	for _, v := range topicListResp.TopicList {
 		if v.Topic == topic {
 			return &v, nil
@@ -781,16 +816,46 @@ func (s *AlikafkaService) AliKafkaInstanceStateRefreshFunc(id, attribute string,
 			}
 			return nil, "", errmsgs.WrapError(err)
 		}
-		
-		rv := reflect.ValueOf(object)
+
+		rv := reflect.ValueOf(object).Elem()
 		// 查找字段
 		field := rv.FieldByName(attribute)
-		if !field.IsValid() || !field.CanInterface(){
+		if !field.IsValid() || !field.CanInterface() {
 			return nil, "", nil
 		}
-	
-		state := field.Interface().(string)
-		
+
+		value := field.Interface()
+		var state string
+		if reflect.TypeOf(value) == reflect.TypeOf(0) {
+			state = strconv.Itoa(value.(int))
+		} else if reflect.TypeOf(value) == reflect.TypeOf("0") {
+			state = value.(string)
+		} else {
+			return nil, fmt.Sprint(state), errmsgs.WrapError(fmt.Errorf("Unsupport attribute Type"))
+		}
+
+		for _, failState := range failStates {
+
+			if fmt.Sprint(state) == failState {
+				return object, fmt.Sprint(state), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(state)))
+			}
+		}
+		return object, fmt.Sprint(state), nil
+	}
+}
+
+func (s *AlikafkaService) AliKafkaInstanceVipStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeAlikafkaInstance(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		state := object.VipInfo.Action
 
 		for _, failState := range failStates {
 
@@ -831,4 +896,93 @@ func (s *AlikafkaService) GetQuotaTip(instanceId string) (object map[string]inte
 		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, instanceId, "$.QuotaData", response)
 	}
 	return v.(map[string]interface{}), nil
+}
+
+type GetInstanceListResponse struct {
+	*responses.BaseResponse
+	Code         string       `json:"Code"`
+	Message      string       `json:"Message"`
+	RequestId    string       `json:"RequestId"`
+	Success      bool         `json:"Success"`
+	InstanceList []InstanceVO `json:"InstanceList"` // 修改为直接使用 []InstanceVO
+}
+
+type InstanceVO struct {
+	VpcId                    string                            `json:"VpcId" xml:"VpcId"`
+	SpecType                 string                            `json:"SpecType" xml:"SpecType"`
+	DeployType               int                               `json:"DeployType" xml:"DeployType"`
+	CreateTime               int64                             `json:"CreateTime" xml:"CreateTime"`
+	CpuType                  string                            `json:"CpuType" xml:"CpuType"`
+	DiskNum                  int                               `json:"DiskNum" xml:"DiskNum"`
+	DiskSize                 int                               `json:"DiskSize" xml:"DiskSize"`
+	DiskType                 int                               `json:"DiskType" xml:"DiskType"`
+	SecurityGroup            string                            `json:"SecurityGroup" xml:"SecurityGroup"`
+	SslEndPoint              string                            `json:"SslEndPoint" xml:"SslEndPoint"`
+	InstanceId               string                            `json:"InstanceId" xml:"InstanceId"`
+	AllConfig                string                            `json:"AllConfig" xml:"AllConfig"`
+	ServiceStatus            int                               `json:"ServiceStatus" xml:"ServiceStatus"`
+	SpecName                 string                            `json:"SpecName" xml:"SpecName"`
+	EipMax                   int                               `json:"EipMax" xml:"EipMax"`
+	RegionId                 string                            `json:"RegionId" xml:"RegionId"`
+	Replicas                 int                               `json:"Replicas" xml:"Replicas"`
+	MsgRetain                int                               `json:"MsgRetain" xml:"MsgRetain"`
+	VSwitchId                string                            `json:"VSwitchId" xml:"VSwitchId"`
+	ExpiredTime              int64                             `json:"ExpiredTime" xml:"ExpiredTime"`
+	TopicNumLimit            int                               `json:"TopicNumLimit" xml:"TopicNumLimit"`
+	ZoneId                   string                            `json:"ZoneId" xml:"ZoneId"`
+	ZoneA                    string                            `json:"ZoneA" xml:"ZoneA"`
+	ZoneB                    string                            `json:"ZoneB" xml:"ZoneB"`
+	ZoneC                    string                            `json:"ZoneC" xml:"ZoneC"`
+	IoMax                    int                               `json:"IoMax" xml:"IoMax"`
+	PaidType                 int                               `json:"PaidType" xml:"PaidType"`
+	Name                     string                            `json:"Name" xml:"Name"`
+	EndPoint                 string                            `json:"EndPoint" xml:"EndPoint"`
+	DomainEndpoint           string                            `json:"DomainEndpoint" xml:"DomainEndpoint"`
+	SslDomainEndpoint        string                            `json:"SslDomainEndpoint" xml:"SslDomainEndpoint"`
+	SaslDomainEndpoint       string                            `json:"SaslDomainEndpoint" xml:"SaslDomainEndpoint"`
+	ResourceGroupId          string                            `json:"ResourceGroupId" xml:"ResourceGroupId"`
+	UsedTopicCount           int                               `json:"UsedTopicCount" xml:"UsedTopicCount"`
+	UsedGroupCount           int                               `json:"UsedGroupCount" xml:"UsedGroupCount"`
+	UsedPartitionCount       int                               `json:"UsedPartitionCount" xml:"UsedPartitionCount"`
+	KmsKeyId                 string                            `json:"KmsKeyId" xml:"KmsKeyId"`
+	StandardZoneId           string                            `json:"StandardZoneId" xml:"StandardZoneId"`
+	IoMaxSpec                string                            `json:"IoMaxSpec" xml:"IoMaxSpec"`
+	UpgradeServiceDetailInfo alikafka.UpgradeServiceDetailInfo `json:"UpgradeServiceDetailInfo" xml:"UpgradeServiceDetailInfo"`
+	Tags                     []Tag                             `json:"Tags" xml:"Tags"`
+	VipInfo                  struct {
+		Action           string            `json:"Action" xml:"Action"`
+		ActionStatus     string            `json:"ActionStatus" xml:"ActionStatus"`
+		EnabledProtocols []string          `json:"EnabledProtocols" xml:"EnabledProtocols"`
+		EndPointMap      map[string]string `json:"EndPointMap" xml:"EndPointMap"`
+		VipMap           map[string]string `json:"VipMap" xml:"VipMap"`
+	} `json:"VipInfo" xml:"VipInfo"`
+}
+
+type GetInstanceConfigResponse struct {
+	*responses.BaseResponse
+	Code            int    `json:"Code"`
+	Message         string `json:"Message"`
+	RequestId       string `json:"RequestId"`
+	Success         bool   `json:"Success"`
+	EagleEyeTraceId string `json:"EagleEyeTraceId"`
+	Data            struct {
+		ConfigMap InstanceConfigMap `json:"ConfigMap"`
+	} `json:"Data"`
+}
+
+type InstanceConfigMap struct {
+	MessageMaxBytes          string `json:"message.max.bytes"`
+	NumPartitions            string `json:"num.partitions"`
+	AutoCreateTopicsEnable   string `json:"auto.create.topics.enable"`
+	NumIoThreads             string `json:"num.io.threads"`
+	QueuedMaxRequests        string `json:"queued.max.requests"`
+	ReplicaFetchWaitMaxMs    string `json:"replica.fetch.wait.max.ms"`
+	ReplicaLagTimeMaxMs      string `json:"replica.lag.time.max.ms"`
+	NumNetworkThreads        string `json:"num.network.threads"`
+	LogRetentionBytes        string `json:"log.retention.bytes"`
+	ReplicaFetchMaxBytes     string `json:"replica.fetch.max.bytes"`
+	NumReplicaFetchers       string `json:"num.replica.fetchers"`
+	DefaultReplicationFactor string `json:"default.replication.factor"`
+	OffsetsRetentionMinutes  string `json:"offsets.retention.minutes"`
+	BackgroundThreads        string `json:"background.threads"`
 }

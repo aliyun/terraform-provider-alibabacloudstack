@@ -14,15 +14,14 @@ import (
 )
 
 func init() {
-	resource.AddTestSweepers("alicloud_alikafka_instance", &resource.Sweeper{
-		Name: "alicloud_alikafka_instance",
+	resource.AddTestSweepers("alibabacloudstack_alikafka_instance", &resource.Sweeper{
+		Name: "alibabacloudstack_alikafka_instance",
 		F:    testSweepAlikafkaInstance,
 		// When implemented, these should be removed firstly
 		Dependencies: []string{
-			"alicloud_alikafka_consumer_group",
-			"alicloud_alikafka_sasl_acl",
-			"alicloud_alikafka_topic",
-			"alicloud_alikafka_sasl_user",
+			"alibabacloudstack_alikafka_sasl_acl",
+			"alibabacloudstack_alikafka_topic",
+			"alibabacloudstack_alikafka_sasl_user",
 		},
 	})
 }
@@ -30,7 +29,7 @@ func init() {
 func testSweepAlikafkaInstance(region string) error {
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, "error getting AliCloud client.")
+		return errmsgs.WrapErrorf(err, "error getting AlibabaCloudStack client.")
 	}
 	client := rawClient.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
@@ -50,9 +49,9 @@ func testSweepAlikafkaInstance(region string) error {
 		log.Printf("[ERROR] Failed to retrieve alikafka instance in service list: %s", err)
 	}
 
-	instanceListResp, _ := raw.(*alikafka.GetInstanceListResponse)
+	instanceListResp, _ := raw.(*GetInstanceListResponse)
 	service := VpcService{client}
-	for _, v := range instanceListResp.InstanceList.InstanceVO {
+	for _, v := range instanceListResp.InstanceList {
 
 		name := v.Name
 		skip := true
@@ -104,16 +103,68 @@ func testSweepAlikafkaInstance(region string) error {
 	return nil
 }
 
-func TestAccAliCloudAlikafkaInstance_basic(t *testing.T) {
+func TestAccAlibabacloudStackAlikafkaInstance_AnyTunnel(t *testing.T) {
 	var v map[string]interface{}
-	resourceId := "alicloud_alikafka_instance.default"
+	resourceId := "alibabacloudstack_alikafka_instance.default"
 	ra := resourceAttrInit(resourceId, alikafkaInstanceBasicMap)
 	serviceFunc := func() interface{} {
 		return &AlikafkaService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeAliKafkaInstance")
 	rac := resourceAttrCheckInit(rc, ra)
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := fmt.Sprintf("tf-testacc-alikafkainstancebasic%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaInstanceSimpleDependence)
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rc.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"name":      name,
+					"zone_id":   "${data.alibabacloudstack_zones.default.zones.0.id}", //${data.alibabacloudstack_zones.default.zones.0.id}",
+					"sasl":      "true",
+					"plaintext": "true",
+					"spec":      "Broker4C16G",
+					"cup_type":  "Intel",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name":                    name,
+						"sasl":                    "true",
+						"spec":                    "Broker4C16G",
+						"vpc_id":                  CHECKSET,
+						"vip_type":                CHECKSET,
+						"status":                  CHECKSET,
+						"sasl_ssl_endpoint":       CHECKSET,
+						"sasl_plaintext_endpoint": CHECKSET,
+					}),
+				),
+			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackAlikafkaInstance_SingleTunnel(t *testing.T) {
+	var v map[string]interface{}
+	resourceId := "alibabacloudstack_alikafka_instance.default"
+	ra := resourceAttrInit(resourceId, alikafkaInstanceBasicMap)
+	serviceFunc := func() interface{} {
+		return &AlikafkaService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeAliKafkaInstance")
+	rac := resourceAttrCheckInit(rc, ra)
+	rand := getAccTestRandInt(10000, 20000)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	name := fmt.Sprintf("tf-testacc-alikafkainstancebasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaInstanceConfigDependence)
@@ -127,250 +178,26 @@ func TestAccAliCloudAlikafkaInstance_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name":           name,
-					"topic_quota":    "50",
-					"disk_type":      "1",
-					"disk_size":      "500",
-					"deploy_type":    "5",
-					"io_max":         "20",
-					"vswitch_id":     "${data.alicloud_vswitches.default.ids.0}",
-					"security_group": "${alicloud_security_group.default.id}",
-					"kms_key_id":     "${alicloud_kms_key.key.id}",
+					"name":       name,
+					"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
+					"zone_id":    "cn-wulan-env149-amtest149001-a", //${data.alibabacloudstack_zones.default.zones.0.id}",
+					"sasl":       "true",
+					"plaintext":  "true",
+					"spec":       "Broker4C16G",
+					"cup_type":   "Intel",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":           name,
-						"security_group": CHECKSET,
-						"kms_key_id":     CHECKSET,
-						"partition_num":  "0",
-						"topic_quota":    "1000",
-					}),
-				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name": fmt.Sprintf("tf-testacc-alikafkainstancechange%v", rand),
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name": fmt.Sprintf("tf-testacc-alikafkainstancechange%v", rand)}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"partition_num": "1",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"partition_num": "1",
-						"topic_quota":   "1001",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"disk_size": "800",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"disk_size": "800",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"deploy_type": "4",
-					"eip_max":     "3",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"deploy_type": "4",
-						"eip_max":     "3",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"io_max": "30",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"io_max": "30",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"spec_type":       "professional",
-					"service_version": "2.2.0",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"spec_type":       "professional",
-						"service_version": "2.2.0",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"config": `{\"enable.vpc_sasl_ssl\":\"false\",\"kafka.log.retention.hours\":\"96\",\"enable.acl\":\"false\",\"kafka.message.max.bytes\":\"1048576\"}`,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"config": CHECKSET,
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"enable_auto_group": "true",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"enable_auto_group": "true",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"enable_auto_topic": "enable",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"enable_auto_topic": "enable",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"default_topic_partition_num": "6",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"default_topic_partition_num": "6",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF-update",
-						"For":     "Test-update",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF-update",
-						"tags.For":     "Test-update",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       REMOVEKEY,
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
-					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAliCloudAlikafkaInstance_convert(t *testing.T) {
-	var v map[string]interface{}
-	resourceId := "alicloud_alikafka_instance.default"
-	ra := resourceAttrInit(resourceId, alikafkaInstanceBasicMap)
-	serviceFunc := func() interface{} {
-		return &AlikafkaService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeAliKafkaInstance")
-	rac := resourceAttrCheckInit(rc, ra)
-	rand := getAccTestRandInt(10000,20000)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testacc-alikafkainstanceconvert%v", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaInstancePrePaidConfigDependence)
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  nil,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":              name,
-					"partition_num":     "50",
-					"disk_type":         "1",
-					"disk_size":         "500",
-					"deploy_type":       "4",
-					"eip_max":           "3",
-					"io_max":            "20",
-					"vswitch_id":        "${data.alicloud_vswitches.default.ids.0}",
-					"paid_type":         "PostPaid",
-					"spec_type":         "normal",
-					"service_version":   "2.2.0",
-					"resource_group_id": "${data.alicloud_resource_manager_resource_groups.default.groups.1.id}",
-					//"config":          `{\"enable.vpc_sasl_ssl\":\"false\",\"kafka.log.retention.hours\":\"72\",\"enable.acl\":\"false\",\"kafka.message.max.bytes\":\"1048576\"}`,
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":              name,
-						"partition_num":     "50",
-						"topic_quota":       "1050",
-						"disk_type":         "1",
-						"disk_size":         "500",
-						"deploy_type":       "4",
-						"eip_max":           "3",
-						"io_max":            "20",
-						"paid_type":         "PostPaid",
-						"spec_type":         "normal",
-						"service_version":   "2.2.0",
-						"resource_group_id": CHECKSET,
-						//"config":          "{\"enable.vpc_sasl_ssl\":\"false\",\"kafka.log.retention.hours\":\"72\",\"enable.acl\":\"false\",\"kafka.message.max.bytes\":\"1048576\"}",
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"paid_type": "PrePaid",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"paid_type": "PrePaid",
+						"name":                    name,
+						"sasl":                    "true",
+						"plaintext":               "true",
+						"spec":                    "Broker4C16G",
+						"vpc_id":                  CHECKSET,
+						"vip_type":                CHECKSET,
+						"status":                  CHECKSET,
+						"sasl_ssl_endpoint":       CHECKSET,
+						"sasl_plaintext_endpoint": CHECKSET,
+						"plaintext_endpoint":      CHECKSET,
 					}),
 				),
 			},
@@ -383,198 +210,8 @@ func TestAccAliCloudAlikafkaInstance_convert(t *testing.T) {
 	})
 }
 
-func TestAccAliCloudAlikafkaInstance_prepaid(t *testing.T) {
-	var v map[string]interface{}
-	resourceId := "alicloud_alikafka_instance.default"
-	ra := resourceAttrInit(resourceId, alikafkaInstanceBasicMap)
-	serviceFunc := func() interface{} {
-		return &AlikafkaService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeAliKafkaInstance")
-	rac := resourceAttrCheckInit(rc, ra)
-	rand := getAccTestRandInt(10000,20000)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testacc-alikafkainstancepre%v", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaInstancePrePaidConfigDependence)
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  nil,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":            name,
-					"partition_num":   "50",
-					"disk_type":       "1",
-					"disk_size":       "500",
-					"deploy_type":     "4",
-					"eip_max":         "3",
-					"io_max":          "20",
-					"vswitch_id":      "${data.alicloud_vswitches.default.ids.0}",
-					"paid_type":       "PrePaid",
-					"spec_type":       "normal",
-					"service_version": "2.2.0",
-					//"config":          `{\"enable.vpc_sasl_ssl\":\"false\",\"kafka.log.retention.hours\":\"72\",\"enable.acl\":\"false\",\"kafka.message.max.bytes\":\"1048576\"}`,
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":            name,
-						"partition_num":   "50",
-						"topic_quota":     "1050",
-						"disk_type":       "1",
-						"disk_size":       "500",
-						"deploy_type":     "4",
-						"eip_max":         "3",
-						"io_max":          "20",
-						"paid_type":       "PrePaid",
-						"spec_type":       "normal",
-						"service_version": "2.2.0",
-						//"config":          "{\"enable.vpc_sasl_ssl\":\"false\",\"kafka.log.retention.hours\":\"72\",\"enable.acl\":\"false\",\"kafka.message.max.bytes\":\"1048576\"}",
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"disk_size": "600",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"disk_size": "600",
-					}),
-				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func TestAccAliCloudAlikafkaInstance_VpcId(t *testing.T) {
-	var v map[string]interface{}
-	resourceId := "alicloud_alikafka_instance.default"
-	ra := resourceAttrInit(resourceId, alikafkaInstanceBasicMap)
-	serviceFunc := func() interface{} {
-		return &AlikafkaService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DescribeAliKafkaInstance")
-	rac := resourceAttrCheckInit(rc, ra)
-	rand := getAccTestRandInt(10000,20000)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testacc-alikafkainstancepre%v", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceAlikafkaInstanceConfigDependence)
-	resource.Test(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":                        name,
-					"topic_quota":                 "50",
-					"disk_type":                   "1",
-					"disk_size":                   "800",
-					"deploy_type":                 "4",
-					"eip_max":                     "3",
-					"io_max_spec":                 "alikafka.hw.2xlarge",
-					"vswitch_id":                  "${data.alicloud_vswitches.default.ids.0}",
-					"paid_type":                   "PostPaid",
-					"spec_type":                   "professional",
-					"service_version":             "2.2.0",
-					"enable_auto_group":           "true",
-					"enable_auto_topic":           "enable",
-					"default_topic_partition_num": "6",
-					"config":                      `{\"enable.vpc_sasl_ssl\":\"true\",\"kafka.log.retention.hours\":\"72\",\"enable.acl\":\"true\",\"kafka.message.max.bytes\":\"1048576\"}`,
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-					},
-					"security_group": "${alicloud_security_group.default.id}",
-					"vpc_id":         "${data.alicloud_vpcs.default.ids.0}",
-					"vswitch_ids":    []string{"${data.alicloud_vswitches.default.ids.0}", "${data.alicloud_vswitches.default.ids.1}"},
-					"selected_zones": []string{"zoneb", "zonec"},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":                        name,
-						"partition_num":               "0",
-						"topic_quota":                 "1000",
-						"disk_type":                   "1",
-						"disk_size":                   "800",
-						"deploy_type":                 "4",
-						"eip_max":                     "3",
-						"io_max_spec":                 "alikafka.hw.2xlarge",
-						"paid_type":                   "PostPaid",
-						"spec_type":                   "professional",
-						"service_version":             "2.2.0",
-						"enable_auto_group":           "true",
-						"enable_auto_topic":           "enable",
-						"default_topic_partition_num": "6",
-						"config":                      CHECKSET,
-						"vswitch_ids.#":               "2",
-						"tags.%":                      "2",
-						"tags.Created":                "TF",
-						"tags.For":                    "acceptance test",
-						"ssl_endpoint":                CHECKSET,
-						"ssl_domain_endpoint":         CHECKSET,
-						"sasl_domain_endpoint":        CHECKSET,
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"io_max_spec": "alikafka.hw.3xlarge",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"io_max_spec": "alikafka.hw.3xlarge",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"partition_num": "1",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"partition_num": "1",
-						"topic_quota":   "1001",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"resource_group_id": "${data.alicloud_resource_manager_resource_groups.default.groups.1.id}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"resource_group_id": CHECKSET,
-					}),
-				),
-			},
-			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"selected_zones"},
-			},
-		},
-	})
+func resourceAlikafkaInstanceSimpleDependence(name string) string {
+	return DataZoneCommonTestCase
 }
 
 func resourceAlikafkaInstanceConfigDependence(name string) string {
@@ -582,73 +219,42 @@ func resourceAlikafkaInstanceConfigDependence(name string) string {
 	variable "name" {
 		default = "%s"
 	}
+	
 
-	data "alicloud_resource_manager_resource_groups" "default" {
-	}
-
-	data "alicloud_vpcs" "default" {
-  		name_regex = "^default-NODELETING$"
-	}
-
-	data "alicloud_vswitches" "default" {
-  		vpc_id = data.alicloud_vpcs.default.ids.0
-	}
-
-	resource "alicloud_security_group" "default" {
-  		name   = var.name
-  		vpc_id = data.alicloud_vpcs.default.ids.0
-	}
-
-	resource "alicloud_kms_key" "key" {
-  		description            = var.name
-  		pending_window_in_days = "7"
-  		status                 = "Enabled"
-	}
-`, name)
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name = "${var.name}_vpc"
+  cidr_block = "192.168.0.0/16"
 }
 
-func resourceAlikafkaInstancePrePaidConfigDependence(name string) string {
-	return fmt.Sprintf(`
-	variable "name" {
-		default = "%s"
-	}
-
-	data "alicloud_resource_manager_resource_groups" "default" {
-	}
-
-	data "alicloud_vpcs" "default" {
-  		name_regex = "^default-NODELETING$"
-	}
-
-	data "alicloud_vswitches" "default" {
-  		vpc_id = data.alicloud_vpcs.default.ids.0
-	}
+resource "alibabacloudstack_vpc_vswitch" "default" {
+  name = "${var.name}_vsw"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  cidr_block = "192.168.0.0/16"
+  zone_id = "cn-wulan-env149-amtest149001-a"
+}
 `, name)
 }
 
 var alikafkaInstanceBasicMap = map[string]string{
-	"topic_quota":      CHECKSET,
-	"partition_num":    CHECKSET,
-	"disk_type":        CHECKSET,
-	"disk_size":        CHECKSET,
-	"deploy_type":      CHECKSET,
-	"io_max":           CHECKSET,
-	"vswitch_id":       CHECKSET,
-	"paid_type":        CHECKSET,
-	"spec_type":        CHECKSET,
-	"vpc_id":           CHECKSET,
-	"zone_id":          CHECKSET,
-	"service_version":  CHECKSET,
-	"config":           CHECKSET,
-	"end_point":        CHECKSET,
-	"domain_endpoint":  CHECKSET,
-	"topic_num_of_buy": CHECKSET,
-	"topic_used":       CHECKSET,
-	"topic_left":       CHECKSET,
-	"partition_used":   CHECKSET,
-	"partition_left":   CHECKSET,
-	"group_used":       CHECKSET,
-	"group_left":       CHECKSET,
-	"is_partition_buy": CHECKSET,
-	"status":           CHECKSET,
+	"cup_type":                  CHECKSET,
+	"spec":                      CHECKSET,
+	"replicas":                  CHECKSET,
+	"storage_class":             CHECKSET,
+	"disk_num":                  CHECKSET,
+	"sasl":                      CHECKSET,
+	"plaintext":                 CHECKSET,
+	"mssage_max_bytes":          CHECKSET,
+	"nm_partitions":             CHECKSET,
+	"ato_create_topics_enable":  CHECKSET,
+	"nm_io_threads":             CHECKSET,
+	"qeued_max_requests":        CHECKSET,
+	"rplica_fetch_wait_max_ms":  CHECKSET,
+	"rplica_lag_time_max_ms":    CHECKSET,
+	"nm_network_threads":        CHECKSET,
+	"lg_retention_bytes":        CHECKSET,
+	"rplica_fetch_max_bytes":    CHECKSET,
+	"nm_replica_fetchers":       CHECKSET,
+	"dfault_replication_factor": CHECKSET,
+	"ofsets_retention_minutes":  CHECKSET,
+	"bckground_threads":         CHECKSET,
 }
