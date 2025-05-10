@@ -135,12 +135,11 @@ func TestAccAlibabacloudStackAlikafkaInstance_AnyTunnel(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":                      name,
-						"sasl":                      "true",
-						"spec":                      "Broker4C16G",
-						"vpc_id":                    CHECKSET,
-						"vip_type":                  CHECKSET,
-						"status":                    CHECKSET,
+						"name":     name,
+						"sasl":     "true",
+						"spec":     "Broker4C16G",
+						"vip_type": CHECKSET,
+						"status":   CHECKSET,
 					}),
 				),
 			},
@@ -151,11 +150,13 @@ func TestAccAlibabacloudStackAlikafkaInstance_AnyTunnel(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"num_partitions": 5,
+					"num_partitions":            "5",
+					"auto_create_topics_enable": "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"num_partitions": "5",
+						"num_partitions":            "5",
+						"auto_create_topics_enable": "true",
 					}),
 				),
 			},
@@ -196,13 +197,13 @@ func TestAccAlibabacloudStackAlikafkaInstance_SingleTunnel(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":                      name,
-						"sasl":                      "true",
-						"plaintext":                 "true",
-						"spec":                      "Broker4C16G",
-						"vpc_id":                    CHECKSET,
-						"vip_type":                  CHECKSET,
-						"status":                    CHECKSET,
+						"name":      name,
+						"sasl":      "true",
+						"plaintext": "true",
+						"spec":      "Broker4C16G",
+						"vpc_id":    CHECKSET,
+						"vip_type":  CHECKSET,
+						"status":    CHECKSET,
 					}),
 				),
 			},

@@ -439,11 +439,6 @@ func resourceAlibabacloudStackAlikafkaInstanceRead(d *schema.ResourceData, meta 
 func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	alikafkaService := AlikafkaService{client}
-	// 	var err error
-
-	if d.IsNewResource() {
-		return nil
-	}
 
 	var configKeys = []string{"message.max.bytes", "num.partitions",
 		"auto.create.topics.enable", "num.io.threads", "queued.max.requests",
@@ -451,26 +446,70 @@ func resourceAlibabacloudStackAlikafkaInstanceUpdate(d *schema.ResourceData, met
 		"log.retention.bytes", "replica.fetch.max.bytes", "num.replica.fetchers",
 		"default.replication.factor", "offsets.retention.minutes", "background.threads",
 	}
+	var last_updated_value interface{}
+	last_updated_key := ""
 	for _, configKey := range configKeys {
 		schemaName := strings.Replace(configKey, ".", "_", -1)
-		if v, ok := d.GetOk(schemaName); ok && d.HasChange(schemaName) {
-			var value string
-			if schemaName == "auto.create.topics.enable" {
-				if v.(bool) {
-					value = "true"
-				} else {
-					value = "false"
-				}
-			} else {
-				value = strconv.Itoa(v.(int))
-			}
+		if value, ok := d.GetOk(schemaName); ok && d.HasChange(schemaName) {
+			last_updated_key = schemaName
+			last_updated_value = value
+			log.Printf("[DEBUG] alikafka instance %s config %s changed!!!", d.Id(), schemaName)
+			v := fmt.Sprintf("%v", value)
 			action := "UpdateInstanceConfig"
-			request := alikafkaService.client.NewCommonRequest("POST", "alikafka", "2019-09-16", action, "")
-			request.QueryParams["InstanceId"] = d.Id()
-			request.QueryParams["Config"] = configKey
-			request.QueryParams["Value"] = value
-			//不判断是否失败，如果失败了等待二次apply
-			client.ProcessCommonRequest(request)
+			request := make(map[string]interface{}, 0)
+			request["InstanceId"] = d.Id()
+			request["Config"] = configKey
+			request["Value"] = v
+			// 如存在变更任务则等待任务完成
+			if err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
+				response, err := client.DoTeaRequest("POST", "alikafka", "2019-09-16", action, "", nil, request, nil)
+				if err != nil {
+					if errmsgs.IsExpectedErrors(err, []string{errmsgs.ThrottlingUser, "already exist task "}) || errmsgs.NeedRetry(err) {
+						return resource.RetryableError(err)
+					}
+					return resource.NonRetryableError(err)
+				}
+				if response["Success"].(bool) == false && response["errorType"].(string) == "Business" {
+					return resource.RetryableError(fmt.Errorf("Task Business, retry!"))
+				}
+				return nil
+			}); err != nil {
+				return err
+			}
+			// 等待任务允许查询
+			if err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
+				_, err := alikafkaService.DescribeAlikafkaInstanceConfigMap(d.Id())
+				if err != nil {
+					// Handle exceptions
+					if errmsgs.NotFoundError(err) {
+						return resource.NonRetryableError(err)
+					}
+					return resource.RetryableError(err)
+				}
+				return nil
+			}); err != nil {
+				return err
+			}
+		}
+	}
+
+	if last_updated_key != "" {
+		// 等待变更终态
+		if err := resource.Retry(client.GetRetryTimeout(d.Timeout(schema.TimeoutUpdate)), func() *resource.RetryError {
+			err := resourceAlibabacloudStackAlikafkaInstanceRead(d, meta)
+			if err != nil {
+				// Handle exceptions
+				if errmsgs.NotFoundError(err) || !errmsgs.NeedRetry(err) {
+					return resource.NonRetryableError(err)
+				}
+				return resource.RetryableError(err)
+			}
+			if d.Get(last_updated_key) != last_updated_value {
+				return resource.RetryableError(fmt.Errorf("alikafka_instance updating, retry!"))
+			}
+			return nil
+		}); err != nil {
+			return err
 		}
 	}
 	return nil
