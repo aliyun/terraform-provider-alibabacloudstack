@@ -94,15 +94,15 @@ func dataSourceAlikafkaInstancesConfigDependence(name string) string {
 		default = "%s"
 	}
 	
-
+%s
 
 resource "alibabacloudstack_alikafka_instance" "default" {
 	name = "${var.name}"
-	zone_id = "cn-wulan-env149-amtest149001-a"
+	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 	sasl =      true
 	plaintext = true
 	spec =      "Broker4C16G"
 }
 
-`, name)
+`, name, DataZoneCommonTestCase)
 }

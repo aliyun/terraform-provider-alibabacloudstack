@@ -133,7 +133,7 @@ func TestAccAlibabacloudStackAlikafkaTopic_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					//"instance_id":   "${alibabacloudstack_alikafka_instance.default.id}",
-					"instance_id":   "cluster-private-paas-default",
+					"instance_id":   "${local.alikafka_instnace_id}",
 					"topic":         "${var.name}",
 					"local_topic":   "true",
 					"compact_topic": "false",
@@ -300,21 +300,34 @@ func TestAccAlibabacloudStackAlikafkaTopic_multi(t *testing.T) {
 func resourceAlikafkaTopicConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-	default = "%v"
+	default = "%s"
 }
 
-//data "alibabacloudstack_vpcs" "default" {
-// name_regex = "^default-NODELETING"
-//}
-//data "alibabacloudstack_vswitches" "default" {
-//  vpc_id = data.alibabacloudstack_vpcs.default.ids.0
-//}
-//
-//resource "alibabacloudstack_security_group" "default" {
-//  name   = var.name
-//  vpc_id = data.alibabacloudstack_vpcs.default.ids.0
-//}
-`, name)
+%s
+
+data "alibabacloudstack_alikafka_instances" "default" {
+	ids = ["cluster-private-paas-default"]
+}
+
+resource "alibabacloudstack_alikafka_instance" "default" {
+	count = length(data.alibabacloudstack_alikafka_instances.default.instances) > 0 ? 0 : 1
+	name = "${var.name}"
+	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	sasl = true
+	plaintext = true
+	spec = "Broker4C16G"
+	
+	provisioner "local-exec" {
+		//防止broker未就绪导致的失败
+		command = "sleep 300"
+	}
+}
+
+locals{
+alikafka_instnace_id = length(data.alibabacloudstack_alikafka_instances.default.instances) > 0 ? data.alibabacloudstack_alikafka_instances.default.instances.0.id : alibabacloudstack_alikafka_instance.default.0.id
+}
+
+`, name, DataZoneCommonTestCase)
 }
 
 var alikafkaTopicBasicMap = map[string]string{

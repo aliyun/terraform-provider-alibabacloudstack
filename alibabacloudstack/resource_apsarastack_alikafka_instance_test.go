@@ -127,7 +127,7 @@ func TestAccAlibabacloudStackAlikafkaInstance_AnyTunnel(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"name":      name,
-					"zone_id":   "${data.alibabacloudstack_zones.default.zones.0.id}", //${data.alibabacloudstack_zones.default.zones.0.id}",
+					"zone_id":   "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"sasl":      "true",
 					"plaintext": "true",
 					"spec":      "Broker4C16G",
@@ -188,7 +188,7 @@ func TestAccAlibabacloudStackAlikafkaInstance_SingleTunnel(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"name":       name,
 					"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
-					"zone_id":    "cn-wulan-env149-amtest149001-a", //${data.alibabacloudstack_zones.default.zones.0.id}",
+					"zone_id":    "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"sasl":       "true",
 					"plaintext":  "true",
 					"spec":       "Broker4C16G",
@@ -236,18 +236,8 @@ func resourceAlikafkaInstanceConfigDependence(name string) string {
 	}
 	
 
-resource "alibabacloudstack_vpc_vpc" "default" {
-  vpc_name = "${var.name}_vpc"
-  cidr_block = "192.168.0.0/16"
-}
-
-resource "alibabacloudstack_vpc_vswitch" "default" {
-  name = "${var.name}_vsw"
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  cidr_block = "192.168.0.0/16"
-  zone_id = "cn-wulan-env149-amtest149001-a"
-}
-`, name)
+%s
+`, name, VSwitchCommonTestCase)
 }
 
 var alikafkaInstanceBasicMap = map[string]string{
