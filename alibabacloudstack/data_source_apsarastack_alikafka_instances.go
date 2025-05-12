@@ -266,7 +266,7 @@ func dataSourceAlicloudAlikafkaInstancesRead(d *schema.ResourceData, meta interf
 		mapping["name"] = object.Name
 		mapping["zone_id"] = object.ZoneId
 		if object.ZoneC != "" && object.ZoneB != "" {
-			mapping["seleced_zones"] = []string{object.ZoneC, object.ZoneB}
+			mapping["selected_zones"] = []string{object.ZoneC, object.ZoneB}
 		}
 
 		mapping["id"] = object.InstanceId
@@ -284,8 +284,6 @@ func dataSourceAlicloudAlikafkaInstancesRead(d *schema.ResourceData, meta interf
 		} else if object.VipInfo.VpcId != "" {
 			mapping["vpc_id"] = object.VipInfo.VpcId
 		}
-		mapping["vswitch_id"] = object.VSwitchId
-		mapping["vpc_id"] = object.VpcId
 		if object.VSwitchId != "" {
 			mapping["vip_type"] = "SingleTunnel"
 		} else {

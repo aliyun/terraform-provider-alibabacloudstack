@@ -255,7 +255,6 @@ func resourceAlibabacloudStackAlikafkaInstanceCreate(d *schema.ResourceData, met
 			vswitch, err := vpcService.DescribeVSwitch(d.Get("vswitch_id").(string))
 			if err != nil {
 				if errmsgs.NotFoundError(err) {
-					d.SetId("")
 					return nil
 				}
 				return errmsgs.WrapError(err)
@@ -331,7 +330,7 @@ func resourceAlibabacloudStackAlikafkaInstanceRead(d *schema.ResourceData, meta 
 	d.Set("name", object.Name)
 	d.Set("zone_id", object.ZoneId)
 	if object.ZoneC != "" && object.ZoneB != "" {
-		d.Set("seleced_zones", []string{object.ZoneC, object.ZoneB})
+		d.Set("selected_zones", []string{object.ZoneC, object.ZoneB})
 	}
 	d.Set("cup_type", object.CpuType)
 	d.Set("spec", object.SpecName)
