@@ -225,6 +225,27 @@ func Provider() *schema.Provider {
 				Description: descriptions["polardb_endpoint"],
 				Deprecated:  "Use schema endpoints replace polardb_endpoint.",
 			},
+			"onerouter_endpoint": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ONEROUTER_ENDPOINT", nil),
+				Description: descriptions["onerouter_endpoint"],
+				Deprecated:  "Use schema endpoints replace onerouter_endpoint.",
+			},
+			"asapi_endpoint": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ASAPI_ENDPOINT", nil),
+				Description: descriptions["asapi_endpoint"],
+				Deprecated:  "Use schema endpoints replace asapi_endpoint.",
+			},
+			"sls_endpoint": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SLS_ENDPOINT", nil),
+				Description: descriptions["sls_endpoint"],
+				Deprecated:  "Use schema endpoints replace sls_endpoint.",
+			},
 		},
 		DataSourcesMap: getDataSourcesMap(),
 		ResourcesMap:   getResourcesMap(),
@@ -992,10 +1013,26 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Endpoints[connectivity.KmsCode] = kmsEndpoint
 	}
 
+	OnerouterEndpoint := d.Get("onerouter_endpoint").(string)
+	if OnerouterEndpoint != "" {
+		config.Endpoints[connectivity.OneRouterCode] = OnerouterEndpoint
+	}
+
 	polardbEndpoint := d.Get("polardb_endpoint").(string)
 	if polardbEndpoint != "" {
 		config.Endpoints[connectivity.POLARDBCode] = polardbEndpoint
 	}
+
+	asapiEndpoint := d.Get("asapi_endpoint").(string)
+	if asapiEndpoint != "" {
+		config.Endpoints[connectivity.ASAPICode] = asapiEndpoint
+	}
+
+	slsEndpoint := d.Get("sls_endpoint").(string)
+	if slsEndpoint != "" {
+		config.Endpoints[connectivity.SLSCode] = slsEndpoint
+	}
+
 	if strings.ToLower(config.Protocol) == "https" {
 		config.Protocol = "HTTPS"
 	} else {
