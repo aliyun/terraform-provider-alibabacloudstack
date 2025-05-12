@@ -1066,33 +1066,6 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 	}
 }
 
-func getRoleIdsAsString(d *schema.ResourceData) (string, error) {
-    // 获取 role_ids 的值
-    roleIdsInterface := d.Get("role_ids")
-    
-    // 类型断言为 *schema.Set
-    roleSet, ok := roleIdsInterface.(*schema.Set)
-    if !ok {
-        return "", fmt.Errorf("Expected role_ids to be a *schema.Set, got %T", roleIdsInterface)
-    }
-
-    // 获取元素列表
-    roleList := roleSet.List()
-
-    // 转换为字符串切片
-    var stringRoleIds []string
-    for _, v := range roleList {
-        roleIdStr, ok := v.(string)
-        if !ok {
-            return "", fmt.Errorf("Invalid role_id type, expected string but got %T", v)
-        }
-        stringRoleIds = append(stringRoleIds, roleIdStr)
-    }
-
-    // 拼接字符串
-    return "["+strings.Join(stringRoleIds, ",")+"]", nil
-}
-
 func noUpdatesAllowedCheck(d *schema.ResourceData, fields []string) error {
 	if d.IsNewResource() {
 		return nil
