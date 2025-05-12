@@ -271,7 +271,7 @@ func testAccEssAttachmentConfigRemoveInstance(rand int) string {
 		default_cooldown = 20
 		removal_policies = ["OldestInstance", "NewestInstance"]
 		scaling_group_name = "${var.name}"
-		vswitch_ids = ["vsw-w6wwljy9dnxt77sm9zvef"]
+		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 	}
 	
 	resource "alibabacloudstack_ecs_deployment_set" "default" {
@@ -285,9 +285,9 @@ func testAccEssAttachmentConfigRemoveInstance(rand int) string {
 	
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		image_id = "centos_7_9_x64_20G_alibase_20220208.vhd"
-		instance_type = "ecs.xn4.small"
-		security_group_ids = ["sg-w6w01hod6fqnpudt6vw6"]
+		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
+		instance_type = "${local.default_instance_type_id}"
+		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 		force_delete = true
 		active = true
 		enable = true

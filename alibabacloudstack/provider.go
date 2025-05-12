@@ -218,13 +218,6 @@ func Provider() *schema.Provider {
 				Description: descriptions["kms_endpoint"],
 				Deprecated:  "Use schema endpoints replace kms_endpoint.",
 			},
-			"onerouter_endpoint": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ONEROUTER_ENDPOINT", nil),
-				Description: descriptions["onerouter_endpoint"],
-				Deprecated:  "Use schema endpoints replace onerouter_endpoint.",
-			},
 			"asapi_endpoint": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -1006,14 +999,9 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		config.Endpoints[connectivity.KmsCode] = kmsEndpoint
 	}
 
-	OnerouterEndpoint := d.Get("onerouter_endpoint").(string)
-	if OnerouterEndpoint != "" {
-		config.Endpoints[connectivity.OneRouterCode] = OnerouterEndpoint
-	}
-
-	asapiEndpoint := d.Get("asapi_endpoint").(string)
-	if asapiEndpoint != "" {
-		config.Endpoints[connectivity.ASAPICode] = asapiEndpoint
+	if asapiEndpoint, ok := d.GetOk("asapi_endpoint"); ok && asapiEndpoint.(string) != "" {
+		config.Endpoints[connectivity.ASAPICode] = asapiEndpoint.(string)
+		config.Endpoints[connectivity.OneRouterCode] = asapiEndpoint.(string)
 	}
 
 	slsEndpoint := d.Get("sls_endpoint").(string)
