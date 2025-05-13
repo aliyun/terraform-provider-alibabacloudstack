@@ -128,47 +128,16 @@ func (s *CsService) DescribeCsKubernetes(id string) (cl *KubernetesClusterDetail
 			cluster.InitVersion = k.InitVersion
 			cluster.NetworkMode = k.NetworkMode
 			cluster.PrivateZone = k.PrivateZone
-			cluster.SecurityGroupId = k.SecurityGroupID
 			cluster.Profile = k.Profile
-			cluster.CpuPolicy = k.CpuPolicy
 			cluster.VSwitchIds = k.VswitchID
-			cluster.EnableSsh = k.EnableSsh
-			cluster.ImageID = k.ImageID
-			cluster.IsEnterpriseSecurityGroup = k.IsEnterpriseSecurityGroup
-			cluster.KeyPair = k.KeyPair
-			cluster.MasterCount = k.MasterCount
-			cluster.MasterDiskCategory = k.MasterDiskCategory
-			cluster.MasterInstanceTypes = k.MasterInstanceTypes
-			cluster.MasterDiskSize = k.MasterDiskSize
-			cluster.MasterVswitchIds = k.MasterVswitchIds
-			cluster.NodeCidrMask = k.NodeCidrMask
-			cluster.NodePortRange = k.NodePortRange
-			cluster.OsType = k.OsType
-			cluster.Platform = k.Platform
-			cluster.ProxyMode = k.ProxyMode
-			cluster.ServiceCidr = k.ServiceCidr
-			cluster.TimeoutMins = k.TimeoutMins
-			cluster.Runtime = k.Runtime
-			cluster.Addons = k.Addons
-			for _, default_node_pool := range k.NodePools {
-				if default_node_pool.NodepoolInfo.Name == "default-nodepool" {
-					cluster.WorkerDiskCategory = default_node_pool.DiskCategory
-					cluster.WorkerDiskSize = default_node_pool.WorkerDiskSize
-					cluster.WorkerInstanceTypes = default_node_pool.InstanceTypes
-					cluster.WorkerVswitchIds = default_node_pool.VswitchIds
-					break
-				}
-			}
 			break
 		}
-
 	}
 	if cluster.ClusterId != id {
 		return cluster, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("CsKubernetes", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 
 	return cluster, nil
-
 }
 
 func (s *CsService) DescribeClusterNodes(id, nodepoolid string) (pools *NodePools, err error) {
@@ -688,89 +657,57 @@ type ClustersV1 struct {
 	PureListData bool   `json:"pureListData"`
 	API          string `json:"api"`
 	Clusters     []struct {
-		Tags                      []Tag     `json:"tags"`
-		ResourceGroupID           string    `json:"resource_group_id"`
-		PrivateZone               bool      `json:"private_zone"`
-		VpcID                     string    `json:"vpc_id"`
-		NetworkMode               string    `json:"network_mode"`
-		SecurityGroupID           string    `json:"security_group_id"`
-		ClusterType               string    `json:"cluster_type"`
-		DockerVersion             string    `json:"docker_version"`
-		DataDiskCategory          string    `json:"data_disk_category"`
-		NextVersion               string    `json:"next_version"`
-		ZoneID                    string    `json:"zone_id"`
-		ClusterID                 string    `json:"cluster_id"`
-		Department                int       `json:"Department"`
-		ExternalLoadbalancerID    string    `json:"external_loadbalancer_id"`
-		VswitchID                 string    `json:"vswitch_id"`
-		SwarmMode                 bool      `json:"swarm_mode"`
-		RMRegionID                string    `json:"RMRegionId"`
-		State                     string    `json:"state"`
-		ResourceGroup             int       `json:"ResourceGroup"`
-		InitVersion               string    `json:"init_version"`
-		NodeStatus                string    `json:"node_status"`
-		NeedUpdateAgent           bool      `json:"need_update_agent"`
-		Created                   time.Time `json:"created"`
-		DeletionProtection        bool      `json:"deletion_protection"`
-		SubnetCidr                string    `json:"subnet_cidr"`
-		Profile                   string    `json:"profile"`
-		RegionID                  string    `json:"region_id"`
-		MasterURL                 string    `json:"master_url"`
-		CurrentVersion            string    `json:"current_version"`
-		NAMING_FAILED             string    `json:"-"`
-		VswitchCidr               string    `json:"vswitch_cidr"`
-		ClusterHealthy            string    `json:"cluster_healthy"`
-		ClusterSpec               string    `json:"cluster_spec"`
-		Size                      int       `json:"size"`
-		DataDiskSize              int       `json:"data_disk_size"`
-		Port                      int       `json:"port"`
-		EnabledMigration          bool      `json:"enabled_migration"`
-		Name                      string    `json:"name"`
-		DepartmentName            string    `json:"DepartmentName"`
-		Updated                   time.Time `json:"updated"`
-		InstanceType              string    `json:"instance_type"`
-		WorkerRAMRoleName         string    `json:"worker_ram_role_name"`
-		ResourceGroupName         string    `json:"ResourceGroupName"`
-		EnableSsh                 bool      `json:"enable_ssh"`
-		CpuPolicy                 string    `json:"cpu_policy"`
-		ImageID                   string    `json:"image_id"`
-		IsEnterpriseSecurityGroup bool      `json:"enable_enterprise_security_group"`
-		KeyPair                   string    `json:"key_pair"`
-		MasterCount               int       `json:"master_count"`
-		MasterDiskCategory        string    `json:"master_system_disk_category"`
-		MasterDiskSize            string    `json:"master_system_disk_size"`
-		MasterInstanceTypes       []string  `json:"master_instance_types"`
-		MasterVswitchIds          []string  `json:"master_vswitch_ids"`
-		NodeCidrMask              int       `json:"node_cidr_mask"`
-		NodePortRange             string    `json:"node_port_range"`
-		OsType                    string    `json:"os_type"`
-		Platform                  string    `json:"platform"`
-		ProxyMode                 string    `json:"proxy_mode"`
-		ServiceCidr               string    `json:"service_cidr"`
-		TimeoutMins               int       `json:"timeout_mins"`
-		Runtime                   struct {
-			Name    string `json:"name"`
-			Version string `json:"version"`
-		} `json:"runtime"`
-		NodePools []struct {
-			NodepoolInfo struct {
-				Name string `json:"name"`
-			} `json:"nodepool_info"`
-			ScalingGroup struct {
-				VswitchIds    []string `json:"vswitch_ids"`
-				InstanceTypes []string `json:"instance_types"`
-				DiskCategory  string   `json:"system_disk_category"`
-				DiskSize      string   `json:"disk_size"`
-			} `json:"scaling_group"`
+		Tags                   []Tag     `json:"tags"`
+		ResourceGroupID        string    `json:"resource_group_id"`
+		PrivateZone            bool      `json:"private_zone"`
+		VpcID                  string    `json:"vpc_id"`
+		NetworkMode            string    `json:"network_mode"`
+		SecurityGroupID        string    `json:"security_group_id"`
+		ClusterType            string    `json:"cluster_type"`
+		DockerVersion          string    `json:"docker_version"`
+		DataDiskCategory       string    `json:"data_disk_category"`
+		NextVersion            string    `json:"next_version"`
+		ZoneID                 string    `json:"zone_id"`
+		ClusterID              string    `json:"cluster_id"`
+		Department             int       `json:"Department"`
+		ExternalLoadbalancerID string    `json:"external_loadbalancer_id"`
+		VswitchID              string    `json:"vswitch_id"`
+		SwarmMode              bool      `json:"swarm_mode"`
+		RMRegionID             string    `json:"RMRegionId"`
+		State                  string    `json:"state"`
+		ResourceGroup          int       `json:"ResourceGroup"`
+		InitVersion            string    `json:"init_version"`
+		NodeStatus             string    `json:"node_status"`
+		NeedUpdateAgent        bool      `json:"need_update_agent"`
+		Created                time.Time `json:"created"`
+		DeletionProtection     bool      `json:"deletion_protection"`
+		SubnetCidr             string    `json:"subnet_cidr"`
+		Profile                string    `json:"profile"`
+		RegionID               string    `json:"region_id"`
+		MasterURL              string    `json:"master_url"`
+		CurrentVersion         string    `json:"current_version"`
+		NAMING_FAILED          string    `json:"-"`
+		VswitchCidr            string    `json:"vswitch_cidr"`
+		ClusterHealthy         string    `json:"cluster_healthy"`
+		ClusterSpec            string    `json:"cluster_spec"`
+		Size                   int       `json:"size"`
+		DataDiskSize           int       `json:"data_disk_size"`
+		Port                   int       `json:"port"`
+		EnabledMigration       bool      `json:"enabled_migration"`
+		Name                   string    `json:"name"`
+		DepartmentName         string    `json:"DepartmentName"`
+		Updated                time.Time `json:"updated"`
+		InstanceType           string    `json:"instance_type"`
+		WorkerRAMRoleName      string    `json:"worker_ram_role_name"`
+		ResourceGroupName      string    `json:"ResourceGroupName"`
+		NodePools              []struct {
+			NodepoolInfo     interface{} `json:"nodepool_info"`
+			ScalingGroup     interface{} `json:"scaling_group"`
 			KubernetesConfig interface{} `json:"kubernetes_config"`
 			AutoScaling      interface{} `json:"auto_scaling"`
 			TeeConfig        interface{} `json:"tee_config"`
 			Count            int         `json:"count"`
 		} `json:"node_pools"`
-		Addons []struct {
-			Name   string `json:"name"`
-			Config string `json:"config"`
-		} `json:"addons"`
 	} `json:"clusters"`
 }
 
@@ -804,37 +741,10 @@ type KubernetesClusterDetail struct {
 	DeletionProtection bool   `json:"deletion_protection"`
 	MetaData           string `json:"meta_data"`
 
-	Created                   time.Time `json:"created"`
-	Updated                   time.Time `json:"updated"`
-	CpuPolicy                 string    `json:"cpu_policy"`
-	EnableSsh                 bool      `json:"enable_ssh"`
-	ImageID                   string    `json:"image_id"`
-	IsEnterpriseSecurityGroup bool      `json:"enable_enterprise_security_group"`
-	KeyPair                   string    `json:"key_pair"`
-	MasterCount               int       `json:"master_count"`
-	MasterDiskCategory        string    `json:"master_system_disk_category"`
-	MasterDiskSize            string    `json:"master_system_disk_size"`
-	MasterInstanceTypes       []string  `json:"master_instance_types"`
-	MasterVswitchIds          []string  `json:"master_vswitch_ids"`
-	NodeCidrMask              int       `json:"node_cidr_mask"`
-	NodePortRange             string    `json:"node_port_range"`
-	OsType                    string    `json:"os_type"`
-	Platform                  string    `json:"platform"`
-	ProxyMode                 string    `json:"proxy_mode"`
-	ServiceCidr               string    `json:"service_cidr"`
-	TimeoutMins               int       `json:"timeout_mins"`
-	Runtime                   struct {
-		Name    string `json:"name"`
-		Version string `json:"version"`
-	} `json:"runtime"`
-	Addons []struct {
-		Name   string `json:"name"`
-		Config string `json:"config"`
-	} `json:"addons"`
-	WorkerDiskCategory  string   `json:"worker_disk_category"`
-	WorkerDiskSize      string   `json:"worker_disk_size"`
-	WorkerInstanceTypes []string `json:"worker_instance_types"`
-	WorkerVswitchIds    []string `json:"worker_vswitch_ids"`
+	Created time.Time `json:"created"`
+	Updated time.Time `json:"updated"`
+
+	WorkerRamRoleName string `json:"worker_ram_role_name"`
 }
 
 type TaskState string
