@@ -368,8 +368,9 @@ func testAccKVStoreInstanceTde_classic(instanceClass, engineVersion string) stri
 variable "name" {
     default = "tf-testAccCheckApsaraStackRKVInstance4"
 }
-// data "alibabacloudstack_zones"  "default" {
-// }
+
+data "alibabacloudstack_zones"  "default" {
+}
 
 resource "alibabacloudstack_kms_key" "key" {
   description             = "Hello KMS"
