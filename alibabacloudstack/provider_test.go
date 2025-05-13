@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 
@@ -13,10 +14,10 @@ import (
 	"testing"
 	"time"
 
+	"io/ioutil"
+	"path/filepath"
 	"strconv"
 	"strings"
-	"path/filepath"
-	"io/ioutil"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 
@@ -31,6 +32,7 @@ var testAccProvider *schema.Provider
 var defaultRegionToTest = os.Getenv("ALIBABACLOUDSTACK_REGION")
 
 func init() {
+	rand.Seed(time.Now().UnixNano())
 	testAccProvider = Provider()
 	testAccProviders = map[string]*schema.Provider{
 		"alibabacloudstack": testAccProvider,
@@ -61,7 +63,7 @@ func testAccPreCheck(t *testing.T) {
 		t.Fatal("ALIBABACLOUDSTACK_INSECURE must be set for acceptance tests")
 	}
 	//if v := os.Getenv("ALIBABACLOUDSTACK_PROXY"); v == "" {
-		//t.Fatal("ALIBABACLOUDSTACK_PROXY must be set for acceptance tests")
+	//t.Fatal("ALIBABACLOUDSTACK_PROXY must be set for acceptance tests")
 	//}
 	v1 := os.Getenv("ALIBABACLOUDSTACK_DOMAIN")
 	v2 := os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")
@@ -282,8 +284,7 @@ func testAccPreCheckWithEnvVariable(t *testing.T, envVariableName string) {
 	}
 }
 
-
-func testAccPreCheckWithCrEe(t *testing.T){
+func testAccPreCheckWithCrEe(t *testing.T) {
 	testAccPreCheck(t)
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	rawClient, err := sharedClientForRegion(region)
@@ -381,9 +382,71 @@ func getAccTestRandInt(min, max int) int {
 	return acctest.RandIntRange(min, max)
 }
 
+// shuffle 函数：随机打乱字符顺序
+func shuffle(chars []rune) []rune {
+	copyChars := make([]rune, len(chars))
+	copy(copyChars, chars)
+	for i := range copyChars {
+		j := rand.Intn(i + 1)
+		copyChars[i], copyChars[j] = copyChars[j], copyChars[i]
+	}
+	return copyChars
+}
+
+func GeneratePassword() string {
+	if v := os.Getenv("ALIBABACLOUDSTACK_ACCRANDPWD"); v != "" {
+		return v
+	}
+	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err != nil && v {
+		return "请输入您的密码"
+	}
+	
+	// 定义字符集
+	const (
+		upperLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		lowerLetters = "abcdefghijklmnopqrstuvwxyz"
+		digits       = "0123456789"
+		symbols      = "!@#$^&*()_"
+	)
+
+	// 转换为 rune 数组
+	var (
+		upperRunes  = []rune(upperLetters)
+		lowerRunes  = []rune(lowerLetters)
+		digitRunes  = []rune(digits)
+		symbolRunes = []rune(symbols)
+		allRunes    = append(upperRunes, append(lowerRunes, append(digitRunes, symbolRunes...)...)...)
+	)
+
+	// 首字符：强制大写字母
+	firstChar := upperRunes[rand.Intn(len(upperRunes))]
+
+	// 必须包含的字符（数字、小写字母、符号）
+	mustHave := []rune{
+		digitRunes[rand.Intn(len(digitRunes))],   // 数字
+		lowerRunes[rand.Intn(len(lowerRunes))],   // 小写字母
+		symbolRunes[rand.Intn(len(symbolRunes))], // 符号
+	}
+
+	// 剩余字符（可选所有类型）
+	remaining := 5 // 8 - 1(首字母) - 3(必须字符) = 4 → 实际生成5个以确保总长度正确
+	others := make([]rune, remaining)
+	for i := range others {
+		others[i] = allRunes[rand.Intn(len(allRunes))]
+	}
+
+	// 合并必须字符和随机字符
+	allChars := append(mustHave, others...)
+	shuffled := shuffle(allChars)
+
+	// 组合最终密码
+	password := append([]rune{firstChar}, shuffled...)
+	return string(password)
+}
+
 func ResourceTest(t *testing.T, c resource.TestCase) {
 	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err == nil && v {
-		dateFolderName := "dryrun_" + time.Now().Format("2006_01_02") 
+		dateFolderName := "dryrun_" + time.Now().Format("2006_01_02")
 		err := os.MkdirAll(dateFolderName, 0755)
 		if err != nil {
 			t.Skipf("Failed to create date folder: %v", err)
@@ -393,7 +456,7 @@ func ResourceTest(t *testing.T, c resource.TestCase) {
 		if err != nil {
 			t.Skipf("Failed to create sub folder: %v", err)
 		}
-		for index, step := range c.Steps{
+		for index, step := range c.Steps {
 			filePath := filepath.Join(subFolderPath, fmt.Sprintf("Step%d.tf", index))
 			err = ioutil.WriteFile(filePath, []byte(step.Config), 0644)
 			if err != nil {
