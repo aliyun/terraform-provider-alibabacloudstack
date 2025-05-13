@@ -106,7 +106,7 @@ func testSweepKVStoreInstances(region string) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackKVStoreRedisInstance_classictest(t *testing.T) {
+func TestAccAlibabacloudStackKVStoreRedisInstanceclassictest(t *testing.T) {
 	var instance *r_kvstore.DBInstanceAttribute
 	resourceId := "alibabacloudstack_kvstore_instance.default"
 	ra := resourceAttrInit(resourceId, KVStoreInstanceCheckMap)
@@ -302,6 +302,7 @@ func testAccCheckKVStoreInstanceDestroy(s *terraform.State) error {
 }
 
 func testAccKVStoreInstance_classic(rand int, instanceType, engineVersion string) string {
+	password := GeneratePassword()
 	return fmt.Sprintf(`
 
 	
@@ -326,10 +327,10 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
-	password       = "1qaz@WSX"
+	password       = "%s"
 }
 
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion)
+	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, password)
 }
 
 var KVStoreInstanceCheckMap = map[string]string{
@@ -383,7 +384,7 @@ resource "alibabacloudstack_vpc" "default" {
 resource "alibabacloudstack_vswitch" "default" {
 	vpc_id            = alibabacloudstack_vpc.default.id
 	cidr_block        = "172.16.0.0/24"
-	availability_zone = "cn-wulan-env205-amtest205001-a"
+	availability_zone = data.alibabacloudstack_zones.default.zones[0].id
 	name              = var.name
 }
 
@@ -496,6 +497,7 @@ func testAccKVStoreInstance_classicUpdateClass(instanceType, instanceClass, engi
 	`, instanceType, instanceClass, engineVersion)
 }
 func testAccKVStoreInstance_classicUpdateAttr(instanceType, instanceClass, engineVersion string) string {
+	password := GeneratePassword()
 	return fmt.Sprintf(`
 	data "alibabacloudstack_zones" "default" {
 		available_resource_creation = "KVStore"
@@ -506,16 +508,18 @@ func testAccKVStoreInstance_classicUpdateAttr(instanceType, instanceClass, engin
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		availability_zone = "${lookup(data.alibabacloudstack_zones.default.zones[(length(data.alibabacloudstack_zones.default.zones)-1)%%length(data.alibabacloudstack_zones.default.zones)], "id")}"
-		password = "1qaz@WSX"
+		password = "%s"
 		instance_name  = "${var.name}"
 		security_ips = ["10.0.0.1"]
 		instance_type = "%s"
 		instance_class = "%s"
 		engine_version = "%s"
 	}
-	`, instanceType, instanceClass, engineVersion)
+	`, password, instanceType, instanceClass, engineVersion)
 }
 func testAccKVStoreInstance_classicUpdateTags(instanceType, instanceClass, engineVersion string) string {
+
+	password := GeneratePassword()
 	return fmt.Sprintf(`
 	data "alibabacloudstack_zones" "default" {
 		available_resource_creation = "KVStore"
@@ -526,7 +530,7 @@ func testAccKVStoreInstance_classicUpdateTags(instanceType, instanceClass, engin
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		availability_zone = "${lookup(data.alibabacloudstack_zones.default.zones[(length(data.alibabacloudstack_zones.default.zones)-1)%%length(data.alibabacloudstack_zones.default.zones)], "id")}"
-		password = "1qaz@WSX"
+		password = "%s"
 		instance_name  = "${var.name}"
 		security_ips = ["10.0.0.1"]
 		instance_type = "%s"
@@ -537,9 +541,10 @@ func testAccKVStoreInstance_classicUpdateTags(instanceType, instanceClass, engin
 			For		= "acceptance test"
 		}
 	}
-	`, instanceType, instanceClass, engineVersion)
+	`, password, instanceType, instanceClass, engineVersion)
 }
 func testAccKVStoreInstance_classicUpdateMaintainStartTime(instanceType, instanceClass, engineVersion string) string {
+	password := GeneratePassword()
 	return fmt.Sprintf(`
 	data "alibabacloudstack_zones" "default" {
 		available_resource_creation = "KVStore"
@@ -550,7 +555,7 @@ func testAccKVStoreInstance_classicUpdateMaintainStartTime(instanceType, instanc
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		availability_zone = "${lookup(data.alibabacloudstack_zones.default.zones[(length(data.alibabacloudstack_zones.default.zones)-1)%%length(data.alibabacloudstack_zones.default.zones)], "id")}"
-		password = "1qaz@WSX"
+		password = "%s"
 		instance_name  = "${var.name}"
 		security_ips = ["10.0.0.1"]
 		instance_type = "%s"
@@ -563,9 +568,10 @@ func testAccKVStoreInstance_classicUpdateMaintainStartTime(instanceType, instanc
 			For		= "acceptance test"
 		}
 	}
-	`, instanceType, instanceClass, engineVersion)
+	`, password, instanceType, instanceClass, engineVersion)
 }
 func testAccKVStoreInstance_classicUpdateAll(instanceType, instanceClass, engineVersion string) string {
+	password := GeneratePassword()
 	return fmt.Sprintf(`
 	
 	variable "name" {
@@ -573,14 +579,14 @@ func testAccKVStoreInstance_classicUpdateAll(instanceType, instanceClass, engine
 	}
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
-		password = "1qaz@WSX"
+		password = "%s"
 		instance_name  = "${var.name}"
 		security_ips = ["10.0.0.2","10.0.0.3"]
 		instance_type = "%s"
 		instance_class = "%s"
 		engine_version = "%s"
 	}
-	`, instanceType, instanceClass, engineVersion)
+	`, password, instanceType, instanceClass, engineVersion)
 }
 
 func testAccKVStoreInstance_vpc(rand int, instanceClass, engineVersion string) string {
@@ -770,6 +776,7 @@ func testAccKVStoreInstance_vpcUpdateClass(common, instanceClass, instanceType, 
 	`, common, instanceClass, instanceType, engineVersion)
 }
 func testAccKVStoreInstance_vpcUpdateAll(common, instanceClass, instanceType, engineVersion string) string {
+	password := GeneratePassword()
 	return fmt.Sprintf(`
 	%s
 	variable "creation" {
@@ -781,13 +788,13 @@ func testAccKVStoreInstance_vpcUpdateAll(common, instanceClass, instanceType, en
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		instance_class = "%s"
 		instance_name  = "${var.name}"
-		password       = "1qaz@WSX"
+		password       = "%s"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1", "10.0.0.4"]
 		instance_type = "%s"
 		engine_version = "%s"
 	}
-	`, common, instanceClass, instanceType, engineVersion)
+	`, common, instanceClass, password, instanceType, engineVersion)
 }
 
 func testAccKVStoreInstance_vpcmulti(common string, instanceClass, instanceType, engineVersion string) string {
@@ -813,6 +820,7 @@ func testAccKVStoreInstance_vpcmulti(common string, instanceClass, instanceType,
 }
 
 func testAccKVStoreInstance_classicmulti(instanceType, instanceClass, engineVersion string) string {
+	password := GeneratePassword()
 	return fmt.Sprintf(`
 
 	variable "name" {
@@ -823,10 +831,10 @@ func testAccKVStoreInstance_classicmulti(instanceType, instanceClass, engineVers
 		count = 3
 		instance_name  = "${var.name}"
 		security_ips = ["10.0.0.1"]
-		password       = "1qaz@WSX"
+		password       = "%s"
 		instance_type = "%s"
 		instance_class = "%s"
 		engine_version = "%s"
 	}
-	`, getAccTestRandInt(10000, 99999), instanceType, instanceClass, engineVersion)
+	`, getAccTestRandInt(10000, 99999), password, instanceType, instanceClass, engineVersion)
 }
