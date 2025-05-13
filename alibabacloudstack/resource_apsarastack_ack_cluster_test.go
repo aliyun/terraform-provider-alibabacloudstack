@@ -232,6 +232,11 @@ variable "name" {
 	default = "%s"
 }
 
+%s
+
+%s
+
+%s
 variable "k8s_number" {
   description = "The number of kubernetes cluster."
   default     = 1
@@ -240,7 +245,7 @@ variable "k8s_number" {
 variable "image_id" {
   default     = "centos_7_9_x64_20G_alibase_20220322.vhd"
 }
-%s
+
 data "alibabacloudstack_instance_types" "default" {
   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
   cpu_core_count       = 1
@@ -312,7 +317,7 @@ resource "alibabacloudstack_ecs_keypair" "default" {
 	key_name = "${var.name}"
 }
 
-`, name, SecurityGroupCommonTestCase)
+`, name, DataAlibabacloudstackImages, DataAlibabacloudstackInstanceTypes, SecurityGroupCommonTestCase)
 }
 
 func resourceCsK8sKeyNameDependence(name string) string {
