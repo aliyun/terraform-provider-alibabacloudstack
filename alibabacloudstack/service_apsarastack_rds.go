@@ -13,7 +13,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/denverdino/aliyungo/common"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -1340,29 +1339,29 @@ func (s *RdsService) WaitForDBDatabase(id string, status Status, timeout int) er
 }
 
 // turn period to TimeType
-func (s *RdsService) TransformPeriod2Time(period int, chargeType string) (ut int, tt common.TimeType) {
+func (s *RdsService) TransformPeriod2Time(period int, chargeType string) (ut int, tt TimeType) {
 	if chargeType == string(Postpaid) {
-		return 1, common.Day
+		return 1, Day
 	}
 
 	if period >= 1 && period <= 9 {
-		return period, common.Month
+		return period, Month
 	}
 
 	if period == 12 {
-		return 1, common.Year
+		return 1, Year
 	}
 
 	if period == 24 {
-		return 2, common.Year
+		return 2, Year
 	}
-	return 0, common.Day
+	return 0, Day
 
 }
 
 // turn TimeType to Period
-func (s *RdsService) TransformTime2Period(ut int, tt common.TimeType) (period int) {
-	if tt == common.Year {
+func (s *RdsService) TransformTime2Period(ut int, tt TimeType) (period int) {
+	if tt == Year {
 		return 12 * ut
 	}
 

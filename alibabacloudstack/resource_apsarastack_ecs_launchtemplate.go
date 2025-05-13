@@ -5,8 +5,6 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/denverdino/aliyungo/common"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
@@ -58,7 +56,7 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 			"instance_charge_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
+				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
 			},
 			"instance_name": {
 				Type:         schema.TypeString,
