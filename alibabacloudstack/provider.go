@@ -232,6 +232,12 @@ func Provider() *schema.Provider {
 				Description: descriptions["sls_endpoint"],
 				Deprecated:  "Use schema endpoints replace sls_endpoint.",
 			},
+			"max_retry_timeout": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("MAX_RETRY_TIMEOUT", 0),
+				Description: descriptions["max_retry_timeout"],
+			},
 		},
 		DataSourcesMap: getDataSourcesMap(),
 		ResourcesMap:   getResourcesMap(),
@@ -263,6 +269,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_adb_zones":                               dataSourceAlibabacloudStackAdbZones(),
 		"alibabacloudstack_adb_db_clusters":                         dataSourceAlibabacloudStackAdbDbClusters(),
 		"alibabacloudstack_adb_dbclusters":                          dataSourceAlibabacloudStackAdbDbClusters(),
+		"alibabacloudstack_alikafka_instances":                      dataSourceAlicloudAlikafkaInstances(),
 		"alibabacloudstack_api_gateway_apis":                        dataSourceAlibabacloudStackApiGatewayApis(),
 		"alibabacloudstack_apigateway_apis":                         dataSourceAlibabacloudStackApiGatewayApis(),
 		"alibabacloudstack_api_gateway_apps":                        dataSourceAlibabacloudStackApiGatewayApps(),
@@ -504,6 +511,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_adb_connection":                         resourceAlibabacloudStackAdbConnection(),
 		"alibabacloudstack_adb_db_cluster":                         resourceAlibabacloudStackAdbDbCluster(),
 		"alibabacloudstack_adb_dbcluster":                          resourceAlibabacloudStackAdbDbCluster(),
+		"alibabacloudstack_alikafka_instance":                      resourceAlibabacloudStackAlikafkaInstance(),
 		"alibabacloudstack_alikafka_sasl_acl":                      resourceAlibabacloudStackAlikafkaSaslAcl(),
 		"alibabacloudstack_alikafka_sasl_user":                     resourceAlibabacloudStackAlikafkaSaslUser(),
 		"alibabacloudstack_alikafka_topic":                         resourceAlibabacloudStackAlikafkaTopic(),
@@ -875,6 +883,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		SecureTransport:      strings.TrimSpace(d.Get("secure_transport").(string)),
 		Endpoints:            make(map[connectivity.ServiceCode]string),
 		Eagleeye:             eagleeye,
+		MaxRetryTimeout:      d.Get("max_retry_timeout").(int),
 	}
 	if v, ok := d.GetOk("security_transport"); config.SecureTransport == "" && ok && v.(string) != "" {
 		config.SecureTransport = v.(string)

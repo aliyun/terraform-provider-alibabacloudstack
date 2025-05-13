@@ -474,20 +474,18 @@ func dataSourceAlibabacloudStackZonesRead(d *schema.ResourceData, meta interface
 	}
 
 	mapZones := make(map[string]ecs.Zone)
-	insType, _ := d.Get("available_instance_type").(string)
-	diskType, _ := d.Get("available_disk_category").(string)
 
 	for _, zone := range resp.Zones.Zone {
 		for _, v := range validZones {
 			if zone.ZoneId != v.ZoneId {
 				continue
 			}
-			if len(zone.AvailableInstanceTypes.InstanceTypes) <= 0 ||
-				(insType != "" && !constraints(zone.AvailableInstanceTypes.InstanceTypes, insType)) {
+			if insType, ok := d.GetOk("available_instance_type"); ok && len(zone.AvailableInstanceTypes.InstanceTypes) <= 0 ||
+				(insType.(string) != "" && !constraints(zone.AvailableInstanceTypes.InstanceTypes, insType.(string))) {
 				continue
 			}
-			if len(zone.AvailableDiskCategories.DiskCategories) <= 0 ||
-				(diskType != "" && !constraints(zone.AvailableDiskCategories.DiskCategories, diskType)) {
+			if diskType, ok := d.GetOk("available_disk_category"); ok && len(zone.AvailableDiskCategories.DiskCategories) <= 0 ||
+				(diskType.(string) != "" && !constraints(zone.AvailableDiskCategories.DiskCategories, diskType.(string))) {
 				continue
 			}
 			if len(rdsZones) > 0 {

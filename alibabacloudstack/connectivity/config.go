@@ -49,6 +49,7 @@ type Config struct {
 	Proxy                    string
 	Domain                   string
 	Eagleeye                 EagleEye
+	MaxRetryTimeout          int
 }
 
 func (c *Config) getAuthCredential(stsSupported, ramSupported bool) auth.Credential {

@@ -363,7 +363,7 @@ func (s *EcsService) DescribeAvailableResources(d *schema.ResourceData, meta int
 	request := ecs.CreateDescribeAvailableResourceRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DestinationResource = string(destination)
-	request.IoOptimized = string(IOOptimized)
+// 	request.IoOptimized = string(IOOptimized)
 
 	if v, ok := d.GetOk("availability_zone"); ok && strings.TrimSpace(v.(string)) != "" {
 		zoneId = strings.TrimSpace(v.(string))
@@ -978,9 +978,6 @@ func (s *EcsService) DescribeImage(id, region string) (image ecs.Image, err erro
 		return ecsClient.DescribeImages(request)
 	})
 	log.Printf("[DEBUG] status %#v", raw)
-	if err != nil {
-		return
-	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	resp, ok := raw.(*ecs.DescribeImagesResponse)
 	if err != nil {
