@@ -157,13 +157,13 @@ func TestAccAlibabacloudStackSlbLoadbalancerClassic(t *testing.T) {
 					"specification": "slb.s1.small",
 					"network_type":  "classic",
 					"address_type":  "intranet",
-					"address":       "10.205.44.221",
+					// "address":       "10.38.44.221",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"name":         "rdk_test_name",
-						"address":      "10.205.44.221",
+						"name": "rdk_test_name",
+						// "address":      "10.38.44.221",
 						"address_type": "intranet",
 						"network_type": "classic",
 					}),

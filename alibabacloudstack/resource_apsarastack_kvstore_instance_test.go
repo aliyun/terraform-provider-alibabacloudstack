@@ -379,12 +379,17 @@ resource "alibabacloudstack_kms_key" "key" {
 
 resource "alibabacloudstack_vpc" "default" {
 	name       = var.name
-	cidr_block = "172.16.0.0/16"
+	cidr_block = "192.168.0.0/16"
 }
+
+data "alibabacloudstack_zones" default {
+	available_resource_creation = "VSwitch"
+  }
+  
 resource "alibabacloudstack_vswitch" "default" {
 	vpc_id            = alibabacloudstack_vpc.default.id
-	cidr_block        = "172.16.0.0/24"
-	availability_zone = "cn-wulan-env205-amtest205001-a"
+	cidr_block        = "192.168.0.0/16"
+	availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
 	name              = var.name
 }
 
