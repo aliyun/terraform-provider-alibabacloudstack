@@ -852,12 +852,12 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 			if len(removeNodesName) > 0 {
 			}
 			req := client.NewCommonRequest("POST", "CS", "2015-12-15", "RemoveClusterNodes", fmt.Sprintf("/api/v2/clusters/%s/nodes/remove", d.Id()))
-			body := fmt.Sprintf("{\"%s\":%t,\"%s\":%t,\"%s\":%q,\"%s\":\"%s\"}",
+			body := fmt.Sprintf("{\"%s\":%t,\"%s\":%t,\"%s\":%q}",
 				"release_node", true,
 				"drain_node", true,
 				"nodes", removeNodesName,
-				"ClusterId", d.Id(),
 			)
+			log.Printf("[DEBUG]RemoveClusterNodes Request body: %s", body)
 			req.SetContent([]byte(body))
 			req.Headers["x-acs-content-type"] = "application/json"
 			var resp *responses.CommonResponse
@@ -900,7 +900,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 				resizeRequestMap := make(map[string]interface{})
 				resizeRequestMap["ClusterId"] = d.Id()
 				resizeRequestMap["Args"] = request.GetQueryParams()
-				addDebug("ResizeKubernetesCluster", resp, resizeRequestMap)
+				addDebug("ScaleClusterNodePool", resp, resizeRequestMap)
 			}
 
 			stateConf := BuildStateConf([]string{"scaling"}, []string{"running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
