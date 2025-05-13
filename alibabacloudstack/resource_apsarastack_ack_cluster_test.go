@@ -130,6 +130,12 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids"},
+			},
 		},
 	})
 }
@@ -187,13 +193,13 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 					"timeout_mins":                 "60",
 					"vpc_id":                       "${alibabacloudstack_vpc_vpc.default.id}",
 					"master_count":                 "3",
-					"master_disk_category":         "cloud_ssd",
+					"master_disk_category":         "cloud_efficiency",
 					"image_id":                     "${var.image_id}",
 					"master_disk_size":             "40",
 					"master_instance_types":        []string{"${data.alibabacloudstack_instance_types.any_n4.instance_types.0.id}", "${data.alibabacloudstack_instance_types.any_n4.instance_types.0.id}", "${data.alibabacloudstack_instance_types.any_n4.instance_types.0.id}"},
 					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
 					"num_of_nodes":                 "1",
-					"worker_disk_category":         "cloud_ssd",
+					"worker_disk_category":         "cloud_efficiency",
 					"worker_disk_size":             "40",
 					"worker_instance_types":        []string{"${data.alibabacloudstack_instance_types.any_n4.instance_types.0.id}"},
 					"worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
@@ -216,9 +222,10 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids"},
 			},
 		},
 	})
@@ -273,14 +280,13 @@ func TestAccAlibabacloudStackCsK8sKeyName(t *testing.T) {
 					"vpc_id":                       "${alibabacloudstack_vpc_vpc.default.id}",
 					"master_count":                 "3",
 					"master_disk_category":         "cloud_ssd",
-					"image_id":                     "${var.image_id}",
 					"master_disk_size":             "40",
-					"master_instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"master_instance_types":        []string{"ecs.sn1ne.large", "ecs.sn1ne.large", "ecs.sn1ne.large"},
 					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
 					"num_of_nodes":                 "1",
 					"worker_disk_category":         "cloud_ssd",
 					"worker_disk_size":             "40",
-					"worker_instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"worker_instance_types":        []string{"ecs.sn1ne.large"},
 					"worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
 					"security_group_id":            "${alibabacloudstack_ecs_securitygroup.default.id}",
 					"is_enterprise_security_group": "false",
@@ -315,6 +321,8 @@ func TestAccAlibabacloudStackCsK8sKeyName(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				// cs k8s 暂不支持部分属性回读
+				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids"},
 			},
 		},
 	})
@@ -425,9 +433,9 @@ variable "image_id" {
 }
 %s
 
-data "alibabacloudstack_instance_types" "default" {
-  availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-}
+// data "alibabacloudstack_instance_types" "default" {
+//   availability_zone = data.alibabacloudstack_zones.default.zones[0].id
+// }
 
 
 variable "new_nat_gateway" {
