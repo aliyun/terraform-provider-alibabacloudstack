@@ -21,7 +21,6 @@ import (
 	//"github.com/aliyun/aliyun-datahub-sdk-go/datahub"
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/aliyun/fc-go-sdk"
-	"github.com/denverdino/aliyungo/common"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -38,7 +37,6 @@ const (
 	// RAM Instance Not Found
 	RamInstanceNotFound              = "Forbidden.InstanceNotFound"
 	AlibabacloudStackGoClientFailure = "AlibabacloudStackGoClientFailure"
-	DenverdinoAlibabacloudStackgo    = ErrorSource("[SDK denverdino/aliyungo ERROR]")
 	ThrottlingUser                   = "Throttling.User"
 	LogClientTimeout                 = "Client.Timeout exceeded while awaiting headers"
 	AlibabacloudstackMaxComputeSdkGo = ErrorSource("[SDK aliyun-maxcompute-sdk-go ERROR]")
@@ -110,10 +108,6 @@ func NotFoundError(err error) bool {
 		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound)
 	}
 
-	if e, ok := err.(*common.Error); ok {
-		return e.Code == InstanceNotFound || e.Code == RamInstanceNotFound || e.Code == NotFound || strings.Contains(strings.ToLower(e.Message), MessageInstanceNotFound)
-	}
-
 	if e, ok := err.(oss.ServiceError); ok {
 		return e.StatusCode == 404 || strings.HasPrefix(e.Code, "NoSuch") || strings.HasPrefix(e.Message, "No Row found") || strings.HasPrefix(e.Message, "ResourceNotfound")
 	}
@@ -155,10 +149,6 @@ func NeedRetry(err error) bool {
 		return e.ErrorCode() == ServiceUnavailable || e.ErrorCode() == "Rejected.Throttling" || throttlingRegex.MatchString(e.ErrorCode()) || codeRegex.MatchString(e.Message())
 	}
 
-	if e, ok := err.(*common.Error); ok {
-		return e.Code == ServiceUnavailable || e.Code == "Rejected.Throttling" || throttlingRegex.MatchString(e.Code) || codeRegex.MatchString(e.Message)
-	}
-
 	return false
 }
 
@@ -198,15 +188,6 @@ func IsExpectedErrors(err error, expectCodes []string) bool {
 	if e, ok := err.(*ProviderError); ok {
 		for _, code := range expectCodes {
 			if e.ErrorCode() == code || strings.Contains(e.Message(), code) {
-				return true
-			}
-		}
-		return false
-	}
-
-	if e, ok := err.(*common.Error); ok {
-		for _, code := range expectCodes {
-			if e.Code == code || strings.Contains(e.Message, code) {
 				return true
 			}
 		}
@@ -268,13 +249,6 @@ func IsThrottling(err error) bool {
 		}
 		return false
 	}
-
-	if e, ok := err.(*common.Error); ok {
-		if e.Code == Throttling {
-			return true
-		}
-		return false
-	}
 	return false
 }
 
@@ -304,7 +278,6 @@ const (
 	AlibabacloudStackLogGoSdkERROR = ErrorSource("[SDK aliyun-log-go-sdk ERROR]")
 	AliyunTablestoreGoSdk          = ErrorSource("[SDK aliyun-tablestore-go-sdk ERROR]")
 	AlibabacloudStackDatahubSdkGo  = ErrorSource("[SDK aliyun-datahub-sdk-go ERROR]")
-	DenverdinoAliyungo             = ErrorSource("[SDK denverdino/aliyungo ERROR]")
 )
 
 // ComplexError is a format error which including origin error, extra error message, error occurred file and line

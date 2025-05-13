@@ -21,7 +21,6 @@ require (
 	github.com/aliyun/aliyun-tablestore-go-sdk v4.1.2+incompatible
 	github.com/aliyun/credentials-go v1.3.1
 	github.com/aliyun/fc-go-sdk v0.0.0-20200619091938-0882be48e49f
-	github.com/denverdino/aliyungo v0.0.0-20200831100606-661b4d73f397
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.30.0
@@ -117,5 +116,4 @@ replace (
 	github.com/aliyun/aliyun-log-go-sdk => ./local_vendor/github.com/aliyun/aliyun-log-go-sdk
 	github.com/aliyun/aliyun-oss-go-sdk => ./local_vendor/github.com/aliyun/aliyun-oss-go-sdk
 	github.com/aliyun/aliyun-tablestore-go-sdk => ./local_vendor/github.com/aliyun/aliyun-tablestore-go-sdk
-	github.com/denverdino/aliyungo => ./local_vendor/github.com/denverdino/aliyungo
 )

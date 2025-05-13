@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
-	"github.com/denverdino/aliyungo/common"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -71,7 +70,7 @@ func resourceAlibabacloudStackElasticsearchOnk8s() *schema.Resource {
 			// Life cycle
 			"instance_charge_type": {
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
+				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
 				Default:      PostPaid,
 				Optional:     true,
 			},

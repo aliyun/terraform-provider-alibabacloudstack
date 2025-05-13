@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/denverdino/aliyungo/common"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -47,7 +46,7 @@ func resourceAlibabacloudStackVpnGateway() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Default:      PostPaid,
-				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
+				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
 			},
 
 			"period": {

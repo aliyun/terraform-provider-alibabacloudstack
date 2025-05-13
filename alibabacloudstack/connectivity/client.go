@@ -51,7 +51,6 @@ import (
 
 	rpcutil "github.com/alibabacloud-go/tea-rpc-utils/service"
 	util "github.com/alibabacloud-go/tea-utils/service"
-	"github.com/denverdino/aliyungo/cs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -91,7 +90,6 @@ type AlibabacloudStackClient struct {
 	vpcconn                      *vpc.Client
 	bastionhostprivateconn       *yundun_bastionhost.Client
 	slbconn                      *slb.Client
-	csconn                       *cs.Client
 	polarDBconn                  *polardb.Client
 	cdnconn                      *cdn.Client
 	kmsconn                      *kms.Client
@@ -737,36 +735,6 @@ func (client *AlibabacloudStackClient) WithCdnClient(do func(*cdn.Client) (inter
 }
 func (client *AlibabacloudStackClient) getUserAgent() string {
 	return fmt.Sprintf("%s/%s %s/%s %s/%s", Terraform, TerraformVersion, Provider, ProviderVersion, Module, client.Config.ConfigurationSource)
-}
-
-func (client *AlibabacloudStackClient) WithCsClient(do func(*cs.Client) (interface{}, error)) (interface{}, error) {
-	goSdkMutex.Lock()
-	defer goSdkMutex.Unlock()
-
-	// Initialize the CS client if necessary
-	if client.csconn == nil {
-		csconn := cs.NewClientForAussumeRole(client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)
-		csconn.SetUserAgent(client.getUserAgent())
-		endpoint := client.Config.Endpoints[CONTAINCode]
-		if endpoint == "" {
-			return nil, fmt.Errorf("unable to initialize the cs client: endpoint or domain is not provided for cs service")
-		}
-		if endpoint != "" {
-			if strings.ToLower(client.Config.Protocol) == "https" {
-				endpoint = fmt.Sprintf("https://%s", endpoint)
-			} else {
-				endpoint = fmt.Sprintf("http://%s", endpoint)
-			}
-			csconn.SetEndpoint(endpoint)
-		}
-		if client.Config.Proxy != "" {
-			// FIXME: 修改环境变量会存在风险
-			os.Setenv("http_proxy", client.Config.Proxy)
-		}
-		client.csconn = csconn
-	}
-
-	return do(client.csconn)
 }
 
 func (client *AlibabacloudStackClient) getHttpProxyUrl() *url.URL {

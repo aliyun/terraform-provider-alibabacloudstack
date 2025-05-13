@@ -7,8 +7,6 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 
-	"github.com/denverdino/aliyungo/common"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -67,7 +65,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 			// Life cycle
 			"instance_charge_type": {
 				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{string(common.PrePaid), string(common.PostPaid)}, false),
+				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
 				Default:      PostPaid,
 				Optional:     true,
 			},
