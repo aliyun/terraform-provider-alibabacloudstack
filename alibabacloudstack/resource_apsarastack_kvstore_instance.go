@@ -745,22 +745,34 @@ func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta i
 	d.Set("maintain_end_time", object.MaintainEndTime)
 	tde_obj, err := kvstoreService.DescribeInstanceTDEStatus(d.Id())
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "DescribeInstanceTDEStatus", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	if tde_obj["TDEStatus"] != nil && tde_obj["TDEStatus"].(string) == "enabled" {
-		d.Set("tde_status", "Enabled")
+		if e, ok := err.(*errmsgs.ComplexError); ok && strings.Contains(e.Error(), "errorCode: InstanceType.NotSupport") {
+			// 部分类型不支持开启TDE
+			//d.Set("tde_status", "Disabled")
+		} else {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "DescribeInstanceTDEStatus", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
 	} else {
-		d.Set("tde_status", "Disabled")
+		if tde_obj["TDEStatus"] != nil && tde_obj["TDEStatus"].(string) == "enabled" {
+			d.Set("tde_status", "Enabled")
+		} else {
+			d.Set("tde_status", "Disabled")
 
+		}
 	}
 	ssl_obj, err := kvstoreService.DescribeInstanceSSL(d.Id())
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "DescribeInstanceSSL", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	if ssl_obj["SSLEnabled"] != nil && ssl_obj["SSLEnabled"].(string) == "true" {
-		d.Set("enable_ssl", "Enabled")
+		if e, ok := err.(*errmsgs.ComplexError); ok && strings.Contains(e.Error(), "ErrorCode: IncorrectEngineVersion") {
+			// 部分类型不支持开启SSL
+			//d.Set("enable_ssl", "Disabled")
+		} else {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "DescribeInstanceSSL", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
 	} else {
-		d.Set("enable_ssl", "Disabled")
+		if ssl_obj["SSLEnabled"] != nil && ssl_obj["SSLEnabled"].(string) == "true" {
+			d.Set("enable_ssl", "Enabled")
+		} else {
+			d.Set("enable_ssl", "Disabled")
+		}
 	}
 	if object.ChargeType == string(PrePaid) {
 		request := r_kvstore.CreateDescribeInstanceAutoRenewalAttributeRequest()
