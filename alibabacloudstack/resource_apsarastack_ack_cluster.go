@@ -904,7 +904,7 @@ func resourceAlibabacloudStackCSKubernetesUpdate(d *schema.ResourceData, meta in
 				addDebug("ScaleClusterNodePool", resp, resizeRequestMap)
 			}
 
-			stateConf := BuildStateConf([]string{"scaling"}, []string{"running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesInstanceStateRefreshFunc(d.Id(), []string{"deleting", "failed"}))
+			stateConf := BuildStateConf([]string{"scaling"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, csService.CsKubernetesNodePoolStateRefreshFunc(nodepoolid, d.Id(), []string{"deleting", "failed"}))
 
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -943,7 +943,11 @@ func resourceAlibabacloudStackCSKubernetesRead(d *schema.ResourceData, meta inte
 	// if err != nil {
 	// 	return errmsgs.WrapError(err)
 	// }
-	d.Set("num_of_nodes", len(clusternode.Nodes))
+	nodepool, err := csService.DescribeCsKubernetesNodePool(nodepoolid, d.Id())
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	d.Set("num_of_nodes", nodepool.Status.HealthyNodes)
 	//d.Set("id", object.ClusterId)
 	//d.Set("state", object.State)
 	d.Set("vpc_id", object.VpcId)

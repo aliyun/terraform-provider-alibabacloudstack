@@ -240,6 +240,7 @@ func (s *CsService) DescribeCsKubernetesNodePool(id, clusterid string) (*NodePoo
 	req.QueryParams["ClusterId"] = clusterid
 	req.QueryParams["NodepoolId"] = id
 	response, err := s.client.ProcessCommonRequest(req)
+	addDebug(req.GetActionName(), response, req, req.QueryParams)
 	if err != nil || !response.IsSuccess() {
 		if response == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")

@@ -263,13 +263,25 @@ func TestAccAlibabacloudStackCsK8sKeyName(t *testing.T) {
 							"name": "flannel",
 						},
 						{
+							"name": "arms-prometheus",
+						},
+						{
 							"name": "csi-plugin",
 						},
 						{
 							"name": "csi-provisioner",
 						},
 						{
-							"name": "nginx-ingress-controller",
+							"name":   "logtail-ds",
+							"config": "{\\\"IngressDashboardEnabled\\\":\\\"true\\\"}",
+						},
+						{
+							"name":   "ack-node-problem-detector",
+							"config": "{\\\"sls_project_name\\\":\\\"\\\"}",
+						},
+						{
+							"name":   "nginx-ingress-controller",
+							"config": "{\\\"IngressSlbNetworkType\\\":\\\"intranet\\\"}",
 						},
 					},
 					"name":                         "${var.name}",
