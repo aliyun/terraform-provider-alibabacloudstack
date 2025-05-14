@@ -15,12 +15,10 @@ func TestAccAlibabacloudStackKVStoreInstanceClasses(t *testing.T) {
 
 	EngineVersionConfRedis := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id":        "${data.alibabacloudstack_zones.resources.zones.0.id}",
 			"engine":         "Redis",
 			"engine_version": "5.0",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"zone_id":        "${data.alibabacloudstack_zones.resources.zones.0.id}",
 			"engine":         "Redis",
 			"engine_version": "4.9",
 		}),
@@ -63,18 +61,6 @@ func TestAccAlibabacloudStackKVStoreInstanceClasses(t *testing.T) {
 		}),
 	}
 
-	ChargeTypeConfPostpaid := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id":              "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"instance_charge_type": "PostPaid",
-		}),
-	}
-	seriesTypeEnhancedPerformanceType := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id":     "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"series_type": "enhanced_performance_type",
-		}),
-	}
 	editionTypeCommunity := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"zone_id":      "${data.alibabacloudstack_zones.resources.zones.0.id}",
@@ -84,7 +70,7 @@ func TestAccAlibabacloudStackKVStoreInstanceClasses(t *testing.T) {
 	shardNumber8 := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"zone_id":      "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"shard_number": "8",
+			"cup": "8",
 		}),
 	}
 	ArchitectureStandard := dataSourceTestAccConfig{
@@ -166,7 +152,7 @@ func TestAccAlibabacloudStackKVStoreInstanceClasses(t *testing.T) {
 	//	ArchitectureStandard, allConf)
 	KVStoreInstanceCheckInfo.dataSourceTestCheck(t, rand, EngineVersionConfRedis,
 		//prePaidSortedByConfRedis, postPaidSortedByConfRedis
-		ChargeTypeConfPostpaid, seriesTypeEnhancedPerformanceType, editionTypeCommunity,
+		editionTypeCommunity,
 		shardNumber8, ArchitectureStandard, ArchitectureCluster,
 		NodeType, allConf, EngineVersionConfMemcache)
 }

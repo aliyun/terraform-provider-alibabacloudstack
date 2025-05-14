@@ -322,59 +322,6 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapError(err)
 	}
-
-	if tde, ok := d.GetOk("tde_status"); ok && tde.(string) == "Enabled" {
-		tde_req := make(map[string]interface{})
-		tde_req["InstanceId"] = d.Id()
-		tde_req["TDEStatus"] = tde.(string)
-		if encryption_key, ok := d.GetOk("encryption_key"); ok && encryption_key != "" {
-			tde_req["EncryptionKey"] = encryption_key
-		} else {
-			if role_arn, ok := d.GetOk("role_arn"); ok && role_arn.(string) != "" {
-				tde_req["RoleArn"] = d.Get("role_arn").(string)
-			} else if client.Config.RamRoleArn != "" {
-				tde_req["RoleArn"] = client.Config.RamRoleArn
-			}
-		}
-
-		tde_response, err := client.DoTeaRequest("POST", "R-kvstore", "2015-01-01", "ModifyInstanceTDE", "", nil, nil, tde_req)
-
-		addDebug("ModifyInstanceTDE", tde_response, tde_req)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "ModifyInstanceTDE", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		if value, exist := tde_response["asapiSuccess"]; !exist || !value.(bool) {
-			err = errmsgs.Error("kvstroe ModifyInstanceTDE Failed !!")
-			return errmsgs.WrapErrorf(err, "kvstroe ModifyInstanceTDE Failed !! %s", action, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		stateConf := BuildStateConf([]string{"disabled"}, []string{"enabled"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, kvstoreService.InstanceTDEStateRefreshFunc(d, client, d.Id(), []string{}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-		log.Print("enabled TDE")
-	}
-	if ssl := d.Get("enable_ssl"); ssl.(string) == "Enabled" {
-		request := client.NewCommonRequest("POST", "R-kvstore", "2015-01-01", "ModifyInstanceSSL", "")
-
-		//request.QueryParams["Forwardedregionid"] = client.RegionId
-		request.QueryParams["InstanceId"] = d.Id()
-		request.QueryParams["SSLEnabled"] = "Enable"
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug("ModifyInstanceSSL", bresponse, request, request.QueryParams)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_kvstore_instance", "ModifyInstanceSSL", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		stateConf := BuildStateConf([]string{"false"}, []string{"true"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, kvstoreService.InstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-		log.Print("enabled SSL")
-	}
 	return nil
 }
 
@@ -526,6 +473,72 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 		//d.SetPartial("maintain_end_time")
 	}
 
+	if old, new := d.GetChange("tde_status"); d.HasChange("tde_status") && old.(string) == "Disabled" && new.(string) == "Enabled" {
+		return fmt.Errorf("Cannot disable TDE after enable")
+	}
+
+	if v, ok := d.GetOk("tde_status"); d.HasChange("tde_status") && ok && v.(string) == "Enabled" {
+		tde_req := make(map[string]interface{})
+		tde_req["InstanceId"] = d.Id()
+		tde_req["TDEStatus"] = d.Get("tde_status").(string)
+		if encryption_key, ok := d.GetOk("encryption_key"); ok && encryption_key != "" {
+			tde_req["EncryptionKey"] = encryption_key
+		} else {
+			if role_arn, ok := d.GetOk("role_arn"); ok && role_arn.(string) != "" {
+				tde_req["RoleArn"] = d.Get("role_arn").(string)
+			} else if client.Config.RamRoleArn != "" {
+				tde_req["RoleArn"] = client.Config.RamRoleArn
+			}
+		}
+
+		tde_response, err := client.DoTeaRequest("POST", "R-kvstore", "2015-01-01", "ModifyInstanceTDE", "", nil, nil, tde_req)
+
+		addDebug("ModifyInstanceTDE", tde_response, tde_req)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "ModifyInstanceTDE", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		if value, exist := tde_response["asapiSuccess"]; !exist || !value.(bool) {
+			err = errmsgs.Error("kvstroe ModifyInstanceTDE Failed !!")
+			return errmsgs.WrapErrorf(err, "kvstroe ModifyInstanceTDE Failed !! %s", "ModifyInstanceTDE", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		stateConf := BuildStateConf([]string{"disabled"}, []string{"enabled"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, kvstoreService.InstanceTDEStateRefreshFunc(d, client, d.Id(), []string{}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+		log.Print("enabled TDE")
+	}
+	if d.HasChange("enable_ssl") {
+		request := client.NewCommonRequest("POST", "R-kvstore", "2015-01-01", "ModifyInstanceSSL", "")
+		//request.QueryParams["Forwardedregionid"] = client.RegionId
+		ssl := "Disable"
+		var target, process string
+		if d.Get("enable_ssl").(string) == "true" {
+			ssl = "Enable"
+			target = "true"
+			process = "false"
+		} else {
+			ssl = "Disable"
+			target = "false"
+			process = "true"
+		}
+		request.QueryParams["DBInstanceId"] = d.Id()
+		request.QueryParams["SSLEnabled"] = ssl
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug("ModifyInstanceSSL", bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_kvstore_instance", "ModifyInstanceSSL", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, kvstoreService.InstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+		log.Print("enabled SSL")
+	}
 	if d.IsNewResource() {
 		d.Partial(false)
 		return nil
@@ -646,69 +659,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 		//d.SetPartial("instance_name")
 		//d.SetPartial("password")
 	}
-	if !d.IsNewResource() && d.HasChange("tde_status") && d.Get("tde_status").(string) == "Enabled" {
-		tde_req := make(map[string]interface{})
-		tde_req["InstanceId"] = d.Id()
-		tde_req["TDEStatus"] = d.Get("tde_status").(string)
-		if encryption_key, ok := d.GetOk("encryption_key"); ok && encryption_key != "" {
-			tde_req["EncryptionKey"] = encryption_key
-		} else {
-			if role_arn, ok := d.GetOk("role_arn"); ok && role_arn.(string) != "" {
-				tde_req["RoleArn"] = d.Get("role_arn").(string)
-			} else if client.Config.RamRoleArn != "" {
-				tde_req["RoleArn"] = client.Config.RamRoleArn
-			}
-		}
 
-		tde_response, err := client.DoTeaRequest("POST", "R-kvstore", "2015-01-01", "ModifyInstanceTDE", "", nil, nil, tde_req)
-
-		addDebug("ModifyInstanceTDE", tde_response, tde_req)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_kvstroe_instance", "ModifyInstanceTDE", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		if value, exist := tde_response["asapiSuccess"]; !exist || !value.(bool) {
-			err = errmsgs.Error("kvstroe ModifyInstanceTDE Failed !!")
-			return errmsgs.WrapErrorf(err, "kvstroe ModifyInstanceTDE Failed !! %s", "ModifyInstanceTDE", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		stateConf := BuildStateConf([]string{"disabled"}, []string{"enabled"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, kvstoreService.InstanceTDEStateRefreshFunc(d, client, d.Id(), []string{}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-		log.Print("enabled TDE")
-	}
-	if !d.IsNewResource() && d.HasChange("enable_ssl") {
-		request := client.NewCommonRequest("POST", "R-kvstore", "2015-01-01", "ModifyInstanceSSL", "")
-		//request.QueryParams["Forwardedregionid"] = client.RegionId
-		ssl := "Disable"
-		var target, process string
-		if d.Get("enable_ssl").(string) == "true" {
-			ssl = "Enable"
-			target = "true"
-			process = "false"
-		} else {
-			ssl = "Disable"
-			target = "false"
-			process = "true"
-		}
-		request.QueryParams["DBInstanceId"] = d.Id()
-		request.QueryParams["SSLEnabled"] = ssl
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug("ModifyInstanceSSL", bresponse, request, request.QueryParams)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_kvstore_instance", "ModifyInstanceSSL", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, kvstoreService.InstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-		log.Print("enabled SSL")
-	}
-	d.Partial(false)
 	return nil
 }
 
