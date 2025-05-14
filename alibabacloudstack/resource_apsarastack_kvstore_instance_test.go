@@ -272,8 +272,8 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_Tde(t *testing.T) {
 				Config: testAccKVStoreInstanceTde_classic(rand, string(KVStoreRedis), string(KVStore5Dot0)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"tde_status": "Enabled",
-						"enable_ssl": "Enabled",
+						"tde_status": "true",
+						"enable_ssl": "true",
 					}),
 				),
 			},
@@ -397,9 +397,9 @@ resource "alibabacloudstack_kvstore_instance" "default" {
     cpu_type = "intel"
 
 	// 只有企业版可以开启TDS
-	tde_status = "Enabled"
+	tde_status = true
 	// 只有集群版可以打开SSL
-	enable_ssl = "Enabled"
+	enable_ssl = true
 	encryption_key = alibabacloudstack_kms_key.key.id
 }
 

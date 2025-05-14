@@ -196,16 +196,14 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				Deprecated:   "Field 'series' is not working properly, set through 'instance_class'",
 			},
 			"tde_status": {
-				Type:         schema.TypeString,
+				Type:         schema.TypeBool,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Disabled", "Enabled"}, false),
 			},
 			"enable_ssl": {
-				Type:         schema.TypeString,
+				Type:         schema.TypeBool,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Disabled", "Enabled"}, false),
 			},
 			"encryption_key": {
 				Type:          schema.TypeString,
@@ -475,14 +473,14 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 		//d.SetPartial("maintain_end_time")
 	}
 
-	if old, new := d.GetChange("tde_status"); d.HasChange("tde_status") && old.(string) == "Enabled" && new.(string) == "Disabled" {
+	if old, new := d.GetChange("tde_status"); d.HasChange("tde_status") && old.(bool) == true && new.(bool) == false {
 		return fmt.Errorf("Cannot disable TDE after enable")
 	}
 
-	if v, ok := d.GetOk("tde_status"); d.HasChange("tde_status") && ok && v.(string) == "Enabled" {
+	if v, ok := d.GetOk("tde_status"); d.HasChange("tde_status") && ok && v.(bool) {
 		tde_req := make(map[string]interface{})
 		tde_req["InstanceId"] = d.Id()
-		tde_req["TDEStatus"] = d.Get("tde_status").(string)
+		tde_req["TDEStatus"] = "Enabled"
 		if encryption_key, ok := d.GetOk("encryption_key"); ok && encryption_key != "" {
 			tde_req["EncryptionKey"] = encryption_key
 		} else {
@@ -514,7 +512,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 		//request.QueryParams["Forwardedregionid"] = client.RegionId
 		ssl := "Disable"
 		var target, process string
-		if d.Get("enable_ssl").(string) == "true" {
+		if d.Get("enable_ssl").(bool) {
 			ssl = "Enable"
 			target = "true"
 			process = "false"
@@ -707,9 +705,9 @@ func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta i
 		}
 	} else {
 		if tde_obj["TDEStatus"] != nil && tde_obj["TDEStatus"].(string) == "enabled" {
-			d.Set("tde_status", "Enabled")
+			d.Set("tde_status", true)
 		} else {
-			d.Set("tde_status", "Disabled")
+			d.Set("tde_status", false)
 
 		}
 	}
@@ -723,9 +721,9 @@ func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta i
 		}
 	} else {
 		if ssl_obj["SSLEnabled"] != nil && ssl_obj["SSLEnabled"].(string) == "true" {
-			d.Set("enable_ssl", "Enabled")
+			d.Set("enable_ssl", true)
 		} else {
-			d.Set("enable_ssl", "Disabled")
+			d.Set("enable_ssl", false)
 		}
 	}
 	if object.ChargeType == string(PrePaid) {
