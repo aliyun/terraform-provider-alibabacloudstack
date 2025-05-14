@@ -396,7 +396,9 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	engine_version = "%s"
     cpu_type = "intel"
 
+	// 只有企业版可以开启TDS
 	tde_status = "Enabled"
+	// 只有集群版可以打开SSL
 	enable_ssl = "Enabled"
 	encryption_key = alibabacloudstack_kms_key.key.id
 }

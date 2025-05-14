@@ -1382,6 +1382,7 @@ data alibabacloudstack_kvstore_instance_classes "default" {
   edition_type = "${var.kv_edition}"
   engine = "${var.kv_engine}"
   sorted_by = "cpu"
+  architecture = "cluster"
 }
 `
 

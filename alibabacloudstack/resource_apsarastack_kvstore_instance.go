@@ -198,11 +198,13 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 			"tde_status": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Disabled", "Enabled"}, false),
 			},
 			"enable_ssl": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Disabled", "Enabled"}, false),
 			},
 			"encryption_key": {
@@ -473,7 +475,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 		//d.SetPartial("maintain_end_time")
 	}
 
-	if old, new := d.GetChange("tde_status"); d.HasChange("tde_status") && old.(string) == "Disabled" && new.(string) == "Enabled" {
+	if old, new := d.GetChange("tde_status"); d.HasChange("tde_status") && old.(string) == "Enabled" && new.(string) == "Disabled" {
 		return fmt.Errorf("Cannot disable TDE after enable")
 	}
 
@@ -501,7 +503,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 			err = errmsgs.Error("kvstroe ModifyInstanceTDE Failed !!")
 			return errmsgs.WrapErrorf(err, "kvstroe ModifyInstanceTDE Failed !! %s", "ModifyInstanceTDE", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		stateConf := BuildStateConf([]string{"disabled"}, []string{"enabled"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, kvstoreService.InstanceTDEStateRefreshFunc(d, client, d.Id(), []string{}))
+		stateConf := BuildStateConf([]string{"disabled"}, []string{"enabled"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, kvstoreService.InstanceTDEStateRefreshFunc(d, client, d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -533,7 +535,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_kvstore_instance", "ModifyInstanceSSL", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, kvstoreService.InstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
+		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, kvstoreService.InstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
