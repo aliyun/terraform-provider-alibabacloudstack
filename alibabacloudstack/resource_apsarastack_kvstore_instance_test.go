@@ -255,6 +255,7 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_Tde(t *testing.T) {
 	}, "DescribeKVstoreInstance")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 99999)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -268,11 +269,11 @@ func TestAccAlibabacloudStackKVStoreRedisInstance_Tde(t *testing.T) {
 		CheckDestroy: testAccCheckKVStoreInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccKVStoreInstanceTde_classic(string(KVStoreRedis), string(KVStore5Dot0)),
+				Config: testAccKVStoreInstanceTde_classic(rand, string(KVStoreRedis), string(KVStore5Dot0)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"tde_status": "Enabled",
-						"enable_ssl": "Enabled",
+						"tde_status": "true",
+						"enable_ssl": "true",
 					}),
 				),
 			},
@@ -311,7 +312,7 @@ variable "name" {
 }
 
 variable "kv_edition" {
-    default = "community"
+    default = "enterprise"
 }
 
 variable "kv_engine" {
@@ -324,10 +325,9 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
 	instance_name  = var.name
 	instance_type  = var.kv_engine
-	instance_class = local.default_kv_instance_classes
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
 	node_type = "double"
-	architecture_type = "standard"
 	password       = "%s"
 }
 
@@ -339,13 +339,13 @@ var KVStoreInstanceCheckMap = map[string]string{
 	"instance_class": CHECKSET,
 }
 
-func testAccKVStoreInstance_classicUpdateParameter(instanceType, instanceClass, engineVersion string) string {
+func testAccKVStoreInstance_classicUpdateParameter(rand int, instanceType, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
 	data "alibabacloudstack_zones" "default" {
 		available_resource_creation = "KVStore"
 	}
 	variable "name" {
-		default = "tf-testAccKVStoreInstance_classic"
+		default = "tf-testAccKVStoreInstance_classic%d"
 	}
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
@@ -360,17 +360,22 @@ func testAccKVStoreInstance_classicUpdateParameter(instanceType, instanceClass, 
 			  value = "volatile-ttl"
 			}
 	}
-	`, instanceType, instanceClass, engineVersion)
+	`, rand, instanceType, instanceClass, engineVersion)
 }
 
-func testAccKVStoreInstanceTde_classic(instanceClass, engineVersion string) string {
+func testAccKVStoreInstanceTde_classic(rand int, instanceClass, engineVersion string) string {
 	return fmt.Sprintf(`
 	
 variable "name" {
-    default = "tf-testAccCheckApsaraStackRKVInstance4"
+    default = "tf-testAccCheckApsaraStackRKVInstance%d"
 }
 
-data "alibabacloudstack_zones"  "default" {
+variable "kv_edition" {
+    default = "enterprise"
+}
+
+variable "kv_engine" {
+    default = "%s"
 }
 
 resource "alibabacloudstack_kms_key" "key" {
@@ -379,38 +384,27 @@ resource "alibabacloudstack_kms_key" "key" {
   key_state               = "Enabled"
 }
 
-resource "alibabacloudstack_vpc" "default" {
-	name       = var.name
-	cidr_block = "192.168.0.0/16"
-}
+%s
 
-data "alibabacloudstack_zones" default {
-	available_resource_creation = "VSwitch"
-  }
-  
-resource "alibabacloudstack_vswitch" "default" {
-	vpc_id            = alibabacloudstack_vpc.default.id
-	cidr_block        = "172.16.0.0/24"
-	availability_zone = data.alibabacloudstack_zones.default.zones[0].id
-	name              = var.name
-}
+%s
 
 resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
-	vswitch_id     = alibabacloudstack_vswitch.default.id
+	vswitch_id     = alibabacloudstack_vpc_vswitch.default.id
 	security_ips   = ["10.0.0.1"]
-	instance_type  = "%s"
-	instance_class = "redis.amber.logic.sharding.1g.2db.0rodb.6proxy.multithread"
+	instance_type  = var.kv_engine
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
     cpu_type = "intel"
-    architecture_type = "cluster"
 
-	tde_status = "Enabled"
-	enable_ssl = "Enabled"
+	// 只有企业版可以开启TDS
+	tde_status = true
+	// 只有集群版可以打开SSL
+	enable_ssl = true
 	encryption_key = alibabacloudstack_kms_key.key.id
 }
 
-	`, instanceClass, engineVersion)
+	`, rand, instanceClass, VSwitchCommonTestCase, KVRInstanceClassCommonTestCase, engineVersion)
 }
 
 func testAccKVStoreInstance_classicAddParameter(instanceType, instanceClass, engineVersion string) string {
@@ -615,7 +609,7 @@ func testAccKVStoreInstance_vpc(rand int, instanceClass, engineVersion string) s
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-		instance_class = local.default_kv_instance_classes
+		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]

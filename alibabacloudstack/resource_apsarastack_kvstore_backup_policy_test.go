@@ -313,7 +313,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
 	instance_name  = var.name
 	instance_type  = var.kv_engine
-	instance_class = local.default_kv_instance_classes
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
@@ -350,7 +350,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
 	instance_name  = var.name
 	instance_type  = var.kv_engine
-	instance_class = local.default_kv_instance_classes
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
@@ -387,7 +387,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
 	instance_name  = var.name
 	instance_type  = var.kv_engine
-	instance_class = local.default_kv_instance_classes
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
@@ -424,7 +424,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
 	instance_name  = var.name
 	instance_type  = var.kv_engine
-	instance_class = local.default_kv_instance_classes
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
@@ -455,7 +455,7 @@ func testAccKVStoreBackupPolicy_vpc(rand int, instanceType, engineVersion string
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-		instance_class = local.default_kv_instance_classes
+		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]
@@ -487,7 +487,7 @@ func testAccKVStoreBackupPolicy_vpcUpdatePeriod(rand int, instanceType, engineVe
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-		instance_class = local.default_kv_instance_classes
+		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]
@@ -518,7 +518,7 @@ func testAccKVStoreBackupPolicy_vpcUpdateTime(rand int, instanceType, engineVers
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-		instance_class = local.default_kv_instance_classes
+		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]
@@ -549,7 +549,7 @@ func testAccKVStoreBackupPolicy_vpcUpdateAll(rand int, instanceType, engineVersi
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
 		zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
-		instance_class = local.default_kv_instance_classes
+		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]

@@ -1379,15 +1379,10 @@ data "alibabacloudstack_zones" "kv_zone" {
 }
  
 data alibabacloudstack_kvstore_instance_classes "default" {
-  zone_id = data.alibabacloudstack_zones.kv_zone.zones[0].id
   edition_type = "${var.kv_edition}"
   engine = "${var.kv_engine}"
-}
-
-locals {
-	# data alibabacloudstack_kvstore_instance_classes接口错误
-	#default_kv_instance_classes = length(data.alibabacloudstack_kvstore_instance_classes.default.instance_classes) > 0 ? data.alibabacloudstack_kvstore_instance_classes.default.instance_classes[0] : "redis.master.small.default"
-	default_kv_instance_classes = "redis.master.small.default"
+  sorted_by = "cpu"
+  architecture = "cluster"
 }
 `
 

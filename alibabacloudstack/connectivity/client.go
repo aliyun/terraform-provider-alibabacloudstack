@@ -1258,12 +1258,12 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 			if errmsgs.NotFoundError(err) {
 				return resource.NonRetryableError(err)
 			}
-			errmsg := errmsgs.GetAsapiErrorMessage(response)
-			if errmsg != "" {
-				return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "popcode", apiname, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+			if errmsgs.NeedRetry(err) {
+				wait()
+				return resource.RetryableError(err)
 			}
-			wait()
-			return resource.RetryableError(err)
+			errmsg := errmsgs.GetAsapiErrorMessage(response)
+			return resource.NonRetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, popcode, apiname, errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
 		}
 		return nil
 	})
