@@ -312,7 +312,7 @@ variable "kv_engine" {
 resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
 	instance_type  = var.kv_engine
-	instance_class = local.default_kv_instance_classes
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
@@ -348,7 +348,7 @@ variable "kv_engine" {
 resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
 	instance_type  = var.kv_engine
-	instance_class = local.default_kv_instance_classes
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
@@ -384,7 +384,7 @@ variable "kv_engine" {
 resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
 	instance_type  = var.kv_engine
-	instance_class = local.default_kv_instance_classes
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
@@ -420,7 +420,7 @@ variable "kv_engine" {
 resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
 	instance_type  = var.kv_engine
-	instance_class = local.default_kv_instance_classes
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
@@ -450,7 +450,7 @@ func testAccKVStoreBackupPolicy_vpc(rand int, instanceType, engineVersion string
 	%s 
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
-		instance_class = local.default_kv_instance_classes
+		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]
@@ -481,7 +481,7 @@ func testAccKVStoreBackupPolicy_vpcUpdatePeriod(rand int, instanceType, engineVe
 	%s 
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
-		instance_class = local.default_kv_instance_classes
+		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]
@@ -511,7 +511,7 @@ func testAccKVStoreBackupPolicy_vpcUpdateTime(rand int, instanceType, engineVers
 	%s 
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
-		instance_class = local.default_kv_instance_classes
+		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]
@@ -541,7 +541,7 @@ func testAccKVStoreBackupPolicy_vpcUpdateAll(rand int, instanceType, engineVersi
 	%s 
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
-		instance_class = local.default_kv_instance_classes
+		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]

@@ -324,10 +324,9 @@ variable "kv_engine" {
 resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_name  = var.name
 	instance_type  = var.kv_engine
-	instance_class = local.default_kv_instance_classes
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
 	node_type = "double"
-	architecture_type = "standard"
 	password       = "%s"
 }
 
@@ -371,7 +370,7 @@ variable "name" {
 }
 
 variable "kv_edition" {
-    default = "community"
+    default = "enterprise"
 }
 
 variable "kv_engine" {
@@ -393,10 +392,9 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	vswitch_id     = alibabacloudstack_vpc_vswitch.default.id
 	security_ips   = ["10.0.0.1"]
 	instance_type  = var.kv_engine
-	instance_class = local.default_kv_instance_classes
+	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
     cpu_type = "intel"
-    architecture_type = "cluster"
 
 	tde_status = "Enabled"
 	enable_ssl = "Enabled"
@@ -607,7 +605,7 @@ func testAccKVStoreInstance_vpc(rand int, instanceClass, engineVersion string) s
 	%s 
 
 	resource "alibabacloudstack_kvstore_instance" "default" {
-		instance_class = local.default_kv_instance_classes
+		instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 		instance_name  = "${var.name}"
 		vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
 		security_ips = ["10.0.0.1"]

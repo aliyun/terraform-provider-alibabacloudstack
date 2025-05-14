@@ -182,18 +182,18 @@ func resourceAlibabacloudStackKVStoreInstance() *schema.Resource {
 				DiffSuppressFunc: NodeTypeDiffSuppressFunc,
 			},
 			"architecture_type": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Computed:         true,
-				ValidateFunc:     validation.StringInSlice([]string{"cluster", "rwsplit", "standard"}, false),
-				DiffSuppressFunc: ArchitectureTypeDiffSuppressFunc,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"cluster", "rwsplit", "standard"}, false),
+				Deprecated:   "Field 'architecture_type' is not working properly, set through 'instance_class'",
 			},
 			"series": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"community", "enterprise"}, false),
+				Deprecated:   "Field 'series' is not working properly, set through 'instance_class'",
 			},
 			"tde_status": {
 				Type:         schema.TypeString,
@@ -521,7 +521,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 			target = "false"
 			process = "true"
 		}
-		request.QueryParams["DBInstanceId"] = d.Id()
+		request.QueryParams["InstanceId"] = d.Id()
 		request.QueryParams["SSLEnabled"] = ssl
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug("ModifyInstanceSSL", bresponse, request, request.QueryParams)
@@ -696,7 +696,8 @@ func resourceAlibabacloudStackKVStoreInstanceRead(d *schema.ResourceData, meta i
 	d.Set("maintain_end_time", object.MaintainEndTime)
 	tde_obj, err := kvstoreService.DescribeInstanceTDEStatus(d.Id())
 	if err != nil {
-		if e, ok := err.(*errmsgs.ComplexError); ok && strings.Contains(e.Error(), "errorCode: InstanceType.NotSupport") {
+		if e, ok := err.(*errmsgs.ComplexError); ok && (
+				strings.Contains(e.Error(), "errorCode: InstanceType.NotSupport")  || strings.Contains(e.Error(), "errorCode: RestoreEngineVersion.NotSupport") ){
 			// 部分类型不支持开启TDE
 			//d.Set("tde_status", "Disabled")
 		} else {
