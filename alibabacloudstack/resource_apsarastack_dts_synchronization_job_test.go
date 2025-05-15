@@ -183,6 +183,11 @@ func AlibabacloudStackDTSSynchronizationJobBasicDependence0(name string) string 
 variable "name" {
   default = "%s"
 }
+
+variable "password" {
+  default = "%s"
+}
+
 variable "creation" {
   default = "Rds"
 }
@@ -229,7 +234,7 @@ resource "alibabacloudstack_db_database" "db" {
 resource "alibabacloudstack_db_account" "account" {
   instance_id      = alibabacloudstack_db_instance.dsinstance.id
   name        = "tftestdts"
-  password    = "inputYourCodeHere"
+  password    = "${var.password}"
   description = "from terraform"
 }
 
@@ -251,7 +256,7 @@ character_set =  "UTF8"
 resource "alibabacloudstack_db_account" "account_r" {
   instance_id      =alibabacloudstack_db_instance.rsinstance.id
   name        = "tftestdts"
-  password    = "inputYourCodeHere"
+  password    = "${var.password}"
   description = "from terraform"
 }
 
@@ -272,5 +277,5 @@ resource "alibabacloudstack_dts_synchronization_instance" "default" {
   sync_architecture                   = "oneway"
 }
 
-`, name)
+`, name, GeneratePassword())
 }

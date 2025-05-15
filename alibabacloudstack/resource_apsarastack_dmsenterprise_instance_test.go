@@ -276,7 +276,7 @@ func resourceDmsConfigDependence(name string) string {
 	resource "alibabacloudstack_db_account" "account" {
 	instance_id = "${alibabacloudstack_db_instance.instance.id}"
 	name        = "tftest123"
-	password    = "inputYourCodeHere"
+	password    = "%s"
 	type        = "Normal"
 	}
 
@@ -298,5 +298,5 @@ func resourceDmsConfigDependence(name string) string {
 	}
 	
 
-	`, name)
+	`, name, GeneratePassword())
 }

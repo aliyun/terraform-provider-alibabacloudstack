@@ -135,10 +135,10 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	instance_class = data.alibabacloudstack_kvstore_instance_classes.default.instance_classes.0.id
 	engine_version = "%s"
 	node_type = "double"
-	password       = "1qaz@WSX"
+	password       = "%s"
 }
 
 
 
-`, name, string(KVStoreRedis), KVRInstanceClassCommonTestCase, string(KVStore4Dot0))
+`, name, string(KVStoreRedis), KVRInstanceClassCommonTestCase, string(KVStore4Dot0), GeneratePassword())
 }

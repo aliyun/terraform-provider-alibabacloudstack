@@ -123,7 +123,7 @@ resource "alibabacloudstack_gpdb_elastic_instance" "default" {
 resource "alibabacloudstack_gpdb_account" "default" {
   account_name        = var.name
   db_instance_id      = alibabacloudstack_gpdb_elastic_instance.default.id
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   account_description = var.name
 }
 
@@ -131,6 +131,6 @@ data "alibabacloudstack_gpdb_accounts" "default" {
 	db_instance_id = alibabacloudstack_gpdb_elastic_instance.default.id
 	%s
 }
-`, rand, strings.Join(pairs, " \n "))
+`, rand, GeneratePassword(), strings.Join(pairs, " \n "))
 	return config
 }

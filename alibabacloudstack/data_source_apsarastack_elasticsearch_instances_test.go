@@ -134,7 +134,7 @@ locals {
 
 resource "alibabacloudstack_elasticsearch_instance" "default" {
   description          = var.name
-  password             = "Yourpassword1234"
+  password             = "%s"
   vswitch_id           = local.vswitch_id
   data_node_amount     = "2"
   data_node_spec       = "elasticsearch.sn2ne.large"
@@ -147,5 +147,5 @@ resource "alibabacloudstack_elasticsearch_instance" "default" {
 	  "For":     "acceptance test",
   }
 }
-`, name)
+`, name, GeneratePassword())
 }
