@@ -103,11 +103,9 @@ func  resourceAlibabacloudStackOtsTableCreate(d *schema.ResourceData, meta inter
 	}
 	tableOption := new(tablestore.TableOption)
 	tableOption.TimeToAlive = d.Get("time_to_live").(int)
-	tableOption.MaxVersion = d.Get("max_version").(int)
-// 后端实际并未消费
-// 	if deviation, ok := d.GetOk("deviation_cell_version_in_sec"); ok {
-// 		tableOption.DeviationCellVersionInSec, _ = strconv.ParseInt(deviation.(string), 10, 64)
-// 	}
+	if deviation, ok := d.GetOk("deviation_cell_version_in_sec"); ok {
+		tableOption.DeviationCellVersionInSec, _ = strconv.ParseInt(deviation.(string), 10, 64)
+	}
 	reservedThroughput := new(tablestore.ReservedThroughput)
 
 	request := new(tablestore.CreateTableRequest)
@@ -187,10 +185,9 @@ func  resourceAlibabacloudStackOtsTableUpdate(d *schema.ResourceData, meta inter
 
 		tableOption.TimeToAlive = d.Get("time_to_live").(int)
 		tableOption.MaxVersion = d.Get("max_version").(int)
-// 后端实际并未消费
-// 		if deviation, ok := d.GetOk("deviation_cell_version_in_sec"); ok {
-// 			tableOption.DeviationCellVersionInSec, _ = strconv.ParseInt(deviation.(string), 10, 64)
-// 		}
+		if deviation, ok := d.GetOk("deviation_cell_version_in_sec"); ok {
+			tableOption.DeviationCellVersionInSec, _ = strconv.ParseInt(deviation.(string), 10, 64)
+		}
 
 		request.TableOption = tableOption
 		if err := resource.Retry(3*time.Minute, func() *resource.RetryError {

@@ -65,8 +65,8 @@ func (s *OtsService) ListOtsTable(instanceName string) (table *tablestore.ListTa
 	return
 }
 
-func (s *OtsService) DescribeOtsTable(id string) (*DescribeTableResponse, error) {
-	table := &DescribeTableResponse{}
+func (s *OtsService) DescribeOtsTable(id string) (*tablestore.DescribeTableResponse, error) {
+	table := &tablestore.DescribeTableResponse{}
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
 		return table, errmsgs.WrapError(err)
@@ -100,7 +100,7 @@ func (s *OtsService) DescribeOtsTable(id string) (*DescribeTableResponse, error)
 		}
 		return table, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "DescribeTable", errmsgs.AliyunTablestoreGoSdk)
 	}
-	table, _ = raw.(*DescribeTableResponse)
+	table, _ = raw.(*tablestore.DescribeTableResponse)
 	if table == nil || table.TableMeta == nil || table.TableMeta.TableName != tableName {
 		return table, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OtsTable", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
@@ -372,18 +372,4 @@ type GetInstanceResponse struct {
 	RequestId       string       `json:"RequestId" xml:"RequestId"`
 	AsapiRequestId  string       `json:"asapiRequestId" xml:"asapiRequestId"`
 	InstanceInfo    InstanceInfo `json:"InstanceInfo" xml:"InstanceInfo"`
-}
-
-type DescribeTableResponse struct {
-	TableMeta          *tablestore.TableMeta
-	TableOption        *TableOption
-	ReservedThroughput *tablestore.ReservedThroughput
-	StreamDetails      *tablestore.StreamDetails
-	IndexMetas         []*tablestore.IndexMeta
-	tablestore.ResponseInfo
-}
-
-type TableOption struct {
-	TimeToAlive, MaxVersion int
-	DeviationCellVersionInSec int64
 }

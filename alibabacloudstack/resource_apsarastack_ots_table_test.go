@@ -8,12 +8,14 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	
+	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore"
+	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlibabacloudStackOtsTable_basic(t *testing.T) {
-	var v *DescribeTableResponse
+	var v *tablestore.DescribeTableResponse
 
 	resourceId := "alibabacloudstack_ots_table.default"
 	ra := resourceAttrInit(resourceId, otsTableBasicMap)
@@ -304,7 +306,7 @@ var otsTableBasicMap = map[string]string{
 	"deviation_cell_version_in_sec": "86400",
 }
 
-func testAccCheckOtsTableExist(n string, table *DescribeTableResponse) resource.TestCheckFunc {
+func testAccCheckOtsTableExist(n string, table *tablestore.DescribeTableResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
