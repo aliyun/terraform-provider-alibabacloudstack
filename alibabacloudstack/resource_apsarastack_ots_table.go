@@ -65,19 +65,18 @@ func resourceAlibabacloudStackOtsTable() *schema.Resource {
 			},
 			"deviation_cell_version_in_sec": {
 				Type:         schema.TypeString,
-				Computed:     true,
-// 				Optional:     true,
-// 				ValidateFunc: validateStringConvertInt64(),
-// 				Default:      "86400",
+				Optional:     true,
+				ValidateFunc: validateStringConvertInt64(),
+				Default:      "86400",
 			},
 		},
 	}
-	setResourceFunc(resource,  resourceAlibabacloudStackOtsTableCreate,  resourceAlibabacloudStackOtsTableRead,
-	  resourceAlibabacloudStackOtsTableUpdate,  resourceAlibabacloudStackOtsTableDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackOtsTableCreate, resourceAlibabacloudStackOtsTableRead,
+		resourceAlibabacloudStackOtsTableUpdate, resourceAlibabacloudStackOtsTableDelete)
 	return resource
 }
 
-func  resourceAlibabacloudStackOtsTableCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackOtsTableCreate(d *schema.ResourceData, meta interface{}) error {
 	tableMeta := new(tablestore.TableMeta)
 	instanceName := d.Get("instance_name").(string)
 	tableName := d.Get("table_name").(string)
@@ -134,7 +133,7 @@ func  resourceAlibabacloudStackOtsTableCreate(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func  resourceAlibabacloudStackOtsTableRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackOtsTableRead(d *schema.ResourceData, meta interface{}) error {
 	instanceName, _, err := parseId(d, meta)
 	if err != nil {
 		return errmsgs.WrapError(err)
@@ -171,7 +170,7 @@ func  resourceAlibabacloudStackOtsTableRead(d *schema.ResourceData, meta interfa
 	return nil
 }
 
-func  resourceAlibabacloudStackOtsTableUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackOtsTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChanges("time_to_live", "max_version", "deviation_cell_version_in_sec") {
 		instanceName, tableName, err := parseId(d, meta)
 		if err != nil {
@@ -210,7 +209,7 @@ func  resourceAlibabacloudStackOtsTableUpdate(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func  resourceAlibabacloudStackOtsTableDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackOtsTableDelete(d *schema.ResourceData, meta interface{}) error {
 	instanceName, tableName, err := parseId(d, meta)
 	if err != nil {
 		return errmsgs.WrapError(err)
