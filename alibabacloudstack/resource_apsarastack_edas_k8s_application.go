@@ -96,16 +96,19 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:         schema.TypeString,
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP", "HTTPS"}, false),
+				Deprecated:   "Field 'internet_slb_protocol' is deprecated and will be removed in a future release. Please use new field 'internet_service_port_infos' instead.",
 			},
 			"internet_slb_port": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeInt,
+				Optional:   true,
+				Computed:   true,
+				Deprecated: "Field 'internet_slb_port' is deprecated and will be removed in a future release. Please use new field 'internet_service_port_infos' instead.",
 			},
 			"internet_target_port": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeInt,
+				Optional:   true,
+				Computed:   true,
+				Deprecated: "Field 'internet_target_port' is deprecated and will be removed in a future release. Please use new field 'internet_service_port_infos' instead.",
 			},
 			"internet_service_port_infos": {
 				Type:          schema.TypeList,
@@ -156,16 +159,19 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Type:         schema.TypeString,
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP", "HTTPS"}, false),
+				Deprecated:   "Field 'intranet_slb_protocol' is deprecated and will be removed in a future release. Please use new field 'intranet_service_port_infos' instead.",
 			},
 			"intranet_slb_port": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeInt,
+				Optional:   true,
+				Computed:   true,
+				Deprecated: "Field 'intranet_slb_port' is deprecated and will be removed in a future release. Please use new field 'intranet_service_port_infos' instead.",
 			},
 			"intranet_target_port": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:       schema.TypeInt,
+				Optional:   true,
+				Computed:   true,
+				Deprecated: "Field 'intranet_target_port' is deprecated and will be removed in a future release. Please use new field 'intranet_service_port_infos' instead.",
 			},
 			"intranet_service_port_infos": {
 				Type:          schema.TypeList,
@@ -680,16 +686,24 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 	d.Set("intranet_service_port_infos", intranet_slbs)
 	if len(intranet_slbs) == 1 {
 		d.Set("intranet_slb_protocol", intranet_slbs[0]["protocol"].(string))
-		d.Set("intranet_target_port", int(intranet_slbs[0]["target_port"].(float64)))
-		d.Set("intranet_slb_port", int(intranet_slbs[0]["port"].(float64)))
+		d.Set("intranet_target_port", intranet_slbs[0]["target_port"].(int))
+		d.Set("intranet_slb_port", intranet_slbs[0]["port"].(int))
+	} else {
+		d.Set("intranet_slb_protocol", nil)
+		d.Set("intranet_target_port", nil)
+		d.Set("intranet_slb_port", nil)
 	}
 	d.Set("internet_slb_id", internet_slb_id)
 	d.Set("internet_external_traffic_policy", internet_external_traffic_policy)
 	d.Set("internet_service_port_infos", internet_slbs)
 	if len(internet_slbs) == 1 {
 		d.Set("internet_slb_protocol", internet_slbs[0]["protocol"].(string))
-		d.Set("internet_target_port", int(internet_slbs[0]["target_port"].(float64)))
-		d.Set("internet_slb_port", int(internet_slbs[0]["port"].(float64)))
+		d.Set("internet_target_port", internet_slbs[0]["target_port"].(int))
+		d.Set("internet_slb_port", internet_slbs[0]["port"].(int))
+	} else {
+		d.Set("internet_slb_protocol", nil)
+		d.Set("internet_target_port", nil)
+		d.Set("internet_slb_port", nil)
 	}
 	if len(response.Conf.PreStop) > 0 {
 		d.Set("pre_stop", response.Conf.PreStop)
