@@ -123,7 +123,7 @@ func testSweepOtsInstances(region string) error {
 }
 
 func TestAccAlibabacloudStackOtsInstance_basic(t *testing.T) {
-	var v ots.InstanceInfo
+	var v InstanceInfo
 
 	resourceId := "alibabacloudstack_ots_instance.default"
 	ra := resourceAttrInit(resourceId, otsInstanceBasicMap)

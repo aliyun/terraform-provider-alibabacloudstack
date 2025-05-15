@@ -7,8 +7,6 @@ import (
 	"fmt"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ots"
 	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -67,8 +65,8 @@ func (s *OtsService) ListOtsTable(instanceName string) (table *tablestore.ListTa
 	return
 }
 
-func (s *OtsService) DescribeOtsTable(id string) (*tablestore.DescribeTableResponse, error) {
-	table := &tablestore.DescribeTableResponse{}
+func (s *OtsService) DescribeOtsTable(id string) (*DescribeTableResponse, error) {
+	table := &DescribeTableResponse{}
 	parts, err := ParseResourceId(id, 2)
 	if err != nil {
 		return table, errmsgs.WrapError(err)
@@ -102,7 +100,7 @@ func (s *OtsService) DescribeOtsTable(id string) (*tablestore.DescribeTableRespo
 		}
 		return table, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, id, "DescribeTable", errmsgs.AliyunTablestoreGoSdk)
 	}
-	table, _ = raw.(*tablestore.DescribeTableResponse)
+	table, _ = raw.(*DescribeTableResponse)
 	if table == nil || table.TableMeta == nil || table.TableMeta.TableName != tableName {
 		return table, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OtsTable", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
@@ -194,22 +192,17 @@ func (s *OtsService) ListOtsInstance(pageSize int, pageNum int) ([]string, error
 func (s *OtsService) DescribeOtsInstance(id string) (inst InstanceInfo, err error) {
 	request := s.client.NewCommonRequest("GET", "Ots", "2016-06-20", "GetInstance", "")
 	request.QueryParams["InstanceName"] = id
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	addDebug(request.GetActionName(), raw, request.QueryParams, errmsgs.AlibabacloudStackSdkGoERROR)
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request.QueryParams, errmsgs.AlibabacloudStackSdkGoERROR)
 	// OTS instance not found error code is "NotFound"
-	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}else{
-			errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OtsInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+		if bresponse == nil {
+			return inst, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		if errmsgs.NotFoundError(err) {
 			return inst, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return inst, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	var instmap GetInstanceResponse
@@ -379,4 +372,18 @@ type GetInstanceResponse struct {
 	RequestId       string       `json:"RequestId" xml:"RequestId"`
 	AsapiRequestId  string       `json:"asapiRequestId" xml:"asapiRequestId"`
 	InstanceInfo    InstanceInfo `json:"InstanceInfo" xml:"InstanceInfo"`
+}
+
+type DescribeTableResponse struct {
+	TableMeta          *tablestore.TableMeta
+	TableOption        *TableOption
+	ReservedThroughput *tablestore.ReservedThroughput
+	StreamDetails      *tablestore.StreamDetails
+	IndexMetas         []*tablestore.IndexMeta
+	tablestore.ResponseInfo
+}
+
+type TableOption struct {
+	TimeToAlive, MaxVersion int
+	DeviationCellVersionInSec int64
 }

@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -214,6 +215,9 @@ func otsInstancesDecriptionAttributes(d *schema.ResourceData, instances []Instan
 func otsTagsToMapFun(tags TagInfos) map[string]string {
 	m := make(map[string]string)
 	for _, t := range tags.TagInfo {
+		if strings.HasPrefix(t["TagKey"], "ascm:") {
+			continue
+		}
 		m[t["TagKey"]] = t["TagValue"]
 	}
 	return m

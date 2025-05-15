@@ -114,5 +114,4 @@ require (
 replace (
 	github.com/aliyun/aliyun-log-go-sdk => ./local_vendor/github.com/aliyun/aliyun-log-go-sdk
 	github.com/aliyun/aliyun-oss-go-sdk => ./local_vendor/github.com/aliyun/aliyun-oss-go-sdk
-	github.com/aliyun/aliyun-tablestore-go-sdk => ./local_vendor/github.com/aliyun/aliyun-tablestore-go-sdk
 )

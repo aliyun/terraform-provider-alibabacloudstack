@@ -912,9 +912,12 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 	// Initialize the TABLESTORE client if necessary
 	tableStoreClient, ok := client.tablestoreconnByInstanceName[instanceName]
 	if !ok {
-		endpoint := client.Config.Endpoints[OTSCode]
+		endpoint := client.Config.Endpoints[OtsCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
+		}
+		if !strings.HasPrefix(endpoint, "http") {
+			endpoint = fmt.Sprintf("%s://%s", strings.ToLower(client.Config.Protocol), endpoint)
 		}
 		tableStoreClient = tablestore.NewClientWithConfig(endpoint, instanceName, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken, tablestore.NewDefaultTableStoreConfig())
 		client.tablestoreconnByInstanceName[instanceName] = tableStoreClient
@@ -925,7 +928,7 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 func (client *AlibabacloudStackClient) WithOtsClient(do func(*ots.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the OTS client if necessary
 	if client.otsconn == nil {
-		conn, error := client.WithProductSDKClient(OTSCode)
+		conn, error := client.WithProductSDKClient(OtsCode)
 		if error != nil {
 			return nil, error
 		}
@@ -947,7 +950,7 @@ func (client *AlibabacloudStackClient) WithDataHubClient(do func(api datahub.Dat
 			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
 		}
 		if !strings.HasPrefix(endpoint, "http") {
-			endpoint = fmt.Sprintf("https://%s", endpoint)
+			endpoint = fmt.Sprintf("%s://%s", strings.ToLower(client.Config.Protocol), endpoint)
 		}
 
 		account := datahub.NewStsCredential(client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)

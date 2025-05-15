@@ -37,7 +37,6 @@ const (
 	CREECode            = ServiceCode("CR_EE")
 	CDNCode             = ServiceCode("CDN")
 	CMSCode             = ServiceCode("CMS")
-	OTSCode             = ServiceCode("OTS")
 	DNSCode             = ServiceCode("CLOUDDNS")
 	PVTZCode            = ServiceCode("PVTZ")
 	LOGCode             = ServiceCode("LOG")
@@ -311,7 +310,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"oss-{{.region}}-a.{{.domain}}",
 	},
 	BssDataCode: PopEndpoint{"", ""},
-	OTSCode:     PopEndpoint{"", ""},
+	OtsCode:     PopEndpoint{
+		"ots.{{.domain}}", 
+		"ots.{{.region}}.{{.domain}}",
+	},
 	// 3.18.3新局点将不会开放
 	OneRouterCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
