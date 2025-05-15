@@ -105,6 +105,14 @@ func (e *EdasService) GetChangeOrderStatus(id string) (info *EdasChangeOrderInfo
 	if err != nil {
 		return &order, errmsgs.WrapError(err)
 	}
+	rps := make(map[string]interface{})
+	err  = json.Unmarshal(bresponse.GetHttpContentBytes(), &rps)
+	if err != nil {
+		return &order, errmsgs.WrapError(fmt.Errorf("GetChangeOrderInfoResponse Failed :%#v", rps))
+	}
+	if fmt.Sprint(rps["Code"]) != "200" {
+		return nil, errmsgs.WrapError(fmt.Errorf("GetChangeOrderInfoResponse Failed :%#v", rps))
+	}
 	order = response.ChangeOrderInfo
 	return &order, nil
 }

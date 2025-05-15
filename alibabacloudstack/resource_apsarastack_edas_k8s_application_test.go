@@ -136,7 +136,6 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testacc-edask8sappb%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sApplicationConfigDependence)
 	// region := os.Getenv("ALIBABACLOUDSTACK_REGION")
-	image := fmt.Sprintf("cr.registry.inter.env212.shuguang.com/edas-1780333199011301/outlier-sc-p-exception:outlier-sc-p-excepti-1734082849")
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -150,21 +149,32 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"application_name": "${var.name}",
-					"cluster_id":       "29a23803-50a5-4e08-879f-acff2b5cbee9",
-					"package_type":     "Image",
-					"image_url":        image,
-					"replicas":         "3",
-					//"internet_slb_protocol": "TCP",
-					//"internet_slb_port":     "8080",
-					//"internet_target_port":  "18082",
+					"cluster_id":       "9f272ee5-4f4c-4368-a0b7-515bbb6b9500",
+					"package_type":     "FatJar",
+					"package_url":      "http://fileserver.edas.inter.env17e.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar",
+					"package_version":  "2025-05-15 14:17:18",
+					"jdk":              "Open JDK 8",
+					"replicas":         "2",
+					"internet_service_port_infos": []map[string]interface{}{
+						{
+							"target_port":            "18082",
+							"port":                   "18082",
+							"protocol":               "TCP",
+							"load_balancer_protocol": "TCP",
+						},
+					},
+					"internet_external_traffic_policy": "Local",
+					"internet_scheduler":               "rr",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"image_url": image,
-						"replicas":  "2",
-						//"internet_slb_protocol": "TCP",
-						//"internet_slb_port":     "8080",
-						//"internet_target_port":  "18082",
+						"replicas":                                  "2",
+						"internet_external_traffic_policy":          "Local",
+						"internet_scheduler":                        "rr",
+						"internet_service_port_infos.#":             "1",
+						"internet_service_port_infos.0.target_port": "18082",
+						"internet_service_port_infos.0.port":        "18082",
+						"internet_service_port_infos.0.protocol":    "TCP",
 					}),
 				),
 			},
@@ -217,6 +227,42 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 						"limit_mem":      "1000",
 						"requests_m_cpu": "100",
 						"requests_mem":   "100",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"internet_service_port_infos": []map[string]interface{}{
+						{
+							"target_port":            "8000",
+							"port":                   "8000",
+							"protocol":               "TCP",
+							"load_balancer_protocol": "TCP",
+						},
+					},
+					"internet_external_traffic_policy": "Local",
+					"internet_scheduler":               "rr",
+					"intranet_service_port_infos": []map[string]interface{}{
+						{
+							"target_port":            "8080",
+							"port":                   "8080",
+							"protocol":               "TCP",
+							"load_balancer_protocol": "TCP",
+						},
+					},
+					"intranet_external_traffic_policy": "Local",
+					"intranet_scheduler":               "rr",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"internet_service_port_infos.#":             "1",
+						"internet_service_port_infos.0.target_port": "8000",
+						"internet_service_port_infos.0.port":        "8000",
+						"intranet_service_port_infos.#":             "1",
+						"intranet_service_port_infos.0.target_port": "8080",
+						"intranet_service_port_infos.0.port":        "8080",
+						"intranet_external_traffic_policy":          "Local",
+						"intranet_scheduler":                        "rr",
 					}),
 				),
 			},
