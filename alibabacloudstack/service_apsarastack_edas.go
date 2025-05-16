@@ -106,7 +106,7 @@ func (e *EdasService) GetChangeOrderStatus(id string) (info *EdasChangeOrderInfo
 		return &order, errmsgs.WrapError(err)
 	}
 	rps := make(map[string]interface{})
-	err  = json.Unmarshal(bresponse.GetHttpContentBytes(), &rps)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &rps)
 	if err != nil {
 		return &order, errmsgs.WrapError(fmt.Errorf("GetChangeOrderInfoResponse Failed :%#v", rps))
 	}
@@ -791,10 +791,15 @@ func (e *EdasService) GetK8sServicePorts(service_ports []interface{}) (string, e
 	return string(b), nil
 }
 
+type EdasK8sApp struct {
+	edas.App
+	HostAliases string `json:"HostAliases" xml:"HostAliases"`
+}
+
 type EdasK8sApplcation struct {
 	Instaces      EdasK8sAppInstances `json:"Instances" xml:"Instances"`
 	Conf          edas.Conf           `json:"Conf" xml:"Conf"`
-	App           edas.App            `json:"App" xml:"App"`
+	App           EdasK8sApp          `json:"App" xml:"App"`
 	ImageInfo     edas.ImageInfo      `json:"ImageInfo" xml:"ImageInfo"`
 	LatestVersion edas.LatestVersion  `json:"LatestVersion" xml:"LatestVersion"`
 	DeployGroups  edas.DeployGroups   `json:"DeployGroups" xml:"DeployGroups"`
