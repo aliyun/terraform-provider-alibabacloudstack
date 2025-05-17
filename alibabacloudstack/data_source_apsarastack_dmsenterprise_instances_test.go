@@ -112,7 +112,7 @@ func dataSourceDmsEnterpriseInstancesConfigDependence(name string) string {
 	resource "alibabacloudstack_db_account" "account" {
 	instance_id = "${alibabacloudstack_db_instance.instance.id}"
 	name        = "admin123"
-	password    = "inputYourCodeHere"
+	password    = "%[3]s"
 	type        = "Normal"
 	}
 
@@ -154,5 +154,5 @@ func dataSourceDmsEnterpriseInstancesConfigDependence(name string) string {
 	  use_dsql          =	 "0"
 	  data_link_name    =	 ""
 	}
-`, name, os.Getenv("ALIBABACLOUDSTACK_REGION"))
+`, name, os.Getenv("ALIBABACLOUDSTACK_REGION"), GeneratePassword())
 }

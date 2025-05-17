@@ -544,7 +544,7 @@ resource "alibabacloudstack_db_database" "db" {
 resource "alibabacloudstack_db_account" "account" {
   instance_id      = alibabacloudstack_db_instance.instance.id
   name        = "tftestprivilege"
-  password    = "inputYourCodeHere"
+  password    = "%s"
   description = "from terraform"
 }
 
@@ -578,5 +578,5 @@ resource "alibabacloudstack_vswitch" "default2" {
 }
 
 
-`, name)
+`, name, GeneratePassword())
 }

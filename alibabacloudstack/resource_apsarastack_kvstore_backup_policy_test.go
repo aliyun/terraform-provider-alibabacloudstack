@@ -317,14 +317,14 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
-	password       = "1qaz@WSX"
+	password       = "%s"
 }
 	resource "alibabacloudstack_kvstore_backup_policy" "default" {
 		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
 		backup_period = ["Tuesday", "Wednesday"]
 		backup_time = "10:00Z-11:00Z"
 	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion)
+	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, GeneratePassword())
 }
 
 func testAccKVStoreBackupPolicy_classicUpdatePeriod(rand int, instanceType, engineVersion string) string {
@@ -354,14 +354,14 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
-	password       = "1qaz@WSX"
+	password       = "%s"
 }
 	resource "alibabacloudstack_kvstore_backup_policy" "default" {
 		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
 		backup_period = ["Tuesday", "Wednesday", "Sunday"]
 		backup_time = "10:00Z-11:00Z"
 	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion)
+	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, GeneratePassword())
 }
 
 func testAccKVStoreBackupPolicy_classicUpdateTime(rand int, instanceType, engineVersion string) string {
@@ -391,14 +391,14 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
-	password       = "1qaz@WSX"
+	password       = "%s"
 }
 	resource "alibabacloudstack_kvstore_backup_policy" "default" {
 		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
 		backup_period = ["Tuesday", "Wednesday", "Sunday"]
 		backup_time = "12:00Z-13:00Z"
 	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion)
+	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, GeneratePassword())
 }
 
 func testAccKVStoreBackupPolicy_classicUpdateAll(rand int, instanceType, engineVersion string) string {
@@ -428,14 +428,14 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 	engine_version = "%s"
 	node_type = "double"
 	architecture_type = "standard"
-	password       = "1qaz@WSX"
+	password       = "%s"
 }
 	resource "alibabacloudstack_kvstore_backup_policy" "default" {
 		instance_id = "${alibabacloudstack_kvstore_instance.default.id}"
 		backup_period = ["Sunday"]
 		backup_time = "13:00Z-14:00Z"
 	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion)
+	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, GeneratePassword())
 }
 
 func testAccKVStoreBackupPolicy_vpc(rand int, instanceType, engineVersion string) string {

@@ -386,10 +386,10 @@ resource "alibabacloudstack_alikafka_topic" "default" {
 resource "alibabacloudstack_alikafka_sasl_user" "default" {
   instance_id = "cluster-private-paas-default"
   username = "${var.name}"
-  password = "password"
+  password = "%s"
   type     = "scram"
 }
-`, name)
+`, name, GeneratePassword())
 }
 
 /*

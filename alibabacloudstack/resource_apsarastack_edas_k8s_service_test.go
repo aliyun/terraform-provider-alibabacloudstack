@@ -166,7 +166,7 @@ func resourceEdasK8sSericeDependence(name string) string {
 			worker_instance_types 		= ["ecs.n4v2.large"]
 			worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
 			worker_disk_category 		= "cloud_ssd"
-			password 					= "Test12345"
+			password 					= "%s"
 			pod_cidr 					= "172.20.0.0/16"
 			service_cidr 				= "172.21.0.0/20"
 			worker_disk_size 			= "40"
@@ -201,5 +201,5 @@ func resourceEdasK8sSericeDependence(name string) string {
 			post_start            	= "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
 			namespace             	= "default"
 		}
-		`, name)
+		`, name, GeneratePassword())
 }

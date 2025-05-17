@@ -130,10 +130,10 @@ resource "alibabacloudstack_db_instance" "default" {
 	resource "alibabacloudstack_db_account" "default" {
 	  instance_id = "${alibabacloudstack_db_instance.default.id}"
 	  name = "tftestprivilege"
-	  password = "inputYourCodeHere"
+	  password = "%s"
 	  description = "from terraform"
 	}
-`, RdsCommonTestCase, name)
+`, RdsCommonTestCase, name, GeneratePassword())
 }
 
 //func TestAccAlibabacloudStackDBAccountPrivilege_PostgreSql(t *testing.T) {

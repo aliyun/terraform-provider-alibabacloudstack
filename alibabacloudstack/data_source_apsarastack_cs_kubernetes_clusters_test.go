@@ -137,7 +137,7 @@ variable "enable_ssh" {
 
 variable "password" {
   description = "The password of ECS instance."
-  default     = "inputYourCodeHere"
+  default     = "%s"
 }
 
 variable "service_cidr" {
@@ -241,5 +241,5 @@ resource "alibabacloudstack_cs_kubernetes" "default" {
 //  worker_data_disk_size =  30
 //  master_disk_size = 45
 //}
-`, name)
+`, name, GeneratePassword())
 }

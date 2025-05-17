@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"testing"
@@ -334,6 +335,7 @@ func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
+	password := GeneratePassword()
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -382,7 +384,7 @@ func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_vpc_account_password,
+				Config: testMongoDBInstance_vpc_account_password(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"account_password": "inputYourCodeHere",
@@ -390,7 +392,7 @@ func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_vpc_security_ip_list,
+				Config: testMongoDBInstance_vpc_security_ip_list(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"security_ip_list.#": "1",
@@ -399,7 +401,7 @@ func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_vpc_backup,
+				Config: testMongoDBInstance_vpc_backup(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"backup_period.#": "1",
@@ -409,7 +411,7 @@ func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_vpc_together,
+				Config: testMongoDBInstance_vpc_together(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":                "tf-testAccMongoDBInstance_test_together",
@@ -438,6 +440,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
+	password := GeneratePassword()
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -486,7 +489,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_multiAZ_account_password,
+				Config: testMongoDBInstance_multiAZ_account_password(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"account_password": "inputYourCodeHere",
@@ -494,7 +497,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_multiAZ_security_ip_list,
+				Config: testMongoDBInstance_multiAZ_security_ip_list(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"security_ip_list.#": "1",
@@ -503,7 +506,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_multiAZ_backup,
+				Config: testMongoDBInstance_multiAZ_backup(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"backup_period.#": "1",
@@ -513,7 +516,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_multiAZ_together,
+				Config: testMongoDBInstance_multiAZ_together(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":                "tf-testAccMongoDBInstance_test_together",
@@ -542,6 +545,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
+	password := GeneratePassword()
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -584,7 +588,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_multi_instance_account_password,
+				Config: testMongoDBInstance_multi_instance_account_password(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"account_password": "inputYourCodeHere",
@@ -592,7 +596,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_multi_instance_security_ip_list,
+				Config: testMongoDBInstance_multi_instance_security_ip_list(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"security_ip_list.#": "1",
@@ -601,7 +605,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_multi_instance_backup,
+				Config: testMongoDBInstance_multi_instance_backup(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"backup_period.#": "1",
@@ -611,7 +615,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_multi_instance_together,
+				Config: testMongoDBInstance_multi_instance_together(password),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name":                "tf-testAccMongoDBInstance_test_together",
@@ -725,8 +729,8 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   ssl_action          = "Close"
 }`
 
-const testMongoDBInstance_classic_account_password = `
-
+func testMongoDBInstance_classic_account_password(password string) string {
+	return fmt.Sprintf(`
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -736,9 +740,10 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   ssl_action          = "Close"
-}`
+}`, password)
+}
 
 const testMongoDBInstance_classic_tde = `
 data "alibabacloudstack_zones" "default" {
@@ -753,7 +758,8 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   tde_status    = "enabled"
 }`
 
-const testMongoDBInstance_classic_security_ip_list = `
+func testMongoDBInstance_classic_security_ip_list(password string) string {
+	return fmt.Sprintf(`
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -764,12 +770,14 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12"]
   ssl_action          = "Close"
-}`
+}`, password)
+}
 
-const testMongoDBInstance_classic_security_group_id = `
+func testMongoDBInstance_classic_security_group_id(password string) string {
+	return fmt.Sprintf(`
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -782,12 +790,14 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_group_id    = "${data.alibabacloudstack_security_groups.default.groups.0.id}"
   ssl_action          = "Close"
-}`
+}`, password)
+}
 
-const testMongoDBInstance_classic_backup = `
+func testMongoDBInstance_classic_backup(password string) string {
+	return fmt.Sprintf(`
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -798,14 +808,16 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12"]
   backup_period       = ["Wednesday"]
   backup_time         = "11:00Z-12:00Z"
   ssl_action          = "Close"
-}`
+}`, password)
+}
 
-const testMongoDBInstance_classic_maintain_time = `
+func testMongoDBInstance_classic_maintain_time(password string) string {
+	return fmt.Sprintf(`
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -816,16 +828,18 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12"]
   backup_period       = ["Wednesday"]
   backup_time         = "11:00Z-12:00Z"
   maintain_start_time = "02:00Z"
   maintain_end_time   = "03:00Z"
   ssl_action          = "Close"
-}`
+}`, password)
+}
 
-const testMongoDBInstance_classic_together = `
+func testMongoDBInstance_classic_together(password string) string {
+	return fmt.Sprintf(`
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -836,12 +850,13 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test_together"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12", "10.168.1.13"]
   backup_period       = ["Tuesday", "Wednesday"]
   backup_time         = "10:00Z-11:00Z"
   ssl_action          = "Open"
-}`
+}`, password)
+}
 
 const testMongoDBInstance_vpc_base = `
 data "alibabacloudstack_zones" "default" {
@@ -926,7 +941,8 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   name                = "tf-testAccMongoDBInstance_test"
 }`
 
-const testMongoDBInstance_vpc_account_password = `
+func testMongoDBInstance_vpc_account_password(password string) string {
+	return fmt.Sprintf(`
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -952,10 +968,12 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
-}`
+  account_password    = "%s"
+}`, password)
+}
 
-const testMongoDBInstance_vpc_security_ip_list = `
+func testMongoDBInstance_vpc_security_ip_list(password string) string {
+	return fmt.Sprintf(`
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -981,11 +999,13 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12"]
-}`
+}`, password)
+}
 
-const testMongoDBInstance_vpc_backup = `
+func testMongoDBInstance_vpc_backup(password string) string {
+	return fmt.Sprintf(`
 data "alibabacloudstack_zones" "default" {
   
 }
@@ -1011,13 +1031,15 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12"]
   backup_period       = ["Wednesday"]
   backup_time         = "11:00Z-12:00Z"
-}`
+}`, password)
+}
 
-const testMongoDBInstance_vpc_together = `
+func testMongoDBInstance_vpc_together(password string) string {
+	return fmt.Sprintf(`
 
 data "alibabacloudstack_zones" "default" {
   
@@ -1043,11 +1065,12 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test_together"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12", "10.168.1.13"]
   backup_period       = ["Tuesday", "Wednesday"]
   backup_time         = "10:00Z-11:00Z"
-}`
+}`, password)
+}
 
 const testMongoDBInstance_multiAZ_base = `
 
@@ -1138,7 +1161,8 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   name                = "tf-testAccMongoDBInstance_test"
 }`
 
-const testMongoDBInstance_multiAZ_account_password = `
+func testMongoDBInstance_multiAZ_account_password(password string) string {
+	return fmt.Sprintf(`
 
 data "alibabacloudstack_zones" "default" {
 
@@ -1165,10 +1189,12 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
-}`
+  account_password    = "%s"
+}`, password)
+}
 
-const testMongoDBInstance_multiAZ_security_ip_list = `
+func testMongoDBInstance_multiAZ_security_ip_list(password string) string {
+	return fmt.Sprintf(`
 
 data "alibabacloudstack_zones" "default" {
   
@@ -1196,11 +1222,13 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12"]
-}`
+}`, password)
+}
 
-const testMongoDBInstance_multiAZ_backup = `
+func testMongoDBInstance_multiAZ_backup(password string) string {
+	return fmt.Sprintf(`
 
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
@@ -1228,13 +1256,15 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12"]
   backup_period       = ["Wednesday"]
   backup_time         = "11:00Z-12:00Z"
-}`
+}`, password)
+}
 
-const testMongoDBInstance_multiAZ_together = `
+func testMongoDBInstance_multiAZ_together(password string) string {
+	return fmt.Sprintf(`
 
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
@@ -1262,11 +1292,12 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test_together"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12", "10.168.1.13"]
   backup_period       = ["Tuesday", "Wednesday"]
   backup_time         = "10:00Z-11:00Z"
-}`
+}`, password)
+}
 
 const testMongoDBInstance_multi_instance_base = `
 
@@ -1351,7 +1382,8 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   name                = "tf-testAccMongoDBInstance_test"
 }`
 
-const testMongoDBInstance_multi_instance_account_password = `
+func testMongoDBInstance_multi_instance_account_password(password string) string {
+	return fmt.Sprintf(`
 
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
@@ -1377,10 +1409,12 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
-}`
+  account_password    = "%s"
+}`, password)
+}
 
-const testMongoDBInstance_multi_instance_security_ip_list = `
+func testMongoDBInstance_multi_instance_security_ip_list(password string) string {
+	return fmt.Sprintf(`
 
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
@@ -1406,11 +1440,13 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12"]
-}`
+}`, password)
+}
 
-const testMongoDBInstance_multi_instance_backup = `
+func testMongoDBInstance_multi_instance_backup(password string) string {
+	return fmt.Sprintf(`
 
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
@@ -1436,13 +1472,15 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12"]
   backup_period       = ["Wednesday"]
   backup_time         = "11:00Z-12:00Z"
-}`
+}`, password)
+}
 
-const testMongoDBInstance_multi_instance_together = `
+func testMongoDBInstance_multi_instance_together(password string) string {
+	return fmt.Sprintf(`
 
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
@@ -1468,8 +1506,9 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"
   name                = "tf-testAccMongoDBInstance_test_together"
-  account_password    = "inputYourCodeHere"
+  account_password    = "%s"
   security_ip_list    = ["10.168.1.12", "10.168.1.13"]
   backup_period       = ["Tuesday", "Wednesday"]
   backup_time         = "10:00Z-11:00Z"
-}`
+}`, password)
+}
