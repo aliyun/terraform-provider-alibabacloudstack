@@ -5,7 +5,7 @@ before:
   hooks:
     # this is just an example and not a requirement for provider building/publishing
     - go mod tidy
-    - go mod vendor
+    # - go mod vendor 删除，以减少磁盘开销
 builds:
 - env:
     # goreleaser does not work with CGO, it could also complicate
@@ -33,7 +33,7 @@ builds:
     - goarch: '386'
       goos: darwin
     - goarch: arm
-      goos: darwim
+      goos: darwin
     - goarch: arm64
       goos: freebsd
     - goarch: arm
