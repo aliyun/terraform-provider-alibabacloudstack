@@ -20,7 +20,7 @@ builds:
   
   hooks:
     post: 
-      - cmd: 'zip -j {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.zip {{ .Path }} ../../LICENSE ../../README.md ../../CHANGELOG.md'
+      - cmd: 'zip -j {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.zip {{ .Path }} ./LICENSE ./README.md ./CHANGELOG.md'
       - cmd: 'rm -f {{ .Path }}'
       - cmd: 'touch {{ .Path }}'
   
@@ -64,6 +64,8 @@ archives:
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
+  extra_files:
+    - glob: '*.zip'
 signs:
   - artifacts: checksum
     args:
