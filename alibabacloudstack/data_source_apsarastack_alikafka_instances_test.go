@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlicloudAlikafkaInstancesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackAlikafkaInstancesDataSource(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_alikafka_instances.default"

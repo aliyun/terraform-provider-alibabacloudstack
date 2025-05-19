@@ -80,7 +80,7 @@ output "first_api_id" {
 
 * `group_id` - (可选) API 所属组的 ID。  
 * `api_id` - (可选，已废弃) 特定 API 的 ID。此字段从版本 1.52.2 开始已被废弃，并由 `ids` 字段取代。  
-* `ids` - (可选，从版本 1.52.2 开始可用) 用于过滤结果的 API ID 列表。  
+* `ids` - (可选) 用于过滤结果的 API ID 列表。  
 * `name_regex` - (可选) 用于按名称筛选 API Gateway API 的正则表达式字符串。  
 
 > **注意**：`api_id` 字段已废弃，请使用 `ids` 字段替代。
