@@ -22,7 +22,6 @@ builds:
     post: 
       - cmd: 'zip -j {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.zip {{ .Path }} ./LICENSE ./README.md ./CHANGELOG.md'
       - cmd: 'rm -f {{ .Path }}'
-      - cmd: 'touch {{ .Path }}'
   
   goos:
     - freebsd
