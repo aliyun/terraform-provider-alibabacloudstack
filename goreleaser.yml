@@ -5,7 +5,7 @@ before:
   hooks:
     # this is just an example and not a requirement for provider building/publishing
     - go mod tidy
-    # - go mod vendor 删除，以减少磁盘开销
+    - go mod vendor 
 builds:
 - env:
     # goreleaser does not work with CGO, it could also complicate
@@ -58,9 +58,8 @@ builds:
     - goarch: arm64
       goos: windows
   binary: '{{ .ProjectName }}_v{{ .Version }}'
-# 禁用默认的打包流程
-archives:
-  - format: binary
+archives: 
+- format: 'none'
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
@@ -78,6 +77,7 @@ signs:
       - "${signature}"
       - "--detach-sign"
       - "${artifact}"
+
 release:
   # 手动指定要上传的文件
   extra_files:
