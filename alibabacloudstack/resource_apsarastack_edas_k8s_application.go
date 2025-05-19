@@ -224,11 +224,12 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"ip": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 						},
 						"hostnames": {
 							Type:     schema.TypeList,
 							MinItems: 1,
+							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
 					},
@@ -793,6 +794,14 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 			}
 		}
 		d.Set("local_volume", local_volumes)
+	}
+	if response.App.HostAliases != "" {
+		host_aliases := make([]map[string]string, 0)
+		err = json.Unmarshal([]byte(response.App.HostAliases), &host_aliases)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		d.Set("host_aliases", host_aliases)
 	}
 	return nil
 }
