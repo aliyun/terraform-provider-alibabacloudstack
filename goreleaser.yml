@@ -17,6 +17,13 @@ builds:
     - -trimpath
   ldflags:
     - '-s -w -X github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity.ProviderVersion={{.Version}}'
+  
+  hooks:
+    post: 
+      - cmd: 'zip -j {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}.zip {{ .Path }} ../../LICENSE ../../README.md ../../CHANGELOG.md'
+      - cmd: 'rm -f {{ .Path }}'
+      - cmd: 'touch {{ .Path }}'
+  
   goos:
     - freebsd
     - openbsd
@@ -51,9 +58,9 @@ builds:
     - goarch: arm64
       goos: windows
   binary: '{{ .ProjectName }}_v{{ .Version }}'
+# 禁用默认的打包流程
 archives:
-- format: zip
-  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+  - format: binary
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
@@ -70,7 +77,6 @@ signs:
       - "--detach-sign"
       - "${artifact}"
 release:
-  # If you want to manually examine the release before its live, uncomment this line:
-  # draft: true
-#changelog:
-#  skip: true
+  # 手动指定要上传的文件
+  extra_files:
+    - glob: '*.zip'
