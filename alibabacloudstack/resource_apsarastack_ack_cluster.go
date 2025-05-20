@@ -66,6 +66,19 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 					string(DiskCloudEfficiency), string(DiskCloudSSD), string(DiskCloudPPERF), string(DiskCloudSPERF)}, false),
 				DiffSuppressFunc: csForceUpdateSuppressFunc,
 			},
+			"master_disk_encrypt_algorithm": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
+			},
+			"master_disk_kms_key_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"master_disk_encrypted": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 			"delete_protection": {
 				Type:     schema.TypeBool,
 				Default:  false,
@@ -90,6 +103,19 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					string(DiskCloudEfficiency), string(DiskCloudSSD), string(DiskCloudPPERF), string(DiskCloudSPERF)}, false),
 				DiffSuppressFunc: csForceUpdateSuppressFunc,
+			},
+			"worker_disk_encrypt_algorithm": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
+			},
+			"worker_disk_kms_key_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"worker_disk_encrypted": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			// 			"worker_data_disk_size": {
 			// 				Type:             schema.TypeInt,
@@ -763,6 +789,26 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 	}
 	if key_name, ok := d.GetOk("key_name"); ok && key_name != "" {
 		body["key_pair"] = key_name.(string)
+	}
+
+	if v, ok := d.GetOk("master_disk_encrypted"); ok && v.(bool) {
+		body["master_system_disk_encrypted"] = fmt.Sprintf("%t", v.(bool))
+		if v, ok := d.GetOk("master_disk_encrypt_algorithm"); ok && v.(string) != "" {
+			body["master_system_disk_encrypt_algorithm"] = v.(string)
+		}
+		if v, ok := d.GetOk("master_disk_kms_key_id"); ok && v.(string) != "" {
+			body["master_system_disk_kms_key_id"] = v.(string)
+		}
+	}
+
+	if v, ok := d.GetOk("worker_disk_encrypted"); ok && v.(bool) {
+		body["worker_system_disk_encrypted"] = fmt.Sprintf("%t", v.(bool))
+		if v, ok := d.GetOk("worker_disk_encrypt_algorithm"); ok && v.(string) != "" {
+			body["worker_system_disk_encrypt_algorithm"] = v.(string)
+		}
+		if v, ok := d.GetOk("worker_disk_kms_key_id"); ok && v.(string) != "" {
+			body["worker_system_disk_kms_key_id"] = v.(string)
+		}
 	}
 
 	if v, ok := d.GetOk("instances"); ok {
