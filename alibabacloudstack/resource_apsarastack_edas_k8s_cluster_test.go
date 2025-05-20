@@ -232,5 +232,5 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 		 slb_internet_enabled 		= "true"
 		}
 
-		`, name, namespace_logical_id, GeneratePassword())
+		`, name, namespace_logical_id, GeneratePassword(12))
 }

@@ -147,5 +147,5 @@ resource "alibabacloudstack_elasticsearch_instance" "default" {
 	  "For":     "acceptance test",
   }
 }
-`, name, GeneratePassword())
+`, name, GeneratePassword(12))
 }

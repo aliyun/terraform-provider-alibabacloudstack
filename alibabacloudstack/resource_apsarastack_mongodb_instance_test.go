@@ -335,7 +335,7 @@ func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
-	password := GeneratePassword()
+	password := GeneratePassword(12)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -440,7 +440,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
-	password := GeneratePassword()
+	password := GeneratePassword(12)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -545,7 +545,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
-	password := GeneratePassword()
+	password := GeneratePassword(12)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {

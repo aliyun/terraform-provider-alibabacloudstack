@@ -303,7 +303,7 @@ func testAccCheckKVStoreInstanceDestroy(s *terraform.State) error {
 }
 
 func testAccKVStoreInstance_classic(rand int, instanceType, engineVersion string) string {
-	password := GeneratePassword()
+	password := GeneratePassword(12)
 	return fmt.Sprintf(`
 
 	
@@ -497,7 +497,7 @@ func testAccKVStoreInstance_classicUpdateClass(instanceType, instanceClass, engi
 	`, instanceType, instanceClass, engineVersion)
 }
 func testAccKVStoreInstance_classicUpdateAttr(instanceType, instanceClass, engineVersion string) string {
-	password := GeneratePassword()
+	password := GeneratePassword(12)
 	return fmt.Sprintf(`
 	data "alibabacloudstack_zones" "default" {
 		available_resource_creation = "KVStore"
@@ -519,7 +519,7 @@ func testAccKVStoreInstance_classicUpdateAttr(instanceType, instanceClass, engin
 }
 func testAccKVStoreInstance_classicUpdateTags(instanceType, instanceClass, engineVersion string) string {
 
-	password := GeneratePassword()
+	password := GeneratePassword(12)
 	return fmt.Sprintf(`
 	data "alibabacloudstack_zones" "default" {
 		available_resource_creation = "KVStore"
@@ -544,7 +544,7 @@ func testAccKVStoreInstance_classicUpdateTags(instanceType, instanceClass, engin
 	`, password, instanceType, instanceClass, engineVersion)
 }
 func testAccKVStoreInstance_classicUpdateMaintainStartTime(instanceType, instanceClass, engineVersion string) string {
-	password := GeneratePassword()
+	password := GeneratePassword(12)
 	return fmt.Sprintf(`
 	data "alibabacloudstack_zones" "default" {
 		available_resource_creation = "KVStore"
@@ -571,7 +571,7 @@ func testAccKVStoreInstance_classicUpdateMaintainStartTime(instanceType, instanc
 	`, password, instanceType, instanceClass, engineVersion)
 }
 func testAccKVStoreInstance_classicUpdateAll(instanceType, instanceClass, engineVersion string) string {
-	password := GeneratePassword()
+	password := GeneratePassword(12)
 	return fmt.Sprintf(`
 	
 	variable "name" {
@@ -776,7 +776,7 @@ func testAccKVStoreInstance_vpcUpdateClass(common, instanceClass, instanceType, 
 	`, common, instanceClass, instanceType, engineVersion)
 }
 func testAccKVStoreInstance_vpcUpdateAll(common, instanceClass, instanceType, engineVersion string) string {
-	password := GeneratePassword()
+	password := GeneratePassword(12)
 	return fmt.Sprintf(`
 	%s
 	variable "creation" {
@@ -820,7 +820,7 @@ func testAccKVStoreInstance_vpcmulti(common string, instanceClass, instanceType,
 }
 
 func testAccKVStoreInstance_classicmulti(instanceType, instanceClass, engineVersion string) string {
-	password := GeneratePassword()
+	password := GeneratePassword(12)
 	return fmt.Sprintf(`
 
 	variable "name" {

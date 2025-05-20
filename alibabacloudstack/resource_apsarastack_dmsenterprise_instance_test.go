@@ -298,5 +298,5 @@ func resourceDmsConfigDependence(name string) string {
 	}
 	
 
-	`, name, GeneratePassword())
+	`, name, GeneratePassword(12))
 }

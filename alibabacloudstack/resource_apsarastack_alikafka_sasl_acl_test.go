@@ -389,7 +389,7 @@ resource "alibabacloudstack_alikafka_sasl_user" "default" {
   password = "%s"
   type     = "scram"
 }
-`, name, GeneratePassword())
+`, name, GeneratePassword(12))
 }
 
 /*
