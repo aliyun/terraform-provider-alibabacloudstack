@@ -820,7 +820,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_arms_dispatchrule":                      resourceAlibabacloudStackArmsDispatchRule(),
 		"alibabacloudstack_arms_prometheus_alert_rule":             resourceAlibabacloudStackArmsPrometheusAlertRule(),
 		"alibabacloudstack_arms_prometheusalertrule":               resourceAlibabacloudStackArmsPrometheusAlertRule(),
-		"alibabacloudstack_elasticsearch_k8s_instance":             resourceAlibabacloudStackElasticsearchOnk8s(),
+		"alibabacloudstack_elasticsearch_k8s_instance":             resourceAlibabacloudStackElasticsearch(),
 		"alibabacloudstack_cloud_firewall_control_policy":          resourceAlibabacloudStackCloudFirewallControlPolicy(),
 		"alibabacloudstack_cloudfirewall_controlpolicy":            resourceAlibabacloudStackCloudFirewallControlPolicy(),
 		"alibabacloudstack_cloud_firewall_control_policy_order":    resourceAlibabacloudStackCloudFirewallControlPolicyOrder(),
