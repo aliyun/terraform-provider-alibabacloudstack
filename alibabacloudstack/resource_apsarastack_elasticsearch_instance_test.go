@@ -16,25 +16,26 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-const DataNodeSpec = "elasticsearch.sn1ne.large"
-const DataNodeAmount = "2"
+const EsVersion = "5.5.3_ali0.0.0"
+const DataNodeSpec = "8C 32Gi"
+const DataNodeAmount = "3"
 const DataNodeDisk = "20"
-const DataNodeDiskType = "cloud_ssd"
+const DataNodeDiskType = "fast-disks-ssd"
 
-const DataNodeSpecForUpdate = "elasticsearch.sn2ne.large"
-const DataNodeAmountForUpdate = "3"
+const DataNodeSpecForUpdate = "16C 64Gi"
+const DataNodeAmountForUpdate = "5"
 const DataNodeDiskForUpdate = "30"
 
 const DataNodeAmountForMultiZone = "4"
 const DefaultZoneAmount = "2"
 
-const MasterNodeSpec = "elasticsearch.sn2ne.large"
-const MasterNodeSpecForUpdate = "elasticsearch.sn2ne.xlarge"
+const MasterNodeSpec = "4C 16Gi"
+const MasterNodeSpecForUpdate = "8C 32Gii"
 
-const ClientNodeSpec = "elasticsearch.sn2ne.large"
+const ClientNodeSpec = "8C 32Gi"
 const ClientNodeAmount = "2"
 
-const ClientNodeSpecForUpdate = "elasticsearch.sn2ne.xlarge"
+const ClientNodeSpecForUpdate = "16C 64Gi"
 const ClientNodeAmountForUpdate = "3"
 
 func init() {
@@ -156,6 +157,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 		name = name[:30]
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
+	password := GeneratePassword(12)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -168,20 +170,21 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"cpu_type":             "Intel",
+					"scene":                "normal",
 					"description":          name,
 					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"version":              "5.5.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
+					"version":              EsVersion,
+					"password":             GeneratePassword(12),
 					"data_node_spec":       DataNodeSpec,
 					"data_node_amount":     DataNodeAmount,
 					"data_node_disk_size":  DataNodeDisk,
 					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"description": name,
-						"version":     "5.5.3_with_X-Pack",
+						"version":     EsVersion,
 					}),
 				),
 			},
@@ -193,11 +196,11 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"password": "inputYourCodeHere",
+					"password": password,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"password": "inputYourCodeHere",
+						"password": password,
 					}),
 				),
 			},
@@ -374,22 +377,23 @@ func TestAccAlibabacloudStackElasticsearchInstance_multizone(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"cpu_type":             "Intel",
+					"scene":                "normal",
 					"description":          name,
 					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"version":              "5.5.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
+					"version":              EsVersion,
+					"password":             GeneratePassword(12),
 					"data_node_spec":       DataNodeSpec,
 					"data_node_amount":     DataNodeAmountForMultiZone,
 					"data_node_disk_size":  DataNodeDisk,
 					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
 					"master_node_spec":     MasterNodeSpec,
 					"zone_count":           DefaultZoneAmount,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"description":      name,
-						"version":          "5.5.3_with_X-Pack",
+						"version":          EsVersion,
 						"data_node_amount": DataNodeAmountForMultiZone,
 						"master_node_spec": MasterNodeSpec,
 						"zone_count":       DefaultZoneAmount,
@@ -432,15 +436,16 @@ func TestAccAlibabacloudStackElasticsearchInstance_version(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"cpu_type":             "Intel",
+					"scene":                "normal",
 					"description":          name,
 					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
 					"version":              "6.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
+					"password":             GeneratePassword(12),
 					"data_node_spec":       DataNodeSpec,
 					"data_node_amount":     DataNodeAmount,
 					"data_node_disk_size":  DataNodeDisk,
 					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -495,15 +500,16 @@ func TestAccAlibabacloudStackElasticsearchInstance_multi(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"cpu_type":             "Intel",
+					"scene":                "normal",
 					"description":          name,
 					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"version":              "5.5.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
+					"version":              EsVersion,
+					"password":             GeneratePassword(12),
 					"data_node_spec":       DataNodeSpec,
 					"data_node_amount":     DataNodeAmount,
 					"data_node_disk_size":  DataNodeDisk,
 					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
 					"count":                "2",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -546,23 +552,24 @@ func TestAccAlibabacloudStackElasticsearchInstance_encrypt_disk(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"cpu_type":                 "Intel",
+					"scene":                    "normal",
 					"description":              name,
 					"vswitch_id":               "${alibabacloudstack_vswitch.default.id}",
-					"version":                  "5.5.3_with_X-Pack",
-					"password":                 "inputYourCodeHere",
+					"version":                  EsVersion,
+					"password":                 GeneratePassword(12),
 					"data_node_spec":           DataNodeSpec,
 					"data_node_amount":         DataNodeAmountForMultiZone,
 					"data_node_disk_size":      DataNodeDisk,
 					"data_node_disk_type":      DataNodeDiskType,
 					"data_node_disk_encrypted": "true",
-					"instance_charge_type":     string(PostPaid),
 					"master_node_spec":         MasterNodeSpec,
 					"zone_count":               DefaultZoneAmount,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"description":              name,
-						"version":                  "5.5.3_with_X-Pack",
+						"version":                  EsVersion,
 						"data_node_amount":         DataNodeAmountForMultiZone,
 						"data_node_disk_encrypted": "true",
 						"master_node_spec":         MasterNodeSpec,
@@ -606,15 +613,16 @@ func TestAccAlibabacloudStackElasticsearchInstance_client_node(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"cpu_type":             "Intel",
+					"scene":                "normal",
 					"description":          name,
 					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
 					"version":              "6.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
+					"password":             GeneratePassword(12),
 					"data_node_spec":       DataNodeSpec,
 					"data_node_amount":     DataNodeAmount,
 					"data_node_disk_size":  DataNodeDisk,
 					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
 					"client_node_spec":     ClientNodeSpec,
 					"client_node_amount":   ClientNodeAmount,
 				}),
@@ -673,15 +681,16 @@ func TestAccAlibabacloudStackElasticsearchInstance_https(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"cpu_type":             "Intel",
+					"scene":                "normal",
 					"description":          name,
 					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
 					"version":              "6.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
+					"password":             GeneratePassword(12),
 					"data_node_spec":       DataNodeSpec,
 					"data_node_amount":     DataNodeAmount,
 					"data_node_disk_size":  DataNodeDisk,
 					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
 					"client_node_spec":     ClientNodeSpec,
 					"client_node_amount":   ClientNodeAmount,
 					"protocol":             "HTTPS",
@@ -748,15 +757,16 @@ func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) 
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"cpu_type":             "Intel",
+					"scene":                "normal",
 					"description":          name,
 					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
 					"version":              "6.7_with_X-Pack",
-					"password":             "inputYourCodeHere",
+					"password":             GeneratePassword(12),
 					"data_node_spec":       DataNodeSpec,
 					"data_node_amount":     "3",
 					"data_node_disk_size":  DataNodeDisk,
 					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
 					"setting_config": map[string]string{
 						"\"action.auto_create_index\"":         "+.*,-*",
 						"\"action.destructive_requires_name\"": "false",
@@ -791,7 +801,6 @@ var elasticsearchMap = map[string]string{
 	"data_node_amount":              DataNodeAmount,
 	"data_node_disk_size":           DataNodeDisk,
 	"data_node_disk_type":           DataNodeDiskType,
-	"instance_charge_type":          string(PostPaid),
 	"status":                        "active",
 	"private_whitelist.#":           "0",
 	"public_whitelist.#":            "0",
@@ -817,7 +826,6 @@ var AlibabacloudStackElasticsearchMap = map[string]string{
 	"kibana_port":          CHECKSET,
 	"vswitch_id":           CHECKSET,
 	"description":          CHECKSET,
-	"instance_charge_type": string(PostPaid),
 }
 
 func resourceElasticsearchInstanceConfigDependence(name string) string {

@@ -250,7 +250,7 @@ func (client *AlibabacloudStackClient) WithAscmClient(do func(*sdk.Client) (inte
 
 func (client *AlibabacloudStackClient) WithElasticsearchClient(do func(*elasticsearch.Client) (interface{}, error)) (interface{}, error) {
 	if client.elasticsearchconn == nil {
-		conn, error := client.WithProductSDKClient(ELASTICSEARCHCode)
+		conn, error := client.WithProductSDKClient(ElasticsearchK8sCode)
 		if error != nil {
 			return nil, error
 		}
@@ -971,7 +971,7 @@ func (client *AlibabacloudStackClient) NewEcsClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("ecs", client.Config.Endpoints[EcsCode])
 }
 func (client *AlibabacloudStackClient) NewElasticsearchClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("elasticsearch", client.Config.Endpoints[ELASTICSEARCHCode])
+	return client.NewTeaSDkClient("elasticsearch", client.Config.Endpoints[ElasticsearchK8sCode])
 }
 
 func (client *AlibabacloudStackClient) NewRosClient() (*rpc.Client, error) {

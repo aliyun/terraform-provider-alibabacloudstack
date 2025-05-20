@@ -25,7 +25,7 @@ type ElasticsearchService struct {
 func (s *ElasticsearchService) DescribeElasticsearchInstance(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := make(map[string]interface{})
-	response, err = s.client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "DescribeInstance", "", nil, nil, request)
+	response, err = s.client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "DescribeInstance", "", nil, nil, request)
 	addDebug("DescribeInstance", response, nil)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
@@ -44,30 +44,6 @@ func (s *ElasticsearchService) DescribeElasticsearchInstance(id string) (object 
 	if (object["instanceId"].(string)) != id {
 		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("Elasticsearch Instance", id)), errmsgs.NotFoundWithResponse, response)
 	}
-	return object, nil
-}
-
-func (s *ElasticsearchService) DescribeElasticsearchOnk8sInstance(id string) (object map[string]interface{}, err error) {
-	request := make(map[string]interface{})
-	request["InstanceId"] = id
-	request["ClientToken"] = buildClientToken("DescribeInstance")
-	
-	response, err := s.client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "DescribeInstance", "", nil, nil, request)
-	addDebug("DescribeInstance", response, request)
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "DescribeInstance", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	if fmt.Sprint(response["asapiSuccess"]) == "false" {
-		return nil, errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", "DescribeInstance", response))
-	}
-	v, err := jsonpath.Get("$.Result", response)
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.Result", response)
-	}
-	object = v.(map[string]interface{})
 	return object, nil
 }
 
@@ -119,7 +95,7 @@ func (s *ElasticsearchService) TriggerNetwork(d *schema.ResourceData, content ma
 	
 	request["clientToken"] = buildClientToken("TriggerNetwork")
 	request["product"] = "elasticsearch"
-	response, err := s.client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "TriggerNetwork", "", nil, nil, request)
+	response, err := s.client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "TriggerNetwork", "", nil, nil, request)
 	addDebug("TriggerNetwork", response, content)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"RepetitionOperationError"}) {
@@ -143,7 +119,7 @@ func (s *ElasticsearchService) ModifyWhiteIps(d *schema.ResourceData, content ma
 	
 	request["clientToken"] = buildClientToken("ModifyWhiteIps")
 	request["product"] = "elasticsearch"
-	response, err := s.client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "ModifyWhiteIps", "", nil, nil, request)
+	response, err := s.client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "ModifyWhiteIps", "", nil, nil, request)
 	addDebug("ModifyWhiteIps", response, nil)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ConcurrencyUpdateInstanceConflict", "InstanceStatusNotSupportCurrentAction", "InternalServerError"}) || errmsgs.NeedRetry(err) {
@@ -354,7 +330,7 @@ func updateInstanceChargeType(d *schema.ResourceData, meta interface{}) error {
 		content["paymentInfo"] = paymentInfo
 	}
 	content["clientToken"] = buildClientToken("UpdateInstanceChargeType")
-	response, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "UpdateInstanceChargeType", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateInstanceChargeType", "", nil, nil, content)
 	time.Sleep(10 * time.Second)
 	addDebug("UpdateInstanceChargeType", response, content)
 	if err != nil {
@@ -376,7 +352,7 @@ func renewInstance(d *schema.ResourceData, meta interface{}) error {
 		content["duration"] = d.Get("period").(int)
 		content["pricingCycle"] = string(Month)
 	}
-	response, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "RenewInstance", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "RenewInstance", "", nil, nil, content)
 	time.Sleep(10 * time.Second)
 
 	addDebug("RenewInstance", response, content)
@@ -393,7 +369,7 @@ func updateDataNodeAmount(d *schema.ResourceData, meta interface{}) error {
 	
 	content["clientToken"] = buildClientToken("UpdateInstance")
 	content["nodeAmount"] = d.Get("data_node_amount").(int)
-	response, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "UpdateInstance", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", "", nil, nil, content)
 	addDebug("UpdateInstance", response, content)
 	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateInstance", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -420,7 +396,7 @@ func updateDataNodeSpec(d *schema.ResourceData, meta interface{}) error {
 	spec["disk"] = d.Get("data_node_disk_size")
 	spec["diskType"] = d.Get("data_node_disk_type")
 	content["nodeSpec"] = spec
-	response, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "UpdateInstance", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", "", nil, nil, content)
 	addDebug("UpdateInstance", response, content)
 	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateInstance", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -453,7 +429,7 @@ func updateMasterNode(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		content["advancedDedicateMaster"] = false
 	}
-	response, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "UpdateInstance", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", "", nil, nil, content)
 	addDebug("UpdateInstance", response, content)
 	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateInstance", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -489,7 +465,7 @@ func updatePassword(d *schema.ResourceData, meta interface{}) error {
 		}
 		content["esAdminPassword"] = decryptResp
 	}
-	response, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "UpdateAdminPassword", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateAdminPassword", "", nil, nil, content)
 	addDebug("UpdateAdminPassword", response, content)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateAdminPassword", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -543,7 +519,7 @@ func updateClientNode(d *schema.ResourceData, meta interface{}) error {
 	spec["disk"] = "20"
 	spec["diskType"] = "cloud_efficiency"
 	content["clientNodeConfiguration"] = spec
-	response, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "UpdateInstance", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", "", nil, nil, content)
 	addDebug("UpdateInstance", response, content)
 	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateInstance", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -565,7 +541,7 @@ func openHttps(d *schema.ResourceData, meta interface{}) error {
 	content := make(map[string]interface{})
 	
 	content["clientToken"] = buildClientToken("OpenHttps")
-	response, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "OpenHttps", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "OpenHttps", "", nil, nil, content)
 	addDebug("OpenHttps", response, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "OpenHttps", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -586,7 +562,7 @@ func closeHttps(d *schema.ResourceData, meta interface{}) error {
 	content := make(map[string]interface{})
 	
 	content["clientToken"] = buildClientToken("CloseHttps")
-	response, err := client.DoTeaRequest("POST", "elasticsearch", "2017-06-13", "CloseHttps", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "CloseHttps", "", nil, nil, content)
 	addDebug("CloseHttps", response, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "CloseHttps", errmsgs.AlibabacloudStackSdkGoERROR)

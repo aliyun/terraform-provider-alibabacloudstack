@@ -50,7 +50,7 @@ const (
 	CLOUDAPICode        = ServiceCode("CLOUDAPI")
 	DRDSCode            = ServiceCode("DRDS")
 	LOCATIONCode        = ServiceCode("LOCATION")
-	ELASTICSEARCHCode   = ServiceCode("ELASTICSEARCH")
+	ElasticsearchK8sCode   = ServiceCode("ELASTICSEARCH_K8S")
 	DDOSCOOCode         = ServiceCode("DDOSCOO")
 	DDOSBGPCode         = ServiceCode("DDOSBGP")
 	SAGCode             = ServiceCode("SAG")
@@ -212,7 +212,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"edas-api.console.{{.region}}.{{.domain}}",
 	},
 	//ELASTICSEARCHCode endpoint
-	ELASTICSEARCHCode: PopEndpoint{
+	ElasticsearchK8sCode: PopEndpoint{
 		"elasticsearch.k8s.{{.region}}.{{.domain}}",
 		"elasticsearch.k8s.{{.region}}.{{.domain}}",
 	},
