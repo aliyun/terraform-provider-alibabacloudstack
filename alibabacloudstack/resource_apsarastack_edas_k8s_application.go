@@ -860,7 +860,10 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 	}
 
 	if d.HasChanges("limit_m_cpu", "requests_m_cpu", "limit_mem", "requests_mem") {
-		K8sAppConfiguration(d, meta)
+		err = K8sAppConfiguration(d, meta)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
 	}
 	request := client.NewCommonRequest("POST", "Edas", "2017-08-01", "DeployK8sApplication", "/pop/v5/k8s/acs/k8s_apps")
 	request.QueryParams["RegionId"] = client.RegionId
@@ -960,30 +963,30 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 	if d.HasChange("pre_stop") {
 		if !edasService.PreStopEqual(d.GetChange("pre_stop")) {
 			partialKeys = append(partialKeys, "pre_stop")
-			request.QueryParams["PreStop"] = d.Get("pre_stop").(string)
 		}
 	}
+	request.QueryParams["PreStop"] = d.Get("pre_stop").(string)
 
 	if d.HasChange("post_start") {
 		if !edasService.PostStartEqual(d.GetChange("post_start")) {
 			partialKeys = append(partialKeys, "post_start")
-			request.QueryParams["PostStart"] = d.Get("post_start").(string)
 		}
 	}
+	request.QueryParams["PostStart"] = d.Get("post_start").(string)
 
 	if d.HasChange("liveness") {
 		if !edasService.LivenessEqual(d.GetChange("liveness")) {
 			partialKeys = append(partialKeys, "liveness")
-			request.QueryParams["Liveness"] = d.Get("liveness").(string)
 		}
 	}
+	request.QueryParams["Liveness"] = d.Get("liveness").(string)
 
 	if d.HasChange("readiness") {
 		if !edasService.ReadinessEqual(d.GetChange("readiness")) {
 			partialKeys = append(partialKeys, "readiness")
-			request.QueryParams["Readiness"] = d.Get("readiness").(string)
 		}
 	}
+	request.QueryParams["Readiness"] = d.Get("readiness").(string)
 
 	if d.HasChange("nas_id") {
 		partialKeys = append(partialKeys, "nas_id")
