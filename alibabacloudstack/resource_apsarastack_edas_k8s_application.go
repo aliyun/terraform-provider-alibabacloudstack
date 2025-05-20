@@ -85,14 +85,12 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 			"internet_external_traffic_policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Local", "Cluster"}, false),
 				Default:      "Local",
 			},
 			"internet_scheduler": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"rr", "wrr"}, false),
 				Default:      "rr",
 			},
@@ -146,14 +144,12 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 			"intranet_external_traffic_policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Local", "Cluster"}, false),
 				Default:      "Local",
 			},
 			"intranet_scheduler": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"rr", "wrr"}, false),
 				Default:      "rr",
 			},
