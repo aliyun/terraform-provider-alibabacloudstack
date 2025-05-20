@@ -859,7 +859,7 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 		}
 	}
 
-	if d.HasChanges("limit_m_cpu", "requests_m_cpu", "limit_mem", "requests_mem") {
+	if !d.IsNewResource() && d.HasChanges("limit_m_cpu", "requests_m_cpu", "limit_mem", "requests_mem") {
 		err = K8sAppConfiguration(d, meta)
 		if err != nil {
 			return errmsgs.WrapError(err)
@@ -1168,22 +1168,22 @@ func K8sBindSlb(net_type string, isnew bool, d *schema.ResourceData, meta interf
 	if v, ok := d.GetOk(fmt.Sprintf("%s_slb_id", net_type)); ok && isnew {
 		request.QueryParams["SlbId"] = v.(string)
 		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(fmt.Sprintf("BindK8sSlb: %s", net_type), bresponse, request, request.QueryParams)
+		addDebug(fmt.Sprintf("%s: %s", action, net_type), bresponse, request, request.QueryParams)
 		if err != nil {
 			errmsg := ""
 			if bresponse != nil {
 				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", "BindK8sSlb", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		response := make(map[string]interface{})
 		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if fmt.Sprint(response["Code"]) != "200" {
-			return errmsgs.WrapError(fmt.Errorf("BindK8sSlb Failed , response: %#v", response))
+			return errmsgs.WrapError(fmt.Errorf("%s Failed , response: %#v", action, response))
 		}
 		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(response["ChangeOrderId"].(string), []string{"3", "6", "10"}))
 		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapError(fmt.Errorf("BindK8sSlb Failed , response: %#v", response))
+			return errmsgs.WrapError(fmt.Errorf("%s Failed , response: %#v", action, response))
 		}
 		return nil
 	} else {
@@ -1230,16 +1230,16 @@ func K8sBindSlb(net_type string, isnew bool, d *schema.ResourceData, meta interf
 				if bresponse != nil {
 					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				}
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", "BindK8sSlb", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 			response := make(map[string]interface{})
 			_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 			if fmt.Sprint(response["Code"]) != "200" {
-				return errmsgs.WrapError(fmt.Errorf("BindK8sSlb Failed , response: %#v", response))
+				return errmsgs.WrapError(fmt.Errorf("%s Failed , response: %#v", action, response))
 			}
 			stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(response["ChangeOrderId"].(string), []string{"3", "6", "10"}))
 			if _, err := stateConf.WaitForState(); err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", "BindK8sSlb", errmsgs.AlibabacloudStackSdkGoERROR, "")
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", action, errmsgs.AlibabacloudStackSdkGoERROR, "")
 			}
 			time.Sleep(time.Duration(10) * time.Second)
 		}

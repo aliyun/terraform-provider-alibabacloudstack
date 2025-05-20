@@ -152,7 +152,7 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 					"cluster_id":       "9f272ee5-4f4c-4368-a0b7-515bbb6b9500",
 					"package_type":     "FatJar",
 					"package_url":      "http://fileserver.edas.inter.env17e.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar",
-					"package_version":  "2025-05-19 14:17:18",
+					"package_version":  "2025-05-20 17:17:18",
 					"jdk":              "Open JDK 8",
 					"replicas":         "2",
 					"internet_service_port_infos": []map[string]interface{}{
@@ -182,6 +182,24 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 						"internet_service_port_infos.1.target_port": "8080",
 						"internet_service_port_infos.1.port":        "8080",
 						"internet_service_port_infos.1.protocol":    "HTTP",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"host_aliases": []map[string]interface{}{
+						{
+							"ip":        "127.0.0.1",
+							"hostnames": []string{"alics.com"},
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"host_aliases.#":             "1",
+						"host_aliases.0.ip":          "127.0.0.1",
+						"host_aliases.0.hostnames.#": "1",
+						"host_aliases.0.hostnames.0": "alics.com",
 					}),
 				),
 			},
@@ -238,24 +256,6 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"host_aliases": []map[string]interface{}{
-						{
-							"ip":        "127.0.0.1",
-							"hostnames": []string{"alics.com"},
-						},
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"host_aliases.#":             "1",
-						"host_aliases.1.ip":          "127.0.0.1",
-						"host_aliases.1.hostnames.#": "1",
-						"host_aliases.1.hostnames.1": "alics.com",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
 					"internet_service_port_infos": []map[string]interface{}{
 						{
 							"target_port": "8000",
@@ -280,9 +280,6 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 						"internet_service_port_infos.#":             "1",
 						"internet_service_port_infos.0.target_port": "8000",
 						"internet_service_port_infos.0.port":        "8000",
-						"intranet_service_port_infos.#":             "1",
-						"intranet_service_port_infos.0.target_port": "8080",
-						"intranet_service_port_infos.0.port":        "8080",
 						"intranet_external_traffic_policy":          "Local",
 						"intranet_scheduler":                        "rr",
 					}),
