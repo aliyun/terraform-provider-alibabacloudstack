@@ -152,21 +152,19 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 					"cluster_id":       "9f272ee5-4f4c-4368-a0b7-515bbb6b9500",
 					"package_type":     "FatJar",
 					"package_url":      "http://fileserver.edas.inter.env17e.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar",
-					"package_version":  "2025-05-16 14:17:18",
+					"package_version":  "2025-05-19 14:17:18",
 					"jdk":              "Open JDK 8",
 					"replicas":         "2",
 					"internet_service_port_infos": []map[string]interface{}{
 						{
-							"target_port":            "18082",
-							"port":                   "18082",
-							"protocol":               "TCP",
-							"load_balancer_protocol": "TCP",
+							"target_port": "18082",
+							"port":        "18082",
+							"protocol":    "TCP",
 						},
 						{
-							"target_port":            "8080",
-							"port":                   "8080",
-							"protocol":               "HTTP",
-							"load_balancer_protocol": "HTTP",
+							"target_port": "8080",
+							"port":        "8080",
+							"protocol":    "HTTP",
 						},
 					},
 					"internet_external_traffic_policy": "Local",
@@ -222,20 +220,37 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 					}),
 				),
 			},
-
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"limit_m_cpu":    "500",
-					"limit_mem":      "1000",
-					"requests_m_cpu": "100",
-					"requests_mem":   "100",
+					"limit_mem":      "256",
+					"requests_m_cpu": "500",
+					"requests_mem":   "256",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"limit_m_cpu":    "500",
-						"limit_mem":      "1000",
-						"requests_m_cpu": "100",
-						"requests_mem":   "100",
+						"limit_mem":      "256",
+						"requests_m_cpu": "500",
+						"requests_mem":   "256",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"host_aliases": []map[string]interface{}{
+						{
+							"ip":        "127.0.0.1",
+							"hostnames": []string{"alics.com"},
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"host_aliases.#":             "1",
+						"host_aliases.1.ip":          "127.0.0.1",
+						"host_aliases.1.hostnames.#": "1",
+						"host_aliases.1.hostnames.1": "alics.com",
 					}),
 				),
 			},
@@ -243,20 +258,18 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"internet_service_port_infos": []map[string]interface{}{
 						{
-							"target_port":            "8000",
-							"port":                   "8000",
-							"protocol":               "TCP",
-							"load_balancer_protocol": "TCP",
+							"target_port": "8000",
+							"port":        "8000",
+							"protocol":    "TCP",
 						},
 					},
 					"internet_external_traffic_policy": "Local",
 					"internet_scheduler":               "rr",
 					"intranet_service_port_infos": []map[string]interface{}{
 						{
-							"target_port":            "8080",
-							"port":                   "8080",
-							"protocol":               "TCP",
-							"load_balancer_protocol": "TCP",
+							"target_port": "8080",
+							"port":        "8080",
+							"protocol":    "TCP",
 						},
 					},
 					"intranet_external_traffic_policy": "Local",
