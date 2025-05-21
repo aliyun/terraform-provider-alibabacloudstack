@@ -131,6 +131,15 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"kms_key_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"encrypt_algorithm": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
+						},
 					},
 				},
 			},
@@ -692,7 +701,20 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		}
 	}
 	if data, ok := d.GetOk("worker_data_disks"); ok {
-		body["worker_data_disks"] = data
+		var data_disks = []map[string]interface{}{}
+		for _, value := range data.([]interface{}) {
+			disk := value.(map[string]interface{})
+			data_disks = append(data_disks, map[string]interface{}{
+				"size":                    fmt.Sprintf("%d", disk["size"].(int)),
+				"category":                disk["category"].(string),
+				"encrypted":               fmt.Sprintf("%t", disk["encrypted"].(bool)),
+				"auto_snapshot_policy_id": disk["auto_snapshot_policy_id"].(string),
+				"performance_level":       disk["performance_level"].(string),
+				"kms_key_id":              disk["kms_key_id"].(string),
+				"encrypt_algorithm":       disk["encrypt_algorithm"].(string),
+			})
+		}
+		body["worker_data_disks"] = data_disks
 	}
 	if v, ok := d.GetOk("tags"); ok {
 		var tags = []map[string]interface{}{}
