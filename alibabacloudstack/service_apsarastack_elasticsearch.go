@@ -25,7 +25,7 @@ type ElasticsearchService struct {
 func (s *ElasticsearchService) DescribeElasticsearchInstance(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := make(map[string]interface{})
-	response, err = s.client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "DescribeInstance", "", nil, nil, request)
+	response, err = s.client.DoTeaRequest("GET", "elasticsearch-k8s", "2017-06-13", "DescribeInstance", fmt.Sprintf("/openapi/instances/%s", id), nil, nil, request)
 	addDebug("DescribeInstance", response, nil)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
@@ -36,7 +36,7 @@ func (s *ElasticsearchService) DescribeElasticsearchInstance(id string) (object 
 	if fmt.Sprint(response["Success"]) == "false" {
 		return object, errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", "DescribeInstance", response))
 	}
-	v, err := jsonpath.Get("$", response)
+	v, err := jsonpath.Get("$.Result", response)
 	if err != nil {
 		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$", response)
 	}
@@ -117,9 +117,7 @@ func (s *ElasticsearchService) ModifyWhiteIps(d *schema.ResourceData, content ma
 	var response map[string]interface{}
 	request := make(map[string]interface{})
 	
-	request["clientToken"] = buildClientToken("ModifyWhiteIps")
-	request["product"] = "elasticsearch"
-	response, err := s.client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "ModifyWhiteIps", "", nil, nil, request)
+	response, err := s.client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "ModifyAclWhiteIps", fmt.Sprintf("/openapi/instances/%s/actions/modify-acl-white-ips", d.Id()), nil, nil, request)
 	addDebug("ModifyWhiteIps", response, nil)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"ConcurrencyUpdateInstanceConflict", "InstanceStatusNotSupportCurrentAction", "InternalServerError"}) || errmsgs.NeedRetry(err) {
@@ -218,9 +216,8 @@ func updateDescription(d *schema.ResourceData, meta interface{}) error {
 	request := make(map[string]interface{})
 	request["InstanceId"] = d.Id()
 	request["description"] = d.Get("description").(string)
-	request["ClientToken"] = buildClientToken("UpdateDescription")
 	
-	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateDescription", "", nil, nil, request)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateDescription", fmt.Sprintf("/openapi/instances/%s/description", d.Id()), nil, nil, request)
 	addDebug("UpdateDescription", response, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"UpdateDescriptionFailed"}) {
@@ -312,56 +309,6 @@ func updateInstanceTags(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func updateInstanceChargeType(d *schema.ResourceData, meta interface{}) error {
-	var response map[string]interface{}
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	content := make(map[string]interface{})
-	content["paymentType"] = strings.ToLower(d.Get("instance_charge_type").(string))
-	if d.Get("instance_charge_type").(string) == string(PrePaid) {
-		paymentInfo := make(map[string]interface{})
-		if d.Get("period").(int) >= 12 {
-			paymentInfo["duration"] = d.Get("period").(int) / 12
-			paymentInfo["pricingCycle"] = string(Year)
-		} else {
-			paymentInfo["duration"] = d.Get("period").(int)
-			paymentInfo["pricingCycle"] = string(Month)
-		}
-
-		content["paymentInfo"] = paymentInfo
-	}
-	content["clientToken"] = buildClientToken("UpdateInstanceChargeType")
-	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateInstanceChargeType", "", nil, nil, content)
-	time.Sleep(10 * time.Second)
-	addDebug("UpdateInstanceChargeType", response, content)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), response, errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	return nil
-}
-
-func renewInstance(d *schema.ResourceData, meta interface{}) error {
-	var response map[string]interface{}
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	content := make(map[string]interface{})
-	
-	content["clientToken"] = buildClientToken("RenewInstance")
-	if d.Get("period").(int) >= 12 {
-		content["duration"] = d.Get("period").(int) / 12
-		content["pricingCycle"] = string(Year)
-	} else {
-		content["duration"] = d.Get("period").(int)
-		content["pricingCycle"] = string(Month)
-	}
-	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "RenewInstance", "", nil, nil, content)
-	time.Sleep(10 * time.Second)
-
-	addDebug("RenewInstance", response, content)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), response, errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	return nil
-}
-
 func updateDataNodeAmount(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	elasticsearchService := ElasticsearchService{client}
@@ -369,7 +316,7 @@ func updateDataNodeAmount(d *schema.ResourceData, meta interface{}) error {
 	
 	content["clientToken"] = buildClientToken("UpdateInstance")
 	content["nodeAmount"] = d.Get("data_node_amount").(int)
-	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", "", nil, nil, content)
+	response, err := client.DoTeaRequest("PUT", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", fmt.Sprintf("/openapi/instances/%s", d.Id()), nil, nil, content)
 	addDebug("UpdateInstance", response, content)
 	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateInstance", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -396,7 +343,7 @@ func updateDataNodeSpec(d *schema.ResourceData, meta interface{}) error {
 	spec["disk"] = d.Get("data_node_disk_size")
 	spec["diskType"] = d.Get("data_node_disk_type")
 	content["nodeSpec"] = spec
-	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", "", nil, nil, content)
+	response, err := client.DoTeaRequest("PUT", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", fmt.Sprintf("/openapi/instances/%s", d.Id()), nil, nil, content)
 	addDebug("UpdateInstance", response, content)
 	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateInstance", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -429,7 +376,7 @@ func updateMasterNode(d *schema.ResourceData, meta interface{}) error {
 	} else {
 		content["advancedDedicateMaster"] = false
 	}
-	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", "", nil, nil, content)
+	response, err := client.DoTeaRequest("PUT", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", fmt.Sprintf("/openapi/instances/%s", d.Id()), nil, nil, content)
 	addDebug("UpdateInstance", response, content)
 	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateInstance", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -465,7 +412,7 @@ func updatePassword(d *schema.ResourceData, meta interface{}) error {
 		}
 		content["esAdminPassword"] = decryptResp
 	}
-	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateAdminPassword", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateAdminPassword", fmt.Sprintf("/openapi/instances/%s/admin-pwd", d.Id()), nil, nil, content)
 	addDebug("UpdateAdminPassword", response, content)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateAdminPassword", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -519,7 +466,7 @@ func updateClientNode(d *schema.ResourceData, meta interface{}) error {
 	spec["disk"] = "20"
 	spec["diskType"] = "cloud_efficiency"
 	content["clientNodeConfiguration"] = spec
-	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", "", nil, nil, content)
+	response, err := client.DoTeaRequest("PUT", "elasticsearch-k8s", "2017-06-13", "UpdateInstance", fmt.Sprintf("/openapi/instances/%s", d.Id()), nil, nil, content)
 	addDebug("UpdateInstance", response, content)
 	if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateInstance", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -541,7 +488,7 @@ func openHttps(d *schema.ResourceData, meta interface{}) error {
 	content := make(map[string]interface{})
 	
 	content["clientToken"] = buildClientToken("OpenHttps")
-	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "OpenHttps", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "EnableHttps", fmt.Sprintf("/openapi/instances/%s/actions/enable-https", d.Id()), nil, nil, content)
 	addDebug("OpenHttps", response, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "OpenHttps", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -562,7 +509,7 @@ func closeHttps(d *schema.ResourceData, meta interface{}) error {
 	content := make(map[string]interface{})
 	
 	content["clientToken"] = buildClientToken("CloseHttps")
-	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "CloseHttps", "", nil, nil, content)
+	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "DisableHttps", fmt.Sprintf("/openapi/instances/%s/actions/disable-https", d.Id()), nil, nil, content)
 	addDebug("CloseHttps", response, nil)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "CloseHttps", errmsgs.AlibabacloudStackSdkGoERROR)
