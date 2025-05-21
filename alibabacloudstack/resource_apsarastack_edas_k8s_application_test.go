@@ -514,5 +514,5 @@ func resourceEdasK8sApplicationConfigDependence(name string) string {
 		resource "alibabacloudstack_edas_k8s_cluster" "default" {
 		  cs_cluster_id = "${alibabacloudstack_cs_kubernetes.default.id}"
 		}
-		`, name, VSwitchCommonTestCase, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackInstanceTypes, GeneratePassword())
+		`, name, VSwitchCommonTestCase, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackInstanceTypes, GeneratePassword(12))
 }

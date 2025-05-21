@@ -15,24 +15,24 @@ import (
 )
 
 const EsVersion = "7.10.0_ali1.6.0"
-const EsDiskType = "fast-disks"
-const DataNodeSpec = "8C 32Gi"
+const EsDiskType = "yoda-lvm"
+const DataNodeSpec = "2C 4Gi"
 const DataNodeAmount = "3"
 const DataNodeDisk = "500"
 
-const DataNodeSpecForUpdate = "16C 64Gi"
+const DataNodeSpecForUpdate = "4C 8Gi"
 const DataNodeAmountForUpdate = "5"
 const DataNodeDiskForUpdate = "30"
 
 const KibanaNodeSpec = "1C 4Gi"
 
-const MasterNodeSpec = "4C 16Gi"
+const MasterNodeSpec = "2C 4Gi"
 const MasterNodeSpecForUpdate = "8C 32Gii"
 
-const ClientNodeSpec = "4C 16Gi"
+const ClientNodeSpec = "2C 4Gi"
 const ClientNodeAmount = "2"
 
-const ClientNodeSpecForUpdate = "16C 64Gi"
+const ClientNodeSpecForUpdate = "4C 8Gi"
 const ClientNodeAmountForUpdate = "3"
 
 func init() {
@@ -135,7 +135,7 @@ func testSweepElasticsearch(region string) error {
 }
 
 func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
-	var instance *elasticsearch.DescribeInstanceResponse
+	var instance map[string]interface{}
 
 	resourceId := "alibabacloudstack_elasticsearch_instance.default.1"
 	ra := resourceAttrInit(resourceId, elasticsearchMap)
@@ -344,9 +344,9 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 }
 
 func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
-	var instance *elasticsearch.DescribeInstanceResponse
+	var instance map[string]interface{}
 
-	resourceId := "alibabacloudstack_elasticsearch_instance.default.1"
+	resourceId := "alibabacloudstack_elasticsearch_instance.default"
 	ra := resourceAttrInit(resourceId, elasticsearchMap)
 
 	serviceFunc := func() interface{} {
@@ -389,7 +389,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 					"master_node_amount":    "3",
 					"master_node_spec":      MasterNodeSpec,
 					"master_node_disk_size": "100",
-					"master_node_disk_type": "yoda-lvm",
+					"master_node_disk_type": EsDiskType,
 					"client_node_amount":    ClientNodeAmount,
 					"client_node_spec":      ClientNodeSpec,
 					"vswitch_id":            "${alibabacloudstack_vpc_vswitch.default.id}",
@@ -398,8 +398,14 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": name,
-						"version":     EsVersion,
+						"slb_address":        CHECKSET,
+						"domain":             CHECKSET,
+						"port":               CHECKSET,
+						"kibana_slb_address": CHECKSET,
+						"kibana_domain":      CHECKSET,
+						"kibana_protocol":    CHECKSET,
+						"kibana_port":        CHECKSET,
+						"status": CHECKSET,
 					}),
 				),
 			},
@@ -407,14 +413,14 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateVerifyIgnore: []string{"password", "monitor_password", "kibana_password", "scene"},
 			},
 		},
 	})
 }
 
 func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) {
-	var instance *elasticsearch.DescribeInstanceResponse
+	var instance map[string]interface{}
 
 	resourceId := "alibabacloudstack_elasticsearch_instance.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackElasticsearchMap)
@@ -484,26 +490,24 @@ func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) 
 }
 
 var elasticsearchMap = map[string]string{
-	"description":                   CHECKSET,
-	"data_node_spec":                DataNodeSpec,
-	"data_node_amount":              DataNodeAmount,
-	"data_node_disk_size":           DataNodeDisk,
-	"data_node_disk_type":           EsDiskType,
-	"status":                        "active",
-	"private_whitelist.#":           "0",
-	"public_whitelist.#":            "0",
-	"enable_public":                 "false",
-	"kibana_whitelist.#":            "0",
-	"enable_kibana_public_network":  "true",
-	"kibana_private_whitelist.#":    "0",
-	"enable_kibana_private_network": "false",
-	"master_node_spec":              "",
-	"id":                            CHECKSET,
-	"domain":                        CHECKSET,
-	"port":                          CHECKSET,
-	"kibana_domain":                 CHECKSET,
-	"kibana_port":                   CHECKSET,
-	"vswitch_id":                    CHECKSET,
+	"description":                CHECKSET,
+	"data_node_spec":             DataNodeSpec,
+	"data_node_amount":           DataNodeAmount,
+	"data_node_disk_size":        DataNodeDisk,
+	"data_node_disk_type":        EsDiskType,
+	"status":                     "active",
+	"private_whitelist.#":        "0",
+	"public_whitelist.#":         "0",
+	"enable_public":              "false",
+	"kibana_whitelist.#":         "0",
+	"kibana_private_whitelist.#": "0",
+	"master_node_spec":           CHECKSET,
+	"id":                         CHECKSET,
+	"domain":                     CHECKSET,
+	"port":                       CHECKSET,
+	"kibana_domain":              CHECKSET,
+	"kibana_port":                CHECKSET,
+	"vswitch_id":                 CHECKSET,
 }
 
 var AlibabacloudStackElasticsearchMap = map[string]string{

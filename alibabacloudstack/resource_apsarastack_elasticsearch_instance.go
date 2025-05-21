@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"time"
 
+	"encoding/json"
+
 	"github.com/PaesslerAG/jsonpath"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -23,7 +25,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			// Basic instance information
-			"zone_id" : {
+			"zone_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -48,7 +50,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 			"scene": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ForceNew:         true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"high", "normal", "log"}, false),
 			},
 
@@ -66,23 +68,23 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 			},
 
 			"data_node_disk_size": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.IntBetween(500, 20480),
 			},
 
 			"data_node_disk_type": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"fast-disks", "fast-disks-ssd"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"yoda-lvm", "fast-disks", "fast-disks-ssd"}, false),
 			},
 
 			"data_node_affinity": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
-				ForceNew:         true,
+				ForceNew: true,
 			},
 
 			// Kibana node configuration
@@ -167,10 +169,10 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 
 			// 只读属性
 			"slb_address": {
-				Type:         schema.TypeString,
-				Computed:    true,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
-			
+
 			"domain": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -179,18 +181,18 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			
+
 			"kibana_slb_address": {
-				Type:         schema.TypeString,
-				Computed:    true,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
-			
+
 			"kibana_domain": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"kibana_protocol": {
-				Type:         schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"kibana_port": {
@@ -202,7 +204,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			
+
 			// 非create参数
 
 			"private_whitelist": {
@@ -214,16 +216,14 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 
 			"enable_public": {
 				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Computed: true,
 			},
 
 			"public_whitelist": {
-				Type:             schema.TypeSet,
-				Optional:         true,
-				Elem:             &schema.Schema{Type: schema.TypeString},
-				Computed:         true,
-				DiffSuppressFunc: elasticsearchEnablePublicDiffSuppressFunc,
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
 			},
 
 			"protocol": {
@@ -233,33 +233,18 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"HTTP", "HTTPS"}, false),
 			},
 
-
-			"enable_kibana_public_network": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  true,
-			},
-
 			"kibana_whitelist": {
-				Type:             schema.TypeSet,
-				Optional:         true,
-				Elem:             &schema.Schema{Type: schema.TypeString},
-				Computed:         true,
-				DiffSuppressFunc: elasticsearchEnableKibanaPublicDiffSuppressFunc,
-			},
-
-			"enable_kibana_private_network": {
-				Type:     schema.TypeBool,
+				Type:     schema.TypeSet,
 				Optional: true,
-				Default:  false,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
 			},
 
 			"kibana_private_whitelist": {
-				Type:             schema.TypeSet,
-				Optional:         true,
-				Elem:             &schema.Schema{Type: schema.TypeString},
-				Computed:         true,
-				DiffSuppressFunc: elasticsearchEnableKibanaPrivateDiffSuppressFunc,
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
 			},
 
 			"setting_config": {
@@ -295,7 +280,7 @@ func resourceAlibabacloudStackElasticsearchCreate(d *schema.ResourceData, meta i
 	}
 	d.SetId(resp.(string))
 
-	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 5*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 3*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 5 * time.Second
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -310,43 +295,65 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 
 	object, err := elasticsearchService.DescribeElasticsearchInstance(d.Id())
 	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			d.SetId("")
-			return nil
-		}
 		return errmsgs.WrapError(err)
 	}
-	
+
 	d.Set("version", object["version"].(string))
 	d.Set("description", object["description"].(string))
-	
+	d.Set("cpu_type", object["cpuType"].(map[string]interface{})["cpuBrand"].(string))
+	d.Set("zone_id", object["zoneInfos"].([]interface{})[0].(map[string]interface{})["zoneId"].(string))
+
 	if object["dataNode"].(bool) {
-		d.Set("data_node_amount", object["nodeAmount"].(int))
+		if v, err := object["nodeAmount"].(json.Number).Int64(); err == nil {
+			d.Set("data_node_amount", int(v))
+		} else {
+			return errmsgs.WrapError(err)
+		}
 		nodeSpec := object["nodeSpec"].(map[string]interface{})
 		d.Set("data_node_spec", nodeSpec["spec"].(string))
-		d.Set("data_node_disk_size", nodeSpec["disk"].(int))
+		if v, err := nodeSpec["disk"].(json.Number).Int64(); err == nil {
+			d.Set("data_node_disk_size", int(v))
+		} else {
+			return errmsgs.WrapError(err)
+		}
 		d.Set("data_node_disk_type", nodeSpec["storageClassName"].(string))
 	}
 
 	if object["haveKibana"].(bool) {
-d.Set("kibana_node_spec", object["kibanaConfiguration"].(map[string]interface{})["spec"].(string))
-d.Set("kibana_slb_address", object["kibanaSlbAddress"].(string))
-d.Set("kibana_domain", object["kibanaDomain"].(string))
-d.Set("kibana_protocol", object["kibanaProtocol"].(string))
-d.Set("kibana_port", object["kibanaPort"].(int))
-}
+		d.Set("kibana_node_spec", object["kibanaConfiguration"].(map[string]interface{})["spec"].(string))
+		d.Set("kibana_slb_address", object["kibanaSlbAddress"].(string))
+		d.Set("kibana_domain", object["kibanaDomain"].(string))
+		d.Set("kibana_protocol", object["kibanaProtocol"].(string))
+		if v, err := object["kibanaPort"].(json.Number).Int64(); err == nil {
+			d.Set("kibana_port", int(v))
+		} else {
+			return errmsgs.WrapError(err)
+		}
+	}
 
 	if object["advancedDedicateMaster"].(bool) {
 		masterConfiguration := object["masterConfiguration"].(map[string]interface{})
-		d.Set("master_node_amount", masterConfiguration["amount"].(int))
+		if v, err := masterConfiguration["amount"].(json.Number).Int64(); err == nil {
+			d.Set("master_node_amount", int(v))
+		} else {
+			return errmsgs.WrapError(err)
+		}
 		d.Set("master_node_spec", masterConfiguration["spec"].(string))
-		d.Set("master_node_disk_size", masterConfiguration["disk"].(int))
+		if v, err := masterConfiguration["disk"].(json.Number).Int64(); err == nil {
+			d.Set("master_node_disk_size", int(v))
+		} else {
+			return errmsgs.WrapError(err)
+		}
 		d.Set("master_node_disk_type", masterConfiguration["storageClassName"].(string))
 	}
-	
+
 	if object["haveClientNode"].(bool) {
 		clientNodeConfiguration := object["clientNodeConfiguration"].(map[string]interface{})
-		d.Set("client_node_amount", clientNodeConfiguration["amount"].(int))
+		if v, err := clientNodeConfiguration["amount"].(json.Number).Int64(); err == nil {
+			d.Set("client_node_amount", int(v))
+		} else {
+			return errmsgs.WrapError(err)
+		}
 		d.Set("client_node_spec", clientNodeConfiguration["spec"].(string))
 	}
 
@@ -357,17 +364,13 @@ d.Set("kibana_port", object["kibanaPort"].(int))
 	d.Set("port", object["port"])
 	d.Set("status", object["status"])
 
-
 	esIPWhitelist := object["esIPWhitelist"].([]interface{})
 	publicIpWhitelist := object["publicIpWhitelist"].([]interface{})
 	d.Set("private_whitelist", filterWhitelist(convertArrayInterfaceToArrayString(esIPWhitelist), d.Get("private_whitelist").(*schema.Set)))
 	d.Set("public_whitelist", filterWhitelist(convertArrayInterfaceToArrayString(publicIpWhitelist), d.Get("public_whitelist").(*schema.Set)))
 	d.Set("enable_public", object["enablePublic"])
 
-	
-
 	// Kibana configuration
-	d.Set("enable_kibana_public_network", object["enableKibanaPublicNetwork"])
 	kibanaIPWhitelist := object["kibanaIPWhitelist"].([]interface{})
 	d.Set("kibana_whitelist", filterWhitelist(convertArrayInterfaceToArrayString(kibanaIPWhitelist), d.Get("kibana_whitelist").(*schema.Set)))
 	if object["enableKibanaPublicNetwork"].(bool) {
@@ -375,7 +378,6 @@ d.Set("kibana_port", object["kibanaPort"].(int))
 		d.Set("kibana_port", object["kibanaPort"])
 	}
 
-	d.Set("enable_kibana_private_network", object["enableKibanaPrivateNetwork"])
 	kibanaPrivateIPWhitelist := object["kibanaPrivateIPWhitelist"].([]interface{})
 	d.Set("kibana_private_whitelist", filterWhitelist(convertArrayInterfaceToArrayString(kibanaPrivateIPWhitelist), d.Get("kibana_private_whitelist").(*schema.Set)))
 
@@ -392,15 +394,6 @@ d.Set("kibana_port", object["kibanaPort"].(int))
 		d.Set("setting_config", esConfig)
 	}
 
-	// tags
-	tags, err := elasticsearchService.DescribeElasticsearchTags(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	if len(tags) > 0 {
-		d.Set("tags", tags)
-	}
-
 	return nil
 }
 
@@ -408,14 +401,8 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	elasticsearchService := ElasticsearchService{client}
 	d.Partial(true)
-	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 5*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 3*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 5 * time.Second
-
-	if d.HasChange("description") {
-		if err := updateDescription(d, meta); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
 
 	if d.HasChange("private_whitelist") {
 		content := make(map[string]interface{})
@@ -427,17 +414,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	if d.HasChange("enable_public") {
-		content := make(map[string]interface{})
-		content["networkType"] = string(PUBLIC)
-		content["nodeType"] = string(WORKER)
-		content["actionType"] = elasticsearchService.getActionType(d.Get("enable_public").(bool))
-		if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
-
-	if d.Get("enable_public").(bool) == true && d.HasChange("public_whitelist") {
+	if d.HasChange("public_whitelist") {
 		content := make(map[string]interface{})
 		content["networkType"] = string(PUBLIC)
 		content["nodeType"] = string(WORKER)
@@ -447,17 +424,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	if d.HasChange("enable_kibana_public_network") || d.IsNewResource() {
-		content := make(map[string]interface{})
-		content["networkType"] = string(PUBLIC)
-		content["nodeType"] = string(KIBANA)
-		content["actionType"] = elasticsearchService.getActionType(d.Get("enable_kibana_public_network").(bool))
-		if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
-
-	if d.Get("enable_kibana_public_network").(bool) == true && d.HasChange("kibana_whitelist") {
+	if d.HasChange("kibana_whitelist") {
 		content := make(map[string]interface{})
 		content["networkType"] = string(PUBLIC)
 		content["nodeType"] = string(KIBANA)
@@ -467,37 +434,12 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	if d.HasChange("enable_kibana_private_network") {
-		content := make(map[string]interface{})
-		content["networkType"] = string(PRIVATE)
-		content["nodeType"] = string(KIBANA)
-		content["actionType"] = elasticsearchService.getActionType(d.Get("enable_kibana_private_network").(bool))
-		if err := elasticsearchService.TriggerNetwork(d, content, meta); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
-
-	if d.Get("enable_kibana_private_network").(bool) == true && d.HasChange("kibana_private_whitelist") {
+	if d.HasChange("kibana_private_whitelist") {
 		content := make(map[string]interface{})
 		content["networkType"] = string(PRIVATE)
 		content["nodeType"] = string(KIBANA)
 		content["whiteIpList"] = d.Get("kibana_private_whitelist").(*schema.Set).List()
 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
-
-	if d.HasChange("tags") {
-		if err := updateInstanceTags(d, meta); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
-
-	if d.HasChanges("client_node_spec", "client_node_amount") {
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-		if err := updateClientNode(d, meta); err != nil {
 			return errmsgs.WrapError(err)
 		}
 	}
@@ -513,7 +455,8 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 			https = closeHttps
 		}
 		if nil != https {
-			if err := https(d, meta); err != nil {
+			if err := https(d, meta); err != nil && !errmsgs.IsExpectedErrors(err, []string{"InvalidAction.NotFound"}) {
+				// 3162 老版本不支持HTTPS -> HTTP
 				return errmsgs.WrapError(err)
 			}
 		}
@@ -532,7 +475,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 			return err
 		}
-		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 5*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 3*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 		stateConf.PollInterval = 5 * time.Second
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -542,6 +485,21 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 	if d.IsNewResource() {
 		d.Partial(false)
 		return nil
+	}
+	
+	if d.HasChange("description") {
+		if err := updateDescription(d, meta); err != nil {
+			return errmsgs.WrapError(err)
+		}
+	}
+
+	if d.HasChanges("client_node_spec", "client_node_amount") {
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+		if err := updateClientNode(d, meta); err != nil {
+			return errmsgs.WrapError(err)
+		}
 	}
 
 	if d.HasChanges("data_node_amount", "data_node.amount") {
@@ -589,6 +547,11 @@ func resourceAlibabacloudStackElasticsearchDelete(d *schema.ResourceData, meta i
 	elasticsearchService := ElasticsearchService{client}
 	action := "DeleteInstance"
 
+	if _, ok := d.GetOk("vswitch_id"); ok {
+		// Instance will be completed deleted in 5 minutes, so deleting vswitch is available after the time.
+		defer time.Sleep(3 * time.Minute)
+	}
+
 	request := map[string]interface{}{
 		"RegionId":    client.RegionId,
 		"clientToken": StringPointer(buildClientToken(action)),
@@ -601,14 +564,12 @@ func resourceAlibabacloudStackElasticsearchDelete(d *schema.ResourceData, meta i
 		return err
 	}
 
-	stateConf := BuildStateConf([]string{"activating", "inactive", "active"}, []string{}, d.Timeout(schema.TimeoutDelete), 5*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"activating", "inactive", "active"}, []string{}, d.Timeout(schema.TimeoutDelete), 3*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{}))
 	stateConf.PollInterval = 5 * time.Second
 
 	if _, err = stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-	// Instance will be completed deleted in 5 minutes, so deleting vswitch is available after the time.
-	time.Sleep(5 * time.Minute)
 
 	return nil
 }
@@ -690,7 +651,7 @@ func buildElasticsearchCreateRequestBody(d *schema.ResourceData, meta interface{
 		network["type"] = "vpc"
 		network["vpcId"] = vsw.VpcId
 		network["vswitchId"] = vswitchId
-		
+
 	} else {
 		network["type"] = "anytunnel"
 	}
