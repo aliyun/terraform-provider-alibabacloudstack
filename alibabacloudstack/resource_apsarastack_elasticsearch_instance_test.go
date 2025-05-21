@@ -14,11 +14,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-const EsVersion = "5.5.3_ali0.0.0"
+const EsVersion = "7.10.0_ali1.6.0"
+const EsDiskType = "fast-disks"
 const DataNodeSpec = "8C 32Gi"
 const DataNodeAmount = "3"
-const DataNodeDisk = "20"
-const DataNodeDiskType = "fast-disks-ssd"
+const DataNodeDisk = "500"
 
 const DataNodeSpecForUpdate = "16C 64Gi"
 const DataNodeAmountForUpdate = "5"
@@ -177,7 +177,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 					"data_node_spec":      DataNodeSpec,
 					"data_node_amount":    DataNodeAmount,
 					"data_node_disk_size": DataNodeDisk,
-					"data_node_disk_type": DataNodeDiskType,
+					"data_node_disk_type": EsDiskType,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -383,12 +383,12 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 					"data_node_amount":      DataNodeAmount,
 					"data_node_spec":        DataNodeSpec,
 					"data_node_disk_size":   DataNodeDisk,
-					"data_node_disk_type":   DataNodeDiskType,
+					"data_node_disk_type":   EsDiskType,
 					"kibana_node_spec":      KibanaNodeSpec,
 					"kibana_password":       GeneratePassword(12),
 					"master_node_amount":    "3",
 					"master_node_spec":      MasterNodeSpec,
-					"master_node_disk_size": "50",
+					"master_node_disk_size": "100",
 					"master_node_disk_type": "yoda-lvm",
 					"client_node_amount":    ClientNodeAmount,
 					"client_node_spec":      ClientNodeSpec,
@@ -454,7 +454,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) 
 					"data_node_spec":      DataNodeSpec,
 					"data_node_amount":    "3",
 					"data_node_disk_size": DataNodeDisk,
-					"data_node_disk_type": DataNodeDiskType,
+					"data_node_disk_type": EsDiskType,
 					"setting_config": map[string]string{
 						"\"action.auto_create_index\"":         "+.*,-*",
 						"\"action.destructive_requires_name\"": "false",
@@ -488,7 +488,7 @@ var elasticsearchMap = map[string]string{
 	"data_node_spec":                DataNodeSpec,
 	"data_node_amount":              DataNodeAmount,
 	"data_node_disk_size":           DataNodeDisk,
-	"data_node_disk_type":           DataNodeDiskType,
+	"data_node_disk_type":           EsDiskType,
 	"status":                        "active",
 	"private_whitelist.#":           "0",
 	"public_whitelist.#":            "0",

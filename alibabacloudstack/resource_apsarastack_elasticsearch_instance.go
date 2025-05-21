@@ -69,6 +69,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Computed: true,
+				ValidateFunc: validation.IntBetween(500, 20480),
 			},
 
 			"data_node_disk_type": {
@@ -118,6 +119,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
+				ValidateFunc: validation.IntAtLeast(100),
 				RequiredWith: []string{"master_node_amount", "master_node_spec", "master_node_disk_type"},
 			},
 
