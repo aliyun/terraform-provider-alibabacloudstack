@@ -149,7 +149,7 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"application_name": "${var.name}",
-					"cluster_id":       "9f272ee5-4f4c-4368-a0b7-515bbb6b9500",
+					"cluster_id":       "${alibabacloudstack_edas_k8s_cluster.default.id}",
 					"package_type":     "FatJar",
 					"package_url":      "http://fileserver.edas.inter.env17e.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar",
 					"package_version":  "2025-05-20 17:17:18",
@@ -159,12 +159,12 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 						{
 							"target_port": "18082",
 							"port":        "18082",
-							"protocol":    "TCP",
+							"protocol":    "HTTP",
 						},
 						{
 							"target_port": "8080",
 							"port":        "8080",
-							"protocol":    "HTTP",
+							"protocol":    "TCP",
 						},
 					},
 					"internet_external_traffic_policy": "Local",
@@ -178,10 +178,10 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 						"internet_service_port_infos.#":             "2",
 						"internet_service_port_infos.0.target_port": "18082",
 						"internet_service_port_infos.0.port":        "18082",
-						"internet_service_port_infos.0.protocol":    "TCP",
+						"internet_service_port_infos.0.protocol":    "HTTP",
 						"internet_service_port_infos.1.target_port": "8080",
 						"internet_service_port_infos.1.port":        "8080",
-						"internet_service_port_infos.1.protocol":    "HTTP",
+						"internet_service_port_infos.1.protocol":    "TCP",
 					}),
 				),
 			},
@@ -258,17 +258,17 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"internet_service_port_infos": []map[string]interface{}{
 						{
-							"target_port": "8000",
-							"port":        "8000",
-							"protocol":    "TCP",
+							"target_port": "18082",
+							"port":        "18082",
+							"protocol":    "HTTP",
 						},
 					},
 					"internet_external_traffic_policy": "Local",
 					"internet_scheduler":               "rr",
 					"intranet_service_port_infos": []map[string]interface{}{
 						{
-							"target_port": "8080",
-							"port":        "8080",
+							"target_port": "8000",
+							"port":        "8000",
 							"protocol":    "TCP",
 						},
 					},
@@ -278,8 +278,14 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"internet_service_port_infos.#":             "1",
-						"internet_service_port_infos.0.target_port": "8000",
-						"internet_service_port_infos.0.port":        "8000",
+						"internet_service_port_infos.0.target_port": "18082",
+						"internet_service_port_infos.0.port":        "18082",
+						"internet_service_port_infos.1.target_port": REMOVEKEY,
+						"internet_service_port_infos.1.port":        REMOVEKEY,
+						"internet_service_port_infos.1.protocol":    REMOVEKEY,
+						"intranet_service_port_infos.#":             "1",
+						"intranet_service_port_infos.0.target_port": "8000",
+						"intranet_service_port_infos.0.port":        "8000",
 						"intranet_external_traffic_policy":          "Local",
 						"intranet_scheduler":                        "rr",
 					}),
@@ -289,6 +295,8 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				// "intranet_scheduler", "internet_scheduler" 无法回读
+				ImportStateVerifyIgnore: []string{"intranet_scheduler", "internet_scheduler"},
 			},
 		},
 	})
@@ -476,48 +484,35 @@ func resourceEdasK8sApplicationConfigDependence(name string) string {
 		variable "name" {
 		  default = "%v"
 		}
+		%s
 
-		//data "alicloud_zones" default {
-		//  available_resource_creation = "VSwitch"
-		//}
-		//
-		//data "alicloud_instance_types" "default" {
-		//  availability_zone = data.alicloud_zones.default.zones.0.id
-		//  cpu_core_count = 2
-		//  memory_size = 4
-		//  kubernetes_node_role = "Worker"
-		//}
-		//
-		//resource "alicloud_vpc" "default" {
-		//  name = var.name
-		//  cidr_block = "10.1.0.0/21"
-		//}
-		//
-		//resource "alicloud_vswitch" "default" {
-		//  name = var.name
-		//  vpc_id = alicloud_vpc.default.id
-		//  cidr_block = "10.1.1.0/24"
-		//  availability_zone = data.alicloud_zones.default.zones.0.id
-		//}
-		//
-		//resource "alicloud_cs_managed_kubernetes" "default" {
-		//  worker_instance_types = [data.alicloud_instance_types.default.instance_types.0.id]
-		//  name = var.name
-		//  worker_vswitch_ids = [alicloud_vswitch.default.id]
-		//  worker_number = 				"2"
-		//  password =                    "Test12345"
-		//  pod_cidr =                   	"172.20.0.0/16"
-		//  service_cidr =               	"172.21.0.0/20"
-		//  worker_disk_size =            "50"
-		//  worker_disk_category =        "cloud_ssd"
-		//  worker_data_disk_size =       "20"
-		//  worker_data_disk_category =   "cloud_ssd"
-		//  worker_instance_charge_type = "PostPaid"
-		//  slb_internet_enabled =        "true"
-		//}
-		
-		// resource "alibabacloudstack_edas_k8s_cluster" "default" {
-		//   cs_cluster_id = "cdca4266cc6ee4e4e984355d72b34956a"
-		// }
-		`, name)
+		%s
+
+		%s
+
+		resource "alibabacloudstack_cs_kubernetes" "default" {
+		 name = var.name
+		 version 					= "1.20.11-aliyun.1"
+		 os_type 					= "linux"
+		 platform 					= "AliyunLinux"
+		 num_of_nodes 				= "1"
+		 master_count				= "3"
+		 master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
+		 master_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
+		 master_disk_category 		= "cloud_ssd"
+		 vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
+		 worker_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
+		 worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
+		 worker_disk_category 		= "cloud_ssd"
+		 password 					= "%s"
+		 pod_cidr 					= "172.20.0.0/16"
+		 service_cidr 				= "172.21.0.0/20"
+		 worker_disk_size 			= "40"
+		 master_disk_size 			= "40"
+		 slb_internet_enabled 		= "true"
+		}
+		resource "alibabacloudstack_edas_k8s_cluster" "default" {
+		  cs_cluster_id = "${alibabacloudstack_cs_kubernetes.default.id}"
+		}
+		`, name, VSwitchCommonTestCase, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackInstanceTypes, GeneratePassword())
 }

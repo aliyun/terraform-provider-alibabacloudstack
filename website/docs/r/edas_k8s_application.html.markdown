@@ -77,14 +77,14 @@ The following arguments are supported:
 * `web_container` - (Optional, ForceNew) The Tomcat version that the deployment package depends on. Applicable to Spring Cloud and Dubbo applications deployed through WAR packages. Image does not support this parameter.
 * `edas_container_version` - (Optional) EDAS-Container version that the deployed package depends on. Image does not support this parameter.
 
-* `internet_target_port` - (Optional, ForceNew) The public SLB back-end port, is also the service port of the application, ranging from 1 to 65535.
-* `internet_slb_port` - (Optional, ForceNew) The public network SLB front-end port, range 1~65535.
-* `internet_slb_protocol` - (Optional, ForceNew) The public network SLB protocol supports TCP, HTTP and HTTPS protocols.
+* `internet_target_port` - (Optional, ForceNew) The public SLB back-end port, is also the service port of the application, ranging from 1 to 65535.("Deprecated, please use the relevant properties of internet_service_port_infos.")
+* `internet_slb_port` - (Optional, ForceNew) The public network SLB front-end port, range 1~65535.("Deprecated, please use the relevant properties of internet_service_port_infos.")
+* `internet_slb_protocol` - (Optional, ForceNew) The public network SLB protocol supports TCP, HTTP and HTTPS protocols.("Deprecated, please use the relevant properties of internet_service_port_infos.")
 * `internet_slb_id` - (Optional, ForceNew) Public network SLB ID. If not configured, EDAS will automatically purchase a new SLB for the user.
 
-* `intranet_target_port` - (Optional, ForceNew) The private SLB back-end port, is also the service port of the application, ranging from 1 to 65535.
-* `intranet_slb_port` - (Optional, ForceNew) The private network SLB front-end port, range 1~65535.
-* `intranet_slb_protocol` - (Optional, ForceNew) The private network SLB protocol supports TCP, HTTP and HTTPS protocols.
+* `intranet_target_port` - (Optional, ForceNew) The private SLB back-end port, is also the service port of the application, ranging from 1 to 65535.("Deprecated, please use the relevant properties of intranet_service_port_infos.")
+* `intranet_slb_port` - (Optional, ForceNew) The private network SLB front-end port, range 1~65535. ("Deprecated, please use the relevant properties of intranet_service_port_infos.")
+* `intranet_slb_protocol` - (Optional, ForceNew) The private network SLB protocol supports TCP, HTTP and HTTPS protocols. ("Deprecated, please use the relevant properties of intranet_service_port_infos.")
 * `intranet_slb_id` - (Optional, ForceNew) private network SLB ID. If not configured, EDAS will automatically purchase a new SLB for the user.
 
 * `limit_mem` - (Optional) The memory limit of the application instance during application operation, unit: M.
@@ -120,6 +120,22 @@ The following arguments are supported:
 * `update_release_type` - (Optional)  Release type of batch deployment. Optional Values: `auto` and `manual`.
 * `update_batch_wait_time` - (Optional)  Automatic release time for batch deployment. When the update_release_type is set to `auto`, You need to set an automatic release time.
 * `update_gray` - (Optional)  Number of batches for grayscale deployment.
+* `host_aliases` - (Optional) haostAliases configuration.
+  * `ip` - (Optional) The ip of hostAliases.
+  * `hostnames` - (Optional) A list of hostnames.
+* `intranet_service_port_infos` - (Optional) Intranet service port configuration.
+  * `port` - (Optional) The port of intranet service port.
+  * `protocol` - (Optional) The protocol of intranet service port.
+  * `target_port` - (Optional) The target port of intranet service port.
+* `intranet_external_traffic_policy` - (Optional) The intranet Slb external traffic policy of the service.
+* `intranet_scheduler` - (Optional) The intranet Slb scheduler of the service.
+* `internet_service_port_infos` - (Optional) Internet service port configuration.
+  * `port` - (Optional) The port of internet service port.
+  * `protocol` - (Optional) The protocol of Internet service port.
+  * `target_port` - (Optional) The target port of Internet service port.
+* `internet_external_traffic_policy` - (Optional) The internet Slb external traffic policy of the service.
+* `internet_scheduler` - (Optional) The internet Slb scheduler of the service.
+
 
 ## Attributes Reference
 

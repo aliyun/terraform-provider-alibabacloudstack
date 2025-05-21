@@ -625,6 +625,7 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 	for _, v := range allDeploy {
 		if len(v.PackageVersion) > 0 {
 			d.Set("package_version", v.PackageVersion)
+			d.Set("package_url", v.PackageUrl)
 		}
 
 		for _, c := range v.Components.ComponentsItem {
@@ -837,10 +838,15 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 			return errmsgs.WrapError(bind_slb_err)
 		}
 	} else {
-		if d.Get("intranet_slb_id") == "" {
+		if d.Get("intranet_slb_id") == "" && len(d.Get("intranet_service_port_infos").([]interface{})) == 0 {
 			err = DeleteK8sSlb("intranet", d, meta)
 			if err != nil {
 				return errmsgs.WrapError(err)
+			}
+		} else if d.HasChange("intranet_service_port_infos") {
+			bind_slb_err := K8sBindSlb("intranet", intranet_slb_unset, d, meta)
+			if bind_slb_err != nil {
+				return errmsgs.WrapError(bind_slb_err)
 			}
 		}
 	}
@@ -851,10 +857,15 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 			return errmsgs.WrapError(bind_slb_err)
 		}
 	} else {
-		if d.Get("internet_slb_id") == "" {
+		if d.Get("internet_slb_id") == "" && len(d.Get("internet_service_port_infos").([]interface{})) == 0 {
 			err = DeleteK8sSlb("internet", d, meta)
 			if err != nil {
 				return errmsgs.WrapError(err)
+			}
+		} else if d.HasChange("internet_service_port_infos") {
+			bind_slb_err := K8sBindSlb("internet", internet_slb_unset, d, meta)
+			if bind_slb_err != nil {
+				return errmsgs.WrapError(bind_slb_err)
 			}
 		}
 	}
@@ -1224,7 +1235,7 @@ func K8sBindSlb(net_type string, isnew bool, d *schema.ResourceData, meta interf
 			}
 			request.QueryParams["ServicePortInfos"] = string(data)
 			bresponse, err := client.ProcessCommonRequest(request)
-			addDebug(fmt.Sprintf("BindK8sSlb: %s", net_type), bresponse, request, request.QueryParams)
+			addDebug(fmt.Sprintf("%s: %s", action, net_type), bresponse, request, request.QueryParams)
 			if err != nil {
 				errmsg := ""
 				if bresponse != nil {
@@ -1237,7 +1248,12 @@ func K8sBindSlb(net_type string, isnew bool, d *schema.ResourceData, meta interf
 			if fmt.Sprint(response["Code"]) != "200" {
 				return errmsgs.WrapError(fmt.Errorf("%s Failed , response: %#v", action, response))
 			}
-			stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(response["ChangeOrderId"].(string), []string{"3", "6", "10"}))
+			var ChangeOrderId string
+			if ChangeOrderId, ok = response["ChangeOrderId"].(string); !ok {
+				time.Sleep(time.Duration(60) * time.Second)
+				return nil
+			}
+			stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(ChangeOrderId, []string{"3", "6", "10"}))
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", action, errmsgs.AlibabacloudStackSdkGoERROR, "")
 			}

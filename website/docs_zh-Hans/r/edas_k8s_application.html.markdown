@@ -77,14 +77,14 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
 * `web_container` - (可选，变更时重建) 部署包依赖的 Tomcat 版本。适用于通过 WAR 包部署的 Spring Cloud 和 Dubbo 应用。Image 不支持此参数。
 * `edas_container_version` - (可选) 部署包依赖的 EDAS-Container 版本。Image 不支持此参数。
 
-* `internet_target_port` - (可选，变更时重建) 公网 SLB 后端端口，也是应用的服务端口，范围为 1 到 65535。
-* `internet_slb_port` - (可选，变更时重建) 公网 SLB 前端端口，范围为 1~65535。
-* `internet_slb_protocol` - (可选，变更时重建) 公网 SLB 协议支持 TCP、HTTP 和 HTTPS 协议。
+* `internet_target_port` - (可选，变更时重建) 公网 SLB 后端端口，也是应用的服务端口，范围为 1 到 65535。(已废弃， internet_service_port_infos 相关属性)
+* `internet_slb_port` - (可选，变更时重建) 公网 SLB 前端端口，范围为 1~65535。(已废弃， internet_service_port_infos 相关属性)
+* `internet_slb_protocol` - (可选，变更时重建) 公网 SLB 协议支持 TCP、HTTP 和 HTTPS 协议。(已废弃， internet_service_port_infos 相关属性)
 * `internet_slb_id` - (可选，变更时重建) 公网 SLB ID。如果不配置，EDAS 将为用户自动购买一个新的 SLB。
 
-* `intranet_target_port` - (可选，变更时重建) 内网 SLB 后端端口，也是应用的服务端口，范围为 1 到 65535。
-* `intranet_slb_port` - (可选，变更时重建) 内网 SLB 前端端口，范围为 1~65535。
-* `intranet_slb_protocol` - (可选，变更时重建) 内网 SLB 协议支持 TCP、HTTP 和 HTTPS 协议。
+* `intranet_target_port` - (可选，变更时重建) 内网 SLB 后端端口，也是应用的服务端口，范围为 1 到 65535。(已废弃， intranet_service_port_infos 相关属性)
+* `intranet_slb_port` - (可选，变更时重建) 内网 SLB 前端端口，范围为 1~65535。(已废弃， intranet_service_port_infos 相关属性)
+* `intranet_slb_protocol` - (可选，变更时重建) 内网 SLB 协议支持 TCP、HTTP 和 HTTPS 协议。(已废弃， intranet_service_port_infos 相关属性)
 * `intranet_slb_id` - (可选，变更时重建) 内网 SLB ID。如果不配置，EDAS 将为用户自动购买一个新的 SLB。
 
 * `limit_mem` - (可选) 应用运行期间实例的内存限制，单位：M。
@@ -120,6 +120,21 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
 * `update_release_type` - (可选) 批量部署的发布类型。可选值：`auto` 和 `manual`。
 * `update_batch_wait_time` - (可选) 批量部署的自动发布时间。当 `update_release_type` 设置为 `auto` 时，需要设置自动发布时间。
 * `update_gray` - (可选) 灰度部署的批次数量。
+* `host_aliases` - (可选) host映射配置
+  * `ip` - (可选) Ip地址.
+  * `hostnames` - (可选) hostname数组.
+* `intranet_service_port_infos` - (可选) 内网SLB服务端口配置。
+  * `port` - (可选) 内网SLB服务端口的端口号
+  * `protocol` - (可选) 内网SLB服务端口的协议。
+  * `target_port` - (可选) 内网SLB服务端口的目标端口号。
+* `intranet_external_traffic_policy` - (可选) 内网SLB外部流量策略。
+* `intranet_scheduler` - (可选) 内网SLB调度规则。
+* `internet_service_port_infos` - (可选) 公网SLB服务端口配置。
+  * `port` - (可选) 公网SLB服务端口。
+  * `protocol` - (可选) 公网SLB服务端口的协议。
+  * `target_port` - (可选) 公网SLB服务的目标端口号。
+* `internet_external_traffic_policy` - (可选) 公网SLB外部流量策略。
+* `internet_scheduler` - (可选) 服务的公网 SLB 调度规则。
 
 ## 属性参考
 
