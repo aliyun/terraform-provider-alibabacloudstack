@@ -23,6 +23,11 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			// Basic instance information
+			"zone_id" : {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
 			"cpu_type": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -43,6 +48,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 			"scene": {
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:         true,
 				ValidateFunc: validation.StringInSlice([]string{"high", "normal", "log"}, false),
 			},
 
@@ -50,15 +56,13 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 
 			"data_node_amount": {
 				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
+				Required:     true,
 				ValidateFunc: validation.IntBetween(3, 50),
 			},
 
 			"data_node_spec": {
 				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Required: true,
 			},
 
 			"data_node_disk_size": {
@@ -69,38 +73,135 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 
 			"data_node_disk_type": {
 				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
+				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"fast-disks", "fast-disks-ssd"}, false),
 			},
 
+			"data_node_affinity": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				ForceNew:         true,
+			},
+
+			// Kibana node configuration
+			"kibana_node_spec": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				RequiredWith: []string{"kibana_password"},
+			},
+
+			"kibana_password": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				RequiredWith: []string{"kibana_node_spec"},
+			},
+
+			// Master node configuration
+			"master_node_amount": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(3, 50),
+				RequiredWith: []string{"master_node_spec", "master_node_disk_size", "master_node_disk_type"},
+			},
+
+			"master_node_spec": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"master_node_amount", "master_node_disk_size", "master_node_disk_type"},
+			},
+
+			"master_node_disk_size": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				RequiredWith: []string{"master_node_amount", "master_node_spec", "master_node_disk_type"},
+			},
+
+			"master_node_disk_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"yoda-lvm", "fast-disks", "fast-disks-ssd"}, false),
+				RequiredWith: []string{"master_node_amount", "master_node_spec", "master_node_disk_size"},
+			},
+
+			// Client node configuration
+			"client_node_amount": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(2, 25),
+				RequiredWith: []string{"client_node_spec"},
+			},
+
+			"client_node_spec": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"client_node_amount"},
+			},
+
+			// network info
 			"vswitch_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				Computed: true,
 				ForceNew: true,
 			},
 
 			"password": {
 				Type:         schema.TypeString,
 				Sensitive:    true,
-				Optional:     true,
+				Required:     true,
 				ValidateFunc: validation.StringLenBetween(12, 32),
 			},
-			"kms_encrypted_password": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				DiffSuppressFunc: kmsDiffSuppressFunc,
-			},
-			"kms_encryption_context": {
-				Type:     schema.TypeMap,
-				Optional: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Get("kms_encrypted_password").(string) == ""
-				},
-				Elem: schema.TypeString,
+			"monitor_password": {
+				Type:         schema.TypeString,
+				Sensitive:    true,
+				Required:     true,
+				ValidateFunc: validation.StringLenBetween(12, 32),
 			},
 
-			"tags": tagsSchema(),
+			// 只读属性
+			"slb_address": {
+				Type:         schema.TypeString,
+				Computed:    true,
+			},
+			
+			"domain": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"port": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+			
+			"kibana_slb_address": {
+				Type:         schema.TypeString,
+				Computed:    true,
+			},
+			
+			"kibana_domain": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"kibana_protocol": {
+				Type:         schema.TypeString,
+				Computed: true,
+			},
+			"kibana_port": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			
+			// 非create参数
 
 			"private_whitelist": {
 				Type:     schema.TypeSet,
@@ -123,23 +224,6 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				DiffSuppressFunc: elasticsearchEnablePublicDiffSuppressFunc,
 			},
 
-			"master_node_spec": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			// Client node configuration
-			"client_node_amount": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ValidateFunc: validation.IntBetween(2, 25),
-			},
-
-			"client_node_spec": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"protocol": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -147,31 +231,6 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"HTTP", "HTTPS"}, false),
 			},
 
-			"domain": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"port": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
-
-			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			// Kibana node configuration
-			"kibana_domain": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
-			"kibana_port": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
 
 			"enable_kibana_public_network": {
 				Type:     schema.TypeBool,
@@ -201,13 +260,6 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				DiffSuppressFunc: elasticsearchEnableKibanaPrivateDiffSuppressFunc,
 			},
 
-			"zone_count": {
-				Type:         schema.TypeInt,
-				ForceNew:     true,
-				Optional:     true,
-				ValidateFunc: validation.IntBetween(1, 3),
-				Default:      1,
-			},
 			"setting_config": {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -262,20 +314,55 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 		}
 		return errmsgs.WrapError(err)
 	}
+	
+	d.Set("version", object["version"].(string))
+	d.Set("description", object["description"].(string))
+	
+	if object["dataNode"].(bool) {
+		d.Set("data_node_amount", object["nodeAmount"].(int))
+		nodeSpec := object["nodeSpec"].(map[string]interface{})
+		d.Set("data_node_spec", nodeSpec["spec"].(string))
+		d.Set("data_node_disk_size", nodeSpec["disk"].(int))
+		d.Set("data_node_disk_type", nodeSpec["storageClassName"].(string))
+	}
 
-	d.Set("description", object["description"])
-	d.Set("status", object["status"])
+	if object["haveKibana"].(bool) {
+d.Set("kibana_node_spec", object["kibanaConfiguration"].(map[string]interface{})["spec"].(string))
+d.Set("kibana_slb_address", object["kibanaSlbAddress"].(string))
+d.Set("kibana_domain", object["kibanaDomain"].(string))
+d.Set("kibana_protocol", object["kibanaProtocol"].(string))
+d.Set("kibana_port", object["kibanaPort"].(int))
+}
+
+	if object["advancedDedicateMaster"].(bool) {
+		masterConfiguration := object["masterConfiguration"].(map[string]interface{})
+		d.Set("master_node_amount", masterConfiguration["amount"].(int))
+		d.Set("master_node_spec", masterConfiguration["spec"].(string))
+		d.Set("master_node_disk_size", masterConfiguration["disk"].(int))
+		d.Set("master_node_disk_type", masterConfiguration["storageClassName"].(string))
+	}
+	
+	if object["haveClientNode"].(bool) {
+		clientNodeConfiguration := object["clientNodeConfiguration"].(map[string]interface{})
+		d.Set("client_node_amount", clientNodeConfiguration["amount"].(int))
+		d.Set("client_node_spec", clientNodeConfiguration["spec"].(string))
+	}
+
 	d.Set("vswitch_id", object["networkConfig"].(map[string]interface{})["vswitchId"])
+
+	d.Set("slb_address", object["slbAddress"].(string))
+	d.Set("domain", object["domain"])
+	d.Set("port", object["port"])
+	d.Set("status", object["status"])
+
 
 	esIPWhitelist := object["esIPWhitelist"].([]interface{})
 	publicIpWhitelist := object["publicIpWhitelist"].([]interface{})
 	d.Set("private_whitelist", filterWhitelist(convertArrayInterfaceToArrayString(esIPWhitelist), d.Get("private_whitelist").(*schema.Set)))
 	d.Set("public_whitelist", filterWhitelist(convertArrayInterfaceToArrayString(publicIpWhitelist), d.Get("public_whitelist").(*schema.Set)))
 	d.Set("enable_public", object["enablePublic"])
-	d.Set("version", object["esVersion"])
 
-	d.Set("domain", object["domain"])
-	d.Set("port", object["port"])
+	
 
 	// Kibana configuration
 	d.Set("enable_kibana_public_network", object["enableKibanaPublicNetwork"])
@@ -290,11 +377,6 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 	kibanaPrivateIPWhitelist := object["kibanaPrivateIPWhitelist"].([]interface{})
 	d.Set("kibana_private_whitelist", filterWhitelist(convertArrayInterfaceToArrayString(kibanaPrivateIPWhitelist), d.Get("kibana_private_whitelist").(*schema.Set)))
 
-	// Data node configuration
-	d.Set("data_node_amount", object["nodeAmount"])
-	d.Set("data_node_spec", object["nodeSpec"].(map[string]interface{})["spec"])
-	d.Set("data_node_disk_size", object["nodeSpec"].(map[string]interface{})["disk"])
-	d.Set("data_node_disk_type", object["nodeSpec"].(map[string]interface{})["diskType"])
 	// Master node configuration
 	d.Set("master_node_spec", object["masterConfiguration"].(map[string]interface{})["spec"])
 	// Client node configuration
@@ -302,9 +384,6 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 	d.Set("client_node_spec", object["clientNodeConfiguration"].(map[string]interface{})["spec"])
 	// Protocol: HTTP/HTTPS
 	d.Set("protocol", object["protocol"])
-
-	// Cross zone configuration
-	d.Set("zone_count", object["zoneCount"])
 
 	esConfig := object["esConfig"].(map[string]interface{})
 	if esConfig != nil {
@@ -547,76 +626,73 @@ func buildElasticsearchCreateRequestBody(d *schema.ResourceData, meta interface{
 		"defaultType": false,
 	}
 
-	password := d.Get("password").(string)
-	kmsPassword := d.Get("kms_encrypted_password").(string)
-
-	if password == "" && kmsPassword == "" {
-		return nil, errmsgs.WrapError(errmsgs.Error("One of the 'password' and 'kms_encrypted_password' should be set."))
-	}
-
-	if password != "" {
-		content["esAdminPassword"] = password
-	} else {
-		kmsService := KmsService{client}
-		decryptResp, err := kmsService.Decrypt(kmsPassword, d.Get("kms_encryption_context").(map[string]interface{}))
-		if err != nil {
-			return content, errmsgs.WrapError(err)
-		}
-		content["esAdminPassword"] = decryptResp
-	}
+	content["esAdminPassword"] = d.Get("password")
+	content["monitorPassword"] = d.Get("monitor_password")
+	content["scene"] = d.Get("scene")
 
 	// Data node configuration
+	content["dataNode"] = true
 	dataNodeSpec := make(map[string]interface{})
 	dataNodeSpec["spec"] = d.Get("data_node_spec")
 	dataNodeSpec["disk"] = d.Get("data_node_disk_size")
 	dataNodeSpec["diskType"] = d.Get("data_node_disk_type")
 	content["nodeSpec"] = dataNodeSpec
+	content["dataNodeAffinity"] = d.Get("data_node_affinity")
+
+	// Kibana node configure
+	if v, ok := d.GetOk("kibana_node_spec"); ok {
+		content["haveKibana"] = true
+		kibanaConfiguration := make(map[string]interface{})
+		kibanaConfiguration["amount"] = 1
+		kibanaConfiguration["spec"] = v
+		content["kibanaConfiguration"] = kibanaConfiguration
+		content["kibanaPassword"] = d.Get("kibana_password")
+	} else {
+		content["haveKibana"] = false
+	}
 
 	// Master node configuration
-	if d.Get("master_node_spec") != nil && d.Get("master_node_spec") != "" {
-		masterNode := make(map[string]interface{})
-		masterNode["spec"] = d.Get("master_node_spec")
-		masterNode["amount"] = "3"
-		masterNode["disk"] = "20"
-		masterNode["diskType"] = "cloud_ssd"
+	if _, ok := d.GetOk("master_node_spec"); ok {
 		content["advancedDedicateMaster"] = true
-		content["masterConfiguration"] = masterNode
+		masterConfiguration := make(map[string]interface{})
+		masterConfiguration["spec"] = d.Get("master_node_spec")
+		masterConfiguration["amount"] = d.Get("master_node_amount")
+		masterConfiguration["disk"] = d.Get("master_node_disk_size")
+		masterConfiguration["diskType"] = d.Get("master_node_disk_type")
+		content["masterConfiguration"] = masterConfiguration
+	} else {
+		content["advancedDedicateMaster"] = false
 	}
 
 	// Client node configuration
-	if d.Get("client_node_spec") != nil && d.Get("client_node_spec") != "" {
+	if _, ok := d.GetOk("client_node_spec"); ok {
 		clientNode := make(map[string]interface{})
 		clientNode["spec"] = d.Get("client_node_spec")
-		clientNode["disk"] = "20"
-		clientNode["diskType"] = "cloud_efficiency"
-		if d.Get("client_node_amount") == nil {
-			clientNode["amount"] = 2
-		} else {
-			clientNode["amount"] = d.Get("client_node_amount")
-		}
+		clientNode["amount"] = d.Get("client_node_amount")
 
 		content["haveClientNode"] = true
 		content["clientNodeConfiguration"] = clientNode
+	} else {
+		content["haveClientNode"] = false
 	}
 
 	// Network configuration
-	vswitchId := d.Get("vswitch_id")
-	vsw, err := vpcService.DescribeVSwitch(vswitchId.(string))
-	if err != nil {
-		return nil, errmsgs.WrapError(err)
-	}
-
 	network := make(map[string]interface{})
-	network["type"] = "vpc"
-	network["vpcId"] = vsw.VpcId
-	network["vswitchId"] = vswitchId
-	network["vsArea"] = vsw.ZoneId
-
-	content["networkConfig"] = network
-
-	if d.Get("zone_count") != nil && d.Get("zone_count") != "" {
-		content["zoneCount"] = d.Get("zone_count")
+	network["vsArea"] = d.Get("zone_id")
+	if _, ok := d.GetOk("vswitch_id"); ok {
+		vswitchId := d.Get("vswitch_id")
+		vsw, err := vpcService.DescribeVSwitch(vswitchId.(string))
+		if err != nil {
+			return nil, errmsgs.WrapError(err)
+		}
+		network["type"] = "vpc"
+		network["vpcId"] = vsw.VpcId
+		network["vswitchId"] = vswitchId
+		
+	} else {
+		network["type"] = "anytunnel"
 	}
+	content["networkConfig"] = network
 
 	return content, nil
 }

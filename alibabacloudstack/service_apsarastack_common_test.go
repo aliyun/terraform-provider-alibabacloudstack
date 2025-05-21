@@ -869,10 +869,6 @@ resource "alibabacloudstack_vswitch" "default" {
 }
 `
 
-const ElasticsearchInstanceCommonTestCase = `
-
-`
-
 const EmrCommonTestCase = `
 data "alibabacloudstack_emr_main_versions" "default" {
 }
