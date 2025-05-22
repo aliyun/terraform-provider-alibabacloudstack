@@ -491,7 +491,6 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_vpc_vpcs":                                dataSourceAlibabacloudStackVpcs(),
 		"alibabacloudstack_zones":                                   dataSourceAlibabacloudStackZones(),
 		"alibabacloudstack_elasticsearch_instances":                 dataSourceAlibabacloudStackElasticsearch(),
-		"alibabacloudstack_elasticsearch_zones":                     dataSourceAlibabacloudStackElaticsearchZones(),
 		"alibabacloudstack_ehpc_job_templates":                      dataSourceAlibabacloudStackEhpcJobTemplates(),
 		"alibabacloudstack_oos_executions":                          dataSourceAlibabacloudStackOosExecutions(),
 		"alibabacloudstack_oos_templates":                           dataSourceAlibabacloudStackOosTemplates(),
