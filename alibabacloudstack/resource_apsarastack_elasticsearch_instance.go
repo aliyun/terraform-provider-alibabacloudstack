@@ -63,20 +63,23 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 			},
 
 			"data_node_spec": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^\d+C \d+Gi`), "Spec format mast be like '\\d+C \\d+Gi'"),
 			},
 
 			"data_node_disk_size": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.IntBetween(500, 20480),
 			},
 
 			"data_node_disk_type": {
 				Type:         schema.TypeString,
 				Required:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"yoda-lvm", "fast-disks", "fast-disks-ssd"}, false),
 			},
 
@@ -93,13 +96,19 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				RequiredWith: []string{"kibana_password"},
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^\d+C \d+Gi`), "Spec format mast be like '\\d+C \\d+Gi'"),
 			},
 
 			"kibana_password": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				RequiredWith: []string{"kibana_node_spec"},
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					if v, ok := d.GetOk("kibana_node_spec"); !ok || v.(string) == "" {
+						return true
+					}
+					return oldValue == newValue
+				},
 			},
 
 			// Master node configuration
@@ -115,12 +124,14 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"master_node_amount", "master_node_disk_size", "master_node_disk_type"},
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^\d+C \d+Gi`), "Spec format mast be like '\\d+C \\d+Gi'"),
 			},
 
 			"master_node_disk_size": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.IntAtLeast(100),
 				RequiredWith: []string{"master_node_amount", "master_node_spec", "master_node_disk_type"},
 			},
@@ -128,6 +139,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 			"master_node_disk_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"yoda-lvm", "fast-disks", "fast-disks-ssd"}, false),
 				RequiredWith: []string{"master_node_amount", "master_node_spec", "master_node_disk_size"},
 			},
@@ -144,6 +156,7 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				RequiredWith: []string{"client_node_amount"},
+				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^\d+C \d+Gi`), "Spec format mast be like '\\d+C \\d+Gi'"),
 			},
 
 			// network info
@@ -205,11 +218,11 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Computed: true,
 			},
 
-			// 非create参数
+			// 3.16.2不支持修改参数
 
 			"private_whitelist": {
-				Type:     schema.TypeSet,
-				Optional: true,
+				Type: schema.TypeSet,
+				// 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
@@ -220,36 +233,37 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 			},
 
 			"public_whitelist": {
-				Type:     schema.TypeSet,
-				Optional: true,
+				Type: schema.TypeSet,
+				// 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
 
 			"protocol": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "HTTP",
-				ValidateFunc: validation.StringInSlice([]string{"HTTP", "HTTPS"}, false),
+				Type: schema.TypeString,
+				// Optional:     true,
+				// Default:      "HTTP",
+				Computed: true,
+				// 				ValidateFunc: validation.StringInSlice([]string{"HTTP", "HTTPS"}, false),
 			},
 
 			"kibana_whitelist": {
-				Type:     schema.TypeSet,
-				Optional: true,
+				Type: schema.TypeSet,
+				// 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
 
 			"kibana_private_whitelist": {
-				Type:     schema.TypeSet,
-				Optional: true,
+				Type: schema.TypeSet,
+				// 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
 
 			"setting_config": {
-				Type:     schema.TypeMap,
-				Optional: true,
+				Type: schema.TypeMap,
+				// 				Optional: true,
 				Computed: true,
 			},
 		},
@@ -281,7 +295,7 @@ func resourceAlibabacloudStackElasticsearchCreate(d *schema.ResourceData, meta i
 	d.SetId(resp.(string))
 
 	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 3*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
-	stateConf.PollInterval = 5 * time.Second
+	stateConf.PollInterval = 10 * time.Second
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -400,9 +414,8 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	elasticsearchService := ElasticsearchService{client}
-	d.Partial(true)
-	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 3*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
-	stateConf.PollInterval = 5 * time.Second
+	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+	stateConf.PollInterval = 10 * time.Second
 
 	if d.HasChange("private_whitelist") {
 		content := make(map[string]interface{})
@@ -475,7 +488,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 			return err
 		}
-		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 3*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 		stateConf.PollInterval = 5 * time.Second
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -483,53 +496,25 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 	}
 
 	if d.IsNewResource() {
-		d.Partial(false)
 		return nil
 	}
-	
+
 	if d.HasChange("description") {
 		if err := updateDescription(d, meta); err != nil {
 			return errmsgs.WrapError(err)
 		}
 	}
 
-	if d.HasChanges("client_node_spec", "client_node_amount") {
+	if d.HasChanges("data_node_amount", "data_node_spec", "master_node_spec", "master_node_amount", "client_node_spec", "client_node_amount", "kibana_node_spec") {
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-		if err := updateClientNode(d, meta); err != nil {
+		if err := updateNodes(d, meta); err != nil {
 			return errmsgs.WrapError(err)
 		}
 	}
 
-	if d.HasChanges("data_node_amount", "data_node.amount") {
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-		if err := updateDataNodeAmount(d, meta); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
-
-	if d.HasChanges("data_node_spec", "data_node_disk_size", "data_node_disk_type") {
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-		if err := updateDataNodeSpec(d, meta); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
-
-	if d.HasChange("master_node_spec") {
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
-		if err := updateMasterNode(d, meta); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
-
-	if d.HasChanges("password", "kms_encrypted_password") {
+	if d.HasChanges("password", "kibana_password", "monitor_password") {
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -538,7 +523,6 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	d.Partial(false)
 	return nil
 }
 
@@ -564,7 +548,7 @@ func resourceAlibabacloudStackElasticsearchDelete(d *schema.ResourceData, meta i
 		return err
 	}
 
-	stateConf := BuildStateConf([]string{"activating", "inactive", "active"}, []string{}, d.Timeout(schema.TimeoutDelete), 3*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"activating", "inactive", "active"}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{}))
 	stateConf.PollInterval = 5 * time.Second
 
 	if _, err = stateConf.WaitForState(); err != nil {
