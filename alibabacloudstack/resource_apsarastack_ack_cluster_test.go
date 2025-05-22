@@ -83,6 +83,18 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 						{
 							"name": "nginx-ingress-controller",
 						},
+						{
+							"name":   "logtail-ds",
+							"config": "{\\\"IngressDashboardEnabled\\\":\\\"true\\\"}",
+						},
+						{
+							"name":   "ack-node-problem-detector",
+							"config": "{\\\"sls_project_name\\\":\\\"\\\"}",
+						},
+						{
+							"name":   "nginx-ingress-controller",
+							"config": "{\\\"IngressSlbNetworkType\\\":\\\"intranet\\\"}",
+						},
 					},
 					"name":                                "${var.name}",
 					"version":                             "1.20.11-aliyun.1",
@@ -137,10 +149,10 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids"},
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids", "new_nat_gateway", "password", "slb_internet_enabled", "worker_data_disks"},
 			},
 		},
 	})
@@ -190,6 +202,18 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 						},
 						{
 							"name": "nginx-ingress-controller",
+						},
+						{
+							"name":   "logtail-ds",
+							"config": "{\\\"IngressDashboardEnabled\\\":\\\"true\\\"}",
+						},
+						{
+							"name":   "ack-node-problem-detector",
+							"config": "{\\\"sls_project_name\\\":\\\"\\\"}",
+						},
+						{
+							"name":   "nginx-ingress-controller",
+							"config": "{\\\"IngressSlbNetworkType\\\":\\\"intranet\\\"}",
 						},
 					},
 					"name":                         "${var.name}",
@@ -490,7 +514,7 @@ resource "alibabacloudstack_ecs_keypair" "default" {
 	key_name = "${var.name}"
 }
 
-`, name, SecurityGroupCommonTestCase, GeneratePassword())
+`, name, SecurityGroupCommonTestCase, GeneratePassword(12))
 }
 
 var CsK8sMap = map[string]string{}
