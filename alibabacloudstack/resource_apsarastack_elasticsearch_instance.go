@@ -331,6 +331,11 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 			return errmsgs.WrapError(err)
 		}
 		d.Set("data_node_disk_type", nodeSpec["storageClassName"].(string))
+	} else {
+		d.Set("data_node_amount", nil)
+		d.Set("data_node_spec", nil)
+		d.Set("data_node_disk_size", nil)
+		d.Set("data_node_disk_type", nil)
 	}
 
 	if object["haveKibana"].(bool) {
@@ -343,6 +348,12 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 		} else {
 			return errmsgs.WrapError(err)
 		}
+	} else {
+		d.Set("kibana_node_spec",nil)
+		d.Set("kibana_slb_address", nil)
+		d.Set("kibana_domain", nil)
+		d.Set("kibana_protocol", nil)
+		d.Set("kibana_port", nil)
 	}
 
 	if object["advancedDedicateMaster"].(bool) {
@@ -359,6 +370,10 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 			return errmsgs.WrapError(err)
 		}
 		d.Set("master_node_disk_type", masterConfiguration["storageClassName"].(string))
+	} else {
+		d.Set("master_node_amount", nil)
+		d.Set("master_node_disk_size", nil)
+		d.Set("master_node_disk_type", nil)
 	}
 
 	if object["haveClientNode"].(bool) {
@@ -369,6 +384,9 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 			return errmsgs.WrapError(err)
 		}
 		d.Set("client_node_spec", clientNodeConfiguration["spec"].(string))
+	} else {
+		d.Set("client_node_amount", nil)
+		d.Set("client_node_spec", nil)
 	}
 
 	d.Set("vswitch_id", object["networkConfig"].(map[string]interface{})["vswitchId"])
@@ -395,11 +413,6 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 	kibanaPrivateIPWhitelist := object["kibanaPrivateIPWhitelist"].([]interface{})
 	d.Set("kibana_private_whitelist", filterWhitelist(convertArrayInterfaceToArrayString(kibanaPrivateIPWhitelist), d.Get("kibana_private_whitelist").(*schema.Set)))
 
-	// Master node configuration
-	d.Set("master_node_spec", object["masterConfiguration"].(map[string]interface{})["spec"])
-	// Client node configuration
-	d.Set("client_node_amount", object["clientNodeConfiguration"].(map[string]interface{})["amount"])
-	d.Set("client_node_spec", object["clientNodeConfiguration"].(map[string]interface{})["spec"])
 	// Protocol: HTTP/HTTPS
 	d.Set("protocol", object["protocol"])
 
