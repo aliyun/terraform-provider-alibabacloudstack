@@ -390,7 +390,10 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						// FIXME: TF 无法识别
-						// "kibana_node_spec": REMOVEKEY,
+						"kibana_node_spec": REMOVEKEY,
+						"kibana_domain": REMOVEKEY,
+						"kibana_protocol" : REMOVEKEY,
+						"kibana_port": REMOVEKEY,
 					}),
 				),
 			},
@@ -422,9 +425,8 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-// FIXME: 可以下线节点但校验不通过
-// 						"client_node_amount": REMOVEKEY,
-// 						"client_node_spec":   REMOVEKEY,
+						"client_node_amount": REMOVEKEY,
+						"client_node_spec":   REMOVEKEY,
 					}),
 				),
 			},

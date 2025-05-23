@@ -271,13 +271,10 @@ func (ra *resourceAttr) updateCheckMapPair(changeMap map[string]string) {
 	ra.checkMap = newCheckMap
 	if changeMap != nil && len(changeMap) > 0 {
 		for rk, rv := range changeMap {
-			_, ok := ra.checkMap[rk]
-			if rv == REMOVEKEY && ok {
+			if _, ok := ra.checkMap[rk]; ok {
 				delete(ra.checkMap, rk)
-			} else if ok {
-				delete(ra.checkMap, rk)
-				ra.checkMap[rk] = rv
-			} else {
+			}
+			if rv != REMOVEKEY {
 				ra.checkMap[rk] = rv
 			}
 		}
