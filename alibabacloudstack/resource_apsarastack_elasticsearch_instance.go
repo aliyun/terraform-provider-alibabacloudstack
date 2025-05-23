@@ -94,7 +94,6 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 			"kibana_node_spec": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
 				RequiredWith: []string{"kibana_password"},
 				ValidateFunc: validation.StringMatch(regexp.MustCompile(`^\d+C \d+Gi`), "Spec format mast be like '\\d+C \\d+Gi'"),
 			},
@@ -430,6 +429,8 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 10 * time.Second
 
+	d.Partial(true)
+
 	if d.HasChange("private_whitelist") {
 		content := make(map[string]interface{})
 		content["networkType"] = string(PRIVATE)
@@ -509,6 +510,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 	}
 
 	if d.IsNewResource() {
+		d.Partial(false)
 		return nil
 	}
 
@@ -536,6 +538,7 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
+	d.Partial(false)
 	return nil
 }
 
