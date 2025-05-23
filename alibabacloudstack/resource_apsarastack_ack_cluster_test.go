@@ -83,6 +83,18 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 						{
 							"name": "nginx-ingress-controller",
 						},
+						{
+							"name":   "logtail-ds",
+							"config": "{\\\"IngressDashboardEnabled\\\":\\\"true\\\"}",
+						},
+						{
+							"name":   "ack-node-problem-detector",
+							"config": "{\\\"sls_project_name\\\":\\\"\\\"}",
+						},
+						{
+							"name":   "nginx-ingress-controller",
+							"config": "{\\\"IngressSlbNetworkType\\\":\\\"intranet\\\"}",
+						},
 					},
 					"name":                                "${var.name}",
 					"version":                             "1.30.1-aliyun.1",
@@ -115,6 +127,12 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"master_storage_set_partition_number": "3",
 					"worker_storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.worker.storage_set_id}",
 					"worker_storage_set_partition_number": "3",
+					"worker_data_disks": map[string]string{
+						"size":"40",
+						"encrypted": "true",
+						"category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
+						"kms_key_id": "${alibabacloudstack_kms_key.default.id}",
+					},
 					"tags": map[string]string{
 						"Created":                   "TF",
 						"For":                       "acceptance test",
@@ -134,7 +152,7 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids"},
+				ImportStateVerifyIgnore: []string{"enable_ssh", "addons", "cluster_type", "cpu_policy", "image_id", "is_enterprise_security_group", "key_name", "master_count", "master_disk_category", "master_disk_size", "master_instance_types", "master_vswitch_ids", "node_cidr_mask", "node_port_range", "os_type", "platform", "proxy_mode", "runtime", "security_group_id", "service_cidr", "timeout_mins", "worker_disk_category", "worker_disk_size", "worker_instance_types", "worker_vswitch_ids", "new_nat_gateway", "password", "slb_internet_enabled", "worker_data_disks"},
 			},
 		},
 	})
@@ -184,6 +202,18 @@ func TestAccAlibabacloudStackCsK8sSecurityGroup(t *testing.T) {
 						},
 						{
 							"name": "nginx-ingress-controller",
+						},
+						{
+							"name":   "logtail-ds",
+							"config": "{\\\"IngressDashboardEnabled\\\":\\\"true\\\"}",
+						},
+						{
+							"name":   "ack-node-problem-detector",
+							"config": "{\\\"sls_project_name\\\":\\\"\\\"}",
+						},
+						{
+							"name":   "nginx-ingress-controller",
+							"config": "{\\\"IngressSlbNetworkType\\\":\\\"intranet\\\"}",
 						},
 					},
 					"name":                         "${var.name}",
@@ -346,6 +376,8 @@ variable "name" {
 	default = "%s"
 }
 
+%s
+
 variable "k8s_number" {
   description = "The number of kubernetes cluster."
   default     = 1
@@ -403,7 +435,7 @@ variable "enable_ssh" {
 
 variable "password" {
   description = "The password of ECS instance."
-  default     = "Alibaba@1688"
+  default     = "%s"
 }
 
 variable "worker_number" {
@@ -422,11 +454,13 @@ variable "service_cidr" {
   default     = "172.25.0.0/16"
 }
 
-resource "alibabacloudstack_ecs_keypair" "default" {
-	key_name = "${var.name}"
+resource "alibabacloudstack_kms_key" "default" {
+	description = "${var.name}"
+	protection_level =     "SOFTWARE"
+	pending_window_in_days = "7"
 }
 
-`, name, SecurityGroupCommonTestCase)
+`, name, SecurityGroupCommonTestCase, GeneratePassword(12))
 }
 
 func resourceCsK8sKeyNameDependence(name string) string {
@@ -469,7 +503,7 @@ variable "enable_ssh" {
 
 variable "password" {
   description = "The password of ECS instance."
-  default     = "Alibaba@1688"
+  default     = "%s"
 }
 
 variable "worker_number" {
@@ -492,7 +526,7 @@ resource "alibabacloudstack_ecs_keypair" "default" {
 	key_name = "${var.name}"
 }
 
-`, name, SecurityGroupCommonTestCase)
+`, name, SecurityGroupCommonTestCase, GeneratePassword(12))
 }
 
 var CsK8sMap = map[string]string{}

@@ -403,12 +403,12 @@ func shuffle(chars []rune) []rune {
 	return copyChars
 }
 
-func GeneratePassword() string {
+func GeneratePassword(length int) string {
 	if v := os.Getenv("ALIBABACLOUDSTACK_ACCRANDPWD"); v != "" {
 		return v
 	}
 	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err != nil && v {
-		return "请输入您的密码"
+		return "<YOUR PASSWORD>"
 	}
 	
 	// 定义字符集
@@ -439,7 +439,7 @@ func GeneratePassword() string {
 	}
 
 	// 剩余字符（可选所有类型）
-	remaining := 5 // 8 - 1(首字母) - 3(必须字符) = 4 → 实际生成5个以确保总长度正确
+	remaining := length - 1 - 3 //  - 1(首字母) - 3(必须字符)
 	others := make([]rune, remaining)
 	for i := range others {
 		others[i] = allRunes[rand.Intn(len(allRunes))]

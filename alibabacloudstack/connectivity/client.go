@@ -252,7 +252,7 @@ func (client *AlibabacloudStackClient) WithAscmClient(do func(*sdk.Client) (inte
 
 func (client *AlibabacloudStackClient) WithElasticsearchClient(do func(*elasticsearch.Client) (interface{}, error)) (interface{}, error) {
 	if client.elasticsearchconn == nil {
-		conn, error := client.WithProductSDKClient(ELASTICSEARCHCode)
+		conn, error := client.WithProductSDKClient(ElasticsearchK8sCode)
 		if error != nil {
 			return nil, error
 		}
@@ -928,9 +928,12 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 	// Initialize the TABLESTORE client if necessary
 	tableStoreClient, ok := client.tablestoreconnByInstanceName[instanceName]
 	if !ok {
-		endpoint := client.Config.Endpoints[OTSCode]
+		endpoint := client.Config.Endpoints[OtsCode]
 		if endpoint == "" {
 			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
+		}
+		if !strings.HasPrefix(endpoint, "http") {
+			endpoint = fmt.Sprintf("%s://%s", strings.ToLower(client.Config.Protocol), endpoint)
 		}
 		tableStoreClient = tablestore.NewClientWithConfig(endpoint, instanceName, client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken, tablestore.NewDefaultTableStoreConfig())
 		client.tablestoreconnByInstanceName[instanceName] = tableStoreClient
@@ -941,7 +944,7 @@ func (client *AlibabacloudStackClient) WithTableStoreClient(instanceName string,
 func (client *AlibabacloudStackClient) WithOtsClient(do func(*ots.Client) (interface{}, error)) (interface{}, error) {
 	// Initialize the OTS client if necessary
 	if client.otsconn == nil {
-		conn, error := client.WithProductSDKClient(OTSCode)
+		conn, error := client.WithProductSDKClient(OtsCode)
 		if error != nil {
 			return nil, error
 		}
@@ -963,7 +966,7 @@ func (client *AlibabacloudStackClient) WithDataHubClient(do func(api datahub.Dat
 			return nil, fmt.Errorf("[ERROR] missing the product Ots endpoint.")
 		}
 		if !strings.HasPrefix(endpoint, "http") {
-			endpoint = fmt.Sprintf("https://%s", endpoint)
+			endpoint = fmt.Sprintf("%s://%s", strings.ToLower(client.Config.Protocol), endpoint)
 		}
 
 		account := datahub.NewStsCredential(client.Config.AccessKey, client.Config.SecretKey, client.Config.SecurityToken)
@@ -984,7 +987,7 @@ func (client *AlibabacloudStackClient) NewEcsClient() (*rpc.Client, error) {
 	return client.NewTeaSDkClient("ecs", client.Config.Endpoints[EcsCode])
 }
 func (client *AlibabacloudStackClient) NewElasticsearchClient() (*rpc.Client, error) {
-	return client.NewTeaSDkClient("elasticsearch", client.Config.Endpoints[ELASTICSEARCHCode])
+	return client.NewTeaSDkClient("elasticsearch", client.Config.Endpoints[ElasticsearchK8sCode])
 }
 
 func (client *AlibabacloudStackClient) NewRosClient() (*rpc.Client, error) {

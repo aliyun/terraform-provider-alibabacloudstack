@@ -141,5 +141,5 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 
 
 
-`, name, string(KVStoreRedis), KVRInstanceClassCommonTestCase, string(KVStore4Dot0), GeneratePassword())
+`, name, string(KVStoreRedis), KVRInstanceClassCommonTestCase, string(KVStore4Dot0), GeneratePassword(12))
 }

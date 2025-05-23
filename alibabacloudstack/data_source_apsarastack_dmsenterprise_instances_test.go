@@ -154,5 +154,5 @@ func dataSourceDmsEnterpriseInstancesConfigDependence(name string) string {
 	  use_dsql          =	 "0"
 	  data_link_name    =	 ""
 	}
-`, name, os.Getenv("ALIBABACLOUDSTACK_REGION"), GeneratePassword())
+`, name, os.Getenv("ALIBABACLOUDSTACK_REGION"), GeneratePassword(12))
 }

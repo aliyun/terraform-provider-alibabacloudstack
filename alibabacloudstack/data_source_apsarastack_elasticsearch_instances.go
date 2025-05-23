@@ -2,10 +2,11 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/PaesslerAG/jsonpath"
 	"regexp"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/elasticsearch"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,8 +19,8 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"description_regex": {
-				Type:        schema.TypeString,
-				Optional:    true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
 			},
 			"ids": {
@@ -29,11 +30,18 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Computed: true,
 			},
 			"version": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"5.5.3_with_X-Pack", "6.3.2_with_X-Pack", "6.7.0_with_X-Pack"}, false),
+				Type:     schema.TypeString,
+				Optional: true,
 			},
-			"tags": tagsSchema(),
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+// Zone过滤存在问题
+// 			"zone_id": {
+// 				Type:     schema.TypeString,
+// 				Optional: true,
+// 			},
 			"output_file": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -53,52 +61,84 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"description": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"instance_charge_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"status": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"data_node_amount": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"data_node_spec": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"data_node_disk_size": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"data_node_disk_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
+						// Basic instance information
 						"version": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						// Data node configuration
+
+						"data_node_amount": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+
+						"data_node_spec": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"data_node_disk_size": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+
+						"data_node_disk_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						// Kibana node configuration
+						"kibana_node_spec": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						// Master node configuration
+						"master_node_amount": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+
+						"master_node_spec": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"master_node_disk_size": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+
+						"master_node_disk_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						// Client node configuration
+						"client_node_amount": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+
+						"client_node_spec": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						// network info
 						"vswitch_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"created_at": {
+
+						"status": {
 							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"updated_at": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"tags": {
-							Type:     schema.TypeMap,
 							Computed: true,
 						},
 					},
@@ -111,64 +151,120 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := elasticsearch.CreateListInstanceRequest()
-	client.InitRoaRequest(*request.RoaRequest)
-	request.EsVersion = d.Get("version").(string)
-	request.Size = requests.NewInteger(PageSizeLarge)
-	request.Page = requests.NewInteger(1)
-
-	if v, ok := d.GetOk("tags"); ok {
-		var reqTags []map[string]string
-
-		for k, v := range v.(map[string]interface{}) {
-			reqTags = append(reqTags, map[string]string{
-				"tagKey": k,
-				"tagValue": v.(string),
-			})
-		}
-
-		reqTagsStr, err := json.Marshal(reqTags)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		request.Tags = string(reqTagsStr)
+	var response map[string]interface{}
+	var err error
+	var ids []string
+	var descriptions []string
+	var instances []map[string]interface{}
+	var filteredInstances []map[string]interface{}
+	request := make(map[string]interface{})
+	if v, ok := d.GetOk("version"); ok && v.(string) != "" {
+		request["esVersion"] = v.(string)
 	}
-
-	var instances []elasticsearch.Instance
-
+	if v, ok := d.GetOk("vpc_id"); ok && v.(string) != "" {
+		request["vpcId"] = v.(string)
+	}
+// 	if v, ok := d.GetOk("zone_id"); ok && v.(string) != "" {
+// 		request["zoneId"] = v.(string)
+// 	}
 	for {
-		raw, err := client.WithElasticsearchClient(func(elasticsearchClient *elasticsearch.Client) (interface{}, error) {
-			return elasticsearchClient.ListInstance(request)
-		})
-		response, ok := raw.(*elasticsearch.ListInstanceResponse)
+		request["Size"] = requests.NewInteger(PageSizeLarge)
+		request["Page"] = 1
+		response, err = client.DoTeaRequest("GET", "elasticsearch-k8s", "2017-06-13", "ListInstance", "/openapi/instances", nil, request, nil)
+		addDebug("ListInstance", response, nil)
 		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+			if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_elasticsearch_instances", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "ListInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		addDebug(request.GetActionName(), raw, request.RoaRequest, request)
-		if len(response.Result) < 1 {
-			break
+		if fmt.Sprint(response["Success"]) == "false" {
+			return errmsgs.WrapError(fmt.Errorf("%s failed, response: %v", "ListInstance", response))
 		}
-
-		for _, item := range response.Result {
-			instances = append(instances, item)
-		}
-
-		if len(response.Result) < PageSizeLarge {
-			break
-		}
-
-		page, err := getNextpageNumber(request.Page)
+		r, err := jsonpath.Get("$.Result", response)
 		if err != nil {
-			return errmsgs.WrapError(err)
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "$.Result", response)
 		}
-		request.Page = page
-	}
 
-	var filteredInstances []elasticsearch.Instance
+		results := r.([]interface{})
+
+		if len(results) < 1 {
+			break
+		}
+
+		for _, result := range results {
+			object := result.(map[string]interface{})
+			mapping := map[string]interface{}{
+				"id":          object["instanceId"],
+				"version":     object["esVersion"],
+				"description": object["description"],
+			}
+			if object["dataNode"].(bool) {
+				if v, err := object["nodeAmount"].(json.Number).Int64(); err == nil {
+					mapping["data_node_amount"]= int(v)
+				} else {
+					return errmsgs.WrapError(err)
+				}
+				nodeSpec := object["nodeSpec"].(map[string]interface{})
+				mapping["data_node_spec"]= nodeSpec["spec"]
+				if v, err := nodeSpec["disk"].(json.Number).Int64(); err == nil {
+					mapping["data_node_disk_size"]= int(v)
+				} else {
+					return errmsgs.WrapError(err)
+				}
+				mapping["data_node_disk_type"]= nodeSpec["storageClassName"]
+			}
+
+			if object["haveKibana"].(bool) {
+				mapping["kibana_node_spec"]= object["kibanaConfiguration"].(map[string]interface{})["spec"]
+				mapping["kibana_slb_address"]= object["kibanaSlbAddress"]
+				mapping["kibana_domain"]= object["kibanaDomain"]
+				mapping["kibana_protocol"]= object["kibanaProtocol"]
+				if v, err := object["kibanaPort"].(json.Number).Int64(); err == nil {
+					mapping["kibana_port"]= int(v)
+				} else {
+					return errmsgs.WrapError(err)
+				}
+			}
+
+			if object["advancedDedicateMaster"].(bool) {
+				masterConfiguration := object["masterConfiguration"].(map[string]interface{})
+				if v, err := masterConfiguration["amount"].(json.Number).Int64(); err == nil {
+					mapping["master_node_amount"]= int(v)
+				} else {
+					return errmsgs.WrapError(err)
+				}
+				mapping["master_node_spec"]= masterConfiguration["spec"]
+				if v, err := masterConfiguration["disk"].(json.Number).Int64(); err == nil {
+					mapping["master_node_disk_size"]= int(v)
+				} else {
+					return errmsgs.WrapError(err)
+				}
+				mapping["master_node_disk_type"]= masterConfiguration["storageClassName"]
+			}
+
+			if object["haveClientNode"].(bool) {
+				clientNodeConfiguration := object["clientNodeConfiguration"].(map[string]interface{})
+				if v, err := clientNodeConfiguration["amount"].(json.Number).Int64(); err == nil {
+					mapping["client_node_amount"]= int(v)
+				} else {
+					return errmsgs.WrapError(err)
+				}
+				mapping["client_node_spec"]= clientNodeConfiguration["spec"]
+			}
+			mapping["vswitch_id"]= object["networkConfig"].(map[string]interface{})["vswitchId"]
+			mapping["status"]= object["status"]
+
+			instances = append(instances, mapping)
+
+		}
+
+		if len(results) < PageSizeLarge {
+			break
+		}
+
+		request["Page"] = request["Page"].(int) + 1
+	}
 
 	var descriptionRegex *regexp.Regexp
 	if v, ok := d.GetOk("description_regex"); ok {
@@ -191,49 +287,21 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 	}
 
 	for _, instance := range instances {
-		if descriptionRegex != nil && !descriptionRegex.MatchString(instance.Description) {
+		if descriptionRegex != nil && !descriptionRegex.MatchString(instance["description"].(string)) {
 			continue
 		}
 		if len(idsMap) > 0 {
-			if _, ok := idsMap[instance.InstanceId]; !ok {
+			if _, ok := idsMap[instance["id"].(string)]; !ok {
 				continue
 			}
 		}
 		filteredInstances = append(filteredInstances, instance)
-	}
-
-	return errmsgs.WrapError(extractInstance(d, filteredInstances))
-}
-
-func extractInstance(d *schema.ResourceData, instances []elasticsearch.Instance) error {
-	var ids []string
-	var descriptions []string
-	var s []map[string]interface{}
-
-	for _, item := range instances {
-		mapping := map[string]interface{}{
-			"id":                    item.InstanceId,
-			"description":           item.Description,
-			"instance_charge_type":  getChargeType(item.PaymentType),
-			"data_node_amount":      item.NodeAmount,
-			"data_node_spec":        item.NodeSpec.Spec,
-			"data_node_disk_size":   item.NodeSpec.Disk,
-			"data_node_disk_type":   item.NodeSpec.DiskType,
-			"status":                item.Status,
-			"version":               item.EsVersion,
-			"created_at":            item.CreatedAt,
-			"updated_at":            item.UpdatedAt,
-			"vswitch_id":            item.NetworkConfig.VswitchId,
-			"tags":                  elasticsearchTagsToMap(item.Tags),
-		}
-
-		ids = append(ids, item.InstanceId)
-		descriptions = append(descriptions, item.Description)
-		s = append(s, mapping)
+		ids = append(ids, instance["id"].(string))
+		descriptions = append(descriptions, instance["description"].(string))
 	}
 
 	d.SetId(dataResourceIdHash(ids))
-	if err := d.Set("instances", s); err != nil {
+	if err := d.Set("instances", filteredInstances); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
@@ -247,7 +315,7 @@ func extractInstance(d *schema.ResourceData, instances []elasticsearch.Instance)
 
 	// create a json file in current directory and write data source to it
 	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		if err := writeToFile(output.(string), s); err != nil {
+		if err := writeToFile(output.(string), filteredInstances); err != nil {
 			return err
 		}
 	}

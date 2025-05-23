@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	"encoding/xml"
 	"regexp"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
@@ -92,7 +91,7 @@ func dataSourceAlibabacloudStackOssBuckets() *schema.Resource {
 func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var requestInfo *oss.Client
-	var allBuckets []oss.BucketProperties
+	var allBuckets []BucketProperties
 	nextMarker := ""
 	for {
 		var options []oss.Option
@@ -122,8 +121,8 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 		}
 
 		for _, k := range buckets {
-			allBuckets = append(allBuckets, oss.BucketProperties{
-				XMLName:          xml.Name{},
+			allBuckets = append(allBuckets, BucketProperties{
+// 				XMLName:          xml.Name{},
 				Name:             k.Name,
 				Location:         k.Location,
 				StorageClass:     k.StorageClass,
@@ -135,7 +134,7 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 		break
 	}
 
-	var filteredBucketsTemp []oss.BucketProperties
+	var filteredBucketsTemp []BucketProperties
 	nameRegex, ok := d.GetOk("name_regex")
 	if ok && nameRegex.(string) != "" {
 		var r *regexp.Regexp
@@ -154,7 +153,7 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 	return bucketsDescriptionAttributes(d, filteredBucketsTemp, meta)
 }
 
-func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []oss.BucketProperties, meta interface{}) error {
+func bucketsDescriptionAttributes(d *schema.ResourceData, buckets []BucketProperties, meta interface{}) error {
 	var ids []string
 	var s []map[string]interface{}
 	var names []string

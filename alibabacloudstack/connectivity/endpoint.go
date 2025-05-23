@@ -37,7 +37,6 @@ const (
 	CREECode            = ServiceCode("CR_EE")
 	CDNCode             = ServiceCode("CDN")
 	CMSCode             = ServiceCode("CMS")
-	OTSCode             = ServiceCode("OTS")
 	DNSCode             = ServiceCode("CLOUDDNS")
 	PVTZCode            = ServiceCode("PVTZ")
 	LOGCode             = ServiceCode("LOG")
@@ -51,7 +50,7 @@ const (
 	CLOUDAPICode        = ServiceCode("CLOUDAPI")
 	DRDSCode            = ServiceCode("DRDS")
 	LOCATIONCode        = ServiceCode("LOCATION")
-	ELASTICSEARCHCode   = ServiceCode("ELASTICSEARCH")
+	ElasticsearchK8sCode   = ServiceCode("ELASTICSEARCH_K8S")
 	DDOSCOOCode         = ServiceCode("DDOSCOO")
 	DDOSBGPCode         = ServiceCode("DDOSBGP")
 	SAGCode             = ServiceCode("SAG")
@@ -226,7 +225,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"edas-api.console.{{.region}}.{{.domain}}",
 	},
 	//ELASTICSEARCHCode endpoint
-	ELASTICSEARCHCode: PopEndpoint{
+	ElasticsearchK8sCode: PopEndpoint{
 		"elasticsearch.k8s.{{.region}}.{{.domain}}",
 		"elasticsearch.k8s.{{.region}}.{{.domain}}",
 	},
@@ -324,10 +323,13 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"oss-{{.region}}-a.{{.domain}}",
 	},
 	BssDataCode: PopEndpoint{"", ""},
-	OTSCode:     PopEndpoint{"", ""},
 	BastionHostCode: PopEndpoint{
 		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
 		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
+	},
+	OtsCode:     PopEndpoint{
+		"ots.{{.domain}}", 
+		"ots.{{.region}}.{{.domain}}",
 	},
 	// 3.18.3新局点将不会开放
 	OneRouterCode: PopEndpoint{

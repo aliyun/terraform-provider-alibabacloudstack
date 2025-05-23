@@ -3,8 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackElasticsearchDataSource(t *testing.T) {
@@ -33,18 +31,23 @@ func TestAccAlibabacloudStackElasticsearchDataSource(t *testing.T) {
 		}),
 	}
 
-	tagsConf := dataSourceTestAccConfig{
+	versionConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"tags": map[string]interface{}{
-				"Created": "TF",
-				"For":     "acceptance test",
-			},
+			"version": "7.10.0_ali1.6.0",
+			"ids": []string{"${alibabacloudstack_elasticsearch_instance.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"tags": map[string]interface{}{
-				"Created": "TF-fake",
-				"For":     "acceptance test",
-			},
+			"version": "7.10.0_ali1.6.0-F",
+			"ids": []string{"${alibabacloudstack_elasticsearch_instance.default.id}"},
+		}),
+	}
+
+	vpcConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"vpc_id": "${alibabacloudstack_vpc_vpc.default.id}-F",
 		}),
 	}
 
@@ -52,20 +55,14 @@ func TestAccAlibabacloudStackElasticsearchDataSource(t *testing.T) {
 		existConfig: testAccConfig(map[string]interface{}{
 			"description_regex": "${alibabacloudstack_elasticsearch_instance.default.description}",
 			"ids":               []string{"${alibabacloudstack_elasticsearch_instance.default.id}"},
-			"version":           "5.5.3_with_X-Pack",
-			"tags": map[string]interface{}{
-				"Created": "TF",
-				"For":     "acceptance test",
-			},
+			"version":           "7.10.0_ali1.6.0",
+			"vpc_id":            "${alibabacloudstack_vpc_vpc.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"description_regex": "${alibabacloudstack_elasticsearch_instance.default.description}-F",
-			"ids":               []string{"${alibabacloudstack_elasticsearch_instance.default.id}"},
-			"version":           "6.7.0_with_X-Pack",
-			"tags": map[string]interface{}{
-				"Created": "TF-fake",
-				"For":     "acceptance test",
-			},
+			"ids":               []string{"${alibabacloudstack_elasticsearch_instance.default.id}-F"},
+			"version":           "7.10.0_ali1.6.0-F",
+			"vpc_id":            "${alibabacloudstack_vpc_vpc.default.id}-F",
 		}),
 	}
 
@@ -74,7 +71,7 @@ func TestAccAlibabacloudStackElasticsearchDataSource(t *testing.T) {
 		existMapFunc: existElasticsearchMapFunc,
 		fakeMapFunc:  fakeElasticsearchMapFunc,
 	}
-	elasticsearchCheckInfo.dataSourceTestCheck(t, rand, descriptionRegexConf, idsConf, tagsConf, allConf)
+	elasticsearchCheckInfo.dataSourceTestCheck(t, rand, descriptionRegexConf, idsConf, versionConf, vpcConf, allConf)
 }
 
 var existElasticsearchMapFunc = func(rand int) map[string]string {
@@ -85,15 +82,11 @@ var existElasticsearchMapFunc = func(rand int) map[string]string {
 		"descriptions.0":                   fmt.Sprintf("tf-testAccES%d", rand),
 		"instances.#":                      "1",
 		"instances.0.id":                   CHECKSET,
-		"instances.0.instance_charge_type": string(PostPaid),
 		"instances.0.description":          fmt.Sprintf("tf-testAccES%d", rand),
-		"instances.0.data_node_amount":     "2",
-		"instances.0.data_node_spec":       "elasticsearch.sn2ne.large",
+		"instances.0.data_node_amount":     "3",
+		"instances.0.data_node_spec":       "1C 2Gi",
 		"instances.0.status":               "active",
-		"instances.0.version":              CHECKSET,
-		"instances.0.tags.%":               CHECKSET,
-		"instances.0.created_at":           CHECKSET,
-		"instances.0.updated_at":           CHECKSET,
+		"instances.0.version":              "7.10.0_ali1.6.0",
 		"instances.0.vswitch_id":           CHECKSET,
 	}
 }
@@ -106,46 +99,33 @@ var fakeElasticsearchMapFunc = func(rand int) map[string]string {
 	}
 }
 
+var esTestPassword = GeneratePassword(12)
+
 func dataSourceElasticsearchConfigDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"
 }
 
-data "alibabacloudstack_elasticsearch_zones" "default" {}
-data "alibabacloudstack_vpcs" "default" {
-  name_regex = "default-NODELETING"
-}
-data "alibabacloudstack_vswitches" "default" {
-  vpc_id = data.alibabacloudstack_vpcs.default.ids.0
-  zone_id = data.alibabacloudstack_elasticsearch_zones.default.ids.0
-}
-resource "alibabacloudstack_vswitch" "vswitch" {
-  count             = length(data.alibabacloudstack_vswitches.default.ids) > 0 ? 0 : 1
-  vpc_id            = data.alibabacloudstack_vpcs.default.ids.0
-  cidr_block        = cidrsubnet(data.alibabacloudstack_vpcs.default.vpcs[0].cidr_block, 8, 8)
-  availability_zone = data.alibabacloudstack_elasticsearch_zones.default.ids.0
- name              = var.name
+variable "password" {
+  default = "%s"
 }
 
-locals {
-  vswitch_id = length(data.alibabacloudstack_vswitches.default.ids) > 0 ? data.alibabacloudstack_vswitches.default.ids[0] : concat(alibabacloudstack_vswitch.vswitch.*.id, [""])[0]
-}
+%s
 
 resource "alibabacloudstack_elasticsearch_instance" "default" {
-  description          = var.name
-  password             = "%s"
-  vswitch_id           = local.vswitch_id
-  data_node_amount     = "2"
-  data_node_spec       = "elasticsearch.sn2ne.large"
-  data_node_disk_size  = "20"
-  data_node_disk_type  = "cloud_ssd"
-  instance_charge_type = "PostPaid"
-  version              = "5.5.3_with_X-Pack"
-  tags                 = {
-	  "Created": "TF",
-	  "For":     "acceptance test",
-  }
+  data_node_disk_type = "yoda-lvm"
+  data_node_spec = "1C 2Gi"
+  password = "${var.password}"
+  monitor_password = "${var.password}"
+  data_node_amount = "3"
+  cpu_type = "Intel"
+  scene = "normal"
+  description = "${var.name}"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
+  version = "7.10.0_ali1.6.0"
+  data_node_disk_size = "500"
 }
-`, name, GeneratePassword())
+`, name, esTestPassword, VSwitchCommonTestCase)
 }

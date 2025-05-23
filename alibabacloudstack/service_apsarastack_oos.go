@@ -87,3 +87,19 @@ func (s *OosService) OosExecutionStateRefreshFunc(id string, failStates []string
 		return object, object["Status"].(string), nil
 	}
 }
+
+
+// BucketProperties defines bucket properties
+type BucketProperties struct {
+	//XMLName      string  `xml:"Bucket"`
+	Name         string    `xml:"Name"`         // Bucket name
+	Location     string    `xml:"Location"`     // Bucket datacenter
+	//CreationDate time.Time `xml:"CreationDate"` // Bucket create time
+	CreationDate string `xml:"CreationDate"` // Bucket create time
+	StorageClass string    `xml:"StorageClass"` // Bucket storage class
+	//Acl          string    `xml:"acl"` // Bucket acl
+	Extranetendpoint string    `xml:"extranet_endpoint"` // Bucket extranet endpoint
+	Intranetendpoint string    `xml:"intranet_endpoint"` // Bucket intranet endpoint
+	//Owner        struct{}    `xml:"owner"` // Bucket owner
+	//Policy       string    `xml:"policy"` // Bucket policy
+}

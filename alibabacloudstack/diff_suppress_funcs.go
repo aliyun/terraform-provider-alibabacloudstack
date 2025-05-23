@@ -60,16 +60,6 @@ func csNodepoolSpotInstanceSettingDiffSuppressFunc(k, old, new string, d *schema
 	}
 	return true
 }
-func elasticsearchEnableKibanaPublicDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	return d.Get("enable_kibana_public_network").(bool) == false
-}
-
-func elasticsearchEnableKibanaPrivateDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	return d.Get("enable_kibana_private_network").(bool) == false
-}
-func elasticsearchEnablePublicDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
-	return d.Get("enable_public").(bool) == false
-}
 func kmsDiffSuppressFunc(k, old, new string, d *schema.ResourceData) bool {
 	if v, ok := d.GetOk("password"); ok && v.(string) != "" {
 		return true

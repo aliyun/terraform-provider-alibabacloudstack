@@ -7,8 +7,6 @@ import (
 	"fmt"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ots"
 	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -194,22 +192,17 @@ func (s *OtsService) ListOtsInstance(pageSize int, pageNum int) ([]string, error
 func (s *OtsService) DescribeOtsInstance(id string) (inst InstanceInfo, err error) {
 	request := s.client.NewCommonRequest("GET", "Ots", "2016-06-20", "GetInstance", "")
 	request.QueryParams["InstanceName"] = id
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	addDebug(request.GetActionName(), raw, request.QueryParams, errmsgs.AlibabacloudStackSdkGoERROR)
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request.QueryParams, errmsgs.AlibabacloudStackSdkGoERROR)
 	// OTS instance not found error code is "NotFound"
-	bresponse, ok := raw.(*responses.CommonResponse)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}else{
-			errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("OtsInstance", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+		if bresponse == nil {
+			return inst, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		if errmsgs.NotFoundError(err) {
 			return inst, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return inst, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	var instmap GetInstanceResponse

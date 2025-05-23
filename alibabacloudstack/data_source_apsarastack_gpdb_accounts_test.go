@@ -131,6 +131,6 @@ data "alibabacloudstack_gpdb_accounts" "default" {
 	db_instance_id = alibabacloudstack_gpdb_elastic_instance.default.id
 	%s
 }
-`, rand, GeneratePassword(), strings.Join(pairs, " \n "))
+`, rand, GeneratePassword(12), strings.Join(pairs, " \n "))
 	return config
 }

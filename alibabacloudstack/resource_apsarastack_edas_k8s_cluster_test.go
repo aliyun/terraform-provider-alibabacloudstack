@@ -299,7 +299,7 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 			worker_instance_types 		= ["${data.alibabacloudstack_instance_types.default.instance_types.0.id}"]
 			worker_vswitch_ids 		    = ["${alibabacloudstack_vpc_vswitch.default.id}"]
 			worker_disk_category 		= "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-			password 					= "Test@12345"
+			password 					= "%s"
 			pod_cidr 					= "172.20.0.0/16"
 			service_cidr 				= "172.21.0.0/20"
 			worker_disk_size 			= "40"
@@ -324,5 +324,5 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 			}
 		}
 
-		`, name, namespace_logical_id, SecurityGroupCommonTestCase)
+		`, name, namespace_logical_id, SecurityGroupCommonTestCase, GeneratePassword(12))
 }

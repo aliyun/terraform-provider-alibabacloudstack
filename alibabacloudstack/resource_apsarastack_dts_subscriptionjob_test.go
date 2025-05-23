@@ -578,5 +578,5 @@ resource "alibabacloudstack_vswitch" "default2" {
 }
 
 
-`, name, GeneratePassword())
+`, name, GeneratePassword(12))
 }

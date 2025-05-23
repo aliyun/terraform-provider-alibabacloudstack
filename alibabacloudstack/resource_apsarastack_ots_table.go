@@ -71,11 +71,12 @@ func resourceAlibabacloudStackOtsTable() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAliyunOtsTableCreate, resourceAliyunOtsTableRead, resourceAliyunOtsTableUpdate, resourceAliyunOtsTableDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackOtsTableCreate, resourceAlibabacloudStackOtsTableRead,
+		resourceAlibabacloudStackOtsTableUpdate, resourceAlibabacloudStackOtsTableDelete)
 	return resource
 }
 
-func resourceAliyunOtsTableCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackOtsTableCreate(d *schema.ResourceData, meta interface{}) error {
 	tableMeta := new(tablestore.TableMeta)
 	instanceName := d.Get("instance_name").(string)
 	tableName := d.Get("table_name").(string)
@@ -101,7 +102,6 @@ func resourceAliyunOtsTableCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 	tableOption := new(tablestore.TableOption)
 	tableOption.TimeToAlive = d.Get("time_to_live").(int)
-	tableOption.MaxVersion = d.Get("max_version").(int)
 	if deviation, ok := d.GetOk("deviation_cell_version_in_sec"); ok {
 		tableOption.DeviationCellVersionInSec, _ = strconv.ParseInt(deviation.(string), 10, 64)
 	}
@@ -133,7 +133,7 @@ func resourceAliyunOtsTableCreate(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceAliyunOtsTableRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackOtsTableRead(d *schema.ResourceData, meta interface{}) error {
 	instanceName, _, err := parseId(d, meta)
 	if err != nil {
 		return errmsgs.WrapError(err)
@@ -170,7 +170,7 @@ func resourceAliyunOtsTableRead(d *schema.ResourceData, meta interface{}) error 
 	return nil
 }
 
-func resourceAliyunOtsTableUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackOtsTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChanges("time_to_live", "max_version", "deviation_cell_version_in_sec") {
 		instanceName, tableName, err := parseId(d, meta)
 		if err != nil {
@@ -209,7 +209,7 @@ func resourceAliyunOtsTableUpdate(d *schema.ResourceData, meta interface{}) erro
 	return nil
 }
 
-func resourceAliyunOtsTableDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackOtsTableDelete(d *schema.ResourceData, meta interface{}) error {
 	instanceName, tableName, err := parseId(d, meta)
 	if err != nil {
 		return errmsgs.WrapError(err)

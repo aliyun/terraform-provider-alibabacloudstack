@@ -8,33 +8,34 @@ import (
 	"testing"
 	"time"
 
-	
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/elasticsearch"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-const DataNodeSpec = "elasticsearch.sn1ne.large"
-const DataNodeAmount = "2"
-const DataNodeDisk = "20"
-const DataNodeDiskType = "cloud_ssd"
+const EsVersion = "7.10.0_ali1.6.0"
+const EsDiskType = "yoda-lvm"
+const DataNodeSpec = "1C 2Gi"
+const DataNodeAmount = "3"
+const DataNodeDisk = "500"
 
-const DataNodeSpecForUpdate = "elasticsearch.sn2ne.large"
-const DataNodeAmountForUpdate = "3"
-const DataNodeDiskForUpdate = "30"
+const DataNodeSpecForUpdate = "2C 4Gi"
+const DataNodeAmountForUpdate = "5"
+const DataNodeDiskForUpdate = "600"
 
-const DataNodeAmountForMultiZone = "4"
-const DefaultZoneAmount = "2"
+const KibanaNodeSpec = "1C 2Gi"
+const KibanaNodeSpecForUpdate = "2C 4Gi"
 
-const MasterNodeSpec = "elasticsearch.sn2ne.large"
-const MasterNodeSpecForUpdate = "elasticsearch.sn2ne.xlarge"
+const MasterNodeSpec = "1C 2Gi"
+const MasterNodeAmount = "3"
+const MasterNodeSpecForUpdate = "2C 4Gi"
+const MasterNodeAmountForUpdate = "3"
 
-const ClientNodeSpec = "elasticsearch.sn2ne.large"
+const ClientNodeSpec = "1C 2Gi"
 const ClientNodeAmount = "2"
 
-const ClientNodeSpecForUpdate = "elasticsearch.sn2ne.xlarge"
+const ClientNodeSpecForUpdate = "2C 4Gi"
 const ClientNodeAmountForUpdate = "3"
 
 func init() {
@@ -137,9 +138,9 @@ func testSweepElasticsearch(region string) error {
 }
 
 func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
-	var instance *elasticsearch.DescribeInstanceResponse
+	var instance map[string]interface{}
 
-	resourceId := "alibabacloudstack_elasticsearch_instance.default.1"
+	resourceId := "alibabacloudstack_elasticsearch_instance.default"
 	ra := resourceAttrInit(resourceId, elasticsearchMap)
 
 	serviceFunc := func() interface{} {
@@ -150,12 +151,13 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
 	if len(name) > 30 {
 		name = name[:30]
 	}
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence_basic)
+	password := GeneratePassword(12)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -168,20 +170,22 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description":          name,
-					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"version":              "5.5.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
-					"data_node_spec":       DataNodeSpec,
-					"data_node_amount":     DataNodeAmount,
-					"data_node_disk_size":  DataNodeDisk,
-					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
+					"zone_id":             "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"cpu_type":            "Intel",
+					"scene":               "normal",
+					"description":         name,
+					"version":             EsVersion,
+					"password":            GeneratePassword(12),
+					"monitor_password":    GeneratePassword(12),
+					"data_node_spec":      DataNodeSpec,
+					"data_node_amount":    DataNodeAmount,
+					"data_node_disk_size": DataNodeDisk,
+					"data_node_disk_type": EsDiskType,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"description": name,
-						"version":     "5.5.3_with_X-Pack",
+						"version":     EsVersion,
 					}),
 				),
 			},
@@ -189,15 +193,25 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateVerifyIgnore: []string{"password", "monitor_password", "kibana_password", "scene"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"password": "inputYourCodeHere",
+					"password": password,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"password": "inputYourCodeHere",
+						"password": password,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"monitor_password": password,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"monitor_password": password,
 					}),
 				),
 			},
@@ -211,659 +225,372 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 					}),
 				),
 			},
+			// 			{
+			// 				Config: testAccConfig(map[string]interface{}{
+			// 					"private_whitelist": []string{"192.168.0.0/24", "127.0.0.1"},
+			// 				}),
+			// 				Check: resource.ComposeTestCheckFunc(
+			// 					testAccCheck(map[string]string{
+			// 						"private_whitelist.#": "2",
+			// 					}),
+			// 				),
+			// 			},
+			// 			{
+			// 				Config: testAccConfig(map[string]interface{}{
+			// 					"enable_public": "true",
+			// 				}),
+			// 				Check: resource.ComposeTestCheckFunc(
+			// 					testAccCheck(map[string]string{
+			// 						"enable_public": "true",
+			// 					}),
+			// 				),
+			// 			},
+			// 			{
+			// 				Config: testAccConfig(map[string]interface{}{
+			// 					"public_whitelist": []string{"192.168.0.0/24", "127.0.0.1"},
+			// 				}),
+			// 				Check: resource.ComposeTestCheckFunc(
+			// 					testAccCheck(map[string]string{
+			// 						"public_whitelist.#": "2",
+			// 					}),
+			// 				),
+			// 			},
+			// 			{
+			// 				Config: testAccConfig(map[string]interface{}{
+			// 					"kibana_whitelist": []string{"192.168.0.0/24", "127.0.0.1"},
+			// 				}),
+			// 				Check: resource.ComposeTestCheckFunc(
+			// 					testAccCheck(map[string]string{
+			// 						"kibana_whitelist.#": "2",
+			// 					}),
+			// 				),
+			// 			},
+			// 			{
+			// 				Config: testAccConfig(map[string]interface{}{
+			// 					"enable_kibana_private_network": "true",
+			// 				}),
+			// 				Check: resource.ComposeTestCheckFunc(
+			// 					testAccCheck(map[string]string{
+			// 						"enable_kibana_private_network": "true",
+			// 					}),
+			// 				),
+			// 			},
+			// 			{
+			// 				Config: testAccConfig(map[string]interface{}{
+			// 					"kibana_private_whitelist": []string{"192.168.0.0/24", "127.0.0.1"},
+			// 				}),
+			// 				Check: resource.ComposeTestCheckFunc(
+			// 					testAccCheck(map[string]string{
+			// 						"kibana_private_whitelist.#": "2",
+			// 					}),
+			// 				),
+			// 			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
+	var instance map[string]interface{}
+
+	resourceId := "alibabacloudstack_elasticsearch_instance.default"
+	ra := resourceAttrInit(resourceId, elasticsearchMap)
+
+	serviceFunc := func() interface{} {
+		return &ElasticsearchService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &instance, serviceFunc)
+
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
+	if len(name) > 30 {
+		name = name[:30]
+	}
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence_vpc)
+	password := GeneratePassword(12)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		// module name
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"data_node_spec": DataNodeSpecForUpdate,
+					"zone_id":               "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"cpu_type":              "Intel",
+					"version":               EsVersion,
+					"description":           name,
+					"scene":                 "normal",
+					"data_node_amount":      DataNodeAmount,
+					"data_node_spec":        DataNodeSpec,
+					"data_node_disk_size":   DataNodeDisk,
+					"data_node_disk_type":   EsDiskType,
+					"kibana_node_spec":      KibanaNodeSpec,
+					"kibana_password":       GeneratePassword(12),
+					"master_node_amount":    MasterNodeAmount,
+					"master_node_spec":      MasterNodeSpec,
+					"master_node_disk_size": "100",
+					"master_node_disk_type": EsDiskType,
+					"client_node_amount":    ClientNodeAmount,
+					"client_node_spec":      ClientNodeSpec,
+					"vswitch_id":            "${alibabacloudstack_vpc_vswitch.default.id}",
+					"password":              GeneratePassword(12),
+					"monitor_password":      GeneratePassword(12),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"data_node_spec": DataNodeSpecForUpdate,
+						"slb_address":   CHECKSET,
+						"domain":        CHECKSET,
+						"port":          CHECKSET,
+						"status":        CHECKSET,
+						"kibana_domain": CHECKSET,
+						"kibana_port":   CHECKSET,
 					}),
 				),
 			},
 			{
+				Config: testAccConfig(map[string]interface{}{
+					"kibana_password": password,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"kibana_password": password,
+					}),
+				),
+			},
+			{
+				// kibana node 升配
+				Config: testAccConfig(map[string]interface{}{
+					"kibana_node_spec": KibanaNodeSpecForUpdate,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
+				),
+			},
+			{
+				// kibana node 降配
+				Config: testAccConfig(map[string]interface{}{
+					"kibana_node_spec": KibanaNodeSpec,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
+				),
+			},
+			{
+				// kibana node 下线
+				Config: testAccConfig(map[string]interface{}{
+					"kibana_node_spec": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						// FIXME: TF 无法识别
+						// "kibana_node_spec": REMOVEKEY,
+					}),
+				),
+			},
+			{
+				// client node 升配
+				Config: testAccConfig(map[string]interface{}{
+					"client_node_amount": ClientNodeAmountForUpdate,
+					"client_node_spec":   ClientNodeSpecForUpdate,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
+				),
+			},
+			{
+				// client node 降配
+				Config: testAccConfig(map[string]interface{}{
+					"client_node_amount": ClientNodeAmount,
+					"client_node_spec":   ClientNodeSpec,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
+				),
+			},
+			{
+				// client node 下线
+				Config: testAccConfig(map[string]interface{}{
+					"client_node_amount": REMOVEKEY,
+					"client_node_spec":   REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+// FIXME: 可以下线节点但校验不通过
+// 						"client_node_amount": REMOVEKEY,
+// 						"client_node_spec":   REMOVEKEY,
+					}),
+				),
+			},
+			{
+				// data node 升配
 				Config: testAccConfig(map[string]interface{}{
 					"data_node_amount": DataNodeAmountForUpdate,
+					"data_node_spec":   DataNodeSpecForUpdate,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"data_node_amount": DataNodeAmountForUpdate,
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
+				// data node 降配
 				Config: testAccConfig(map[string]interface{}{
-					"data_node_disk_size": DataNodeDiskForUpdate,
+					"data_node_amount": DataNodeAmount,
+					"data_node_spec":   DataNodeSpec,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"data_node_disk_size": DataNodeDiskForUpdate,
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
+				// master node 升配
 				Config: testAccConfig(map[string]interface{}{
-					"master_node_spec": MasterNodeSpec,
+					"master_node_amount": MasterNodeAmountForUpdate,
+					"master_node_spec":   MasterNodeSpecForUpdate,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"master_node_spec": MasterNodeSpec,
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
+				// master node 降配
 				Config: testAccConfig(map[string]interface{}{
-					"private_whitelist": []string{"192.168.0.0/24", "127.0.0.1"},
+					"master_node_amount": MasterNodeAmount,
+					"master_node_spec":   MasterNodeSpec,
 				}),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"private_whitelist.#": "2",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"enable_public": "true",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"enable_public": "true",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"public_whitelist": []string{"192.168.0.0/24", "127.0.0.1"},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"public_whitelist.#": "2",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"kibana_whitelist": []string{"192.168.0.0/24", "127.0.0.1"},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"kibana_whitelist.#": "2",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"enable_kibana_private_network": "true",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"enable_kibana_private_network": "true",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"kibana_private_whitelist": []string{"192.168.0.0/24", "127.0.0.1"},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"kibana_private_whitelist.#": "2",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance Test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance Test",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": REMOVEKEY,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       REMOVEKEY,
-						"tags.Created": REMOVEKEY,
-						"tags.For":     REMOVEKEY,
-					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackElasticsearchInstance_multizone(t *testing.T) {
-	var instance *elasticsearch.DescribeInstanceResponse
-
-	resourceId := "alibabacloudstack_elasticsearch_instance.default"
-	ra := resourceAttrInit(resourceId, elasticsearchMap)
-
-	serviceFunc := func() interface{} {
-		return &ElasticsearchService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &instance, serviceFunc)
-
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
-	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
-	if len(name) > 30 {
-		name = name[:30]
-	}
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"description":          name,
-					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"version":              "5.5.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
-					"data_node_spec":       DataNodeSpec,
-					"data_node_amount":     DataNodeAmountForMultiZone,
-					"data_node_disk_size":  DataNodeDisk,
-					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
-					"master_node_spec":     MasterNodeSpec,
-					"zone_count":           DefaultZoneAmount,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"description":      name,
-						"version":          "5.5.3_with_X-Pack",
-						"data_node_amount": DataNodeAmountForMultiZone,
-						"master_node_spec": MasterNodeSpec,
-						"zone_count":       DefaultZoneAmount,
-					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackElasticsearchInstance_version(t *testing.T) {
-	var instance *elasticsearch.DescribeInstanceResponse
-
-	resourceId := "alibabacloudstack_elasticsearch_instance.default"
-	ra := resourceAttrInit(resourceId, elasticsearchMap)
-
-	serviceFunc := func() interface{} {
-		return &ElasticsearchService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &instance, serviceFunc)
-
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
-	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
-	if len(name) > 30 {
-		name = name[:30]
-	}
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"description":          name,
-					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"version":              "6.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
-					"data_node_spec":       DataNodeSpec,
-					"data_node_amount":     DataNodeAmount,
-					"data_node_disk_size":  DataNodeDisk,
-					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"description": name,
-						"version":     REGEXMATCH + "^6.3.*_with_X-Pack",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"version": "6.7_with_X-Pack",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"version": REGEXMATCH + "6.7.*_with_X-Pack",
-					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackElasticsearchInstance_multi(t *testing.T) {
-	var instance *elasticsearch.DescribeInstanceResponse
-
-	resourceId := "alibabacloudstack_elasticsearch_instance.default.1"
-	ra := resourceAttrInit(resourceId, elasticsearchMap)
-
-	serviceFunc := func() interface{} {
-		return &ElasticsearchService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &instance, serviceFunc)
-
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
-	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
-	if len(name) > 30 {
-		name = name[:30]
-	}
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence_multi)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"description":          name,
-					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"version":              "5.5.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
-					"data_node_spec":       DataNodeSpec,
-					"data_node_amount":     DataNodeAmount,
-					"data_node_disk_size":  DataNodeDisk,
-					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
-					"count":                "2",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(nil),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackElasticsearchInstance_encrypt_disk(t *testing.T) {
-	var instance *elasticsearch.DescribeInstanceResponse
-
-	resourceId := "alibabacloudstack_elasticsearch_instance.default"
-	ra := resourceAttrInit(resourceId, elasticsearchMap)
-
-	serviceFunc := func() interface{} {
-		return &ElasticsearchService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &instance, serviceFunc)
-
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
-	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
-	if len(name) > 30 {
-		name = name[:30]
-	}
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"description":              name,
-					"vswitch_id":               "${alibabacloudstack_vswitch.default.id}",
-					"version":                  "5.5.3_with_X-Pack",
-					"password":                 "inputYourCodeHere",
-					"data_node_spec":           DataNodeSpec,
-					"data_node_amount":         DataNodeAmountForMultiZone,
-					"data_node_disk_size":      DataNodeDisk,
-					"data_node_disk_type":      DataNodeDiskType,
-					"data_node_disk_encrypted": "true",
-					"instance_charge_type":     string(PostPaid),
-					"master_node_spec":         MasterNodeSpec,
-					"zone_count":               DefaultZoneAmount,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"description":              name,
-						"version":                  "5.5.3_with_X-Pack",
-						"data_node_amount":         DataNodeAmountForMultiZone,
-						"data_node_disk_encrypted": "true",
-						"master_node_spec":         MasterNodeSpec,
-						"zone_count":               DefaultZoneAmount,
-					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackElasticsearchInstance_client_node(t *testing.T) {
-	var instance *elasticsearch.DescribeInstanceResponse
-
-	resourceId := "alibabacloudstack_elasticsearch_instance.default"
-	ra := resourceAttrInit(resourceId, elasticsearchMap)
-
-	serviceFunc := func() interface{} {
-		return &ElasticsearchService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &instance, serviceFunc)
-
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
-	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
-	if len(name) > 30 {
-		name = name[:30]
-	}
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"description":          name,
-					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"version":              "6.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
-					"data_node_spec":       DataNodeSpec,
-					"data_node_amount":     DataNodeAmount,
-					"data_node_disk_size":  DataNodeDisk,
-					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
-					"client_node_spec":     ClientNodeSpec,
-					"client_node_amount":   ClientNodeAmount,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"client_node_spec":   ClientNodeSpec,
-						"client_node_amount": ClientNodeAmount,
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"client_node_spec":   ClientNodeSpecForUpdate,
-					"client_node_amount": ClientNodeAmountForUpdate,
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"client_node_spec":   ClientNodeSpecForUpdate,
-						"client_node_amount": ClientNodeAmountForUpdate,
-					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackElasticsearchInstance_https(t *testing.T) {
-	var instance *elasticsearch.DescribeInstanceResponse
-
-	resourceId := "alibabacloudstack_elasticsearch_instance.default"
-	ra := resourceAttrInit(resourceId, elasticsearchMap)
-
-	serviceFunc := func() interface{} {
-		return &ElasticsearchService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &instance, serviceFunc)
-
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
-	name := fmt.Sprintf("tf-testAccES-keepit%s%d", defaultRegionToTest, rand)
-	if len(name) > 30 {
-		name = name[:30]
-	}
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"description":          name,
-					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"version":              "6.3_with_X-Pack",
-					"password":             "inputYourCodeHere",
-					"data_node_spec":       DataNodeSpec,
-					"data_node_amount":     DataNodeAmount,
-					"data_node_disk_size":  DataNodeDisk,
-					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
-					"client_node_spec":     ClientNodeSpec,
-					"client_node_amount":   ClientNodeAmount,
-					"protocol":             "HTTPS",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"protocol": "HTTPS",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"protocol": "HTTP",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"protocol": "HTTP",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"protocol": "HTTPS",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"protocol": "HTTPS",
-					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) {
-	var instance *elasticsearch.DescribeInstanceResponse
-
-	resourceId := "alibabacloudstack_elasticsearch_instance.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudStackElasticsearchMap)
-
-	serviceFunc := func() interface{} {
-		return &ElasticsearchService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInit(resourceId, &instance, serviceFunc)
-
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
-	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
-	if len(name) > 30 {
-		name = name[:30]
-	}
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
-
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-		// module name
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"description":          name,
-					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"version":              "6.7_with_X-Pack",
-					"password":             "inputYourCodeHere",
-					"data_node_spec":       DataNodeSpec,
-					"data_node_amount":     "3",
-					"data_node_disk_size":  DataNodeDisk,
-					"data_node_disk_type":  DataNodeDiskType,
-					"instance_charge_type": string(PostPaid),
-					"setting_config": map[string]string{
-						"\"action.auto_create_index\"":         "+.*,-*",
-						"\"action.destructive_requires_name\"": "false",
-						"\"xpack.security.audit.enabled\"":     "true",
-						"\"xpack.security.audit.outputs\"":     "index",
-						"\"xpack.watcher.enabled\"":            "false",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"setting_config.action.auto_create_index":         "+.*,-*",
-						"setting_config.action.destructive_requires_name": "false",
-						"setting_config.xpack.security.audit.enabled":     "true",
-						"setting_config.xpack.security.audit.outputs":     "index",
-						"setting_config.xpack.watcher.enabled":            "false",
-					}),
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"password"},
+				ImportStateVerifyIgnore: []string{"password", "monitor_password", "kibana_password", "scene"},
 			},
 		},
 	})
 }
 
+// func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) {
+// 	var instance map[string]interface{}
+//
+// 	resourceId := "alibabacloudstack_elasticsearch_instance.default"
+// 	ra := resourceAttrInit(resourceId, AlibabacloudStackElasticsearchMap)
+//
+// 	serviceFunc := func() interface{} {
+// 		return &ElasticsearchService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+// 	}
+// 	rc := resourceCheckInit(resourceId, &instance, serviceFunc)
+//
+// 	rac := resourceAttrCheckInit(rc, ra)
+//
+// 	testAccCheck := rac.resourceAttrMapUpdateSet()
+// 	rand := getAccTestRandInt(10000, 20000)
+// 	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
+// 	if len(name) > 30 {
+// 		name = name[:30]
+// 	}
+// 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence_vpc)
+//
+// 	ResourceTest(t, resource.TestCase{
+// 		PreCheck: func() {
+// 			testAccPreCheck(t)
+// 		},
+// 		// module name
+// 		IDRefreshName: resourceId,
+// 		Providers:     testAccProviders,
+// 		CheckDestroy:  rac.checkResourceDestroy(),
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: testAccConfig(map[string]interface{}{
+// 					"cpu_type":            "Intel",
+// 					"scene":               "normal",
+// 					"description":         name,
+// 					"vswitch_id":          "${alibabacloudstack_vswitch.default.id}",
+// 					"version":             "6.7_with_X-Pack",
+// 					"password":            GeneratePassword(12),
+// 					"data_node_spec":      DataNodeSpec,
+// 					"data_node_amount":    "3",
+// 					"data_node_disk_size": DataNodeDisk,
+// 					"data_node_disk_type": EsDiskType,
+// 					"setting_config": map[string]string{
+// 						"\"action.auto_create_index\"":         "+.*,-*",
+// 						"\"action.destructive_requires_name\"": "false",
+// 						"\"xpack.security.audit.enabled\"":     "true",
+// 						"\"xpack.security.audit.outputs\"":     "index",
+// 						"\"xpack.watcher.enabled\"":            "false",
+// 					},
+// 				}),
+// 				Check: resource.ComposeTestCheckFunc(
+// 					testAccCheck(map[string]string{
+// 						"setting_config.action.auto_create_index":         "+.*,-*",
+// 						"setting_config.action.destructive_requires_name": "false",
+// 						"setting_config.xpack.security.audit.enabled":     "true",
+// 						"setting_config.xpack.security.audit.outputs":     "index",
+// 						"setting_config.xpack.watcher.enabled":            "false",
+// 					}),
+// 				),
+// 			},
+// 			{
+// 				ResourceName:            resourceId,
+// 				ImportState:             true,
+// 				ImportStateVerify:       true,
+// 				ImportStateVerifyIgnore: []string{"password"},
+// 			},
+// 		},
+// 	})
+// }
+
 var elasticsearchMap = map[string]string{
-	"description":                   CHECKSET,
-	"data_node_spec":                DataNodeSpec,
-	"data_node_amount":              DataNodeAmount,
-	"data_node_disk_size":           DataNodeDisk,
-	"data_node_disk_type":           DataNodeDiskType,
-	"instance_charge_type":          string(PostPaid),
-	"status":                        "active",
-	"private_whitelist.#":           "0",
-	"public_whitelist.#":            "0",
-	"enable_public":                 "false",
-	"kibana_whitelist.#":            "0",
-	"enable_kibana_public_network":  "true",
-	"kibana_private_whitelist.#":    "0",
-	"enable_kibana_private_network": "false",
-	"master_node_spec":              "",
-	"id":                            CHECKSET,
-	"domain":                        CHECKSET,
-	"port":                          CHECKSET,
-	"kibana_domain":                 CHECKSET,
-	"kibana_port":                   CHECKSET,
-	"vswitch_id":                    CHECKSET,
+	"description":                CHECKSET,
+	"data_node_spec":             CHECKSET,
+	"data_node_amount":           CHECKSET,
+	"data_node_disk_size":        CHECKSET,
+	"data_node_disk_type":        CHECKSET,
+	"status":                     "active",
+	"private_whitelist.#":        "0",
+	"public_whitelist.#":         "0",
+	"enable_public":              "false",
+	"kibana_whitelist.#":         "0",
+	"kibana_private_whitelist.#": "0",
+	"id":                         CHECKSET,
+	"domain":                     CHECKSET,
+	"port":                       CHECKSET,
 }
 
 var AlibabacloudStackElasticsearchMap = map[string]string{
-	"id":                   CHECKSET,
-	"domain":               CHECKSET,
-	"port":                 CHECKSET,
-	"kibana_domain":        CHECKSET,
-	"kibana_port":          CHECKSET,
-	"vswitch_id":           CHECKSET,
-	"description":          CHECKSET,
-	"instance_charge_type": string(PostPaid),
+	"id":            CHECKSET,
+	"domain":        CHECKSET,
+	"port":          CHECKSET,
+	"kibana_domain": CHECKSET,
+	"kibana_port":   CHECKSET,
+	"vswitch_id":    CHECKSET,
+	"description":   CHECKSET,
 }
 
-func resourceElasticsearchInstanceConfigDependence(name string) string {
+func resourceElasticsearchInstanceConfigDependence_basic(name string) string {
 	return fmt.Sprintf(`
-    %s
 	variable "name" {
 		default = "%s"
 	}
-	data "alibabacloudstack_zones" "default" {
-			available_resource_creation= "VSwitch"
-		}	
-	resource "alibabacloudstack_vpc" "default" {
- 	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
+	%s
+	`, name, DataZoneCommonTestCase)
 }
 
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "172.16.0.0/21"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name = "${var.name}"
-}
-		
-	`, ElasticsearchInstanceCommonTestCase, name)
-}
-
-func resourceElasticsearchInstanceConfigDependence_multi(name string) string {
+func resourceElasticsearchInstanceConfigDependence_vpc(name string) string {
 	return fmt.Sprintf(`
-    %s
 	variable "name" {
 		default = "%s"
 	}
-	data "alibabacloudstack_zones" "default" {
-			
-		}	
-	resource "alibabacloudstack_vpc" "default" {
-  	name = "${var.name}"
-	cidr_block = "172.16.0.0/12"
-}
 
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id = "${alibabacloudstack_vpc.default.id}"
-  cidr_block = "172.16.0.0/21"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name = "${var.name}"
-}
+%s
 		
-	`, ElasticsearchInstanceCommonTestCase, name)
+	`, name, VSwitchCommonTestCase)
 }

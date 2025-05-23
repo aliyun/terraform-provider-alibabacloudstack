@@ -16,9 +16,9 @@ require (
 	github.com/alibabacloud-go/tea-utils v1.4.5
 	github.com/aliyun/alibaba-cloud-sdk-go v1.62.681
 	github.com/aliyun/aliyun-datahub-sdk-go v0.1.5
-	github.com/aliyun/aliyun-log-go-sdk v0.1.14
+	github.com/aliyun/aliyun-log-go-sdk v0.1.21
 	github.com/aliyun/aliyun-oss-go-sdk v2.1.4+incompatible
-	github.com/aliyun/aliyun-tablestore-go-sdk v4.1.2+incompatible
+	github.com/aliyun/aliyun-tablestore-go-sdk v4.1.3+incompatible
 	github.com/aliyun/credentials-go v1.3.1
 	github.com/aliyun/fc-go-sdk v0.0.0-20200619091938-0882be48e49f
 	github.com/google/uuid v1.3.0
@@ -43,6 +43,7 @@ require (
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.5 // indirect
 	github.com/alibabacloud-go/tea-xml v1.1.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
+	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/clbanning/mxj/v2 v2.5.5 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect
@@ -84,9 +85,10 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/opentracing/opentracing-go v1.2.1-0.20220228012449-10b1cf09e00b // indirect
-	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
+	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	github.com/tjfoc/gmsm v1.4.1 // indirect
@@ -110,10 +112,4 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/resty.v1 v1.12.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-replace (
-	github.com/aliyun/aliyun-log-go-sdk => ./local_vendor/github.com/aliyun/aliyun-log-go-sdk
-	github.com/aliyun/aliyun-oss-go-sdk => ./local_vendor/github.com/aliyun/aliyun-oss-go-sdk
-	github.com/aliyun/aliyun-tablestore-go-sdk => ./local_vendor/github.com/aliyun/aliyun-tablestore-go-sdk
 )
