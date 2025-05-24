@@ -156,7 +156,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 	if len(name) > 30 {
 		name = name[:30]
 	}
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence_basic)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
 	password := GeneratePassword(12)
 
 	ResourceTest(t, resource.TestCase{
@@ -203,6 +203,31 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password", "monitor_password", "kibana_password", "scene"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"vpc_whitelist": []map[string]interface{}{ 
+						map[string]interface{}{
+							"vpc_id": "${alibabacloudstack_vpc_vswitch.default.vpc_id}",
+							"ips" : []string{"${alibabacloudstack_vpc_vswitch.default.cidr_block}"},
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vpc_whitelist.#": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"vpc_whitelist": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"vpc_whitelist.#": "0",
+					}),
+				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -367,7 +392,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 	if len(name) > 30 {
 		name = name[:30]
 	}
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence_vpc)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
 	password := GeneratePassword(12)
 
 	ResourceTest(t, resource.TestCase{
@@ -558,7 +583,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) 
 	if len(name) > 30 {
 		name = name[:30]
 	}
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence_vpc)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -638,16 +663,7 @@ var AlibabacloudStackElasticsearchMap = map[string]string{
 	"description":   CHECKSET,
 }
 
-func resourceElasticsearchInstanceConfigDependence_basic(name string) string {
-	return fmt.Sprintf(`
-	variable "name" {
-		default = "%s"
-	}
-	%s
-	`, name, DataZoneCommonTestCase)
-}
-
-func resourceElasticsearchInstanceConfigDependence_vpc(name string) string {
+func resourceElasticsearchInstanceConfigDependence(name string) string {
 	return fmt.Sprintf(`
 	variable "name" {
 		default = "%s"

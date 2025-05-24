@@ -16,7 +16,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-// 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -183,6 +183,34 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(12, 32),
 			},
 
+			"protocol": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "HTTP",
+				ValidateFunc: validation.StringInSlice([]string{"HTTP", "HTTPS"}, false),
+			},
+
+			"vpc_whitelist": {
+				Type: schema.TypeSet,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"vpc_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"ips": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							MinItems: 1,
+						},
+					},
+				},
+				Set: func(v interface{}) int {
+					return hashcode.String(v.(map[string]interface{})["vpc_id"].(string))
+				},
+				Optional: true,
+			},
 
 			// cluster config
 			"apack_accesslog_enabled": {
@@ -305,8 +333,8 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 			},
 
 			"setting_config": {
-				Type: schema.TypeMap,
-				// 				Optional: true,
+				Type:     schema.TypeMap,
+				Optional: true,
 				Computed: true,
 			},
 		},
@@ -453,6 +481,20 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 		d.Set("kibana_port", object["kibanaPort"])
 	}
 
+	AclWhiteList := make([]map[string]interface{}, 0)
+	if _, exists := object["esAclWhiteIpList"]; exists {
+		for _, item := range object["esAclWhiteIpList"].([]interface{}) {
+			esAclWhiteIp := item.(map[string]interface{})
+			AclWhiteList = append(AclWhiteList, map[string]interface{}{
+				"vpc_id": esAclWhiteIp["vpcId"],
+				"ips":    esAclWhiteIp["ips"],
+			})
+		}
+		d.Set("vpc_whitelist", AclWhiteList)
+	} else {
+		d.Set("vpc_whitelist", nil)
+	}
+
 	kibanaPrivateIPWhitelist := object["kibanaPrivateIPWhitelist"].([]interface{})
 	d.Set("kibana_private_whitelist", filterWhitelist(convertArrayInterfaceToArrayString(kibanaPrivateIPWhitelist), d.Get("kibana_private_whitelist").(*schema.Set)))
 
@@ -460,6 +502,11 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 	d.Set("protocol", object["protocol"])
 
 	esConfig := object["esConfig"].(map[string]interface{})
+	for _, key := range []string{"cluster.routing.allocation.awareness.attributes", "cluster.routing.allocation.awareness.force.node_name.values", "opendistro_security.unsupported.restore.securityindex.enabled:", "node.attr.node_name"} {
+		if _, exists := esConfig[key]; exists {
+			delete(esConfig, key)
+		}
+	}
 	if esConfig != nil {
 		d.Set("setting_config", esConfig)
 	}
@@ -509,50 +556,107 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 10 * time.Second
 
-	if d.HasChange("private_whitelist") {
-		content := make(map[string]interface{})
-		content["networkType"] = string(PRIVATE)
-		content["nodeType"] = string(WORKER)
-		content["whiteIpList"] = d.Get("private_whitelist").(*schema.Set).List()
-		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
+	// 	if d.HasChange("private_whitelist") {
+	// 		content := make(map[string]interface{})
+	// 		content["networkType"] = string(PRIVATE)
+	// 		content["nodeType"] = string(WORKER)
+	// 		content["whiteIpList"] = d.Get("private_whitelist").(*schema.Set).List()
+	// 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
+	// 			return errmsgs.WrapError(err)
+	// 		}
+	// 	}
+	//
+	// 	if d.HasChange("public_whitelist") {
+	// 		content := make(map[string]interface{})
+	// 		content["networkType"] = string(PUBLIC)
+	// 		content["nodeType"] = string(WORKER)
+	// 		content["whiteIpList"] = d.Get("public_whitelist").(*schema.Set).List()
+	// 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
+	// 			return errmsgs.WrapError(err)
+	// 		}
+	// 	}
+	//
+	// 	if d.HasChange("kibana_whitelist") {
+	// 		content := make(map[string]interface{})
+	// 		content["networkType"] = string(PUBLIC)
+	// 		content["nodeType"] = string(KIBANA)
+	// 		content["whiteIpList"] = d.Get("kibana_whitelist").(*schema.Set).List()
+	// 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
+	// 			return errmsgs.WrapError(err)
+	// 		}
+	// 	}
+	//
+	// 	if d.HasChange("kibana_private_whitelist") {
+	// 		content := make(map[string]interface{})
+	// 		content["networkType"] = string(PRIVATE)
+	// 		content["nodeType"] = string(KIBANA)
+	// 		content["whiteIpList"] = d.Get("kibana_private_whitelist").(*schema.Set).List()
+	// 		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
+	// 			return errmsgs.WrapError(err)
+	// 		}
+	// 	}
 
-	if d.HasChange("public_whitelist") {
-		content := make(map[string]interface{})
-		content["networkType"] = string(PUBLIC)
-		content["nodeType"] = string(WORKER)
-		content["whiteIpList"] = d.Get("public_whitelist").(*schema.Set).List()
-		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return errmsgs.WrapError(err)
+	if d.HasChange("vpc_whitelist") {
+		oldValue, newValue := d.GetChange("vpc_whitelist")
+		oldList := oldValue.(*schema.Set).List()
+		newList := newValue.(*schema.Set).List()
+		oldMap := make(map[string]map[string]interface{})
+		newMap := make(map[string]map[string]interface{})
+		for _, item := range oldList {
+			v := item.(map[string]interface{})
+			oldMap[v["vpc_id"].(string)] = v
 		}
-	}
-
-	if d.HasChange("kibana_whitelist") {
-		content := make(map[string]interface{})
-		content["networkType"] = string(PUBLIC)
-		content["nodeType"] = string(KIBANA)
-		content["whiteIpList"] = d.Get("kibana_whitelist").(*schema.Set).List()
-		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return errmsgs.WrapError(err)
+		for _, item := range newList {
+			v := item.(map[string]interface{})
+			newMap[v["vpc_id"].(string)] = v
 		}
-	}
 
-	if d.HasChange("kibana_private_whitelist") {
-		content := make(map[string]interface{})
-		content["networkType"] = string(PRIVATE)
-		content["nodeType"] = string(KIBANA)
-		content["whiteIpList"] = d.Get("kibana_private_whitelist").(*schema.Set).List()
-		if err := elasticsearchService.ModifyWhiteIps(d, content, meta); err != nil {
-			return errmsgs.WrapError(err)
+		for oldKey := range oldMap {
+			if _, exists := newMap[oldKey]; !exists {
+				request := map[string]interface{}{
+					"aclWhiteIp": map[string]interface{}{
+						"vpcId":       oldKey,
+						"whiteIpType": "PRIVATE_ES",
+						"ips":         []string{},
+					},
+					"modifyMode": "Delete",
+				}
+				_, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "ModifyAclWhiteIps", fmt.Sprintf("/openapi/instances/%s/actions/modify-acl-white-ips", d.Id()), nil, nil, request)
+				if err != nil {
+					if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+						return nil
+					}
+					return err
+				}
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
+			}
+		}
+
+		for _, item := range newList {
+			request := map[string]interface{}{
+				"aclWhiteIp": map[string]interface{}{
+					"vpcId":       item.(map[string]interface{})["vpc_id"],
+					"whiteIpType": "PRIVATE_ES",
+					"ips":         item.(map[string]interface{})["ips"],
+				},
+				"modifyMode": "Cover",
+			}
+			_, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "ModifyAclWhiteIps", fmt.Sprintf("/openapi/instances/%s/actions/modify-acl-white-ips", d.Id()), nil, nil, request)
+			if err != nil {
+				if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+					return nil
+				}
+				return err
+			}
+			if _, err := stateConf.WaitForState(); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+			}
 		}
 	}
 
 	if d.HasChange("protocol") {
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		}
 		var https func(*schema.ResourceData, interface{}) error
 		if d.Get("protocol") == "HTTPS" {
 			https = openHttps
@@ -565,23 +669,27 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 				return errmsgs.WrapError(err)
 			}
 		}
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
 	}
 
 	if d.HasChange("setting_config") {
 		action := "UpdateInstanceSettings"
-		content := map[string]interface{}{
-			"RegionId":    client.RegionId,
-			"clientToken": StringPointer(buildClientToken(action)),
-		}
+		content := map[string]interface{}{}
 		config := d.Get("setting_config").(map[string]interface{})
 		content["esConfig"] = config
+		// 不可修改项
+		config["cluster.routing.allocation.awareness.attributes"] = "node_name,zone"
+		config["cluster.routing.allocation.awareness.force.node_name.values"] = "abcd"
+		config["opendistro_security.unsupported.restore.securityindex.enabled"] = "true"
+		config["node.attr.node_name"] = "${K8S_NODE_NAME}"
+
 		_, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", action, fmt.Sprintf("/openapi/instances/%s/instance-settings", d.Id()), nil, nil, content)
 
 		if err != nil && !errmsgs.IsExpectedErrors(err, []string{"MustChangeOneResource", "CssCheckUpdowngradeError"}) {
 			return err
 		}
-		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
-		stateConf.PollInterval = 5 * time.Second
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -605,8 +713,6 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 			}
 			return err
 		}
-		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
-		stateConf.PollInterval = 5 * time.Second
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
