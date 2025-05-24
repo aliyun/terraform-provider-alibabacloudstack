@@ -2,7 +2,10 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"reflect"
 	"regexp"
+	"strconv"
+	"strings"
 	"time"
 
 	"encoding/json"
@@ -13,6 +16,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+// 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -179,6 +183,54 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(12, 32),
 			},
 
+
+			// cluster config
+			"apack_accesslog_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"apack_accesslog_search_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"thread_pool_write_queue_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			"thread_pool_search_queue_size": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			"cluster_routing_allocation_disk_watermark_low": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"cluster_routing_allocation_disk_watermark_high": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"cluster_routing_allocation_disk_watermark_flood_stage": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"action_auto_create_index": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+			"action_destructive_requires_name": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+			},
+
 			// 只读属性
 			"slb_address": {
 				Type:     schema.TypeString,
@@ -236,14 +288,6 @@ func resourceAlibabacloudStackElasticsearch() *schema.Resource {
 				// 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
-			},
-
-			"protocol": {
-				Type: schema.TypeString,
-				// Optional:     true,
-				// Default:      "HTTP",
-				Computed: true,
-				// 				ValidateFunc: validation.StringInSlice([]string{"HTTP", "HTTPS"}, false),
 			},
 
 			"kibana_whitelist": {
@@ -348,7 +392,7 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 			return errmsgs.WrapError(err)
 		}
 	} else {
-		d.Set("kibana_node_spec",nil)
+		d.Set("kibana_node_spec", nil)
 		d.Set("kibana_slb_address", nil)
 		d.Set("kibana_domain", nil)
 		d.Set("kibana_protocol", nil)
@@ -420,6 +464,42 @@ func resourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta int
 		d.Set("setting_config", esConfig)
 	}
 
+	var response map[string]interface{}
+	action := "GetElasticsearchSettings"
+	response, err = client.DoTeaRequest("GET", "elasticsearch-k8s", "2017-06-13", action, fmt.Sprintf("/openapi/instances/%s/actions/es-settings", d.Id()), nil, nil, nil)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+			return nil
+		}
+		return err
+	}
+	v, err := jsonpath.Get("$.Result", response)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, d.Id(), "$", response)
+	}
+	for _, item := range v.([]interface{}) {
+		info := item.(map[string]interface{})
+		key := info["key"].(string)
+		if info["type"] == "Boolean" {
+			if reflect.TypeOf(info["value"]) == reflect.TypeOf(true) {
+				d.Set(strings.Replace(key, ".", "_", -1), info["value"])
+			} else {
+				value := strings.ToLower(info["value"].(string)) == "true"
+				d.Set(strings.Replace(key, ".", "_", -1), value)
+			}
+		} else if info["type"] == "Integer" {
+			var valueString string
+			if reflect.TypeOf(info["value"]) == reflect.TypeOf("0") {
+				valueString = info["value"].(string)
+			} else {
+				valueString = info["value"].(json.Number).String()
+			}
+			value, _ := strconv.Atoi(valueString)
+			d.Set(strings.Replace(key, ".", "_", -1), value)
+		} else {
+			d.Set(strings.Replace(key, ".", "_", -1), info["value"])
+		}
+	}
 	return nil
 }
 
@@ -428,8 +508,6 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 	elasticsearchService := ElasticsearchService{client}
 	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 30*time.Second, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 10 * time.Second
-
-	d.Partial(true)
 
 	if d.HasChange("private_whitelist") {
 		content := make(map[string]interface{})
@@ -509,8 +587,32 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
+	cluster_configs := []string{"apack_accesslog_enabled", "apack_accesslog_search_enabled", "thread_pool_write_queue_size", "thread_pool_search_queue_size", "cluster_routing_allocation_disk_watermark_low", "cluster_routing_allocation_disk_watermark_high", "cluster_routing_allocation_disk_watermark_flood_stage", "action_auto_create_index", "action_destructive_requires_name"}
+	if d.HasChanges(cluster_configs...) {
+		esConfig := map[string]interface{}{}
+		for _, config := range cluster_configs {
+			if d.HasChange(config) {
+				esConfig[EsClusterConfig[config]] = d.Get(config)
+			}
+		}
+		request := map[string]interface{}{
+			"esConfig": esConfig,
+		}
+		_, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "UpdateElasticsearchSettings", fmt.Sprintf("/openapi/instances/%s/actions/es-settings", d.Id()), nil, nil, request)
+		if err != nil {
+			if errmsgs.IsExpectedErrors(err, []string{"InstanceNotFound"}) {
+				return nil
+			}
+			return err
+		}
+		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+		stateConf.PollInterval = 5 * time.Second
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
+
 	if d.IsNewResource() {
-		d.Partial(false)
 		return nil
 	}
 
@@ -538,7 +640,6 @@ func resourceAlibabacloudStackElasticsearchUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	d.Partial(false)
 	return nil
 }
 

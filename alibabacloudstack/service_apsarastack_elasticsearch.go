@@ -24,6 +24,18 @@ type ElasticsearchService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
+var EsClusterConfig = map[string]string{
+	"apack_accesslog_enabled":                               "apack.accesslog.enabled",
+	"apack_accesslog_search_enabled":                        "apack.accesslog.search.enabled",
+	"thread_pool_write.queue_size":                          "thread_pool.write_queue_size",
+	"thread_pool_search_queue_size":                         "thread_pool.search.queue_size",
+	"cluster_routing_allocation_disk_watermark_low":         "cluster.routing.allocation.disk.watermark.low",
+	"cluster_routing_allocation_disk_watermark_high":        "cluster.routing.allocation.disk.watermark.high",
+	"cluster_routing_allocation_disk_watermark_flood_stage": "cluster.routing.allocation.disk.watermark.flood_stage",
+	"action_auto_create_index":                              "action.auto_create_index",
+	"action_destructive_requires_name":                      "action_destructive_requires_name",
+}
+
 func (s *ElasticsearchService) DescribeElasticsearchInstance(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	request := make(map[string]interface{})
@@ -95,7 +107,6 @@ func (s *ElasticsearchService) TriggerNetwork(d *schema.ResourceData, content ma
 	var response map[string]interface{}
 	request := make(map[string]interface{})
 
-	request["clientToken"] = buildClientToken("TriggerNetwork")
 	request["product"] = "elasticsearch"
 	response, err := s.client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "TriggerNetwork", "", nil, nil, request)
 	addDebug("TriggerNetwork", response, content)
@@ -529,7 +540,6 @@ func openHttps(d *schema.ResourceData, meta interface{}) error {
 	elasticsearchService := ElasticsearchService{client}
 	content := make(map[string]interface{})
 
-	content["clientToken"] = buildClientToken("OpenHttps")
 	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "EnableHttps", fmt.Sprintf("/openapi/instances/%s/actions/enable-https", d.Id()), nil, nil, content)
 	addDebug("OpenHttps", response, nil)
 	if err != nil {
@@ -550,7 +560,6 @@ func closeHttps(d *schema.ResourceData, meta interface{}) error {
 	elasticsearchService := ElasticsearchService{client}
 	content := make(map[string]interface{})
 
-	content["clientToken"] = buildClientToken("CloseHttps")
 	response, err := client.DoTeaRequest("POST", "elasticsearch-k8s", "2017-06-13", "DisableHttps", fmt.Sprintf("/openapi/instances/%s/actions/disable-https", d.Id()), nil, nil, content)
 	addDebug("CloseHttps", response, nil)
 	if err != nil {

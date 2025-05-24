@@ -184,8 +184,17 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description": name,
-						"version":     EsVersion,
+						"description":                                           name,
+						"version":                                               EsVersion,
+						"apack_accesslog_enabled":                               CHECKSET,
+						"apack_accesslog_search_enabled":                        CHECKSET,
+						"thread_pool_write_queue_size":                          CHECKSET,
+						"thread_pool_search_queue_size":                         CHECKSET,
+						"cluster_routing_allocation_disk_watermark_low":         CHECKSET,
+						"cluster_routing_allocation_disk_watermark_high":        CHECKSET,
+						"cluster_routing_allocation_disk_watermark_flood_stage": CHECKSET,
+						"action_auto_create_index":                              CHECKSET,
+						"action_destructive_requires_name":                      CHECKSET,
 					}),
 				),
 			},
@@ -194,6 +203,36 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"password", "monitor_password", "kibana_password", "scene"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"apack_accesslog_enabled": "false",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"apack_accesslog_enabled": "false",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"thread_pool_search_queue_size": "2000",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"thread_pool_search_queue_size": "2000",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"cluster_routing_allocation_disk_watermark_low": "80%",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"cluster_routing_allocation_disk_watermark_low": "80%",
+					}),
+				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -212,6 +251,26 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"monitor_password": password,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"protocol": "HTTPS",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"protocol": "HTTPS",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"protocol": "HTTP",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"protocol": "HTTP",
 					}),
 				),
 			},
@@ -391,9 +450,9 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 					testAccCheck(map[string]string{
 						// FIXME: TF 无法识别
 						"kibana_node_spec": REMOVEKEY,
-						"kibana_domain": REMOVEKEY,
-						"kibana_protocol" : REMOVEKEY,
-						"kibana_port": REMOVEKEY,
+						"kibana_domain":    REMOVEKEY,
+						"kibana_protocol":  REMOVEKEY,
+						"kibana_port":      REMOVEKEY,
 					}),
 				),
 			},
@@ -480,75 +539,77 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 	})
 }
 
-// func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) {
-// 	var instance map[string]interface{}
-//
-// 	resourceId := "alibabacloudstack_elasticsearch_instance.default"
-// 	ra := resourceAttrInit(resourceId, AlibabacloudStackElasticsearchMap)
-//
-// 	serviceFunc := func() interface{} {
-// 		return &ElasticsearchService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-// 	}
-// 	rc := resourceCheckInit(resourceId, &instance, serviceFunc)
-//
-// 	rac := resourceAttrCheckInit(rc, ra)
-//
-// 	testAccCheck := rac.resourceAttrMapUpdateSet()
-// 	rand := getAccTestRandInt(10000, 20000)
-// 	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
-// 	if len(name) > 30 {
-// 		name = name[:30]
-// 	}
-// 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence_vpc)
-//
-// 	ResourceTest(t, resource.TestCase{
-// 		PreCheck: func() {
-// 			testAccPreCheck(t)
-// 		},
-// 		// module name
-// 		IDRefreshName: resourceId,
-// 		Providers:     testAccProviders,
-// 		CheckDestroy:  rac.checkResourceDestroy(),
-// 		Steps: []resource.TestStep{
-// 			{
-// 				Config: testAccConfig(map[string]interface{}{
-// 					"cpu_type":            "Intel",
-// 					"scene":               "normal",
-// 					"description":         name,
-// 					"vswitch_id":          "${alibabacloudstack_vswitch.default.id}",
-// 					"version":             "6.7_with_X-Pack",
-// 					"password":            GeneratePassword(12),
-// 					"data_node_spec":      DataNodeSpec,
-// 					"data_node_amount":    "3",
-// 					"data_node_disk_size": DataNodeDisk,
-// 					"data_node_disk_type": EsDiskType,
-// 					"setting_config": map[string]string{
-// 						"\"action.auto_create_index\"":         "+.*,-*",
-// 						"\"action.destructive_requires_name\"": "false",
-// 						"\"xpack.security.audit.enabled\"":     "true",
-// 						"\"xpack.security.audit.outputs\"":     "index",
-// 						"\"xpack.watcher.enabled\"":            "false",
-// 					},
-// 				}),
-// 				Check: resource.ComposeTestCheckFunc(
-// 					testAccCheck(map[string]string{
-// 						"setting_config.action.auto_create_index":         "+.*,-*",
-// 						"setting_config.action.destructive_requires_name": "false",
-// 						"setting_config.xpack.security.audit.enabled":     "true",
-// 						"setting_config.xpack.security.audit.outputs":     "index",
-// 						"setting_config.xpack.watcher.enabled":            "false",
-// 					}),
-// 				),
-// 			},
-// 			{
-// 				ResourceName:            resourceId,
-// 				ImportState:             true,
-// 				ImportStateVerify:       true,
-// 				ImportStateVerifyIgnore: []string{"password"},
-// 			},
-// 		},
-// 	})
-// }
+func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) {
+	var instance map[string]interface{}
+
+	resourceId := "alibabacloudstack_elasticsearch_instance.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudStackElasticsearchMap)
+
+	serviceFunc := func() interface{} {
+		return &ElasticsearchService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInit(resourceId, &instance, serviceFunc)
+
+	rac := resourceAttrCheckInit(rc, ra)
+
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-testAccES%s%d", defaultRegionToTest, rand)
+	if len(name) > 30 {
+		name = name[:30]
+	}
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence_vpc)
+
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+			testAccPreCheck(t)
+		},
+		// module name
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"zone_id":             "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"cpu_type":            "Intel",
+					"version":             EsVersion,
+					"description":         name,
+					"scene":               "normal",
+					"data_node_amount":    DataNodeAmount,
+					"data_node_spec":      DataNodeSpec,
+					"data_node_disk_size": DataNodeDisk,
+					"data_node_disk_type": EsDiskType,
+					"vswitch_id":            "${alibabacloudstack_vpc_vswitch.default.id}",
+					"password":              GeneratePassword(12),
+					"monitor_password":      GeneratePassword(12),
+					"setting_config": map[string]string{
+						"\"action.auto_create_index\"":         "+.*,-*",
+						"\"action.destructive_requires_name\"": "false",
+						"\"xpack.security.audit.enabled\"":     "true",
+						"\"xpack.security.audit.outputs\"":     "index",
+						"\"xpack.watcher.enabled\"":            "false",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"setting_config.action.auto_create_index":         "+.*,-*",
+						"setting_config.action.destructive_requires_name": "false",
+						"setting_config.xpack.security.audit.enabled":     "true",
+						"setting_config.xpack.security.audit.outputs":     "index",
+						"setting_config.xpack.watcher.enabled":            "false",
+					}),
+				),
+			},
+			{
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"password", "monitor_password", "kibana_password", "scene"},
+			},
+		},
+	})
+}
 
 var elasticsearchMap = map[string]string{
 	"description":                CHECKSET,
