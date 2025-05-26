@@ -15,9 +15,26 @@ Filters support description regex, searches by tags, and other filters which are
 ## Example Usage
 
 ```
-data "alibabacloudstack_elasticsearch_instances" "instances" {
-  description_regex = "myes"
-  version           = "5.5.3_with_X-Pack"
+variable "name" {
+  default = "tf-testacc-alikafkainstance18734"
+}
+
+data "alibabacloudstack_zones" default {
+  available_resource_creation = "VSwitch"
+  enable_details = true
+}
+
+resource "alibabacloudstack_alikafka_instance" "default" {
+  name = "${var.name}"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  sasl =      true
+  plaintext = true
+  spec =      "Broker4C16G"
+}
+
+data "alibabacloudstack_alikafka_instances" "default" {
+  enable_details = "true"
+  name_regex = "${alibabacloudstack_alikafka_instance.default.name}"
 }
 ```
 
@@ -38,15 +55,22 @@ The following attributes are exported in addition to the arguments listed above:
 * `descriptions` - A list of Elasticsearch instance descriptions.
 * `instances` - A list of Elasticsearch instances. Its every element contains the following attributes:
   * `id` - The ID of the Elasticsearch instance.
+  * `zone_id` - The ID of the zone to which the elasticsearch instance belong.
+  * `cpu_type` - The CPU type of the resource. 
+  * `version` - The version of Elasticsearch to deploy.
   * `description` - The description of the Elasticsearch instance.
-  * `instance_charge_type` - Billing method. Value options: `PostPaid` for  Pay-As-You-Go and `PrePaid` for subscription.
-  * `data_node_amount` - The Elasticsearch cluster's data node quantity, between 2 and 50.
-  * `data_node_spec` - The data node specifications of the elasticsearch instance.
-  * `data_node_disk_size` - The single data node storage space. Unit: GB.
-  * `data_node_disk_type` - The data node disk type. Included values: `cloud_ssd` and `cloud_efficiency`.
-  * `vswitch_id` - VSwitch ID the instance belongs to.
-  * `version` - Elasticsearch version includes `5.5.3_with_X-Pack`, `6.3.2_with_X-Pack` and `6.7.0_with_X-Pack`.
-  * `created_at` - The creation time of the instance. It's a GTM format, such as: "2019-01-08T15:50:50.623Z".
-  * `updated_at` - The last modified time of the instance. It's a GMT format, such as: "2019-01-08T15:50:50.623Z".
-  * `status` - Status of the instance. It includes `active`, `activating`, `inactive`
-  * `tags` - A map of tags assigned to the instance.
+  * `scense` - Application Scenarios. 
+  * `data_node_amount` - The number of data nodes in the Elasticsearch cluster.
+  * `data_node_spec` - The specification of the data nodes.
+  * `data_node_disk_size` - The disk size of the data nodes.
+  * `data_node_disk_type` - The disk type of the data nodes.
+  * `data_node_affinity` - Whether the data node disk is encrypted.
+  * `kibana_node_spec` - The specification of the kibana nodes.
+  * `kibana_node_password` - The password of the kibana nodes.
+  * `master_node_amount` - The number of master nodes in the Elasticsearch cluster.
+  * `master_node_spec` - The specification of the master nodes.
+  * `master_node_disk_size` - The disk size of the master nodes
+  * `master_node_disk_type` - The disk type of the master nodes.
+  * `client_node_amount` - The number of client nodes in the Elasticsearch cluster.
+  * `client_node_spec` - The specification of the client nodes.
+  * `vswitch_id` - The ID of the VSwitch in which to launch the Elasticsearch instance.
