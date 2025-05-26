@@ -4,79 +4,104 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_elasticsearch_instance"
 sidebar_current: "docs-Alibabacloudstack-elasticsearch-instance"
 description: |-
-  Provides a Elasticsearch on K8s instance resource.
+  提供一个在阿里云上的Elasticsearch实例资源。
 ---
 
 # alibabacloudstack_elasticsearch_instance
 
-Provides a Elasticsearch nstance resource.
+提供一个在阿里云上的Elasticsearch实例资源。
 
+## 概述
 
-The `alibabacloudstack_elasticsearch_instance` resource allows you to manage Elasticsearch instances on Alibaba Cloud.
+`alibabacloudstack_elasticsearch_instance` 资源允许您在阿里云上管理Elasticsearch实例。
 
-## Example Usage
-
+## 示例用法
 ```hcl
-resource "alibabacloudstack_elasticsearch_instance" "example" {
-  description            = "example_elasticsearch"
-  vswitch_id             = "vsw-1234567890abcdef0"
-  version                = "6.7_with_X-Pack"
-  instance_charge_type   = "PostPaid"
-  data_node_amount       = 2
-  data_node_spec         = "elasticsearch.sn2ne.large"
-  data_node_disk_size    = 20
-  data_node_disk_type    = "cloud_efficiency"
-  enable_public          = true
-  public_whitelist       = ["0.0.0.0/0"]
-  enable_kibana_public_network = true
-  kibana_whitelist       = ["0.0.0.0/0"]
-  zone_count             = 2
+variable "name" {
+  default = "tf-testAccES"
+}
+
+data "alibabacloudstack_zones" default {
+  available_resource_creation = "VSwitch"
+  enable_details = true
+}
+
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name = "${var.name}_vpc"
+  cidr_block = "192.168.0.0/16"
+}
+
+resource "alibabacloudstack_vpc_vswitch" "default" {
+  name = "${var.name}_vsw"
+  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+  cidr_block = "192.168.0.0/16"
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+}
+
+resource "alibabacloudstack_elasticsearch_instance" "default" {
+  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  description = "tf-testAccES16373"
+  data_node_spec = "1C 2Gi"
+  client_node_amount = "2"
+  monitor_password = "Pz*Pu3NIXuk("
+  cpu_type = "Intel"
+  data_node_disk_type = "yoda-lvm"
+  master_node_disk_size = "100"
+  master_node_disk_type = "yoda-lvm"
+  data_node_disk_size = "500"
+  password = "MSPFu4fXosn^"
+  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
+  master_node_spec = "1C 2Gi"
+  master_node_amount = "3"
+  client_node_spec = "1C 2Gi"
+  data_node_amount = "3"
+  kibana_node_spec = "1C 2Gi"
+  kibana_password = "W7mI##At(q*M"
+  version = "7.10.0_ali1.6.0"
+  scene = "normal"
 }
 ```
 
-## Argument Reference
-The following arguments are supported -
+## 参数说明
+以下参数是支持的：
 
-* `description` - (Optional) - The description of the Elasticsearch instance. It must be 0 to 30 characters in length and can contain numbers, letters, underscores, and hyphens. It must start with a letter, a number, or a Chinese character.
-* `vswitch_id` - (Required) - The ID of the VSwitch in which to launch the Elasticsearch instance.
-* `password` - (Optional) - The password for the Elasticsearch instance.
-* `kms_encrypted_password` - (Optional) - An KMS encrypted password for the Elasticsearch instance.
-* `kms_encryption_context` - (Optional) - A map of key-value pairs that can be used to provide additional context for the KMS encryption.
-* `version` - (Required) - The version of Elasticsearch to deploy.
-* `tags` - (Optional) - A mapping of tags to assign to the resource.
-* `instance_charge_type` - (Optional) - The charge type of the instance. Valid values are PrePaid and PostPaid. Default value is PostPaid.
-* `period` - (Optional) - The subscription period of the instance. Valid values are 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36. Default value is 1.
-* `data_node_amount` - (Required) - The number of data nodes in the Elasticsearch cluster. Valid range is from 2 to 50.
-* `data_node_spec` - (Required) - The specification of the data nodes.
-* `data_node_disk_size` - (Required) - The disk size of the data nodes.
-* `data_node_disk_type` - (Required) - The disk type of the data nodes.
-* `data_node_disk_encrypted` - (Optional) - Whether the data node disk is encrypted. Default value is false.
-* `private_whitelist` - (Optional) - The private IP whitelist for the Elasticsearch instance.
-* `enable_public` - (Optional) - Whether to enable public access to the Elasticsearch instance. Default value is false.
-* `public_whitelist` - (Optional) - The public IP whitelist for the Elasticsearch instance.
-* `master_node_spec` - (Optional) - The specification of the master nodes.
-* `client_node_amount` - (Optional) - The number of client nodes in the Elasticsearch cluster. Valid range is from 2 to 25.
-* `client_node_spec` - (Optional) - The specification of the client nodes.
-* `protocol` - (Optional) - The protocol used by the Elasticsearch instance. Valid values are HTTP and HTTPS. Default value is HTTP.
-* `zone_count` - (Optional) - The number of zones in which to deploy the Elasticsearch instance. Valid range is from 1 to 3. Default value is 1.
-* `resource_group_id` - (Optional) - The ID of the resource group to which the Elasticsearch instance belongs.
-* `setting_config` - (Optional) - A map of settings to configure the Elasticsearch instance.
+* `zone_id` - (必选, 变更时重建) Elasticsearch实例所属的可用区。
+* `cpu_type` - (必选, 变更时重建) Elasticsearch实例的CPU类型，有效值为`intel`。
+* `version` - (必选) 要部署的Elasticsearch版本。
+* `description` - (可选) Elasticsearch实例的描述。长度必须在0到30个字符之间，可以包含数字、字母、下划线和连字符。必须以字母、数字或中文字符开头。
+* `scense` - (必选, 变更时重建) 实例应用场景。 有效值为 "high", "normal", "log"。
+* `data_node_amount` - (必选)Elasticsearch集群中的数据节点数量。有效范围是从 2 到 50。
+* `data_node_spec` - (必选) 数据节点的规格。
+* `data_node_disk_size` - (必选, 变更时重建) 数据节点的磁盘大小。
+* `data_node_disk_type` - (必选, 变更时重建) 数据节点的磁盘类型。
+* `kibana_node_spec` - (可选) Kibana节点的规格。
+* `kibana_node_password` - (可选)  Kibana节点密码。
+* `master_node_amount` - (必选) Elasticsearch集群中的主节点数量。有效范围是从 3 到 50。
+* `master_node_spec` - (可选) 主节点的规格。
+* `master_node_disk_size` - (可选, 变更时重建) 主节点的磁盘大小。
+* `master_node_disk_type` - (可选, 变更时重建) 主节点的磁盘类型。
+* `client_node_amount` - (可选) Elasticsearch集群中的客户端节点数量。有效范围是从 2 到 25。
+* `client_node_spec` - (可选) 客户端节点的规格。
+* `vswitch_id` - (可选) 启动Elasticsearch实例的VSwitch的ID。
+* `password` - (必选选) Elasticsearch实例的密码。
+* `monitor_password` - (必选) Elasticsearch实例监控的密码。
+* `protocol` - (可选) Elasticsearch实例使用的协议。有效值为 HTTP 和 HTTPS。默认值为 HTTP。
+* `vpc_whitelist` - (可选) VPC私网访问白名单。
+* `setting_config` - (可选) Elasticsearch实例配置参数，修改会导致实例重启。
 
-## Attributes Reference
-The following attributes are exported -
+## 属性说明
+以下属性会被导出：
 
-* `domain` - The domain name of the Elasticsearch instance.
-* `port` - The port number of the Elasticsearch instance.
-* `status` - The status of the Elasticsearch instance.
-* `kibana_domain` - The domain name of the Kibana instance.
-* `kibana_port` - The port number of the Kibana instance.
-* `enable_kibana_public_network` - Whether public access to the Kibana instance is enabled.
-* `enable_kibana_private_network` - Whether private access to the Kibana instance is enabled.
-* `kibana_whitelist` - The public IP whitelist for the Kibana instance.
-* `kibana_private_whitelist` - The private IP whitelist for the Kibana instance.
+* `slb_address` - Elasticsearch实例的IP地址。
+* `domain` - Elasticsearch实例的域名。
+* `port` - Elasticsearch实例的端口号。
+* `status` - Elasticsearch实例的状态。
+* `kibana_slb_address` - Kibana实例的IP地址.
+* `kibana_domain` - Kibana实例的域名。
+* `kibana_port` - Kibana实例的端口号。
 
-## Import
-Elasticsearch instances can be imported using the id, e.g.
+## 导入
+Elasticsearch实例可以使用ID进行导入，例如：
 
 ```bash
 $ terraform import alibabacloudstack_elasticsearch_instance.example i-1234567890abcdef0
