@@ -87,6 +87,16 @@ The following arguments are supported -
 * `password` - (Required) The password for the Elasticsearch instance.
 * `monitor_password` - (Required) The password for the Elasticsearch monitor service.
 * `protocol` - (Optional) The protocol used by the Elasticsearch instance. Valid values are HTTP and HTTPS. Default value is HTTP.
+* `vpc_whitelist` - (Optional) The Vpc ACL whitelist for the Elasticsearch instance.
+* `apack_accesslog_enabled` - (Optional) Access log audit function, only supported on version 7.10.0.
+* `apack_accesslog_search_enabled` - (Optional) Search request field printing function, only supported on version 7.10.0.
+* `thread_pool_write_queue_size` - (Optional) Document write queue size.
+* `thread_pool_search_queue_size` - (Optional) Document search queue size.
+* `cluster_routing_allocation_disk_watermark_low` - (Optional) When the disk usage reaches this threshold, Elasticsearch will attempt to no longer allocate new shards to this node.
+* `cluster_routing_allocation_disk_watermark_high` - (Optional) When the disk usage reaches this threshold, Elasticsearch will attempt to reallocate shards to other nodes with lower usage.
+* `cluster_routing_allocation_disk_watermark_flood_stage` - (Optional) When the disk usage reaches this threshold, Elasticsearch will mark the node as unallocated and attempt to move all shards from that node to other nodes, with shards on the node set to read-only indexes.
+* `action_auto_create_index` - (Optional) After receiving a new document, if there is no corresponding index, is it allowed for the system to automatically create an index.
+* `action_destructive_requires_name` - (Optional) Is it necessary to explicitly specify the index name when deleting an index.
 * `setting_config` - (Optional) - A map of settings to configure the Elasticsearch instance.
 
 ## Attributes Reference

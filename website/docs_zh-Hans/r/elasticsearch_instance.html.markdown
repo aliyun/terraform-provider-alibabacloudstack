@@ -87,6 +87,15 @@ resource "alibabacloudstack_elasticsearch_instance" "default" {
 * `monitor_password` - (必选) Elasticsearch实例监控的密码。
 * `protocol` - (可选) Elasticsearch实例使用的协议。有效值为 HTTP 和 HTTPS。默认值为 HTTP。
 * `vpc_whitelist` - (可选) VPC私网访问白名单。
+* `apack_accesslog_enabled` - (可选) 访问日志审计功能，仅7.10.0支持。
+* `apack_accesslog_search_enabled` - (可选) 搜索请求字段打印功能，仅7.10.0支持。
+* `thread_pool_write_queue_size` - (可选) 文档写入队列大小。
+* `thread_pool_search_queue_size` - (可选) 文档搜索队列大小。
+* `cluster_routing_allocation_disk_watermark_low` - (可选) 当磁盘使用率达到此阈值时，Elasticsearch 会尝试不再向这个节点分配新的分片。
+* `cluster_routing_allocation_disk_watermark_high` - (可选) 当磁盘使用率达到此阈值时，Elasticsearch 会尝试将分片重新分配到其他使用率较低的节点。
+* `cluster_routing_allocation_disk_watermark_flood_stage` - (可选) 当磁盘使用率达到此阈值时，Elasticsearch会将节点标记为不可分配，并尝试将所有分片从该节点移动到其他节点,节点上的分片设置为只读索引。
+* `action_auto_create_index` - (可选) 接收到新文档后，如果没有对应索引，是否允许系统自动创建索引。
+* `action_destructive_requires_name` - (可选) 在删除索引时是否需要明确指定索引名称。
 * `setting_config` - (可选) Elasticsearch实例配置参数，修改会导致实例重启。
 
 ## 属性说明
