@@ -693,7 +693,6 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"name":                                 d.Get("name").(string),
 		"master_instance_types":                d.Get("master_instance_types").([]interface{}),
 		"master_vswitch_ids":                   d.Get("master_vswitch_ids").([]interface{}),
-		"num_of_nodes":                         d.Get("num_of_nodes").(int),
 		"master_count":                         d.Get("master_count").(int),
 		"snat_entry":                           d.Get("new_nat_gateway").(bool),
 		"endpoint_public_access":               d.Get("slb_internet_enabled").(bool),
@@ -709,7 +708,6 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"cpu_policy":                           d.Get("cpu_policy").(string),
 		"cloud_monitor_flags":                  d.Get("cloud_monitor_flags").(bool),
 		"master_system_disk_performance_level": d.Get("master_system_disk_performance_level").(string),
-		"worker_system_disk_performance_level": d.Get("worker_system_disk_performance_level").(string),
 		"image_id":                             d.Get("image_id").(string),
 	}
 
@@ -726,6 +724,56 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 			}
 		}
 	}
+
+	defnodepool := make(map[string]interface{})
+	defnodepool["nodepool_info"] = map[string]string{
+		"name": "default-nodepool",
+	}
+	defnodepool["count"] = d.Get("num_of_nodes").(int)
+	auto_scaling := map[string]interface{}{
+		"enable": false,
+	}
+	defnodepool["auto_scaling"] = auto_scaling
+	tee_config := map[string]interface{}{
+		"tee_enable": false,
+	}
+	defnodepool["tee_config"] = tee_config
+	scaling_group := map[string]interface{}{
+		"platform":                      d.Get("platform").(string),
+		"vpc_id":                        d.Get("vpc_id").(string),
+		"vswitch_ids":                   d.Get("worker_vswitch_ids").([]interface{}),
+		"instance_types":                d.Get("worker_instance_types").([]interface{}),
+		"system_disk_size":              d.Get("worker_disk_size").(int),
+		"system_disk_category":          d.Get("worker_disk_category").(string),
+		"system_disk_performance_level": d.Get("worker_system_disk_performance_level").(string),
+	}
+
+	if v, ok := d.GetOk("worker_disk_encrypted"); ok && v.(bool) {
+		scaling_group["system_disk_encrypted"] = v.(bool)
+		if v, ok := d.GetOk("worker_disk_encrypt_algorithm"); ok && v.(string) != "" {
+			scaling_group["system_disk_encrypt_algorithm"] = v.(string)
+		}
+		if v, ok := d.GetOk("worker_disk_kms_key_id"); ok && v.(string) != "" {
+			scaling_group["system_disk_kms_key_id"] = v.(string)
+		}
+	}
+	if password, ok := d.GetOk("password"); ok && password.(string) != "" {
+		body["login_Password"] = password.(string)
+		scaling_group["login_Password"] = password.(string)
+	} else if v, ok := d.GetOk("kms_encrypted_password"); v.(string) != "" && ok {
+		kmsService := KmsService{client}
+		decryptResp, err := kmsService.Decrypt(v.(string), d.Get("kms_encryption_context").(map[string]interface{}))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		password = decryptResp.Plaintext
+		body["login_Password"] = password
+		scaling_group["login_Password"] = password
+	}
+	if key_name, ok := d.GetOk("key_name"); ok && key_name != "" {
+		body["key_pair"] = key_name.(string)
+		scaling_group["key_pair"] = key_name.(string)
+	}
 	if data, ok := d.GetOk("worker_data_disks"); ok {
 		var data_disks = []map[string]interface{}{}
 		for _, value := range data.([]interface{}) {
@@ -740,8 +788,9 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 				"encrypt_algorithm":       disk["encrypt_algorithm"].(string),
 			})
 		}
-		body["worker_data_disks"] = data_disks
+		scaling_group["data_disks"] = data_disks
 	}
+	defnodepool["scaling_group"] = scaling_group
 	if v, ok := d.GetOk("tags"); ok {
 		var tags = []map[string]interface{}{}
 		for key, value := range v.(map[string]interface{}) {
@@ -752,10 +801,13 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		}
 		body["tags"] = tags
 	}
-	if v, ok := d.GetOk("runtime"); ok {
+	if v, ok := d.GetOk("runtime"); ok && len(v.([]interface{})) > 0 {
 		all, _ := v.([]interface{})
-		for _, runtime := range all {
-			body["runtime"] = runtime
+		runtime := all[0].(map[string]interface{})
+		body["runtime"] = runtime
+		defnodepool["kubernetes_config"] = map[string]interface{}{
+			"runtime":         runtime["name"].(string),
+			"runtime_version": runtime["version"].(string),
 		}
 	}
 	if v, ok := d.GetOk("is_enterprise_security_group"); ok && v.(bool) {
@@ -774,23 +826,6 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		body["pod_vswitch_ids"] = expandStringList(v.(*schema.Set).List())
 	}
 
-	if password := d.Get("password").(string); password == "" {
-		if v := d.Get("kms_encrypted_password").(string); v != "" {
-			kmsService := KmsService{client}
-			decryptResp, err := kmsService.Decrypt(v, d.Get("kms_encryption_context").(map[string]interface{}))
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
-			password = decryptResp.Plaintext
-		}
-		body["login_Password"] = password
-	} else {
-		body["login_Password"] = password
-	}
-	if key_name, ok := d.GetOk("key_name"); ok && key_name != "" {
-		body["key_pair"] = key_name.(string)
-	}
-
 	if v, ok := d.GetOk("master_disk_encrypted"); ok && v.(bool) {
 		body["master_system_disk_encrypted"] = fmt.Sprintf("%t", v.(bool))
 		if v, ok := d.GetOk("master_disk_encrypt_algorithm"); ok && v.(string) != "" {
@@ -801,31 +836,18 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		}
 	}
 
-	if v, ok := d.GetOk("worker_disk_encrypted"); ok && v.(bool) {
-		body["worker_system_disk_encrypted"] = fmt.Sprintf("%t", v.(bool))
-		if v, ok := d.GetOk("worker_disk_encrypt_algorithm"); ok && v.(string) != "" {
-			body["worker_system_disk_encrypt_algorithm"] = v.(string)
-		}
-		if v, ok := d.GetOk("worker_disk_kms_key_id"); ok && v.(string) != "" {
-			body["worker_system_disk_kms_key_id"] = v.(string)
-		}
-	}
-
 	if v, ok := d.GetOk("instances"); ok {
 		body["format_disk"] = d.Get("format_disk").(bool)
 		body["keep_instance_name"] = d.Get("keep_instance_name").(bool)
 		body["instances"] = expandStringList(v.(*schema.Set).List())
 	} else {
-		body["worker_instance_types"] = d.Get("worker_instance_types").([]interface{})
-		body["worker_vswitch_ids"] = d.Get("worker_vswitch_ids").([]interface{})
-		body["worker_system_disk_category"] = d.Get("worker_disk_category").(string)
-		body["worker_system_disk_size"] = d.Get("worker_disk_size").(int)
-		body["master_storage_set_id"] = d.Get("master_storage_set_id").(string)
-		body["master_storage_set_partition_number"] = d.Get("master_storage_set_partition_number").(int)
-		body["worker_storage_set_id"] = d.Get("worker_storage_set_id").(string)
-		body["worker_storage_set_partition_number"] = d.Get("worker_storage_set_partition_number").(int)
+		body["nodepools"] = []interface{}{defnodepool}
+		// body["master_storage_set_id"] = d.Get("master_storage_set_id").(string)
+		// body["master_storage_set_partition_number"] = d.Get("master_storage_set_partition_number").(int)
+		// body["worker_storage_set_id"] = d.Get("worker_storage_set_id").(string)
+		// body["worker_storage_set_partition_number"] = d.Get("worker_storage_set_partition_number").(int)
 	}
-	log.Printf("[DEBUG] Request body: %s", body)
+	log.Printf("[DEBUG] Request body: %v", body)
 	if data, err := json.Marshal(body); err != nil {
 		return fmt.Errorf("failed to marshal JSON: %w", err)
 	} else {
