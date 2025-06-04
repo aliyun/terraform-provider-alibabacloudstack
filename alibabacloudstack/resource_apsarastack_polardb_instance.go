@@ -225,6 +225,11 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"force_restart": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"maintain_time": {
 				Type:     schema.TypeString,
 				Optional: true,
