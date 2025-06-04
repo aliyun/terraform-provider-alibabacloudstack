@@ -791,16 +791,6 @@ func (s *PolardbService) RefreshParameters(d *schema.ResourceData, client *conne
 		}
 	}
 
-	for _, i := range object.ConfigParameters.DBInstanceParameter {
-		if i.ParameterName != "" {
-			parameter := map[string]interface{}{
-				"name":  i.ParameterName,
-				"value": i.ParameterValue,
-			}
-			parameters[i.ParameterName] = parameter
-		}
-	}
-
 	for _, parameter := range documented.(*schema.Set).List() {
 		name := parameter.(map[string]interface{})["name"]
 		for _, value := range parameters {
@@ -883,7 +873,11 @@ func (s *PolardbService) ModifyParameters(d *schema.ResourceData, client *connec
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyParameters", "")
 
 	request.QueryParams["DBInstanceId"] = d.Id()
-	request.QueryParams["Forcerestart"] = d.Get("force_restart").(string)
+	if d.Get("force_restart").(bool) {
+		request.QueryParams["Forcerestart"] = "true"
+	} else {
+		request.QueryParams["Forcerestart"] = "false"
+	}
 	config := make(map[string]string)
 	allConfig := make(map[string]string)
 	o, n := d.GetChange(attribute)
