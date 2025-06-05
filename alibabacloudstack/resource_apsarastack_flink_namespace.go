@@ -1,13 +1,13 @@
 package alibabacloudstack
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
+	"time"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -23,163 +23,108 @@ func resourceAlibabacloudStackFlinkNamespace() *schema.Resource {
 				ValidateFunc: validation.StringLenBetween(2, 30),
 			},
 			"cu": {
-				Type:     schema.TypeBool,
-				Required: true,
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntAtLeast(1),
 			},
-			"default_visibility": {
+			"cpu_type": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"PUBLIC", "PRIVATE"}, false),
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Intel"}, false),
+			},
+			"owner_uid": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackCRNamespaceCreate, resourceAlibabacloudStackCRNamespaceRead, resourceAlibabacloudStackCRNamespaceUpdate, resourceAlibabacloudStackCRNamespaceDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackFlinkNamespaceCreate, resourceAlibabacloudStackFlinkNamespaceRead,
+		resourceAlibabacloudStackFlinkNamespaceUpdate, resourceAlibabacloudStackFlinkNamespaceDelete)
 	return resource
 }
 
-func resourceAlibabacloudStackCRNamespaceCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackFlinkNamespaceCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	resp := crResponse{}
 	namespaceName := d.Get("name").(string)
-	request := client.NewCommonRequest("PUT", "cr", "2016-06-07", "CreateNamespace", "/namespace")
-	body := map[string]interface{}{
-		"namespace": map[string]interface{}{
-			"namespace":     namespaceName,
-			"haApsaraStack": "false",
-			"arch":          "x86_64",
-		},
+	var userId string
+	if v, ok := d.GetOk("owner_uid"); ok {
+		userId = v.(string)
+	} else if userId, err = client.AccountId(); err != nil {
+		return errmsgs.WrapError(fmt.Errorf("Get user Owner Id Failed %v", err))
 	}
-	jsonData, err := json.Marshal(body)
+	requestQuery := map[string]interface{}{
+		"name":       namespaceName,
+		"allocateCu": d.Get("cu").(int),
+		"cpuBrand":   d.Get("cpu_type").(string),
+		"ownerUid":   userId,
+	}
+	var response map[string]interface{}
+	response, err = client.DoTeaRequest("POST", "ververica", "2020-05-01", "CreateNamespace", "/flink/namespace/create", nil, requestQuery, nil)
 	if err != nil {
-		return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
+		return err
 	}
-	request.SetContentType(requests.Json)
-	request.SetContent(jsonData)
-	bresponse, err := client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	log.Printf("response for create %v", bresponse)
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &resp)
-	if err != nil {
-		return errmsgs.WrapError(fmt.Errorf("Error Unmarshal to JSON: %v", err))
-	}
-	log.Printf("unmarshalled response for create %v", resp)
-	addDebug(request.GetActionName(), bresponse, request)
-	create := d.Get("auto_create").(bool)
-	visibility := d.Get("default_visibility").(string)
-	if create == false || visibility == "PUBLIC" {
-		request := client.NewCommonRequest("POST", "cr", "2016-06-07", "UpdateNamespace", fmt.Sprintf("/namespace/%s", namespaceName))
-		body = map[string]interface{}{
-			"namespace": map[string]interface{}{
-				"AutoCreate":        fmt.Sprintf("%t", create),
-				"DefaultVisibility": visibility,
-			},
-		}
-		request.QueryParams["Namespace"] = namespaceName
-		jsonData, err := json.Marshal(body)
-		if err != nil {
-			return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
-		}
-		request.SetContentType(requests.Json)
-		request.SetContent(jsonData)
-		uresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if uresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(uresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		err = json.Unmarshal(uresponse.GetHttpContentBytes(), &resp)
-		log.Printf("response for update %v", &resp)
-		if err != nil {
-			return errmsgs.WrapError(fmt.Errorf("Error Unmarshal to JSON: %v", err))
-		}
-		addDebug(request.GetActionName(), uresponse, request)
-	}
+	log.Printf("response for create %v", response)
 
 	d.SetId(namespaceName)
 
 	return nil
 }
 
-func resourceAlibabacloudStackCRNamespaceUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackFlinkNamespaceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	create := d.Get("auto_create").(bool)
-	visibility := d.Get("default_visibility").(string)
-	if d.HasChanges("auto_create", "default_visibility") {
-		request := client.NewCommonRequest("POST", "cr", "2016-06-07", "UpdateNamespace", fmt.Sprintf("/namespace/%s", d.Id()))
-		body := map[string]interface{}{
-			"namespace": map[string]interface{}{
-				"AutoCreate":        fmt.Sprintf("%t", create),
-				"DefaultVisibility": visibility,
-			},
+	if d.HasChanges("cu") {
+		requestQuery := map[string]interface{}{
+			"name":       d.Id(),
+			"allocateCu": d.Get("cu").(int),
 		}
-		request.QueryParams["Namespace"] = d.Id()
-		jsonData, err := json.Marshal(body)
+		response, err := client.DoTeaRequest("PUT", "ververica", "2020-05-01", "UpdateNamespace", "/flink/namespace/update", nil, requestQuery, nil)
 		if err != nil {
-			return errmsgs.WrapError(fmt.Errorf("Error marshaling to JSON: %v", err))
+			return err
 		}
-		request.SetContentType(requests.Json)
-		request.SetContent(jsonData)
-		uresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if uresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(uresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(request.GetActionName(), uresponse, request)
+		log.Printf("response for create %v", response)
 	}
+	
+	time.Sleep(5 * time.Second)
 
 	return nil
 }
 
-func resourceAlibabacloudStackCRNamespaceRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackFlinkNamespaceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	crService := CrService{client}
+	flinkService := FlinkService{client}
 
-	object, err := crService.DescribeCrNamespace(d.Id())
-	if err != nil {
-		if errmsgs.NotFoundError(err) {
+	object, err := flinkService.DescribeFlinkNamespace(d.Id())
+	if err != nil || object == nil {
+		if object == nil || errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
 	}
 
-	d.Set("name", object.Data.Namespace.Namespace)
-	d.Set("auto_create", object.Data.Namespace.AutoCreate)
-	d.Set("default_visibility", object.Data.Namespace.DefaultVisibility)
+	d.Set("name", object["Name"].(string))
+	cu, err := strconv.Atoi(object["GuaranteeQuota"].(string))
+	if err != nil {
+		return err
+	}
+	d.Set("cu", cu)
+	d.Set("cpu_type", object["CpuBrand"].(string))
+	d.Set("owner_uid", object["Uid"].(string))
 
 	return nil
 }
 
-func resourceAlibabacloudStackCRNamespaceDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackFlinkNamespaceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	resp := crResponse{}
-	request := client.NewCommonRequest("DELETE", "cr", "2016-06-07", "DeleteNamespace", fmt.Sprintf("/namespace/%s", d.Id()))
-	request.QueryParams["Namespace"] = d.Id()
-	uresponse, err := client.ProcessCommonRequest(request)
-	if err != nil {
-		if uresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(uresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cr_namespace", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	requestQuery := map[string]interface{}{
+		"name": d.Id(),
 	}
-	err = json.Unmarshal(uresponse.GetHttpContentBytes(), &resp)
-	log.Printf("response for delete %v", &resp)
+	response, err := client.DoTeaRequest("DELETE", "ververica", "2020-05-01", "DeleteNamespace", "/flink/namespace/delete", nil, requestQuery, nil)
 	if err != nil {
-		return errmsgs.WrapError(fmt.Errorf("Error Unmarshal to JSON: %v", err))
+		return err
 	}
-
-	addDebug(request.GetActionName(), uresponse, request)
+	log.Printf("response for delete %v", response)
 	return nil
 }

@@ -1,8 +1,8 @@
 package connectivity
 
 import (
-	"encoding/json"
 	"log"
+	"github.com/PaesslerAG/jsonpath"
 
 	roaCS "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
@@ -523,60 +523,17 @@ func (client *AlibabacloudStackClient) WithKmsClient(do func(*kms.Client) (inter
 	return do(client.kmsconn)
 }
 
-func (client *AlibabacloudStackClient) GetCallerInfo() (*responses.BaseResponse, error) {
+func (client *AlibabacloudStackClient) GetCallerInfo() (map[string]interface{}, error) {
 
-	endpoint := client.Config.Endpoints[ASCMCode]
-	if endpoint == "" {
-		return nil, fmt.Errorf("unable to initialize the ascm client: endpoint or domain is not provided for ascm service")
-	}
-	ascmClient, err := sdk.NewClientWithAccessKey(client.Config.RegionId, client.Config.AccessKey, client.Config.SecretKey)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize the ascm client: %#v", err)
-	}
-
-	ascmClient.AppendUserAgent(Terraform, TerraformVersion)
-	ascmClient.AppendUserAgent(Provider, ProviderVersion)
-	ascmClient.AppendUserAgent(Module, client.Config.ConfigurationSource)
-	ascmClient.SetHTTPSInsecure(client.Config.Insecure)
-	ascmClient.Domain = endpoint
-	if client.Config.Proxy != "" {
-		ascmClient.SetHttpProxy(client.Config.Proxy)
-	}
-	if client.Config.Department == "" || client.Config.ResourceGroup == "" {
-		return nil, fmt.Errorf("unable to initialize the ascm client: department or resource_group is not provided")
-	}
-	request := requests.NewCommonRequest()
-	if strings.ToLower(client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	if client.Config.Insecure {
-		request.SetHTTPSInsecure(client.Config.Insecure)
-	}
-	request.Method = "GET"         // Set request method
-	request.Product = "ascm"       // Specify product
-	request.Domain = endpoint      // Location Service will not be enabled if the host is specified. For example, service with a Certification type-Bearer Token should be specified
-	request.Version = "2019-05-10" // Specify product version
-	request.ApiName = "GetUserInfo"
-	request.QueryParams = map[string]string{
-		// 		"AccessKeySecret":  client.Config.SecretKey,
-		// 		"SecurityToken":    client.Config.SecurityToken,
-		// 		"Product":          "ascm",
-		// 		"Department":       client.Config.Department,
-		// 		"ResourceGroup":    client.Config.ResourceGroup,
-		// 		"RegionId":         client.RegionId,
-		// 		"Action":           "GetAllNavigationInfo",
-		// 		"Version":          "2019-05-10",
-		"SignatureVersion": "1.0",
-	}
-	resp := responses.BaseResponse{}
-	request.TransToAcsRequest()
-	err = ascmClient.DoAction(request, &resp)
+	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "GetUserInfo", "/ascm/auth/user/getUserInfo", nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}
-	return &resp, nil
+	resp, err := jsonpath.Get("$.data", response)
+	if err != nil {
+		return nil, err
+	}
+	return resp.(map[string]interface{}), nil
 }
 func (client *AlibabacloudStackClient) GetCallerIdentity() (string, error) {
 
@@ -584,9 +541,7 @@ func (client *AlibabacloudStackClient) GetCallerIdentity() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	response := &AccountId{}
-	err = json.Unmarshal(resp.GetHttpContentBytes(), response)
-	ownerId := response.Data.PrimaryKey
+	ownerId := resp["primaryKey"].(string)
 
 	if ownerId == "" {
 		return "", fmt.Errorf("ownerId not found")
@@ -600,9 +555,7 @@ func (client *AlibabacloudStackClient) GetCallerDefaultRole() (int, error) {
 	if err != nil {
 		return 1, err
 	}
-	response := &RoleId{}
-	err = json.Unmarshal(resp.GetHttpContentBytes(), response)
-	roleId := response.Data.DefaultRole.Id
+	roleId := resp["defaultRole"].(map[string]interface{})["id"].(int)
 
 	if roleId == 0 {
 		return 0, fmt.Errorf("default roleId not found")

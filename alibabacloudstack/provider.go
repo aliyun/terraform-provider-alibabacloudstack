@@ -815,6 +815,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		//"alibabacloudstack_polardb_readwrite_splitting_connection": resourceAlibabacloudStackPolardbReadWriteSplittingConnection(),
 		"alibabacloudstack_bastionhost_instance": resourceAlibabacloudStackBastionhostInstance(),
 		"alibabacloudstack_waf_instance":         resourceAlibabacloudstackWafInstance(),
+		"alibabacloudstack_flink_namespace":      resourceAlibabacloudStackFlinkNamespace(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

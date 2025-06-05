@@ -52,6 +52,10 @@ func resourceAlibabacloudStackAscmUser() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"user_uid": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"login_policy_id": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -272,6 +276,7 @@ func resourceAlibabacloudStackAscmUserRead(d *schema.ResourceData, meta interfac
 	}
 
 	d.Set("user_id", object.Data[0].ID)
+	d.Set("user_uid", object.Data[0].PrimaryKey)
 	d.Set("login_name", object.Data[0].LoginName)
 	d.Set("display_name", object.Data[0].DisplayName)
 	d.Set("email", object.Data[0].Email)

@@ -174,7 +174,10 @@ func (rc *resourceCheck) checkResourceDestroy() resource.TestCheckFunc {
 					}
 					return errmsgs.WrapError(err)
 				}
-			} else {
+			} else if outValue[0].IsNil() {
+				// 返回为空，且没有报错时也视为未找到数据，删除成功
+				continue
+			}else {
 				return errmsgs.WrapError(errmsgs.Error("the resource %s %s was not destroyed ! ", rc.resourceId, rs.Primary.ID))
 			}
 		}
