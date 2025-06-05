@@ -161,11 +161,12 @@ func resourceAlibabacloudStackCSKubernetes() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"encrypt_algorithm": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
-						},
+						// 不支持
+						// "encrypt_algorithm": {
+						// 	Type:         schema.TypeString,
+						// 	Optional:     true,
+						// 	ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
+						// },
 					},
 				},
 			},
@@ -687,6 +688,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"region_id":                            client.RegionId,
 		"timeout_mins":                         d.Get("timeout_mins").(int),
 		"disable_rollback":                     true,
+		"ip_stack":                             "ipv4",
 		"kubernetes_version":                   d.Get("version").(string),
 		"container_cidr":                       d.Get("pod_cidr").(string),
 		"service_cidr":                         d.Get("service_cidr").(string),
@@ -709,6 +711,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"cloud_monitor_flags":                  d.Get("cloud_monitor_flags").(bool),
 		"master_system_disk_performance_level": d.Get("master_system_disk_performance_level").(string),
 		"image_id":                             d.Get("image_id").(string),
+		"image_type":                           "AliyunLinux3",
 	}
 
 	pod := 0
@@ -743,9 +746,12 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"vpc_id":                        d.Get("vpc_id").(string),
 		"vswitch_ids":                   d.Get("worker_vswitch_ids").([]interface{}),
 		"instance_types":                d.Get("worker_instance_types").([]interface{}),
+		"image_type":                    "AliyunLinux3",
 		"system_disk_size":              d.Get("worker_disk_size").(int),
 		"system_disk_category":          d.Get("worker_disk_category").(string),
 		"system_disk_performance_level": d.Get("worker_system_disk_performance_level").(string),
+		"internet_max_bandwidth_out":    0,
+		"rds_instances":                 []string{},
 	}
 
 	if v, ok := d.GetOk("worker_disk_encrypted"); ok && v.(bool) {
@@ -779,13 +785,12 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		for _, value := range data.([]interface{}) {
 			disk := value.(map[string]interface{})
 			data_disks = append(data_disks, map[string]interface{}{
-				"size":                    fmt.Sprintf("%d", disk["size"].(int)),
+				"size":                    disk["size"].(int),
 				"category":                disk["category"].(string),
 				"encrypted":               fmt.Sprintf("%t", disk["encrypted"].(bool)),
 				"auto_snapshot_policy_id": disk["auto_snapshot_policy_id"].(string),
 				"performance_level":       disk["performance_level"].(string),
 				"kms_key_id":              disk["kms_key_id"].(string),
-				"encrypt_algorithm":       disk["encrypt_algorithm"].(string),
 			})
 		}
 		scaling_group["data_disks"] = data_disks
@@ -801,14 +806,19 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		}
 		body["tags"] = tags
 	}
+	kubernetes_config := map[string]interface{}{
+		"cpu_policy":    d.Get("cpu_policy").(string),
+		"cms_enabled":   false,
+		"unschedulable": false,
+		"labels":        []string{},
+	}
 	if v, ok := d.GetOk("runtime"); ok && len(v.([]interface{})) > 0 {
 		all, _ := v.([]interface{})
 		runtime := all[0].(map[string]interface{})
 		body["runtime"] = runtime
-		defnodepool["kubernetes_config"] = map[string]interface{}{
-			"runtime":         runtime["name"].(string),
-			"runtime_version": runtime["version"].(string),
-		}
+		kubernetes_config["runtime"] = runtime["name"].(string)
+		kubernetes_config["runtime_version"] = runtime["version"].(string)
+		defnodepool["kubernetes_config"] = kubernetes_config
 	}
 	if v, ok := d.GetOk("is_enterprise_security_group"); ok && v.(bool) {
 		if v, ok := d.GetOk("security_group_id"); ok && v.(string) != "" {
