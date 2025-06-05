@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/PaesslerAG/jsonpath"
 	"strconv"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -648,6 +650,45 @@ func (s *PolardbService) DoPolardbDescribeparametersRequest(d *schema.ResourceDa
 	return PolardbDescribeparametersResponse, nil
 }
 
+type PolardbParametersTemplateRecord struct {
+	ForceModify          string `json:"ForceModify"`
+	CheckingCode         string `json:"CheckingCode"`
+	ParameterValue       string `json:"ParameterValue"`
+	ForceRestart         string `json:"ForceRestart"`
+	ParameterName        string `json:"ParameterName"`
+	ParameterDescription string `json:"ParameterDescription"`
+}
+
+func (s *PolardbService) DoPolardbDescribeParameterTemplatesRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) ([]PolardbParametersTemplateRecord, error) {
+	// api: polardb - 2024-01-30 - DescribeParameters
+	action := "DescribeParameterTemplates"
+	requQuery := map[string]interface{}{
+		"DBInstanceId":  d.Id(),
+		"Engine":        d.Get("engine").(string),
+		"EngineVersion": d.Get("engine_version").(string),
+	}
+	resp, err := client.DoTeaRequest("GET", "polardb", "2024-01-30", action, "", nil, requQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	templates, err := jsonpath.Get("$.Parameters.TemplateRecord	", resp)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, action, "$.Parameters.TemplateRecord", resp)
+	}
+
+	result := make([]PolardbParametersTemplateRecord, 0)
+	// 将 map 转换为 JSON
+	jsonData, _ := json.Marshal(templates)
+
+	// 将 JSON 解析到结构体
+	if err := json.Unmarshal(jsonData, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 type PolardbDescribedbinstanceiparraylistResponse struct {
 	Items struct {
 		DBInstanceIPArray []struct {
@@ -738,6 +779,41 @@ func (s *PolardbService) WaitForDBInstance(d *schema.ResourceData, client *conne
 	return nil
 }
 
+func (s *PolardbService) DescribeModifyParameterLog(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, status Status, timeout int) error {
+	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
+	now := time.Now().UTC()
+	StartTime := now.Add(-5 * time.Minute)
+	EndTime := now.Add(5 * time.Minute)
+	requQuery := map[string]interface{}{
+		"DBInstanceId": d.Id(),
+		"StartTime":    StartTime.Format("2006-01-02T15:04Z"),
+		"EndTime":      EndTime.Format("2006-01-02T15:04Z"),
+	}
+	for {
+		isSyncing := false
+		resp, err := client.DoTeaRequest("GET", "polardb", "2024-01-30", "DescribeModifyParameterLog", "", nil, requQuery, nil)
+		if err != nil {
+			return err
+		}
+
+		for _, i := range resp["Items"].(map[string]interface{})["ParameterChangeLog"].([]interface{}) {
+			item := i.(map[string]interface{})
+			if item["Status"].(string) == "Syncing" {
+				time.Sleep(DefaultIntervalShort * time.Second)
+				if time.Now().After(deadline) {
+					return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, d.Id(), GetFunc(1), timeout, item["ParameterName"].(string), status, errmsgs.ProviderERROR)
+				}
+				isSyncing = true
+				break
+			}
+		}
+		if !isSyncing {
+			break
+		}
+	}
+	return nil
+}
+
 func (s *PolardbService) GetSecurityIps(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) ([]string, error) {
 	object, err := s.DoPolardbDescribedbinstanceiparraylistRequest(d, client)
 	if err != nil {
@@ -768,41 +844,27 @@ func (s *PolardbService) GetSecurityIps(d *schema.ResourceData, client *connecti
 	return finalIps, nil
 }
 
-func (s *PolardbService) RefreshParameters(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, attribute string) error {
-	var param []map[string]interface{}
-	documented, ok := d.GetOk(attribute)
-	if !ok {
-		d.Set(attribute, param)
-		return nil
-	}
-	object, err := s.DoPolardbDescribeparametersRequest(d, client)
-	if err != nil {
+func (s *PolardbService) RefreshParameters(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) error {
+
+	diffParameters := make([]map[string]string, 0)
+	if object, err := s.DoPolardbDescribeparametersRequest(d, client); err != nil {
 		return errmsgs.WrapError(err)
-	}
-
-	var parameters = make(map[string]interface{})
-	for _, i := range object.RunningParameters.DBInstanceParameter {
-		if i.ParameterName != "" {
-			parameter := map[string]interface{}{
-				"name":  i.ParameterName,
-				"value": i.ParameterValue,
-			}
-			parameters[i.ParameterName] = parameter
-		}
-	}
-
-	for _, parameter := range documented.(*schema.Set).List() {
-		name := parameter.(map[string]interface{})["name"]
-		for _, value := range parameters {
-			if value.(map[string]interface{})["name"] == name {
-				param = append(param, value.(map[string]interface{}))
-				break
+	} else {
+		for _, i := range object.RunningParameters.DBInstanceParameter {
+			if i.ParameterName != "" {
+				param := map[string]string{
+					"name":  i.ParameterName,
+					"value": i.ParameterValue,
+				}
+				diffParameters = append(diffParameters, param)
 			}
 		}
 	}
-	if err := d.Set(attribute, param); err != nil {
+
+	if err := d.Set("parameters", diffParameters); err != nil {
 		return errmsgs.WrapError(err)
 	}
+
 	return nil
 }
 
@@ -869,67 +931,62 @@ func (s *PolardbService) DoPolardbDescribeinstanceautorenewalattributeRequest(d 
 	return PolardbDescribeinstanceautorenewalattributeResponse, nil
 }
 
-func (s *PolardbService) ModifyParameters(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, attribute string) error {
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyParameters", "")
+func (s *PolardbService) ModifyParameters(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) error {
 
-	request.QueryParams["DBInstanceId"] = d.Id()
-	if d.Get("force_restart").(bool) {
-		request.QueryParams["Forcerestart"] = "true"
+	changed := make(map[string]string)
+	if _, ok := d.GetOk("parameters"); !ok {
+		return nil
 	} else {
-		request.QueryParams["Forcerestart"] = "false"
-	}
-	config := make(map[string]string)
-	allConfig := make(map[string]string)
-	o, n := d.GetChange(attribute)
-	os, ns := o.(*schema.Set), n.(*schema.Set)
-	add := ns.Difference(os).List()
-	if len(add) > 0 {
-		for _, i := range add {
-			key := i.(map[string]interface{})["name"].(string)
-			value := i.(map[string]interface{})["value"].(string)
-			config[key] = value
+		// FIXME: d.HasChange("parameters") 异常，开始手动判断
+		rawConfig := d.GetRawConfig()
+		if parametersVal := rawConfig.GetAttr("parameters"); !parametersVal.IsNull() {
+			parametersSet := parametersVal.AsValueSet()
+			for _, value := range parametersSet.Values() {
+				item := value.AsValueMap()
+				key := item["name"].AsString()
+				value := item["value"].AsString()
+				id := fmt.Sprintf("parameters.%d.value", hashcode.String(key))
+				old, _ := d.GetChange(id)
+				// FIXME: d.GetChange("parameters") 无法取到正确的new值
+				if old.(string) != value {
+					changed[key] = value
+				}
+			}
 		}
-		cfg, _ := json.Marshal(config)
+	}
+
+	if !d.Get("force_restart").(bool) {
+		templates, err := s.DoPolardbDescribeParameterTemplatesRequest(d, client)
+		if err != nil {
+			return err
+		}
+		for _, template := range templates {
+			if template.ForceRestart != "true" {
+				continue
+			}
+			key := template.ParameterName
+			for k, _ := range changed {
+				if key == k {
+					return errmsgs.WrapError(fmt.Errorf("Modifying RDS instance's parameter '%s' requires setting 'force_restart = true'.", key))
+				}
+			}
+		}
+	}
+
+	if len(changed) > 0 {
+		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyParameter", "")
+
+		request.QueryParams["DBInstanceId"] = d.Id()
+		if d.Get("force_restart").(bool) {
+			request.QueryParams["Forcerestart"] = "true"
+		} else {
+			request.QueryParams["Forcerestart"] = "false"
+		}
+		cfg, _ := json.Marshal(changed)
 		request.QueryParams["Parameters"] = string(cfg)
 		// wait instance status is Normal before modifying
 		if err := s.WaitForDBInstance(d, client, Running, DefaultLongTimeout); err != nil {
 			return errmsgs.WrapError(err)
-		}
-		// Need to check whether some parameter needs restart
-		if !d.Get("force_restart").(bool) {
-			req := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeParameterTemplates", "")
-			req.QueryParams["DBInstanceId"] = d.Id()
-			req.QueryParams["Engine"] = d.Get("engine").(string)
-			req.QueryParams["EngineVersion"] = d.Get("engine_version").(string)
-			req.QueryParams["ClientToken"] = buildClientToken(req.GetActionName())
-			forceRestartMap := make(map[string]string)
-			bresponse, err := client.ProcessCommonRequest(req)
-			DescribeParameterTemplatesResponse := DescribeParameterTemplatesResponse{}
-			if err != nil {
-				if bresponse == nil {
-					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-				}
-				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "CreateReadOnlyDBInstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
-
-			err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DescribeParameterTemplatesResponse)
-			if err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-					"alibabacloudstack_polardb_db_instance", "CreateReadOnlyDBInstance", errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-			for _, para := range DescribeParameterTemplatesResponse.Parameters.TemplateRecord {
-				if para.ForceRestart == "true" {
-					forceRestartMap[para.ParameterName] = para.ForceRestart
-				}
-			}
-			if len(forceRestartMap) > 0 {
-				for key, _ := range config {
-					if _, ok := forceRestartMap[key]; ok {
-						return errmsgs.WrapError(fmt.Errorf("Modifying RDS instance's parameter '%s' requires setting 'force_restart = true'.", key))
-					}
-				}
-			}
 		}
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
@@ -937,26 +994,13 @@ func (s *PolardbService) ModifyParameters(d *schema.ResourceData, client *connec
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "CreateReadOnlyDBInstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "ModifyParameters", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_polardb_db_instance", "CreateReadOnlyDBInstance", errmsgs.AlibabacloudStackSdkGoERROR)
+		if err := s.DescribeModifyParameterLog(d, client, Running, DefaultLongTimeout); err != nil {
+			return errmsgs.WrapError(err)
 		}
-
-		// wait instance parameter expect after modifying
-		for _, i := range ns.List() {
-			key := i.(map[string]interface{})["name"].(string)
-			value := i.(map[string]interface{})["value"].(string)
-			allConfig[key] = value
-		}
-		//待实现
-		// if err := s.WaitForDBParameter(d.Id(), DefaultTimeoutMedium, allConfig); err != nil {
-		// 	return errmsgs.WrapError(err)
-		// }
 	}
-	//d.SetPartial(attribute)
 	return nil
 }
 
