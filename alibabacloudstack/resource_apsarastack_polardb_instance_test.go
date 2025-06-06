@@ -45,15 +45,27 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 					"instance_name":            "${var.name}",
 					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
 					"db_instance_storage_type": "local_ssd",
+					"parameters": []map[string]interface{}{{
+						"name":  "show_old_temporals",
+						"value": "ON",
+					},},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"instance_name": name,
+						"instance_name":       name,
 						"engine":              "MySQL",
 						"engine_version":      "5.7",
 						"db_instance_class":   CHECKSET,
 						"db_instance_storage": CHECKSET,
 					}),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceId,     // 资源地址
+						"parameters.*", // TypeSet 属性路径（通配符 `*` 表示集合中的任意元素）
+						map[string]string{
+							"name":  "show_old_temporals",
+							"value": "ON",
+						},
+					),
 				),
 			},
 			{
@@ -268,6 +280,11 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 					"encryption":               "true",
 					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
 					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
+					"parameters": []map[string]interface{}{{
+						"name":  "polar_px_interconnect_transmit_timeout",
+						"value": "4000",
+					},},
+					
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -276,6 +293,14 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 						"tde_status":    "true",
 						"enable_ssl":    "true",
 					}),
+										resource.TestCheckTypeSetElemNestedAttrs(
+						resourceId,
+						"parameters.*",
+						map[string]string{
+							"name":  "polar_px_interconnect_transmit_timeout",
+							"value": "4000",
+						},
+					),
 				),
 			},
 		},

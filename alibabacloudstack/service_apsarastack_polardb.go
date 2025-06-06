@@ -377,7 +377,7 @@ type PolardbDescribedbinstancenetinfoResponse struct {
 	DBInstanceNetInfos struct {
 		DBInstanceNetInfo []struct {
 			SecurityIPGroups struct {
-				securityIPGroup []struct {
+				SecurityIPGroup []struct {
 					SecurityIPGroupName string `json:"SecurityIPGroupName"`
 					SecurityIPs         string `json:"SecurityIPs"`
 				} `json:"securityIPGroup"`
@@ -1167,7 +1167,7 @@ func (s *PolardbService) WaitForConnectionDBInstance(d *schema.ResourceData, cli
 
 func (s *PolardbService) DoPolardbDescribedbinstancesRequest(id string, client *connectivity.AlibabacloudStackClient) (*PolardbDescribedbinstancesResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeDBInstances
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstances", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstances", "")
 	PolardbDescribedbinstancesResponse := &PolardbDescribedbinstancesResponse{}
 	request.QueryParams["DBInstanceId"] = id
 	request.QueryParams["InstanceLevel"] = "1"
@@ -1198,7 +1198,7 @@ func (s *PolardbService) DoPolardbDescribedbinstancesRequest(id string, client *
 
 func (s *PolardbService) Describedbinstances(id string) (*PolardbDescribedbinstancesResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeDBInstances
-	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstances", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstances", "")
 	PolardbDescribedbinstancesResponse := &PolardbDescribedbinstancesResponse{}
 	request.QueryParams["DBInstanceId"] = id
 	bresponse, err := s.client.ProcessCommonRequest(request)

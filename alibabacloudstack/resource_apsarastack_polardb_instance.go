@@ -441,7 +441,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	d.SetId(PolardbCreatedbinstanceResponse.DBInstanceId)
 	d.Set("connection_string", PolardbCreatedbinstanceResponse.ConnectionString)
 
-	stateConf := BuildStateConfByTimes([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 5*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}), 100)
+	stateConf := BuildStateConfByTimes([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}), 100)
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
