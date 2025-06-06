@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/PaesslerAG/jsonpath"
+	"log"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -77,7 +79,7 @@ type PolardbDescribeaccountsResponse struct {
 func (s *PolardbService) DescribeDBAccount(id string) (*PolardbDescribeaccountsResponse, error) {
 	parts, _ := ParseResourceId(id, 2)
 	// api: polardb - 2024-01-30 - DescribeAccounts
-	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeAccounts", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeAccounts", "")
 	PolardbDescribeaccountsResponse := &PolardbDescribeaccountsResponse{}
 
 	request.QueryParams["AccountName"] = parts[1]
@@ -112,7 +114,7 @@ func (s *PolardbService) DescribeDBAccount(id string) (*PolardbDescribeaccountsR
 
 func (s *PolardbService) DoPolardbDescribeaccountsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbDescribeaccountsResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeAccounts
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeAccounts", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeAccounts", "")
 	PolardbDescribeaccountsResponse := &PolardbDescribeaccountsResponse{}
 
 	//调用request_params_handler
@@ -188,7 +190,7 @@ type PolardbDescribedatabasesResponse struct {
 
 func (s *PolardbService) DescribeDBDatabase(id string) (*PolardbDescribedatabasesResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeDatabases
-	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDatabases", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDatabases", "")
 	PolardbDescribedatabasesResponse := &PolardbDescribedatabasesResponse{}
 
 	parts, err := ParseResourceId(id, 2)
@@ -223,7 +225,7 @@ func (s *PolardbService) DescribeDBDatabase(id string) (*PolardbDescribedatabase
 }
 func (s *PolardbService) DoPolardbDescribedatabasesRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbDescribedatabasesResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeDatabases
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDatabases", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDatabases", "")
 	PolardbDescribedatabasesResponse := &PolardbDescribedatabasesResponse{}
 
 	//调用request_params_handler
@@ -316,7 +318,7 @@ type PolardbDescribebackuppolicyResponse struct {
 
 func (s *PolardbService) DoPolardbDescribebackuppolicyRequest(id string) (*PolardbDescribebackuppolicyResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeBackupPolicy
-	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeBackupPolicy", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeBackupPolicy", "")
 	PolardbDescribebackuppolicyResponse := &PolardbDescribebackuppolicyResponse{}
 
 	//调用requestin_handler
@@ -353,7 +355,7 @@ type PolardbDescriberegionsResponse struct {
 
 func (s *PolardbService) DoPolardbDescriberegionsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbDescriberegionsResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeRegions
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeRegions", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeRegions", "")
 	PolardbDescriberegionsResponse := &PolardbDescriberegionsResponse{}
 
 	bresponse, err := client.ProcessCommonRequest(request)
@@ -411,7 +413,7 @@ type PolardbDescribedbinstancenetinfoResponse struct {
 
 func (s *PolardbService) DoPolardbDescribedbinstancenetinfoRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string) (*PolardbDescribedbinstancenetinfoResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeDBInstanceNetInfo
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceNetInfo", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceNetInfo", "")
 	PolardbDescribedbinstancenetinfoResponse := &PolardbDescribedbinstancenetinfoResponse{}
 
 	//调用request_params_handler
@@ -546,7 +548,7 @@ type PolardbDescribedbinstanceattributeResponse struct {
 
 func (s *PolardbService) DoPolardbDescribedbinstanceattributeRequest(id string, client *connectivity.AlibabacloudStackClient) (*PolardbDescribedbinstanceattributeResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeDBInstanceAttribute
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceAttribute", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceAttribute", "")
 	PolardbDescribedbinstanceattributeResponse := &PolardbDescribedbinstanceattributeResponse{}
 
 	//调用request_params_handler
@@ -583,7 +585,7 @@ type PolardbDescribedbinstancemonitorResponse struct {
 
 func (s *PolardbService) DoPolardbDescribedbinstancemonitorRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbDescribedbinstancemonitorResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeDBInstanceMonitor
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceMonitor", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceMonitor", "")
 	PolardbDescribedbinstancemonitorResponse := &PolardbDescribedbinstancemonitorResponse{}
 
 	request.QueryParams["DBInstanceId"] = d.Id()
@@ -628,7 +630,7 @@ type PolardbDescribeparametersResponse struct {
 
 func (s *PolardbService) DoPolardbDescribeparametersRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbDescribeparametersResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeParameters
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeParameters", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeParameters", "")
 	PolardbDescribeparametersResponse := &PolardbDescribeparametersResponse{}
 
 	//调用request_params_handler
@@ -704,7 +706,7 @@ type PolardbDescribedbinstanceiparraylistResponse struct {
 
 func (s *PolardbService) DoPolardbDescribedbinstanceiparraylistRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbDescribedbinstanceiparraylistResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeDBInstanceIPArrayList
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceIPArrayList", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceIPArrayList", "")
 	PolardbDescribedbinstanceiparraylistResponse := &PolardbDescribedbinstanceiparraylistResponse{}
 
 	//调用request_params_handler
@@ -910,7 +912,7 @@ type PolardbDescribeinstanceautorenewalattributeResponse struct {
 
 func (s *PolardbService) DoPolardbDescribeinstanceautorenewalattributeRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbDescribeinstanceautorenewalattributeResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeInstanceAutoRenewalAttribute
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeInstanceAutoRenewalAttribute", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeInstanceAutoRenewalAttribute", "")
 	PolardbDescribeinstanceautorenewalattributeResponse := &PolardbDescribeinstanceautorenewalattributeResponse{}
 
 	request.QueryParams["DBInstanceId"] = d.Id()
@@ -974,7 +976,7 @@ func (s *PolardbService) ModifyParameters(d *schema.ResourceData, client *connec
 	}
 
 	if len(changed) > 0 {
-		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyParameter", "")
+		request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "ModifyParameter", "")
 
 		request.QueryParams["DBInstanceId"] = d.Id()
 		if d.Get("force_restart").(bool) {
@@ -1065,7 +1067,7 @@ func (s *PolardbService) PolardbDBInstanceTdeStateRefreshFunc(d *schema.Resource
 }
 
 func (s *PolardbService) DescribeDBInstanceTDE(id string) (map[string]interface{}, error) {
-	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceTDE", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceTDE", "")
 	request.QueryParams["DBInstanceId"] = id
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -1102,7 +1104,7 @@ func (s *PolardbService) PolardbDBInstanceSslStateRefreshFunc(d *schema.Resource
 }
 
 func (s *PolardbService) DescribeDBInstanceSSL(id string) (map[string]interface{}, error) {
-	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceSSL", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceSSL", "")
 	request.QueryParams["DBInstanceId"] = id
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -1225,7 +1227,7 @@ func (s *PolardbService) Describedbinstances(id string) (*PolardbDescribedbinsta
 }
 
 func (s *PolardbService) DescribeDBSecurityIps(instanceId string) (*PolardbDescribedbinstanceiparraylistResponse, error) {
-	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceIPArrayList", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceIPArrayList", "")
 	PolardbDescribedbinstanceiparraylistResponse := &PolardbDescribedbinstanceiparraylistResponse{}
 
 	//调用request_params_handler
@@ -1264,7 +1266,7 @@ func (s *PolardbService) flattenDBSecurityIPs(resp *PolardbDescribedbinstanceipa
 
 func (s *PolardbService) DescribeDBConnection(id string) (*PolardbDescribedbinstancenetinfoResponse, error) {
 	parts, _ := ParseResourceId(id, 2)
-	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstanceNetInfo", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceNetInfo", "")
 	PolardbDescribedbinstancenetinfoResponse := &PolardbDescribedbinstancenetinfoResponse{}
 
 	//调用request_params_handler
@@ -1297,4 +1299,97 @@ func (s *PolardbService) DescribeDBConnection(id string) (*PolardbDescribedbinst
 	}
 
 	return PolardbDescribedbinstancenetinfoResponse, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+}
+
+func (s *PolardbService) SetInstanceTags(d *schema.ResourceData) error {
+	if d.HasChange("tags") {
+		oraw, nraw := d.GetChange("tags")
+		remove := oraw.(map[string]interface{})
+		add := nraw.(map[string]interface{})
+
+		if len(remove) > 0 {
+			b, err := json.Marshal(remove)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+			reqQuery := map[string]interface{}{
+				"DBInstanceId": d.Id(),
+				"Tags":         string(b),
+			}
+			if _, err := s.client.DoTeaRequest(
+				"POST", "polardb", "2024-01-30", "RemoveTagsFromResource", "", nil, reqQuery, nil); err != nil {
+				return err
+			}
+		}
+
+		if len(add) > 0 {
+			b, err := json.Marshal(add)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+
+			reqQuery := map[string]interface{}{
+				"DBInstanceId": d.Id(),
+				"Tags":         string(b),
+			}
+			if _, err := s.client.DoTeaRequest(
+				"POST", "polardb", "2024-01-30", "AddTagsToResource", "", nil, reqQuery, nil); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (s *PolardbService) describeTags(d *schema.ResourceData) ([]Tag, error) {
+	reqQuery := map[string]interface{}{
+		"DBInstanceId": d.Id(),
+	}
+	resp, err := s.client.DoTeaRequest("GET", "polardb", "2024-01-30", "DescribeTags", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	tagSet := make([]Tag, 0)
+	tags := resp["Items"].(map[string]interface{})["TagInfos"].([]interface{})
+	for _, t := range tags {
+		tag := t.(map[string]interface{})
+		tagSet = append(tagSet, Tag{
+			Key:   tag["TagKey"].(string),
+			Value: tag["TagValue"].(string),
+		})
+	}
+	return tagSet, nil
+}
+
+func (s *PolardbService) tagsToMap(tags []Tag) map[string]string {
+	result := make(map[string]string)
+	for _, t := range tags {
+		if !s.ignoreTag(t) {
+			result[t.Key] = t.Value
+		}
+	}
+
+	return result
+}
+
+func (s *PolardbService) ignoreTag(t Tag) bool {
+	filter := []string{"^aliyun", "^acs:", "^http://", "^https://"}
+	for _, v := range filter {
+		log.Printf("[DEBUG] Matching prefix %v with %v\n", v, t.Key)
+		ok, _ := regexp.MatchString(v, t.Key)
+		if ok {
+			log.Printf("[DEBUG] Found Alibaba Cloud specific t %s (val: %s), ignoring.\n", t.Key, t.Value)
+			return true
+		}
+	}
+	return false
+}
+
+func (s *PolardbService) tagsToString(tags []Tag) string {
+	v, _ := json.Marshal(s.tagsToMap(tags))
+
+	return string(v)
 }

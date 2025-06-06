@@ -285,6 +285,7 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"tags": caseInsensitiveTagsSchema(),
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackPolardbInstanceCreate, resourceAlibabacloudStackPolardbInstanceRead, resourceAlibabacloudStackPolardbInstanceUpdate, resourceAlibabacloudStackPolardbInstanceDelete)
@@ -527,6 +528,10 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 	stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
 
 	if err := PolardbService.ModifyParameters(d, client); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	if err := PolardbService.SetInstanceTags(d); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
@@ -836,7 +841,6 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 	instance, err := PolardbService.DoPolardbDescribedbinstanceattributeRequest(d.Id(), client)
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
-			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
@@ -847,14 +851,11 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 		return errmsgs.WrapError(err)
 	}
 
-	// 未完成
-	// tags, err := rdsService.describeTags(d)
-	// if err != nil {
-	// 	return errmsgs.WrapError(err)
-	// }
-	// if len(tags) > 0 {
-	// 	d.Set("tags", rdsService.tagsToMap(tags))
-	// }
+	tags, err := PolardbService.describeTags(d)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	d.Set("tags", PolardbService.tagsToMap(tags))
 
 	monitoringPeriod, err := PolardbService.DoPolardbDescribedbinstancemonitorRequest(d, client)
 	if err != nil {

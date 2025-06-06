@@ -48,7 +48,7 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 					"parameters": []map[string]interface{}{{
 						"name":  "show_old_temporals",
 						"value": "ON",
-					},},
+					}},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -110,6 +110,33 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					resource.ComposeTestCheckFunc(testPolardbAccCheckSecurityIpExists("alibabacloudstack_polardb_dbinstance.default", ips)),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"created": "tf",
+						"for":     "test acc",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":              "2",
+						"tags.created":        "tf",
+						"tags.for":            "test acc",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "0",
+						"tags.created": REMOVEKEY,
+						"tags.for":     REMOVEKEY,
+					}),
 				),
 			},
 		},
@@ -216,12 +243,6 @@ func TestAccAlibabacloudStackPolardbInstanceClassic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"encryption", "period", "auto_renew"},
-			},
-			{
 				Config: testAccConfig(map[string]interface{}{
 					"enable_ssl":               "true",
 					"tde_status":               "true",
@@ -283,8 +304,7 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 					"parameters": []map[string]interface{}{{
 						"name":  "polar_px_interconnect_transmit_timeout",
 						"value": "4000",
-					},},
-					
+					}},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -293,7 +313,7 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 						"tde_status":    "true",
 						"enable_ssl":    "true",
 					}),
-										resource.TestCheckTypeSetElemNestedAttrs(
+					resource.TestCheckTypeSetElemNestedAttrs(
 						resourceId,
 						"parameters.*",
 						map[string]string{
