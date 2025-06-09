@@ -236,7 +236,7 @@ func resourceAlibabacloudStackAscmUserUpdate(d *schema.ResourceData, meta interf
 			addDebug("AddRoleToUser", bresponse, request, request.QueryParams)
 			log.Printf("response of queryparams AddRoleToUser is : %s", request.QueryParams)
 		}
-
+		
 		for _, roleId := range remove {
 			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUser", "/ascm/auth/role/removeRoleFromUser")
 			request.QueryParams["loginName"] = lname

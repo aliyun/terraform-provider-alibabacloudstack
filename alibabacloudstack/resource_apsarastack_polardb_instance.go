@@ -10,6 +10,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -56,12 +57,11 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 					if d.Get("engine").(string) == "MySQL" {
 						return true
 					}
-					if v,ok:= d.GetOk("tde_status"); ok && v.(bool) {
+					if v, ok := d.GetOk("tde_status"); ok && v.(bool) {
 						return old == new
 					}
 					return true
 				},
-
 			},
 			"enable_ssl": {
 				Type:     schema.TypeBool,
@@ -214,16 +214,66 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 						"name": {
 							Type:     schema.TypeString,
 							Required: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								oldAll, newAll := d.GetChange("parameters")
+								oldSet := oldAll.(*schema.Set)
+								newSet := newAll.(*schema.Set)
+
+								removed := make(map[string]string)
+								for _, i := range oldSet.Difference(newSet).List() {
+									item := i.(map[string]interface{})
+									if item["name"].(string) == "" {
+										continue
+									}
+									removed[item["name"].(string)] = item["value"].(string)
+								}
+								changekey := old
+								if _, ok := removed[changekey]; ok {
+									return true
+								}
+								return old == new
+							},
 						},
 						"value": {
 							Type:     schema.TypeString,
 							Required: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								oldAll, newAll := d.GetChange("parameters")
+								oldSet := oldAll.(*schema.Set)
+								newSet := newAll.(*schema.Set)
+
+								removed := make(map[string]string)
+								for _, i := range oldSet.Difference(newSet).List() {
+									item := i.(map[string]interface{})
+									if item["name"].(string) == "" {
+										continue
+									}
+									removed[item["name"].(string)] = item["value"].(string)
+								}
+								parts := strings.Split(k, ".")
+								lastIndex := len(parts) - 1
+								parts[lastIndex] = "name"
+								name_k := strings.Join(parts, ".")
+								changekey := d.Get(name_k).(string)
+								if _, ok := removed[changekey]; ok {
+									return true
+								}
+								return old == new
+							},
 						},
 					},
 				},
-				Set:      parameterToHash,
+				Set: func(v interface{}) int {
+					m := v.(map[string]interface{})
+					return hashcode.String(m["name"].(string))
+				},
 				Optional: true,
 				Computed: true,
+			},
+			"force_restart": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"maintain_time": {
 				Type:     schema.TypeString,
@@ -235,6 +285,7 @@ func resourceAlibabacloudStackPolardbInstance() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
+			"tags": caseInsensitiveTagsSchema(),
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackPolardbInstanceCreate, resourceAlibabacloudStackPolardbInstanceRead, resourceAlibabacloudStackPolardbInstanceUpdate, resourceAlibabacloudStackPolardbInstanceDelete)
@@ -391,7 +442,7 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 	d.SetId(PolardbCreatedbinstanceResponse.DBInstanceId)
 	d.Set("connection_string", PolardbCreatedbinstanceResponse.ConnectionString)
 
-	stateConf := BuildStateConfByTimes([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 5*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}), 100)
+	stateConf := BuildStateConfByTimes([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}), 100)
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -474,13 +525,14 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	PolardbService := PolardbService{client}
-	d.Partial(true)
 	stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
 
-	if d.HasChange("parameters") {
-		if err := PolardbService.ModifyParameters(d, client, "parameters"); err != nil {
-			return errmsgs.WrapError(err)
-		}
+	if err := PolardbService.ModifyParameters(d, client); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	if err := PolardbService.SetInstanceTags(d); err != nil {
+		return errmsgs.WrapError(err)
 	}
 
 	payType := Postpaid
@@ -601,7 +653,6 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 	}
 
 	if d.IsNewResource() {
-		d.Partial(false)
 		return nil
 	}
 
@@ -710,7 +761,6 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 		}
 	}
 
-	d.Partial(false)
 	engine := Trim(d.Get("engine").(string))
 	if d.HasChange("tde_status") && d.Get("tde_status").(bool) && engine == "MySQL" {
 		tde_req := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceTDE", "")
@@ -791,7 +841,6 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 	instance, err := PolardbService.DoPolardbDescribedbinstanceattributeRequest(d.Id(), client)
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
-			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
@@ -802,14 +851,11 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 		return errmsgs.WrapError(err)
 	}
 
-	// 未完成
-	// tags, err := rdsService.describeTags(d)
-	// if err != nil {
-	// 	return errmsgs.WrapError(err)
-	// }
-	// if len(tags) > 0 {
-	// 	d.Set("tags", rdsService.tagsToMap(tags))
-	// }
+	tags, err := PolardbService.describeTags(d)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	d.Set("tags", PolardbService.tagsToMap(tags))
 
 	monitoringPeriod, err := PolardbService.DoPolardbDescribedbinstancemonitorRequest(d, client)
 	if err != nil {
@@ -848,7 +894,7 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 	}
 	d.Set("tde_status", tde_object["TDEStatus"].(string) == "Enabled")
 	d.Set("encrypt_algorithm", tde_object["EncryptAlgorithm"].(string))
-	if err = PolardbService.RefreshParameters(d, client, "parameters"); err != nil {
+	if err = PolardbService.RefreshParameters(d, client); err != nil {
 		return errmsgs.WrapError(err)
 	}
 

@@ -119,7 +119,7 @@ func resourceAlibabacloudStackAscmUserGroupUpdate(d *schema.ResourceData, meta i
 		remove := oldSet.Difference(newSet).List()
 		create := newSet.Difference(oldSet).List()
 
-		for _, roleId := range(create) {
+		for _, roleId := range create {
 			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "AddRoleToUserGroup", "/ascm/auth/user/addRoleToUserGroup")
 			request.QueryParams["userGroupId"] = userGroupId
 			request.QueryParams["roleId"] = roleId.(string)
@@ -137,7 +137,7 @@ func resourceAlibabacloudStackAscmUserGroupUpdate(d *schema.ResourceData, meta i
 			log.Printf("response of queryparams AddRoleToUser is : %s", request.QueryParams)
 		}
 		
-		for _, roleId := range(remove) {
+		for _, roleId := range remove {
 			request := client.NewCommonRequest("POST", "ascm", "2019-05-10", "RemoveRoleFromUserGroup", "/ascm/auth/user/removeRoleFromUserGroup")
 			request.QueryParams["userGroupId"] = userGroupId
 			request.QueryParams["roleId"] = roleId.(string)

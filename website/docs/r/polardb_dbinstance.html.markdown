@@ -86,6 +86,9 @@ The following arguments are supported:
   * `security_ip_mode` - (Optional) - The security IP mode for the instance.
   * `maintain_time` - (Optional) - Instance maintenance time period, which is the UTC time, +8 hours is the maintenance time period displayed on the console.
   * `role_arn` - (Optional) - The Global Resource Descriptor (ARN) that authorizes the POLARDB cloud service account to access KMS. You can view the ARN information by using the [CheckCloudResourceAuthorized](~~ 446261 ~~) interface.
+  * `parameters` - (Optional) A mapping of parameters to the resource.
+  * `force_restart` - (Optional) Specifies whether to force restart the instance.
+  * `tags` - (Optional) A mapping of tags to assign to the resource.
 
 ## Attributes Reference
 

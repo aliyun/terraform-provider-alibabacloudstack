@@ -85,8 +85,11 @@ resource "alibabacloudstack_polardb_dbinstance" "default" {
   * `security_ip_mode` - (选填) - 实例的安全IP模式。
   * `maintain_time` - (选填) - 实例可维护时间段，是UTC时间，+8小时才是控制台上显示的可维护时间段。
   * `role_arn` - (选填) - 主账号授权POLARDB云服务账号访问KMS权限的全局资源描述符(ARN)。您可以通过[CheckCloudResourceAuthorized](~~446261~~)接口查看ARN信息。
-
-## 属性说明
+  * `parameters` - (选填) 实例内核参数配置。
+  * `force_restart` - (选填) 指定是否强制重启实例。
+  * `tags` - (选填) 要分配给资源的标签映射。
+  
+## 属性参考
 
 除了上述所有参数外，还导出了以下属性：
   * `storage_type` - 实例的存储类型。有效值：* **local_ssd**, **ephemeral_ssd**: 本地SSD磁盘.* **cloud_ssd**: SSD磁盘.* **cloud_essd**: ESSD云盘。

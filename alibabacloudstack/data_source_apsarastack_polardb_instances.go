@@ -410,7 +410,7 @@ func dataSourceAlibabacloudStackPolardbDbInstances() *schema.Resource {
 func dataSourceAlibabacloudStackPolardbDbInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBInstances", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstances", "")
 	PolardbDescribedbinstancesResponse := PolardbDescribedbinstancesResponse{}
 
 	if v, ok := d.GetOk("db_instance_type"); ok {

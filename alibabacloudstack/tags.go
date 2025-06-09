@@ -9,7 +9,9 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/gpdb"
 
+	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cdn"
@@ -35,6 +37,33 @@ func tagsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeMap,
 		Optional: true,
+	}
+}
+func caseInsensitiveTagsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeMap,
+		Optional: true,
+		ValidateFunc: func(i interface{}, k string) ([]string, []error) {
+			m := i.(map[string]interface{})
+			var errs []error
+
+			for key := range m {
+				// 直接检查键是否为小写
+				if key != strings.ToLower(key) {
+					errs = append(errs, fmt.Errorf(
+						"key '%s' Must be lowercase",
+						key,
+					))
+				}
+			}
+			return nil, errs
+		}, // 关键校验函数
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			if strings.ToLower(old) == strings.ToLower(new) {
+				return true
+			}
+			return false
+		},
 	}
 }
 

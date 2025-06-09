@@ -7,6 +7,6 @@ type Tag struct {
 }
 
 type JsonTag struct {
-	TagKey   string
-	TagValue string
+	TagKey   string `json:"TagKey"`
+	TagValue string `json:"TagValue"`
 }

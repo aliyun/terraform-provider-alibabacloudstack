@@ -302,7 +302,7 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*Membe
 		return nil,errmsgs.WrapError(err)
 	}
 
-	for _, data := range(resp.Data) {
+	for _, data := range resp.Data {
 		if data.AuthorizedType != "UserGroup" {
 			continue
 		}
