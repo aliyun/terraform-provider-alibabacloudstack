@@ -3,8 +3,8 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
-	"time"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -34,9 +34,9 @@ func resourceAlibabacloudStackFlinkNamespace() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Intel"}, false),
 			},
 			"owner_uid": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 		},
 	}
@@ -85,8 +85,8 @@ func resourceAlibabacloudStackFlinkNamespaceUpdate(d *schema.ResourceData, meta 
 		}
 		log.Printf("response for create %v", response)
 	}
-	
-	time.Sleep(5 * time.Second)
+
+	time.Sleep(3 * time.Second)
 
 	return nil
 }
