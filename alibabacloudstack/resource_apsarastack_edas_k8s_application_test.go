@@ -335,7 +335,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
 					"package_version":  "2025-05-20 17:17:18",
 					"jdk":              "Open JDK 8",
 					"replicas":         "1",
-					"internet_slb_id":  "lb-4uvw79x5den0x40rq3f4j",
+					"internet_slb_id":  "${alibabacloudstack_slb.default.id}",
 					"internet_service_port_infos": []map[string]interface{}{
 						{
 							"target_port": "18082",
@@ -343,7 +343,7 @@ func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
 							"protocol":    "HTTP",
 						},
 					},
-					"intranet_slb_id": "lb-4uvhmlzibelgkuu5lwiuy",
+					"intranet_slb_id": "${alibabacloudstack_slb.default1.id}",
 					"intranet_service_port_infos": []map[string]interface{}{
 						{
 							"target_port": "8080",
@@ -469,6 +469,20 @@ func resourceEdasK8sApplicationConfigDependence(name string) string {
 		%s
 
 		%s
+
+		resource "alibabacloudstack_slb" "default" {
+			name = "${var.name}"
+			// vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+			address_type       = "internet"
+			specification        = "slb.s2.small"
+		}
+		
+		resource "alibabacloudstack_slb" "default1" {
+			name = "${var.name}2"
+			vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+			address_type       = "intranet"
+			specification        = "slb.s2.small"
+		}
 
 		resource "alibabacloudstack_cs_kubernetes" "default" {
 		 name = var.name
