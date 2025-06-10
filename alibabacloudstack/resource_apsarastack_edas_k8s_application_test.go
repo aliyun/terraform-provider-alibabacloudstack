@@ -302,131 +302,111 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 	})
 }
 
-/*
-	func TestAccAlibabacloudStackEdasK8sApplicationJar_basic(t *testing.T) {
-		var v *edas.Applcation
-		resourceId := "alibabacloudstack_edas_k8s_application.default"
-		ra := resourceAttrInit(resourceId, edasK8sApplicationBasicMap)
-		serviceFunc := func() interface{} {
-			return &EdasService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-		}
-		rc := resourceCheckInit(resourceId, &v, serviceFunc)
-		rac := resourceAttrCheckInit(rc, ra)
-
-		rand := getAccTestRandInt(1000, 9999)
-		testAccCheck := rac.resourceAttrMapUpdateSet()
-		name := fmt.Sprintf("tf-testacc-edask8sappb%v", rand)
-		testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sApplicationConfigDependence)
-		packageUrl := "http://edas-bj.oss-cn-beijing.aliyuncs.com/prod/demo/SPRING_CLOUD_PROVIDER.jar"
-		updateUrl := "http://edas-bj.oss-cn-beijing.aliyuncs.com/prod/demo/DUBBO_PROVIDER.jar"
-		ResourceTest(t, resource.TestCase{
-			PreCheck: func() {
-
-				testAccPreCheck(t)
-			},
-
-			IDRefreshName: resourceId,
-			Providers:     testAccProviders,
-			CheckDestroy:  testAccCheckEdasK8sApplicationDestroy,
-			Steps: []resource.TestStep{
-				{
-					Config: testAccConfig(map[string]interface{}{
-						"application_name": "${var.name}",
-						"cluster_id":       "${alibabacloudstack_edas_k8s_cluster.default.id}",
-						"package_type":     "FatJar",
-						"package_url":      packageUrl,
-						"jdk":              "Open JDK 8",
-						"replicas":         "1",
-						"readiness":        `{\"failureThreshold\": 3,\"initialDelaySeconds\": 5,\"successThreshold\": 1,\"timeoutSeconds\": 1,\"tcpSocket\":{\"host\":\"\", \"port\":18081}}`,
-						"liveness":         `{\"failureThreshold\": 3,\"initialDelaySeconds\": 5,\"successThreshold\": 1,\"timeoutSeconds\": 1,\"tcpSocket\":{\"host\":\"\", \"port\":18081}}`,
-					}),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheck(map[string]string{
-							"package_type": "FatJar",
-							"package_url":  packageUrl,
-							"replicas":     "1",
-							"jdk":          "Open JDK 8",
-							"readiness":    CHECKSET,
-							"liveness":     CHECKSET,
-						}),
-					),
-				},
-
-				{
-					ResourceName:            resourceId,
-					ImportState:             true,
-					ImportStateVerify:       true,
-					ImportStateVerifyIgnore: []string{"package_url", "package_version"},
-				},
-
-				{
-					Config: testAccConfig(map[string]interface{}{
-						"readiness": "{}",
-						"liveness":  "{}",
-					}),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheck(map[string]string{
-							"readiness": "{}",
-							"liveness":  "{}",
-						}),
-					),
-				},
-
-				{
-					Config: testAccConfig(map[string]interface{}{
-						"package_url": updateUrl,
-					}),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheck(map[string]string{
-							"package_url": updateUrl,
-						}),
-					),
-				},
-
-				{
-					Config: testAccConfig(map[string]interface{}{
-						"replicas": "2",
-					}),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheck(map[string]string{
-							"replicas": "2",
-						}),
-					),
-				},
-
-				{
-					Config: testAccConfig(map[string]interface{}{
-						"jdk": "Dragonwell JDK 8",
-					}),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheck(map[string]string{
-							"jdk": "Dragonwell JDK 8",
-						}),
-					),
-				},
-
-				{
-					Config: testAccConfig(map[string]interface{}{
-						"package_url": updateUrl,
-						"replicas":    "2",
-						"jdk":         "Dragonwell JDK 8",
-						"readiness":   "{}",
-						"liveness":    "{}",
-					}),
-					Check: resource.ComposeTestCheckFunc(
-						testAccCheck(map[string]string{
-							"package_url": updateUrl,
-							"replicas":    "2",
-							"jdk":         "Dragonwell JDK 8",
-							"readiness":   "{}",
-							"liveness":    "{}",
-						}),
-					),
-				},
-			},
-		})
+func TestAccAlibabacloudStackEdasK8sApplicationJar_slbbind(t *testing.T) {
+	var v *EdasK8sApplcation
+	resourceId := "alibabacloudstack_edas_k8s_application.default"
+	ra := resourceAttrInit(resourceId, edasK8sApplicationBasicMap)
+	serviceFunc := func() interface{} {
+		return &EdasService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
+	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rac := resourceAttrCheckInit(rc, ra)
 
+	rand := getAccTestRandInt(1000, 9999)
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	name := fmt.Sprintf("tf-testacc-edask8sappb%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceEdasK8sApplicationConfigDependence)
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+
+			testAccPreCheck(t)
+		},
+
+		IDRefreshName: resourceId,
+		Providers:     testAccProviders,
+		CheckDestroy:  testAccCheckEdasK8sApplicationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"application_name": "${var.name}",
+					"cluster_id":       "${alibabacloudstack_edas_k8s_cluster.default.id}",
+					"package_type":     "FatJar",
+					"package_url":      "http://fileserver.edas.intra.env205.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar",
+					"package_version":  "2025-05-20 17:17:18",
+					"jdk":              "Open JDK 8",
+					"replicas":         "1",
+					"internet_slb_id":  "lb-4uvw79x5den0x40rq3f4j",
+					"internet_service_port_infos": []map[string]interface{}{
+						{
+							"target_port": "18082",
+							"port":        "18082",
+							"protocol":    "HTTP",
+						},
+					},
+					"intranet_slb_id": "lb-4uvhmlzibelgkuu5lwiuy",
+					"intranet_service_port_infos": []map[string]interface{}{
+						{
+							"target_port": "8080",
+							"port":        "8080",
+							"protocol":    "TCP",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"internet_service_port_infos.#":             "1",
+						"internet_service_port_infos.0.target_port": "18082",
+						"internet_service_port_infos.0.port":        "18082",
+						"intranet_service_port_infos.#":             "1",
+						"intranet_service_port_infos.0.target_port": "8080",
+						"intranet_service_port_infos.0.port":        "8080",
+						"intranet_scheduler":                        "rr",
+					}),
+				),
+			},
+
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// "intranet_scheduler", "internet_scheduler" 无法回读
+				ImportStateVerifyIgnore: []string{"intranet_scheduler", "internet_scheduler"},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"internet_service_port_infos": []map[string]interface{}{
+						{
+							"target_port": "18000",
+							"port":        "18000",
+							"protocol":    "HTTP",
+						},
+					},
+					"intranet_service_port_infos": []map[string]interface{}{
+						{
+							"target_port": "8000",
+							"port":        "8000",
+							"protocol":    "TCP",
+						},
+					},
+					"intranet_scheduler": "rr",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"internet_service_port_infos.#":             "1",
+						"internet_service_port_infos.0.target_port": "18000",
+						"internet_service_port_infos.0.port":        "18000",
+						"intranet_service_port_infos.#":             "1",
+						"intranet_service_port_infos.0.target_port": "8000",
+						"intranet_service_port_infos.0.port":        "8000",
+						"intranet_scheduler":                        "rr",
+					}),
+				),
+			},
+		},
+	})
+}
+
+/*
 	func TestAccAlibabacloudStackEdasK8sApplication_multi(t *testing.T) {
 		var v *edas.Applcation
 		resourceId := "alibabacloudstack_edas_k8s_application.default.1"

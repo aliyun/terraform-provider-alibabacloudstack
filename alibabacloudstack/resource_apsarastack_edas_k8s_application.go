@@ -98,8 +98,15 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Optional:     true,
 				Type:         schema.TypeString,
 				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP", "HTTPS"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
 				Deprecated:   "Field 'internet_slb_protocol' is deprecated and will be removed in a future release. Please use new field 'internet_service_port_infos' instead.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					//  3.16环境回读时，protocol均为 TCP
+					if old == "TCP" && new == "HTTP" {
+						return true
+					}
+					return false
+				},
 			},
 			"internet_slb_port": {
 				Type:       schema.TypeInt,
@@ -124,6 +131,13 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								//  3.16环境回读时，protocol均为 TCP
+								if old == "TCP" && new == "HTTP" {
+									return true
+								}
+								return false
+							},
 						},
 						"target_port": {
 							Type:     schema.TypeInt,
@@ -157,8 +171,15 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Optional:     true,
 				Type:         schema.TypeString,
 				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP", "HTTPS"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
 				Deprecated:   "Field 'intranet_slb_protocol' is deprecated and will be removed in a future release. Please use new field 'intranet_service_port_infos' instead.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					//  3.16环境回读时，protocol均为 TCP
+					if old == "TCP" && new == "HTTP" {
+						return true
+					}
+					return false
+				},
 			},
 			"intranet_slb_port": {
 				Type:       schema.TypeInt,
@@ -183,6 +204,13 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Type:         schema.TypeString,
 							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								//  3.16环境回读时，protocol均为 TCP
+								if old == "TCP" && new == "HTTP" {
+									return true
+								}
+								return false
+							},
 						},
 						"target_port": {
 							Type:     schema.TypeInt,
@@ -625,8 +653,13 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 	for _, v := range allDeploy {
 		if len(v.PackageVersion) > 0 {
 			d.Set("package_version", v.PackageVersion)
-			d.Set("package_url", v.PackageUrl)
+			
 		}
+		if v.PackageUrl != "" {
+			d.Set("package_url", v.PackageUrl)
+		} else if v.PackagePublicUrl != "" {
+			d.Set("package_url", v.PackagePublicUrl)
+		}	
 
 		for _, c := range v.Components.ComponentsItem {
 			if strings.Contains(c.ComponentKey, "JDK") {
@@ -654,7 +687,9 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 			slb := slbinfo.(map[string]interface{})
 			if slb["addressType"] == "intranet" {
 				intranet_slb_id = slb["slbId"].(string)
-				intranet_external_traffic_policy = slb["externalTrafficPolicy"].(string)
+				if v, ok := slb["externalTrafficPolicy"]; ok && v.(string) != "" {
+					intranet_external_traffic_policy = v.(string)
+				}
 				for _, service_port := range slb["portMappings"].([]interface{}) {
 					info := service_port.(map[string]interface{})
 					port_data := info["servicePort"].(map[string]interface{})
@@ -667,7 +702,9 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 				}
 			} else if slb["addressType"] == "internet" {
 				internet_slb_id = slb["slbId"].(string)
-				internet_external_traffic_policy = slb["externalTrafficPolicy"].(string)
+				if v, ok := slb["externalTrafficPolicy"]; ok && v.(string) != "" {
+					internet_external_traffic_policy = v.(string)
+				}
 				for _, service_port := range slb["portMappings"].([]interface{}) {
 					info := service_port.(map[string]interface{})
 					port_data := info["servicePort"].(map[string]interface{})
@@ -1170,14 +1207,48 @@ func K8sBindSlb(net_type string, isnew bool, d *schema.ResourceData, meta interf
 		method = "PUT"
 	}
 	request := client.NewCommonRequest(method, "Edas", "2017-08-01", action, "/pop/v5/k8s/acs/k8s_slb_binding")
+	request.Headers["x-acs-content-type"] = "application/json"
+	request.Headers["Content-Type"] = "application/json"
 	request.QueryParams["RegionId"] = client.RegionId
 	request.QueryParams["AppId"] = d.Id()
 	request.QueryParams["ClusterId"] = d.Get("cluster_id").(string)
 	request.QueryParams["Type"] = net_type
-	request.Headers["x-acs-content-type"] = "application/json"
-	request.Headers["Content-Type"] = "application/json"
-	if v, ok := d.GetOk(fmt.Sprintf("%s_slb_id", net_type)); ok && isnew {
-		request.QueryParams["SlbId"] = v.(string)
+	request.QueryParams["SlbId"] = d.Get(fmt.Sprintf("%s_slb_id", net_type)).(string)
+	request.QueryParams["Scheduler"] = d.Get(fmt.Sprintf("%s_scheduler", net_type)).(string)
+	request.QueryParams["ExternalTrafficPolicy"] = d.Get(fmt.Sprintf("%s_external_traffic_policy", net_type)).(string)
+	service_port_infos := make([]map[string]interface{}, 0)
+	if v, ok := d.GetOk(fmt.Sprintf("%s_service_port_infos", net_type)); ok && len(v.([]interface{})) > 0 {
+		for _, info := range v.([]interface{}) {
+			service_port_info := info.(map[string]interface{})
+			service_port_infos = append(service_port_infos, map[string]interface{}{
+				"protocol":             "TCP",
+				"port":                 service_port_info["port"].(int),
+				"targetPort":           service_port_info["target_port"].(int),
+				"loadBalancerProtocol": service_port_info["protocol"].(string),
+			})
+		}
+	} else {
+		v1, ok1 := d.GetOk(fmt.Sprintf("%s_target_port", net_type))
+		v2, ok2 := d.GetOk(fmt.Sprintf("%s_slb_port", net_type))
+		v3, ok3 := d.GetOk(fmt.Sprintf("%s_slb_protocol", net_type))
+		if ok1 && ok2 && ok3 {
+			service_port_infos = append(service_port_infos, map[string]interface{}{
+				"protocol":             "TCP",
+				"port":                 v2.(int),
+				"targetPort":           v1.(int),
+				"loadBalancerProtocol": v3.(string),
+			})
+		}
+	}
+	if len(service_port_infos) > 0 {
+		request.QueryParams["SlbProtocol"] = service_port_infos[0]["loadBalancerProtocol"].(string)
+		request.QueryParams["TargetPort"] = fmt.Sprintf("%d", service_port_infos[0]["targetPort"].(int))
+		request.QueryParams["Port"] = fmt.Sprintf("%d", service_port_infos[0]["port"].(int))
+		data, err := json.Marshal(service_port_infos)
+		if err != nil {
+			return fmt.Errorf("slb service_port_infos data to marshal JSON failed: %w", err)
+		}
+		request.QueryParams["ServicePortInfos"] = string(data)
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(fmt.Sprintf("%s: %s", action, net_type), bresponse, request, request.QueryParams)
 		if err != nil {
@@ -1192,73 +1263,18 @@ func K8sBindSlb(net_type string, isnew bool, d *schema.ResourceData, meta interf
 		if fmt.Sprint(response["Code"]) != "200" {
 			return errmsgs.WrapError(fmt.Errorf("%s Failed , response: %#v", action, response))
 		}
-		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(response["ChangeOrderId"].(string), []string{"3", "6", "10"}))
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapError(fmt.Errorf("%s Failed , response: %#v", action, response))
-		}
-		return nil
-	} else {
-		request.QueryParams["SlbId"] = d.Get(fmt.Sprintf("%s_slb_id", net_type)).(string)
-		request.QueryParams["Scheduler"] = d.Get(fmt.Sprintf("%s_scheduler", net_type)).(string)
-		request.QueryParams["ExternalTrafficPolicy"] = d.Get(fmt.Sprintf("%s_external_traffic_policy", net_type)).(string)
-		service_port_infos := make([]map[string]interface{}, 0)
-		if v, ok := d.GetOk(fmt.Sprintf("%s_service_port_infos", net_type)); ok && len(v.([]interface{})) > 0 {
-			for _, info := range v.([]interface{}) {
-				service_port_info := info.(map[string]interface{})
-				service_port_infos = append(service_port_infos, map[string]interface{}{
-					"protocol":             "TCP",
-					"port":                 service_port_info["port"].(int),
-					"targetPort":           service_port_info["target_port"].(int),
-					"loadBalancerProtocol": service_port_info["protocol"].(string),
-				})
-			}
+		var ChangeOrderId string
+		if v, ok := response["ChangeOrderId"]; ok && v != "" {
+			ChangeOrderId = v.(string)
 		} else {
-			v1, ok1 := d.GetOk(fmt.Sprintf("%s_target_port", net_type))
-			v2, ok2 := d.GetOk(fmt.Sprintf("%s_slb_port", net_type))
-			v3, ok3 := d.GetOk(fmt.Sprintf("%s_slb_protocol", net_type))
-			if ok1 && ok2 && ok3 {
-				service_port_infos = append(service_port_infos, map[string]interface{}{
-					"protocol":             "TCP",
-					"port":                 v2.(int),
-					"targetPort":           v1.(int),
-					"loadBalancerProtocol": v3.(string),
-				})
-			}
+			time.Sleep(time.Duration(60) * time.Second)
+			return nil
 		}
-		if len(service_port_infos) > 0 {
-			request.QueryParams["SlbProtocol"] = service_port_infos[0]["protocol"].(string)
-			request.QueryParams["TargetPort"] = fmt.Sprintf("%d", service_port_infos[0]["targetPort"].(int))
-			request.QueryParams["Port"] = fmt.Sprintf("%d", service_port_infos[0]["port"].(int))
-			data, err := json.Marshal(service_port_infos)
-			if err != nil {
-				return fmt.Errorf("slb service_port_infos data to marshal JSON failed: %w", err)
-			}
-			request.QueryParams["ServicePortInfos"] = string(data)
-			bresponse, err := client.ProcessCommonRequest(request)
-			addDebug(fmt.Sprintf("%s: %s", action, net_type), bresponse, request, request.QueryParams)
-			if err != nil {
-				errmsg := ""
-				if bresponse != nil {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				}
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
-			response := make(map[string]interface{})
-			_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-			if fmt.Sprint(response["Code"]) != "200" {
-				return errmsgs.WrapError(fmt.Errorf("%s Failed , response: %#v", action, response))
-			}
-			var ChangeOrderId string
-			if ChangeOrderId, ok = response["ChangeOrderId"].(string); !ok {
-				time.Sleep(time.Duration(60) * time.Second)
-				return nil
-			}
-			stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(ChangeOrderId, []string{"3", "6", "10"}))
-			if _, err := stateConf.WaitForState(); err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", action, errmsgs.AlibabacloudStackSdkGoERROR, "")
-			}
-			time.Sleep(time.Duration(10) * time.Second)
+		stateConf := BuildStateConf([]string{"0", "1"}, []string{"2"}, d.Timeout(schema.TimeoutCreate), 5*time.Second, edasService.EdasChangeOrderStatusRefreshFunc(ChangeOrderId, []string{"3", "6", "10"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_k8s_application", action, errmsgs.AlibabacloudStackSdkGoERROR, "")
 		}
+		time.Sleep(time.Duration(10) * time.Second)
 	}
 	return nil
 }
