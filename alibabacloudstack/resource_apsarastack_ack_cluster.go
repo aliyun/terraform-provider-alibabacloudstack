@@ -695,6 +695,7 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		"name":                                 d.Get("name").(string),
 		"master_instance_types":                d.Get("master_instance_types").([]interface{}),
 		"master_vswitch_ids":                   d.Get("master_vswitch_ids").([]interface{}),
+		"num_of_nodes":                         d.Get("num_of_nodes").(int),
 		"master_count":                         d.Get("master_count").(int),
 		"snat_entry":                           d.Get("new_nat_gateway").(bool),
 		"endpoint_public_access":               d.Get("slb_internet_enabled").(bool),
@@ -781,7 +782,8 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		scaling_group["key_pair"] = key_name.(string)
 	}
 	if data, ok := d.GetOk("worker_data_disks"); ok {
-		var data_disks = []map[string]interface{}{}
+		data_disks := make([]map[string]interface{}, 0)
+		// worker_data_disks := make([]map[string]interface{}, 0)
 		for _, value := range data.([]interface{}) {
 			disk := value.(map[string]interface{})
 			data_disks = append(data_disks, map[string]interface{}{
@@ -792,8 +794,19 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 				"performance_level":       disk["performance_level"].(string),
 				"kms_key_id":              disk["kms_key_id"].(string),
 			})
+			// v3.18.3 Sp01 后不支持该参数加密worker节点
+			// worker_data_disks = append(worker_data_disks, map[string]interface{}{
+			// 	"size":                    fmt.Sprintf("%d", disk["size"].(int)),
+			// 	"category":                disk["category"].(string),
+			// 	"encrypted":               fmt.Sprintf("%t", disk["encrypted"].(bool)),
+			// 	"auto_snapshot_policy_id": disk["auto_snapshot_policy_id"].(string),
+			// 	"performance_level":       disk["performance_level"].(string),
+			// 	"kms_key_id":              disk["kms_key_id"].(string),
+			// })
 		}
 		scaling_group["data_disks"] = data_disks
+		// v3.18.3 Sp01 后不支持该参数加密worker节点
+		// body["worker_data_disks"] = worker_data_disks
 	}
 	defnodepool["scaling_group"] = scaling_group
 	if v, ok := d.GetOk("tags"); ok {
@@ -846,12 +859,29 @@ func resourceAlibabacloudStackCSKubernetesCreate(d *schema.ResourceData, meta in
 		}
 	}
 
+	// v3.18.3 Sp01 后不支持该参数加密worker节点
+	// if v, ok := d.GetOk("worker_disk_encrypted"); ok && v.(bool) {
+	// 	body["worker_system_disk_encrypted"] = fmt.Sprintf("%t", v.(bool))
+	// 	if v, ok := d.GetOk("worker_disk_encrypt_algorithm"); ok && v.(string) != "" {
+	// 		body["worker_system_disk_encrypt_algorithm"] = v.(string)
+	// 	}
+	// 	if v, ok := d.GetOk("worker_disk_kms_key_id"); ok && v.(string) != "" {
+	// 		body["worker_system_disk_kms_key_id"] = v.(string)
+	// 	}
+	// }
+
 	if v, ok := d.GetOk("instances"); ok {
 		body["format_disk"] = d.Get("format_disk").(bool)
 		body["keep_instance_name"] = d.Get("keep_instance_name").(bool)
 		body["instances"] = expandStringList(v.(*schema.Set).List())
 	} else {
 		body["nodepools"] = []interface{}{defnodepool}
+		// v3.18.3 Sp01 后不支持该参数加密worker节点
+		// body["worker_instance_types"] = d.Get("worker_instance_types").([]interface{})
+		// body["worker_vswitch_ids"] = d.Get("worker_vswitch_ids").([]interface{})
+		// body["worker_system_disk_category"] = d.Get("worker_disk_category").(string)
+		// body["worker_system_disk_size"] = d.Get("worker_disk_size").(int)
+		// body["worker_system_disk_performance_level"] = d.Get("worker_system_disk_performance_level").(string)
 		// body["master_storage_set_id"] = d.Get("master_storage_set_id").(string)
 		// body["master_storage_set_partition_number"] = d.Get("master_storage_set_partition_number").(int)
 		// body["worker_storage_set_id"] = d.Get("worker_storage_set_id").(string)
