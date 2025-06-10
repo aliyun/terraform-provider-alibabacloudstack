@@ -52,10 +52,9 @@ func TestAccAlibabacloudStackFlinkNamespacesDataSource(t *testing.T) {
 	AlibabacloudstacFlinkNamesapcesDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameregex_idConf, oweruid_idConf, allConf)
 }
 
-
 var existAlibabacloudstackFlinkNamesapcesDataMapFunc = func(rand int) map[string]string {
 	return map[string]string{
-		"namespaces.#":    "1",
+		"namespaces.#":      "1",
 		"namespaces.0.name": CHECKSET,
 	}
 }
@@ -71,7 +70,6 @@ var AlibabacloudstacFlinkNamesapcesDataCheckInfo = dataSourceAttr{
 	existMapFunc: existAlibabacloudstackFlinkNamesapcesDataMapFunc,
 	fakeMapFunc:  fakeAlibabacloudstackFlinkNamesapcesDataMapFunc,
 }
-
 
 func dataSourceFlinkNamespacesConfigDependence(rand int, attrMap map[string]string) string {
 	var pairs []string

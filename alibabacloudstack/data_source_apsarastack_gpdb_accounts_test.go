@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackGpdbAccountsDataSource(t *testing.T) {

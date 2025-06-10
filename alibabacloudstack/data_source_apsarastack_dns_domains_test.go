@@ -26,8 +26,8 @@ func TestAccAlibabacloudStackDnsDomainDataSource(t *testing.T) {
 	})
 }
 
-func dataSourceAlibabacloudStackDnsDomain () string {
-	return  fmt.Sprintf(`
+func dataSourceAlibabacloudStackDnsDomain() string {
+	return fmt.Sprintf(`
 
 resource "alibabacloudstack_dns_domain" "default" {
  domain_name = "testdummy%d."

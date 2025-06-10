@@ -21,8 +21,8 @@ func dataSourceAlibabacloudStackSecurityGroupRules() *schema.Resource {
 				Required: true,
 			},
 			"nic_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
+				Type:     schema.TypeString,
+				Optional: true,
 				// must be one of GroupRuleInternet, GroupRuleIntranet
 				ValidateFunc: validation.StringInSlice([]string{"internet", "intranet"}, false),
 			},
@@ -32,8 +32,8 @@ func dataSourceAlibabacloudStackSecurityGroupRules() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"ingress", "egress"}, false),
 			},
 			"ip_protocol": {
-				Type:         schema.TypeString,
-				Optional:     true,
+				Type:     schema.TypeString,
+				Optional: true,
 				// must be one of Tcp, Udp, Icmp, Gre, All
 				ValidateFunc: validation.StringInSlice([]string{
 					string(Tcp),
@@ -113,8 +113,9 @@ func dataSourceAlibabacloudStackSecurityGroupRules() *schema.Resource {
 				Computed: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 		},
 	}
@@ -153,17 +154,17 @@ func dataSourceAlibabacloudStackSecurityGroupRulesRead(d *schema.ResourceData, m
 			}
 
 			mapping := map[string]interface{}{
-				"ip_protocol":                  strings.ToLower(string(item.IpProtocol)),
-				"port_range":                   item.PortRange,
-				"source_cidr_ip":               item.SourceCidrIp,
-				"source_group_id":              item.SourceGroupId,
-				"source_group_owner_account":   item.SourceGroupOwnerAccount,
-				"dest_cidr_ip":                 item.DestCidrIp,
-				"dest_group_id":                item.DestGroupId,
-				"dest_group_owner_account":     item.DestGroupOwnerAccount,
-				"policy":                       strings.ToLower(string(item.Policy)),
-				"nic_type":                     item.NicType,
-				"direction":                    item.Direction,
+				"ip_protocol":                strings.ToLower(string(item.IpProtocol)),
+				"port_range":                 item.PortRange,
+				"source_cidr_ip":             item.SourceCidrIp,
+				"source_group_id":            item.SourceGroupId,
+				"source_group_owner_account": item.SourceGroupOwnerAccount,
+				"dest_cidr_ip":               item.DestCidrIp,
+				"dest_group_id":              item.DestGroupId,
+				"dest_group_owner_account":   item.DestGroupOwnerAccount,
+				"policy":                     strings.ToLower(string(item.Policy)),
+				"nic_type":                   item.NicType,
+				"direction":                  item.Direction,
 				//"description":                item.Description,//has been removed for Alibabacloudstack
 			}
 

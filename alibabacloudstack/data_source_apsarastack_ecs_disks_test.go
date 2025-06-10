@@ -1,9 +1,9 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"strings"
 	"testing"
-	"fmt"
 )
 
 func TestAccAlibabacloudStackDisksDataSource(t *testing.T) {

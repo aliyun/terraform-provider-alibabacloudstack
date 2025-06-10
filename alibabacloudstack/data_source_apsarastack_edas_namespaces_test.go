@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
 )
 
 func TestAccAlibabacloudStackEdasNamespacesDataSource(t *testing.T) {
@@ -37,10 +36,10 @@ func TestAccAlibabacloudStackEdasNamespacesDataSource(t *testing.T) {
 	}
 	var existAlibabacloudStackEdasNamespacesDataSourceNameMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":                             "1",
-			"names.#":                           "1",
-			"namespaces.#":                      "1",
-// 			"namespaces.0.debug_enable":         "false",
+			"ids.#":        "1",
+			"names.#":      "1",
+			"namespaces.#": "1",
+			// 			"namespaces.0.debug_enable":         "false",
 			"namespaces.0.description":          fmt.Sprintf("tf-testAccNamespace-%d", rand),
 			"namespaces.0.namespace_logical_id": fmt.Sprintf("%s:tftest%d", defaultRegionToTest, rand),
 			"namespaces.0.namespace_name":       fmt.Sprintf("tf-testAccNamespace-%d", rand),

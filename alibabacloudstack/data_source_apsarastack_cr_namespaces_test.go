@@ -1,9 +1,9 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
-	"fmt"
 )
 
 func TestAccAlibabacloudStackCRNamespacesDataSource(t *testing.T) {

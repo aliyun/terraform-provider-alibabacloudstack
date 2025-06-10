@@ -23,8 +23,9 @@ func dataSourceAlibabacloudStackRouteTables() *schema.Resource {
 				ForceNew:     true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"vpc_id": {
 				Type:     schema.TypeString,
@@ -115,7 +116,7 @@ func dataSourceAlibabacloudStackRouteTablesRead(d *schema.ResourceData, meta int
 			})
 			return err
 		})
-		response, ok := raw.(*vpc.DescribeRouteTableListResponse) 
+		response, ok := raw.(*vpc.DescribeRouteTableListResponse)
 		if err != nil {
 			errmsg := ""
 			if ok {
@@ -175,12 +176,12 @@ func RouteTablesDecriptionAttributes(d *schema.ResourceData, tables []vpc.Router
 	var s []map[string]interface{}
 	for _, table := range tables {
 		mapping := map[string]interface{}{
-			"id":                table.RouteTableId,
-			"router_id":         table.RouterId,
-			"route_table_type":  table.RouteTableType,
-			"name":              table.RouteTableName,
-			"description":       table.Description,
-			"creation_time":     table.CreationTime,
+			"id":               table.RouteTableId,
+			"router_id":        table.RouterId,
+			"route_table_type": table.RouteTableType,
+			"name":             table.RouteTableName,
+			"description":      table.Description,
+			"creation_time":    table.CreationTime,
 		}
 		names = append(names, table.RouteTableName)
 		ids = append(ids, table.RouteTableId)

@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackForwardEntriesDataSourceBasic(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	forwardTableIdConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackForwardEntriesDataSourceConfigBasic(rand, map[string]string{
 			"forward_table_id": `"${alibabacloudstack_forward_entry.default.forward_table_id}"`,

@@ -3,8 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackKmsKeysDataSource(t *testing.T) {

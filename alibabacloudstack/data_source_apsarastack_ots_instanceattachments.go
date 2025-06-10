@@ -12,66 +12,67 @@ import (
 
 func dataSourceAlibabacloudStackOtsInstanceAttachments() *schema.Resource {
 	return &schema.Resource{
-		Read:	dataSourceAlibabacloudStackOtsInstanceAttachmentsRead,
+		Read: dataSourceAlibabacloudStackOtsInstanceAttachmentsRead,
 
 		Schema: map[string]*schema.Schema{
 			"instance_name": {
-				Type:		schema.TypeString,
-				Required:	true,
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"name_regex": {
-				Type:		schema.TypeString,
-				Optional:	true,
-				ValidateFunc:	validation.StringIsValidRegExp,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
 			},
 			"output_file": {
-				Type:		schema.TypeString,
-				Optional:	true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 
 			// Computed values
 			"names": {
-				Type:		schema.TypeList,
-				Computed:	true,
-				Elem:		&schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"vpc_ids": {
-				Type:		schema.TypeList,
-				Computed:	true,
-				Elem:		&schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"attachments": {
-				Type:		schema.TypeList,
-				Computed:	true,
+				Type:     schema.TypeList,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"domain": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"endpoint": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"region": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"instance_name": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"vpc_name": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"vpc_id": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 					},
 				},
@@ -110,13 +111,13 @@ func otsAttachmentsDescriptionAttributes(d *schema.ResourceData, vpcInfos []ots.
 	var s []map[string]interface{}
 	for _, vpc := range vpcInfos {
 		mapping := map[string]interface{}{
-			"id":			vpc.InstanceName,
-			"domain":		vpc.Domain,
-			"endpoint":		vpc.Endpoint,
-			"region":		vpc.RegionNo,
-			"instance_name":	vpc.InstanceName,
-			"vpc_name":		vpc.InstanceVpcName,
-			"vpc_id":		vpc.VpcId,
+			"id":            vpc.InstanceName,
+			"domain":        vpc.Domain,
+			"endpoint":      vpc.Endpoint,
+			"region":        vpc.RegionNo,
+			"instance_name": vpc.InstanceName,
+			"vpc_name":      vpc.InstanceVpcName,
+			"vpc_id":        vpc.VpcId,
 		}
 		names = append(names, vpc.InstanceVpcName)
 		ids = append(ids, vpc.InstanceName)

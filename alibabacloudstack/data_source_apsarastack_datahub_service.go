@@ -42,7 +42,7 @@ func dataSourceAlibabacloudStackDatahubServiceRead(d *schema.ResourceData, meta 
 	request := client.NewCommonRequest("GET", "datahub", "2019-11-20", "OpenDataHubService", "")
 
 	err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-		response, err := client.ProcessCommonRequest(request)	
+		response, err := client.ProcessCommonRequest(request)
 		addDebug(action, response, nil)
 		if err != nil {
 			if response == nil {

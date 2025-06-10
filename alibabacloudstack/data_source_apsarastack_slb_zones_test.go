@@ -2,12 +2,10 @@ package alibabacloudstack
 
 import (
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackSlbZonesDataSource_basic(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_slb_zones.default"
 
 	var existSlbZonesMapFunc = func(rand int) map[string]string {

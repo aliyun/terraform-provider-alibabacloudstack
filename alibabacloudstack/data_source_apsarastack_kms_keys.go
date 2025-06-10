@@ -33,9 +33,9 @@ func dataSourceAlibabacloudStackKmsKeys() *schema.Resource {
 			},
 
 			"status": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 				// must contain a valid status, expected Enabled, Disabled, PendingDeletion
 				ValidateFunc: validation.StringInSlice([]string{
 					string(EnabledStatus),
@@ -45,8 +45,9 @@ func dataSourceAlibabacloudStackKmsKeys() *schema.Resource {
 			},
 
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 
 			//Computed value
@@ -174,13 +175,13 @@ func dataSourceAlibabacloudStackKmsKeysRead(d *schema.ResourceData, meta interfa
 			continue
 		}
 		mapping := map[string]interface{}{
-			"id":              response.KeyMetadata.KeyId,
-			"arn":             response.KeyMetadata.Arn,
-			"description":     response.KeyMetadata.Description,
-			"status":          response.KeyMetadata.KeyState,
-			"creation_date":   response.KeyMetadata.CreationDate,
-			"delete_date":     response.KeyMetadata.DeleteDate,
-			"creator":         response.KeyMetadata.Creator,
+			"id":            response.KeyMetadata.KeyId,
+			"arn":           response.KeyMetadata.Arn,
+			"description":   response.KeyMetadata.Description,
+			"status":        response.KeyMetadata.KeyState,
+			"creation_date": response.KeyMetadata.CreationDate,
+			"delete_date":   response.KeyMetadata.DeleteDate,
+			"creator":       response.KeyMetadata.Creator,
 		}
 
 		s = append(s, mapping)

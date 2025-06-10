@@ -45,8 +45,9 @@ func dataSourceAlibabacloudStackExpressConnectPhysicalConnections() *schema.Reso
 				ValidateFunc: validation.StringInSlice([]string{"Allocated", "Allocating", "Allocation Failed", "Approved", "Canceled", "Confirmed", "Enabled", "Initial", "Rejected", "Terminated"}, false),
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"connections": {
 				Type:     schema.TypeList,

@@ -1,6 +1,5 @@
 package alibabacloudstack
 
-
 import (
 	"testing"
 )

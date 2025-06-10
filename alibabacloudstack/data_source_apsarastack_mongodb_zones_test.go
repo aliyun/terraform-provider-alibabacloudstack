@@ -2,12 +2,10 @@ package alibabacloudstack
 
 import (
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackMongoDBZonesDataSource_basic(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_mongodb_zones.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "", dataSourceMongoDBZonesConfigDependence)

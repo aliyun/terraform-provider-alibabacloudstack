@@ -66,8 +66,9 @@ func dataSourceAlibabacloudStackKVStoreInstanceClasses() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"cpu", "memory"}, false),
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"instance_classes": {
 				Type:     schema.TypeList,
@@ -189,7 +190,7 @@ func dataSourceAlibabacloudStackKVStoreAvailableResourceRead(d *schema.ResourceD
 	}
 
 	for _, data := range response.Data {
-		if cpu != 0 && momroy != 0 && ( data.Cpu != cpu || data.Memory != momroy ) {
+		if cpu != 0 && momroy != 0 && (data.Cpu != cpu || data.Memory != momroy) {
 			continue
 		}
 		Datas = append(Datas, data)

@@ -48,7 +48,7 @@ resource "alibabacloudstack_vpc_vpc" "default" {
   * `false`（默认值）：禁用IPv6 CIDR块。
   * `true`：启用IPv6 CIDR块。当此参数设置为`true`时，系统将自动为您创建一个免费版本的IPv6网关，并分配一个/56的IPv6网络段。
 * `resource_group_id` - (可选) 要移入云资源实例的资源组ID。资源组是阿里云账号下进行资源分组管理的一种机制，资源组能够帮助您解决单个云账号内的资源分组和授权管理等复杂性问题。更多信息，请参见[什么是资源管理](https://help.aliyun.com/document_detail/94475.html)。
-* `secondary_cidr_blocks` - (可选) VPC的附加CIDR块列表。**注意**：从provider版本1.185.0开始，该字段已被废弃，并将在未来的版本中移除。请改用新资源`alicloud_vpc_ipv4_cidr_block`。`secondary_cidr_blocks`属性和`alicloud_vpc_ipv4_cidr_block`资源不能同时使用。
+* `secondary_cidr_blocks` - (可选) VPC的附加CIDR块列表。请改用新资源`alicloud_vpc_ipv4_cidr_block`。`secondary_cidr_blocks`属性和`alicloud_vpc_ipv4_cidr_block`资源不能同时使用。
 * `user_cidrs` - (可选, 变更时重建) 用户定义的CIDR列表。
 * `status` - (可选) VPC的状态。有效值：
   * `Pending`：VPC正在配置中。

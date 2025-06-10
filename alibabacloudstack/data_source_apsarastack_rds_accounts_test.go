@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackRdsAccountsDataSource(t *testing.T) {
@@ -100,4 +98,3 @@ data "alibabacloudstack_rds_accounts" "default" {
 `, rand, strings.Join(pairs, "\n   "))
 	return config
 }
-

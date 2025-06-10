@@ -60,8 +60,9 @@ func dataSourceAlibabacloudStackVpnGateways() *schema.Resource {
 			},
 
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 
 			// Computed values
@@ -247,20 +248,20 @@ func vpnsDecriptionAttributes(d *schema.ResourceData, vpnSetTypes []vpc.VpnGatew
 	var s []map[string]interface{}
 	for _, vpn := range vpnSetTypes {
 		mapping := map[string]interface{}{
-			"id":                vpn.VpnGatewayId,
-			"vpc_id":            vpn.VpcId,
-			"internet_ip":       vpn.InternetIp,
-			"create_time":       TimestampToStr(vpn.CreateTime),
-			"end_time":          TimestampToStr(vpn.EndTime),
-			"specification":     vpn.Spec,
-			"name":              vpn.Name,
-			"description":       vpn.Description,
-			"status":            convertStatus(vpn.Status),
-			"business_status":   vpn.BusinessStatus,
+			"id":                   vpn.VpnGatewayId,
+			"vpc_id":               vpn.VpcId,
+			"internet_ip":          vpn.InternetIp,
+			"create_time":          TimestampToStr(vpn.CreateTime),
+			"end_time":             TimestampToStr(vpn.EndTime),
+			"specification":        vpn.Spec,
+			"name":                 vpn.Name,
+			"description":          vpn.Description,
+			"status":               convertStatus(vpn.Status),
+			"business_status":      vpn.BusinessStatus,
 			"instance_charge_type": convertChargeType(vpn.ChargeType),
-			"enable_ipsec":      vpn.IpsecVpn,
-			"enable_ssl":        vpn.SslVpn,
-			"ssl_connections":   vpn.SslMaxConnections,
+			"enable_ipsec":         vpn.IpsecVpn,
+			"enable_ssl":           vpn.SslVpn,
+			"ssl_connections":      vpn.SslMaxConnections,
 		}
 
 		ids = append(ids, vpn.VpnGatewayId)

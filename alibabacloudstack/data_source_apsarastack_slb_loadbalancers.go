@@ -67,9 +67,9 @@ func dataSourceAlibabacloudStackSlbs() *schema.Resource {
 				ForceNew: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"names": {
 				Type:     schema.TypeList,
@@ -249,17 +249,17 @@ func slbsDescriptionAttributes(d *schema.ResourceData, loadBalancers []slb.LoadB
 	for _, loadBalancer := range loadBalancers {
 		tags, _ := slbService.DescribeTags(loadBalancer.LoadBalancerId, nil, TagResourceInstance)
 		mapping := map[string]interface{}{
-			"id":                     loadBalancer.LoadBalancerId,
-			"region_id":              loadBalancer.RegionId,
+			"id":                       loadBalancer.LoadBalancerId,
+			"region_id":                loadBalancer.RegionId,
 			"master_availability_zone": loadBalancer.MasterZoneId,
 			"slave_availability_zone":  loadBalancer.SlaveZoneId,
-			"name":                   loadBalancer.LoadBalancerName,
-			"network_type":           loadBalancer.NetworkType,
-			"vpc_id":                 loadBalancer.VpcId,
-			"vswitch_id":             loadBalancer.VSwitchId,
-			"address":                loadBalancer.Address,
-			"creation_time":          loadBalancer.CreateTime,
-			"tags":                   slbService.tagsToMap(tags),
+			"name":                     loadBalancer.LoadBalancerName,
+			"network_type":             loadBalancer.NetworkType,
+			"vpc_id":                   loadBalancer.VpcId,
+			"vswitch_id":               loadBalancer.VSwitchId,
+			"address":                  loadBalancer.Address,
+			"creation_time":            loadBalancer.CreateTime,
+			"tags":                     slbService.tagsToMap(tags),
 		}
 
 		ids = append(ids, loadBalancer.LoadBalancerId)

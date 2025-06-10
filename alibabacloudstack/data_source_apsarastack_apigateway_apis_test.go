@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"fmt"
-
-	
 )
 
 func TestAccAlibabacloudStackApigatewayApisDataSource(t *testing.T) {

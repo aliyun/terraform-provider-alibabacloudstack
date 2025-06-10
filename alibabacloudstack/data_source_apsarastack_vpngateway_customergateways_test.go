@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackVpnCgwsDataSourceBasic(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackVpnCustomerGatewaysConfig(rand, map[string]string{
 			"ids": `[ "${alibabacloudstack_vpn_customer_gateway.default.id}" ]`,

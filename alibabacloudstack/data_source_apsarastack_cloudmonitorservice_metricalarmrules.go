@@ -18,6 +18,11 @@ func dataSourceAlibabacloudStackCmsAlarms() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"output_file": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
+			},
 			"alarms": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -180,7 +185,6 @@ func dataSourceAlibabacloudStackCmsAlarmsRead(d *schema.ResourceData, meta inter
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cms_alarms", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 		if err != nil {

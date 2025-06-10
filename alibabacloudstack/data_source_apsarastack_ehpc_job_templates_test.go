@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackEhpcJobTemplatesDataSource(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackEhpcJobTemplatesDataSourceName(rand, map[string]string{
 			"ids": `["${alibabacloudstack_ehpc_job_template.default.id}"]`,

@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackAdbDbClustersDataSource(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	nameConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackAdbDbClusterDataSourceConfig(rand, map[string]string{
 			"description_regex": `"${alibabacloudstack_adb_db_cluster.default.description}"`,

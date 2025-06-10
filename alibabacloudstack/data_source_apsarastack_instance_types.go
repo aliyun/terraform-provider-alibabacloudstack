@@ -10,13 +10,13 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 )
 
 type instanceTypeWithOriginalPrice struct {
-	InstanceType ecs.InstanceType
+	InstanceType  ecs.InstanceType
 	OriginalPrice float64
 }
 
@@ -70,8 +70,9 @@ func dataSourceAlibabacloudStackInstanceTypes() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"CPU", "Memory", "Price"}, false),
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -286,11 +287,11 @@ func instanceTypesDescriptionAttributes(d *schema.ResourceData, types []instance
 	for _, t := range types {
 
 		mapping := map[string]interface{}{
-			"id":            t.InstanceType.InstanceTypeId,
+			"id":             t.InstanceType.InstanceTypeId,
 			"cpu_core_count": t.InstanceType.CpuCoreCount,
-			"memory_size":   t.InstanceType.MemorySize,
-			"family":        t.InstanceType.InstanceTypeFamily,
-			"eni_amount":    t.InstanceType.EniQuantity,
+			"memory_size":    t.InstanceType.MemorySize,
+			"family":         t.InstanceType.InstanceTypeFamily,
+			"eni_amount":     t.InstanceType.EniQuantity,
 		}
 		if sortedBy == "Price" {
 			mapping["price"] = fmt.Sprintf("%.4f", t.OriginalPrice)
@@ -300,7 +301,7 @@ func instanceTypesDescriptionAttributes(d *schema.ResourceData, types []instance
 		mapping["availability_zones"] = zoneIds
 
 		brust := []map[string]interface{}{{
-			"initial_credit": strconv.Itoa(t.InstanceType.InitialCredit),
+			"initial_credit":  strconv.Itoa(t.InstanceType.InitialCredit),
 			"baseline_credit": strconv.Itoa(t.InstanceType.BaselineCredit),
 		}}
 		mapping["burstable_instance"] = brust

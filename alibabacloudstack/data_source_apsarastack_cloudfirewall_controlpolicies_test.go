@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccCheckAlibabacloudStackCloudFirewallControlPoliciesDataSource(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 
 	var existAlibabacloudStackCloudFirewallControlPoliciesDataSourceNameMapFunc = func(rand int) map[string]string {
 		return map[string]string{

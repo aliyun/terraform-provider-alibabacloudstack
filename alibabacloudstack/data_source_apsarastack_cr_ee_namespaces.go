@@ -12,59 +12,60 @@ import (
 
 func dataSourceAlibabacloudStackCrEeNamespaces() *schema.Resource {
 	return &schema.Resource{
-		Read:	dataSourceAlibabacloudStackCrEeNamespacesRead,
+		Read: dataSourceAlibabacloudStackCrEeNamespacesRead,
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
-				Type:		schema.TypeString,
-				ForceNew:	true,
-				Required:	true,
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Required: true,
 			},
 			"name_regex": {
-				Type:		schema.TypeString,
-				Optional:	true,
-				ValidateFunc:	validation.StringIsValidRegExp,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
 			},
 			"output_file": {
-				Type:		schema.TypeString,
-				Optional:	true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 
 			// Computed values
 			"ids": {
-				Type:		schema.TypeList,
-				Optional:	true,
-				Computed:	true,
-				Elem:		&schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"names": {
-				Type:		schema.TypeList,
-				Computed:	true,
-				Elem:		&schema.Schema{Type: schema.TypeString},
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"namespaces": {
-				Type:		schema.TypeList,
-				Computed:	true,
+				Type:     schema.TypeList,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"instance_id": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"id": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"name": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"auto_create": {
-							Type:		schema.TypeBool,
-							Computed:	true,
+							Type:     schema.TypeBool,
+							Computed: true,
 						},
 						"default_visibility": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 					},
 				},
@@ -127,9 +128,9 @@ func dataSourceAlibabacloudStackCrEeNamespacesRead(d *schema.ResourceData, meta 
 	})
 
 	var (
-		ids		[]string
-		names		[]string
-		namespaceMaps	[]map[string]interface{}
+		ids           []string
+		names         []string
+		namespaceMaps []map[string]interface{}
 	)
 
 	for _, namespace := range targetNamespaces {

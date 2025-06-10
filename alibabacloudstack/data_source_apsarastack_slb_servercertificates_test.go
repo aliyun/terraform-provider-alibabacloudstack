@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackSlbServerCertificatesDataSource_basic(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackSlbServerCertificatesDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_slb_server_certificate.default.name}"`,

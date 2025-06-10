@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackVpcVpcsDataSource(t *testing.T) {
@@ -35,10 +33,10 @@ func TestAccAlibabacloudStackVpcVpcsDataSource(t *testing.T) {
 
 	vswtich_idConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"vswitch_id":    `"${alibabacloudstack_vpc_vswitch.default.id}"`,
+			"vswitch_id": `"${alibabacloudstack_vpc_vswitch.default.id}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
-			"vswitch_id":    `"${alibabacloudstack_vpc_vswitch.default.id}_fake"`,
+			"vswitch_id": `"${alibabacloudstack_vpc_vswitch.default.id}_fake"`,
 		}),
 	}
 
@@ -57,13 +55,13 @@ func TestAccAlibabacloudStackVpcVpcsDataSource(t *testing.T) {
 		existConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
 			"ids": `["${alibabacloudstack_vpc_vpc.default.id}"]`,
 
-			"resource_group_id":   `"${alibabacloudstack_vpc_vpc.default.resource_group_id}"`,
-			"vpc_name":            `"${alibabacloudstack_vpc_vpc.default.vpc_name}"`}),
+			"resource_group_id": `"${alibabacloudstack_vpc_vpc.default.resource_group_id}"`,
+			"vpc_name":          `"${alibabacloudstack_vpc_vpc.default.vpc_name}"`}),
 		fakeConfig: testAccCheckAlibabacloudstackVpcVpcsDataSourceConfig(rand, map[string]string{
 			"ids": `["${alibabacloudstack_vpc_vpc.default.id}_fake"]`,
 
-			"resource_group_id":   `"${alibabacloudstack_vpc_vpc.default.resource_group_id}_fake"`,
-			"vpc_name":            `"${alibabacloudstack_vpc_vpc.default.vpc_name}_fake"`}),
+			"resource_group_id": `"${alibabacloudstack_vpc_vpc.default.resource_group_id}_fake"`,
+			"vpc_name":          `"${alibabacloudstack_vpc_vpc.default.vpc_name}_fake"`}),
 	}
 
 	AlibabacloudstackVpcVpcsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, vswtich_idConf, resource_group_idConf, vpc_nameConf, allConf)

@@ -16,8 +16,9 @@ func dataSourceAlibabacloudStackSlbServerCertificates() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -130,11 +131,11 @@ func slbServerCertificatesDescriptionAttributes(d *schema.ResourceData, certific
 	for _, certificate := range certificates {
 
 		mapping := map[string]interface{}{
-			"id":                 certificate.ServerCertificateId,
-			"name":               certificate.ServerCertificateName,
-			"fingerprint":        certificate.Fingerprint,
-			"created_time":       certificate.CreateTime,
-			"created_timestamp":  certificate.CreateTimeStamp,
+			"id":                certificate.ServerCertificateId,
+			"name":              certificate.ServerCertificateName,
+			"fingerprint":       certificate.Fingerprint,
+			"created_time":      certificate.CreateTime,
+			"created_timestamp": certificate.CreateTimeStamp,
 		}
 		ids = append(ids, certificate.ServerCertificateId)
 		names = append(names, certificate.ServerCertificateName)

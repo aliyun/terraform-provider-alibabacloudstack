@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackNatGatewaysDataSourceBasic(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackNatGatewaysDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_nat_gateway.default.name}"`,

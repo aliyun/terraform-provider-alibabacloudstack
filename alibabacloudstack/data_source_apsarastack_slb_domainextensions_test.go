@@ -2,13 +2,13 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	
+
 	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackSlbDomainExtensionsDataSource_basic(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	basicConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackDomainExtensionDataSourceConfig(rand, map[string]string{
 			"load_balancer_id": `"${alibabacloudstack_slb_domain_extension.default.load_balancer_id}"`,

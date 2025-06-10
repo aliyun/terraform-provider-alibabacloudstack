@@ -4,13 +4,11 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudstackCmsAlarmContactGroupGroups_basic(t *testing.T) {
 	testAccPreCheckWithAPIIsNotSupport(t)
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackCmsAlarmContactGroupsDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_cms_alarm_contact_group.default.id}"`,

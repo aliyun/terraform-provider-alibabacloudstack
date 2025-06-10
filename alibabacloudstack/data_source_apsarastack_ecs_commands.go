@@ -60,8 +60,9 @@ func dataSourceAlibabacloudStackEcsCommands() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"RunBatScript", "RunPowerShellScript", "RunShellScript"}, false),
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"commands": {
 				Type:     schema.TypeList,
@@ -196,16 +197,16 @@ func dataSourceAlibabacloudStackEcsCommandsRead(d *schema.ResourceData, meta int
 	s := make([]map[string]interface{}, 0)
 	for _, object := range objects {
 		mapping := map[string]interface{}{
-			"command_content": object["CommandContent"],
-			"id":              fmt.Sprint(object["CommandId"]),
-			"command_id":      fmt.Sprint(object["CommandId"]),
-			"description":     object["Description"],
+			"command_content":  object["CommandContent"],
+			"id":               fmt.Sprint(object["CommandId"]),
+			"command_id":       fmt.Sprint(object["CommandId"]),
+			"description":      object["Description"],
 			"enable_parameter": object["EnableParameter"],
-			"name":            object["Name"],
-			"parameter_names": object["ParameterNames"].(map[string]interface{})["ParameterName"],
-			"timeout":         object["Timeout"],
-			"type":            object["Type"],
-			"working_dir":     object["WorkingDir"],
+			"name":             object["Name"],
+			"parameter_names":  object["ParameterNames"].(map[string]interface{})["ParameterName"],
+			"timeout":          object["Timeout"],
+			"type":             object["Type"],
+			"working_dir":      object["WorkingDir"],
 		}
 		ids = append(ids, fmt.Sprint(object["CommandId"]))
 		names = append(names, object["Name"])

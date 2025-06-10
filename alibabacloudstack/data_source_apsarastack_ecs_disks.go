@@ -55,8 +55,9 @@ func dataSourceAlibabacloudStackDisks() *schema.Resource {
 			},
 
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"tags": tagsSchema(),
 
@@ -233,7 +234,7 @@ func dataSourceAlibabacloudStackDisksRead(d *schema.ResourceData, meta interface
 		}
 		log.Printf("filtereddisks %v", filteredDisksTemp)
 		allDisks = filteredDisksTemp
-		filteredDisksTemp = make([]interface{},0)
+		filteredDisksTemp = make([]interface{}, 0)
 	}
 	if ok && nameRegex.(string) != "" {
 		var r *regexp.Regexp

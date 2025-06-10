@@ -2,7 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	
+
 	"strings"
 	"testing"
 )

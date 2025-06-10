@@ -13,7 +13,7 @@ import (
 
 func dataSourceAlibabacloudStackEssScalingRules() *schema.Resource {
 	return &schema.Resource{
-		Read:   dataSourceAlibabacloudStackEssScalingRulesRead,
+		Read: dataSourceAlibabacloudStackEssScalingRulesRead,
 		Schema: map[string]*schema.Schema{
 			"scaling_group_id": {
 				Type:     schema.TypeString,
@@ -39,9 +39,9 @@ func dataSourceAlibabacloudStackEssScalingRules() *schema.Resource {
 				ForceNew: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"names": {
 				Type:     schema.TypeList,
@@ -178,14 +178,14 @@ func scalingRulesDescriptionAttribute(d *schema.ResourceData, scalingRules []ess
 	var s = make([]map[string]interface{}, 0)
 	for _, scalingRule := range scalingRules {
 		mapping := map[string]interface{}{
-			"id":                  scalingRule.ScalingRuleId,
-			"scaling_group_id":    scalingRule.ScalingGroupId,
-			"name":                scalingRule.ScalingRuleName,
-			"type":                scalingRule.ScalingRuleType,
-			"cooldown":            scalingRule.Cooldown,
-			"adjustment_type":     scalingRule.AdjustmentType,
-			"adjustment_value":    scalingRule.AdjustmentValue,
-			"scaling_rule_ari":    scalingRule.ScalingRuleAri,
+			"id":               scalingRule.ScalingRuleId,
+			"scaling_group_id": scalingRule.ScalingGroupId,
+			"name":             scalingRule.ScalingRuleName,
+			"type":             scalingRule.ScalingRuleType,
+			"cooldown":         scalingRule.Cooldown,
+			"adjustment_type":  scalingRule.AdjustmentType,
+			"adjustment_value": scalingRule.AdjustmentValue,
+			"scaling_rule_ari": scalingRule.ScalingRuleAri,
 		}
 		ids = append(ids, scalingRule.ScalingRuleId)
 		names = append(names, scalingRule.ScalingRuleName)

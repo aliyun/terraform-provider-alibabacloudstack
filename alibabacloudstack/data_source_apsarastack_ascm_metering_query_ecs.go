@@ -13,7 +13,7 @@ import (
 
 func dataSourceAlibabacloudStackAscmMeteringQueryEcs() *schema.Resource {
 	return &schema.Resource{
-		Read:    dataSourceAlibabacloudStackAscmMeteringQueryEcsRead,
+		Read: dataSourceAlibabacloudStackAscmMeteringQueryEcsRead,
 		Schema: map[string]*schema.Schema{
 			"start_time": {
 				Type:     schema.TypeString,
@@ -59,6 +59,11 @@ func dataSourceAlibabacloudStackAscmMeteringQueryEcs() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+			},
+			"output_file": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"data": {
 				Type:     schema.TypeList,

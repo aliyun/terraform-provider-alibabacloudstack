@@ -18,9 +18,9 @@ func dataSourceAlibabacloudStackKVStoreZones() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"multi": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"instance_charge_type": {
 				Type:         schema.TypeString,
@@ -30,8 +30,9 @@ func dataSourceAlibabacloudStackKVStoreZones() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"PrePaid", "PostPaid"}, false),
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -109,7 +110,7 @@ func dataSourceAlibabacloudStackKVStoreZoneRead(d *schema.ResourceData, meta int
 	} else {
 		for _, zoneId := range zoneIds {
 			mapping := map[string]interface{}{
-				"id":            zoneId,
+				"id":             zoneId,
 				"multi_zone_ids": splitMultiZoneId(zoneId),
 			}
 			s = append(s, mapping)

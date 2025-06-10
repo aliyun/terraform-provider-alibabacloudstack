@@ -37,14 +37,15 @@ func dataSourceAlibabacloudStackElasticsearch() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-// Zone过滤存在问题
-// 			"zone_id": {
-// 				Type:     schema.TypeString,
-// 				Optional: true,
-// 			},
+			// Zone过滤存在问题
+			// 			"zone_id": {
+			// 				Type:     schema.TypeString,
+			// 				Optional: true,
+			// 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			// Computed values
 			"descriptions": {
@@ -164,9 +165,9 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 	if v, ok := d.GetOk("vpc_id"); ok && v.(string) != "" {
 		request["vpcId"] = v.(string)
 	}
-// 	if v, ok := d.GetOk("zone_id"); ok && v.(string) != "" {
-// 		request["zoneId"] = v.(string)
-// 	}
+	// 	if v, ok := d.GetOk("zone_id"); ok && v.(string) != "" {
+	// 		request["zoneId"] = v.(string)
+	// 	}
 	for {
 		request["Size"] = requests.NewInteger(PageSizeLarge)
 		request["Page"] = 1
@@ -201,27 +202,27 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 			}
 			if object["dataNode"].(bool) {
 				if v, err := object["nodeAmount"].(json.Number).Int64(); err == nil {
-					mapping["data_node_amount"]= int(v)
+					mapping["data_node_amount"] = int(v)
 				} else {
 					return errmsgs.WrapError(err)
 				}
 				nodeSpec := object["nodeSpec"].(map[string]interface{})
-				mapping["data_node_spec"]= nodeSpec["spec"]
+				mapping["data_node_spec"] = nodeSpec["spec"]
 				if v, err := nodeSpec["disk"].(json.Number).Int64(); err == nil {
-					mapping["data_node_disk_size"]= int(v)
+					mapping["data_node_disk_size"] = int(v)
 				} else {
 					return errmsgs.WrapError(err)
 				}
-				mapping["data_node_disk_type"]= nodeSpec["storageClassName"]
+				mapping["data_node_disk_type"] = nodeSpec["storageClassName"]
 			}
 
 			if object["haveKibana"].(bool) {
-				mapping["kibana_node_spec"]= object["kibanaConfiguration"].(map[string]interface{})["spec"]
-				mapping["kibana_slb_address"]= object["kibanaSlbAddress"]
-				mapping["kibana_domain"]= object["kibanaDomain"]
-				mapping["kibana_protocol"]= object["kibanaProtocol"]
+				mapping["kibana_node_spec"] = object["kibanaConfiguration"].(map[string]interface{})["spec"]
+				mapping["kibana_slb_address"] = object["kibanaSlbAddress"]
+				mapping["kibana_domain"] = object["kibanaDomain"]
+				mapping["kibana_protocol"] = object["kibanaProtocol"]
 				if v, err := object["kibanaPort"].(json.Number).Int64(); err == nil {
-					mapping["kibana_port"]= int(v)
+					mapping["kibana_port"] = int(v)
 				} else {
 					return errmsgs.WrapError(err)
 				}
@@ -230,30 +231,30 @@ func dataSourceAlibabacloudStackElasticsearchRead(d *schema.ResourceData, meta i
 			if object["advancedDedicateMaster"].(bool) {
 				masterConfiguration := object["masterConfiguration"].(map[string]interface{})
 				if v, err := masterConfiguration["amount"].(json.Number).Int64(); err == nil {
-					mapping["master_node_amount"]= int(v)
+					mapping["master_node_amount"] = int(v)
 				} else {
 					return errmsgs.WrapError(err)
 				}
-				mapping["master_node_spec"]= masterConfiguration["spec"]
+				mapping["master_node_spec"] = masterConfiguration["spec"]
 				if v, err := masterConfiguration["disk"].(json.Number).Int64(); err == nil {
-					mapping["master_node_disk_size"]= int(v)
+					mapping["master_node_disk_size"] = int(v)
 				} else {
 					return errmsgs.WrapError(err)
 				}
-				mapping["master_node_disk_type"]= masterConfiguration["storageClassName"]
+				mapping["master_node_disk_type"] = masterConfiguration["storageClassName"]
 			}
 
 			if object["haveClientNode"].(bool) {
 				clientNodeConfiguration := object["clientNodeConfiguration"].(map[string]interface{})
 				if v, err := clientNodeConfiguration["amount"].(json.Number).Int64(); err == nil {
-					mapping["client_node_amount"]= int(v)
+					mapping["client_node_amount"] = int(v)
 				} else {
 					return errmsgs.WrapError(err)
 				}
-				mapping["client_node_spec"]= clientNodeConfiguration["spec"]
+				mapping["client_node_spec"] = clientNodeConfiguration["spec"]
 			}
-			mapping["vswitch_id"]= object["networkConfig"].(map[string]interface{})["vswitchId"]
-			mapping["status"]= object["status"]
+			mapping["vswitch_id"] = object["networkConfig"].(map[string]interface{})["vswitchId"]
+			mapping["status"] = object["status"]
 
 			instances = append(instances, mapping)
 

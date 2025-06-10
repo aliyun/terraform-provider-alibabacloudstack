@@ -23,6 +23,11 @@ func dataSourceAlibabacloudStackCmsMetricMetalist() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				ForceNew:     true,
 			},
+			"output_file": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
+			},
 			"resources": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -119,14 +124,14 @@ func dataSourceAlibabacloudStackCmsMetricMetalistRead(d *schema.ResourceData, me
 			continue
 		}
 		mapping := map[string]interface{}{
-			"description":  rg.Description,
-			"namespace":    rg.Namespace,
-			"labels":       rg.Labels,
-			"metric_name":  rg.MetricName,
-			"dimensions":   rg.Dimensions,
-			"periods":      rg.Periods,
-			"statistics":   rg.Statistics,
-			"unit":         rg.Unit,
+			"description": rg.Description,
+			"namespace":   rg.Namespace,
+			"labels":      rg.Labels,
+			"metric_name": rg.MetricName,
+			"dimensions":  rg.Dimensions,
+			"periods":     rg.Periods,
+			"statistics":  rg.Statistics,
+			"unit":        rg.Unit,
 		}
 		ids = append(ids, fmt.Sprintf(rg.Namespace))
 		s = append(s, mapping)

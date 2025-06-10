@@ -7,7 +7,7 @@ import (
 )
 
 func TestAccAlibabacloudStackVSwitchesDataSourceBasic(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackVSwitchesDataSourceConfig(rand, map[string]string{
 			"name_regex": `"${alibabacloudstack_vswitch.default.name}"`,

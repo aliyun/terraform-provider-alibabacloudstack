@@ -20,9 +20,9 @@ func dataSourceAlibabacloudStackEdasClusters() *schema.Resource {
 				ForceNew: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -177,19 +177,19 @@ func edasClusterDescriptionAttributes(d *schema.ResourceData, clusters []edas.Cl
 
 	for _, cluster := range clusters {
 		mapping := map[string]interface{}{
-			"cluster_id":     cluster.ClusterId,
-			"cluster_name":   cluster.ClusterName,
-			"cluster_type":   cluster.ClusterType,
-			"create_time":    cluster.CreateTime,
-			"update_time":    cluster.UpdateTime,
-			"cpu":            cluster.Cpu,
-			"cpu_used":       cluster.CpuUsed,
-			"mem":            cluster.Mem,
-			"mem_used":       cluster.MemUsed,
-			"network_mode":   cluster.NetworkMode,
-			"node_num":       cluster.NodeNum,
-			"vpc_id":         cluster.VpcId,
-			"region_id":      cluster.RegionId,
+			"cluster_id":   cluster.ClusterId,
+			"cluster_name": cluster.ClusterName,
+			"cluster_type": cluster.ClusterType,
+			"create_time":  cluster.CreateTime,
+			"update_time":  cluster.UpdateTime,
+			"cpu":          cluster.Cpu,
+			"cpu_used":     cluster.CpuUsed,
+			"mem":          cluster.Mem,
+			"mem_used":     cluster.MemUsed,
+			"network_mode": cluster.NetworkMode,
+			"node_num":     cluster.NodeNum,
+			"vpc_id":       cluster.VpcId,
+			"region_id":    cluster.RegionId,
 		}
 		ids = append(ids, cluster.ClusterId)
 		s = append(s, mapping)

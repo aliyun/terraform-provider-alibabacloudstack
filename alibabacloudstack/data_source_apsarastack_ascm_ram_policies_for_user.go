@@ -29,8 +29,9 @@ func dataSourceAlibabacloudStackAscmRamPoliciesForUser() *schema.Resource {
 				ForceNew: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"policies": {
 				Type:     schema.TypeList,
@@ -105,12 +106,12 @@ func dataSourceAlibabacloudStackAscmRamPoliciesForUserRead(d *schema.ResourceDat
 	var s []map[string]interface{}
 	for _, rp := range response.Data {
 		mapping := map[string]interface{}{
-			"policy_name":      rp.PolicyName,
-			"policy_type":      rp.PolicyType,
-			"description":      rp.Description,
-			"default_version":  rp.DefaultVersion,
-			"attach_date":      time.Unix(rp.AttachDate/1000, 0).Format("2006-01-02 03:04:05"),
-			"policy_document":  rp.PolicyDocument,
+			"policy_name":     rp.PolicyName,
+			"policy_type":     rp.PolicyType,
+			"description":     rp.Description,
+			"default_version": rp.DefaultVersion,
+			"attach_date":     time.Unix(rp.AttachDate/1000, 0).Format("2006-01-02 03:04:05"),
+			"policy_document": rp.PolicyDocument,
 		}
 		names = append(names, rp.PolicyName)
 		s = append(s, mapping)

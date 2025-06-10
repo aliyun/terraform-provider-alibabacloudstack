@@ -1,8 +1,8 @@
 package alibabacloudstack
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackEcsEbsStorageSets_datasource(t *testing.T) {
 }
 
 func dataSourceAlibabacloudStackEcsEbsStorageSet() string {
-return fmt.Sprintf(`
+	return fmt.Sprintf(`
 data "alibabacloudstack_zones"  "default" {
 }
 resource "alibabacloudstack_ecs_ebs_storage_set" "default" {

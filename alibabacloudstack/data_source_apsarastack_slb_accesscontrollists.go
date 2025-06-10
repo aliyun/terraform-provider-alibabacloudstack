@@ -31,8 +31,9 @@ func dataSourceAlibabacloudStackSlbAcls() *schema.Resource {
 				ForceNew:     true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			// Computed values
 			"names": {
@@ -205,12 +206,12 @@ func slbAclsDescriptionAttributes(d *schema.ResourceData, acls []slb.Acl, client
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
 		mapping := map[string]interface{}{
-			"id":                   response.AclId,
-			"name":                 response.AclName,
-			"ip_version":           response.AddressIPVersion,
-			"entry_list":           slbService.FlattenSlbAclEntryMappings(response.AclEntrys.AclEntry),
-			"related_listeners":    slbService.flattenSlbRelatedListenerMappings(response.RelatedListeners.RelatedListener),
-			"tags":                 aclTagsMappings(d, response.AclId, meta),
+			"id":                response.AclId,
+			"name":              response.AclName,
+			"ip_version":        response.AddressIPVersion,
+			"entry_list":        slbService.FlattenSlbAclEntryMappings(response.AclEntrys.AclEntry),
+			"related_listeners": slbService.flattenSlbRelatedListenerMappings(response.RelatedListeners.RelatedListener),
+			"tags":              aclTagsMappings(d, response.AclId, meta),
 		}
 
 		ids = append(ids, response.AclId)

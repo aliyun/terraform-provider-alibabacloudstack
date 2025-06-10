@@ -34,8 +34,9 @@ func dataSourceAlibabacloudStackCmsAlarmContactGroups() *schema.Resource {
 				Computed: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"groups": {
 				Type:     schema.TypeList,
@@ -138,11 +139,11 @@ func dataSourceAlibabacloudStackCmsAlarmContactGroupsRead(d *schema.ResourceData
 	s := make([]map[string]interface{}, 0)
 	for _, object := range objects {
 		mapping := map[string]interface{}{
-			"id":                      object.Name,
+			"id":                       object.Name,
 			"alarm_contact_group_name": object.Name,
-			"contacts":                object.Contacts.Contact,
-			"describe":                object.Describe,
-			"enable_subscribed":       object.EnableSubscribed,
+			"contacts":                 object.Contacts.Contact,
+			"describe":                 object.Describe,
+			"enable_subscribed":        object.EnableSubscribed,
 		}
 		ids = append(ids, object.Name)
 		names = append(names, object.Name)

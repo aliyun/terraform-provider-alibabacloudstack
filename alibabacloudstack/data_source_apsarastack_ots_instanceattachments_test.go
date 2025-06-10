@@ -3,8 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackOtsInstanceAttachmentsDataSourceBasic(t *testing.T) {

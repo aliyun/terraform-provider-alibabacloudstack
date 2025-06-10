@@ -29,9 +29,9 @@ func dataSourceAlibabacloudStackEssScalingGroups() *schema.Resource {
 				ForceNew: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"names": {
 				Type:     schema.TypeList,
@@ -198,23 +198,23 @@ func scalingGroupsDescriptionAttribute(d *schema.ResourceData, scalingGroups []e
 	var s = make([]map[string]interface{}, 0)
 	for _, scalingGroup := range scalingGroups {
 		mapping := map[string]interface{}{
-			"id":                          scalingGroup.ScalingGroupId,
-			"name":                        scalingGroup.ScalingGroupName,
+			"id":                           scalingGroup.ScalingGroupId,
+			"name":                         scalingGroup.ScalingGroupName,
 			"active_scaling_configuration": scalingGroup.ActiveScalingConfigurationId,
-			"region_id":                   scalingGroup.RegionId,
-			"min_size":                    scalingGroup.MinSize,
-			"max_size":                    scalingGroup.MaxSize,
-			"cooldown_time":               scalingGroup.DefaultCooldown,
-			"removal_policies":            scalingGroup.RemovalPolicies.RemovalPolicy,
-			"load_balancer_ids":           scalingGroup.LoadBalancerIds.LoadBalancerId,
-			"db_instance_ids":             scalingGroup.DBInstanceIds.DBInstanceId,
-			"vswitch_ids":                 scalingGroup.VSwitchIds.VSwitchId,
-			"lifecycle_state":             scalingGroup.LifecycleState,
-			"total_capacity":              scalingGroup.TotalCapacity,
-			"active_capacity":             scalingGroup.ActiveCapacity,
-			"pending_capacity":            scalingGroup.PendingCapacity,
-			"removing_capacity":           scalingGroup.RemovingCapacity,
-			"creation_time":               scalingGroup.CreationTime,
+			"region_id":                    scalingGroup.RegionId,
+			"min_size":                     scalingGroup.MinSize,
+			"max_size":                     scalingGroup.MaxSize,
+			"cooldown_time":                scalingGroup.DefaultCooldown,
+			"removal_policies":             scalingGroup.RemovalPolicies.RemovalPolicy,
+			"load_balancer_ids":            scalingGroup.LoadBalancerIds.LoadBalancerId,
+			"db_instance_ids":              scalingGroup.DBInstanceIds.DBInstanceId,
+			"vswitch_ids":                  scalingGroup.VSwitchIds.VSwitchId,
+			"lifecycle_state":              scalingGroup.LifecycleState,
+			"total_capacity":               scalingGroup.TotalCapacity,
+			"active_capacity":              scalingGroup.ActiveCapacity,
+			"pending_capacity":             scalingGroup.PendingCapacity,
+			"removing_capacity":            scalingGroup.RemovingCapacity,
+			"creation_time":                scalingGroup.CreationTime,
 		}
 		ids = append(ids, scalingGroup.ScalingGroupId)
 		names = append(names, scalingGroup.ScalingGroupName)

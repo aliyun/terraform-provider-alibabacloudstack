@@ -34,11 +34,11 @@ func TestAccAlibabacloudStackElasticsearchDataSource(t *testing.T) {
 	versionConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"version": "7.10.0_ali1.6.0",
-			"ids": []string{"${alibabacloudstack_elasticsearch_instance.default.id}"},
+			"ids":     []string{"${alibabacloudstack_elasticsearch_instance.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"version": "7.10.0_ali1.6.0-F",
-			"ids": []string{"${alibabacloudstack_elasticsearch_instance.default.id}"},
+			"ids":     []string{"${alibabacloudstack_elasticsearch_instance.default.id}"},
 		}),
 	}
 
@@ -76,18 +76,18 @@ func TestAccAlibabacloudStackElasticsearchDataSource(t *testing.T) {
 
 var existElasticsearchMapFunc = func(rand int) map[string]string {
 	return map[string]string{
-		"ids.#":                            "1",
-		"ids.0":                            CHECKSET,
-		"descriptions.#":                   "1",
-		"descriptions.0":                   fmt.Sprintf("tf-testAccES%d", rand),
-		"instances.#":                      "1",
-		"instances.0.id":                   CHECKSET,
-		"instances.0.description":          fmt.Sprintf("tf-testAccES%d", rand),
-		"instances.0.data_node_amount":     "3",
-		"instances.0.data_node_spec":       "1C 2Gi",
-		"instances.0.status":               "active",
-		"instances.0.version":              "7.10.0_ali1.6.0",
-		"instances.0.vswitch_id":           CHECKSET,
+		"ids.#":                        "1",
+		"ids.0":                        CHECKSET,
+		"descriptions.#":               "1",
+		"descriptions.0":               fmt.Sprintf("tf-testAccES%d", rand),
+		"instances.#":                  "1",
+		"instances.0.id":               CHECKSET,
+		"instances.0.description":      fmt.Sprintf("tf-testAccES%d", rand),
+		"instances.0.data_node_amount": "3",
+		"instances.0.data_node_spec":   "1C 2Gi",
+		"instances.0.status":           "active",
+		"instances.0.version":          "7.10.0_ali1.6.0",
+		"instances.0.vswitch_id":       CHECKSET,
 	}
 }
 

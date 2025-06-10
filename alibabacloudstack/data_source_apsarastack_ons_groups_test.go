@@ -3,12 +3,10 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackOnsGroupsDataSource(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_ons_groups.default"
 	name := fmt.Sprintf("GID-tf-testacconsgroup%v", rand)
 

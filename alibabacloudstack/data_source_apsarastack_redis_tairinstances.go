@@ -17,8 +17,8 @@ func dataSourceAlibabacloudStackKVStoreInstances() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
-				Type:        schema.TypeString,
-				Optional:    true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
 			},
 			"status": {
@@ -33,8 +33,9 @@ func dataSourceAlibabacloudStackKVStoreInstances() *schema.Resource {
 			},
 			"tags": tagsSchema(),
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -222,25 +223,25 @@ func kvstoreInstancesDescription(d *schema.ResourceData, dbi []r_kvstore.KVStore
 
 	for _, item := range dbi {
 		mapping := map[string]interface{}{
-			"id":                 item.InstanceId,
-			"name":               item.InstanceName,
-			"charge_type":        item.ChargeType,
-			"instance_type":      item.InstanceType,
-			"instance_class":     item.InstanceClass,
-			"region_id":          item.RegionId,
-			"create_time":        item.CreateTime,
-			"expire_time":        item.EndTime,
-			"status":             item.InstanceStatus,
-			"availability_zone":  item.ZoneId,
-			"vpc_id":             item.VpcId,
-			"vswitch_id":         item.VSwitchId,
-			"private_ip":         item.PrivateIp,
-			"port":               item.Port,
-			"user_name":          item.UserName,
-			"capacity":           item.Bandwidth,
-			"bandwidth":          item.Bandwidth,
-			"connections":        item.Connections,
-			"connection_domain":  item.ConnectionDomain,
+			"id":                item.InstanceId,
+			"name":              item.InstanceName,
+			"charge_type":       item.ChargeType,
+			"instance_type":     item.InstanceType,
+			"instance_class":    item.InstanceClass,
+			"region_id":         item.RegionId,
+			"create_time":       item.CreateTime,
+			"expire_time":       item.EndTime,
+			"status":            item.InstanceStatus,
+			"availability_zone": item.ZoneId,
+			"vpc_id":            item.VpcId,
+			"vswitch_id":        item.VSwitchId,
+			"private_ip":        item.PrivateIp,
+			"port":              item.Port,
+			"user_name":         item.UserName,
+			"capacity":          item.Bandwidth,
+			"bandwidth":         item.Bandwidth,
+			"connections":       item.Connections,
+			"connection_domain": item.ConnectionDomain,
 		}
 
 		ids = append(ids, item.InstanceId)

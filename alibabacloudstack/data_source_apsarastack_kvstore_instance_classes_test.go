@@ -3,12 +3,10 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackKVStoreInstanceClasses(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_kvstore_instance_classes.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "KVStore", kvstoreConfigHeader)
@@ -69,8 +67,8 @@ func TestAccAlibabacloudStackKVStoreInstanceClasses(t *testing.T) {
 	}
 	shardNumber8 := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"zone_id":      "${data.alibabacloudstack_zones.resources.zones.0.id}",
-			"cup": "8",
+			"zone_id": "${data.alibabacloudstack_zones.resources.zones.0.id}",
+			"cup":     "8",
 		}),
 	}
 	ArchitectureStandard := dataSourceTestAccConfig{

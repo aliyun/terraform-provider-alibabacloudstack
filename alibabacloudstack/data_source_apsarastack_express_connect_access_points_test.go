@@ -3,13 +3,11 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackExpressConnectAccessPointsDataSource(t *testing.T) {
 
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_express_connect_access_points.default"
 	name := fmt.Sprintf("tf-testacc-expressConnectAccessPoints%v", rand)
 

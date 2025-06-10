@@ -17,14 +17,14 @@ func dataSourceAlibabacloudStackDmsEnterpriseInstances() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
 				Type:          schema.TypeString,
-				Optional: true,
+				Optional:      true,
 				ValidateFunc:  validation.StringIsValidRegExp,
 				ForceNew:      true,
 				ConflictsWith: []string{"instance_alias_regex"},
 			},
 			"instance_alias_regex": {
 				Type:          schema.TypeString,
-				Optional: true,
+				Optional:      true,
 				ValidateFunc:  validation.StringIsValidRegExp,
 				ForceNew:      true,
 				ConflictsWith: []string{"name_regex"},
@@ -76,8 +76,9 @@ func dataSourceAlibabacloudStackDmsEnterpriseInstances() *schema.Resource {
 				Computed: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"instances": {
 				Type:     schema.TypeList,

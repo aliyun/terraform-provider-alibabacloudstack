@@ -21,8 +21,9 @@ func dataSourceAlibabacloudStackEssNotifications() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"notifications": {
 				Type:     schema.TypeList,
@@ -109,9 +110,9 @@ func notificationsDescriptionAttribute(d *schema.ResourceData, notifications []e
 	var s = make([]map[string]interface{}, 0)
 	for _, n := range notifications {
 		mapping := map[string]interface{}{
-			"notification_arn": n.NotificationArn,
+			"notification_arn":   n.NotificationArn,
 			"notification_types": n.NotificationTypes.NotificationType,
-			"scaling_group_id": n.ScalingGroupId,
+			"scaling_group_id":   n.ScalingGroupId,
 		}
 		ids = append(ids, n.NotificationArn)
 		s = append(s, mapping)

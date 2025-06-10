@@ -1,9 +1,9 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
-	"fmt"
 )
 
 func TestAccAlibabacloudStackOnsInstancesDataSource(t *testing.T) {
@@ -49,5 +49,5 @@ data "alibabacloudstack_ons_instances" "default" {
   ids = [alibabacloudstack_ons_instance.default.id]
 
 }
-`, getAccTestRandInt(10000,20000) )
+`, getAccTestRandInt(10000, 20000))
 }

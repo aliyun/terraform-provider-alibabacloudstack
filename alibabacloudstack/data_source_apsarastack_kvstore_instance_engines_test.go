@@ -2,12 +2,10 @@ package alibabacloudstack
 
 import (
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackKVStoreInstanceEngines(t *testing.T) {
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	resourceId := "data.alibabacloudstack_kvstore_instance_engines.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, "KVStore", kvstoreConfigHeader)

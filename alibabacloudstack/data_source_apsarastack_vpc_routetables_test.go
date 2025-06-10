@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"strings"
 	"testing"
-
-	
 )
 
 func TestAccAlibabacloudStackRouteTablesDataSourceBasic(t *testing.T) {
 	preCheck := func() {
 		testAccPreCheck(t)
 	}
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 
 	allConfig := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackRouteTablesDataSourceConfigBasic(rand, map[string]string{

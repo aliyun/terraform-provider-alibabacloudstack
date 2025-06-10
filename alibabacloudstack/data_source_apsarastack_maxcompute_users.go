@@ -12,66 +12,67 @@ import (
 
 func dataSourceAlibabacloudStackMaxcomputeUsers() *schema.Resource {
 	return &schema.Resource{
-		Read:	dataSourceAlibabacloudStackMaxcomputeUsersRead,
+		Read: dataSourceAlibabacloudStackMaxcomputeUsersRead,
 		Schema: map[string]*schema.Schema{
 			"ids": {
-				Type:		schema.TypeList,
-				Optional:	true,
-				ForceNew:	true,
-				Elem:		&schema.Schema{Type: schema.TypeString},
-				Computed:	true,
-				MinItems:	1,
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Computed: true,
+				MinItems: 1,
 			},
 			"name_regex": {
-				Type:		schema.TypeString,
-				Optional:	true,
-				ForceNew:	true,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
 			},
 			"output_file": {
-				Type:		schema.TypeString,
-				Optional:	true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"users": {
-				Type:		schema.TypeList,
-				Computed:	true,
+				Type:     schema.TypeList,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {
-							Type:		schema.TypeString,
-							Computed:	true,
-							ForceNew:	true,
+							Type:     schema.TypeString,
+							Computed: true,
+							ForceNew: true,
 						},
 						"user_id": {
-							Type:		schema.TypeString,
-							Computed:	true,
-							ForceNew:	true,
+							Type:     schema.TypeString,
+							Computed: true,
+							ForceNew: true,
 						},
 						"user_pk": {
-							Type:		schema.TypeString,
-							Computed:	true,
-							ForceNew:	true,
+							Type:     schema.TypeString,
+							Computed: true,
+							ForceNew: true,
 						},
 						"user_name": {
-							Type:		schema.TypeString,
-							Required:	true,
+							Type:     schema.TypeString,
+							Required: true,
 						},
 						"user_type": {
-							Type:		schema.TypeString,
-							Computed:	true,
-							ForceNew:	true,
+							Type:     schema.TypeString,
+							Computed: true,
+							ForceNew: true,
 						},
 						"organization_id": {
-							Type:		schema.TypeInt,
-							Optional:	true,
+							Type:     schema.TypeInt,
+							Optional: true,
 						},
 						"organization_name": {
-							Type:		schema.TypeString,
-							Computed:	true,
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"description": {
-							Type:		schema.TypeString,
-							Required:	true,
-							ValidateFunc:	validation.StringLenBetween(2, 255),
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringLenBetween(2, 255),
 						},
 					},
 				},
@@ -97,14 +98,14 @@ func dataSourceAlibabacloudStackMaxcomputeUsersRead(d *schema.ResourceData, meta
 	var ids []string
 	for _, object := range objects.Data {
 		user := map[string]interface{}{
-			"id":			strconv.Itoa(object.ID),
-			"user_id":		object.UserID,
-			"user_name":		object.UserName,
-			"user_type":		object.UserType,
-			"organization_id":	object.OrganizationId,
-			"organization_name":	object.OrganizationName,
-			"description":		object.Description,
-			"user_pk":		object.UserPK,
+			"id":                strconv.Itoa(object.ID),
+			"user_id":           object.UserID,
+			"user_name":         object.UserName,
+			"user_type":         object.UserType,
+			"organization_id":   object.OrganizationId,
+			"organization_name": object.OrganizationName,
+			"description":       object.Description,
+			"user_pk":           object.UserPK,
 		}
 		t = append(t, user)
 		ids = append(ids, user["id"].(string))

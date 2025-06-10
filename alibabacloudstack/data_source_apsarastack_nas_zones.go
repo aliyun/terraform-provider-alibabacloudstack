@@ -12,11 +12,12 @@ import (
 
 func dataSourceAlibabacloudStackNasZones() *schema.Resource {
 	return &schema.Resource{
-		Read:    dataSourceAlibabacloudStackNasZonesRead,
+		Read: dataSourceAlibabacloudStackNasZonesRead,
 		Schema: map[string]*schema.Schema{
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"zones": {
 				Type:     schema.TypeList,
@@ -85,7 +86,7 @@ func dataSourceAlibabacloudStackNasZonesRead(d *schema.ResourceData, meta interf
 						for _, vv := range m1 {
 							if res, ok := vv.(map[string]interface{}); ok {
 								temp1 := map[string]interface{}{
-									"storage_type": res["StorageType"],
+									"storage_type":  res["StorageType"],
 									"protocol_type": res["ProtocolType"],
 								}
 								InstanceTypes = append(InstanceTypes, temp1)

@@ -40,8 +40,9 @@ func dataSourceAlibabacloudStackVpnCustomerGateways() *schema.Resource {
 			},
 
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 
 			// Computed values
@@ -159,11 +160,11 @@ func vpnCgwsDecriptionAttributes(d *schema.ResourceData, vpnSetTypes []vpc.Custo
 	var s []map[string]interface{}
 	for _, vpn := range vpnSetTypes {
 		mapping := map[string]interface{}{
-			"id":           vpn.CustomerGatewayId,
-			"name":         vpn.Name,
-			"ip_address":   vpn.IpAddress,
-			"description":  vpn.Description,
-			"create_time":  TimestampToStr(vpn.CreateTime),
+			"id":          vpn.CustomerGatewayId,
+			"name":        vpn.Name,
+			"ip_address":  vpn.IpAddress,
+			"description": vpn.Description,
+			"create_time": TimestampToStr(vpn.CreateTime),
 		}
 		ids = append(ids, vpn.CustomerGatewayId)
 		names = append(names, vpn.Name)

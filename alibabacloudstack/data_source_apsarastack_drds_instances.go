@@ -15,21 +15,22 @@ func dataSourceAlibabacloudStackDRDSInstances() *schema.Resource {
 		Read: dataSourceAlibabacloudStackDRDSInstancesRead,
 		Schema: map[string]*schema.Schema{
 			"name_regex": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ValidateFunc: validation.StringIsValidRegExp,
-				Deprecated:  "Field 'name_regex' is deprecated and will be removed in a future release. Please use new field 'description_regex' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringIsValidRegExp,
+				Deprecated:    "Field 'name_regex' is deprecated and will be removed in a future release. Please use new field 'description_regex' instead.",
 				ConflictsWith: []string{"description_regex"},
 			},
 			"description_regex": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ValidateFunc: validation.StringIsValidRegExp,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringIsValidRegExp,
 				ConflictsWith: []string{"name_regex"},
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -147,14 +148,14 @@ func drdsInstancesDescription(d *schema.ResourceData, dbi []drds.Instance) error
 	var s []map[string]interface{}
 	for _, item := range dbi {
 		mapping := map[string]interface{}{
-			"id":            item.DrdsInstanceId,
-			"description":   item.Description,
-			"type":          item.Type,
-			"create_time":   item.CreateTime,
-			"status":        item.Status,
-			"network_type":  item.NetworkType,
-			"zone_id":       item.ZoneId,
-			"version":       item.Version,
+			"id":           item.DrdsInstanceId,
+			"description":  item.Description,
+			"type":         item.Type,
+			"create_time":  item.CreateTime,
+			"status":       item.Status,
+			"network_type": item.NetworkType,
+			"zone_id":      item.ZoneId,
+			"version":      item.Version,
 		}
 		ids = append(ids, item.DrdsInstanceId)
 		descriptions = append(descriptions, item.Description)

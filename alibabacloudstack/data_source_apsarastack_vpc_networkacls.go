@@ -60,8 +60,9 @@ func dataSourceAlibabacloudStackNetworkAcls() *schema.Resource {
 				ForceNew: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"acls": {
 				Type:     schema.TypeList,
@@ -262,12 +263,12 @@ func dataSourceAlibabacloudStackNetworkAclsRead(d *schema.ResourceData, meta int
 	s := make([]map[string]interface{}, 0)
 	for _, object := range objects {
 		mapping := map[string]interface{}{
-			"description":       object["Description"],
-			"id":                fmt.Sprint(object["NetworkAclId"]),
-			"network_acl_id":    fmt.Sprint(object["NetworkAclId"]),
-			"network_acl_name":  object["NetworkAclName"],
-			"status":            object["Status"],
-			"vpc_id":            object["VpcId"],
+			"description":      object["Description"],
+			"id":               fmt.Sprint(object["NetworkAclId"]),
+			"network_acl_id":   fmt.Sprint(object["NetworkAclId"]),
+			"network_acl_name": object["NetworkAclName"],
+			"status":           object["Status"],
+			"vpc_id":           object["VpcId"],
 		}
 
 		egressAclEntry := make([]map[string]interface{}, 0)
@@ -275,12 +276,12 @@ func dataSourceAlibabacloudStackNetworkAclsRead(d *schema.ResourceData, meta int
 			for _, v := range egressAclEntryList {
 				if m1, ok := v.(map[string]interface{}); ok {
 					temp1 := map[string]interface{}{
-						"description":           m1["Description"],
-						"destination_cidr_ip":   m1["DestinationCidrIp"],
+						"description":            m1["Description"],
+						"destination_cidr_ip":    m1["DestinationCidrIp"],
 						"network_acl_entry_name": m1["NetworkAclEntryName"],
-						"policy":                m1["Policy"],
-						"port":                  m1["Port"],
-						"protocol":              m1["Protocol"],
+						"policy":                 m1["Policy"],
+						"port":                   m1["Port"],
+						"protocol":               m1["Protocol"],
 					}
 					egressAclEntry = append(egressAclEntry, temp1)
 				}
@@ -293,12 +294,12 @@ func dataSourceAlibabacloudStackNetworkAclsRead(d *schema.ResourceData, meta int
 			for _, v := range ingressAclEntryList {
 				if m1, ok := v.(map[string]interface{}); ok {
 					temp1 := map[string]interface{}{
-						"description":           m1["Description"],
+						"description":            m1["Description"],
 						"network_acl_entry_name": m1["NetworkAclEntryName"],
-						"policy":                m1["Policy"],
-						"port":                  m1["Port"],
-						"protocol":              m1["Protocol"],
-						"source_cidr_ip":        m1["SourceCidrIp"],
+						"policy":                 m1["Policy"],
+						"port":                   m1["Port"],
+						"protocol":               m1["Protocol"],
+						"source_cidr_ip":         m1["SourceCidrIp"],
 					}
 					ingressAclEntry = append(ingressAclEntry, temp1)
 				}
@@ -311,9 +312,9 @@ func dataSourceAlibabacloudStackNetworkAclsRead(d *schema.ResourceData, meta int
 			for _, v := range resourceMapList {
 				if m1, ok := v.(map[string]interface{}); ok {
 					temp1 := map[string]interface{}{
-						"resource_id":  m1["ResourceId"],
+						"resource_id":   m1["ResourceId"],
 						"resource_type": m1["ResourceType"],
-						"status":       m1["Status"],
+						"status":        m1["Status"],
 					}
 					resourceMap = append(resourceMap, temp1)
 				}

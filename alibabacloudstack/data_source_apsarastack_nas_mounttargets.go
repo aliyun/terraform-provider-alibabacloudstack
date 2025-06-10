@@ -65,8 +65,9 @@ func dataSourceAlibabacloudStackNasMountTargets() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Active", "Inactive", "Pending"}, false),
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"targets": {
 				Type:     schema.TypeList,

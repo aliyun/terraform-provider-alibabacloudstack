@@ -1,7 +1,6 @@
 package alibabacloudstack
 
 import (
-	
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	"fmt"
@@ -17,15 +16,15 @@ func TestAccAlibabacloudStackDnsRecordDataSource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: fmt.Sprintf(dataSourceAlibabacloudStackDnsRecord, getAccTestRandInt(1000000, 9999999)),
-				Check:  resource.ComposeTestCheckFunc(
+				Check: resource.ComposeTestCheckFunc(
 
-				testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_dns_records.default"),
-				resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.record_id"),
-				resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.domain_id"),
-				resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.host_record"),
-				resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.type"),
-				resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.rr_set"),
-				resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.ttl"),
+					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_dns_records.default"),
+					resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.record_id"),
+					resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.domain_id"),
+					resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.host_record"),
+					resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.type"),
+					resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.rr_set"),
+					resource.TestCheckNoResourceAttr("data.alibabacloudstack_dns_records.default", "records.ttl"),
 				),
 			},
 		},

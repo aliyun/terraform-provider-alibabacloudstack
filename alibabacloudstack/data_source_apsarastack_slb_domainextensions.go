@@ -29,8 +29,9 @@ func dataSourceAlibabacloudStackSlbDomainExtensions() *schema.Resource {
 				Required: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"extensions": {
 				Type:     schema.TypeList,
@@ -102,8 +103,8 @@ func slbDomainExtensionDescriptionAttributes(d *schema.ResourceData, domainExten
 	var s []map[string]interface{}
 	for _, domainExtension := range domainExtensions {
 		mapping := map[string]interface{}{
-			"id":                   domainExtension.DomainExtensionId,
-			"domain":               domainExtension.Domain,
+			"id":                    domainExtension.DomainExtensionId,
+			"domain":                domainExtension.Domain,
 			"server_certificate_id": domainExtension.ServerCertificateId,
 		}
 		ids = append(ids, domainExtension.DomainExtensionId)

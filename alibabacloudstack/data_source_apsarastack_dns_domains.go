@@ -27,8 +27,9 @@ func dataSourceAlibabacloudStackDnsDomains() *schema.Resource {
 				Computed: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"names": {
 				Type:     schema.TypeList,
@@ -65,7 +66,7 @@ func dataSourceAlibabacloudStackDnsDomains() *schema.Resource {
 func dataSourceAlibabacloudStackDnsDomainsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "CloudDns", "2021-06-24", "DescribeGlobalZones", "")
-	request.Scheme="HTTP" // CloudDns不支持HTTPS
+	request.Scheme = "HTTP" // CloudDns不支持HTTPS
 	request.QueryParams["PageNumber"] = fmt.Sprint(1)
 	request.QueryParams["PageSize"] = fmt.Sprint(PageSizeLarge)
 	request.QueryParams["Name"] = d.Get("domain_name").(string)

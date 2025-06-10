@@ -10,7 +10,7 @@ import (
 
 func dataSourceAlibabacloudStackRouteEntries() *schema.Resource {
 	return &schema.Resource{
-		Read:   dataSourceAlibabacloudStackRouteEntriesRead,
+		Read: dataSourceAlibabacloudStackRouteEntriesRead,
 		Schema: map[string]*schema.Schema{
 			"route_table_id": {
 				Type:     schema.TypeString,
@@ -18,8 +18,9 @@ func dataSourceAlibabacloudStackRouteEntries() *schema.Resource {
 				Required: true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 			"instance_id": {
 				Type:     schema.TypeString,

@@ -30,8 +30,9 @@ func dataSourceAlibabacloudStackOssBuckets() *schema.Resource {
 				ForceNew:     true,
 			},
 			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The 'output_file' field has been deprecated and is scheduled for removal in version 3.19.0. To write content to a file, use the 'local_file' provider instead.",
 			},
 
 			// Computed values
@@ -122,7 +123,7 @@ func dataSourceAlibabacloudStackOssBucketsRead(d *schema.ResourceData, meta inte
 
 		for _, k := range buckets {
 			allBuckets = append(allBuckets, BucketProperties{
-// 				XMLName:          xml.Name{},
+				// 				XMLName:          xml.Name{},
 				Name:             k.Name,
 				Location:         k.Location,
 				StorageClass:     k.StorageClass,

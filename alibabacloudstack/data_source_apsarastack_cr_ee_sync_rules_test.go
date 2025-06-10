@@ -5,7 +5,7 @@ package alibabacloudstack
 	"os"
 	"testing"
 
-	
+
 )
 
 func TestAccAlibabacloudStackCrEeSyncRulesDataSource(t *testing.T) {
