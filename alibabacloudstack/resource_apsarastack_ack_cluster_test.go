@@ -128,9 +128,9 @@ func TestAccAlibabacloudStackCsK8s_Basic(t *testing.T) {
 					"worker_storage_set_id":               "${alibabacloudstack_ecs_ebs_storage_set.worker.storage_set_id}",
 					"worker_storage_set_partition_number": "3",
 					"worker_data_disks": map[string]string{
-						"size":"40",
-						"encrypted": "true",
-						"category": "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
+						"size":       "40",
+						"encrypted":  "true",
+						"category":   "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
 						"kms_key_id": "${alibabacloudstack_kms_key.default.id}",
 					},
 					"tags": map[string]string{
@@ -314,33 +314,46 @@ func TestAccAlibabacloudStackCsK8sKeyName(t *testing.T) {
 							"config": "{\\\"IngressSlbNetworkType\\\":\\\"intranet\\\"}",
 						},
 					},
-					"name":                         "${var.name}",
-					"version":                      "1.30.1-aliyun.1",
-					"os_type":                      "linux",
-					"platform":                     "AliyunLinux",
-					"timeout_mins":                 "60",
-					"vpc_id":                       "${alibabacloudstack_vpc_vpc.default.id}",
-					"master_count":                 "3",
-					"master_disk_category":         "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
-					"master_disk_size":             "40",
-					"master_instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
-					"master_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
-					"num_of_nodes":                 "1",
-					"worker_disk_category":         "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
-					"worker_disk_size":             "40",
-					"worker_instance_types":        []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
-					"worker_vswitch_ids":           []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
-					"security_group_id":            "${alibabacloudstack_ecs_securitygroup.default.id}",
-					"is_enterprise_security_group": "false",
-					"enable_ssh":                   "${var.enable_ssh}",
-					"key_name":                     "${alibabacloudstack_ecs_keypair.default.key_name}",
-					"delete_protection":            "false",
-					"pod_cidr":                     "${var.pod_cidr}",
-					"service_cidr":                 "${var.service_cidr}",
-					"node_cidr_mask":               "${var.node_cidr_mask}",
-					"new_nat_gateway":              "false",
-					"slb_internet_enabled":         "false",
-					"proxy_mode":                   "ipvs",
+					"name":                          "${var.name}",
+					"version":                       "1.30.1-aliyun.1",
+					"os_type":                       "linux",
+					"platform":                      "AliyunLinux",
+					"timeout_mins":                  "60",
+					"vpc_id":                        "${alibabacloudstack_vpc_vpc.default.id}",
+					"master_count":                  "3",
+					"master_disk_category":           "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
+					"master_disk_size":              "40",
+					"master_instance_types":         []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}", "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"master_vswitch_ids":            []string{"${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"},
+					"master_disk_encrypted":         "true",
+					"master_disk_encrypt_algorithm": "aes-256",
+					"master_disk_kms_key_id":        "${alibabacloudstack_kms_key.default.id}",
+					"num_of_nodes":                  "1",
+					"worker_disk_category":           "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
+					"worker_disk_size":              "40",
+					"worker_instance_types":         []string{"${data.alibabacloudstack_instance_types.default.instance_types.0.id}"},
+					"worker_vswitch_ids":            []string{"${alibabacloudstack_vpc_vswitch.default.id}"},
+					"worker_disk_encrypted":         "true",
+					"worker_disk_encrypt_algorithm": "aes-256",
+					"worker_disk_kms_key_id":        "${alibabacloudstack_kms_key.default.id}",
+					"is_enterprise_security_group":  "true",
+					"enable_ssh":                    "${var.enable_ssh}",
+					"key_name":                      "${alibabacloudstack_ecs_keypair.default.key_name}",
+					"delete_protection":             "false",
+					"pod_cidr":                      "${var.pod_cidr}",
+					"service_cidr":                  "${var.service_cidr}",
+					"node_cidr_mask":                "${var.node_cidr_mask}",
+					"new_nat_gateway":               "false",
+					"slb_internet_enabled":          "false",
+					"proxy_mode":                    "ipvs",
+					"worker_data_disks": []map[string]interface{}{
+						{
+							"size":       40,
+							"encrypted":  true,
+							"category":   "cloud_pperf",
+							"kms_key_id": "${alibabacloudstack_kms_key.default.id}",
+						},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -524,6 +537,10 @@ variable "service_cidr" {
 
 resource "alibabacloudstack_ecs_keypair" "default" {
 	key_name = "${var.name}"
+}
+
+resource "alibabacloudstack_kms_key" "default" {
+	description = "${var.name}"
 }
 
 `, name, SecurityGroupCommonTestCase, GeneratePassword(12))
