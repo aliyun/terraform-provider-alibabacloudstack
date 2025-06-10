@@ -98,15 +98,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Optional:     true,
 				Type:         schema.TypeString,
 				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP", "HTTPS"}, false),
 				Deprecated:   "Field 'internet_slb_protocol' is deprecated and will be removed in a future release. Please use new field 'internet_service_port_infos' instead.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					//  3.16环境回读时，protocol均为 TCP
-					if old == "TCP" && new == "HTTP" {
-						return true
-					}
-					return false
-				},
 			},
 			"internet_slb_port": {
 				Type:       schema.TypeInt,
@@ -130,14 +123,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 						"protocol": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								//  3.16环境回读时，protocol均为 TCP
-								if old == "TCP" && new == "HTTP" {
-									return true
-								}
-								return false
-							},
+							ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP", "HTTPS"}, false),
 						},
 						"target_port": {
 							Type:     schema.TypeInt,
@@ -171,15 +157,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Optional:     true,
 				Type:         schema.TypeString,
 				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP", "HTTPS"}, false),
 				Deprecated:   "Field 'intranet_slb_protocol' is deprecated and will be removed in a future release. Please use new field 'intranet_service_port_infos' instead.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					//  3.16环境回读时，protocol均为 TCP
-					if old == "TCP" && new == "HTTP" {
-						return true
-					}
-					return false
-				},
 			},
 			"intranet_slb_port": {
 				Type:       schema.TypeInt,
@@ -203,14 +182,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 						"protocol": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP"}, false),
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								//  3.16环境回读时，protocol均为 TCP
-								if old == "TCP" && new == "HTTP" {
-									return true
-								}
-								return false
-							},
+							ValidateFunc: validation.StringInSlice([]string{"TCP", "HTTP", "HTTPS"}, false),
 						},
 						"target_port": {
 							Type:     schema.TypeInt,
