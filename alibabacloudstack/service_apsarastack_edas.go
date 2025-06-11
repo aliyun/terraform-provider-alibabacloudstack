@@ -90,30 +90,38 @@ func (e *EdasService) GetChangeOrderStatus(id string) (info *EdasChangeOrderInfo
 
 	request.Headers["x-acs-content-type"] = "application/json"
 	request.Headers["Content-Type"] = "application/json"
-	bresponse, err := e.client.ProcessCommonRequest(request)
-
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return &order, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	addDebug(request.GetActionName(), bresponse, request, request)
+	retry := 0
 	response := EdasGetChangeOrderInfoResponse{}
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
-	if err != nil {
-		return &order, errmsgs.WrapError(err)
+	for retry < 3 {
+		bresponse, err := e.client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return &order, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_edas_cluster", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		addDebug(request.GetActionName(), bresponse, request, request)
+		rps := make(map[string]interface{})
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &rps)
+		if err != nil {
+			return &order, errmsgs.WrapError(fmt.Errorf("GetChangeOrderInfoResponse Failed :%#v", rps))
+		}
+		if fmt.Sprint(rps["Code"]) != "200" {
+			return nil, errmsgs.WrapError(fmt.Errorf("GetChangeOrderInfoResponse Failed :%#v", rps))
+		}
+
+		if fmt.Sprint(rps["Code"]) == "604" {
+			retry += 1
+			time.Sleep(30 * time.Second)
+		}
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+		if err != nil {
+			return &order, errmsgs.WrapError(err)
+		}
+		order = response.ChangeOrderInfo
+		break
 	}
-	rps := make(map[string]interface{})
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &rps)
-	if err != nil {
-		return &order, errmsgs.WrapError(fmt.Errorf("GetChangeOrderInfoResponse Failed :%#v", rps))
-	}
-	if fmt.Sprint(rps["Code"]) != "200" {
-		return nil, errmsgs.WrapError(fmt.Errorf("GetChangeOrderInfoResponse Failed :%#v", rps))
-	}
-	order = response.ChangeOrderInfo
 	return &order, nil
 }
 
@@ -158,7 +166,6 @@ func (e *EdasService) EdasChangeOrderStatusRefreshFunc(id string, failStates []s
 			}
 			return nil, "", errmsgs.WrapError(err)
 		}
-
 		for _, failState := range failStates {
 			if strconv.Itoa(object.Status) == failState {
 				return object, strconv.Itoa(object.Status), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, strconv.Itoa(object.Status)))

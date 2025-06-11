@@ -625,13 +625,13 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 	for _, v := range allDeploy {
 		if len(v.PackageVersion) > 0 {
 			d.Set("package_version", v.PackageVersion)
-			
+
 		}
 		if v.PackageUrl != "" {
 			d.Set("package_url", v.PackageUrl)
 		} else if v.PackagePublicUrl != "" {
 			d.Set("package_url", v.PackagePublicUrl)
-		}	
+		}
 
 		for _, c := range v.Components.ComponentsItem {
 			if strings.Contains(c.ComponentKey, "JDK") {
@@ -857,6 +857,15 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 			if bind_slb_err != nil {
 				return errmsgs.WrapError(bind_slb_err)
 			}
+		} else if d.HasChange("intranet_slb_id") {
+			err = DeleteK8sSlb("intranet", d, meta)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+			bind_slb_err := K8sBindSlb("intranet", true, d, meta)
+			if bind_slb_err != nil {
+				return errmsgs.WrapError(bind_slb_err)
+			}
 		}
 	}
 
@@ -873,6 +882,15 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 			}
 		} else if d.HasChange("internet_service_port_infos") {
 			bind_slb_err := K8sBindSlb("internet", internet_slb_unset, d, meta)
+			if bind_slb_err != nil {
+				return errmsgs.WrapError(bind_slb_err)
+			}
+		} else if d.HasChange("internet_slb_id") {
+			err = DeleteK8sSlb("internet", d, meta)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+			bind_slb_err := K8sBindSlb("internet", true, d, meta)
 			if bind_slb_err != nil {
 				return errmsgs.WrapError(bind_slb_err)
 			}
