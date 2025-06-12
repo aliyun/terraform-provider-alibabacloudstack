@@ -85,6 +85,11 @@ func resourceAlibabacloudStackEbsDiskreplicagroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			
+			"replica_group_id":{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 
 			"status": {
 				Type:     schema.TypeString,
@@ -195,8 +200,8 @@ func resourceAlibabacloudStackEbsDiskreplicagroupUpdate(d *schema.ResourceData, 
 			request.QueryParams["GroupName"] = v.(string)
 		}
 
-		if v, ok := d.GetOk("rpo"); ok {
-			request.QueryParams["RPO"] = v.(string)
+		if v, ok := d.GetOk("rpo"); ok { 
+			request.QueryParams["RPO"] = fmt.Sprintf("%d", v.(int))
 		}
 
 		// if v, ok := d.GetOk("bandwidth"); ok {
@@ -370,6 +375,8 @@ func resourceAlibabacloudStackEbsDiskreplicagroupRead(d *schema.ResourceData, me
 	d.Set("source_zone_id", data.SourceZoneId)
 
 	d.Set("status", data.Status)
+	
+	d.Set("replica_group_id", data.ReplicaGroupId)
 
 	return nil
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackEbsDiskreplicagroup_basic0(t *testing.T) {
+func TestAccAlibabacloudStackEbsDiskReplicaGroup_basic0(t *testing.T) {
 	var v *EbsReplicaGroup
 	resourceId := "alibabacloudstack_ebs_diskreplicagroup.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackEbsDiskreplicagroupCheckMap)
@@ -38,7 +38,7 @@ func TestAccAlibabacloudStackEbsDiskreplicagroup_basic0(t *testing.T) {
 					"destination_zone_id":     "${data.alibabacloudstack_zones.default.zones[1].id}",
 					"destination_region_id":   "${var.region}",
 					"site":                    "production",
-					"rpo":                     300,
+					"rpo":                     "300",
 					// "bandwidth": 				1000,  属性不支持修改
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -52,7 +52,7 @@ func TestAccAlibabacloudStackEbsDiskreplicagroup_basic0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"disk_replica_group_name": "${var.name}_test",
 					"description":             "ebs_diskreplicagroup test2",
-					"rpo":                     600,
+					"rpo":                     "600",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -85,5 +85,5 @@ variable "region" {
 }
 %s
 
-`, DataAlibabacloudstackVswitchZones, region, name)
+`, name, region, DataAlibabacloudstackVswitchZones)
 }
