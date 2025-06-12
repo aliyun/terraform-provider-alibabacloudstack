@@ -115,7 +115,7 @@ type EbsDescribediskreplicapairsResponse struct {
 
 func (s *EbsService) DoEbsDescribediskreplicapairsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*EbsDescribediskreplicapairsResponse, error) {
 	// api: ebs - 2021-07-30 - DescribeDiskReplicaPairs
-	request := client.NewCommonRequest("POST", "ebs", "2021-07-30", "DescribeDiskReplicaPairs", "")
+	request := client.NewCommonRequest("GET", "ebs", "2021-07-30", "DescribeDiskReplicaPairs", "")
 	EbsDescribediskreplicapairsResponse := &EbsDescribediskreplicapairsResponse{}
 
 	//调用request_params_handler
@@ -163,7 +163,7 @@ func (s *EbsService) DoEbsDescribediskreplicapairsRequest(d *schema.ResourceData
 
 func (s *EbsService) Describediskreplicapairs(id string) (*EbsDiskReplicaPair, error) {
 	// api: ebs - 2021-07-30 - DescribeDiskReplicaPairs
-	request := s.client.NewCommonRequest("POST", "ebs", "2021-07-30", "DescribeDiskReplicaPairs", "")
+	request := s.client.NewCommonRequest("GET", "ebs", "2021-07-30", "DescribeDiskReplicaPairs", "")
 	EbsDescribediskreplicapairsResponse := &EbsDescribediskreplicapairsResponse{}
 	request.QueryParams["PairIds"] = id
 

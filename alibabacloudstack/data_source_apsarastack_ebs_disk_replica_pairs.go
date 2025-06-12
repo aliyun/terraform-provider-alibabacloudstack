@@ -52,11 +52,6 @@ func dataSourceAlibabacloudStackEbsDiskReplicaPairs() *schema.Resource {
 				Optional: true,
 			},
 
-			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"disk_replica_pairs": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -189,7 +184,7 @@ func dataSourceAlibabacloudStackEbsDiskReplicaPairsRead(d *schema.ResourceData, 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// api: ebs - 2021-07-30 - DescribeDiskReplicaPairs
-	request := client.NewCommonRequest("POST", "ebs", "2021-07-30", "DescribeDiskReplicaPairs", "")
+	request := client.NewCommonRequest("GET", "ebs", "2021-07-30", "DescribeDiskReplicaPairs", "")
 	EbsDescribediskreplicapairsResponse := EbsDescribediskreplicapairsResponse{}
 	if v, ok := d.GetOk("source_region_id"); ok {
 		request.QueryParams["RegionId"] = v.(string)
@@ -214,21 +209,27 @@ func dataSourceAlibabacloudStackEbsDiskReplicaPairsRead(d *schema.ResourceData, 
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_ebs_disk_replica_pair", "DescribeDiskReplicaPairs", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
+	
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			idsMap[Trim(vv.(string))] = Trim(vv.(string))
+		}
+	}
 
 	var ids []string
 	datas := make([]interface{}, 0)
 	for _, data := range EbsDescribediskreplicapairsResponse.ReplicaPairs {
 
-		if descriptionRegex, ok := d.GetOk("description_regex"); ok {
-			r := regexp.MustCompile(descriptionRegex.(string))
-			if !r.MatchString(data.Description) {
+		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
+			r := regexp.MustCompile(description_regex.(string))
+			if !r.MatchString(data.PairName) {
 				continue
 			}
 		}
-
-		if nameRegex, ok := d.GetOk("name_regex"); ok {
-			r := regexp.MustCompile(nameRegex.(string))
-			if !r.MatchString(data.PairName) {
+		
+		if len(idsMap) > 0 {
+			if _, exist := idsMap[data.ReplicaPairId]; !exist {
 				continue
 			}
 		}

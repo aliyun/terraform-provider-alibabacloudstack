@@ -14,15 +14,6 @@ func TestAccAlibabacloudStackEbsDiskReplicaPairsDataSource(t *testing.T) {
 		fmt.Sprintf("tf-testAcc%sEbsDiskReplicaPairsDataSource-%d", defaultRegionToTest, rand),
 		dataSourceEbsDiskReplicaPairsDependence)
 
-	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_ebs_diskreplicapair.default.description}",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_ebs_diskreplicapair.default.description}-fakeTestAcccc",
-		}),
-	}
-
 	descriptionRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"description_regex": "${alibabacloudstack_ebs_diskreplicapair.default.description}",
@@ -44,12 +35,10 @@ func TestAccAlibabacloudStackEbsDiskReplicaPairsDataSource(t *testing.T) {
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"name_regex":        "${alibabacloudstack_ebs_diskreplicapair.default.description}",
-			"description_regex": "${alibabacloudstack_ebs_diskreplicapair.default.description}",
 			"ids":               []string{"${alibabacloudstack_ebs_diskreplicapair.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"name_regex":        "${alibabacloudstack_ebs_diskreplicapair.default.description}-fakeTestAcccc",
-			"description_regex": "${alibabacloudstack_ebs_diskreplicapair.default.description}-fakeTestAcccc",
 			"ids":               []string{"${alibabacloudstack_ebs_diskreplicapair.default.id}-fakeTestAcccc"},
 		}),
 	}
@@ -83,7 +72,7 @@ func TestAccAlibabacloudStackEbsDiskReplicaPairsDataSource(t *testing.T) {
 		fakeMapFunc:  fakeEbsDiskReplicaPairsMapFunc,
 	}
 
-	EbsDiskReplicaPairsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, descriptionRegexConf, idsConf, allConf)
+	EbsDiskReplicaPairsCheckInfo.dataSourceTestCheck(t, rand, descriptionRegexConf, idsConf, allConf)
 }
 
 func dataSourceEbsDiskReplicaPairsDependence(name string) string {
