@@ -487,6 +487,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_waf_instances":         dataSourceAlibabacloudStackWafInstances(),
 		"alibabacloudstack_flink_namespaces":      dataSourceAlibabacloudStackFlinkNamespaces(),
 		"alibabacloudstack_ebs_diskreplicapairs":  dataSourceAlibabacloudStackEbsDiskReplicaPairs(),
+		"alibabacloudstack_ebs_diskreplicagroups": dataSourceAlibabacloudStackEbsDiskReplicaGroups(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -815,10 +816,11 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardb_dbinstance":                     resourceAlibabacloudStackPolardbInstance(),
 		//"alibabacloudstack_polardb_readonly_instance":              resourceAlibabacloudStackPolardbReadonlyInstance(),
 		//"alibabacloudstack_polardb_readwrite_splitting_connection": resourceAlibabacloudStackPolardbReadWriteSplittingConnection(),
-		"alibabacloudstack_ebs_diskreplicapair":  resourceAlibabacloudStackEbsDiskreplicapair(),
 		"alibabacloudstack_bastionhost_instance": resourceAlibabacloudStackBastionhostInstance(),
 		"alibabacloudstack_waf_instance":         resourceAlibabacloudstackWafInstance(),
 		"alibabacloudstack_flink_namespace":      resourceAlibabacloudStackFlinkNamespace(),
+		"alibabacloudstack_ebs_diskreplicapair":  resourceAlibabacloudStackEbsDiskreplicapair(),
+		"alibabacloudstack_ebs_diskreplicagroup": resourceAlibabacloudStackEbsDiskreplicagroup(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
