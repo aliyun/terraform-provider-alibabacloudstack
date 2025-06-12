@@ -67,6 +67,7 @@ const (
 	STSCode             = ServiceCode("STS")
 	CLOUDFWCode         = ServiceCode("CLOUDFW")
 	FlinkCode       = ServiceCode("VERVERICA")
+	EBSCode              = ServiceCode("EBS")
 	//undefined code 先添加
 	GDBCode             = ServiceCode("GDB")
 	ARMSCode            = ServiceCode("ARMS")
@@ -244,6 +245,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	STSCode: PopEndpoint{
 		"sts-vpc.{{.domain}}",
 		"sts-vpc.{{.region}}.{{.domain}}",
+	},
+	EBSCode: PopEndpoint{
+		"ebsnext.{{.domain}}",
+		"ebsnext.{{.region}}.{{.domain}}",
 	},
 
 	POLARDBCode: PopEndpoint{
