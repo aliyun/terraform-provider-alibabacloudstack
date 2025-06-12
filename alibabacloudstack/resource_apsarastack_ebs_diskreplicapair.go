@@ -85,13 +85,24 @@ func resourceAlibabacloudStackEbsDiskreplicapair() *schema.Resource {
 				Required: true,
 			},
 
+			"replica_pair_id":{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			
+			"create_time": {
+			  Type:         schema.TypeString,
+			  Computed: true,
+			},
+			
 			"status": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"tags": tagsSchema(),
+			// TODO: ResourceMeta有定义改属性，但没有定义相关API
+			//"tags": tagsSchema(),
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackEbsDiskreplicapairCreate,
@@ -386,6 +397,8 @@ func resourceAlibabacloudStackEbsDiskreplicapairRead(d *schema.ResourceData, met
 	}
 	// d.Set("bandwidth", replicapair.Bandwidth)
 
+	d.Set("replica_pair_id", replicapair.ReplicaPairId)
+
 	d.Set("description", replicapair.Description)
 
 	d.Set("destination_disk_id", replicapair.DestinationDiskId)
@@ -407,6 +420,9 @@ func resourceAlibabacloudStackEbsDiskreplicapairRead(d *schema.ResourceData, met
 	d.Set("source_zone_id", replicapair.SourceZoneId)
 
 	d.Set("status", replicapair.Status)
+	
+	utcTime := time.Unix(replicapair.CreateTime, 0).UTC()
+	d.Set("create_time", utcTime.Format("2006-01-02T15:04:05-07:00"))
 
 	return nil
 }

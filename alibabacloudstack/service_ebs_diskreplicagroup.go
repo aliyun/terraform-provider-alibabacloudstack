@@ -98,7 +98,7 @@ type EbsDiskReplicaPair struct {
 	StatusMessage     string `json:"StatusMessage"`
 	LastRecoverPoint  int    `json:"LastRecoverPoint"`
 	ReplicaGroupId    string `json:"ReplicaGroupId"`
-	CreateTime        int    `json:"CreateTime"`
+	CreateTime        int64    `json:"CreateTime"`
 	ReplicaGroupName  string `json:"ReplicaGroupName"`
 	Site              string `json:"Site"`
 	PrimaryRegion     string `json:"PrimaryRegion"`

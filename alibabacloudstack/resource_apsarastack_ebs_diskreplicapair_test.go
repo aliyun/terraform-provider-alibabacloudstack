@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackEbsdiskreplicapair_basic0(t *testing.T) {
+func TestAccAlibabacloudStackEbsDiskReplicaPair_basic0(t *testing.T) {
 	var v *EbsDiskReplicaPair
 	resourceId := "alibabacloudstack_ebs_diskreplicapair.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackEbsDiskreplicapairCheckMap)
@@ -73,7 +73,11 @@ func TestAccAlibabacloudStackEbsdiskreplicapair_basic0(t *testing.T) {
 	})
 }
 
-var AlibabacloudStackEbsDiskreplicapairCheckMap = map[string]string{}
+var AlibabacloudStackEbsDiskreplicapairCheckMap = map[string]string{
+	"create_time" : CHECKSET,
+	"status" : CHECKSET,
+	"replica_pair_id" : CHECKSET,
+}
 
 func AlibabacloudStackEbsDiskreplicapairDependence0(name string) string {
 	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
@@ -92,6 +96,10 @@ resource "alibabacloudstack_ecs_disk" "disk1" {
 	size = "20"
 	name = "${var.name}"
 	category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
+
+	lifecycle {
+		ignore_changes = ["tags"]
+	}
 }
 
 resource "alibabacloudstack_ecs_disk" "disk2" {
@@ -99,8 +107,11 @@ resource "alibabacloudstack_ecs_disk" "disk2" {
 	size = "20"
 	name = "${var.name}"
 	category = "${data.alibabacloudstack_zones.default.zones.1.available_disk_categories.0}"
+	lifecycle {
+		ignore_changes = ["tags"]
+	}
 }
 
 
-`, DataAlibabacloudstackVswitchZones, region, name)
+`, name, region, DataAlibabacloudstackVswitchZones)
 }
