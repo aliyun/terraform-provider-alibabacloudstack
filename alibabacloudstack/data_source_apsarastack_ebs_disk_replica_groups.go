@@ -42,11 +42,6 @@ func dataSourceAlibabacloudStackEbsDiskReplicaGroups() *schema.Resource {
 				Optional: true,
 			},
 
-			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"disk_replica_groups": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -181,19 +176,24 @@ func dataSourceAlibabacloudStackEbsDiskReplicaGroupsRead(d *schema.ResourceData,
 			"alibabacloudstack_ebs_disk_replica_group", "DescribeDiskReplicaGroups", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			idsMap[Trim(vv.(string))] = Trim(vv.(string))
+		}
+	}
 	var ids []string
 	datas := make([]interface{}, 0)
 	for _, data := range EbsDescribediskreplicagroupsResponse.ReplicaGroups {
-		if descriptionRegex, ok := d.GetOk("description_regex"); ok {
-			r := regexp.MustCompile(descriptionRegex.(string))
-			if !r.MatchString(data.Description) {
+		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
+			r := regexp.MustCompile(description_regex.(string))
+			if !r.MatchString(data.GroupName) {
 				continue
 			}
 		}
 
-		if nameRegex, ok := d.GetOk("name_regex"); ok {
-			r := regexp.MustCompile(nameRegex.(string))
-			if !r.MatchString(data.GroupName) {
+		if len(idsMap) > 0 {
+			if _, exist := idsMap[data.ReplicaGroupId]; !exist {
 				continue
 			}
 		}
@@ -238,11 +238,6 @@ func dataSourceAlibabacloudStackEbsDiskReplicaGroupsRead(d *schema.ResourceData,
 	}
 	if err := d.Set("ids", ids); err != nil {
 		return err
-	}
-
-	// create a json file in current directory and write data source to it.
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), datas)
 	}
 
 	return nil

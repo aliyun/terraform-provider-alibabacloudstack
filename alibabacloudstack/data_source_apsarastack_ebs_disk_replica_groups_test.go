@@ -14,15 +14,6 @@ func TestAccAlibabacloudStackEbsDiskReplicaGroupsDataSource(t *testing.T) {
 		fmt.Sprintf("tf-testAcc%sEbsDiskReplicaGroupsDataSource-%d", defaultRegionToTest, rand),
 		dataSourceEbsDiskReplicaGroupsDependence)
 
-	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_ebs_diskreplicagroup.default.description}",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_ebs_diskreplicagroup.default.description}-fakeTestAcccc",
-		}),
-	}
-
 	descriptionRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"description_regex": "${alibabacloudstack_ebs_diskreplicagroup.default.description}",
@@ -43,14 +34,12 @@ func TestAccAlibabacloudStackEbsDiskReplicaGroupsDataSource(t *testing.T) {
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex":        "${alibabacloudstack_ebs_diskreplicagroup.default.description}",
-			"description_regex": "${alibabacloudstack_ebs_diskreplicagroup.default.description}",
-			"ids":               []string{"${alibabacloudstack_ebs_diskreplicagroup.default.id}"},
+			"name_regex": "${alibabacloudstack_ebs_diskreplicagroup.default.description}",
+			"ids":        []string{"${alibabacloudstack_ebs_diskreplicagroup.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex":        "${alibabacloudstack_ebs_diskreplicagroup.default.description}-fakeTestAcccc",
-			"description_regex": "${alibabacloudstack_ebs_diskreplicagroup.default.description}-fakeTestAcccc",
-			"ids":               []string{"${alibabacloudstack_ebs_diskreplicagroup.default.id}-fakeTestAcccc"},
+			"name_regex": "${alibabacloudstack_ebs_diskreplicagroup.default.description}-fakeTestAcccc",
+			"ids":        []string{"${alibabacloudstack_ebs_diskreplicagroup.default.id}-fakeTestAcccc"},
 		}),
 	}
 
@@ -81,7 +70,7 @@ func TestAccAlibabacloudStackEbsDiskReplicaGroupsDataSource(t *testing.T) {
 		fakeMapFunc:  fakeEbsDiskReplicaGroupsMapFunc,
 	}
 
-	EbsDiskReplicaGroupsCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, descriptionRegexConf, idsConf, allConf)
+	EbsDiskReplicaGroupsCheckInfo.dataSourceTestCheck(t, rand, descriptionRegexConf, idsConf, allConf)
 }
 
 func dataSourceEbsDiskReplicaGroupsDependence(name string) string {
@@ -92,32 +81,20 @@ variable "name" {
 	default = "%s"
 }
 
-variable "region" {
+variable "region_id" {
   default = "%s"
 }
 
-// resource "alibabacloudstack_ecs_disk" "disk1" {
-// 	availability_zone = "${data.alibabacloudstack_zones.default.zones[0].id}"
-// 	size = "20"
-// 	name = "${var.name}"
-// 	category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-// }
+%s
 
-// resource "alibabacloudstack_ecs_disk" "disk2" {
-// 	availability_zone = "${data.alibabacloudstack_zones.default.zones[1].id}"
-// 	size = "20"
-// 	name = "${var.name}"
-// 	category = "${data.alibabacloudstack_zones.default.zones.1.available_disk_categories.0}"
-// }
-	
 resource "alibabacloudstack_ebs_diskreplicagroup" "default" {
     disk_replica_group_name = "${var.name}"
     description = "${var.name}"
-    destination_region_id = "cn-wulan-env82-d01"
-    destination_zone_id ="cn-wulan-env82-amtest83002-b"
+    destination_region_id = "${var.region_id}"
+    destination_zone_id ="${data.alibabacloudstack_zones.default.zones[1].id}"
     site = "production"
-    source_region_id = "cn-wulan-env82-d01"
-    source_zone_id = "cn-wulan-env82-amtest82001-a"
+    source_region_id = "${var.region_id}"
+    source_zone_id = "${data.alibabacloudstack_zones.default.zones[0].id}"
 }
- `, name, region)
+ `, name, region, DataAlibabacloudstackVswitchZones)
 }
