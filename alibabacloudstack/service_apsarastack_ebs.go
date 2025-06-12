@@ -2,13 +2,10 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"fmt"
-	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 type EbsService struct {
@@ -35,51 +32,6 @@ type EbsDescribediskreplicagroupsResponse struct {
 	ReplicaGroups []EbsReplicaGroup `json:"ReplicaGroups"`
 	RequestId     string            `json:"RequestId"`
 	NextToken     string            `json:"NextToken"`
-}
-
-func (s *EbsService) DoEbsDescribediskreplicagroupsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*EbsDescribediskreplicagroupsResponse, error) {
-	// api: ebs - 2021-07-30 - DescribeDiskReplicaGroups
-	request := client.NewCommonRequest("POST", "ebs", "2021-07-30", "DescribeDiskReplicaGroups", "")
-	EbsDescribediskreplicagroupsResponse := &EbsDescribediskreplicagroupsResponse{}
-	request.QueryParams["GroupIds"] = d.Id()
-	//调用request_params_handler
-
-	if v, ok := d.GetOk("max_results"); ok {
-		request.QueryParams["MaxResults"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("next_token"); ok {
-		request.QueryParams["NextToken"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	} else {
-		return nil, fmt.Errorf("RegionId is required")
-	}
-
-	if v, ok := d.GetOk("site"); ok {
-		request.QueryParams["Site"] = v.(string)
-	}
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDiskReplicaGroups", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &EbsDescribediskreplicagroupsResponse)
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDiskReplicaGroups", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	if len(EbsDescribediskreplicagroupsResponse.ReplicaGroups) < 1 {
-		return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ebs_diskreplicagroup", d.Id())), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return EbsDescribediskreplicagroupsResponse, nil
 }
 
 type EbsDiskReplicaPair struct {
@@ -113,57 +65,9 @@ type EbsDescribediskreplicapairsResponse struct {
 	NextToken    string               `json:"NextToken"`
 }
 
-func (s *EbsService) DoEbsDescribediskreplicapairsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*EbsDescribediskreplicapairsResponse, error) {
-	// api: ebs - 2021-07-30 - DescribeDiskReplicaPairs
-	request := client.NewCommonRequest("GET", "ebs", "2021-07-30", "DescribeDiskReplicaPairs", "")
-	EbsDescribediskreplicapairsResponse := &EbsDescribediskreplicapairsResponse{}
-
-	//调用request_params_handler
-
-	if v, ok := d.GetOk("max_results"); ok {
-		request.QueryParams["MaxResults"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("next_token"); ok {
-		request.QueryParams["NextToken"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	} else {
-		return nil, fmt.Errorf("RegionId is required")
-	}
-
-	if v, ok := d.GetOk("replica_group_id"); ok {
-		request.QueryParams["ReplicaGroupId"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("replica_pair_id"); ok {
-		request.QueryParams["PairIds"] = v.(string)
-	}
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDiskReplicaPairs", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &EbsDescribediskreplicapairsResponse)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDiskReplicaPairs", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return EbsDescribediskreplicapairsResponse, nil
-}
-
 func (s *EbsService) Describediskreplicapairs(id string) (*EbsDiskReplicaPair, error) {
 	// api: ebs - 2021-07-30 - DescribeDiskReplicaPairs
-	request := s.client.NewCommonRequest("GET", "ebs", "2021-07-30", "DescribeDiskReplicaPairs", "")
+	request := s.client.NewCommonRequest("POST", "ebs", "2021-07-30", "DescribeDiskReplicaPairs", "")
 	EbsDescribediskreplicapairsResponse := &EbsDescribediskreplicapairsResponse{}
 	request.QueryParams["PairIds"] = id
 
