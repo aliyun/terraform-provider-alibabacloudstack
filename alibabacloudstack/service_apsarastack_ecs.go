@@ -2140,3 +2140,77 @@ func (s *EcsService) SnapshotGroupsStatusRefreshFunc(id string, failStates []str
 		return object, object.Status, nil
 	}
 }
+
+
+type EcsDescribededicatedhostclustersResponse struct {
+	DedicatedHostClusters struct {
+		DedicatedHostCluster []struct {
+			DedicatedHostIds struct {
+				DedicatedHostId []string `json:"DedicatedHostId"`
+			} `json:"DedicatedHostIds"`
+
+			Tags struct {
+				Tag []struct {
+					TagValue string `json:"TagValue"`
+					TagKey   string `json:"TagKey"`
+				} `json:"Tag"`
+			} `json:"Tags"`
+			Description              string `json:"Description"`
+			DedicatedHostClusterId   string `json:"DedicatedHostClusterId"`
+			ResourceGroupId          string `json:"ResourceGroupId"`
+			ZoneId                   string `json:"ZoneId"`
+			RegionId                 string `json:"RegionId"`
+			DedicatedHostClusterName string `json:"DedicatedHostClusterName"`
+
+			DedicatedHostClusterCapacity struct {
+				LocalStorageCapacities struct {
+					LocalStorageCapacity []struct {
+						DataDiskCategory string `json:"DataDiskCategory"`
+						AvailableDisk    int    `json:"AvailableDisk"`
+						TotalDisk        int    `json:"TotalDisk"`
+					} `json:"LocalStorageCapacity"`
+				} `json:"LocalStorageCapacities"`
+
+				AvailableInstanceTypes struct {
+					AvailableInstanceType []struct {
+						InstanceType              string `json:"InstanceType"`
+						AvailableInstanceCapacity int    `json:"AvailableInstanceCapacity"`
+					} `json:"AvailableInstanceType"`
+				} `json:"AvailableInstanceTypes"`
+				AvailableVcpus  int `json:"AvailableVcpus"`
+				AvailableMemory int `json:"AvailableMemory"`
+				TotalMemory     int `json:"TotalMemory"`
+				TotalVcpus      int `json:"TotalVcpus"`
+			} `json:"DedicatedHostClusterCapacity"`
+		} `json:"DedicatedHostCluster"`
+	} `json:"DedicatedHostClusters"`
+	PageSize   int    `json:"PageSize"`
+	RequestId  string `json:"RequestId"`
+	PageNumber int    `json:"PageNumber"`
+	TotalCount int    `json:"TotalCount"`
+}
+
+func (s *EcsService) DoEcsDescribededicatedhostclustersRequest(id string) (*EcsDescribededicatedhostclustersResponse, error) {
+	// api: Ecs - 2014-05-26 - DescribeDedicatedHostClusters
+	request := s.client.NewCommonRequest("GET", "Ecs", "2014-05-26", "DescribeDedicatedHostClusters", "")
+	EcsDescribededicatedhostclustersResponse := &EcsDescribededicatedhostclustersResponse{}
+
+	request.QueryParams["DedicatedHostClusterIds"] = fmt.Sprintf("[%s]", id)
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDedicatedHostClusters", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &EcsDescribededicatedhostclustersResponse)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDedicatedHostClusters", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return EcsDescribededicatedhostclustersResponse, nil
+}

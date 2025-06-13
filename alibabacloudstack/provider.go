@@ -489,6 +489,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ebs_diskreplicapairs":  dataSourceAlibabacloudStackEbsDiskReplicaPairs(),
 		"alibabacloudstack_ebs_diskreplicagroups": dataSourceAlibabacloudStackEbsDiskReplicaGroups(),
 		"alibabacloudstack_ecs_snapshot_groups":   dataSourceAlibabacloudStackEcsSnapshotGroups(),
+		"alibabacloudstack_ecs_dedicatedhost_cluster": dataSourceAlibabacloudStackEcsDedicatedHostClusters(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -824,6 +825,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ebs_diskreplicapair":  resourceAlibabacloudStackEbsDiskreplicapair(),
 		"alibabacloudstack_ebs_diskreplicagroup": resourceAlibabacloudStackEbsDiskreplicagroup(),
 		"alibabacloudstack_ecs_snapshot_group":   resourceAlibabacloudStackEcsSnapshotgroup(),
+		"alibabacloudstack_ecs_dedicatedhost_cluster": resourceAlibabacloudStackEcsDedicatedhostcluster(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
