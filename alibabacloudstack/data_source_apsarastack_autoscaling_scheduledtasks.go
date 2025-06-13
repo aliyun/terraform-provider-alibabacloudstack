@@ -97,6 +97,10 @@ func dataSourceAlibabacloudStackEssScheduledTasks() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 						},
+						"scaling_group_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 					},
 				},
 			},
@@ -191,6 +195,7 @@ func scheduledTasksDescriptionAttribute(d *schema.ResourceData, tasks []ess.Sche
 			"recurrence_value":       t.RecurrenceValue,
 			"recurrence_type":        t.RecurrenceType,
 			"task_enabled":           t.TaskEnabled,
+			"scaling_group_id":       t.ScalingGroupId,
 		}
 		ids = append(ids, t.ScheduledTaskId)
 		names = append(names, t.ScheduledTaskName)

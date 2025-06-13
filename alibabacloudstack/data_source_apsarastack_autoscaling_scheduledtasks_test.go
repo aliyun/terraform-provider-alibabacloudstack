@@ -24,6 +24,7 @@ func TestAccAlibabacloudStackEssScheduledtasksDataSource(t *testing.T) {
 					resource.TestCheckResourceAttr("data.alibabacloudstack_ess_scheduled_tasks.default", "tasks.#", "1"),
 					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ess_scheduled_tasks.default", "tasks.1.id"),
 					resource.TestCheckResourceAttrSet("data.alibabacloudstack_ess_scheduled_tasks.default", "ids.#"),
+					resource.TestCheckNoResourceAttr("data.alibabacloudstack_ess_scheduled_tasks.default", "tasks.1.scaling_group_id"),
 				),
 			},
 		},
@@ -57,7 +58,8 @@ resource "alibabacloudstack_ecs_deployment_set" "default" {
 resource "alibabacloudstack_ess_scaling_configuration" "default" {
 	scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 	image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-	instance_type = "ecs.e4.small"
+	instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
+	system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
 	security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 	force_delete = true
 	active = true

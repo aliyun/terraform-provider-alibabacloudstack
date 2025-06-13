@@ -56,6 +56,11 @@ func resourceAlibabacloudStackEssScheduledTask() *schema.Resource {
 				Default:  true,
 				Optional: true,
 			},
+			"scaling_group_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Optional: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackEssScheduledTaskCreate,
@@ -108,6 +113,7 @@ func resourceAlibabacloudStackEssScheduledTaskRead(d *schema.ResourceData, meta 
 	d.Set("recurrence_value", object.RecurrenceValue)
 	d.Set("recurrence_end_time", object.RecurrenceEndTime)
 	d.Set("task_enabled", object.TaskEnabled)
+	d.Set("scaling_group_id", object.ScalingGroupId)
 
 	return nil
 }

@@ -146,6 +146,7 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 						"scheduled_task_name":    fmt.Sprintf("tf-testAccEssScheduleConfig-%d", rand),
 						"launch_expiration_time": "600",
 						"task_enabled":           "true",
+						"scaling_group_id":       CHECKSET,
 					}),
 				),
 			},
@@ -257,6 +258,7 @@ func TestAccAlibabacloudStackEssScheduledTask_multi(t *testing.T) {
 						"scheduled_task_name":    fmt.Sprintf("tf-testAccEssScheduleConfig-%d-9", rand),
 						"launch_expiration_time": "600",
 						"task_enabled":           "true",
+						"scaling_group_id":       CHECKSET,
 					}),
 				),
 			},
@@ -311,7 +313,8 @@ func testAccEssScheduleConfig(common, scheduleTime string, rand int) string {
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "ecs.e4.small"
+		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
+		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
 		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 		force_delete = true
 		active = true
@@ -360,7 +363,8 @@ func testAccEssScheduleUpdateScheduledTaskName(common, scheduleTime string, rand
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "ecs.e4.small"
+		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
+		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
 		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 		force_delete = true
 		active = true
@@ -409,7 +413,8 @@ func testAccEssScheduleUpdateDescription(common, scheduleTime string, rand int) 
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "ecs.e4.small"
+		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
+		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
 		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 		force_delete = true
 		active = true
@@ -459,7 +464,8 @@ func testAccEssScheduleUpdateLaunchExpirationTime(common, scheduleTime string, r
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "ecs.e4.small"
+		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
+		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
 		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 		force_delete = true
 		active = true
@@ -509,7 +515,8 @@ func testAccEssScheduleUpdateRecurrenceType(common, scheduleTime string, endTime
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "ecs.e4.small"
+		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
+		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
 		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 		force_delete = true
 		active = true
@@ -563,7 +570,8 @@ func testAccEssScheduleUpdateTaskEnabled(common, scheduleTime string, rand int) 
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "ecs.e4.small"
+		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
+		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
 		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 		force_delete = true
 		active = true
@@ -617,7 +625,8 @@ func testAccEssScheduleConfigMulti(common, scheduleTime string, rand int) string
 	resource "alibabacloudstack_ess_scaling_configuration" "default" {
 		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "ecs.e4.small"
+		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
+		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
 		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
 		force_delete = true
 		active = true
