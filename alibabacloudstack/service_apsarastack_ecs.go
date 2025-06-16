@@ -363,7 +363,7 @@ func (s *EcsService) DescribeAvailableResources(d *schema.ResourceData, meta int
 	request := ecs.CreateDescribeAvailableResourceRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DestinationResource = string(destination)
-// 	request.IoOptimized = string(IOOptimized)
+	// 	request.IoOptimized = string(IOOptimized)
 
 	if v, ok := d.GetOk("availability_zone"); ok && strings.TrimSpace(v.(string)) != "" {
 		zoneId = strings.TrimSpace(v.(string))
@@ -2041,4 +2041,101 @@ func (s *EcsService) DescribeEcsDeploymentSet(id string) (object map[string]inte
 	}
 	object = v.([]interface{})[0].(map[string]interface{})
 	return object, nil
+}
+
+type EcsSnapshotGroup struct {
+	Tags struct {
+		Tag []struct {
+			Key   string `json:"Key"`
+			Value string `json:"Value"`
+		} `json:"Tag"`
+	} `json:"Tags"`
+
+	Snapshots struct {
+		Snapshot []struct {
+			Tags struct {
+				Tag []struct {
+					Key   string `json:"Key"`
+					Value string `json:"Value"`
+				} `json:"Tag"`
+			} `json:"Tags"`
+			SourceDiskId               string `json:"SourceDiskId"`
+			Progress                   string `json:"Progress"`
+			InstantAccessRetentionDays int    `json:"InstantAccessRetentionDays"`
+			SnapshotId                 string `json:"SnapshotId"`
+			InstantAccess              bool   `json:"InstantAccess"`
+			SourceDiskType             string `json:"SourceDiskType"`
+		} `json:"Snapshot"`
+	} `json:"Snapshots"`
+	Status          string `json:"Status"`
+	CreationTime    string `json:"CreationTime"`
+	Description     string `json:"Description"`
+	ProgressStatus  string `json:"ProgressStatus"`
+	SnapshotGroupId string `json:"SnapshotGroupId"`
+	InstanceId      string `json:"InstanceId"`
+	Name            string `json:"Name"`
+	ResourceGroupId string `json:"ResourceGroupId"`
+}
+
+type EcsDescribesnapshotgroupsResponse struct {
+	SnapshotGroups struct {
+		SnapshotGroup []EcsSnapshotGroup `json:"SnapshotGroup"`
+	} `json:"SnapshotGroups"`
+	NextToken string `json:"NextToken"`
+	RequestId string `json:"RequestId"`
+}
+
+func (s *EcsService) DoEcsDescribesnapshotgroupsRequest(id string) (snapshot_group *EcsSnapshotGroup, err error) {
+	// api: Ecs - 2014-05-26 - DescribeSnapshotGroups
+	request := s.client.NewCommonRequest("POST", "Ecs", "2014-05-26", "DescribeSnapshotGroups", "")
+	request.QueryParams["SnapshotGroupId"] = fmt.Sprintf("[\"%s\"]", id)
+	rsp := &EcsDescribesnapshotgroupsResponse{}
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeSnapshotGroups", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &rsp)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeSnapshotGroups", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	if len(rsp.SnapshotGroups.SnapshotGroup) > 0 {
+		for _, data := range rsp.SnapshotGroups.SnapshotGroup {
+			if data.SnapshotGroupId == id {
+				snapshot_group = &data
+			}
+		}
+	}
+	if snapshot_group == nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, "DescribeSnapshotGroups")
+
+	}
+	return snapshot_group, nil
+}
+
+func (s *EcsService) SnapshotGroupsStatusRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DoEcsDescribesnapshotgroupsRequest(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object.Status == failState {
+				return object, object.Status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Status))
+			}
+		}
+
+		return object, object.Status, nil
+	}
 }
