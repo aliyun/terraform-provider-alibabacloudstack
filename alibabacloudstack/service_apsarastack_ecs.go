@@ -2149,18 +2149,13 @@ type EcsDescribededicatedhostclustersResponse struct {
 				DedicatedHostId []string `json:"DedicatedHostId"`
 			} `json:"DedicatedHostIds"`
 
-			Tags struct {
-				Tag []struct {
-					TagValue string `json:"TagValue"`
-					TagKey   string `json:"TagKey"`
-				} `json:"Tag"`
-			} `json:"Tags"`
-			Description              string `json:"Description"`
-			DedicatedHostClusterId   string `json:"DedicatedHostClusterId"`
-			ResourceGroupId          string `json:"ResourceGroupId"`
-			ZoneId                   string `json:"ZoneId"`
-			RegionId                 string `json:"RegionId"`
-			DedicatedHostClusterName string `json:"DedicatedHostClusterName"`
+			Tags                     ecs.TagsInDescribeInstances `json:"Tags"`
+			Description              string                      `json:"Description"`
+			DedicatedHostClusterId   string                      `json:"DedicatedHostClusterId"`
+			ResourceGroupId          string                      `json:"ResourceGroupId"`
+			ZoneId                   string                      `json:"ZoneId"`
+			RegionId                 string                      `json:"RegionId"`
+			DedicatedHostClusterName string                      `json:"DedicatedHostClusterName"`
 
 			DedicatedHostClusterCapacity struct {
 				LocalStorageCapacities struct {
@@ -2195,7 +2190,7 @@ func (s *EcsService) DoEcsDescribededicatedhostclustersRequest(id string) (*EcsD
 	request := s.client.NewCommonRequest("GET", "Ecs", "2014-05-26", "DescribeDedicatedHostClusters", "")
 	EcsDescribededicatedhostclustersResponse := &EcsDescribededicatedhostclustersResponse{}
 
-	request.QueryParams["DedicatedHostClusterIds"] = fmt.Sprintf("[%s]", id)
+	request.QueryParams["DedicatedHostClusterIds"] = fmt.Sprintf("[\"%s\"]", id)
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
