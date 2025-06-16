@@ -50,13 +50,13 @@ func TestAccAlibabacloudStackEcsSnapshotGroup_basic0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"disk_replica_pair_name": "${var.name}_test",
-					"description":            "${var.name}_test",
+					"snapshot_group_name": "${var.name}_test",
+					"description":         "${var.name}_test",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"disk_replica_pair_name": fmt.Sprintf("%s_test", name),
-						"description":            fmt.Sprintf("%s_test", name),
+						"snapshot_group_name": fmt.Sprintf("%s_test", name),
+						"description":         fmt.Sprintf("%s_test", name),
 					}),
 				),
 			},

@@ -110,11 +110,13 @@ func resourceAlibabacloudStackEcsSnapshotgroupCreate(d *schema.ResourceData, met
 		request.QueryParams["Name"] = v.(string)
 	}
 	if v, ok := d.GetOk("disk_ids"); ok {
-		disk_ids, _ := json.Marshal(v.([]interface{}))
+		disks := expandStringList(v.(*schema.Set).List())
+		disk_ids, _ := json.Marshal(disks)
 		request.QueryParams["DiskId"] = string(disk_ids)
 	}
-	if v, ok := d.GetOk("exclude_disk_ids"); ok && len(v.([]interface{})) > 0 {
-		exclude_disk_ids, _ := json.Marshal(v.([]interface{}))
+	if v, ok := d.GetOk("exclude_disk_ids"); ok {
+		disks := expandStringList(v.(*schema.Set).List())
+		exclude_disk_ids, _ := json.Marshal(disks)
 		request.QueryParams["ExcludeDiskId"] = string(exclude_disk_ids)
 	}
 
@@ -142,7 +144,7 @@ func resourceAlibabacloudStackEcsSnapshotgroupCreate(d *schema.ResourceData, met
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-	return resourceAlibabacloudStackEcsSnapshotgroupUpdate(d, meta)
+	return nil
 
 }
 
@@ -174,7 +176,7 @@ func resourceAlibabacloudStackEcsSnapshotgroupUpdate(d *schema.ResourceData, met
 
 	}
 
-	return resourceAlibabacloudStackEcsSnapshotgroupRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEcsSnapshotgroupRead(d *schema.ResourceData, meta interface{}) error {
