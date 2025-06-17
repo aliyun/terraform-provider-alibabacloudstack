@@ -199,12 +199,17 @@ func resourceAlibabacloudStackEcsSnapshotgroupRead(d *schema.ResourceData, meta 
 	d.Set("status", snapshot_group.Status)
 	if len(snapshot_group.Snapshots.Snapshot) > 0 {
 		disk_ids := make([]string, 0)
+		instant_access_retention_days := 0
+		instant_access := false
 		for _, snapshot := range snapshot_group.Snapshots.Snapshot {
 			disk_ids = append(disk_ids, snapshot.SourceDiskId)
+			instant_access_retention_days = snapshot.InstantAccessRetentionDays
+			instant_access = snapshot.InstantAccess
 		}
 		d.Set("disk_ids", disk_ids)
+		d.Set("instant_access_retention_days", instant_access_retention_days)
+		d.Set("instant_access", instant_access)
 	}
-
 	return nil
 }
 

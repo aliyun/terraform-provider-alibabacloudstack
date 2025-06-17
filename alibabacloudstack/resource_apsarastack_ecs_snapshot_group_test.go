@@ -60,7 +60,6 @@ func TestAccAlibabacloudStackEcsSnapshotGroup_basic0(t *testing.T) {
 					}),
 				),
 			},
-
 			{
 				ResourceName:      resourceId,
 				ImportState:       true,

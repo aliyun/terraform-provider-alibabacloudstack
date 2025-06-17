@@ -11,6 +11,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudStackEcsSnapshotGroups() *schema.Resource {
@@ -23,6 +24,19 @@ func dataSourceAlibabacloudStackEcsSnapshotGroups() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 				MinItems: 1,
+			},
+			"name_regex": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringIsValidRegExp,
+				Deprecated:    "Field 'name_regex' is deprecated and will be removed in a future release. Please use new field 'description_regex' instead.",
+				ConflictsWith: []string{"description_regex"},
+			},
+			"description_regex": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringIsValidRegExp,
+				ConflictsWith: []string{"name_regex"},
 			},
 
 			"instance_id": {
@@ -56,28 +70,51 @@ func dataSourceAlibabacloudStackEcsSnapshotGroups() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"disk_ids": {
-							// TypeSet
+						"snapshots": {
 							Type:     schema.TypeSet,
 							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
 
+									"snapshot_id": {
+										// TypeString
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"progress": {
+										// TypeString
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"available": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"source_disk_type": {
+										// TypeString
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"source_disk_id": {
+										// TypeString
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"instant_access": {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									"instant_access_retention_days": {
+										// TypeInt
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+								},
+							},
+						},
 						"instance_id": {
 							// TypeString
 							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"instant_access": {
-							// TypeBool
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-
-						"instant_access_retention_days": {
-							// TypeInt
-							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"snapshot_group_id": {
@@ -167,13 +204,19 @@ func dataSourceAlibabacloudStackEcsSnapshotGroupsRead(d *schema.ResourceData, me
 				continue
 			}
 		}
-		disk_ids := make([]string, 0)
+		snapshots := make([]map[string]interface{}, 0)
 		if len(data.Snapshots.Snapshot) > 0 {
 			for _, snapshot := range data.Snapshots.Snapshot {
-				disk_ids = append(disk_ids, snapshot.SourceDiskId)
+				snapshots = append(snapshots, map[string]interface{}{
+					"snapshot_id":      snapshot.SnapshotId,
+					"progress":         snapshot.Progress,
+					"available":        snapshot.Available,
+					"source_disk_type": snapshot.SourceDiskType,
+					"source_disk_id":   snapshot.SourceDiskId,
+					"instant_access":   snapshot.InstantAccess,
+				})
 			}
 		}
-
 		i := map[string]interface{}{
 			"id": data.SnapshotGroupId,
 
@@ -189,7 +232,7 @@ func dataSourceAlibabacloudStackEcsSnapshotGroupsRead(d *schema.ResourceData, me
 
 			"status": data.Status,
 
-			"disk_ids": disk_ids,
+			"snapshots": snapshots,
 		}
 
 		datas = append(datas, i)

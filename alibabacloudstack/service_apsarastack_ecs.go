@@ -2059,6 +2059,7 @@ type EcsSnapshotGroup struct {
 					Value string `json:"Value"`
 				} `json:"Tag"`
 			} `json:"Tags"`
+			Available                  bool   `json:"Available"`
 			SourceDiskId               string `json:"SourceDiskId"`
 			Progress                   string `json:"Progress"`
 			InstantAccessRetentionDays int    `json:"InstantAccessRetentionDays"`

@@ -1007,14 +1007,14 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 		if updateFunc != nil {
 			err = updateFunc(d, meta)
 		}
-		
+
 		if err != nil {
 			waitSecondsIfWithTest(3)
 			// 如果创建成功但读取加载失败，tf不会终态，为方式残留资源，触发删除
 			resource.DeleteContext(ctx, d, meta)
 			return diag.FromErr(err)
 		}
-		
+
 		waitSecondsIfWithTest(1)
 		retry := 5
 		for retry > 0 {
@@ -1033,7 +1033,7 @@ func setResourceFunc(resource *schema.Resource, createFunc schema.CreateFunc, re
 			resource.DeleteContext(ctx, d, meta)
 			return diag.FromErr(err)
 		}
-		
+
 		return nil
 	}
 

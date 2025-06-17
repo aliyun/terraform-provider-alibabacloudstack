@@ -50,9 +50,9 @@ func TestAccAlibabacloudStackEcsSnapshotGroupsDataSource(t *testing.T) {
 			"snapshot_groups.0.description": fmt.Sprintf("tf-testAcc%sEcsSnapshotGroupsDataSource-%d", defaultRegionToTest, rand),
 			"snapshot_groups.0.create_time":   CHECKSET,
 			"snapshot_groups.0.instance_id": CHECKSET,
-			"snapshot_groups.0.disk_ids":   CHECKSET,
-			"snapshot_groups.0.instant_access":                    CHECKSET,
-			"snapshot_groups.0.instant_access_retention_days":        CHECKSET,
+			"snapshot_groups.0.snapshots.#":   "3",
+			"snapshot_groups.0.snapshots.0.instant_access":                    CHECKSET,
+			"snapshot_groups.0.snapshots.0.instant_access_retention_days":        CHECKSET,
 			"snapshot_groups.0.snapshot_group_id":      CHECKSET,
 			"snapshot_groups.0.snapshot_group_name":        CHECKSET,
 		}
