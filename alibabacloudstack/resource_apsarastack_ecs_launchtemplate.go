@@ -159,11 +159,13 @@ func resourceAlibabacloudStackLaunchTemplate() *schema.Resource {
 			"userdata": {
 				Type:       schema.TypeString,
 				Optional:   true,
+				Computed:   true,
 				Deprecated: "Field 'userdata' is deprecated and will be removed in a future release. Please use new field 'user_data' instead.",
 			},
 			"user_data": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
@@ -274,9 +276,10 @@ func resourceAlibabacloudStackLaunchTemplateCreate(d *schema.ResourceData, meta 
 	request.IoOptimized = d.Get("io_optimized").(string)
 	request.KeyPairName = d.Get("key_pair_name").(string)
 	request.NetworkType = d.Get("network_type").(string)
-
 	request.RamRoleName = d.Get("ram_role_name").(string)
-	request.ResourceGroupId = d.Get("resource_group_id").(string)
+	if v, ok := d.GetOk("resource_group_id"); ok && v.(string) != "" {
+		request.ResourceGroupId = v.(string)
+	}
 	request.SecurityEnhancementStrategy = d.Get("security_enhancement_strategy").(string)
 	request.SecurityGroupId = d.Get("security_group_id").(string)
 	request.SpotPriceLimit = requests.NewFloat(d.Get("spot_price_limit").(float64))
@@ -349,6 +352,7 @@ func resourceAlibabacloudStackLaunchTemplateCreate(d *schema.ResourceData, meta 
 	response, _ := raw.(*ecs.CreateLaunchTemplateResponse)
 
 	d.SetId(response.LaunchTemplateId)
+	createLaunchTemplateVersion(d, meta)
 
 	return nil
 }
@@ -398,7 +402,6 @@ func resourceAlibabacloudStackLaunchTemplateRead(d *schema.ResourceData, meta in
 	d.Set("system_disk_category", latestVersion.LaunchTemplateData.SystemDiskCategory)
 	d.Set("system_disk_description", latestVersion.LaunchTemplateData.SystemDiskDescription)
 	d.Set("system_disk_size", latestVersion.LaunchTemplateData.SystemDiskSize)
-	d.Set("resource_group_id", latestVersion.LaunchTemplateData.ResourceGroupId)
 	connectivity.SetResourceData(d, latestVersion.LaunchTemplateData.UserData, "user_data", "userdata")
 	d.Set("vswitch_id", latestVersion.LaunchTemplateData.VSwitchId)
 	d.Set("vpc_id", latestVersion.LaunchTemplateData.VpcId)
@@ -461,7 +464,7 @@ func resourceAlibabacloudStackLaunchTemplateUpdate(d *schema.ResourceData, meta 
 			return errmsgs.WrapError(err)
 		}
 	}
-	return nil
+	return createLaunchTemplateVersion(d, meta)
 
 }
 
@@ -556,7 +559,7 @@ func createLaunchTemplateVersion(d *schema.ResourceData, meta interface{}) error
 	request.IoOptimized = d.Get("io_optimized").(string)
 	request.KeyPairName = d.Get("key_pair_name").(string)
 	request.NetworkType = d.Get("network_type").(string)
-
+	request.InstanceName = d.Get("instance_name").(string)
 	request.RamRoleName = d.Get("ram_role_name").(string)
 	request.ResourceGroupId = d.Get("resource_group_id").(string)
 	request.SecurityEnhancementStrategy = d.Get("security_enhancement_strategy").(string)

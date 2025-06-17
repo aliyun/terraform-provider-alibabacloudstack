@@ -2,8 +2,9 @@ package alibabacloudstack
 
 import (
 	"fmt"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	
+
 	"log"
 	"strings"
 	"testing"
@@ -84,7 +85,7 @@ func TestAccAlibabacloudStackLaunchTemplateBasic(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-testaccLaunchTemplateBasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLaunchTemplateConfigDependence)
 
@@ -107,7 +108,7 @@ func TestAccAlibabacloudStackLaunchTemplateBasic(t *testing.T) {
 					"host_name":                     name,
 					"instance_charge_type":          "PrePaid",
 					"instance_name":                 name,
-					"instance_type":                 "${data.alibabacloudstack_instance_types.default.instance_types.0.id}",
+					"instance_type":                 "${local.default_instance_type_id}",
 					"internet_charge_type":          "PayByBandwidth",
 					"internet_max_bandwidth_in":     "5",
 					"internet_max_bandwidth_out":    "0",
@@ -123,7 +124,6 @@ func TestAccAlibabacloudStackLaunchTemplateBasic(t *testing.T) {
 					"system_disk_description":       name,
 					"system_disk_name":              name,
 					"system_disk_size":              "40",
-					"resource_group_id":             "rg-zkdfjahg9zxncv0",
 					"userdata":                      "xxxxxxxxxxxxxx",
 					"vswitch_id":                    "sw-ljkngaksdjfj0nnasdf",
 					"vpc_id":                        "vpc-asdfnbg0as8dfk1nb2",
@@ -565,7 +565,7 @@ func TestAccAlibabacloudStackLaunchTemplateBasic(t *testing.T) {
 					"host_name":                     name,
 					"instance_charge_type":          "PrePaid",
 					"instance_name":                 name,
-					"instance_type":                 "${data.alibabacloudstack_instance_types.default.instance_types.0.id}",
+					"instance_type":                 "${local.default_instance_type_id}",
 					"internet_charge_type":          "PayByBandwidth",
 					"internet_max_bandwidth_in":     "5",
 					"internet_max_bandwidth_out":    "0",
@@ -672,7 +672,7 @@ func TestAccAlibabacloudStackLaunchTemplateMulti(t *testing.T) {
 	rc := resourceCheckInit(resourceId, &v, serviceFunc)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-testaccLaunchTemplateMulti%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceLaunchTemplateConfigDependence)
 
@@ -693,7 +693,7 @@ func TestAccAlibabacloudStackLaunchTemplateMulti(t *testing.T) {
 					"host_name":                     name,
 					"instance_charge_type":          "PrePaid",
 					"instance_name":                 name,
-					"instance_type":                 "${data.alibabacloudstack_instance_types.default.instance_types.0.id}",
+					"instance_type":                 "${local.default_instance_type_id}",
 					"internet_charge_type":          "PayByBandwidth",
 					"internet_max_bandwidth_in":     "5",
 					"internet_max_bandwidth_out":    "0",

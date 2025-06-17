@@ -1533,6 +1533,7 @@ func (s *EcsService) DescribeLaunchTemplateVersion(id string, version int) (set 
 		return ecsClient.DescribeLaunchTemplateVersions(request)
 	})
 	response, ok := raw.(*ecs.DescribeLaunchTemplateVersionsResponse)
+	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidLaunchTemplate.NotFound"}) {
 			err = errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -1545,7 +1546,6 @@ func (s *EcsService) DescribeLaunchTemplateVersion(id string, version int) (set 
 		err = errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		return set, err
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if len(response.LaunchTemplateVersionSets.LaunchTemplateVersionSet) != 1 ||
 		response.LaunchTemplateVersionSets.LaunchTemplateVersionSet[0].LaunchTemplateId != id {
 		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("LaunchTemplateVersion", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR, response.RequestId)

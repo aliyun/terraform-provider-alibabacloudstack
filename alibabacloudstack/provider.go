@@ -673,8 +673,9 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_redis_connection":                       resourceAlibabacloudStackKvstoreConnection(),
 		"alibabacloudstack_kvstore_instance":                       resourceAlibabacloudStackKVStoreInstance(),
 		"alibabacloudstack_redis_tairinstance":                     resourceAlibabacloudStackKVStoreInstance(),
-		"alibabacloudstack_launch_template":                        resourceAlibabacloudStackLaunchTemplate(),
-		"alibabacloudstack_ecs_launchtemplate":                     resourceAlibabacloudStackLaunchTemplate(),
+		// 该资源专有云前端暂未支持
+		// "alibabacloudstack_launch_template":                        resourceAlibabacloudStackLaunchTemplate(),
+		// "alibabacloudstack_ecs_launchtemplate":                     resourceAlibabacloudStackLaunchTemplate(),
 		"alibabacloudstack_log_alert":                              resourceAlibabacloudStackLogAlert(),
 		"alibabacloudstack_log_machine_group":                      resourceAlibabacloudStackLogMachineGroup(),
 		"alibabacloudstack_log_project":                            resourceAlibabacloudStackLogProject(),
