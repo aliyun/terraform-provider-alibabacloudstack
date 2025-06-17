@@ -7,37 +7,37 @@ import (
 
 func TestAccAlibabacloudStackEcsDedicatedHostsClusterDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
-	resourceId := "data.alibabacloudstack_ecs_dedicatedhost_cluster.default"
+	resourceId := "data.alibabacloudstack_ecs_dedicated_host_cluster.default"
 	name := fmt.Sprintf("tf_testAccEcsDedicatedHostsClusterDataSource_%d", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceEcsDedicatedHostsClusterConfigDependence)
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 
-			"ids": []string{"${alibabacloudstack_ecs_dedicatedhost_cluster.default.id}"},
+			"ids": []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 
-			"ids": []string{"${alibabacloudstack_ecs_dedicatedhost_cluster.default.id}-fake"},
+			"ids": []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}-fake"},
 		}),
 	}
 
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 
-			// "ids":        []string{"${alibabacloudstack_ecs_dedicatedhost_cluster.default.id}"},
+			// "ids":        []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
 			"dedicated_host_cluster_name": name,
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 
-			// "ids":        []string{"${alibabacloudstack_ecs_dedicatedhost_cluster.default.id}"},
+			// "ids":        []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
 			"dedicated_host_cluster_name": name + "fake",
 		}),
 	}
 	// tagsConf := dataSourceTestAccConfig{
 	// 	existConfig: testAccConfig(map[string]interface{}{
 	//
-	// 		// "ids": []string{"${alibabacloudstack_ecs_dedicatedhost_cluster.default.id}"},
+	// 		// "ids": []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
 	// 		"tags": map[string]string{
 	// 			"Create": "TF",
 	// 			"For":    "ddh-test",
@@ -45,7 +45,7 @@ func TestAccAlibabacloudStackEcsDedicatedHostsClusterDataSource(t *testing.T) {
 	// 	}),
 	// 	fakeConfig: testAccConfig(map[string]interface{}{
 	//
-	// 		// "ids": []string{"${alibabacloudstack_ecs_dedicatedhost_cluster.default.id}"},
+	// 		// "ids": []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
 	// 		"tags": map[string]string{
 	// 			"Create": "ddh-test",
 	// 			"For":    "TF",
@@ -54,11 +54,11 @@ func TestAccAlibabacloudStackEcsDedicatedHostsClusterDataSource(t *testing.T) {
 	// }
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":                         []string{"${alibabacloudstack_ecs_dedicatedhost_cluster.default.id}"},
+			"ids":                         []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
 			"dedicated_host_cluster_name": name,
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":                         []string{"${alibabacloudstack_ecs_dedicatedhost_cluster.default.id}"},
+			"ids":                         []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
 			"dedicated_host_cluster_name": name + "fake",
 		}),
 	}
@@ -92,7 +92,7 @@ func TestAccAlibabacloudStackEcsDedicatedHostsClusterDataSource(t *testing.T) {
 
 func dataSourceEcsDedicatedHostsClusterConfigDependence(name string) string {
 	return fmt.Sprintf(`
-		resource "alibabacloudstack_ecs_dedicatedhost_cluster" "default" {
+		resource "alibabacloudstack_ecs_dedicated_host_cluster" "default" {
 		  dedicated_host_cluster_name = "%s"
           zone_id = "cn-wulan-env26-amtest26001-a"
 		}

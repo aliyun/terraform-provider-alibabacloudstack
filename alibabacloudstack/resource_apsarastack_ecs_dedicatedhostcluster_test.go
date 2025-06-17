@@ -12,7 +12,7 @@ import (
 func TestAccAlibabacloudStackEcsdedicatedhostcluster0(t *testing.T) {
 	var v *EcsDescribededicatedhostclustersResponse
 
-	resourceId := "alibabacloudstack_ecs_dedicatedhost_cluster.default"
+	resourceId := "alibabacloudstack_ecs_dedicated_host_cluster.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccEcsdedicatedhostclusterCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &EcsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
