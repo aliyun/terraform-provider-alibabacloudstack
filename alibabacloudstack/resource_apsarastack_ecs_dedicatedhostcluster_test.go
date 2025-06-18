@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackEcsdedicatedhostcluster0(t *testing.T) {
+func TestAccAlibabacloudStackEcsDedicatedHostsCluster_basic0(t *testing.T) {
 	var v *EcsDescribededicatedhostclustersResponse
 
 	resourceId := "alibabacloudstack_ecs_dedicated_host_cluster.default"

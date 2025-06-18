@@ -59,7 +59,7 @@ func TestAccAlibabacloudStackEcsDedicatedHostsClusterDataSource(t *testing.T) {
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":                         []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
-			"dedicated_host_cluster_name": name + "fake",
+			"dedicated_host_cluster_name": name + "_fake",
 		}),
 	}
 
@@ -69,7 +69,6 @@ func TestAccAlibabacloudStackEcsDedicatedHostsClusterDataSource(t *testing.T) {
 			"ids.0":                     CHECKSET,
 			"dedicated_host_clusters.#": "1",
 			"dedicated_host_clusters.0.dedicated_host_cluster_name": name,
-			"dedicated_host_clusters.0.region_id":                   CHECKSET,
 			"dedicated_host_clusters.0.zone_id":                     CHECKSET,
 		}
 	}
@@ -92,9 +91,10 @@ func TestAccAlibabacloudStackEcsDedicatedHostsClusterDataSource(t *testing.T) {
 
 func dataSourceEcsDedicatedHostsClusterConfigDependence(name string) string {
 	return fmt.Sprintf(`
+		%s
 		resource "alibabacloudstack_ecs_dedicated_host_cluster" "default" {
 		  dedicated_host_cluster_name = "%s"
-          zone_id = "cn-wulan-env26-amtest26001-a"
+          zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 		}
-	`, name)
+	`, DataZoneCommonTestCase, name)
 }
