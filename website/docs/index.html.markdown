@@ -135,11 +135,14 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
 (e.g. `alias` and `version`), the following arguments are supported in the AlibabacloudStack Cloud
  `provider` block:
 
-* `access_key` - This is the AlibabacloudStack access key. It must be provided, but
+* `popgw_romain` - (Required) Cluster gateway standard domain suffix.
+Usually, the endpoint of Ecs can be queried to extract suffixes, such as ecs.inter.example.com, where the suffix is inter.example.com.
+
+* `access_key` - (Required) This is the AlibabacloudStack access key. It must be provided, but
   it can also be sourced from the `ALIBABACLOUDSTACK_ACCESS_KEY` environment variable, or via
   a dynamic access key if `ecs_role_name` is specified.
 
-* `secret_key` - This is the AlibabacloudStack secret key. It must be provided, but
+* `secret_key` - (Required) This is the AlibabacloudStack secret key. It must be provided, but
   it can also be sourced from the `ALIBABACLOUDSTACK_SECRET_KEY` environment variable, or via
   a dynamic secret key if `ecs_role_name` is specified.
   
@@ -148,7 +151,11 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
 
 * `insecure` - (Optional) Use this to Trust self-signed certificates. It's typically used to allow insecure connections.
 
-* `resource_group_set_name` - (Optional) Use this to give resource_group_set_name for specific user organisation.
+* `department` - (Optional) Specifies the ID of the organization to which the orchestration resource belongs. When not configured, it will be searched through `resource_group_det_name`.
+
+* `resource_group` - (Optional) Specifies the ID of the resource set to which the orchestration resource belongs. When not configured, it will be searched through `resource_group_det_name`.
+
+* `resource_group_set_name` - (Optional) Use this to give resource_group_set_name for specific user organisation. When `resource_group_det_name` is not unique or not configured, `department` and `resource_group` need to be configured.
 
 * `protocol` - (Optional) The Protocol of used by API request. Valid values: `HTTP` and `HTTPS`. Default to `HTTPS`.
 

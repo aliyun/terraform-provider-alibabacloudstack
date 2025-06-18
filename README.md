@@ -125,7 +125,7 @@ go2xunit -input $outfile -output $GOPATH/tests.xml
 AlibabacloudStack Cloud Provider [Official Docs](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)
 
 
-## 当前Provider兼容性
+## Current Provider Compatibility
 <!-- INSERT TABLE HERE -->
 
 
@@ -150,10 +150,3 @@ AlibabacloudStack Cloud Provider [Official Docs](https://registry.terraform.io/p
 | MoveResourceState  |    |    |    |    |    |    |    |    | :no_entry_sign:  | :no_entry_sign:  |    | :no_entry_sign:  | :no_entry_sign: |
 | GetFunctions  |    |    |    |    |    |    |    |    | :no_entry_sign:  | :no_entry_sign:  |    | :no_entry_sign:  | :no_entry_sign: |
 | CallFunction  |    |    |    |    |    |    |    |    | :no_entry_sign:  | :no_entry_sign:  |    | :no_entry_sign:  | :no_entry_sign: |
-| GetMetadata  |    |    |    |    |    |    | :white_check_mark:  | :white_check_mark:  | :x:  | :x:  |    | :x:  | :x: |
-| GetSchema  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :x:  | :white_check_mark:  | :x:  | :x: |
-| Configure  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| ReadResource  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| PlanResourceChange  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| ImportResourceState  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| ReadDataSource  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |

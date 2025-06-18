@@ -124,6 +124,8 @@ $ terraform plan
 除[Terraform通用参数](https://www.terraform.io/docs/configuration/providers.html)(如. `alias` 和 `version`)外, 
 AlibabacloudStack 的 provider 配置块支持以下参数：
 
+* `popgw_domain` - (必填) 云平台网关标准域名后缀。通常情况下可以查询Ecs的endpoint提取后缀，如ecs.inter.example.com，则后缀为inter.example.com。
+
 * `access_key` - (必填) 访问密钥。也可通过ALIBABACLOUDSTACK_ACCESS_KEY环境变量获取。
 
 * `secret_key` - (必填) 秘密密钥。也可通过ALIBABACLOUDSTACK_SECRET_KEY环境变量获取。
@@ -132,9 +134,9 @@ AlibabacloudStack 的 provider 配置块支持以下参数：
 
 * `insecure` - (可选) 允许自签名证书，用于启用不安全连接。
 
-* `department` - (可选) 指定编排资源所隶属的组织的ID。为配置时会通过`resource_group_set_name`查找。
+* `department` - (可选) 指定编排资源所隶属的组织的ID。未配置时会通过`resource_group_set_name`查找。
 
-* `resource_group` - (可选) 指定编排资源所隶属的资源集的ID。为配置时会通过`resource_group_set_name`查找。
+* `resource_group` - (可选) 指定编排资源所隶属的资源集的ID。未配置时会通过`resource_group_set_name`查找。
 
 * `resource_group_set_name` - (可选) 指定编排资源所隶属的资源集的名称。当`resource_group_set_name`不唯一或未配置时需要配置`department`和`resource_group`。
 
