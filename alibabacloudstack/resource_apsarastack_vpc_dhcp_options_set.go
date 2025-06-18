@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
-	"strconv"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -16,32 +16,11 @@ import (
 func resourceAlibabacloudStackVpcDhcpoptionsset() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-
-			"all": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-
 			"associate_vpcs": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,
-
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-
-						"associate_status": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-
-						"vpc_id": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			"dhcp_options_set_description": {
@@ -51,7 +30,7 @@ func resourceAlibabacloudStackVpcDhcpoptionsset() *schema.Resource {
 
 			"dhcp_options_set_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 
 			"dhcp_options_set_name": {
@@ -68,18 +47,13 @@ func resourceAlibabacloudStackVpcDhcpoptionsset() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"resource_type": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 
 			"status": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 
-			"tags": tagsSchema(),
+			// "tags": tagsSchema(),
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackVpcDhcpoptionssetCreate,
@@ -113,6 +87,7 @@ func resourceAlibabacloudStackVpcDhcpoptionssetCreate(d *schema.ResourceData, me
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -136,25 +111,27 @@ func resourceAlibabacloudStackVpcDhcpoptionssetCreate(d *schema.ResourceData, me
 
 func resourceAlibabacloudStackVpcDhcpoptionssetUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	vpcService := VpcService{client}
-	if d.HasChange("tags") {
-		if err := vpcService.SetResourceTags(d, "vpc"); err != nil {
-			return errmsgs.WrapError(err)
-		}
-	}
+	// vpcService := VpcService{client}
+	// if d.HasChange("tags") {
+	// 	if err := vpcService.SetResourceTags(d, "DHCPOPTIONSSET"); err != nil {
+	// 		return errmsgs.WrapError(err)
+	// 	}
+	// }
 
 	if d.HasChanges("associate_vpcs") {
 		old, new := d.GetChange("associate_vpcs")
+		old_vpcs := expandStringList(old.(*schema.Set).List())
+		new_vpcs := expandStringList(new.(*schema.Set).List())
 		added := make([]string, 0)
 		removed := make([]string, 0)
-		for _, vpc := range old.([]string) {
-			exists := slices.Contains(new.([]string), vpc)
+		for _, vpc := range old_vpcs {
+			exists := slices.Contains(new_vpcs, vpc)
 			if !exists {
 				removed = append(removed, vpc)
 			}
 		}
-		for _, vpc := range new.([]string) {
-			exists := slices.Contains(old.([]string), vpc)
+		for _, vpc := range new_vpcs {
+			exists := slices.Contains(old_vpcs, vpc)
 			if !exists {
 				added = append(added, vpc)
 			}
@@ -165,6 +142,7 @@ func resourceAlibabacloudStackVpcDhcpoptionssetUpdate(d *schema.ResourceData, me
 		for _, vpc := range added {
 			add_request.QueryParams["VpcId"] = vpc
 			bresponse, err := client.ProcessCommonRequest(add_request)
+			addDebug(add_request.GetActionName(), bresponse, add_request, add_request.QueryParams)
 			if err != nil {
 				if bresponse == nil {
 					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -180,6 +158,7 @@ func resourceAlibabacloudStackVpcDhcpoptionssetUpdate(d *schema.ResourceData, me
 		for _, vpc := range removed {
 			remove_request.QueryParams["VpcId"] = vpc
 			bresponse, err := client.ProcessCommonRequest(remove_request)
+			addDebug(remove_request.GetActionName(), bresponse, remove_request, remove_request.QueryParams)
 			if err != nil {
 				if bresponse == nil {
 					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -191,78 +170,10 @@ func resourceAlibabacloudStackVpcDhcpoptionssetUpdate(d *schema.ResourceData, me
 		}
 
 	}
-	// DhcpOptionsSetId
-
-	// RegionId
-
-	// ResourceType
-
-	// Tags
-
-	// api: Vpc - 2016-04-28 - TagResources
-	if d.HasChanges("region_id", "resource_type", "tags") {
-		request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "TagResources", "")
-		VpcTagresourcesResponseObj := VpcTagresourcesResponse{}
-
-		if v, ok := d.GetOk("dhcp_options_set_id"); ok {
-			request.QueryParams["ResourceId[*]"] = v.(string)
-		}
-
-		if v, ok := d.GetOk("region_id"); ok {
-			request.QueryParams["RegionId"] = v.(string)
-		} else {
-			return fmt.Errorf("RegionId is required")
-		}
-
-		if v, ok := d.GetOk("resource_type"); ok {
-			request.QueryParams["ResourceType"] = v.(string)
-		} else {
-			return fmt.Errorf("ResourceType is required")
-		}
-
-		if v, ok := d.GetOk("tags"); ok {
-			tagsList := v.([]interface{})
-			tagsValues := make([]map[string]interface{}, 0)
-			for _, item := range tagsList {
-				itemMap := item.(map[string]interface{})
-				item_data := make(map[string]interface{})
-
-				if v, ok := itemMap["tag_key"]; ok && v != "" {
-					item_data["Tag[*].Key"] = v.(string)
-				}
-
-				if v, ok := itemMap["tag_value"]; ok && v != "" {
-					item_data["Tag[*].Value"] = v.(string)
-				}
-
-				tagsValues = append(tagsValues, item_data)
-			}
-			data, _ := json.Marshal(tagsValues)
-			request.QueryParams["Tags"] = string(data)
-		}
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_vpc_dhcp_options_set", "TagResources", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcTagresourcesResponseObj)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_vpc_dhcp_options_set", "TagResources", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
-	}
 
 	// api: Vpc - 2016-04-28 - UpdateDhcpOptionsSetAttribute
-	if d.HasChanges("dhcp_options_set_description", "dhcp_options_set_name", "domain_name", "domain_name_servers", "dry_run", "region_id") {
+	if d.HasChanges("dhcp_options_set_description", "dhcp_options_set_name", "domain_name", "domain_name_servers") {
 		request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "UpdateDhcpOptionsSetAttribute", "")
-		VpcUpdatedhcpoptionssetattributeResponseObj := VpcUpdatedhcpoptionssetattributeResponse{}
 		request.QueryParams["DhcpOptionsSetId"] = d.Id()
 		if v, ok := d.GetOk("dhcp_options_set_description"); ok {
 			request.QueryParams["DhcpOptionsSetDescription"] = v.(string)
@@ -281,6 +192,7 @@ func resourceAlibabacloudStackVpcDhcpoptionssetUpdate(d *schema.ResourceData, me
 		}
 
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -290,12 +202,6 @@ func resourceAlibabacloudStackVpcDhcpoptionssetUpdate(d *schema.ResourceData, me
 				"alibabacloudstack_vpc_dhcp_options_set", "UpdateDhcpOptionsSetAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcUpdatedhcpoptionssetattributeResponseObj)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_vpc_dhcp_options_set", "UpdateDhcpOptionsSetAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
 	}
 
 	return nil
@@ -303,8 +209,8 @@ func resourceAlibabacloudStackVpcDhcpoptionssetUpdate(d *schema.ResourceData, me
 
 func resourceAlibabacloudStackVpcDhcpoptionssetRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	vpcdhcp_options_setservice := VpcService{client}
-	response, err := vpcdhcp_options_setservice.DoVpcGetdhcpoptionssetRequest(d.Id())
+	vpcservice := VpcService{client}
+	response, err := vpcservice.DoVpcGetdhcpoptionssetRequest(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_vpc_dhcpoptionsset", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -319,38 +225,60 @@ func resourceAlibabacloudStackVpcDhcpoptionssetRead(d *schema.ResourceData, meta
 
 	d.Set("domain_name_servers", data.DhcpOptions.DomainNameServers)
 
-	d.Set("owner_id", data.OwnerId)
-
 	d.Set("status", data.Status)
 
+	vpcs := make([]string, 0)
+	if len(data.AssociateVpcs) > 0 {
+		for _, v := range data.AssociateVpcs {
+			vpcs = append(vpcs, v.VpcId)
+		}
+	}
+	d.Set("associate_vpcs", vpcs)
+	// tags, err := vpcservice.ListTagResources(d.Id(), "DHCPOPTIONSSET")
+	// if err == nil {
+	// 	d.Set("tags", tagsToMap(tags))
+	// }
 	return nil
 }
 
 func resourceAlibabacloudStackVpcDhcpoptionssetDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	// 需要先解绑所有vpc 才可删除dhcpoptionsset
+	associate_vpcs := d.Get("associate_vpcs")
+	vpcs := expandStringList(associate_vpcs.(*schema.Set).List())
+	remove_request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DetachDhcpOptionsSetFromVpc", "")
+	remove_request.QueryParams["DhcpOptionsSetId"] = d.Id()
+	for _, vpc := range vpcs {
+		remove_request.QueryParams["VpcId"] = vpc
+		bresponse, err := client.ProcessCommonRequest(remove_request)
+		addDebug(remove_request.GetActionName(), bresponse, remove_request, remove_request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_vpc_dhcp_options_set", "DetachDhcpOptionsSetFromVpc", remove_request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+	}
+	vpcservice := VpcService{client}
+	retry := 0
+	for retry < 10 {
+		dhcpoptionsset, err := vpcservice.DoVpcGetdhcpoptionssetRequest(d.Id())
+		if err != nil {
+			return err
+		}
+		if len(dhcpoptionsset.AssociateVpcs) == 0 {
+			break
+		}
+		time.Sleep(10 * time.Second)
+		retry++
+	}
 	// api: Vpc - 2016-04-28 - DeleteDhcpOptionsSet
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteDhcpOptionsSet", "")
-	VpcDeletedhcpoptionssetResponseObj := VpcDeletedhcpoptionssetResponse{}
-
-	//调用request_params_handler
-
-	if v, ok := d.GetOk("dhcp_options_set_id"); ok {
-		request.QueryParams["DhcpOptionsSetId"] = v.(string)
-	} else {
-		return fmt.Errorf("DhcpOptionsSetId is required")
-	}
-
-	if v, ok := d.GetOk("dry_run"); ok {
-		request.QueryParams["DryRun"] = strconv.FormatBool(v.(bool))
-	}
-
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	} else {
-		return fmt.Errorf("RegionId is required")
-	}
-
+	request.QueryParams["DhcpOptionsSetId"] = d.Id()
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -358,43 +286,10 @@ func resourceAlibabacloudStackVpcDhcpoptionssetDelete(d *schema.ResourceData, me
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_vpc_dhcp_options_set", "DeleteDhcpOptionsSet", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDeletedhcpoptionssetResponseObj)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_vpc_dhcp_options_set", "DeleteDhcpOptionsSet", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
 	return nil
 }
 
 type VpcCreatedhcpoptionssetResponse struct {
 	RequestId        string `json:"RequestId"`
 	DhcpOptionsSetId string `json:"DhcpOptionsSetId"`
-}
-
-type VpcAttachdhcpoptionssettovpcResponse struct {
-	RequestId string `json:"RequestId"`
-}
-type VpcDetachdhcpoptionssetfromvpcResponse struct {
-	RequestId string `json:"RequestId"`
-}
-type VpcMoveresourcegroupResponse struct {
-	RequestId string `json:"RequestId"`
-}
-type VpcReplacevpcdhcpoptionssetResponse struct {
-	RequestId string `json:"RequestId"`
-}
-type VpcTagresourcesResponse struct {
-	RequestId string `json:"RequestId"`
-}
-type VpcUntagresourcesResponse struct {
-	RequestId string `json:"RequestId"`
-}
-type VpcUpdatedhcpoptionssetattributeResponse struct {
-	RequestId string `json:"RequestId"`
-}
-
-type VpcDeletedhcpoptionssetResponse struct {
-	RequestId string `json:"RequestId"`
 }

@@ -7,11 +7,9 @@ import (
 )
 
 type VpcGetdhcpoptionssetResponse struct {
-	AssociateVpcs struct {
-		AssociateVpc []struct {
-			VpcId           string `json:"VpcId"`
-			AssociateStatus string `json:"AssociateStatus"`
-		} `json:"AssociateVpc"`
+	AssociateVpcs []struct {
+		VpcId           string `json:"VpcId"`
+		AssociateStatus string `json:"AssociateStatus"`
 	} `json:"AssociateVpcs"`
 	RequestId                 string `json:"RequestId"`
 	DhcpOptionsSetName        string `json:"DhcpOptionsSetName"`
@@ -34,6 +32,7 @@ func (s *VpcService) DoVpcGetdhcpoptionssetRequest(id string) (*VpcGetdhcpoption
 	request.QueryParams["DhcpOptionsSetId"] = id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("ListTagResources", bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
