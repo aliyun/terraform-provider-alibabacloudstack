@@ -6,7 +6,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"regexp"
-	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -26,17 +25,7 @@ func dataSourceAlibabacloudStackEcsDedicatedHostClusters() *schema.Resource {
 				MinItems: 1,
 			},
 
-			"region_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"zone_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			"resource_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -129,22 +118,6 @@ func dataSourceAlibabacloudStackEcsDedicatedHostClustersRead(d *schema.ResourceD
 
 	if v, ok := d.GetOk("dedicated_host_cluster_name"); ok {
 		request.QueryParams["DedicatedHostClusterName"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("page_number"); ok {
-		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("page_size"); ok {
-		request.QueryParams["PageSize"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("resource_group_id"); ok {
-		request.QueryParams["ResourceGroupId"] = v.(string)
 	}
 
 //	tags := d.Get("tags").(map[string]interface{})

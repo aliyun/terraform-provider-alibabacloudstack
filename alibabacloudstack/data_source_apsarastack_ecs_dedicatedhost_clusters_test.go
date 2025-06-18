@@ -22,7 +22,7 @@ func TestAccAlibabacloudStackEcsDedicatedHostsClusterDataSource(t *testing.T) {
 		}),
 	}
 
-	nameRegexConf := dataSourceTestAccConfig{
+	nameConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 
 			// "ids":        []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
@@ -32,6 +32,18 @@ func TestAccAlibabacloudStackEcsDedicatedHostsClusterDataSource(t *testing.T) {
 
 			// "ids":        []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
 			"dedicated_host_cluster_name": name + "fake",
+		}),
+	}
+	nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+
+			// "ids":        []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
+			"dedicated_host_cluster_name_regex": name,
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+
+			// "ids":        []string{"${alibabacloudstack_ecs_dedicated_host_cluster.default.id}"},
+			"dedicated_host_cluster_name_regex": name + "fake",
 		}),
 	}
 	// tagsConf := dataSourceTestAccConfig{
@@ -86,7 +98,7 @@ func TestAccAlibabacloudStackEcsDedicatedHostsClusterDataSource(t *testing.T) {
 		fakeMapFunc:  fakeKmsSecretVersionsMapFunc,
 	}
 
-	ecsDedicatedHostsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
+	ecsDedicatedHostsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameConf, nameRegexConf, allConf)
 }
 
 func dataSourceEcsDedicatedHostsClusterConfigDependence(name string) string {
