@@ -532,6 +532,7 @@ const (
 	TagResourceConsumerGroup       = TagResourceType("consumergroup")
 	TagResourceCluster             = TagResourceType("cluster")
 	TagResourceDedicateHostCluster = TagResourceType("dedicated_host_cluster")
+	TagResourceEcsInvocation       = TagResourceType("invocation")
 )
 
 type KubernetesNodeType string

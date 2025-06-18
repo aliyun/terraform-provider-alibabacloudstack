@@ -142,7 +142,7 @@ func resourceAlibabacloudStackEcsCommandRead(d *schema.ResourceData, meta interf
 		return errmsgs.WrapError(err)
 	}
 
-	d.Set("command_content", object.Commands.Command[0].CommandContent)
+	// d.Set("command_content", object.Commands.Command[0].CommandContent)
 	d.Set("description", object.Commands.Command[0].Description)
 	d.Set("enable_parameter", object.Commands.Command[0].EnableParameter)
 	d.Set("name", object.Commands.Command[0].Name)

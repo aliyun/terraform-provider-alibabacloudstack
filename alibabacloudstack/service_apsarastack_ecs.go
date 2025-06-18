@@ -2217,29 +2217,24 @@ type EcsDescribeinvocationresultsResponse struct {
 	Invocation struct {
 		InvocationResults struct {
 			InvocationResult []struct {
-				Tags struct {
-					Tag []struct {
-						TagKey   string `json:"TagKey"`
-						TagValue string `json:"TagValue"`
-					} `json:"Tag"`
-				} `json:"Tags"`
-				InvocationStatus   string `json:"InvocationStatus"`
-				Repeats            int    `json:"Repeats"`
-				CommandId          string `json:"CommandId"`
-				InstanceId         string `json:"InstanceId"`
-				Output             string `json:"Output"`
-				Dropped            int    `json:"Dropped"`
-				StopTime           string `json:"StopTime"`
-				ExitCode           int    `json:"ExitCode"`
-				StartTime          string `json:"StartTime"`
-				ErrorInfo          string `json:"ErrorInfo"`
-				ErrorCode          string `json:"ErrorCode"`
-				FinishedTime       string `json:"FinishedTime"`
-				InvokeId           string `json:"InvokeId"`
-				InvokeRecordStatus string `json:"InvokeRecordStatus"`
-				Username           string `json:"Username"`
-				ContainerId        string `json:"ContainerId"`
-				ContainerName      string `json:"ContainerName"`
+				Tags               ecs.TagsInDescribeInstances `json:"Tags"`
+				InvocationStatus   string                      `json:"InvocationStatus"`
+				Repeats            int                         `json:"Repeats"`
+				CommandId          string                      `json:"CommandId"`
+				InstanceId         string                      `json:"InstanceId"`
+				Output             string                      `json:"Output"`
+				Dropped            int                         `json:"Dropped"`
+				StopTime           string                      `json:"StopTime"`
+				ExitCode           int                         `json:"ExitCode"`
+				StartTime          string                      `json:"StartTime"`
+				ErrorInfo          string                      `json:"ErrorInfo"`
+				ErrorCode          string                      `json:"ErrorCode"`
+				FinishedTime       string                      `json:"FinishedTime"`
+				InvokeId           string                      `json:"InvokeId"`
+				InvokeRecordStatus string                      `json:"InvokeRecordStatus"`
+				Username           string                      `json:"Username"`
+				ContainerId        string                      `json:"ContainerId"`
+				ContainerName      string                      `json:"ContainerName"`
 			} `json:"InvocationResult"`
 		} `json:"InvocationResults"`
 		PageSize   int `json:"PageSize"`
@@ -2248,26 +2243,20 @@ type EcsDescribeinvocationresultsResponse struct {
 	} `json:"Invocation"`
 }
 
-func (s *EcsService) DoEcsDescribeinvocationresultsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*EcsDescribeinvocationresultsResponse, error) {
+func (s *EcsService) DoEcsDescribeinvocationresultsRequest(id string) (*EcsDescribeinvocationresultsResponse, error) {
 	// api: Ecs - 2014-05-26 - DescribeInvocationResults
 	request := s.client.NewCommonRequest("POST", "Ecs", "2014-05-26", "DescribeInvocationResults", "")
 	EcsDescribeinvocationresultsResponseObj := &EcsDescribeinvocationresultsResponse{}
 
 	//调用request_params_handler
 
-	if v, ok := d.GetOk("command_id"); ok {
-		request.QueryParams["CommandId"] = v.(string)
-	}
+	request.QueryParams["InvokeId"] = id
 
-	if v, ok := d.GetOk("invocation_id"); ok {
-		request.QueryParams["InvokeId"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	} else {
-		return nil, fmt.Errorf("RegionId is required")
-	}
+	// if v, ok := d.GetOk("region_id"); ok {
+	// 	request.QueryParams["RegionId"] = v.(string)
+	// } else {
+	// 	return nil, fmt.Errorf("RegionId is required")
+	// }
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
