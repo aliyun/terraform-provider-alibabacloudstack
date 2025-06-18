@@ -40,7 +40,7 @@ func resourceAlibabacloudStackEcsDedicatedhostcluster() *schema.Resource {
 			// 	Optional: true,
 			// },dedicated_host_cluster
 
-			"tags": tagsSchema(),
+			//"tags": tagsSchema(),
 
 			"zone_id": {
 				Type:     schema.TypeString,
@@ -70,21 +70,6 @@ func resourceAlibabacloudStackEcsDedicatedhostclusterCreate(d *schema.ResourceDa
 
 	if v, ok := d.GetOk("description"); ok {
 		request.QueryParams["Description"] = v.(string)
-	}
-
-	tags := d.Get("tags").(map[string]interface{})
-	if tags != nil && len(tags) > 0 {
-		Tags := make([]map[string]string, 0, len(tags))
-		for k, v := range tags {
-			Tag := map[string]string{
-				"Key":   k,
-				"Value": v.(string),
-			}
-			Tags = append(Tags, Tag)
-		}
-		request_byte, _ := json.Marshal(Tags)
-		requeststring := string(request_byte)
-		request.QueryParams["Tags"] = requeststring
 	}
 
 	if v, ok := d.GetOk("zone_id"); ok {
@@ -120,16 +105,13 @@ func resourceAlibabacloudStackEcsDedicatedhostclusterCreate(d *schema.ResourceDa
 
 func resourceAlibabacloudStackEcsDedicatedhostclusterUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	err := setTags(client, TagResourceDedicateHostCluster, d)
-	if err != nil {
-		return errmsgs.WrapError(err)
+//	err := setTags(client, TagResourceDedicateHostCluster, d)
+//	if err != nil {
+//		return errmsgs.WrapError(err)
+//	}
+	if d.IsNewResource() {
+		return nil
 	}
-	// if !d.IsNewResource() {
-	// 	err := setTags(client, TagResourceInstance, d)
-	// 	if err != nil {
-	// 		return errmsgs.WrapError(err)
-	// 	}
-	// }
 
 	// DedicatedHostClusterId
 
@@ -191,7 +173,7 @@ func resourceAlibabacloudStackEcsDedicatedhostclusterRead(d *schema.ResourceData
 	// d.Set("resource_group_id", data.ResourceGroupId)
 
 	d.Set("zone_id", data.ZoneId)
-	d.Set("tags", ecsdedicated_host_clusterservice.tagsToMap(data.Tags.Tag))
+	//d.Set("tags", ecsdedicated_host_clusterservice.tagsToMap(data.Tags.Tag))
 	return nil
 }
 
