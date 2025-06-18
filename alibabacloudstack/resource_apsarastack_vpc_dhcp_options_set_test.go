@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackVpcDhcpoptionsset_basic(t *testing.T) {
+func TestAccAlibabacloudStackVpcDhcpOptionsSet_basic(t *testing.T) {
 	var v *VpcGetdhcpoptionssetResponse
 	resourceId := "alibabacloudstack_vpc_dhcp_options_set.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackVpcDhcpOptionsDataSource(t *testing.T) {
+func TestAccAlibabacloudStackVpcDhcpOptionsSetsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_vpc_dhcp_options_sets.default"
 
