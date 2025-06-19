@@ -5,7 +5,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -19,16 +18,12 @@ func resourceAlibabacloudStackEcsInvocation() *schema.Resource {
 			"command_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 
 			"create_time": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-
-			"frequency": {
-				Type:     schema.TypeString,
-				Optional: true,
 			},
 
 			"instance_ids": {
@@ -43,36 +38,18 @@ func resourceAlibabacloudStackEcsInvocation() *schema.Resource {
 				Computed: true,
 			},
 
-			"parameters": {
-				Type:     schema.TypeMap,
-				Optional: true,
-			},
-
 			"repeat_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
-			},
-
-			"resource_type": {
-				Type:     schema.TypeString,
-				Optional: true,
+				ForceNew: true,
 			},
 
 			"tags": tagsSchema(),
 
-			"timed": {
-				Type:     schema.TypeBool,
-				Optional: true,
-			},
-
 			"username": {
 				Type:     schema.TypeString,
 				Optional: true,
-			},
-
-			"windows_password_name": {
-				Type:     schema.TypeString,
-				Optional: true,
+				ForceNew: true,
 			},
 		},
 	}
@@ -97,32 +74,14 @@ func resourceAlibabacloudStackEcsInvocationCreate(d *schema.ResourceData, meta i
 		return fmt.Errorf("CommandId is required")
 	}
 
-	if v, ok := d.GetOk("frequency"); ok {
-		request.QueryParams["Frequency"] = v.(string)
-	}
 	if v, ok := d.GetOk("repeat_mode"); ok {
 		request.QueryParams["RepeatMode"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("parameters"); ok {
-		request.QueryParams["Parameters"] = v.(string)
-	}
-
-	// if v, ok := d.GetOk("region_id"); ok {
-	// 	request.QueryParams["RegionId"] = v.(string)
-	// }
-
-	if v, ok := d.GetOk("timed"); ok {
-		request.QueryParams["Timed"] = strconv.FormatBool(v.(bool))
 	}
 
 	if v, ok := d.GetOk("username"); ok {
 		request.QueryParams["Username"] = v.(string)
 	}
 
-	if v, ok := d.GetOk("windows_password_name"); ok {
-		request.QueryParams["WindowsPasswordName"] = v.(string)
-	}
 	instanceIds := d.Get("instance_ids").([]interface{})
 	for i, v := range instanceIds {
 		key := fmt.Sprintf("InstanceId.%d", i+1)

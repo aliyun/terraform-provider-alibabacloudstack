@@ -190,8 +190,8 @@ func dataSourceAlibabacloudStackEcsInvocationsRead(d *schema.ResourceData, meta 
 	datas := make([]interface{}, 0)
 	for _, data := range EcsDescribeinvocationsResponseObj.Invocations.Invocation {
 		instance_ids := []string{}
-		for _, instance_id := range data.InvokeInstances.InvokeInstance {
-			instance_ids = append(instance_ids, instance_id)
+		for _, instance := range data.InvokeInstances.InvokeInstance {
+			instance_ids = append(instance_ids, instance.InstanceId)
 		}
 		i := map[string]interface{}{
 			"id": data.InvokeId,
