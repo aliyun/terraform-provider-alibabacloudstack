@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -69,6 +70,8 @@ func resourceAlibabacloudStackEcsCommandCreate(d *schema.ResourceData, meta inte
 	response := &datahub_patch.EcsCreate{}
 
 	CommandContent := d.Get("command_content").(string)
+	contentBytes := []byte(CommandContent)
+	encoded := base64.StdEncoding.EncodeToString(contentBytes)
 	var Description string
 	if v, ok := d.GetOk("description"); ok {
 		Description = fmt.Sprint(v.(string))
@@ -91,7 +94,7 @@ func resourceAlibabacloudStackEcsCommandCreate(d *schema.ResourceData, meta inte
 	request := client.NewCommonRequest("POST", "Ecs", "2014-05-26", "CreateCommand", "")
 	mergeMaps(request.QueryParams, map[string]string{
 		"Name":            name,
-		"CommandContent":  CommandContent,
+		"CommandContent":  encoded,
 		"Description":     Description,
 		"EnableParameter": EnableParameter,
 		"Timeout":         Timeout,
