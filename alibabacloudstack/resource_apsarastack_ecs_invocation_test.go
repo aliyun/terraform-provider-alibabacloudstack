@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackEcsInvocation0(t *testing.T) {
+func TestAccAlibabacloudStackEcsInvocation_basic0(t *testing.T) {
 	var v *EcsDescribeinvocationresultsResponse
 
 	resourceId := "alibabacloudstack_ecs_invocation.default"

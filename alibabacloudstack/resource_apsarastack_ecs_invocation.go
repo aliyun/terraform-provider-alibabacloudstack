@@ -23,7 +23,6 @@ func resourceAlibabacloudStackEcsInvocation() *schema.Resource {
 
 			"create_time": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 
@@ -44,20 +43,9 @@ func resourceAlibabacloudStackEcsInvocation() *schema.Resource {
 				Computed: true,
 			},
 
-			"page_total": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-			},
-
 			"parameters": {
 				Type:     schema.TypeMap,
 				Optional: true,
-			},
-
-			"region_id": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 
 			"repeat_mode": {
