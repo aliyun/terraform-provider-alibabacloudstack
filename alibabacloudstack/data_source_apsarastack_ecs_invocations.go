@@ -92,6 +92,12 @@ func dataSourceAlibabacloudStackEcsInvocations() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						
+						"parameters": {
+							// TypeString
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 
 						"resource_type": {
 							// TypeString

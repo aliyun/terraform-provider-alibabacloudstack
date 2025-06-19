@@ -39,11 +39,11 @@ func TestAccAlibabacloudStackEcsInvocationsDataSource(t *testing.T) {
 	// 平台可能会自行启动一些Agent安装的命令，因此需要组合查找
 	instanceIdConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"command_name": "${alibabacloudstack_ecs_command.default.name}",
+			"command_id": "${alibabacloudstack_ecs_command.default.id}",
 			"instance_id": "${alibabacloudstack_ecs_instance.default.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"command_name": "${alibabacloudstack_ecs_command.default.name}",
+			"command_id": "${alibabacloudstack_ecs_command.default.id}",
 			"instance_id": "${alibabacloudstack_ecs_instance.default.id}_fake",
 		}),
 	}
