@@ -229,6 +229,9 @@ func buildAlibabacloudStackEssScheduledTaskArgs(d *schema.ResourceData) *ess.Cre
 	if v, ok := d.GetOk("launch_expiration_time"); ok && v.(int) != 0 {
 		request.LaunchExpirationTime = requests.NewInteger(v.(int))
 	}
+	if v, ok := d.GetOk("scaling_group_id"); ok {
+		request.ScalingGroupId = v.(string)
+	}
 
 	return request
 }

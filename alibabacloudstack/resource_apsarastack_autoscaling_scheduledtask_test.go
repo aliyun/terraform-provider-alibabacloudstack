@@ -332,6 +332,8 @@ func testAccEssScheduleConfig(common, scheduleTime string, rand int) string {
 		scheduled_action = "${alibabacloudstack_ess_scaling_rule.default.ari}"
 		launch_time = "%s"
 		scheduled_task_name = "${var.name}"
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
+		
 	}
 	`, common, rand, scheduleTime)
 }
@@ -382,6 +384,7 @@ func testAccEssScheduleUpdateScheduledTaskName(common, scheduleTime string, rand
 		scheduled_action = "${alibabacloudstack_ess_scaling_rule.default.ari}"
 		launch_time = "%s"
 		scheduled_task_name = "${var.name}"
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 	}
 	`, common, rand, scheduleTime)
 }
@@ -433,6 +436,7 @@ func testAccEssScheduleUpdateDescription(common, scheduleTime string, rand int) 
 		launch_time = "%s"
 		scheduled_task_name = "${var.name}"
 		description = "terraform test"
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 	}
 	`, common, rand, scheduleTime)
 }
@@ -485,6 +489,7 @@ func testAccEssScheduleUpdateLaunchExpirationTime(common, scheduleTime string, r
 		scheduled_task_name = "${var.name}"
 		description = "terraform test"
 		launch_expiration_time = 500
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 	}
 	`, common, rand, scheduleTime)
 }
@@ -539,6 +544,7 @@ func testAccEssScheduleUpdateRecurrenceType(common, scheduleTime string, endTime
 		recurrence_type = "Weekly"
 		recurrence_value = "0,1,2"
 		recurrence_end_time = "%s"
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 	}
 	`, common, rand, scheduleTime, endTime)
 }
@@ -595,6 +601,7 @@ func testAccEssScheduleUpdateTaskEnabled(common, scheduleTime string, rand int) 
 		//recurrence_value = "0,1,2"
 		//recurrence_end_time = "%s"
 		task_enabled = false
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 	}
 	`, common, rand, scheduleTime, scheduleTime)
 }
@@ -645,6 +652,7 @@ func testAccEssScheduleConfigMulti(common, scheduleTime string, rand int) string
 		scheduled_action = "${alibabacloudstack_ess_scaling_rule.default.ari}"
 		launch_time = "%s"
 		scheduled_task_name = "${var.name}-${count.index}"
+		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
 	}
 	`, common, rand, scheduleTime)
 }
