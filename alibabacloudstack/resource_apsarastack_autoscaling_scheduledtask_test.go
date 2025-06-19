@@ -124,6 +124,8 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 	oneDay, _ := time.ParseDuration("24h")
 	twoDay, _ := time.ParseDuration("48h")
 	rand := getAccTestRandInt(1000, 999999)
+	name := fmt.Sprintf("tf-testAccEssScheduleConfig%v", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testAccEssScheduleConfig)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -136,14 +138,22 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 		// CheckDestroy: testAccCheckEssScheduledTaskDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: providerCommon + testAccEssScheduleConfig(ECSInstanceCommonTestCase,
-					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
-
+				Config: testAccConfig(map[string]interface{}{
+					"scheduled_action":    "${alibabacloudstack_ess_scaling_rule.default.ari}",
+					"description": "test terraform",
+					"scheduled_task_name": name,
+					"launch_time":         time.Now().Add(oneDay).Format("2006-01-02T15:04Z"),
+					"recurrence_type":     "Daily",
+					"recurrence_value":    "7",
+					"recurrence_end_time": time.Now().Add(twoDay).Format("2006-01-02T15:04Z"),
+					"scaling_group_id":    "${alibabacloudstack_ess_scaling_group.default.id}",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
+						"description": "test terraform",
 						"scheduled_action":       CHECKSET,
 						"launch_time":            CHECKSET,
-						"scheduled_task_name":    fmt.Sprintf("tf-testAccEssScheduleConfig-%d", rand),
+						"scheduled_task_name":    name,
 						"launch_expiration_time": "600",
 						"task_enabled":           "true",
 						"scaling_group_id":       CHECKSET,
@@ -156,9 +166,9 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: providerCommon + testAccEssScheduleUpdateScheduledTaskName(ECSInstanceCommonTestCase,
-					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
-
+				Config: testAccConfig(map[string]interface{}{
+					"scheduled_task_name": fmt.Sprintf("tf-testAccEssSchedule-%d", rand),
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"scheduled_task_name": fmt.Sprintf("tf-testAccEssSchedule-%d", rand),
@@ -166,19 +176,9 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: providerCommon + testAccEssScheduleUpdateDescription(ECSInstanceCommonTestCase,
-					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
-
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"description": "terraform test",
-					}),
-				),
-			},
-			{
-				Config: providerCommon + testAccEssScheduleUpdateLaunchExpirationTime(ECSInstanceCommonTestCase,
-					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
-
+				Config: testAccConfig(map[string]interface{}{
+					"launch_expiration_time": "500",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"launch_expiration_time": "500",
@@ -186,11 +186,17 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: providerCommon + testAccEssScheduleUpdateRecurrenceType(ECSInstanceCommonTestCase,
-					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), time.Now().Add(twoDay).Format("2006-01-02T15:04Z"), rand),
-
+				Config: testAccConfig(map[string]interface{}{
+					"launch_time":            time.Now().Add(oneDay).Format("2006-01-02T15:04Z"),
+					"description":            "terraform test",
+					"launch_expiration_time": "500",
+					"recurrence_type":        "Weekly",
+					"recurrence_value":       "0,1,2",
+					"recurrence_end_time":    time.Now().Add(twoDay).Format("2006-01-02T15:04Z"),
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
+						"description":         "terraform test",
 						"recurrence_type":     "Weekly",
 						"recurrence_value":    CHECKSET,
 						"recurrence_end_time": CHECKSET,
@@ -198,9 +204,9 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: providerCommon + testAccEssScheduleUpdateTaskEnabled(ECSInstanceCommonTestCase,
-					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
-
+				Config: testAccConfig(map[string]interface{}{
+					"task_enabled": "false",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"task_enabled": "false",
@@ -208,57 +214,14 @@ func TestAccAlibabacloudStackEssScheduledTask_basic(t *testing.T) {
 				),
 			},
 			{
-				Config: providerCommon + testAccEssScheduleConfig(ECSInstanceCommonTestCase,
-					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
-
+				Config: testAccConfig(map[string]interface{}{
+					"launch_expiration_time": "600",
+					"task_enabled":           "true",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"scheduled_task_name":    fmt.Sprintf("tf-testAccEssScheduleConfig-%d", rand),
 						"launch_expiration_time": "600",
 						"task_enabled":           "true",
-					}),
-				),
-			},
-		},
-	})
-}
-
-func TestAccAlibabacloudStackEssScheduledTask_multi(t *testing.T) {
-	var v ess.ScheduledTask
-	resourceId := "alibabacloudstack_ess_scheduled_task.default.9"
-	ra := resourceAttrInit(resourceId, nil)
-	rc := resourceCheckInit(resourceId, &v, func() interface{} {
-		return &EssService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	})
-	rac := resourceAttrCheckInit(rc, ra)
-
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	// Setting schedule time to more than one day
-	oneDay, _ := time.ParseDuration("24h")
-	rand := getAccTestRandInt(1000, 999999)
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-		},
-
-		// module name
-		IDRefreshName: resourceId,
-
-		Providers: testAccProviders,
-		// CheckDestroy: testAccCheckEssScheduledTaskDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEssScheduleConfigMulti(ECSInstanceCommonTestCase,
-					time.Now().Add(oneDay).Format("2006-01-02T15:04Z"), rand),
-
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"scheduled_action":       CHECKSET,
-						"launch_time":            CHECKSET,
-						"scheduled_task_name":    fmt.Sprintf("tf-testAccEssScheduleConfig-%d-9", rand),
-						"launch_expiration_time": "600",
-						"task_enabled":           "true",
-						"scaling_group_id":       CHECKSET,
 					}),
 				),
 			},
@@ -286,12 +249,13 @@ func testAccCheckEssScheduledTaskDestroy(s *terraform.State) error {
 	return nil
 }
 
-func testAccEssScheduleConfig(common, scheduleTime string, rand int) string {
+func testAccEssScheduleConfig(name string) string {
 	return fmt.Sprintf(`
-	%s
 	variable "name" {
-		default = "tf-testAccEssScheduleConfig-%d"
+		default = "%s"
 	}
+	
+	%s
 	
 	resource "alibabacloudstack_ess_scaling_group" "default" {
 		min_size = 0
@@ -328,331 +292,5 @@ func testAccEssScheduleConfig(common, scheduleTime string, rand int) string {
 		cooldown = 0
 	}
 	
-	resource "alibabacloudstack_ess_scheduled_task" "default" {
-		scheduled_action = "${alibabacloudstack_ess_scaling_rule.default.ari}"
-		launch_time = "%s"
-		scheduled_task_name = "${var.name}"
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		
-	}
-	`, common, rand, scheduleTime)
-}
-
-func testAccEssScheduleUpdateScheduledTaskName(common, scheduleTime string, rand int) string {
-	return fmt.Sprintf(`
-	%s
-	variable "name" {
-		default = "tf-testAccEssSchedule-%d"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 0
-		max_size = 2
-		default_cooldown = 20
-		removal_policies = ["OldestInstance", "NewestInstance"]
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
-	}
-	
-	resource "alibabacloudstack_ecs_deployment_set" "default" {
-		strategy            = "Availability"
-		domain              = "Default"
-		granularity         = "Host"
-		deployment_set_name = "example_value"
-		description         = "example_value"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_configuration" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
-		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
-		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
-		force_delete = true
-		active = true
-		enable = true
-		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
-	}
-	resource "alibabacloudstack_ess_scaling_rule" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		adjustment_type = "TotalCapacity"
-		adjustment_value = "1"
-		cooldown = 0
-	}
-	
-	resource "alibabacloudstack_ess_scheduled_task" "default" {
-		scheduled_action = "${alibabacloudstack_ess_scaling_rule.default.ari}"
-		launch_time = "%s"
-		scheduled_task_name = "${var.name}"
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-	}
-	`, common, rand, scheduleTime)
-}
-
-func testAccEssScheduleUpdateDescription(common, scheduleTime string, rand int) string {
-	return fmt.Sprintf(`
-	%s
-	variable "name" {
-		default = "tf-testAccEssSchedule-%d"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 0
-		max_size = 2
-		default_cooldown = 20
-		removal_policies = ["OldestInstance", "NewestInstance"]
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
-	}
-	
-	resource "alibabacloudstack_ecs_deployment_set" "default" {
-		strategy            = "Availability"
-		domain              = "Default"
-		granularity         = "Host"
-		deployment_set_name = "example_value"
-		description         = "example_value"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_configuration" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
-		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
-		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
-		force_delete = true
-		active = true
-		enable = true
-		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
-	}
-	resource "alibabacloudstack_ess_scaling_rule" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		adjustment_type = "TotalCapacity"
-		adjustment_value = "1"
-		cooldown = 0
-	}
-	
-	resource "alibabacloudstack_ess_scheduled_task" "default" {
-		scheduled_action = "${alibabacloudstack_ess_scaling_rule.default.ari}"
-		launch_time = "%s"
-		scheduled_task_name = "${var.name}"
-		description = "terraform test"
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-	}
-	`, common, rand, scheduleTime)
-}
-
-func testAccEssScheduleUpdateLaunchExpirationTime(common, scheduleTime string, rand int) string {
-	return fmt.Sprintf(`
-	%s
-	variable "name" {
-		default = "tf-testAccEssSchedule-%d"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 0
-		max_size = 2
-		default_cooldown = 20
-		removal_policies = ["OldestInstance", "NewestInstance"]
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
-	}
-	
-	resource "alibabacloudstack_ecs_deployment_set" "default" {
-		strategy            = "Availability"
-		domain              = "Default"
-		granularity         = "Host"
-		deployment_set_name = "example_value"
-		description         = "example_value"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_configuration" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
-		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
-		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
-		force_delete = true
-		active = true
-		enable = true
-		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
-	}
-	resource "alibabacloudstack_ess_scaling_rule" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		adjustment_type = "TotalCapacity"
-		adjustment_value = "1"
-		cooldown = 0
-	}
-	
-	resource "alibabacloudstack_ess_scheduled_task" "default" {
-		scheduled_action = "${alibabacloudstack_ess_scaling_rule.default.ari}"
-		launch_time = "%s"
-		scheduled_task_name = "${var.name}"
-		description = "terraform test"
-		launch_expiration_time = 500
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-	}
-	`, common, rand, scheduleTime)
-}
-func testAccEssScheduleUpdateRecurrenceType(common, scheduleTime string, endTime string, rand int) string {
-	return fmt.Sprintf(`
-	%s
-	variable "name" {
-		default = "tf-testAccEssSchedule-%d"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 0
-		max_size = 2
-		default_cooldown = 20
-		removal_policies = ["OldestInstance", "NewestInstance"]
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
-	}
-	
-	resource "alibabacloudstack_ecs_deployment_set" "default" {
-		strategy            = "Availability"
-		domain              = "Default"
-		granularity         = "Host"
-		deployment_set_name = "example_value"
-		description         = "example_value"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_configuration" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
-		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
-		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
-		force_delete = true
-		active = true
-		enable = true
-		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
-	}
-	resource "alibabacloudstack_ess_scaling_rule" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		adjustment_type = "TotalCapacity"
-		adjustment_value = "1"
-		cooldown = 0
-	}
-	
-	resource "alibabacloudstack_ess_scheduled_task" "default" {
-		scheduled_action = "${alibabacloudstack_ess_scaling_rule.default.ari}"
-		launch_time = "%s"
-		scheduled_task_name = "${var.name}"
-		description = "terraform test"
-		launch_expiration_time = 500
-		recurrence_type = "Weekly"
-		recurrence_value = "0,1,2"
-		recurrence_end_time = "%s"
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-	}
-	`, common, rand, scheduleTime, endTime)
-}
-
-func testAccEssScheduleUpdateTaskEnabled(common, scheduleTime string, rand int) string {
-	return fmt.Sprintf(`
-	%s
-	variable "name" {
-		default = "tf-testAccEssSchedule-%d"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 0
-		max_size = 2
-		default_cooldown = 20
-		removal_policies = ["OldestInstance", "NewestInstance"]
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
-	}
-	
-	resource "alibabacloudstack_ecs_deployment_set" "default" {
-		strategy            = "Availability"
-		domain              = "Default"
-		granularity         = "Host"
-		deployment_set_name = "example_value"
-		description         = "example_value"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_configuration" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
-		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
-		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
-		force_delete = true
-		active = true
-		enable = true
-		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
-	}
-	resource "alibabacloudstack_ess_scaling_rule" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		adjustment_type = "TotalCapacity"
-		adjustment_value = "1"
-		cooldown = 0
-	}
-	
-	resource "alibabacloudstack_ess_scheduled_task" "default" {
-		scheduled_action = "${alibabacloudstack_ess_scaling_rule.default.ari}"
-		launch_time = "%s"
-		scheduled_task_name = "${var.name}"
-		description = "terraform test"
-		launch_expiration_time = 500
-		//recurrence_type = "Weekly"
-		//recurrence_value = "0,1,2"
-		//recurrence_end_time = "%s"
-		task_enabled = false
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-	}
-	`, common, rand, scheduleTime, scheduleTime)
-}
-func testAccEssScheduleConfigMulti(common, scheduleTime string, rand int) string {
-	return fmt.Sprintf(`
-	%s
-	variable "name" {
-		default = "tf-testAccEssScheduleConfig-%d"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_group" "default" {
-		min_size = 0
-		max_size = 2
-		default_cooldown = 20
-		removal_policies = ["OldestInstance", "NewestInstance"]
-		scaling_group_name = "${var.name}"
-		vswitch_ids = ["${alibabacloudstack_vpc_vswitch.default.id}"]
-	}
-	
-	resource "alibabacloudstack_ecs_deployment_set" "default" {
-		strategy            = "Availability"
-		domain              = "Default"
-		granularity         = "Host"
-		deployment_set_name = "example_value"
-		description         = "example_value"
-	}
-	
-	resource "alibabacloudstack_ess_scaling_configuration" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		image_id = "${data.alibabacloudstack_images.default.images.0.id}"
-		instance_type = "${alibabacloudstack_ecs_instance.default.instance_type}"
-		system_disk_category = "${alibabacloudstack_ecs_instance.default.system_disk_category}"
-		security_group_ids = [alibabacloudstack_ecs_securitygroup.default.id]
-		force_delete = true
-		active = true
-		enable = true
-		deployment_set_id = alibabacloudstack_ecs_deployment_set.default.id
-	}
-	resource "alibabacloudstack_ess_scaling_rule" "default" {
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-		adjustment_type = "TotalCapacity"
-		adjustment_value = "1"
-		cooldown = 0
-	}
-	
-	resource "alibabacloudstack_ess_scheduled_task" "default" {
-		count = 10
-		scheduled_action = "${alibabacloudstack_ess_scaling_rule.default.ari}"
-		launch_time = "%s"
-		scheduled_task_name = "${var.name}-${count.index}"
-		scaling_group_id = "${alibabacloudstack_ess_scaling_group.default.id}"
-	}
-	`, common, rand, scheduleTime)
+	`, name, ECSInstanceCommonTestCase)
 }

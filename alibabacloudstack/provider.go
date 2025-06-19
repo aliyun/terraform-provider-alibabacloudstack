@@ -643,6 +643,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ess_scaling_rule":                       resourceAlibabacloudStackEssScalingRule(),
 		"alibabacloudstack_ess_scalinggroup_vserver_groups":        resourceAlibabacloudStackEssScalingGroupVserverGroups(),
 		"alibabacloudstack_ess_scheduled_task":                     resourceAlibabacloudStackEssScheduledTask(),
+		"alibabacloudstack_autoscaling_scheduled_task":             resourceAlibabacloudStackEssScheduledTask(),
 		"alibabacloudstack_autoscaling_scheduledtask":              resourceAlibabacloudStackEssScheduledTask(),
 		"alibabacloudstack_forward_entry":                          resourceAlibabacloudStackForwardEntry(),
 		"alibabacloudstack_natgateway_forwardentry":                resourceAlibabacloudStackForwardEntry(),
