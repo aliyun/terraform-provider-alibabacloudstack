@@ -839,6 +839,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ecs_invocation":       resourceAlibabacloudStackEcsInvocation(),
 		"alibabacloudstack_vpc_dhcp_options_set": resourceAlibabacloudStackVpcDhcpoptionsset(),
 		"alibabacloudstack_slb_access_log":       resourceAlibabacloudStackSlbAccesslog(),
+		"alibabacloudstack_vpc_ha_vip":           resourceAlibabacloudStackVpcHavip(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

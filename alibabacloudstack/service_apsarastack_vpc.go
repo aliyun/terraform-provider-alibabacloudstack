@@ -5,7 +5,7 @@ import (
 	"log"
 	"regexp"
 	"time"
-	
+
 	"encoding/json"
 
 	"github.com/PaesslerAG/jsonpath"
@@ -1801,7 +1801,6 @@ func (s *VpcService) ExpressConnectVirtualBorderRouterStateRefreshFunc(id string
 		return object, fmt.Sprint(object["Status"]), nil
 	}
 }
-
 
 type VpcGetdhcpoptionssetResponse struct {
 	AssociateVpcs []struct {
