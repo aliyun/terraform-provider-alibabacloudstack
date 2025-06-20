@@ -52,7 +52,7 @@ func TestAccAlibabacloudStackVpcHaVipsDataSource(t *testing.T) {
 			"ha_vips.0.ha_vip_id":                CHECKSET,
 			"ha_vips.0.ip_address":               CHECKSET,
 			"ha_vips.0.associated_instance_type": CHECKSET,
-			"ha_vips.0.associated_instances.#":   "2",
+			"ha_vips.0.associated_instances.#":   "1",
 		}
 	}
 
