@@ -65,28 +65,8 @@ func TestAccAlibabacloudStackVpcHavip_basic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"ha_vip_name":        fmt.Sprintf("%s_change", name),
-						"ha_vip_description": fmt.Sprintf("%s_change", name),
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"master_instance_id": "${alibabacloudstack_ecs_instance.default0.id}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"master_instance_id": "${alibabacloudstack_ecs_instance.default0.id}",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"master_instance_id": "${alibabacloudstack_ecs_instance.default1.id}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"master_instance_id": "${alibabacloudstack_ecs_instance.default1.id}",
+						"ha_vip_name": fmt.Sprintf("%s_change", name),
+						"description": fmt.Sprintf("%s_change", name),
 					}),
 				),
 			},
@@ -180,7 +160,6 @@ variable "name" {
 %s
 
 resource "alibabacloudstack_ecs_instance" "default0" {
-  count                = 2
   image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
   instance_type        = "${local.default_instance_type_id}"
   system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"

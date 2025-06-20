@@ -64,10 +64,10 @@ func resourceAlibabacloudStackVpcHavip() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"master_instance_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
+			// "master_instance_id": {
+			// 	Type:     schema.TypeString,
+			// 	Optional: true,
+			// },
 
 			"status": {
 				Type:     schema.TypeString,
@@ -147,7 +147,6 @@ func resourceAlibabacloudStackVpcHavipCreate(d *schema.ResourceData, meta interf
 	d.SetId(fmt.Sprintf("%s", ha_vip_id))
 	vpcservice := VpcService{client}
 	stateConf := BuildStateConf([]string{"Pending"}, []string{"Available", "InUse"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, vpcservice.VpcHaVipStateRefreshFunc(ha_vip_id, []string{}))
-
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -159,15 +158,16 @@ func resourceAlibabacloudStackVpcHavipUpdate(d *schema.ResourceData, meta interf
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	// api: Vpc - 2016-04-28 - AssociateHaVip
 	vpcservice := VpcService{client}
-	if d.HasChanges("associated_instance_type", "associated_instances") {
-		if !d.IsNewResource() && d.HasChange("associated_instance_type") {
-			response, err := vpcservice.DoVpcDescribehavipsRequest(d.Id())
-			if err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-					"alibabacloudstack_vpc_ha_vip", "AssociateHaVip", errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-			instances := response.HaVips.HaVip[0].AssociatedInstances.AssociatedInstance
-			instance_type := response.HaVips.HaVip[0].AssociatedInstanceType
+	if !d.IsNewResource() && d.HasChanges("associated_instance_type") {
+		old_type, new_type := d.GetChange("associated_instance_type")
+		response, err := vpcservice.DoVpcDescribehavipsRequest(d.Id())
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+				"alibabacloudstack_vpc_ha_vip", "AssociateHaVip", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		instances := response.HaVips.HaVip[0].AssociatedInstances.AssociatedInstance
+		instance_type := response.HaVips.HaVip[0].AssociatedInstanceType
+		if len(instances) > 0 && response.HaVips.HaVip[0].Status == "InUse" && instance_type == old_type.(string) {
 			for _, instance := range instances {
 				err := vpcservice.UnassociateHaVip(d.Id(), instance_type, instance)
 				if err != nil {
@@ -176,34 +176,35 @@ func resourceAlibabacloudStackVpcHavipUpdate(d *schema.ResourceData, meta interf
 				}
 			}
 		}
-
-		if d.HasChange("associated_instances") {
-			old, new := d.GetChange("associated_instances")
-			old_instances := expandStringList(old.(*schema.Set).List())
-			new_instances := expandStringList(new.(*schema.Set).List())
-			added := make([]string, 0)
-			removed := make([]string, 0)
-			for _, instance := range old_instances {
-				exists := slices.Contains(new_instances, instance)
-				if !exists {
-					removed = append(removed, instance)
-				}
+		new := d.Get("associated_instances")
+		new_instances := expandStringList(new.(*schema.Set).List())
+		for _, instance := range new_instances {
+			err := vpcservice.AssociateHaVip(d.Id(), new_type.(string), instance)
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+					"alibabacloudstack_vpc_ha_vip", "AssociateHaVip", errmsgs.AlibabacloudStackSdkGoERROR)
 			}
-			for _, instance := range new_instances {
-				exists := slices.Contains(old_instances, instance)
-				if !exists {
-					added = append(added, instance)
-				}
+		}
+	} else if d.HasChange("associated_instances") {
+		old, new := d.GetChange("associated_instances")
+		old_instances := expandStringList(old.(*schema.Set).List())
+		new_instances := expandStringList(new.(*schema.Set).List())
+		added := make([]string, 0)
+		removed := make([]string, 0)
+		for _, instance := range old_instances {
+			exists := slices.Contains(new_instances, instance)
+			if !exists {
+				removed = append(removed, instance)
 			}
-			instance_type := d.Get("associated_instance_type").(string)
-
-			for _, instance := range removed {
-				err := vpcservice.UnassociateHaVip(d.Id(), instance_type, instance)
-				if err != nil {
-					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-						"alibabacloudstack_vpc_ha_vip", "UnassociateHaVip", errmsgs.AlibabacloudStackSdkGoERROR)
-				}
+		}
+		for _, instance := range new_instances {
+			exists := slices.Contains(old_instances, instance)
+			if !exists {
+				added = append(added, instance)
 			}
+		}
+		instance_type := d.Get("associated_instance_type").(string)
+		if len(added) > 0 {
 			for _, instance := range added {
 				err := vpcservice.AssociateHaVip(d.Id(), instance_type, instance)
 				if err != nil {
@@ -211,9 +212,16 @@ func resourceAlibabacloudStackVpcHavipUpdate(d *schema.ResourceData, meta interf
 						"alibabacloudstack_vpc_ha_vip", "AssociateHaVip", errmsgs.AlibabacloudStackSdkGoERROR)
 				}
 			}
-
 		}
-
+		if len(removed) > 0 {
+			for _, instance := range removed {
+				err := vpcservice.UnassociateHaVip(d.Id(), instance_type, instance)
+				if err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+						"alibabacloudstack_vpc_ha_vip", "UnassociateHaVip", errmsgs.AlibabacloudStackSdkGoERROR)
+				}
+			}
+		}
 	}
 
 	// Description
@@ -248,27 +256,27 @@ func resourceAlibabacloudStackVpcHavipUpdate(d *schema.ResourceData, meta interf
 		}
 	}
 
-	// api: Vpc - 2016-04-28 - SetHaVipMasterInstance
-	if d.HasChanges("master_instance_id") && d.Get("master_instance_id").(string) != "" {
-		request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "SetHaVipMasterInstance", "")
-		request.QueryParams["HaVipId"] = d.Id()
-		if v, ok := d.GetOk("master_instance_id"); ok {
-			request.QueryParams["MasterInstanceId"] = v.(string)
-		} else {
-			return fmt.Errorf("MasterInstanceId is required")
-		}
+	// // api: Vpc - 2016-04-28 - SetHaVipMasterInstance
+	// if d.HasChanges("master_instance_id") && d.Get("master_instance_id").(string) != "" {
+	// 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "SetHaVipMasterInstance", "")
+	// 	request.QueryParams["HaVipId"] = d.Id()
+	// 	if v, ok := d.GetOk("master_instance_id"); ok {
+	// 		request.QueryParams["MasterInstanceId"] = v.(string)
+	// 	} else {
+	// 		return fmt.Errorf("MasterInstanceId is required")
+	// 	}
 
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_vpc_ha_vip", "SetHaVipMasterInstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-	}
+	// 	bresponse, err := client.ProcessCommonRequest(request)
+	// 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	// 	if err != nil {
+	// 		if bresponse == nil {
+	// 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	// 		}
+	// 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	// 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+	// 			"alibabacloudstack_vpc_ha_vip", "SetHaVipMasterInstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	// 	}
+	// }
 
 	return nil
 }
@@ -297,7 +305,7 @@ func resourceAlibabacloudStackVpcHavipRead(d *schema.ResourceData, meta interfac
 
 	d.Set("ip_address", data.IpAddress)
 
-	d.Set("master_instance_id", data.MasterInstanceId)
+	// d.Set("master_instance_id", data.MasterInstanceId)
 
 	d.Set("status", data.Status)
 

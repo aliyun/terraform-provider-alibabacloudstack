@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -98,6 +99,10 @@ func (s *VpcService) AssociateHaVip(id, instance_type, instance_id string) error
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 			"alibabacloudstack_vpc_ha_vip", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
+	stateConf := BuildStateConf([]string{"Associating"}, []string{"Available", "InUse"}, 5*time.Minute, 10*time.Second, s.VpcHaVipStateRefreshFunc(id, []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, id)
+	}
 	return nil
 }
 
@@ -116,6 +121,10 @@ func (s *VpcService) UnassociateHaVip(id, instance_type, instance_id string) err
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 			"alibabacloudstack_vpc_ha_vip", "UnassociateHaVip", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	stateConf := BuildStateConf([]string{"Associating", "Unassociating"}, []string{"Available", "InUse"}, 5*time.Minute, 10*time.Second, s.VpcHaVipStateRefreshFunc(id, []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, id)
 	}
 	return nil
 }
