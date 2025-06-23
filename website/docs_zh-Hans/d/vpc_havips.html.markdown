@@ -105,7 +105,7 @@ resource "alibabacloudstack_vpc_ha_vip" "default" {
   vswitch_id  = "${alibabacloudstack_vpc_vswitch.default.id}"
   vpc_id      = "${alibabacloudstack_vpc_vpc.default.id}"
   associated_instance_type = "NetworkInterface"
-  associated_instances = ["${alibabacloudstack_ecs_networkinterface.default[0].id}", "${alibabacloudstack_ecs_networkinterface.default[1].id}",]
+  associated_instances = ["${alibabacloudstack_ecs_networkinterface.default.0.id}", "${alibabacloudstack_ecs_networkinterface.default[1].id}",]
 }
 
  

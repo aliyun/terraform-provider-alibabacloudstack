@@ -17,7 +17,8 @@ func TestAccAlibabacloudStackVpcHavip_basic(t *testing.T) {
 	}, "DoVpcDescribehavipsRequest")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	name := fmt.Sprintf("tf-testAccVpcHavipBasic")
+	rand := getAccTestRandInt(1000, 9999)
+	name := fmt.Sprintf("tf-testAccVpcHavipBasic_%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceVpcHavipBasicDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -37,8 +38,8 @@ func TestAccAlibabacloudStackVpcHavip_basic(t *testing.T) {
 					"vpc_id":                   "${alibabacloudstack_vpc_vpc.default.id}",
 					"associated_instance_type": "EcsInstance",
 					"associated_instances": []string{
-						"${alibabacloudstack_ecs_instance.default0.id}",
-						"${alibabacloudstack_ecs_instance.default1.id}",
+						"${alibabacloudstack_ecs_instance.default.0.id}",
+						"${alibabacloudstack_ecs_instance.default.1.id}",
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -159,32 +160,15 @@ variable "name" {
 
 %s
 
-resource "alibabacloudstack_ecs_instance" "default0" {
+resource "alibabacloudstack_ecs_instance" "default" {
+  count                = 2
   image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
   instance_type        = "${local.default_instance_type_id}"
   system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
   system_disk_size     = 20
   system_disk_name     = "test_sys_disk"
   security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
-  instance_name        = "${var.name}_ecs"
-  vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
-  zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
-  lifecycle {
-    ignore_changes = [
-      instance_type,
-	  system_disk_category
-    ]
-  }
-}
-
-resource "alibabacloudstack_ecs_instance" "default1" {
-  image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
-  instance_type        = "${local.default_instance_type_id}"
-  system_disk_category = "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"
-  system_disk_size     = 20
-  system_disk_name     = "test_sys_disk"
-  security_groups      = [alibabacloudstack_ecs_securitygroup.default.id]
-  instance_name        = "${var.name}_ecs1"
+  instance_name        = "${var.name}_ecs_${count.index}"
   vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
   zone_id    		   = data.alibabacloudstack_zones.default.zones.0.id
   lifecycle {
@@ -198,7 +182,7 @@ resource "alibabacloudstack_ecs_instance" "default1" {
 
 resource "alibabacloudstack_ecs_networkinterface" "default" {
   	count                	= 2
-	network_interface_name 	= "${var.name}_eni"
+	network_interface_name 	= "${var.name}_eni_${count.index}"
     vswitch_id 				= "${alibabacloudstack_vpc_vswitch.default.id}"
 	security_groups      	= [alibabacloudstack_ecs_securitygroup.default.id]
 }
