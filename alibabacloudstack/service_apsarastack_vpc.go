@@ -1846,3 +1846,110 @@ func (s *VpcService) DoVpcGetdhcpoptionssetRequest(id string) (*VpcGetdhcpoption
 
 	return VpcGetdhcpoptionssetResponseObj, nil
 }
+
+
+type NatgatewayService struct {
+	client *connectivity.AlibabacloudStackClient
+}
+
+type VpcDescribebandwidthpackagemonitordataResponse struct {
+	MonitorDatas struct {
+		MonitorData []struct {
+			RX                   int    `json:"RX"`
+			TX                   int    `json:"TX"`
+			ReceivedBandwidth    int    `json:"ReceivedBandwidth"`
+			TransportedBandwidth int    `json:"TransportedBandwidth"`
+			Flow                 int    `json:"Flow"`
+			Bandwidth            int    `json:"Bandwidth"`
+			Packets              int    `json:"Packets"`
+			TimeStamp            string `json:"TimeStamp"`
+		} `json:"MonitorData"`
+	} `json:"MonitorDatas"`
+	RequestId string `json:"RequestId"`
+}
+
+func (s *NatgatewayService) DoVpcDescribebandwidthpackagemonitordataRequest(id string) (*VpcDescribebandwidthpackagemonitordataResponse, error) {
+	// api: Vpc - 2016-04-28 - DescribeBandwidthPackageMonitorData
+	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeBandwidthPackageMonitorData", "")
+	VpcDescribebandwidthpackagemonitordataResponseObj := &VpcDescribebandwidthpackagemonitordataResponse{}
+
+	//调用request_params_handler
+
+	request.QueryParams["BandwidthPackageId"] = id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBandwidthPackageMonitorData", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribebandwidthpackagemonitordataResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBandwidthPackageMonitorData", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return VpcDescribebandwidthpackagemonitordataResponseObj, nil
+}
+
+type VpcDescribebandwidthpackagesResponse struct {
+	BandwidthPackages struct {
+		BandwidthPackage []struct {
+			PublicIpAddresses struct {
+				PublicIpAddresse []struct {
+					AllocationId    string `json:"AllocationId"`
+					IpAddress       string `json:"IpAddress"`
+					UsingStatus     string `json:"UsingStatus"`
+					ApAccessEnabled bool   `json:"ApAccessEnabled"`
+				} `json:"PublicIpAddresse"`
+			} `json:"PublicIpAddresses"`
+			BandwidthPackageId string `json:"BandwidthPackageId"`
+			RegionId           string `json:"RegionId"`
+			Name               string `json:"Name"`
+			Description        string `json:"Description"`
+			ZoneId             string `json:"ZoneId"`
+			NatGatewayId       string `json:"NatGatewayId"`
+			Bandwidth          string `json:"Bandwidth"`
+			InstanceChargeType string `json:"InstanceChargeType"`
+			InternetChargeType string `json:"InternetChargeType"`
+			BusinessStatus     string `json:"BusinessStatus"`
+			IpCount            string `json:"IpCount"`
+			CreationTime       string `json:"CreationTime"`
+			Status             string `json:"Status"`
+			ISP                string `json:"ISP"`
+		} `json:"BandwidthPackage"`
+	} `json:"BandwidthPackages"`
+	RequestId  string `json:"RequestId"`
+	TotalCount int    `json:"TotalCount"`
+	PageNumber int    `json:"PageNumber"`
+	PageSize   int    `json:"PageSize"`
+}
+
+func (s *NatgatewayService) DoVpcDescribebandwidthpackagesRequest(id string) (*VpcDescribebandwidthpackagesResponse, error) {
+	// api: Vpc - 2016-04-28 - DescribeBandwidthPackages
+	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeBandwidthPackages", "")
+	VpcDescribebandwidthpackagesResponseObj := &VpcDescribebandwidthpackagesResponse{}
+
+	//调用request_params_handler
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBandwidthPackages", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribebandwidthpackagesResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBandwidthPackages", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return VpcDescribebandwidthpackagesResponseObj, nil
+}
