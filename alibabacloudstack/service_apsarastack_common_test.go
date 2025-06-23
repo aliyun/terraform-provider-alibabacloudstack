@@ -177,7 +177,7 @@ func (rc *resourceCheck) checkResourceDestroy() resource.TestCheckFunc {
 			} else if outValue[0].IsNil() {
 				// 返回为空，且没有报错时也视为未找到数据，删除成功
 				continue
-			}else {
+			} else {
 				return errmsgs.WrapError(errmsgs.Error("the resource %s %s was not destroyed ! ", rc.resourceId, rs.Primary.ID))
 			}
 		}
@@ -1151,7 +1151,6 @@ resource "alibabacloudstack_ram_role" "default" {
 `
 
 const SlbListenerVserverCommonTestCase = DataAlibabacloudstackVswitchZones + DataAlibabacloudstackInstanceTypes + DataAlibabacloudstackImages + SecurityGroupCommonTestCase + `
-
 resource "alibabacloudstack_instance" "default" {
   image_id = "${data.alibabacloudstack_images.default.images.0.id}"
   instance_type = "${data.alibabacloudstack_instance_types.default.instance_types.0.id}"
@@ -1193,7 +1192,6 @@ resource "alibabacloudstack_slb_master_slave_server_group" "default" {
 `
 
 const DataZoneCommonTestCase = `
-
 data "alibabacloudstack_zones" default {
   available_resource_creation = "VSwitch"
   enable_details = true
@@ -1202,7 +1200,6 @@ data "alibabacloudstack_zones" default {
 `
 
 const VpcCommonTestCase = `
-
 resource "alibabacloudstack_vpc_vpc" "default" {
   vpc_name = "${var.name}_vpc"
   cidr_block = "172.16.0.0/16"
@@ -1210,7 +1207,6 @@ resource "alibabacloudstack_vpc_vpc" "default" {
 `
 
 const VSwitchCommonTestCase = DataZoneCommonTestCase + VpcCommonTestCase + `
-
 resource "alibabacloudstack_vpc_vswitch" "default" {
   name = "${var.name}_vsw"
   vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
@@ -1221,7 +1217,6 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 `
 
 const DBClusterCommonTestCase = VSwitchCommonTestCase + `
-
 resource "alibabacloudstack_adb_db_cluster" "cluster" {
   db_cluster_version  = "3.0"
   db_cluster_category = "Cluster"
@@ -1236,7 +1231,6 @@ resource "alibabacloudstack_adb_db_cluster" "cluster" {
 `
 
 const EipCommonTestCase = `
-
 resource "alibabacloudstack_eip" "example" {
   bandwidth            = "10"
 }
@@ -1244,7 +1238,6 @@ resource "alibabacloudstack_eip" "example" {
 `
 
 const SecurityGroupCommonTestCase = VSwitchCommonTestCase + `
-
 resource "alibabacloudstack_ecs_securitygroup" "default" {
   name   = "${var.name}_sg"
   vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
@@ -1264,8 +1257,6 @@ resource "alibabacloudstack_security_group_rule" "default" {
 `
 
 const ECSInstanceCommonTestCase = SecurityGroupCommonTestCase + DataAlibabacloudstackImages + DataAlibabacloudstackInstanceTypes + `
-
- 
 resource "alibabacloudstack_ecs_instance" "default" {
   image_id             = "${data.alibabacloudstack_images.default.images.0.id}"
   instance_type        = "${local.default_instance_type_id}"
@@ -1287,7 +1278,6 @@ resource "alibabacloudstack_ecs_instance" "default" {
 `
 
 const CbwpCommonTestCase = `
-
 resource "alibabacloudstack_common_bandwidth_package" "foo" {
   bandwidth            = "200"
   name                 = "${var.name}_cbwp"

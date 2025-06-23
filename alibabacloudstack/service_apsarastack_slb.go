@@ -905,137 +905,91 @@ func (s *SlbService) DescribeTags(resourceId string, resourceTags map[string]int
 	return
 }
 
-func (s *SlbService) SetAccessLogsDownloadAttribute(logs_download_attributes map[string]interface{}, load_balancer_id string) error {
-	request := requests.NewCommonRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	logs_attr_str := fmt.Sprintf("[{\"LoadBalancerId\":\"%s\",\"LogProject\":\"%s\",\"Logstore\":\"%s\",\"LogType\":\"layer7\",\"RoleName\":\"aliyunlogarchiverole\",\"Department\":\"%s\",\"ResourceGroup\":\"%s\"}]",
-		load_balancer_id, logs_download_attributes["log_project"], logs_download_attributes["log_store"], s.client.Department, s.client.ResourceGroup)
-	request.Method = "POST"
-	request.Product = "Slb"
-	request.Version = "2014-05-15"
-	request.ApiName = "SetAccessLogsDownloadAttribute"
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{
-		"RegionId": s.client.RegionId,
-	}
+func (s *SlbService) SetAccessLogsDownloadAttribute(logs_attr_str string, load_balancer_id string) error {
+	request := s.client.NewCommonRequest("POST", "Slb", "2014-05-15", "SetAccessLogsDownloadAttribute", "")
 	request.QueryParams = map[string]string{
-
-		"Product":                "slb",
-		"Department":             s.client.Department,
-		"ResourceGroup":          s.client.ResourceGroup,
-		"RegionId":               s.client.RegionId,
 		"LogsDownloadAttributes": logs_attr_str,
 		"loadBalancerId":         load_balancer_id,
 	}
-	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-		return slbClient.ProcessCommonRequest(request)
-	})
-	addDebug(request.GetActionName(), raw, request, request.QueryParams)
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_slb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_slb_access_log", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	response, _ := raw.(*responses.CommonResponse)
-	if !response.IsSuccess() {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_slb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_access_log", "SetAccessLogsDownloadAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	return nil
 }
 
 func (s *SlbService) DeleteAccessLogsDownloadAttribute(load_balancer_id string) error {
-	request := requests.NewCommonRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
+	request := s.client.NewCommonRequest("POST", "Slb", "2014-05-15", "DeleteAccessLogsDownloadAttribute", "")
 	logs_download_attributes := fmt.Sprintf("[{\"LoadBalancerId\":\"%s\",}]", load_balancer_id)
-	request.Method = "POST"
-	request.Product = "Slb"
-	request.Version = "2014-05-15"
-	request.ApiName = "DeleteAccessLogsDownloadAttribute"
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{
-		"RegionId": s.client.RegionId,
-	}
 	request.QueryParams = map[string]string{
-
-		"Product":                "slb",
-		"Department":             s.client.Department,
-		"ResourceGroup":          s.client.ResourceGroup,
-		"RegionId":               s.client.RegionId,
 		"LogsDownloadAttributes": logs_download_attributes,
 		"loadBalancerId":         load_balancer_id,
 	}
-	raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-		return slbClient.ProcessCommonRequest(request)
-	})
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_slb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	addDebug(request.GetActionName(), raw, request, request.QueryParams)
-	response, _ := raw.(*responses.CommonResponse)
-	if !response.IsSuccess() {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_slb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_slb_access_log", "DeleteAccessLogsDownloadAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	return nil
 }
 
-func (s *SlbService) DescribeAccessLogsDownloadAttribute(logs_type string, load_balancer_id string) (logsattr []interface{}, err error) {
-	request := requests.NewCommonRequest()
-	if strings.ToLower(s.client.Config.Protocol) == "https" {
-		request.Scheme = "https"
-	} else {
-		request.Scheme = "http"
-	}
-	request.Method = "POST"
-	request.Product = "Slb"
-	request.Version = "2014-05-15"
-	request.ApiName = "DescribeAccessLogsDownloadAttribute"
-	request.RegionId = s.client.RegionId
-	request.Headers = map[string]string{
-		"RegionId": s.client.RegionId,
-	}
-	logsattr = make([]interface{}, 0)
-	PageNumber := 1
-	for {
-		request.QueryParams = map[string]string{
+type Slblogsdownloadattribute struct {
+	LogProject     string `json:"LogProject"`
+	LogStore       string `json:"LogStore"`
+	LoadBalancerId string `json:"LoadBalancerId"`
+	LogType        string `json:"LogType"`
+	RoleArn        string `json:"RoleArn"`
+	Region         string `json:"Region"`
+}
 
-			"Product":        "slb",
-			"Department":     s.client.Department,
-			"ResourceGroup":  s.client.ResourceGroup,
-			"RegionId":       s.client.RegionId,
-			"PageNumber":     "1",
-			"PageSize":       "50",
-			"loadBalancerId": load_balancer_id,
-			"LogType":        "layer7",
-		}
-		raw, err := s.client.WithSlbClient(func(slbClient *slb.Client) (interface{}, error) {
-			return slbClient.ProcessCommonRequest(request)
-		})
-		if err != nil {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_slb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		addDebug(request.GetActionName(), raw, request, request.QueryParams)
-		response, _ := raw.(*responses.CommonResponse)
-		if !response.IsSuccess() {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "apsarastack_slb", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		response_body := make(map[string]interface{})
-		err = json.Unmarshal(response.GetHttpContentBytes(), &response_body)
-		if err != nil {
-			return nil, errmsgs.WrapError(err)
-		} else {
-			logsattr = append(logsattr, response_body["LogsDownloadAttributes"].([]interface{})...)
-		}
-		if len(logsattr) < response_body["TotalCount"].(int) {
-			PageNumber += 1
-		} else {
-			break
-		}
+type SlbDescribeaccesslogsdownloadattributeResponse struct {
+	LogsDownloadAttributes struct {
+		LogsDownloadAttribute []Slblogsdownloadattribute `json:"LogsDownloadAttribute"`
+	} `json:"LogsDownloadAttributes"`
+	RequestId  string `json:"RequestId"`
+	PageNumber int    `json:"PageNumber"`
+	PageSize   int    `json:"PageSize"`
+	TotalCount int    `json:"TotalCount"`
+	Count      int    `json:"Count"`
+}
+
+func (s *SlbService) DescribeAccessLogsDownloadAttribute(load_balancer_id string) (logsattr *Slblogsdownloadattribute, err error) {
+	request := s.client.NewCommonRequest("POST", "Slb", "2014-05-15", "DescribeAccessLogsDownloadAttribute", "")
+	request.QueryParams = map[string]string{
+		"loadBalancerId": load_balancer_id,
+		"LogType":        "layer7",
+	}
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_slb_access_log", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if !bresponse.IsSuccess() {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_slb_access_log", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	
+	slblogs := &SlbDescribeaccesslogsdownloadattributeResponse{}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &slblogs)
+	if err != nil {
+		return nil, errmsgs.WrapError(err)
+	}
+	if len(slblogs.LogsDownloadAttributes.LogsDownloadAttribute) > 0 {
+		logsattr = &slblogs.LogsDownloadAttributes.LogsDownloadAttribute[0]
 	}
 	return logsattr, nil
 }

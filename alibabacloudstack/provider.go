@@ -339,7 +339,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ecs_hpcclusters":                         dataSourceAlibabacloudStackEcsHpcClusters(),
 		"alibabacloudstack_ecs_dedicated_hosts":                     dataSourceAlibabacloudStackEcsDedicatedHosts(),
 		"alibabacloudstack_ecs_dedicatedhosts":                      dataSourceAlibabacloudStackEcsDedicatedHosts(),
-		"alibabacloudstack_ecs_dedicated_host_cluster":               dataSourceAlibabacloudStackEcsDedicatedHostClusters(),
+		"alibabacloudstack_ecs_dedicated_host_cluster":              dataSourceAlibabacloudStackEcsDedicatedHostClusters(),
 		"alibabacloudstack_edas_deploy_groups":                      dataSourceAlibabacloudStackEdasDeployGroups(),
 		"alibabacloudstack_edas_deploygroups":                       dataSourceAlibabacloudStackEdasDeployGroups(),
 		"alibabacloudstack_edas_clusters":                           dataSourceAlibabacloudStackEdasClusters(),
@@ -493,6 +493,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ecs_snapshot_groups":   dataSourceAlibabacloudStackEcsSnapshotGroups(),
 		"alibabacloudstack_ecs_invocations":       dataSourceAlibabacloudStackEcsInvocations(),
 		"alibabacloudstack_vpc_dhcp_options_sets": dataSourceAlibabacloudStackVpcDhcpOptionsSets(),
+		"alibabacloudstack_slb_access_logs":       dataSourceAlibabacloudStackSlbAccessLogs(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -833,6 +834,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_ecs_snapshot_group":   resourceAlibabacloudStackEcsSnapshotgroup(),
 		"alibabacloudstack_ecs_invocation":       resourceAlibabacloudStackEcsInvocation(),
 		"alibabacloudstack_vpc_dhcp_options_set": resourceAlibabacloudStackVpcDhcpoptionsset(),
+		"alibabacloudstack_slb_access_log":       resourceAlibabacloudStackSlbAccesslog(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

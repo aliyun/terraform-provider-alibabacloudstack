@@ -716,8 +716,12 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 				return errmsgs.WrapError(err)
 			}
 		}
+		logs_download_attributes := new.(map[string]interface{})
+		load_balancer_id := d.Get("load_balancer_id").(string)
+		logs_attr_str := fmt.Sprintf("[{\"LoadBalancerId\":\"%s\",\"LogProject\":\"%s\",\"Logstore\":\"%s\",\"LogType\":\"layer7\",\"RoleName\":\"aliyunlogarchiverole\",\"Department\":\"%s\",\"ResourceGroup\":\"%s\"}]",
+			load_balancer_id, logs_download_attributes["log_project"].(string), logs_download_attributes["log_store"].(string), client.Department, client.ResourceGroup)
 		if new != "" {
-			err = slbService.SetAccessLogsDownloadAttribute(new.(map[string]interface{}), d.Get("load_balancer_id").(string))
+			err = slbService.SetAccessLogsDownloadAttribute(logs_attr_str, load_balancer_id)
 			if err != nil {
 				return errmsgs.WrapError(err)
 			}
