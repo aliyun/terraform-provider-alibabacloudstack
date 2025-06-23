@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceAlibabacloudStackNatgatewayBandwidthpackage() *schema.Resource {
+func resourceAlibabacloudStackNatgatewayBandwidthPackage() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -143,9 +143,9 @@ func resourceAlibabacloudStackNatgatewayBandwidthpackageCreate(d *schema.Resourc
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_natgateway_bandwidthpackage", "CreateBandwidthPackage", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	bandwithpackage_id := VpcCreatebandwidthpackageResponseObj.BandwidthPackageId
+	bandwidthpackage_id := VpcCreatebandwidthpackageResponseObj.BandwidthPackageId
 
-	d.SetId(bandwithpackage_id)
+	d.SetId(bandwidthpackage_id)
 	return nil
 
 }

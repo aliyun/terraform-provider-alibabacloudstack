@@ -204,10 +204,10 @@ func dataSourceAlibabacloudStackNatgatewayBandwidthPackagesRead(d *schema.Resour
 			}
 		}
 		public_ip_addresses := []map[string]string{}
-		for _, data := range data.PublicIpAddresses.PublicIpAddresse {
+		for _, public_ip_addrdss_data := range data.PublicIpAddresses.PublicIpAddresse {
 			ip_address_map := map[string]string{}
-			ip_address_map["ip_address"] = data.IpAddress
-			ip_address_map["allocation_id"] = data.AllocationId
+			ip_address_map["ip_address"] = public_ip_addrdss_data.IpAddress
+			ip_address_map["allocation_id"] = public_ip_addrdss_data.AllocationId
 			public_ip_addresses = append(public_ip_addresses, ip_address_map)
 		}
 		i := map[string]interface{}{

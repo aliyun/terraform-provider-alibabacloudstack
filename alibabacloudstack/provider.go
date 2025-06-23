@@ -649,7 +649,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_autoscaling_scheduledtask":              resourceAlibabacloudStackEssScheduledTask(),
 		"alibabacloudstack_forward_entry":                          resourceAlibabacloudStackForwardEntry(),
 		"alibabacloudstack_natgateway_forwardentry":                resourceAlibabacloudStackForwardEntry(),
-		"alibabacloudstack_natgateway_bandwidth_package":           resourceAlibabacloudStackNatgatewayBandwidthpackage(),
+		"alibabacloudstack_natgateway_bandwidth_package":           resourceAlibabacloudStackNatgatewayBandwidthPackage(),
 		"alibabacloudstack_gpdb_account":                           resourceAlibabacloudStackGpdbAccount(),
 		"alibabacloudstack_gpdb_connection":                        resourceAlibabacloudStackGpdbConnection(),
 		"alibabacloudstack_gpdb_publicconnection":                  resourceAlibabacloudStackGpdbConnection(),
