@@ -292,8 +292,9 @@ func resourceAlibabacloudStackSlbListener() *schema.Resource {
 				Default:  false,
 			},
 			"logs_download_attributes": {
-				Type:     schema.TypeList,
-				Optional: true,
+				Type:       schema.TypeList,
+				Optional:   true,
+				Deprecated: "Field 'logs_download_attributes' has been deprecated from 3.19.0+ and using new resource 'alibabastack_slb_access_log' instead.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"log_project": {
