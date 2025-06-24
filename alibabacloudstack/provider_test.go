@@ -408,7 +408,9 @@ func GeneratePassword(length int) string {
 		return v
 	}
 	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err != nil && v {
-		return "<YOUR PASSWORD>"
+		if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_SENSITIVE")); err == nil && v {
+			return "<YOUR PASSWORD>"
+		}
 	}
 	
 	// 定义字符集

@@ -1,8 +1,8 @@
 package connectivity
 
 import (
-	"log"
 	"github.com/PaesslerAG/jsonpath"
+	"log"
 
 	roaCS "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
@@ -1125,7 +1125,7 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 	request.QueryParams = client.defaultQueryParams()
 }
 
-func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode string, version string, apiname string, pathpattern string, headers map[string]*string, query map[string]interface{}, body map[string]interface{}) (_result map[string]interface{}, _err error) {
+func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, apiname, pathpattern string, headers map[string]*string, query, body map[string]interface{}) (_result map[string]interface{}, _err error) {
 	ServiceCodeStr := strings.ReplaceAll(strings.ToUpper(popcode), "-", "_")
 	endpoint := client.Config.Endpoints[ServiceCode(ServiceCodeStr)]
 	if endpoint == "" {
@@ -1241,7 +1241,7 @@ func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*s
 }
 
 func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.CommonRequest) (*responses.CommonResponse, error) {
-	popcode := ServiceCode(strings.ReplaceAll(strings.ToUpper(request.Product),"-","_"))
+	popcode := ServiceCode(strings.ReplaceAll(strings.ToUpper(request.Product), "-", "_"))
 
 	conn, err := client.getConnectClient(popcode)
 	if err != nil {

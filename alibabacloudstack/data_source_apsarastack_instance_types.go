@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -187,14 +188,31 @@ func dataSourceAlibabacloudStackInstanceTypesRead(d *schema.ResourceData, meta i
 			}
 		}
 	}
-
-	cpu := d.Get("cpu_core_count").(int)
-	mem := d.Get("memory_size").(float64)
-	family := strings.TrimSpace(d.Get("instance_type_family").(string))
+	var instanceTypes []instanceTypeWithOriginalPrice
+	
+	if len(mapInstanceTypes) == 0 {
+		return instanceTypesDescriptionAttributes(d, instanceTypes, mapInstanceTypes)
+	}
 
 	req := ecs.CreateDescribeInstanceTypesRequest()
 	client.InitRpcRequest(*req.RpcRequest)
-	req.InstanceTypeFamily = family
+	if v, ok := d.GetOk("cpu_core_count"); ok {
+		req.MaximumCpuCoreCount = requests.NewInteger(v.(int))
+		req.MinimumCpuCoreCount = requests.NewInteger(v.(int))
+	}
+	if v, ok := d.GetOk("memory_size"); ok {
+		req.MaximumMemorySize = requests.NewFloat(v.(float64))
+		req.MinimumMemorySize = requests.NewFloat(v.(float64))
+	}
+	if v, ok := d.GetOk("instance_type_family"); ok {
+		family := strings.TrimSpace(v.(string))
+		if family != "" {
+			req.InstanceTypeFamily = family
+		}
+	}
+	if v, ok := d.GetOk("eni_amount"); ok {
+		req.MinimumEniQuantity = requests.NewInteger(v.(int))
+	}
 
 	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
 		return ecsClient.DescribeInstanceTypes(req)
@@ -207,7 +225,6 @@ func dataSourceAlibabacloudStackInstanceTypesRead(d *schema.ResourceData, meta i
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_instance_types", req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	var instanceTypes []instanceTypeWithOriginalPrice
 
 	if resp != nil {
 		eniAmount := d.Get("eni_amount").(int)
@@ -232,13 +249,6 @@ func dataSourceAlibabacloudStackInstanceTypesRead(d *schema.ResourceData, meta i
 				}
 			}
 
-			if cpu > 0 && types.CpuCoreCount != cpu {
-				continue
-			}
-
-			if mem > 0 && types.MemorySize != mem {
-				continue
-			}
 			if eniAmount > types.EniQuantity {
 				continue
 			}
