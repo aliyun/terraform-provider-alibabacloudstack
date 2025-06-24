@@ -17,8 +17,9 @@ func TestAccAlibabacloudStackVpcHavip_basic(t *testing.T) {
 	}, "DoVpcDescribehavipsRequest")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(1000, 9999)
+	rand := getAccTestRandInt(1, 254)
 	name := fmt.Sprintf("tf-testAccVpcHavipBasic_%v", rand)
+	ip := fmt.Sprintf("172.16.1_%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceVpcHavipBasicDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -33,7 +34,7 @@ func TestAccAlibabacloudStackVpcHavip_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"ha_vip_name":              "${var.name}",
 					"description":              "${var.name}",
-					"ip_address":               "172.16.1.88",
+					"ip_address":               ip,
 					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
 					"vpc_id":                   "${alibabacloudstack_vpc_vpc.default.id}",
 					"associated_instance_type": "EcsInstance",
@@ -46,7 +47,7 @@ func TestAccAlibabacloudStackVpcHavip_basic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"ha_vip_name":              name,
 						"description":              name,
-						"ip_address":               "172.16.1.88",
+						"ip_address":               ip,
 						"associated_instance_type": "EcsInstance",
 						"associated_instances.#":   "2",
 						"vswitch_id":               CHECKSET,
