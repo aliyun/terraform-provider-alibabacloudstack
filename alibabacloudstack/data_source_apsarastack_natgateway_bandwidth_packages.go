@@ -6,7 +6,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"regexp"
-	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -145,16 +144,6 @@ func dataSourceAlibabacloudStackNatgatewayBandwidthPackagesRead(d *schema.Resour
 	// api: Vpc - 2016-04-28 - DescribeBandwidthPackages
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeBandwidthPackages", "")
 	VpcDescribebandwidthpackagesResponseObj := VpcDescribebandwidthpackagesResponse{}
-
-	//调用request_params_handler
-
-	if v, ok := d.GetOk("page_number"); ok {
-		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("page_size"); ok {
-		request.QueryParams["PageSize"] = strconv.Itoa(v.(int))
-	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
