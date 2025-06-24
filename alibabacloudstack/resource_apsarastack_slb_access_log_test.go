@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackSlbAccesslog_basic0(t *testing.T) {
+func TestAccAlibabacloudStackSlbAccessLog_basic0(t *testing.T) {
 	var v *Slblogsdownloadattribute
 	resourceId := "alibabacloudstack_slb_access_log.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackSlbAccesslogCheckMap)
@@ -30,15 +30,15 @@ func TestAccAlibabacloudStackSlbAccesslog_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"log_project":      "testtf",
-					"log_store":        "testtf1",
+					"log_project":      "${alibabacloudstack_log_project.default.name}",
+					"log_store":        "${alibabacloudstack_log_store.default.name}",
 					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
 					"depends_on":       []string{"alibabacloudstack_slb_listener.default"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"log_project": "alibabacloudstack_log_project.default.name",
-						"log_store":   "alibabacloudstack_log_store.default.name",
+						"log_project": name,
+						"log_store":   name,
 					}),
 				),
 			},
