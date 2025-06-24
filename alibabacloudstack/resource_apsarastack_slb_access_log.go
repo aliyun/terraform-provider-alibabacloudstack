@@ -111,7 +111,7 @@ func resourceAlibabacloudStackSlbAccesslogCreate(d *schema.ResourceData, meta in
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_slb_accesslog", "SetAccessLogsDownloadAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	d.SetId(fmt.Sprintf("%s", load_balancer_id))
+	d.SetId(fmt.Sprintf("%s:%s:%s", load_balancer_id, log_project, log_store))
 	return nil
 
 }

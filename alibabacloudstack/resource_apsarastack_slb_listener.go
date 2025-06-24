@@ -717,10 +717,15 @@ func resourceAlibabacloudStackSlbListenerUpdate(d *schema.ResourceData, meta int
 			}
 		}
 		logs_download_attributes := new.(map[string]interface{})
-		load_balancer_id := d.Get("load_balancer_id").(string)
-		logs_attr_str := fmt.Sprintf("[{\"LoadBalancerId\":\"%s\",\"LogProject\":\"%s\",\"Logstore\":\"%s\",\"LogType\":\"layer7\",\"RoleName\":\"aliyunlogarchiverole\",\"Department\":\"%s\",\"ResourceGroup\":\"%s\"}]",
-			load_balancer_id, logs_download_attributes["log_project"].(string), logs_download_attributes["log_store"].(string), client.Department, client.ResourceGroup)
-		if new != "" {
+		if len(logs_download_attributes) > 0 {
+			load_balancer_id := d.Get("load_balancer_id").(string)
+			access_log_id := fmt.Sprintf("%s:%s:%s", load_balancer_id, logs_download_attributes["log_project"].(string), logs_download_attributes["log_store"].(string))
+			access_log, err := slbService.DescribeAccessLogsDownloadAttribute(access_log_id)
+			if access_log != nil {
+				return errmsgs.WrapError(errmsgs.Error("The logs_download_attributes can not be updated when the logs_download_attributes is already set on the slb load balancer ."))
+			}
+			logs_attr_str := fmt.Sprintf("[{\"LoadBalancerId\":\"%s\",\"LogProject\":\"%s\",\"Logstore\":\"%s\",\"LogType\":\"layer7\",\"RoleName\":\"aliyunlogarchiverole\",\"Department\":\"%s\",\"ResourceGroup\":\"%s\"}]",
+				load_balancer_id, logs_download_attributes["log_project"].(string), logs_download_attributes["log_store"].(string), client.Department, client.ResourceGroup)
 			err = slbService.SetAccessLogsDownloadAttribute(logs_attr_str, load_balancer_id)
 			if err != nil {
 				return errmsgs.WrapError(err)

@@ -10,7 +10,7 @@ func TestAccAlibabacloudStackSlbAccessLogsDataSource(t *testing.T) {
 	resourceId := "data.alibabacloudstack_slb_access_logs.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf-testAcc%sSlbAccessLogsDataSource-%d", defaultRegionToTest, rand),
+		fmt.Sprintf("tf-testAcc%s-%d", defaultRegionToTest, rand),
 		dataSourceSlbAccessLogsDependence)
 
 	descriptionRegexConf := dataSourceTestAccConfig{
@@ -47,7 +47,7 @@ func TestAccAlibabacloudStackSlbAccessLogsDataSource(t *testing.T) {
 			"ids.#":                          "1",
 			"ids.0":                          CHECKSET,
 			"access_logs.#":                  "1",
-			"access_logs.0.log_store":        fmt.Sprintf("tf-testAcc%sSlbAccessLogsDataSource-%d", defaultRegionToTest, rand),
+			"access_logs.0.log_store":        "testtf1",
 			"access_logs.0.log_project":      CHECKSET,
 			"access_logs.0.load_balancer_id": CHECKSET,
 			"access_logs.0.log_type":         CHECKSET,
@@ -82,19 +82,6 @@ resource "alibabacloudstack_slb" "default" {
   name          = "${var.name}_slb"
   vswitch_id    = "${alibabacloudstack_vpc_vswitch.default.id}"
 }
-
-# slb_server_group
-resource "alibabacloudstack_slb_server_group" "default" {
-  name = "tf-test"
-	load_balancer_id =  alibabacloudstack_slb.default.id
-	servers {
-        server_ids = ["${alibabacloudstack_ecs_instance.default.id}"]
-        port = 100
-        weight = 10
-        type = "ecs"
-    }
-}
-
 resource "alibabacloudstack_slb_server_certificate" "servercertificate" {
   name               = "slbservercertificate"
   server_certificate = "-----BEGIN CERTIFICATE-----\nMIIDRjCCAq+gAwIBAgIJAJn3ox4K13PoMA0GCSqGSIb3DQEBBQUAMHYxCzAJBgNV\nBAYTAkNOMQswCQYDVQQIEwJCSjELMAkGA1UEBxMCQkoxDDAKBgNVBAoTA0FMSTEP\nMA0GA1UECxMGQUxJWVVOMQ0wCwYDVQQDEwR0ZXN0MR8wHQYJKoZIhvcNAQkBFhB0\nZXN0QGhvdG1haWwuY29tMB4XDTE0MTEyNDA2MDQyNVoXDTI0MTEyMTA2MDQyNVow\ndjELMAkGA1UEBhMCQ04xCzAJBgNVBAgTAkJKMQswCQYDVQQHEwJCSjEMMAoGA1UE\nChMDQUxJMQ8wDQYDVQQLEwZBTElZVU4xDTALBgNVBAMTBHRlc3QxHzAdBgkqhkiG\n9w0BCQEWEHRlc3RAaG90bWFpbC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJ\nAoGBAM7SS3e9+Nj0HKAsRuIDNSsS3UK6b+62YQb2uuhKrp1HMrOx61WSDR2qkAnB\ncoG00Uz38EE+9DLYNUVQBK7aSgLP5M1Ak4wr4GqGyCgjejzzh3DshUzLCCy2rook\nKOyRTlPX+Q5l7rE1fcSNzgepcae5i2sE1XXXzLRIDIvQxcspAgMBAAGjgdswgdgw\nHQYDVR0OBBYEFBdy+OuMsvbkV7R14f0OyoLoh2z4MIGoBgNVHSMEgaAwgZ2AFBdy\n+OuMsvbkV7R14f0OyoLoh2z4oXqkeDB2MQswCQYDVQQGEwJDTjELMAkGA1UECBMC\nQkoxCzAJBgNVBAcTAkJKMQwwCgYDVQQKEwNBTEkxDzANBgNVBAsTBkFMSVlVTjEN\nMAsGA1UEAxMEdGVzdDEfMB0GCSqGSIb3DQEJARYQdGVzdEBob3RtYWlsLmNvbYIJ\nAJn3ox4K13PoMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAY7KOsnyT\ncQzfhiiG7ASjiPakw5wXoycHt5GCvLG5htp2TKVzgv9QTliA3gtfv6oV4zRZx7X1\nOfi6hVgErtHaXJheuPVeW6eAW8mHBoEfvDAfU3y9waYrtUevSl07643bzKL6v+Qd\nDUBTxOAvSYfXTtI90EAxEG/bJJyOm5LqoiA=\n-----END CERTIFICATE-----"
@@ -103,7 +90,6 @@ resource "alibabacloudstack_slb_server_certificate" "servercertificate" {
 
 resource "alibabacloudstack_slb_listener" "default" {
     load_balancer_id            = alibabacloudstack_slb.default.id
-    server_group_id             = alibabacloudstack_slb_server_group.default.id
     server_certificate_id       = alibabacloudstack_slb_server_certificate.servercertificate.id
     sticky_session              = "off"
     sticky_session_type         = "insert"
@@ -135,10 +121,26 @@ resource "alibabacloudstack_slb_listener" "default" {
     description                 = "testslblistener"
 }
 
+// resource "alibabacloudstack_log_project" "default" {
+// 	name = "${var.name}_project"
+// 	description = "test"
+// }
+
+// resource "alibabacloudstack_log_store" "default" {
+// 	name = "${var.name}_store"
+// 	project = "${alibabacloudstack_log_project.default.name}"	
+// 	retention_period      = "30"
+// 	shard_count           = "2"
+// 	enable_web_tracking   = false
+// 	auto_split            = true
+// 	max_split_shard_count = "64"
+// 	append_meta           = true
+// }
+
 resource "alibabacloudstack_slb_access_log" "default" {
-  load_balancer_id = "${alibabacloudstack_slb_loadbalancer.default.id}"
-  project_name     = "default"
-  log_store        = "${var.name}"
+  load_balancer_id = "${alibabacloudstack_slb.default.id}"
+  log_project = "testtf"
+  log_store = "testtf1"
 }
 `, name, ECSInstanceCommonTestCase)
 }

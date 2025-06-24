@@ -926,12 +926,13 @@ func (s *SlbService) SetAccessLogsDownloadAttribute(logs_attr_str string, load_b
 	return nil
 }
 
-func (s *SlbService) DeleteAccessLogsDownloadAttribute(load_balancer_id string) error {
+func (s *SlbService) DeleteAccessLogsDownloadAttribute(id string) error {
 	request := s.client.NewCommonRequest("POST", "Slb", "2014-05-15", "DeleteAccessLogsDownloadAttribute", "")
-	logs_download_attributes := fmt.Sprintf("[{\"LoadBalancerId\":\"%s\",}]", load_balancer_id)
+	parts := strings.Split(id, ":")
+	logs_download_attributes := fmt.Sprintf("[{\"LoadBalancerId\":\"%s\",}]", parts[0])
 	request.QueryParams = map[string]string{
 		"LogsDownloadAttributes": logs_download_attributes,
-		"loadBalancerId":         load_balancer_id,
+		"loadBalancerId":         parts[0],
 	}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
@@ -968,10 +969,11 @@ type SlbDescribeaccesslogsdownloadattributeResponse struct {
 	Count      int    `json:"Count"`
 }
 
-func (s *SlbService) DescribeAccessLogsDownloadAttribute(load_balancer_id string) (logsattr *Slblogsdownloadattribute, err error) {
+func (s *SlbService) DescribeAccessLogsDownloadAttribute(id string) (logsattr *Slblogsdownloadattribute, err error) {
 	request := s.client.NewCommonRequest("POST", "Slb", "2014-05-15", "DescribeAccessLogsDownloadAttribute", "")
+	parts := strings.Split(id, ":")
 	request.QueryParams = map[string]string{
-		"loadBalancerId": load_balancer_id,
+		"loadBalancerId": parts[0],
 		"LogType":        "layer7",
 	}
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -982,14 +984,19 @@ func (s *SlbService) DescribeAccessLogsDownloadAttribute(load_balancer_id string
 	if !bresponse.IsSuccess() {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_slb_access_log", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	
+
 	slblogs := &SlbDescribeaccesslogsdownloadattributeResponse{}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &slblogs)
 	if err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
 	if len(slblogs.LogsDownloadAttributes.LogsDownloadAttribute) > 0 {
-		logsattr = &slblogs.LogsDownloadAttributes.LogsDownloadAttribute[0]
+		for _, log := range slblogs.LogsDownloadAttributes.LogsDownloadAttribute {
+			if log.LogProject == parts[1] && log.LogStore == parts[2] {
+				logsattr = &log
+			}
+		}
+
 	}
 	return logsattr, nil
 }

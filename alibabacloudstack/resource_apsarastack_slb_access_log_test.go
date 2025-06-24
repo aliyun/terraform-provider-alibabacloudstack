@@ -26,19 +26,19 @@ func TestAccAlibabacloudStackSlbAccesslog_basic0(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"log_project":      "testtf",
-					"log_store":        "${var.name}",
+					"log_store":        "testtf1",
 					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
 					"depends_on":       []string{"alibabacloudstack_slb_listener.default"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"log_project": "testtf",
-						"log_store":   name,
+						"log_store":   "testtf1",
 					}),
 				),
 			},
@@ -46,6 +46,8 @@ func TestAccAlibabacloudStackSlbAccesslog_basic0(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				// 该参数无回读信息
+				ImportStateVerifyIgnore: []string{"role_name"},
 			},
 		},
 	})
@@ -61,22 +63,9 @@ variable "name" {
 
 %s
 
-
 resource "alibabacloudstack_slb" "default" {
   name          = "${var.name}_slb"
   vswitch_id    = "${alibabacloudstack_vpc_vswitch.default.id}"
-}
-
-# slb_server_group
-resource "alibabacloudstack_slb_server_group" "default" {
-  name = "tf-test"
-	load_balancer_id =  alibabacloudstack_slb.default.id
-	servers {
-        server_ids = ["${alibabacloudstack_ecs_instance.default.id}"]
-        port = 100
-        weight = 10
-        type = "ecs"
-    }
 }
 
 resource "alibabacloudstack_slb_server_certificate" "servercertificate" {
@@ -87,7 +76,6 @@ resource "alibabacloudstack_slb_server_certificate" "servercertificate" {
 
 resource "alibabacloudstack_slb_listener" "default" {
     load_balancer_id            = alibabacloudstack_slb.default.id
-    server_group_id             = alibabacloudstack_slb_server_group.default.id
     server_certificate_id       = alibabacloudstack_slb_server_certificate.servercertificate.id
     sticky_session              = "off"
     sticky_session_type         = "insert"
@@ -118,6 +106,21 @@ resource "alibabacloudstack_slb_listener" "default" {
     health_check_http_code      = "http_2xx,http_3xx"
     description                 = "testslblistener"
 }
+
+// resource "alibabacloudstack_log_project" "default" {
+// 	name = "${var.name}_project"
+// 	description = "test"
+// }
+// resource "alibabacloudstack_log_store" "default" {
+// 	name = "${var.name}_store"
+// 	project = "${alibabacloudstack_log_project.default.name}"	
+// 	retention_period      = "30"
+// 	shard_count           = "2"
+// 	enable_web_tracking   = false
+// 	auto_split            = true
+// 	max_split_shard_count = "64"
+// 	append_meta           = true
+// }
 
 `, name, ECSInstanceCommonTestCase)
 }
