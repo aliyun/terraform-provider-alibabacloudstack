@@ -112,7 +112,7 @@ resource "alibabacloudstack_slb_acl" "default" {
 resource "alibabacloudstack_slb" "default" {
 	name = "${var.name}"
 	// vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-	address_type       = "internet"
+	//address_type       = "internet"
   	specification        = "slb.s2.small"
   }
 

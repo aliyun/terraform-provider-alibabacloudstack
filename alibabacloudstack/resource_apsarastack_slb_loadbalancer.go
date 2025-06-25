@@ -33,7 +33,7 @@ func resourceAlibabacloudStackSlb() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				Default:      "vpc",
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"classic", "vpc"}, false),
 			},
 
@@ -77,17 +77,26 @@ func resourceAlibabacloudStackSlbCreate(d *schema.ResourceData, meta interface{}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	slbService := SlbService{client}
 	request := client.NewCommonRequest("POST", "Slb", "2014-05-15", "CreateLoadBalancerPro", "")
-	network_type := d.Get("network_type").(string)
 	request.QueryParams["LoadBalancerName"] = d.Get("name").(string)
 	request.QueryParams["AddressType"] = strings.ToLower(string(Intranet))
 	request.QueryParams["AddressIPVersion"] = d.Get("ip_version").(string)
-	request.QueryParams["NetworkType"] = network_type
 
-	if network_type == "vpc" {
+	if v, ok := d.GetOk("network_type"); ok {
+		network_type:=v.(string)
+		request.QueryParams["NetworkType"] = network_type
+		if network_type == "vpc" {
+			if v, ok := d.GetOk("vswitch_id"); ok && v.(string) != "" {
+				request.QueryParams["VSwitchId"] = d.Get("vswitch_id").(string)
+			} else {
+				return errmsgs.WrapError(errmsgs.Error("VSwitchId is required when network_type is vpc"))
+			}
+		}
+	} else {
 		if v, ok := d.GetOk("vswitch_id"); ok && v.(string) != "" {
 			request.QueryParams["VSwitchId"] = d.Get("vswitch_id").(string)
+			request.QueryParams["NetworkType"] = "vpc"
 		} else {
-			return errmsgs.WrapError(errmsgs.Error("VSwitchId is required when network_type is vpc"))
+			request.QueryParams["NetworkType"] = "classic"
 		}
 	}
 
