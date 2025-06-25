@@ -22,7 +22,7 @@ func TestAccAlibabacloudStackSlbListener0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sslblistener%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc-slblistener%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackSlbListener0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
+					"load_balancer_id": "${alibabacloudstack_slb_loadbalancer.default.id}",
 					"bandwidth":        "10",
 					"frontend_port":    "80",
 					"backend_port":     "80",
@@ -109,7 +109,7 @@ resource "alibabacloudstack_slb_acl" "default" {
 	ip_version = "ipv4"
   }
 
-resource "alibabacloudstack_slb" "default" {
+resource "alibabacloudstack_slb_loadbalancer" "default" {
 	name = "${var.name}"
 	// vswitch_id = "${alibabacloudstack_vswitch.default.id}"
 	//address_type       = "internet"
@@ -131,7 +131,7 @@ func TestAccAlibabacloudStackSlbListener1(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sslblistener%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc-slblistener%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -149,7 +149,7 @@ func TestAccAlibabacloudStackSlbListener1(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
+					"load_balancer_id": "${alibabacloudstack_slb_loadbalancer.default.id}",
 					"bandwidth":        "10",
 					"frontend_port":    "80",
 					"backend_port":     "80",
@@ -189,7 +189,7 @@ func TestAccAlibabacloudStackSlbListener2(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sslblistener%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc-slblistener%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -206,7 +206,7 @@ func TestAccAlibabacloudStackSlbListener2(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
+					"load_balancer_id": "${alibabacloudstack_slb_loadbalancer.default.id}",
 					"bandwidth":        "10",
 					"frontend_port":    "80",
 					"backend_port":     "80",
@@ -243,7 +243,7 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sslblistener%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc-slblistener%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccSlbListenerLogStoredependence)
 	ResourceTest(t, resource.TestCase{
@@ -261,7 +261,7 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"load_balancer_id": "${alibabacloudstack_slb.default.id}",
+					"load_balancer_id": "${alibabacloudstack_slb_loadbalancer.default.id}",
 					"protocol":         "http",
 					"bandwidth":        "10",
 					"frontend_port":    "80",
@@ -301,11 +301,11 @@ func TestAccAlibabacloudStackSlbListener3(t *testing.T) {
 func AlibabacloudTestAccSlbListenerLogStoredependence(name string) string {
 	return AlibabacloudTestAccSlbListenerBasicdependence(name) + fmt.Sprintf(`
 	resource "alibabacloudstack_log_project" "default" {
-		name = "${var.name}_"
+		name = "${var.name}"
 		description = "test"
 	}
 	resource "alibabacloudstack_log_store" "default" {
-		name = "${var.name}_store"
+		name = "${var.name}"
 		project = "${alibabacloudstack_log_project.default.name}"	
 		retention_period      = "30"
 		shard_count           = "2"

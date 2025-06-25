@@ -32,8 +32,8 @@ func resourceAlibabacloudStackSlb() *schema.Resource {
 			"network_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				Computed:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"classic", "vpc"}, false),
 			},
 

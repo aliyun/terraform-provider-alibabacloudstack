@@ -34,6 +34,6 @@ variable "name" {
 ` + SlbCommonTestCase + `
 
 data "alibabacloudstack_slbs" "default" {
- ids = ["${alibabacloudstack_slb.default.id}"]
+ ids = ["${alibabacloudstack_slb_loadbalancer.default.id}"]
 }
 `

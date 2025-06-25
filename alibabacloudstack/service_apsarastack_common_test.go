@@ -1377,9 +1377,11 @@ data alibabacloudstack_kvstore_instance_classes "default" {
 
 const SlbCommonTestCase = VSwitchCommonTestCase + `
 
-resource "alibabacloudstack_slb" "default" {
+resource "alibabacloudstack_slb_loadbalancer" "default" {
   name          = "${var.name}_slb"
   vswitch_id    = "${alibabacloudstack_vpc_vswitch.default.id}"
+  address_type  = "internet"
+  specification = "slb.s2.small"
 }
 
 `
