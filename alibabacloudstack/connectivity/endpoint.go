@@ -9,65 +9,66 @@ import (
 type ServiceCode string
 
 const (
-	DcdnCode            = ServiceCode("DCDN")
-	MseCode             = ServiceCode("MSE")
-	ActiontrailCode     = ServiceCode("ACTIONTRAIL")
-	OosCode             = ServiceCode("OOS")
-	EcsCode             = ServiceCode("ECS")
-	ASCMCode            = ServiceCode("ASCM")
-	NasCode             = ServiceCode("NAS")
-	EciCode             = ServiceCode("ECI")
-	DdoscooCode         = ServiceCode("DDOSCOO")
-	AlidnsCode          = ServiceCode("ALIDNS")
-	ResourcemanagerCode = ServiceCode("RESOURCEMANAGER")
-	WafOpenapiCode      = ServiceCode("WAFOPENAPI")
-	DmsEnterpriseCode   = ServiceCode("DMSENTERPRISE")
-	DnsCode             = ServiceCode("ALIDNS")
-	KmsCode             = ServiceCode("KMS")
-	CbnCode             = ServiceCode("CBN")
-	ESSCode             = ServiceCode("ESS")
-	RAMCode             = ServiceCode("RAM")
-	VPCCode             = ServiceCode("VPC")
-	SLBCode             = ServiceCode("SLB")
-	RDSCode             = ServiceCode("RDS")
-	OSSCode             = ServiceCode("OSS")
-	ONSCode             = ServiceCode("ONS")
-	CONTAINCode         = ServiceCode("CS")
-	CRCode              = ServiceCode("CR")
-	CREECode            = ServiceCode("CR_EE")
-	CDNCode             = ServiceCode("CDN")
-	CMSCode             = ServiceCode("CMS")
-	DNSCode             = ServiceCode("CLOUDDNS")
-	PVTZCode            = ServiceCode("PVTZ")
-	LOGCode             = ServiceCode("LOG")
-	FCCode              = ServiceCode("FC")
-	DDSCode             = ServiceCode("DDS")
-	GPDBCode            = ServiceCode("GPDB")
-	CENCode             = ServiceCode("CEN")
-	KVSTORECode         = ServiceCode("R_KVSTORE") // 不允许出现-，schema不接受，以_代替
-	POLARDBCode         = ServiceCode("POLARDB")
-	MNSCode             = ServiceCode("MNS")
-	CLOUDAPICode        = ServiceCode("CLOUDAPI")
-	DRDSCode            = ServiceCode("DRDS")
-	LOCATIONCode        = ServiceCode("LOCATION")
-	ElasticsearchK8sCode   = ServiceCode("ELASTICSEARCH_K8S")
-	DDOSCOOCode         = ServiceCode("DDOSCOO")
-	DDOSBGPCode         = ServiceCode("DDOSBGP")
-	SAGCode             = ServiceCode("SAG")
-	EMRCode             = ServiceCode("EMR")
-	CasCode             = ServiceCode("CAS")
-	YUNDUNDBAUDITCode   = ServiceCode("YUNDUNDBAUDIT")
-	MARKETCode          = ServiceCode("MARKET")
-	HBASECode           = ServiceCode("HBASE")
-	ADBCode             = ServiceCode("ADB")
-	EDASCode            = ServiceCode("EDAS")
-	CassandraCode       = ServiceCode("CASSANDRA")
-	OtsCode             = ServiceCode("OTS")
-	DatahubCode         = ServiceCode("DATAHUB")
-	STSCode             = ServiceCode("STS")
-	CLOUDFWCode         = ServiceCode("CLOUDFW")
-	FlinkCode       = ServiceCode("VERVERICA")
+	DcdnCode             = ServiceCode("DCDN")
+	MseCode              = ServiceCode("MSE")
+	ActiontrailCode      = ServiceCode("ACTIONTRAIL")
+	OosCode              = ServiceCode("OOS")
+	EcsCode              = ServiceCode("ECS")
+	ASCMCode             = ServiceCode("ASCM")
+	NasCode              = ServiceCode("NAS")
+	EciCode              = ServiceCode("ECI")
+	DdoscooCode          = ServiceCode("DDOSCOO")
+	AlidnsCode           = ServiceCode("ALIDNS")
+	ResourcemanagerCode  = ServiceCode("RESOURCEMANAGER")
+	WafOpenapiCode       = ServiceCode("WAFOPENAPI")
+	DmsEnterpriseCode    = ServiceCode("DMSENTERPRISE")
+	DnsCode              = ServiceCode("ALIDNS")
+	KmsCode              = ServiceCode("KMS")
+	CbnCode              = ServiceCode("CBN")
+	ESSCode              = ServiceCode("ESS")
+	RAMCode              = ServiceCode("RAM")
+	VPCCode              = ServiceCode("VPC")
+	SLBCode              = ServiceCode("SLB")
+	RDSCode              = ServiceCode("RDS")
+	OSSCode              = ServiceCode("OSS")
+	ONSCode              = ServiceCode("ONS")
+	CONTAINCode          = ServiceCode("CS")
+	CRCode               = ServiceCode("CR")
+	CREECode             = ServiceCode("CR_EE")
+	CDNCode              = ServiceCode("CDN")
+	CMSCode              = ServiceCode("CMS")
+	DNSCode              = ServiceCode("CLOUDDNS")
+	PVTZCode             = ServiceCode("PVTZ")
+	LOGCode              = ServiceCode("LOG")
+	FCCode               = ServiceCode("FC")
+	DDSCode              = ServiceCode("DDS")
+	GPDBCode             = ServiceCode("GPDB")
+	CENCode              = ServiceCode("CEN")
+	KVSTORECode          = ServiceCode("R_KVSTORE") // 不允许出现-，schema不接受，以_代替
+	POLARDBCode          = ServiceCode("POLARDB")
+	MNSCode              = ServiceCode("MNS")
+	CLOUDAPICode         = ServiceCode("CLOUDAPI")
+	DRDSCode             = ServiceCode("DRDS")
+	LOCATIONCode         = ServiceCode("LOCATION")
+	ElasticsearchK8sCode = ServiceCode("ELASTICSEARCH_K8S")
+	DDOSCOOCode          = ServiceCode("DDOSCOO")
+	DDOSBGPCode          = ServiceCode("DDOSBGP")
+	SAGCode              = ServiceCode("SAG")
+	EMRCode              = ServiceCode("EMR")
+	CasCode              = ServiceCode("CAS")
+	YUNDUNDBAUDITCode    = ServiceCode("YUNDUNDBAUDIT")
+	MARKETCode           = ServiceCode("MARKET")
+	HBASECode            = ServiceCode("HBASE")
+	ADBCode              = ServiceCode("ADB")
+	EDASCode             = ServiceCode("EDAS")
+	CassandraCode        = ServiceCode("CASSANDRA")
+	OtsCode              = ServiceCode("OTS")
+	DatahubCode          = ServiceCode("DATAHUB")
+	STSCode              = ServiceCode("STS")
+	CLOUDFWCode          = ServiceCode("CLOUDFW")
+	FlinkCode            = ServiceCode("VERVERICA")
 	EBSCode              = ServiceCode("EBS")
+	YaochiOpsCode        = ServiceCode("YAOCHIOPS")
 	//undefined code 先添加
 	GDBCode             = ServiceCode("GDB")
 	ARMSCode            = ServiceCode("ARMS")
@@ -84,9 +85,9 @@ const (
 	WAFONECSCode        = ServiceCode("WAF_ONECS")
 	ALIKAFKACode        = ServiceCode("ALIKAFKA")
 	//自建网关虚假Code
-	OssDataCode  = ServiceCode("OSSDATA")
-	SlSDataCode  = ServiceCode("SLSDATA")
-	BssDataCode  = ServiceCode("BSSDATA")
+	OssDataCode = ServiceCode("OSSDATA")
+	SlSDataCode = ServiceCode("SLSDATA")
+	BssDataCode = ServiceCode("BSSDATA")
 
 	// ASAPI
 	ASAPICode = ServiceCode("ASAPI")
@@ -250,7 +251,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"ebsnext.{{.domain}}",
 		"ebsnext.{{.region}}.{{.domain}}",
 	},
-
+	YaochiOpsCode: PopEndpoint{
+		"yaochiops.{{.domain}}",
+		"yaochiops.{{.region}}.{{.domain}}",
+	},
 	POLARDBCode: PopEndpoint{
 		"polardb.{{.domain}}",
 		"polardb.{{.region}}.{{.domain}}",
@@ -333,8 +337,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
 		"bastionhostprivate-biz.{{.region}}.{{.domain}}",
 	},
-	OtsCode:     PopEndpoint{
-		"ots.{{.domain}}", 
+	OtsCode: PopEndpoint{
+		"ots.{{.domain}}",
 		"ots.{{.region}}.{{.domain}}",
 	},
 	FlinkCode: PopEndpoint{
