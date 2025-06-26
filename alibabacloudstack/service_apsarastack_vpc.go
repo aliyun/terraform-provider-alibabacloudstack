@@ -1604,6 +1604,19 @@ func (s *VpcService) SetInstanceSecondaryCidrBlocks(d *schema.ResourceData) erro
 	return nil
 }
 
+func (s *VpcService) AllocateVpcIpv6Cidr(ipv6_cidr, ipv6isp string) error {
+	request := map[string]interface{}{
+		"Ipv6CidrBlock": ipv6_cidr,
+		"Ipv6Isp":       ipv6isp,
+	}
+	response, err := s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "AllocateVpcIpv6Cidr", "", nil, nil, request)
+	if err != nil {
+		return err
+	}
+	addDebug("AllocateVpcIpv6Cidr", response, request)
+	return nil
+}
+
 func (s *VpcService) SetIpv6CidrBlocks(d *schema.ResourceData) error {
 	var response map[string]interface{}
 	var err error
@@ -1632,6 +1645,12 @@ func (s *VpcService) SetIpv6CidrBlocks(d *schema.ResourceData) error {
 				"IpVersion": "IPV6",
 			}
 			for _, ivp6 := range added {
+				// 预设ipv6_cidr_block
+				err := s.AllocateVpcIpv6Cidr(ivp6["ipv6_cidr_block"].(string), ivp6["ipv6_isp"].(string))
+				if err != nil {
+					log.Println(fmt.Sprintf("Warning: %s: %s allocate err: %v", ivp6["ipv6_cidr_block"], ivp6["ipv6_isp"], err))
+					return err
+				}
 				request["Ipv6Isp"] = ivp6["ipv6_isp"]
 				request["IPv6CidrBlock"] = ivp6["ipv6_cidr_block"]
 				response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "AssociateVpcCidrBlock", "", nil, nil, request)

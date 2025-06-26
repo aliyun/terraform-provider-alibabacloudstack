@@ -287,11 +287,11 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 					"ipv6_cidr_blocks": []map[string]interface{}{
 						{
 							"ipv6_isp":        "BGP",
-							"ipv6_cidr_block": "2020:83:2:20::/61",
+							"ipv6_cidr_block": "2020:82:2:50::/61",
 						},
 						{
-							"ipv6_cidr_block": "2020:82:13:20::/61",
-							"ipv6_isp":        "CMCC_AZ1",
+							"ipv6_cidr_block": "2020:82:13:10::/61",
+							"ipv6_isp":        "CTC_AZ1",
 						},
 					},
 				}),
@@ -299,9 +299,9 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 					testAccCheck(map[string]string{
 						"ipv6_cidr_block":                    CHECKSET,
 						"ipv6_cidr_blocks.#":                 "2",
-						"ipv6_cidr_blocks.0.ipv6_cidr_block": "2020:83:2:20::/61",
-						"ipv6_cidr_blocks.1.ipv6_cidr_block": "2020:82:13:20::/61",
-						"ipv6_cidr_blocks.1.ipv6_isp":        "CMCC_AZ1",
+						"ipv6_cidr_blocks.0.ipv6_cidr_block": "2020:82:2:50::/61",
+						"ipv6_cidr_blocks.1.ipv6_cidr_block": "2020:82:13:10::/61",
+						"ipv6_cidr_blocks.1.ipv6_isp":        "CTC_AZ1",
 					}),
 				),
 			},
@@ -311,7 +311,7 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 						{
 
 							"ipv6_isp":        "BGP",
-							"ipv6_cidr_block": "2020:83:2:20::/61",
+							"ipv6_cidr_block": "2020:82:2:50::/61",
 						},
 					},
 				}),
@@ -330,7 +330,7 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 					"ipv6_cidr_blocks": []map[string]interface{}{
 						{
 							"ipv6_isp":        "BGP",
-							"ipv6_cidr_block": "2020:83:2:20::/61",
+							"ipv6_cidr_block": "2020:82:2:60::/61",
 						},
 					},
 				}),
