@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"log"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
@@ -43,25 +44,30 @@ func resourceAlibabacloudStackNetworkAclAttachment() *schema.Resource {
 }
 
 func resourceAlibabacloudStackNetworkAclAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
-	d.SetId(d.Get("network_acl_id").(string) + COLON_SEPARATED + resource.UniqueId())
+	d.SetId(d.Get("network_acl_id").(string))
 	return resourceAlibabacloudStackNetworkAclAttachmentUpdate(d, meta)
 }
 
 func resourceAlibabacloudStackNetworkAclAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-	parts, err := ParseResourceId(d.Id(), 2)
+	networkAclId := d.Id()
+	object, err := vpcService.DescribeNetworkAcl(networkAclId)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
-	networkAclId := parts[0]
+	resources := object["Resources"].(map[string]interface{})["Resource"].([]interface{})
 	vpcResource := []vpc.Resource{}
-	for _, e := range d.Get("resources").(*schema.Set).List() {
-		resourceId := e.(map[string]interface{})["resource_id"]
-		resourceType := e.(map[string]interface{})["resource_type"]
+	setresource := make([]map[string]interface{}, 0)
+	for _, e := range resources {
+		item := e.(map[string]interface{})
 		vpcResource = append(vpcResource, vpc.Resource{
-			ResourceId:   resourceId.(string),
-			ResourceType: resourceType.(string),
+			ResourceId:   item["ResourceId"].(string),
+			ResourceType: item["ResourceType"].(string),
+		})
+		setresource = append(setresource, map[string]interface{}{
+			"resource_id":   item["ResourceId"].(string),
+			"resource_type": item["ResourceType"].(string),
 		})
 	}
 	err = vpcService.DescribeNetworkAclAttachment(networkAclId, vpcResource)
@@ -72,25 +78,54 @@ func resourceAlibabacloudStackNetworkAclAttachmentRead(d *schema.ResourceData, m
 		}
 		return errmsgs.WrapError(err)
 	}
+	log.Printf("[DEBUG] This network acl attachment resources is %v ", setresource)
 	d.Set("network_acl_id", networkAclId)
-	d.Set("resources", vpcResource)
+	d.Set("resources", setresource)
 	return nil
 }
 
 func resourceAlibabacloudStackNetworkAclAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-	parts, err := ParseResourceId(d.Id(), 2)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	networkAclId := parts[0]
+	networkAclId := d.Id()
 	if d.HasChange("resources") {
-		oraw, nraw := d.GetChange("resources")
-		o := oraw.(*schema.Set)
-		n := nraw.(*schema.Set)
-		remove := o.Difference(n).List()
-		create := n.Difference(o).List()
+		object, err := vpcService.DescribeNetworkAcl(networkAclId)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		old_resources := object["Resources"].(map[string]interface{})["Resource"].([]interface{})
+		remove := make([]map[string]interface{}, 0)
+
+		for _, e := range old_resources {
+			item := e.(map[string]interface{})
+			remove = append(remove, map[string]interface{}{
+				"resource_id":   item["ResourceId"].(string),
+				"resource_type": item["ResourceType"].(string),
+			})
+		}
+		var create []map[string]interface{}
+
+		if value, ok := d.GetOk("resources"); ok {
+			// 检查类型是否为 *schema.Set
+			if set, ok := value.(*schema.Set); ok {
+				// 将 Set 转换为 []interface{}
+				items := set.List()
+				// 验证每个元素是否为 map[string]interface{}
+				for _, item := range items {
+					if m, ok := item.(map[string]interface{}); ok {
+						create = append(create, m)
+					} else {
+						// 处理类型不匹配的元素（可选）
+						log.Printf("Invalid resource item type: %T", item)
+					}
+				}
+			} else {
+				// 处理 resources 字段类型不匹配的情况（例如用户误传为字符串）
+				log.Printf("Expected *schema.Set for 'resources', got %T", value)
+			}
+		}
+		log.Printf("[DEBUG] %s: remove: %#v", d.Id(), remove)
+		log.Printf("[DEBUG] %s: create: %#v", d.Id(), create)
 
 		if len(remove) > 0 {
 			request := vpc.CreateUnassociateNetworkAclRequest()
@@ -100,12 +135,11 @@ func resourceAlibabacloudStackNetworkAclAttachmentUpdate(d *schema.ResourceData,
 			var resources []vpc.UnassociateNetworkAclResource
 			vpcResource := []vpc.Resource{}
 			for _, t := range remove {
-				s := t.(map[string]interface{})
 				var resourceId, resourceType string
-				if v, ok := s["resource_id"]; ok {
+				if v, ok := t["resource_id"]; ok {
 					resourceId = v.(string)
 				}
-				if v, ok := s["resource_type"]; ok {
+				if v, ok := t["resource_type"]; ok {
 					resourceType = v.(string)
 				}
 				resources = append(resources, vpc.UnassociateNetworkAclResource{
@@ -143,12 +177,12 @@ func resourceAlibabacloudStackNetworkAclAttachmentUpdate(d *schema.ResourceData,
 			var resources []vpc.AssociateNetworkAclResource
 			vpcResource := []vpc.Resource{}
 			for _, t := range create {
-				s := t.(map[string]interface{})
+				// s := t.(map[string]interface{})
 				var resourceId, resourceType string
-				if v, ok := s["resource_id"]; ok {
+				if v, ok := t["resource_id"]; ok {
 					resourceId = v.(string)
 				}
-				if v, ok := s["resource_type"]; ok {
+				if v, ok := t["resource_type"]; ok {
 					resourceType = v.(string)
 				}
 				resources = append(resources, vpc.AssociateNetworkAclResource{
@@ -184,13 +218,9 @@ func resourceAlibabacloudStackNetworkAclAttachmentUpdate(d *schema.ResourceData,
 func resourceAlibabacloudStackNetworkAclAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
-	parts, err := ParseResourceId(d.Id(), 2)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	networkAclId := parts[0]
+	networkAclId := d.Id()
 	resources := []vpc.UnassociateNetworkAclResource{}
-	object, err := vpcService.DescribeNetworkAcl(networkAclId)
+	object, _ := vpcService.DescribeNetworkAcl(networkAclId)
 	vpcResource := []vpc.Resource{}
 	request := vpc.CreateUnassociateNetworkAclRequest()
 	client.InitRpcRequest(*request.RpcRequest)
@@ -209,7 +239,7 @@ func resourceAlibabacloudStackNetworkAclAttachmentDelete(d *schema.ResourceData,
 		})
 	}
 	request.Resource = &resources
-	err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+	resource.Retry(5*time.Minute, func() *resource.RetryError {
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.UnassociateNetworkAcl(request)
 		})
