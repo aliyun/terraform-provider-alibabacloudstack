@@ -19,7 +19,7 @@ func TestAccAlibabacloudStackVpcHavip_basic(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1, 254)
 	name := fmt.Sprintf("tf-testAccVpcHavipBasic_%v", rand)
-	ip := fmt.Sprintf("172.16.1_%v", rand)
+	ip := fmt.Sprintf("172.16.1.%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceVpcHavipBasicDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
