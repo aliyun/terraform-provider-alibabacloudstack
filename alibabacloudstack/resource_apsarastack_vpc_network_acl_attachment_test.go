@@ -12,7 +12,7 @@ import (
 func TestAccAlibabacloudStackNetwokerAclAttachment0(t *testing.T) {
 	var v map[string]interface{}
 
-	resourceId := "alibabacloudstack_network_acl_attachment.default"
+	resourceId := "alibabacloudstack_vpc_network_acl_attachment.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccNetworkAclAttachmentCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -39,7 +39,7 @@ func TestAccAlibabacloudStackNetwokerAclAttachment0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"network_acl_id": "${alibabacloudstack_network_acl.default.id}",
+					"network_acl_id": "${alibabacloudstack_vpc_networkacl.default.id}",
 					"resources": []map[string]interface{}{
 						{
 							"resource_id":   "${alibabacloudstack_vswitch.default.id}",
@@ -60,7 +60,7 @@ func TestAccAlibabacloudStackNetwokerAclAttachment0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"network_acl_id": "${alibabacloudstack_network_acl.default.id}",
+					"network_acl_id": "${alibabacloudstack_vpc_networkacl.default.id}",
 					"resources": []map[string]interface{}{
 						{
 							"resource_id":   "${alibabacloudstack_vswitch.default.id}",
@@ -84,7 +84,7 @@ func TestAccAlibabacloudStackNetwokerAclAttachment0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"network_acl_id": "${alibabacloudstack_network_acl.default.id}",
+					"network_acl_id": "${alibabacloudstack_vpc_networkacl.default.id}",
 					"resources": []map[string]interface{}{
 						{
 							"resource_id":   "${alibabacloudstack_vswitch.default2.id}",
@@ -143,7 +143,7 @@ func AlibabacloudTestAccNetworkAclAttachmentdependence(name string) string {
 		cidr_block = "172.16.0.0/12"
 	}
 	
-	resource "alibabacloudstack_network_acl" "default" {
+	resource "alibabacloudstack_vpc_networkacl" "default" {
 		vpc_id = "${alibabacloudstack_vpc.default.id}"
 		network_acl_name = "${var.name}"
 	}
