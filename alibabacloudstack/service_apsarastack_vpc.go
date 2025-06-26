@@ -1611,9 +1611,6 @@ func (s *VpcService) SetIpv6CidrBlocks(d *schema.ResourceData) error {
 		old, new := d.GetChange("ipv6_cidr_blocks")
 		old_ipv6s := old.(*schema.Set).List()
 		new_ipv6s := new.(*schema.Set).List()
-		if len(old_ipv6s) > 0 && len(new_ipv6s) == 0 {
-			return errmsgs.Error("Operation failed because ipv6Gateway is in use.")
-		}
 		added := make([]map[string]interface{}, 0)
 		removed := make([]map[string]interface{}, 0)
 		for _, ipv6 := range old_ipv6s {
@@ -1638,10 +1635,10 @@ func (s *VpcService) SetIpv6CidrBlocks(d *schema.ResourceData) error {
 				request["Ipv6Isp"] = ivp6["ipv6_isp"]
 				request["IPv6CidrBlock"] = ivp6["ipv6_cidr_block"]
 				response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "AssociateVpcCidrBlock", "", nil, nil, request)
+				addDebug("AssociateVpcCidrBlock", response, request)
 				if err != nil {
 					return err
 				}
-				addDebug("AssociateVpcCidrBlock", response, request)
 			}
 		}
 
@@ -1654,10 +1651,10 @@ func (s *VpcService) SetIpv6CidrBlocks(d *schema.ResourceData) error {
 				request["Ipv6Isp"] = ivp6["ipv6_isp"]
 				request["IPv6CidrBlock"] = ivp6["ipv6_cidr_block"]
 				response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "UnassociateVpcCidrBlock", "", nil, nil, request)
+				addDebug("UnassociateVpcCidrBlock", response, request)
 				if err != nil {
 					return err
 				}
-				addDebug("UnassociateVpcCidrBlock", response, request)
 			}
 		}
 	}

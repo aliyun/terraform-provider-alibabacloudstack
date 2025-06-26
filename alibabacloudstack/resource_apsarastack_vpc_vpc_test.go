@@ -235,8 +235,6 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 
 	var v map[string]interface{}
 
-	// TODO Describe method，v 的类型
-
 	resourceId := "alibabacloudstack_vpc_vpc.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccVpcVpcCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
@@ -262,24 +260,24 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cidr_block":            "192.168.0.0/24",
-					"secondary_cidr_blocks": []string{"172.16.0.0/24"},
+					"cidr_block":            "172.16.0.0/24",
+					"secondary_cidr_blocks": []string{"192.168.0.0/24"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"cidr_block":              "192.168.0.0/24",
+						"cidr_block":              "172.16.0.0/24",
 						"secondary_cidr_blocks.#": "1",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cidr_block":            "192.168.0.0/24",
+					"cidr_block":            "172.16.0.0/24",
 					"secondary_cidr_blocks": []string{"172.16.1.0/24", "172.16.2.0/24"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"cidr_block":              "192.168.0.0/24",
+						"cidr_block":              "172.16.0.0/24",
 						"secondary_cidr_blocks.#": "2",
 					}),
 				),
@@ -289,10 +287,10 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 					"ipv6_cidr_blocks": []map[string]interface{}{
 						{
 							"ipv6_isp":        "BGP",
-							"ipv6_cidr_block": "2020:83:2:4::/61",
+							"ipv6_cidr_block": "2020:83:2:20::/61",
 						},
 						{
-							"ipv6_cidr_block": "2020:83:13:8::/61",
+							"ipv6_cidr_block": "2020:82:13:20::/61",
 							"ipv6_isp":        "CMCC_AZ1",
 						},
 					},
@@ -301,8 +299,8 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 					testAccCheck(map[string]string{
 						"ipv6_cidr_block":                    CHECKSET,
 						"ipv6_cidr_blocks.#":                 "2",
-						"ipv6_cidr_blocks.0.ipv6_cidr_block": "2020:83:2:::/61",
-						"ipv6_cidr_blocks.1.ipv6_cidr_block": "2020:83:13:8::/61",
+						"ipv6_cidr_blocks.0.ipv6_cidr_block": "2020:83:2:20::/61",
+						"ipv6_cidr_blocks.1.ipv6_cidr_block": "2020:82:13:20::/61",
 						"ipv6_cidr_blocks.1.ipv6_isp":        "CMCC_AZ1",
 					}),
 				),
@@ -311,8 +309,9 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"ipv6_cidr_blocks": []map[string]interface{}{
 						{
+
 							"ipv6_isp":        "BGP",
-							"ipv6_cidr_block": "2020:83:13:18::/61",
+							"ipv6_cidr_block": "2020:83:2:20::/61",
 						},
 					},
 				}),
@@ -331,7 +330,7 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 					"ipv6_cidr_blocks": []map[string]interface{}{
 						{
 							"ipv6_isp":        "BGP",
-							"ipv6_cidr_block": "2020:83:13:10::/61",
+							"ipv6_cidr_block": "2020:83:2:20::/61",
 						},
 					},
 				}),
@@ -348,17 +347,6 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 }
 
 var AlibabacloudTestAccVpcVpcCheckmap = map[string]string{
-	//  TODO  checkmap 和 case的资源对齐
-
-	// "name": CHECKSET,
-
-	// "vpc_name": CHECKSET,
-
-	// "route_table_id":    CHECKSET,
-	// "resource_group_id": CHECKSET,
-	// // "router_table_id":   CHECKSET,
-	// "router_id":       CHECKSET,
-	// "ipv6_cidr_block": CHECKSET,
 	"status": CHECKSET,
 }
 
