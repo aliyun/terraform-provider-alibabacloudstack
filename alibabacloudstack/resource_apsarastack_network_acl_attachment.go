@@ -220,7 +220,10 @@ func resourceAlibabacloudStackNetworkAclAttachmentDelete(d *schema.ResourceData,
 	vpcService := VpcService{client}
 	networkAclId := d.Id()
 	resources := []vpc.UnassociateNetworkAclResource{}
-	object, _ := vpcService.DescribeNetworkAcl(networkAclId)
+	object, err := vpcService.DescribeNetworkAcl(networkAclId)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
 	vpcResource := []vpc.Resource{}
 	request := vpc.CreateUnassociateNetworkAclRequest()
 	client.InitRpcRequest(*request.RpcRequest)
