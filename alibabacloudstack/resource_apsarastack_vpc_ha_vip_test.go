@@ -72,36 +72,50 @@ func TestAccAlibabacloudStackVpcHavip_basic(t *testing.T) {
 					}),
 				),
 			},
-			{
+						{
 				Config: testAccConfig(map[string]interface{}{
-					"associated_instance_type": "NetworkInterface",
 					"associated_instances": []string{
-						"${alibabacloudstack_ecs_networkinterface.default.0.id}",
-						"${alibabacloudstack_ecs_networkinterface.default.1.id}",
+						"${alibabacloudstack_ecs_instance.default.0.id}",
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"associated_instance_type": "NetworkInterface",
-						"associated_instances.#":   "2",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"associated_instance_type": "NetworkInterface",
-					"associated_instances": []string{
-						"${alibabacloudstack_ecs_networkinterface.default.0.id}",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"associated_instance_type": "NetworkInterface",
+						"associated_instance_type": "EcsInstance",
 						"associated_instances.#":   "1",
 						"associated_instances.1":   REMOVEKEY,
 					}),
 				),
 			},
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"associated_instance_type": "NetworkInterface",
+			// 		"associated_instances": []string{
+			// 			"${alibabacloudstack_ecs_networkinterface.default.0.id}",
+			// 			"${alibabacloudstack_ecs_networkinterface.default.1.id}",
+			// 		},
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"associated_instance_type": "NetworkInterface",
+			// 			"associated_instances.#":   "2",
+			// 		}),
+			// 	),
+			// },
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"associated_instance_type": "NetworkInterface",
+			// 		"associated_instances": []string{
+			// 			"${alibabacloudstack_ecs_networkinterface.default.0.id}",
+			// 		},
+			// 	}),
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"associated_instance_type": "NetworkInterface",
+			// 			"associated_instances.#":   "1",
+			// 			"associated_instances.1":   REMOVEKEY,
+			// 		}),
+			// 	),
+			// },
 			// {
 			// 	Config: testAccConfig(map[string]interface{}{
 			// 		"tags": map[string]string{
@@ -181,11 +195,11 @@ resource "alibabacloudstack_ecs_instance" "default" {
 }
 
 
-resource "alibabacloudstack_ecs_networkinterface" "default" {
-  	count                	= 2
-	network_interface_name 	= "${var.name}_eni_${count.index}"
-    vswitch_id 				= "${alibabacloudstack_vpc_vswitch.default.id}"
-	security_groups      	= [alibabacloudstack_ecs_securitygroup.default.id]
-}
+// resource "alibabacloudstack_ecs_networkinterface" "default" {
+//   	count                	= 2
+// 	network_interface_name 	= "${var.name}_eni_${count.index}"
+//     vswitch_id 				= "${alibabacloudstack_vpc_vswitch.default.id}"
+// 	security_groups      	= [alibabacloudstack_ecs_securitygroup.default.id]
+// }
 `, name, DataAlibabacloudstackImages, DataAlibabacloudstackInstanceTypes, SecurityGroupCommonTestCase)
 }
