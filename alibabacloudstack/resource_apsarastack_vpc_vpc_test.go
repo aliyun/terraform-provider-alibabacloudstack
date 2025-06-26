@@ -284,6 +284,65 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 					}),
 				),
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"ipv6_cidr_blocks": []map[string]interface{}{
+						{
+							"ipv6_isp":        "BGP",
+							"ipv6_cidr_block": "2020:83:2:4::/61",
+						},
+						{
+							"ipv6_cidr_block": "2020:83:13:8::/61",
+							"ipv6_isp":        "CMCC_AZ1",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"ipv6_cidr_block":                    CHECKSET,
+						"ipv6_cidr_blocks.#":                 "2",
+						"ipv6_cidr_blocks.0.ipv6_cidr_block": "2020:83:2:::/61",
+						"ipv6_cidr_blocks.1.ipv6_cidr_block": "2020:83:13:8::/61",
+						"ipv6_cidr_blocks.1.ipv6_isp":        "CMCC_AZ1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"ipv6_cidr_blocks": []map[string]interface{}{
+						{
+							"ipv6_isp":        "BGP",
+							"ipv6_cidr_block": "2020:83:13:18::/61",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"ipv6_cidr_block":                    CHECKSET,
+						"ipv6_cidr_blocks.#":                 "1",
+						"ipv6_cidr_blocks.0.ipv6_cidr_block": CHECKSET,
+						"ipv6_cidr_blocks.1.ipv6_cidr_block": REMOVEKEY,
+						"ipv6_cidr_blocks.1.ipv6_isp":        REMOVEKEY,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"ipv6_cidr_blocks": []map[string]interface{}{
+						{
+							"ipv6_isp":        "BGP",
+							"ipv6_cidr_block": "2020:83:13:10::/61",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"ipv6_cidr_block":                    CHECKSET,
+						"ipv6_cidr_blocks.#":                 "1",
+						"ipv6_cidr_blocks.0.ipv6_cidr_block": CHECKSET,
+					}),
+				),
+			},
 		},
 	})
 }

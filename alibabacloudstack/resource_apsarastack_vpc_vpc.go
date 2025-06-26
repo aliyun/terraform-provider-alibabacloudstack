@@ -57,7 +57,7 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 			"enable_ipv6": {
 				Type:          schema.TypeBool,
 				Optional:      true,
-				ConflictsWith: []string{"cidr_block"},
+				ConflictsWith: []string{"ipv6_cidr_blocks"},
 			},
 			"ipv6_cidr_block": {
 				Type:     schema.TypeString,
@@ -76,8 +76,27 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 			"secondary_cidr_blocks": {
 				Type:     schema.TypeList,
 				Optional: true,
+				MaxItems: 5,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
+				},
+			},
+			"ipv6_cidr_blocks": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 4,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"ipv6_isp": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"ipv6_cidr_block": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
 				},
 			},
 			"status": {
@@ -169,6 +188,14 @@ func resourceAlibabacloudStackVpcRead(d *schema.ResourceData, meta interface{}) 
 	d.Set("router_id", object.VRouterId)
 	d.Set("ipv6_cidr_block", object.Ipv6CidrBlock)
 	d.Set("secondary_cidr_blocks", object.SecondaryCidrBlocks.SecondaryCidrBlock)
+	ipv6_cidr_blocks := make([]map[string]interface{}, 0)
+	for _, cidr := range object.Ipv6CidrBlocks.Ipv6CidrBlock {
+		ipv6_cidr_blocks = append(ipv6_cidr_blocks, map[string]interface{}{
+			"ipv6_isp":        cidr.Ipv6Isp,
+			"ipv6_cidr_block": cidr.Ipv6CidrBlock,
+		})
+	}
+	d.Set("ipv6_cidr_blocks", ipv6_cidr_blocks)
 	d.Set("status", object.Status)
 	d.Set("resource_group_id", object.ResourceGroupId)
 	if tag := object.Tags.Tag; tag != nil {
@@ -236,7 +263,7 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpcService := VpcService{client}
 
-	if err := vpcService.setInstanceSecondaryCidrBlocks(d); err != nil {
+	if err := vpcService.SetInstanceSecondaryCidrBlocks(d); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	if d.HasChange("tags") {
@@ -279,26 +306,22 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 	client.InitRpcRequest(*request.RpcRequest)
 	request.VpcId = d.Id()
 
-
 	if d.HasChanges("name", "vpc_name") {
-		request.VpcName = connectivity.GetResourceData(d, "vpc_name", "name").(string)
 		attributeUpdate = true
 	}
-
+	request.VpcName = connectivity.GetResourceData(d, "vpc_name", "name").(string)
 	if d.HasChange("description") {
-		request.Description = d.Get("description").(string)
 		attributeUpdate = true
 	}
-
+	request.Description = d.Get("description").(string)
 	if !d.IsNewResource() && d.HasChange("cidr_block") {
-		request.CidrBlock = d.Get("cidr_block").(string)
 		attributeUpdate = true
 	}
-	enable_ipv6 := d.Get("enable_ipv6").(bool)
+	request.CidrBlock = d.Get("cidr_block").(string)
+	if d.HasChange("enable_ipv6") && d.Get("enable_ipv6").(bool) {
+		request.EnableIPv6 = requests.NewBoolean(true)
+	}
 	if attributeUpdate {
-		if enable_ipv6 {
-			request.EnableIPv6 = requests.NewBoolean(d.Get("enable_ipv6").(bool))
-		}
 		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
 			return vpcClient.ModifyVpcAttribute(request)
 		})
@@ -311,6 +334,10 @@ func resourceAlibabacloudStackVpcUpdate(d *schema.ResourceData, meta interface{}
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	}
+
+	if err := vpcService.SetIpv6CidrBlocks(d); err != nil {
+		return errmsgs.WrapError(err)
 	}
 
 	return nil

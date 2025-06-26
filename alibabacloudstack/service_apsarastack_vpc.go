@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"slices"
 	"time"
 
 	"encoding/json"
@@ -1565,7 +1566,7 @@ func (s *VpcService) DescribeVpcIpv6InternetBandwidth(id string) (object map[str
 	return object, nil
 }
 
-func (s *VpcService) setInstanceSecondaryCidrBlocks(d *schema.ResourceData) error {
+func (s *VpcService) SetInstanceSecondaryCidrBlocks(d *schema.ResourceData) error {
 	var response map[string]interface{}
 	var err error
 	if d.HasChange("secondary_cidr_blocks") {
@@ -1599,7 +1600,66 @@ func (s *VpcService) setInstanceSecondaryCidrBlocks(d *schema.ResourceData) erro
 				}
 			}
 		}
-		//d.SetPartial("secondary_cidr_blocks")
+	}
+	return nil
+}
+
+func (s *VpcService) SetIpv6CidrBlocks(d *schema.ResourceData) error {
+	var response map[string]interface{}
+	var err error
+	if d.HasChanges("ipv6_cidr_blocks") {
+		old, new := d.GetChange("ipv6_cidr_blocks")
+		old_ipv6s := old.(*schema.Set).List()
+		new_ipv6s := new.(*schema.Set).List()
+		if len(old_ipv6s) > 0 && len(new_ipv6s) == 0 {
+			return errmsgs.Error("Operation failed because ipv6Gateway is in use.")
+		}
+		added := make([]map[string]interface{}, 0)
+		removed := make([]map[string]interface{}, 0)
+		for _, ipv6 := range old_ipv6s {
+			exists := slices.Contains(new_ipv6s, ipv6)
+			if !exists {
+				removed = append(removed, ipv6.(map[string]interface{}))
+			}
+		}
+		for _, ipv6 := range new_ipv6s {
+			exists := slices.Contains(old_ipv6s, ipv6)
+			if !exists {
+				added = append(added, ipv6.(map[string]interface{}))
+			}
+		}
+
+		if len(added) > 0 {
+			request := map[string]interface{}{
+				"VpcId":     d.Id(),
+				"IpVersion": "IPV6",
+			}
+			for _, ivp6 := range added {
+				request["Ipv6Isp"] = ivp6["ipv6_isp"]
+				request["IPv6CidrBlock"] = ivp6["ipv6_cidr_block"]
+				response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "AssociateVpcCidrBlock", "", nil, nil, request)
+				if err != nil {
+					return err
+				}
+				addDebug("AssociateVpcCidrBlock", response, request)
+			}
+		}
+
+		if len(removed) > 0 {
+			request := map[string]interface{}{
+				"VpcId":     d.Id(),
+				"IpVersion": "IPV6",
+			}
+			for _, ivp6 := range removed {
+				request["Ipv6Isp"] = ivp6["ipv6_isp"]
+				request["IPv6CidrBlock"] = ivp6["ipv6_cidr_block"]
+				response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", "UnassociateVpcCidrBlock", "", nil, nil, request)
+				if err != nil {
+					return err
+				}
+				addDebug("UnassociateVpcCidrBlock", response, request)
+			}
+		}
 	}
 	return nil
 }
@@ -1845,7 +1905,6 @@ func (s *VpcService) DoVpcGetdhcpoptionssetRequest(id string) (*VpcGetdhcpoption
 
 	return VpcGetdhcpoptionssetResponseObj, nil
 }
-
 
 type NatgatewayService struct {
 	client *connectivity.AlibabacloudStackClient
