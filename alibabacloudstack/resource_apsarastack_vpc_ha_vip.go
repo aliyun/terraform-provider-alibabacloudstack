@@ -27,6 +27,7 @@ func resourceAlibabacloudStackVpcHavip() *schema.Resource {
 			"associated_instance_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"EcsInstance", "NetworkInterface"}, false),
 			},
 
@@ -158,34 +159,8 @@ func resourceAlibabacloudStackVpcHavipUpdate(d *schema.ResourceData, meta interf
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	// api: Vpc - 2016-04-28 - AssociateHaVip
 	vpcservice := VpcService{client}
-	if !d.IsNewResource() && d.HasChanges("associated_instance_type") {
-		old_type, new_type := d.GetChange("associated_instance_type")
-		response, err := vpcservice.DoVpcDescribehavipsRequest(d.Id())
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_vpc_ha_vip", "AssociateHaVip", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		instances := response.HaVips.HaVip[0].AssociatedInstances.AssociatedInstance
-		instance_type := response.HaVips.HaVip[0].AssociatedInstanceType
-		if len(instances) > 0 && response.HaVips.HaVip[0].Status == "InUse" && instance_type == old_type.(string) {
-			for _, instance := range instances {
-				err := vpcservice.UnassociateHaVip(d.Id(), instance_type, instance)
-				if err != nil {
-					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-						"alibabacloudstack_vpc_ha_vip", "UnassociateHaVip", errmsgs.AlibabacloudStackSdkGoERROR)
-				}
-			}
-		}
-		new := d.Get("associated_instances")
-		new_instances := expandStringList(new.(*schema.Set).List())
-		for _, instance := range new_instances {
-			err := vpcservice.AssociateHaVip(d.Id(), new_type.(string), instance)
-			if err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-					"alibabacloudstack_vpc_ha_vip", "AssociateHaVip", errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-		}
-	} else if d.HasChange("associated_instances") {
+
+	if d.HasChange("associated_instances") {
 		old, new := d.GetChange("associated_instances")
 		old_instances := expandStringList(old.(*schema.Set).List())
 		new_instances := expandStringList(new.(*schema.Set).List())
@@ -222,6 +197,10 @@ func resourceAlibabacloudStackVpcHavipUpdate(d *schema.ResourceData, meta interf
 				}
 			}
 		}
+	}
+	
+	if d.IsNewResource() {
+		return nil
 	}
 
 	// Description
