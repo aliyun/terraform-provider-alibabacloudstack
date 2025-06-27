@@ -12,6 +12,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 type VpnGatewayService struct {
@@ -493,4 +494,105 @@ func (s *VpnGatewayService) VpnGatewayStateRefreshFunc(id string, failStates []s
 		}
 		return object, object.Status, nil
 	}
+}
+	
+type VpcDescribesslvpnserversResponse struct {
+	SslVpnServers struct {
+		SslVpnServer []struct {
+			RegionId       string `json:"RegionId"`
+			SslVpnServerId string `json:"SslVpnServerId"`
+			VpnGatewayId   string `json:"VpnGatewayId"`
+			Name           string `json:"Name"`
+			LocalSubnet    string `json:"LocalSubnet"`
+			ClientIpPool   string `json:"ClientIpPool"`
+			CreateTime     int    `json:"CreateTime"`
+			Cipher         string `json:"Cipher"`
+			Proto          string `json:"Proto"`
+			Port           int    `json:"Port"`
+			Compress       bool   `json:"Compress"`
+			Connections    int    `json:"Connections"`
+			MaxConnections int    `json:"MaxConnections"`
+			InternetIp     string `json:"InternetIp"`
+			AscmCreateUser string `json:"AscmCreateUser"`
+		} `json:"SslVpnServer"`
+	} `json:"SslVpnServers"`
+	RequestId  string `json:"RequestId"`
+	TotalCount int    `json:"TotalCount"`
+	PageNumber int    `json:"PageNumber"`
+	PageSize   int    `json:"PageSize"`
+}
+
+func (s *VpnGatewayService) DoVpcDescribesslvpnserversRequest(id string) (*VpcDescribesslvpnserversResponse, error) {
+	// api: Vpc - 2016-04-28 - DescribeSslVpnServers
+	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeSslVpnServers", "")
+	VpcDescribesslvpnserversResponseObj := &VpcDescribesslvpnserversResponse{}
+
+	//调用request_params_handler
+	request.QueryParams["SslVpnServerId"] = id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeSslVpnServers", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribesslvpnserversResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeSslVpnServers", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return VpcDescribesslvpnserversResponseObj, nil
+}
+
+type VpcDescribevpnsslserverlogsResponse struct {
+	Data struct {
+		Logs []string `json:"Logs"`
+	} `json:"Data"`
+	RequestId   string `json:"RequestId"`
+	Count       int    `json:"Count"`
+	IsCompleted bool   `json:"IsCompleted"`
+	PageNumber  int    `json:"PageNumber"`
+	PageSize    int    `json:"PageSize"`
+}
+
+func (s *VpnGatewayService) DoVpcDescribevpnsslserverlogsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*VpcDescribevpnsslserverlogsResponse, error) {
+	// api: Vpc - 2016-04-28 - DescribeVpnSslServerLogs
+	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeVpnSslServerLogs", "")
+	VpcDescribevpnsslserverlogsResponseObj := &VpcDescribevpnsslserverlogsResponse{}
+
+	//调用request_params_handler
+
+	if v, ok := d.GetOk("region_id"); ok {
+		request.QueryParams["RegionId"] = v.(string)
+	} else {
+		return nil, fmt.Errorf("RegionId is required")
+	}
+
+	if v, ok := d.GetOk("ssl_vpn_server_id"); ok {
+		request.QueryParams["VpnSslServerId"] = v.(string)
+	} else {
+		return nil, fmt.Errorf("SslVpnServerId is required")
+	}
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeVpnSslServerLogs", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribevpnsslserverlogsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeVpnSslServerLogs", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return VpcDescribevpnsslserverlogsResponseObj, nil
 }
