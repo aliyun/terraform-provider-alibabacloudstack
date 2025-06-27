@@ -348,8 +348,8 @@ func TestAccAlibabacloudStackCsK8sKeyName(t *testing.T) {
 					"proxy_mode":                    "ipvs",
 					"worker_data_disks": []map[string]interface{}{
 						{
-							"size":       40,
-							"encrypted":  true,
+							"size":       "40",
+							"encrypted":  "true",
 							"category":   "cloud_pperf",
 							"kms_key_id": "${alibabacloudstack_kms_key.default.id}",
 						},
