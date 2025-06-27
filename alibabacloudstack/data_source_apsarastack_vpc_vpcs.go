@@ -143,6 +143,22 @@ func dataSourceAlibabacloudStackVpcs() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"ipv6_cidr_blocks": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ipv6_isp": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"ipv6_cidr_block": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -362,6 +378,14 @@ func vpcsDecriptionAttributes(d *schema.ResourceData, vpcSetTypes []vpc.Vpc, rou
 	var names []string
 	var s []map[string]interface{}
 	for index, vpc := range vpcSetTypes {
+		ipv6_cidr_blocks := make([]map[string]interface{}, 0)
+		for _, cidr := range vpc.Ipv6CidrBlocks.Ipv6CidrBlock {
+			ipv6_cidr_blocks = append(ipv6_cidr_blocks, map[string]interface{}{
+				"ipv6_isp":        cidr.Ipv6Isp,
+				"ipv6_cidr_block": cidr.Ipv6CidrBlock,
+			})
+		}
+		d.Set("ipv6_cidr_blocks", ipv6_cidr_blocks)
 		mapping := map[string]interface{}{
 			"id":                    vpc.VpcId,
 			"region_id":             vpc.RegionId,
@@ -375,6 +399,7 @@ func vpcsDecriptionAttributes(d *schema.ResourceData, vpcSetTypes []vpc.Vpc, rou
 			"is_default":            vpc.IsDefault,
 			"creation_time":         vpc.CreationTime,
 			"ipv6_cidr_block":       vpc.Ipv6CidrBlock,
+			"ipv6_cidr_blocks":      ipv6_cidr_blocks,
 			"resource_group_id":     vpc.ResourceGroupId,
 			"router_id":             vpc.VRouterId,
 			"secondary_cidr_blocks": vpc.SecondaryCidrBlocks.SecondaryCidrBlock,
