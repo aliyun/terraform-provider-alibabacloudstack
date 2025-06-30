@@ -385,7 +385,6 @@ func vpcsDecriptionAttributes(d *schema.ResourceData, vpcSetTypes []vpc.Vpc, rou
 				"ipv6_cidr_block": cidr.Ipv6CidrBlock,
 			})
 		}
-		d.Set("ipv6_cidr_blocks", ipv6_cidr_blocks)
 		mapping := map[string]interface{}{
 			"id":                    vpc.VpcId,
 			"region_id":             vpc.RegionId,
