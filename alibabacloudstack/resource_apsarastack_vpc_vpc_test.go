@@ -246,7 +246,7 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%svpcvpc%d", defaultRegionToTest, rand)
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcVpcBasicdependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccVpcVpcIpv6Basicdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -286,12 +286,12 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"ipv6_cidr_blocks": []map[string]interface{}{
 						{
-							"ipv6_isp":        "BGP",
-							"ipv6_cidr_block": "2020:82:2:50::/61",
+							"ipv6_isp":        "${data.alibabacloudstack_vpc_ipv6_isps.default.ipv6_isps[0].service_provider}",
+							"ipv6_cidr_block": "${local.subnet0_ipv6_cidr}",
 						},
 						{
-							"ipv6_cidr_block": "2020:82:13:10::/61",
-							"ipv6_isp":        "CTC_AZ1",
+							"ipv6_isp":        "${data.alibabacloudstack_vpc_ipv6_isps.default.ipv6_isps[1].service_provider}",
+							"ipv6_cidr_block": "${local.subnet1_ipv6_cidr}",
 						},
 					},
 				}),
@@ -299,9 +299,9 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 					testAccCheck(map[string]string{
 						"ipv6_cidr_block":                    CHECKSET,
 						"ipv6_cidr_blocks.#":                 "2",
-						"ipv6_cidr_blocks.0.ipv6_cidr_block": "2020:82:2:50::/61",
-						"ipv6_cidr_blocks.1.ipv6_cidr_block": "2020:82:13:10::/61",
-						"ipv6_cidr_blocks.1.ipv6_isp":        "CTC_AZ1",
+						"ipv6_cidr_blocks.0.ipv6_cidr_block": CHECKSET,
+						"ipv6_cidr_blocks.1.ipv6_cidr_block": CHECKSET,
+						"ipv6_cidr_blocks.1.ipv6_isp":        CHECKSET,
 					}),
 				),
 			},
@@ -309,9 +309,8 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"ipv6_cidr_blocks": []map[string]interface{}{
 						{
-
-							"ipv6_isp":        "BGP",
-							"ipv6_cidr_block": "2020:82:2:50::/61",
+							"ipv6_isp":        "${data.alibabacloudstack_vpc_ipv6_isps.default.ipv6_isps[0].service_provider}",
+							"ipv6_cidr_block": "${local.subnet0_ipv6_cidr}",
 						},
 					},
 				}),
@@ -329,9 +328,9 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"ipv6_cidr_blocks": []map[string]interface{}{
 						{
-							"ipv6_isp":        "BGP",
-							"ipv6_cidr_block": "2020:82:2:60::/61",
-						},
+								"ipv6_isp":        "${data.alibabacloudstack_vpc_ipv6_isps.default.ipv6_isps[0].service_provider}",
+								"ipv6_cidr_block": "${local.subnet0_ipv6_cidr_update}",
+							},
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -361,3 +360,22 @@ variable "name" {
 
 `, name)
 }
+
+
+func AlibabacloudTestAccVpcVpcIpv6Basicdependence(name string) string {
+
+	//  TODO  检查依赖变量
+
+	return fmt.Sprintf(`
+%s
+data "alibabacloudstack_vpc_ipv6_isps" "default" {
+}
+
+locals {
+  subnet0_ipv6_cidr = cidrsubnet(data.alibabacloudstack_vpc_ipv6_isps.default.ipv6_isps[0].cidr_block, 13, 1644)
+  subnet0_ipv6_cidr_update = cidrsubnet(data.alibabacloudstack_vpc_ipv6_isps.default.ipv6_isps[0].cidr_block, 13, 1645)
+  subnet1_ipv6_cidr = cidrsubnet(data.alibabacloudstack_vpc_ipv6_isps.default.ipv6_isps[1].cidr_block, 13, 1644)
+}
+`, AlibabacloudTestAccVpcVpcBasicdependence(name))
+}
+

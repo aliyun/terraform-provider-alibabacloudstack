@@ -32,7 +32,7 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
-				Deprecated:    "Field 'name' has been deprecated from provider version 1.119.0. New field 'vpc_name' instead.",
+				Deprecated:    "Field 'name' has been deprecated and will be removed in a future release.. New field 'vpc_name' instead.",
 				ConflictsWith: []string{"vpc_name"},
 				ValidateFunc:  validateNormalName,
 			},
@@ -67,6 +67,7 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				Deprecated: "Field 'resource_group_id' is deprecated and will be removed in a future release.",
 			},
 			"router_table_id": {
 				Type:       schema.TypeString,

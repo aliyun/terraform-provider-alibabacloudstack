@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"slices"
 	"time"
 
 	"encoding/json"
@@ -1617,25 +1616,50 @@ func (s *VpcService) AllocateVpcIpv6Cidr(ipv6_cidr, ipv6isp string) error {
 	return nil
 }
 
+func ipv6CidrBlock2String(ipv6 interface{}) string {
+	if ipv6 == nil {
+		return ""
+	}
+	if ipv6Info, ok := ipv6.(map[string]interface{}); ok {
+		if _, exist := ipv6Info["ipv6_isp"]; !exist {
+			return ""
+		}
+		if _, exist := ipv6Info["ipv6_cidr_block"]; !exist {
+			return ""
+		}
+		return fmt.Sprintf("%s_%s", ipv6Info["ipv6_isp"].(string), ipv6Info["ipv6_cidr_block"].(string))
+	} else {
+		return ""
+	}
+}
+
 func (s *VpcService) SetIpv6CidrBlocks(d *schema.ResourceData) error {
 	var response map[string]interface{}
 	var err error
 	if d.HasChanges("ipv6_cidr_blocks") {
 		old, new := d.GetChange("ipv6_cidr_blocks")
-		old_ipv6s := old.(*schema.Set).List()
-		new_ipv6s := new.(*schema.Set).List()
-		added := make([]map[string]interface{}, 0)
-		removed := make([]map[string]interface{}, 0)
-		for _, ipv6 := range old_ipv6s {
-			exists := slices.Contains(new_ipv6s, ipv6)
-			if !exists {
-				removed = append(removed, ipv6.(map[string]interface{}))
+		old_ipv6s := map[string]interface{}{}
+		new_ipv6s := map[string]interface{}{}
+		for _, ipv6 := range old.(*schema.Set).List() {
+			if ipv6String := ipv6CidrBlock2String(ipv6); ipv6String != "" {
+				old_ipv6s[ipv6CidrBlock2String(ipv6)] = ipv6
 			}
 		}
-		for _, ipv6 := range new_ipv6s {
-			exists := slices.Contains(old_ipv6s, ipv6)
-			if !exists {
-				added = append(added, ipv6.(map[string]interface{}))
+		for _, ipv6 := range new.(*schema.Set).List() {
+			if ipv6String := ipv6CidrBlock2String(ipv6); ipv6String != "" {
+				new_ipv6s[ipv6CidrBlock2String(ipv6)] = ipv6
+			}
+		}
+		added := make([]map[string]interface{}, 0)
+		removed := make([]map[string]interface{}, 0)
+		for ipv6String, ipv6Info := range old_ipv6s {
+			if _, exist := new_ipv6s[ipv6String]; !exist {
+				removed = append(removed, ipv6Info.(map[string]interface{}))
+			}
+		}
+		for ipv6String, ipv6Info := range new_ipv6s {
+			if _, exist := old_ipv6s[ipv6String]; !exist {
+				added = append(added, ipv6Info.(map[string]interface{}))
 			}
 		}
 
