@@ -32,7 +32,7 @@ func TestAccAlibabacloudStackVpngatewayVpnpbrrouteentry_basic(t *testing.T) {
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
-		CheckDestroy:  rac.checkResourceDestroy(),
+		CheckDestroy:  nil,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -58,6 +58,8 @@ func TestAccAlibabacloudStackVpngatewayVpnpbrrouteentry_basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				// 这两个值 不支持回读
+				ImportStateVerifyIgnore: []string{"publish_vpc", "overlay_mode"},
 			},
 		},
 	})

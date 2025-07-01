@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -139,20 +140,28 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentryCreate(d *schema.Resourc
 	} else {
 		return fmt.Errorf("Weight is required")
 	}
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	retry := 0
+	for retry <= 6 {
+		retry++
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if errmsgs.IsExpectedErrors(err, []string{"VpnGateway.Configuring"}) {
+				time.Sleep(10 * time.Second)
+				continue
+			}
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_vpn_gateway_vpn_pbr_route_entry", "CreateVpnPbrRouteEntry", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_vpn_gateway_vpn_pbr_route_entry", "CreateVpnPbrRouteEntry", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcCreatevpnpbrrouteentryResponseObj)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_vpn_gateway_vpn_pbr_route_entry", "CreateVpnPbrRouteEntry", errmsgs.AlibabacloudStackSdkGoERROR)
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcCreatevpnpbrrouteentryResponseObj)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+				"alibabacloudstack_vpn_gateway_vpn_pbr_route_entry", "CreateVpnPbrRouteEntry", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		break
 	}
 
 	next_hop := VpcCreatevpnpbrrouteentryResponseObj.NextHop
@@ -215,6 +224,7 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentryDelete(d *schema.Resourc
 	request.QueryParams["RouteSource"] = d.Get("route_source").(string)
 	request.QueryParams["VpnGatewayId"] = d.Get("vpn_gateway_id").(string)
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")

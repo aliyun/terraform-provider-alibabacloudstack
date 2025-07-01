@@ -6,7 +6,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -23,11 +22,6 @@ func dataSourceAlibabacloudStackVpngatewayVpnPbrRouteEntries() *schema.Resource 
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 				MinItems: 1,
-			},
-
-			"region_id": {
-				Type:     schema.TypeString,
-				Required: true,
 			},
 
 			"vpn_gateway_id": {
@@ -57,47 +51,29 @@ func dataSourceAlibabacloudStackVpngatewayVpnPbrRouteEntries() *schema.Resource 
 							Computed: true,
 						},
 
-						"new_weight": {
-							// TypeInt
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-
 						"next_hop": {
 							// TypeString
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						// 接口无next_hop_tunnel_id, overlay_mode, publish_vpc属性
+						// "next_hop_tunnel_id": {
+						// 	TypeString
+						// 	Type:     schema.TypeString,
+						// 	Computed: true,
+						// },
+						
+						// "overlay_mode": {
+						// 	// TypeString
+						// 	Type:     schema.TypeString,
+						// 	Computed: true,
+						// },
 
-						"next_hop_tunnel_id": {
-							// TypeString
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"overlay_mode": {
-							// TypeString
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"publish_vpc": {
-							// TypeBool
-							Type:     schema.TypeBool,
-							Computed: true,
-						},
-
-						"record_total": {
-							// TypeInt
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-
-						"region_id": {
-							// TypeString
-							Type:     schema.TypeString,
-							Computed: true,
-						},
+						// "publish_vpc": {
+						// 	// TypeBool
+						// 	Type:     schema.TypeBool,
+						// 	Computed: true,
+						// },
 
 						"route_dest": {
 							// TypeString
@@ -141,27 +117,9 @@ func dataSourceAlibabacloudStackVpngatewayVpnPbrRouteEntriesRead(d *schema.Resou
 	// api: Vpc - 2016-04-28 - DescribeVpnPbrRouteEntries
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeVpnPbrRouteEntries", "")
 	VpcDescribevpnpbrrouteentriesResponseObj := VpcDescribevpnpbrrouteentriesResponse{}
-
-	//调用request_params_handler
-
-	if v, ok := d.GetOk("page_number"); ok {
-		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("page_size"); ok {
-		request.QueryParams["PageSize"] = strconv.Itoa(v.(int))
-	}
-
+	request.QueryParams["VpnGatewayId"] = d.Get("vpn_gateway_id").(string)
 	if v, ok := d.GetOk("region_id"); ok {
 		request.QueryParams["RegionId"] = v.(string)
-	} else {
-		return fmt.Errorf("RegionId is required")
-	}
-
-	if v, ok := d.GetOk("vpn_gateway_id"); ok {
-		request.QueryParams["VpnGatewayId"] = v.(string)
-	} else {
-		return fmt.Errorf("VpnGatewayId is required")
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
@@ -203,8 +161,6 @@ func dataSourceAlibabacloudStackVpngatewayVpnPbrRouteEntriesRead(d *schema.Resou
 			"next_hop": data.NextHop,
 
 			// "next_hop_tunnel_id": data.NextHopTunnelId,
-
-			"record_total": data,
 
 			"route_dest": data.RouteDest,
 
