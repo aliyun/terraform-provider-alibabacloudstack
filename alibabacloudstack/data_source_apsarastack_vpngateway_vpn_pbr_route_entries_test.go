@@ -7,7 +7,7 @@ import (
 
 func TestAccAlibabacloudStackVpngatewayVpnPbrRouteEntriesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
-	resourceId := "data.alibabacloudstack_vpngateway_vpn_pbr_route_entrys.default"
+	resourceId := "data.alibabacloudstack_vpngateway_vpn_pbr_route_entries.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
 		fmt.Sprintf("tf-testAcc%sVpngatewayVpnPbrRouteEntriesDataSource-%d", defaultRegionToTest, rand),

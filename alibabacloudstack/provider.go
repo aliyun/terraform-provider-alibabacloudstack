@@ -496,7 +496,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_slb_access_logs":       dataSourceAlibabacloudStackSlbAccessLogs(),
 		"alibabacloudstack_vpc_ipv6_isps":         dataSourceAlibabacloudStackVpcIpv6Isps(),
 		"alibabacloudstack_vpc_ha_vips":           dataSourceAlibabacloudStackVpcHaVips(),
-		"alibabacloudstack_vpngateway_vpn_pbr_route_entrys": dataSourceAlibabacloudStackVpngatewayVpnPbrRouteEntries(),
+		"alibabacloudstack_vpngateway_vpn_pbr_route_entries": dataSourceAlibabacloudStackVpngatewayVpnPbrRouteEntries(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
