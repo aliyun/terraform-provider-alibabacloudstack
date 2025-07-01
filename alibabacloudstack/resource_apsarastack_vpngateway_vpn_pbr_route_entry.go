@@ -26,45 +26,45 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentry() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
-				ForceNew:     true,
+				ForceNew: true,
 			},
 
 			"next_hop": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew:     true,
+				ForceNew: true,
 			},
 
 			"next_hop_tunnel_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew:     true,
+				ForceNew: true,
 			},
 
 			"overlay_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "Ipsec",
-				ForceNew:     true,
+				ForceNew: true,
 			},
 
 			"publish_vpc": {
 				Type:     schema.TypeBool,
 				Required: true,
-				ForceNew:     true,
+				ForceNew: true,
 			},
 
 			"route_dest": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew:     true,
+				ForceNew: true,
 			},
 
 			"route_source": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew:     true,
+				ForceNew: true,
 			},
 
 			"status": {
@@ -76,7 +76,7 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentry() *schema.Resource {
 			"vpn_gateway_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew:     true,
+				ForceNew: true,
 			},
 
 			"weight": {
@@ -114,12 +114,7 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentryCreate(d *schema.Resourc
 	}
 
 	request.QueryParams["OverlayMode"] = d.Get("overlay_mode").(string)
-
-	if v, ok := d.GetOk("publish_vpc"); ok {
-		request.QueryParams["PublishVpc"] = strconv.FormatBool(v.(bool))
-	} else {
-		return fmt.Errorf("PublishVpc is required")
-	}
+	request.QueryParams["PublishVpc"] = strconv.FormatBool(d.Get("publish_vpc").(bool))
 
 	if v, ok := d.GetOk("route_dest"); ok {
 		request.QueryParams["RouteDest"] = v.(string)
@@ -182,8 +177,8 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentryUpdate(d *schema.Resourc
 
 func resourceAlibabacloudStackVpngatewayVpnpbrrouteentryRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	vpn_gatewayvpn_pbr_route_entryservice := VpngatewayService{client}
-	data, err := vpn_gatewayvpn_pbr_route_entryservice.DoVpcDescribevpnpbrrouteentriesRequest(d.Id())
+	vpn_service := VpnGatewayService{client}
+	data, err := vpn_service.DoVpcDescribevpnpbrrouteentriesRequest(d.Id())
 	if err != nil {
 		if !d.IsNewResource() && errmsgs.NotFoundError(err) {
 			d.SetId("")

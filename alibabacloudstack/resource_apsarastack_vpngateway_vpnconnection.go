@@ -33,19 +33,19 @@ func resourceAlibabacloudStackVpnConnection() *schema.Resource {
 			},
 
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
-				Deprecated:  "Field 'name' is deprecated and will be removed in a future release. Please use new field 'vpn_connection_name' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'vpn_connection_name' instead.",
 				ConflictsWith: []string{"vpn_connection_name"},
 			},
 
 			"vpn_connection_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 128),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 128),
 				ConflictsWith: []string{"name"},
 			},
 
@@ -260,14 +260,19 @@ func resourceAlibabacloudStackVpnConnectionRead(d *schema.ResourceData, meta int
 }
 
 func resourceAlibabacloudStackVpnConnectionUpdate(d *schema.ResourceData, meta interface{}) error {
+	if d.IsNewResource() {
+		return nil
+	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpnGatewayService := VpnGatewayService{client}
 	request := vpc.CreateModifyVpnConnectionAttributeRequest()
 	client.InitRpcRequest(*request.RpcRequest)
+	update := false
 	request.VpnConnectionId = d.Id()
 
 	if d.HasChanges("name", "vpn_connection_name") {
 		request.Name = connectivity.GetResourceData(d, "vpn_connection_name", "name").(string)
+		update = true
 	}
 
 	request.LocalSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("local_subnet").(*schema.Set).List())
@@ -276,6 +281,7 @@ func resourceAlibabacloudStackVpnConnectionUpdate(d *schema.ResourceData, meta i
 	/* If not set effect_immediately value, VPN connection will automatically set the value to false*/
 	if v, ok := d.GetOk("effect_immediately"); ok {
 		request.EffectImmediately = requests.NewBoolean(v.(bool))
+		update = true
 	}
 
 	if d.HasChange("ike_config") {
@@ -284,6 +290,7 @@ func resourceAlibabacloudStackVpnConnectionUpdate(d *schema.ResourceData, meta i
 			return errmsgs.WrapError(err)
 		}
 		request.IkeConfig = ike_config
+		update = true
 	}
 
 	if d.HasChange("ipsec_config") {
@@ -292,21 +299,22 @@ func resourceAlibabacloudStackVpnConnectionUpdate(d *schema.ResourceData, meta i
 			return errmsgs.WrapError(err)
 		}
 		request.IpsecConfig = ipsec_config
+		update = true
 	}
-
-	raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
-		return vpcClient.ModifyVpnConnectionAttribute(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
-	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	if update {
+		raw, err := client.WithVpcClient(func(vpcClient *vpc.Client) (interface{}, error) {
+			return vpcClient.ModifyVpnConnectionAttribute(request)
+		})
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		bresponse, ok := raw.(*responses.CommonResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-
 	return nil
 }
 
@@ -358,7 +366,7 @@ func buildAlibabacloudStackVpnConnectionArgs(d *schema.ResourceData, meta interf
 	request.LocalSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("local_subnet").(*schema.Set).List())
 	request.RemoteSubnet = vpnGatewayService.AssembleNetworkSubnetToString(d.Get("remote_subnet").(*schema.Set).List())
 
-	if v := connectivity.GetResourceData(d, "vpn_connection_name", "name"); v != ""{
+	if v := connectivity.GetResourceData(d, "vpn_connection_name", "name"); v != "" {
 		request.Name = v.(string)
 	}
 

@@ -11,6 +11,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 type VpnGatewayService struct {
@@ -18,7 +19,7 @@ type VpnGatewayService struct {
 }
 
 func (s *VpnGatewayService) DoVpcDescribevpngatewayRequest(id string) (v vpc.DescribeVpnGatewayResponse, err error) {
-    return s.DescribeVpnGateway(id)
+	return s.DescribeVpnGateway(id)
 }
 func (s *VpnGatewayService) DescribeVpnGateway(id string) (v vpc.DescribeVpnGatewayResponse, err error) {
 	request := vpc.CreateDescribeVpnGatewayRequest()
@@ -47,7 +48,7 @@ func (s *VpnGatewayService) DescribeVpnGateway(id string) (v vpc.DescribeVpnGate
 }
 
 func (s *VpnGatewayService) DoVpcDescribecustomergatewayRequest(id string) (v vpc.DescribeCustomerGatewayResponse, err error) {
-    return s.DescribeVpnCustomerGateway(id)
+	return s.DescribeVpnCustomerGateway(id)
 }
 func (s *VpnGatewayService) DescribeVpnCustomerGateway(id string) (v vpc.DescribeCustomerGatewayResponse, err error) {
 	request := vpc.CreateDescribeCustomerGatewayRequest()
@@ -419,4 +420,77 @@ func TimestampToStr(timestamp int64) string {
 	tm := time.Unix(timestamp/1000, 0)
 	timeString := tm.Format("2006-01-02T15:04:05Z")
 	return timeString
+}
+
+type VpnGatewayVpnPbrRouteEntry struct {
+	VpnInstanceId string `json:"VpnInstanceId"`
+	RouteSource   string `json:"RouteSource"`
+	RouteDest     string `json:"RouteDest"`
+	NextHop       string `json:"NextHop"`
+	Weight        int    `json:"Weight"`
+	CreateTime    int    `json:"CreateTime"`
+	State         string `json:"State"`
+}
+
+type VpcDescribevpnpbrrouteentriesResponse struct {
+	VpnPbrRouteEntries struct {
+		VpnPbrRouteEntry []VpnGatewayVpnPbrRouteEntry `json:"VpnPbrRouteEntry"`
+	} `json:"VpnPbrRouteEntries"`
+	RequestId  string `json:"RequestId"`
+	TotalCount int    `json:"TotalCount"`
+	PageNumber int    `json:"PageNumber"`
+	PageSize   int    `json:"PageSize"`
+}
+
+func (s *VpnGatewayService) DoVpcDescribevpnpbrrouteentriesRequest(id string) (*VpnGatewayVpnPbrRouteEntry, error) {
+	// api: Vpc - 2016-04-28 - DescribeVpnPbrRouteEntries
+	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeVpnPbrRouteEntries", "")
+	VpcDescribevpnpbrrouteentriesResponseObj := &VpcDescribevpnpbrrouteentriesResponse{}
+	result := &VpnGatewayVpnPbrRouteEntry{}
+	param := strings.Split(id, "_")
+	request.QueryParams["VpnGatewayId"] = param[3]
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeVpnPbrRouteEntries", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribevpnpbrrouteentriesResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeVpnPbrRouteEntries", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	for _, data := range VpcDescribevpnpbrrouteentriesResponseObj.VpnPbrRouteEntries.VpnPbrRouteEntry {
+		if data.NextHop == param[0] && data.RouteDest == param[1] && data.RouteSource == param[2] && data.VpnInstanceId == param[3] && fmt.Sprint(data.Weight) == param[4] {
+			result = &data
+		}
+	}
+	if result == nil {
+		return nil, errmsgs.Error(fmt.Sprintf(errmsgs.NotFoundMsg, "VpnPbrRouteEntry"))
+	}
+
+	return result, nil
+}
+
+func (s *VpnGatewayService) VpnGatewayStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeVpnGateway(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object.Status == failState {
+				return object, object.Status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Status))
+			}
+		}
+		return object, object.Status, nil
+	}
 }

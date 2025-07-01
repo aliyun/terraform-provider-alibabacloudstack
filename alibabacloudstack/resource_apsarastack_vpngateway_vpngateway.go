@@ -208,10 +208,10 @@ func resourceAlibabacloudStackVpnGatewayCreate(d *schema.ResourceData, meta inte
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	response, _ := raw.(*vpc.CreateVpnGatewayResponse)
 	d.SetId(response.VpnGatewayId)
+	stateConf := BuildStateConf([]string{"provisioning"}, []string{"active"}, d.Timeout(schema.TimeoutCreate), 2*time.Second, vpnGatewayService.VpnGatewayStateRefreshFunc(d.Id(), []string{"failed"}))
 
-	time.Sleep(10 * time.Second)
-	if err := vpnGatewayService.WaitForVpnGateway(d.Id(), Active, 2*DefaultTimeout); err != nil {
-		return errmsgs.WrapError(err)
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return nil

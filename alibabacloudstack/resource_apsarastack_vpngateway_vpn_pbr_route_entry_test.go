@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccAlibabacloudStackVpngatewayVpnpbrrouteentry_basic(t *testing.T) {
-	var v VpcDescribevpnpbrrouteentriesResponse
+	var v *VpnGatewayVpnPbrRouteEntry
 
 	resourceId := "alibabacloudstack_vpngateway_vpn_pbr_route_entry.default"
 	ra := resourceAttrInit(resourceId, VpngatewayVpnpbrrouteentrybasicMap)
@@ -29,9 +29,7 @@ func TestAccAlibabacloudStackVpngatewayVpnpbrrouteentry_basic(t *testing.T) {
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			// testAccPreCheckWithAccountSiteType(t, IntlSite)
 		},
-		// module name
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
 		CheckDestroy:  rac.checkResourceDestroy(),
@@ -67,11 +65,10 @@ func TestAccAlibabacloudStackVpngatewayVpnpbrrouteentry_basic(t *testing.T) {
 
 func resourceVpngatewayVpnpbrrouteentryConfigDependence(name string) string {
 	return fmt.Sprintf(`
-variable "route_dests" {
- default = ["10.1.0.0/24", "10.1.0.0/32"]
-}
+
 data "alibabacloudstack_zones" "default"{
 }
+
 resource "alibabacloudstack_vpc" "default" {
  name  = "%s"
  cidr_block = "10.1.0.0/21"
@@ -88,6 +85,7 @@ resource "alibabacloudstack_vpn_gateway" "default" {
  bandwidth            = 10
  instance_charge_type = "PostPaid"
  enable_ssl           = true
+ enable_ipsec		  = true
  vswitch_id			  = "${alibabacloudstack_vswitch.default.id}"
 }
 resource "alibabacloudstack_vpn_connection" "default" {
