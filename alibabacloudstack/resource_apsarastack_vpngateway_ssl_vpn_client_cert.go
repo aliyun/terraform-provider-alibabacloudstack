@@ -4,9 +4,13 @@ package alibabacloudstack
 // Product VPNGateway Resouce SslVpnClientCert
 import (
 	"encoding/json"
+	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -95,8 +99,23 @@ func resourceAlibabacloudStackVpngatewaySslvpnclientcertCreate(d *schema.Resourc
 	request.QueryParams["SslVpnServerId"] = d.Get("ssl_vpn_server_id").(string)
 	request.QueryParams["VpnGatewayId"] = d.Get("vpn_gateway_id").(string)
 
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	var bresponse *responses.CommonResponse
+	var err error
+	resource.Retry(5*time.Minute, func() *resource.RetryError {
+		bresponse, err = client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+
+		if err == nil {
+			return nil
+		} else {
+			if sdkErr, ok := err.(*errors.ServerError); ok && sdkErr.ErrorCode() == "VpnGateway.Configuring" {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+
+	})
+
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -154,7 +173,7 @@ func resourceAlibabacloudStackVpngatewaySslvpnclientcertUpdate(d *schema.Resourc
 
 func resourceAlibabacloudStackVpngatewaySslvpnclientcertRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	vpn_gatewayssl_vpn_client_certservice :=VpnGatewayService{client}
+	vpn_gatewayssl_vpn_client_certservice := VpnGatewayService{client}
 	response, err := vpn_gatewayssl_vpn_client_certservice.DoVpcDescribesslvpnclientcertRequest(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_vpngateway_sslvpnclientcert", errmsgs.AlibabacloudStackSdkGoERROR)
