@@ -38,24 +38,25 @@ func TestAccAlibabacloudStackVpngatewaySslVpnServer0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"client_ip_pool": "10.8.0.0/24",
-
 					"local_subnet": "192.168.1.0/24",
-
 					"ssl_vpn_server_name": name,
-					"vpn_gateway_id":      "${alibabacloudstack_vpngateway_vpngateway.default.id}",
+					"vpn_gateway_id":      "${alibabacloudstack_vpn_gateway.default.id}",
+					"proto":          "TCP",
+					"port":           "1193",
+					"cipher":         "AES-128-CBC",
+					"compress":       "true",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"client_ip_pool": "10.8.0.0/24",
-
 						"local_subnet": "192.168.1.0/24",
-
 						"ssl_vpn_server_name": name,
-
 						"vpn_gateway_id": CHECKSET,
+						"proto":          "TCP",
+						"port":           "1193",
+						"cipher":         "AES-128-CBC",
+						"compress":       "true",
 					}),
 				),
 			},
@@ -64,33 +65,6 @@ func TestAccAlibabacloudStackVpngatewaySslVpnServer0(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-
-					"ssl_vpn_server_name": name + "_new",
-
-					"client_ip_pool": "10.8.0.0/16",
-					"local_subnet":   "192.168.10.0/24,192.168.1.0/16",
-					"proto":          "TCP",
-					"port":           "1193",
-					"cipher":         "AES-128-CBC",
-					"compress":       "true",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"ssl_vpn_server_name": name + "_new",
-
-						"client_ip_pool": "10.8.0.0/16",
-						"local_subnet":   "192.168.10.0/24,192.168.1.0/16",
-						"proto":          "TCP",
-						"port":           "1193",
-						"cipher":         "AES-128-CBC",
-						"compress":       "true",
-					}),
-				),
-			},
-
 			{
 				Config: testAccConfig(map[string]interface{}{
 
@@ -131,21 +105,5 @@ variable "name" {
 
 %s
 
-resource "alibabacloudstack_vpngateway_vpngateway" "default" {
-description= "${var.name}"
-
-vpn_gateway_name = "${var.name}"
-
-bandwidth = "5"
-
-vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
-
-vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-
-enable_ssl = "true"
-
-instance_charge_type = "PostPaid"
-}
-
-`, name, VSwitchCommonTestCase)
+`, name, VpnGatewayCommonTestCase)
 }

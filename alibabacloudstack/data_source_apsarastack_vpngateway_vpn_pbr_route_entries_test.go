@@ -58,15 +58,7 @@ variable "name" {
 
 %s
 
-resource "alibabacloudstack_vpn_gateway" "default" {
- name                 = "${var.name}"
- vpc_id               = "${alibabacloudstack_vpc_vpc.default.id}"
- bandwidth            = 10
- instance_charge_type = "PostPaid"
- enable_ssl           = true
- enable_ipsec		  = true
- vswitch_id			  = "${alibabacloudstack_vpc_vswitch.default.id}"
-}
+
 resource "alibabacloudstack_vpn_connection" "default" {
  name                = "${var.name}"
  customer_gateway_id = "${alibabacloudstack_vpn_customer_gateway.default.id}"
@@ -86,5 +78,5 @@ resource "alibabacloudstack_vpngateway_vpn_pbr_route_entry" "default" {
 	weight =       "100"
 	publish_vpc =    "false"
 }
- `, name, VSwitchCommonTestCase)
+ `, name, VpnGatewayCommonTestCase)
 }

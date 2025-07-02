@@ -26,11 +26,6 @@ func dataSourceAlibabacloudStackVpngatewaySslVpnServers() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"ascm_create_user": {
-				// TypeString
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 
 			"ssl_vpn_servers": {
 				Type:     schema.TypeList,
@@ -119,11 +114,6 @@ func dataSourceAlibabacloudStackVpngatewaySslVpnServers() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"ascm_create_user": {
-							// TypeString
-							Type:     schema.TypeString,
-							Computed: true,
-						},
 					},
 				},
 			},
@@ -184,9 +174,6 @@ func dataSourceAlibabacloudStackVpngatewaySslVpnServersRead(d *schema.ResourceDa
 				continue
 			}
 		}
-		if d.Get("ascm_create_user").(string) != "" && data.AscmCreateUser != d.Get("ascm_create_user").(string) {
-			continue
-		}
 		i := map[string]interface{}{
 			"cipher": data.Cipher,
 
@@ -214,7 +201,6 @@ func dataSourceAlibabacloudStackVpngatewaySslVpnServersRead(d *schema.ResourceDa
 			"ssl_vpn_server_name": data.Name,
 
 			"vpn_gateway_id":   data.VpnGatewayId,
-			"ascm_create_user": data.AscmCreateUser,
 		}
 		datas = append(datas, i)
 

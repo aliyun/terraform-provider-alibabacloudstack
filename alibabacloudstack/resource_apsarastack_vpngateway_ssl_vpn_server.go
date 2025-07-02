@@ -4,7 +4,6 @@ package alibabacloudstack
 // Product VPNGateway Resouce SslVpnServer
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -108,21 +107,13 @@ func resourceAlibabacloudStackVpngatewaySslvpnserverCreate(d *schema.ResourceDat
 		request.QueryParams["Cipher"] = v.(string)
 	}
 
-	if v, ok := d.GetOk("client_ip_pool"); ok {
-		request.QueryParams["ClientIpPool"] = v.(string)
-	} else {
-		return fmt.Errorf("ClientIpPool is required")
-	}
+	request.QueryParams["ClientIpPool"] = d.Get("client_ip_pool").(string)
 
 	if v, ok := d.GetOk("compress"); ok {
 		request.QueryParams["Compress"] = strconv.FormatBool(v.(bool))
 	}
 
-	if v, ok := d.GetOk("local_subnet"); ok {
-		request.QueryParams["LocalSubnet"] = v.(string)
-	} else {
-		return fmt.Errorf("LocalSubnet is required")
-	}
+	request.QueryParams["LocalSubnet"] = d.Get("local_subnet").(string)
 
 	if v, ok := d.GetOk("port"); ok {
 		request.QueryParams["Port"] = strconv.Itoa(v.(int))
@@ -136,11 +127,7 @@ func resourceAlibabacloudStackVpngatewaySslvpnserverCreate(d *schema.ResourceDat
 		request.QueryParams["Name"] = v.(string)
 	}
 
-	if v, ok := d.GetOk("vpn_gateway_id"); ok {
-		request.QueryParams["VpnGatewayId"] = v.(string)
-	} else {
-		return fmt.Errorf("VpnGatewayId is required")
-	}
+	request.QueryParams["VpnGatewayId"] = d.Get("vpn_gateway_id").(string)
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -168,26 +155,21 @@ func resourceAlibabacloudStackVpngatewaySslvpnserverCreate(d *schema.ResourceDat
 func resourceAlibabacloudStackVpngatewaySslvpnserverUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
+	if d.IsNewResource() {
+		return nil
+	}
+
 	// Cipher
-
 	// ClientIpPool
-
 	// Compress
-
 	// LocalSubnet
-
 	// Port
-
 	// Proto
-
 	// RegionId
-
 	// SslVpnServerId
-
 	// SslVpnServerName
-
 	// api: Vpc - 2016-04-28 - ModifySslVpnServer
-	if !d.IsNewResource() && d.HasChanges("cipher", "client_ip_pool", "compress", "local_subnet", "port", "proto", "ssl_vpn_server_name") {
+	if d.HasChanges("cipher", "client_ip_pool", "compress", "local_subnet", "port", "proto", "ssl_vpn_server_name") {
 		request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ModifySslVpnServer", "")
 		VpcModifysslvpnserverResponseObj := VpcModifysslvpnserverResponse{}
 
@@ -199,14 +181,6 @@ func resourceAlibabacloudStackVpngatewaySslvpnserverUpdate(d *schema.ResourceDat
 			request.QueryParams["ClientIpPool"] = v.(string)
 		}
 		request.QueryParams["Compress"] = strconv.FormatBool(d.Get("compress").(bool))
-		// if v, ok := d.GetOk("compress"); ok {
-		// 	log.Printf("2222222222222222222222222222222222222222")
-		// 	log.Printf("ModifySslVpnServer request compress: %s", v)
-		// 	request.QueryParams["Compress"] = strconv.FormatBool(d.Get("compress").(bool))
-		// }
-		// v1, ok1 := d.GetOk("compress")
-		// log.Printf("Get Compress%v, %v, %v", v1, ok1, d.Get("compress").(bool))
-		// log.Printf("ModifySslVpnServer request: %s", request.QueryParams)
 
 		if v, ok := d.GetOk("local_subnet"); ok {
 			request.QueryParams["LocalSubnet"] = v.(string)
@@ -302,21 +276,18 @@ func resourceAlibabacloudStackVpngatewaySslvpnserverDelete(d *schema.ResourceDat
 	//调用request_params_handler
 
 	request.QueryParams["SslVpnServerId"] = d.Id()
+	var errmsg string
+	var err error
 	for i := 0; i < 12; i++ {
-		bresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if i == 11 {
-				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_vpn_gateway_ssl_vpn_server", "DeleteSslVpnServer", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			} else {
-				time.Sleep(time.Duration(5) * time.Second)
-				continue
-			}
+		if bresponse, e := client.ProcessCommonRequest(request); e == nil {
+			return nil
+		} else {
+			err = e
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			time.Sleep(time.Duration(5) * time.Second)
 		}
-		break
 	}
-
-	return nil
+	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_vpn_gateway_ssl_vpn_server", "DeleteSslVpnServer", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 }
 
 type VpcCreatesslvpnserverResponse struct {

@@ -22,16 +22,6 @@ func TestAccAlibabacloudStackVpngatewaySslVpnServersDataSource(t *testing.T) {
 		}),
 	}
 
-	ascmcreateuserConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-
-			"ascm_create_user": "admin",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-
-			"ascm_create_user": "admin" + "fake",
-		}),
-	}
 	nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 
@@ -47,12 +37,10 @@ func TestAccAlibabacloudStackVpngatewaySslVpnServersDataSource(t *testing.T) {
 		existConfig: testAccConfig(map[string]interface{}{
 			"ids":              []string{"${alibabacloudstack_vpngateway_ssl_vpnserver.default.id}"},
 			"name_regex":       name,
-			"ascm_create_user": "admin",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":              []string{"${alibabacloudstack_vpngateway_ssl_vpnserver.default.id}"},
 			"name_regex":       name + "_fake",
-			"ascm_create_user": "admin" + "_fake",
 		}),
 	}
 
@@ -67,7 +55,6 @@ func TestAccAlibabacloudStackVpngatewaySslVpnServersDataSource(t *testing.T) {
 			"ssl_vpn_servers.0.connections":         CHECKSET,
 			"ssl_vpn_servers.0.local_subnet":        CHECKSET,
 			"ssl_vpn_servers.0.create_time":         CHECKSET,
-			"ssl_vpn_servers.0.ascm_create_user":    CHECKSET,
 			"ssl_vpn_servers.0.cipher":              CHECKSET,
 			"ssl_vpn_servers.0.port":                CHECKSET,
 			"ssl_vpn_servers.0.ssl_vpn_server_id":   CHECKSET,
@@ -91,7 +78,7 @@ func TestAccAlibabacloudStackVpngatewaySslVpnServersDataSource(t *testing.T) {
 		fakeMapFunc:  fakeKmsSecretVersionsMapFunc,
 	}
 
-	ecsDedicatedHostsCheckInfo.dataSourceTestCheck(t, rand, idsConf, ascmcreateuserConf, nameRegexConf, allConf)
+	ecsDedicatedHostsCheckInfo.dataSourceTestCheck(t, rand, idsConf, nameRegexConf, allConf)
 }
 
 func dataSourceVpngatewaySslvpnserverConfigDependence(name string) string {
@@ -102,26 +89,10 @@ variable "name" {
 
 %s
 
-resource "alibabacloudstack_vpngateway_vpngateway" "default" {
-description= "${var.name}"
-
-vpn_gateway_name = "${var.name}"
-
-bandwidth = "5"
-
-vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
-
-vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-
-enable_ssl = "true"
-
-instance_charge_type = "PostPaid"
-}
-
 resource "alibabacloudstack_vpngateway_ssl_vpnserver" "default" {
 ssl_vpn_server_name = "${var.name}"
 
-vpn_gateway_id = "${alibabacloudstack_vpngateway_vpngateway.default.id}"
+vpn_gateway_id = "${alibabacloudstack_vpn_gateway.default.id}"
 
 local_subnet = "192.168.1.0/24"
 
@@ -129,5 +100,5 @@ client_ip_pool = "10.8.0.0/24"
 }
 
 
-`, name, VSwitchCommonTestCase)
+`, name, VpnGatewayCommonTestCase)
 }

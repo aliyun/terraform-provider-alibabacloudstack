@@ -1219,6 +1219,18 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 
 `
 
+const VpnGatewayCommonTestCase =VSwitchCommonTestCase + `
+resource "alibabacloudstack_vpn_gateway" "default" {
+ name                 = "${var.name}"
+ vpc_id               = "${alibabacloudstack_vpc_vpc.default.id}"
+ bandwidth            = 10
+ instance_charge_type = "PostPaid"
+ enable_ssl           = true
+ enable_ipsec		  = true
+ vswitch_id			  = "${alibabacloudstack_vpc_vswitch.default.id}"
+}
+`
+
 const DBClusterCommonTestCase = VSwitchCommonTestCase + `
 resource "alibabacloudstack_adb_db_cluster" "cluster" {
   db_cluster_version  = "3.0"
