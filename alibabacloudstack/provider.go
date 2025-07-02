@@ -793,6 +793,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_vpngateway_vpngateway":                 resourceAlibabacloudStackVpnGateway(),
 		"alibabacloudstack_vpn_route_entry":                       resourceAlibabacloudStackVpnRouteEntry(),
 		"alibabacloudstack_vpngateway_vpnrouteentry":              resourceAlibabacloudStackVpnRouteEntry(),
+		"alibabacloudstack_vpngateway_ssl_vpn_server":             resourceAlibabacloudStackVpngatewaySslvpnserver(),
 		"alibabacloudstack_vpngateway_ssl_vpnserver":              resourceAlibabacloudStackVpngatewaySslvpnserver(),
 		"alibabacloudstack_vswitch":                               resourceAlibabacloudStackSwitch(),
 		"alibabacloudstack_vpc_vswitch":                           resourceAlibabacloudStackSwitch(),
