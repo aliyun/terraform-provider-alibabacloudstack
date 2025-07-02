@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackVpngatewayVpnpbrrouteentry_basic(t *testing.T) {
+func TestAccAlibabacloudStackVpngatewayVpnPbrRouteEntry_basic(t *testing.T) {
 	var v *VpnGatewayVpnPbrRouteEntry
 
 	resourceId := "alibabacloudstack_vpngateway_vpn_pbr_route_entry.default"
@@ -23,7 +23,7 @@ func TestAccAlibabacloudStackVpngatewayVpnpbrrouteentry_basic(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-testacc%sVpngatewayVpnpbrrouteentrybasic%v", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc_Vpn_pbrrouteentrybasic%v", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceVpngatewayVpnpbrrouteentryConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -55,11 +55,31 @@ func TestAccAlibabacloudStackVpngatewayVpnpbrrouteentry_basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccConfig(map[string]interface{}{
+					"publish_vpc": "true",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"publish_vpc": "true",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"weight": "0",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"weight": "0",
+					}),
+				),
+			},
+			{
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
-				// 这两个值 不支持回读
-				ImportStateVerifyIgnore: []string{"publish_vpc", "overlay_mode"},
+				// overlay_mode 不支持回读
+				ImportStateVerifyIgnore: []string{"overlay_mode"},
 			},
 		},
 	})
@@ -68,40 +88,33 @@ func TestAccAlibabacloudStackVpngatewayVpnpbrrouteentry_basic(t *testing.T) {
 func resourceVpngatewayVpnpbrrouteentryConfigDependence(name string) string {
 	return fmt.Sprintf(`
 
-data "alibabacloudstack_zones" "default"{
+variable "name" {
+ default = "%s"
 }
 
-resource "alibabacloudstack_vpc" "default" {
- name  = "%s"
- cidr_block = "10.1.0.0/21"
-}
-resource "alibabacloudstack_vswitch" "default" {
- name			   = "${alibabacloudstack_vpc.default.name}"
- vpc_id            = "${alibabacloudstack_vpc.default.id}"
- cidr_block        = "10.1.1.0/24"
- availability_zone = "${data.alibabacloudstack_zones.default.ids.0}"
-}
+%s
+
 resource "alibabacloudstack_vpn_gateway" "default" {
- name                 = "${alibabacloudstack_vpc.default.name}"
- vpc_id               = "${alibabacloudstack_vpc.default.id}"
+ name                 = "${var.name}"
+ vpc_id               = "${alibabacloudstack_vpc_vpc.default.id}"
  bandwidth            = 10
  instance_charge_type = "PostPaid"
  enable_ssl           = true
  enable_ipsec		  = true
- vswitch_id			  = "${alibabacloudstack_vswitch.default.id}"
+ vswitch_id			  = "${alibabacloudstack_vpc_vswitch.default.id}"
 }
 resource "alibabacloudstack_vpn_connection" "default" {
- name                = "${alibabacloudstack_vpc.default.name}"
+ name                = "${var.name}"
  customer_gateway_id = "${alibabacloudstack_vpn_customer_gateway.default.id}"
  vpn_gateway_id      = "${alibabacloudstack_vpn_gateway.default.id}"
  local_subnet        = ["192.168.2.0/24"]
  remote_subnet       = ["192.168.3.0/24"]
 }
 resource "alibabacloudstack_vpn_customer_gateway" "default" {
- name       = "${alibabacloudstack_vpc.default.name}"
+ name       = "${var.name}"
  ip_address = "192.168.1.1"
 }
-`, name)
+`, name, VSwitchCommonTestCase)
 }
 
 var VpngatewayVpnpbrrouteentrybasicMap = map[string]string{

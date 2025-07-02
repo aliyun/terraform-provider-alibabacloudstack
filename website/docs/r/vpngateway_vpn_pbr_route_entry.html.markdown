@@ -61,15 +61,13 @@ resource "alibabacloudstack_vpngateway_vpn_pbr_route_entry" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `description` - (Optional, ForceNew) - Description information of the policy route.
   * `next_hop` - (Required, ForceNew) - The next hop of the destination route entry.
   * `overlay_mode` - (Optional, ForceNew) - Tunnel protocol. Value: **Ipsec**(IPsec tunnel protocol).
-  * `publish_vpc` - (Required, ForceNew) - Whether to publish a policy route to a VPC. Value:-**true**: The publish policy is routed to the VPC.-**false**: does not publish the policy route to the VPC.
+  * `publish_vpc` - (Required) - Whether to publish a policy route to a VPC. Value:-**true**: The publish policy is routed to the VPC.-**false**: does not publish the policy route to the VPC.
   * `route_dest` - (Required, ForceNew) - The destination CIDR block of the destination route.
   * `route_source` - (Required, ForceNew) - The source CIDR block of the policy route.
-  * `status` - (Optional) - The status of the VPN destination route.
   * `vpn_gateway_id` - (Required, ForceNew) - The ID of the VPN Gateway.
-  * `weight` - (Required, ForceNew) - The weight of the destination route.
+  * `weight` - (Required) - The weight of the destination route.
 
 ## Attributes Reference
 

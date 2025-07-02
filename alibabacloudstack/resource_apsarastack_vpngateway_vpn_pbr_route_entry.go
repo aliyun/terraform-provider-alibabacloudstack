@@ -20,14 +20,7 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentry() *schema.Resource {
 
 			"create_time": {
 				Type:     schema.TypeInt,
-				Optional: true,
 				Computed: true,
-			},
-
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
 			},
 
 			"next_hop": {
@@ -36,24 +29,15 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentry() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"next_hop_tunnel_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-			},
-
 			"overlay_mode": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "Ipsec",
-				ForceNew: true,
 			},
 
 			"publish_vpc": {
 				Type:     schema.TypeBool,
 				Required: true,
-				ForceNew: true,
 			},
 
 			"route_dest": {
@@ -70,7 +54,6 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentry() *schema.Resource {
 
 			"status": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 
@@ -83,7 +66,6 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentry() *schema.Resource {
 			"weight": {
 				Type:         schema.TypeInt,
 				Required:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.IntInSlice([]int{0, 100}),
 			},
 		},
@@ -104,42 +86,15 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentryCreate(d *schema.Resourc
 
 	//调用request_params_handler
 
-	if v, ok := d.GetOk("description"); ok {
-		request.QueryParams["Description"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("next_hop"); ok {
-		request.QueryParams["NextHop"] = v.(string)
-	} else {
-		return fmt.Errorf("NextHop is required")
-	}
+	request.QueryParams["NextHop"] = d.Get("next_hop").(string)
 
 	request.QueryParams["OverlayMode"] = d.Get("overlay_mode").(string)
 	request.QueryParams["PublishVpc"] = strconv.FormatBool(d.Get("publish_vpc").(bool))
+	request.QueryParams["RouteDest"] = d.Get("route_dest").(string)
+	request.QueryParams["RouteSource"] = d.Get("route_source").(string)
+	request.QueryParams["VpnGatewayId"] = d.Get("vpn_gateway_id").(string)
+	request.QueryParams["Weight"] = strconv.Itoa(d.Get("weight").(int))
 
-	if v, ok := d.GetOk("route_dest"); ok {
-		request.QueryParams["RouteDest"] = v.(string)
-	} else {
-		return fmt.Errorf("RouteDest is required")
-	}
-
-	if v, ok := d.GetOk("route_source"); ok {
-		request.QueryParams["RouteSource"] = v.(string)
-	} else {
-		return fmt.Errorf("RouteSource is required")
-	}
-
-	if v, ok := d.GetOk("vpn_gateway_id"); ok {
-		request.QueryParams["VpnGatewayId"] = v.(string)
-	} else {
-		return fmt.Errorf("VpnGatewayId is required")
-	}
-
-	if v, ok := d.GetOk("weight"); ok {
-		request.QueryParams["Weight"] = strconv.Itoa(v.(int))
-	} else {
-		return fmt.Errorf("Weight is required")
-	}
 	retry := 0
 	for retry <= 6 {
 		retry++
@@ -165,22 +120,54 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentryCreate(d *schema.Resourc
 	}
 
 	next_hop := VpcCreatevpnpbrrouteentryResponseObj.NextHop
-
 	route_dest := VpcCreatevpnpbrrouteentryResponseObj.RouteDest
-
 	route_source := VpcCreatevpnpbrrouteentryResponseObj.RouteSource
-
 	vpn_gateway_id := VpcCreatevpnpbrrouteentryResponseObj.VpnInstanceId
 
-	weight := VpcCreatevpnpbrrouteentryResponseObj.Weight
-
-	id := fmt.Sprintf("%s_%s_%s_%s_%d", next_hop, route_dest, route_source, vpn_gateway_id, weight)
+	id := fmt.Sprintf("%s_%s_%s_%s", vpn_gateway_id, route_source, route_dest, next_hop)
 	d.SetId(id)
 	return nil
 
 }
 
 func resourceAlibabacloudStackVpngatewayVpnpbrrouteentryUpdate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+
+	if d.IsNewResource() {
+		return nil
+	}
+
+	if d.HasChange("publish_vpc") {
+		reqQuery := map[string]interface{}{
+			"VpnGatewayId": d.Get("vpn_gateway_id").(string),
+			"RouteType":    "pbr",
+			"RouteSource":  d.Get("route_source").(string),
+			"RouteDest":    d.Get("route_dest").(string),
+			"NextHop":      d.Get("next_hop").(string),
+			"PublishVpc":   d.Get("publish_vpc").(bool),
+		}
+		_, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", "PublishVpnRouteEntry", "", nil, reqQuery, nil)
+		if err != nil {
+			return err
+		}
+	}
+
+	if d.HasChanges("weight", "overlay_mode") {
+		oldWeight, newWeight := d.GetChange("weight")
+		reqQuery := map[string]interface{}{
+			"Weight":       oldWeight.(int),
+			"NewWeight":    newWeight.(int),
+			"OverlayMode":  d.Get("overlay_mode").(string),
+			"VpnGatewayId": d.Get("vpn_gateway_id").(string),
+			"RouteSource":  d.Get("route_source").(string),
+			"RouteDest":    d.Get("route_dest").(string),
+			"NextHop":      d.Get("next_hop").(string),
+		}
+		_, err := client.DoTeaRequest("POST", "Vpc", "2016-04-28", "ModifyVpnPbrRouteEntryWeight", "", nil, reqQuery, nil)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -205,6 +192,7 @@ func resourceAlibabacloudStackVpngatewayVpnpbrrouteentryRead(d *schema.ResourceD
 	d.Set("route_source", data.RouteSource)
 
 	d.Set("status", data.State)
+	d.Set("publish_vpc", data.State == "published")
 
 	d.Set("vpn_gateway_id", data.VpnInstanceId)
 

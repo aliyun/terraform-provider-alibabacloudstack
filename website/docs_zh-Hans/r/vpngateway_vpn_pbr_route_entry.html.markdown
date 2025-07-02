@@ -61,14 +61,13 @@ resource "alibabacloudstack_vpngateway_vpn_pbr_route_entry" "default" {
 ## 参数参考
 
 支持以下参数：
-  * `description` - (选填, 变更时重建) - 策略路由的描述信息。
   * `next_hop` - (必填, 变更时重建) - 目的路由的下一跳。
   * `overlay_mode` - (选填, 变更时重建) - 隧道协议，取值：**Ipsec**（IPsec隧道协议）。
-  * `publish_vpc` - (必填, 变更时重建) - 是否发布策略路由到VPC，取值：- **true**：发布策略路由到VPC。- **false**：不发布策略路由到VPC。
+  * `publish_vpc` - (必填) - 是否发布策略路由到VPC，取值：- **true**：发布策略路由到VPC。- **false**：不发布策略路由到VPC。
   * `route_dest` - (必填, 变更时重建) - 目的路由的目标网段。
   * `route_source` - (必填, 变更时重建) - 策略路由的源网段。
   * `vpn_gateway_id` - (必填, 变更时重建) - VPN网关的ID。
-  * `weight` - (必填, 变更时重建) - 目的路由的权重值，取值：**0**|**100**。
+  * `weight` - (必填) - 目的路由的权重值，取值：**0**|**100**。
 
 ## 属性参考
 

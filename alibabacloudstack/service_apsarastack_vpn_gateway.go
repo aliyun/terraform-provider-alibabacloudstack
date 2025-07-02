@@ -448,7 +448,7 @@ func (s *VpnGatewayService) DoVpcDescribevpnpbrrouteentriesRequest(id string) (*
 	VpcDescribevpnpbrrouteentriesResponseObj := &VpcDescribevpnpbrrouteentriesResponse{}
 	result := &VpnGatewayVpnPbrRouteEntry{}
 	param := strings.Split(id, "_")
-	request.QueryParams["VpnGatewayId"] = param[3]
+	request.QueryParams["VpnGatewayId"] = param[0]
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
 		if bresponse == nil {
@@ -464,12 +464,12 @@ func (s *VpnGatewayService) DoVpcDescribevpnpbrrouteentriesRequest(id string) (*
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeVpnPbrRouteEntries", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	for _, data := range VpcDescribevpnpbrrouteentriesResponseObj.VpnPbrRouteEntries.VpnPbrRouteEntry {
-		if data.NextHop == param[0] && data.RouteDest == param[1] && data.RouteSource == param[2] && data.VpnInstanceId == param[3] && fmt.Sprint(data.Weight) == param[4] {
+		if data.NextHop == param[3] && data.RouteDest == param[2] && data.RouteSource == param[1] && data.VpnInstanceId == param[0] {
 			result = &data
 		}
 	}
 	if result == nil {
-		return nil, errmsgs.Error(fmt.Sprintf(errmsgs.NotFoundMsg, "VpnPbrRouteEntry"))
+		return nil, errmsgs.Error(errmsgs.NotFoundMsg, "VpnPbrRouteEntry")
 	}
 
 	return result, nil
