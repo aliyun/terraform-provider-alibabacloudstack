@@ -225,20 +225,11 @@ func resourceAlibabacloudStackVpngatewaySslvpnserverUpdate(d *schema.ResourceDat
 func resourceAlibabacloudStackVpngatewaySslvpnserverRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	vpn_gatewayssl_vpn_serverservice := VpnGatewayService{client}
-	for i := 0; i < 12; i++ {
-		response, err := vpn_gatewayssl_vpn_serverservice.DoVpcDescribesslvpnserversRequest(d.Id())
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_vpngateway_sslvpnserver", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
-		if len(response.SslVpnServers.SslVpnServer) > 0 {
-			break
-		}
-		if i < 11 {
-			time.Sleep(time.Duration(5) * time.Second)
-		}
+	response, err := vpn_gatewayssl_vpn_serverservice.DoVpcDescribesslvpnserversRequest(d.Id())
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_vpngateway_sslvpnserver", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	response, _ := vpn_gatewayssl_vpn_serverservice.DoVpcDescribesslvpnserversRequest(d.Id())
+	
 	data := &response.SslVpnServers.SslVpnServer[0]
 	d.Set("cipher", data.Cipher)
 
