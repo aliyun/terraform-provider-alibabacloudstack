@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"strconv"
 	"time"
 
 	"strings"
@@ -595,4 +596,108 @@ func (s *VpnGatewayService) DoVpcDescribevpnsslserverlogsRequest(d *schema.Resou
 	}
 
 	return VpcDescribevpnsslserverlogsResponseObj, nil
+}
+
+type VpcDescribesslvpnclientcertResponse struct {
+	RequestId          string `json:"RequestId"`
+	RegionId           string `json:"RegionId"`
+	SslVpnClientCertId string `json:"SslVpnClientCertId"`
+	Name               string `json:"Name"`
+	SslVpnServerId     string `json:"SslVpnServerId"`
+	CaCert             string `json:"CaCert"`
+	ClientCert         string `json:"ClientCert"`
+	ClientKey          string `json:"ClientKey"`
+	ClientConfig       string `json:"ClientConfig"`
+	CreateTime         int    `json:"CreateTime"`
+	EndTime            int    `json:"EndTime"`
+	Status             string `json:"Status"`
+}
+
+func (s *VpnGatewayService) DoVpcDescribesslvpnclientcertRequest(id string) (*VpcDescribesslvpnclientcertResponse, error) {
+	// api: Vpc - 2016-04-28 - DescribeSslVpnClientCert
+	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeSslVpnClientCert", "")
+	VpcDescribesslvpnclientcertResponseObj := &VpcDescribesslvpnclientcertResponse{}
+
+	//调用request_params_handler
+
+	request.QueryParams["SslVpnClientCertId"] = id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeSslVpnClientCert", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribesslvpnclientcertResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeSslVpnClientCert", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return VpcDescribesslvpnclientcertResponseObj, nil
+}
+
+type VpcDescribesslvpnclientcertsResponse struct {
+	SslVpnClientCertKeys struct {
+		SslVpnClientCertKey []struct {
+			RegionId           string `json:"RegionId"`
+			SslVpnClientCertId string `json:"SslVpnClientCertId"`
+			Name               string `json:"Name"`
+			SslVpnServerId     string `json:"SslVpnServerId"`
+			CreateTime         int    `json:"CreateTime"`
+			EndTime            int    `json:"EndTime"`
+			Status             string `json:"Status"`
+		} `json:"SslVpnClientCertKey"`
+	} `json:"SslVpnClientCertKeys"`
+	RequestId  string `json:"RequestId"`
+	TotalCount int    `json:"TotalCount"`
+	PageNumber int    `json:"PageNumber"`
+	PageSize   int    `json:"PageSize"`
+}
+
+func (s *VpnGatewayService) DoVpcDescribesslvpnclientcertsRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*VpcDescribesslvpnclientcertsResponse, error) {
+	// api: Vpc - 2016-04-28 - DescribeSslVpnClientCerts
+	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeSslVpnClientCerts", "")
+	VpcDescribesslvpnclientcertsResponseObj := &VpcDescribesslvpnclientcertsResponse{}
+
+	//调用request_params_handler
+
+	if v, ok := d.GetOk("page_number"); ok {
+		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))
+	}
+
+	if v, ok := d.GetOk("page_size"); ok {
+		request.QueryParams["PageSize"] = strconv.Itoa(v.(int))
+	}
+
+	if v, ok := d.GetOk("region_id"); ok {
+		request.QueryParams["RegionId"] = v.(string)
+	} else {
+		return nil, fmt.Errorf("RegionId is required")
+	}
+
+	if v, ok := d.GetOk("ssl_vpn_client_cert_id"); ok {
+		request.QueryParams["SslVpnClientCertId"] = v.(string)
+	}
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeSslVpnClientCerts", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribesslvpnclientcertsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeSslVpnClientCerts", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return VpcDescribesslvpnclientcertsResponseObj, nil
 }
