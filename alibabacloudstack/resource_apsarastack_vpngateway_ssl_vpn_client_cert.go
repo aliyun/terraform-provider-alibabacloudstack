@@ -4,7 +4,6 @@ package alibabacloudstack
 // Product VPNGateway Resouce SslVpnClientCert
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -93,17 +92,8 @@ func resourceAlibabacloudStackVpngatewaySslvpnclientcertCreate(d *schema.Resourc
 		request.QueryParams["Name"] = v.(string)
 	}
 
-	if v, ok := d.GetOk("ssl_vpn_server_id"); ok {
-		request.QueryParams["SslVpnServerId"] = v.(string)
-	} else {
-		return fmt.Errorf("SslVpnServerId is required")
-	}
-
-	if v, ok := d.GetOk("vpn_gateway_id"); ok {
-		request.QueryParams["VpnGatewayId"] = v.(string)
-	} else {
-		return fmt.Errorf("VpnGatewayId is required")
-	}
+	request.QueryParams["SslVpnServerId"] = d.Get("ssl_vpn_server_id").(string)
+	request.QueryParams["VpnGatewayId"] = d.Get("vpn_gateway_id").(string)
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -164,8 +154,7 @@ func resourceAlibabacloudStackVpngatewaySslvpnclientcertUpdate(d *schema.Resourc
 
 func resourceAlibabacloudStackVpngatewaySslvpnclientcertRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	vpn_gatewayssl_vpn_client_certservice :=
-		VpnGatewayService{client}
+	vpn_gatewayssl_vpn_client_certservice :=VpnGatewayService{client}
 	response, err := vpn_gatewayssl_vpn_client_certservice.DoVpcDescribesslvpnclientcertRequest(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_vpngateway_sslvpnclientcert", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -195,7 +184,6 @@ func resourceAlibabacloudStackVpngatewaySslvpnclientcertDelete(d *schema.Resourc
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	// api: Vpc - 2016-04-28 - DeleteSslVpnClientCert
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteSslVpnClientCert", "")
-	// VpcDeletesslvpnclientcertResponseObj := VpcDeletesslvpnclientcertResponse{}
 
 	//调用request_params_handler
 
@@ -223,8 +211,4 @@ type VpcModifysslvpnclientcertResponse struct {
 	RequestId          string `json:"RequestId"`
 	Name               string `json:"Name"`
 	SslVpnClientCertId string `json:"SslVpnClientCertId"`
-}
-
-type VpcDeletesslvpnclientcertResponse struct {
-	RequestId string `json:"RequestId"`
 }

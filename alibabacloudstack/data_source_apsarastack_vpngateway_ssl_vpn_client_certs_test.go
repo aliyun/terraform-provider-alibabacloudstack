@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackVpngatewaySslVpnClientCertDataSource(t *testing.T) {
+func TestAccAlibabacloudStackVpngatewaySslVpnClientCertsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
 	resourceId := "data.alibabacloudstack_vpngateway_sslvpnclientcerts.default"
 	name := fmt.Sprintf("tf_testAccVpngatewaySslvpnclientcertDataSource_%d", rand)
@@ -86,29 +86,13 @@ func dataSourceVpngatewaySslvpnclientcertConfigDependence(name string) string {
 	
 	%s
 	
-	resource "alibabacloudstack_vpngateway_vpngateway" "default" {
-	description= "${var.name}"
-	
-	vpn_gateway_name = "${var.name}"
-	
-	bandwidth = "5"
-	
-	vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
-	
-	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-	
-	enable_ssl = "true"
-	
-	instance_charge_type = "PostPaid"
-	}
-	
 	resource "alibabacloudstack_vpngateway_ssl_vpnserver" "default" {
 		client_ip_pool =  "10.8.0.0/24"
 	
 		local_subnet =  "192.168.1.0/24"
 	
 		ssl_vpn_server_name =  "${var.name}"
-		vpn_gateway_id =     "${alibabacloudstack_vpngateway_vpngateway.default.id}"
+		vpn_gateway_id =     "${alibabacloudstack_vpn_gateway.default.id}"
 		}
 
 resource "alibabacloudstack_vpngateway_sslvpnclientcert" "default" {
@@ -116,8 +100,8 @@ resource "alibabacloudstack_vpngateway_sslvpnclientcert" "default" {
 
 	ssl_vpn_server_id= "${alibabacloudstack_vpngateway_ssl_vpnserver.default.id}"
 
-	vpn_gateway_id= "${alibabacloudstack_vpngateway_vpngateway.default.id}"
+	vpn_gateway_id= "${alibabacloudstack_vpn_gateway.default.id}"
 }
 
-`, name, VSwitchCommonTestCase)
+`, name, VpnGatewayCommonTestCase)
 }
