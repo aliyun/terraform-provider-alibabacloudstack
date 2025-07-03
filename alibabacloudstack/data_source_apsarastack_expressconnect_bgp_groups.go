@@ -30,11 +30,6 @@ func dataSourceAlibabacloudStackExpressconnectBgpGroups() *schema.Resource {
 				Required: true,
 			},
 
-			"region_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"name_regex": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -131,12 +126,6 @@ func dataSourceAlibabacloudStackExpressconnectBgpGroups() *schema.Resource {
 							Computed: true,
 						},
 
-						"region_id": {
-							// TypeString
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
 						"status": {
 							// TypeString
 							Type:     schema.TypeString,
@@ -156,10 +145,6 @@ func dataSourceAlibabacloudStackExpressconnectBgpGroupsRead(d *schema.ResourceDa
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeBgpGroups", "")
 	VpcDescribebgpgroupsResponseObj := VpcDescribebgpgroupsResponse{}
 	request.QueryParams["RouterId"] = d.Get("router_id").(string)
-
-	if v, ok := d.GetOk("region_id"); ok && v.(string) != "" {
-		request.QueryParams["RegionId"] = v.(string)
-	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
@@ -222,8 +207,6 @@ func dataSourceAlibabacloudStackExpressconnectBgpGroupsRead(d *schema.ResourceDa
 			"local_asn": data.LocalAsn,
 
 			"peer_asn": data.PeerAsn,
-
-			"region_id": data.RegionId,
 
 			"route_limit": data.RouteLimit,
 

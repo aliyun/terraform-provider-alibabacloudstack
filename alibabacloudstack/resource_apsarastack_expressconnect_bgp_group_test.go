@@ -36,6 +36,7 @@ func TestAccAlibabacloudStackExpressconnectBgpgroup_basic0(t *testing.T) {
 					"local_asn":      "65534",
 					"peer_asn":       "10",
 					"router_id":      "${alibabacloudstack_express_connect_virtual_border_router.default.id}",
+					"auth_key":       getAccTestPassword(10),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -44,6 +45,7 @@ func TestAccAlibabacloudStackExpressconnectBgpgroup_basic0(t *testing.T) {
 						"local_asn":      "65534",
 						"peer_asn":       "10",
 						"router_id":      CHECKSET,
+						"auth_key":       CHECKSET,
 					}),
 				),
 			},

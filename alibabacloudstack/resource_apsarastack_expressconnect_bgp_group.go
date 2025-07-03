@@ -77,12 +77,6 @@ func resourceAlibabacloudStackExpressconnectBgpgroup() *schema.Resource {
 				Required: true,
 			},
 
-			"region_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-
 			"route_limit": {
 				Type:     schema.TypeInt,
 				Computed: true,
@@ -115,9 +109,6 @@ func resourceAlibabacloudStackExpressconnectBgpgroupCreate(d *schema.ResourceDat
 	VpcCreatebgpgroupResponseObj := VpcCreatebgpgroupResponse{}
 
 	//调用request_params_handler
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	}
 
 	if v, ok := d.GetOk("auth_key"); ok {
 		request.QueryParams["AuthKey"] = v.(string)
@@ -135,17 +126,8 @@ func resourceAlibabacloudStackExpressconnectBgpgroupCreate(d *schema.ResourceDat
 		request.QueryParams["LocalAsn"] = fmt.Sprintf("%d", v.(int))
 	}
 
-	if v, ok := d.GetOk("peer_asn"); ok {
-		request.QueryParams["PeerAsn"] = fmt.Sprintf("%d", v.(int))
-	} else {
-		return fmt.Errorf("PeerAsn is required")
-	}
-
-	if v, ok := d.GetOk("router_id"); ok {
-		request.QueryParams["RouterId"] = v.(string)
-	} else {
-		return fmt.Errorf("RouterId is required")
-	}
+	request.QueryParams["PeerAsn"] = fmt.Sprintf("%d", d.Get("peer_asn").(int))
+	request.QueryParams["RouterId"] = d.Get("router_id").(string)
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -180,14 +162,10 @@ func resourceAlibabacloudStackExpressconnectBgpgroupUpdate(d *schema.ResourceDat
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// api: Vpc - 2016-04-28 - ModifyBgpGroupAttribute
-	if d.HasChanges("auth_key", "bgp_group_name", "description", "local_asn", "peer_asn", "region_id") {
+	if d.HasChanges("auth_key", "bgp_group_name", "description", "local_asn", "peer_asn") {
 		request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ModifyBgpGroupAttribute", "")
 
 		request.QueryParams["BgpGroupId"] = d.Id()
-
-		if v, ok := d.GetOk("region_id"); ok {
-			request.QueryParams["RegionId"] = v.(string)
-		}
 
 		if v, ok := d.GetOk("auth_key"); ok {
 			request.QueryParams["AuthKey"] = v.(string)
@@ -261,8 +239,6 @@ func resourceAlibabacloudStackExpressconnectBgpgroupRead(d *schema.ResourceData,
 
 	d.Set("peer_asn", data.PeerAsn)
 
-	d.Set("region_id", data.RegionId)
-
 	d.Set("route_limit", data.RouteLimit)
 
 	d.Set("router_id", data.RouterId)
@@ -277,9 +253,6 @@ func resourceAlibabacloudStackExpressconnectBgpgroupDelete(d *schema.ResourceDat
 	// api: Vpc - 2016-04-28 - DeleteBgpGroup
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteBgpGroup", "")
 	request.QueryParams["BgpGroupId"] = d.Id()
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	}
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
