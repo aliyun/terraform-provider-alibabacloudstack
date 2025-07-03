@@ -488,18 +488,19 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardb_dbinstances": dataSourceAlibabacloudStackPolardbDbInstances(),
 		"alibabacloudstack_polardb_instances":   dataSourceAlibabacloudStackPolardbDbInstances(),
 		//	"alibabacloudstack_polardb_accounts":                       dataSourceAlibabacloudStackPolardbAccounts(),
-		"alibabacloudstack_bastionhost_instances": dataSourceAlibabacloudStackBastionhostInstances(),
-		"alibabacloudstack_waf_instances":         dataSourceAlibabacloudStackWafInstances(),
-		"alibabacloudstack_flink_namespaces":      dataSourceAlibabacloudStackFlinkNamespaces(),
-		"alibabacloudstack_ebs_diskreplicapairs":  dataSourceAlibabacloudStackEbsDiskReplicaPairs(),
-		"alibabacloudstack_ebs_diskreplicagroups": dataSourceAlibabacloudStackEbsDiskReplicaGroups(),
-		"alibabacloudstack_ecs_snapshot_groups":   dataSourceAlibabacloudStackEcsSnapshotGroups(),
-		"alibabacloudstack_ecs_invocations":       dataSourceAlibabacloudStackEcsInvocations(),
-		"alibabacloudstack_vpc_dhcp_options_sets": dataSourceAlibabacloudStackVpcDhcpOptionsSets(),
-		"alibabacloudstack_slb_access_logs":       dataSourceAlibabacloudStackSlbAccessLogs(),
-		"alibabacloudstack_vpc_ipv6_isps":         dataSourceAlibabacloudStackVpcIpv6Isps(),
-		"alibabacloudstack_vpc_ha_vips":           dataSourceAlibabacloudStackVpcHaVips(),
+		"alibabacloudstack_bastionhost_instances":            dataSourceAlibabacloudStackBastionhostInstances(),
+		"alibabacloudstack_waf_instances":                    dataSourceAlibabacloudStackWafInstances(),
+		"alibabacloudstack_flink_namespaces":                 dataSourceAlibabacloudStackFlinkNamespaces(),
+		"alibabacloudstack_ebs_diskreplicapairs":             dataSourceAlibabacloudStackEbsDiskReplicaPairs(),
+		"alibabacloudstack_ebs_diskreplicagroups":            dataSourceAlibabacloudStackEbsDiskReplicaGroups(),
+		"alibabacloudstack_ecs_snapshot_groups":              dataSourceAlibabacloudStackEcsSnapshotGroups(),
+		"alibabacloudstack_ecs_invocations":                  dataSourceAlibabacloudStackEcsInvocations(),
+		"alibabacloudstack_vpc_dhcp_options_sets":            dataSourceAlibabacloudStackVpcDhcpOptionsSets(),
+		"alibabacloudstack_slb_access_logs":                  dataSourceAlibabacloudStackSlbAccessLogs(),
+		"alibabacloudstack_vpc_ipv6_isps":                    dataSourceAlibabacloudStackVpcIpv6Isps(),
+		"alibabacloudstack_vpc_ha_vips":                      dataSourceAlibabacloudStackVpcHaVips(),
 		"alibabacloudstack_vpngateway_vpn_pbr_route_entries": dataSourceAlibabacloudStackVpngatewayVpnPbrRouteEntries(),
+		"alibabacloudstack_expressconnect_bgp_groups":        dataSourceAlibabacloudStackExpressconnectBgpGroups(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -850,6 +851,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_slb_access_log":                 resourceAlibabacloudStackSlbAccesslog(),
 		"alibabacloudstack_vpc_ha_vip":                     resourceAlibabacloudStackVpcHavip(),
 		"alibabacloudstack_vpngateway_vpn_pbr_route_entry": resourceAlibabacloudStackVpngatewayVpnpbrrouteentry(),
+		"alibabacloudstack_expressconnect_bgp_group":       resourceAlibabacloudStackExpressconnectBgpgroup(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
