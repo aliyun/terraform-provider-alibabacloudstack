@@ -5,11 +5,13 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackExpressconnectBgpgroup() *schema.Resource {
@@ -30,6 +32,7 @@ func resourceAlibabacloudStackExpressconnectBgpgroup() *schema.Resource {
 			"bgp_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"bgp_group_name": {
@@ -43,53 +46,45 @@ func resourceAlibabacloudStackExpressconnectBgpgroup() *schema.Resource {
 			},
 
 			"hold": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
 			"ip_version": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
 			},
 
 			"is_fake": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 
 			"keepalive": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
 			"local_asn": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 			},
 
 			"peer_asn": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-
-			"record_total": {
 				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Required: true,
 			},
 
 			"region_id": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"route_limit": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
@@ -137,11 +132,11 @@ func resourceAlibabacloudStackExpressconnectBgpgroupCreate(d *schema.ResourceDat
 	}
 
 	if v, ok := d.GetOk("local_asn"); ok {
-		request.QueryParams["LocalAsn"] = v.(string)
+		request.QueryParams["LocalAsn"] = fmt.Sprintf("%d", v.(int))
 	}
 
 	if v, ok := d.GetOk("peer_asn"); ok {
-		request.QueryParams["PeerAsn"] = v.(string)
+		request.QueryParams["PeerAsn"] = fmt.Sprintf("%d", v.(int))
 	} else {
 		return fmt.Errorf("PeerAsn is required")
 	}
@@ -207,11 +202,11 @@ func resourceAlibabacloudStackExpressconnectBgpgroupUpdate(d *schema.ResourceDat
 		}
 
 		if v, ok := d.GetOk("local_asn"); ok {
-			request.QueryParams["LocalAsn"] = v.(string)
+			request.QueryParams["LocalAsn"] = fmt.Sprintf("%d", v.(int))
 		}
 
 		if v, ok := d.GetOk("peer_asn"); ok {
-			request.QueryParams["PeerAsn"] = v.(string)
+			request.QueryParams["PeerAsn"] = fmt.Sprintf("%d", v.(int))
 		}
 
 		bresponse, err := client.ProcessCommonRequest(request)
@@ -254,7 +249,9 @@ func resourceAlibabacloudStackExpressconnectBgpgroupRead(d *schema.ResourceData,
 
 	d.Set("hold", data.Hold)
 
-	d.Set("ip_version", data.IpVersion)
+	ipversion := strings.ToLower(data.IpVersion)
+
+	d.Set("ip_version", ipversion)
 
 	d.Set("is_fake", data.IsFake)
 
@@ -293,7 +290,7 @@ func resourceAlibabacloudStackExpressconnectBgpgroupDelete(d *schema.ResourceDat
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_express_connect_bgp_group", "DeleteBgpGroup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	expressconnectservice := ExpressconnectService{client}
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{""}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, expressconnectservice.ExpressconnectBgpGroupsStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutCreate), 2*time.Second, expressconnectservice.ExpressconnectBgpGroupsStateRefreshFunc(d.Id(), []string{"Failed"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())

@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -17,15 +16,15 @@ type ExpressconnectBgpGroup struct {
 	Name        string `json:"Name"`
 	Description string `json:"Description"`
 	BgpGroupId  string `json:"BgpGroupId"`
-	PeerAsn     string `json:"PeerAsn"`
+	PeerAsn     int    `json:"PeerAsn"`
 	AuthKey     string `json:"AuthKey"`
 	RouterId    string `json:"RouterId"`
 	Status      string `json:"Status"`
 	Keepalive   int    `json:"Keepalive"`
-	LocalAsn    string `json:"LocalAsn"`
-	Hold        string `json:"Hold"`
-	IsFake      string `json:"IsFake"`
-	RouteLimit  string `json:"RouteLimit"`
+	LocalAsn    int    `json:"LocalAsn"`
+	Hold        int    `json:"Hold"`
+	IsFake      bool   `json:"IsFake"`
+	RouteLimit  int    `json:"RouteLimit"`
 	RegionId    string `json:"RegionId"`
 	IpVersion   string `json:"IpVersion"`
 }
@@ -64,7 +63,7 @@ func (s *ExpressconnectService) DoVpcDescribebgpgroupsRequest(id string) (*Expre
 	if len(VpcDescribebgpgroupsResponseObj.BgpGroups.BgpGroup) > 0 {
 		return &VpcDescribebgpgroupsResponseObj.BgpGroups.BgpGroup[0], nil
 	} else {
-		return nil, errmsgs.Error(fmt.Sprintf("NotFound ExpressConnect BgpGroup:%s", id))
+		return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("BgpGroup", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 	}
 }
 

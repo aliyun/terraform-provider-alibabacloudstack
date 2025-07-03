@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -9,11 +10,16 @@ import (
 )
 
 func TestAccAlibabacloudStackExpressconnectBgpgroup_basic0(t *testing.T) {
-	var v *VpcDescribebgpgroupsResponse
+	var v *ExpressconnectBgpGroup
+	router_id := os.Getenv("ALIBABACLOUDSTACK_EXCONNECT_ROUTER_ID")
+	if router_id == "" {
+		t.Skip("Skipping TestAccAlibabacloudStackExpressconnectBgpgroup_basic0: The Env:ALIBABACLOUDSTACK_EXCONNECT_ROUTER_ID unset!")
+		t.Skipped()
+	}
 	resourceId := "alibabacloudstack_expressconnect_bgp_group.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackExpressconnectBgpgroupCheckMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &VpcService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &ExpressconnectService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}, "DoVpcDescribebgpgroupsRequest")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -34,7 +40,7 @@ func TestAccAlibabacloudStackExpressconnectBgpgroup_basic0(t *testing.T) {
 					"description":    "${var.name}",
 					"local_asn":      "65534",
 					"peer_asn":       "10",
-					"router_id":      "vbr-rw3s92a1ujdg21we2137v",
+					"router_id":      router_id,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
