@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -11,11 +10,6 @@ import (
 
 func TestAccAlibabacloudStackExpressconnectBgpgroup_basic0(t *testing.T) {
 	var v *ExpressconnectBgpGroup
-	router_id := os.Getenv("ALIBABACLOUDSTACK_EXCONNECT_ROUTER_ID")
-	if router_id == "" {
-		t.Skip("Skipping TestAccAlibabacloudStackExpressconnectBgpgroup_basic0: The Env:ALIBABACLOUDSTACK_EXCONNECT_ROUTER_ID unset!")
-		t.Skipped()
-	}
 	resourceId := "alibabacloudstack_expressconnect_bgp_group.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackExpressconnectBgpgroupCheckMap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
@@ -23,12 +17,13 @@ func TestAccAlibabacloudStackExpressconnectBgpgroup_basic0(t *testing.T) {
 	}, "DoVpcDescribebgpgroupsRequest")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	rand := getAccTestRandInt(10000, 99999)
+	rand := getAccTestRandInt(1000, 2000)
 	name := fmt.Sprintf("tf-testaccexpressconnect-bgp-group%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackExpressconnectBgpgroupDependence0)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudStackExpressconnectBgpgroupDependence0(rand))
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
+			testAccPreCheckWithEnvVariable(t, "ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID")
 		},
 		IDRefreshName: resourceId,
 		Providers:     testAccProviders,
@@ -40,7 +35,7 @@ func TestAccAlibabacloudStackExpressconnectBgpgroup_basic0(t *testing.T) {
 					"description":    "${var.name}",
 					"local_asn":      "65534",
 					"peer_asn":       "10",
-					"router_id":      router_id,
+					"router_id":      "${alibabacloudstack_express_connect_virtual_border_router.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -75,11 +70,23 @@ func TestAccAlibabacloudStackExpressconnectBgpgroup_basic0(t *testing.T) {
 
 var AlibabacloudStackExpressconnectBgpgroupCheckMap = map[string]string{}
 
-func AlibabacloudStackExpressconnectBgpgroupDependence0(name string) string {
-	return fmt.Sprintf(` 
+func AlibabacloudStackExpressconnectBgpgroupDependence0(vlanId int) func(string) string {
+	return func(name string) string {
+		return fmt.Sprintf(` 
 variable "name" {
   default = "%s"
 }
 
-`, name)
+resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
+	physical_connection_id =     "%s"
+	vlan_id =                    %d
+	local_gateway_ip =           "10.0.0.1"
+	peer_gateway_ip =            "10.0.0.2"
+	peering_subnet_mask =        "255.255.255.252"
+	virtual_border_router_name = "${var.name}"
+	description =                "TestAccAlibabacloudStackExpressconnectBgpgroup_basic0"
+}
+
+`, name, getAccTestOsEnv("ALIBABACLOUDSTACK_PHYSICAL_CONNECTION_ID"), vlanId)
+	}
 }
