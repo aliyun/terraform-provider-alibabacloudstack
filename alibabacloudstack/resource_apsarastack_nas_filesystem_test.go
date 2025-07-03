@@ -135,16 +135,19 @@ func TestAccAlibabacloudStackNasFileSystem_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"protocol_type": "${data.alibabacloudstack_nas_protocols.example.protocols.0}",
-					"storage_type":  "Capacity",
+					"protocol_type": "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.instance_types.0.protocol_type}",
+					"storage_type":  "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.instance_types.0.storage_type}",
 					"zone_id":       "${data.alibabacloudstack_nas_zones.default.zones.0.zone_id}",
+					"cluster_id":    "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.cluster_id}",
 					"description":   name,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"protocol_type": CHECKSET,
-						"storage_type":  "Capacity",
+						"storage_type":  CHECKSET,
+						"encrypt_type":  "0",
 						"zone_id":       CHECKSET,
+						"cluster_id":    CHECKSET,
 						"description":   name,
 					}),
 				),
@@ -164,16 +167,16 @@ func TestAccAlibabacloudStackNasFileSystem_basic(t *testing.T) {
 			// 		}),
 			// 	),
 			// },
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"description": name + "Update",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"description": name + "Update",
-			// 		}),
-			// 	),
-			// },
+			 {
+			 	Config: testAccConfig(map[string]interface{}{
+			 		"description": name + "Update",
+			 	}),
+			 	Check: resource.ComposeTestCheckFunc(
+			 		testAccCheck(map[string]string{
+			 			"description": name + "Update",
+			 		}),
+			 	),
+			 },
 		},
 	})
 }
@@ -200,18 +203,20 @@ func TestAccAlibabacloudStackNasFileSystemEncrypt(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"protocol_type": "NFS",
-					"storage_type":  "Capacity",
+					"protocol_type": "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.instance_types.0.protocol_type}",
+					"storage_type":  "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.instance_types.0.storage_type}",
 					"encrypt_type":  "0",
 					"zone_id":       "${data.alibabacloudstack_nas_zones.default.zones.0.zone_id}",
+					"cluster_id":    "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.cluster_id}",
 					"description":   name,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"protocol_type": CHECKSET,
-						"storage_type":  "Capacity",
+						"storage_type":  CHECKSET,
 						"encrypt_type":  "0",
 						"zone_id":       CHECKSET,
+						"cluster_id":    CHECKSET,
 						"description":   name,
 					}),
 				),
@@ -221,26 +226,16 @@ func TestAccAlibabacloudStackNasFileSystemEncrypt(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"description": name,
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"description": name,
-			// 		}),
-			// 	),
-			// },
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
-			// 		"description": name + "Update",
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"description": name + "Update",
-			// 		}),
-			// 	),
-			// },
+			 {
+			 	Config: testAccConfig(map[string]interface{}{
+			 		"description": name + "Update",
+			 	}),
+			 	Check: resource.ComposeTestCheckFunc(
+			 		testAccCheck(map[string]string{
+			 			"description": name + "Update",
+			 		}),
+			 	),
+			 },
 		},
 	})
 }
@@ -252,12 +247,12 @@ func AlibabacloudStackNasFileSystemBasicDependence0(name string) string {
 variable "name" {
 	default = "%s"
 }
-data "alibabacloudstack_nas_protocols" "example" {
-        type = "Capacity"
-}
+%s
+
 data "alibabacloudstack_nas_zones" "default" {
 }
-`, name)
+
+`, name, DataZoneCommonTestCase)
 }
 
 func AlibabacloudStackNasFileSystemBasicDependence1(name string) string {

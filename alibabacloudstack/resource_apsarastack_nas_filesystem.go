@@ -52,9 +52,13 @@ func resourceAlibabacloudStackNasFileSystem() *schema.Resource {
 			},
 			"zone_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
-				Computed: true,
+			},
+			"cluster_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 			"kms_key_id": {
 				Type:     schema.TypeString,
@@ -145,6 +149,7 @@ func resourceAlibabacloudStackNasFileSystemRead(d *schema.ResourceData, meta int
 	d.Set("capacity", object["Capacity"])
 	d.Set("zone_id", object["ZoneId"])
 	d.Set("kms_key_id", object["KMSKeyId"])
+	d.Set("cluster_id", object["Location"])
 	return nil
 }
 

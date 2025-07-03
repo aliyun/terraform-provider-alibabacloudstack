@@ -392,7 +392,6 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_maxcompute_cluster_quotas":               dataSourceAlibabacloudStackMaxcomputeClusterQuotas(),
 		"alibabacloudstack_maxcompute_projects":                     dataSourceAlibabacloudStackMaxcomputeProjects(),
 		"alibabacloudstack_nas_zones":                               dataSourceAlibabacloudStackNasZones(),
-		"alibabacloudstack_nas_protocols":                           dataSourceAlibabacloudStackNasProtocols(),
 		"alibabacloudstack_nas_file_systems":                        dataSourceAlibabacloudStackFileSystems(),
 		"alibabacloudstack_nas_filesystems":                         dataSourceAlibabacloudStackFileSystems(),
 		"alibabacloudstack_nas_mount_targets":                       dataSourceAlibabacloudStackNasMountTargets(),

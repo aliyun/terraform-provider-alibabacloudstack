@@ -36,7 +36,7 @@ func dataSourceAlibabacloudStackNasZones() *schema.Resource {
 							Computed: true,
 						},
 						"clusters": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -139,10 +139,15 @@ func dataSourceAlibabacloudStackNasZonesRead(d *schema.ResourceData, meta interf
 					"protocol_type": instanceType["ProtocolType"],
 				})
 			}
+			if len(instanceTypes) < 1 {
+				continue
+			}
 			cluster["instance_types"] = instanceTypes
 			clusters = append(clusters, cluster)
 			}
-		
+		if len(clusters) < 1 {
+			continue
+		}
 		mapping := map[string]interface{}{
 			"zone_id": object["ZoneId"],
 			"clusters": clusters,
