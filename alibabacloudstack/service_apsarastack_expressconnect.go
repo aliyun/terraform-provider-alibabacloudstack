@@ -87,3 +87,61 @@ func (s *ExpressconnectService) ExpressconnectBgpGroupsStateRefreshFunc(id strin
 		return object, object.Status, nil
 	}
 }
+
+
+type ExpressconnectService struct {
+	client *connectivity.AlibabacloudStackClient
+}
+
+type VpcDescribebgppeersResponse struct {
+	BgpPeers struct {
+		BgpPeer []struct {
+			Name          string `json:"Name"`
+			Description   string `json:"Description"`
+			BgpPeerId     string `json:"BgpPeerId"`
+			BgpGroupId    string `json:"BgpGroupId"`
+			PeerIpAddress string `json:"PeerIpAddress"`
+			PeerAsn       string `json:"PeerAsn"`
+			AuthKey       string `json:"AuthKey"`
+			RouterId      string `json:"RouterId"`
+			BgpStatus     string `json:"BgpStatus"`
+			Status        string `json:"Status"`
+			Keepalive     string `json:"Keepalive"`
+			LocalAsn      string `json:"LocalAsn"`
+			Hold          string `json:"Hold"`
+			IsFake        string `json:"IsFake"`
+			RouteLimit    string `json:"RouteLimit"`
+			RegionId      string `json:"RegionId"`
+			EnableBfd     bool   `json:"EnableBfd"`
+			IpVersion     string `json:"IpVersion"`
+			BfdMultiHop   int    `json:"BfdMultiHop"`
+		} `json:"BgpPeer"`
+	} `json:"BgpPeers"`
+	RequestId  string `json:"RequestId"`
+	TotalCount int    `json:"TotalCount"`
+	PageNumber int    `json:"PageNumber"`
+	PageSize   int    `json:"PageSize"`
+}
+
+func (s *ExpressconnectService) DoVpcDescribebgppeersRequest(id string) (*VpcDescribebgppeersResponse, error) {
+	// api: Vpc - 2016-04-28 - DescribeBgpPeers
+	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeBgpPeers", "")
+	VpcDescribebgppeersResponseObj := &VpcDescribebgppeersResponse{}
+	request.QueryParams["BgpPeerId"] = id
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBgpPeers", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribebgppeersResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBgpPeers", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return VpcDescribebgppeersResponseObj, nil
+}
