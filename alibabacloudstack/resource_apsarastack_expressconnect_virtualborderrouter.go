@@ -460,6 +460,9 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterDelete(d *schema.
 		return nil
 	})
 	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidVbrId.NotFound"}) {
+			return nil
+		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil

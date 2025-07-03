@@ -1846,15 +1846,13 @@ func (s *VpcService) ExpressConnectPhysicalConnectionStateRefreshFunc(id string,
 func (s *VpcService) DescribeExpressConnectVirtualBorderRouter(id string) (object map[string]interface{}, err error) {
 	var response map[string]interface{}
 	action := "DescribeVirtualBorderRouters"
-	request := map[string]interface{}{
+	reqQuery := map[string]interface{}{
 		"PageNumber":     1,
 		"PageSize":       50,
-		"Product":        "Vpc",
-		"OrganizationId": s.client.Department,
 	}
 	idExist := false
 	for {
-		response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, nil, request)
+		response, err = s.client.DoTeaRequest("POST", "VPC", "2016-04-28", action, "", nil, reqQuery, nil)
 		if err != nil {
 			return object, err
 		}
@@ -1871,10 +1869,10 @@ func (s *VpcService) DescribeExpressConnectVirtualBorderRouter(id string) (objec
 				return v.(map[string]interface{}), nil
 			}
 		}
-		if len(v.([]interface{})) < request["PageSize"].(int) {
+		if len(v.([]interface{})) < reqQuery["PageSize"].(int) {
 			break
 		}
-		request["PageNumber"] = request["PageNumber"].(int) + 1
+		reqQuery["PageNumber"] = reqQuery["PageNumber"].(int) + 1
 	}
 	if !idExist {
 		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ExpressConnect", id)), errmsgs.NotFoundWithResponse, response)
