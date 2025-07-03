@@ -6,7 +6,9 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -26,7 +28,7 @@ func dataSourceAlibabacloudStackNasLifecyclePolicies() *schema.Resource {
 
 			"file_system_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			"lifecycle_policies": {
@@ -69,20 +71,17 @@ func dataSourceAlibabacloudStackNasLifecyclePolicies() *schema.Resource {
 							Computed: true,
 						},
 
-						"paths": {
-							// TypeList
-							Type:     schema.TypeList,
+						"recursive": {
+							Type:     schema.TypeBool,
 							Computed: true,
-
-							Elem: &schema.Schema{
-								//TypeString
-								Type:     schema.TypeString,
-								Computed: true,
-							},
 						},
 
 						"storage_type": {
 							// TypeString
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"oss_bucket": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -104,31 +103,42 @@ func dataSourceAlibabacloudStackNasLifecyclePoliciesRead(d *schema.ResourceData,
 
 	if v, ok := d.GetOk("file_system_id"); ok {
 		request.QueryParams["FileSystemId"] = v.(string)
-	} else {
-		return fmt.Errorf("FileSystemId is required")
 	}
 
-	bresponse, err := client.ProcessCommonRequest(request)
-	if err != nil {
+	if bresponse, err := client.ProcessCommonRequest(request); err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_nas_lifecycle_policy", "DescribeLifecyclePolicies", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		if sdkErr, ok := err.(*errors.ServerError); !ok || (sdkErr.ErrorCode() != "InvalidFileSystem.NotFound" && sdkErr.ErrorCode() != "InvalidParameter.FileSystemId"){
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_nas_lifecycle_policy", "DescribeLifecyclePolicies", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+	} else {
+
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &NasDescribelifecyclepoliciesResponseObj)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+				"alibabacloudstack_nas_lifecycle_policy", "DescribeLifecyclePolicies", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
 	}
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &NasDescribelifecyclepoliciesResponseObj)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_nas_lifecycle_policy", "DescribeLifecyclePolicies", errmsgs.AlibabacloudStackSdkGoERROR)
+	var filteredIds, ids []string
+	if ids, ok := d.GetOk("ids"); ok {
+		for _, id := range ids.([]interface{}) {
+			if id.(string) == "" {
+				continue
+			}
+			filteredIds = append(filteredIds, id.(string))
+		}
 	}
-
-	var ids []string
 	datas := make([]interface{}, 0)
 	for _, data := range NasDescribelifecyclepoliciesResponseObj.LifecyclePolicies {
-		file_system_id := data.FileSystemId
-		lifecycle_policy_name := data.LifecyclePolicyName
-		id := fmt.Sprintf("%s:%s", file_system_id, lifecycle_policy_name)
+		fileSystemId := data.FileSystemId
+		lifecyclePolicyName := data.LifecyclePolicyName
+		id := fmt.Sprintf("%s:%s", fileSystemId, lifecyclePolicyName)
+		if len(filteredIds) > 0 && !slices.Contains(filteredIds, id) {
+			continue
+		}
 		i := map[string]interface{}{
 			"id": id,
 
@@ -142,7 +152,9 @@ func dataSourceAlibabacloudStackNasLifecyclePoliciesRead(d *schema.ResourceData,
 
 			"path": data.Path,
 
-			"record_total": data,
+			"recursive": data.Recursive,
+
+			"oss_bucket": data.OssBucket,
 
 			"storage_type": data.StorageType,
 		}

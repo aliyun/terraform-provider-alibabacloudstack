@@ -399,6 +399,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_nas_access_rules":                        dataSourceAlibabacloudStackAccessRules(),
 		"alibabacloudstack_nas_accessrules":                         dataSourceAlibabacloudStackAccessRules(),
 		"alibabacloudstack_nat_gateways":                            dataSourceAlibabacloudStackNatGateways(),
+		"alibabacloudstack_nas_lifecycle_policies":                  dataSourceAlibabacloudStackNasLifecyclePolicies(),
 		"alibabacloudstack_natgateway_natgateways":                  dataSourceAlibabacloudStackNatGateways(),
 		"alibabacloudstack_natgateway_bandwidth_packages":           dataSourceAlibabacloudStackNatgatewayBandwidthPackages(),
 		"alibabacloudstack_network_acls":                            dataSourceAlibabacloudStackNetworkAcls(),

@@ -86,11 +86,8 @@ func dataSourceAlibabacloudStackNasZones() *schema.Resource {
 func dataSourceAlibabacloudStackNasZonesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	request := make(map[string]interface{})
-	request["PageSize"] = PageSizeLarge
-	request["PageNumber"] = 1
 
-	response, err := client.DoTeaRequest("POST", "NAS", "2017-06-26", "DescribeZones", "", nil, nil, request)
+	response, err := client.DoTeaRequest("GET", "NAS", "2017-06-26", "DescribeZones", "", nil, nil, nil)
 	if err != nil {
 		return err
 	}
