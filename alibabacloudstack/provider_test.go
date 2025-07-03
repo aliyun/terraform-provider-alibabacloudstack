@@ -403,7 +403,7 @@ func shuffle(chars []rune) []rune {
 	return copyChars
 }
 
-func GeneratePassword(length int) string {
+func getAccTestPassword(length int) string {
 	if v := os.Getenv("ALIBABACLOUDSTACK_ACCRANDPWD"); v != "" {
 		return v
 	}
@@ -454,6 +454,15 @@ func GeneratePassword(length int) string {
 	// 组合最终密码
 	password := append([]rune{firstChar}, shuffled...)
 	return string(password)
+}
+
+func getAccTestOsEnv(keyName string) string{
+	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err != nil && v {
+		if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_SENSITIVE")); err == nil && v {
+			return fmt.Sprintf("<%s>", keyName)
+		}
+	}
+	return os.Getenv(keyName)
 }
 
 func ResourceTest(t *testing.T, c resource.TestCase) {

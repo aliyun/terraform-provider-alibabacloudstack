@@ -324,7 +324,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 		backup_period = ["Tuesday", "Wednesday"]
 		backup_time = "10:00Z-11:00Z"
 	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, GeneratePassword(12))
+	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, getAccTestPassword(12))
 }
 
 func testAccKVStoreBackupPolicy_classicUpdatePeriod(rand int, instanceType, engineVersion string) string {
@@ -361,7 +361,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 		backup_period = ["Tuesday", "Wednesday", "Sunday"]
 		backup_time = "10:00Z-11:00Z"
 	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, GeneratePassword(12))
+	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, getAccTestPassword(12))
 }
 
 func testAccKVStoreBackupPolicy_classicUpdateTime(rand int, instanceType, engineVersion string) string {
@@ -398,7 +398,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 		backup_period = ["Tuesday", "Wednesday", "Sunday"]
 		backup_time = "12:00Z-13:00Z"
 	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, GeneratePassword(12))
+	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, getAccTestPassword(12))
 }
 
 func testAccKVStoreBackupPolicy_classicUpdateAll(rand int, instanceType, engineVersion string) string {
@@ -435,7 +435,7 @@ resource "alibabacloudstack_kvstore_instance" "default" {
 		backup_period = ["Sunday"]
 		backup_time = "13:00Z-14:00Z"
 	}
-	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, GeneratePassword(12))
+	`, rand, instanceType, KVRInstanceClassCommonTestCase, engineVersion, getAccTestPassword(12))
 }
 
 func testAccKVStoreBackupPolicy_vpc(rand int, instanceType, engineVersion string) string {

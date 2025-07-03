@@ -324,5 +324,5 @@ func resourceEdasK8sClusterConfigDependence(name string) string {
 			}
 		}
 
-		`, name, namespace_logical_id, SecurityGroupCommonTestCase, GeneratePassword(12))
+		`, name, namespace_logical_id, SecurityGroupCommonTestCase, getAccTestPassword(12))
 }

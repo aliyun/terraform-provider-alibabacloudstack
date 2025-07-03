@@ -201,5 +201,5 @@ func resourceEdasK8sSericeDependence(name string) string {
 			post_start            	= "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
 			namespace             	= "default"
 		}
-		`, name, GeneratePassword(12))
+		`, name, getAccTestPassword(12))
 }

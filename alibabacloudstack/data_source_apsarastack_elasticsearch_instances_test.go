@@ -99,7 +99,7 @@ var fakeElasticsearchMapFunc = func(rand int) map[string]string {
 	}
 }
 
-var esTestPassword = GeneratePassword(12)
+var esTestPassword = getAccTestPassword(12)
 
 func dataSourceElasticsearchConfigDependence(name string) string {
 	return fmt.Sprintf(`

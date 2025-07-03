@@ -239,5 +239,5 @@ resource "alibabacloudstack_cs_kubernetes" "default" {
 //  worker_data_disk_size =  30
 //  master_disk_size = 45
 //}
-`, name, GeneratePassword(12))
+`, name, getAccTestPassword(12))
 }

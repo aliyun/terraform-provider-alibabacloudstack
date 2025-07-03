@@ -277,5 +277,5 @@ resource "alibabacloudstack_dts_synchronization_instance" "default" {
   sync_architecture                   = "oneway"
 }
 
-`, name, GeneratePassword(12))
+`, name, getAccTestPassword(12))
 }

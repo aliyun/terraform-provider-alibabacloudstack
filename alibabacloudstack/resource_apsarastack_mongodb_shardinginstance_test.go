@@ -148,7 +148,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_classic(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	password := GeneratePassword(12)
+	password := getAccTestPassword(12)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -323,7 +323,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_vpc(t *testing.T) {
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
-	password := GeneratePassword(12)
+	password := getAccTestPassword(12)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -439,7 +439,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_multi_instance(t *testing.T
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
-	password := GeneratePassword(12)
+	password := getAccTestPassword(12)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {

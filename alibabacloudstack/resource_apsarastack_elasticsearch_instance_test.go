@@ -157,7 +157,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 		name = name[:30]
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
-	password := GeneratePassword(12)
+	password := getAccTestPassword(12)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -175,8 +175,8 @@ func TestAccAlibabacloudStackElasticsearchInstance_basic(t *testing.T) {
 					"scene":               "normal",
 					"description":         name,
 					"version":             EsVersion,
-					"password":            GeneratePassword(12),
-					"monitor_password":    GeneratePassword(12),
+					"password":            getAccTestPassword(12),
+					"monitor_password":    getAccTestPassword(12),
 					"data_node_spec":      DataNodeSpec,
 					"data_node_amount":    DataNodeAmount,
 					"data_node_disk_size": DataNodeDisk,
@@ -393,7 +393,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 		name = name[:30]
 	}
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceElasticsearchInstanceConfigDependence)
-	password := GeneratePassword(12)
+	password := getAccTestPassword(12)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -416,7 +416,7 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 					"data_node_disk_size":   DataNodeDisk,
 					"data_node_disk_type":   EsDiskType,
 					"kibana_node_spec":      KibanaNodeSpec,
-					"kibana_password":       GeneratePassword(12),
+					"kibana_password":       getAccTestPassword(12),
 					"master_node_amount":    MasterNodeAmount,
 					"master_node_spec":      MasterNodeSpec,
 					"master_node_disk_size": "100",
@@ -424,8 +424,8 @@ func TestAccAlibabacloudStackElasticsearchInstance_vpc(t *testing.T) {
 					"client_node_amount":    ClientNodeAmount,
 					"client_node_spec":      ClientNodeSpec,
 					"vswitch_id":            "${alibabacloudstack_vpc_vswitch.default.id}",
-					"password":              GeneratePassword(12),
-					"monitor_password":      GeneratePassword(12),
+					"password":              getAccTestPassword(12),
+					"monitor_password":      getAccTestPassword(12),
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -606,8 +606,8 @@ func TestAccAlibabacloudStackElasticsearchInstance_setting_config(t *testing.T) 
 					"data_node_disk_size": DataNodeDisk,
 					"data_node_disk_type": EsDiskType,
 					"vswitch_id":            "${alibabacloudstack_vpc_vswitch.default.id}",
-					"password":              GeneratePassword(12),
-					"monitor_password":      GeneratePassword(12),
+					"password":              getAccTestPassword(12),
+					"monitor_password":      getAccTestPassword(12),
 					"setting_config": map[string]string{
 						"\"action.auto_create_index\"":         "+.*,-*",
 						"\"action.destructive_requires_name\"": "false",

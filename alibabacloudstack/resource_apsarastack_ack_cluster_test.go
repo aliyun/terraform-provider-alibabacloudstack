@@ -473,7 +473,7 @@ resource "alibabacloudstack_kms_key" "default" {
 	pending_window_in_days = "7"
 }
 
-`, name, SecurityGroupCommonTestCase, GeneratePassword(12))
+`, name, SecurityGroupCommonTestCase, getAccTestPassword(12))
 }
 
 func resourceCsK8sKeyNameDependence(name string) string {
@@ -543,7 +543,7 @@ resource "alibabacloudstack_kms_key" "default" {
 	description = "${var.name}"
 }
 
-`, name, SecurityGroupCommonTestCase, GeneratePassword(12))
+`, name, SecurityGroupCommonTestCase, getAccTestPassword(12))
 }
 
 var CsK8sMap = map[string]string{}

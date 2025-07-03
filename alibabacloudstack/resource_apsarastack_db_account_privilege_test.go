@@ -133,7 +133,7 @@ resource "alibabacloudstack_db_instance" "default" {
 	  password = "%s"
 	  description = "from terraform"
 	}
-`, RdsCommonTestCase, name, GeneratePassword(12))
+`, RdsCommonTestCase, name, getAccTestPassword(12))
 }
 
 //func TestAccAlibabacloudStackDBAccountPrivilege_PostgreSql(t *testing.T) {
