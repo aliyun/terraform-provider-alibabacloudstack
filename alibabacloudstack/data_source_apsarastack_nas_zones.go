@@ -1,8 +1,7 @@
 package alibabacloudstack
 
 import (
-	"strconv"
-	"time"
+	"slices"
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -14,6 +13,14 @@ func dataSourceAlibabacloudStackNasZones() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackNasZonesRead,
 		Schema: map[string]*schema.Schema{
+			"zone_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"protocol": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"output_file": {
 				Type:       schema.TypeString,
 				Optional:   true,
@@ -28,21 +35,46 @@ func dataSourceAlibabacloudStackNasZones() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"instance_types": {
-							Type:     schema.TypeList,
+						"clusters": {
+							Type:     schema.TypeSet,
 							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"storage_type": {
+									"cluster_id": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"protocol_type": {
+									"cluster_type": {
 										Type:     schema.TypeString,
 										Computed: true,
+									},
+									"cluster_version": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"instance_types": {
+										Type:     schema.TypeList,
+										Computed: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"storage_type": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+												"protocol_type": {
+													Type:     schema.TypeString,
+													Computed: true,
+												},
+											},
+										},
 									},
 								},
 							},
+						},
+						"protocols": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem:  schema.TypeString,
 						},
 					},
 				},
@@ -58,7 +90,7 @@ func dataSourceAlibabacloudStackNasZonesRead(d *schema.ResourceData, meta interf
 	request["PageSize"] = PageSizeLarge
 	request["PageNumber"] = 1
 
-	response, err := client.DoTeaRequest("POST", "Nas", "2017-06-26", "DescribeZones", "", nil, nil, request)
+	response, err := client.DoTeaRequest("POST", "NAS", "2017-06-26", "DescribeZones", "", nil, nil, request)
 	if err != nil {
 		return err
 	}
@@ -67,40 +99,60 @@ func dataSourceAlibabacloudStackNasZonesRead(d *schema.ResourceData, meta interf
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "DescribeZones", "$.Zones.Zone", response)
 	}
-	result, _ := resp.([]interface{})
-	objects := make([]map[string]interface{}, 0)
-	for _, v := range result {
-		item := v.(map[string]interface{})
-		objects = append(objects, item)
+	var zoneId, protocol string
+	var zoneIds []string
+	if v, ok := d.GetOk("zone_id"); ok {
+		zoneId = v.(string)
 	}
+	if v, ok := d.GetOk("protocol"); ok {
+		protocol = v.(string)
+	}
+	
 	s := make([]map[string]interface{}, 0)
-	for _, object := range objects {
+	for _, r := range resp.([]interface{}) {
+		object := r.(map[string]interface{})
+		if zoneId != "" && zoneId != object["ZoneId"].(string) {
+			continue
+		}
+		var protocols []string
+		for _, v := range object["Performance"].(map[string]interface{})["Protocol"].([]interface{}) {
+			protocols = append(protocols, v.(string))
+		}
+		if protocol != "" && !slices.Contains(protocols, protocol) {
+			continue
+		}
+		zoneIds = append(zoneIds, zoneId)
+		
+		clusters := []map[string]interface{}{}
+		for _, ci := range object["Clusters"].(map[string]interface {})["Cluster"].([]interface{}) {
+			c := ci.(map[string]interface{})
+			cluster := map[string]interface{}{
+				"cluster_id": c["ClusterId"],
+				"cluster_type": c["ClusterType"],
+				"cluster_version": c["ClusterVersion"],
+			}
+			instanceTypes := []map[string]interface{}{}
+			for _, i := range c["InstanceTypes"].(map[string]interface{})["InstanceType"].([]interface{}){
+				instanceType := i.(map[string]interface{})
+				instanceTypes = append(instanceTypes, map[string]interface{}{
+					"storage_type": instanceType["StorageType"],
+					"protocol_type": instanceType["ProtocolType"],
+				})
+			}
+			cluster["instance_types"] = instanceTypes
+			clusters = append(clusters, cluster)
+			}
+		
 		mapping := map[string]interface{}{
 			"zone_id": object["ZoneId"],
+			"clusters": clusters,
+			"protocols": object["Performance"].(map[string]interface{})["Protocol"].([]interface{}),
+			
 		}
-		InstanceTypes := make([]map[string]interface{}, 0)
-		if InstanceTypesList, ok := object["InstanceTypes"]; ok {
-			if data, ok := InstanceTypesList.(map[string]interface{}); ok {
-				for _, v := range data {
-					if m1, ok := v.([]interface{}); ok {
-						for _, vv := range m1 {
-							if res, ok := vv.(map[string]interface{}); ok {
-								temp1 := map[string]interface{}{
-									"storage_type":  res["StorageType"],
-									"protocol_type": res["ProtocolType"],
-								}
-								InstanceTypes = append(InstanceTypes, temp1)
-							}
-						}
-					}
-				}
-			}
-		}
-		mapping["instance_types"] = InstanceTypes
 		s = append(s, mapping)
 	}
 
-	d.SetId(strconv.FormatInt(time.Now().Unix(), 16))
+	d.SetId(dataResourceIdHash(zoneIds))
 
 	if err := d.Set("zones", s); err != nil {
 		return errmsgs.WrapError(err)

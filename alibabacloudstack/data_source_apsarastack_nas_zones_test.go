@@ -9,13 +9,13 @@ import (
 func TestAccAlicloudNasZonesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(100, 999)
 	regionIdConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlicloudNasZonesDataSourceName(rand, map[string]string{}),
+		existConfig: testAccCheckAlicloudNasZonesDataSourceName(map[string]string{}),
 		fakeConfig:  "",
 	}
 
 	var existAlicloudNasZoneDataSourceNameMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"zones.#": CHECKSET,
+			"zones.#":                       CHECKSET,
 		}
 	}
 	var fakeNasZonesMapFunc = func(rand int) map[string]string {
@@ -32,16 +32,17 @@ func TestAccAlicloudNasZonesDataSource(t *testing.T) {
 	alicloudNasZonesAccountBusesCheckInfo.dataSourceTestCheck(t, rand, regionIdConf)
 }
 
-func testAccCheckAlicloudNasZonesDataSourceName(rand int, attrMap map[string]string) string {
+func testAccCheckAlicloudNasZonesDataSourceName(attrMap map[string]string) string {
 	var pairs []string
 	for k, v := range attrMap {
 		pairs = append(pairs, k+" = "+v)
 	}
 
 	config := fmt.Sprintf(`
+%s
 data "alibabacloudstack_nas_zones" "default" {  
    %s
 }
-`, strings.Join(pairs, " \n "))
+`, DataZoneCommonTestCase, strings.Join(pairs, " \n "))
 	return config
 }
