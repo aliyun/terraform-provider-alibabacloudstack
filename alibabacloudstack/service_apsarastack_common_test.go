@@ -1202,6 +1202,20 @@ data "alibabacloudstack_zones" default {
 
 `
 
+const NasCommonTestCase = DataZoneCommonTestCase + `
+data "alibabacloudstack_nas_zones" "default" {
+}
+
+resource "alibabacloudstack_nas_file_system" "default" {
+  protocol_type = "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.instance_types.0.protocol_type}"
+  storage_type = "${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.instance_types.0.storage_type}"
+  encrypt_type = "0"
+  zone_id = "${data.alibabacloudstack_nas_zones.default.zones.0.zone_id}"
+  cluster_id ="${data.alibabacloudstack_nas_zones.default.zones.0.clusters.0.cluster_id}"
+  description = "${var.name}"
+}
+`
+
 const VpcCommonTestCase = `
 resource "alibabacloudstack_vpc_vpc" "default" {
   vpc_name = "${var.name}_vpc"

@@ -193,8 +193,7 @@ func (s *NasService) DescribeNasFileSystemStateRefreshFunc(id string, defaultRet
 
 
 type NasDescribelifecyclepoliciesResponse struct {
-	LifecyclePolicies struct {
-		LifecyclePolicy []struct {
+	LifecyclePolicies []struct {
 			FileSystemId        string `json:"FileSystemId"`
 			LifecyclePolicyName string `json:"LifecyclePolicyName"`
 			Path                string `json:"Path"`
@@ -203,7 +202,6 @@ type NasDescribelifecyclepoliciesResponse struct {
 			StorageType         string `json:"StorageType"`
 			CreateTime          string `json:"CreateTime"`
 			OssBucket           string `json:"OssBucket"`
-		} `json:"LifecyclePolicy"`
 	} `json:"LifecyclePolicies"`
 	RequestId  string `json:"RequestId"`
 	TotalCount int    `json:"TotalCount"`

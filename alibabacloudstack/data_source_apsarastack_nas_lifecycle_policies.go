@@ -125,7 +125,7 @@ func dataSourceAlibabacloudStackNasLifecyclePoliciesRead(d *schema.ResourceData,
 
 	var ids []string
 	datas := make([]interface{}, 0)
-	for _, data := range NasDescribelifecyclepoliciesResponseObj.LifecyclePolicies.LifecyclePolicy {
+	for _, data := range NasDescribelifecyclepoliciesResponseObj.LifecyclePolicies {
 		file_system_id := data.FileSystemId
 		lifecycle_policy_name := data.LifecyclePolicyName
 		id := fmt.Sprintf("%s:%s", file_system_id, lifecycle_policy_name)

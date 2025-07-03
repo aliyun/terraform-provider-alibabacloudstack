@@ -709,6 +709,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_nas_accessrule":                        resourceAlibabacloudStackNasAccessRule(),
 		"alibabacloudstack_nas_file_system":                       resourceAlibabacloudStackNasFileSystem(),
 		"alibabacloudstack_nas_filesystem":                        resourceAlibabacloudStackNasFileSystem(),
+		"alibabacloudstack_nas_lifecycle_policy":                  resourceAlibabacloudStackNasLifecyclepolicy(),
 		"alibabacloudstack_nas_mount_target":                      resourceAlibabacloudStackNasMountTarget(),
 		"alibabacloudstack_nas_mounttarget":                       resourceAlibabacloudStackNasMountTarget(),
 		"alibabacloudstack_nat_gateway":                           resourceAlibabacloudStackNatGateway(),

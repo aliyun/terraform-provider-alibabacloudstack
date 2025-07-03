@@ -380,6 +380,9 @@ func resourceAlibabacloudStackOssBucketRead(d *schema.ResourceData, meta interfa
 	if len(tags) > 0 {
 		for _, tag := range tags {
 			tagmap := tag.(map[string]interface{})
+			if tagmap["Key"].(string)=="ascm:tag/rg" {
+				continue
+			}
 			tags_map[tagmap["Key"].(string)] = tagmap["Value"].(string)
 		}
 	}

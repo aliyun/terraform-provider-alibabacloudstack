@@ -5,9 +5,13 @@ package alibabacloudstack
 import (
 	"fmt"
 	"strings"
+	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -16,56 +20,55 @@ func resourceAlibabacloudStackNasLifecyclepolicy() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 
-			"create_time": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-
-			"file_system_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-
 			"lifecycle_policy_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
+			},
+			
+			"storage_type":{
+				Type:     schema.TypeString,
+				Optional: true,
+				Default: "InfrequentAccess",
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{"InfrequentAccess"}, false),
+			},
+			
+			"file_system_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			
+			"path": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 
+			"recursive" :{
+				Type: schema.TypeBool,
+				Optional: true,
+				Default: false,
+			},
+			
 			"lifecycle_rule_name": {
 				Type:     schema.TypeString,
 				Required: true,
-
-				ValidateFunc: validation.StringInSlice([]string{}, false),
+				ValidateFunc: validation.StringInSlice([]string{"DEFAULT_ATIME_14","DEFAULT_ATIME_30","DEFAULT_ATIME_60","DEFAULT_ATIME_90"}, false),
 			},
-
-			"path": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			"paths": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-
-				Elem: &schema.Schema{
-					Type:     schema.TypeString,
-					Computed: true,
-				},
-			},
-
-			"record_total": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-			},
-
-			"storage_type": {
+			
+			"oss_bucket": {
 				Type:     schema.TypeString,
 				Required: true,
-				Default:  "InfrequentAccess",
+				ForceNew: true,
 			},
+			
+			"create_time": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackNasLifecyclepolicyCreate,
@@ -82,36 +85,31 @@ func resourceAlibabacloudStackNasLifecyclepolicyCreate(d *schema.ResourceData, m
 	request := client.NewCommonRequest("POST", "NAS", "2017-06-26", "CreateLifecyclePolicy", "")
 
 	//调用request_params_handler
+	request.QueryParams["LifecyclePolicyName"] = d.Get("lifecycle_policy_name").(string)
+	request.QueryParams["StorageType"] = d.Get("storage_type").(string)
+	request.QueryParams["FileSystemId"] = d.Get("file_system_id").(string)
+	request.QueryParams["LifecycleRuleName"] = d.Get("lifecycle_rule_name").(string)
+	request.QueryParams["Path"] = d.Get("path").(string)
+	request.QueryParams["Recursive"] = fmt.Sprintf("%v", d.Get("recursive").(bool))
+	request.QueryParams["OssBucket"] = d.Get("oss_bucket").(string)
 
-	if v, ok := d.GetOk("file_system_id"); ok {
-		request.QueryParams["FileSystemId"] = v.(string)
-	} else {
-		return fmt.Errorf("FileSystemId is required")
-	}
+	var bresponse *responses.CommonResponse
+	var err error
+	resource.Retry(5*time.Minute, func() *resource.RetryError {
+		bresponse, err = client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 
-	if v, ok := d.GetOk("lifecycle_policy_name"); ok {
-		request.QueryParams["LifecyclePolicyName"] = v.(string)
-	} else {
-		return fmt.Errorf("LifecyclePolicyName is required")
-	}
+		if err == nil {
+			return nil
+		} else {
+			if sdkErr, ok := err.(*errors.ServerError); ok && sdkErr.ErrorCode() == "InvalidStatus.ValueNotSupported" {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
 
-	if v, ok := d.GetOk("lifecycle_rule_name"); ok {
-		request.QueryParams["LifecycleRuleName"] = v.(string)
-	} else {
-		return fmt.Errorf("LifecycleRuleName is required")
-	}
-
-	if v, ok := d.GetOk("path"); ok {
-		request.QueryParams["Path"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("storage_type"); ok {
-		request.QueryParams["StorageType"] = v.(string)
-	} else {
-		return fmt.Errorf("StorageType is required")
-	}
-
-	bresponse, err := client.ProcessCommonRequest(request)
+	})
+	
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -130,6 +128,10 @@ func resourceAlibabacloudStackNasLifecyclepolicyCreate(d *schema.ResourceData, m
 
 func resourceAlibabacloudStackNasLifecyclepolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	
+	if d.IsNewResource() {
+		return nil
+	}
 
 	// FileSystemId
 
@@ -148,20 +150,12 @@ func resourceAlibabacloudStackNasLifecyclepolicyUpdate(d *schema.ResourceData, m
 		request.QueryParams["FileSystemId"] = params[0]
 		request.QueryParams["LifecyclePolicyName"] = params[1]
 
-		if v, ok := d.GetOk("lifecycle_rule_name"); ok {
-			request.QueryParams["LifecycleRuleName"] = v.(string)
-		} else {
-			return fmt.Errorf("LifecycleRuleName is required")
-		}
-
-		if v, ok := d.GetOk("path"); ok {
-			request.QueryParams["Path"] = v.(string)
-		}
-
-		if v, ok := d.GetOk("storage_type"); ok {
-			request.QueryParams["StorageType"] = v.(string)
-		}
-
+		request.QueryParams["StorageType"] = d.Get("storage_type").(string)
+		request.QueryParams["LifecycleRuleName"] = d.Get("lifecycle_rule_name").(string)
+		request.QueryParams["Path"] = d.Get("path").(string)
+		request.QueryParams["Recursive"] = fmt.Sprintf("%v", d.Get("recursive").(bool))
+		request.QueryParams["OssBucket"] = d.Get("oss_bucket").(string)
+		
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
 			if bresponse == nil {
@@ -184,20 +178,15 @@ func resourceAlibabacloudStackNasLifecyclepolicyRead(d *schema.ResourceData, met
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_nas_lifecyclepolicy", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	data := response.LifecyclePolicies.LifecyclePolicy
+	data := response.LifecyclePolicies
 	d.Set("create_time", data[0].CreateTime)
-
 	d.Set("file_system_id", data[0].FileSystemId)
-
 	d.Set("lifecycle_policy_name", data[0].LifecyclePolicyName)
-
 	d.Set("lifecycle_rule_name", data[0].LifecycleRuleName)
-
 	d.Set("path", data[0].Path)
-
-	d.Set("record_total", data)
-
 	d.Set("storage_type", data[0].StorageType)
+	d.Set("recursive", data[0].Recursive)
+	d.Set("oss_bucket", data[0].OssBucket)
 
 	return nil
 }
