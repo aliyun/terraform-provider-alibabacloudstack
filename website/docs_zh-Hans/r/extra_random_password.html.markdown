@@ -14,6 +14,14 @@ description: |-
 ## 示例用法
 
 ```
+terraform {
+  required_providers {
+    random = {   # 必须制定这个Provider
+      source = "hashicorp/random"
+    }
+  }
+}
+
 resource "random_password" "password" {
   length           = 16
   special          = true

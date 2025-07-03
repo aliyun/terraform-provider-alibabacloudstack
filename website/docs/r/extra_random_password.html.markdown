@@ -14,6 +14,14 @@ This resource does use a cryptographic random number generator.provides a random
 ## Example Usage
 
 ```
+terraform {
+  required_providers {
+    random = {
+      source = "hashicorp/random"
+    }
+  }
+}
+
 resource "random_password" "password" {
   length           = 16
   special          = true

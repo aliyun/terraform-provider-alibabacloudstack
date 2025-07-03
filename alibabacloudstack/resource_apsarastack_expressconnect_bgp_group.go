@@ -160,6 +160,10 @@ func resourceAlibabacloudStackExpressconnectBgpgroupCreate(d *schema.ResourceDat
 
 func resourceAlibabacloudStackExpressconnectBgpgroupUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	
+	if d.IsNewResource() {
+		return nil
+	}
 
 	// api: Vpc - 2016-04-28 - ModifyBgpGroupAttribute
 	if d.HasChanges("auth_key", "bgp_group_name", "description", "local_asn", "peer_asn") {

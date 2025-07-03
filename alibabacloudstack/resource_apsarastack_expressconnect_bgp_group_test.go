@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackExpressconnectBgpgroup_basic0(t *testing.T) {
+func TestAccAlibabacloudStackExpressconnectBgpGroup_basic0(t *testing.T) {
 	var v *ExpressconnectBgpGroup
 	resourceId := "alibabacloudstack_expressconnect_bgp_group.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudStackExpressconnectBgpgroupCheckMap)
