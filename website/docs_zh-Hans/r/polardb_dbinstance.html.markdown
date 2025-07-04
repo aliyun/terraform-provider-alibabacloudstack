@@ -48,10 +48,6 @@ resource "alibabacloudstack_polardb_dbinstance" "default" {
   engine = "MySQL"
   engine_version = "5.7"
   instance_type = "rds.mysql.t1.small"
-  db_instance_class = "polardb.mysql.x4.large"
-  payment_type = "PayAsYouGo"
-  maintain_time = "02:00Z-03:00Z"
-  role_arn = "acs:ram::123456789012:role/aliyunpolardbdefaultrole"
 }
 ```
 
