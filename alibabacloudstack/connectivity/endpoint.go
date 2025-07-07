@@ -299,7 +299,7 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"nas.{{.region}}.{{.domain}}",
 	},
 	RosCode: PopEndpoint{
-		"ros.{{.region}}.{{.domain}}",
+		"ros.{{.domain}}",
 		"ros.{{.region}}.{{.domain}}",
 	},
 	RDSCode: PopEndpoint{

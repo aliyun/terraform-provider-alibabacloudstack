@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackRosTemplate0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%srostemplate%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testaccrostemplate%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRosTemplateBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -41,16 +41,16 @@ func TestAccAlibabacloudStackRosTemplate0(t *testing.T) {
 
 					"description": "模板的描述",
 
-					"template_name": "MyTemplateTest12",
+					"template_name": name,
 
-					"template_body": "{\"ROSTemplateFormatVersion\":\"2015-09-01\"}",
+					"template_body": "{\\\"ROSTemplateFormatVersion\\\":\\\"2015-09-01\\\"}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"description": "模板的描述",
 
-						"template_name": "MyTemplateTest12",
+						"template_name": name,
 
 						"template_body": "{\"ROSTemplateFormatVersion\":\"2015-09-01\"}",
 					}),
@@ -62,22 +62,20 @@ func TestAccAlibabacloudStackRosTemplate0(t *testing.T) {
 
 					"description": "模板的描述123",
 
-					"template_name": "TemplateName123",
+					"template_name": fmt.Sprintf("%s_update", name),
 
-					"resource_type": "template",
 
-					"template_body": "{   \"ROSTemplateFormatVersion\": \"2015-09-01\",   \"Transform\": \"Aliyun::Terraform-v1.0\",   \"Workspace\": {     \"main.tf\": \"variable  \\\"name\\\" {  default = \\\"auto_provisioning_group\\\"}\"   },  \"Outputs\": {} }",
+					"template_body": "{\\\"ROSTemplateFormatVersion\\\": \\\"2015-09-01\\\",   \\\"Transform\\\": \\\"Aliyun::Terraform-v1.0\\\",   \\\"Workspace\\\": {     \\\"main.tf\\\": \\\"variable  \\\\\\\"name\\\\\\\" {  default = \\\\\\\"auto_provisioning_group\\\\\\\"}\\\"   },  \\\"Outputs\\\": {} }",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"description": "模板的描述123",
 
-						"template_name": "TemplateName123",
+						"template_name": fmt.Sprintf("%s_update", name),
 
-						"resource_type": "template",
 
-						"template_body": "{   \"ROSTemplateFormatVersion\": \"2015-09-01\",   \"Transform\": \"Aliyun::Terraform-v1.0\",   \"Workspace\": {     \"main.tf\": \"variable  \\\"name\\\" {  default = \"auto_provisioning_group\"}\"   },   \"Outputs\": {} }",
+						"template_body": "{\"ROSTemplateFormatVersion\": \"2015-09-01\",   \"Transform\": \"Aliyun::Terraform-v1.0\",   \"Workspace\": {     \"main.tf\": \"variable  \\\"name\\\" {  default = \\\"auto_provisioning_group\\\"}\"   },  \"Outputs\": {} }",
 					}),
 				),
 			},
@@ -137,17 +135,10 @@ var AlibabacloudTestAccRosTemplateCheckmap = map[string]string{
 
 	"description": CHECKSET,
 
-	"resource_type": CHECKSET,
-
 	"template_body": CHECKSET,
 
 	"template_name": CHECKSET,
 
-	"tags": CHECKSET,
-
-	"template_id": CHECKSET,
-
-	"stack_id": CHECKSET,
 }
 
 func AlibabacloudTestAccRosTemplateBasicdependence(name string) string {

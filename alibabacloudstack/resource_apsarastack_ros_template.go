@@ -31,10 +31,6 @@ func resourceAlibabacloudStackRosTemplate() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"template_url": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackRosTemplateCreate, resourceAlibabacloudStackRosTemplateRead, resourceAlibabacloudStackRosTemplateUpdate, resourceAlibabacloudStackRosTemplateDelete)
@@ -87,6 +83,22 @@ func resourceAlibabacloudStackRosTemplateRead(d *schema.ResourceData, meta inter
 		return errmsgs.WrapError(err)
 	}
 	d.Set("template_body", object["TemplateBody"])
+	
+	
+	reqQuery := map[string]interface{}{"TemplateName" : d.Id()}
+	resp, err := client.DoTeaRequest("GET", "ROS", "2019-09-10", "ListTemplates", "", nil, reqQuery, nil)
+	if err != nil {
+		return err
+	}
+	for _, item := range resp["Templates"].([]interface{}) {
+		template := item.(map[string]interface{})
+		if template["TemplateId"].(string) != d.Id() {
+			continue
+		}
+		d.Set("description", template["Description"].(string))
+		d.Set("template_name", template["TemplateName"].(string))
+	}
+	
 	return nil
 }
 
