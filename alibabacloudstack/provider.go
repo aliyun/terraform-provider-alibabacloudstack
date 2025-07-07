@@ -815,6 +815,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_dbs_backupplan":                        resourceAlibabacloudStackDbsBackupPlan(),
 		"alibabacloudstack_express_connect_physical_connection":   resourceAlibabacloudStackExpressConnectPhysicalConnection(),
 		"alibabacloudstack_expressconnect_physicalconnection":     resourceAlibabacloudStackExpressConnectPhysicalConnection(),
+		"alibabacloudstack_expressconnect_vbr_ha":                 resourceAlibabacloudStackExpressconnectVbrHa(),
 		"alibabacloudstack_express_connect_virtual_border_router": resourceAlibabacloudStackExpressConnectVirtualBorderRouter(),
 		"alibabacloudstack_expressconnect_virtualborderrouter":    resourceAlibabacloudStackExpressConnectVirtualBorderRouter(),
 		"alibabacloudstack_oos_template":                          resourceAlibabacloudStackOosTemplate(),

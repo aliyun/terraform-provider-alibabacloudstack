@@ -145,6 +145,19 @@ func (s *ExpressconnectService) DoVpcDescribebgppeersRequest(id string) (*Expres
 	}
 }
 
+func (s *ExpressconnectService) DoVpcDescribeVbrHaRequest(id string) (map[string]interface{}, error) {
+	
+	reqQuery := map[string]interface{}{
+		"VbrHaId" : id,
+	}
+	// api: Vpc - 2016-04-28 - DescribeBgpPeers
+	response, err := s.client.DoTeaRequest("GET", "Vpc", "2016-04-28", "DescribeVbrHa", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
 func (s *ExpressconnectService) ExpressconnectBgpPeersStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		object, err := s.DoVpcDescribebgppeersRequest(id)
@@ -162,5 +175,27 @@ func (s *ExpressconnectService) ExpressconnectBgpPeersStateRefreshFunc(id string
 		}
 
 		return object, object.Status, nil
+	}
+}
+
+
+func (s *ExpressconnectService) ExpressconnectVbrHaStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DoVpcDescribeVbrHaRequest(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		objectStatus := object["Status"].(string)
+		for _, failState := range failStates {
+			if objectStatus == failState {
+				return object, objectStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, objectStatus))
+			}
+		}
+
+		return object, objectStatus, nil
 	}
 }
