@@ -176,6 +176,10 @@ func resourceAlibabacloudStackExpressconnectBgppeerCreate(d *schema.ResourceData
 
 func resourceAlibabacloudStackExpressconnectBgppeerUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	
+	if d.IsNewResource() {
+		return nil
+	}
 
 	// BfdMultiHop
 
