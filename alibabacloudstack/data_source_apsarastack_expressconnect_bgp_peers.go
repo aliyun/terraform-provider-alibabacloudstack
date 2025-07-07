@@ -28,11 +28,6 @@ func dataSourceAlibabacloudStackExpressconnectBgpPeers() *schema.Resource {
 				Required: true,
 			},
 
-			"region_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"bgp_group_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -138,12 +133,6 @@ func dataSourceAlibabacloudStackExpressconnectBgpPeers() *schema.Resource {
 							Computed: true,
 						},
 
-						"region_id": {
-							// TypeString
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
 						"route_limit": {
 							// TypeString
 							Type:     schema.TypeInt,
@@ -178,14 +167,6 @@ func dataSourceAlibabacloudStackExpressconnectBgpPeersRead(d *schema.ResourceDat
 
 	if v, ok := d.GetOk("bgp_group_id"); ok {
 		request.QueryParams["BgpGroupId"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("bgp_peer_id"); ok {
-		request.QueryParams["BgpPeerId"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
@@ -238,8 +219,6 @@ func dataSourceAlibabacloudStackExpressconnectBgpPeersRead(d *schema.ResourceDat
 			"peer_asn": data.PeerAsn,
 
 			"peer_ip_address": data.PeerIpAddress,
-
-			"region_id": data.RegionId,
 
 			"route_limit": data.RouteLimit,
 
