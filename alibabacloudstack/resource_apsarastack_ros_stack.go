@@ -211,7 +211,7 @@ func resourceAlibabacloudStackRosStackCreate(d *schema.ResourceData, meta interf
 	}
 
 	d.SetId(fmt.Sprint(response["StackId"]))
-	stateConf := BuildStateConf([]string{}, []string{"CREATE_COMPLETE"}, d.Timeout(schema.TimeoutCreate), 100*time.Second, rosService.RosStackStateRefreshFunc(d.Id(), []string{"CREATE_FAILED", "CREATE_ROLLBACK_COMPLETE", "CREATE_ROLLBACK_FAILED"}))
+	stateConf := BuildStateConf([]string{}, []string{"CREATE_COMPLETE"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, rosService.RosStackStateRefreshFunc(d.Id(), []string{"CREATE_FAILED", "CREATE_ROLLBACK_COMPLETE", "CREATE_ROLLBACK_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -325,7 +325,7 @@ func resourceAlibabacloudStackRosStackUpdate(d *schema.ResourceData, meta interf
 		if err != nil {
 			return err
 		}
-		stateConf := BuildStateConf([]string{}, []string{"UPDATE_COMPLETE"}, d.Timeout(schema.TimeoutUpdate), 100*time.Second, rosService.RosStackStateRefreshFunc(d.Id(), []string{"UPDATE_FAILED", "ROLLBACK_FAILED"}))
+		stateConf := BuildStateConf([]string{}, []string{"UPDATE_COMPLETE"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rosService.RosStackStateRefreshFunc(d.Id(), []string{"UPDATE_FAILED", "ROLLBACK_FAILED"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -359,7 +359,7 @@ func resourceAlibabacloudStackRosStackDelete(d *schema.ResourceData, meta interf
 		}
 		return err
 	}
-	stateConf := BuildStateConf([]string{}, []string{"DELETE_COMPLETE"}, d.Timeout(schema.TimeoutDelete), 100*time.Second, rosService.RosStackStateRefreshFunc(d.Id(), []string{"DELETE_FAILED"}))
+	stateConf := BuildStateConf([]string{}, []string{"DELETE_COMPLETE"}, d.Timeout(schema.TimeoutDelete), 10*time.Second, rosService.RosStackStateRefreshFunc(d.Id(), []string{"DELETE_FAILED"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

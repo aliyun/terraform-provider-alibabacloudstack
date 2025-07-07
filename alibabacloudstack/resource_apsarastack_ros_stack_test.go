@@ -122,7 +122,7 @@ func TestAccAlibabacloudStackRosStack_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"stack_name":        name,
 					"stack_policy_body": `{\"Statement\": [{\"Action\": \"Update:Delete\", \"Resource\": \"*\", \"Effect\": \"Allow\", \"Principal\": \"*\"}]}`,
-					"template_body":     `{\"ROSTemplateFormatVersion\":\"2015-09-01\", \"Parameters\": {\"VpcName\": {\"Type\": \"String\"},\"InstanceType\": {\"Type\": \"String\"}}}`,
+					"template_body":     "${alibabacloudstack_ros_template.default.template_body}",
 					"tags": map[string]string{
 						"Created": "TF",
 						"For":     "ROS",
@@ -257,5 +257,15 @@ var AlibabacloudStackRosStackMap = map[string]string{
 }
 
 func AlibabacloudStackRosStackBasicDependence(name string) string {
-	return ""
+	return 	fmt.Sprintf(`
+variable "name" {
+	default = "%s"
+}
+
+resource "alibabacloudstack_ros_template" "default" {
+	description = "模板的描述"
+	template_name = "${var.name}"
+	template_body = "{\"ROSTemplateFormatVersion\":\"2015-09-01\", \"Parameters\": {\"VpcName\": {\"Type\": \"String\"},\"InstanceType\": {\"Type\": \"String\"}}}"
+}
+`, name)
 }
