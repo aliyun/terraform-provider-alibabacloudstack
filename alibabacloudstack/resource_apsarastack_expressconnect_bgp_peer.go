@@ -68,7 +68,6 @@ func resourceAlibabacloudStackExpressconnectBgppeer() *schema.Resource {
 
 			"ip_version": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 
@@ -95,12 +94,6 @@ func resourceAlibabacloudStackExpressconnectBgppeer() *schema.Resource {
 			"peer_ip_address": {
 				Type:     schema.TypeString,
 				Optional: true,
-			},
-
-			"region_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
 			},
 
 			"route_limit": {
@@ -147,17 +140,10 @@ func resourceAlibabacloudStackExpressconnectBgppeerCreate(d *schema.ResourceData
 		request.QueryParams["EnableBfd"] = strconv.FormatBool(v.(bool))
 	}
 
-	if v, ok := d.GetOk("ip_version"); ok {
-		request.QueryParams["IpVersion"] = v.(string)
-	}
-
 	if v, ok := d.GetOk("peer_ip_address"); ok {
 		request.QueryParams["PeerIpAddress"] = v.(string)
 	}
 
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	}
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
@@ -204,7 +190,7 @@ func resourceAlibabacloudStackExpressconnectBgppeerUpdate(d *schema.ResourceData
 	// RegionId
 
 	// api: Vpc - 2016-04-28 - ModifyBgpPeerAttribute
-	if d.HasChanges("bfd_multi_hop", "enable_bfd", "peer_ip_address", "region_id") {
+	if d.HasChanges("bfd_multi_hop", "enable_bfd", "peer_ip_address") {
 		request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ModifyBgpPeerAttribute", "")
 
 		request.QueryParams["BgpPeerId"] = d.Id()
@@ -219,9 +205,6 @@ func resourceAlibabacloudStackExpressconnectBgppeerUpdate(d *schema.ResourceData
 			request.QueryParams["PeerIpAddress"] = v.(string)
 		}
 
-		if v, ok := d.GetOk("region_id"); ok {
-			request.QueryParams["RegionId"] = v.(string)
-		}
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
@@ -280,8 +263,6 @@ func resourceAlibabacloudStackExpressconnectBgppeerRead(d *schema.ResourceData, 
 
 	d.Set("peer_ip_address", bgp_peer.PeerIpAddress)
 
-	d.Set("region_id", bgp_peer.RegionId)
-
 	d.Set("route_limit", bgp_peer.RouteLimit)
 
 	d.Set("router_id", bgp_peer.RouterId)
@@ -299,10 +280,6 @@ func resourceAlibabacloudStackExpressconnectBgppeerDelete(d *schema.ResourceData
 	//调用request_params_handler
 
 	request.QueryParams["BgpPeerId"] = d.Get("bgp_peer_id").(string)
-
-	if v, ok := d.GetOk("region_id"); ok {
-		request.QueryParams["RegionId"] = v.(string)
-	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
