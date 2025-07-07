@@ -9,7 +9,7 @@ description: |-
 
 # alibabacloudstack\_expressconnect\_bgppeer
 
-Provides a expressconnect Bgppeer resource.
+使用Provider配置的凭证在指定的资源集下编排高速通道虚拟边界路由器下的BGP邻居。
 
 ## 示例用法
 ```
@@ -33,7 +33,7 @@ resource "alibabacloudstack_expressconnect_bgp_group" "default" {
 	local_asn =      65534
 	peer_asn =       10
 	router_id =      "${alibabacloudstack_express_connect_virtual_border_router.default.id}"
-	auth_key =       "YoPcOh&7Tt"
+	auth_key =       "<YOUR PASSWORD>"
 }
 
 resource "alibabacloudstack_expressconnect_bgp_peer" "default" {

@@ -33,7 +33,7 @@ resource "alibabacloudstack_expressconnect_bgp_group" "default" {
 	local_asn =      65534
 	peer_asn =       10
 	router_id =      "${alibabacloudstack_express_connect_virtual_border_router.default.id}"
-	auth_key =       "YoPcOh&7Tt"
+	auth_key =       "<YOUR PASSWORD>"
 }
 
 resource "alibabacloudstack_expressconnect_bgp_peer" "default" {

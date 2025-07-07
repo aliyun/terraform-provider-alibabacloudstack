@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -155,6 +156,11 @@ func (s *ExpressconnectService) DoVpcDescribeVbrHaRequest(id string) (map[string
 	if err != nil {
 		return nil, err
 	}
+	
+	if _, exist := response["VbrHaId"]; !exist {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Vbr Ha %s Not Found", id))
+	}
+	
 	return response, nil
 }
 
@@ -189,7 +195,12 @@ func (s *ExpressconnectService) ExpressconnectVbrHaStateRefreshFunc(id string, f
 			}
 			return nil, "", errmsgs.WrapError(err)
 		}
-		objectStatus := object["Status"].(string)
+		var objectStatus string
+		if v, exist := object["Status"]; !exist {
+			return nil, "", nil
+		} else {
+			objectStatus = v.(string)
+		}
 		for _, failState := range failStates {
 			if objectStatus == failState {
 				return object, objectStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, objectStatus))

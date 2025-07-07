@@ -9,7 +9,7 @@ description: |-
 
 # alibabacloudstack\_expressconnect\_bgpgroup
 
-Provides a expressconnect Bgpgroup resource.
+使用Provider配置的凭证在指定的资源集下编排高速通道虚拟边界路由器下的BGP组。
 
 ## 示例用法
 ```
