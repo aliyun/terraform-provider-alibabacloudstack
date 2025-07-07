@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -35,7 +36,7 @@ func resourceAlibabacloudStackExpressconnectBgppeer() *schema.Resource {
 
 			"bgp_peer_id": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 
 			"bgp_peer_name": {
@@ -46,10 +47,7 @@ func resourceAlibabacloudStackExpressconnectBgppeer() *schema.Resource {
 
 			"bgp_status": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-
-				ValidateFunc: validation.StringInSlice([]string{}, false),
 			},
 
 			"description": {
@@ -64,37 +62,33 @@ func resourceAlibabacloudStackExpressconnectBgppeer() *schema.Resource {
 			},
 
 			"hold": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
 			"ip_version": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"is_fake": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 
 			"keepalive": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
 			"local_asn": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
 			"peer_asn": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
@@ -103,20 +97,14 @@ func resourceAlibabacloudStackExpressconnectBgppeer() *schema.Resource {
 				Optional: true,
 			},
 
-			"record_total": {
-				Type:     schema.TypeInt,
+			"region_id": {
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
 
-			"region_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-
 			"route_limit": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
@@ -148,13 +136,12 @@ func resourceAlibabacloudStackExpressconnectBgppeerCreate(d *schema.ResourceData
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "CreateBgpPeer", "")
 	VpcCreatebgppeerResponseObj := VpcCreatebgppeerResponse{}
 
-	//调用request_params_handler
+	request.QueryParams["BgpGroupId"] = d.Get("bgp_group_id").(string)
+	request.QueryParams["VbrId"] = d.Get("router_id").(string)
 
 	if v, ok := d.GetOk("bfd_multi_hop"); ok {
 		request.QueryParams["BfdMultiHop"] = strconv.Itoa(v.(int))
 	}
-
-	request.QueryParams["BgpGroupId"] = d.Get("bgp_group_id").(string)
 
 	if v, ok := d.GetOk("enable_bfd"); ok {
 		request.QueryParams["EnableBfd"] = strconv.FormatBool(v.(bool))
@@ -168,9 +155,11 @@ func resourceAlibabacloudStackExpressconnectBgppeerCreate(d *schema.ResourceData
 		request.QueryParams["PeerIpAddress"] = v.(string)
 	}
 
-	request.QueryParams["RegionId"] = d.Get("region_id").(string)
-
+	if v, ok := d.GetOk("region_id"); ok {
+		request.QueryParams["RegionId"] = v.(string)
+	}
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -185,9 +174,16 @@ func resourceAlibabacloudStackExpressconnectBgppeerCreate(d *schema.ResourceData
 			"alibabacloudstack_express_connect_bgp_peer", "CreateBgpPeer", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	bgp_peer_id := d.Get("bgp_peer_id").(string)
+	bgp_peer_id := VpcCreatebgppeerResponseObj.BgpPeerId
 
 	d.SetId(fmt.Sprintf("%s", bgp_peer_id))
+	expressconnectservice := ExpressconnectService{client}
+
+	stateConf := BuildStateConf([]string{"Pending"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, expressconnectservice.ExpressconnectBgpPeersStateRefreshFunc(bgp_peer_id, []string{"Failed"}))
+
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, bgp_peer_id)
+	}
 	return nil
 
 }
@@ -208,29 +204,26 @@ func resourceAlibabacloudStackExpressconnectBgppeerUpdate(d *schema.ResourceData
 	// RegionId
 
 	// api: Vpc - 2016-04-28 - ModifyBgpPeerAttribute
-	if d.HasChanges("bfd_multi_hop", "bgp_group_id", "enable_bfd", "peer_ip_address", "region_id") {
+	if d.HasChanges("bfd_multi_hop", "enable_bfd", "peer_ip_address", "region_id") {
 		request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ModifyBgpPeerAttribute", "")
+
+		request.QueryParams["BgpPeerId"] = d.Id()
+		request.QueryParams["BgpGroupId"] = d.Get("bgp_group_id").(string)
+		request.QueryParams["EnableBfd"] = strconv.FormatBool(d.Get("enable_bfd").(bool))
+
 		if v, ok := d.GetOk("bfd_multi_hop"); ok {
 			request.QueryParams["BfdMultiHop"] = strconv.Itoa(v.(int))
-		}
-
-		if v, ok := d.GetOk("bgp_group_id"); ok {
-			request.QueryParams["BgpGroupId"] = v.(string)
-		}
-
-		request.QueryParams["BgpPeerId"] = d.Get("bgp_peer_id").(string)
-
-		if v, ok := d.GetOk("enable_bfd"); ok {
-			request.QueryParams["EnableBfd"] = strconv.FormatBool(v.(bool))
 		}
 
 		if v, ok := d.GetOk("peer_ip_address"); ok {
 			request.QueryParams["PeerIpAddress"] = v.(string)
 		}
 
-		request.QueryParams["RegionId"] = d.Get("region_id").(string)
-
+		if v, ok := d.GetOk("region_id"); ok {
+			request.QueryParams["RegionId"] = v.(string)
+		}
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -239,6 +232,12 @@ func resourceAlibabacloudStackExpressconnectBgppeerUpdate(d *schema.ResourceData
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_express_connect_bgp_peer", "ModifyBgpPeerAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
+		expressconnectservice := ExpressconnectService{client}
+		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, expressconnectservice.ExpressconnectBgpPeersStateRefreshFunc(d.Id(), []string{"Failed"}))
+
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
 	}
 	return nil
 }
@@ -246,48 +245,48 @@ func resourceAlibabacloudStackExpressconnectBgppeerUpdate(d *schema.ResourceData
 func resourceAlibabacloudStackExpressconnectBgppeerRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	express_connectbgp_peerservice := ExpressconnectService{client}
-	response, err := express_connectbgp_peerservice.DoVpcDescribebgppeersRequest(d.Id())
+	bgp_peer, err := express_connectbgp_peerservice.DoVpcDescribebgppeersRequest(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_expressconnect_bgppeer", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	data := response.BgpPeers.BgpPeer[0]
-	d.Set("auth_key", data.AuthKey)
 
-	d.Set("bfd_multi_hop", data.BfdMultiHop)
+	d.Set("auth_key", bgp_peer.AuthKey)
 
-	d.Set("bgp_group_id", data.BgpGroupId)
+	d.Set("bfd_multi_hop", bgp_peer.BfdMultiHop)
 
-	d.Set("bgp_peer_id", data.BgpPeerId)
+	d.Set("bgp_group_id", bgp_peer.BgpGroupId)
 
-	d.Set("bgp_peer_name", data.Name)
+	d.Set("bgp_peer_id", bgp_peer.BgpPeerId)
 
-	d.Set("bgp_status", data.BgpStatus)
+	d.Set("bgp_peer_name", bgp_peer.Name)
 
-	d.Set("description", data.Description)
+	d.Set("bgp_status", bgp_peer.BgpStatus)
 
-	d.Set("enable_bfd", data.EnableBfd)
+	d.Set("description", bgp_peer.Description)
 
-	d.Set("hold", data.Hold)
+	d.Set("enable_bfd", bgp_peer.EnableBfd)
 
-	d.Set("ip_version", data.IpVersion)
+	d.Set("hold", bgp_peer.Hold)
 
-	d.Set("is_fake", data.IsFake)
+	d.Set("ip_version", bgp_peer.IpVersion)
 
-	d.Set("keepalive", data.Keepalive)
+	d.Set("is_fake", bgp_peer.IsFake)
 
-	d.Set("local_asn", data.LocalAsn)
+	d.Set("keepalive", bgp_peer.Keepalive)
 
-	d.Set("peer_asn", data.PeerAsn)
+	d.Set("local_asn", bgp_peer.LocalAsn)
 
-	d.Set("peer_ip_address", data.PeerIpAddress)
+	d.Set("peer_asn", bgp_peer.PeerAsn)
 
-	d.Set("region_id", data.RegionId)
+	d.Set("peer_ip_address", bgp_peer.PeerIpAddress)
 
-	d.Set("route_limit", data.RouteLimit)
+	d.Set("region_id", bgp_peer.RegionId)
 
-	d.Set("router_id", data.RouterId)
+	d.Set("route_limit", bgp_peer.RouteLimit)
 
-	d.Set("status", data.Status)
+	d.Set("router_id", bgp_peer.RouterId)
+
+	d.Set("status", bgp_peer.Status)
 
 	return nil
 }
@@ -301,9 +300,12 @@ func resourceAlibabacloudStackExpressconnectBgppeerDelete(d *schema.ResourceData
 
 	request.QueryParams["BgpPeerId"] = d.Get("bgp_peer_id").(string)
 
-	request.QueryParams["RegionId"] = d.Get("region_id").(string)
+	if v, ok := d.GetOk("region_id"); ok {
+		request.QueryParams["RegionId"] = v.(string)
+	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -311,7 +313,12 @@ func resourceAlibabacloudStackExpressconnectBgppeerDelete(d *schema.ResourceData
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_express_connect_bgp_peer", "DeleteBgpPeer", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
+	expressconnectservice := ExpressconnectService{client}
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutCreate), 10*time.Second, expressconnectservice.ExpressconnectBgpPeersStateRefreshFunc(d.Id(), []string{"Failed"}))
 
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
 	return nil
 }
 

@@ -458,7 +458,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_vpn_connections":                         dataSourceAlibabacloudStackVpnConnections(),
 		"alibabacloudstack_vpngateway_vpnconnections":               dataSourceAlibabacloudStackVpnConnections(),
 		"alibabacloudstack_vpngateway_ssl_vpnservers":               dataSourceAlibabacloudStackVpngatewaySslVpnServers(),
-		"alibabacloudstack_vpngateway_ssl_vpn_client_certs":          dataSourceAlibabacloudStackVpngatewaySslVpnClientCerts(),
+		"alibabacloudstack_vpngateway_ssl_vpn_client_certs":         dataSourceAlibabacloudStackVpngatewaySslVpnClientCerts(),
 		"alibabacloudstack_vpngateway_sslvpnclientcerts":            dataSourceAlibabacloudStackVpngatewaySslVpnClientCerts(),
 		"alibabacloudstack_vpc_ipv6_gateways":                       dataSourceAlibabacloudStackVpcIpv6Gateways(),
 		"alibabacloudstack_vpc_ipv6_egress_rules":                   dataSourceAlibabacloudStackVpcIpv6EgressRules(),
@@ -501,6 +501,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_vpc_ha_vips":                      dataSourceAlibabacloudStackVpcHaVips(),
 		"alibabacloudstack_vpngateway_vpn_pbr_route_entries": dataSourceAlibabacloudStackVpngatewayVpnPbrRouteEntries(),
 		"alibabacloudstack_expressconnect_bgp_groups":        dataSourceAlibabacloudStackExpressconnectBgpGroups(),
+		"alibabacloudstack_expressconnect_bgp_peers":        dataSourceAlibabacloudStackExpressconnectBgpPeers(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -853,6 +854,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_vpc_ha_vip":                     resourceAlibabacloudStackVpcHavip(),
 		"alibabacloudstack_vpngateway_vpn_pbr_route_entry": resourceAlibabacloudStackVpngatewayVpnpbrrouteentry(),
 		"alibabacloudstack_expressconnect_bgp_group":       resourceAlibabacloudStackExpressconnectBgpgroup(),
+		"alibabacloudstack_expressconnect_bgp_peer":        resourceAlibabacloudStackExpressconnectBgppeer(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

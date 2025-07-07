@@ -88,34 +88,31 @@ func (s *ExpressconnectService) ExpressconnectBgpGroupsStateRefreshFunc(id strin
 	}
 }
 
-
-type ExpressconnectService struct {
-	client *connectivity.AlibabacloudStackClient
+type ExpressconnectBgpPeer struct {
+	Name          string `json:"Name"`
+	Description   string `json:"Description"`
+	BgpPeerId     string `json:"BgpPeerId"`
+	BgpGroupId    string `json:"BgpGroupId"`
+	PeerIpAddress string `json:"PeerIpAddress"`
+	PeerAsn       int    `json:"PeerAsn"`
+	AuthKey       string `json:"AuthKey"`
+	RouterId      string `json:"RouterId"`
+	BgpStatus     string `json:"BgpStatus"`
+	Status        string `json:"Status"`
+	Keepalive     int    `json:"Keepalive"`
+	LocalAsn      int    `json:"LocalAsn"`
+	Hold          int    `json:"Hold"`
+	IsFake        bool   `json:"IsFake"`
+	RouteLimit    int    `json:"RouteLimit"`
+	RegionId      string `json:"RegionId"`
+	EnableBfd     bool   `json:"EnableBfd"`
+	IpVersion     string `json:"IpVersion"`
+	BfdMultiHop   int    `json:"BfdMultiHop"`
 }
 
 type VpcDescribebgppeersResponse struct {
 	BgpPeers struct {
-		BgpPeer []struct {
-			Name          string `json:"Name"`
-			Description   string `json:"Description"`
-			BgpPeerId     string `json:"BgpPeerId"`
-			BgpGroupId    string `json:"BgpGroupId"`
-			PeerIpAddress string `json:"PeerIpAddress"`
-			PeerAsn       string `json:"PeerAsn"`
-			AuthKey       string `json:"AuthKey"`
-			RouterId      string `json:"RouterId"`
-			BgpStatus     string `json:"BgpStatus"`
-			Status        string `json:"Status"`
-			Keepalive     string `json:"Keepalive"`
-			LocalAsn      string `json:"LocalAsn"`
-			Hold          string `json:"Hold"`
-			IsFake        string `json:"IsFake"`
-			RouteLimit    string `json:"RouteLimit"`
-			RegionId      string `json:"RegionId"`
-			EnableBfd     bool   `json:"EnableBfd"`
-			IpVersion     string `json:"IpVersion"`
-			BfdMultiHop   int    `json:"BfdMultiHop"`
-		} `json:"BgpPeer"`
+		BgpPeer []ExpressconnectBgpPeer `json:"BgpPeer"`
 	} `json:"BgpPeers"`
 	RequestId  string `json:"RequestId"`
 	TotalCount int    `json:"TotalCount"`
@@ -123,7 +120,7 @@ type VpcDescribebgppeersResponse struct {
 	PageSize   int    `json:"PageSize"`
 }
 
-func (s *ExpressconnectService) DoVpcDescribebgppeersRequest(id string) (*VpcDescribebgppeersResponse, error) {
+func (s *ExpressconnectService) DoVpcDescribebgppeersRequest(id string) (*ExpressconnectBgpPeer, error) {
 	// api: Vpc - 2016-04-28 - DescribeBgpPeers
 	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeBgpPeers", "")
 	VpcDescribebgppeersResponseObj := &VpcDescribebgppeersResponse{}
@@ -138,10 +135,32 @@ func (s *ExpressconnectService) DoVpcDescribebgppeersRequest(id string) (*VpcDes
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcDescribebgppeersResponseObj)
-
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBgpPeers", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
+	if len(VpcDescribebgppeersResponseObj.BgpPeers.BgpPeer) > 0 {
+		return &VpcDescribebgppeersResponseObj.BgpPeers.BgpPeer[0], nil
+	} else {
+		return nil, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("BgpPeer", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+	}
+}
 
-	return VpcDescribebgppeersResponseObj, nil
+func (s *ExpressconnectService) ExpressconnectBgpPeersStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DoVpcDescribebgppeersRequest(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		for _, failState := range failStates {
+			if object.Status == failState {
+				return object, object.Status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Status))
+			}
+		}
+
+		return object, object.Status, nil
+	}
 }
