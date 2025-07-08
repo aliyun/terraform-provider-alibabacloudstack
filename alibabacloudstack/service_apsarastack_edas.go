@@ -23,9 +23,9 @@ type EdasService struct {
 }
 
 type Hook struct {
-	Exec      *Exec      `json:"exec,omitempty"`
-	HttpGet   *HttpGet   `json:"httpGet,omitempty"`
-	TcpSocket *TcpSocket `json:"tcpSocket,omitempty"`
+	Exec      *Exec      `json:"exec"`
+	HttpGet   *HttpGet   `json:"httpGet"`
+	TcpSocket *TcpSocket `json:"tcpSocket"`
 }
 
 type Exec struct {
@@ -964,4 +964,87 @@ func (s *EdasService) DescribeEdasNamespace(id string) (object map[string]interf
 		return object, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("EDAS", id)), errmsgs.NotFoundWithResponse, response)
 	}
 	return object, nil
+}
+
+type EdasK8sAppAffinity struct {
+	NodeAffinity *struct {
+		RequiredDuringSchedulingIgnoredDuringExecution *struct {
+			NodeSelectorTerms []struct {
+				MatchExpressions []struct {
+					Key      string   `json:"key"`
+					Operator string   `json:"operator"`
+					Values   []string `json:"values"`
+				} `json:"matchExpressions"`
+			} `json:"nodeSelectorTerms"`
+		} `json:"requiredDuringSchedulingIgnoredDuringExecution"`
+
+		PreferredDuringSchedulingIgnoredDuringExecution []struct {
+			Weight     int `json:"weight"`
+			Preference struct {
+				MatchExpressions []struct {
+					Key      string   `json:"key"`
+					Operator string   `json:"operator"`
+					Values   []string `json:"values"`
+				} `json:"matchExpressions"`
+			} `json:"preference"`
+		} `json:"preferredDuringSchedulingIgnoredDuringExecution"`
+	} `json:"nodeAffinity"`
+
+	PodAffinity *struct {
+		RequiredDuringSchedulingIgnoredDuringExecution []struct {
+			Namespaces    []string `json:"namespaces"`
+			TopologyKey   string   `json:"topologyKey"`
+			LabelSelector struct {
+				MatchExpressions []struct {
+					Key      string   `json:"key"`
+					Operator string   `json:"operator"`
+					Values   []string `json:"values"`
+				} `json:"matchExpressions"`
+			} `json:"labelSelector"`
+		} `json:"requiredDuringSchedulingIgnoredDuringExecution"`
+
+		PreferredDuringSchedulingIgnoredDuringExecution []struct {
+			PodAffinityTerm struct {
+				Namespaces    []string `json:"namespaces"`
+				TopologyKey   string   `json:"topologyKey"`
+				LabelSelector struct {
+					MatchExpressions []struct {
+						Key      string   `json:"key"`
+						Operator string   `json:"operator"`
+						Values   []string `json:"values"`
+					} `json:"matchExpressions"`
+				} `json:"labelSelector"`
+			} `json:"podAffinityTerm"`
+			Weight int `json:"weight"`
+		} `json:"preferredDuringSchedulingIgnoredDuringExecution"`
+	} `json:"podAffinity"`
+
+	PodAntiAffinity *struct {
+		RequiredDuringSchedulingIgnoredDuringExecution []struct {
+			Namespaces    []string `json:"namespaces"`
+			TopologyKey   string   `json:"topologyKey"`
+			LabelSelector struct {
+				MatchExpressions []struct {
+					Key      string   `json:"key"`
+					Operator string   `json:"operator"`
+					Values   []string `json:"values"`
+				} `json:"matchExpressions"`
+			} `json:"labelSelector"`
+		} `json:"requiredDuringSchedulingIgnoredDuringExecution"`
+
+		PreferredDuringSchedulingIgnoredDuringExecution []struct {
+			PodAffinityTerm struct {
+				Namespaces    []string `json:"namespaces"`
+				TopologyKey   string   `json:"topologyKey"`
+				LabelSelector struct {
+					MatchExpressions []struct {
+						Key      string   `json:"key"`
+						Operator string   `json:"operator"`
+						Values   []string `json:"values"`
+					} `json:"matchExpressions"`
+				} `json:"labelSelector"`
+			} `json:"podAffinityTerm"`
+			Weight int `json:"weight"`
+		} `json:"preferredDuringSchedulingIgnoredDuringExecution"`
+	} `json:"podAntiAffinity"`
 }

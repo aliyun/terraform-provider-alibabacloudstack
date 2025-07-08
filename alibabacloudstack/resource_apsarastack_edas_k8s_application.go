@@ -473,8 +473,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"value": {
-										Type:     schema.TypeSet,
+									"values": {
+										Type:     schema.TypeList,
 										Optional: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
@@ -508,8 +508,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"value": {
-										Type:     schema.TypeSet,
+									"values": {
+										Type:     schema.TypeList,
 										Optional: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
@@ -546,8 +546,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"value": {
-										Type:     schema.TypeSet,
+									"values": {
+										Type:     schema.TypeList,
 										Optional: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
@@ -590,8 +590,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"value": {
-										Type:     schema.TypeSet,
+									"values": {
+										Type:     schema.TypeList,
 										Optional: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
@@ -628,8 +628,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"value": {
-										Type:     schema.TypeSet,
+									"values": {
+										Type:     schema.TypeList,
 										Optional: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
@@ -672,8 +672,8 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Type:     schema.TypeString,
 										Required: true,
 									},
-									"value": {
-										Type:     schema.TypeSet,
+									"values": {
+										Type:     schema.TypeList,
 										Optional: true,
 										Elem:     &schema.Schema{Type: schema.TypeString},
 									},
@@ -899,7 +899,18 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 		return errmsgs.WrapError(err)
 	}
 	if response.Conf.Affinity != "" {
-		ReadAffinityArgs(response.Conf.Affinity)
+		var affinity EdasK8sAppAffinity
+		err := json.Unmarshal([]byte(response.Conf.Affinity), &affinity)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		custom_node_affinity_require, custom_node_affinity_preferred, custom_pod_affinity_require, custom_pod_affinity_preferred, custom_pod_ant_affinity_require, custom_pod_ant_affinity_preferred := ReadAffinityArgs(affinity)
+		d.Set("custom_node_affinity_require", custom_node_affinity_require)
+		d.Set("custom_node_affinity_preferred", custom_node_affinity_preferred)
+		d.Set("custom_pod_affinity_require", custom_pod_affinity_require)
+		d.Set("custom_pod_affinity_preferred", custom_pod_affinity_preferred)
+		d.Set("custom_pod_ant_affinity_require", custom_pod_ant_affinity_require)
+		d.Set("custom_pod_ant_affinity_preferred", custom_pod_ant_affinity_preferred)
 	}
 	d.Set("application_name", response.App.ApplicationName)
 	d.Set("cluster_id", response.App.ClusterId)
@@ -1638,7 +1649,7 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 	if len(custom_node_affinity_requires) > 0 {
 		for _, custom_node_affinity_require := range custom_node_affinity_requires {
 			custom_node_affinity_require_map := custom_node_affinity_require.(map[string]interface{})
-			custom_node_affinity_require_match_expressions := custom_node_affinity_require_map["match_expressions"].([]interface{})
+			custom_node_affinity_require_match_expressions := custom_node_affinity_require_map["match_expressions"].(*schema.Set).List()
 			if len(custom_node_affinity_require_match_expressions) > 0 {
 				node_affinity_require = append(node_affinity_require, map[string]interface{}{
 					"matchExpressions": custom_node_affinity_require_match_expressions,
@@ -1652,7 +1663,7 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 		for _, custom_node_affinity_preferred := range custom_node_affinity_preferreds {
 			custom_node_affinity_preferred_map := custom_node_affinity_preferred.(map[string]interface{})
 			weight := custom_node_affinity_preferred_map["weight"].(int)
-			custom_node_affinity_preferred_match_expressions := custom_node_affinity_preferred_map["match_expressions"].([]interface{})
+			custom_node_affinity_preferred_match_expressions := custom_node_affinity_preferred_map["match_expressions"].(*schema.Set).List()
 			if len(custom_node_affinity_preferred_match_expressions) > 0 {
 				node_affinity_preferred = append(node_affinity_preferred, map[string]interface{}{
 					"weight": weight,
@@ -1682,9 +1693,9 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 	if len(custom_pod_affinity_requires) > 0 {
 		for _, custom_pod_affinity_require := range custom_pod_affinity_requires {
 			custom_pod_affinity_require_map := custom_pod_affinity_require.(map[string]interface{})
-			custom_pod_affinity_require_match_expressions := custom_pod_affinity_require_map["match_expressions"].([]interface{})
-			k8s_namespace := custom_pod_affinity_require_map["k8s_namespace"].([]interface{})
-			topology_key := custom_pod_affinity_require_map["topology_key"].([]interface{})
+			custom_pod_affinity_require_match_expressions := custom_pod_affinity_require_map["match_expressions"].(*schema.Set).List()
+			k8s_namespace := custom_pod_affinity_require_map["k8s_namespace"].(*schema.Set).List()
+			topology_key := custom_pod_affinity_require_map["topology_key"].(string)
 			if len(custom_pod_affinity_require_match_expressions) > 0 {
 				pod_affinity_require = append(pod_affinity_require, map[string]interface{}{
 					"namespaces":  k8s_namespace,
@@ -1701,8 +1712,8 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 	if len(custom_pod_affinity_preferreds) > 0 {
 		for _, custom_pod_affinity_preferred := range custom_pod_affinity_preferreds {
 			custom_pod_affinity_preferred_map := custom_pod_affinity_preferred.(map[string]interface{})
-			custom_pod_affinity_preferred_match_expressions := custom_pod_affinity_preferred_map["match_expressions"].([]interface{})
-			k8s_namespace := custom_pod_affinity_preferred_map["k8s_namespace"].([]interface{})
+			custom_pod_affinity_preferred_match_expressions := custom_pod_affinity_preferred_map["match_expressions"].(*schema.Set).List()
+			k8s_namespace := custom_pod_affinity_preferred_map["k8s_namespace"].(*schema.Set).List()
 			topology_key := custom_pod_affinity_preferred_map["topology_key"].(string)
 			weight := custom_pod_affinity_preferred_map["weight"].(int)
 			if len(custom_pod_affinity_preferred_match_expressions) > 0 {
@@ -1736,9 +1747,9 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 	if len(custom_pod_ant_affinity_requires) > 0 {
 		for _, custom_pod_ant_affinity_require := range custom_pod_ant_affinity_requires {
 			custom_pod_ant_affinity_require_map := custom_pod_ant_affinity_require.(map[string]interface{})
-			custom_pod_ant_affinity_require_match_expressions := custom_pod_ant_affinity_require_map["match_expressions"].([]interface{})
-			k8s_namespace := custom_pod_ant_affinity_require_map["k8s_namespace"].([]interface{})
-			topology_key := custom_pod_ant_affinity_require_map["topology_key"].([]interface{})
+			custom_pod_ant_affinity_require_match_expressions := custom_pod_ant_affinity_require_map["match_expressions"].(*schema.Set).List()
+			k8s_namespace := custom_pod_ant_affinity_require_map["k8s_namespace"].(*schema.Set).List()
+			topology_key := custom_pod_ant_affinity_require_map["topology_key"].(string)
 			if len(custom_pod_ant_affinity_require_match_expressions) > 0 {
 				pod_ant_affinity_require = append(pod_ant_affinity_require, map[string]interface{}{
 					"namespaces":  k8s_namespace,
@@ -1755,8 +1766,8 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 	if len(custom_pod_ant_affinity_preferreds) > 0 {
 		for _, custom_pod_ant_affinity_preferred := range custom_pod_ant_affinity_preferreds {
 			custom_pod_ant_affinity_preferred_map := custom_pod_ant_affinity_preferred.(map[string]interface{})
-			custom_pod_ant_affinity_preferred_match_expressions := custom_pod_ant_affinity_preferred_map["match_expressions"].([]interface{})
-			k8s_namespace := custom_pod_ant_affinity_preferred_map["k8s_namespace"].([]interface{})
+			custom_pod_ant_affinity_preferred_match_expressions := custom_pod_ant_affinity_preferred_map["match_expressions"].(*schema.Set).List()
+			k8s_namespace := custom_pod_ant_affinity_preferred_map["k8s_namespace"].(*schema.Set).List()
 			topology_key := custom_pod_ant_affinity_preferred_map["topology_key"].(string)
 			weight := custom_pod_ant_affinity_preferred_map["weight"].(int)
 			if len(custom_pod_ant_affinity_preferred_match_expressions) > 0 {
@@ -1784,4 +1795,130 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 		custom_args["podAntiAffinity"] = podAntiAffinity
 	}
 	return custom_args
+}
+
+func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []map[string]interface{}, []map[string]interface{}, []map[string]interface{}, []map[string]interface{}, []map[string]interface{}) {
+	custom_node_affinity_require := make([]map[string]interface{}, 0)
+	custom_node_affinity_preferred := make([]map[string]interface{}, 0)
+	custom_pod_affinity_require := make([]map[string]interface{}, 0)
+	custom_pod_affinity_preferred := make([]map[string]interface{}, 0)
+	custom_pod_ant_affinity_require := make([]map[string]interface{}, 0)
+	custom_pod_ant_affinity_preferred := make([]map[string]interface{}, 0)
+
+	// node_affinity_require
+
+	if len(affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms) > 0 {
+		for _, node_affinity_require := range affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms {
+			match_expressions := make([]map[string]interface{}, 0)
+			for _, match_expression := range node_affinity_require.MatchExpressions {
+				match_expressions = append(match_expressions, map[string]interface{}{
+					"key":      match_expression.Key,
+					"operator": match_expression.Operator,
+					"values":   match_expression.Values,
+				})
+			}
+			custom_node_affinity_require = append(custom_node_affinity_require, map[string]interface{}{
+				"match_expressions": match_expressions,
+			})
+		}
+	}
+
+	// node_affinity_preferred
+
+	if len(affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
+		for _, node_affinity_preferred := range affinity.NodeAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
+			match_expressions := make([]map[string]interface{}, 0)
+			for _, match_expression := range node_affinity_preferred.Preference.MatchExpressions {
+				match_expressions = append(match_expressions, map[string]interface{}{
+					"key":      match_expression.Key,
+					"operator": match_expression.Operator,
+					"values":   match_expression.Values,
+				})
+			}
+			custom_node_affinity_preferred = append(custom_node_affinity_preferred, map[string]interface{}{
+				"match_expressions": match_expressions,
+				"weight":            node_affinity_preferred.Weight,
+			})
+		}
+	}
+
+	// pod_affinity_require
+	if len(affinity.PodAffinity.RequiredDuringSchedulingIgnoredDuringExecution) > 0 {
+		for _, pod_affinity_require := range affinity.PodAffinity.RequiredDuringSchedulingIgnoredDuringExecution {
+			match_expressions := make([]map[string]interface{}, 0)
+			for _, match_expression := range pod_affinity_require.LabelSelector.MatchExpressions {
+				match_expressions = append(match_expressions, map[string]interface{}{
+					"key":      match_expression.Key,
+					"operator": match_expression.Operator,
+					"values":   match_expression.Values,
+				})
+			}
+			custom_pod_affinity_require = append(custom_pod_affinity_require, map[string]interface{}{
+				"match_expressions": match_expressions,
+				"k8s_namespaces":    pod_affinity_require.Namespaces,
+				"topology_key":      pod_affinity_require.TopologyKey,
+			})
+		}
+	}
+
+	// pod_affinity_preferred
+	if len(affinity.PodAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
+		for _, pod_affinity_preferred := range affinity.PodAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
+			match_expressions := make([]map[string]interface{}, 0)
+			for _, match_expression := range pod_affinity_preferred.PodAffinityTerm.LabelSelector.MatchExpressions {
+				match_expressions = append(match_expressions, map[string]interface{}{
+					"key":      match_expression.Key,
+					"operator": match_expression.Operator,
+					"values":   match_expression.Values,
+				})
+			}
+			custom_pod_affinity_preferred = append(custom_pod_affinity_preferred, map[string]interface{}{
+				"match_expressions": match_expressions,
+				"k8s_namespaces":    pod_affinity_preferred.PodAffinityTerm.Namespaces,
+				"topology_key":      pod_affinity_preferred.PodAffinityTerm.TopologyKey,
+				"weight":            pod_affinity_preferred.Weight,
+			})
+		}
+	}
+
+	// pod_ant_affinity_require
+	if len(affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution) > 0 {
+		for _, pod_ant_affinity_require := range affinity.PodAntiAffinity.RequiredDuringSchedulingIgnoredDuringExecution {
+			match_expressions := make([]map[string]interface{}, 0)
+			for _, match_expression := range pod_ant_affinity_require.LabelSelector.MatchExpressions {
+				match_expressions = append(match_expressions, map[string]interface{}{
+					"key":      match_expression.Key,
+					"operator": match_expression.Operator,
+					"values":   match_expression.Values,
+				})
+			}
+			custom_pod_ant_affinity_require = append(custom_pod_ant_affinity_require, map[string]interface{}{
+				"match_expressions": match_expressions,
+				"k8s_namespaces":    pod_ant_affinity_require.Namespaces,
+				"topology_key":      pod_ant_affinity_require.TopologyKey,
+			})
+		}
+	}
+
+	// pod_ant_affinity_preferred
+	if len(affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution) > 0 {
+		for _, pod_ant_affinity_preferred := range affinity.PodAntiAffinity.PreferredDuringSchedulingIgnoredDuringExecution {
+			match_expressions := make([]map[string]interface{}, 0)
+			for _, match_expression := range pod_ant_affinity_preferred.PodAffinityTerm.LabelSelector.MatchExpressions {
+				match_expressions = append(match_expressions, map[string]interface{}{
+					"key":      match_expression.Key,
+					"operator": match_expression.Operator,
+					"values":   match_expression.Values,
+				})
+			}
+			custom_pod_ant_affinity_preferred = append(custom_pod_ant_affinity_preferred, map[string]interface{}{
+				"match_expressions": match_expressions,
+				"k8s_namespaces":    pod_ant_affinity_preferred.PodAffinityTerm.Namespaces,
+				"topology_key":      pod_ant_affinity_preferred.PodAffinityTerm.TopologyKey,
+				"weight":            pod_ant_affinity_preferred.Weight,
+			})
+		}
+	}
+
+	return custom_node_affinity_require, custom_node_affinity_preferred, custom_pod_affinity_require, custom_pod_affinity_preferred, custom_pod_ant_affinity_require, custom_pod_ant_affinity_preferred
 }
