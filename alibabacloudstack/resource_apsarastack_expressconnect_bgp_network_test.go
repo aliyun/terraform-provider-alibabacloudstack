@@ -62,7 +62,7 @@ variable "name" {
 }
 
 resource "alibabacloudstack_express_connect_virtual_border_router" "default" {
-    physical_connection_id = %s
+    physical_connection_id = "%s"
     vlan_id = %d
     local_gateway_ip = "10.0.0.1"
     peer_gateway_ip = "10.0.0.2"
