@@ -148,20 +148,20 @@ func (s *ExpressconnectService) DoVpcDescribebgppeersRequest(id string) (*Expres
 }
 
 func (s *ExpressconnectService) DoVpcDescribeVbrHaRequest(id string) (map[string]interface{}, error) {
-	
+
 	reqQuery := map[string]interface{}{
-		"VbrHaId" : id,
+		"VbrHaId": id,
 	}
 	// api: Vpc - 2016-04-28 - DescribeBgpPeers
 	response, err := s.client.DoTeaRequest("GET", "Vpc", "2016-04-28", "DescribeVbrHa", "", nil, reqQuery, nil)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if _, exist := response["VbrHaId"]; !exist {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Vbr Ha %s Not Found", id))
 	}
-	
+
 	return response, nil
 }
 
@@ -184,7 +184,6 @@ func (s *ExpressconnectService) ExpressconnectBgpPeersStateRefreshFunc(id string
 		return object, object.Status, nil
 	}
 }
-
 
 func (s *ExpressconnectService) ExpressconnectVbrHaStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
@@ -211,8 +210,6 @@ func (s *ExpressconnectService) ExpressconnectVbrHaStateRefreshFunc(id string, f
 		return object, objectStatus, nil
 	}
 }
-
-
 
 type VpcDescribebgpnetworksResponse struct {
 	BgpNetworks struct {
@@ -256,28 +253,29 @@ func (s *ExpressconnectService) DoVpcDescribebgpnetworksRequest(id string) (*Vpc
 	return VpcDescribebgpnetworksResponseObj, nil
 }
 
+type VbrAssociatedPhysicalConnection struct {
+	CircuitCode                      string `json:"CircuitCode"`
+	VlanInterfaceId                  string `json:"VlanInterfaceId"`
+	LocalGatewayIp                   string `json:"LocalGatewayIp"`
+	PeerGatewayIp                    string `json:"PeerGatewayIp"`
+	PeeringSubnetMask                string `json:"PeeringSubnetMask"`
+	PhysicalConnectionId             string `json:"PhysicalConnectionId"`
+	PhysicalConnectionStatus         string `json:"PhysicalConnectionStatus"`
+	PhysicalConnectionBusinessStatus string `json:"PhysicalConnectionBusinessStatus"`
+	PhysicalConnectionOwnerUid       string `json:"PhysicalConnectionOwnerUid"`
+	VlanId                           string `json:"VlanId"`
+	LocalIpv6GatewayIp               string `json:"LocalIpv6GatewayIp"`
+	PeerIpv6GatewayIp                string `json:"PeerIpv6GatewayIp"`
+	PeeringIpv6SubnetMask            string `json:"PeeringIpv6SubnetMask"`
+	Status                           string `json:"Status"`
+	EnableIpv6                       bool   `json:"EnableIpv6"`
+}
 
 type VpcDescribevirtualborderroutersResponse struct {
 	VirtualBorderRouterSet struct {
 		VirtualBorderRouterType []struct {
 			AssociatedPhysicalConnections struct {
-				AssociatedPhysicalConnection []struct {
-					CircuitCode                      string `json:"CircuitCode"`
-					VlanInterfaceId                  string `json:"VlanInterfaceId"`
-					LocalGatewayIp                   string `json:"LocalGatewayIp"`
-					PeerGatewayIp                    string `json:"PeerGatewayIp"`
-					PeeringSubnetMask                string `json:"PeeringSubnetMask"`
-					PhysicalConnectionId             string `json:"PhysicalConnectionId"`
-					PhysicalConnectionStatus         string `json:"PhysicalConnectionStatus"`
-					PhysicalConnectionBusinessStatus string `json:"PhysicalConnectionBusinessStatus"`
-					PhysicalConnectionOwnerUid       string `json:"PhysicalConnectionOwnerUid"`
-					VlanId                           string `json:"VlanId"`
-					LocalIpv6GatewayIp               string `json:"LocalIpv6GatewayIp"`
-					PeerIpv6GatewayIp                string `json:"PeerIpv6GatewayIp"`
-					PeeringIpv6SubnetMask            string `json:"PeeringIpv6SubnetMask"`
-					Status                           string `json:"Status"`
-					EnableIpv6                       bool   `json:"EnableIpv6"`
-				} `json:"AssociatedPhysicalConnection"`
+				AssociatedPhysicalConnection []VbrAssociatedPhysicalConnection `json:"AssociatedPhysicalConnection"`
 			} `json:"AssociatedPhysicalConnections"`
 
 			AssociatedCens struct {
@@ -328,18 +326,15 @@ type VpcDescribevirtualborderroutersResponse struct {
 func (s *ExpressconnectService) DoVpcDescribevirtualborderroutersRequest(id string) (*VpcDescribevirtualborderroutersResponse, error) {
 	// api: Vpc - 2016-04-28 - DescribeVirtualBorderRouters
 
-	parts := strings.Split(id, ":")
-	vbrId:= parts[1]
-	
 	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeVirtualBorderRouters", "")
 	VpcDescribevirtualborderroutersResponseObj := &VpcDescribevirtualborderroutersResponse{}
 
 	//调用request_params_handler
 
-	request.QueryParams["Filter[*].Key"] = "VbrId"
-		request.QueryParams["PageNumber"] = "1"
-		request.QueryParams["PageSize"] = "100"
-		request.QueryParams["Filter[*].Value"] = vbrId
+	request.QueryParams["PageNumber"] = "1"
+	request.QueryParams["PageSize"] = "10"
+	request.QueryParams["Filter.1.Key"] = "VbrId"
+	request.QueryParams["Filter.1.Value.1"] = id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
@@ -357,4 +352,45 @@ func (s *ExpressconnectService) DoVpcDescribevirtualborderroutersRequest(id stri
 	}
 
 	return VpcDescribevirtualborderroutersResponseObj, nil
+}
+
+func (s *ExpressconnectService) DoVpcDescribeVbrpconnassociationRequest(id string) (*VbrAssociatedPhysicalConnection, error) {
+	parts := strings.Split(id, ":")
+	physicalConnectionId := parts[0]
+	vbrId := parts[1]
+
+	response, err := s.DoVpcDescribevirtualborderroutersRequest(vbrId)
+	if err != nil {
+		return nil, err
+	}
+	if len(response.VirtualBorderRouterSet.VirtualBorderRouterType) < 1{
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Vbr Pconn Association %s Not Found", id))
+	}
+	for _, object := range response.VirtualBorderRouterSet.VirtualBorderRouterType[0].AssociatedPhysicalConnections.AssociatedPhysicalConnection {
+		if object.PhysicalConnectionId == physicalConnectionId {
+			return &object, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Vbr Pconn Association %s Not Found", id))
+}
+
+func (s *ExpressconnectService) ExpressconnectVbrPconnAssociationStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DoVpcDescribeVbrpconnassociationRequest(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		objectStatus := object.Status
+		for _, failState := range failStates {
+			if objectStatus == failState {
+				return object, objectStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, objectStatus))
+			}
+		}
+
+		return object, objectStatus, nil
+	}
 }

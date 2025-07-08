@@ -46,7 +46,7 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouter() *schema.Resour
 			"enable_ipv6": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Computed: true,
+				Default:  false,
 			},
 			"local_gateway_ip": {
 				Type:     schema.TypeString,
@@ -55,6 +55,7 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouter() *schema.Resour
 			"local_ipv6_gateway_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				RequiredWith: []string{"peer_ipv6_gateway_ip", "peering_ipv6_subnet_mask"},
 			},
 			"min_rx_interval": {
 				Type:         schema.TypeInt,
@@ -75,10 +76,12 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouter() *schema.Resour
 			"peer_ipv6_gateway_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				RequiredWith: []string{"local_ipv6_gateway_ip", "peering_ipv6_subnet_mask"},
 			},
 			"peering_ipv6_subnet_mask": {
 				Type:     schema.TypeString,
 				Optional: true,
+				RequiredWith: []string{"local_ipv6_gateway_ip", "peer_ipv6_gateway_ip"},
 			},
 			"peering_subnet_mask": {
 				Type:     schema.TypeString,
@@ -139,17 +142,16 @@ func resourceAlibabacloudStackExpressConnectVirtualBorderRouterCreate(d *schema.
 	if v, ok := d.GetOk("description"); ok {
 		request.QueryParams["Description"] = v.(string)
 	}
-	if v, ok := d.GetOkExists("enable_ipv6"); ok {
-		request.QueryParams["EnableIpv6"] = v.(string)
-	}
-	if v, ok := d.GetOk("local_ipv6_gateway_ip"); ok {
-		request.QueryParams["LocalIpv6GatewayIp"] = v.(string)
-	}
-	if v, ok := d.GetOk("peer_ipv6_gateway_ip"); ok {
-		request.QueryParams["PeerIpv6GatewayIp"] = v.(string)
-	}
-	if v, ok := d.GetOk("peering_ipv6_subnet_mask"); ok {
-		request.QueryParams["PeeringIpv6SubnetMask"] = v.(string)
+	if v, ok := d.GetOk("enable_ipv6"); ok && v.(bool) {
+		request.QueryParams["EnableIpv6"] = "true"
+		if _, ok := d.GetOk("local_ipv6_gateway_ip"); !ok {
+			return fmt.Errorf("local_ipv6_gateway_ip is required while enable_ipv6 is true")
+		}
+		request.QueryParams["LocalIpv6GatewayIp"] = d.Get("local_ipv6_gateway_ip").(string)
+		request.QueryParams["PeerIpv6GatewayIp"] = d.Get("peer_ipv6_gateway_ip").(string)
+		request.QueryParams["PeeringIpv6SubnetMask"] = d.Get("peering_ipv6_subnet_mask").(string)
+	} else {
+		request.QueryParams["EnableIpv6"] = "false"
 	}
 	if v, ok := d.GetOk("vbr_owner_id"); ok {
 		request.QueryParams["VbrOwnerId"] = v.(string)

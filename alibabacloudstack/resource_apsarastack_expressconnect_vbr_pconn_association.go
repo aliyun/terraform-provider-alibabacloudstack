@@ -5,6 +5,9 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -16,18 +19,21 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociation() *schema.Resour
 			"physical_connection_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"vbr_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"vlan_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"circuit_code": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Computed: true,
 			},
 			"local_gateway_ip": {
 				Type:     schema.TypeString,
@@ -42,21 +48,24 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociation() *schema.Resour
 				Optional: true,
 			},
 			"enable_ipv6": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  "false",
+				Default:  false,
 			},
 			"local_ipv6_gateway_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				RequiredWith: []string{"peer_ipv6_gateway_ip", "peering_ipv6_subnet_mask"},
 			},
 			"peer_ipv6_gateway_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				RequiredWith: []string{"local_ipv6_gateway_ip", "peering_ipv6_subnet_mask"},
 			},
 			"peering_ipv6_subnet_mask": {
 				Type:     schema.TypeString,
 				Optional: true,
+				RequiredWith: []string{"local_ipv6_gateway_ip", "peer_ipv6_gateway_ip"},
 			},
 			"status": {
 				Type:     schema.TypeString,
@@ -80,23 +89,22 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationCreate(d *schema.
 
 	//调用request_params_handler
 
-	if v, ok := d.GetOk("enable_ipv6"); ok {
-		request.QueryParams["EnableIpv6"] = v.(string)
+	if v, ok := d.GetOk("enable_ipv6"); ok && v.(bool) {
+		request.QueryParams["EnableIpv6"] = "true"
+		if _, ok := d.GetOk("local_ipv6_gateway_ip"); !ok {
+			return fmt.Errorf("local_ipv6_gateway_ip is required while enable_ipv6 is true")
+		}
+		request.QueryParams["LocalIpv6GatewayIp"] = d.Get("local_ipv6_gateway_ip").(string)
+		request.QueryParams["PeerIpv6GatewayIp"] = d.Get("peer_ipv6_gateway_ip").(string)
+		request.QueryParams["PeeringIpv6SubnetMask"] = d.Get("peering_ipv6_subnet_mask").(string)
+	} else {
+		request.QueryParams["EnableIpv6"] = "false"
 	}
 	if v, ok := d.GetOk("local_gateway_ip"); ok {
 		request.QueryParams["LocalGatewayIp"] = v.(string)
 	}
-	if v, ok := d.GetOk("local_ipv6_gateway_ip"); ok {
-		request.QueryParams["LocalIpv6GatewayIp"] = v.(string)
-	}
 	if v, ok := d.GetOk("peer_gateway_ip"); ok {
 		request.QueryParams["PeerGatewayIp"] = v.(string)
-	}
-	if v, ok := d.GetOk("peer_ipv6_gateway_ip"); ok {
-		request.QueryParams["PeerIpv6GatewayIp"] = v.(string)
-	}
-	if v, ok := d.GetOk("peering_ipv6_subnet_mask"); ok {
-		request.QueryParams["PeeringIpv6SubnetMask"] = v.(string)
 	}
 	if v, ok := d.GetOk("peering_subnet_mask"); ok {
 		request.QueryParams["PeeringSubnetMask"] = v.(string)
@@ -125,6 +133,14 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationCreate(d *schema.
 	vbr_id := d.Get("vbr_id").(string)
 
 	d.SetId(fmt.Sprintf("%s", physical_connection_id+":"+vbr_id))
+
+	expressconnectservice := ExpressconnectService{client}
+
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Associated"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, expressconnectservice.ExpressconnectVbrPconnAssociationStateRefreshFunc(d.Id(), []string{"Failed"}))
+
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
 	return nil
 
 }
@@ -140,11 +156,15 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationUpdate(d *schema.
 func resourceAlibabacloudStackExpressconnectVbrpconnassociationRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	expressconnectService := ExpressconnectService{client}
-	response, err := expressconnectService.DoVpcDescribevirtualborderroutersRequest(d.Id())
+	data, err := expressconnectService.DoVpcDescribeVbrpconnassociationRequest(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_expressconnect_vbrpconnassociation", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	data := response.VirtualBorderRouterSet.VirtualBorderRouterType[0].AssociatedPhysicalConnections.AssociatedPhysicalConnection[0]
+	
+	parts := strings.Split(d.Id(), ":")
+	d.Set("physical_connection_id", parts[0])
+	d.Set("vbr_id", parts[1])
+	
 	d.Set("circuit_code", data.CircuitCode)
 
 	d.Set("enable_ipv6", data.EnableIpv6)
@@ -161,9 +181,6 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationRead(d *schema.Re
 
 	d.Set("peering_subnet_mask", data.PeeringSubnetMask)
 
-	d.Set("physical_connection_id", data.PhysicalConnectionId)
-
-	d.Set("record_total", data)
 
 	d.Set("status", data.Status)
 
@@ -196,6 +213,14 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationDelete(d *schema.
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_express_connect_vbr_pconn_association", "UnassociatePhysicalConnectionFromVirtualBorderRouter", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	expressconnectservice := ExpressconnectService{client}
+
+	stateConf := BuildStateConf([]string{"UnAssociating"}, []string{}, d.Timeout(schema.TimeoutCreate), 10*time.Second, expressconnectservice.ExpressconnectVbrPconnAssociationStateRefreshFunc(d.Id(), []string{"Failed"}))
+
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
 	return nil

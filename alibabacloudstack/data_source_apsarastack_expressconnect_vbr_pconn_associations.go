@@ -23,10 +23,6 @@ func dataSourceAlibabacloudStackExpressconnectVbrPconnAssociations() *schema.Res
 				MinItems: 1,
 			},
 
-			"region_id": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"vbr_pconn_associations": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -51,30 +47,6 @@ func dataSourceAlibabacloudStackExpressconnectVbrPconnAssociations() *schema.Res
 							// TypeString
 							Type:     schema.TypeString,
 							Computed: true,
-						},
-						"filter": {
-							// TypeList
-							Type:     schema.TypeList,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"key": {
-										// TypeString
-										Type:     schema.TypeString,
-										Computed: true,
-									},
-									"value": {
-										// TypeList
-										Type:     schema.TypeList,
-										Computed: true,
-										Elem: &schema.Schema{
-											//TypeString
-											Type:     schema.TypeString,
-											Computed: true,
-										},
-									},
-								},
-							},
 						},
 						"local_gateway_ip": {
 							// TypeString
@@ -107,16 +79,6 @@ func dataSourceAlibabacloudStackExpressconnectVbrPconnAssociations() *schema.Res
 							Computed: true,
 						},
 						"physical_connection_id": {
-							// TypeString
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"record_total": {
-							// TypeInt
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-						"region_id": {
 							// TypeString
 							Type:     schema.TypeString,
 							Computed: true,
