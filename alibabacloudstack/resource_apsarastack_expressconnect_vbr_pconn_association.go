@@ -38,33 +38,40 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociation() *schema.Resour
 			"local_gateway_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"peer_gateway_ip": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"peering_subnet_mask": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"enable_ipv6": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+				ForceNew: true,
 			},
 			"local_ipv6_gateway_ip": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
 				RequiredWith: []string{"peer_ipv6_gateway_ip", "peering_ipv6_subnet_mask"},
 			},
 			"peer_ipv6_gateway_ip": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
 				RequiredWith: []string{"local_ipv6_gateway_ip", "peering_ipv6_subnet_mask"},
 			},
 			"peering_ipv6_subnet_mask": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
 				RequiredWith: []string{"local_ipv6_gateway_ip", "peer_ipv6_gateway_ip"},
 			},
 			"status": {
@@ -146,11 +153,57 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationCreate(d *schema.
 }
 
 func resourceAlibabacloudStackExpressconnectVbrpconnassociationUpdate(d *schema.ResourceData, meta interface{}) error {
-	//client := meta.(*connectivity.AlibabacloudStackClient)
-	if d.IsNewResource() {
-		return nil
-	}
-	return nil
+	//	 当前无法编辑
+	//		client := meta.(*connectivity.AlibabacloudStackClient)
+	//		if d.IsNewResource() {
+	//			return nil
+	//		}
+	//
+	//		if d.HasChanges("local_gateway_ip", "peer_gateway_ip", "peering_subnet_mask", "enable_ipv6", "local_ipv6_gateway_ip", "peer_ipv6_gateway_ip", "peering_ipv6_subnet_mask") {
+	//			request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ModifyVirtualBorderRouterAttribute", "")
+	//			if v, ok := d.GetOk("enable_ipv6"); ok && v.(bool) {
+	//				request.QueryParams["EnableIpv6"] = "true"
+	//				if _, ok := d.GetOk("local_ipv6_gateway_ip"); !ok {
+	//					return fmt.Errorf("local_ipv6_gateway_ip is required while enable_ipv6 is true")
+	//				}
+	//				request.QueryParams["LocalIpv6GatewayIp"] = d.Get("local_ipv6_gateway_ip").(string)
+	//				request.QueryParams["PeerIpv6GatewayIp"] = d.Get("peer_ipv6_gateway_ip").(string)
+	//				request.QueryParams["PeeringIpv6SubnetMask"] = d.Get("peering_ipv6_subnet_mask").(string)
+	//			} else {
+	//				request.QueryParams["EnableIpv6"] = "false"
+	//			}
+	//			if v, ok := d.GetOk("local_gateway_ip"); ok {
+	//				request.QueryParams["LocalGatewayIp"] = v.(string)
+	//			}
+	//			if v, ok := d.GetOk("peer_gateway_ip"); ok {
+	//				request.QueryParams["PeerGatewayIp"] = v.(string)
+	//			}
+	//			if v, ok := d.GetOk("peering_subnet_mask"); ok {
+	//				request.QueryParams["PeeringSubnetMask"] = v.(string)
+	//			}
+	//			request.QueryParams["PhysicalConnectionId"] = d.Get("physical_connection_id").(string)
+	//			request.QueryParams["VbrId"] = d.Get("vbr_id").(string)
+	//			request.QueryParams["VlanId"] = d.Get("vlan_id").(string)
+	//
+	//			bresponse, err := client.ProcessCommonRequest(request)
+	//			if err != nil {
+	//				if bresponse == nil {
+	//					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	//				}
+	//				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	//				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_express_connect_vbr_pconn_association", "AssociatePhysicalConnectionToVirtualBorderRouter", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	//			}
+	//
+	//			expressconnectservice := ExpressconnectService{client}
+	//
+	//			stateConf := BuildStateConf([]string{"Updating"}, []string{"Associated"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, expressconnectservice.ExpressconnectVbrPconnAssociationStateRefreshFunc(d.Id(), []string{"Failed"}))
+	//
+	//			if _, err := stateConf.WaitForState(); err != nil {
+	//				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	//			}
+	//			return nil
+	//		}
+			return nil
 }
 
 func resourceAlibabacloudStackExpressconnectVbrpconnassociationRead(d *schema.ResourceData, meta interface{}) error {
@@ -160,11 +213,11 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationRead(d *schema.Re
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_expressconnect_vbrpconnassociation", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	
+
 	parts := strings.Split(d.Id(), ":")
 	d.Set("physical_connection_id", parts[0])
 	d.Set("vbr_id", parts[1])
-	
+
 	d.Set("circuit_code", data.CircuitCode)
 
 	d.Set("enable_ipv6", data.EnableIpv6)
@@ -180,7 +233,6 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociationRead(d *schema.Re
 	d.Set("peering_ipv6_subnet_mask", data.PeeringIpv6SubnetMask)
 
 	d.Set("peering_subnet_mask", data.PeeringSubnetMask)
-
 
 	d.Set("status", data.Status)
 
