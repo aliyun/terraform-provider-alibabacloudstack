@@ -82,7 +82,7 @@ func resourceAlibabacloudStackExpressconnectVbrpconnassociation() *schema.Resour
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackExpressconnectVbrpconnassociationCreate,
 		resourceAlibabacloudStackExpressconnectVbrpconnassociationRead,
-		resourceAlibabacloudStackExpressconnectVbrpconnassociationUpdate,
+		nil,
 		resourceAlibabacloudStackExpressconnectVbrpconnassociationDelete)
 	return resource
 }

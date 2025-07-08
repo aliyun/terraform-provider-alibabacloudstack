@@ -228,7 +228,7 @@ type VpcDescribebgpnetworksResponse struct {
 
 func (s *ExpressconnectService) DoVpcDescribebgpnetworksRequest(id string) (*VpcDescribebgpnetworksResponse, error) {
 	// api: Vpc - 2016-04-28 - DescribeBgpNetworks
-	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeBgpNetworks", "")
+	request := s.client.NewCommonRequest("GET", "Vpc", "2016-04-28", "DescribeBgpNetworks", "")
 	VpcDescribebgpnetworksResponseObj := &VpcDescribebgpnetworksResponse{}
 
 	//调用request_params_handler
@@ -253,6 +253,50 @@ func (s *ExpressconnectService) DoVpcDescribebgpnetworksRequest(id string) (*Vpc
 	return VpcDescribebgpnetworksResponseObj, nil
 }
 
+type VirtualBorderRouter struct {
+	AssociatedPhysicalConnections struct {
+		AssociatedPhysicalConnection []VbrAssociatedPhysicalConnection `json:"AssociatedPhysicalConnection"`
+	} `json:"AssociatedPhysicalConnections"`
+
+	AssociatedCens struct {
+		AssociatedCen []struct {
+			CenId      string `json:"CenId"`
+			CenOwnerId int    `json:"CenOwnerId"`
+			CenStatus  string `json:"CenStatus"`
+		} `json:"AssociatedCen"`
+	} `json:"AssociatedCens"`
+	VbrId                            string `json:"VbrId"`
+	CreationTime                     string `json:"CreationTime"`
+	ActivationTime                   string `json:"ActivationTime"`
+	TerminationTime                  string `json:"TerminationTime"`
+	RecoveryTime                     string `json:"RecoveryTime"`
+	Status                           string `json:"Status"`
+	VlanId                           int    `json:"VlanId"`
+	CircuitCode                      string `json:"CircuitCode"`
+	RouteTableId                     string `json:"RouteTableId"`
+	VlanInterfaceId                  string `json:"VlanInterfaceId"`
+	LocalGatewayIp                   string `json:"LocalGatewayIp"`
+	PeerGatewayIp                    string `json:"PeerGatewayIp"`
+	PeeringSubnetMask                string `json:"PeeringSubnetMask"`
+	PhysicalConnectionId             string `json:"PhysicalConnectionId"`
+	PhysicalConnectionStatus         string `json:"PhysicalConnectionStatus"`
+	PhysicalConnectionBusinessStatus string `json:"PhysicalConnectionBusinessStatus"`
+	PhysicalConnectionOwnerUid       string `json:"PhysicalConnectionOwnerUid"`
+	AccessPointId                    string `json:"AccessPointId"`
+	Name                             string `json:"Name"`
+	Description                      string `json:"Description"`
+	PConnVbrExpireTime               string `json:"PConnVbrExpireTime"`
+	EccId                            string `json:"EccId"`
+	Type                             string `json:"Type"`
+	MinTxInterval                    int    `json:"MinTxInterval"`
+	MinRxInterval                    int    `json:"MinRxInterval"`
+	DetectMultiplier                 int    `json:"DetectMultiplier"`
+	LocalIpv6GatewayIp               string `json:"LocalIpv6GatewayIp"`
+	PeerIpv6GatewayIp                string `json:"PeerIpv6GatewayIp"`
+	PeeringIpv6SubnetMask            string `json:"PeeringIpv6SubnetMask"`
+	EnableIpv6                       bool   `json:"EnableIpv6"`
+}
+
 type VbrAssociatedPhysicalConnection struct {
 	CircuitCode                      string `json:"CircuitCode"`
 	VlanInterfaceId                  string `json:"VlanInterfaceId"`
@@ -273,49 +317,7 @@ type VbrAssociatedPhysicalConnection struct {
 
 type VpcDescribevirtualborderroutersResponse struct {
 	VirtualBorderRouterSet struct {
-		VirtualBorderRouterType []struct {
-			AssociatedPhysicalConnections struct {
-				AssociatedPhysicalConnection []VbrAssociatedPhysicalConnection `json:"AssociatedPhysicalConnection"`
-			} `json:"AssociatedPhysicalConnections"`
-
-			AssociatedCens struct {
-				AssociatedCen []struct {
-					CenId      string `json:"CenId"`
-					CenOwnerId int    `json:"CenOwnerId"`
-					CenStatus  string `json:"CenStatus"`
-				} `json:"AssociatedCen"`
-			} `json:"AssociatedCens"`
-			VbrId                            string `json:"VbrId"`
-			CreationTime                     string `json:"CreationTime"`
-			ActivationTime                   string `json:"ActivationTime"`
-			TerminationTime                  string `json:"TerminationTime"`
-			RecoveryTime                     string `json:"RecoveryTime"`
-			Status                           string `json:"Status"`
-			VlanId                           int    `json:"VlanId"`
-			CircuitCode                      string `json:"CircuitCode"`
-			RouteTableId                     string `json:"RouteTableId"`
-			VlanInterfaceId                  string `json:"VlanInterfaceId"`
-			LocalGatewayIp                   string `json:"LocalGatewayIp"`
-			PeerGatewayIp                    string `json:"PeerGatewayIp"`
-			PeeringSubnetMask                string `json:"PeeringSubnetMask"`
-			PhysicalConnectionId             string `json:"PhysicalConnectionId"`
-			PhysicalConnectionStatus         string `json:"PhysicalConnectionStatus"`
-			PhysicalConnectionBusinessStatus string `json:"PhysicalConnectionBusinessStatus"`
-			PhysicalConnectionOwnerUid       string `json:"PhysicalConnectionOwnerUid"`
-			AccessPointId                    string `json:"AccessPointId"`
-			Name                             string `json:"Name"`
-			Description                      string `json:"Description"`
-			PConnVbrExpireTime               string `json:"PConnVbrExpireTime"`
-			EccId                            string `json:"EccId"`
-			Type                             string `json:"Type"`
-			MinTxInterval                    int    `json:"MinTxInterval"`
-			MinRxInterval                    int    `json:"MinRxInterval"`
-			DetectMultiplier                 int    `json:"DetectMultiplier"`
-			LocalIpv6GatewayIp               string `json:"LocalIpv6GatewayIp"`
-			PeerIpv6GatewayIp                string `json:"PeerIpv6GatewayIp"`
-			PeeringIpv6SubnetMask            string `json:"PeeringIpv6SubnetMask"`
-			EnableIpv6                       bool   `json:"EnableIpv6"`
-		} `json:"VirtualBorderRouterType"`
+		VirtualBorderRouterType []VirtualBorderRouter `json:"VirtualBorderRouterType"`
 	} `json:"VirtualBorderRouterSet"`
 	RequestId  string `json:"RequestId"`
 	PageNumber int    `json:"PageNumber"`
@@ -323,10 +325,10 @@ type VpcDescribevirtualborderroutersResponse struct {
 	TotalCount int    `json:"TotalCount"`
 }
 
-func (s *ExpressconnectService) DoVpcDescribevirtualborderroutersRequest(id string) (*VpcDescribevirtualborderroutersResponse, error) {
+func (s *ExpressconnectService) DoVpcDescribevirtualborderroutersRequest(id string) (*VirtualBorderRouter, error) {
 	// api: Vpc - 2016-04-28 - DescribeVirtualBorderRouters
 
-	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeVirtualBorderRouters", "")
+	request := s.client.NewCommonRequest("GET", "Vpc", "2016-04-28", "DescribeVirtualBorderRouters", "")
 	VpcDescribevirtualborderroutersResponseObj := &VpcDescribevirtualborderroutersResponse{}
 
 	//调用request_params_handler
@@ -350,8 +352,12 @@ func (s *ExpressconnectService) DoVpcDescribevirtualborderroutersRequest(id stri
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeVirtualBorderRouters", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
+	
+	if len(VpcDescribevirtualborderroutersResponseObj.VirtualBorderRouterSet.VirtualBorderRouterType) != 1 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Vbr Pconn Association %s Not Found", id))
+	}
 
-	return VpcDescribevirtualborderroutersResponseObj, nil
+	return &VpcDescribevirtualborderroutersResponseObj.VirtualBorderRouterSet.VirtualBorderRouterType[0], nil
 }
 
 func (s *ExpressconnectService) DoVpcDescribeVbrpconnassociationRequest(id string) (*VbrAssociatedPhysicalConnection, error) {
@@ -363,10 +369,7 @@ func (s *ExpressconnectService) DoVpcDescribeVbrpconnassociationRequest(id strin
 	if err != nil {
 		return nil, err
 	}
-	if len(response.VirtualBorderRouterSet.VirtualBorderRouterType) < 1{
-		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Vbr Pconn Association %s Not Found", id))
-	}
-	for _, object := range response.VirtualBorderRouterSet.VirtualBorderRouterType[0].AssociatedPhysicalConnections.AssociatedPhysicalConnection {
+	for _, object := range response.AssociatedPhysicalConnections.AssociatedPhysicalConnection {
 		if object.PhysicalConnectionId == physicalConnectionId {
 			return &object, nil
 		}
