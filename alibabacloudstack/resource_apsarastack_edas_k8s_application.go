@@ -490,9 +490,9 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"weight": {
-							Type:     schema.TypeInt,
-							Required: true,
-							Default:  1,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      1,
 							ValidateFunc: validation.IntBetween(1, 100),
 						},
 						"match_expressions": {
@@ -563,9 +563,9 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"weight": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  1,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      1,
 							ValidateFunc: validation.IntBetween(1, 100),
 						},
 						"k8s_namespace": {
@@ -645,9 +645,9 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"weight": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  1,
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Default:      1,
 							ValidateFunc: validation.IntBetween(1, 100),
 						},
 						"k8s_namespace": {
@@ -856,7 +856,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 		if err != nil {
 			return fmt.Errorf("custom args data to marshal JSON failed: %w \n%v", err, custom_args)
 		}
-		request.QueryParams["customAffinity"] = string(data)
+		request.QueryParams["CustomAffinity"] = string(data)
 	}
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug("InsertK8sApplication", bresponse, request.QueryParams, request)
@@ -898,6 +898,9 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 		}
 		return errmsgs.WrapError(err)
 	}
+	if response.Conf.Affinity != "" {
+		ReadAffinityArgs(response.Conf.Affinity)
+	}
 	d.Set("application_name", response.App.ApplicationName)
 	d.Set("cluster_id", response.App.ClusterId)
 	d.Set("replicas", response.App.Instances)
@@ -921,13 +924,13 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 	for _, v := range allDeploy {
 		if len(v.PackageVersion) > 0 {
 			d.Set("package_version", v.PackageVersion)
-			
+
 		}
 		if v.PackageUrl != "" {
 			d.Set("package_url", v.PackageUrl)
 		} else if v.PackagePublicUrl != "" {
 			d.Set("package_url", v.PackagePublicUrl)
-		}	
+		}
 
 		for _, c := range v.Components.ComponentsItem {
 			if strings.Contains(c.ComponentKey, "JDK") {
@@ -1341,6 +1344,17 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 	}
 	request.QueryParams["PvcMountDescs"] = pvc_mount_descs
 
+	if !d.IsNewResource() && d.HasChanges("custom_node_affinity_require", "custom_node_affinity_preferred", "custom_pod_affinity_require", "custom_pod_affinity_preferred", "custom_pod_ant_affinity_require", "custom_pod_ant_affinity_preferred") {
+		custom_args := BuildCustomArgs(d)
+		if len(custom_args) > 0 {
+			data, err := json.Marshal(custom_args)
+			if err != nil {
+				return fmt.Errorf("custom args data to marshal JSON failed: %w \n%v", err, custom_args)
+			}
+			request.QueryParams["CustomAffinity"] = string(data)
+		}
+		partialKeys = append(partialKeys, "custom_args")
+	}
 	// if d.HasChange("requests_m_cpu") {
 	// 	partialKeys = append(partialKeys, "requests_m_cpu")
 	// }
@@ -1615,18 +1629,16 @@ func K8sAppConfiguration(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-
-
 func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 	custom_args := make(map[string]interface{})
 
 	// node_affinity
 	node_affinity_require := make([]map[string]interface{}, 0)
-	custom_node_affinity_requires := d.Get("custom_node_affinity_require").(*schema.Set).List();
+	custom_node_affinity_requires := d.Get("custom_node_affinity_require").(*schema.Set).List()
 	if len(custom_node_affinity_requires) > 0 {
 		for _, custom_node_affinity_require := range custom_node_affinity_requires {
 			custom_node_affinity_require_map := custom_node_affinity_require.(map[string]interface{})
-			custom_node_affinity_require_match_expressions = custom_node_affinity_require_map["match_expressions"].([]interface{})
+			custom_node_affinity_require_match_expressions := custom_node_affinity_require_map["match_expressions"].([]interface{})
 			if len(custom_node_affinity_require_match_expressions) > 0 {
 				node_affinity_require = append(node_affinity_require, map[string]interface{}{
 					"matchExpressions": custom_node_affinity_require_match_expressions,
@@ -1635,15 +1647,15 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 		}
 	}
 	node_affinity_preferred := make([]map[string]interface{}, 0)
-	custom_node_affinity_preferreds := d.Get("custom_node_affinity_preferred").(*schema.Set).List();
+	custom_node_affinity_preferreds := d.Get("custom_node_affinity_preferred").(*schema.Set).List()
 	if len(custom_node_affinity_preferreds) > 0 {
 		for _, custom_node_affinity_preferred := range custom_node_affinity_preferreds {
 			custom_node_affinity_preferred_map := custom_node_affinity_preferred.(map[string]interface{})
-			weight = custom_node_affinity_preferred_map["weight"].(int)
-			custom_node_affinity_preferred_match_expressions = custom_node_affinity_preferred_map["match_expressions"].([]interface{})
+			weight := custom_node_affinity_preferred_map["weight"].(int)
+			custom_node_affinity_preferred_match_expressions := custom_node_affinity_preferred_map["match_expressions"].([]interface{})
 			if len(custom_node_affinity_preferred_match_expressions) > 0 {
 				node_affinity_preferred = append(node_affinity_preferred, map[string]interface{}{
-					"weight":weight, 
+					"weight": weight,
 					"preference": map[string]interface{}{
 						"matchExpressions": custom_node_affinity_preferred_match_expressions,
 					},
@@ -1652,7 +1664,7 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 		}
 	}
 	if len(node_affinity_require) > 0 || len(node_affinity_preferred) > 0 {
-		nodeAffinity = make(map[string]interface{})
+		nodeAffinity := make(map[string]interface{})
 		if len(node_affinity_require) > 0 {
 			nodeAffinity["requiredDuringSchedulingIgnoredDuringExecution"] = map[string]interface{}{
 				"nodeSelectorTerms": node_affinity_require,
@@ -1666,49 +1678,49 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 
 	// pod_affinity
 	pod_affinity_require := make([]map[string]interface{}, 0)
-	custom_pod_affinity_requires := d.Get("custom_pod_affinity_require").(*schema.Set).List();
+	custom_pod_affinity_requires := d.Get("custom_pod_affinity_require").(*schema.Set).List()
 	if len(custom_pod_affinity_requires) > 0 {
 		for _, custom_pod_affinity_require := range custom_pod_affinity_requires {
 			custom_pod_affinity_require_map := custom_pod_affinity_require.(map[string]interface{})
-			custom_pod_affinity_require_match_expressions = custom_pod_affinity_require_map["match_expressions"].([]interface{})
-			k8s_namespace = custom_pod_affinity_require_map["k8s_namespace"].([]interface{})
-			topology_key = custom_pod_affinity_require_map["topology_key"].([]interface{})
+			custom_pod_affinity_require_match_expressions := custom_pod_affinity_require_map["match_expressions"].([]interface{})
+			k8s_namespace := custom_pod_affinity_require_map["k8s_namespace"].([]interface{})
+			topology_key := custom_pod_affinity_require_map["topology_key"].([]interface{})
 			if len(custom_pod_affinity_require_match_expressions) > 0 {
 				pod_affinity_require = append(pod_affinity_require, map[string]interface{}{
-					"namespaces": k8s_namespace,
+					"namespaces":  k8s_namespace,
 					"topologyKey": topology_key,
 					"labelSelector": map[string]interface{}{
-						"matchExpressions": custom_node_affinity_require_match_expressions,
-					}				
+						"matchExpressions": custom_pod_affinity_require_match_expressions,
+					},
 				})
 			}
 		}
 	}
 	pod_affinity_preferred := make([]map[string]interface{}, 0)
-	custom_pod_affinity_preferreds := d.Get("custom_pod_affinity_preferred").(*schema.Set).List();
+	custom_pod_affinity_preferreds := d.Get("custom_pod_affinity_preferred").(*schema.Set).List()
 	if len(custom_pod_affinity_preferreds) > 0 {
 		for _, custom_pod_affinity_preferred := range custom_pod_affinity_preferreds {
 			custom_pod_affinity_preferred_map := custom_pod_affinity_preferred.(map[string]interface{})
-			custom_pod_affinity_preferred_match_expressions = custom_pod_affinity_preferred_map["match_expressions"].([]interface{})
-			k8s_namespace = custom_pod_affinity_preferred_map["k8s_namespace"].([]interface{})
-			topology_key = custom_pod_affinity_preferred_map["topology_key"].(string)
-			weight = custom_pod_affinity_preferred_map["weight"].(int)
+			custom_pod_affinity_preferred_match_expressions := custom_pod_affinity_preferred_map["match_expressions"].([]interface{})
+			k8s_namespace := custom_pod_affinity_preferred_map["k8s_namespace"].([]interface{})
+			topology_key := custom_pod_affinity_preferred_map["topology_key"].(string)
+			weight := custom_pod_affinity_preferred_map["weight"].(int)
 			if len(custom_pod_affinity_preferred_match_expressions) > 0 {
 				pod_affinity_preferred = append(pod_affinity_preferred, map[string]interface{}{
 					"podAffinityTerm": map[string]interface{}{
-						"namespaces": k8s_namespace,
+						"namespaces":  k8s_namespace,
 						"topologyKey": topology_key,
 						"labelSelector": map[string]interface{}{
-							"matchExpressions": custom_node_affinity_require_match_expressions,
-						}	
+							"matchExpressions": custom_pod_affinity_preferred_match_expressions,
+						},
 					},
-					"weight": weight,				
+					"weight": weight,
 				})
 			}
 		}
 	}
 	if len(pod_affinity_require) > 0 || len(pod_affinity_preferred) > 0 {
-		podAffinity = make(map[string]interface{})
+		podAffinity := make(map[string]interface{})
 		if len(pod_affinity_require) > 0 {
 			podAffinity["requiredDuringSchedulingIgnoredDuringExecution"] = pod_affinity_require
 		}
@@ -1720,49 +1732,49 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 
 	// pod_ant_affinity
 	pod_ant_affinity_require := make([]map[string]interface{}, 0)
-	custom_pod_ant_affinity_requires := d.Get("custom_pod_ant_affinity_require").(*schema.Set).List();
+	custom_pod_ant_affinity_requires := d.Get("custom_pod_ant_affinity_require").(*schema.Set).List()
 	if len(custom_pod_ant_affinity_requires) > 0 {
 		for _, custom_pod_ant_affinity_require := range custom_pod_ant_affinity_requires {
 			custom_pod_ant_affinity_require_map := custom_pod_ant_affinity_require.(map[string]interface{})
-			custom_pod_ant_affinity_require_match_expressions = custom_pod_ant_affinity_require_map["match_expressions"].([]interface{})
-			k8s_namespace = custom_pod_ant_affinity_require_map["k8s_namespace"].([]interface{})
-			topology_key = custom_pod_ant_affinity_require_map["topology_key"].([]interface{})
+			custom_pod_ant_affinity_require_match_expressions := custom_pod_ant_affinity_require_map["match_expressions"].([]interface{})
+			k8s_namespace := custom_pod_ant_affinity_require_map["k8s_namespace"].([]interface{})
+			topology_key := custom_pod_ant_affinity_require_map["topology_key"].([]interface{})
 			if len(custom_pod_ant_affinity_require_match_expressions) > 0 {
 				pod_ant_affinity_require = append(pod_ant_affinity_require, map[string]interface{}{
-					"namespaces": k8s_namespace,
+					"namespaces":  k8s_namespace,
 					"topologyKey": topology_key,
 					"labelSelector": map[string]interface{}{
-						"matchExpressions": custom_node_affinity_require_match_expressions,
-					}				
+						"matchExpressions": custom_pod_ant_affinity_require_match_expressions,
+					},
 				})
 			}
 		}
 	}
 	pod_ant_affinity_preferred := make([]map[string]interface{}, 0)
-	custom_pod_ant_affinity_preferreds := d.Get("custom_pod_ant_affinity_preferred").(*schema.Set).List();
+	custom_pod_ant_affinity_preferreds := d.Get("custom_pod_ant_affinity_preferred").(*schema.Set).List()
 	if len(custom_pod_ant_affinity_preferreds) > 0 {
 		for _, custom_pod_ant_affinity_preferred := range custom_pod_ant_affinity_preferreds {
 			custom_pod_ant_affinity_preferred_map := custom_pod_ant_affinity_preferred.(map[string]interface{})
-			custom_pod_ant_affinity_preferred_match_expressions = custom_pod_ant_affinity_preferred_map["match_expressions"].([]interface{})
-			k8s_namespace = custom_pod_ant_affinity_preferred_map["k8s_namespace"].([]interface{})
-			topology_key = custom_pod_ant_affinity_preferred_map["topology_key"].(string)
-			weight = custom_pod_ant_affinity_preferred_map["weight"].(int)
+			custom_pod_ant_affinity_preferred_match_expressions := custom_pod_ant_affinity_preferred_map["match_expressions"].([]interface{})
+			k8s_namespace := custom_pod_ant_affinity_preferred_map["k8s_namespace"].([]interface{})
+			topology_key := custom_pod_ant_affinity_preferred_map["topology_key"].(string)
+			weight := custom_pod_ant_affinity_preferred_map["weight"].(int)
 			if len(custom_pod_ant_affinity_preferred_match_expressions) > 0 {
 				pod_ant_affinity_preferred = append(pod_ant_affinity_preferred, map[string]interface{}{
 					"podAffinityTerm": map[string]interface{}{
-						"namespaces": k8s_namespace,
+						"namespaces":  k8s_namespace,
 						"topologyKey": topology_key,
 						"labelSelector": map[string]interface{}{
-							"matchExpressions": custom_node_affinity_require_match_expressions,
-						}	
+							"matchExpressions": custom_pod_ant_affinity_preferred_match_expressions,
+						},
 					},
-					"weight": weight,				
+					"weight": weight,
 				})
 			}
 		}
 	}
 	if len(pod_ant_affinity_require) > 0 || len(pod_ant_affinity_preferred) > 0 {
-		podAntiAffinity = make(map[string]interface{})
+		podAntiAffinity := make(map[string]interface{})
 		if len(pod_ant_affinity_require) > 0 {
 			podAntiAffinity["requiredDuringSchedulingIgnoredDuringExecution"] = pod_ant_affinity_require
 		}
@@ -1771,5 +1783,5 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 		}
 		custom_args["podAntiAffinity"] = podAntiAffinity
 	}
-	return custom_args, nil
+	return custom_args
 }
