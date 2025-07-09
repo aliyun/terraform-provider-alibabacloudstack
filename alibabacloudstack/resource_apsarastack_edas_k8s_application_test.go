@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -149,10 +150,9 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"application_name": "${var.name}",
-					// "cluster_id":       "${alibabacloudstack_edas_k8s_cluster.default.id}",
-					"cluster_id":      "8160857e-2755-43d7-a6fa-20a59c8c33f1",
+					"cluster_id":       "${alibabacloudstack_edas_k8s_cluster.default.id}",
 					"package_type":    "FatJar",
-					"package_url":     "http://fileserver.edas.inter.env149.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar",
+					"package_url":     "http://secure-edas-bucket-cn-wulan-env205-d01.oss-cn-wulan-env205-d01-a.intra.env205.shuguang.com/apps/K8S_APP_ID/9c2b927d-9621-4e2d-996b-b73869afbb66/SPRING_CLOUD_PROVIDER.jar",
 					"package_version": "2025-07-09 13:00:18",
 					"jdk":             "Open JDK 8",
 					"replicas":        "2",
@@ -610,52 +610,52 @@ func testAccCheckEdasK8sApplicationDestroy(s *terraform.State) error {
 func resourceEdasK8sApplicationConfigDependence(name string) string {
 	return fmt.Sprintf(`
 		variable "name" {
-		  default = "%v"
+			default = "%v"
 		}
-		%s
-
-		%s
-
-		%s
-
-		resource "alibabacloudstack_slb" "default" {
-			name = "${var.name}"
-			// vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-			address_type       = "internet"
-			specification        = "slb.s2.small"
+		
+		variable "cs_k8s_id" {
+			default = "%s"
 		}
+		
+		%s
+
+		%s
 		
 		resource "alibabacloudstack_slb" "default1" {
 			name = "${var.name}2"
-			vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+			vswitch_id    = "${alibabacloudstack_vpc_vswitch.default.id}"
 			address_type       = "intranet"
 			specification        = "slb.s2.small"
 		}
 
-		// resource "alibabacloudstack_cs_kubernetes" "default" {
+		locals {
+			create_k8s_count = var.cs_k8s_id == "" ? 1 : 0
+		} 
 		
-		//  name = var.name
-		//  version 					= "1.20.11-aliyun.1"
-		//  os_type 					= "linux"
-		//  platform 					= "AliyunLinux"
-		//  num_of_nodes 				= "1"
-		//  master_count				= "3"
-		//  master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
-		//  master_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
-		//  master_disk_category 		= "cloud_ssd"
-		//  vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
-		//  worker_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
-		//  worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
-		//  worker_disk_category 		= "cloud_ssd"
-		//  password 					= " "
-		//  pod_cidr 					= "172.20.0.0/16"
-		//  service_cidr 				= "172.21.0.0/20"
-		//  worker_disk_size 			= "40"
-		//  master_disk_size 			= "40"
-		//  slb_internet_enabled 		= "true"
-		// }
-		// resource "alibabacloudstack_edas_k8s_cluster" "default" {
-		//   cs_cluster_id = "${alibabacloudstack_cs_kubernetes.default.id}"
-		// }
-		`, name, VSwitchCommonTestCase, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackInstanceTypes) // GeneratePassword(12))
+		resource "alibabacloudstack_cs_kubernetes" "default" {
+			count = local.create_k8s_count
+			name = var.name
+			version 					= "1.20.11-aliyun.1"
+			os_type 					= "linux"
+			platform 					= "AliyunLinux"
+			num_of_nodes 				= "1"
+			master_count				= "3"
+			master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
+			master_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
+			master_disk_category 		= "cloud_ssd"
+			vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
+			worker_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
+			worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
+			worker_disk_category 		= "cloud_ssd"
+			password 					= " "
+			pod_cidr 					= "172.20.0.0/16"
+			service_cidr 				= "172.21.0.0/20"
+			worker_disk_size 			= "40"
+			master_disk_size 			= "40"
+			slb_internet_enabled 		= "true"
+		}
+		resource "alibabacloudstack_edas_k8s_cluster" "default" {
+			cs_cluster_id = var.cs_k8s_id == "" ? "${alibabacloudstack_cs_kubernetes.default.0.id}" : var.cs_k8s_id
+		}
+		`, name, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_K8S_ID"), SlbCommonTestCase, DataAlibabacloudstackInstanceTypes) // GeneratePassword(12))
 }
