@@ -149,12 +149,13 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"application_name": "${var.name}",
-					"cluster_id":       "${alibabacloudstack_edas_k8s_cluster.default.id}",
-					"package_type":     "FatJar",
-					"package_url":      "http://fileserver.edas.inter.env17e.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar",
-					"package_version":  "2025-05-20 17:17:18",
-					"jdk":              "Open JDK 8",
-					"replicas":         "2",
+					// "cluster_id":       "${alibabacloudstack_edas_k8s_cluster.default.id}",
+					"cluster_id":      "8160857e-2755-43d7-a6fa-20a59c8c33f1",
+					"package_type":    "FatJar",
+					"package_url":     "http://fileserver.edas.inter.env149.shuguang.com//prod/demo/SPRING_CLOUD_PROVIDER.jar",
+					"package_version": "2025-07-09 13:00:18",
+					"jdk":             "Open JDK 8",
+					"replicas":        "2",
 					"internet_service_port_infos": []map[string]interface{}{
 						{
 							"target_port": "18082",
@@ -169,19 +170,139 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 					},
 					"internet_external_traffic_policy": "Local",
 					"internet_scheduler":               "rr",
+					"custom_tolerations": []map[string]interface{}{
+						{
+							"key":      "test",
+							"value":    "test",
+							"operator": "Equal",
+							"effect":   "NoSchedule",
+						},
+					},
+					"custom_node_affinity_require": []map[string]interface{}{
+						{
+							"match_expressions": []map[string]interface{}{
+								{
+									"key":      "test",
+									"values":   []string{"aaaaa21", "bbbb21"},
+									"operator": "In",
+								},
+							},
+						},
+					},
+					"custom_node_affinity_preferred": []map[string]interface{}{
+						{
+							"weight": "100",
+							"match_expressions": []map[string]interface{}{
+								{
+									"key":      "test1",
+									"values":   []string{"aaaaa1", "bbbb1"},
+									"operator": "In",
+								},
+							},
+						},
+					},
+					"custom_pod_affinity_require": []map[string]interface{}{
+						{
+							"k8s_namespace": []string{"default"},
+							"topology_key":  "test",
+							"match_expressions": []map[string]interface{}{
+								{
+									"key":      "test",
+									"values":   []string{"aaaaa21", "bbbb21"},
+									"operator": "In",
+								},
+								{
+									"key":      "test22",
+									"values":   []string{"aaaaa22", "bbbb22"},
+									"operator": "NotIn",
+								},
+							},
+						},
+					},
+					"custom_pod_affinity_preferred": []map[string]interface{}{
+						{
+							"weight":        "1",
+							"k8s_namespace": []string{"default"},
+							"topology_key":  "test",
+							"match_expressions": []map[string]interface{}{
+								{
+									"key":      "test3",
+									"values":   []string{"aaaaa31", "bbbb31"},
+									"operator": "In",
+								},
+								{
+									"key":      "test33",
+									"values":   []string{"aaaaa33", "bbbb33"},
+									"operator": "NotIn",
+								},
+							},
+						},
+					},
+					"custom_pod_ant_affinity_require": []map[string]interface{}{
+						{
+							"k8s_namespace": []string{"default"},
+							"topology_key":  "test4",
+							"match_expressions": []map[string]interface{}{
+								{
+									"key":      "test4",
+									"values":   []string{"aaaaa41", "bbbb41"},
+									"operator": "In",
+								},
+								{
+									"key":      "test42",
+									"values":   []string{"aaaaa42", "bbbb42"},
+									"operator": "NotIn",
+								},
+							},
+						},
+					},
+					"custom_pod_ant_affinity_preferred": []map[string]interface{}{
+						{
+							"weight":        "1",
+							"k8s_namespace": []string{"default"},
+							"topology_key":  "test5",
+							"match_expressions": []map[string]interface{}{
+								{
+									"key":      "test5",
+									"values":   []string{"aaaaa51", "bbbb51"},
+									"operator": "In",
+								},
+							},
+						},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"replicas":                                  "2",
-						"internet_external_traffic_policy":          "Local",
-						"internet_scheduler":                        "rr",
-						"internet_service_port_infos.#":             "2",
-						"internet_service_port_infos.0.target_port": "18082",
-						"internet_service_port_infos.0.port":        "18082",
-						"internet_service_port_infos.0.protocol":    "HTTP",
-						"internet_service_port_infos.1.target_port": "8080",
-						"internet_service_port_infos.1.port":        "8080",
-						"internet_service_port_infos.1.protocol":    "TCP",
+						"replicas":                                                "2",
+						"internet_external_traffic_policy":                        "Local",
+						"internet_scheduler":                                      "rr",
+						"internet_service_port_infos.#":                           "2",
+						"internet_service_port_infos.0.target_port":               "18082",
+						"internet_service_port_infos.0.port":                      "18082",
+						"internet_service_port_infos.0.protocol":                  "HTTP",
+						"internet_service_port_infos.1.target_port":               "8080",
+						"internet_service_port_infos.1.port":                      "8080",
+						"internet_service_port_infos.1.protocol":                  "TCP",
+						"custom_tolerations":                                      CHECKSET,
+						"custom_tolerations.0.effect":                             "NoSchedule",
+						"custom_node_affinity_require":                            CHECKSET,
+						"custom_node_affinity_require.0.match_expressions.#":      "1",
+						"custom_node_affinity_preferred":                          CHECKSET,
+						"custom_node_affinity_preferred.0.match_expressions.#":    "1",
+						"custom_pod_affinity_require":                             CHECKSET,
+						"custom_pod_affinity_require.0.match_expressions.#":       "2",
+						"custom_pod_affinity_require.0.topology_key":              "test",
+						"custom_pod_affinity_preferred":                           CHECKSET,
+						"custom_pod_affinity_preferred.0.match_expressions.#":     "2",
+						"custom_pod_affinity_preferred.0.topology_key":            "test",
+						"custom_pod_affinity_preferred.0.weight":                  "1",
+						"custom_pod_ant_affinity_require":                         CHECKSET,
+						"custom_pod_ant_affinity_require.0.match_expressions.#":   "2",
+						"custom_pod_ant_affinity_require.0.topology_key":          "test4",
+						"custom_pod_ant_affinity_preferred":                       CHECKSET,
+						"custom_pod_ant_affinity_preferred.0.match_expressions.#": "2",
+						"custom_pod_ant_affinity_preferred.0.topology_key":        "test5",
+						"custom_pod_ant_affinity_preferred.0.weight":              "1",
 					}),
 				),
 			},
@@ -288,6 +409,33 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 						"intranet_service_port_infos.0.port":        "8000",
 						"intranet_external_traffic_policy":          "Local",
 						"intranet_scheduler":                        "rr",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"custom_node_affinity_require": []map[string]interface{}{
+						{
+							"match_expressions": []map[string]interface{}{
+								{
+									"key":      "test",
+									"values":   []string{"aaaaa21", "bbbb21"},
+									"operator": "In",
+								},
+								{
+									"key":      "test51",
+									"values":   []string{"aaaaa521", "bbb521"},
+									"operator": "In",
+								},
+							},
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"custom_node_affinity_require":                           CHECKSET,
+						"custom_node_affinity_require.0.match_expressions.#":     "2",
+						"custom_node_affinity_require.0.match_expressions.1.key": "test51",
 					}),
 				),
 			},
@@ -484,29 +632,30 @@ func resourceEdasK8sApplicationConfigDependence(name string) string {
 			specification        = "slb.s2.small"
 		}
 
-		resource "alibabacloudstack_cs_kubernetes" "default" {
-		 name = var.name
-		 version 					= "1.20.11-aliyun.1"
-		 os_type 					= "linux"
-		 platform 					= "AliyunLinux"
-		 num_of_nodes 				= "1"
-		 master_count				= "3"
-		 master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
-		 master_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
-		 master_disk_category 		= "cloud_ssd"
-		 vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
-		 worker_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
-		 worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
-		 worker_disk_category 		= "cloud_ssd"
-		 password 					= "%s"
-		 pod_cidr 					= "172.20.0.0/16"
-		 service_cidr 				= "172.21.0.0/20"
-		 worker_disk_size 			= "40"
-		 master_disk_size 			= "40"
-		 slb_internet_enabled 		= "true"
-		}
-		resource "alibabacloudstack_edas_k8s_cluster" "default" {
-		  cs_cluster_id = "${alibabacloudstack_cs_kubernetes.default.id}"
-		}
-		`, name, VSwitchCommonTestCase, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackInstanceTypes, GeneratePassword(12))
+		// resource "alibabacloudstack_cs_kubernetes" "default" {
+		
+		//  name = var.name
+		//  version 					= "1.20.11-aliyun.1"
+		//  os_type 					= "linux"
+		//  platform 					= "AliyunLinux"
+		//  num_of_nodes 				= "1"
+		//  master_count				= "3"
+		//  master_vswitch_ids   		= ["${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}", "${alibabacloudstack_vpc_vswitch.default.id}"]
+		//  master_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}","${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
+		//  master_disk_category 		= "cloud_ssd"
+		//  vpc_id 					= "${alibabacloudstack_vpc_vpc.default.id}"
+		//  worker_instance_types 		= ["${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}"]
+		//  worker_vswitch_ids 		= ["${alibabacloudstack_vpc_vswitch.default.id}"]
+		//  worker_disk_category 		= "cloud_ssd"
+		//  password 					= " "
+		//  pod_cidr 					= "172.20.0.0/16"
+		//  service_cidr 				= "172.21.0.0/20"
+		//  worker_disk_size 			= "40"
+		//  master_disk_size 			= "40"
+		//  slb_internet_enabled 		= "true"
+		// }
+		// resource "alibabacloudstack_edas_k8s_cluster" "default" {
+		//   cs_cluster_id = "${alibabacloudstack_cs_kubernetes.default.id}"
+		// }
+		`, name, VSwitchCommonTestCase, DataAlibabacloudstackInstanceTypes, DataAlibabacloudstackInstanceTypes) // GeneratePassword(12))
 }

@@ -441,16 +441,22 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Required: true,
 						},
 						"operator": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"Equal", "Exists"}, false),
 						},
 						"value": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
 						"effect": {
-							Type:     schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"NoSchedule", "NoExecute", "PreferNoSchedule"}, false),
+						},
+						"tolerationSeconds": {
+							Type:     schema.TypeInt,
+							Optional: true,
 						},
 					},
 				},
@@ -470,8 +476,9 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Required: true,
 									},
 									"operator": {
-										Type:     schema.TypeString,
-										Required: true,
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validation.StringInSlice([]string{"In", "NotIn", "Exists", "DoesNotExist", "Gt", "Lt"}, false),
 									},
 									"values": {
 										Type:     schema.TypeList,
@@ -505,8 +512,9 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Required: true,
 									},
 									"operator": {
-										Type:     schema.TypeString,
-										Required: true,
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validation.StringInSlice([]string{"In", "NotIn", "Exists", "DoesNotExist", "Gt", "Lt"}, false),
 									},
 									"values": {
 										Type:     schema.TypeList,
@@ -543,8 +551,9 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Required: true,
 									},
 									"operator": {
-										Type:     schema.TypeString,
-										Required: true,
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validation.StringInSlice([]string{"In", "NotIn", "Exists", "DoesNotExist"}, false),
 									},
 									"values": {
 										Type:     schema.TypeList,
@@ -587,8 +596,9 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Required: true,
 									},
 									"operator": {
-										Type:     schema.TypeString,
-										Required: true,
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validation.StringInSlice([]string{"In", "NotIn", "Exists", "DoesNotExist"}, false),
 									},
 									"values": {
 										Type:     schema.TypeList,
@@ -625,8 +635,9 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Required: true,
 									},
 									"operator": {
-										Type:     schema.TypeString,
-										Required: true,
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validation.StringInSlice([]string{"In", "NotIn", "Exists", "DoesNotExist"}, false),
 									},
 									"values": {
 										Type:     schema.TypeList,
@@ -669,8 +680,9 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 										Required: true,
 									},
 									"operator": {
-										Type:     schema.TypeString,
-										Required: true,
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validation.StringInSlice([]string{"In", "NotIn", "Exists", "DoesNotExist"}, false),
 									},
 									"values": {
 										Type:     schema.TypeList,
@@ -852,6 +864,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	}
 	custom_args := BuildCustomArgs(d)
 	if len(custom_args) > 0 {
+		log.Printf("====================  custom_args  :\n%#v", custom_args)
 		data, err := json.Marshal(custom_args)
 		if err != nil {
 			return fmt.Errorf("custom args data to marshal JSON failed: %w \n%v", err, custom_args)
@@ -859,7 +872,7 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 		request.QueryParams["CustomAffinity"] = string(data)
 	}
 	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug("InsertK8sApplication", bresponse, request.QueryParams, request)
+	addDebug("InsertK8sApplication", bresponse, request, request.QueryParams)
 	if err != nil {
 		errmsg := ""
 		if bresponse != nil {
@@ -911,6 +924,13 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 		d.Set("custom_pod_affinity_preferred", custom_pod_affinity_preferred)
 		d.Set("custom_pod_ant_affinity_require", custom_pod_ant_affinity_require)
 		d.Set("custom_pod_ant_affinity_preferred", custom_pod_ant_affinity_preferred)
+	}
+	if response.Conf.Tolerations != "" {
+		tolerations := make([]interface{}, 0)
+		if err := json.Unmarshal([]byte(response.Conf.Tolerations), &tolerations); err != nil {
+			return errmsgs.WrapError(err)
+		}
+		d.Set("custom_tolerations", tolerations)
 	}
 	d.Set("application_name", response.App.ApplicationName)
 	d.Set("cluster_id", response.App.ClusterId)
@@ -1365,6 +1385,15 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 			request.QueryParams["CustomAffinity"] = string(data)
 		}
 		partialKeys = append(partialKeys, "custom_args")
+	}
+	if !d.IsNewResource() && d.HasChange("custom_tolerations") {
+		custom_tolerations := d.Get("custom_tolerations").(*schema.Set).List()
+		data, err := json.Marshal(custom_tolerations)
+		if err != nil {
+			return fmt.Errorf("custom tolerations data to marshal JSON failed: %w \n%v", err, custom_tolerations)
+		}
+		request.QueryParams["CustomTolerations"] = string(data)
+		partialKeys = append(partialKeys, "custom_tolerations")
 	}
 	// if d.HasChange("requests_m_cpu") {
 	// 	partialKeys = append(partialKeys, "requests_m_cpu")
