@@ -67,6 +67,15 @@ func TestAccAlibabacloudStackLogAlert_basic(t *testing.T) {
 							"service_uri": "www.aliyun.com",
 							"content":     content,
 						},
+						{
+							"type":        "Webhook",
+							"service_uri": "http://www.aliyun.com",
+							"content":     content,
+							"method":      "POST",
+							"headers": map[string]string{
+								"Foo": "Bar",
+							},
+						},
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
