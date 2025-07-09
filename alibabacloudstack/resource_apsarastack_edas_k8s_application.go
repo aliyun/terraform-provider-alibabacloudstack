@@ -454,7 +454,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"NoSchedule", "NoExecute", "PreferNoSchedule"}, false),
 						},
-						"tolerationSeconds": {
+						"toleration_seconds": {
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
@@ -856,6 +856,11 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	}
 	if v, ok := d.GetOk("custom_tolerations"); ok {
 		custom_tolerations := v.(*schema.Set).List()
+		for _, data:=range custom_tolerations {
+			custom_toleration := data.(map[string]interface{})
+			custom_toleration["tolerationSeconds"] = custom_toleration["toleration_seconds"]
+			delete(custom_toleration,"toleration_seconds")
+		}
 		data, err := json.Marshal(custom_tolerations)
 		if err != nil {
 			return fmt.Errorf("custom tolerations data to marshal JSON failed: %w \n%v", err, custom_tolerations)
@@ -929,6 +934,11 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 		tolerations := make([]interface{}, 0)
 		if err := json.Unmarshal([]byte(response.Conf.Tolerations), &tolerations); err != nil {
 			return errmsgs.WrapError(err)
+		}
+		for _, data:=range tolerations {
+			custom_toleration := data.(map[string]interface{})
+			custom_toleration["toleration_seconds"]= custom_toleration["tolerationSeconds"]
+			delete(custom_toleration,"tolerationSeconds")
 		}
 		d.Set("custom_tolerations", tolerations)
 	}
@@ -1388,6 +1398,11 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 	}
 	if !d.IsNewResource() && d.HasChange("custom_tolerations") {
 		custom_tolerations := d.Get("custom_tolerations").(*schema.Set).List()
+		for _, data:=range custom_tolerations {
+			custom_toleration := data.(map[string]interface{})
+			custom_toleration["tolerationSeconds"] = custom_toleration["toleration_seconds"]
+			delete(custom_toleration,"toleration_seconds")
+		}
 		data, err := json.Marshal(custom_tolerations)
 		if err != nil {
 			return fmt.Errorf("custom tolerations data to marshal JSON failed: %w \n%v", err, custom_tolerations)
