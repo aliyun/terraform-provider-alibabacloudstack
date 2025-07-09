@@ -209,12 +209,10 @@ func resourceAlibabacloudStackLogAlertCreate(d *schema.ResourceData, meta interf
 	}
 	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
 		_, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			dashboard := d.Get("dashboard").(string)
-			err := CreateDashboard(project_name, dashboard, slsClient)
-			if err != nil {
+			var err error
+			if alert.Configuration, err = createAlertConfig(d, slsClient); err != nil {
 				return nil, err
 			}
-			alert.Configuration = createAlertConfig(d, project_name, dashboard, slsClient)
 			return nil, slsClient.CreateAlert(project_name, alert)
 		})
 		if err != nil {
@@ -292,6 +290,14 @@ func resourceAlibabacloudStackLogAlertUpdate(d *schema.ResourceData, meta interf
 		return errmsgs.WrapError(err)
 	}
 
+	if d.IsNewResource() {
+		return nil
+	}
+
+	if !d.HasChangesExcept("project_name", "alert_name") {
+		return nil
+	}
+
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	params := &sls.Alert{
 		Name:        parts[1],
@@ -306,13 +312,10 @@ func resourceAlibabacloudStackLogAlertUpdate(d *schema.ResourceData, meta interf
 
 	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
 		_, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			project_name := d.Get("project_name").(string)
-			dashboard := d.Get("dashboard").(string)
-			err := CreateDashboard(project_name, dashboard, slsClient)
-			if err != nil {
+			var err error
+			if params.Configuration, err = createAlertConfig(d, slsClient); err != nil {
 				return nil, err
 			}
-			params.Configuration = createAlertConfig(d, project_name, dashboard, slsClient)
 			return nil, slsClient.UpdateAlert(parts[0], params)
 		})
 		if err != nil {
@@ -364,7 +367,16 @@ func resourceAlibabacloudStackLogAlertDelete(d *schema.ResourceData, meta interf
 	return errmsgs.WrapError(logService.WaitForLogstoreAlert(d.Id(), Deleted, DefaultTimeout))
 }
 
-func createAlertConfig(d *schema.ResourceData, project, dashboard string, client *sls.Client) *sls.AlertConfiguration {
+func createAlertConfig(d *schema.ResourceData, client *sls.Client) (*sls.AlertConfiguration, error) {
+
+	project := d.Get("project_name").(string)
+	dashboard := d.Get("dashboard").(string)
+	if d.HasChange("dashboard") {
+		err := CreateDashboard(project, dashboard, client)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	noti := []*sls.Notification{}
 	if v, ok := d.GetOk("notification_list"); ok {
@@ -434,10 +446,36 @@ func createAlertConfig(d *schema.ResourceData, project, dashboard string, client
 	queryList := []*sls.AlertQuery{}
 
 	if v, ok := d.GetOk("query_list"); ok {
-		for _, e := range v.([]interface{}) {
+		for index, e := range v.([]interface{}) {
 			query_map := e.(map[string]interface{})
+			if d.HasChange(fmt.Sprintf("query_list.%d", index)) {
+				chart := sls.Chart{
+					Title: query_map["chart_title"].(string),
+					Type:  "rawlog",
+					Search: sls.ChartSearch{
+						Logstore: project,
+						Topic:    "",
+						Query:    query_map["query"].(string),
+						Start:    query_map["start"].(string),
+						End:      query_map["end"].(string),
+					},
+					Display: sls.ChartDisplay{
+						DisplayName: query_map["chart_title"].(string),
+					},
+				}
+				if !d.IsNewResource() {
+					if err := client.DeleteChart(project, dashboard, chart.Title); err == nil {
+						if err := client.DeleteChart(project, dashboard, chart.Title); err != nil {
+							return nil, err
+						}
+					}
+				}
+				if err := client.CreateChart(project, dashboard, chart); err != nil {
+					return nil, err
+				}
+			}
 			query := &sls.AlertQuery{
-				ChartTitle:   GetCharTitile(project, dashboard, query_map["chart_title"].(string), client),
+				ChartTitle:   query_map["chart_title"].(string),
 				LogStore:     query_map["logstore"].(string),
 				Query:        query_map["query"].(string),
 				Start:        query_map["start"].(string),
@@ -463,7 +501,7 @@ func createAlertConfig(d *schema.ResourceData, project, dashboard string, client
 		Throttling:       d.Get("throttling").(string),
 		NotifyThreshold:  int32(d.Get("notify_threshold").(int)),
 	}
-	return config
+	return config, nil
 }
 
 func getNotiMap(v *sls.Notification) map[string]interface{} {
