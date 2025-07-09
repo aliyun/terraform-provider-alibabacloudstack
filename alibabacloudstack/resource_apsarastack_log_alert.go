@@ -464,7 +464,7 @@ func createAlertConfig(d *schema.ResourceData, client *sls.Client) (*sls.AlertCo
 					},
 				}
 				if !d.IsNewResource() {
-					if err := client.DeleteChart(project, dashboard, chart.Title); err == nil {
+					if _, err := client.GetChart(project, dashboard, chart.Title); err == nil {
 						if err := client.DeleteChart(project, dashboard, chart.Title); err != nil {
 							return nil, err
 						}
