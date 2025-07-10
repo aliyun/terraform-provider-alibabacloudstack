@@ -1,5 +1,5 @@
 ---
-subcategory: "bastionhostprivate"
+subcategory: "Bastion Host"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_bastionhost_instance"
 sidebar_current: "docs-alibabacloudstack-resource-bastionhost_instance"

@@ -1,6 +1,6 @@
 
 ---
-subcategory: "waf-onecs"
+subcategory: "Web Application Firewall"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_waf-instances"
 sidebar_current: "docs-alibabacloudstack-resource_waf-instances"

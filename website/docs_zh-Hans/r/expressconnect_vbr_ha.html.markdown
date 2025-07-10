@@ -1,5 +1,5 @@
 ---
-subcategory: "ExpressConnect"
+subcategory: "Express Connect"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_expressconnect_vbr_ha"
 sidebar_current: "docs-Alibabacloudstack-expressconnect-vbr_ha"

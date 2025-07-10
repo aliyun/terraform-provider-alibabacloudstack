@@ -1,5 +1,5 @@
 ---
-subcategory: "GraphDatabase(GPDB)"
+subcategory: "AnalyticDB for PostgreSQL(GPDB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_account"
 sidebar_current: "docs-Alibabacloudstack-gpdb-account"

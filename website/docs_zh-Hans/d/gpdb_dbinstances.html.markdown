@@ -1,16 +1,16 @@
 ---
-subcategory: "GraphDatabase(GPDB)"
+subcategory: "AnalyticDB for PostgreSQL(GPDB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_dbinstances"
 sidebar_current: "docs-Alibabacloudstack-datasource-gpdb-dbinstances"
 description: |- 
-  查询图数据库实例
+  查询云原生数据仓库 AnalyticDB PostgreSQL版实例
 ---
 
 # alibabacloudstack_gpdb_dbinstances
 -> **NOTE:** 该资源等效别名有: `alibabacloudstack_gpdb_instances`
 
-根据指定过滤条件列出当前凭证权限可以访问的图数据库实例列表。
+根据指定过滤条件列出当前凭证权限可以访问的云原生数据仓库 AnalyticDB PostgreSQL版实例列表。
 
 ## 示例用法
 

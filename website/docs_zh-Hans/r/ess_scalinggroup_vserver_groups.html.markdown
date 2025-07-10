@@ -1,5 +1,5 @@
 ---
-subcategory: "ESS"
+subcategory: "Auto Scaling (ESS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ess_scalinggroup_vserver_groups"
 sidebar_current: "docs-Alibabacloudstack-ess-scalinggroup-vserver-groups"

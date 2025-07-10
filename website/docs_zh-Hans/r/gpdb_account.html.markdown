@@ -1,15 +1,15 @@
 ---
-subcategory: "GraphDatabase(GPDB)"
+subcategory: "AnalyticDB for PostgreSQL(GPDB)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_gpdb_account"
 sidebar_current: "docs-Alibabacloudstack-gpdb-account"
 description: |- 
-  编排图数据库帐号
+  编排云原生数据仓库 AnalyticDB PostgreSQL版帐号
 ---
 
 # alibabacloudstack_gpdb_account
 
-使用Provider配置的凭证在指定的资源集下编排图数据库帐号。
+使用Provider配置的凭证在指定的资源集下编排云原生数据仓库 AnalyticDB PostgreSQL版帐号。
 
 ## 示例用法
 
