@@ -62,52 +62,47 @@ func resourceAlibabacloudStackDRDSInstance() *schema.Resource {
 func resourceAlibabacloudStackDRDSInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	drdsService := DrdsService{client}
-
-	request := drds.CreateCreateDrdsInstanceRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.Description = d.Get("description").(string)
-	request.Type = "PRIVATE"
-	request.ZoneId = d.Get("zone_id").(string)
-	request.Specification = d.Get("specification").(string)
-	request.PayType = d.Get("instance_charge_type").(string)
-	request.VswitchId = d.Get("vswitch_id").(string)
-	request.InstanceSeries = d.Get("instance_series").(string)
-	request.Quantity = "1"
-
-	if request.VswitchId != "" {
+	
+	action := "CreateDrdsInstance"
+	
+	reqQuery := map[string]interface{}{
+		"Description" : d.Get("description").(string),
+		"Type" : "PRIVATE",
+		"ZoneId" : d.Get("zone_id").(string),
+		"Specification" : d.Get("specification").(string),
+		"PayType" : d.Get("instance_charge_type").(string),
+		"VswitchId" : d.Get("vswitch_id").(string),
+		"InstanceSeries" : d.Get("instance_series").(string),
+		"ClientToken" : buildClientToken(action),
+		"Quantity" : "1",
+	}
+	
+	if reqQuery["VswitchId"] != "" {
 		vpcService := VpcService{client}
-		vsw, err := vpcService.DescribeVSwitch(request.VswitchId)
+		vsw, err := vpcService.DescribeVSwitch(reqQuery["VswitchId"].(string))
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-		request.VpcId = vsw.VpcId
+		reqQuery["VpcId"] = vsw.VpcId
 	}
-	request.ClientToken = buildClientToken(request.GetActionName())
-
-	if request.PayType == string(PostPaid) {
-		request.PayType = "drdsPost"
+	
+	if reqQuery["PayType"] == string(PostPaid) {
+		reqQuery["PayType"] = "drdsPost"
 	}
-	if request.PayType == string(PrePaid) {
-		request.PayType = "drdsPre"
+	if reqQuery["PayType"] == string(PrePaid) {
+		reqQuery["PayType"] = "drdsPre"
 	}
-
-	raw, err := client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
-		return drdsClient.CreateDrdsInstance(request)
-	})
-	bresponse, ok := raw.(*drds.CreateDrdsInstanceResponse)
+	
+	response ,err := client.DoTeaRequest("POST", "Drds", "2019-01-23", action, "", nil, reqQuery, nil )
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return err
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	idList := bresponse.Data.DrdsInstanceIdList.DrdsInstanceIdList
+
+	idList := response["Data"].(map[string]interface{})["DrdsInstanceIdList"].(map[string]interface{})["DrdsInstanceId"].([]interface{})
 	if len(idList) != 1 {
 		return errmsgs.WrapError(errmsgs.Error("failed to get DRDS instance id and response. DrdsInstanceIdList is %#v", idList))
 	}
-	d.SetId(idList[0])
+	d.SetId(idList[0].(string))
 
 	stateConf := BuildStateConf([]string{"DO_CREATE"}, []string{"RUN"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, drdsService.DrdsInstanceStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {

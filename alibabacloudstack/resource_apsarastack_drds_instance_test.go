@@ -130,7 +130,7 @@ func TestAccAlibabacloudStackDRDSInstance_Vpc(t *testing.T) {
 					"description":          "${var.name}",
 					"zone_id":              "${alibabacloudstack_vswitch.default.availability_zone}",
 					"instance_series":      "${var.instance_series}",
-					"instance_charge_type": "drdsPost",
+					"instance_charge_type": "PostPaid",
 					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
 					"specification":        "drds.sn2.4c16g.8C32G",
 				}),
