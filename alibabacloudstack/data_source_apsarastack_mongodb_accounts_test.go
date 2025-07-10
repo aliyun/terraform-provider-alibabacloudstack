@@ -17,7 +17,7 @@ func TestAccAlibabacloudStackMongodbAccountsDataSource(t *testing.T) {
 			"instance_id": `"${alibabacloudstack_mongodb_instance.default.id}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackMongodbAccountsDataSourceConfig(rand, account_password, map[string]string{
-			"ids":         `["${alibabacloudstack_mongodb_account.default.id}"]`,
+			"ids":         `["${alibabacloudstack_mongodb_account.default.id}_fake"]`,
 			"instance_id": `"${alibabacloudstack_mongodb_instance.default.id}"`,
 		}),
 	}
@@ -25,11 +25,11 @@ func TestAccAlibabacloudStackMongodbAccountsDataSource(t *testing.T) {
 	account_nameRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackMongodbAccountsDataSourceConfig(rand, account_password, map[string]string{
 			"instance_id":        `"${alibabacloudstack_mongodb_instance.default.id}"`,
-			"account_name_regex": `"testaccountv1"`,
+			"account_name_regex": `"${alibabacloudstack_mongodb_account.default.account_name}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackMongodbAccountsDataSourceConfig(rand, account_password, map[string]string{
 			"instance_id":        `"${alibabacloudstack_mongodb_instance.default.id}"`,
-			"account_name_regex": `"testaccountv1fake"`,
+			"account_name_regex": `"${alibabacloudstack_mongodb_account.default.account_name}_fake"`,
 		}),
 	}
 
@@ -37,12 +37,12 @@ func TestAccAlibabacloudStackMongodbAccountsDataSource(t *testing.T) {
 		existConfig: testAccCheckAlibabacloudstackMongodbAccountsDataSourceConfig(rand, account_password, map[string]string{
 			"ids":                `["${alibabacloudstack_mongodb_account.default.id}"]`,
 			"instance_id":        `"${alibabacloudstack_mongodb_instance.default.id}"`,
-			"account_name_regex": `"root"`,
+			"account_name_regex": `"${alibabacloudstack_mongodb_account.default.account_name}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackMongodbAccountsDataSourceConfig(rand, account_password, map[string]string{
 			"ids":                `["${alibabacloudstack_mongodb_account.default.id}"]`,
 			"instance_id":        `"${alibabacloudstack_mongodb_instance.default.id}"`,
-			"account_name_regex": `"root_fake"`,
+			"account_name_regex": `"${alibabacloudstack_mongodb_account.default.account_name}_fake"`,
 		}),
 	}
 	AlibabacloudstackMongodbAccountsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, account_nameRegexConf, allConf)
