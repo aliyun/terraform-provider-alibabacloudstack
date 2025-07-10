@@ -622,7 +622,7 @@ func (s *MongoDBService) DoDdsDescribeaccountsRequest(id string) (*DdsDescribeac
 	request := s.client.NewCommonRequest("POST", "Dds", "2022-11-21", "DescribeAccounts", "")
 	DdsDescribeaccountsResponseObj := &DdsDescribeaccountsResponse{}
 	//调用request_params_handler
-	parts := strings.Split(id, "_")
+	parts := strings.Split(id, COLON_SEPARATED)
 	instance_id := parts[1]
 	request.QueryParams["DBInstanceId"] = instance_id
 

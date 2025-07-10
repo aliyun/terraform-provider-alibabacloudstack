@@ -89,7 +89,7 @@ func resourceAlibabacloudStackMongodbAccountCreate(d *schema.ResourceData, meta 
 
 	instance_id := d.Get("instance_id").(string)
 
-	d.SetId(fmt.Sprintf("%s", account_name+":"+instance_id))
+	d.SetId(fmt.Sprintf("%s", account_name+COLON_SEPARATED+instance_id))
 	return nil
 
 }
@@ -107,7 +107,7 @@ func resourceAlibabacloudStackMongodbAccountUpdate(d *schema.ResourceData, meta 
 
 	// api: Dds - 2022-11-21 - ResetAccountPassword
 	if !d.IsNewResource() && d.HasChanges("account_password") {
-		parts := strings.Split(d.Id(), ":")
+		parts := strings.Split(d.Id(), COLON_SEPARATED)
 		account_name := parts[0]
 		instance_id := parts[1]
 		request := client.NewCommonRequest("POST", "Dds", "2022-11-21", "ResetAccountPassword", "")
@@ -143,7 +143,7 @@ func resourceAlibabacloudStackMongodbAccountUpdate(d *schema.ResourceData, meta 
 func resourceAlibabacloudStackMongodbAccountRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	mongo_dbaccountservice := MongoDBService{client}
-	parts := strings.Split(d.Id(), ":")
+	parts := strings.Split(d.Id(), COLON_SEPARATED)
 	account_name := parts[0]
 	response, err := mongo_dbaccountservice.DoDdsDescribeaccountsRequest(d.Id())
 	if err != nil {
@@ -168,7 +168,7 @@ func resourceAlibabacloudStackMongodbAccountRead(d *schema.ResourceData, meta in
 
 func resourceAlibabacloudStackMongodbAccountDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	parts := strings.Split(d.Id(), ":")
+	parts := strings.Split(d.Id(), COLON_SEPARATED)
 	account_name := parts[0]
 	instance_id := parts[1]
 	request := client.NewCommonRequest("POST", "Dds", "2022-11-21", "DeleteAccount", "")
