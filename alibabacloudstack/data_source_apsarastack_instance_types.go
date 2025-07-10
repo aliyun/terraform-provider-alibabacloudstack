@@ -2,6 +2,8 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"log"
 	"regexp"
 	"sort"
@@ -10,13 +12,14 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"time"
 )
 
 type instanceTypeWithOriginalPrice struct {
-	InstanceType ecs.InstanceType
+	InstanceType  ecs.InstanceType
 	OriginalPrice float64
 }
 
@@ -195,8 +198,19 @@ func dataSourceAlibabacloudStackInstanceTypesRead(d *schema.ResourceData, meta i
 	client.InitRpcRequest(*req.RpcRequest)
 	req.InstanceTypeFamily = family
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.DescribeInstanceTypes(req)
+	var raw interface{}
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			return ecsClient.DescribeInstanceTypes(req)
+		})
+
+		if err != nil {
+			if sdkErr, ok := err.(*errors.ServerError); ok && sdkErr.ErrorCode() == "asapi.server.timeout.socket" {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
 	})
 	resp, ok := raw.(*ecs.DescribeInstanceTypesResponse)
 	if err != nil {
@@ -286,11 +300,11 @@ func instanceTypesDescriptionAttributes(d *schema.ResourceData, types []instance
 	for _, t := range types {
 
 		mapping := map[string]interface{}{
-			"id":            t.InstanceType.InstanceTypeId,
+			"id":             t.InstanceType.InstanceTypeId,
 			"cpu_core_count": t.InstanceType.CpuCoreCount,
-			"memory_size":   t.InstanceType.MemorySize,
-			"family":        t.InstanceType.InstanceTypeFamily,
-			"eni_amount":    t.InstanceType.EniQuantity,
+			"memory_size":    t.InstanceType.MemorySize,
+			"family":         t.InstanceType.InstanceTypeFamily,
+			"eni_amount":     t.InstanceType.EniQuantity,
 		}
 		if sortedBy == "Price" {
 			mapping["price"] = fmt.Sprintf("%.4f", t.OriginalPrice)
@@ -300,7 +314,7 @@ func instanceTypesDescriptionAttributes(d *schema.ResourceData, types []instance
 		mapping["availability_zones"] = zoneIds
 
 		brust := []map[string]interface{}{{
-			"initial_credit": strconv.Itoa(t.InstanceType.InitialCredit),
+			"initial_credit":  strconv.Itoa(t.InstanceType.InitialCredit),
 			"baseline_credit": strconv.Itoa(t.InstanceType.BaselineCredit),
 		}}
 		mapping["burstable_instance"] = brust
