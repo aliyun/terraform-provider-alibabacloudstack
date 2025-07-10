@@ -118,7 +118,7 @@ func dataSourceAlibabacloudStackMongodbAccountsRead(d *schema.ResourceData, meta
 	datas := make([]interface{}, 0)
 	for _, data := range DdsDescribeaccountsResponseObj.Accounts.Account {
 		if len(idsMap) > 0 {
-			if _, ok := idsMap[data.AccountName+"_"+data.DBInstanceId]; !ok {
+			if _, ok := idsMap[data.AccountName+":"+data.DBInstanceId]; !ok {
 				continue
 			}
 		}
@@ -144,7 +144,7 @@ func dataSourceAlibabacloudStackMongodbAccountsRead(d *schema.ResourceData, meta
 
 		instance_id := data.DBInstanceId
 
-		ids = append(ids, account_name+"_"+instance_id)
+		ids = append(ids, account_name+":"+instance_id)
 	}
 
 	d.SetId(dataResourceIdHash(ids))
