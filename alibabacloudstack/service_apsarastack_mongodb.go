@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
@@ -19,6 +20,28 @@ import (
 
 type MongoDBService struct {
 	client *connectivity.AlibabacloudStackClient
+}
+
+type DdsDescribeaccountsResponse struct {
+	Accounts struct {
+		Account []struct {
+			Roles struct {
+				AccountRole []struct {
+					DatabaseName string `json:"DatabaseName"`
+					RoleName     string `json:"RoleName"`
+				} `json:"AccountRole"`
+			} `json:"Roles"`
+			DBInstanceId       string `json:"DBInstanceId"`
+			AccountName        string `json:"AccountName"`
+			DatabaseName       string `json:"DatabaseName"`
+			AccountStatus      string `json:"AccountStatus"`
+			AccountDescription string `json:"AccountDescription"`
+			CharacterType      string `json:"CharacterType"`
+			AccountType        string `json:"AccountType"`
+			AccountId          int    `json:"AccountId"`
+		} `json:"Account"`
+	} `json:"Accounts"`
+	RequestId string `json:"RequestId"`
 }
 
 func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInstance, err error) {
@@ -592,4 +615,31 @@ func (s *MongoDBService) tagsFromMap(m map[string]interface{}) []dds.TagResource
 	}
 
 	return result
+}
+
+func (s *MongoDBService) DoDdsDescribeaccountsRequest(id string) (*DdsDescribeaccountsResponse, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("POST", "Dds", "2022-11-21", "DescribeAccounts", "")
+	DdsDescribeaccountsResponseObj := &DdsDescribeaccountsResponse{}
+	//调用request_params_handler
+	parts := strings.Split(id, "_")
+	instance_id := parts[1]
+	request.QueryParams["DBInstanceId"] = instance_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeAccounts", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsDescribeaccountsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return DdsDescribeaccountsResponseObj, nil
 }

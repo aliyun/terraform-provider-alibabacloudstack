@@ -385,6 +385,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_kvstore_instance_classes":                dataSourceAlibabacloudStackKVStoreInstanceClasses(),
 		"alibabacloudstack_kvstore_instance_engines":                dataSourceAlibabacloudStackKVStoreInstanceEngines(),
 		"alibabacloudstack_mongodb_instances":                       dataSourceAlibabacloudStackMongoDBInstances(),
+		"alibabacloudstack_mongodb_accounts":                        dataSourceAlibabacloudStackMongodbAccounts(),
 		"alibabacloudstack_mongodb_zones":                           dataSourceAlibabacloudStackMongoDBZones(),
 		"alibabacloudstack_maxcompute_cus":                          dataSourceAlibabacloudStackMaxcomputeCus(),
 		"alibabacloudstack_maxcompute_users":                        dataSourceAlibabacloudStackMaxcomputeUsers(),
@@ -504,7 +505,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_vpc_ha_vips":                      dataSourceAlibabacloudStackVpcHaVips(),
 		"alibabacloudstack_vpngateway_vpn_pbr_route_entries": dataSourceAlibabacloudStackVpngatewayVpnPbrRouteEntries(),
 		"alibabacloudstack_expressconnect_bgp_groups":        dataSourceAlibabacloudStackExpressconnectBgpGroups(),
-		"alibabacloudstack_expressconnect_bgp_peers":        dataSourceAlibabacloudStackExpressconnectBgpPeers(),
+		"alibabacloudstack_expressconnect_bgp_peers":         dataSourceAlibabacloudStackExpressconnectBgpPeers(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -706,6 +707,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_maxcompute_user":                       resourceAlibabacloudStackMaxcomputeUser(),
 		"alibabacloudstack_maxcompute_cu":                         resourceAlibabacloudStackMaxcomputeCu(),
 		"alibabacloudstack_mongodb_instance":                      resourceAlibabacloudStackMongoDBInstance(),
+		"alibabacloudstack_mongodb_account":                       resourceAlibabacloudStackMongodbAccount(),
 		"alibabacloudstack_mongodb_sharding_instance":             resourceAlibabacloudStackMongoDBShardingInstance(),
 		"alibabacloudstack_mongodb_shardinginstance":              resourceAlibabacloudStackMongoDBShardingInstance(),
 		"alibabacloudstack_nas_access_group":                      resourceAlibabacloudStackNasAccessGroup(),
