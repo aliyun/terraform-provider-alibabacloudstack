@@ -432,7 +432,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				},
 			},
 			"custom_tolerations": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -464,12 +464,12 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				},
 			},
 			"custom_node_affinity_require": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"match_expressions": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -495,7 +495,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				},
 			},
 			"custom_node_affinity_preferred": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -506,7 +506,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							ValidateFunc: validation.IntBetween(1, 100),
 						},
 						"match_expressions": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -532,12 +532,12 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				},
 			},
 			"custom_pod_affinity_require": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"k8s_namespace": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
@@ -546,7 +546,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Required: true,
 						},
 						"match_expressions": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -572,7 +572,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				},
 			},
 			"custom_pod_affinity_preferred": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -583,7 +583,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							ValidateFunc: validation.IntBetween(1, 100),
 						},
 						"k8s_namespace": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
@@ -592,7 +592,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Required: true,
 						},
 						"match_expressions": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -618,12 +618,12 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				},
 			},
 			"custom_pod_ant_affinity_require": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"k8s_namespace": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
@@ -632,7 +632,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Required: true,
 						},
 						"match_expressions": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -658,7 +658,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 				},
 			},
 			"custom_pod_ant_affinity_preferred": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -669,7 +669,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							ValidateFunc: validation.IntBetween(1, 100),
 						},
 						"k8s_namespace": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
 						},
@@ -678,7 +678,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 							Required: true,
 						},
 						"match_expressions": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -1707,11 +1707,11 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 
 	// node_affinity
 	node_affinity_require := make([]map[string]interface{}, 0)
-	custom_node_affinity_requires := d.Get("custom_node_affinity_require").(*schema.Set).List()
+	custom_node_affinity_requires := d.Get("custom_node_affinity_require").([]interface{})
 	if len(custom_node_affinity_requires) > 0 {
 		for _, custom_node_affinity_require := range custom_node_affinity_requires {
 			custom_node_affinity_require_map := custom_node_affinity_require.(map[string]interface{})
-			custom_node_affinity_require_match_expressions := custom_node_affinity_require_map["match_expressions"].(*schema.Set).List()
+			custom_node_affinity_require_match_expressions := custom_node_affinity_require_map["match_expressions"].([]interface{})
 			expressions := BuildMatchExpression(custom_node_affinity_require_match_expressions)
 			if len(custom_node_affinity_require_match_expressions) > 0 {
 				node_affinity_require = append(node_affinity_require, map[string]interface{}{
@@ -1721,12 +1721,12 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 		}
 	}
 	node_affinity_preferred := make([]map[string]interface{}, 0)
-	custom_node_affinity_preferreds := d.Get("custom_node_affinity_preferred").(*schema.Set).List()
+	custom_node_affinity_preferreds := d.Get("custom_node_affinity_preferred").([]interface{})
 	if len(custom_node_affinity_preferreds) > 0 {
 		for _, custom_node_affinity_preferred := range custom_node_affinity_preferreds {
 			custom_node_affinity_preferred_map := custom_node_affinity_preferred.(map[string]interface{})
 			weight := custom_node_affinity_preferred_map["weight"].(int)
-			custom_node_affinity_preferred_match_expressions := custom_node_affinity_preferred_map["match_expressions"].(*schema.Set).List()
+			custom_node_affinity_preferred_match_expressions := custom_node_affinity_preferred_map["match_expressions"].([]interface{})
 			expressions := BuildMatchExpression(custom_node_affinity_preferred_match_expressions)
 			if len(custom_node_affinity_preferred_match_expressions) > 0 {
 				node_affinity_preferred = append(node_affinity_preferred, map[string]interface{}{
@@ -1753,13 +1753,13 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 
 	// pod_affinity
 	pod_affinity_require := make([]map[string]interface{}, 0)
-	custom_pod_affinity_requires := d.Get("custom_pod_affinity_require").(*schema.Set).List()
+	custom_pod_affinity_requires := d.Get("custom_pod_affinity_require").([]interface{})
 	if len(custom_pod_affinity_requires) > 0 {
 		for _, custom_pod_affinity_require := range custom_pod_affinity_requires {
 			custom_pod_affinity_require_map := custom_pod_affinity_require.(map[string]interface{})
-			custom_pod_affinity_require_match_expressions := custom_pod_affinity_require_map["match_expressions"].(*schema.Set).List()
+			custom_pod_affinity_require_match_expressions := custom_pod_affinity_require_map["match_expressions"].([]interface{})
 			expressions := BuildMatchExpression(custom_pod_affinity_require_match_expressions)
-			k8s_namespace := custom_pod_affinity_require_map["k8s_namespace"].(*schema.Set).List()
+			k8s_namespace := custom_pod_affinity_require_map["k8s_namespace"].([]interface{})
 			topology_key := custom_pod_affinity_require_map["topology_key"].(string)
 			if len(custom_pod_affinity_require_match_expressions) > 0 {
 				pod_affinity_require = append(pod_affinity_require, map[string]interface{}{
@@ -1773,13 +1773,13 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 		}
 	}
 	pod_affinity_preferred := make([]map[string]interface{}, 0)
-	custom_pod_affinity_preferreds := d.Get("custom_pod_affinity_preferred").(*schema.Set).List()
+	custom_pod_affinity_preferreds := d.Get("custom_pod_affinity_preferred").([]interface{})
 	if len(custom_pod_affinity_preferreds) > 0 {
 		for _, custom_pod_affinity_preferred := range custom_pod_affinity_preferreds {
 			custom_pod_affinity_preferred_map := custom_pod_affinity_preferred.(map[string]interface{})
-			custom_pod_affinity_preferred_match_expressions := custom_pod_affinity_preferred_map["match_expressions"].(*schema.Set).List()
+			custom_pod_affinity_preferred_match_expressions := custom_pod_affinity_preferred_map["match_expressions"].([]interface{})
 			expressions := BuildMatchExpression(custom_pod_affinity_preferred_match_expressions)
-			k8s_namespace := custom_pod_affinity_preferred_map["k8s_namespace"].(*schema.Set).List()
+			k8s_namespace := custom_pod_affinity_preferred_map["k8s_namespace"].([]interface{})
 			topology_key := custom_pod_affinity_preferred_map["topology_key"].(string)
 			weight := custom_pod_affinity_preferred_map["weight"].(int)
 			if len(expressions) > 0 {
@@ -1809,13 +1809,13 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 
 	// pod_ant_affinity
 	pod_ant_affinity_require := make([]map[string]interface{}, 0)
-	custom_pod_ant_affinity_requires := d.Get("custom_pod_ant_affinity_require").(*schema.Set).List()
+	custom_pod_ant_affinity_requires := d.Get("custom_pod_ant_affinity_require").([]interface{})
 	if len(custom_pod_ant_affinity_requires) > 0 {
 		for _, custom_pod_ant_affinity_require := range custom_pod_ant_affinity_requires {
 			custom_pod_ant_affinity_require_map := custom_pod_ant_affinity_require.(map[string]interface{})
-			custom_pod_ant_affinity_require_match_expressions := custom_pod_ant_affinity_require_map["match_expressions"].(*schema.Set).List()
+			custom_pod_ant_affinity_require_match_expressions := custom_pod_ant_affinity_require_map["match_expressions"].([]interface{})
 			expressions := BuildMatchExpression(custom_pod_ant_affinity_require_match_expressions)
-			k8s_namespace := custom_pod_ant_affinity_require_map["k8s_namespace"].(*schema.Set).List()
+			k8s_namespace := custom_pod_ant_affinity_require_map["k8s_namespace"].([]interface{})
 			topology_key := custom_pod_ant_affinity_require_map["topology_key"].(string)
 			if len(expressions) > 0 {
 				pod_ant_affinity_require = append(pod_ant_affinity_require, map[string]interface{}{
@@ -1829,13 +1829,13 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 		}
 	}
 	pod_ant_affinity_preferred := make([]map[string]interface{}, 0)
-	custom_pod_ant_affinity_preferreds := d.Get("custom_pod_ant_affinity_preferred").(*schema.Set).List()
+	custom_pod_ant_affinity_preferreds := d.Get("custom_pod_ant_affinity_preferred").([]interface{})
 	if len(custom_pod_ant_affinity_preferreds) > 0 {
 		for _, custom_pod_ant_affinity_preferred := range custom_pod_ant_affinity_preferreds {
 			custom_pod_ant_affinity_preferred_map := custom_pod_ant_affinity_preferred.(map[string]interface{})
-			custom_pod_ant_affinity_preferred_match_expressions := custom_pod_ant_affinity_preferred_map["match_expressions"].(*schema.Set).List()
+			custom_pod_ant_affinity_preferred_match_expressions := custom_pod_ant_affinity_preferred_map["match_expressions"].([]interface{})
 			expressions := BuildMatchExpression(custom_pod_ant_affinity_preferred_match_expressions)
-			k8s_namespace := custom_pod_ant_affinity_preferred_map["k8s_namespace"].(*schema.Set).List()
+			k8s_namespace := custom_pod_ant_affinity_preferred_map["k8s_namespace"].([]interface{})
 			topology_key := custom_pod_ant_affinity_preferred_map["topology_key"].(string)
 			weight := custom_pod_ant_affinity_preferred_map["weight"].(int)
 			if len(expressions) > 0 {
