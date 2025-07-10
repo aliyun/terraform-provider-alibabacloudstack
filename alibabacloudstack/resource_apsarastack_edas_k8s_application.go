@@ -862,23 +862,12 @@ func resourceAlibabacloudStackEdasK8sApplicationCreate(d *schema.ResourceData, m
 	if v, ok := d.GetOk("limit_m_cpu"); ok {
 		request.QueryParams["LimitmCpu"] = fmt.Sprintf("%d", v.(int))
 	}
-	if v, ok := d.GetOk("custom_tolerations"); ok {
-		custom_tolerations := v.(*schema.Set).List()
-		for _, data := range custom_tolerations {
-			custom_toleration := data.(map[string]interface{})
-			if custom_toleration["operator"] == "Exists" {
-				delete(custom_toleration, "value")
-			}
-			if custom_toleration["effect"] == "NoExecute" {
-				custom_toleration["tolerationSeconds"] = custom_toleration["toleration_seconds"]
-			}
-			delete(custom_toleration, "toleration_seconds")
+	if _, ok := d.GetOk("custom_tolerations"); ok {
+		if data, err := buildCustomTolerationsParam(d); err != nil {
+			return err
+		} else {
+			request.QueryParams["CustomTolerations"] = data
 		}
-		data, err := json.Marshal(custom_tolerations)
-		if err != nil {
-			return fmt.Errorf("custom tolerations data to marshal JSON failed: %w \n%v", err, custom_tolerations)
-		}
-		request.QueryParams["CustomTolerations"] = string(data)
 	}
 	custom_args := BuildCustomArgs(d)
 	if len(custom_args) > 0 {
@@ -950,9 +939,8 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 		}
 		for _, data := range tolerations {
 			custom_toleration := data.(map[string]interface{})
-			toleration_seconds, ok := custom_toleration["tolerationSeconds"]
-			if ok {
-				custom_toleration["toleration_seconds"] = custom_toleration["tolerationSeconds"]
+			if v, ok := custom_toleration["tolerationSeconds"]; ok {
+				custom_toleration["toleration_seconds"] = v
 			}
 			delete(custom_toleration, "tolerationSeconds")
 		}
@@ -1413,23 +1401,12 @@ func resourceAlibabacloudStackEdasK8sApplicationUpdate(d *schema.ResourceData, m
 		partialKeys = append(partialKeys, "custom_args")
 	}
 	if !d.IsNewResource() && d.HasChange("custom_tolerations") {
-		custom_tolerations := d.Get("custom_tolerations").(*schema.Set).List()
-		for _, data := range custom_tolerations {
-			custom_toleration := data.(map[string]interface{})
-			if custom_toleration["operator"] == "Exists" {
-				delete(custom_toleration, "value")
-			}
-			if custom_toleration["effect"] == "NoExecute" {
-				custom_toleration["tolerationSeconds"] = custom_toleration["toleration_seconds"]
-			}
-			delete(custom_toleration, "toleration_seconds")
+		if data, err := buildCustomTolerationsParam(d); err != nil {
+			return err
+		} else {
+			request.QueryParams["CustomTolerations"] = string(data)
+			partialKeys = append(partialKeys, "custom_tolerations")
 		}
-		data, err := json.Marshal(custom_tolerations)
-		if err != nil {
-			return fmt.Errorf("custom tolerations data to marshal JSON failed: %w \n%v", err, custom_tolerations)
-		}
-		request.QueryParams["CustomTolerations"] = string(data)
-		partialKeys = append(partialKeys, "custom_tolerations")
 	}
 	// if d.HasChange("requests_m_cpu") {
 	// 	partialKeys = append(partialKeys, "requests_m_cpu")
@@ -1738,7 +1715,7 @@ func BuildCustomArgs(d *schema.ResourceData) map[string]interface{} {
 			expressions := BuildMatchExpression(custom_node_affinity_require_match_expressions)
 			if len(custom_node_affinity_require_match_expressions) > 0 {
 				node_affinity_require = append(node_affinity_require, map[string]interface{}{
-					"matchExpressions": expressions
+					"matchExpressions": expressions,
 				})
 			}
 		}
@@ -2012,4 +1989,33 @@ func ReadAffinityArgs(affinity EdasK8sAppAffinity) ([]map[string]interface{}, []
 	}
 
 	return custom_node_affinity_require, custom_node_affinity_preferred, custom_pod_affinity_require, custom_pod_affinity_preferred, custom_pod_ant_affinity_require, custom_pod_ant_affinity_preferred
+}
+
+func buildCustomTolerationsParam(d *schema.ResourceData) (string, error) {
+	custom_tolerations := []interface{}{}
+	count := d.Get("custom_tolerations.#").(int)
+	for index := 0; index < count; index++ {
+		prexKey := fmt.Sprintf("custom_tolerations.%d.", index)
+		custom_toleration := map[string]interface{}{
+			"key":      d.Get(prexKey + "key"),
+			"operator": d.Get(prexKey + "operator"),
+			"effect":   d.Get(prexKey + "effect"),
+		}
+		if v, ok := d.GetOk(prexKey + "value"); ok && d.Get(prexKey+"operator") != "Exists" {
+			custom_toleration["value"] = v
+		}
+		if v, ok := d.GetOk(prexKey + "toleration_seconds"); ok {
+			if custom_toleration["effect"] != "NoExecute" {
+				return "", fmt.Errorf("%s.effect: Invalid value: \"%s\": effect must be 'NoExecute' when `toleration_seconds` is set", prexKey, custom_toleration["effect"])
+			}
+			custom_toleration["tolerationSeconds"] = v
+		}
+		custom_tolerations = append(custom_tolerations, custom_toleration)
+	}
+
+	data, err := json.Marshal(custom_tolerations)
+	if err != nil {
+		return "", fmt.Errorf("custom tolerations data to marshal JSON failed: %w \n%v", err, custom_tolerations)
+	}
+	return string(data), nil
 }
