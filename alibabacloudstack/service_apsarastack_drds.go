@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/drds"
@@ -33,7 +34,7 @@ func (s *DrdsService) DescribeDrdsInstance(id string) (*drds.DescribeDrdsInstanc
 		return response, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	
+
 	if response.Data.Status == "5" {
 		return response, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -90,4 +91,185 @@ func (s *DrdsService) WaitDrdsInstanceConfigEffect(id string, item map[string]st
 	}
 
 	return nil
+}
+
+type DrdsDescribedrdsdbResponse struct {
+	RequestId string `json:"RequestId"`
+	Success   bool   `json:"Success"`
+
+	Data struct {
+		DbName     string `json:"DbName"`
+		Status     string `json:"Status"`
+		CreateTime string `json:"CreateTime"`
+		Mode       string `json:"Mode"`
+		Schema     string `json:"Schema"`
+		DbInstType string `json:"DbInstType"`
+		InstRole   string `json:"InstRole"`
+	} `json:"Data"`
+}
+
+func (s *DrdsService) DoDrdsDescribedrdsdbRequest(id string) (*DrdsDescribedrdsdbResponse, error) {
+
+	var instanceId, databaseName string
+	if parts, err := ParseResourceId(id, 2); err != nil {
+		return nil, err
+	} else {
+		instanceId = parts[0]
+		databaseName = parts[1]
+	}
+
+	// api: Drds - 2019-01-23 - DescribeDrdsDB
+	request := s.client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeDrdsDB", "")
+	DrdsDescribedrdsdbResponse := &DrdsDescribedrdsdbResponse{}
+
+	//调用request_params_handler
+
+	request.QueryParams["DbName"] = databaseName
+
+	request.QueryParams["DrdsInstanceId"] = instanceId
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDrdsDB", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsDescribedrdsdbResponse)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDrdsDB", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return DrdsDescribedrdsdbResponse, nil
+}
+
+type DrdsDescribedrdsdbipwhitelistResponse struct {
+	IpWhiteList struct {
+		Ip []string `json:"Ip"`
+	} `json:"IpWhiteList"`
+	RequestId string `json:"RequestId"`
+	Success   bool   `json:"Success"`
+}
+
+func (s *DrdsService) DoDrdsDescribedrdsdbipwhitelistRequest(id string) (*DrdsDescribedrdsdbipwhitelistResponse, error) {
+	var instanceId, databaseName string
+	if parts, err := ParseResourceId(id, 2); err != nil {
+		return nil, err
+	} else {
+		instanceId = parts[0]
+		databaseName = parts[1]
+	}
+	// api: Drds - 2019-01-23 - DescribeDrdsDBIpWhiteList
+	request := s.client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeDrdsDBIpWhiteList", "")
+	DrdsDescribedrdsdbipwhitelistResponse := &DrdsDescribedrdsdbipwhitelistResponse{}
+
+	//调用request_params_handler
+
+	request.QueryParams["DbName"] = databaseName
+
+	request.QueryParams["DrdsInstanceId"] = instanceId
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDrdsDBIpWhiteList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsDescribedrdsdbipwhitelistResponse)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDrdsDBIpWhiteList", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return DrdsDescribedrdsdbipwhitelistResponse, nil
+}
+
+type DrdsDescribedrdsdbsResponse struct {
+	Data struct {
+		Db []struct {
+			DbName     string `json:"DbName"`
+			Status     string `json:"Status"`
+			CreateTime string `json:"CreateTime"`
+			Mode       string `json:"Mode"`
+			Schema     string `json:"Schema"`
+			DbInstType string `json:"DbInstType"`
+		} `json:"Db"`
+	} `json:"Data"`
+	RequestId  string `json:"RequestId"`
+	Success    bool   `json:"Success"`
+	PageNumber string `json:"PageNumber"`
+	PageSize   string `json:"PageSize"`
+	Total      string `json:"Total"`
+}
+
+func (s *DrdsService) DoDrdsDescribedrdsdbsRequest(id string) (*DrdsDescribedrdsdbsResponse, error) {
+	// api: Drds - 2019-01-23 - DescribeDrdsDBs
+	request := s.client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeDrdsDBs", "")
+	DrdsDescribedrdsdbsResponse := &DrdsDescribedrdsdbsResponse{}
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDrdsDBs", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsDescribedrdsdbsResponse)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDrdsDBs", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return DrdsDescribedrdsdbsResponse, nil
+}
+
+type DrdsDescribeinstanceaccountsResponse struct {
+	InstanceAccounts struct {
+		InstanceAccount []struct {
+			DbPrivileges struct {
+				DbPrivilege []struct {
+					DbName    string `json:"DbName"`
+					Privilege string `json:"Privilege"`
+				} `json:"DbPrivilege"`
+			} `json:"DbPrivileges"`
+			AccountName string `json:"AccountName"`
+			Host        string `json:"Host"`
+			AccountType int    `json:"AccountType"`
+			Description string `json:"Description"`
+		} `json:"InstanceAccount"`
+	} `json:"InstanceAccounts"`
+	RequestId string `json:"RequestId"`
+	Success   bool   `json:"Success"`
+}
+
+func (s *DrdsService) DoDrdsDescribeinstanceaccountsRequest(id string) (*DrdsDescribeinstanceaccountsResponse, error) {
+	// api: Drds - 2019-01-23 - DescribeInstanceAccounts
+	request := s.client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeInstanceAccounts", "")
+	DrdsDescribeinstanceaccountsResponse := &DrdsDescribeinstanceaccountsResponse{}
+
+	//调用request_params_handler
+	request.QueryParams["DrdsInstanceId"] = id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeInstanceAccounts", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsDescribeinstanceaccountsResponse)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeInstanceAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	return DrdsDescribeinstanceaccountsResponse, nil
 }
