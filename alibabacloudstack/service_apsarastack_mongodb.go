@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -48,8 +49,22 @@ func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInst
 	request := dds.CreateDescribeDBInstanceAttributeRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
-		return client.DescribeDBInstanceAttribute(request)
+	// raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+	// 	return client.DescribeDBInstanceAttribute(request)
+	// })
+	var raw interface{}
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		raw, err = s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+			return client.DescribeDBInstanceAttribute(request)
+		})
+
+		if err != nil {
+			if sdkErr, ok := err.(*errors.ServerError); ok && sdkErr.ErrorCode() == "InternalError" {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
 	})
 	bresponse, ok := raw.(*dds.DescribeDBInstanceAttributeResponse)
 	if err != nil {
