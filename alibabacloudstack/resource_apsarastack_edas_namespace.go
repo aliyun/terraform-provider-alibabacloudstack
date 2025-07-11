@@ -43,6 +43,10 @@ func resourceAlibabacloudStackEdasNamespace() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringLenBetween(1, 63),
 			},
+			"tenant_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackEdasNamespaceCreate, resourceAlibabacloudStackEdasNamespaceRead, resourceAlibabacloudStackEdasNamespaceUpdate, resourceAlibabacloudStackEdasNamespaceDelete)
@@ -111,6 +115,16 @@ func resourceAlibabacloudStackEdasNamespaceRead(d *schema.ResourceData, meta int
 	d.Set("description", object["Description"])
 	d.Set("namespace_logical_id", object["RegionId"])
 	d.Set("namespace_name", object["RegionName"])
+
+	reqQuery := map[string]interface{}{
+		"NamespaceId": object["RegionId"],
+	}
+	response, err := client.DoTeaRequest("GET", "Edas", "2017-08-01", "GetSecureToken", "/pop/v5/secure_token", nil, reqQuery, nil)
+	if err != nil {
+		return err
+	}
+	d.Set("tenant_id", response["SecureToken"].(map[string]interface{})["TenantId"].(string))
+
 	return nil
 }
 
