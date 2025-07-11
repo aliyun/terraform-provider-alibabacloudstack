@@ -139,7 +139,7 @@ func resourceAlibabacloudStackAcmConfigurationUpdate(d *schema.ResourceData, met
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// api: acm - 2020-02-06 - DeployConfiguration
-	if d.HasChanges("app_name", "content", "desc", "group", "tags", "type") {
+	if !d.IsNewResource() && d.HasChanges("app_name", "content", "desc", "group", "tags", "type") {
 		request := client.NewCommonRequest("PUT", "acm", "2020-02-06", "DeployConfiguration", "/diamond-ops/pop/configuration")
 
 		params := strings.Split(d.Id(), ":")
