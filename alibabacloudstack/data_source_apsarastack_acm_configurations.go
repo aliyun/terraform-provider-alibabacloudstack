@@ -166,7 +166,7 @@ func dataSourceAlibabacloudStackAcmConfigurationsRead(d *schema.ResourceData, me
 
 	var ids []string
 	datas := make([]interface{}, 0)
-	for _, data := range AcmDescribeconfigurationsResponseObj.Configurations {
+	for _, data := range AcmDescribeconfigurationsResponseObj.Configurations.Configuration {
 		i := map[string]interface{}{
 			"app_name": data.AppName,
 

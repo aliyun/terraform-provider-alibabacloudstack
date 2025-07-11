@@ -33,7 +33,7 @@ type AcmDescribeconfigurationResponse struct {
 
 func (s *AcmService) DoAcmDescribeconfigurationRequest(id string) (*AcmDescribeconfigurationResponse, error) {
 	// api: acm - 2020-02-06 - DescribeConfiguration
-	request := s.client.NewCommonRequest("GET", "acm", "2020-02-06", "DescribeConfiguration", "")
+	request := s.client.NewCommonRequest("GET", "acm", "2020-02-06", "DescribeConfiguration", "/diamond-ops/pop/configuration")
 	AcmDescribeconfigurationResponseObj := &AcmDescribeconfigurationResponse{}
 
 	params := strings.Split(id, ":")
@@ -42,7 +42,10 @@ func (s *AcmService) DoAcmDescribeconfigurationRequest(id string) (*AcmDescribec
 
 	request.QueryParams["Group"] = params[1]
 
+	request.QueryParams["NamespaceId"] = params[2]
+
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -86,6 +89,7 @@ func (s *AcmService) DoAcmDescribeconfigurationsRequest(d *schema.ResourceData, 
 	AcmDescribeconfigurationsResponseObj := &AcmDescribeconfigurationsResponse{}
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
