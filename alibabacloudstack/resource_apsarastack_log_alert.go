@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	sls "github.com/aliyun/aliyun-log-go-sdk"
@@ -102,6 +103,7 @@ func resourceAlibabacloudStackLogAlert() *schema.Resource {
 							ValidateFunc: validation.StringInSlice([]string{
 								sls.NotificationTypeSMS,
 								sls.NotificationTypeDingTalk,
+								sls.NotificationTypeWebhook,
 								sls.NotificationTypeEmail,
 								sls.NotificationTypeMessageCenter},
 								false),
@@ -113,16 +115,59 @@ func resourceAlibabacloudStackLogAlert() *schema.Resource {
 						"service_uri": {
 							Type:     schema.TypeString,
 							Optional: true,
+							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+								notiType := getNotiType(d, k)
+								if notiType == sls.NotificationTypeDingTalk || notiType == sls.NotificationTypeWebhook {
+									return oldValue == newValue
+								}
+								return true
+							},
 						},
 						"mobile_list": {
 							Type:     schema.TypeSet,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
+							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+								if getNotiType(d, k) == sls.NotificationTypeSMS {
+									return oldValue == newValue
+								}
+								return true
+							},
 						},
 						"email_list": {
 							Type:     schema.TypeSet,
 							Optional: true,
 							Elem:     &schema.Schema{Type: schema.TypeString},
+							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+								if getNotiType(d, k) == sls.NotificationTypeEmail {
+									return oldValue == newValue
+								}
+								return true
+							},
+						},
+						"method": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"GET", "POST", "DELETE", "PUT", "OPTIONS"}, false),
+							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+								if getNotiType(d, k) == sls.NotificationTypeWebhook {
+									return oldValue == newValue
+								}
+								return true
+							},
+						},
+						"headers": {
+							Type:     schema.TypeMap,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+								if getNotiType(d, k) == sls.NotificationTypeWebhook {
+									return oldValue == newValue
+								}
+								return true
+							},
 						},
 					},
 				},
@@ -164,12 +209,10 @@ func resourceAlibabacloudStackLogAlertCreate(d *schema.ResourceData, meta interf
 	}
 	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
 		_, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			dashboard := d.Get("dashboard").(string)
-			err := CreateDashboard(project_name, dashboard, slsClient)
-			if err != nil {
+			var err error
+			if alert.Configuration, err = createAlertConfig(d, slsClient); err != nil {
 				return nil, err
 			}
-			alert.Configuration = createAlertConfig(d, project_name, dashboard, slsClient)
 			return nil, slsClient.CreateAlert(project_name, alert)
 		})
 		if err != nil {
@@ -247,6 +290,14 @@ func resourceAlibabacloudStackLogAlertUpdate(d *schema.ResourceData, meta interf
 		return errmsgs.WrapError(err)
 	}
 
+	if d.IsNewResource() {
+		return nil
+	}
+
+	if !d.HasChangesExcept("project_name", "alert_name") {
+		return nil
+	}
+
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	params := &sls.Alert{
 		Name:        parts[1],
@@ -261,13 +312,10 @@ func resourceAlibabacloudStackLogAlertUpdate(d *schema.ResourceData, meta interf
 
 	if err := resource.Retry(2*time.Minute, func() *resource.RetryError {
 		_, err := client.WithSlsDataClient(func(slsClient *sls.Client) (interface{}, error) {
-			project_name := d.Get("project_name").(string)
-			dashboard := d.Get("dashboard").(string)
-			err := CreateDashboard(project_name, dashboard, slsClient)
-			if err != nil {
+			var err error
+			if params.Configuration, err = createAlertConfig(d, slsClient); err != nil {
 				return nil, err
 			}
-			params.Configuration = createAlertConfig(d, project_name, dashboard, slsClient)
 			return nil, slsClient.UpdateAlert(parts[0], params)
 		})
 		if err != nil {
@@ -319,7 +367,16 @@ func resourceAlibabacloudStackLogAlertDelete(d *schema.ResourceData, meta interf
 	return errmsgs.WrapError(logService.WaitForLogstoreAlert(d.Id(), Deleted, DefaultTimeout))
 }
 
-func createAlertConfig(d *schema.ResourceData, project, dashboard string, client *sls.Client) *sls.AlertConfiguration {
+func createAlertConfig(d *schema.ResourceData, client *sls.Client) (*sls.AlertConfiguration, error) {
+
+	project := d.Get("project_name").(string)
+	dashboard := d.Get("dashboard").(string)
+	if d.HasChange("dashboard") {
+		err := CreateDashboard(project, dashboard, client)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	noti := []*sls.Notification{}
 	if v, ok := d.GetOk("notification_list"); ok {
@@ -349,25 +406,34 @@ func createAlertConfig(d *schema.ResourceData, project, dashboard string, client
 					Content:   content,
 				}
 				noti = append(noti, email)
-			}
-
-			if noti_map["type"].(string) == sls.NotificationTypeSMS {
+			} else if noti_map["type"].(string) == sls.NotificationTypeSMS {
 				sms := &sls.Notification{
 					Type:       sls.NotificationTypeSMS,
 					MobileList: mobile_list,
 					Content:    content,
 				}
 				noti = append(noti, sms)
-			}
-			if noti_map["type"].(string) == sls.NotificationTypeDingTalk {
+			} else if noti_map["type"].(string) == sls.NotificationTypeDingTalk {
 				ding := &sls.Notification{
 					Type:       sls.NotificationTypeDingTalk,
 					ServiceUri: noti_map["service_uri"].(string),
 					Content:    content,
 				}
 				noti = append(noti, ding)
-			}
-			if noti_map["type"].(string) == sls.NotificationTypeMessageCenter {
+			} else if noti_map["type"].(string) == sls.NotificationTypeWebhook {
+				headers := make(map[string]string, 0)
+				for key, value := range noti_map["headers"].(map[string]interface{}) {
+					headers[key] = value.(string)
+				}
+				webhook := &sls.Notification{
+					Type:       sls.NotificationTypeWebhook,
+					ServiceUri: noti_map["service_uri"].(string),
+					Content:    content,
+					Method:     noti_map["method"].(string),
+					Headers:    headers,
+				}
+				noti = append(noti, webhook)
+			} else if noti_map["type"].(string) == sls.NotificationTypeMessageCenter {
 				messageCenter := &sls.Notification{
 					Type:    sls.NotificationTypeMessageCenter,
 					Content: content,
@@ -380,10 +446,36 @@ func createAlertConfig(d *schema.ResourceData, project, dashboard string, client
 	queryList := []*sls.AlertQuery{}
 
 	if v, ok := d.GetOk("query_list"); ok {
-		for _, e := range v.([]interface{}) {
+		for index, e := range v.([]interface{}) {
 			query_map := e.(map[string]interface{})
+			if d.HasChange(fmt.Sprintf("query_list.%d", index)) {
+				chart := sls.Chart{
+					Title: query_map["chart_title"].(string),
+					Type:  "rawlog",
+					Search: sls.ChartSearch{
+						Logstore: project,
+						Topic:    "",
+						Query:    query_map["query"].(string),
+						Start:    query_map["start"].(string),
+						End:      query_map["end"].(string),
+					},
+					Display: sls.ChartDisplay{
+						DisplayName: query_map["chart_title"].(string),
+					},
+				}
+				if !d.IsNewResource() {
+					if _, err := client.GetChart(project, dashboard, chart.Title); err == nil {
+						if err := client.DeleteChart(project, dashboard, chart.Title); err != nil {
+							return nil, err
+						}
+					}
+				}
+				if err := client.CreateChart(project, dashboard, chart); err != nil {
+					return nil, err
+				}
+			}
 			query := &sls.AlertQuery{
-				ChartTitle:   GetCharTitile(project, dashboard, query_map["chart_title"].(string), client),
+				ChartTitle:   query_map["chart_title"].(string),
 				LogStore:     query_map["logstore"].(string),
 				Query:        query_map["query"].(string),
 				Start:        query_map["start"].(string),
@@ -409,31 +501,50 @@ func createAlertConfig(d *schema.ResourceData, project, dashboard string, client
 		Throttling:       d.Get("throttling").(string),
 		NotifyThreshold:  int32(d.Get("notify_threshold").(int)),
 	}
-	return config
+	return config, nil
 }
 
 func getNotiMap(v *sls.Notification) map[string]interface{} {
-	mapping := make(map[string]interface{})
+	var mapping map[string]interface{}
+
+	if v.Type == sls.NotificationTypeSMS {
+		mapping = map[string]interface{}{
+			"type":        sls.NotificationTypeSMS,
+			"mobile_list": v.MobileList,
+		}
+
+	} else if v.Type == sls.NotificationTypeEmail {
+		mapping = map[string]interface{}{
+			"type":       sls.NotificationTypeEmail,
+			"email_list": v.EmailList,
+		}
+	} else if v.Type == sls.NotificationTypeDingTalk {
+		mapping = map[string]interface{}{
+			"type":        sls.NotificationTypeDingTalk,
+			"service_uri": v.ServiceUri,
+		}
+	} else if v.Type == sls.NotificationTypeMessageCenter {
+		mapping = map[string]interface{}{
+			"type": sls.NotificationTypeMessageCenter,
+		}
+	} else if v.Type == sls.NotificationTypeWebhook {
+		mapping = map[string]interface{}{
+			"type":        sls.NotificationTypeWebhook,
+			"service_uri": v.ServiceUri,
+			"method":      v.Method,
+			"headers":     v.Headers,
+		}
+	} else {
+		mapping = map[string]interface{}{}
+	}
 
 	mapping["content"] = v.Content
-	if v.Type == sls.NotificationTypeSMS {
-		mapping["type"] = sls.NotificationTypeSMS
-		mapping["mobile_list"] = v.MobileList
-	}
-
-	if v.Type == sls.NotificationTypeEmail {
-		mapping["type"] = sls.NotificationTypeEmail
-		mapping["email_list"] = v.EmailList
-	}
-
-	if v.Type == sls.NotificationTypeDingTalk {
-		mapping["type"] = sls.NotificationTypeDingTalk
-		mapping["service_uri"] = v.ServiceUri
-	}
-
-	if v.Type == sls.NotificationTypeMessageCenter {
-		mapping["type"] = sls.NotificationTypeMessageCenter
-	}
 	return mapping
 
+}
+
+func getNotiType(d *schema.ResourceData, key string) string {
+	parts := strings.Split(key, ".")
+	newKeys := fmt.Sprintf("notification_list.%s.type", parts[1])
+	return d.Get(newKeys).(string)
 }

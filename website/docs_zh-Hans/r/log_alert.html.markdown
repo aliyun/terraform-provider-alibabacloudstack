@@ -61,6 +61,15 @@ resource "alibabacloudstack_log_alert" "example" {
     service_uri = "www.aliyun.com"
     content     = "alert content"
   }
+  notification_list {
+    type        = "DingTalk"
+    service_uri = "http://www.aliyun.com"
+    content     = "alert content"
+    method      = "POST"
+    headers     = {
+        FOO = "Bar"
+    }
+  }
 }
 ```
 
@@ -90,6 +99,8 @@ resource "alibabacloudstack_log_alert" "example" {
   * `service_uri` - (可选) 请求地址。
   * `mobile_list` - (可选) 短信发送的手机号码。
   * `email_list` - (可选) 电子邮件地址列表。
+  * `method` - (可选) WebHook HTTP或HTTPS的请求方式。
+  * `headers` - (可选) WebHook HTTP或HTTPS请求的请求头。
 * `schedule_interval` - (可选) 执行间隔。最小为 `60` 秒，例如 `60s`、`1h`。
 * `schedule_type` - (可选) 默认为 `FixedRate`。无需配置此参数。
 * `mute_until` - (可选) 时间戳，在此之前关闭通知。此属性允许大于或等于 `0` 的值。

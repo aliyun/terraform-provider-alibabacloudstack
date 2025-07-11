@@ -60,6 +60,15 @@ resource "alibabacloudstack_log_alert" "example" {
     service_uri = "www.aliyun.com"
     content     = "alert content"
   }
+  notification_list {
+    type        = "DingTalk"
+    service_uri = "http://www.aliyun.com"
+    content     = "alert content"
+    method      = "POST"
+    headers     = {
+        FOO = "Bar"
+    }
+  }
 }
 ```
 ## Argument Reference
@@ -83,11 +92,13 @@ The following arguments are supported:
     * `end` - (Required) end time. example: 20s.
     * `time_span_type` - (Optional) default Custom. No need to configure this parameter.
 * `notification_list` - (Required) Alarm information notification list.
-    * `type` - (Required) Notification type. support Email, SMS, DingTalk, MessageCenter.
+    * `type` - (Required) Notification type. support Email, SMS, DingTalk, MessageCenter, WebHook.
     * `content` - (Required) Notice content of alarm.
     * `service_uri` - (Optional) Request address.
     * `mobile_list` - (Optional) SMS sending mobile number.
-    * `email_list` - (Optional) Email address list.   
+    * `email_list` - (Optional) Email address list.
+    * `method` - (Optional) Webhook Request method.
+    * `headers` - (Optional) Webhook Request header Map.
 * `schedule_interval` - (Optional) Execution interval. 60 seconds minimum, such as 60s, 1h.
 * `schedule_type` - (Optional) Default FixedRate. No need to configure this parameter.
 * `mute_until` - (Optional)  Timestamp, notifications before closing again. This attribute allows values that are greater than or equal to 0. 

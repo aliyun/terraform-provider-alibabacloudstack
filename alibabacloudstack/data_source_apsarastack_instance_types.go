@@ -2,6 +2,8 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"log"
 	"regexp"
 	"sort"
@@ -14,6 +16,7 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"time"
 )
 
 type instanceTypeWithOriginalPrice struct {
@@ -214,8 +217,19 @@ func dataSourceAlibabacloudStackInstanceTypesRead(d *schema.ResourceData, meta i
 		req.MinimumEniQuantity = requests.NewInteger(v.(int))
 	}
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.DescribeInstanceTypes(req)
+	var raw interface{}
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		raw, err = client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			return ecsClient.DescribeInstanceTypes(req)
+		})
+
+		if err != nil {
+			if sdkErr, ok := err.(*errors.ServerError); ok && sdkErr.ErrorCode() == "asapi.server.timeout.socket" {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
 	})
 	resp, ok := raw.(*ecs.DescribeInstanceTypesResponse)
 	if err != nil {

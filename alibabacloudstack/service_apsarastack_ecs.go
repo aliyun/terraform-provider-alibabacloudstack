@@ -9,6 +9,7 @@ import (
 
 	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 
 	"time"
 
@@ -374,8 +375,19 @@ func (s *EcsService) DescribeAvailableResources(d *schema.ResourceData, meta int
 		}
 	}
 
-	raw, err := s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.DescribeAvailableResource(request)
+	var raw interface{}
+	err = resource.Retry(2*time.Minute, func() *resource.RetryError {
+		raw, err = s.client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
+			return ecsClient.DescribeAvailableResource(request)
+		})
+
+		if err != nil {
+			if sdkErr, ok := err.(*errors.ServerError); ok && sdkErr.ErrorCode() == "asapi.server.timeout.socket" {
+				return resource.RetryableError(err)
+			}
+			return resource.NonRetryableError(err)
+		}
+		return nil
 	})
 	response, ok := raw.(*ecs.DescribeAvailableResourceResponse)
 	if err != nil {
