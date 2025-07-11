@@ -61,6 +61,15 @@ resource "alibabacloudstack_log_alert" "example" {
     service_uri = "www.aliyun.com"
     content     = "alert content"
   }
+  notification_list {
+    type        = "DingTalk"
+    service_uri = "http://www.aliyun.com"
+    content     = "alert content"
+    method      = "POST"
+    headers     = {
+        FOO = "Bar"
+    }
+  }
 }
 ```
 
@@ -85,11 +94,13 @@ resource "alibabacloudstack_log_alert" "example" {
     * `end` - (必填) 结束时间。示例：20s。
     * `time_span_type` - (可选) 默认自定义。无需配置此参数。
 * `notification_list` - (必填) 告警通知列表。
-    * `type` - (必填) 通知类型。支持 Email, SMS, DingTalk, MessageCenter。
+    * `type` - (必填) 通知类型。支持 Email, SMS, DingTalk, MessageCenter, WebHook。
     * `content` - (必填) 告警通知内容。
     * `service_uri` - (可选) 请求地址。
     * `mobile_list` - (可选) 短信发送的手机号码。
     * `email_list` - (可选) 电子邮件地址列表。
+    * `method` - (可选) WebHook HTTP或HTTPS的请求方式。
+    * `headers` - (可选) WebHook HTTP或HTTPS请求的请求头。
 * `schedule_interval` - (可选) 执行间隔。最小60秒，例如60s, 1h。
 * `schedule_type` - (可选) 默认 FixedRate。无需配置此参数。
 * `mute_until` - (可选) 时间戳，在此之前关闭通知。此属性允许大于或等于0的值。
