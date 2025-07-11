@@ -43,7 +43,7 @@ func TestAccAlibabacloudStackAcmConfiguration0(t *testing.T) {
 
 					"content": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 
-					"data_id": "data_id_test",
+					"data_id": "${var.name}",
 
 					"group": "DEFAULT_GROUP",
 
@@ -64,7 +64,7 @@ func TestAccAlibabacloudStackAcmConfiguration0(t *testing.T) {
 
 						"content": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
 
-						"data_id": "data_id_test",
+						"data_id": name,
 
 						"group": "DEFAULT_GROUP",
 

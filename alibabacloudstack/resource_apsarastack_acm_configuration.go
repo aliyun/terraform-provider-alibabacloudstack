@@ -5,6 +5,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -179,6 +180,7 @@ func resourceAlibabacloudStackAcmConfigurationUpdate(d *schema.ResourceData, met
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_acm_configuration", "DeployConfiguration", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
+		time.Sleep(time.Second * 5)
 
 	}
 	return nil

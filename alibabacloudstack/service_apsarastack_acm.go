@@ -106,3 +106,35 @@ func (s *AcmService) DoAcmDescribeconfigurationsRequest(d *schema.ResourceData, 
 
 	return AcmDescribeconfigurationsResponseObj, nil
 }
+
+func (s *AcmService) DoAcmDescribeBetaConfigurationRequest(id string) (*AcmDescribeconfigurationResponse, error) {
+	// api: acm - 2020-02-06 - DescribeBetaConfiguration
+	request := s.client.NewCommonRequest("GET", "acm", "2020-02-06", "DescribeBetaConfiguration", "/diamond-ops/pop/configuration/beta")
+	AcmDescribeconfigurationResponseObj := &AcmDescribeconfigurationResponse{}
+
+	params := strings.Split(id, ":")
+
+	request.QueryParams["DataId"] = params[0]
+
+	request.QueryParams["Group"] = params[1]
+
+	request.QueryParams["NamespaceId"] = params[2]
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBetaConfiguration", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &AcmDescribeconfigurationResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBetaConfiguration", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return AcmDescribeconfigurationResponseObj, nil
+}
