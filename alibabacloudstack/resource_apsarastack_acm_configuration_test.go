@@ -38,74 +38,58 @@ func TestAccAlibabacloudStackAcmConfiguration0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"app_name": "${var.name}",
-
-					"content": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-
+					"content": "step1",
 					"data_id": "${var.name}",
-
 					"group": "DEFAULT_GROUP",
-
 					"desc": "${var.name}",
-
 					"type": "text",
-
-					"beta_ips": "192.168.1.1,192.168.1.2",
-
 					"tags": "aaaaaa,bbbbbbb",
-
 					 "namespace_id": "${alibabacloudstack_edas_namespace.default.tenant_id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"app_name": name,
-
-						"content": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-
+						"content": "step1",
 						"data_id": name,
-
 						"group": "DEFAULT_GROUP",
-
 						"desc": name,
-
 						"type": "text",
-
-						"beta_ips": "192.168.1.1,192.168.1.2",
-
 						"tags": "aaaaaa,bbbbbbb",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"beta_app_name": "${var.name}_beta",
+					"beta_ips": "192.168.1.1",
+					"beta_content": "{step2}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"beta_app_name": fmt.Sprintf("%s_beta", name),
+						"beta_ips": "192.168.1.1",
+						"beta_content": "{step2}",
 					}),
 				),
 			},
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"app_name": "${var.name}_update",
-
 					"desc": "${var.name}_update",
-
-					"beta_ips": "192.168.1.1",
-
 					"tags": "aaaaaa",
-
+					"beta_ips": REMOVEKEY,
 					"content": "{\\\"aaa\\\": \\\"bbb\\\"}",
-
 					"type": "json",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
 						"app_name": fmt.Sprintf("%s_update", name),
-
 						"desc": fmt.Sprintf("%s_update", name),
-
-						"beta_ips": "192.168.1.1",
-
 						"tags": "aaaaaa",
-
+						"beta_ips": REMOVEKEY,
 						"content": "{\\\"aaa\\\": \\\"bbb\\\"}",
-
 						"type": "json",
 					}),
 				),

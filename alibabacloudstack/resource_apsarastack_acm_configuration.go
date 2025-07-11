@@ -5,7 +5,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -44,11 +43,6 @@ func resourceAlibabacloudStackAcmConfiguration() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"beta_ips": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"namespace_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -70,6 +64,34 @@ func resourceAlibabacloudStackAcmConfiguration() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"AES_128", "AES_256"}, false),
+			},
+
+			"beta_ips": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"beta_content"},
+			},
+			"beta_content": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"beta_ips"},
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					if v, ok := d.GetOk("beta_ips"); ! ok || v.(string) == "" {
+						return true
+					}
+					return oldValue == newValue
+				},
+			},
+			"beta_app_name": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"beta_ips"},
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					if v, ok := d.GetOk("beta_ips"); ! ok || v.(string) == "" {
+						return true
+					}
+					return oldValue == newValue
+				},
 			},
 		},
 	}
@@ -137,18 +159,59 @@ func resourceAlibabacloudStackAcmConfigurationCreate(d *schema.ResourceData, met
 
 func resourceAlibabacloudStackAcmConfigurationUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	params := strings.Split(d.Id(), ":")
+
+	if old, new := d.GetChange("beta_ips"); !d.IsNewResource() && old != "" && old != new {
+		reqQuery := map[string]interface{}{
+			"DataId" : params[0], 
+			"Group" : params[1],
+			"NamespaceId": params[2],
+		}
+		_, err := client.DoTeaRequest("PUT", "acm", "2020-02-06", "StopBetaConfiguration", "/diamond-ops/pop/configuration/stopBeta", nil, reqQuery, nil)
+		if err != nil {
+			return nil
+		}
+	}
+	
+	request := client.NewCommonRequest("PUT", "acm", "2020-02-06", "DeployConfiguration", "/diamond-ops/pop/configuration")
+	request.QueryParams["DataId"] = params[0]
+	request.QueryParams["Group"] = params[1]
+	request.QueryParams["NamespaceId"] = params[2]
+	
+	if v, ok := d.GetOk("beta_ips"); ok && v != "" {
+
+		if d.HasChanges("beta_content",  "beta_app_name") {
+			request.QueryParams["Content"] = d.Get("beta_content").(string)
+			request.QueryParams["Type"] = d.Get("type").(string)
+			request.QueryParams["BetaIps"] = d.Get("beta_ips").(string)
+
+			if v, ok := d.GetOk("beta_app_name"); ok {
+				request.QueryParams["AppName"] = v.(string)
+			}
+
+			bresponse, err := client.ProcessCommonRequest(request)
+			addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+			if err != nil {
+				if bresponse == nil {
+					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+				}
+				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+					"alibabacloudstack_acm_configuration", "DeployConfiguration", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+		}
+	}
+
+	if d.IsNewResource() {
+		return nil
+	}
 
 	// api: acm - 2020-02-06 - DeployConfiguration
-	if !d.IsNewResource() && d.HasChanges("app_name", "content", "desc", "group", "tags", "type") {
-		request := client.NewCommonRequest("PUT", "acm", "2020-02-06", "DeployConfiguration", "/diamond-ops/pop/configuration")
+	if d.HasChanges("app_name", "content", "desc", "group", "tags", "type") {
 
-		params := strings.Split(d.Id(), ":")
-
-		request.QueryParams["DataId"] = params[0]
-
-		request.QueryParams["Group"] = params[1]
-
-		request.QueryParams["NamespaceId"] = params[2]
+		if _, ok := d.GetOk("beta_ips"); ok {
+			return fmt.Errorf("Modifying Formal parameters is not allowed when beta_ip is set")
+		}
 
 		request.QueryParams["Content"] = d.Get("content").(string)
 
@@ -166,10 +229,6 @@ func resourceAlibabacloudStackAcmConfigurationUpdate(d *schema.ResourceData, met
 			request.QueryParams["Tags"] = v.(string)
 		}
 
-		if v, ok := d.GetOk("beta_ips"); ok {
-			request.QueryParams["BetaIps"] = v.(string)
-		}
-
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
@@ -180,7 +239,6 @@ func resourceAlibabacloudStackAcmConfigurationUpdate(d *schema.ResourceData, met
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_acm_configuration", "DeployConfiguration", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		time.Sleep(time.Second * 5)
 
 	}
 	return nil
@@ -207,6 +265,32 @@ func resourceAlibabacloudStackAcmConfigurationRead(d *schema.ResourceData, meta 
 	d.Set("tags", data.Tags)
 
 	d.Set("type", data.Type)
+
+	reqQuery := map[string]interface{}{
+		"DataId":      data.DataId,
+		"Group":       data.Group,
+		"NamespaceId": d.Get("namespace_id").(string),
+	}
+	resp, err := client.DoTeaRequest("GET", "acm", "2020-02-06", "DescribeBetaTab", "/diamond-ops/pop/configuration/betaTab", nil, reqQuery, nil)
+	if err != nil {
+		return nil
+	}
+
+	if len(resp["Tabs"].([]interface{})) == 0 {
+		d.Set("beta_ips", "")
+		d.Set("beta_content", "")
+		d.Set("beta_app_name", "")
+		return nil
+	}
+
+	resp, err = client.DoTeaRequest("GET", "acm", "2020-02-06", "DescribeBetaConfiguration", "/diamond-ops/pop/configuration/beta", nil, reqQuery, nil)
+	if err != nil {
+		return nil
+	}
+	configure := resp["Configuration"].(map[string]interface{})
+	d.Set("beta_ips", configure["BetaIps"])
+	d.Set("beta_content", configure["Content"])
+	d.Set("beta_app_name", configure["AppName"])
 
 	return nil
 }
