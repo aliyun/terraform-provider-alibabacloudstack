@@ -55,8 +55,7 @@ func TestAccAlibabacloudStackAcmConfiguration0(t *testing.T) {
 
 					"tags": "aaaaaa,bbbbbbb",
 
-					// "namespace_id": "${alibabacloudstack_edas_namespace.default.id}",
-					"namespace_id": "ef8c9ec9-8b54-4be5-931b-7d8e5a21ca45",
+					 "namespace_id": "${alibabacloudstack_edas_namespace.default.tenant_id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -132,10 +131,10 @@ variable "logical_id" {
   default = "%s:%s"
 }
 
-// resource "alibabacloudstack_edas_namespace" "default" {
-//   	description = "${var.name}"
-// 	namespace_name = "${var.name}"
-// 	namespace_logical_id = "${var.logical_id}"
-// }
+resource "alibabacloudstack_edas_namespace" "default" {
+	description = "${var.name}"
+	namespace_name = "${var.name}"
+	namespace_logical_id = "${var.logical_id}"
+}
 `, name, defaultRegionToTest, name)
 }
