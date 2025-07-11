@@ -28,17 +28,17 @@ func dataSourceAlibabacloudStackAcmConfigurations() *schema.Resource {
 				Required: true,
 			},
 
-			"tags": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"group": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 
 			"app_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+
+			"namespace_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -89,7 +89,7 @@ func dataSourceAlibabacloudStackAcmConfigurations() *schema.Resource {
 							Computed: true,
 						},
 
-						"region_id": {
+						"namespace_id": {
 							// TypeString
 							Type:     schema.TypeString,
 							Computed: true,
@@ -102,6 +102,12 @@ func dataSourceAlibabacloudStackAcmConfigurations() *schema.Resource {
 						},
 
 						"type": {
+							// TypeString
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"ud_version": {
 							// TypeString
 							Type:     schema.TypeString,
 							Computed: true,
@@ -134,19 +140,8 @@ func dataSourceAlibabacloudStackAcmConfigurationsRead(d *schema.ResourceData, me
 		request.QueryParams["Group"] = v.(string)
 	}
 
-	tags := d.Get("tags").(map[string]interface{})
-	if tags != nil && len(tags) > 0 {
-		Tags := make([]map[string]string, 0, len(tags))
-		for k, v := range tags {
-			Tag := map[string]string{
-				"Key":   k,
-				"Value": v.(string),
-			}
-			Tags = append(Tags, Tag)
-		}
-		request_byte, _ := json.Marshal(Tags)
-		requeststring := string(request_byte)
-		request.QueryParams["Tags"] = requeststring
+	if v, ok := d.GetOk("namespace_id"); ok {
+		request.QueryParams["NamespaceId"] = v.(string)
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
@@ -174,7 +169,11 @@ func dataSourceAlibabacloudStackAcmConfigurationsRead(d *schema.ResourceData, me
 
 			"group": data.Group,
 
+			"namespace_id": data.NamespaceId,
+
 			"message_digest": data.Md5,
+
+			"ud_version": data.UdVersion,
 		}
 		datas = append(datas, i)
 
