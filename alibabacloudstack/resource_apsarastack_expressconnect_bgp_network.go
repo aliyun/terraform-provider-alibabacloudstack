@@ -66,7 +66,7 @@ func resourceAlibabacloudStackExpressconnectBgpnetworkCreate(d *schema.ResourceD
 
 	router_id := d.Get("router_id").(string)
 
-	d.SetId(fmt.Sprintf("%s", dst_cidr_block+"_"+router_id))
+	d.SetId(fmt.Sprintf("%s", dst_cidr_block+COLON_SEPARATED+router_id))
 	deadline := time.Now().Add(DefaultTimeout * time.Second)
 	for {
 		response, err := express_connectbgp_networkservice.DoVpcDescribebgpnetworksRequest(router_id)
@@ -103,7 +103,7 @@ func resourceAlibabacloudStackExpressconnectBgpnetworkRead(d *schema.ResourceDat
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	express_connectbgp_networkservice :=
 		ExpressconnectService{client}
-	parts := strings.Split(d.Id(), "_")
+	parts := strings.Split(d.Id(), COLON_SEPARATED)
 	route_id := parts[1]
 	dst_cidr_block := parts[0]
 	response, err := express_connectbgp_networkservice.DoVpcDescribebgpnetworksRequest(route_id)
@@ -129,7 +129,7 @@ func resourceAlibabacloudStackExpressconnectBgpnetworkDelete(d *schema.ResourceD
 	express_connectbgp_networkservice := ExpressconnectService{client}
 	// api: Vpc - 2016-04-28 - DeleteBgpNetwork
 	request := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DeleteBgpNetwork", "")
-	parts := strings.Split(d.Id(), "_")
+	parts := strings.Split(d.Id(), COLON_SEPARATED)
 	route_id := parts[1]
 	dst_cidr_block := parts[0]
 
