@@ -152,7 +152,7 @@ func TestAccAlibabacloudStackEdasK8sApplication_basic(t *testing.T) {
 					"application_name": "${var.name}",
 					"cluster_id":       "${alibabacloudstack_edas_k8s_cluster.default.id}",
 					"package_type":    "FatJar",
-					"package_url":     "http://secure-edas-bucket-cn-wulan-env205-d01.oss-cn-wulan-env205-d01-a.intra.env205.shuguang.com/apps/K8S_APP_ID/9c2b927d-9621-4e2d-996b-b73869afbb66/SPRING_CLOUD_PROVIDER.jar",
+					"package_url":     fmt.Sprintf("http://fileserver.edas.%s//prod/demo/SPRING_CLOUD_PROVIDER.jar", os.Getenv("ALIBABACLOUDSTACK_POPGW_DOMAIN")),
 					"package_version": "2025-07-09 13:00:18",
 					"jdk":             "Open JDK 8",
 					"replicas":        "2",
