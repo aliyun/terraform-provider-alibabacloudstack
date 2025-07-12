@@ -9,13 +9,14 @@ func TestAccAlibabacloudStackAcmConfigurationsDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(100, 999)
 	resourceId := "data.alibabacloudstack_acm_configurations.default"
 
-	testAccConfig := dataSourceTestAccConfigFunc(resourceId, fmt.Sprintf("tf_testacmconfig_%d", rand), dataSourceAcmConfigurationsConfigDependence)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, fmt.Sprintf("tftestd%d", rand), dataSourceAcmConfigurationsConfigDependence)
 
 	namespaceConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"namespace_id": "${alibabacloudstack_edas_namespace.default.id}",
-			"data_id":      "${var.name}",
-			"group_id":     "DEFAULT_GROUP",
+			"namespace_id": "${alibabacloudstack_edas_namespace.default.tenant_id}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"namespace_id": "${alibabacloudstack_edas_namespace.default.tenant_id}11",
 		}),
 	}
 
@@ -58,7 +59,7 @@ resource "alibabacloudstack_edas_namespace" "default" {
 	namespace_logical_id = "${var.logical_id}"
 }
 
-resource "apsarastack_acm_configuration" "default" {
+resource "alibabacloudstack_acm_configuration" "default" {
 	app_name = "${var.name}"
 	content = "test"
 	data_id = "${var.name}"

@@ -81,11 +81,11 @@ func resourceAlibabacloudStackEdasNamespaceCreate(d *schema.ResourceData, meta i
 		if code, ok := response["Code"]; !ok {
 			return resource.NonRetryableError(errmsgs.Error("No Code in body of InsertOrUpdateRegion"))
 		} else if v, ok := code.(string); ok && v != "200" {
-			return resource.NonRetryableError(errmsgs.Error(response["Message"].(string)))
+			return resource.NonRetryableError(errmsgs.Error("%s", response["Message"].(string)))
 		} else if vv, ok := code.(json.Number); !ok {
 			return resource.NonRetryableError(errmsgs.Error("Unknow Code type in body of InsertOrUpdateRegion"))
 		} else if string(vv) != "200" {
-			return resource.NonRetryableError(errmsgs.Error(response["Message"].(string)))
+			return resource.NonRetryableError(errmsgs.Error("%s", response["Message"].(string)))
 		}
 		return nil
 	})

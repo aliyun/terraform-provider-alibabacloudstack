@@ -25,12 +25,12 @@ func dataSourceAlibabacloudStackAcmConfigurations() *schema.Resource {
 
 			"data_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
-			"group": {
+			"group_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			"app_name": {
@@ -123,7 +123,7 @@ func dataSourceAlibabacloudStackAcmConfigurationsRead(d *schema.ResourceData, me
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// api: acm - 2020-02-06 - DescribeConfigurations
-	request := client.NewCommonRequest("GET", "acm", "2020-02-06", "DescribeConfigurations", "")
+	request := client.NewCommonRequest("GET", "acm", "2020-02-06", "DescribeConfigurations", "/diamond-ops/pop/configuration/list")
 	AcmDescribeconfigurationsResponseObj := AcmDescribeconfigurationsResponse{}
 
 	//调用request_params_handler
@@ -136,7 +136,7 @@ func dataSourceAlibabacloudStackAcmConfigurationsRead(d *schema.ResourceData, me
 		request.QueryParams["DataId"] = v.(string)
 	}
 
-	if v, ok := d.GetOk("group"); ok {
+	if v, ok := d.GetOk("group_id"); ok {
 		request.QueryParams["Group"] = v.(string)
 	}
 
