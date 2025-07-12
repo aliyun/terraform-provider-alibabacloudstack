@@ -60,11 +60,11 @@ func resourceAlibabacloudStackAcmConfiguration() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"text", "json", "xml", "yaml", "html", "properties"}, false),
 			},
 
-			"encrypt_algorithm": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"AES_128", "AES_256"}, false),
-			},
+//			"encrypt_algorithm": {
+//				Type:         schema.TypeString,
+//				Optional:     true,
+//				ValidateFunc: validation.StringInSlice([]string{"AES_128", "AES_256"}, false),
+//			},
 
 			"beta_ips": {
 				Type:         schema.TypeString,
@@ -74,7 +74,6 @@ func resourceAlibabacloudStackAcmConfiguration() *schema.Resource {
 			"beta_content": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				RequiredWith: []string{"beta_ips"},
 				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 					if v, ok := d.GetOk("beta_ips"); ! ok || v.(string) == "" {
 						return true
@@ -85,7 +84,6 @@ func resourceAlibabacloudStackAcmConfiguration() *schema.Resource {
 			"beta_app_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				RequiredWith: []string{"beta_ips"},
 				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 					if v, ok := d.GetOk("beta_ips"); ! ok || v.(string) == "" {
 						return true
@@ -120,7 +118,7 @@ func resourceAlibabacloudStackAcmConfigurationCreate(d *schema.ResourceData, met
 
 	request.QueryParams["Type"] = d.Get("type").(string)
 
-	request.QueryParams["EncryptAlgorithm"] = d.Get("encrypt_algorithm").(string)
+//	request.QueryParams["EncryptAlgorithm"] = d.Get("encrypt_algorithm").(string)
 
 	if v, ok := d.GetOk("app_name"); ok {
 		request.QueryParams["AppName"] = v.(string)
@@ -251,6 +249,10 @@ func resourceAlibabacloudStackAcmConfigurationRead(d *schema.ResourceData, meta 
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_acm_configuration", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
+	
+	params := strings.Split(d.Id(), ":")
+	d.Set("namespace_id",  params[2])
+	
 	data := response.Configuration
 	d.Set("app_name", data.AppName)
 

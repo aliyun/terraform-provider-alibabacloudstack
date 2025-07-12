@@ -3,10 +3,12 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"strings"
+	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 )
 
 type AcmService struct {
@@ -47,6 +49,9 @@ func (s *AcmService) DoAcmDescribeconfigurationRequest(id string) (*AcmDescribec
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
+		if sdkErr, ok := err.(*errors.ServerError); ok && sdkErr.ErrorCode() == "ConfigurationNotExists" {
+			return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Configuration %s Not Exists", id))
+		}
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
