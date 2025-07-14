@@ -131,17 +131,20 @@ func dataSourceAlibabacloudStackAcmConfigurationsRead(d *schema.ResourceData, me
 	if v, ok := d.GetOk("app_name"); ok {
 		request.QueryParams["AppName"] = v.(string)
 	}
-
+	var data_id, group_id, namespace_id string
 	if v, ok := d.GetOk("data_id"); ok {
-		request.QueryParams["DataId"] = v.(string)
+		data_id = v.(string)
+		request.QueryParams["DataId"] = data_id
 	}
 
 	if v, ok := d.GetOk("group_id"); ok {
-		request.QueryParams["Group"] = v.(string)
+		group_id = v.(string)
+		request.QueryParams["Group"] = group_id
 	}
 
 	if v, ok := d.GetOk("namespace_id"); ok {
-		request.QueryParams["NamespaceId"] = v.(string)
+		namespace_id = v.(string)
+		request.QueryParams["NamespaceId"] = namespace_id
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
@@ -159,9 +162,14 @@ func dataSourceAlibabacloudStackAcmConfigurationsRead(d *schema.ResourceData, me
 			"alibabacloudstack_acm_configuration", "DescribeConfigurations", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
+	var configresponse *AcmDescribeconfigurationResponse
+	acmconfigurationservice := AcmService{client}
+	if data_id != "" && group_id != "" && namespace_id != "" {
+		configresponse, err = acmconfigurationservice.DoAcmDescribeconfigurationRequest(d.Id())
+	}
 	var ids []string
 	datas := make([]interface{}, 0)
-	for _, data := range AcmDescribeconfigurationsResponseObj.Configurations.Configuration {
+	for _, data := range AcmDescribeconfigurationsResponseObj.Configurations {
 		i := map[string]interface{}{
 			"app_name": data.AppName,
 
@@ -174,6 +182,12 @@ func dataSourceAlibabacloudStackAcmConfigurationsRead(d *schema.ResourceData, me
 			"message_digest": data.Md5,
 
 			"ud_version": data.UdVersion,
+		}
+		if data.DataId == configresponse.Configuration.DataId && data.Group == configresponse.Configuration.Group && data.NamespaceId == namespace_id {
+			i["content"] = configresponse.Configuration.Content
+			i["desc"] = configresponse.Configuration.Desc
+			i["tags"] = configresponse.Configuration.Tags
+			i["type"] = configresponse.Configuration.Type
 		}
 		datas = append(datas, i)
 

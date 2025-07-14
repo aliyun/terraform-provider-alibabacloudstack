@@ -2,13 +2,13 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
-	"strings"
 	"fmt"
+	"strings"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 )
 
 type AcmService struct {
@@ -69,16 +69,14 @@ func (s *AcmService) DoAcmDescribeconfigurationRequest(id string) (*AcmDescribec
 }
 
 type AcmDescribeconfigurationsResponse struct {
-	Configurations struct {
-		Configuration []struct {
-			AppName          string `json:"AppName"`
-			DataId           string `json:"DataId"`
-			EncryptedDataKey string `json:"EncryptedDataKey"`
-			Group            string `json:"Group"`
-			Md5              string `json:"Md5"`
-			NamespaceId      string `json:"NamespaceId"`
-			UdVersion        string `json:"UdVersion"`
-		} `json:"Configuration"`
+	Configurations []struct {
+		AppName          string `json:"AppName"`
+		DataId           string `json:"DataId"`
+		EncryptedDataKey string `json:"EncryptedDataKey"`
+		Group            string `json:"Group"`
+		Md5              string `json:"Md5"`
+		NamespaceId      string `json:"NamespaceId"`
+		UdVersion        string `json:"UdVersion"`
 	} `json:"Configurations"`
 	Code       string `json:"Code"`
 	Message    string `json:"Message"`
