@@ -48,8 +48,11 @@ The following arguments are supported:
   * `data_id` - (Required, ForceNew) - Data ID of the Acm configuration.
   * `desc` - (Optional) - The description of the Acm configuration.
   * `group` - (Required, ForceNew) - The group of the Acm configuration.
-  * `beta_ips` - (Optional) - The IPs of the beta environment.
   * `namespace_id` - (Required, ForceNew) - The ID of the edas namespace.
   * `tags` - (Optional) - The tags of the Acm configuration.
   * `type` - (Required) - The type of the Acm configuration.
-  * `encrypt_algorithm` - (Optional) - The encrypt algorithm of the Acm configuration.
+  <!-- * `encrypt_algorithm` - (Optional) - The encrypt algorithm of the Acm configuration. -->
+  * `beta_content` - (Optional) - The beta content of the beta environment.
+  * `beta_app_name` - (Optional) - The app name of the beta environment.
+  * `beta_ips` - (Optional) - The IPs of the beta environment.
+

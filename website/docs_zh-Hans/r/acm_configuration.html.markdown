@@ -53,4 +53,7 @@ resource "alibabacloudstack_acm_configuration" "default" {
   * `namespace_id` - (必填, 强制新建) - Edas命名空间ID
   * `tags` - (选填) - 配置的标签
   * `type` - (必填) - 配置内容的格式
-  * `encrypt_algorithm` - (选填) - 加密方式
+  <!-- * `encrypt_algorithm` - (选填) - 加密方式 -->
+  * `beta_content` - (选填) - 发布到bate环境的配置内容。
+  * `beta_app_name` - (选填) - 发布到bate环境的配置归属的应用名称。
+  * `beta_ips` - (选填) - bate环境的 IPs。
