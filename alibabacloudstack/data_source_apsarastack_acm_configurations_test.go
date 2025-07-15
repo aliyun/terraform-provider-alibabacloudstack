@@ -9,7 +9,8 @@ func TestAccAlibabacloudStackAcmConfigurationsDataSource_basic(t *testing.T) {
 	rand := getAccTestRandInt(100, 999)
 	resourceId := "data.alibabacloudstack_acm_configurations.default"
 
-	testAccConfig := dataSourceTestAccConfigFunc(resourceId, fmt.Sprintf("tftestd%d", rand), dataSourceAcmConfigurationsConfigDependence)
+	name := fmt.Sprintf("tftestd%d", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourceAcmConfigurationsConfigDependence)
 
 	namespaceConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -17,6 +18,37 @@ func TestAccAlibabacloudStackAcmConfigurationsDataSource_basic(t *testing.T) {
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"namespace_id": "${alibabacloudstack_edas_namespace.default.tenant_id}11",
+		}),
+	}
+	
+	appnameConfig := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"namespace_id": "${alibabacloudstack_edas_namespace.default.tenant_id}",
+			"app_name": name,
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"namespace_id": "${alibabacloudstack_edas_namespace.default.tenant_id}",
+			"app_name": "tftestacmconfigdataempty",
+		}),
+	}
+	groupConfig := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"namespace_id": "${alibabacloudstack_edas_namespace.default.tenant_id}",
+			"group_id": "DEFAULT_GROUP",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"namespace_id": "${alibabacloudstack_edas_namespace.default.tenant_id}",
+			"group_id": "tftestacmconfigdataempty",
+		}),
+	}
+	dataIdConfig := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"namespace_id": "${alibabacloudstack_edas_namespace.default.tenant_id}",
+			"data_id": "name",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"namespace_id": "${alibabacloudstack_edas_namespace.default.tenant_id}",
+			"data_id": "tftestacmconfigdataempty",
 		}),
 	}
 
@@ -40,7 +72,7 @@ func TestAccAlibabacloudStackAcmConfigurationsDataSource_basic(t *testing.T) {
 		fakeMapFunc:  fakeAcmConfigurationsMapFunc,
 	}
 
-	AcmConfigurationsCheckInfo.dataSourceTestCheck(t, rand, namespaceConfig)
+	AcmConfigurationsCheckInfo.dataSourceTestCheck(t, rand, namespaceConfig, appnameConfig, groupConfig, dataIdConfig)
 }
 
 func dataSourceAcmConfigurationsConfigDependence(name string) string {
@@ -65,7 +97,8 @@ resource "alibabacloudstack_acm_configuration" "default" {
 	data_id = "${var.name}"
 	group = "DEFAULT_GROUP"
 	type = "text"
-	namespace_id = "${alibabacloudstack_edas_namespace.default.id}"
+	desc = "${var.name}"
+	namespace_id = "${alibabacloudstack_edas_namespace.default.tenant_id}"
 }
 `, name, defaultRegionToTest, name)
 }
