@@ -381,7 +381,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
 	
-	if !d.IsNewResource() && d.HasChanges("audit_status") {
+	if d.HasChanges("audit_status") && d.Get("audit_status").(string) != ""{
 		request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyAuditPolicy", "")
 
 		request.QueryParams["DBInstanceId"] = d.Id()
