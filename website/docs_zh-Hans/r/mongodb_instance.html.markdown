@@ -69,7 +69,8 @@ resource "alibabacloudstack_mongodb_instance" "example" {
 * `maintain_end_time` - (选填) 维护窗口的结束时间。指定 UTC 时间格式为 `HH:mmZ`。
 * `tags` - (选填，映射) 要分配给资源的标签映射。
 * `db_instance_description` - (选填) DB 实例的描述。
-* `audit_status` - (选填) 是否开启该实例的日志审计能力. 有效值包括：`Enable`, `Disabled`。
+* `audit_status` - (选填) 是否开启该实例的日志审计能力。 有效值包括：`Enable`, `Disabled`。
+* `audit_filter` - (选填) 需要审计的日志类型列表。有效值包括：`admin`, `slow`, `query`, `insert`, `update`, `delete`, `command`。
 
 ## 属性说明
 

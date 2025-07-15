@@ -71,6 +71,7 @@ The following arguments are supported:
 * `tags` - (Optional, Map) A mapping of tags to assign to the resource.
 * `db_instance_description` - (Optional) The description of the DB instance.
 * `audit_status` - (Optional) Enable or disable log audit for the DB instance. Valid values include: `Enable`, `Disabled`.
+* `audit_filter` - (Optional) Operation Type List for Audit Log Filter. Valid values include: `admin`, `slow`, `query`, `insert`, `update`, `delete`, `command`.
 
 ## Attributes Reference
 
