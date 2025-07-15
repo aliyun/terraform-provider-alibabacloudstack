@@ -82,6 +82,7 @@ func TestAccAlibabacloudStackAcmConfiguration0(t *testing.T) {
 					"beta_ips":          REMOVEKEY,
 					"content":           "{\\\"aaa\\\": \\\"bbb\\\"}",
 					"type":              "json",
+					"encrypt_algorithm": "AES_128",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -93,6 +94,7 @@ func TestAccAlibabacloudStackAcmConfiguration0(t *testing.T) {
 						"beta_app_name":     REMOVEKEY,
 						"content":           "{\"aaa\": \"bbb\"}",
 						"type":              "json",
+						"encrypt_algorithm": "AES_128",
 					}),
 				),
 			},

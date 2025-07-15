@@ -60,11 +60,11 @@ func resourceAlibabacloudStackAcmConfiguration() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"text", "json", "xml", "yaml", "html", "properties"}, false),
 			},
 
-//			"encrypt_algorithm": {
-//				Type:         schema.TypeString,
-//				Optional:     true,
-//				ValidateFunc: validation.StringInSlice([]string{"AES_128", "AES_256"}, false),
-//			},
+			"encrypt_algorithm": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"AES_128", "AES_256"}, false),
+			},
 
 			"beta_ips": {
 				Type:         schema.TypeString,
@@ -118,10 +118,10 @@ func resourceAlibabacloudStackAcmConfigurationCreate(d *schema.ResourceData, met
 
 	request.QueryParams["Type"] = d.Get("type").(string)
 
-//	if v, ok := d.GetOk("encrypt_algorithm"); ok {
-//		request.QueryParams["encryptType"] = "inner"
-//		request.QueryParams["encryptAlgorithm"] = v.(string)
-//	}
+	if v, ok := d.GetOk("encrypt_algorithm"); ok {
+		request.QueryParams["encryptType"] = "inner"
+		request.QueryParams["encryptAlgorithm"] = v.(string)
+	}
 
 	if v, ok := d.GetOk("app_name"); ok {
 		request.QueryParams["AppName"] = v.(string)
@@ -203,12 +203,12 @@ func resourceAlibabacloudStackAcmConfigurationUpdate(d *schema.ResourceData, met
 		return nil
 	}
 
-//	if old, new := d.GetChange("encrypt_algorithm"); old != new && new == "" {
-//		return fmt.Errorf("Data encryption cannot be turned off after being turned on")
-//	}
+	if old, new := d.GetChange("encrypt_algorithm"); old != new && new == "" {
+		return fmt.Errorf("Data encryption cannot be turned off after being turned on")
+	}
 
 	// api: acm - 2020-02-06 - DeployConfiguration
-	if d.HasChanges("app_name", "content", "desc", "group", "tags", "type") {
+	if d.HasChanges("app_name", "content", "desc", "group", "tags", "type", "encrypt_algorithm") {
 
 		if _, ok := d.GetOk("beta_ips"); ok {
 			return fmt.Errorf("Modifying Formal parameters is not allowed when beta_ip is set")
@@ -230,10 +230,10 @@ func resourceAlibabacloudStackAcmConfigurationUpdate(d *schema.ResourceData, met
 			request.QueryParams["Tags"] = v.(string)
 		}
 
-//		if v, ok := d.GetOk("encrypt_algorithm"); ok {
-//			request.QueryParams["encryptType"] = "inner"
-//			request.QueryParams["encryptAlgorithm"] = v.(string)
-//		}
+		if v, ok := d.GetOk("encrypt_algorithm"); ok {
+			request.QueryParams["encryptType"] = "inner"
+			request.QueryParams["encryptAlgorithm"] = v.(string)
+		}
 
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -276,13 +276,13 @@ func resourceAlibabacloudStackAcmConfigurationRead(d *schema.ResourceData, meta 
 
 	d.Set("type", data.Type)
 
-//	if data.EncryptedDataKey != "" {
-//		parts := strings.Split(data.EncryptedDataKey, "-")
-//		if len(parts) < 3 {
-//			return fmt.Errorf("Unsupport Encrypted Data Key:%s", data.EncryptedDataKey)
-//		}
-//		d.Set("encrypt_algorithm", parts[1])
-//	}
+	if data.EncryptedDataKey != "" {
+		parts := strings.Split(data.EncryptedDataKey, "-")
+		if len(parts) < 3 {
+			return fmt.Errorf("Unsupport Encrypted Data Key:%s", data.EncryptedDataKey)
+		}
+		d.Set("encrypt_algorithm", parts[1])
+	}
 
 	reqQuery := map[string]interface{}{
 		"DataId":      data.DataId,
