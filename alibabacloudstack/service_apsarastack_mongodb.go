@@ -658,3 +658,35 @@ func (s *MongoDBService) DoDdsDescribeaccountsRequest(id string) (*DdsDescribeac
 
 	return DdsDescribeaccountsResponseObj, nil
 }
+
+type DdsDescribeauditpolicyResponse struct {
+	RequestId      string `json:"RequestId"`
+	LogAuditStatus string `json:"LogAuditStatus"`
+}
+
+func (s *MongoDBService) DoDdsDescribeauditpolicyRequest(id string) (*DdsDescribeauditpolicyResponse, error) {
+	// api: Dds - 2015-12-01 - DescribeAuditPolicy
+	request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeAuditPolicy", "")
+	DdsDescribeauditpolicyResponseObj := &DdsDescribeauditpolicyResponse{}
+
+	//调用request_params_handler
+
+	request.QueryParams["DBInstanceId"] = id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeAuditPolicy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsDescribeauditpolicyResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeAuditPolicy", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return DdsDescribeauditpolicyResponseObj, nil
+}
