@@ -132,6 +132,11 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
+
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tfaccount%d", rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBInstanceClassicBase)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -142,7 +147,12 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 		CheckDestroy:  testAccCheckMongoDBInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testMongoDBInstance_classic_base,
+				Config: testAccConfig(map[string]interface{}{
+					"zone_id":             "${data.alibabacloudstack_zones.default.zones[0].id}",
+					"engine_version":      "3.4",
+					"db_instance_storage": "10",
+					"db_instance_class":   "dds.mongo.mid",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"engine_version":       "3.4",
@@ -162,7 +172,9 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"ssl_action"},
 			},
 			{
-				Config: testMongoDBInstance_classic_ssl_action,
+				Config: testAccConfig(map[string]interface{}{
+					"ssl_action": "Open",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"ssl_status": "Open",
@@ -170,7 +182,9 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_classic_ssl_action_update,
+				Config: testAccConfig(map[string]interface{}{
+					"ssl_action": "Close",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"ssl_status": "Closed",
@@ -188,7 +202,9 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 			//				),
 			//			},
 			{
-				Config: testMongoDBInstance_classic_name,
+				Config: testAccConfig(map[string]interface{}{
+					"name": "tf-testAccMongoDBInstance_test",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"name": "tf-testAccMongoDBInstance_test",
@@ -199,11 +215,34 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_classic_configure,
+				Config: testAccConfig(map[string]interface{}{
+					"db_instance_storage": "30",
+					"db_instance_class":   "dds.mongo.standard",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"db_instance_storage": "30",
 						"db_instance_class":   "dds.mongo.standard",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"audit_status": "Enable",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"audit_status": "Enable",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"audit_status": "Disabled",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"audit_status": "Disabled",
 					}),
 				),
 			},
@@ -635,42 +674,9 @@ func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
 	})
 }
 
-const testMongoDBInstance_classic_base = `
-
-data "alibabacloudstack_zones" "default" { 
+func testMongoDBInstanceClassicBase(name string) string {
+	return DataZoneCommonTestCase
 }
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 10
-  db_instance_class   = "dds.mongo.mid"
-}`
-
-const testMongoDBInstance_classic_ssl_action = `
-
-data "alibabacloudstack_zones" "default" {
-  
-}
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 10
-  db_instance_class   = "dds.mongo.mid"
-  ssl_action          = "Open"
-}`
-
-const testMongoDBInstance_classic_ssl_action_update = `
-
-data "alibabacloudstack_zones" "default" {
-  
-}
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 10
-  db_instance_class   = "dds.mongo.mid"
-  ssl_action          = "Close"
-}`
 
 const testMongoDBInstance_classic_base4 = `
 
@@ -699,34 +705,6 @@ resource "alibabacloudstack_mongodb_instance" "default" {
     Created = "TF"
     For     = "acceptance test"
   }
-}`
-
-const testMongoDBInstance_classic_name = `
-
-data "alibabacloudstack_zones" "default" {
-  
-}
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 10
-  db_instance_class   = "dds.mongo.mid"
-  name                = "tf-testAccMongoDBInstance_test"
-  ssl_action          = "Close"
-}`
-
-const testMongoDBInstance_classic_configure = `
-
-data "alibabacloudstack_zones" "default" {
-  
-}
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  ssl_action          = "Close"
 }`
 
 func testMongoDBInstance_classic_account_password(password string) string {

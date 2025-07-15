@@ -187,6 +187,12 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Computed: true,
 			},
 			"tags": tagsSchema(),
+			"audit_status": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: validation.StringInSlice([]string{"Enable", "Disabled"}, false),
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackMongoDBInstanceCreate, resourceAlibabacloudStackMongoDBInstanceRead, resourceAlibabacloudStackMongoDBInstanceUpdate, resourceAlibabacloudStackMongoDBInstanceDelete)
@@ -360,12 +366,39 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	}
 
 	d.Set("tags", ddsService.tagsInAttributeToMap(instance.Tags.Tag))
+	
+	response, err := ddsService.DoDdsDescribeauditpolicyRequest(d.Id())
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_auditpolicy", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	d.Set("audit_status", response.LogAuditStatus)
+	
+	
 	return nil
 }
 
 func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
+	
+	if !d.IsNewResource() && d.HasChanges("audit_status") {
+		request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyAuditPolicy", "")
+
+		request.QueryParams["DBInstanceId"] = d.Id()
+
+		request.QueryParams["AuditStatus"] = d.Get("audit_status").(string)
+
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_mongo_db_audit_policy", "ModifyAuditPolicy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+
+	}
 
 	d.Partial(true)
 
