@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -77,18 +78,18 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Computed: true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
 				ConflictsWith: []string{"db_instance_description"},
 			},
 			"db_instance_description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
 				ConflictsWith: []string{"name"},
 			},
 			"security_ip_list": {
@@ -121,33 +122,33 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Elem: schema.TypeString,
 			},
 			"backup_period": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-				Computed: true,
-				Deprecated: "Field 'backup_period' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_period' instead.",
+				Type:          schema.TypeSet,
+				Elem:          &schema.Schema{Type: schema.TypeString},
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'backup_period' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_period' instead.",
 				ConflictsWith: []string{"preferred_backup_period"},
 			},
 			"preferred_backup_period": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeSet,
+				Elem:          &schema.Schema{Type: schema.TypeString},
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"backup_period"},
 			},
 			"backup_time": {
-				Type:     schema.TypeString,
-				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
-				Optional:     true,
-				Computed:     true,
-				Deprecated: "Field 'backup_time' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_time' instead.",
+				Type:          schema.TypeString,
+				ValidateFunc:  validation.StringInSlice(BACKUP_TIME, false),
+				Optional:      true,
+				Computed:      true,
+				Deprecated:    "Field 'backup_time' is deprecated and will be removed in a future release. Please use new field 'preferred_backup_time' instead.",
 				ConflictsWith: []string{"preferred_backup_time"},
 			},
 			"preferred_backup_time": {
-				Type:     schema.TypeString,
-				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
-				Optional:     true,
-				Computed:     true,
+				Type:          schema.TypeString,
+				ValidateFunc:  validation.StringInSlice(BACKUP_TIME, false),
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"backup_time"},
 			},
 			"ssl_action": {
@@ -188,10 +189,38 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 			},
 			"tags": tagsSchema(),
 			"audit_status": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Enable", "Disabled"}, false),
+			},
+			"audit_filter": {
+				Type: schema.TypeList,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{"admin", "slow", "query", "insert", "update", "delete", "command"}, false),
+				},
+				Optional:     true,
+				Computed:     true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if d.Get("audit_status").(string) != "Enable" {
+						return true
+					}
+					if k == "audit_filter.#" {
+						return old == new
+					}
+					o, n := d.GetChange("audit_filter")
+					var oldValue, newVlaue []string
+					for _, v := range o.([]interface{}) {
+						oldValue = append(oldValue, v.(string))
+					}
+					sort.Strings(oldValue)
+					for _, v := range n.([]interface{}) {
+						newVlaue = append(newVlaue, v.(string))
+					}
+					sort.Strings(newVlaue)
+					return strings.Join(oldValue, ",") == strings.Join(newVlaue, ",")
+				},
 			},
 		},
 	}
@@ -366,22 +395,28 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	}
 
 	d.Set("tags", ddsService.tagsInAttributeToMap(instance.Tags.Tag))
-	
-	response, err := ddsService.DoDdsDescribeauditpolicyRequest(d.Id())
-	if err != nil {
+
+	if response, err := ddsService.DoDdsDescribeauditpolicyRequest(d.Id()); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_auditpolicy", errmsgs.AlibabacloudStackSdkGoERROR)
+	} else {
+		d.Set("audit_status", response.LogAuditStatus)
 	}
-	d.Set("audit_status", response.LogAuditStatus)
-	
-	
+
+	if response, err := ddsService.DoDdsDescribeauditlogfilterRequest(d.Id()); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_auditlogfilter", errmsgs.AlibabacloudStackSdkGoERROR)
+	} else {
+		filters := strings.Split(response.Filter,",")
+		sort.Strings(filters)
+		d.Set("audit_filter", filters)
+	}
 	return nil
 }
 
 func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
-	
-	if d.HasChanges("audit_status") && d.Get("audit_status").(string) != ""{
+
+	if d.HasChanges("audit_status") && d.Get("audit_status").(string) != "" {
 		request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyAuditPolicy", "")
 
 		request.QueryParams["DBInstanceId"] = d.Id()
@@ -396,6 +431,28 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_mongo_db_audit_policy", "ModifyAuditPolicy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+	}
+
+	if v, ok := d.GetOk("audit_filter"); ok && d.Get("audit_status").(string) == "Enable" && d.HasChange("audit_filter") {
+		request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyAuditLogFilter", "")
+		// DdsModifyauditlogfilterResponseObj := DdsModifyauditlogfilterResponse{}
+		auditFilter := []string{}
+		for _, f := range v.([]interface{}) {
+			auditFilter = append(auditFilter, f.(string))
+		}
+		request.QueryParams["DBInstanceId"] = d.Id()
+
+		request.QueryParams["Filter"] = strings.Join(auditFilter, ",")
+
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_mongo_db_audit_log_filter", "ModifyAuditLogFilter", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 	}
@@ -429,7 +486,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		//d.SetPartial("period")
 	}
 
-	if d.HasChanges("preferred_backup_time", "preferred_backup_period", "backup_time", "backup_period"){
+	if d.HasChanges("preferred_backup_time", "preferred_backup_period", "backup_time", "backup_period") {
 		if err := ddsService.MotifyMongoDBBackupPolicy(d); err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -508,7 +565,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		return nil
 	}
 
-	if d.HasChanges("db_instance_description", "name"){
+	if d.HasChanges("db_instance_description", "name") {
 		request := dds.CreateModifyDBInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()

@@ -173,6 +173,21 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"audit_status": "Enable",
+					"audit_filter": []string{"update","delete", "admin"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"audit_status": "Enable",
+						"audit_filter.#": "3",
+						"audit_filter.0": "admin",
+						"audit_filter.1": "delete",
+						"audit_filter.2": "update",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"ssl_action": "Open",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -223,16 +238,6 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"db_instance_storage": "30",
 						"db_instance_class":   "dds.mongo.standard",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"audit_status": "Enable",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"audit_status": "Enable",
 					}),
 				),
 			},

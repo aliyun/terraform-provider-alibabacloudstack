@@ -690,3 +690,55 @@ func (s *MongoDBService) DoDdsDescribeauditpolicyRequest(id string) (*DdsDescrib
 
 	return DdsDescribeauditpolicyResponseObj, nil
 }
+
+type DdsDescribeauditlogfilterResponse struct {
+	RequestId string `json:"RequestId"`
+	Filter    string `json:"Filter"`
+	RoleType  string `json:"RoleType"`
+}
+
+func (s *MongoDBService) DoDdsDescribeauditlogfilterRequest(id string) (*DdsDescribeauditlogfilterResponse, error) {
+	// api: Dds - 2015-12-01 - DescribeAuditLogFilter
+	const maxRetries = 24
+	var instance dds.DBInstance
+
+	for i := 0; i < maxRetries; i++ {
+		var err error
+		instance, err = s.DescribeMongoDBInstance(id)
+
+		if err != nil {
+			log.Printf("DescribeMongoDBInstance failed: %v", err)
+			continue
+		}
+
+		if instance.DBInstanceStatus != "CONFIG_SWITCHING" {
+			break
+		}
+		time.Sleep(5 * time.Second)
+	}
+
+	// 使用最终获取的 instance 变量
+	request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeAuditLogFilter", "")
+	DdsDescribeauditlogfilterResponseObj := &DdsDescribeauditlogfilterResponse{}
+
+	//调用request_params_handler
+
+	request.QueryParams["DBInstanceId"] = id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeAuditLogFilter", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsDescribeauditlogfilterResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeAuditLogFilter", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return DdsDescribeauditlogfilterResponseObj, nil
+}
