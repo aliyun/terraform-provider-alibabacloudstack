@@ -21,15 +21,16 @@ type AcmDescribeconfigurationResponse struct {
 	RequestId string `json:"RequestId"`
 
 	Configuration struct {
-		AppName   string `json:"AppName"`
-		Content   string `json:"Content"`
-		DataId    string `json:"DataId"`
-		Desc      string `json:"Desc"`
-		Group     string `json:"Group"`
-		Md5       string `json:"Md5"`
-		Tags      string `json:"Tags"`
-		Type      string `json:"Type"`
-		UdVersion string `json:"UdVersion"`
+		AppName          string `json:"AppName"`
+		Content          string `json:"Content"`
+		DataId           string `json:"DataId"`
+		Desc             string `json:"Desc"`
+		Group            string `json:"Group"`
+		Md5              string `json:"Md5"`
+		Tags             string `json:"Tags"`
+		Type             string `json:"Type"`
+		UdVersion        string `json:"UdVersion"`
+		EncryptedDataKey string `json:"EncryptedDataKey"`
 	} `json:"Configuration"`
 }
 
