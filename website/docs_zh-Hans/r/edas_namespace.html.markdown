@@ -55,3 +55,4 @@ resource "alibabacloudstack_edas_namespace" "default" {
 除了上述所有参数外，还导出了以下属性：
 
 * `id` - 命名空间在Terraform中的唯一标识符(ID)。
+* `tenant_id` - 命名空间的租户侧ID。

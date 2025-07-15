@@ -69,6 +69,7 @@ const (
 	FlinkCode            = ServiceCode("VERVERICA")
 	EBSCode              = ServiceCode("EBS")
 	YaochiOpsCode        = ServiceCode("YAOCHIOPS")
+	ACMCode              = ServiceCode("ACM")
 	//undefined code 先添加
 	GDBCode             = ServiceCode("GDB")
 	ARMSCode            = ServiceCode("ARMS")
@@ -344,6 +345,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	FlinkCode: PopEndpoint{
 		"ververica.{{.region}}.{{.domain}}",
 		"ververica.{{.region}}.{{.domain}}",
+	},
+	ACMCode: PopEndpoint{
+		"dncs-api.console.{{.region}}.{{.domain}}",
+		"dncs-api.console.{{.region}}.{{.domain}}",
 	},
 	// 3.18.3新局点将不会开放
 	OneRouterCode: PopEndpoint{

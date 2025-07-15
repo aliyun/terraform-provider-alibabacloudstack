@@ -43,6 +43,10 @@ func resourceAlibabacloudStackEdasNamespace() *schema.Resource {
 				Required:     true,
 				ValidateFunc: validation.StringLenBetween(1, 63),
 			},
+			"tenant_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackEdasNamespaceCreate, resourceAlibabacloudStackEdasNamespaceRead, resourceAlibabacloudStackEdasNamespaceUpdate, resourceAlibabacloudStackEdasNamespaceDelete)
@@ -75,12 +79,12 @@ func resourceAlibabacloudStackEdasNamespaceCreate(d *schema.ResourceData, meta i
 		}
 		if code , ok:= response["Code"]; !ok{
 			return resource.NonRetryableError(errmsgs.Error("No Code in body of InsertOrUpdateRegion"))
-		} else if v, ok := code.(string); ok && v != "200"{
-			return resource.NonRetryableError(errmsgs.Error(response["Message"].(string)))
+		} else if v, ok := code.(string); ok && v != "200" {
+			return resource.NonRetryableError(errmsgs.Error("%s", response["Message"].(string)))
 		} else if vv, ok := code.(json.Number); !ok {
 			return resource.NonRetryableError(errmsgs.Error("Unknow Code type in body of InsertOrUpdateRegion"))
-		} else if string(vv) != "200"{
-			return resource.NonRetryableError(errmsgs.Error(response["Message"].(string)))
+		} else if string(vv) != "200" {
+			return resource.NonRetryableError(errmsgs.Error("%s", response["Message"].(string)))
 		}
 		return nil
 	})
@@ -110,6 +114,16 @@ func resourceAlibabacloudStackEdasNamespaceRead(d *schema.ResourceData, meta int
 	d.Set("description", object["Description"])
 	d.Set("namespace_logical_id", object["RegionId"])
 	d.Set("namespace_name", object["RegionName"])
+
+	reqQuery := map[string]interface{}{
+		"NamespaceId": object["RegionId"],
+	}
+	response, err := client.DoTeaRequest("GET", "Edas", "2017-08-01", "GetSecureToken", "/pop/v5/secure_token", nil, reqQuery, nil)
+	if err != nil {
+		return err
+	}
+	d.Set("tenant_id", response["SecureToken"].(map[string]interface{})["TenantId"].(string))
+
 	return nil
 }
 
