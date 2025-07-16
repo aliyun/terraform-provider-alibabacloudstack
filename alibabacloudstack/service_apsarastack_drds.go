@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/drds"
@@ -272,4 +273,79 @@ func (s *DrdsService) DoDrdsDescribeinstanceaccountsRequest(id string) (*DrdsDes
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeInstanceAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return DrdsDescribeinstanceaccountsResponse, nil
+}
+
+
+func (s *DrdsService) DescribeDrdsRdsInstance(id string) (map[string]interface{}, error) {
+
+	var drdsInstanceId, rdsInstanceId string
+	if parts, err := ParseResourceId(id, 2); err != nil {
+		return nil, err
+	} else {
+		drdsInstanceId = parts[0]
+		rdsInstanceId = parts[1]
+	}
+
+	reqQuery := map[string]interface{}{
+		"DrdsInstanceId": drdsInstanceId,
+	}
+	
+	response, err := s.client.DoTeaRequest("GET", "Drds", "2019-01-23", "DescribeDrdsRdsInstances", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	dbInstances := response["DbInstances"].(map[string]interface{})["DbInstance"].([]interface{})
+	
+	if len(dbInstances) < 1 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("No private rds for drds Instance %s", drdsInstanceId))
+	}
+	
+	for _, d := range dbInstances{
+		dbInstance := d.(map[string]interface{})
+		if dbInstance["DBInstanceId"].(string) != rdsInstanceId {
+			continue
+		}
+		return dbInstance, nil
+	}
+
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Private Rds %s for Drds %s Not Found", rdsInstanceId,  drdsInstanceId))
+	
+}
+
+
+// WaitForInstance waits for instance to given status
+func (s *DrdsService) PrivateRdsStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeDrdsRdsInstance(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		
+		if object == nil {
+			return nil, "", nil
+		}
+		
+		var status string
+		if v, err := object["DBInstanceStatus"].(json.Number).Int64(); err != nil {
+			return nil, "", err
+		} else {
+			if v < 0 {
+				return nil, "", nil
+			}
+			status = DrdsPrivateRdsDbInstanceStatus[int(v)]
+		}
+
+		for _, failState := range failStates {
+			if status == failState {
+				return object, status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, status))
+			}
+		}
+
+		return object, status, nil
+	}
 }

@@ -617,6 +617,8 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_alidns_domaingroup":                     resourceAlibabacloudStackDnsGroup(),
 		"alibabacloudstack_dns_record":                             resourceAlibabacloudStackDnsRecord(),
 		"alibabacloudstack_drds_instance":                          resourceAlibabacloudStackDRDSInstance(),
+		"alibabacloudstack_drds_database":                          resourceAlibabacloudStackDrdsDatabase(),
+		"alibabacloudstack_drds_rds_instance":                      resourceAlibabacloudStackDrdsRdsInstnace(),
 		"alibabacloudstack_dts_subscription_job":                   resourceAlibabacloudStackDtsSubscriptionJob(),
 		"alibabacloudstack_dts_subscriptionjob":                    resourceAlibabacloudStackDtsSubscriptionJob(),
 		"alibabacloudstack_dts_synchronization_instance":           resourceAlibabacloudStackDtsSynchronizationInstance(),

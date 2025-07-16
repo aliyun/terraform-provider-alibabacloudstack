@@ -109,18 +109,6 @@ func testAccPreCheckWithAccountSiteType(t *testing.T, account AccountSite) {
 	}
 }
 
-func testAccPreCheckWithRegions(t *testing.T, supported bool, regions []connectivity.Region) {
-	if v := os.Getenv("ALIBABACLOUDSTACK_ACCESS_KEY"); v == "" {
-		t.Fatal("ALIBABACLOUDSTACK_ACCESS_KEY must be set for acceptance tests")
-	}
-	if v := os.Getenv("ALIBABACLOUDSTACK_SECRET_KEY"); v == "" {
-		t.Fatal("ALIBABACLOUDSTACK_SECRET_KEY must be set for acceptance tests")
-	}
-	if v := os.Getenv("ALIBABACLOUDSTACK_REGION"); v == "" {
-		t.Fatal("ALIBABACLOUDSTACK_REGION must be set for acceptance tests")
-	}
-}
-
 // Skip automatically the sweep testcases which does not support some known regions.
 // If supported is true, the regions should a list of supporting the service regions.
 // If supported is false, the regions should a list of unsupporting the service regions.
@@ -418,7 +406,7 @@ func getAccTestPassword(length int) string {
 			return "<YOUR PASSWORD>"
 		}
 	}
-	
+
 	// 定义字符集
 	const (
 		upperLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -462,7 +450,7 @@ func getAccTestPassword(length int) string {
 	return string(password)
 }
 
-func getAccTestOsEnv(keyName string) string{
+func getAccTestOsEnv(keyName string) string {
 	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err != nil && v {
 		if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_SENSITIVE")); err == nil && v {
 			return fmt.Sprintf("<%s>", keyName)
