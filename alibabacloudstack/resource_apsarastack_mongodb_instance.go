@@ -210,16 +210,16 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 						return old == new
 					}
 					o, n := d.GetChange("audit_filter")
-					var oldValue, newVlaue []string
+					var oldValue, newValue []string
 					for _, v := range o.([]interface{}) {
 						oldValue = append(oldValue, v.(string))
 					}
 					sort.Strings(oldValue)
 					for _, v := range n.([]interface{}) {
-						newVlaue = append(newVlaue, v.(string))
+						newValue = append(newValue, v.(string))
 					}
-					sort.Strings(newVlaue)
-					return strings.Join(oldValue, ",") == strings.Join(newVlaue, ",")
+					sort.Strings(newValue)
+					return strings.Join(oldValue, ",") == strings.Join(newValue, ",")
 				},
 			},
 		},
