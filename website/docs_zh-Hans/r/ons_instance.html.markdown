@@ -42,8 +42,6 @@ output "inst" {
 * `independent_naming` - (必填) 此属性用于定义是否具有独立命名。它只接受布尔值。
 * `cluster` - (必填) 此属性用于添加集群名称。
 * `remark` - (可选) 此属性是对实例的简要描述。长度不得超过128。
-* `instance_type` - (必填) 此属性指定实例的类型。
-* `instance_status` - (必填) 此属性指定实例的状态。
 
 ## 属性说明
 
@@ -60,3 +58,5 @@ output "inst" {
 * `independent_naming` - 此属性表示实例是否有独立命名。
 * `cluster` - 此属性表示与实例关联的集群。
 * `remark` - 此属性表示实例的备注。
+* `instance_type` - 此属性指定实例的类型。
+* `instance_status` - 此属性指定实例的状态。

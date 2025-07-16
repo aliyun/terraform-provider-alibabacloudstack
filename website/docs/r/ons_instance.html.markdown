@@ -43,8 +43,6 @@ The following arguments are supported:
 * `independent_naming` - (Required)This attribute is used to define an independent name or not. It takes only bool value.
 * `cluster` - (Required)This attribute is a used to add cluster name.
 * `remark` - (Optional)This attribute is a concise description of instance. The length cannot exceed 128.
-* `instance_type` - (Required)  This attribute specifies the type of the instance.
-* `instance_status` - (Required)  This attribute specifies the status of the instance.
 
 ## Attributes Reference
 
@@ -61,3 +59,5 @@ The following attributes are exported:
 * `independent_naming` -  This attribute indicates whether the instance has independent naming.
 * `cluster` -  This attribute indicates the cluster associated with the instance.
 * `remark` -  This attribute indicates the remark of the instance.
+* `instance_type` - This attribute specifies the type of the instance.
+* `instance_status` - This attribute specifies the status of the instance.
