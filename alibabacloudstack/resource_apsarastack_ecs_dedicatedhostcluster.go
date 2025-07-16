@@ -99,7 +99,7 @@ func resourceAlibabacloudStackEcsDedicatedhostclusterCreate(d *schema.ResourceDa
 	d.SetId(fmt.Sprintf("%s", dedicated_host_cluster_id))
 
 	// dedicated_host_cluster_id := d.Get("dedicated_host_cluster_id").(string)
-	return resourceAlibabacloudStackEcsDedicatedhostclusterUpdate(d, meta)
+	return nil
 
 }
 
@@ -149,7 +149,7 @@ func resourceAlibabacloudStackEcsDedicatedhostclusterUpdate(d *schema.ResourceDa
 
 	}
 
-	return resourceAlibabacloudStackEcsDedicatedhostclusterRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackEcsDedicatedhostclusterRead(d *schema.ResourceData, meta interface{}) error {

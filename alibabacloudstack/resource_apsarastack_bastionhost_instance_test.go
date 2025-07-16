@@ -461,7 +461,7 @@ func TestAccAlibabacloudStackBastionhostInstance_PublicAccess(t *testing.T) {
 			{
 				ResourceName:            resourceId,
 				ImportState:             true,
-				ImportStateVerify:       false,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"period", "storage", "bandwidth"},
 			},
 		},
