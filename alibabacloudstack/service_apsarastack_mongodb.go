@@ -742,3 +742,66 @@ func (s *MongoDBService) DoDdsDescribeauditlogfilterRequest(id string) (*DdsDesc
 
 	return DdsDescribeauditlogfilterResponseObj, nil
 }
+
+func (s *MongoDBService) FormatMongodbTime(mongodbtime string) (string, error) {
+	t, err := time.Parse("2006-01-02T15:04:05Z", mongodbtime)
+	if err != nil {
+		return "", fmt.Errorf("parse mongodb time failed: %w", err)
+	}
+	outputLayout := "2006-01-02T15:04Z"
+	format_time := t.Format(outputLayout)
+	return format_time, nil
+}
+
+type DdsDescribebackupsResponse struct {
+	Backups struct {
+		Backup []struct {
+			BackupDBNames             string `json:"BackupDBNames"`
+			BackupId                  int    `json:"BackupId"`
+			BackupStatus              string `json:"BackupStatus"`
+			BackupStartTime           string `json:"BackupStartTime"`
+			BackupEndTime             string `json:"BackupEndTime"`
+			BackupType                string `json:"BackupType"`
+			BackupMode                string `json:"BackupMode"`
+			BackupMethod              string `json:"BackupMethod"`
+			BackupDownloadURL         string `json:"BackupDownloadURL"`
+			BackupIntranetDownloadURL string `json:"BackupIntranetDownloadURL"`
+			BackupSize                int    `json:"BackupSize"`
+		} `json:"Backup"`
+	} `json:"Backups"`
+	RequestId  string `json:"RequestId"`
+	PageNumber int    `json:"PageNumber"`
+	PageSize   int    `json:"PageSize"`
+	TotalCount int    `json:"TotalCount"`
+}
+
+func (s *MongoDBService) DoDdsDescribebackupsRequest(id string) (*DdsDescribebackupsResponse, error) {
+	// api: Dds - 2015-12-01 - DescribeBackups
+	request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeBackups", "")
+	DdsDescribebackupsResponseObj := &DdsDescribebackupsResponse{}
+	parts := strings.Split(id, "&")
+	instance_id := parts[1]
+	start_time := parts[2]
+	end_time := time.Now().UTC().Add(time.Hour).Format("2006-01-02T15:04Z")
+	//调用request_params_handler
+
+	request.QueryParams["DBInstanceId"] = instance_id
+	request.QueryParams["StartTime"] = start_time
+	request.QueryParams["EndTime"] = end_time
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBackups", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsDescribebackupsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBackups", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	return DdsDescribebackupsResponseObj, nil
+}
