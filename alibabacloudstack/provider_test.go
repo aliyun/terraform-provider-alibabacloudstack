@@ -398,6 +398,7 @@ func shuffle(chars []rune) []rune {
 }
 
 func getAccTestPassword(length int) string {
+	// 废弃方法，请使用RandomPasswordTestCase代替
 	if v := os.Getenv("ALIBABACLOUDSTACK_ACCRANDPWD"); v != "" {
 		return v
 	}
