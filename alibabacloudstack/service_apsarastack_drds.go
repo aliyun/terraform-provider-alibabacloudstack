@@ -270,7 +270,7 @@ type DrdsDescribedrdsdbsResponse struct {
 		Db []struct {
 			DbName     string `json:"DbName"`
 			Status     string `json:"Status"`
-			CreateTime string `json:"CreateTime"`
+			CreateTime int64  `json:"CreateTime"`
 			Mode       string `json:"Mode"`
 			Schema     string `json:"Schema"`
 			DbInstType string `json:"DbInstType"`
@@ -278,9 +278,9 @@ type DrdsDescribedrdsdbsResponse struct {
 	} `json:"Data"`
 	RequestId  string `json:"RequestId"`
 	Success    bool   `json:"Success"`
-	PageNumber string `json:"PageNumber"`
-	PageSize   string `json:"PageSize"`
-	Total      string `json:"Total"`
+	PageNumber int    `json:"PageNumber"`
+	PageSize   int    `json:"PageSize"`
+	Total      int    `json:"Total"`
 }
 
 func (s *DrdsService) DoDrdsDescribedrdsdbsRequest(id string) (*DrdsDescribedrdsdbsResponse, error) {

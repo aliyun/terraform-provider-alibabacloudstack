@@ -27,7 +27,7 @@ func resourceAlibabacloudStackDrdsDatabase() *schema.Resource {
 				Required: true,
 			},
 
-			"db_name": {
+			"drds_database_name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringMatch(regexp.MustCompile("^[a-z][a-z0-9_]{0,23}$"), "The database name must be 1 to 24 characters in length and can contain lowercase letters, digits, and underscores (_). It must start with a letter."),
@@ -156,7 +156,7 @@ func resourceAlibabacloudStackDrdsDatabaseCreate(d *schema.ResourceData, meta in
 
 	// api: Drds - 2019-01-23 - CreateDrdsDB
 	reqQuery := map[string]interface{}{
-		"DbName":               d.Get("db_name").(string),
+		"DbName":               d.Get("drds_database_name").(string),
 		"DrdsInstanceId":       d.Get("instance_id").(string),
 		"Encode":               d.Get("encode").(string),
 		"Password":             d.Get("password").(string),
@@ -175,7 +175,7 @@ func resourceAlibabacloudStackDrdsDatabaseCreate(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_database", "CreateDrdsDB", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	drds_database_name := d.Get("db_name").(string)
+	drds_database_name := d.Get("drds_database_name").(string)
 
 	instance_id := d.Get("instance_id").(string)
 
@@ -400,7 +400,7 @@ func resourceAlibabacloudStackDrdsDatabaseRead(d *schema.ResourceData, meta inte
 	createTime := time.Unix(sec, nsec).UTC() // 关键改动：直接转UTC
 	d.Set("create_time", createTime.Format("2006-01-02T15:04:05-07:00"))
 
-	d.Set("db_name", data.DbName)
+	d.Set("drds_database_name", data.DbName)
 
 	d.Set("split_mode", data.Mode)
 
@@ -414,6 +414,7 @@ func resourceAlibabacloudStackDrdsDatabaseRead(d *schema.ResourceData, meta inte
 	} else {
 		drdsInstanceId = parts[0]
 		databaseName = parts[1]
+		d.Set("instance_id",drdsInstanceId)
 	}
 	reqQuery := map[string]interface{}{
 		"DbName":         databaseName,

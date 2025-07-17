@@ -49,36 +49,29 @@ func TestAccAlibabacloudStackDrdsDatabase_basic0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id":      "${local.drds_instance_id}",
-					"db_name":          name,
+					"drds_database_name":          name,
 					"password":         "${random_password.password.0.result}",
-					"rds_instance_ids": []string{"${alibabacloudstack_drds_rds_instance.default.0.rds_instance_id}"},
+					"rds_instance_ids": []string{"${alibabacloudstack_drds_rds_instance.default.0.rds_instance_id}",
+					"${alibabacloudstack_drds_rds_instance.default.1.rds_instance_id}"},
 					"ip_white_list": map[string]string{
 						"test1": "127.0.0.1,192.168.1.1",
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"rds_instance_ids.#":  "1",
+						"rds_instance_ids.#":  "2",
 						"ip_white_list.test1": "192.168.1.1, 127.0.0.1",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"rds_instance_ids": []string{"${alibabacloudstack_drds_rds_instance.default.0.rds_instance_id}",
-						"${alibabacloudstack_drds_rds_instance.default.1.rds_instance_id}"},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"rds_instance_ids.#": "2",
 					}),
 				),
 			},
 			{
 				ResourceName:      resourceId,
 				ImportState:       true,
-				ImportStateVerify: false,
+				ImportStateVerify: true,
+				// encode和password无法回读
+				ImportStateVerifyIgnore: []string{"encode", "password"},
 			},
+
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"password": "${random_password.password.1.result}",
@@ -91,6 +84,18 @@ func TestAccAlibabacloudStackDrdsDatabase_basic0(t *testing.T) {
 					testAccCheck(map[string]string{
 						"ip_white_list.test1": "192.168.1.1, 127.0.0.2",
 						"ip_white_list.test2": "192.168.2.1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"rds_instance_ids": []string{"${alibabacloudstack_drds_rds_instance.default.0.rds_instance_id}",
+						"${alibabacloudstack_drds_rds_instance.default.1.rds_instance_id}",
+						"${alibabacloudstack_drds_rds_instance.default.2.rds_instance_id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"rds_instance_ids.#": "3",
 					}),
 				),
 			},
@@ -144,7 +149,7 @@ func resourceDrdsDatabaseDependence(name string) string {
 	}
 	
 	resource "alibabacloudstack_drds_rds_instance" "default" {
-		count               = 2
+		count               = 3
 		zone_id             = data.alibabacloudstack_zones.default.zones.0.id
 		db_instance_storage = "20"
 		storage_type        = "local_ssd"
@@ -158,7 +163,7 @@ func resourceDrdsDatabaseDependence(name string) string {
 
 var drdsDatabasebasicMap = map[string]string{
 	"instance_id":  CHECKSET,
-	"db_name":      CHECKSET,
+	"drds_database_name":      CHECKSET,
 	"split_mode":   "HORIZONTAL",
 	"encode":       "utf8",
 	"create_time":  CHECKSET,

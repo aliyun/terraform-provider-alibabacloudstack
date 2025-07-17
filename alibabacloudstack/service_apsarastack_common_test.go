@@ -548,6 +548,7 @@ func (dsa *dataSourceAttr) dataSourceTestCheckWithPreCheck(t *testing.T, rand in
 	ResourceTest(t, resource.TestCase{
 		PreCheck:  preCheck,
 		Providers: testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 		Steps:     steps,
 	})
 }
