@@ -13,36 +13,29 @@ func TestAccAlibabacloudStackPolardbDatabasesDataSource(t *testing.T) {
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_polardb_database.default.id}"},
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_polardb_database.default.id}_fake"},
-		}),
-	}
-
-	data_base_instance_idConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
 			"ids":                   []string{"${alibabacloudstack_polardb_database.default.id}"},
-			"data_base_instance_id": "${alibabacloudstack_polardb_instance.instance.id}",
+			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"ids":                   []string{"${alibabacloudstack_polardb_database.default.id}_fake"},
-			"data_base_instance_id": "${alibabacloudstack_polardb_instance.instance.id}_fake",
+			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
 		}),
 	}
 
 	data_base_nameConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids":            []string{"${alibabacloudstack_polardb_database.default.id}"},
-			"data_base_name": "${alibabacloudstack_polardb_database.default.data_base_name}",
+			"ids":                   []string{"${alibabacloudstack_polardb_database.default.id}"},
+			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+			"data_base_name":        "${alibabacloudstack_polardb_database.default.data_base_name}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids":            []string{"${alibabacloudstack_polardb_database.default.id}_fake"},
-			"data_base_name": "${alibabacloudstack_polardb_database.default.data_base_name}_fake",
+			"ids":                   []string{"${alibabacloudstack_polardb_database.default.id}_fake"},
+			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+			"data_base_name":        "${alibabacloudstack_polardb_database.default.data_base_name}_fake",
 		}),
 	}
 
-	AlibabacloudstackPolardbDatabasesCheckInfo.dataSourceTestCheck(t, rand, idsConf, data_base_instance_idConf, data_base_nameConf)
+	AlibabacloudstackPolardbDatabasesCheckInfo.dataSourceTestCheck(t, rand, idsConf, data_base_nameConf)
 }
 
 var existAlibabacloudstackPolardbDatabasesMapFunc = func(rand int) map[string]string {
@@ -69,7 +62,13 @@ func dataSourcePolardbDatabaseDependence(name string) string {
 variable "name" {
 	default = "%s"
 }
-resource "alibabacloudstack_polardb_instance" "instance" {
+
+data "alibabacloudstack_zones" default {
+  available_resource_creation = "VSwitch"
+  enable_details = true
+}
+
+resource "alibabacloudstack_polardb_dbinstance" "instance" {
 	engine            = "MySQL"
 	engine_version    = "5.7"
 	instance_name = "${var.name}"
@@ -79,7 +78,7 @@ resource "alibabacloudstack_polardb_instance" "instance" {
 	zone_id= "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
 resource "alibabacloudstack_polardb_database" "default" {
-	data_base_instance_id = "${alibabacloudstack_polardb_instance.instance.id}"
+	data_base_instance_id = "${alibabacloudstack_polardb_dbinstance.instance.id}"
 	data_base_description = "自动化生成测试"
 	data_base_name        = "tftest"
 	character_set_name = "utf8"

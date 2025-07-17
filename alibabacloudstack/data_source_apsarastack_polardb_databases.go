@@ -36,28 +36,6 @@ func dataSourceAlibabacloudStackPolardbDatabases() *schema.Resource {
 				Optional: true,
 			},
 
-			"page_number": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  "1",
-			},
-
-			"page_size": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  "10",
-			},
-
-			"status": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"databases": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -219,11 +197,5 @@ func dataSourceAlibabacloudStackPolardbDatabasesRead(d *schema.ResourceData, met
 	if err := d.Set("ids", ids); err != nil {
 		return err
 	}
-
-	// create a json file in current directory and write data source to it.
-	if output, ok := d.GetOk("output_file"); ok && output.(string) != "" {
-		writeToFile(output.(string), datas)
-	}
-
 	return nil
 }
