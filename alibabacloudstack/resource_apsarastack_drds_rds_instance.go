@@ -68,7 +68,7 @@ func resourceAlibabacloudStackDrdsRdsInstnace() *schema.Resource {
 			"force_remove": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  true,
+				Default:  false,
 			},
 		},
 	}

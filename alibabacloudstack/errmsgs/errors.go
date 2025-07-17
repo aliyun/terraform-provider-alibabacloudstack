@@ -101,11 +101,11 @@ func NotFoundError(err error) bool {
 	}
 
 	if e, ok := err.(*sdkerrors.ServerError); ok {
-		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound)
+		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound) || strings.Contains(e.ErrorCode(), ".NotFound") 
 	}
 
 	if e, ok := err.(*ProviderError); ok {
-		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound)
+		return e.ErrorCode() == InstanceNotFound || e.ErrorCode() == RamInstanceNotFound || e.ErrorCode() == NotFound || strings.Contains(strings.ToLower(e.Message()), MessageInstanceNotFound) || strings.Contains(e.ErrorCode(), ".NotFound") 
 	}
 
 	if e, ok := err.(oss.ServiceError); ok {

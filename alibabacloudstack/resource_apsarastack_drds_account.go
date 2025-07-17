@@ -12,14 +12,7 @@ import (
 )
 
 func resourceAlibabacloudStackDrdsAccount() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackDrdsAccountCreate,
-		Read:   resourceAlibabacloudStackDrdsAccountRead,
-		Update: resourceAlibabacloudStackDrdsAccountUpdate,
-		Delete: resourceAlibabacloudStackDrdsAccountDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
+	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 
 			"account_type": {
@@ -75,6 +68,8 @@ func resourceAlibabacloudStackDrdsAccount() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackDrdsAccountCreate, resourceAlibabacloudStackDrdsAccountRead, resourceAlibabacloudStackDrdsAccountUpdate, resourceAlibabacloudStackDrdsAccountDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackDrdsAccountCreate(d *schema.ResourceData, meta interface{}) error {

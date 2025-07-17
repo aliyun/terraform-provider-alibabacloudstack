@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/drds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -101,7 +102,7 @@ type DrdsDescribedrdsdbResponse struct {
 	Data struct {
 		DbName     string `json:"DbName"`
 		Status     string `json:"Status"`
-		CreateTime string `json:"CreateTime"`
+		CreateTime int64  `json:"CreateTime"`
 		Mode       string `json:"Mode"`
 		Schema     string `json:"Schema"`
 		DbInstType string `json:"DbInstType"`
@@ -109,7 +110,7 @@ type DrdsDescribedrdsdbResponse struct {
 	} `json:"Data"`
 }
 
-func (s *DrdsService) DoDrdsDescribedrdsdbRequest(id string) (*DrdsDescribedrdsdbResponse, error) {
+func (s *DrdsService) DescribeDrdsDatabase(id string) (*DrdsDescribedrdsdbResponse, error) {
 
 	var instanceId, databaseName string
 	if parts, err := ParseResourceId(id, 2); err != nil {
@@ -120,7 +121,7 @@ func (s *DrdsService) DoDrdsDescribedrdsdbRequest(id string) (*DrdsDescribedrdsd
 	}
 
 	// api: Drds - 2019-01-23 - DescribeDrdsDB
-	request := s.client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeDrdsDB", "")
+	request := s.client.NewCommonRequest("GET", "Drds", "2019-01-23", "DescribeDrdsDB", "")
 	DrdsDescribedrdsdbResponse := &DrdsDescribedrdsdbResponse{}
 
 	//调用request_params_handler
@@ -131,6 +132,9 @@ func (s *DrdsService) DoDrdsDescribedrdsdbRequest(id string) (*DrdsDescribedrdsd
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
+		if sdkErr, ok := err.(*errors.ServerError); ok && sdkErr.ErrorCode() == "InvalidDbName.NotFound" {
+			return nil, sdkErr
+		}
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
@@ -145,6 +149,76 @@ func (s *DrdsService) DoDrdsDescribedrdsdbRequest(id string) (*DrdsDescribedrdsd
 	}
 
 	return DrdsDescribedrdsdbResponse, nil
+}
+
+func (s *DrdsService) DbStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeDrdsDatabase(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object.Data.Status == failState {
+				return object, object.Data.Status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.Data.Status))
+			}
+		}
+
+		return object, object.Data.Status, nil
+	}
+}
+
+func (s *DrdsService) DescribeDrdsDbTask(id string) (map[string]interface{}, error) {
+	var drdsInstanceId, databaseName string
+	if parts, err := ParseResourceId(id, 2); err != nil {
+		return nil, err
+	} else {
+		drdsInstanceId = parts[0]
+		databaseName = parts[1]
+	}
+
+	reqQuery := map[string]interface{}{
+		"DbName":         databaseName,
+		"DrdsInstanceId": drdsInstanceId,
+	}
+	repsonse, err := s.client.DoTeaRequest("GET", "Drds", "2019-01-23", "DescribeDrdsDbTasks", "", nil, reqQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+	task := repsonse["Tasks"].(map[string]interface{})["Task"].([]interface{})
+	if len(task) < 1 {
+		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Not Rearrange Task Found for Drds %s DB %s", drdsInstanceId, databaseName))
+	}
+	return task[len(task)-1].(map[string]interface{}), nil
+}
+
+func (s *DrdsService) DbTaskRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeDrdsDbTask(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		taskStatus, err := object["TaskStatus"].(json.Number).Int64()
+		if err != nil {
+			return nil, "", err
+		}
+		status := DrdsRearrangeTaskStatus[int(taskStatus)]
+		for _, failState := range failStates {
+			if status == failState {
+				return object, status, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, status))
+			}
+		}
+
+		return object, status, nil
+	}
 }
 
 type DrdsDescribedrdsdbipwhitelistResponse struct {
@@ -275,7 +349,6 @@ func (s *DrdsService) DoDrdsDescribeinstanceaccountsRequest(id string) (*DrdsDes
 	return DrdsDescribeinstanceaccountsResponse, nil
 }
 
-
 func (s *DrdsService) DescribeDrdsRdsInstance(id string) (map[string]interface{}, error) {
 
 	var drdsInstanceId, rdsInstanceId string
@@ -289,19 +362,19 @@ func (s *DrdsService) DescribeDrdsRdsInstance(id string) (map[string]interface{}
 	reqQuery := map[string]interface{}{
 		"DrdsInstanceId": drdsInstanceId,
 	}
-	
+
 	response, err := s.client.DoTeaRequest("GET", "Drds", "2019-01-23", "DescribeDrdsRdsInstances", "", nil, reqQuery, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	dbInstances := response["DbInstances"].(map[string]interface{})["DbInstance"].([]interface{})
-	
+
 	if len(dbInstances) < 1 {
 		return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("No private rds for drds Instance %s", drdsInstanceId))
 	}
-	
-	for _, d := range dbInstances{
+
+	for _, d := range dbInstances {
 		dbInstance := d.(map[string]interface{})
 		if dbInstance["DBInstanceId"].(string) != rdsInstanceId {
 			continue
@@ -309,10 +382,9 @@ func (s *DrdsService) DescribeDrdsRdsInstance(id string) (map[string]interface{}
 		return dbInstance, nil
 	}
 
-	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Private Rds %s for Drds %s Not Found", rdsInstanceId,  drdsInstanceId))
-	
-}
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Private Rds %s for Drds %s Not Found", rdsInstanceId, drdsInstanceId))
 
+}
 
 // WaitForInstance waits for instance to given status
 func (s *DrdsService) PrivateRdsStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
@@ -325,11 +397,11 @@ func (s *DrdsService) PrivateRdsStateRefreshFunc(id string, failStates []string)
 			}
 			return nil, "", errmsgs.WrapError(err)
 		}
-		
+
 		if object == nil {
 			return nil, "", nil
 		}
-		
+
 		var status string
 		if v, err := object["DBInstanceStatus"].(json.Number).Int64(); err != nil {
 			return nil, "", err

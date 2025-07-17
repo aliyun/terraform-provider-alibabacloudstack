@@ -30,11 +30,6 @@ func dataSourceAlibabacloudStackDrdsAccounts() *schema.Resource {
 				Required: true,
 			},
 
-			"output_file": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
 			"accounts": {
 				Type:     schema.TypeList,
 				Computed: true,
