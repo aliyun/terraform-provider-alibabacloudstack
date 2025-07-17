@@ -21,11 +21,11 @@ func TestAccAlibabacloudStackDrdsDatabasesDataSource(t *testing.T) {
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackDrdsDatabasesSourceConfig(name, map[string]string{
 			"instance_id":        `"${local.drds_instance_id}"`,
-			"drds_database_name": `["${alibabacloudstack_drds_databases.default.drds_database_name}"]`,
+			"drds_database_name": fmt.Sprintf(`"%s"`, name),
 		}),
 		fakeConfig: testAccCheckAlibabacloudStackDrdsDatabasesSourceConfig(name, map[string]string{
 			"instance_id":        `"${local.drds_instance_id}"`,
-			"drds_database_name": `["${alibabacloudstack_drds_databases.default.drds_database_name}_fake"]`,
+			"drds_database_name": `"tf_acc_drds_db__fake"`,
 		}),
 	}
 
@@ -44,7 +44,7 @@ func TestAccAlibabacloudStackDrdsDatabasesDataSource(t *testing.T) {
 	}
 
 	var CheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_drds_rds_instances.default",
+		resourceId:   "data.alibabacloudstack_drds_databases.default",
 		existMapFunc: exisMapFunc,
 		fakeMapFunc:  fakeMapFunc,
 	}
@@ -77,7 +77,7 @@ func testAccCheckAlibabacloudStackDrdsDatabasesSourceConfig(name string, attrMap
 	}
 
 	resource "random_password" "password" {
-		count            = 2
+		count            = 1
 		length           = 12
 		special          = true
 		override_special = "_"
@@ -90,16 +90,16 @@ func testAccCheckAlibabacloudStackDrdsDatabasesSourceConfig(name string, attrMap
 
 	resource "alibabacloudstack_drds_instance" "default" {
 		count                = local.create_drds_instance_count
-		description          = "${var.name}"
-		zone_id              = "${alibabacloudstack_vpc_vswitch.default.availability_zone}"
-		instance_series      = "${var.instance_series}"
+		description          = var.name
+		zone_id              = alibabacloudstack_vpc_vswitch.default.availability_zone
+		instance_series      = var.instance_series
 		instance_charge_type = "PostPaid"
-		vswitch_id           = "${alibabacloudstack_vpc_vswitch.default.id}"
+		vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
 		specification        = "drds.sn2.4c16g.8C32G"
 	}
 
 	locals {
-		drds_instance_id = var.existed_drds_instance == "" ? alibabacloudstack_drds_instance.default.0.id: var.existed_drds_instance
+		drds_instance_id = var.existed_drds_instance == "" ? alibabacloudstack_drds_instance.default.0.id : var.existed_drds_instance
 	}
 
 	resource "alibabacloudstack_drds_rds_instance" "default" {
@@ -111,15 +111,15 @@ func testAccCheckAlibabacloudStackDrdsDatabasesSourceConfig(name string, attrMap
 		db_instance_class   = "rds.mysql.s1.small"
 		drds_instance_id    = local.drds_instance_id
 	}
-	
+
 	resource "alibabacloudstack_drds_database" "default" {
-		instance_id = "${local.drds_instance_id}"
-		drds_database_name = "${var.name}"
-		password = "${random_password.password.0.result}"
+		instance_id        = local.drds_instance_id
+		drds_database_name = var.name
+		password = random_password.password.0.result
 		rds_instance_ids = [
-			"${alibabacloudstack_drds_rds_instance.default.0.id}"
+			"${alibabacloudstack_drds_rds_instance.default.0.rds_instance_id}",
 		]
-	}
+}
 	
 data "alibabacloudstack_drds_databases" "default" {
   %s

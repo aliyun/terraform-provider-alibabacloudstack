@@ -79,6 +79,21 @@ func dataSourceAlibabacloudStackDrdsDatabases() *schema.Resource {
 
 func dataSourceAlibabacloudStackDrdsDatabasesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	drdsService:= DrdsService{client}
+	
+	if _,  err := drdsService.DescribeDrdsInstance(d.Get("instance_id").(string)); err != nil {
+		// 需要先判断drds_instance_id，不存在时直接返回空
+		ids := []string{}
+		datas := []interface{}{}
+		d.SetId(dataResourceIdHash(ids))
+		if err := d.Set("databases", datas); err != nil {
+			return err
+		}
+		if err := d.Set("drds_database_names", ids); err != nil {
+			return err
+		}
+		return nil
+	}
 
 	// api: Drds - 2019-01-23 - DescribeDrdsDBs
 	request := client.NewCommonRequest("GET", "Drds", "2019-01-23", "DescribeDrdsDBs", "")
