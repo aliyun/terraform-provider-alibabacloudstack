@@ -119,6 +119,7 @@ func resourceAlibabacloudStackPolardbAccountCreate(d *schema.ResourceData, meta 
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug("CreateAccount", bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -137,7 +138,7 @@ func resourceAlibabacloudStackPolardbAccountCreate(d *schema.ResourceData, meta 
 
 	data_base_instance_id := d.Get("data_base_instance_id").(string)
 
-	d.SetId(fmt.Sprintf("%s", data_base_instance_id+":"+account_name))
+	d.SetId(fmt.Sprintf("%s:%s", data_base_instance_id, account_name))
 	return nil
 
 }
@@ -219,6 +220,7 @@ func resourceAlibabacloudStackPolardbAccountUpdate(d *schema.ResourceData, meta 
 					return fmt.Errorf("DataBaseName is required")
 				}
 				bresponse, err := client.ProcessCommonRequest(request)
+				addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 				if err != nil {
 					if bresponse == nil {
 						return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -260,6 +262,7 @@ func resourceAlibabacloudStackPolardbAccountUpdate(d *schema.ResourceData, meta 
 					return fmt.Errorf("DataBaseName is required")
 				}
 				bresponse, err := client.ProcessCommonRequest(request)
+				addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 				if err != nil {
 					if bresponse == nil {
 						return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -295,6 +298,7 @@ func resourceAlibabacloudStackPolardbAccountUpdate(d *schema.ResourceData, meta 
 		}
 
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -328,6 +332,7 @@ func resourceAlibabacloudStackPolardbAccountUpdate(d *schema.ResourceData, meta 
 		}
 
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -394,6 +399,7 @@ func resourceAlibabacloudStackPolardbAccountDelete(d *schema.ResourceData, meta 
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")

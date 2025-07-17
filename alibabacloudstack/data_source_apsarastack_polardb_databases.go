@@ -84,11 +84,6 @@ func dataSourceAlibabacloudStackPolardbDatabases() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-
-									"account_privilege_detail": {
-										Type:     schema.TypeString,
-										Computed: true,
-									},
 								},
 							},
 						},
@@ -186,6 +181,13 @@ func dataSourceAlibabacloudStackPolardbDatabasesRead(d *schema.ResourceData, met
 	datas := make([]interface{}, 0)
 
 	for _, data := range PolardbDescribedatabasesResponse.Databases.Database {
+		accounts := make([]map[string]interface{}, 0)
+		for _, data1 := range data.Accounts.AccountPrivilegeInfo {
+			accounts = append(accounts, map[string]interface{}{
+				"account":           data1.Account,
+				"account_privilege": data1.AccountPrivilege,
+			})
+		}
 		i := map[string]interface{}{
 			"character_set_name": data.CharacterSetName,
 
@@ -198,6 +200,8 @@ func dataSourceAlibabacloudStackPolardbDatabasesRead(d *schema.ResourceData, met
 			"engine": data.Engine,
 
 			"status": data.DBStatus,
+
+			"accounts": accounts,
 		}
 		datas = append(datas, i)
 

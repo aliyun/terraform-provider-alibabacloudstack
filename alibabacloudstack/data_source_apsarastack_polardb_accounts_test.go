@@ -31,14 +31,14 @@ func TestAccAlibabacloudStackPolardbAccountsDataSource(t *testing.T) {
 		}),
 	}
 
-	data_base_instance_idConf := dataSourceTestAccConfig{
+	data_instance_idConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
-			"ids":                   `["${alibabacloudstack_polardb_account.default.id}"]`,
-			"data_base_instance_id": `"${alibabacloudstack_polardb_account.default.data_base_instance_id}"`,
+			"ids":              `["${alibabacloudstack_polardb_account.default.id}"]`,
+			"data_instance_id": `"${alibabacloudstack_polardb_dbinstance.default.id}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
-			"ids":                   `["${alibabacloudstack_polardb_account.default.id}_fake"]`,
-			"data_base_instance_id": `"${alibabacloudstack_polardb_account.default.data_base_instance_id}_fake"`,
+			"ids":              `["${alibabacloudstack_polardb_account.default.id}_fake"]`,
+			"data_instance_id": `"${alibabacloudstack_polardb_dbinstance.default.id}_fake"`,
 		}),
 	}
 
@@ -46,16 +46,16 @@ func TestAccAlibabacloudStackPolardbAccountsDataSource(t *testing.T) {
 		existConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
 			"ids": `["${alibabacloudstack_polardb_account.default.id}"]`,
 
-			"account_name":          `"${alibabacloudstack_polardb_account.default.account_name}"`,
-			"data_base_instance_id": `"${alibabacloudstack_polardb_account.default.data_base_instance_id}"`}),
+			"account_name":     `"${alibabacloudstack_polardb_account.default.account_name}"`,
+			"data_instance_id": `"${alibabacloudstack_polardb_dbinstance.default.id}"`}),
 		fakeConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
 			"ids": `["${alibabacloudstack_polardb_account.default.id}_fake"]`,
 
-			"account_name":          `"${alibabacloudstack_polardb_account.default.account_name}_fake"`,
-			"data_base_instance_id": `"${alibabacloudstack_polardb_account.default.data_base_instance_id}_fake"`}),
+			"account_name":     `"${alibabacloudstack_polardb_account.default.account_name}_fake"`,
+			"data_instance_id": `"${alibabacloudstack_polardb_dbinstance.default.id}_fake"`}),
 	}
 
-	AlibabacloudstackPolardbAccountsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, account_nameConf, data_base_instance_idConf, allConf)
+	AlibabacloudstackPolardbAccountsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, account_nameConf, data_instance_idConf, allConf)
 }
 
 var existAlibabacloudstackPolardbAccountsDataMapFunc = func(rand int) map[string]string {
@@ -82,40 +82,34 @@ func testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand int, attr
 	for k, v := range attrMap {
 		pairs = append(pairs, k+" = "+v)
 	}
-	config := fmt.Sprintf(`
+	return fmt.Sprintf(`
 variable "name" {
 	default = "tf-testAlibabacloudstackPolardbAccounts%d"
 }
+
+data  "alibabacloudstack_zones" "default" {
+	available_resource_creation = "PolarDB"
+}
+resource "alibabacloudstack_polardb_dbinstance" "instance" {
+	engine            = "MySQL"
+	engine_version    = "5.7"
+	instance_name = "tfinstance"
+	db_instance_storage_type= "local_ssd"
+	db_instance_storage = 5
+	db_instance_class = "rds.mysql.t1.small"
+	zone_id= "${data.alibabacloudstack_zones.default.zones.0.id}"
+}
+resource "alibabacloudstack_polardb_account" "default" {
+	data_base_instance_id = "${resource.alibabacloudstack_polardb_dbinstance.instance.id}"
+	account_description = "test"
+	account_name        = "polardb_account"
+	account_password = "Test12345"
+	account_type ="Normal"
+}
+		
 
 data "alibabacloudstack_polardb_accounts" "default" {
 %s
 }
 `, rand, strings.Join(pairs, "\n   "))
-
-	instanceConfig := fmt.Sprintf(`
-	%s
-	variable "creation" {
-		default = "PolarDB"
-	}
-	resource "alibabacloudstack_polardb_instance" "instance" {
-		engine            = "MySQL"
-		engine_version    = "5.7"
-		instance_name = "tfinstance"
-		db_instance_storage_type= "local_ssd"
-		db_instance_storage = 5
-		db_instance_class = "rds.mysql.t1.small"
-		zone_id= "${data.alibabacloudstack_zones.default.zones.0.id}"
-		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-	}
-	resource "alibabacloudstack_polardb_account" "default" {
-		data_base_instance_id = "${resource.alibabacloudstack_polardb_instance.instance.id}"
-		account_description = "test"
-		account_name        = "polardb_account"
-		account_password = "Test12345"
-		account_type ="Normal"
-	}
-		
-	`, RdsCommonTestCase)
-
-	return config + instanceConfig
 }

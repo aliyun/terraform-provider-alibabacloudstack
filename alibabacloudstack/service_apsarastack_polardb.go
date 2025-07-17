@@ -1302,6 +1302,79 @@ func (s *PolardbService) DescribeDBConnection(id string) (*PolardbDescribedbinst
 	return PolardbDescribedbinstancenetinfoResponse, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("DBConnection", id)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
 }
 
+type PolardbBackupJob struct {
+	BackupProgressStatus string `json:"BackupProgressStatus"`
+	BackupStatus         string `json:"BackupStatus"`
+	JobMode              string `json:"JobMode"`
+	Process              string `json:"Process"`
+	TaskAction           string `json:"TaskAction"`
+	BackupJobId          int    `json:"BackupJobId"`
+	BackupId             string `json:"BackupId"`
+}
+
+type DescribeBackupTasksResponse struct {
+	EagleEyeTraceId string `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool   `json:"asapiSuccess"`
+	ResponseVersion string `json:"responseVersion"`
+	RequestId       string `json:"RequestId"`
+	Success         bool   `json:"success"`
+	RequestID       string `json:"requestId"` // 注意字段大小写可能不一致，需确认是否与[RequestId](file://d:\terraform\terraform-provider-apsarastack\alibabacloudstack\resource_apsarastack_ack_cluster.go#L657-L657)相同
+	Items           struct {
+		BackupJob []PolardbBackupJob `json:"BackupJob"`
+	} `json:"Items"`
+}
+
+func (s *PolardbService) DoPolardbDescribebackupTaskRequest(db_instance_id, job_id string) (PolardbBackupJob, error) {
+	// api: polardb - 2024-01-30 - DescribeBackups
+	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeBackupTasks", "")
+	DescribeBackupTasksResponseObj := &DescribeBackupTasksResponse{}
+	var backup_job PolardbBackupJob
+	request.QueryParams["DBInstanceId"] = db_instance_id
+	request.QueryParams["BackupJobId"] = job_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return backup_job, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return backup_job, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBackups", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DescribeBackupTasksResponseObj)
+
+	if err != nil {
+		return backup_job, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBackups", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	for _, v := range DescribeBackupTasksResponseObj.Items.BackupJob {
+		if fmt.Sprint(v.BackupJobId) == job_id {
+			backup_job = v
+			break
+		}
+	}
+	return backup_job, nil
+}
+
+func (s *PolardbService) PolardbDescribebackupTaskStateRefreshFunc(db_instance_id string, job_id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DoPolardbDescribebackupTaskRequest(db_instance_id, job_id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object.BackupStatus == failState {
+				return object, object.BackupStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.BackupStatus))
+			}
+		}
+		return object, object.BackupStatus, nil
+	}
+}
+
 type PolardbbackupData struct {
 	BackupMethod              string `json:"BackupMethod"`
 	BackupIntranetDownloadURL string `json:"BackupIntranetDownloadURL"`
@@ -1309,7 +1382,7 @@ type PolardbbackupData struct {
 	BackupSize                int    `json:"BackupSize"`
 	BackupId                  int    `json:"BackupId"`
 	SlaveStatus               string `json:"SlaveStatus"`
-	HostInstanceID            string `json:"HostInstanceID"`
+	HostInstanceID            int    `json:"HostInstanceID"`
 	BackupDBNames             string `json:"BackupDBNames"`
 	StoreStatus               string `json:"StoreStatus"`
 	DBInstanceId              string `json:"DBInstanceId"`
@@ -1327,10 +1400,10 @@ type PolardbDescribebackupsResponse struct {
 	Items struct {
 		Backup []PolardbbackupData `json:"Backup"`
 	} `json:"Items"`
-	TotalRecordCount string `json:"TotalRecordCount"`
-	PageRecordCount  string `json:"PageRecordCount"`
+	TotalRecordCount int    `json:"TotalRecordCount"`
+	PageRecordCount  int    `json:"PageRecordCount"`
 	RequestId        string `json:"RequestId"`
-	PageNumber       string `json:"PageNumber"`
+	PageNumber       int    `json:"PageNumber"`
 }
 
 func (s *PolardbService) DoPolardbDescribebackupsRequest(id string) (*PolardbbackupData, error) {
@@ -1338,9 +1411,15 @@ func (s *PolardbService) DoPolardbDescribebackupsRequest(id string) (*Polardbbac
 	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeBackups", "")
 	PolardbDescribebackupsResponseObj := &PolardbDescribebackupsResponse{}
 	param := strings.Split(id, ":")
-
-	request.QueryParams["DBInstanceId"] = param[0]
-	request.QueryParams["BackupId"] = param[1]
+	t, err := time.Parse("2006-01-02", param[0])
+	if err != nil {
+		fmt.Println("时间解析失败:", err)
+		return nil, err
+	}
+	end_time := t.AddDate(0, 0, 1)
+	request.QueryParams["DBInstanceId"] = param[1]
+	request.QueryParams["StartTime"] = t.Format("2006-01-02T15:04Z")
+	request.QueryParams["EndTime"] = end_time.Format("2006-01-02T15:04Z")
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -1357,11 +1436,12 @@ func (s *PolardbService) DoPolardbDescribebackupsRequest(id string) (*Polardbbac
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBackups", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	if len(PolardbDescribebackupsResponseObj.Items.Backup) > 0 {
-		return &PolardbDescribebackupsResponseObj.Items.Backup[0], nil
-	} else {
-		return nil, errmsgs.Error(errmsgs.NotFoundWithResponse, id)
+	for _, v := range PolardbDescribebackupsResponseObj.Items.Backup {
+		if fmt.Sprint(v.BackupId) == param[2] {
+			return &v, nil
+		}
 	}
+	return nil, errmsgs.Error(errmsgs.NotFoundWithResponse, id)
 }
 
 func (s *PolardbService) PolardbDescribebackupsStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {

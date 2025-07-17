@@ -5,7 +5,6 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -24,11 +23,6 @@ func resourceAlibabacloudStackPolardbBackup() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Logical", "Physical", "Snapshot"}, false),
 			},
 
-			"backup_intranet_download_url": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"backup_mode": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -40,7 +34,7 @@ func resourceAlibabacloudStackPolardbBackup() *schema.Resource {
 			},
 
 			"backup_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
@@ -50,7 +44,7 @@ func resourceAlibabacloudStackPolardbBackup() *schema.Resource {
 			},
 
 			"host_instance_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
 
@@ -67,16 +61,6 @@ func resourceAlibabacloudStackPolardbBackup() *schema.Resource {
 			"db_instance_id": {
 				Type:     schema.TypeString,
 				Required: true,
-			},
-
-			"db_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			"backup_download_url": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 
 			"backup_end_time": {
@@ -142,23 +126,16 @@ func resourceAlibabacloudStackPolardbBackupCreate(d *schema.ResourceData, meta i
 
 	if v, ok := d.GetOk("backup_method"); ok {
 		request.QueryParams["BackupMethod"] = v.(string)
-		if v.(string) == "logical" {
-			if v, ok := d.GetOk("backup_strategy"); ok {
-				request.QueryParams["BackupStrategy"] = v.(string)
-			} else {
-				request.QueryParams["BackupStrategy"] = "instance"
-			}
-		}
 	}
-
-	if v, ok := d.GetOk("db_name"); ok {
-		request.QueryParams["DBName"] = v.(string)
+	if v, ok := d.GetOk("backup_strategy"); ok {
+		request.QueryParams["BackupStrategy"] = v.(string)
+	} else {
+		request.QueryParams["BackupStrategy"] = "instance"
 	}
-
 	if v, ok := d.GetOk("backup_type"); ok {
 		request.QueryParams["BackupType"] = v.(string)
 	}
-
+	now := time.Now()
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
@@ -174,14 +151,18 @@ func resourceAlibabacloudStackPolardbBackupCreate(d *schema.ResourceData, meta i
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_polar_db_backup", "CreateBackup", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-
-	backup_jobid := PolardbCreatebackupResponseObj.BackupJobId
-	d.SetId(fmt.Sprintf("%s:%s", d.Get("db_instance_id").(string), backup_jobid))
 	polar_dbbackupservice := PolardbService{client}
-	stateConf := BuildStateConf([]string{}, []string{"Success"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, polar_dbbackupservice.PolardbDescribebackupsStateRefreshFunc(d.Id(), []string{"Failed"}))
+	db_instance_id := d.Get("db_instance_id").(string)
+	backup_jobid := PolardbCreatebackupResponseObj.BackupJobId
+	stateConf := BuildStateConf([]string{"NoStart", "Preparing", "Waiting", "Uploading", "Checking"}, []string{"Finished"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, polar_dbbackupservice.PolardbDescribebackupTaskStateRefreshFunc(db_instance_id, backup_jobid, []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, fmt.Sprintf("%s:%s", db_instance_id, backup_jobid))
 	}
+	object, err := polar_dbbackupservice.DoPolardbDescribebackupTaskRequest(db_instance_id, backup_jobid)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, fmt.Sprintf("%s:%s", db_instance_id, backup_jobid))
+	}
+	d.SetId(fmt.Sprintf("%s:%s:%s", now.Format("2006-01-02"), db_instance_id, object.BackupId))
 	return nil
 }
 
@@ -197,7 +178,6 @@ func resourceAlibabacloudStackPolardbBackupRead(d *schema.ResourceData, meta int
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_backup", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	d.Set("backup_method", data.BackupMethod)
-	d.Set("backup_intranet_download_url", data.BackupIntranetDownloadURL)
 	d.Set("backup_mode", data.BackupMode)
 	d.Set("backup_size", data.BackupSize)
 	d.Set("backup_id", data.BackupId)
@@ -206,7 +186,6 @@ func resourceAlibabacloudStackPolardbBackupRead(d *schema.ResourceData, meta int
 	d.Set("backup_db_names", data.BackupDBNames)
 	d.Set("store_status", data.StoreStatus)
 	d.Set("db_instance_id", data.DBInstanceId)
-	d.Set("backup_download_url", data.BackupDownloadURL)
 	d.Set("backup_end_time", data.BackupEndTime)
 	d.Set("backup_start_time", data.BackupStartTime)
 	d.Set("backup_type", data.BackupType)
@@ -218,26 +197,6 @@ func resourceAlibabacloudStackPolardbBackupRead(d *schema.ResourceData, meta int
 }
 
 func resourceAlibabacloudStackPolardbBackupDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	// api: polardb - 2024-01-30 - DeleteBackup
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DeleteBackup", "")
-
-	//调用request_params_handler
-	param := strings.Split(d.Id(), ":")
-
-	request.QueryParams["DBInstanceId"] = param[0]
-	request.QueryParams["BackupId"] = param[1]
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polar_db_backup", "DeleteBackup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
 	return nil
 }
 
