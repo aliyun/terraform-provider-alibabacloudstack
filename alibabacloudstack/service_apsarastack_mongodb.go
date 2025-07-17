@@ -805,3 +805,165 @@ func (s *MongoDBService) DoDdsDescribebackupsRequest(id string) (*DdsDescribebac
 	}
 	return DdsDescribebackupsResponseObj, nil
 }
+
+type DdsDescribeshardingnetworkaddressResponse struct {
+	NetworkAddresses struct {
+		NetworkAddress []struct {
+			NetworkAddress string `json:"NetworkAddress"`
+			IPAddress      string `json:"IPAddress"`
+			NetworkType    string `json:"NetworkType"`
+			Port           string `json:"Port"`
+			VPCId          string `json:"VPCId"`
+			VswitchId      string `json:"VswitchId"`
+			NodeId         string `json:"NodeId"`
+			ExpiredTime    string `json:"ExpiredTime"`
+			NodeType       string `json:"NodeType"`
+			Role           string `json:"Role"`
+		} `json:"NetworkAddress"`
+	} `json:"NetworkAddresses"`
+
+	CompatibleConnections struct {
+		CompatibleConnection []struct {
+			NetworkAddress string `json:"NetworkAddress"`
+			IPAddress      string `json:"IPAddress"`
+			NetworkType    string `json:"NetworkType"`
+			Port           string `json:"Port"`
+			VPCId          string `json:"VPCId"`
+			VswitchId      string `json:"VswitchId"`
+			ExpiredTime    string `json:"ExpiredTime"`
+		} `json:"CompatibleConnection"`
+	} `json:"CompatibleConnections"`
+	RequestId string `json:"RequestId"`
+}
+
+type DdsDescribeDBInstancesResponse struct {
+	TotalCount  int    `json:"TotalCount" xml:"TotalCount"`
+	RequestId   string `json:"RequestId" xml:"RequestId"`
+	PageSize    int    `json:"PageSize" xml:"PageSize"`
+	PageNumber  int    `json:"PageNumber" xml:"PageNumber"`
+	DBInstances struct {
+		DBInstance []struct {
+			ReplicaSetName              string                                            `json:"ReplicaSetName" xml:"ReplicaSetName"`
+			Engine                      string                                            `json:"Engine" xml:"Engine"`
+			ProvisionedIops             int64                                             `json:"ProvisionedIops" xml:"ProvisionedIops"`
+			DBInstanceOrderStatus       string                                            `json:"DBInstanceOrderStatus" xml:"DBInstanceOrderStatus"`
+			DBInstanceClass             string                                            `json:"DBInstanceClass" xml:"DBInstanceClass"`
+			VpcAuthMode                 string                                            `json:"VpcAuthMode" xml:"VpcAuthMode"`
+			LastDowngradeTime           string                                            `json:"LastDowngradeTime" xml:"LastDowngradeTime"`
+			MaxConnections              int                                               `json:"MaxConnections" xml:"MaxConnections"`
+			HiddenZoneId                string                                            `json:"HiddenZoneId" xml:"HiddenZoneId"`
+			DBInstanceType              string                                            `json:"DBInstanceType" xml:"DBInstanceType"`
+			UseClusterBackup            bool                                              `json:"UseClusterBackup" xml:"UseClusterBackup"`
+			DBInstanceId                string                                            `json:"DBInstanceId" xml:"DBInstanceId"`
+			NetworkType                 string                                            `json:"NetworkType" xml:"NetworkType"`
+			ReplicationFactor           string                                            `json:"ReplicationFactor" xml:"ReplicationFactor"`
+			EncryptionKey               string                                            `json:"EncryptionKey" xml:"EncryptionKey"`
+			MaxIOPS                     int                                               `json:"MaxIOPS" xml:"MaxIOPS"`
+			DBInstanceReleaseProtection bool                                              `json:"DBInstanceReleaseProtection" xml:"DBInstanceReleaseProtection"`
+			ReplacateId                 string                                            `json:"ReplacateId" xml:"ReplacateId"`
+			EngineVersion               string                                            `json:"EngineVersion" xml:"EngineVersion"`
+			VPCId                       string                                            `json:"VPCId" xml:"VPCId"`
+			BurstingEnabled             bool                                              `json:"BurstingEnabled" xml:"BurstingEnabled"`
+			VPCCloudInstanceIds         string                                            `json:"VPCCloudInstanceIds" xml:"VPCCloudInstanceIds"`
+			MaintainStartTime           string                                            `json:"MaintainStartTime" xml:"MaintainStartTime"`
+			DBInstanceStorage           int                                               `json:"DBInstanceStorage" xml:"DBInstanceStorage"`
+			SecondaryZoneId             string                                            `json:"SecondaryZoneId" xml:"SecondaryZoneId"`
+			Encrypted                   bool                                              `json:"Encrypted" xml:"Encrypted"`
+			CurrentKernelVersion        string                                            `json:"CurrentKernelVersion" xml:"CurrentKernelVersion"`
+			StorageType                 string                                            `json:"StorageType" xml:"StorageType"`
+			ZoneId                      string                                            `json:"ZoneId" xml:"ZoneId"`
+			PaymentType                 string                                            `json:"PaymentType" xml:"PaymentType"`
+			LockMode                    string                                            `json:"LockMode" xml:"LockMode"`
+			DBInstanceDescription       string                                            `json:"DBInstanceDescription" xml:"DBInstanceDescription"`
+			ChargeType                  string                                            `json:"ChargeType" xml:"ChargeType"`
+			ReadonlyReplicas            string                                            `json:"ReadonlyReplicas" xml:"ReadonlyReplicas"`
+			CapacityUnit                string                                            `json:"CapacityUnit" xml:"CapacityUnit"`
+			DestroyTime                 string                                            `json:"DestroyTime" xml:"DestroyTime"`
+			RegionId                    string                                            `json:"RegionId" xml:"RegionId"`
+			ResourceGroupId             string                                            `json:"ResourceGroupId" xml:"ResourceGroupId"`
+			CloudType                   string                                            `json:"CloudType" xml:"CloudType"`
+			MaintainEndTime             string                                            `json:"MaintainEndTime" xml:"MaintainEndTime"`
+			ExpireTime                  string                                            `json:"ExpireTime" xml:"ExpireTime"`
+			SyncPercent                 string                                            `json:"SyncPercent" xml:"SyncPercent"`
+			VSwitchId                   string                                            `json:"VSwitchId" xml:"VSwitchId"`
+			CreationTime                string                                            `json:"CreationTime" xml:"CreationTime"`
+			StorageEngine               string                                            `json:"StorageEngine" xml:"StorageEngine"`
+			DBInstanceStatus            string                                            `json:"DBInstanceStatus" xml:"DBInstanceStatus"`
+			ProtocolType                string                                            `json:"ProtocolType" xml:"ProtocolType"`
+			KindCode                    int                                               `json:"KindCode" xml:"KindCode"`
+			ReplicaSets                 dds.ReplicaSetsInDescribeDBInstanceAttribute      `json:"ReplicaSets" xml:"ReplicaSets"`
+			Tags                        dds.TagsInDescribeDBInstanceAttribute             `json:"Tags" xml:"Tags"`
+			ConfigserverList            dds.ConfigserverList                              `json:"ConfigserverList" xml:"ConfigserverList"`
+			ShardList                   dds.ShardListInDescribeDBInstances                `json:"ShardList" xml:"ShardList"`
+			NetworkAddresses            dds.NetworkAddressesInDescribeDBInstanceAttribute `json:"NetworkAddresses" xml:"NetworkAddresses"`
+			MongosList                  dds.MongosListInDescribeDBInstanceAttribute       `json:"MongosList" xml:"MongosList"`
+		}
+	}
+}
+
+func (s *MongoDBService) DoDdsDescribeshardingnetworkaddressRequest(id string) (*DdsDescribeshardingnetworkaddressResponse, error) {
+	// api: Dds - 2015-12-01 - DescribeShardingNetworkAddress
+	request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeShardingNetworkAddress", "")
+	DdsDescribeshardingnetworkaddressResponseObj := &DdsDescribeshardingnetworkaddressResponse{}
+
+	//调用request_params_handler
+	parts := strings.Split(id, COLON_SEPARATED)
+	db_instance_id := parts[0]
+	request.QueryParams["DBInstanceId"] = db_instance_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug("DescribeShardingNetworkAddress", bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeShardingNetworkAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsDescribeshardingnetworkaddressResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeShardingNetworkAddress", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return DdsDescribeshardingnetworkaddressResponseObj, nil
+}
+
+func (s *MongoDBService) DoWaitDdsShardDbinstanceRunningRequest(id string) (*DdsDescribeDBInstancesResponse, error) {
+	deadline := time.Now().Add(time.Duration(300) * time.Second)
+	for {
+		request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeDBInstances", "")
+		//调用request_params_handler
+		parts := strings.Split(id, COLON_SEPARATED)
+		db_instance_id := parts[0]
+		request.QueryParams["DBInstanceId"] = db_instance_id
+		request.QueryParams["DBInstanceType"] = "sharding"
+		DdsWaitShardDbInstanceRuningResponseObj := &DdsDescribeDBInstancesResponse{}
+		for i := 0; i < 100; i++ {
+		}
+		bresponse, err := s.client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeShardingNetworkAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsWaitShardDbInstanceRuningResponseObj)
+
+		if err != nil {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeShardingNetworkAddress", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		log.Printf("dbinstance status is %s", DdsWaitShardDbInstanceRuningResponseObj.DBInstances.DBInstance[0].DBInstanceStatus)
+		if DdsWaitShardDbInstanceRuningResponseObj.DBInstances.DBInstance[0].DBInstanceStatus == "Running" {
+			return DdsWaitShardDbInstanceRuningResponseObj, nil
+
+		}
+		if time.Now().After(deadline) {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DoWaitDdsShardDbinstanceRunningRequest timeout", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		time.Sleep(DefaultIntervalShort * time.Second)
+	}
+}

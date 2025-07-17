@@ -55,18 +55,18 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				Optional: true,
 			},
 			"name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
-				Deprecated:   "Field 'name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
+				Deprecated:    "Field 'name' is deprecated and will be removed in a future release. Please use new field 'db_instance_description' instead.",
 				ConflictsWith: []string{"db_instance_description"},
 			},
 			"db_instance_description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ValidateFunc:  validation.StringLenBetween(2, 256),
 				ConflictsWith: []string{"name"},
 			},
 			"security_ip_list": {
@@ -99,7 +99,7 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				Elem: schema.TypeString,
 			},
 			"tde_status": {
-				Type:             schema.TypeString,
+				Type: schema.TypeString,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return old == "" && new == "disabled" || old == "enabled"
 				},
@@ -116,26 +116,26 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				ConflictsWith: []string{"preferred_backup_period"},
 			},
 			"preferred_backup_period": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-				Computed: true,
+				Type:          schema.TypeSet,
+				Elem:          &schema.Schema{Type: schema.TypeString},
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"backup_period"},
 			},
 			"backup_time": {
-				Type:     schema.TypeString,
+				Type:         schema.TypeString,
 				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
-				Optional: true,
-				Computed: true,
+				Optional:     true,
+				Computed:     true,
 				Deprecated: "Field 'backup_time' is deprecated and will be removed in a future release. " +
 					"Please use new field 'preferred_backup_time' instead.",
 				ConflictsWith: []string{"preferred_backup_time"},
 			},
 			"preferred_backup_time": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
-				Optional:     true,
-				Computed:     true,
+				Type:          schema.TypeString,
+				ValidateFunc:  validation.StringInSlice(BACKUP_TIME, false),
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"backup_time"},
 			},
 			//Computed
@@ -343,14 +343,14 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		return errmsgs.WrapError(err)
 	}
 
-	backupPolicy, err := ddsService.DescribeMongoDBBackupPolicy(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	connectivity.SetResourceData(d, backupPolicy.PreferredBackupTime, "preferred_backup_time", "backup_time")
-	connectivity.SetResourceData(d, backupPolicy.PreferredBackupPeriod, "preferred_backup_period", "backup_period")
-	retention_period, _ := strconv.Atoi(backupPolicy.BackupRetentionPeriod)
-	d.Set("retention_period", retention_period)
+	// backupPolicy, err := ddsService.DescribeMongoDBBackupPolicy(d.Id())
+	// if err != nil {
+	// 	return errmsgs.WrapError(err)
+	// }
+	// connectivity.SetResourceData(d, backupPolicy.PreferredBackupTime, "preferred_backup_time", "backup_time")
+	// connectivity.SetResourceData(d, backupPolicy.PreferredBackupPeriod, "preferred_backup_period", "backup_period")
+	// retention_period, _ := strconv.Atoi(backupPolicy.BackupRetentionPeriod)
+	// d.Set("retention_period", retention_period)
 
 	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "name")
 	d.Set("engine_version", instance.EngineVersion)
@@ -369,10 +369,10 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 	mongosList := []map[string]interface{}{}
 	for _, item := range instance.MongosList.MongosAttribute {
 		mongo := map[string]interface{}{
-			"node_class":      item.NodeClass,
-			"node_id":         item.NodeId,
-			"port":            item.Port,
-			"connect_string":  item.ConnectSting,
+			"node_class":     item.NodeClass,
+			"node_id":        item.NodeId,
+			"port":           item.Port,
+			"connect_string": item.ConnectSting,
 		}
 		mongosList = append(mongosList, mongo)
 	}
@@ -384,9 +384,9 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 	shardList := []map[string]interface{}{}
 	for _, item := range instance.ShardList.ShardAttribute {
 		shard := map[string]interface{}{
-			"node_id":       item.NodeId,
-			"node_storage":  item.NodeStorage,
-			"node_class":    item.NodeClass,
+			"node_id":      item.NodeId,
+			"node_storage": item.NodeStorage,
+			"node_class":   item.NodeClass,
 		}
 		shardList = append(shardList, shard)
 	}
@@ -501,7 +501,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		//d.SetPartial("mongo_list")
 	}
 
-	if d.HasChanges("db_instance_description", "name"){
+	if d.HasChanges("db_instance_description", "name") {
 		request := dds.CreateModifyDBInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DBInstanceId = d.Id()
