@@ -64,6 +64,17 @@ func TestAccAlibabacloudStackDrdsDatabase_basic0(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccConfig(map[string]interface{}{
+					"rds_instance_ids": []string{"${alibabacloudstack_drds_rds_instance.default.0.rds_instance_id}",
+						"${alibabacloudstack_drds_rds_instance.default.1.rds_instance_id}"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"rds_instance_ids.#": "2",
+					}),
+				),
+			},
+			{
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: false,
@@ -78,7 +89,6 @@ func TestAccAlibabacloudStackDrdsDatabase_basic0(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"rds_instance_ids.#":  "1",
 						"ip_white_list.test1": "192.168.1.1, 127.0.0.2",
 						"ip_white_list.test2": "192.168.2.1",
 					}),

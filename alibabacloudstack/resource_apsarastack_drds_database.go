@@ -4,6 +4,7 @@ package alibabacloudstack
 // Product DRDS Resouce Database
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -60,7 +61,6 @@ func resourceAlibabacloudStackDrdsDatabase() *schema.Resource {
 				Type:     schema.TypeList,
 				MinItems: 1,
 				Required: true,
-				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 					if k == "rds_instance_ids.#" {
@@ -122,10 +122,10 @@ func resourceAlibabacloudStackDrdsDatabase() *schema.Resource {
 				newMap, _ := newVal.(map[string]interface{})
 
 				for oldKey := range oldMap {
-					if oldKey == "default" && oldMap[oldKey] == "*.*.*.*" && newMap[oldKey] == "" {
-						continue
-					}
 					if _, exists := newMap[oldKey]; !exists {
+						if oldKey == "default" && oldMap[oldKey].(string) == "*.*.*.*" {
+							continue
+						}
 						return fmt.Errorf("ip_white_list key %q cannot be removed. Keys can only be added, not deleted.", oldKey)
 					}
 				}
@@ -181,7 +181,7 @@ func resourceAlibabacloudStackDrdsDatabaseCreate(d *schema.ResourceData, meta in
 
 	d.SetId(fmt.Sprintf("%s:%s", instance_id, drds_database_name))
 
-	stateConf := BuildStateConf([]string{"INIT"}, []string{"NORMAL"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, drdsService.DbStateRefreshFunc(d.Id(), []string{"Error"}))
+	stateConf := BuildStateConf([]string{"INIT"}, []string{"NORMAL"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, drdsService.DbStateRefreshFunc(d.Id(), []string{"INIT_FAIL"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -193,6 +193,7 @@ func resourceAlibabacloudStackDrdsDatabaseCreate(d *schema.ResourceData, meta in
 
 func resourceAlibabacloudStackDrdsDatabaseUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	drdsService := DrdsService{client}
 	var drdsInstanceId, databaseName string
 	if parts, err := ParseResourceId(d.Id(), 2); err != nil {
 		return err
@@ -254,6 +255,131 @@ func resourceAlibabacloudStackDrdsDatabaseUpdate(d *schema.ResourceData, meta in
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_drds_database", "ModifyDrdsIpWhiteList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+	}
+
+	if d.HasChange("rds_instance_ids") {
+		if task, err := drdsService.DescribeDrdsDbTask(d.Id()); task != nil {
+			return fmt.Errorf("There are currently rearrange tasks in expansion, please wait for them to complete.")
+		} else if err != nil && !errmsgs.NotFoundError(err) {
+			return err
+		}
+
+		old, new := d.GetChange("rds_instance_ids")
+		oldMap := map[string]interface{}{}
+		for _, o := range old.([]interface{}) {
+			oldMap[o.(string)] = ""
+		}
+		newInstance := []string{}
+		for _, n := range new.([]interface{}) {
+			rdsId := n.(string)
+			if _, exist := oldMap[rdsId]; exist {
+				continue
+			}
+			newInstance = append(newInstance, rdsId)
+		}
+		reqQuery := map[string]interface{}{
+			"DbName":               databaseName,
+			"DrdsInstanceId":       drdsInstanceId,
+			"DbInstanceIsCreating": false,
+			"DbInstType":           d.Get("storage_type").(string),
+			"InstanceList":         newInstance,
+		}
+		repsonse, err := client.DoTeaRequest("POST", "Drds", "2019-01-23", "RearrangeDbToInstance", "", nil, reqQuery, nil)
+		if err != nil {
+			return err
+		}
+		transferTaskInfos := []map[string]interface{}{}
+		for _, d := range repsonse["Data"].(map[string]interface{})["data"].([]interface{}) {
+			rearrangeInfo := d.(map[string]interface{})
+			transferTask := map[string]interface{}{
+				"SrcInstanceName": rearrangeInfo["SrcInstance"].(string),
+				"DstInstanceName": rearrangeInfo["DstInstance"].(string),
+				"DbName":          rearrangeInfo["SrcDbName"].(string),
+			}
+			transferTaskInfos = append(transferTaskInfos, transferTask)
+		}
+
+		reqQuery = map[string]interface{}{
+			"DbName":               databaseName,
+			"DrdsInstanceId":       drdsInstanceId,
+			"DbInstanceIsCreating": false,
+			"DbInstType":           d.Get("storage_type").(string),
+			"TransferTaskInfos":    transferTaskInfos,
+			"TaskName":             "terraform_auto",
+			"TaskDesc":             "alibabacloudstack Automated ",
+		}
+		repsonse, err = client.DoTeaRequest("POST", "Drds", "2019-01-23", "SubmitSmoothExpandTask", "", nil, reqQuery, nil)
+		if err != nil {
+			return err
+		}
+
+		stateConf := BuildStateConf([]string{"Running"}, []string{"Success"}, 60*time.Minute, 10*time.Second, drdsService.DbTaskRefreshFunc(d.Id(), []string{"Error"}))
+
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+
+		task, err := drdsService.DescribeDrdsDbTask(d.Id())
+		if err != nil {
+			return err
+		}
+
+		var targetId int
+		parentJobId := task["ParentJobId"].(string)
+		if v, err := task["TargetId"].(json.Number).Int64(); err != nil {
+			return err
+		} else {
+			targetId = int(v)
+		}
+
+		reqQuery = map[string]interface{}{
+			"DbName":         databaseName,
+			"DrdsInstanceId": drdsInstanceId,
+			"TaskId":         targetId,
+			"JobId":          targetId,
+			"ParentJobId":    parentJobId,
+			"ExpandType":     "smooth_expand",
+			"IsRetry":        false,
+		}
+		repsonse, err = client.DoTeaRequest("POST", "Drds", "2019-01-23", "SubmitSwitchTask", "", nil, reqQuery, nil)
+		if err != nil {
+			return err
+		}
+		stateConf = BuildStateConf([]string{"Running"}, []string{"Success"}, 60*time.Minute, 10*time.Second, drdsService.DbTaskRefreshFunc(d.Id(), []string{"Error"}))
+
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+
+		task, err = drdsService.DescribeDrdsDbTask(d.Id())
+		if err != nil {
+			return err
+		}
+
+		if v, err := task["TargetId"].(json.Number).Int64(); err != nil {
+			return err
+		} else {
+			targetId = int(v)
+		}
+
+		reqQuery = map[string]interface{}{
+			"DbName":         databaseName,
+			"DrdsInstanceId": drdsInstanceId,
+			"TaskId":         targetId,
+			"JobId":          targetId,
+			"ParentJobId":    parentJobId,
+			"ExpandType":     "smooth_expand",
+			"IsRetry":        false,
+		}
+		repsonse, err = client.DoTeaRequest("POST", "Drds", "2019-01-23", "SubmitCleanTask", "", nil, reqQuery, nil)
+		if err != nil {
+			return err
+		}
+		stateConf = BuildStateConf([]string{"Running"}, []string{}, 60*time.Minute, 10*time.Second, drdsService.DbTaskRefreshFunc(d.Id(), []string{"Error"}))
+
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
 
