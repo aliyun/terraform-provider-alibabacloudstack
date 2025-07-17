@@ -11,22 +11,13 @@ func TestAccAlibabacloudStackPolardbBackupsDataSource_basic(t *testing.T) {
 	name := fmt.Sprintf("tf-testAccPolardbBackups%v", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourcePolardbBackupsDependence)
 
-	baseConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}}",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}}_fake",
-		}),
-	}
-
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}}",
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
 			"ids":            []string{"${alibabacloudstack_polardb_backup.default.backup_id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}}",
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
 			"ids":            []string{"${alibabacloudstack_polardb_backup.default.backup_id}_fake"},
 		}),
 	}
@@ -65,7 +56,7 @@ func TestAccAlibabacloudStackPolardbBackupsDataSource_basic(t *testing.T) {
 		fakeMapFunc:  fakeDBbackupsMapFunc,
 	}
 
-	DBbackupsCheckInfo.dataSourceTestCheck(t, rand, baseConf, idsConf)
+	DBbackupsCheckInfo.dataSourceTestCheck(t, rand, idsConf)
 }
 
 func dataSourcePolardbBackupsDependence(name string) string {
@@ -89,7 +80,7 @@ resource "alibabacloudstack_polardb_dbinstance" "default" {
 }
   
 resource "alibabacloudstack_polardb_backup" "default" {
-  db_instance_id = "${alibabacloudstack_polardb_dbinstance.default.id}}"
+  db_instance_id = "${alibabacloudstack_polardb_dbinstance.default.id}"
   backup_method = "Physical"
 }
 

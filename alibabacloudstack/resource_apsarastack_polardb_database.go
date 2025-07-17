@@ -111,6 +111,7 @@ func resourceAlibabacloudStackPolardbDatabaseCreate(d *schema.ResourceData, meta
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -129,7 +130,7 @@ func resourceAlibabacloudStackPolardbDatabaseCreate(d *schema.ResourceData, meta
 
 	data_base_name := d.Get("data_base_name").(string)
 
-	d.SetId(fmt.Sprintf("%s", data_base_instance_id+":"+data_base_name))
+	d.SetId(fmt.Sprintf("%s:%s", data_base_instance_id, data_base_name))
 	return nil
 }
 
@@ -159,6 +160,7 @@ func resourceAlibabacloudStackPolardbDatabaseUpdate(d *schema.ResourceData, meta
 		}
 
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -181,8 +183,7 @@ func resourceAlibabacloudStackPolardbDatabaseUpdate(d *schema.ResourceData, meta
 
 func resourceAlibabacloudStackPolardbDatabaseRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	polardbdatabaseservice :=
-		PolardbService{client}
+	polardbdatabaseservice := PolardbService{client}
 	response, err := polardbdatabaseservice.DescribeDBDatabase(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_database", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -220,6 +221,7 @@ func resourceAlibabacloudStackPolardbDatabaseDelete(d *schema.ResourceData, meta
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")

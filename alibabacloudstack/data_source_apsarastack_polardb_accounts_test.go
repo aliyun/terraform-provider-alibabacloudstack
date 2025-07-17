@@ -2,60 +2,53 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestAccAlibabacloudStackPolardbAccountsDataSource(t *testing.T) {
-	// 根据test_meta自动生成的tasecase
-
-	rand := getAccTestRandInt(10000, 99999)
+	rand := getAccTestRandInt(10000, 20000)
+	resourceId := "data.alibabacloudstack_polardb_accounts.default"
+	name := fmt.Sprintf("tf-testAccPolardbAccounts%v", rand)
+	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourcePolardbAccountsDependence)
 
 	idsConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_polardb_account.default.id}"]`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":            []string{"${alibabacloudstack_polardb_account.default.id}"},
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_polardb_account.default.id}_fake"]`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":            []string{"${alibabacloudstack_polardb_account.default.id}_fake"},
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
 		}),
 	}
 
 	account_nameConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_polardb_account.default.id}"]`,
-			"account_name": `"${alibabacloudstack_polardb_account.default.account_name}"`,
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":            []string{"${alibabacloudstack_polardb_account.default.id}"},
+			"account_name":   "${alibabacloudstack_polardb_account.default.account_name}",
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
 		}),
-		fakeConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
-			"ids":          `["${alibabacloudstack_polardb_account.default.id}_fake"]`,
-			"account_name": `"${alibabacloudstack_polardb_account.default.account_name}_fake"`,
-		}),
-	}
-
-	data_instance_idConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
-			"ids":              `["${alibabacloudstack_polardb_account.default.id}"]`,
-			"data_instance_id": `"${alibabacloudstack_polardb_dbinstance.default.id}"`,
-		}),
-		fakeConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
-			"ids":              `["${alibabacloudstack_polardb_account.default.id}_fake"]`,
-			"data_instance_id": `"${alibabacloudstack_polardb_dbinstance.default.id}_fake"`,
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":            []string{"${alibabacloudstack_polardb_account.default.id}_fake"},
+			"account_name":   "${alibabacloudstack_polardb_account.default.account_name}_fake",
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
 		}),
 	}
 
-	allConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_polardb_account.default.id}"]`,
-
-			"account_name":     `"${alibabacloudstack_polardb_account.default.account_name}"`,
-			"data_instance_id": `"${alibabacloudstack_polardb_dbinstance.default.id}"`}),
-		fakeConfig: testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand, map[string]string{
-			"ids": `["${alibabacloudstack_polardb_account.default.id}_fake"]`,
-
-			"account_name":     `"${alibabacloudstack_polardb_account.default.account_name}_fake"`,
-			"data_instance_id": `"${alibabacloudstack_polardb_dbinstance.default.id}_fake"`}),
+	name_regex_Conf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":            []string{"${alibabacloudstack_polardb_account.default.id}"},
+			"account_name":   "${alibabacloudstack_polardb_account.default.account_name}",
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":            []string{"${alibabacloudstack_polardb_account.default.id}_fake"},
+			"account_name":   "${alibabacloudstack_polardb_account.default.account_name}_fake",
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+		}),
 	}
 
-	AlibabacloudstackPolardbAccountsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, account_nameConf, data_instance_idConf, allConf)
+	AlibabacloudstackPolardbAccountsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, account_nameConf, name_regex_Conf)
 }
 
 var existAlibabacloudstackPolardbAccountsDataMapFunc = func(rand int) map[string]string {
@@ -77,14 +70,10 @@ var AlibabacloudstackPolardbAccountsDataCheckInfo = dataSourceAttr{
 	fakeMapFunc:  fakeAlibabacloudstackPolardbAccountsDataMapFunc,
 }
 
-func testAccCheckAlibabacloudstackPolardbAccountsDataSourceConfig(rand int, attrMap map[string]string) string {
-	var pairs []string
-	for k, v := range attrMap {
-		pairs = append(pairs, k+" = "+v)
-	}
+func dataSourcePolardbAccountsDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
-	default = "tf-testAlibabacloudstackPolardbAccounts%d"
+	default = "%s"
 }
 
 data  "alibabacloudstack_zones" "default" {
@@ -100,16 +89,12 @@ resource "alibabacloudstack_polardb_dbinstance" "instance" {
 	zone_id= "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
 resource "alibabacloudstack_polardb_account" "default" {
-	data_base_instance_id = "${resource.alibabacloudstack_polardb_dbinstance.instance.id}"
+	data_base_instance_id = "${alibabacloudstack_polardb_dbinstance.instance.id}"
 	account_description = "test"
 	account_name        = "polardb_account"
-	account_password = "Test12345"
+	account_password = "%s"
 	account_type ="Normal"
 }
-		
-
-data "alibabacloudstack_polardb_accounts" "default" {
-%s
-}
-`, rand, strings.Join(pairs, "\n   "))
+	
+`, name, getAccTestPassword(12))
 }

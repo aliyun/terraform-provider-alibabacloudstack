@@ -35,7 +35,18 @@ func TestAccAlibabacloudStackPolardbDatabasesDataSource(t *testing.T) {
 		}),
 	}
 
-	AlibabacloudstackPolardbDatabasesCheckInfo.dataSourceTestCheck(t, rand, idsConf, data_base_nameConf)
+	name_regex_Conf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"name_regex":            "${alibabacloudstack_polardb_database.default.data_base_name}",
+			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"name_regex":            "${alibabacloudstack_polardb_database.default.data_base_name}-fakeTestAcccc",
+			"data_base_instance_id": "${alibabacloudstack_polardb_dbinstance.instance.id}",
+		}),
+	}
+
+	AlibabacloudstackPolardbDatabasesCheckInfo.dataSourceTestCheck(t, rand, idsConf, data_base_nameConf, name_regex_Conf)
 }
 
 var existAlibabacloudstackPolardbDatabasesMapFunc = func(rand int) map[string]string {

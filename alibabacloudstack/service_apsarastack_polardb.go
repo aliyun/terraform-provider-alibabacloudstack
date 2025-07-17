@@ -200,6 +200,7 @@ func (s *PolardbService) DescribeDBDatabase(id string) (*PolardbDescribedatabase
 
 	request.QueryParams["DBName"] = parts[1]
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InternalError", "OperationDenied.DBInstanceStatus"}) {
 			return nil, nil

@@ -6,11 +6,12 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
+	"regexp"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudStackPolardbDatabases() *schema.Resource {
@@ -34,6 +35,20 @@ func dataSourceAlibabacloudStackPolardbDatabases() *schema.Resource {
 			"data_base_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+
+			"name_regex": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringIsValidRegExp,
+				Deprecated:    "Field 'name_regex' is deprecated and will be removed in a future release. Please use new field 'description_regex' instead.",
+				ConflictsWith: []string{"description_regex"},
+			},
+			"description_regex": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ValidateFunc:  validation.StringIsValidRegExp,
+				ConflictsWith: []string{"name_regex"},
 			},
 
 			"databases": {
@@ -118,29 +133,14 @@ func dataSourceAlibabacloudStackPolardbDatabasesRead(d *schema.ResourceData, met
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDatabases", "")
 	PolardbDescribedatabasesResponse := PolardbDescribedatabasesResponse{}
 
-	if v, ok := d.GetOk("data_base_instance_id"); ok {
-		request.QueryParams["DBInstanceId"] = v.(string)
-	} else {
-		return fmt.Errorf("DataBaseInstanceId is required")
-	}
+	request.QueryParams["DBInstanceId"] = d.Get("data_base_instance_id").(string)
 
 	if v, ok := d.GetOk("data_base_name"); ok {
 		request.QueryParams["DBName"] = v.(string)
 	}
 
-	if v, ok := d.GetOk("page_number"); ok {
-		request.QueryParams["PageNumber"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("page_size"); ok {
-		request.QueryParams["PageSize"] = strconv.Itoa(v.(int))
-	}
-
-	if v, ok := d.GetOk("status"); ok {
-		request.QueryParams["DBStatus"] = v.(string)
-	}
-
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -154,11 +154,37 @@ func dataSourceAlibabacloudStackPolardbDatabasesRead(d *schema.ResourceData, met
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_polardb_database", "DescribeDatabases", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
+	idsMap := make(map[string]string)
+	if v, ok := d.GetOk("ids"); ok {
+		for _, vv := range v.([]interface{}) {
+			idsMap[Trim(vv.(string))] = Trim(vv.(string))
+		}
+	}
 
 	var ids []string
 	datas := make([]interface{}, 0)
 
 	for _, data := range PolardbDescribedatabasesResponse.Databases.Database {
+
+		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
+			r := regexp.MustCompile(description_regex.(string))
+			if !r.MatchString(data.DBName) {
+				continue
+			}
+		}
+
+		data_base_instance_id := data.DBInstanceId
+
+		data_base_name := data.DBName
+
+		dbid := fmt.Sprintf("%s:%s", data_base_instance_id, data_base_name)
+
+		if len(idsMap) > 0 {
+			if _, exist := idsMap[dbid]; !exist {
+				continue
+			}
+		}
+
 		accounts := make([]map[string]interface{}, 0)
 		for _, data1 := range data.Accounts.AccountPrivilegeInfo {
 			accounts = append(accounts, map[string]interface{}{
@@ -166,7 +192,11 @@ func dataSourceAlibabacloudStackPolardbDatabasesRead(d *schema.ResourceData, met
 				"account_privilege": data1.AccountPrivilege,
 			})
 		}
+
 		i := map[string]interface{}{
+
+			"id": dbid,
+
 			"character_set_name": data.CharacterSetName,
 
 			"data_base_description": data.DBDescription,
@@ -183,11 +213,7 @@ func dataSourceAlibabacloudStackPolardbDatabasesRead(d *schema.ResourceData, met
 		}
 		datas = append(datas, i)
 
-		data_base_instance_id := data.DBInstanceId
-
-		data_base_name := data.DBName
-
-		ids = append(ids, data_base_instance_id+"_"+data_base_name)
+		ids = append(ids, dbid)
 	}
 
 	d.SetId(dataResourceIdHash(ids))
