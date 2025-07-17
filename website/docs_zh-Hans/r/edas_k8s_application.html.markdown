@@ -61,6 +61,103 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
 }
 ```
 
+### 亲和性用法
+```
+resource "alibabacloudstack_edas_k8s_application" "default" {
+  // package type is Image / FatJar / War
+  package_type            = "FatJar"
+  application_name        = "terraform-test-fatjar2"
+  application_description = "This is description of description"
+  cluster_id              = "xxxxxxxxxxxxxxxxxxx"
+  replicas                = 1
+
+  package_url     = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  package_version = "2025-07-09 10:00:18"
+  jdk             = "Open JDK 8"
+
+  command               = "/bin/sh"
+  command_args          = ["-c", "sleep 1001", ]
+  pre_stop              = "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
+  post_start            = "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
+  namespace             = "default"
+  custom_tolerations {
+    key    = "test"
+    value = "test"
+    operator = "Equal"
+    effect   = "NoSchedule"
+  }
+  custom_node_affinity_require {
+    match_expressions {
+      key    = "test"
+      values = ["aaaaa", "bbbb"]
+      operator = "In"
+    }
+  }
+  custom_node_affinity_preferred {
+    weight = 100
+    match_expressions {
+      key    = "test"
+      values = ["aaaaa", "bbbb"]
+      operator = "In"
+    }
+  }
+  custom_pod_affinity_require {
+    k8s_namespace = ["default"]
+    topology_key = "test"
+    match_expressions {
+      key    = "test"
+      values = ["aaaaa", "bbbb"]
+      operator = "In"
+    }
+    match_expressions {
+      key    = "test1"
+      values = ["aaaaa2", "bbbb2"]
+      operator = "In"
+    }
+  }
+  custom_pod_affinity_preferred {
+    weight = 1
+    k8s_namespace = ["default"]
+    topology_key = "test2"
+    match_expressions {
+      key    = "test1"
+      values = ["aaaaa1", "bbbb1"]
+      operator = "In"
+    }
+    match_expressions {
+      key    = "test2"
+      values = ["aaaaa2", "bbbb2"]
+      operator = "NotIn"
+    }
+  }
+  custom_pod_ant_affinity_require {
+    k8s_namespace = ["default"]
+    topology_key = "test3"
+    match_expressions {
+      key    = "test3"
+      values = ["aaaaa3", "bbbb3"]
+      operator = "In"
+    }
+    match_expressions {
+      key    = "test4"
+      values = ["aaaaa4", "bbbb4"]
+      operator = "NotIn"
+    }
+  }
+  custom_pod_ant_affinity_preferred {
+    weight = 1
+    k8s_namespace = ["default"]
+    topology_key = "test5"
+    match_expressions {
+      key    = "test5"
+      values = ["aaaaa5", "bbbb5"]
+      operator = "In"
+    }
+  }
+}
+
+```
+
 ## 参数参考
 
 以下参数受支持：
@@ -135,6 +232,53 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   * `target_port` - (可选) 公网SLB服务的目标端口号。
 * `internet_external_traffic_policy` - (可选) 公网SLB外部流量策略。
 * `internet_scheduler` - (可选) 服务的公网 SLB 调度规则。
+* `custom_tolerations` - (可选) 调度容忍
+  * `key` - (可选) 节点标签的键。
+  * `operator` - (可选) 操作符号， 取值：`Equal`, `Exists`.
+  * `value` - (可选) 节点标签的值。
+  * `effect` - (可选) 效果，取值：`NoExecute`, `NoSchedule`, `PreferNoSchedule`.
+  * `toleration_seconds` - (可选) 容忍时间（秒）.
+* `custom_node_affinity_require` - (可选) 必须满足的节点亲和性.
+  * `match_expressions` - (可选) 必须满足的节点亲和性规则列表.
+    * `key` - (可选) 节点标签的键。
+    * `operator` - (可选)  操作符号，取值：`In`, `NotIn`, `Exists`, `DoesNotExist`, `Gt`, `Lt`.
+    * `values` - (可选) 节点标签的值。
+* `custom_node_affinity_preference` - (可选) 尽量满足的节点亲和性.
+  * `weight` - (可选) 权重，取值范围：1~100.
+  * `match_expressions` - (可选) 尽量满足的节点亲和性规则列表.
+    * `key` - (可选) 节点标签的键。
+    * `operator` - (可选) 操作符号，取值：`In`, `NotIn`, `Exists`, `DoesNotExist`, `Gt`, `Lt`.
+    * `values` - (可选) 节点标签的值。
+* `custom_pod_affinity_require` - (可选) 必须满足的Pod亲和性.
+  * `k8s_namespace` - (可选) 集群的命名空间.
+  * `topology_key` - (可选) 拓扑域
+  * `match_expressions` - (可选) 尽量满足的Pod亲和性规则列表.
+    * `key` - (可选) Pod标签的键。
+    * `operator` - (可选) 操作符号，取值：`In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (可选) Pod标签的值。
+* `custom_pod_affinity_preferred` - (可选) 尽量满足的Pod亲和性.
+  * `weight` - (可选) 权重， 取值范围：1~100.
+  * `k8s_namespace` - (可选) 集群的命名空间.
+  * `topology_key` - (可选) 拓扑域
+  * `match_expressions` - (可选) 尽量满足的Pod亲和性规则列表.
+    * `key` - (可选) Pod标签的键。
+    * `operator` - (可选) 操作符号，取值：`In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (可选) Pod标签的值。
+* `custom_pod_ant_affinity_require` - (可选) 必须满足的Pod反亲和性.
+  * `k8s_namespace` - (可选) 集群的命名空间.
+  * `topology_key` - (可选) 拓扑域
+  * `match_expressions` - (可选) 尽量满足的Pod反亲和性规则列表.
+    * `key` - (可选) Pod标签的键。
+    * `operator` - (可选) 操作符号，取值：`In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (可选) Pod标签的值。
+* `custom_pod_ant_affinity_preferred` - (可选) 尽量满足的Pod反亲和性.
+  * `weight` - (可选) 权重， 取值范围：1~100.
+  * `k8s_namespace` - (可选) 集群的命名空间.
+  * `topology_key` - (可选) 拓扑域
+  * `match_expressions` - (可选) 尽量满足的Pod反亲和性规则列表.
+    * `key` - (可选) Pod标签的键。
+    * `operator` - (可选) 操作符号，取值：`In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (可选) Pod标签的值。
 
 ## 属性参考
 
