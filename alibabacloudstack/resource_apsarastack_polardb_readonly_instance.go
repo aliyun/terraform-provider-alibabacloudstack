@@ -237,7 +237,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 	PolardbService := PolardbService{client}
 	d.Partial(true)
 	if d.HasChange("parameters") {
-		if err := PolardbService.ModifyParameters(d, client, "parameters"); err != nil {
+		if err := PolardbService.ModifyParameters(d, client); err != nil {
 			return errmsgs.WrapError(err)
 		}
 	}
@@ -351,7 +351,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceRead(d *schema.ResourceData
 	connectivity.SetResourceData(d, instance.Items.DBInstanceAttribute[0].DBInstanceDescription, "db_instance_description", "instance_name")
 	d.Set("db_instance_storage_type", instance.Items.DBInstanceAttribute[0].DBInstanceStorageType)
 
-	if err = PolardbService.RefreshParameters(d, client, "parameters"); err != nil {
+	if err = PolardbService.RefreshParameters(d, client); err != nil {
 		return errmsgs.WrapError(err)
 	}
 	return nil
