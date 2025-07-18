@@ -39,6 +39,7 @@ func resourceAlibabacloudStackMongodbBackup() *schema.Resource {
 			"backup_method": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 
 			"backup_mode": {
@@ -80,7 +81,7 @@ func resourceAlibabacloudStackMongodbBackup() *schema.Resource {
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackMongodbBackupCreate,
 		resourceAlibabacloudStackMongodbBackupRead,
-		resourceAlibabacloudStackMongodbBackupUpdate,
+		nil,
 		resourceAlibabacloudStackMongodbBackupDelete)
 	return resource
 }

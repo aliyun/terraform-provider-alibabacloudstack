@@ -60,7 +60,7 @@ resource "alibabacloudstack_mongodb_backup" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `backup_method` - (Required) - Backup Method
+  * `backup_method` - (Required, ForceNew) - Backup Method
   * `db_instance_id` - (Required, ForceNew) - db instance id
 
 ## Attributes Reference
