@@ -1,5 +1,5 @@
 ---
-subcategory: "EBS"
+subcategory: "块存储 EBS"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ebs_diskreplicagroup"
 sidebar_current: "docs-Alibabacloudstack-ebs-diskreplicagroup"

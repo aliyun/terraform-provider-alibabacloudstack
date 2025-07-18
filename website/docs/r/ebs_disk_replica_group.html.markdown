@@ -1,5 +1,5 @@
 ---
-subcategory: "EBS"
+subcategory: "Elastic Block Storage (EBS)"
 layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_ebs_diskreplicagroup"
 sidebar_current: "docs-Alibabacloudstack-ebs-diskreplicagroup"
