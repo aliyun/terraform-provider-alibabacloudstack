@@ -12,36 +12,36 @@ func TestAccAlibabacloudStackMongodbShardingNetworkPublicAddressesDataSource(t *
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackMongodbShardingNetworkPublicAddressesDataSourceConfig(rand, map[string]string{
-			"ids":            `["${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.id}"]`,
-			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.db_instance_id}"`,
+			"ids":            `["${alibabacloudstack_mongodb_sharding_network_public_address.default.id}"]`,
+			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_public_address.default.db_instance_id}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackMongodbShardingNetworkPublicAddressesDataSourceConfig(rand, map[string]string{
-			"ids":            `["${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.id}_fake"]`,
-			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.db_instance_id}"`,
+			"ids":            `["${alibabacloudstack_mongodb_sharding_network_public_address.default.id}_fake"]`,
+			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_public_address.default.db_instance_id}"`,
 		}),
 	}
 
 	nodeidConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackMongodbShardingNetworkPublicAddressesDataSourceConfig(rand, map[string]string{
-			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.db_instance_id}"`,
-			"node_id":        `"${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.node_id}"`,
+			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_public_address.default.db_instance_id}"`,
+			"node_id":        `"${alibabacloudstack_mongodb_sharding_network_public_address.default.node_id}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackMongodbShardingNetworkPublicAddressesDataSourceConfig(rand, map[string]string{
-			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.db_instance_id}"`,
-			"node_id":        `"${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.node_id}_fake"`,
+			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_public_address.default.db_instance_id}"`,
+			"node_id":        `"${alibabacloudstack_mongodb_sharding_network_public_address.default.node_id}_fake"`,
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackMongodbShardingNetworkPublicAddressesDataSourceConfig(rand, map[string]string{
-			"ids":            `["${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.id}"]`,
-			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.db_instance_id}"`,
-			"node_id":        `"${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.node_id}"`,
+			"ids":            `["${alibabacloudstack_mongodb_sharding_network_public_address.default.id}"]`,
+			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_public_address.default.db_instance_id}"`,
+			"node_id":        `"${alibabacloudstack_mongodb_sharding_network_public_address.default.node_id}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackMongodbShardingNetworkPublicAddressesDataSourceConfig(rand, map[string]string{
-			"ids":            `["${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.id}_fake"]`,
-			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.db_instance_id}"`,
-			"node_id":        `"${alibabacloudstack_mongodb_sharding_network_publicaddrdss.default.node_id}_fake"`,
+			"ids":            `["${alibabacloudstack_mongodb_sharding_network_public_address.default.id}_fake"]`,
+			"db_instance_id": `"${alibabacloudstack_mongodb_sharding_network_public_address.default.db_instance_id}"`,
+			"node_id":        `"${alibabacloudstack_mongodb_sharding_network_public_address.default.node_id}_fake"`,
 		}),
 	}
 	AlibabacloudstackMongodbShardingNetworkPublicAddressesDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, nodeidConf, allConf)
@@ -66,7 +66,7 @@ var fakeAlibabacloudstackMongodbShardingNetworkPublicAddressesDataMapFunc = func
 }
 
 var AlibabacloudstackMongodbShardingNetworkPublicAddressesDataCheckInfo = dataSourceAttr{
-	resourceId:   "data.alibabacloudstack_mongodb_sharding_network_publicaddrdsses.default",
+	resourceId:   "data.alibabacloudstack_mongodb_sharding_network_public_addresses.default",
 	existMapFunc: existAlibabacloudstackMongodbShardingNetworkPublicAddressesDataMapFunc,
 	fakeMapFunc:  fakeAlibabacloudstackMongodbShardingNetworkPublicAddressesDataMapFunc,
 }
@@ -105,13 +105,13 @@ resource "alibabacloudstack_mongodb_sharding_instance" "default" {
 }
 
 
-resource "alibabacloudstack_mongodb_sharding_network_publicaddrdss" "default" {
+resource "alibabacloudstack_mongodb_sharding_network_public_address" "default" {
 	db_instance_id="${alibabacloudstack_mongodb_sharding_instance.default.id}"
 
 	node_id="${alibabacloudstack_mongodb_sharding_instance.default.mongo_list.0.node_id}"
 }
 
-data "alibabacloudstack_mongodb_sharding_network_publicaddrdsses" "default" {
+data "alibabacloudstack_mongodb_sharding_network_public_addresses" "default" {
 	%s
 }
 

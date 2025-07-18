@@ -168,13 +168,13 @@ func resourceAlibabacloudStackMongodbShardingnetworkpublicaddressUpdate(d *schem
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_mongodb_sharding_network_publicaddrdss", "ModifyDBInstanceConnectionString", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_mongodb_sharding_network_public_address", "ModifyDBInstanceConnectionString", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsResetaccountpasswordResponseObj)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_mongodb_sharding_network_publicaddrdss", "ModifyDBInstanceConnectionString", errmsgs.AlibabacloudStackSdkGoERROR)
+				"alibabacloudstack_mongodb_sharding_network_public_address", "ModifyDBInstanceConnectionString", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
 	}

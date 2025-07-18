@@ -12,7 +12,7 @@ import (
 func TestAccAlibabacloudStackMongodbShardingNetworkPublicAddress0(t *testing.T) {
 	var v *DdsDescribeshardingnetworkaddressResponse
 
-	resourceId := "alibabacloudstack_mongodb_sharding_network_publicaddrdss.default"
+	resourceId := "alibabacloudstack_mongodb_sharding_network_public_address.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccMongodbShardingNetworkPublicAddressCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
 		return &MongoDBService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
