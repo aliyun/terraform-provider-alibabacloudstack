@@ -15,7 +15,7 @@ Create an EDAS k8s application.For information about EDAS K8s Application and ho
 
 ## Example Usage
 
-Basic Usage
+### Basic Usage
 
 ```terraform
 resource "alibabacloudstack_edas_k8s_application" "default" {
@@ -59,6 +59,103 @@ resource "alibabacloudstack_edas_k8s_application" "default" {
   namespace             = "default"
   logical_region_id     = cn-beijing
 }
+```
+
+### Affinity Usage
+```
+resource "alibabacloudstack_edas_k8s_application" "default" {
+  // package type is Image / FatJar / War
+  package_type            = "FatJar"
+  application_name        = "terraform-test-fatjar2"
+  application_description = "This is description of description"
+  cluster_id              = "xxxxxxxxxxxxxxxxxxx"
+  replicas                = 1
+
+  package_url     = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  package_version = "2025-07-09 10:00:18"
+  jdk             = "Open JDK 8"
+
+  command               = "/bin/sh"
+  command_args          = ["-c", "sleep 1001", ]
+  pre_stop              = "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
+  post_start            = "{\"exec\":{\"command\":[\"ls\",\"/\"]}}"
+  namespace             = "default"
+  custom_tolerations {
+    key    = "test"
+    value = "test"
+    operator = "Equal"
+    effect   = "NoSchedule"
+  }
+  custom_node_affinity_require {
+    match_expressions {
+      key    = "test"
+      values = ["aaaaa", "bbbb"]
+      operator = "In"
+    }
+  }
+  custom_node_affinity_preferred {
+    weight = 100
+    match_expressions {
+      key    = "test"
+      values = ["aaaaa", "bbbb"]
+      operator = "In"
+    }
+  }
+  custom_pod_affinity_require {
+    k8s_namespace = ["default"]
+    topology_key = "test"
+    match_expressions {
+      key    = "test"
+      values = ["aaaaa", "bbbb"]
+      operator = "In"
+    }
+    match_expressions {
+      key    = "test1"
+      values = ["aaaaa2", "bbbb2"]
+      operator = "In"
+    }
+  }
+  custom_pod_affinity_preferred {
+    weight = 1
+    k8s_namespace = ["default"]
+    topology_key = "test2"
+    match_expressions {
+      key    = "test1"
+      values = ["aaaaa1", "bbbb1"]
+      operator = "In"
+    }
+    match_expressions {
+      key    = "test2"
+      values = ["aaaaa2", "bbbb2"]
+      operator = "NotIn"
+    }
+  }
+  custom_pod_ant_affinity_require {
+    k8s_namespace = ["default"]
+    topology_key = "test3"
+    match_expressions {
+      key    = "test3"
+      values = ["aaaaa3", "bbbb3"]
+      operator = "In"
+    }
+    match_expressions {
+      key    = "test4"
+      values = ["aaaaa4", "bbbb4"]
+      operator = "NotIn"
+    }
+  }
+  custom_pod_ant_affinity_preferred {
+    weight = 1
+    k8s_namespace = ["default"]
+    topology_key = "test5"
+    match_expressions {
+      key    = "test5"
+      values = ["aaaaa5", "bbbb5"]
+      operator = "In"
+    }
+  }
+}
+
 ```
 
 ## Argument Reference
@@ -136,6 +233,54 @@ The following arguments are supported:
   * `target_port` - (Optional) The target port of Internet service port.
 * `internet_external_traffic_policy` - (Optional) The internet Slb external traffic policy of the service.
 * `internet_scheduler` - (Optional) The internet Slb scheduler of the service.
+* `custom_tolerations` - (Optional) Taint tolerations.
+  * `key` - (Optional) The key of the node tag.
+  * `operator` - (Optional) The operator of the node tag. Valid values: `Exists` and `Equal`.
+  * `value` - (Optional) The value of the node tag.
+  * `effect` - (Optional) The effect of the node tag. Valid values: `NoExecute`, `NoSchedule` and `PreferNoSchedule`.
+  * `toleration_seconds` - (Optional) The toleration seconds.
+* `custom_node_affinity_require` - (Optional) Required Node Affinity.
+  * `match_expressions` - (Optional) The match expressions of the node affinity.
+    * `key` - (Optional) The key of the node label.
+    * `operator` - (Optional) The operator of the node label. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`, `Gt`, `Lt`.
+    * `values` - (Optional) The values of the node label.
+* `custom_node_affinity_preference` - (Optional) Preferred Node Affinity.
+  * `weight` - (Optional) The weight of the node affinity. Valid values: `1` to `100`.
+  * `match_expressions` - (Optional) The match expressions of the node affinity.
+    * `key` - (Optional) The key of the node tag.
+    * `operator` - (Optional) The operator of the node tag. Values: `In`, `NotIn`, `Exists`, `DoesNotExist`, `Gt`, `Lt`.
+    * `values` - (Optional) The values of the node tag.
+* `custom_pod_affinity_require` - (Optional) Required Pod Affinity.
+  * `k8s_namespace` - (Optional) The namespace of the K8s cluster namespace.
+  * `topology_key` - (Optional) The topology key of the pod.
+  * `match_expressions` - (Optional) The match expressions of the pod affinity.
+    * `key` - (Optional) The key of the pod tag.
+    * `operator` - (Optional) The operator of the pod tag. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (Optional) The values of the pod tag.
+* `custom_pod_affinity_preferred` - (Optional) The custom pod affinity preferred.
+  * `weight` - (Optional) The weight of the pod affinity. Valid values: `1` to `100`.
+  * `k8s_namespace` - (Optional) The namespace of the K8s cluster namespace.
+  * `topology_key` - (Optional) The topology key of the pod.
+  * `match_expressions` - (Optional) The match expressions of the pod affinity.
+    * `key` - (Optional) The key of the pod tag.
+    * `operator` - (Optional) The operator of the pod tag. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (Optional) The values of the pod tag.
+* `custom_pod_ant_affinity_require` - (Optional) Required Pod ant Affinity.
+  * `k8s_namespace` - (Optional) The namespace of the K8s cluster namespace.
+  * `topology_key` - (Optional) The topology key of the pod.
+  * `match_expressions` - (Optional) The match expressions of the pod ant affinity.
+    * `key` - (Optional) The key of the pod tag.
+    * `operator` - (Optional) The operator of the pod tag. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (Optional) The values of the pod tag.
+* `custom_pod_ant_affinity_preferred` - (Optional) The custom pod ant affinity preferred.
+  * `weight` - (Optional) The weight of the pod ant affinity. Valid values: `1` to `100`.
+  * `k8s_namespace` - (Optional) The namespace of the K8s cluster namespace.
+  * `topology_key` - (Optional) The topology key of the pod.
+  * `match_expressions` - (Optional) The match expressions of the pod ant affinity.
+    * `key` - (Optional) The key of the pod tag.
+    * `operator` - (Optional) The operator of the pod tag. Valid values: `In`, `NotIn`, `Exists`, `DoesNotExist`.
+    * `values` - (Optional) The values of the pod tag.
+
 
 
 ## Attributes Reference
