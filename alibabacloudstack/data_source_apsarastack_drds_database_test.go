@@ -12,7 +12,7 @@ func TestAccAlibabacloudStackDrdsDatabasesDataSource(t *testing.T) {
 	name := fmt.Sprintf("tf_acc_drds_db_%d", rand)
 	drdsInstanceIdRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackDrdsDatabasesSourceConfig(name, map[string]string{
-			"instance_id": `"${local.drds_instance_id}"`,
+			"instance_id": `"${alibabacloudstack_drds_database.default.instance_id}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudStackDrdsDatabasesSourceConfig(name, map[string]string{
 			"instance_id": `"drdsusrztw1cfake"`,
