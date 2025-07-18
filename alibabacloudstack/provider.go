@@ -882,6 +882,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_vpngateway_vpn_pbr_route_entry": resourceAlibabacloudStackVpngatewayVpnpbrrouteentry(),
 		"alibabacloudstack_expressconnect_bgp_group":       resourceAlibabacloudStackExpressconnectBgpgroup(),
 		"alibabacloudstack_expressconnect_bgp_peer":        resourceAlibabacloudStackExpressconnectBgppeer(),
+		"alibabacloudstack_db_proxy":                       resourceAlibabacloudStackRdsDbproxy(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
