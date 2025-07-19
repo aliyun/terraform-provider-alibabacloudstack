@@ -211,18 +211,60 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_classicVersion3(t *testing.
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"audit_status": "Enable",
-					"audit_filter": map[string][]string{
-						"db": {"update", "delete", "admin"},
-						"mongos": {"admin", "slow"},
-					},
+					"audit_filter": []map[string]interface{}{{
+						"role_type": "db",
+						"filters":   []string{"update", "delete", "command"},
+					}, {
+						"role_type": "mongos",
+						"filters":   []string{"admin", "insert"},
+					}},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"audit_status":   "Enable",
-						"audit_filter.%": "2",
-						"audit_filter.db.#": "3",
-						"audit_filter.mongos.#": "2",
+						"audit_filter.#": "2",
 					}),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceId,
+						"audit_filter.*",
+						map[string]string{
+							"role_type": "db",
+							"filters.#": "3",
+						},
+					),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceId,
+						"audit_filter.*",
+						map[string]string{
+							"role_type": "mongos",
+							"filters.#": "2",
+						},
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"update",
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"delete",
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"admin",
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"command",
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"insert",
+					),
 				),
 			},
 			{
@@ -509,7 +551,6 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_vpc(t *testing.T) {
 			}},
 	})
 }
-
 
 func testMongoDBShardingInstance_classic_base(name string) string {
 	return fmt.Sprintf(`

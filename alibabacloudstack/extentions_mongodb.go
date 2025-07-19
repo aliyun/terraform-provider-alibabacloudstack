@@ -1,6 +1,11 @@
 package alibabacloudstack
 
 import (
+	"fmt"
+	"sort"
+	"strings"
+
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -34,6 +39,16 @@ func auditFilterSchema(availableRoleType []string) *schema.Schema {
 		},
 		Optional: true,
 		Computed: true,
+		Set: func(i interface{}) int {
+			m := i.(map[string]interface{})
+			filters := []string{}
+			for _, f := range m["filters"].(*schema.Set).List() {
+				filters = append(filters, f.(string))
+			}
+			sort.Strings(filters)
+			hashString := fmt.Sprintf("%s@%s", m["role_type"].(string), strings.Join(filters, ","))
+			return hashcode.String(hashString)
+		},
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			if d.Get("audit_status").(string) != "Enable" {
 				return true
