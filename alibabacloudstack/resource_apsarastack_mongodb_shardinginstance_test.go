@@ -138,27 +138,53 @@ func testAccCheckMongoDBShardingInstanceDestroy(s *terraform.State) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackMongoDBShardingInstance_classic(t *testing.T) {
+func TestAccAlibabacloudStackMongoDBShardingInstance_classicVersion3(t *testing.T) {
 	var v dds.DBInstance
 	resourceId := "alibabacloudstack_mongodb_sharding_instance.default"
 	serverFunc := func() interface{} {
 		return &MongoDBService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tfaccount%d", rand)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	// password := getAccTestPassword(12)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBShardingInstance_classic_base)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 		// CheckDestroy:  testAccCheckMongoDBShardingInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testMongoDBShardingInstance_classic_base,
+				Config: testAccConfig(map[string]interface{}{
+
+					"zone_id":        "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"engine_version": "3.4",
+					"shard_list": []map[string]interface{}{
+						{
+							"node_class":   "dds.shard.mid",
+							"node_storage": "10",
+						},
+						{
+							"node_class":   "dds.shard.standard",
+							"node_storage": "20",
+						},
+					},
+					"mongo_list": []map[string]interface{}{
+						{
+							"node_class": "dds.mongos.mid",
+						},
+						{
+							"node_class": "dds.mongos.mid",
+						},
+					},
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"zone_id":                   CHECKSET,
@@ -182,73 +208,126 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_classic(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// {
-			// 	Config: testMongoDBShardingInstance_classic_name,
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"name": "tf-testAccMongoDBShardingInstance_test",
-			// 		}),
-			// 	),
-			// },
-			// {
-			// 	Config: testMongoDBShardingInstance_classic_account_password(password),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"account_password": password,
-			// 		}),
-			// 	),
-			// },
-			// {
-			// 	Config: testMongoDBShardingInstance_classic_mongos(password),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"mongo_list.#":            "3",
-			// 			"mongo_list.0.node_class": "dds.mongos.mid",
-			// 			"mongo_list.1.node_class": "dds.mongos.mid",
-			// 			"mongo_list.2.node_class": "dds.mongos.mid",
-			// 		}),
-			// 	),
-			// },
-			// {
-			// 	Config: testMongoDBShardingInstance_classic_shard(password),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"shard_list.#":              "3",
-			// 			"shard_list.0.node_class":   "dds.shard.mid",
-			// 			"shard_list.0.node_storage": "10",
-			// 			"shard_list.1.node_class":   "dds.shard.standard",
-			// 			"shard_list.1.node_storage": "20",
-			// 			"shard_list.2.node_class":   "dds.shard.standard",
-			// 			"shard_list.2.node_storage": "20",
-			// 		}),
-			// 	),
-			// },
-			// {
-			// 	Config: testMongoDBShardingInstance_classic_backup(password),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"backup_period.#": "1",
-			// 			"backup_period.0": "Wednesday",
-			// 			"backup_time":     "11:00Z-12:00Z",
-			// 		}),
-			// 	),
-			// },
-			// {
-			// 	Config: testMongoDBShardingInstance_classic_together(password),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"name":               "tf-testAccMongoDBShardingInstance_test_together",
-			// 			"account_password":   "inputYourCodeHere",
-			// 			"security_ip_list.#": "2",
-			// 			"security_ip_list.0": "10.168.1.12",
-			// 			"security_ip_list.1": "10.168.1.13",
-			// 			"backup_period.#":    "2",
-			// 			"backup_period.0":    "Tuesday",
-			// 			"backup_period.1":    "Wednesday",
-			// 			"backup_time":        "10:00Z-11:00Z",
-			// 		}),
-			// 	),
-			// }
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"audit_status": "Enable",
+					"audit_filter": map[string][]string{
+						"db": {"update", "delete", "admin"},
+						"mongos": {"admin", "slow"},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"audit_status":   "Enable",
+						"audit_filter.%": "2",
+						"audit_filter.db.#": "3",
+						"audit_filter.mongos.#": "2",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"name": "${var.name}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name": name,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"account_password": "${random_password.password.result}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"mongo_list": []map[string]interface{}{
+						{
+							"node_class": "dds.mongos.mid",
+						},
+						{
+							"node_class": "dds.mongos.mid",
+						}, {
+							"node_class": "dds.mongos.mid",
+						},
+					},
+				}),
+
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"mongo_list.#":            "3",
+						"mongo_list.0.node_class": "dds.mongos.mid",
+						"mongo_list.1.node_class": "dds.mongos.mid",
+						"mongo_list.2.node_class": "dds.mongos.mid",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"shard_list": []map[string]interface{}{
+						{
+							"node_class":   "dds.shard.mid",
+							"node_storage": "10",
+						},
+						{
+							"node_class":   "dds.shard.standard",
+							"node_storage": "20",
+						},
+						{
+							"node_class":   "dds.shard.standard",
+							"node_storage": "30",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"shard_list.#":              "3",
+						"shard_list.0.node_class":   "dds.shard.mid",
+						"shard_list.0.node_storage": "10",
+						"shard_list.1.node_class":   "dds.shard.standard",
+						"shard_list.1.node_storage": "20",
+						"shard_list.2.node_class":   "dds.shard.standard",
+						"shard_list.2.node_storage": "30",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"backup_period": []string{"Wednesday"},
+					"backup_time":   "11:00Z-12:00Z",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"backup_period.#": "1",
+						"backup_period.0": "Wednesday",
+						"backup_time":     "11:00Z-12:00Z",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"name":             "${var.name}_update",
+					"backup_period":    []string{"Tuesday", "Wednesday"},
+					"backup_time":      "10:00Z-11:00Z",
+					"security_ip_list": []string{"10.168.1.12", "10.168.1.13"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"name":               fmt.Sprintf("%s_update", name),
+						"security_ip_list.#": "2",
+						"security_ip_list.0": "10.168.1.12",
+						"security_ip_list.1": "10.168.1.13",
+						"backup_period.#":    "2",
+						"backup_period.0":    "Tuesday",
+						"backup_period.1":    "Wednesday",
+						"backup_time":        "10:00Z-11:00Z",
+					}),
+				),
+			},
 		},
 	})
 }
@@ -431,144 +510,21 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_vpc(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackMongoDBShardingInstance_multi_instance(t *testing.T) {
-	var v dds.DBInstance
-	resourceId := "alibabacloudstack_mongodb_sharding_instance.default.2"
-	serverFunc := func() interface{} {
-		return &MongoDBService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+
+func testMongoDBShardingInstance_classic_base(name string) string {
+	return fmt.Sprintf(`
+	
+variable "name" {
+	  default = "%s"
 	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
-	ra := resourceAttrInit(resourceId, nil)
-	rac := resourceAttrCheckInit(rc, ra)
-	password := getAccTestPassword(12)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckMongoDBShardingInstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testMongoDBShardingInstance_multi_instance_base,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"zone_id":                   CHECKSET,
-						"engine_version":            "3.4",
-						"shard_list.#":              "2",
-						"shard_list.0.node_class":   "dds.shard.mid",
-						"shard_list.0.node_storage": "10",
-						"shard_list.1.node_class":   "dds.shard.standard",
-						"shard_list.1.node_storage": "20",
-						"mongo_list.#":              "2",
-						"mongo_list.0.node_class":   "dds.mongos.mid",
-						"mongo_list.1.node_class":   "dds.mongos.mid",
-						"name":                      "",
-						"storage_engine":            "WiredTiger",
-						"instance_charge_type":      "PostPaid",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBShardingInstance_multi_instance_name,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name": "tf-testAccMongoDBShardingInstance_test",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBShardingInstance_multi_instance_account_password(password),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"account_password": "inputYourCodeHere",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBShardingInstance_multi_instance_mongos(password),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"mongo_list.#":            "3",
-						"mongo_list.0.node_class": "dds.mongos.mid",
-						"mongo_list.1.node_class": "dds.mongos.mid",
-						"mongo_list.2.node_class": "dds.mongos.mid",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBShardingInstance_multi_instance_shard(password),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"shard_list.#":              "3",
-						"shard_list.0.node_class":   "dds.shard.mid",
-						"shard_list.0.node_storage": "10",
-						"shard_list.1.node_class":   "dds.shard.standard",
-						"shard_list.1.node_storage": "20",
-						"shard_list.2.node_class":   "dds.shard.standard",
-						"shard_list.2.node_storage": "20",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBShardingInstance_multi_instance_backup(password),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":               "tf-testAccMongoDBShardingInstance_test_together",
-						"account_password":   "inputYourCodeHere",
-						"security_ip_list.#": "2",
-						"security_ip_list.0": "10.168.1.12",
-						"security_ip_list.1": "10.168.1.13",
-						"backup_period.#":    "2",
-						"backup_period.0":    "Tuesday",
-						"backup_period.1":    "Wednesday",
-						"backup_time":        "10:00Z-11:00Z",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBShardingInstance_multi_instance_together(password),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":               "tf-testAccMongoDBShardingInstance_test_together",
-						"account_password":   "inputYourCodeHere",
-						"security_ip_list.#": "2",
-						"security_ip_list.0": "10.168.1.12",
-						"security_ip_list.1": "10.168.1.13",
-						"backup_period.#":    "2",
-						"backup_period.0":    "Tuesday",
-						"backup_period.1":    "Wednesday",
-						"backup_time":        "10:00Z-11:00Z",
-					}),
-				),
-			}},
-	})
-}
-
-const testMongoDBShardingInstance_classic_base = `
+	
+%s
 
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "MongoDB"
 }
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-  }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-}`
+`, name, RandomPasswordTestCase(12))
+}
 
 const testMongoDBShardingInstance_classic_base4 = `
 
@@ -646,196 +602,6 @@ resource "alibabacloudstack_mongodb_sharding_instance" "default" {
   tde_status    = "enabled"
   security_group_id    = "${data.alibabacloudstack_security_groups.default.groups.0.id}"
 }`
-
-const testMongoDBShardingInstance_classic_name = `
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-  }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name = "tf-testAccMongoDBShardingInstance_test"
-}`
-
-func testMongoDBShardingInstance_classic_account_password(password string) string {
-	return fmt.Sprintf(`
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-  }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name             = "tf-testAccMongoDBShardingInstance_test"
-  account_password = "%s"
-}`, password)
-}
-
-func testMongoDBShardingInstance_classic_mongos(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-   mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name             = "tf-testAccMongoDBShardingInstance_test"
-  account_password = "%s"
-}`, password)
-}
-
-func testMongoDBShardingInstance_classic_shard(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-   mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name             = "tf-testAccMongoDBShardingInstance_test"
-  account_password = "%s"
-}`, password)
-}
-
-func testMongoDBShardingInstance_classic_backup(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-   mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name             = "tf-testAccMongoDBShardingInstance_test"
-  account_password = "%s"
-  backup_period    = ["Wednesday"]
-  backup_time      = "11:00Z-12:00Z"
-}`, password)
-}
-
-func testMongoDBShardingInstance_classic_together(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-   mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name             = "tf-testAccMongoDBShardingInstance_test_together"
-  account_password = "%s"
-  backup_period    = ["Tuesday", "Wednesday"]
-  backup_time      = "10:00Z-11:00Z"
-  security_ip_list = ["10.168.1.12", "10.168.1.13"]
-}`, password)
-}
 
 const testMongoDBShardingInstance_vpc_base = `
 
@@ -1126,256 +892,6 @@ resource "alibabacloudstack_vswitch" "default" {
 
 resource "alibabacloudstack_mongodb_sharding_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-   mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name             = "tf-testAccMongoDBShardingInstance_test_together"
-  account_password = "%s"
-  backup_period    = ["Tuesday", "Wednesday"]
-  backup_time      = "10:00Z-11:00Z"
-  security_ip_list = ["10.168.1.12", "10.168.1.13"]
-}`, password)
-}
-
-const testMongoDBShardingInstance_multi_instance_base = `
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBShardingInstance_multi_instance"
-}
-
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  count          = 3
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-}`
-
-const testMongoDBShardingInstance_multi_instance_name = `
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBShardingInstance_multi_instance"
-}
-
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  count          = 3
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name = "tf-testAccMongoDBShardingInstance_test"
-}`
-
-func testMongoDBShardingInstance_multi_instance_account_password(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBShardingInstance_multi_instance"
-}
-
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  count          = 3
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name             = "tf-testAccMongoDBShardingInstance_test"
-  account_password = "%s"
-}`, password)
-}
-
-func testMongoDBShardingInstance_multi_instance_mongos(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBShardingInstance_multi_instance"
-}
-
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  count          = 3
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-  }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name             = "tf-testAccMongoDBShardingInstance_test"
-  account_password = "%s"
-}`, password)
-}
-
-func testMongoDBShardingInstance_multi_instance_shard(password string) string {
-	return fmt.Sprintf(`
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBShardingInstance_multi_instance"
-}
-
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  count          = 3
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-  }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name             = "tf-testAccMongoDBShardingInstance_test"
-  account_password = "%s"
-}`, password)
-}
-
-func testMongoDBShardingInstance_multi_instance_backup(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBShardingInstance_multi_instance"
-}
-
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  count          = 3
-  zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  engine_version = "3.4"
-  shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-    }
-  shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
-  }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-  mongo_list {
-    node_class = "dds.mongos.mid"
-    }
-   mongo_list {
-    node_class = "dds.mongos.mid"
-  }
-  name             = "tf-testAccMongoDBShardingInstance_test"
-  account_password = "%s"
-  backup_period    = ["Wednesday"]
-  backup_time      = "11:00Z-12:00Z"
-}`, password)
-}
-
-func testMongoDBShardingInstance_multi_instance_together(password string) string {
-	return fmt.Sprintf(`
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBShardingInstance_multi_instance"
-}
-
-resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  count          = 3
   zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
   engine_version = "3.4"
   shard_list {

@@ -194,6 +194,13 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				MinItems: 2,
 				MaxItems: 32,
 			},
+			"audit_status": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Enable", "Disabled"}, false),
+			},
+			"audit_filter": auditFilterSchema([]string{"db","mongos"}),
 		},
 	}
 
@@ -417,6 +424,17 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 	//	if len(groupIp.Items.RdsEcsSecurityGroupRel) > 0 {
 	//		d.Set("security_group_id", groupIp.Items.RdsEcsSecurityRel[0].SecurityGroupId)
 	//	}
+	if response, err := ddsService.DoDdsDescribeauditpolicyRequest(d.Id()); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_auditpolicy", errmsgs.AlibabacloudStackSdkGoERROR)
+	} else {
+		d.Set("audit_status", response.LogAuditStatus)
+	}
+
+	if auditFilters, err := ddsService.GetAuditLogFilter(d.Id()); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_auditlogfilter", errmsgs.AlibabacloudStackSdkGoERROR)
+	} else {
+		d.Set("audit_filter", auditFilters)
+	}
 
 	return nil
 }
@@ -424,7 +442,30 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
-	d.Partial(true)
+
+	if d.HasChanges("audit_status") && d.Get("audit_status").(string) != "" {
+		request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyAuditPolicy", "")
+
+		request.QueryParams["DBInstanceId"] = d.Id()
+
+		request.QueryParams["AuditStatus"] = d.Get("audit_status").(string)
+
+		bresponse, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_mongo_db_audit_policy", "ModifyAuditPolicy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+	}
+
+	if _, ok := d.GetOk("audit_filter"); ok && d.Get("audit_status").(string) == "Enable" && d.HasChange("audit_filter") {
+		if err :=ddsService.ModifyAuditLogFilter(d); err!= nil{
+			return err
+		}
+	}
 
 	if d.HasChanges("preferred_backup_time", "preferred_backup_period", "backup_time", "backup_period") {
 		if err := ddsService.MotifyMongoDBBackupPolicy(d); err != nil {
@@ -479,7 +520,6 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 	}
 
 	if d.IsNewResource() {
-		d.Partial(false)
 		return nil
 	}
 
@@ -560,7 +600,6 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		}
 		//d.SetPartial("security_ip_list")
 	}
-	d.Partial(false)
 	return nil
 }
 

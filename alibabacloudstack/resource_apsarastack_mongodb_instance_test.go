@@ -148,21 +148,84 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"zone_id":             "${data.alibabacloudstack_zones.default.zones[0].id}",
-					"engine_version":      "3.4",
-					"db_instance_storage": "10",
-					"db_instance_class":   "dds.mongo.mid",
+					"zone_id":                 "${data.alibabacloudstack_zones.default.zones[0].id}",
+					"db_instance_description": "${var.name}",
+					"engine_version":          "3.4",
+					"db_instance_storage":     "10",
+					"db_instance_class":       "dds.mongo.mid",
+					"audit_status":            "Enable",
+					"audit_filter": []map[string]interface{}{{
+						"role_type": "db",
+						"filters":   []string{"update", "delete"},
+					}},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine_version":       "3.4",
-						"db_instance_storage":  "10",
-						"db_instance_class":    "dds.mongo.mid",
-						"name":                 "",
-						"storage_engine":       "WiredTiger",
-						"instance_charge_type": "PostPaid",
-						"replication_factor":   "3",
+						"engine_version":          "3.4",
+						"db_instance_storage":     "10",
+						"db_instance_class":       "dds.mongo.mid",
+						"db_instance_description": name,
+						"storage_engine":          "WiredTiger",
+						"instance_charge_type":    "PostPaid",
+						"replication_factor":      "3",
+						"audit_status":            "Enable",
+						"audit_filter.#":          "1",
+					}), 
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceId,
+						"audit_filter.*",
+						map[string]string{
+							"role_type": "db",
+							"filters.#": "2",
+						},
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"update",
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"delete",
+					),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"audit_filter": []map[string]interface{}{{
+						"role_type": "db",
+						"filters":   []string{"update", "delete", "admin"},
+					}},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"audit_status":            "Enable",
+						"audit_filter.#":          "1",
 					}),
+					resource.TestCheckTypeSetElemNestedAttrs(
+						resourceId,
+						"audit_filter.*",
+						map[string]string{
+							"role_type": "db",
+							"filters.#": "3",
+						},
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"update",
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"delete",
+					),
+					resource.TestCheckTypeSetElemAttr(
+						resourceId,
+						"audit_filter.*.filters.*",
+						"admin",
+					),
 				),
 			},
 			{
@@ -173,16 +236,12 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"audit_status": "Enable",
-					"audit_filter": []string{"update","delete", "admin"},
+					"audit_status": "Disabled",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"audit_status": "Enable",
-						"audit_filter.#": "3",
-						"audit_filter.0": "admin",
-						"audit_filter.1": "delete",
-						"audit_filter.2": "update",
+						"audit_status": "Disabled",
+						"audit_filter": REMOVEKEY,
 					}),
 				),
 			},
@@ -218,11 +277,11 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 			//			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"name": "tf-testAccMongoDBInstance_test",
+					"db_instance_description": "tf-testAccMongoDBInstance_test",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name": "tf-testAccMongoDBInstance_test",
+						"db_instance_description": "tf-testAccMongoDBInstance_test",
 						//						"tags.%":       REMOVEKEY,
 						//						"tags.Created": REMOVEKEY,
 						//						"tags.For":     REMOVEKEY,
@@ -238,16 +297,6 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 					testAccCheck(map[string]string{
 						"db_instance_storage": "30",
 						"db_instance_class":   "dds.mongo.standard",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"audit_status": "Disabled",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"audit_status": "Disabled",
 					}),
 				),
 			},
@@ -680,7 +729,11 @@ func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
 }
 
 func testMongoDBInstanceClassicBase(name string) string {
-	return DataZoneCommonTestCase
+	return fmt.Sprintf(`
+variable "name" {
+default="%s"
+}
+%s`, name, DataZoneCommonTestCase)
 }
 
 const testMongoDBInstance_classic_base4 = `

@@ -28,6 +28,7 @@ import (
 )
 
 var testAccProviders map[string]*schema.Provider
+var testAccExternalProviders map[string]resource.ExternalProvider
 var testAccProvider *schema.Provider
 var defaultRegionToTest = os.Getenv("ALIBABACLOUDSTACK_REGION")
 
@@ -36,6 +37,11 @@ func init() {
 	testAccProvider = Provider()
 	testAccProviders = map[string]*schema.Provider{
 		"alibabacloudstack": testAccProvider,
+	}
+	testAccExternalProviders = map[string]resource.ExternalProvider{
+		"random": {
+			Source: "hashicorp/random",
+		},
 	}
 }
 

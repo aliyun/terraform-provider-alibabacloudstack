@@ -2,7 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -194,34 +193,7 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Enable", "Disabled"}, false),
 			},
-			"audit_filter": {
-				Type: schema.TypeList,
-				Elem: &schema.Schema{
-					Type:         schema.TypeString,
-					ValidateFunc: validation.StringInSlice([]string{"admin", "slow", "query", "insert", "update", "delete", "command"}, false),
-				},
-				Optional:     true,
-				Computed:     true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if d.Get("audit_status").(string) != "Enable" {
-						return true
-					}
-					if k == "audit_filter.#" {
-						return old == new
-					}
-					o, n := d.GetChange("audit_filter")
-					var oldValue, newValue []string
-					for _, v := range o.([]interface{}) {
-						oldValue = append(oldValue, v.(string))
-					}
-					sort.Strings(oldValue)
-					for _, v := range n.([]interface{}) {
-						newValue = append(newValue, v.(string))
-					}
-					sort.Strings(newValue)
-					return strings.Join(oldValue, ",") == strings.Join(newValue, ",")
-				},
-			},
+			"audit_filter": auditFilterSchema([]string{"db"}),
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackMongoDBInstanceCreate, resourceAlibabacloudStackMongoDBInstanceRead, resourceAlibabacloudStackMongoDBInstanceUpdate, resourceAlibabacloudStackMongoDBInstanceDelete)
@@ -402,12 +374,10 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 		d.Set("audit_status", response.LogAuditStatus)
 	}
 
-	if response, err := ddsService.DoDdsDescribeauditlogfilterRequest(d.Id()); err != nil {
+	if auditFilters, err := ddsService.GetAuditLogFilter(d.Id()); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_auditlogfilter", errmsgs.AlibabacloudStackSdkGoERROR)
 	} else {
-		filters := strings.Split(response.Filter,",")
-		sort.Strings(filters)
-		d.Set("audit_filter", filters)
+		d.Set("audit_filter", auditFilters)
 	}
 	return nil
 }
@@ -434,30 +404,12 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		}
 	}
 
-	if v, ok := d.GetOk("audit_filter"); ok && d.Get("audit_status").(string) == "Enable" && d.HasChange("audit_filter") {
-		request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyAuditLogFilter", "")
-		// DdsModifyauditlogfilterResponseObj := DdsModifyauditlogfilterResponse{}
-		auditFilter := []string{}
-		for _, f := range v.([]interface{}) {
-			auditFilter = append(auditFilter, f.(string))
-		}
-		request.QueryParams["DBInstanceId"] = d.Id()
-
-		request.QueryParams["Filter"] = strings.Join(auditFilter, ",")
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_mongo_db_audit_log_filter", "ModifyAuditLogFilter", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	if _, ok := d.GetOk("audit_filter"); ok && d.Get("audit_status").(string) == "Enable" && d.HasChange("audit_filter") {
+		if err := ddsService.ModifyAuditLogFilter(d); err != nil {
+			return err
 		}
 
 	}
-
-	d.Partial(true)
 
 	if !d.IsNewResource() && (d.HasChange("instance_charge_type") && d.Get("instance_charge_type").(string) == "PrePaid") {
 		prePaidRequest := dds.CreateTransformToPrePaidRequest()
@@ -561,7 +513,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 	}
 
 	if d.IsNewResource() {
-		d.Partial(false)
 		return nil
 	}
 
@@ -686,7 +637,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			return errmsgs.WrapError(err)
 		}
 	}
-	d.Partial(false)
 	return nil
 }
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -634,7 +635,7 @@ func (s *MongoDBService) tagsFromMap(m map[string]interface{}) []dds.TagResource
 
 func (s *MongoDBService) DoDdsDescribeaccountsRequest(id string) (*DdsDescribeaccountsResponse, error) {
 	// api: Dds - 2022-11-21 - DescribeAccounts
-	request := s.client.NewCommonRequest("POST", "Dds", "2022-11-21", "DescribeAccounts", "")
+	request := s.client.NewCommonRequest("GET", "Dds", "2022-11-21", "DescribeAccounts", "")
 	DdsDescribeaccountsResponseObj := &DdsDescribeaccountsResponse{}
 	//调用request_params_handler
 	parts := strings.Split(id, COLON_SEPARATED)
@@ -666,7 +667,7 @@ type DdsDescribeauditpolicyResponse struct {
 
 func (s *MongoDBService) DoDdsDescribeauditpolicyRequest(id string) (*DdsDescribeauditpolicyResponse, error) {
 	// api: Dds - 2015-12-01 - DescribeAuditPolicy
-	request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeAuditPolicy", "")
+	request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeAuditPolicy", "")
 	DdsDescribeauditpolicyResponseObj := &DdsDescribeauditpolicyResponse{}
 
 	//调用request_params_handler
@@ -697,28 +698,15 @@ type DdsDescribeauditlogfilterResponse struct {
 	RoleType  string `json:"RoleType"`
 }
 
-func (s *MongoDBService) DoDdsDescribeauditlogfilterRequest(id string) (*DdsDescribeauditlogfilterResponse, error) {
+func (s *MongoDBService) doDdsDescribeauditlogfilterRequest(id string) (*DdsDescribeauditlogfilterResponse, error) {
 	// api: Dds - 2015-12-01 - DescribeAuditLogFilter
-	const maxRetries = 24
-	var instance dds.DBInstance
-
-	for i := 0; i < maxRetries; i++ {
-		var err error
-		instance, err = s.DescribeMongoDBInstance(id)
-
-		if err != nil {
-			log.Printf("DescribeMongoDBInstance failed: %v", err)
-			continue
-		}
-
-		if instance.DBInstanceStatus != "CONFIG_SWITCHING" {
-			break
-		}
-		time.Sleep(5 * time.Second)
+	stateConf := BuildStateConf([]string{"CONFIG_SWITCHING"}, []string{"Running"}, 10*time.Minute, 10*time.Second, s.RdsMongodbDBInstanceStateRefreshFunc(id, []string{"Deleting"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return nil, errmsgs.WrapError(err)
 	}
 
 	// 使用最终获取的 instance 变量
-	request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeAuditLogFilter", "")
+	request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeAuditLogFilter", "")
 	DdsDescribeauditlogfilterResponseObj := &DdsDescribeauditlogfilterResponse{}
 
 	//调用request_params_handler
@@ -777,7 +765,7 @@ type DdsDescribebackupsResponse struct {
 
 func (s *MongoDBService) DoDdsDescribebackupsRequest(id string) (*DdsDescribebackupsResponse, error) {
 	// api: Dds - 2015-12-01 - DescribeBackups
-	request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeBackups", "")
+	request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeBackups", "")
 	DdsDescribebackupsResponseObj := &DdsDescribebackupsResponse{}
 	parts := strings.Split(id, "&")
 	instance_id := parts[1]
@@ -903,7 +891,7 @@ type DdsDescribeDBInstancesResponse struct {
 
 func (s *MongoDBService) DoDdsDescribeshardingnetworkaddressRequest(id string) (*DdsDescribeshardingnetworkaddressResponse, error) {
 	// api: Dds - 2015-12-01 - DescribeShardingNetworkAddress
-	request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeShardingNetworkAddress", "")
+	request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeShardingNetworkAddress", "")
 	DdsDescribeshardingnetworkaddressResponseObj := &DdsDescribeshardingnetworkaddressResponse{}
 
 	//调用request_params_handler
@@ -933,7 +921,7 @@ func (s *MongoDBService) DoDdsDescribeshardingnetworkaddressRequest(id string) (
 func (s *MongoDBService) DoWaitDdsShardDbinstanceRunningRequest(id string) (*DdsDescribeDBInstancesResponse, error) {
 	deadline := time.Now().Add(time.Duration(300) * time.Second)
 	for {
-		request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "DescribeDBInstances", "")
+		request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeDBInstances", "")
 		//调用request_params_handler
 		parts := strings.Split(id, COLON_SEPARATED)
 		db_instance_id := parts[0]
@@ -965,5 +953,88 @@ func (s *MongoDBService) DoWaitDdsShardDbinstanceRunningRequest(id string) (*Dds
 			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DoWaitDdsShardDbinstanceRunningRequest timeout", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
+	}
+}
+
+func (s *MongoDBService) ModifyAuditLogFilter(d *schema.ResourceData) error {
+	stateConf := BuildStateConf([]string{"CONFIG_SWITCHING"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, s.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	request := s.client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyAuditLogFilter", "")
+	// DdsModifyauditlogfilterResponseObj := DdsModifyauditlogfilterResponse{}
+	request.QueryParams["DBInstanceId"] = d.Id()
+
+	old, new := d.GetChange("audit_filter")
+	oldValue := map[string][]string{}
+	newValue := map[string][]string{}
+	for _, v := range old.(*schema.Set).List() {
+		i := v.(map[string]interface{})
+		roleType := i["role_type"].(string)
+		filters := []string{}
+		for _, f := range i["filters"].(*schema.Set).List() {
+			filters = append(filters, f.(string))
+		}
+		sort.Strings(filters)
+		oldValue[roleType] = filters
+	}
+	for _, v := range new.(*schema.Set).List() {
+		i := v.(map[string]interface{})
+		roleType := i["role_type"].(string)
+		filters := []string{}
+		for _, f := range i["filters"].(*schema.Set).List() {
+			filters = append(filters, f.(string))
+		}
+		sort.Strings(filters)
+		newValue[roleType] = filters
+	}
+
+	for roleType := range newValue {
+		if _, exist := oldValue[roleType]; exist && strings.Join(newValue[roleType], ",") == strings.Join(oldValue[roleType], ",") {
+			continue
+		}
+		request.QueryParams["RoleType"] = roleType
+		request.QueryParams["Filter"] = strings.Join(newValue[roleType], ",")
+
+		bresponse, err := s.client.ProcessCommonRequest(request)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_mongo_db_audit_log_filter", "ModifyAuditLogFilter", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		stateConf := BuildStateConf([]string{"CONFIG_SWITCHING"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, s.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapError(err)
+		}
+	}
+	return nil
+}
+
+func (s *MongoDBService) GetAuditLogFilter(id string) ([]map[string]interface{}, error) {
+	if response, err := s.doDdsDescribeauditlogfilterRequest(id); err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_auditlogfilter", errmsgs.AlibabacloudStackSdkGoERROR)
+	} else {
+		auditFilters := []map[string]interface{}{}
+		for _, item := range strings.Split(response.Filter, "-") {
+			var filters []string
+			var filterType string
+			parts := strings.Split(item, "@")
+			if len(parts) == 2 {
+				filterType = parts[0]
+				filters = strings.Split(parts[1], ",")
+			} else {
+				filterType = "db"
+				filters = strings.Split(parts[0], ",")
+			}
+			auditFilters = append(auditFilters, map[string]interface{}{
+				"role_type": filterType,
+				"filters":   filters,
+			})
+		}
+		return auditFilters, nil
 	}
 }
