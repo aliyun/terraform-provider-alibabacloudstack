@@ -3,7 +3,6 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -35,11 +34,9 @@ func TestAccAlibabacloudStackDBProxy_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_instance_id":          "${alibabacloudstack_db_instance.instance.id}",
-					"config_db_proxy_service": "Startup",
-					// "db_instance_id":          "rm-rw351e34bqk41yde5",
+					"db_instance_id":        "${alibabacloudstack_db_instance.instance.id}",
 					"db_proxy_instance_num": "1",
-					"instance_network_type": "VPC",
+					"instance_network_type": "Classic",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -50,15 +47,12 @@ func TestAccAlibabacloudStackDBProxy_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_proxy_instance_num":   "3",
-					"db_proxy_instance_type":  "common",
-					"effective_specific_time": "${var.effective_specific_time}",
-					"effective_time":          "SpecificTime",
+					"db_proxy_instance_num": "3",
+					"effective_time":        "MaintainTime",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"db_proxy_instance_num":  "3",
-						"db_proxy_instance_type": "common",
+						"db_proxy_instance_num": "3",
 					}),
 				),
 			},
@@ -73,6 +67,17 @@ func TestAccAlibabacloudStackDBProxy_basic(t *testing.T) {
 				),
 			},
 			{
+				Config: testAccConfig(map[string]interface{}{
+					"db_proxy_connect_string_port": "8000",
+					"db_proxy_connect_string":      "test1234",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"db_proxy_connect_string": "test1234",
+					}),
+				),
+			},
+			{
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -82,12 +87,7 @@ func TestAccAlibabacloudStackDBProxy_basic(t *testing.T) {
 }
 
 func resourceDBProxyConfigDependence(name string) string {
-	now := time.Now().UTC()
-	effective_specific_time := now.Add(time.Minute * 30)
 	return fmt.Sprintf(`
-	variable "effective_specific_time" {
-		default = "%s"
-	}
 	variable "name" {
 		default = "%v"
 	}
@@ -101,5 +101,5 @@ func resourceDBProxyConfigDependence(name string) string {
 	    storage_type         = "local_ssd"
 	}
 	
-	`, effective_specific_time.Format("2006-01-02T15:04Z"), name)
+	`, name)
 }
