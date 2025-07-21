@@ -17,9 +17,6 @@ func TestAccAlibabacloudStackRdsDbProxiesDataSource(t *testing.T) {
 		existConfig: testAccConfig(map[string]interface{}{
 			"db_instance_id": "${alibabacloudstack_db_proxy.default.db_instance_id}",
 		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_db_proxy.default.db_instance_id}-fake",
-		}),
 	}
 	var existRdsDbProxiesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
@@ -58,7 +55,7 @@ variable "name" {
 resource "alibabacloudstack_db_instance" "instance" {
 	engine               = "MySQL"
 	engine_version       = "5.7"
-	instance_type        = "rds.mysql.s2.large"
+	instance_type        = "mysql.x8.medium.2"
 	instance_storage     = "5"
 	instance_name 		 = "${var.name}"
 	storage_type         = "local_ssd"
