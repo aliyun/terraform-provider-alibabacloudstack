@@ -1327,7 +1327,7 @@ type DescribeBackupTasksResponse struct {
 
 func (s *PolardbService) DoPolardbDescribebackupTaskRequest(db_instance_id, job_id string) (PolardbBackupJob, error) {
 	// api: polardb - 2024-01-30 - DescribeBackups
-	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeBackupTasks", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeBackupTasks", "")
 	DescribeBackupTasksResponseObj := &DescribeBackupTasksResponse{}
 	var backup_job PolardbBackupJob
 	request.QueryParams["DBInstanceId"] = db_instance_id
@@ -1409,18 +1409,11 @@ type PolardbDescribebackupsResponse struct {
 
 func (s *PolardbService) DoPolardbDescribebackupsRequest(id string) (*PolardbbackupData, error) {
 	// api: polardb - 2024-01-30 - DescribeBackups
-	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeBackups", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeBackups", "")
 	PolardbDescribebackupsResponseObj := &PolardbDescribebackupsResponse{}
 	param := strings.Split(id, ":")
-	t, err := time.Parse("2006-01-02", param[0])
-	if err != nil {
-		fmt.Println("时间解析失败:", err)
-		return nil, err
-	}
-	end_time := t.AddDate(0, 0, 1)
-	request.QueryParams["DBInstanceId"] = param[1]
-	request.QueryParams["StartTime"] = t.Format("2006-01-02T15:04Z")
-	request.QueryParams["EndTime"] = end_time.Format("2006-01-02T15:04Z")
+	request.QueryParams["DBInstanceId"] = param[0]
+	request.QueryParams["BackupId"] = param[1]
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -1438,7 +1431,7 @@ func (s *PolardbService) DoPolardbDescribebackupsRequest(id string) (*Polardbbac
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBackups", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	for _, v := range PolardbDescribebackupsResponseObj.Items.Backup {
-		if fmt.Sprint(v.BackupId) == param[2] {
+		if fmt.Sprint(v.BackupId) == param[1] {
 			return &v, nil
 		}
 	}

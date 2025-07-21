@@ -20,6 +20,7 @@ func resourceAlibabacloudStackPolardbBackup() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Logical", "Physical", "Snapshot"}, false),
 			},
 
@@ -61,6 +62,7 @@ func resourceAlibabacloudStackPolardbBackup() *schema.Resource {
 			"db_instance_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 
 			"backup_end_time": {
@@ -77,12 +79,14 @@ func resourceAlibabacloudStackPolardbBackup() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Auto", "FullBackup"}, false),
 			},
 			"backup_strategy": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"instance", "db"}, false),
 			},
 			"meta_status": {
@@ -108,7 +112,7 @@ func resourceAlibabacloudStackPolardbBackup() *schema.Resource {
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackPolardbBackupCreate,
 		resourceAlibabacloudStackPolardbBackupRead,
-		resourceAlibabacloudStackPolardbBackupUpdate,
+		nil,
 		resourceAlibabacloudStackPolardbBackupDelete)
 	return resource
 }
@@ -135,7 +139,6 @@ func resourceAlibabacloudStackPolardbBackupCreate(d *schema.ResourceData, meta i
 	if v, ok := d.GetOk("backup_type"); ok {
 		request.QueryParams["BackupType"] = v.(string)
 	}
-	now := time.Now()
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
@@ -162,13 +165,13 @@ func resourceAlibabacloudStackPolardbBackupCreate(d *schema.ResourceData, meta i
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, fmt.Sprintf("%s:%s", db_instance_id, backup_jobid))
 	}
-	d.SetId(fmt.Sprintf("%s:%s:%s", now.Format("2006-01-02"), db_instance_id, object.BackupId))
+	d.SetId(fmt.Sprintf("%s:%s", db_instance_id, object.BackupId))
 	return nil
 }
 
-func resourceAlibabacloudStackPolardbBackupUpdate(d *schema.ResourceData, meta interface{}) error {
-	return nil
-}
+//func resourceAlibabacloudStackPolardbBackupUpdate(d *schema.ResourceData, meta interface{}) error {
+//	return nil
+//}
 
 func resourceAlibabacloudStackPolardbBackupRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
