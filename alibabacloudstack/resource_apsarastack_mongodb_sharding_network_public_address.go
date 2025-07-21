@@ -133,7 +133,7 @@ func resourceAlibabacloudStackMongodbShardingnetworkpublicaddressUpdate(d *schem
 	db_instance_id := parts[0]
 	node_id := parts[1]
 	if !d.IsNewResource() && d.HasChanges("network_address", "port") {
-		request := client.NewCommonRequest("POST", "Dds", "2022-11-21", "ModifyDBInstanceConnectionString", "")
+		request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "")
 		response, err := mongo_dbsharding_network_public_addressservice.DoDdsDescribeshardingnetworkaddressRequest(d.Id())
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_shardingnetworkpublicaddress", errmsgs.AlibabacloudStackSdkGoERROR)

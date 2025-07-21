@@ -38,12 +38,9 @@ func TestAccAlibabacloudStackMongodbShardingNetworkPublicAddress0(t *testing.T) 
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"db_instance_id": "${alibabacloudstack_mongodb_sharding_instance.default.id}",
 
 					"node_id": "${alibabacloudstack_mongodb_sharding_instance.default.mongo_list.0.node_id}",
-
-					// "instance_id": "${alibabacloudstack_mongodb_instance.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -58,25 +55,31 @@ func TestAccAlibabacloudStackMongodbShardingNetworkPublicAddress0(t *testing.T) 
 					}),
 				),
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"network_address": "test-pub",
 
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
+					"port": "3891",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
 
-			// 		"account_password": modify_passward,
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-
-			// 			"account_name": name,
-			// 		}),
-			// 	),
-			// },
+						"network_addresses.#":                 "1",
+						"network_addresses.0.network_address": CHECKSET,
+						"network_addresses.0.port":            "3891",
+						"network_addresses.0.node_id":         CHECKSET,
+						"network_addresses.0.role":            CHECKSET,
+						"network_addresses.0.ip_address":      CHECKSET,
+						"network_addresses.0.network_type":    CHECKSET,
+					}),
+				),
+			},
 
 			{
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"db_instance_id", "node_id"},
+				ImportStateVerifyIgnore: []string{"db_instance_id", "node_id", "port", "network_address"},
 			},
 		},
 	})
