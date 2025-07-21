@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"fmt"
 	"testing"
+	"time"
 )
 
 func TestAccAlibabacloudStackPolardbBackupsDataSource_basic(t *testing.T) {
@@ -10,6 +11,9 @@ func TestAccAlibabacloudStackPolardbBackupsDataSource_basic(t *testing.T) {
 	resourceId := "data.alibabacloudstack_polardb_backups.default"
 	name := fmt.Sprintf("tf-testAccPolardbBackups%v", rand)
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId, name, dataSourcePolardbBackupsDependence)
+	createTime := time.Now().UTC()
+	tomorrowTime := createTime.AddDate(0, 0, 1)
+	twoDayAgoTime := createTime.AddDate(0, 0, 2)
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
@@ -19,6 +23,27 @@ func TestAccAlibabacloudStackPolardbBackupsDataSource_basic(t *testing.T) {
 		fakeConfig: testAccConfig(map[string]interface{}{
 			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
 			"ids":            []string{"${alibabacloudstack_polardb_backup.default.backup_id}_fake"},
+		}),
+	}
+	startTimeConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"start_time":     createTime.Format("2006-01-02T15:04Z"),
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"start_time":     tomorrowTime.Format("2006-01-02T15:04Z"),
+			"end_time":       twoDayAgoTime.Format("2006-01-02T15:04Z"),
+		}),
+	}
+	endTimeConfig := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"end_time":       tomorrowTime.Format("2006-01-02T15:04Z"),
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"db_instance_id": "${alibabacloudstack_polardb_dbinstance.default.id}",
+			"end_time":       createTime.Format("2006-01-02T15:04Z"),
 		}),
 	}
 	var existDBbackupsMapFunc = func(rand int) map[string]string {
@@ -56,7 +81,7 @@ func TestAccAlibabacloudStackPolardbBackupsDataSource_basic(t *testing.T) {
 		fakeMapFunc:  fakeDBbackupsMapFunc,
 	}
 
-	DBbackupsCheckInfo.dataSourceTestCheck(t, rand, idsConf)
+	DBbackupsCheckInfo.dataSourceTestCheck(t, rand, idsConf, startTimeConf, endTimeConfig)
 }
 
 func dataSourcePolardbBackupsDependence(name string) string {

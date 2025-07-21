@@ -136,9 +136,10 @@ func dataSourceAlibabacloudStackPolardbBackups() *schema.Resource {
 func dataSourceAlibabacloudStackPolardbBackupsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	polardbbackup_policyservice := PolardbService{client}
-	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeBackups", "")
+	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeBackups", "")
 	PolardbDescribebackupsResponseObj := &PolardbDescribebackupsResponse{}
 	request.QueryParams["DBInstanceId"] = d.Get("db_instance_id").(string)
+	request.QueryParams["PageSize"] = "100"
 	now := time.Now().UTC()
 	if v, ok := d.GetOk("start_time"); ok {
 		request.QueryParams["StartTime"] = v.(string)
