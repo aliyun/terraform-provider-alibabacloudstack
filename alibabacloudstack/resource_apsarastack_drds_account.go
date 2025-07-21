@@ -9,36 +9,28 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackDrdsAccount() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 
-			"account_type": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+			"instance_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 
-			"db_privileges": {
-				Type:     schema.TypeList,
+			"drds_account_name": {
+				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
+			},
 
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-
-						"db_name": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-
-						"privilege": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
+			"host": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 
 			"description": {
@@ -46,25 +38,34 @@ func resourceAlibabacloudStackDrdsAccount() *schema.Resource {
 				Optional: true,
 			},
 
-			"drds_account_name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-
-			"host": {
-				Type:     schema.TypeString,
-				Optional: true,
+			"account_type": {
+				Type:     schema.TypeInt,
 				Computed: true,
 			},
-
-			"instance_id": {
-				Type:     schema.TypeString,
-				Required: true,
+			"password": {
+				Type:      schema.TypeString,
+				Required:  true,
+				Sensitive: true,
 			},
 
-			"password": {
-				Type:     schema.TypeString,
+			"db_privileges": {
+				Type:     schema.TypeSet,
 				Required: true,
+				MinItems: 1,
+
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"db_name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"privilege": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"R", "RW", "DDL", "DML"}, false),
+						},
+					},
+				},
 			},
 		},
 	}
@@ -75,71 +76,28 @@ func resourceAlibabacloudStackDrdsAccount() *schema.Resource {
 func resourceAlibabacloudStackDrdsAccountCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	// api: Drds - 2019-01-23 - CreateInstanceAccount
-	request := client.NewCommonRequest("POST", "Drds", "2019-01-23", "CreateInstanceAccount", "")
-	DrdsCreateinstanceaccountResponse := DrdsCreateinstanceaccountResponse{}
-
-	//调用request_params_handler
-
-	if v, ok := d.GetOk("db_privileges"); ok {
-		db_privilegesList := v.([]interface{})
-		db_privilegesValues := make([]map[string]interface{}, 0)
-		for _, item := range db_privilegesList {
-			itemMap := item.(map[string]interface{})
-			item_data := make(map[string]interface{})
-
-			if v, ok := itemMap["db_name"]; ok && v != "" {
-				item_data["DbPrivilege[*].DbName"] = v.(string)
-			}
-
-			if v, ok := itemMap["privilege"]; ok && v != "" {
-				item_data["DbPrivilege[*].Privilege"] = v.(string)
-			}
-
-			db_privilegesValues = append(db_privilegesValues, item_data)
-		}
-		data, _ := json.Marshal(db_privilegesValues)
-		request.QueryParams["DbPrivileges"] = string(data)
+	reqQuery := map[string]interface{}{
+		"DrdsInstanceId": d.Get("instance_id").(string),
+		"AccountName":    d.Get("drds_account_name").(string),
+		"Password":       d.Get("password").(string),
 	}
 
-	if v, ok := d.GetOk("drds_account_name"); ok {
-		request.QueryParams["AccountName"] = v.(string)
-	} else {
-		return fmt.Errorf("DrdsAccountName is required")
+	dbPrivileges := []map[string]string{}
+	for _, d := range d.Get("db_privileges").(*schema.Set).List() {
+		dbPrivilege := d.(map[string]interface{})
+		dbPrivileges = append(dbPrivileges, map[string]string{
+			"DbName":    dbPrivilege["db_name"].(string),
+			"Privilege": dbPrivilege["privilege"].(string),
+		})
 	}
+	reqQuery["DbPrivilege"] = dbPrivileges
 
-	if v, ok := d.GetOk("instance_id"); ok {
-		request.QueryParams["DrdsInstanceId"] = v.(string)
-	} else {
-		return fmt.Errorf("InstanceId is required")
-	}
-
-	if v, ok := d.GetOk("password"); ok {
-		request.QueryParams["Password"] = v.(string)
-	} else {
-		return fmt.Errorf("Password is required")
-	}
-
-	bresponse, err := client.ProcessCommonRequest(request)
+	_, err := client.DoTeaRequest("POST", "Drds", "2019-01-23", "CreateInstanceAccount", "", nil, reqQuery, nil)
 	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_account", "CreateInstanceAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return err
 	}
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsCreateinstanceaccountResponse)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_drds_account", "CreateInstanceAccount", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	drds_account_name := d.Get("drds_account_name").(string)
-
-	instance_id := d.Get("instance_id").(string)
-
-	d.SetId(fmt.Sprintf("%s", drds_account_name+"_"+instance_id))
+	d.SetId(fmt.Sprintf("%s:%s@%%", d.Get("instance_id").(string), d.Get("drds_account_name").(string)))
 	return resourceAlibabacloudStackDrdsAccountUpdate(d, meta)
 
 }
@@ -147,53 +105,13 @@ func resourceAlibabacloudStackDrdsAccountCreate(d *schema.ResourceData, meta int
 func resourceAlibabacloudStackDrdsAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	// DrdsAccountName
-
-	// InstanceId
-
-	// Password
-
-	// api: Drds - 2019-01-23 - ChangeAccountPassword
-	if d.HasChanges("password") {
-		request := client.NewCommonRequest("POST", "Drds", "2019-01-23", "ChangeAccountPassword", "")
-		DrdsChangeaccountpasswordResponse := DrdsChangeaccountpasswordResponse{}
-
-		if v, ok := d.GetOk("drds_account_name"); ok {
-			request.QueryParams["AccountName"] = v.(string)
-		} else {
-			return fmt.Errorf("DrdsAccountName is required")
-		}
-
-		if v, ok := d.GetOk("instance_id"); ok {
-			request.QueryParams["DrdsInstanceId"] = v.(string)
-		} else {
-			return fmt.Errorf("InstanceId is required")
-		}
-
-		if v, ok := d.GetOk("password"); ok {
-			request.QueryParams["Password"] = v.(string)
-		} else {
-			return fmt.Errorf("Password is required")
-		}
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_drds_account", "ChangeAccountPassword", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsChangeaccountpasswordResponse)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_drds_account", "ChangeAccountPassword", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
+	var instanceId, drdsAccountName string
+	if parts, err := ParseResourceId(d.Id(), 2); err != nil {
+		return err
+	} else {
+		instanceId = parts[0]
+		drdsAccountName = parts[1]
 	}
-
 	// Description
 
 	// DrdsAccountName
@@ -201,27 +119,13 @@ func resourceAlibabacloudStackDrdsAccountUpdate(d *schema.ResourceData, meta int
 	// InstanceId
 
 	// api: Drds - 2019-01-23 - ModifyAccountDescription
-	if d.HasChanges("description") {
+	if d.HasChanges("description") && d.Get("description").(string) != "" {
 		request := client.NewCommonRequest("POST", "Drds", "2019-01-23", "ModifyAccountDescription", "")
 		DrdsModifyaccountdescriptionResponse := DrdsModifyaccountdescriptionResponse{}
 
-		if v, ok := d.GetOk("description"); ok {
-			request.QueryParams["Description"] = v.(string)
-		} else {
-			return fmt.Errorf("Description is required")
-		}
-
-		if v, ok := d.GetOk("drds_account_name"); ok {
-			request.QueryParams["AccountName"] = v.(string)
-		} else {
-			return fmt.Errorf("DrdsAccountName is required")
-		}
-
-		if v, ok := d.GetOk("instance_id"); ok {
-			request.QueryParams["DrdsInstanceId"] = v.(string)
-		} else {
-			return fmt.Errorf("InstanceId is required")
-		}
+		request.QueryParams["Description"] = d.Get("description").(string)
+		request.QueryParams["AccountName"] = drdsAccountName
+		request.QueryParams["DrdsInstanceId"] = instanceId
 
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
@@ -241,49 +145,25 @@ func resourceAlibabacloudStackDrdsAccountUpdate(d *schema.ResourceData, meta int
 
 	}
 
-	// DbPrivileges
+	if d.IsNewResource() {
+		return nil
+	}
 
 	// DrdsAccountName
 
 	// InstanceId
 
-	// api: Drds - 2019-01-23 - ModifyAccountPrivilege
-	if d.HasChanges("db_privileges") {
-		request := client.NewCommonRequest("POST", "Drds", "2019-01-23", "ModifyAccountPrivilege", "")
-		DrdsModifyaccountprivilegeResponse := DrdsModifyaccountprivilegeResponse{}
+	// Password
 
-		if v, ok := d.GetOk("db_privileges"); ok {
-			db_privilegesList := v.([]interface{})
-			db_privilegesValues := make([]map[string]interface{}, 0)
-			for _, item := range db_privilegesList {
-				itemMap := item.(map[string]interface{})
-				item_data := make(map[string]interface{})
+	// api: Drds - 2019-01-23 - ChangeAccountPassword
+	if d.HasChanges("password") {
+		request := client.NewCommonRequest("POST", "Drds", "2019-01-23", "ChangeAccountPassword", "")
+		DrdsChangeaccountpasswordResponse := DrdsChangeaccountpasswordResponse{}
 
-				if v, ok := itemMap["db_name"]; ok && v != "" {
-					item_data["DbPrivilege[*].DbName"] = v.(string)
-				}
+		request.QueryParams["AccountName"] = drdsAccountName
+		request.QueryParams["DrdsInstanceId"] = instanceId
 
-				if v, ok := itemMap["privilege"]; ok && v != "" {
-					item_data["DbPrivilege[*].Privilege"] = v.(string)
-				}
-
-				db_privilegesValues = append(db_privilegesValues, item_data)
-			}
-			data, _ := json.Marshal(db_privilegesValues)
-			request.QueryParams["DbPrivileges"] = string(data)
-		}
-
-		if v, ok := d.GetOk("drds_account_name"); ok {
-			request.QueryParams["AccountName"] = v.(string)
-		} else {
-			return fmt.Errorf("DrdsAccountName is required")
-		}
-
-		if v, ok := d.GetOk("instance_id"); ok {
-			request.QueryParams["DrdsInstanceId"] = v.(string)
-		} else {
-			return fmt.Errorf("InstanceId is required")
-		}
+		request.QueryParams["Password"] = d.Get("password").(string)
 
 		bresponse, err := client.ProcessCommonRequest(request)
 		if err != nil {
@@ -292,15 +172,45 @@ func resourceAlibabacloudStackDrdsAccountUpdate(d *schema.ResourceData, meta int
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_drds_account", "ModifyAccountPrivilege", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_drds_account", "ChangeAccountPassword", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsModifyaccountprivilegeResponse)
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsChangeaccountpasswordResponse)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_drds_account", "ModifyAccountPrivilege", errmsgs.AlibabacloudStackSdkGoERROR)
+				"alibabacloudstack_drds_account", "ChangeAccountPassword", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
+	}
+
+	// DbPrivileges
+
+	// DrdsAccountName
+
+	// InstanceId
+
+	// api: Drds - 2019-01-23 - ModifyAccountPrivilege
+	if d.HasChanges("db_privileges") {
+		reqQuery := map[string]interface{}{
+			"DrdsInstanceId": d.Get("instance_id").(string),
+			"AccountName":    d.Get("drds_account_name").(string),
+			"Password":       d.Get("password").(string),
+		}
+
+		dbPrivileges := []map[string]string{}
+		for _, d := range d.Get("db_privileges").(*schema.Set).List() {
+			dbPrivilege := d.(map[string]interface{})
+			dbPrivileges = append(dbPrivileges, map[string]string{
+				"DbName":    dbPrivilege["db_name"].(string),
+				"Privilege": dbPrivilege["privilege"].(string),
+			})
+		}
+		reqQuery["DbPrivilege"] = dbPrivileges
+
+		_, err := client.DoTeaRequest("POST", "Drds", "2019-01-23", "ModifyAccountPrivilege", "", nil, reqQuery, nil)
+		if err != nil {
+			return err
+		}
 	}
 
 	return resourceAlibabacloudStackDrdsAccountRead(d, meta)
@@ -309,18 +219,31 @@ func resourceAlibabacloudStackDrdsAccountUpdate(d *schema.ResourceData, meta int
 func resourceAlibabacloudStackDrdsAccountRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	drdsaccountservice := DrdsService{client}
-	response, err := drdsaccountservice.DoDrdsDescribeinstanceaccountsRequest(d.Id())
+	account, err := drdsaccountservice.DescribeDrdsAccount(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_drds_account", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	data := response.InstanceAccounts.InstanceAccount[0]
-	d.Set("account_type", data.AccountType)
+	if parts, err := ParseResourceId(d.Id(), 2); err != nil {
+		return err
+	} else {
+		d.Set("instance_id", parts[0])
+	}
 
-	d.Set("description", data.Description)
+	d.Set("description", account.Description)
+	d.Set("drds_account_name", account.AccountName)
 
-	d.Set("drds_account_name", data.AccountName)
+	dbPrivileges := []map[string]string{}
+	for _, d := range account.DbPrivileges.DbPrivilege {
+		dbPrivileges = append(dbPrivileges, map[string]string{
+			"db_name":   d.DbName,
+			"privilege": d.Privilege,
+		})
+	}
 
-	d.Set("host", data.Host)
+	d.Set("db_privileges", dbPrivileges)
+
+	d.Set("host", account.Host)
+	d.Set("account_type", account.AccountType)
 
 	return nil
 }
@@ -331,19 +254,13 @@ func resourceAlibabacloudStackDrdsAccountDelete(d *schema.ResourceData, meta int
 	request := client.NewCommonRequest("POST", "Drds", "2019-01-23", "RemoveInstanceAccount", "")
 	DrdsRemoveinstanceaccountResponse := DrdsRemoveinstanceaccountResponse{}
 
+	parts, err := ParseResourceId(d.Id(), 2)
+	if err != nil {
+		return err
+	}
 	//调用request_params_handler
-
-	if v, ok := d.GetOk("drds_account_name"); ok {
-		request.QueryParams["AccountName"] = v.(string)
-	} else {
-		return fmt.Errorf("DrdsAccountName is required")
-	}
-
-	if v, ok := d.GetOk("instance_id"); ok {
-		request.QueryParams["DrdsInstanceId"] = v.(string)
-	} else {
-		return fmt.Errorf("InstanceId is required")
-	}
+	request.QueryParams["DrdsInstanceId"] = parts[0]
+	request.QueryParams["AccountName"] = parts[1]
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {

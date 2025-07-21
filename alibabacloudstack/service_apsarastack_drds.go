@@ -306,32 +306,41 @@ func (s *DrdsService) DoDrdsDescribedrdsdbsRequest(id string) (*DrdsDescribedrds
 	return DrdsDescribedrdsdbsResponse, nil
 }
 
+type DrdsDescribeinstanceAccount struct {
+	DbPrivileges struct {
+					DbPrivilege []struct {
+						DbName    string `json:"DbName"`
+						Privilege string `json:"Privilege"`
+					} `json:"DbPrivilege"`
+				} `json:"DbPrivileges"`
+				AccountName string `json:"AccountName"`
+				Host        string `json:"Host"`
+				AccountType int    `json:"AccountType"`
+				Description string `json:"Description"`
+}
+
 type DrdsDescribeinstanceaccountsResponse struct {
 	InstanceAccounts struct {
-		InstanceAccount []struct {
-			DbPrivileges struct {
-				DbPrivilege []struct {
-					DbName    string `json:"DbName"`
-					Privilege string `json:"Privilege"`
-				} `json:"DbPrivilege"`
-			} `json:"DbPrivileges"`
-			AccountName string `json:"AccountName"`
-			Host        string `json:"Host"`
-			AccountType int    `json:"AccountType"`
-			Description string `json:"Description"`
-		} `json:"InstanceAccount"`
+		InstanceAccount []DrdsDescribeinstanceAccount `json:"InstanceAccount"`
 	} `json:"InstanceAccounts"`
 	RequestId string `json:"RequestId"`
 	Success   bool   `json:"Success"`
 }
 
-func (s *DrdsService) DoDrdsDescribeinstanceaccountsRequest(id string) (*DrdsDescribeinstanceaccountsResponse, error) {
+func (s *DrdsService) DescribeDrdsAccount(id string) (*DrdsDescribeinstanceAccount, error) {
+	var instanceId, drdsAccountName string
+	if parts, err := ParseResourceId(id, 2); err != nil {
+		return nil, err
+	} else {
+		instanceId = parts[0]
+		drdsAccountName = parts[1]
+	}
 	// api: Drds - 2019-01-23 - DescribeInstanceAccounts
 	request := s.client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeInstanceAccounts", "")
-	DrdsDescribeinstanceaccountsResponse := &DrdsDescribeinstanceaccountsResponse{}
+	drdsDescribeinstanceaccountsResponse := &DrdsDescribeinstanceaccountsResponse{}
 
 	//调用request_params_handler
-	request.QueryParams["DrdsInstanceId"] = id
+	request.QueryParams["DrdsInstanceId"] = instanceId
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	if err != nil {
@@ -341,12 +350,17 @@ func (s *DrdsService) DoDrdsDescribeinstanceaccountsRequest(id string) (*DrdsDes
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeInstanceAccounts", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsDescribeinstanceaccountsResponse)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &drdsDescribeinstanceaccountsResponse)
 
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeInstanceAccounts", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	return DrdsDescribeinstanceaccountsResponse, nil
+	for _, account := range drdsDescribeinstanceaccountsResponse.InstanceAccounts.InstanceAccount{
+		if account.AccountName == drdsAccountName {
+			return &account, nil
+		}
+	}
+	return nil, errmsgs.GetNotFoundErrorFromString(fmt.Sprintf("Can't Found Account %s in Drds %s", drdsAccountName, instanceId))
 }
 
 func (s *DrdsService) DescribeDrdsRdsInstance(id string) (map[string]interface{}, error) {
