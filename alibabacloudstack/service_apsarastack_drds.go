@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/drds"
@@ -333,7 +334,8 @@ func (s *DrdsService) DescribeDrdsAccount(id string) (*DrdsDescribeinstanceAccou
 		return nil, err
 	} else {
 		instanceId = parts[0]
-		drdsAccountName = parts[1]
+		p2 := strings.Split(parts[1], "@")
+		drdsAccountName = p2[0]
 	}
 	// api: Drds - 2019-01-23 - DescribeInstanceAccounts
 	request := s.client.NewCommonRequest("POST", "Drds", "2019-01-23", "DescribeInstanceAccounts", "")

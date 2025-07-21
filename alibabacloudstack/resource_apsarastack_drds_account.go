@@ -98,7 +98,7 @@ func resourceAlibabacloudStackDrdsAccountCreate(d *schema.ResourceData, meta int
 	}
 
 	d.SetId(fmt.Sprintf("%s:%s@%%", d.Get("instance_id").(string), d.Get("drds_account_name").(string)))
-	return resourceAlibabacloudStackDrdsAccountUpdate(d, meta)
+	return nil
 
 }
 
@@ -213,7 +213,7 @@ func resourceAlibabacloudStackDrdsAccountUpdate(d *schema.ResourceData, meta int
 		}
 	}
 
-	return resourceAlibabacloudStackDrdsAccountRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackDrdsAccountRead(d *schema.ResourceData, meta interface{}) error {

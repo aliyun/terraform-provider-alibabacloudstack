@@ -160,7 +160,7 @@ func dataSourceAlibabacloudStackDrdsAccountsRead(d *schema.ResourceData, meta in
 			}
 		}
 		
-		if accountType >=0 && accountType != data.AccountType{
+		if accountType != -1 && accountType != data.AccountType{
 			continue
 		}
 		i := map[string]interface{}{

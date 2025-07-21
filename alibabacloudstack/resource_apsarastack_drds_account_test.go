@@ -18,10 +18,10 @@ func init() {
 }
 
 func TestAccAlibabacloudStackDrdsAccount_basic0(t *testing.T) {
-	var v *DrdsDescribedrdsdbResponse
+	var v *DrdsDescribeinstanceAccount
 
 	resourceId := "alibabacloudstack_drds_account.default"
-	ra := resourceAttrInit(resourceId, drdsDatabasebasicMap)
+	ra := resourceAttrInit(resourceId, drdsAccountbasicMap)
 
 	serviceFunc := func() interface{} {
 		return &DrdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
