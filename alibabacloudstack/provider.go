@@ -329,6 +329,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_dns_domains":                               dataSourceAlibabacloudStackDnsDomains(),
 		"alibabacloudstack_drds_instances":                            dataSourceAlibabacloudStackDRDSInstances(),
 		"alibabacloudstack_drds_rds_instances":                        dataSourceAlibabacloudStackDrdsRdsInstances(),
+		"alibabacloudstack_drds_databases":                            dataSourceAlibabacloudStackDrdsAccounts(),
 		"alibabacloudstack_dms_enterprise_instances":                  dataSourceAlibabacloudStackDmsEnterpriseInstances(),
 		"alibabacloudstack_dmsenterprise_instances":                   dataSourceAlibabacloudStackDmsEnterpriseInstances(),
 		"alibabacloudstack_dms_enterprise_users":                      dataSourceAlibabacloudStackDmsEnterpriseUsers(),
