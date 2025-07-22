@@ -2,9 +2,11 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"sort"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudStackDrdsInstanceSpecifications() *schema.Resource {
@@ -37,6 +39,12 @@ func dataSourceAlibabacloudStackDrdsInstanceSpecifications() *schema.Resource {
 			"memory": {
 				Type:     schema.TypeInt,
 				Optional: true,
+			},
+			"sorted_by": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"CPU", "Memory"}, false),
 			},
 			// Computed values.
 			"specifications": {
@@ -142,13 +150,26 @@ func dataSourceAlibabacloudStackDrdsInstanceSpecificationsRead(d *schema.Resourc
 			"name":   name,
 			"cpu":    cpu,
 			"memory": memory,
-			"series": data["seriesId	"],
+			"series": data["seriesId"],
 		})
 		existedId[id] = ""
 		ids = append(ids, id)
 		names = append(names, name)
 	}
 
+	sortedBy := d.Get("sorted_by").(string)
+	if sortedBy != "" {
+		sort.SliceStable(specifications, func(i, j int) bool {
+			switch sortedBy {
+			case "CPU":
+				return specifications[i]["cpu"].(int64) < specifications[j]["cpu"].(int64)
+			case "Memory":
+				return specifications[i]["memory"].(int64) < specifications[j]["memory"].(int64)
+			}
+			return false
+		})
+	}
+	
 	d.Set("ids", ids)
 	d.Set("names", names)
 	d.Set("specifications", specifications)

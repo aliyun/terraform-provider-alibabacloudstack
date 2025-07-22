@@ -13,8 +13,15 @@ func TestAccAlibabacloudStackDrdsInstanceSpecificationsDataSource(t *testing.T) 
 		fmt.Sprintf("tf_testAccDrdsInstanceSpecificationsDataSource_%d", rand),
 		dataSourceDrdsInstanceSpecificationsConfigDependence)
 
-	generationConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{}),
+	cpuSortConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"sorted_by": "CPU",
+		}),
+	}
+	memorySortConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"sorted_by": "Memory",
+		}),
 	}
 
 	seriesConf := dataSourceTestAccConfig{
@@ -65,11 +72,12 @@ func TestAccAlibabacloudStackDrdsInstanceSpecificationsDataSource(t *testing.T) 
 
 	var existDrdsInstanceSpecificationsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":                 CHECKSET,
-			"ids.0":                 CHECKSET,
-			"specifications.#":      CHECKSET,
-			"specifications.0.id":   CHECKSET,
-			"specifications.0.name": CHECKSET,
+			"ids.#":                   CHECKSET,
+			"ids.0":                   CHECKSET,
+			"specifications.#":        CHECKSET,
+			"specifications.0.id":     CHECKSET,
+			"specifications.0.name":   CHECKSET,
+			"specifications.0.series": CHECKSET,
 		}
 	}
 
@@ -86,7 +94,7 @@ func TestAccAlibabacloudStackDrdsInstanceSpecificationsDataSource(t *testing.T) 
 		fakeMapFunc:  fakeDrdsInstanceSpecificationsMapFunc,
 	}
 
-	DrdsInstanceSpecificationsCheckInfo.dataSourceTestCheck(t, rand, generationConf, seriesConf, idsConf, namesConf, cpuConf, memoryConf)
+	DrdsInstanceSpecificationsCheckInfo.dataSourceTestCheck(t, rand, cpuSortConf, memorySortConf, seriesConf, idsConf, namesConf, cpuConf, memoryConf)
 }
 
 func dataSourceDrdsInstanceSpecificationsConfigDependence(name string) string {

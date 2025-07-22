@@ -36,6 +36,7 @@ data "alibabacloudstack_drds_instance_specifications" "default {
 * `series` - (可选) 筛选特定例规格系列的结果。
 * `cpu` - (可选) 筛选特定数量CPU核心的结果。
 * `memory` - (可选) 筛选特定内存大小(GB)的结果。
+* `sorted_by` - (可选，强制更新) 排序模式，有效值：`CPU`, `Memory`。
 
 ## 属性说明
 

@@ -36,6 +36,7 @@ The following arguments are supported:
 * `series` - (Optional)Filter the results to a specific drds series.
 * `cpu` - (Optional) Filter the results to a specific number of cpu cores.
 * `memory` - (Optional) Filter the results to a specific memory size in GB.
+* `sorted_by` - (Optional, ForceNew) Sort mode, valid values: `CPU`, `Memory`.
 
 ## Attributes Reference
 
