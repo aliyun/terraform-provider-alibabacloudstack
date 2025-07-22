@@ -1,6 +1,7 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -11,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceAlibabacloudStackDRDSInstance() *schema.Resource {
+func resourceAlibabacloudStackDrdsInstance() *schema.Resource {
 	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(10 * time.Minute),
@@ -20,38 +21,36 @@ func resourceAlibabacloudStackDRDSInstance() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"description": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringLenBetween(1, 129),
-			},
 			"zone_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
+			"instance_charge_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{string(PostPaid), string(PrePaid)}, false),
+				ForceNew:     true,
+				Default:      PostPaid,
+			},
 			"specification": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
-			"instance_charge_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{string(PostPaid), string(PrePaid)}, false),
-				ForceNew: true,
-				Default:  PostPaid,
+			"description": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringLenBetween(1, 129),
 			},
 			"vswitch_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 			"instance_series": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"drds.sn2.4c16g", "drds.sn2.8c32g", "drds.sn2.16c64g", "drds.sn1.32c64g"}, false),
-				ForceNew:     true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "The `instance_series` property is no longer a required field. Selecting the `specification` will automatically retrieve the corresponding value.",
 			},
 		},
 	}
@@ -62,30 +61,40 @@ func resourceAlibabacloudStackDRDSInstance() *schema.Resource {
 func resourceAlibabacloudStackDRDSInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	drdsService := DrdsService{client}
-	
+
 	action := "CreateDrdsInstance"
-	
-	reqQuery := map[string]interface{}{
-		"Description" : d.Get("description").(string),
-		"Type" : "PRIVATE",
-		"ZoneId" : d.Get("zone_id").(string),
-		"Specification" : d.Get("specification").(string),
-		"PayType" : d.Get("instance_charge_type").(string),
-		"VswitchId" : d.Get("vswitch_id").(string),
-		"InstanceSeries" : d.Get("instance_series").(string),
-		"ClientToken" : buildClientToken(action),
-		"Quantity" : "1",
+
+	var series string
+	if v, err := drdsService.DescribeInstanceSpecification(d.Get("specification").(string)); err != nil {
+		return err
+	} else {
+		series = v["seriesId"].(string)
 	}
-	
-	if reqQuery["VswitchId"] != "" {
+
+	reqQuery := map[string]interface{}{
+		"Type":           "PRIVATE",
+		"InstanceSeries": series,
+		"Specification":  d.Get("specification").(string),
+		"Description":    d.Get("description").(string),
+		"Quantity":       "1",
+		"ClientToken":    buildClientToken(action),
+		"ZoneId":         d.Get("zone_id").(string),
+		"PayType":        d.Get("instance_charge_type").(string),
+	}
+
+	if v, ok := d.GetOk("vswitch_id"); ok && v.(string) != "" {
 		vpcService := VpcService{client}
-		vsw, err := vpcService.DescribeVSwitch(reqQuery["VswitchId"].(string))
+		vsw, err := vpcService.DescribeVSwitch(v.(string))
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
 		reqQuery["VpcId"] = vsw.VpcId
+		reqQuery["VswitchId"] = vsw.VpcId
+		reqQuery["InstanceNetworkType"] = "VPC"
+	} else {
+		reqQuery["InstanceNetworkType"] = "CLASSIC"
 	}
-	
+
 	if reqQuery["PayType"] == string(PostPaid) {
 		reqQuery["PayType"] = "drdsPost"
 	}
@@ -93,7 +102,12 @@ func resourceAlibabacloudStackDRDSInstanceCreate(d *schema.ResourceData, meta in
 		reqQuery["PayType"] = "drdsPre"
 	}
 	
-	response ,err := client.DoTeaRequest("POST", "Drds", "2019-01-23", action, "", nil, reqQuery, nil )
+	if v, ok := d.GetOk("master_instance_id"); ok {
+		// Only work for Readonly Instance
+		reqQuery["MasterInstId"] = v
+	}
+
+	response, err := client.DoTeaRequest("POST", "Drds", "2019-01-23", action, "", nil, reqQuery, nil)
 	if err != nil {
 		return err
 	}
@@ -115,14 +129,16 @@ func resourceAlibabacloudStackDRDSInstanceCreate(d *schema.ResourceData, meta in
 func resourceAlibabacloudStackDRDSInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	drdsService := DrdsService{client}
-
-	configItem := make(map[string]string)
+	
+	if d.IsNewResource() {
+		return nil
+	}
+	
 	if d.HasChange("description") {
 		request := drds.CreateModifyDrdsInstanceDescriptionRequest()
 		client.InitRpcRequest(*request.RpcRequest)
 		request.DrdsInstanceId = d.Id()
 		request.Description = d.Get("description").(string)
-		configItem["description"] = request.Description
 
 		raw, err := client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
 			return drdsClient.ModifyDrdsInstanceDescription(request)
@@ -138,14 +154,51 @@ func resourceAlibabacloudStackDRDSInstanceUpdate(d *schema.ResourceData, meta in
 		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	}
 
-	if err := drdsService.WaitDrdsInstanceConfigEffect(
-		d.Id(), configItem, d.Timeout(schema.TimeoutUpdate)); err != nil {
-		return errmsgs.WrapError(err)
+	if d.HasChange("specification") {
+		specification := d.Get("specification").(string)
+		var series, chargeType string
+		if v, err := drdsService.DescribeInstanceSpecification(d.Get("specification").(string)); err != nil {
+			return err
+		} else {
+			series = v["seriesId"].(string)
+		}
+		if d.Get("instance_charge_type").(string) == string(PostPaid) {
+			chargeType = "POSTPAY"
+		} else {
+			chargeType = "PREPAY"
+		}
+		
+		reqQuery := map[string]interface{}{
+			"commodityCode":"drdsPost",
+			"data": map[string]interface{}{
+				"drds_instance_type":"private",
+				"orderType":"UPGRADE",
+				"drds_region":client.RegionId,
+				"drds_zone":d.Get("zone_id").(string),
+				"instId":d.Id(),
+				"drds_instance_series":series,
+				"drds_instance_spec":specification,
+				"chargeType":chargeType,
+			},
+		}
+		orders, err := json.Marshal(reqQuery)
+		if err != nil {
+			return err
+		}
+		reqQuery = map[string]interface{}{
+			"DrdsInstanceId":d.Id(),
+			"Orders": string(orders),
+		}
+		if _, err := client.DoTeaRequest("POST", "Drds", "2019-01-23", "UpgradeDrdsInstance", "", nil, reqQuery, nil); err != nil {
+			return err
+		}
+		stateConf := BuildStateConf([]string{"CHANGE_GRADE"}, []string{"RUN"}, d.Timeout(schema.TimeoutUpdate), 3*time.Second, drdsService.DrdsInstanceStateRefreshFunc(d.Id(), []string{}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+			
 	}
-	stateConf := BuildStateConf([]string{}, []string{"RUN"}, d.Timeout(schema.TimeoutUpdate), 3*time.Second, drdsService.DrdsInstanceStateRefreshFunc(d.Id(), []string{}))
-	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	}
+	
 
 	return nil
 }
@@ -165,6 +218,13 @@ func resourceAlibabacloudStackDRDSInstanceRead(d *schema.ResourceData, meta inte
 	data := object.Data
 	d.Set("zone_id", data.ZoneId)
 	d.Set("description", data.Description)
+	d.Set("specification", data.InstanceSpec)
+	
+	if data.CommodityCode == "drdsPost" {
+		d.Set("instance_charge_type", string(PostPaid))
+	} else if data.CommodityCode == "drdsPre" {
+		d.Set("instance_charge_type", string(PrePaid))
+	}
 
 	return nil
 }

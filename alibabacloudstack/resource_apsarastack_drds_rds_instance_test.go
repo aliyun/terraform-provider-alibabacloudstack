@@ -13,7 +13,7 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_drds_rds", &resource.Sweeper{
 		Name: "alibabacloudstack_drds_rds",
-		F:    testSweepDRDSInstances,
+		F:    testSweepDrdsInstances,
 	})
 }
 

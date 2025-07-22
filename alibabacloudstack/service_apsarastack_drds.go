@@ -437,3 +437,23 @@ func (s *DrdsService) PrivateRdsStateRefreshFunc(id string, failStates []string)
 		return object, status, nil
 	}
 }
+
+func (s *DrdsService) DescribeInstanceSpecification(id string)(map[string]interface{},error){
+	reqQuery := map[string]interface{}{
+			"status":       "Available",
+			"resourceType": "DRDS",
+			"spec": id,
+		}
+		reqHeader := map[string]string{
+			"x-acs-territory": "US",
+			"x-acs-lang":      "EN",
+		}
+		response, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select", reqHeader, reqQuery, nil)
+		if err != nil {
+			return nil, err
+		}
+		if len(response["data"].([]interface{})) == 0 {
+			return nil, errmsgs.GetNotFoundErrorFromString("Can not find drds specificaiont " + id)
+		}
+		return response["data"].([]interface{})[0].(map[string]interface{}), nil
+}

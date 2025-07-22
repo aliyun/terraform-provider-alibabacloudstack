@@ -18,11 +18,11 @@ import (
 func init() {
 	resource.AddTestSweepers("alibabacloudstack_drds_instance", &resource.Sweeper{
 		Name: "alibabacloudstack_drds_instance",
-		F:    testSweepDRDSInstances,
+		F:    testSweepDrdsInstances,
 	})
 }
 
-func testSweepDRDSInstances(region string) error {
+func testSweepDrdsInstances(region string) error {
 	rawClient, err := sharedClientForRegion(region)
 	if err != nil {
 		return fmt.Errorf("error getting AlibabacloudStack client: %s", err)
@@ -97,7 +97,7 @@ func testSweepDRDSInstances(region string) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackDRDSInstance_Vpc(t *testing.T) {
+func TestAccAlibabacloudStackDrdsInstance_Vpc(t *testing.T) {
 	var v *drds.DescribeDrdsInstanceResponse
 
 	resourceId := "alibabacloudstack_drds_instance.default"
@@ -113,7 +113,7 @@ func TestAccAlibabacloudStackDRDSInstance_Vpc(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-testacc%sDrdsdatabase-%d", defaultRegionToTest, rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDRDSInstanceConfigDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDrdsInstanceConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -128,10 +128,9 @@ func TestAccAlibabacloudStackDRDSInstance_Vpc(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description":          "${var.name}",
-					"zone_id":              "${alibabacloudstack_vswitch.default.availability_zone}",
-					"instance_series":      "${var.instance_series}",
+					"zone_id":              "${alibabacloudstack_vpc_vswitch.default.availability_zone}",
 					"instance_charge_type": "PostPaid",
-					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
+					"vswitch_id":           "${alibabacloudstack_vpc_vswitch.default.id}",
 					"specification":        "drds.sn2.4c16g.8C32G",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -143,7 +142,7 @@ func TestAccAlibabacloudStackDRDSInstance_Vpc(t *testing.T) {
 			{
 				ResourceName:      resourceId,
 				ImportState:       true,
-				ImportStateVerify: false,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -169,10 +168,10 @@ func TestAccAlibabacloudStackDRDSInstance_Vpc(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackDRDSInstance_Multi(t *testing.T) {
+func TestAccAlibabacloudStackDrdsInstance_Classic(t *testing.T) {
 	var v *drds.DescribeDrdsInstanceResponse
 
-	resourceId := "alibabacloudstack_drds_instance.default.2"
+	resourceId := "alibabacloudstack_drds_instance.default"
 	ra := resourceAttrInit(resourceId, drdsInstancebasicMap)
 
 	serviceFunc := func() interface{} {
@@ -185,7 +184,7 @@ func TestAccAlibabacloudStackDRDSInstance_Multi(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-testacc%sDrdsdatabase-%d", defaultRegionToTest, rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDRDSInstanceConfigDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDrdsInstanceConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -199,13 +198,9 @@ func TestAccAlibabacloudStackDRDSInstance_Multi(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description":          "${var.name}",
-					"zone_id":              "${alibabacloudstack_vswitch.default.availability_zone}",
-					"instance_series":      "${var.instance_series}",
-					"instance_charge_type": "PostPaid",
-					"vswitch_id":           "${alibabacloudstack_vswitch.default.id}",
-					"specification":        "drds.sn2.4c16g.8C32G",
-					"count":                "3",
+					"description":   "${var.name}",
+					"zone_id":       "${alibabacloudstack_vpc_vswitch.default.availability_zone}",
+					"specification": "${data.alibabacloudstack_drds_instance_specifications.default.specifications.0.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -213,41 +208,44 @@ func TestAccAlibabacloudStackDRDSInstance_Multi(t *testing.T) {
 					}),
 				),
 			},
+			{
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"description":   "${var.name}_update",
+					"specification": "${data.alibabacloudstack_drds_instance_specifications.default.specifications.1.id}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"description": name+"_update",
+					}),
+				),
+			},
 		},
 	})
 }
 
-func resourceDRDSInstanceConfigDependence(name string) string {
+func resourceDrdsInstanceConfigDependence(name string) string {
 	return fmt.Sprintf(`
 
 	variable "name" {
 		default = "%s"
 	}
-	data "alibabacloudstack_zones" "default" {
-		available_resource_creation = "VSwitch"
+	
+	data "alibabacloudstack_drds_instance_specifications" "default" {
+		sorted_by = "CPU"
 	}
 	
-	variable "instance_series" {
-		default = "drds.sn2.4c16g"
-	}
-	
-	resource "alibabacloudstack_vpc" "default" {
-	  name       = "${var.name}"
-	  cidr_block = "172.16.0.0/16"
-	}
-	resource "alibabacloudstack_vswitch" "default" {
-	  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-	  cidr_block        = "172.16.0.0/24"
-	  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	  name              = "${var.name}"
-	}	
-`, name)
+	%s	
+`, name, VSwitchCommonTestCase)
 }
 
 var drdsInstancebasicMap = map[string]string{
 	"description":          CHECKSET,
 	"zone_id":              CHECKSET,
-	"instance_series":      "drds.sn2.4c16g",
 	"instance_charge_type": "PostPaid",
-	"specification":        "drds.sn2.4c16g.8C32G",
+	"specification":        CHECKSET,
 }
