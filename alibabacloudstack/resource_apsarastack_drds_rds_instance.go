@@ -27,7 +27,7 @@ func resourceAlibabacloudStackDrdsRdsInstnace() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"HighAvailability"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"HighAvailability", "Finance"}, false),
 			},
 
 			"db_instance_class": {
