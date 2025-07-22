@@ -1125,19 +1125,23 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 	request.QueryParams = client.defaultQueryParams()
 }
 
-func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, apiname, pathpattern string, headers map[string]*string, query, body map[string]interface{}) (_result map[string]interface{}, _err error) {
+func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, apiname, pathpattern string, headers map[string]string, query, body map[string]interface{}) (_result map[string]interface{}, _err error) {
 	ServiceCodeStr := strings.ReplaceAll(strings.ToUpper(popcode), "-", "_")
 	endpoint := client.Config.Endpoints[ServiceCode(ServiceCodeStr)]
 	if endpoint == "" {
 		return nil, fmt.Errorf("[ERROR] missing the product %s endpoint.", popcode)
 	}
 
-	if headers == nil {
-		headers = make(map[string]*string)
+	reqHeaders := make(map[string]*string)
+	if headers != nil {
+		for key, value := range headers {
+			v := value
+			reqHeaders[key] = &v
+		}
 	}
 	for key, value := range client.defaultHeaders(popcode) {
 		v := value
-		headers[key] = &v
+		reqHeaders[key] = &v
 	}
 
 	if query == nil {
@@ -1189,7 +1193,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 					"Version":        tea.StringValue(&version),
 					"SignatureNonce": tea.StringValue(util.GetNonce()),
 				}, query))
-				r, e := conn.DoRequestWithAction(&apiname, &version, &protocol, &method, &authType, &pathpattern, roa_query, headers, body, &runtime)
+				r, e := conn.DoRequestWithAction(&apiname, &version, &protocol, &method, &authType, &pathpattern, roa_query, reqHeaders, body, &runtime)
 				if e != nil {
 					return r, e
 				} else {
@@ -1204,7 +1208,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 				if err != nil {
 					return nil, err
 				}
-				conn.Headers = headers
+				conn.Headers = reqHeaders
 				return conn.DoRequest(&apiname, &protocol, &method, &version, &authType, query, body, &runtime)
 			}()
 		}
