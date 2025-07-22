@@ -145,7 +145,6 @@ func resourceAlibabacloudStackMongodbShardingnetworkprivateaddressCreate(d *sche
 }
 
 func resourceAlibabacloudStackMongodbShardingnetworkprivateaddressUpdate(d *schema.ResourceData, meta interface{}) error {
-	//private 申请只支持shard和cs,修改只支持mongos节点，所以private不支持修改
 	return nil
 }
 
