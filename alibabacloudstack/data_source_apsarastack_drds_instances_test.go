@@ -13,15 +13,6 @@ func TestAccAlibabacloudStackDRDSInstancesDataSource(t *testing.T) {
 		fmt.Sprintf("tf-testAcc%sDRDSInstancesDataSource-%d", defaultRegionToTest, rand),
 		dataSourceDRDSInstancesConfigDependence)
 
-	nameRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_drds_instance.default.description}",
-		}),
-		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_drds_instance.default.description}-fake",
-		}),
-	}
-
 	descriptionRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
 			"description_regex": "${alibabacloudstack_drds_instance.default.description}",
@@ -40,14 +31,23 @@ func TestAccAlibabacloudStackDRDSInstancesDataSource(t *testing.T) {
 		}),
 	}
 
+	typeConf := dataSourceTestAccConfig{
+		existConfig: testAccConfig(map[string]interface{}{
+			"ids":           []string{"${alibabacloudstack_drds_instance.default.id}"},
+			"instance_type": "RW",
+		}),
+		fakeConfig: testAccConfig(map[string]interface{}{
+			"ids":           []string{"${alibabacloudstack_drds_instance.default.id}"},
+			"instance_type": "RO",
+		}),
+	}
+
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex":        "${alibabacloudstack_drds_instance.default.description}",
 			"description_regex": "${alibabacloudstack_drds_instance.default.description}",
 			"ids":               []string{"${alibabacloudstack_drds_instance.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex":        "${alibabacloudstack_drds_instance.default.description}-fake",
 			"description_regex": "${alibabacloudstack_drds_instance.default.description}-fake",
 			"ids":               []string{"${alibabacloudstack_drds_instance.default.id}-fake"},
 		}),
@@ -83,7 +83,7 @@ func TestAccAlibabacloudStackDRDSInstancesDataSource(t *testing.T) {
 		fakeMapFunc:  fakeDRDSInstancesMapFunc,
 	}
 
-	drdsInstancesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, descriptionRegexConf, idsConf, allConf)
+	drdsInstancesCheckInfo.dataSourceTestCheck(t, rand, descriptionRegexConf, idsConf, typeConf, allConf)
 }
 
 func dataSourceDRDSInstancesConfigDependence(name string) string {

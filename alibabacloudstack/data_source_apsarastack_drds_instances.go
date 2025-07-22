@@ -39,6 +39,12 @@ func dataSourceAlibabacloudStackDRDSInstances() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 			},
+			"instance_type": {
+				Type: schema.TypeString,
+				Optional: true,
+				Default: "",
+				ValidateFunc:  validation.StringInSlice([]string{"RW", "RO"}, false),
+			},
 			// Computed values
 			"descriptions": {
 				Type:     schema.TypeList,
@@ -62,6 +68,10 @@ func dataSourceAlibabacloudStackDRDSInstances() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"specification": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"create_time": {
 							Type:     schema.TypeInt,
 							Computed: true,
@@ -78,8 +88,16 @@ func dataSourceAlibabacloudStackDRDSInstances() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"vswitch_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"version": {
 							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"master_instance_id": {
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 					},
@@ -111,6 +129,8 @@ func dataSourceAlibabacloudStackDRDSInstancesRead(d *schema.ResourceData, meta i
 		}
 	}
 
+	instanceType := d.Get("instance_type").(string)
+	
 	raw, err := client.WithDrdsClient(func(drdsClient *drds.Client) (interface{}, error) {
 		return drdsClient.DescribeDrdsInstances(request)
 	})
@@ -136,6 +156,12 @@ func dataSourceAlibabacloudStackDRDSInstancesRead(d *schema.ResourceData, meta i
 				continue
 			}
 		}
+		
+		if instanceType == "RW" && item.MasterInstanceId != "" {
+			continue
+		} else if instanceType == "RO" && item.MasterInstanceId == "" {
+			continue
+		}
 
 		dbi = append(dbi, item)
 	}
@@ -147,15 +173,25 @@ func drdsInstancesDescription(d *schema.ResourceData, dbi []drds.Instance) error
 	var descriptions []string
 	var s []map[string]interface{}
 	for _, item := range dbi {
+		var vswtichId string
+		for _, vip := range item.Vips.Vip {
+			if vip.VswitchId != "" {
+				vswtichId = vip.VswitchId
+				break
+			}
+		}
 		mapping := map[string]interface{}{
-			"id":           item.DrdsInstanceId,
-			"description":  item.Description,
-			"type":         item.Type,
-			"create_time":  item.CreateTime,
-			"status":       item.Status,
-			"network_type": item.NetworkType,
-			"zone_id":      item.ZoneId,
-			"version":      item.Version,
+			"id":                 item.DrdsInstanceId,
+			"description":        item.Description,
+			"type":               item.Type,
+			"create_time":        item.CreateTime,
+			"status":             item.Status,
+			"network_type":       item.NetworkType,
+			"zone_id":            item.ZoneId,
+			"version":            item.Version,
+			"specification":      item.InstanceSpec,
+			"vswitch_id":         vswtichId,
+			"master_instance_id": item.MasterInstanceId,
 		}
 		ids = append(ids, item.DrdsInstanceId)
 		descriptions = append(descriptions, item.Description)
