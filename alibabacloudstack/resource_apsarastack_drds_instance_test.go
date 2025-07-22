@@ -112,7 +112,7 @@ func TestAccAlibabacloudStackDrdsInstance_Vpc(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-testacc%sDrdsdatabase-%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc-instance-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDrdsInstanceConfigDependence)
 
 	ResourceTest(t, resource.TestCase{
@@ -131,7 +131,7 @@ func TestAccAlibabacloudStackDrdsInstance_Vpc(t *testing.T) {
 					"zone_id":              "${alibabacloudstack_vpc_vswitch.default.availability_zone}",
 					"instance_charge_type": "PostPaid",
 					"vswitch_id":           "${alibabacloudstack_vpc_vswitch.default.id}",
-					"specification":        "drds.sn2.4c16g.8C32G",
+					"specification":        "${data.alibabacloudstack_drds_instance_specifications.default.specifications.0.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -183,7 +183,7 @@ func TestAccAlibabacloudStackDrdsInstance_Classic(t *testing.T) {
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf-testacc%sDrdsdatabase-%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testacc-instance-%d", rand)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDrdsInstanceConfigDependence)
 
 	ResourceTest(t, resource.TestCase{

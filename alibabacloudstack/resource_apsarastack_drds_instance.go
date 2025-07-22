@@ -89,7 +89,7 @@ func resourceAlibabacloudStackDRDSInstanceCreate(d *schema.ResourceData, meta in
 			return errmsgs.WrapError(err)
 		}
 		reqQuery["VpcId"] = vsw.VpcId
-		reqQuery["VswitchId"] = vsw.VpcId
+		reqQuery["VswitchId"] = v.(string)
 		reqQuery["InstanceNetworkType"] = "VPC"
 	} else {
 		reqQuery["InstanceNetworkType"] = "CLASSIC"
@@ -219,6 +219,16 @@ func resourceAlibabacloudStackDRDSInstanceRead(d *schema.ResourceData, meta inte
 	d.Set("zone_id", data.ZoneId)
 	d.Set("description", data.Description)
 	d.Set("specification", data.InstanceSpec)
+	for _, vip := range data.Vips.Vip {
+		if vip.VswitchId!= ""{
+			d.Set("vswitch_id", vip.VswitchId)
+			break
+		}
+	}
+	
+	if data.MasterInstanceId != "" {
+		d.Set("master_instance_id", data.MasterInstanceId) 
+	}
 	
 	if data.CommodityCode == "drdsPost" {
 		d.Set("instance_charge_type", string(PostPaid))
