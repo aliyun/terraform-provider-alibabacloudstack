@@ -1687,7 +1687,7 @@ type RdsDescribedbproxyResponse struct {
 
 func (s *RdsService) DoRdsDescribedbproxyRequest(id string) (*RdsDescribedbproxyResponse, error) {
 	// api: Rds - 2014-08-15 - DescribeDBProxy
-	request := s.client.NewCommonRequest("POST", "Rds", "2014-08-15", "DescribeDBProxy", "")
+	request := s.client.NewCommonRequest("GET", "Rds", "2014-08-15", "DescribeDBProxy", "")
 	RdsDescribedbproxyResponseObj := &RdsDescribedbproxyResponse{}
 
 	request.QueryParams["DBInstanceId"] = id

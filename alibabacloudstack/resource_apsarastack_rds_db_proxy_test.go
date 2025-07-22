@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackDBProxy_basic(t *testing.T) {
+func TestAccAlibabacloudStackRdsDbProxy_basic(t *testing.T) {
 	var v *RdsDescribedbproxyResponse
 	rand := getAccTestRandInt(10000, 999999)
 	name := fmt.Sprintf("tf-testAccdbproxy-%d", rand)
