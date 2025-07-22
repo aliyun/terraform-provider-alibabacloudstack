@@ -32,6 +32,7 @@ The following arguments are supported:
 * `name_regex` - (Optional) A regex string to filter results by instance name.
 * `description_regex` - (Optional) A regex string to filter results by instance description.
 * `ids` - (Optional) A list of DRDS instance IDs. This can be used to limit the results to specific instances.
+* `instance_type` - (Optional) Filter the results to a specific type of drds instance. valid values: `RW`, `RO`.
 
 ## Attributes Reference
 

@@ -48,6 +48,17 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
   zone_id    = data.alibabacloudstack_zones.default.zones.0.id
 }
 
+
+
+
+resource "alibabacloudstack_drds_readonly_instance" "default" {
+  master_instance_id   = alibabacloudstack_drds_instance.default.id
+  zone_id              = alibabacloudstack_vpc_vswitch.default.availability_zone
+  instance_charge_type = "PostPaid"
+  vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
+  specification        = data.alibabacloudstack_drds_instance_specifications.default.specifications.0.id
+  description          = var.name
+}
 ```
 
 ## 参数说明
@@ -59,6 +70,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 * `specification` - (必填，变更时重建) 用户定义的DRDS实例规格。值范围：
 * `instance_charge_type` - (可选，变更时重建) 计费类型。有效值为`PrePaid`(预付费)和`PostPaid`(后付费)。默认为`PostPaid`。
 * `vswitch_id` - (必填，变更时重建) 要启动的交换机ID。
+* `master_instance_id` - (必填，变更时重建) 需要镜像的Drds实力的ID。
 
 ### 超时时间
 

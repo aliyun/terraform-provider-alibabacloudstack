@@ -1,15 +1,15 @@
 ---
 subcategory: "DRDS"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_drds_instance"
+page_title: "Alibabacloudstack: alibabacloudstack_drds_readnoly_instance"
 sidebar_current: "docs-Alibabacloudstack-drds-instance"
 description: |- 
-  Provides a drds Instance resource.
+  Provides a drds Read Only Instance resource.
 ---
 
-# alibabacloudstack_drds_instance
+# alibabacloudstack_drds_readonly_instance
 
-Provides a drds Instance resource.
+Provides a drds Read Only Instance resource.
 
 For information about DRDS and how to use it, see [What is DRDS](https://www.alibabacloud.com/help/doc-detail/29659.htm).
 
@@ -54,6 +54,17 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
   zone_id    = data.alibabacloudstack_zones.default.zones.0.id
 }
 
+
+
+
+resource "alibabacloudstack_drds_readonly_instance" "default" {
+  master_instance_id   = alibabacloudstack_drds_instance.default.id
+  zone_id              = alibabacloudstack_vpc_vswitch.default.availability_zone
+  instance_charge_type = "PostPaid"
+  vswitch_id           = alibabacloudstack_vpc_vswitch.default.id
+  specification        = data.alibabacloudstack_drds_instance_specifications.default.specifications.0.id
+  description          = var.name
+}
 ```
 
 ## Argument Reference
@@ -65,7 +76,7 @@ The following arguments are supported:
 * `specification` - (Required, ForceNew) User-defined DRDS instance specification. Value range:
 * `instance_charge_type` - (Optional, ForceNew) Valid values are `PrePaid`, `PostPaid`. Default to `PostPaid`.
 * `vswitch_id` - (Optional, ForceNew) The VSwitch ID to launch in. If not set while use classic network.
-
+* `master_instance_id` - (Required, ForceNew) The maseter instance id.
 
 ### Timeouts
 
