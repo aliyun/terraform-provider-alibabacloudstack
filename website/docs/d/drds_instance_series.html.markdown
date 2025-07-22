@@ -4,14 +4,14 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_drds_instance_series"
 sidebar_current: "docs-alibabacloudstack-drds-instance-series"
 description: |-
-  Provides a list of Drds Instance Series to be used by the alibabacloudstack_instance resource.
+  Provides a list of Drds Instance Series to be used by the alibabacloudstack_drds_instance resource.
 ---
 
 # alibabacloudstack_drds_instance_series
 
 This data source provides the Drds Instance Series families of AlibabacloudStack.
 
-## 示例用法
+## Example Usage
 
 ```
 data "alibabacloudstack_drds_instance_series" "default" {
@@ -25,7 +25,7 @@ data "alibabacloudstack_drds_instance_series" "default" {
 
 The following arguments are supported:
 
-* `ids` - (Optional, ForceNew) Specifies the ID range of instance series. If not specified, returns instance type families across all availability zones.
+* `ids` - (Optional, ForceNew) Specifies the ID range of instance series. If not specified, returns instance series across all availability zones.
 * `names` - (Optional, ForceNew) Specifies the name range of instance series.
 
 ## Attributes Reference
