@@ -40,6 +40,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 			"image_url": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				//ConflictsWith: []string{"package_url"},
 			},
 			"package_type": {
@@ -303,7 +304,7 @@ func resourceAlibabacloudStackEdasK8sApplication() *schema.Resource {
 			"package_url": {
 				Type:     schema.TypeString,
 				Optional: true,
-				//ConflictsWith: []string{"image_url"},
+				Computed: true,
 			},
 			"package_version": {
 				Type:     schema.TypeString,
