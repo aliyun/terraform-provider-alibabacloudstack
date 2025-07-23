@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -71,9 +72,19 @@ func resourceAlibabacloudStackInstance() *schema.Resource {
 			},
 
 			"description": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringLenBetween(2, 256),
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+					value := v.(string)
+					charLength := utf8.RuneCountInString(value)
+					if charLength < 2 || charLength > 256 {
+						errors = append(errors, fmt.Errorf("%s must be between 2 and 256 characters in length", k))
+					}
+					if strings.HasPrefix(value, "http://") || strings.HasPrefix(value, "https://") {
+						errors = append(errors, fmt.Errorf("%s cannot starts with http:// or https://", k))
+					}
+					return
+				},
 			},
 
 			"internet_max_bandwidth_in": {

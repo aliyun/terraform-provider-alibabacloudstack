@@ -225,17 +225,27 @@ func TestAccAlibabacloudStackInstance_Basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
-					"security_enhancement_strategy", 
-					"dry_run", "user_data", "enable_ipv6", 
+					"security_enhancement_strategy",
+					"dry_run", "user_data", "enable_ipv6",
 					"ipv6_address_count",
 					"system_disk_tags.%",
 					"system_disk_tags.Bar",
 					"system_disk_tags.foo",
-					},
+				},
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"description": "${var.long_des}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"description": CHECKSET,
+					}),
+				),
 			},
 		},
 	})
@@ -629,7 +639,7 @@ func TestAccAlibabacloudStackInstance_ImageUpdateTags(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"image_id":                      "${data.alibabacloudstack_images.default.images.0.id}",
-					"security_groups":                []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
+					"security_groups":               []string{"${alibabacloudstack_ecs_securitygroup.default.id}"},
 					"instance_type":                 "${local.default_instance_type_id}",
 					"availability_zone":             "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"system_disk_category":          "${data.alibabacloudstack_zones.default.zones.0.available_disk_categories.0}",
@@ -733,6 +743,15 @@ data "alibabacloudstack_images" "update" {
 
 variable "name" {
 	default = "%s"
+}
+
+variable "long_des" {
+	default = <<EOF
+一二三四五六七八九十abcdefghij。、；’「」一二三四五六七八九十abcdefghij。、；’「」
+一二三四五六七八九十abcdefghij。、；’「」一二三四五六七八九十abcdefghij。、；’「」
+一二三四五六七八九十abcdefghij。、；’「」一二三四五六七八九十abcdefghij。、；’「」
+一二三四五六七八九十abcdefghij。、；’「」一二三四五六七八九十abcdefghij。、；’「」
+EOF
 }
 
 //resource "alibabacloudstack_key_pair" "default" {
