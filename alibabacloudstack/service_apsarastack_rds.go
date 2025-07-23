@@ -114,7 +114,7 @@ func (s *RdsService) DescribeDBReadonlyInstance(id string) (*rds.DBInstanceAttri
 }
 
 func (s *RdsService) DoRdsDescribeaccountsRequest(id string) (*rds.DBInstanceAccount, error) {
-    return s.DescribeDBAccount(id)
+	return s.DescribeDBAccount(id)
 }
 func (s *RdsService) DescribeDBAccount(id string) (*rds.DBInstanceAccount, error) {
 	ds := &rds.DBInstanceAccount{}
@@ -201,7 +201,7 @@ func (s *RdsService) DescribeDBAccountPrivilege(id string) (*rds.DBInstanceAccou
 }
 
 func (s *RdsService) DoRdsDescribedatabasesRequest(id string) (*rds.Database, error) {
-    return s.DescribeDBDatabase(id)
+	return s.DescribeDBDatabase(id)
 }
 func (s *RdsService) DescribeDBDatabase(id string) (*rds.Database, error) {
 	ds := &rds.Database{}
@@ -1538,7 +1538,7 @@ func (s *RdsService) FormatUtcTime(kvstoretime string) (string, error) {
 
 func (s *RdsService) DoDescribebackupsRequest(id string) (*RdsDescribebackupsResponse, error) {
 	// api: rds - 2014-08-15 - DescribeBackups
-	request := s.client.NewCommonRequest("POST", "rds", "2014-08-15", "DescribeBackups", "")
+	request := s.client.NewCommonRequest("GET", "rds", "2014-08-15", "DescribeBackups", "")
 	RkvstoreDescribebackupsResponseObj := &RdsDescribebackupsResponse{}
 
 	//调用request_params_handler
@@ -1588,4 +1588,68 @@ type RdsDescribebackupsResponse struct {
 	PageNumber int    `json:"PageNumber"`
 	PageSize   int    `json:"PageSize"`
 	TotalCount int    `json:"TotalCount"`
+}
+
+func (s *RdsService) DoDescribebackuptasksRequest(instanceId, jobId string) (*RdsBackupJobResponse, error) {
+	// api: R-kvstore - 2015-01-01 - DescribeBackupTasks
+	request := s.client.NewCommonRequest("GET", "Rds", "2014-08-15", "DescribeBackupTasks", "")
+	rdsDescribebackuptasksResponse := &RdsDescribebackuptasksResponse{}
+	request.QueryParams["DBInstanceId"] = instanceId
+	request.QueryParams["BackupJobId"] = jobId
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBackupTasks", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &rdsDescribebackuptasksResponse)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBackupTasks", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return &rdsDescribebackuptasksResponse.Items.BackupJob[0], nil
+}
+
+type RdsBackupJobResponse struct {
+	BackupId             string `json:"BackupId"`
+	BackupJobID          int    `json:"BackupJobID"`
+	BackupProgressStatus string `json:"BackupProgressStatus"`
+	BackupStatus         string `json:"BackupStatus"`
+	JobMode              string `json:"JobMode"`
+	Process              string `json:"Process"`
+	TaskAction           string `json:"TaskAction"`
+}
+
+type RdsDescribebackuptasksResponse struct {
+	Items struct {
+		BackupJob []RdsBackupJobResponse `json:"BackupJob"`
+	} `json:"Items"`
+	RequestId  string `json:"RequestId"`
+	InstanceId string `json:"InstanceId"`
+}
+
+func (s *RdsService) RdsBackupTaskStateRefreshFunc(instanceId, jobId string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DoDescribebackuptasksRequest(instanceId, jobId)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object.BackupStatus == failState {
+				return object, object.BackupStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.BackupStatus))
+			}
+		}
+
+		return object, object.BackupStatus, nil
+	}
 }

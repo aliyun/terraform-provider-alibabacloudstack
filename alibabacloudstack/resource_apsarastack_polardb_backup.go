@@ -157,7 +157,7 @@ func resourceAlibabacloudStackPolardbBackupCreate(d *schema.ResourceData, meta i
 	polar_dbbackupservice := PolardbService{client}
 	db_instance_id := d.Get("db_instance_id").(string)
 	backup_jobid := PolardbCreatebackupResponseObj.BackupJobId
-	stateConf := BuildStateConf([]string{"NoStart", "Preparing", "Waiting", "Uploading", "Checking"}, []string{"Finished"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, polar_dbbackupservice.PolardbDescribebackupTaskStateRefreshFunc(db_instance_id, backup_jobid, []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"NoStart", "Preparing", "Waiting", "Uploading", "Checking"}, []string{"Finished"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, polar_dbbackupservice.PolardbDescribebackupTaskStateRefreshFunc(db_instance_id, backup_jobid, []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, fmt.Sprintf("%s:%s", db_instance_id, backup_jobid))
 	}

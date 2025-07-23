@@ -537,29 +537,6 @@ func (s *KvstoreService) DescribeInstanceTDEStatus(id string) (map[string]interf
 	return result, nil
 }
 
-func (s *KvstoreService) DoRkvstoreDescribebackuptasksRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*RkvstoreDescribebackuptasksResponse, error) {
-	// api: R-kvstore - 2015-01-01 - DescribeBackupTasks
-	request := s.client.NewCommonRequest("POST", "R-kvstore", "2015-01-01", "DescribeBackupTasks", "")
-	RkvstoreDescribebackuptasksResponseObj := &RkvstoreDescribebackuptasksResponse{}
-
-	bresponse, err := s.client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBackupTasks", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &RkvstoreDescribebackuptasksResponseObj)
-
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBackupTasks", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-
-	return RkvstoreDescribebackuptasksResponseObj, nil
-}
-
 type GetKVInstanceClassResponse struct {
 	*responses.BaseResponse
 	Code      any               `json:"Code"`
@@ -583,18 +560,3 @@ type KVInstanceClass struct {
 	Status         string `json:"status"`
 }
 
-type RkvstoreDescribebackuptasksResponse struct {
-	BackupJobs struct {
-		BackupJob []struct {
-			NodeId               string `json:"NodeId"`
-			BackupJobID          int    `json:"BackupJobID"`
-			BackupProgressStatus string `json:"BackupProgressStatus"`
-			JobMode              string `json:"JobMode"`
-			Process              string `json:"Process"`
-			StartTime            string `json:"StartTime"`
-			TaskAction           string `json:"TaskAction"`
-		} `json:"BackupJob"`
-	} `json:"BackupJobs"`
-	RequestId  string `json:"RequestId"`
-	InstanceId string `json:"InstanceId"`
-}

@@ -101,9 +101,10 @@ func resourceAlibabacloudStackRdsBackupCreate(d *schema.ResourceData, meta inter
 
 	//调用request_params_handler
 
+	instanceId := d.Get("instance_id").(string)
 	request.QueryParams["BackupMethod"] = d.Get("backup_method").(string)
 
-	request.QueryParams["DBInstanceId"] = d.Get("instance_id").(string)
+	request.QueryParams["DBInstanceId"] = instanceId
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -120,12 +121,25 @@ func resourceAlibabacloudStackRdsBackupCreate(d *schema.ResourceData, meta inter
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_polar_db_backup", "CreateBackup", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
+	
+	
 
 	// api: Rds - 2015-12-01 - DescribeBackupDBs
-	backup_id := rdsCreatebackupResponse.BackupJobId
+	backupJobId := rdsCreatebackupResponse.BackupJobId
+	
+	stateConf := BuildStateConf([]string{"NoStart","Checking","Preparing","Waiting","Uploading"}, []string{"Finished"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, rdsservice.RdsBackupTaskStateRefreshFunc(instanceId, backupJobId, []string{"Failed"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
 
+	var backupId string
+	if v, err := rdsservice.DoDescribebackuptasksRequest(instanceId, backupJobId); err != nil{
+		return err
+	}else{
+		backupId = v.BackupId
+	}
 	instance_id := d.Get("instance_id").(string)
-	d.SetId(fmt.Sprintf("%s:%s", instance_id, backup_id))
+	d.SetId(fmt.Sprintf("%s:%s", instance_id, backupId))
 	for i := 0; i < 30; i++ {
 		response, err := rdsservice.DoDescribebackupsRequest(d.Id())
 		if err == nil {

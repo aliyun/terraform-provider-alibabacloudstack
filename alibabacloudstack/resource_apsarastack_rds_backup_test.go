@@ -118,7 +118,6 @@ var AlibabacloudTestAccRdsBackupCheckmap = map[string]string{
 	"backup_method": CHECKSET,
 //	"backup_download_url":          CHECKSET,
 //	"backup_intranet_download_url": CHECKSET,
-	"backup_db_names": CHECKSET,
 	"backup_id": CHECKSET,
 	"backup_mode": CHECKSET,
 	"backup_size": CHECKSET,
