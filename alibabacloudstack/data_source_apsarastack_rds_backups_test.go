@@ -4,27 +4,57 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestAccAlibabacloudStackRdsBackupsDataSource(t *testing.T) {
 
 	rand := getAccTestRandInt(10000, 99999)
-	idsConf := dataSourceTestAccConfig{
+	createTime := time.Now().UTC()
+	tomorrowTime := createTime.AddDate(0, 0, 1)
+	twoDayAgoTime := createTime.AddDate(0, 0, 2)
+
+	instanceIdConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudstackRdsBackupsDataSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_rds_backup.default.id}"]`,
 			"instance_id": `"${alibabacloudstack_rds_backup.default.instance_id}"`,
-			"start_time":  `"${alibabacloudstack_rds_backup.default.start_time}"`,
-			"end_time":    `"${alibabacloudstack_rds_backup.default.end_time}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudstackRdsBackupsDataSourceConfig(rand, map[string]string{
-			"ids":         `["${alibabacloudstack_rds_backup.default.id}_fake"]`,
+			"instance_id": `"${alibabacloudstack_rds_backup.default.instance_id}_fake"`,
+		}),
+	}
+	idsConf := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudstackRdsBackupsDataSourceConfig(rand, map[string]string{
+			"backup_ids":  `["${alibabacloudstack_rds_backup.default.backup_id}"]`,
 			"instance_id": `"${alibabacloudstack_rds_backup.default.instance_id}"`,
-			"start_time":  `"${alibabacloudstack_rds_backup.default.start_time}"`,
-			"end_time":    `"${alibabacloudstack_rds_backup.default.end_time}"`,
+		}),
+		fakeConfig: testAccCheckAlibabacloudstackRdsBackupsDataSourceConfig(rand, map[string]string{
+			"backup_ids":  `["${alibabacloudstack_rds_backup.default.backup_id}_fake"]`,
+			"instance_id": `"${alibabacloudstack_rds_backup.default.instance_id}"`,
+		}),
+	}
+	startTimeConf := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudstackRdsBackupsDataSourceConfig(rand, map[string]string{
+			"instance_id": `"${alibabacloudstack_rds_backup.default.instance_id}"`,
+			"start_time":  fmt.Sprintf(`"%s"`, createTime.Format("2006-01-02T15:04Z")),
+		}),
+		fakeConfig: testAccCheckAlibabacloudstackRdsBackupsDataSourceConfig(rand, map[string]string{
+			"instance_id": `"${alibabacloudstack_rds_backup.default.instance_id}"`,
+			"start_time":  fmt.Sprintf(`"%s"`, tomorrowTime.Format("2006-01-02T15:04Z")),
+			"end_time":    fmt.Sprintf(`"%s"`, twoDayAgoTime.Format("2006-01-02T15:04Z")),
+		}),
+	}
+	endTimeConf := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudstackRdsBackupsDataSourceConfig(rand, map[string]string{
+			"instance_id": `"${alibabacloudstack_rds_backup.default.instance_id}"`,
+			"end_time":    fmt.Sprintf(`"%s"`, tomorrowTime.Format("2006-01-02T15:04Z")),
+		}),
+		fakeConfig: testAccCheckAlibabacloudstackRdsBackupsDataSourceConfig(rand, map[string]string{
+			"instance_id": `"${alibabacloudstack_rds_backup.default.instance_id}"`,
+			"end_time":    fmt.Sprintf(`"%s"`, createTime.Format("2006-01-02T15:04Z")),
 		}),
 	}
 
-	AlibabacloudstackRdsBackupsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf)
+	AlibabacloudstackRdsBackupsDataCheckInfo.dataSourceTestCheck(t, rand, idsConf, instanceIdConf, startTimeConf, endTimeConf)
 }
 
 var existAlibabacloudstackRdsBackupsDataMapFunc = func(rand int) map[string]string {

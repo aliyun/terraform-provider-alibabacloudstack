@@ -53,7 +53,7 @@ resource "alibabacloudstack_rds_backup" "default" {
 }
 
 data "alibabacloudstack_rds_backups" "default" {
-	ids = ["${alibabacloudstack_rds_backup.default.id}"]
+   backup_ids = ["${alibabacloudstack_rds_backup.default.id}"]
    instance_id = "${alibabacloudstack_rds_backup.default.instance_id}"
    start_time = "${alibabacloudstack_rds_backup.default.start_time}"
    end_time = "${alibabacloudstack_rds_backup.default.end_time}"
@@ -63,10 +63,10 @@ data "alibabacloudstack_rds_backups" "default" {
 ## Argument Reference
 
 The following arguments are supported:
-  * `ids` - (Optional) - the ids of the backups.
-  * `start_time` - (Required) - The query start time, in the format <I> yyyy-MM-dd</I> T <I> HH:mm</I> Z(UTC time).
+  * `backup_ids` - (Optional) - the ids of the backups.
+  * `start_time` - (Optional) - The query start time, in the format <I> yyyy-MM-dd</I> T <I> HH:mm</I> Z(UTC time).
   * `backup_id` - (Optional) - Backup ID.
-  * `end_time` - (Required) - The query end time must be later than the query start time in the format <I> yyyy-MM-dd</I> T <I> HH:mm</I> Z(UTC time).
+  * `end_time` - (Optional) - The query end time must be later than the query start time in the format <I> yyyy-MM-dd</I> T <I> HH:mm</I> Z(UTC time).
   * `instance_id` - (Required) - InstanceId
 
 ## Attributes Reference

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -19,7 +20,7 @@ func dataSourceAlibabacloudStackRdsBackups() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceAlibabacloudStackRdsBackupsRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
+			"backup_ids": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -29,17 +30,12 @@ func dataSourceAlibabacloudStackRdsBackups() *schema.Resource {
 
 			"start_time": {
 				Type:     schema.TypeString,
-				Required: true,
-			},
-
-			"backup_id": {
-				Type:     schema.TypeString,
 				Optional: true,
 			},
 
 			"end_time": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			"instance_id": {
@@ -137,7 +133,22 @@ func dataSourceAlibabacloudStackRdsBackups() *schema.Resource {
 
 func dataSourceAlibabacloudStackRdsBackupsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	rdsbackupservice := RdsService{client}
+	rdsService := RdsService{client}
+
+	instanceId := d.Get("instance_id").(string)
+	if _, err := rdsService.DescribeDBInstance(instanceId); err != nil {
+		// 需要先判断rds_instance_id，不存在时直接返回空
+		ids := []string{}
+		datas := []interface{}{}
+		d.SetId(dataResourceIdHash(ids))
+		if err := d.Set("backup_ids", ids); err != nil {
+			return err
+		}
+		if err := d.Set("backups", datas); err != nil {
+			return err
+		}
+		return nil
+	}
 
 	// api: rdse - 2015-01-01 - DescribeBackups
 	request := client.NewCommonRequest("GET", "rds", "2014-08-15", "DescribeBackups", "")
@@ -146,30 +157,27 @@ func dataSourceAlibabacloudStackRdsBackupsRead(d *schema.ResourceData, meta inte
 	//调用request_params_handler
 
 	//调用request_params_handler
-
-	if v, ok := d.GetOk("backup_id"); ok {
-		request.QueryParams["BackupId"] = v.(string)
+	now := time.Now().UTC()
+	if v, ok := d.GetOk("start_time"); ok {
+		startTime, err := formataRdsBackupTime(v.(string))
+		if err != nil {
+			return err
+		}
+		request.QueryParams["StartTime"] = startTime
+	} else {
+		sevenDaysAgo := now.AddDate(0, 0, -7)
+		request.QueryParams["StartTime"] = sevenDaysAgo.Format("2006-01-02T15:04Z")
 	}
-
-	request.QueryParams["DBInstanceId"] = d.Get("instance_id").(string)
-	start_time, err := rdsbackupservice.FormatUtcTime(d.Get("start_time").(string))
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "FormatUtcTime", errmsgs.AlibabacloudStackSdkGoERROR)
+	if v, ok := d.GetOk("end_time"); ok {
+		endTime, err := formataRdsBackupTime(v.(string))
+		if err != nil {
+			return err
+		}
+		request.QueryParams["EndTime"] = endTime
+	} else {
+		request.QueryParams["EndTime"] = now.Format("2006-01-02T15:04Z")
 	}
-	end_time, err := rdsbackupservice.FormatUtcTime(d.Get("end_time").(string))
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "FormatUtcTime", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	layout := "2006-01-02T15:04Z"
-	t, err := time.Parse(layout, end_time)
-	if err != nil {
-		panic(err)
-	}
-	nextMinute := t.Add(time.Minute)
-
-	end_time = nextMinute.Format(layout)
-	request.QueryParams["EndTime"] = end_time
-	request.QueryParams["StartTime"] = start_time
+	request.QueryParams["DBInstanceId"] = instanceId
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
@@ -186,7 +194,7 @@ func dataSourceAlibabacloudStackRdsBackupsRead(d *schema.ResourceData, meta inte
 			"alibabacloudstack_rds_backups", "DescribeBackups", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	idsMap := make(map[string]string)
-	if v, ok := d.GetOk("ids"); ok {
+	if v, ok := d.GetOk("backup_ids"); ok {
 		for _, vv := range v.([]interface{}) {
 			if vv == nil {
 				continue
@@ -201,49 +209,64 @@ func dataSourceAlibabacloudStackRdsBackupsRead(d *schema.ResourceData, meta inte
 	for _, data := range rdsDescribebackupsResponse.Items.Backup {
 		log.Printf("[DEBUG] alibabacloudstack_rds_backups DescribeBackups id %#v", strconv.Itoa(data.BackupId)+"&"+request.QueryParams["DBInstanceId"]+"&"+request.QueryParams["StartTime"])
 		if len(idsMap) > 0 {
-			if _, ok := idsMap[strconv.Itoa(data.BackupId)+"&"+request.QueryParams["DBInstanceId"]+"&"+request.QueryParams["StartTime"]]; !ok {
+			if _, ok := idsMap[fmt.Sprintf("%d", data.BackupId)]; !ok {
 				continue
 			}
 		}
 		i := map[string]interface{}{
-			"id": fmt.Sprintf("%s:%d", d.Get("instance_id").(string), data.BackupId),
-			"backup_db_names": data.BackupDBNames,
-
-			"backup_download_url": data.BackupDownloadURL,
-
-			"backup_id": fmt.Sprintf("%d",data.BackupId),
-
+			"id":                           fmt.Sprintf("%s:%d", instanceId, data.BackupId),
+			"backup_db_names":              data.BackupDBNames,
+			"backup_download_url":          data.BackupDownloadURL,
+			"backup_id":                    fmt.Sprintf("%d", data.BackupId),
 			"backup_intranet_download_url": data.BackupIntranetDownloadURL,
-
-			"backup_method": data.BackupMethod,
-
-			"backup_mode": data.BackupMode,
-
-			"backup_size": data.BackupSize,
-
-			"backup_type": data.BackupType,
-
-			"status":     data.BackupStatus,
-			"start_time": data.BackupStartTime,
-			"end_time":   data.BackupEndTime,
+			"backup_method":                data.BackupMethod,
+			"backup_mode":                  data.BackupMode,
+			"backup_size":                  data.BackupSize,
+			"backup_type":                  data.BackupType,
+			"status":                       data.BackupStatus,
+			"start_time":                   data.BackupStartTime,
+			"end_time":                     data.BackupEndTime,
 		}
 		datas = append(datas, i)
 
 		backup_id := data.BackupId
 
-		instance_id := d.Get("instance_id").(string)
-
-		ids = append(ids, strconv.Itoa(backup_id)+COLON_SEPARATED+instance_id+COLON_SEPARATED+request.QueryParams["StartTime"])
+		ids = append(ids, strconv.Itoa(backup_id))
 	}
 
 	d.SetId(dataResourceIdHash(ids))
 	if err := d.Set("backups", datas); err != nil {
 		return err
 	}
-	if err := d.Set("ids", ids); err != nil {
+	if err := d.Set("backup_ids", ids); err != nil {
 		return err
 	}
 
 	return nil
 
+}
+
+var (
+	withSecondsRegex    = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$`)
+	withoutSecondsRegex = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}Z$`)
+)
+
+func formataRdsBackupTime(input string) (string, error) {
+	switch {
+	case withSecondsRegex.MatchString(input):
+		t, err := time.Parse("2006-01-02T15:04:05Z", input)
+		if err != nil {
+			return "", fmt.Errorf("invalid time: %w", err)
+		}
+		return t.Format("2006-01-02T15:04Z"), nil
+
+	case withoutSecondsRegex.MatchString(input):
+		if _, err := time.Parse("2006-01-02T15:04Z", input); err != nil {
+			return "", fmt.Errorf("invalid time: %w", err)
+		}
+		return input, nil
+
+	default:
+		return "", fmt.Errorf("invalid format")
+	}
 }

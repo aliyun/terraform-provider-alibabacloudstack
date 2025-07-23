@@ -52,7 +52,7 @@ resource "alibabacloudstack_rds_backup" "default" {
 }
 
 data "alibabacloudstack_rds_backups" "default" {
-	ids = ["${alibabacloudstack_rds_backup.default.id}"]
+   backup_ids = ["${alibabacloudstack_rds_backup.default.id}"]
    instance_id = "${alibabacloudstack_rds_backup.default.instance_id}"
    start_time = "${alibabacloudstack_rds_backup.default.start_time}"
    end_time = "${alibabacloudstack_rds_backup.default.end_time}"
@@ -61,10 +61,10 @@ data "alibabacloudstack_rds_backups" "default" {
 ## 参数说明
 支持以下参数：
 
-* `ids` - (可选) - 备份的 ID 列表。
-* `start_time` - (必填) - 查询开始时间，格式为 <I> yyyy-MM-dd </I> T <I> HH:mm </I> Z (UTC 时间)。
+* `backup_ids` - (可选) - 备份的 ID 列表。
+* `start_time` - (可选) - 查询开始时间，格式为 <I> yyyy-MM-dd </I> T <I> HH:mm </I> Z (UTC 时间)。
 * `backup_id` - (可选) - 备份 ID。
-* `end_time` - (必填) - 查询结束时间，必须晚于开始时间，格式为 <I> yyyy-MM-dd </I> T <I> HH:mm </I> Z (UTC 时间)。
+* `end_time` - (可选) - 查询结束时间，必须晚于开始时间，格式为 <I> yyyy-MM-dd </I> T <I> HH:mm </I> Z (UTC 时间)。
 * `instance_id` - (必填) - 实例 ID。
 属性输出
 除了上述参数外，还导出以下属性：
