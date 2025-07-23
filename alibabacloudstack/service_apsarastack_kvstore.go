@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"regexp"
 	"strings"
@@ -537,6 +538,75 @@ func (s *KvstoreService) DescribeInstanceTDEStatus(id string) (map[string]interf
 	return result, nil
 }
 
+func (s *KvstoreService) FormatUtcTime(kvstoretime string) (string, error) {
+	t, err := time.Parse("2006-01-02T15:04:05Z", kvstoretime)
+	if err != nil {
+		return "", fmt.Errorf("parse kvstore time failed: %w", err)
+	}
+	outputLayout := "2006-01-02T15:04Z"
+	format_time := t.Format(outputLayout)
+	return format_time, nil
+}
+
+func (s *KvstoreService) DoRkvstoreDescribebackupsRequest(id string) (*RkvstoreDescribebackupsResponse, error) {
+	// api: R-kvstore - 2015-01-01 - DescribeBackups
+	request := s.client.NewCommonRequest("POST", "rds", "2014-08-15", "DescribeBackups", "")
+	RkvstoreDescribebackupsResponseObj := &RkvstoreDescribebackupsResponse{}
+
+	//调用request_params_handler
+
+	parts := strings.Split(id, "&")
+	instance_id := parts[1]
+	start_time := parts[2]
+	end_time := time.Now().UTC().Add(time.Hour).Format("2006-01-02T15:04Z")
+	//调用request_params_handler
+
+	request.QueryParams["DBInstanceId"] = instance_id
+	request.QueryParams["StartTime"] = start_time
+	request.QueryParams["EndTime"] = end_time
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBackups", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &RkvstoreDescribebackupsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBackups", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return RkvstoreDescribebackupsResponseObj, nil
+}
+
+func (s *KvstoreService) DoRkvstoreDescribebackuptasksRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*RkvstoreDescribebackuptasksResponse, error) {
+	// api: R-kvstore - 2015-01-01 - DescribeBackupTasks
+	request := s.client.NewCommonRequest("POST", "R-kvstore", "2015-01-01", "DescribeBackupTasks", "")
+	RkvstoreDescribebackuptasksResponseObj := &RkvstoreDescribebackuptasksResponse{}
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBackupTasks", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &RkvstoreDescribebackuptasksResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBackupTasks", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return RkvstoreDescribebackuptasksResponseObj, nil
+}
+
 type GetKVInstanceClassResponse struct {
 	*responses.BaseResponse
 	Code      any               `json:"Code"`
@@ -558,4 +628,44 @@ type KVInstanceClass struct {
 	Product        string `json:"product"`
 	Series         string `json:"series"`
 	Status         string `json:"status"`
+}
+
+type RkvstoreDescribebackupsResponse struct {
+	Items struct {
+		Backup []struct {
+			BackupId                  int    `json:"BackupId"`
+			BackupDBNames             string `json:"BackupDBNames"`
+			BackupStatus              string `json:"BackupStatus"`
+			BackupStartTime           string `json:"BackupStartTime"`
+			BackupEndTime             string `json:"BackupEndTime"`
+			BackupType                string `json:"BackupType"`
+			BackupMode                string `json:"BackupMode"`
+			BackupMethod              string `json:"BackupMethod"`
+			BackupDownloadURL         string `json:"BackupDownloadURL"`
+			BackupSize                int    `json:"BackupSize"`
+			EngineVersion             string `json:"EngineVersion"`
+			NodeInstanceId            string `json:"NodeInstanceId"`
+			BackupIntranetDownloadURL string `json:"BackupIntranetDownloadURL"`
+		} `json:"Backup"`
+	} `json:"Items"`
+	RequestId  string `json:"RequestId"`
+	PageNumber int    `json:"PageNumber"`
+	PageSize   int    `json:"PageSize"`
+	TotalCount int    `json:"TotalCount"`
+}
+
+type RkvstoreDescribebackuptasksResponse struct {
+	BackupJobs struct {
+		BackupJob []struct {
+			NodeId               string `json:"NodeId"`
+			BackupJobID          int    `json:"BackupJobID"`
+			BackupProgressStatus string `json:"BackupProgressStatus"`
+			JobMode              string `json:"JobMode"`
+			Process              string `json:"Process"`
+			StartTime            string `json:"StartTime"`
+			TaskAction           string `json:"TaskAction"`
+		} `json:"BackupJob"`
+	} `json:"BackupJobs"`
+	RequestId  string `json:"RequestId"`
+	InstanceId string `json:"InstanceId"`
 }

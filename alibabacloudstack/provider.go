@@ -385,6 +385,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_kms_secrets":                               dataSourceAlibabacloudStackKmsSecrets(),
 		"alibabacloudstack_kvstore_instances":                         dataSourceAlibabacloudStackKVStoreInstances(),
 		"alibabacloudstack_redis_tairinstances":                       dataSourceAlibabacloudStackKVStoreInstances(),
+		"alibabacloudstack_redis_backups":                             dataSourceAlibabacloudStackRedisBackups(),
 		"alibabacloudstack_kvstore_zones":                             dataSourceAlibabacloudStackKVStoreZones(),
 		"alibabacloudstack_kvstore_instance_classes":                  dataSourceAlibabacloudStackKVStoreInstanceClasses(),
 		"alibabacloudstack_kvstore_instance_engines":                  dataSourceAlibabacloudStackKVStoreInstanceEngines(),
@@ -704,6 +705,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_redis_connection":                       resourceAlibabacloudStackKvstoreConnection(),
 		"alibabacloudstack_kvstore_instance":                       resourceAlibabacloudStackKVStoreInstance(),
 		"alibabacloudstack_redis_tairinstance":                     resourceAlibabacloudStackKVStoreInstance(),
+		"alibabacloudstack_redis_backup":                           resourceAlibabacloudStackRedisBackup(),
 		// 该资源专有云前端暂未支持
 		// "alibabacloudstack_launch_template":                        resourceAlibabacloudStackLaunchTemplate(),
 		// "alibabacloudstack_ecs_launchtemplate":                     resourceAlibabacloudStackLaunchTemplate(),
