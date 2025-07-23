@@ -746,7 +746,7 @@ variable "name" {
 }
 
 variable "long_des" {
-	default = <<EOF
+	default = <<-EOF
 一二三四五六七八九十abcdefghij。、；’「」一二三四五六七八九十abcdefghij。、；’「」
 一二三四五六七八九十abcdefghij。、；’「」一二三四五六七八九十abcdefghij。、；’「」
 一二三四五六七八九十abcdefghij。、；’「」一二三四五六七八九十abcdefghij。、；’「」
