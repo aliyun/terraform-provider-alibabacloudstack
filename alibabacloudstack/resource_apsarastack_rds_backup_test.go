@@ -9,21 +9,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackRedisBackup0(t *testing.T) {
-	var v *RkvstoreDescribebackupsResponse
+func TestAccAlibabacloudStackRdsBackup0(t *testing.T) {
+	var v *RdsDescribebackupsResponse
 
-	resourceId := "alibabacloudstack_redis_backup.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudTestAccRedisBackupCheckmap)
+	resourceId := "alibabacloudstack_rds_backup.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccRdsBackupCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DoRkvstoreDescribebackupsRequest")
+		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DoDescribebackupsRequest")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tfredis_backup%d", rand)
+	name := fmt.Sprintf("tfrds_backup%d", rand)
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRedisBackupBasicdependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRdsBackupBasicdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -61,21 +61,21 @@ func TestAccAlibabacloudStackRedisBackup0(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackRedisBackup1(t *testing.T) {
-	var v *RkvstoreDescribebackupsResponse
+func TestAccAlibabacloudStackRdsBackup1(t *testing.T) {
+	var v *RdsDescribebackupsResponse
 
-	resourceId := "alibabacloudstack_redis_backup.default"
-	ra := resourceAttrInit(resourceId, AlibabacloudTestAccRedisBackupCheckmap)
+	resourceId := "alibabacloudstack_rds_backup.default"
+	ra := resourceAttrInit(resourceId, AlibabacloudTestAccRdsBackupCheckmap)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, func() interface{} {
-		return &KvstoreService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}, "DoRkvstoreDescribebackupsRequest")
+		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}, "DoDescribebackupsRequest")
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tfredis_backup%d", rand)
+	name := fmt.Sprintf("tfrds_backup%d", rand)
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRedisBackupBasicdependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccRdsBackupBasicdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -113,7 +113,7 @@ func TestAccAlibabacloudStackRedisBackup1(t *testing.T) {
 	})
 }
 
-var AlibabacloudTestAccRedisBackupCheckmap = map[string]string{
+var AlibabacloudTestAccRdsBackupCheckmap = map[string]string{
 
 	"backup_method": CHECKSET,
 	// "account_type":   CHECKSET,
@@ -121,7 +121,7 @@ var AlibabacloudTestAccRedisBackupCheckmap = map[string]string{
 	// "instance_id":    CHECKSET,
 }
 
-func AlibabacloudTestAccRedisBackupBasicdependence(name string) string {
+func AlibabacloudTestAccRdsBackupBasicdependence(name string) string {
 	return fmt.Sprintf(
 		`
 

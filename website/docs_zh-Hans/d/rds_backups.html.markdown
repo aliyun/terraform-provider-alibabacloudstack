@@ -1,19 +1,19 @@
 ---
-subcategory: "Redis"
+subcategory: "RDS"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_redis_backups"
-sidebar_current: "docs-Alibabacloudstack-datasource-redis-backups"
+page_title: "Alibabacloudstack: alibabacloudstack_rds_backups"
+sidebar_current: "docs-Alibabacloudstack-datasource-rds-backups"
 description: |-
-提供一个由 AlibabacloudStack 账户拥有的 Redis 备份列表。
+提供一个由 AlibabacloudStack 账户拥有的 rds 备份列表。
 ---
 
-# alibabacloudstack\_redis\_backups
-该数据源根据指定的过滤条件，提供一个 AlibabacloudStack 账户下的 Redis 备份列表。
+# alibabacloudstack\_rds\_backups
+该数据源根据指定的过滤条件，提供一个 Alibabacrdstack 账户下的 rds 备份列表。
 
 ## 示例用法
 ```
 variable "name" {
-	default = "tf-testAlibabacloudstackRedisBackups21486"
+	default = "tf-testAlibabacloudstackrdsBackups21486"
 }
 
 
@@ -46,16 +46,16 @@ resource "alibabacloudstack_db_instance" "default" {
 	storage_type         = "local_ssd"
   }
 
-resource "alibabacloudstack_redis_backup" "default" {
+resource "alibabacloudstack_rds_backup" "default" {
 	backup_method = "Physical"
 	instance_id = alibabacloudstack_db_instance.default.id
 }
 
-data "alibabacloudstack_redis_backups" "default" {
-	ids = ["${alibabacloudstack_redis_backup.default.id}"]
-   instance_id = "${alibabacloudstack_redis_backup.default.instance_id}"
-   start_time = "${alibabacloudstack_redis_backup.default.start_time}"
-   end_time = "${alibabacloudstack_redis_backup.default.end_time}"
+data "alibabacloudstack_rds_backups" "default" {
+	ids = ["${alibabacloudstack_rds_backup.default.id}"]
+   instance_id = "${alibabacloudstack_rds_backup.default.instance_id}"
+   start_time = "${alibabacloudstack_rds_backup.default.start_time}"
+   end_time = "${alibabacloudstack_rds_backup.default.end_time}"
 }
 ```
 ## 参数说明

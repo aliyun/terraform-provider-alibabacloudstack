@@ -1,19 +1,19 @@
 ---
-subcategory: "Redis"
+subcategory: "RDS"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_redis_backup"
-sidebar_current: "docs-Alibabacloudstack-redis-backup"
+page_title: "Alibabacloudstack: alibabacloudstack_rds_backup"
+sidebar_current: "docs-Alibabacloudstack-rds-backup"
 description: |-
-提供一个 Redis 备份资源。
+提供一个 rds 备份资源。
 ---
 
-# alibabacloudstack\_redis\_backup
-提供一个 Redis 备份资源。
+# alibabacloudstack\_rds\_backup
+提供一个 rds 备份资源。
 
 ## 示例用法
 ```
 variable "name" {
-		default = "tfredis_backup77672"
+		default = "tfrds_backup77672"
 	}
 
 
@@ -49,7 +49,7 @@ resource "alibabacloudstack_db_instance" "default" {
 
 
 
-resource "alibabacloudstack_redis_backup" "default" {
+resource "alibabacloudstack_rds_backup" "default" {
   backup_method = "Physical"
   instance_id = "${alibabacloudstack_db_instance.default.id}"
 }
