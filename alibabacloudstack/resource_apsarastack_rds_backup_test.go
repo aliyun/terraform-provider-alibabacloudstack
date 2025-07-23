@@ -116,9 +116,17 @@ func TestAccAlibabacloudStackRdsBackup1(t *testing.T) {
 var AlibabacloudTestAccRdsBackupCheckmap = map[string]string{
 
 	"backup_method": CHECKSET,
-	// "account_type":   CHECKSET,
-	// "character_type": CHECKSET,
-	// "instance_id":    CHECKSET,
+//	"backup_download_url":          CHECKSET,
+//	"backup_intranet_download_url": CHECKSET,
+	"backup_db_names": CHECKSET,
+	"backup_id": CHECKSET,
+	"backup_mode": CHECKSET,
+	"backup_size": CHECKSET,
+	"backup_type": CHECKSET,
+	"end_time": CHECKSET,
+	"instance_id": CHECKSET,
+	"start_time": CHECKSET,
+	"status": CHECKSET,
 }
 
 func AlibabacloudTestAccRdsBackupBasicdependence(name string) string {

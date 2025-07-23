@@ -1543,15 +1543,9 @@ func (s *RdsService) DoDescribebackupsRequest(id string) (*RdsDescribebackupsRes
 
 	//调用request_params_handler
 
-	parts := strings.Split(id, "&")
-	instance_id := parts[1]
-	start_time := parts[2]
-	end_time := time.Now().UTC().Add(time.Hour).Format("2006-01-02T15:04Z")
-	//调用request_params_handler
-
-	request.QueryParams["DBInstanceId"] = instance_id
-	request.QueryParams["StartTime"] = start_time
-	request.QueryParams["EndTime"] = end_time
+	parts := strings.Split(id, ":")
+	request.QueryParams["DBInstanceId"] = parts[0]
+	request.QueryParams["BackupId"] = parts[1]
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
