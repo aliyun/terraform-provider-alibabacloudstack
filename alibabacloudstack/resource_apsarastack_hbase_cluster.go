@@ -760,7 +760,7 @@ func resourceAlibabacloudStackHBaseInstanceDelete(d *schema.ResourceData, meta i
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	stateConf := BuildStateConf([]string{Hb_DELETING}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, hbaseService.HBaseClusterStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{Hb_DELETING}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, hbaseService.HBaseClusterStateRefreshFunc(d.Id(), []string{}))
 	_, err = stateConf.WaitForState()
 	return errmsgs.WrapError(err)
 }

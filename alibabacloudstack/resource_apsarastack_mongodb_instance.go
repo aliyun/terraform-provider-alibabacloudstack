@@ -294,7 +294,7 @@ func resourceAlibabacloudStackMongoDBInstanceCreate(d *schema.ResourceData, meta
 
 	d.SetId(response.DBInstanceId)
 
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -606,7 +606,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		request.ReplicationFactor = strconv.Itoa(d.Get("replication_factor").(int))
 
 		// wait instance status is running before modifying
-		stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+		stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -673,7 +673,7 @@ func resourceAlibabacloudStackMongoDBInstanceDelete(d *schema.ResourceData, meta
 			return nil
 		}
 	}
-	stateConf := BuildStateConf([]string{"Creating", "Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"Creating", "Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{}))
 	_, err = stateConf.WaitForState()
 	return errmsgs.WrapError(err)
 }

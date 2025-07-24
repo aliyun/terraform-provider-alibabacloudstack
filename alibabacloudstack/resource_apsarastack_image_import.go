@@ -135,7 +135,7 @@ func resourceAlibabacloudStackImageImportCreate(d *schema.ResourceData, meta int
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_import_image", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	d.SetId(response.ImageId)
-	stateConf := BuildStateConfByTimes([]string{"Waiting"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, ecsService.ImageStateRefreshFunc(d.Id(), []string{"CreateFailed", "UnAvailable"}), 200)
+	stateConf := BuildStateConfByTimes([]string{"Waiting"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, ecsService.ImageStateRefreshFunc(d.Id(), []string{"CreateFailed", "UnAvailable"}), 200)
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

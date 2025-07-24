@@ -149,7 +149,7 @@ func resourceAlibabacloudStackExpressconnectBgpgroupCreate(d *schema.ResourceDat
 	d.SetId(fmt.Sprintf("%s", bgp_group_id))
 	expressconnectservice := ExpressconnectService{client}
 
-	stateConf := BuildStateConf([]string{"Pending"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, expressconnectservice.ExpressconnectBgpGroupsStateRefreshFunc(bgp_group_id, []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"Pending"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, expressconnectservice.ExpressconnectBgpGroupsStateRefreshFunc(bgp_group_id, []string{"Failed"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, bgp_group_id)
@@ -202,7 +202,7 @@ func resourceAlibabacloudStackExpressconnectBgpgroupUpdate(d *schema.ResourceDat
 				"alibabacloudstack_express_connect_bgp_group", "ModifyBgpGroupAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		expressconnectservice := ExpressconnectService{client}
-		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, expressconnectservice.ExpressconnectBgpGroupsStateRefreshFunc(d.Id(), []string{"Failed"}))
+		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Available"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, expressconnectservice.ExpressconnectBgpGroupsStateRefreshFunc(d.Id(), []string{"Failed"}))
 
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())

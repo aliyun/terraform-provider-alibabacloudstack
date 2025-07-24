@@ -771,7 +771,7 @@ func resourceAlibabacloudStackElasticsearchDelete(d *schema.ResourceData, meta i
 		return err
 	}
 
-	stateConf := BuildStateConf([]string{"activating", "inactive", "active"}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"activating", "inactive", "active"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{}))
 	stateConf.PollInterval = 5 * time.Second
 
 	if _, err = stateConf.WaitForState(); err != nil {

@@ -1654,7 +1654,6 @@ func (s *RdsService) RdsBackupTaskStateRefreshFunc(instanceId, jobId string, fai
 	}
 }
 
-
 type RdsDescribedbproxyResponse struct {
 	DBProxyConnectStringItems struct {
 		DBProxyConnectStringItems []struct {
@@ -1729,4 +1728,39 @@ func (s *RdsService) RdsProxyStateRefreshFunc(id string, failStates []string) re
 		}
 		return object, object.DBProxyInstanceStatus, nil
 	}
+}
+
+type DBProxyEndpoint struct {
+	ReadOnlyInstanceDistributionType string `json:"ReadOnlyInstanceDistributionType"`
+	DBProxyConnectString             string `json:"DBProxyConnectString"`
+	DBProxyEndpointId                string `json:"DBProxyEndpointId"`
+	DBProxyFeatures                  string `json:"DBProxyFeatures"`
+	ReadOnlyInstanceWeight           string `json:"ReadOnlyInstanceWeight"`
+	ReadOnlyInstanceMaxDelayTime     string `json:"ReadOnlyInstanceMaxDelayTime"`
+	DBProxyConnectStringNetType      string `json:"DBProxyConnectStringNetType"`
+	DBProxyConnectStringPort         string `json:"DBProxyConnectStringPort"`
+}
+
+func (s *RdsService) DoDescribeDBProxyEndpointRequest(instanceId string) (*DBProxyEndpoint, error) {
+	// api: R-kvstore - 2015-01-01 - DescribeBackupTasks
+	request := s.client.NewCommonRequest("GET", "Rds", "2014-08-15", "DescribeDBProxyEndpoint", "")
+	dBProxyEndpoint := &DBProxyEndpoint{}
+	request.QueryParams["DBInstanceId"] = instanceId
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBackupTasks", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &dBProxyEndpoint)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBackupTasks", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return dBProxyEndpoint, nil
 }

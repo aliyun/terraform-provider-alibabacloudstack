@@ -45,7 +45,8 @@ resource "alibabacloudstack_db_proxy" "default" {
   * `effective_specific_time` - (选填) - 指定时间生效。格式：<i>yyyy-MM-dd</i>T<i>HH:mm:ss</i>Z（UTC时间）。>**EffectiveTime**为**SpecificTime**时，该参数必传。
   * `effective_time` - (选填) - 生效时间，取值：* **Immediate**：立即生效。* **MaintainTime**：在可运维时间段内生效，请参见ModifyDBInstanceMaintainTime。* **SpecificTime**：指定时间生效。默认值：**MaintainTime**。
   * `instance_network_type` - (选填) - 网络类型
-  * `persistent_connection_status` - (选填) - 是否开启连接保持。取值：- **Enabled**：开启连接保持- **Disabled**：关闭连接保持> - 仅RDS MySQL支持此参数。> - 修改连接保持状态时，**ConfigDBProxyService**取值为**Modify**。
+  * `connection_persist` - (选填) - 连接池。取值：- **0**：关闭 - **1**：开启会话级连接池 - **2**：开启事务级连接池。
+  * `causal_consist_read` - (选填) - 一致性参数。取值：- **0**：始终一致 - **1**：开启会话一致性 - **2**：开启全局一致性。
 
 ## 属性参考
 

@@ -318,7 +318,7 @@ func resourceAlibabacloudStackKVStoreInstanceCreate(d *schema.ResourceData, meta
 
 	d.SetId(fmt.Sprint(response["InstanceId"]))
 	// wait instance status change from Creating to Normal
-	stateConf := BuildStateConfByTimes([]string{"Creating"}, []string{"Normal"}, d.Timeout(schema.TimeoutCreate), 1*time.Minute, kvstoreService.RdsKvstoreInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}), 200)
+	stateConf := BuildStateConfByTimes([]string{"Creating"}, []string{"Normal"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, kvstoreService.RdsKvstoreInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}), 200)
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -329,7 +329,7 @@ func resourceAlibabacloudStackKVStoreInstanceUpdate(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	kvstoreService := KvstoreService{client}
 	d.Partial(true)
-	stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging", "Changing"}, []string{"Normal"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, kvstoreService.RdsKvstoreInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+	stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging", "Changing"}, []string{"Normal"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, kvstoreService.RdsKvstoreInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 
 	if d.HasChange("parameters") {
 		config := make(map[string]interface{})
@@ -798,7 +798,7 @@ func resourceAlibabacloudStackKVStoreInstanceDelete(d *schema.ResourceData, meta
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	stateConf := BuildStateConf([]string{"Creating", "Active", "Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 1*time.Minute, kvstoreService.RdsKvstoreInstanceStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"Creating", "Active", "Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, kvstoreService.RdsKvstoreInstanceStateRefreshFunc(d.Id(), []string{}))
 	_, err = stateConf.WaitForState()
 	return errmsgs.WrapError(err)
 }

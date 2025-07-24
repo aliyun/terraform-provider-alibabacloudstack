@@ -44,8 +44,8 @@ The following arguments are supported:
   * `effective_specific_time` - (Optional) - The specified time takes effect. Format: <I> yyyy-MM-dd</I> T <I> HH:mm:ss</I> Z(UTC time).> When **EffectiveTime** is set to **SpecificTime**, this parameter must be set.
   * `effective_time` - (Optional) - Effective time, value:* **Immediate**: Effective immediately.* **MaintainTime**: takes effect during the O & M period. For details, see ModifyDBInstanceMaintainTime.* **SpecificTime**: The specified time takes effect.Default value: **MaintainTime * *.
   * `instance_network_type` - (Optional) - Network type
-  * `persistent_connection_status` - (Optional) - Whether to turn on the connection hold. Value:-**Enabled**: open connection hold-**Disabled**: Turn off connection hold>-only RDS MySQL supports this parameter.>-The value of **ConfigDBProxyService** is **Modify** when the connection retention status is modified * *.
-
+  * `connection_persist` - (Optional) - Connection Pool.  Value: - **0**: Disable - **1**: Enable Session Connection Pool - **2**：Enable Transaction Connection Pool.
+  * `causal_consist_read` - (Optional) - Consistency Parameters.  Value: - **0**: Enable Transaction Connection Pool - **1**: Session Consistency - **2**: Global Consistency.
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:

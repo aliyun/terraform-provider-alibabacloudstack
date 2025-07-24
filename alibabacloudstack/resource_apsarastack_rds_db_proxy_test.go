@@ -11,7 +11,7 @@ import (
 func TestAccAlibabacloudStackRdsDbProxy_basic(t *testing.T) {
 	var v *RdsDescribedbproxyResponse
 	rand := getAccTestRandInt(10000, 999999)
-	name := fmt.Sprintf("tf-testAccdbproxy-%d", rand)
+	name := fmt.Sprintf("tf-testaccdbproxy%d", rand)
 	resourceId := "alibabacloudstack_db_proxy.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
 	serviceFunc := func() interface{} {
@@ -57,24 +57,44 @@ func TestAccAlibabacloudStackRdsDbProxy_basic(t *testing.T) {
 					}),
 				),
 			},
+//			{
+//				Config: testAccConfig(map[string]interface{}{
+//					"persistent_connection_status": "Enabled",
+//				}),
+//				Check: resource.ComposeTestCheckFunc(
+//					testAccCheck(map[string]string{
+//						"persistent_connection_status": "Enabled",
+//					}),
+//				),
+//			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"persistent_connection_status": "Enabled",
+					"connection_persist": "1",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"persistent_connection_status": "Enabled",
+						"connection_persist": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"causal_consist_read": "2",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"causal_consist_read": "2",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"db_proxy_connect_string_port": "8000",
-					"db_proxy_connect_string":      "test1234",
+					"db_proxy_connect_string":      "${var.name}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"db_proxy_connect_string": "test1234",
+						"db_proxy_connect_string": name,
 					}),
 				),
 			},

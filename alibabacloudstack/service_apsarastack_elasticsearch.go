@@ -117,7 +117,7 @@ func (s *ElasticsearchService) TriggerNetwork(d *schema.ResourceData, content ma
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "TriggerNetwork", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, s.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, s.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 10 * time.Second
 
 	if _, err := stateConf.WaitForState(); err != nil {
@@ -157,7 +157,7 @@ func (s *ElasticsearchService) ModifyWhiteIps(d *schema.ResourceData, content ma
 		}
 	}
 
-	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, s.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, s.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 10 * time.Second
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -457,7 +457,7 @@ func updateNodes(d *schema.ResourceData, meta interface{}) error {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateInstance", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
-		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 		stateConf.PollInterval = 10 * time.Second
 
 		if _, err := stateConf.WaitForState(); err != nil {
@@ -504,7 +504,7 @@ func updatePassword(d *schema.ResourceData, meta interface{}) error {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "UpdateUserSecurityInfo", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
-		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+		stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 		stateConf.PollInterval = 10 * time.Second
 
 		if _, err := stateConf.WaitForState(); err != nil {
@@ -546,7 +546,7 @@ func openHttps(d *schema.ResourceData, meta interface{}) error {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "OpenHttps", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 10 * time.Second
 
 	if _, err := stateConf.WaitForState(); err != nil {
@@ -566,7 +566,7 @@ func closeHttps(d *schema.ResourceData, meta interface{}) error {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), "CloseHttps", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
+	stateConf := BuildStateConf([]string{"activating"}, []string{"active"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, elasticsearchService.ElasticsearchStateRefreshFunc(d.Id(), []string{"inactive"}))
 	stateConf.PollInterval = 10 * time.Second
 
 	if _, err := stateConf.WaitForState(); err != nil {
