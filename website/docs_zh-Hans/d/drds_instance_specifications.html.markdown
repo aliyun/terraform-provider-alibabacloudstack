@@ -44,7 +44,7 @@ data "alibabacloudstack_drds_instance_specifications" "default {
 
 * `ids` - 包含所有匹配条件的实例规格ID的列表。
 * `names` - 包含所有匹配条件的实例规格名称的列表。
-* `series` - 实例规格的详细信息列表。每个元素包含以下属性：
+* `specifications` - 实例规格的详细信息列表。每个元素包含以下属性：
   * `id` - 实例规格的唯一标识符。
   * `name` - 实例规格的名称。
   * `cpu` - CPU核心数量。
