@@ -8,22 +8,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-var PolarDBReadWriteMap = map[string]string{
-	"port":              "3306",
-	"distribution_type": "Standard",
-	"weight":            NOSET,
-	"max_delay_time":    "30",
-	"instance_id":       CHECKSET,
-	"connection_string": CHECKSET,
-}
-
 func TestAccAlibabacloudStackPolarDBReadWriteSplittingConnection_update(t *testing.T) {
 	var connection *PolardbDescribedbinstancenetinfoResponse
 	var primary *PolardbDescribedbinstanceattributeResponse
 	var readonly *PolardbDescribedbinstanceattributeResponse
 
 	resourceId := "alibabacloudstack_polardb_readwrite_splitting_connection.default"
-	ra := resourceAttrInit(resourceId, PolarDBReadWriteMap)
+	ra := resourceAttrInit(resourceId, map[string]string{})
 
 	rc_connection := resourceCheckInitWithDescribeMethod(resourceId, &connection, func() interface{} {
 		return &PolardbService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -47,9 +38,8 @@ func TestAccAlibabacloudStackPolarDBReadWriteSplittingConnection_update(t *testi
 
 		// module name
 		IDRefreshName: resourceId,
-
-		Providers:    testAccProviders,
-		CheckDestroy: rac.checkResourceDestroy(),
+		Providers:     testAccProviders,
+		CheckDestroy:  rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -125,13 +115,12 @@ func resourcePolarDBReadWriteSplittingConfigDependence(prefix string) string {
 	}
 
 	resource "alibabacloudstack_polardb_dbinstance" "default" {
+		instance_storage = "5"
+		instance_name = "${var.name}"
+		storage_type = "local_ssd"
 		engine = "MySQL"
 		engine_version = "5.7"
 		instance_type = "rds.mysql.t1.small"
-		instance_storage = "30"
-		instance_name = "${var.name}"
-		storage_type = "local_ssd"
-		security_ips = ["10.168.1.12", "100.69.7.112"]
 	}
 
 	resource "alibabacloudstack_polardb_readonly_instance" "default" {

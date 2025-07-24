@@ -93,6 +93,7 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionCreate(d *schem
 	if err := resource.Retry(60*time.Minute, func() *resource.RetryError {
 
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return resource.RetryableError(errmsgs.WrapErrorf(err, "Process Common Request Failed"))
@@ -208,6 +209,7 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionUpdate(d *schem
 		}
 
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -231,6 +233,7 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionDelete(d *schem
 	request.QueryParams["DBInstanceId"] = d.Id()
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")

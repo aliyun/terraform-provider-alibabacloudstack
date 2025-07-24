@@ -10,7 +10,7 @@ import (
 
 func TestAccAlibabacloudStackPolarDBReadonlyInstance_update(t *testing.T) {
 	var instance *PolardbDescribedbinstanceattributeResponse
-	resourceId := "alibabacloudstack_polardb_readwrite_splitting_connection.default"
+	resourceId := "alibabacloudstack_polardb_readonly_instance.default"
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testAccDBInstance%d", rand)
 	var PolarDBReadonlyMap = map[string]string{}
