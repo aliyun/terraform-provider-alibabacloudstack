@@ -83,7 +83,7 @@ resource "alibabacloudstack_drds_account" "default" {
 	}
 }
 	
-data "alibabacloudstack_drds_databases" "default" {
+data "alibabacloudstack_drds_accounts" "default" {
   instance_id = "${alibabacloudstack_drds_database.default.instance_id}"
 }
 
