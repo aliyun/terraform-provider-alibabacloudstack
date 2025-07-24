@@ -68,7 +68,7 @@ func TestAccAlibabacloudStackDrdsAccountsDataSource(t *testing.T) {
 	}
 
 	var CheckInfo = dataSourceAttr{
-		resourceId:   "data.alibabacloudstack_drds_databases.default",
+		resourceId:   "data.alibabacloudstack_drds_accounts.default",
 		existMapFunc: exisMapFunc,
 		fakeMapFunc:  fakeMapFunc,
 	}
