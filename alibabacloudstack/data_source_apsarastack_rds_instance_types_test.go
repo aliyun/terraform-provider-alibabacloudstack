@@ -67,6 +67,9 @@ func TestAccAlibabacloudStackRdsInstanceTypesDataSource(t *testing.T) {
 			"instance_types.0.cpu_type":       CHECKSET,
 			"instance_types.0.series":         CHECKSET,
 			"instance_types.0.connections":    CHECKSET,
+			"instance_types.0.storage_type":     CHECKSET,
+			"instance_types.0.storage_min":      CHECKSET,
+			"instance_types.0.storage_max":      CHECKSET,
 		}
 	}
 

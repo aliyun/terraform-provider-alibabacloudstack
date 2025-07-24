@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"sort"
+	"strconv"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -22,14 +23,14 @@ func dataSourceAlibabacloudStackRdsInstanceTypes() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"engine": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"PostgreSQL", "MySQL", "POLARDB"}, false),
 			},
 			"engine_version": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:         schema.TypeString,
+				Optional:     true,
 				RequiredWith: []string{"engine"},
 			},
 			"cpu": {
@@ -40,7 +41,7 @@ func dataSourceAlibabacloudStackRdsInstanceTypes() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"intel", "arm64",}, false),
+				ValidateFunc: validation.StringInSlice([]string{"intel", "arm64"}, false),
 			},
 			"memory": {
 				Type:     schema.TypeInt,
@@ -52,11 +53,11 @@ func dataSourceAlibabacloudStackRdsInstanceTypes() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"CPU", "Memory"}, false),
 			},
-			"series":{
-				Type:     schema.TypeString,
-				Optional: true,
+			"series": {
+				Type:         schema.TypeString,
+				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"dual_ha"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"dual_ha", "read_only"}, false),
 			},
 			// Computed values.
 			"instance_types": {
@@ -88,11 +89,23 @@ func dataSourceAlibabacloudStackRdsInstanceTypes() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"series":{
+						"series": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"connections": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"storage_type": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"storage_min": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"storage_max": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
@@ -118,22 +131,22 @@ func dataSourceAlibabacloudStackRdsInstanceTypesRead(d *schema.ResourceData, met
 	types := []map[string]interface{}{}
 
 	reqQuery := map[string]interface{}{
-		"pageStart":1,
-		"pageSize":500,
-		"label":"true",
-		"resourceType":"rds",
-		"status":"Available",
+		"pageStart":    1,
+		"pageSize":     500,
+		"label":        "true",
+		"resourceType": "rds",
+		"status":       "Available",
 	}
-	if v,ok := d.GetOk("engine"); ok {
+	if v, ok := d.GetOk("engine"); ok {
 		reqQuery["engine"] = v
 	}
-	if v,ok := d.GetOk("engine_version"); ok {
+	if v, ok := d.GetOk("engine_version"); ok {
 		reqQuery["engineVersion"] = v
 	}
-	if v,ok := d.GetOk("cpu_type"); ok {
+	if v, ok := d.GetOk("cpu_type"); ok {
 		reqQuery["cpuType"] = v
 	}
-	
+
 	if v, ok := d.GetOk("series"); ok {
 		reqQuery["series"] = v
 	}
@@ -143,7 +156,7 @@ func dataSourceAlibabacloudStackRdsInstanceTypesRead(d *schema.ResourceData, met
 	if v, ok := d.GetOk("memory"); ok {
 		reqQuery["memory"] = v
 	}
-	
+
 	reqHeader := map[string]string{
 		"x-acs-territory": "US",
 		"x-acs-lang":      "EN",
@@ -170,15 +183,36 @@ func dataSourceAlibabacloudStackRdsInstanceTypesRead(d *schema.ResourceData, met
 		if err != nil {
 			return err
 		}
+		var connections int
+		if v, ok := data["connections"].(json.Number); ok {
+			vv, err := v.Int64()
+			if err != nil {
+				return err
+			}
+			connections = int(vv)
+		} else if v, ok := data["connections"].(string); ok {
+			if v == "Unlimited" {
+				connections = -1
+			} else {
+				vv, err := strconv.Atoi(v)
+				if err != nil {
+					return err
+				}
+				connections = vv
+			}
+		}
 		types = append(types, map[string]interface{}{
-			"id":     id,
-			"cpu":    cpu,
-			"memory": memory,
-			"series": data["series"],
-			"engine": data["engineLabel"],
+			"id":             id,
+			"cpu":            cpu,
+			"memory":         memory,
+			"series":         data["series"],
+			"engine":         data["engineLabel"],
 			"engine_version": data["engineVersionLabel"],
-			"cpu_type": data["cpuType"],
-			"connections": data["connectionsLabel	"],
+			"cpu_type":       data["cpuType"],
+			"connections":    connections,
+			"storage_type":   data["dbInstanceStorageType"],
+			"storage_min":    data["storageMin"],
+			"storage_max":    data["storageMax"],
 		})
 		existedId[id] = ""
 		ids = append(ids, id)
@@ -196,7 +230,7 @@ func dataSourceAlibabacloudStackRdsInstanceTypesRead(d *schema.ResourceData, met
 			return false
 		})
 	}
-	
+
 	d.Set("ids", ids)
 	d.Set("instance_types", types)
 	d.SetId(dataResourceIdHash(ids))
