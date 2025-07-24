@@ -20,50 +20,50 @@ func TestAccAlibabacloudStackDrdsAccountsDataSource(t *testing.T) {
 	namesRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackDrdsAccountsSourceConfig(name, map[string]string{
 			"instance_id": `"${alibabacloudstack_drds_database.default.instance_id}"`,
-			"names":`["${var.name}",]`,
+			"names":       `["${var.name}",]`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudStackDrdsAccountsSourceConfig(name, map[string]string{
 			"instance_id": `"${alibabacloudstack_drds_database.default.instance_id}"`,
-						"names":`["${var.name}_fake",]`,
+			"names":       `["${var.name}_fake",]`,
 		}),
 	}
 	defaultAccountTypeRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackDrdsAccountsSourceConfig(name, map[string]string{
-			"instance_id": `"${alibabacloudstack_drds_database.default.instance_id}"`,
-			"names":`["${var.name}_db",]`,
-			"account_type" : "0",
+			"instance_id":  `"${alibabacloudstack_drds_database.default.instance_id}"`,
+			"names":        `["${var.name}_db",]`,
+			"account_type": "0",
 		}),
 		fakeConfig: testAccCheckAlibabacloudStackDrdsAccountsSourceConfig(name, map[string]string{
-			"instance_id": `"${alibabacloudstack_drds_database.default.instance_id}"`,
-			"names":`["${var.name}_db",]`,
-			"account_type" : "1",
+			"instance_id":  `"${alibabacloudstack_drds_database.default.instance_id}"`,
+			"names":        `["${var.name}_db",]`,
+			"account_type": "1",
 		}),
 	}
 	userAccountTypeRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackDrdsAccountsSourceConfig(name, map[string]string{
-			"instance_id": `"${alibabacloudstack_drds_database.default.instance_id}"`,
-			"names":`["${var.name}",]`,
-			"account_type" : "1",
+			"instance_id":  `"${alibabacloudstack_drds_database.default.instance_id}"`,
+			"names":        `["${var.name}",]`,
+			"account_type": "1",
 		}),
 		fakeConfig: testAccCheckAlibabacloudStackDrdsAccountsSourceConfig(name, map[string]string{
-			"instance_id": `"${alibabacloudstack_drds_database.default.instance_id}"`,
-			"names":`["${var.name}",]`,
-			"account_type" : "0",
+			"instance_id":  `"${alibabacloudstack_drds_database.default.instance_id}"`,
+			"names":        `["${var.name}",]`,
+			"account_type": "0",
 		}),
 	}
 
 	var exisMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"accounts.#":                    CHECKSET,
+			"accounts.#":                   CHECKSET,
 			"accounts.0.drds_account_name": CHECKSET,
-			"accounts.0.instance_id":        CHECKSET,
+			"accounts.0.instance_id":       CHECKSET,
 		}
 	}
 	var fakeMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"accounts.#":           "0",
-			"ids.#": "0",
-			"names.#": "0",
+			"accounts.#": "0",
+			"ids.#":      "0",
+			"names.#":    "0",
 		}
 	}
 
@@ -139,7 +139,7 @@ func testAccCheckAlibabacloudStackDrdsAccountsSourceConfig(name string, attrMap 
 		}
 	}
 	
-data "alibabacloudstack_drds_databases" "default" {
+data "alibabacloudstack_drds_accounts" "default" {
   %s
 }
 `, name, VSwitchCommonTestCase, strings.Join(pairs, "\n  "))
