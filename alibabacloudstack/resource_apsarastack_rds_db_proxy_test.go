@@ -34,7 +34,7 @@ func TestAccAlibabacloudStackRdsDbProxy_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_instance_id":        "${alibabacloudstack_db_instance.instance.id}",
+					"db_instance_id":        "${alibabacloudstack_db_instance.default.id}",
 					"db_proxy_instance_num": "1",
 					"instance_network_type": "Classic",
 				}),
@@ -47,12 +47,13 @@ func TestAccAlibabacloudStackRdsDbProxy_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_proxy_instance_num": "3",
-					"effective_time":        "MaintainTime",
+					"db_proxy_instance_num": "2",
+					//"effective_time":        "SpecificTime",
+					//"effective_specific_time": "${local.thrity_seconds_after}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"db_proxy_instance_num": "3",
+						"db_proxy_instance_num": "2",
 					}),
 				),
 			},
@@ -91,15 +92,13 @@ func resourceDBProxyConfigDependence(name string) string {
 	variable "name" {
 		default = "%v"
 	}
-
-	resource "alibabacloudstack_db_instance" "instance" {
-		engine               = "MySQL"
-	    engine_version       = "5.7"
-	    instance_type        = "rds.mysql.s2.large"
-	    instance_storage     = "5"
-	    instance_name 		 = "${var.name}"
-	    storage_type         = "local_ssd"
-	}
 	
-	`, name)
+	%s
+	%s
+
+locals {
+  thrity_seconds_after = formatdate("YYYY-MM-DD'T'hh:mm:ssZ", timeadd(timestamp(), "30s"))
+}
+
+	`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase())
 }

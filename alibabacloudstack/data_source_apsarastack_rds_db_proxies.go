@@ -178,8 +178,8 @@ func dataSourceAlibabacloudStackRdsDbProxiesRead(d *schema.ResourceData, meta in
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// api: Rds - 2014-08-15 - DescribeDBProxy
-	request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "DescribeDBProxy", "")
-	RdsDescribedbproxyResponseObj := RdsDescribedbproxyResponse{}
+	request := client.NewCommonRequest("GET", "Rds", "2014-08-15", "DescribeDBProxy", "")
+	rdsDescribedbproxyResponseObj := RdsDescribedbproxyResponse{}
 
 	if v, ok := d.GetOk("db_instance_id"); ok {
 		request.QueryParams["DBInstanceId"] = v.(string)
@@ -195,7 +195,7 @@ func dataSourceAlibabacloudStackRdsDbProxiesRead(d *schema.ResourceData, meta in
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_db_proxy", "DescribeDBProxy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &RdsDescribedbproxyResponseObj)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &rdsDescribedbproxyResponseObj)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_rds_db_proxy", "DescribeDBProxy", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -204,7 +204,7 @@ func dataSourceAlibabacloudStackRdsDbProxiesRead(d *schema.ResourceData, meta in
 	var ids []string
 	datas := make([]interface{}, 0)
 	db_proxy_connect_string_items := make([]map[string]interface{}, 0)
-	for _, item := range RdsDescribedbproxyResponseObj.DBProxyConnectStringItems.DBProxyConnectStringItems {
+	for _, item := range rdsDescribedbproxyResponseObj.DBProxyConnectStringItems.DBProxyConnectStringItems {
 		db_proxy_connect_string_items = append(db_proxy_connect_string_items, map[string]interface{}{
 			"db_proxy_connect_string":               item.DBProxyConnectString,
 			"db_proxy_connect_string_port":          item.DBProxyConnectStringPort,
@@ -215,7 +215,7 @@ func dataSourceAlibabacloudStackRdsDbProxiesRead(d *schema.ResourceData, meta in
 	}
 
 	db_proxy_endpoint_items := make([]map[string]interface{}, 0)
-	for _, item := range RdsDescribedbproxyResponseObj.DBProxyEndpointItems.DBProxyEndpointItems {
+	for _, item := range rdsDescribedbproxyResponseObj.DBProxyEndpointItems.DBProxyEndpointItems {
 		db_proxy_endpoint_items = append(db_proxy_endpoint_items, map[string]interface{}{
 			"db_proxy_endpoint_name":    item.DBProxyEndpointName,
 			"db_proxy_endpoint_type":    item.DBProxyEndpointType,
@@ -226,19 +226,19 @@ func dataSourceAlibabacloudStackRdsDbProxiesRead(d *schema.ResourceData, meta in
 	log.Printf("[DEBUG] db_proxy_endpoint_items: %#v", db_proxy_endpoint_items)
 	log.Printf("[DEBUG] db_proxy_connect_string_items: %#v", db_proxy_connect_string_items)
 	i := map[string]interface{}{
-		"db_proxy_instance_current_minor_version": RdsDescribedbproxyResponseObj.DBProxyInstanceCurrentMinorVersion,
+		"db_proxy_instance_current_minor_version": rdsDescribedbproxyResponseObj.DBProxyInstanceCurrentMinorVersion,
 
-		"db_proxy_instance_latest_minor_version": RdsDescribedbproxyResponseObj.DBProxyInstanceLatestMinorVersion,
+		"db_proxy_instance_latest_minor_version": rdsDescribedbproxyResponseObj.DBProxyInstanceLatestMinorVersion,
 
 		"db_proxy_connect_string_items": db_proxy_connect_string_items,
 
-		"db_proxy_instance_num": RdsDescribedbproxyResponseObj.DBProxyInstanceNum,
+		"db_proxy_instance_num": rdsDescribedbproxyResponseObj.DBProxyInstanceNum,
 
-		"db_proxy_instance_status": RdsDescribedbproxyResponseObj.DBProxyInstanceStatus,
+		"db_proxy_instance_status": rdsDescribedbproxyResponseObj.DBProxyInstanceStatus,
 
-		"db_proxy_instance_type": RdsDescribedbproxyResponseObj.DBProxyInstanceType,
+		"db_proxy_instance_type": rdsDescribedbproxyResponseObj.DBProxyInstanceType,
 
-		"db_proxy_service_status": RdsDescribedbproxyResponseObj.DBProxyServiceStatus,
+		"db_proxy_service_status": rdsDescribedbproxyResponseObj.DBProxyServiceStatus,
 
 		"db_proxy_endpoint_items": db_proxy_endpoint_items,
 	}

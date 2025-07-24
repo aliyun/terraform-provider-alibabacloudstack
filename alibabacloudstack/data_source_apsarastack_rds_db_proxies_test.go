@@ -52,20 +52,15 @@ variable "name" {
   default = "%s"
 }
 
-resource "alibabacloudstack_db_instance" "instance" {
-	engine               = "MySQL"
-	engine_version       = "5.7"
-	instance_type        = "mysql.x8.medium.2"
-	instance_storage     = "5"
-	instance_name 		 = "${var.name}"
-	storage_type         = "local_ssd"
-}
+%s
+
+%s
 
 resource "alibabacloudstack_db_proxy" "default" {
-	db_instance_id = "${alibabacloudstack_db_instance.instance.id}"
+	db_instance_id = "${alibabacloudstack_db_instance.default.id}"
 	db_proxy_instance_num = "1"
 	instance_network_type = "Classic"
 }
 
- `, name)
+ `, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase())
 }
