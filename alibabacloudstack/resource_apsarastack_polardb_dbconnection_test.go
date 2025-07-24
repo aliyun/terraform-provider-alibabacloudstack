@@ -77,7 +77,7 @@ func resourcePolardbConnectionConfigDependence(name string) string {
 		db_instance_storage = 5
 		db_instance_class = "rds.mysql.t1.small"
 		zone_id= "${data.alibabacloudstack_zones.default.zones.0.id}"
-		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+		vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 	}
-	`, RdsCommonTestCase, name)
+	`, VSwitchCommonTestCase, name)
 }

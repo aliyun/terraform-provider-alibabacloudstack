@@ -8,14 +8,14 @@ import (
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
-	
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackDBConnectionConfigUpdate(t *testing.T) {
 	var v *rds.DBInstanceNetInfo
 	var rdsEndpoint string
-	rand := getAccTestRandInt(10000,20000)
+	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf-testAccDBconnection%d", rand)
 
 	if rdsEndpoint = os.Getenv("RDS_ENDPOINT"); rdsEndpoint == "" {
@@ -56,7 +56,7 @@ func TestAccAlibabacloudStackDBConnectionConfigUpdate(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id":       "${alibabacloudstack_db_instance.instance.id}",
+					"instance_id":       "${alibabacloudstack_db_instance.default.id}",
 					"connection_prefix": fmt.Sprintf("tf-testacc%d", rand),
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -84,7 +84,7 @@ func TestAccAlibabacloudStackDBConnectionConfigUpdate(t *testing.T) {
 
 func resourceDBConnectionConfigDependence(name string) string {
 	return fmt.Sprintf(`
-	%s
+	
 
 	variable "creation" {
 		default = "Rds"
@@ -93,17 +93,7 @@ func resourceDBConnectionConfigDependence(name string) string {
 	variable "name" {
 		default = "%s"
 	}
-
-	resource "alibabacloudstack_db_instance" "instance" {
-	  engine               = "MySQL"
-	  engine_version       = "5.6"
-	  instance_type        = "rds.mysql.s2.large"
-	  instance_storage     = "5"
-	  instance_charge_type = "Postpaid"
-	  instance_name        = "${var.name}"
-	  vswitch_id           = "${alibabacloudstack_vswitch.default.id}"
-	  monitoring_period    = "60"
-	  storage_type         = "local_ssd"
-	}
-	`, RdsCommonTestCase, name)
+	%s
+	%s 
+	`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase())
 }

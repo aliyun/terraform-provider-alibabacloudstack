@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -42,6 +40,7 @@ func TestAccAlibabacloudStackDBAccountPrivilege_mysql(t *testing.T) {
 		IDRefreshName: resourceId,
 
 		Providers:    testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 		// CheckDestroy: rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
 			{
@@ -95,7 +94,7 @@ func TestAccAlibabacloudStackDBAccountPrivilege_mysql(t *testing.T) {
 
 func resourceDBAccountPrivilegeConfigDependenceForMySql(name string) string {
 	return fmt.Sprintf(`
-%s
+
 
 	variable "creation" {
 		default = "Rds"
@@ -106,17 +105,18 @@ func resourceDBAccountPrivilegeConfigDependenceForMySql(name string) string {
 	}
 
 
-resource "alibabacloudstack_db_instance" "default" {
-		engine               = "MySQL"
-        engine_version       = "5.6"
-        instance_type        = "rds.mysql.s2.large"
-	    instance_storage     = "30"
-		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-	    instance_name = "${var.name}"
-	    storage_type         = "local_ssd"
+%s
 
-	}
+%s
 
+resource "random_password" "password" {
+	length           = 12
+	special          = true
+	override_special = "!@#$^&*()_"
+	min_lower        = 1
+	min_upper        = 1
+	min_numeric      = 1
+}
 
 
 	resource "alibabacloudstack_db_database" "default" {
@@ -130,10 +130,10 @@ resource "alibabacloudstack_db_instance" "default" {
 	resource "alibabacloudstack_db_account" "default" {
 	  instance_id = "${alibabacloudstack_db_instance.default.id}"
 	  name = "tftestprivilege"
-	  password = "%s"
+	  password = random_password.password.result
 	  description = "from terraform"
 	}
-`, RdsCommonTestCase, name, getAccTestPassword(12))
+`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase())
 }
 
 //func TestAccAlibabacloudStackDBAccountPrivilege_PostgreSql(t *testing.T) {
@@ -219,7 +219,7 @@ resource "alibabacloudstack_db_instance" "default" {
 //		engine_version = "10.0"
 //		instance_type = "pg.n2.large.1"
 //		instance_storage = "30"
-//		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+//		vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 //		instance_name = "${var.name}"
 //	}
 //
@@ -237,5 +237,5 @@ resource "alibabacloudstack_db_instance" "default" {
 //	  password = "inputYourCodeHere"
 //	  description = "from terraform"
 //	}
-//`, RdsCommonTestCase, name)
+//`, VSwitchCommonTestCase, name)
 //}

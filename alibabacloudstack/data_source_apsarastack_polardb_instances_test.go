@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-var testAccCheckAlibabacloudStackPolardbInstanceDataSourceConfig_mysql string = RdsCommonTestCase +
+var testAccCheckAlibabacloudStackPolardbInstanceDataSourceConfig_mysql string = VSwitchCommonTestCase +
 	fmt.Sprintf(
 		`
 variable "name" {
@@ -27,7 +27,7 @@ resource "alibabacloudstack_polardb_dbinstance" "default" {
 	db_instance_storage = 5
 	db_instance_class = "rds.mysql.t1.small"
 	zone_id= "${data.alibabacloudstack_zones.default.zones.0.id}"
-	vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+	vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 }
 
 data "alibabacloudstack_polardb_dbinstances" "default" {

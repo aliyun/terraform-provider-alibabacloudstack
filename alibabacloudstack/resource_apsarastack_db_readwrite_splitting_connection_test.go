@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	
-
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -113,7 +111,7 @@ func TestAccAlibabacloudStackDBReadWriteSplittingConnection_update(t *testing.T)
 
 func resourceDBReadWriteSplittingConfigDependence(prefix string) string {
 	return fmt.Sprintf(`
-	%s
+	
 	variable "creation" {
 		default = "Rds"
 	}
@@ -128,17 +126,9 @@ func resourceDBReadWriteSplittingConfigDependence(prefix string) string {
 		default = "%s"
 	}
 
-	resource "alibabacloudstack_db_instance" "default" {
-		engine = "MySQL"
-		engine_version = "5.6"
-		instance_type = "rds.mysql.s2.large"
-		instance_storage = "30"
-		instance_charge_type = "Postpaid"
-		instance_name = "${var.name}"
-		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
-		storage_type = "local_ssd"
-		security_ips = ["10.168.1.12", "100.69.7.112"]
-	}
+	%s
+	
+	%s
 
 	resource "alibabacloudstack_db_readonly_instance" "default" {
 		master_db_instance_id = "${alibabacloudstack_db_instance.default.id}"
@@ -147,8 +137,8 @@ func resourceDBReadWriteSplittingConfigDependence(prefix string) string {
 		instance_type = "${alibabacloudstack_db_instance.default.instance_type}"
 		instance_storage = "${alibabacloudstack_db_instance.default.instance_storage}"
 		instance_name = "${var.name}_ro"
-		vswitch_id = "${alibabacloudstack_vswitch.default.id}"
+		vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
 		db_instance_storage_type = "${alibabacloudstack_db_instance.default.storage_type}"
 	}
-`, RdsCommonTestCase, prefix)
+`, prefix, VSwitchCommonTestCase, RdsMysqlCommonTestCase() )
 }

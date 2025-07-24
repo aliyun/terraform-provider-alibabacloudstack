@@ -810,21 +810,36 @@ data "alibabacloudstack_images" "default" {
 
 `
 
-const RdsCommonTestCase = `
-data  "alibabacloudstack_zones" "default" {
-  available_resource_creation = "${var.creation}"
+func RdsMysqlCommonTestCase() string {
+	return fmt.Sprintf(`
+variable "rds_instance_type" {
+  type      = string
+  default   = "%s"
+  sensitive = true
 }
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "192.168.0.0/16"
+
+data "alibabacloudstack_rds_instance_types" "default" {
+  ids                  = var.rds_instance_type != "" ? [var.rds_instance_type] : null
+  engine               = "MySQL"
+  engine_version       = "5.7"
+  sorted_by            = "CPU"
+  series               = "dual_ha"
 }
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "192.168.0.0/16"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
+
+resource "alibabacloudstack_db_instance" "default" {
+  engine               = data.alibabacloudstack_rds_instance_types.default.instance_types.0.engine
+  engine_version       = data.alibabacloudstack_rds_instance_types.default.instance_types.0.engine_version
+  instance_type        = data.alibabacloudstack_rds_instance_types.default.instance_types.0.id
+  instance_storage     = data.alibabacloudstack_rds_instance_types.default.instance_types.0.storage_min
+  instance_charge_type = "Postpaid"
+  instance_name        = "${var.name}"
+  vswitch_id           = "${alibabacloudstack_vpc_vswitch.default.id}"
+  monitoring_period    = "60"
+  storage_type         = data.alibabacloudstack_rds_instance_types.default.instance_types.0.storage_type
 }
-`
+` ,  os.Getenv("ALIBABACLOUDSTACK_TEST_RDS_INSTNCE_TYPE")) 
+}
+
 const PolarDBCommonTestCase = `
 data "alibabacloudstack_zones" "default" {
   available_resource_creation = "${var.creation}"
@@ -1381,21 +1396,6 @@ resource "alibabacloudstack_disk" "disk" {
   description       = "ECS-Disk"
   category          = "cloud_efficiency"
   size              = "30"
-}
-
-`
-
-const DBInstanceCommonTestCase = `
-
-resource "alibabacloudstack_db_instance" "default" {
-  engine               = "MySQL"
-  engine_version       = "5.6"
-  instance_type        = "rds.mysql.s2.large"
-  instance_storage     = "30"
-  storage_type         = "local_ssd"
-  instance_name        = "testacctf-mysql"
-  tde_status           = false
-  enable_ssl           = false
 }
 
 `
