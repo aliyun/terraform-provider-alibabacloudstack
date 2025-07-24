@@ -495,6 +495,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cloud_firewall_control_policies":           dataSourceAlibabacloudStackCloudFirewallControlPolicies(),
 		"alibabacloudstack_ecs_ebs_storage_sets":                      dataSourceAlibabacloudStackEcsEbsStorageSets(),
 		"alibabacloudstack_polardb_zones":                             dataSourceAlibabacloudStackPolardbZones(),
+		"alibabacloudstack_polardb_instance_types":                    dataSourceAlibabacloudStackPolardbInstanceTypes(),
 		"alibabacloudstack_polardb_databases":                         dataSourceAlibabacloudStackPolardbDatabases(),
 		"alibabacloudstack_polardb_dbinstances":                       dataSourceAlibabacloudStackPolardbDbInstances(),
 		"alibabacloudstack_polardb_instances":                         dataSourceAlibabacloudStackPolardbDbInstances(),
