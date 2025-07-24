@@ -318,6 +318,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cms_alarms":                                dataSourceAlibabacloudStackCmsAlarms(),
 		"alibabacloudstack_cloudmonitorservice_metricalarmrules":      dataSourceAlibabacloudStackCmsAlarms(),
 		"alibabacloudstack_datahub_service":                           dataSourceAlibabacloudStackDatahubService(),
+		"alibabacloudstack_rds_instance_types":                        dataSourceAlibabacloudStackRdsInstanceTypes(),
 		"alibabacloudstack_db_instances":                              dataSourceAlibabacloudStackDBInstances(),
 		"alibabacloudstack_rds_dbinstances":                           dataSourceAlibabacloudStackDBInstances(),
 		"alibabacloudstack_db_zones":                                  dataSourceAlibabacloudStackDBZones(),
