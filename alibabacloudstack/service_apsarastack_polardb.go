@@ -417,16 +417,16 @@ type PolardbDescribedbinstancenetinfoResponse struct {
 	SecurityIPMode      string `json:"SecurityIPMode"`
 }
 
-func (s *PolardbService) DoPolardbDescribedbinstancenetinfoRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string) (*PolardbDescribedbinstancenetinfoResponse, error) {
+func (s *PolardbService) DoPolardbDescribedbinstancenetinfoRequest(id string) (*PolardbDescribedbinstancenetinfoResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeDBInstanceNetInfo
-	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceNetInfo", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceNetInfo", "")
 	PolardbDescribedbinstancenetinfoResponse := &PolardbDescribedbinstancenetinfoResponse{}
 
 	//调用request_params_handler
 
 	request.QueryParams["DBInstanceId"] = id
 
-	bresponse, err := client.ProcessCommonRequest(request)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
@@ -746,7 +746,7 @@ func (s *PolardbService) WaitForPolardbConnection(d *schema.ResourceData, client
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
 		parts, err := ParseResourceId(d.Id(), 2)
-		object, err := s.DoPolardbDescribedbinstancenetinfoRequest(d, client, parts[0])
+		object, err := s.DoPolardbDescribedbinstancenetinfoRequest(parts[0])
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				if status == Deleted {

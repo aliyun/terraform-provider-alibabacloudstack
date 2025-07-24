@@ -457,11 +457,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceDelete(d *schema.ResourceDa
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_account", "DeleteAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 5*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Failed"}))
-	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	}
-	return nil
+	return PolardbService.WaitForDBInstance(d.Id(), Deleted, DefaultLongTimeout)
 }
 
 type PolardbCreatereadonlydbinstanceResponse struct {

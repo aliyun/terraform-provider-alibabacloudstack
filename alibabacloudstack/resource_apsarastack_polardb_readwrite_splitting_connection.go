@@ -116,7 +116,7 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionRead(d *schema.
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	PolardbService := PolardbService{client}
 
-	res, err := PolardbService.DoPolardbDescribedbinstancenetinfoRequest(d, client, d.Id())
+	res, err := PolardbService.DoPolardbDescribedbinstancenetinfoRequest(d.Id())
 	if res != nil {
 		for _, conn := range res.DBInstanceNetInfos.DBInstanceNetInfo {
 			if conn.ConnectionStringType != "ReadWriteSplitting" {
@@ -215,10 +215,9 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionUpdate(d *schem
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "AllocateInstancePublicConnection", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
-		// wait instance running after modifying
-		if err := PolardbService.WaitForDBInstance(d.Id(), Running, DefaultLongTimeout); err != nil {
-			return errmsgs.WrapError(err)
+		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Running"}, d.Timeout(schema.TimeoutDelete), 5*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
 
