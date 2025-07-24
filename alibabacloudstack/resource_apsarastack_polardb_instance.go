@@ -822,7 +822,7 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 
-		if err := PolardbService.WaitForDBInstance(d, client, Running, DefaultLongTimeout); err != nil {
+		if err := PolardbService.WaitForDBInstance(d.Id(), Running, DefaultLongTimeout); err != nil {
 			return errmsgs.WrapError(err)
 		}
 		if ssl == true {
@@ -838,7 +838,7 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	PolardbService := PolardbService{client}
 
-	instance, err := PolardbService.DoPolardbDescribedbinstanceattributeRequest(d.Id(), client)
+	instance, err := PolardbService.DoPolardbDescribedbinstanceattributeRequest(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			return nil
@@ -900,6 +900,9 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 
 	if instance.Items.DBInstanceAttribute[0].PayType == string(Prepaid) {
 		response, err := PolardbService.DoPolardbDescribeinstanceautorenewalattributeRequest(d, client)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
 		if response != nil && len(response.Items.Item) > 0 {
 			renew := response.Items.Item[0]
 			d.Set("auto_renew", renew.AutoRenew == "True")
@@ -919,7 +922,7 @@ func resourceAlibabacloudStackPolardbInstanceDelete(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	PolardbService := PolardbService{client}
 
-	instance, err := PolardbService.DoPolardbDescribedbinstanceattributeRequest(d.Id(), client)
+	instance, err := PolardbService.DoPolardbDescribedbinstanceattributeRequest(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			return nil
@@ -942,7 +945,7 @@ func resourceAlibabacloudStackPolardbInstanceDelete(d *schema.ResourceData, meta
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_account", "DeleteAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	return PolardbService.WaitForDBInstance(d, client, Deleted, DefaultLongTimeout)
+	return PolardbService.WaitForDBInstance(d.Id(), Deleted, DefaultLongTimeout)
 }
 
 type PolardbCreatedbinstanceResponse struct {

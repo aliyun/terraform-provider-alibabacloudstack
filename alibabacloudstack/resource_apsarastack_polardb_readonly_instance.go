@@ -14,17 +14,9 @@ import (
 )
 
 func resourceAlibabacloudStackPolardbReadonlyInstance() *schema.Resource {
-	return &schema.Resource{
-		Create: resourceAlibabacloudStackPolardbReadonlyInstanceCreate,
-		Read:   resourceAlibabacloudStackPolardbReadonlyInstanceRead,
-		Update: resourceAlibabacloudStackPolardbReadonlyInstanceUpdate,
-		Delete: resourceAlibabacloudStackPolardbReadonlyInstanceDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
+	resource := &schema.Resource{
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(20 * time.Minute),
+			Create: schema.DefaultTimeout(40 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
@@ -148,6 +140,8 @@ func resourceAlibabacloudStackPolardbReadonlyInstance() *schema.Resource {
 			},
 		},
 	}
+	setResourceFunc(resource, resourceAlibabacloudStackPolardbReadonlyInstanceCreate, resourceAlibabacloudStackPolardbReadonlyInstanceRead, resourceAlibabacloudStackPolardbReadonlyInstanceUpdate, resourceAlibabacloudStackPolardbReadonlyInstanceDelete)
+	return resource
 }
 
 func resourceAlibabacloudStackPolardbReadonlyInstanceCreate(d *schema.ResourceData, meta interface{}) error {
@@ -155,12 +149,12 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceCreate(d *schema.ResourceDa
 	PolardbService := PolardbService{client}
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "CreateReadOnlyDBInstance", "")
 	PolardbCreatereadonlydbinstanceResponse := PolardbCreatereadonlydbinstanceResponse{}
-
-	if err := PolardbService.WaitForDBInstance(d, client, Running, DefaultLongTimeout); err != nil {
+	master_instance_id := connectivity.GetResourceData(d, "master_instance_id", "master_db_instance_id").(string)
+	if err := PolardbService.WaitForDBInstance(master_instance_id, Running, DefaultLongTimeout); err != nil {
 		return errmsgs.WrapError(err)
 	}
 
-	request.QueryParams["DBInstanceId"] = connectivity.GetResourceData(d, "master_instance_id", "master_db_instance_id").(string)
+	request.QueryParams["DBInstanceId"] = master_instance_id
 	if err := errmsgs.CheckEmpty(request.QueryParams["DBInstanceId"], schema.TypeString, "master_instance_id", "master_db_instance_id"); err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -209,6 +203,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceCreate(d *schema.ResourceDa
 	request.QueryParams["ClientToken"] = buildClientToken(request.GetActionName())
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -229,13 +224,12 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceCreate(d *schema.ResourceDa
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	return resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	PolardbService := PolardbService{client}
-	d.Partial(true)
 	if d.HasChange("parameters") {
 		if err := PolardbService.ModifyParameters(d, client); err != nil {
 			return errmsgs.WrapError(err)
@@ -243,7 +237,6 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 	}
 
 	if d.IsNewResource() {
-		d.Partial(false)
 		return resourceAlibabacloudStackPolardbReadonlyInstanceRead(d, meta)
 	}
 
@@ -254,6 +247,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 		request.QueryParams["DBInstanceDescription"] = connectivity.GetResourceData(d, "db_instance_description", "instance_name").(string)
 
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -275,11 +269,6 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 	request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceSpec", "")
 	PolardbModifydbinstancespecResponse := PolardbModifydbinstancespecResponse{}
 	request.QueryParams["DBInstanceId"] = d.Id()
-	if v, ok := connectivity.GetResourceDataOk(d, "payment_type", "instance_charge_type"); ok {
-		request.QueryParams["PayType"] = v.(string)
-	} else {
-		request.QueryParams["PayType"] = string(Postpaid)
-	}
 
 	if d.HasChanges("instance_type", "db_instance_class") {
 		request.QueryParams["DBInstanceClass"] = connectivity.GetResourceData(d, "db_instance_class", "instance_type").(string)
@@ -305,6 +294,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -320,9 +310,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSpec", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
-
-	d.Partial(false)
-	return resourceAlibabacloudStackPolardbReadonlyInstanceRead(d, meta)
+	return nil
 }
 
 func resourceAlibabacloudStackPolardbReadonlyInstanceRead(d *schema.ResourceData, meta interface{}) error {
@@ -330,7 +318,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceRead(d *schema.ResourceData
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	PolardbService := PolardbService{client}
 
-	instance, err := PolardbService.DoPolardbDescribedbinstanceattributeRequest(d.Id(), client)
+	instance, err := PolardbService.DoPolardbDescribedbinstanceattributeRequest(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
@@ -345,12 +333,11 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceRead(d *schema.ResourceData
 	d.Set("port", instance.Items.DBInstanceAttribute[0].Port)
 	connectivity.SetResourceData(d, instance.Items.DBInstanceAttribute[0].DBInstanceStorage, "db_instance_storage", "instance_storage")
 	d.Set("zone_id", instance.Items.DBInstanceAttribute[0].ZoneId)
-	connectivity.SetResourceData(d, instance.Items.DBInstanceAttribute[0].PayType, "payment_type", "instance_charge_type")
 	d.Set("vswitch_id", instance.Items.DBInstanceAttribute[0].VSwitchId)
 	d.Set("connection_string", instance.Items.DBInstanceAttribute[0].ConnectionString)
 	connectivity.SetResourceData(d, instance.Items.DBInstanceAttribute[0].DBInstanceDescription, "db_instance_description", "instance_name")
 	d.Set("db_instance_storage_type", instance.Items.DBInstanceAttribute[0].DBInstanceStorageType)
-
+	d.Set("master_db_instance_id", instance.Items.DBInstanceAttribute[0].MasterInstanceId)
 	if err = PolardbService.RefreshParameters(d, client); err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -361,7 +348,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceDelete(d *schema.ResourceDa
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	PolardbService := PolardbService{client}
 
-	instance, err := PolardbService.DoPolardbDescribedbinstanceattributeRequest(d.Id(), client)
+	instance, err := PolardbService.DoPolardbDescribedbinstanceattributeRequest(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			return nil
@@ -375,6 +362,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceDelete(d *schema.ResourceDa
 	request.QueryParams["DBInstanceId"] = d.Id()
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -383,7 +371,10 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceDelete(d *schema.ResourceDa
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_account", "DeleteAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	waitSecondsIfWithTest(600)
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 5*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Failed"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
 	return nil
 }
 

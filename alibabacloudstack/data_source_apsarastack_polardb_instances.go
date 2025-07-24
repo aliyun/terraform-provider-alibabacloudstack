@@ -560,57 +560,59 @@ func dataSourceAlibabacloudStackPolardbDbInstancesRead(d *schema.ResourceData, m
 
 }
 
+type PolardbDescribedbinstance struct {
+	SlaveZones struct {
+		SlaveZone []struct {
+			ZoneId string `json:"ZoneId"`
+		} `json:"SlaveZone"`
+	} `json:"SlaveZones"`
+
+	ReadOnlyDBInstanceIds struct {
+		ReadOnlyDBInstanceId []struct {
+			DBInstanceId string `json:"DBInstanceId"`
+		} `json:"ReadOnlyDBInstanceId"`
+	} `json:"ReadOnlyDBInstanceIds"`
+	InsId                 int         `json:"InsId"`
+	DBInstanceId          string      `json:"DBInstanceId"`
+	DBInstanceDescription string      `json:"DBInstanceDescription"`
+	PayType               string      `json:"PayType"`
+	DBInstanceType        string      `json:"DBInstanceType"`
+	RegionId              string      `json:"RegionId"`
+	ExpireTime            string      `json:"ExpireTime"`
+	DestroyTime           string      `json:"DestroyTime"`
+	DBInstanceStatus      string      `json:"DBInstanceStatus"`
+	Engine                string      `json:"Engine"`
+	DBInstanceNetType     interface{} `json:"DBInstanceNetType"`
+	ConnectionMode        string      `json:"ConnectionMode"`
+	LockMode              string      `json:"LockMode"`
+	Category              string      `json:"Category"`
+	DBInstanceStorageType string      `json:"DBInstanceStorageType"`
+	DBInstanceClass       string      `json:"DBInstanceClass"`
+	InstanceNetworkType   string      `json:"InstanceNetworkType"`
+	VpcCloudInstanceId    string      `json:"VpcCloudInstanceId"`
+	LockReason            string      `json:"LockReason"`
+	ZoneId                string      `json:"ZoneId"`
+	MutriORsignle         bool        `json:"MutriORsignle"`
+	CreateTime            string      `json:"CreateTime"`
+	EngineVersion         string      `json:"EngineVersion"`
+	GuardDBInstanceId     string      `json:"GuardDBInstanceId"`
+	TempDBInstanceId      string      `json:"TempDBInstanceId"`
+	MasterInstanceId      string      `json:"MasterInstanceId"`
+	VpcId                 string      `json:"VpcId"`
+	VSwitchId             string      `json:"VSwitchId"`
+	ReplicateId           string      `json:"ReplicateId"`
+	ResourceGroupId       string      `json:"ResourceGroupId"`
+	DispenseMode          string      `json:"DispenseMode"`
+	MasterZone            string      `json:"MasterZone"`
+	CpuType               string      `json:"CpuType"`
+	Vip                   string      `json:"Vip"`
+	Vip_v6                string      `json:"Vip_v6"`
+	Vport                 string      `json:"Vport"`
+}
+
 type PolardbDescribedbinstancesResponse struct {
 	Items struct {
-		DBInstance []struct {
-			SlaveZones struct {
-				SlaveZone []struct {
-					ZoneId string `json:"ZoneId"`
-				} `json:"SlaveZone"`
-			} `json:"SlaveZones"`
-
-			ReadOnlyDBInstanceIds struct {
-				ReadOnlyDBInstanceId []struct {
-					DBInstanceId string `json:"DBInstanceId"`
-				} `json:"ReadOnlyDBInstanceId"`
-			} `json:"ReadOnlyDBInstanceIds"`
-			InsId                 int         `json:"InsId"`
-			DBInstanceId          string      `json:"DBInstanceId"`
-			DBInstanceDescription string      `json:"DBInstanceDescription"`
-			PayType               string      `json:"PayType"`
-			DBInstanceType        string      `json:"DBInstanceType"`
-			RegionId              string      `json:"RegionId"`
-			ExpireTime            string      `json:"ExpireTime"`
-			DestroyTime           string      `json:"DestroyTime"`
-			DBInstanceStatus      string      `json:"DBInstanceStatus"`
-			Engine                string      `json:"Engine"`
-			DBInstanceNetType     interface{} `json:"DBInstanceNetType"`
-			ConnectionMode        string      `json:"ConnectionMode"`
-			LockMode              string      `json:"LockMode"`
-			Category              string      `json:"Category"`
-			DBInstanceStorageType string      `json:"DBInstanceStorageType"`
-			DBInstanceClass       string      `json:"DBInstanceClass"`
-			InstanceNetworkType   string      `json:"InstanceNetworkType"`
-			VpcCloudInstanceId    string      `json:"VpcCloudInstanceId"`
-			LockReason            string      `json:"LockReason"`
-			ZoneId                string      `json:"ZoneId"`
-			MutriORsignle         bool        `json:"MutriORsignle"`
-			CreateTime            string      `json:"CreateTime"`
-			EngineVersion         string      `json:"EngineVersion"`
-			GuardDBInstanceId     string      `json:"GuardDBInstanceId"`
-			TempDBInstanceId      string      `json:"TempDBInstanceId"`
-			MasterInstanceId      string      `json:"MasterInstanceId"`
-			VpcId                 string      `json:"VpcId"`
-			VSwitchId             string      `json:"VSwitchId"`
-			ReplicateId           string      `json:"ReplicateId"`
-			ResourceGroupId       string      `json:"ResourceGroupId"`
-			DispenseMode          string      `json:"DispenseMode"`
-			MasterZone            string      `json:"MasterZone"`
-			CpuType               string      `json:"CpuType"`
-			Vip                   string      `json:"Vip"`
-			Vip_v6                string      `json:"Vip_v6"`
-			Vport                 string      `json:"Vport"`
-		} `json:"DBInstance"`
+		DBInstance []PolardbDescribedbinstance `json:"DBInstance"`
 	} `json:"Items"`
 	RequestId        string `json:"RequestId"`
 	PageNumber       int    `json:"PageNumber"`

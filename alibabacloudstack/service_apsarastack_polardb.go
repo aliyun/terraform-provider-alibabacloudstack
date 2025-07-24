@@ -33,6 +33,7 @@ func (s *PolardbService) DoPolardbCheckaccountnameavailableRequest(d *schema.Res
 	PolardbCheckaccountnameavailableResponse := &PolardbCheckaccountnameavailableResponse{}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -147,6 +148,7 @@ func (s *PolardbService) DoPolardbDescribeaccountsRequest(d *schema.ResourceData
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -265,6 +267,7 @@ func (s *PolardbService) DoPolardbDescribedatabasesRequest(d *schema.ResourceDat
 	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -361,6 +364,7 @@ func (s *PolardbService) DoPolardbDescriberegionsRequest(d *schema.ResourceData,
 	PolardbDescriberegionsResponse := &PolardbDescriberegionsResponse{}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -423,6 +427,7 @@ func (s *PolardbService) DoPolardbDescribedbinstancenetinfoRequest(d *schema.Res
 	request.QueryParams["DBInstanceId"] = id
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -548,16 +553,17 @@ type PolardbDescribedbinstanceattributeResponse struct {
 	RequestId string `json:"RequestId"`
 }
 
-func (s *PolardbService) DoPolardbDescribedbinstanceattributeRequest(id string, client *connectivity.AlibabacloudStackClient) (*PolardbDescribedbinstanceattributeResponse, error) {
+func (s *PolardbService) DoPolardbDescribedbinstanceattributeRequest(id string) (*PolardbDescribedbinstanceattributeResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeDBInstanceAttribute
-	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceAttribute", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstanceAttribute", "")
 	PolardbDescribedbinstanceattributeResponse := &PolardbDescribedbinstanceattributeResponse{}
 
 	//调用request_params_handler
 
 	request.QueryParams["DBInstanceId"] = id
 
-	bresponse, err := client.ProcessCommonRequest(request)
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -593,6 +599,7 @@ func (s *PolardbService) DoPolardbDescribedbinstancemonitorRequest(d *schema.Res
 	request.QueryParams["DBInstanceId"] = d.Id()
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -638,6 +645,7 @@ func (s *PolardbService) DoPolardbDescribeparametersRequest(d *schema.ResourceDa
 	//调用request_params_handler
 	request.QueryParams["DBInstanceId"] = d.Id()
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -716,6 +724,7 @@ func (s *PolardbService) DoPolardbDescribedbinstanceiparraylistRequest(d *schema
 	request.QueryParams["DBInstanceId"] = d.Id()
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -755,10 +764,10 @@ func (s *PolardbService) WaitForPolardbConnection(d *schema.ResourceData, client
 		}
 	}
 }
-func (s *PolardbService) WaitForDBInstance(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, status Status, timeout int) error {
+func (s *PolardbService) WaitForDBInstance(id string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
-		object, err := s.DoPolardbDescribedbinstancesRequest(d.Id(), client)
+		object, err := s.DoPolardbDescribedbinstancesRequest(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
@@ -777,7 +786,7 @@ func (s *PolardbService) WaitForDBInstance(d *schema.ResourceData, client *conne
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, d.Id(), GetFunc(1), timeout, object.Items.DBInstance[0].DBInstanceStatus, status, errmsgs.ProviderERROR)
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, object.Items.DBInstance[0].DBInstanceStatus, status, errmsgs.ProviderERROR)
 		}
 	}
 	return nil
@@ -879,6 +888,7 @@ func (s *PolardbService) ModifyDBSecurityIps(d *schema.ResourceData, client *con
 	request.QueryParams["SecurityIps"] = ips
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -919,6 +929,7 @@ func (s *PolardbService) DoPolardbDescribeinstanceautorenewalattributeRequest(d 
 
 	request.QueryParams["DBInstanceId"] = d.Id()
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -989,10 +1000,11 @@ func (s *PolardbService) ModifyParameters(d *schema.ResourceData, client *connec
 		cfg, _ := json.Marshal(changed)
 		request.QueryParams["Parameters"] = string(cfg)
 		// wait instance status is Normal before modifying
-		if err := s.WaitForDBInstance(d, client, Running, DefaultLongTimeout); err != nil {
+		if err := s.WaitForDBInstance(d.Id(), Running, DefaultLongTimeout); err != nil {
 			return errmsgs.WrapError(err)
 		}
 		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 		if err != nil {
 			if bresponse == nil {
 				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -1030,7 +1042,7 @@ type TemplateRecord struct {
 
 func (s *PolardbService) PolardbDBInstanceStateRefreshFunc(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
-		object, err := s.DoPolardbDescribedbinstancesRequest(d.Id(), client)
+		object, err := s.DoPolardbDescribedbinstancesRequest(d.Id())
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				// Set this to nil as if we didn't find anything.
@@ -1148,7 +1160,7 @@ func (s *PolardbService) WaitForDBConnection(d *schema.ResourceData, client *con
 func (s *PolardbService) WaitForConnectionDBInstance(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient, id string, status Status, timeout int) error {
 	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
 	for {
-		object, err := s.DoPolardbDescribedbinstancesRequest(id, client)
+		object, err := s.DoPolardbDescribedbinstancesRequest(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				if status == Deleted {
@@ -1169,15 +1181,15 @@ func (s *PolardbService) WaitForConnectionDBInstance(d *schema.ResourceData, cli
 	return nil
 }
 
-func (s *PolardbService) DoPolardbDescribedbinstancesRequest(id string, client *connectivity.AlibabacloudStackClient) (*PolardbDescribedbinstancesResponse, error) {
+func (s *PolardbService) DoPolardbDescribedbinstancesRequest(id string) (*PolardbDescribedbinstancesResponse, error) {
 	// api: polardb - 2024-01-30 - DescribeDBInstances
-	request := client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstances", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBInstances", "")
 	PolardbDescribedbinstancesResponse := &PolardbDescribedbinstancesResponse{}
 	request.QueryParams["DBInstanceId"] = id
 	request.QueryParams["InstanceLevel"] = "1"
 	request.QueryParams["PageNumber"] = "1"
 	request.QueryParams["PageSize"] = "1"
-	bresponse, err := client.ProcessCommonRequest(request)
+	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {

@@ -203,7 +203,7 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionUpdate(d *schem
 
 	if update {
 		// wait instance running before modifying
-		if err := PolardbService.WaitForDBInstance(d, client, Running, 60*60); err != nil {
+		if err := PolardbService.WaitForDBInstance(d.Id(), Running, 60*60); err != nil {
 			return errmsgs.WrapError(err)
 		}
 
@@ -217,7 +217,7 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionUpdate(d *schem
 		}
 
 		// wait instance running after modifying
-		if err := PolardbService.WaitForDBInstance(d, client, Running, DefaultLongTimeout); err != nil {
+		if err := PolardbService.WaitForDBInstance(d.Id(), Running, DefaultLongTimeout); err != nil {
 			return errmsgs.WrapError(err)
 		}
 	}
