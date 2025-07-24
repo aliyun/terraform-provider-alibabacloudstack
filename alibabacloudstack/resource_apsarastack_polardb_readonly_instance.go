@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -106,6 +107,29 @@ func resourceAlibabacloudStackPolardbReadonlyInstance() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"local_ssd", "cloud_ssd", "cloud_essd", "cloud_essd2", "cloud_essd3", "cloud_pperf", "cloud_sperf"}, false),
 			},
+			"tde_status": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"encrypt_algorithm": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "aes-256",
+				ValidateFunc: validation.StringInSlice([]string{"sm4-128", "aes-256"}, false),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if d.Get("engine").(string) == "MySQL" {
+						return true
+					}
+					if v, ok := d.GetOk("tde_status"); ok && v.(bool) {
+						return old == new
+					}
+					return true
+				},
+			},
+			"enable_ssl": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 
 			"parameters": {
 				Type: schema.TypeSet,
@@ -129,6 +153,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstance() *schema.Resource {
 			"engine": {
 				Type:     schema.TypeString,
 				Computed: true,
+				Optional: true,
 			},
 			"connection_string": {
 				Type:     schema.TypeString,
@@ -158,6 +183,8 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceCreate(d *schema.ResourceDa
 	if err := errmsgs.CheckEmpty(request.QueryParams["DBInstanceId"], schema.TypeString, "master_instance_id", "master_db_instance_id"); err != nil {
 		return errmsgs.WrapError(err)
 	}
+	engine := d.Get("engine").(string)
+	request.QueryParams["Engine"] = engine
 	request.QueryParams["EngineVersion"] = Trim(d.Get("engine_version").(string))
 	//待测
 	request.QueryParams["DBInstanceStorage"] = strconv.Itoa(connectivity.GetResourceData(d, "db_instance_storage", "instance_storage").(int))
@@ -201,7 +228,6 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceCreate(d *schema.ResourceDa
 	}
 	request.QueryParams["PayType"] = string(Postpaid)
 	request.QueryParams["ClientToken"] = buildClientToken(request.GetActionName())
-
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
@@ -311,6 +337,59 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSpec", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 	}
+	if d.HasChange("enable_ssl") {
+		ssl := d.Get("enable_ssl").(bool)
+		if d.IsNewResource() && ssl == false {
+			// 新资源默认false
+			return nil
+		}
+		ssl_req := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceSSL", "")
+		ssl_req.QueryParams["DBInstanceId"] = d.Id()
+		ssl_req.QueryParams["ConnectionString"] = d.Get("connection_string").(string)
+		var target, process string
+		engine := Trim(d.Get("engine").(string))
+		if ssl == true {
+			ssl_req.QueryParams["SSLEnabled"] = "1"
+			if engine == "MySQL" {
+				target = "Yes"
+				process = "No"
+			} else {
+				target = "on"
+				process = "off"
+			}
+
+		} else {
+			ssl_req.QueryParams["SSLEnabled"] = "0"
+			if engine == "MySQL" {
+				target = "off"
+				process = "on"
+			} else {
+				target = "No"
+				process = "Yes"
+			}
+		}
+		bresponse, err := client.ProcessCommonRequest(ssl_req)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_account", "DeleteAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+
+		if err := PolardbService.WaitForDBInstance(d.Id(), Running, DefaultLongTimeout); err != nil {
+			return errmsgs.WrapError(err)
+		}
+		if ssl == true {
+			log.Print("Updated SSL to true")
+		} else {
+			log.Print("Updated SSL to false")
+		}
+	}
 	return nil
 }
 
@@ -327,8 +406,8 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceRead(d *schema.ResourceData
 		}
 		return errmsgs.WrapError(err)
 	}
-
-	d.Set("engine", instance.Items.DBInstanceAttribute[0].Engine)
+	engine := Trim(instance.Items.DBInstanceAttribute[0].Engine)
+	d.Set("engine", engine)
 	d.Set("engine_version", instance.Items.DBInstanceAttribute[0].EngineVersion)
 	connectivity.SetResourceData(d, instance.Items.DBInstanceAttribute[0].DBInstanceClass, "db_instance_class", "instance_type")
 	d.Set("port", instance.Items.DBInstanceAttribute[0].Port)
@@ -342,6 +421,12 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceRead(d *schema.ResourceData
 	if err = PolardbService.RefreshParameters(d, client); err != nil {
 		return errmsgs.WrapError(err)
 	}
+	ssl_object, err := PolardbService.DescribeDBInstanceSSL(d.Id())
+	ssl := false
+	if (engine == "MySQL" && ssl_object["SSLEnabled"].(string) == "Yes") || (engine != "MySQL" && ssl_object["SSLEnabled"].(string) == "on") {
+		ssl = true
+	}
+	d.Set("enable_ssl", ssl)
 	return nil
 }
 
