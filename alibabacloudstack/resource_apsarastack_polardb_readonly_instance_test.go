@@ -83,6 +83,16 @@ func TestAccAlibabacloudStackPolarDBReadonlyInstance_update(t *testing.T) {
 					}),
 				),
 			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"instance_type": "rds.mysql.s1.small",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"instance_type": "rds.mysql.s1.small",
+					}),
+				),
+			},
 		},
 	})
 

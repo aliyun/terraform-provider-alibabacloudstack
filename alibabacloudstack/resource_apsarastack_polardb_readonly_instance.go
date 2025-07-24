@@ -288,6 +288,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 	if update {
 
 		// wait instance status is running before modifying
+		request.QueryParams["PayType"] = string(Postpaid)
 		stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
 		_, err := stateConf.WaitForState()
 		if err != nil {
