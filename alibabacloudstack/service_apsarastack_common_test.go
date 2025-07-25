@@ -840,15 +840,38 @@ resource "alibabacloudstack_db_instance" "default" {
 ` ,  os.Getenv("ALIBABACLOUDSTACK_TEST_RDS_INSTNCE_TYPE")) 
 }
 
-const PolarDBCommonTestCase = `
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "${var.creation}"
+func PolarDBMysqlCommonTestCase(enableVpc bool) string {
+	var vswtichId string
+	if enableVpc {
+		vswtichId = `vswitch_id           = "${alibabacloudstack_vpc_vswitch.default.id}"`
+	}
+	return fmt.Sprintf(`
+variable "polardb_instance_type" {
+  type      = string
+  default   = "%s"
+  sensitive = true
 }
-data "alibabacloudstack_vswitches" "default" {
-  zone_id = data.alibabacloudstack_zones.default.ids[0]
-  is_default = "true"
+
+data "alibabacloudstack_polardb_instance_types" "default" {
+  ids                  = var.polardb_instance_type != "" ? [var.polardb_instance_type] : null
+  engine               = "MySQL"
+  engine_version       = "5.7"
+  sorted_by            = "CPU"
+  series               = "dual_ha"
 }
-`
+
+resource "alibabacloudstack_polardb_dbinstance" "default" {
+  engine               = "${data.alibabacloudstack_polardb_instance_types.default.instance_types.0.engine}"
+  engine_version       = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.engine_version
+  instance_type        = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.id
+  instance_storage     = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_min
+  instance_charge_type = "Postpaid"
+  instance_name        = "${var.name}"
+  %s
+  storage_type         = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_type
+}
+` ,  os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_INSTNCE_TYPE"), vswtichId) 
+}
 const AdbCommonTestCase = `
 resource "alibabacloudstack_vpc" "default" {
  name = "${var.name}"

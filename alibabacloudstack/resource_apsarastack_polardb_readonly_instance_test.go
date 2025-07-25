@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -23,6 +24,76 @@ func TestAccAlibabacloudStackPolarDBReadonlyInstance_update(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolarDBReadonlyInstanceConfigDependence)
+
+	testSteps := []resource.TestStep{
+		{
+			Config: testAccConfig(map[string]interface{}{
+				"master_db_instance_id":    "${alibabacloudstack_polardb_dbinstance.default.id}",
+				"zone_id":                  "${alibabacloudstack_polardb_dbinstance.default.zone_id}",
+				"engine_version":           "${alibabacloudstack_polardb_dbinstance.default.engine_version}",
+				"instance_type":            "${alibabacloudstack_polardb_dbinstance.default.instance_type}",
+				"instance_storage":         "${alibabacloudstack_polardb_dbinstance.default.instance_storage}",
+				"instance_name":            "${var.name}",
+				"db_instance_storage_type": "${alibabacloudstack_polardb_dbinstance.default.storage_type}",
+			}),
+			Check: resource.ComposeTestCheckFunc(
+				testAccCheck(map[string]string{
+					"instance_name":         name,
+					"instance_type":         CHECKSET,
+					"master_db_instance_id": CHECKSET,
+					"zone_id":               CHECKSET,
+					"connection_string":     CHECKSET,
+				}),
+			),
+		},
+		{
+			Config: testAccConfig(map[string]interface{}{
+				"enable_ssl": "true",
+			}),
+			Check: resource.ComposeTestCheckFunc(
+				testAccCheck(map[string]string{
+					"enable_ssl": "true",
+				}),
+			),
+		},
+		{
+			ResourceName:      resourceId,
+			ImportState:       true,
+			ImportStateVerify: true,
+		},
+		{
+			Config: testAccConfig(map[string]interface{}{
+				"instance_name": "${var.name}_ro",
+			}),
+			Check: resource.ComposeTestCheckFunc(
+				testAccCheck(map[string]string{
+					"instance_name": name + "_ro",
+				}),
+			),
+		},
+		{
+			Config: testAccConfig(map[string]interface{}{
+				"instance_storage": "${local.new_instance_storage}",
+			}),
+			Check: resource.ComposeTestCheckFunc(
+				testAccCheck(map[string]string{
+					"instance_storage": CHECKSET,
+				}),
+			),
+		},
+	}
+	if os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_INSTNCE_TYPE") == "" {
+		testSteps = append(testSteps, resource.TestStep{
+			Config: testAccConfig(map[string]interface{}{
+				"instance_type": "${data.alibabacloudstack_polardb_instance_types.default.instance_types.1.id}",
+			}),
+			Check: resource.ComposeTestCheckFunc(
+				testAccCheck(map[string]string{
+					"instance_storage": CHECKSET,
+				}),
+			),
+		})
+	}
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -33,77 +104,7 @@ func TestAccAlibabacloudStackPolarDBReadonlyInstance_update(t *testing.T) {
 
 		Providers:    testAccProviders,
 		CheckDestroy: rac.checkResourceDestroy(),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"master_db_instance_id":    "${alibabacloudstack_polardb_dbinstance.default.id}",
-					"zone_id":                  "${alibabacloudstack_polardb_dbinstance.default.zone_id}",
-					"engine_version":           "${alibabacloudstack_polardb_dbinstance.default.engine_version}",
-					"instance_type":            "${alibabacloudstack_polardb_dbinstance.default.instance_type}",
-					"instance_storage":         "${alibabacloudstack_polardb_dbinstance.default.instance_storage}",
-					"instance_name":            "${var.name}",
-					"db_instance_storage_type": "${alibabacloudstack_polardb_dbinstance.default.storage_type}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"instance_storage":      "5",
-						"engine_version":        "5.7",
-						"engine":                "MySQL",
-						"port":                  "3306",
-						"instance_name":         name,
-						"instance_type":         CHECKSET,
-						"master_db_instance_id": CHECKSET,
-						"zone_id":               CHECKSET,
-						"connection_string":     CHECKSET,
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"enable_ssl": "true",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"enable_ssl": "true",
-					}),
-				),
-			},
-			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"instance_name": "${var.name}_ro",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"instance_name": name + "_ro",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"instance_storage": "10",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"instance_storage": "10",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"instance_type": "rds.mysql.s1.small",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"instance_type": "rds.mysql.s1.small",
-					}),
-				),
-			},
-		},
+		Steps:        testSteps,
 	})
 
 }
@@ -113,13 +114,11 @@ func resourcePolarDBReadonlyInstanceConfigDependence(name string) string {
 	variable "name" {
 		default = "%s"
 	}
-resource "alibabacloudstack_polardb_dbinstance" "default" {
-  instance_storage = "5"
-  instance_name = "${var.name}"
-  storage_type = "local_ssd"
-  engine = "MySQL"
-  engine_version = "5.7"
-  instance_type = "rds.mysql.t1.small"
-}
-`, name)
+%s
+
+	locals {
+		new_instance_storage = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_min + 10
+	}
+
+`, name, PolarDBMysqlCommonTestCase(false))
 }
