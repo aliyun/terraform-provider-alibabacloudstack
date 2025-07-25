@@ -390,7 +390,7 @@ func resourceAlibabacloudStackDBInstanceCreate(d *schema.ResourceData, meta inte
 	d.Set("connection_string", resp.ConnectionString)
 
 	// wait instance status change from Creating to running
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -872,6 +872,13 @@ func resourceAlibabacloudStackDBInstanceDelete(d *schema.ResourceData, meta inte
 	if err != nil {
 		return err
 	}
+	
+	// wait instance status change from Creating to running
+	stateConf := BuildStateConf([]string{"Running","Deleting"}, []string{""}, d.Timeout(schema.TimeoutCreate), 10*time.Second, rdsService.RdsDBInstanceStateRefreshFunc(d.Id(), []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+	
 	return nil
 }
 

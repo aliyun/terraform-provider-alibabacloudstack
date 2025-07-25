@@ -259,10 +259,6 @@ func resourceAlibabacloudStackRdsDbproxyUpdate(d *schema.ResourceData, meta inte
 
 	}
 
-	// DBInstanceId
-
-	// DBProxyConnectStringItems
-
 	// api: Rds - 2014-08-15 - ModifyDBProxyEndpointAddress
 	if d.HasChanges("db_proxy_connect_string_port") {
 		request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBProxyEndpointAddress", "")
@@ -286,7 +282,7 @@ func resourceAlibabacloudStackRdsDbproxyUpdate(d *schema.ResourceData, meta inte
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 	}
-	
+
 	// Cannot be modified simultaneously with db_proxy_connect_string
 	if d.HasChanges("db_proxy_connect_string") {
 		request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBProxyEndpointAddress", "")
@@ -310,6 +306,9 @@ func resourceAlibabacloudStackRdsDbproxyUpdate(d *schema.ResourceData, meta inte
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
+		
+		// There is a delay in updating the access address
+		time.Sleep(time.Second * 5)
 	}
 
 	// api: Rds - 2014-08-15 - ModifyDBProxyInstance
