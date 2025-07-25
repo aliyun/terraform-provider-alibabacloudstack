@@ -1,9 +1,9 @@
 package alibabacloudstack
 
 import (
+	"log"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -11,7 +11,6 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -160,6 +159,35 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"connect_string": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"port": {
+							Type:     schema.TypeString,
+							Computed: true,
+							Optional: true,
+						},
+						"public_enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"private_enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"account_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
+						"account_password": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 					},
 				},
 				Required: true,
@@ -180,13 +208,35 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"connect_string": {
+						"connect_string_public": {
 							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
 						},
-						"port": {
-							Type:     schema.TypeInt,
+						"connect_string_private": {
+							Type:     schema.TypeString,
+							Optional: true,
 							Computed: true,
+						},
+						"port_public": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"port_private": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"public_enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"private_enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  true,
 						},
 					},
 				},
@@ -194,13 +244,65 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				MinItems: 2,
 				MaxItems: 32,
 			},
+			"configserver_list": {
+				Type: schema.TypeList,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"node_class": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"node_storage": {
+							Type:     schema.TypeInt,
+							Required: true,
+						},
+						//Computed
+						"node_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"connect_string": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"port": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"public_enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"private_enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"account_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+
+						"account_password": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+				Required: true,
+				MinItems: 1,
+				MaxItems: 1,
+			},
 			"audit_status": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Enable", "Disabled"}, false),
 			},
-			"audit_filter": auditFilterSchema([]string{"db","mongos"}),
+			"audit_filter": auditFilterSchema([]string{"db", "mongos"}),
 		},
 	}
 
@@ -210,7 +312,7 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 	return resource
 }
 
-func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{}) (*dds.CreateShardingDBInstanceRequest, error) {
+func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{}) (*dds.CreateShardingDBInstanceRequest, error, []map[string]interface{}) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := dds.CreateCreateShardingDBInstanceRequest()
 	client.InitRpcRequest(*request.RpcRequest)
@@ -220,12 +322,13 @@ func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{})
 	request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "name").(string)
 
 	request.AccountPassword = d.Get("account_password").(string)
+	apply_info := []map[string]interface{}{}
 	if request.AccountPassword == "" {
 		if v := d.Get("kms_encrypted_password").(string); v != "" {
 			kmsService := KmsService{client}
 			decryptResp, err := kmsService.Decrypt(v, d.Get("kms_encryption_context").(map[string]interface{}))
 			if err != nil {
-				return request, errmsgs.WrapError(err)
+				return request, errmsgs.WrapError(err), apply_info
 			}
 			request.AccountPassword = decryptResp.Plaintext
 		}
@@ -235,6 +338,7 @@ func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{})
 
 	shardList, ok := d.GetOk("shard_list")
 	if ok {
+		i := 0
 		replicaSets := []dds.CreateShardingDBInstanceReplicaSet{}
 		for _, rew := range shardList.([]interface{}) {
 			item := rew.(map[string]interface{})
@@ -244,6 +348,30 @@ func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{})
 			csr.Class = class
 			csr.Storage = strconv.Itoa(nodeStorage)
 			replicaSets = append(replicaSets, csr)
+			apply_item := map[string]interface{}{
+				"index":                  i,
+				"node_type":              "shard",
+				"public_enable":          false,
+				"private_enable":         true,
+				"connect_string_public":  "",
+				"connect_string_private": "",
+				"port_public":            "",
+				"port_private":           "",
+			}
+			if item["public_enable"] == true {
+				apply_item["public_enable"] = true
+				apply_item["connect_string_public"] = item["connect_string_public"]
+				apply_item["port_public"] = item["port_public"]
+			}
+			if item["private_enable"] == true {
+				apply_item["private_enable"] = true
+				apply_item["connect_string_private"] = item["connect_string_private"]
+				apply_item["port_private"] = item["port_private"]
+				apply_item["account_name"] = item["account_name"]
+				apply_item["account_password"] = item["account_password"]
+			}
+			apply_info = append(apply_info, apply_item)
+			i += 1
 		}
 		request.ReplicaSet = &replicaSets
 	}
@@ -251,15 +379,78 @@ func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{})
 	mongoList, ok := d.GetOk("mongo_list")
 	if ok {
 		mongos := []dds.CreateShardingDBInstanceMongos{}
+		i := 0
 		for _, rew := range mongoList.([]interface{}) {
 			item := rew.(map[string]interface{})
 			class := item["node_class"].(string)
 			mongos = append(mongos, dds.CreateShardingDBInstanceMongos{class})
+			apply_item := map[string]interface{}{
+				"index":                  i,
+				"node_type":              "mongo",
+				"public_enable":          false,
+				"private_enable":         true,
+				"connect_string_public":  "",
+				"connect_string_private": "",
+				"port_public":            "",
+				"port_private":           "",
+			}
+			if item["public_enable"] == true {
+				apply_item["public_enable"] = true
+				apply_item["connect_string_public"] = item["connect_string_public"]
+				apply_item["port_public"] = item["port_public"]
+			}
+			if item["private_enable"] == true {
+				apply_item["private_enable"] = true
+				apply_item["connect_string_private"] = item["connect_string_private"]
+				apply_item["port_private"] = item["port_private"]
+			}
+			apply_info = append(apply_info, apply_item)
+			i += 1
 		}
 		request.Mongos = &mongos
 	}
 
-	request.ConfigServer = &[]dds.CreateShardingDBInstanceConfigServer{{"20", "dds.cs.mid"}}
+	configservers, ok := d.GetOk("configserver_list")
+	if ok {
+		i := 0
+		configserver := []dds.CreateShardingDBInstanceConfigServer{}
+		for _, rew := range configservers.([]interface{}) {
+			item := rew.(map[string]interface{})
+			class := item["node_class"].(string)
+			nodeStorage := item["node_storage"].(int)
+			var csr dds.CreateShardingDBInstanceConfigServer
+			csr.Class = class
+			csr.Storage = strconv.Itoa(nodeStorage)
+			configserver = append(configserver, csr)
+			apply_item := map[string]interface{}{
+				"node_type":              "configserver",
+				"index":                  i,
+				"public_enable":          false,
+				"private_enable":         true,
+				"connect_string_public":  "",
+				"connect_string_private": "",
+				"port_public":            "",
+				"port_private":           "",
+			}
+			if item["public_enable"] == true {
+				apply_item["public_enable"] = true
+				apply_item["connect_string_public"] = item["connect_string_public"]
+				apply_item["port_public"] = item["port_public"]
+			}
+			if item["private_enable"] == true {
+				apply_item["private_enable"] = true
+				apply_item["connect_string_private"] = item["connect_string_private"]
+				apply_item["port_private"] = item["port_private"]
+				apply_item["account_name"] = item["account_name"]
+				apply_item["account_password"] = item["account_password"]
+			}
+			apply_info = append(apply_info, apply_item)
+			i += 1
+		}
+		request.ConfigServer = &configserver
+	}
+
+	// request.ConfigServer = &[]dds.CreateShardingDBInstanceConfigServer{{"20", "dds.cs.mid"}}
 
 	request.NetworkType = string(Classic)
 	vswitchId := Trim(d.Get("vswitch_id").(string))
@@ -268,7 +459,7 @@ func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{})
 		vpcService := VpcService{client}
 		vsw, err := vpcService.DescribeVSwitch(vswitchId)
 		if err != nil {
-			return nil, errmsgs.WrapError(err)
+			return nil, errmsgs.WrapError(err), apply_info
 		}
 
 		if request.ZoneId == "" {
@@ -276,10 +467,10 @@ func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{})
 		} else if strings.Contains(request.ZoneId, MULTI_IZ_SYMBOL) {
 			zonestr := strings.Split(strings.SplitAfter(request.ZoneId, "(")[1], ")")[0]
 			if !strings.Contains(zonestr, string([]byte(vsw.ZoneId)[len(vsw.ZoneId)-1])) {
-				return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch " + vsw.VSwitchId + " isn't in multi the zone " + request.ZoneId))
+				return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch " + vsw.VSwitchId + " isn't in multi the zone " + request.ZoneId)), apply_info
 			}
 		} else if request.ZoneId != vsw.ZoneId {
-			return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch " + vsw.VSwitchId + " isn't in the zone " + request.ZoneId))
+			return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch " + vsw.VSwitchId + " isn't in the zone " + request.ZoneId)), apply_info
 		}
 		request.VSwitchId = vswitchId
 		request.NetworkType = strings.ToUpper(string(Vpc))
@@ -298,17 +489,18 @@ func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{})
 	}
 
 	request.ClientToken = buildClientToken(request.GetActionName())
-	return request, nil
+	return request, nil, apply_info
 }
 
 func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
 
-	request, err := buildMongoDBShardingCreateRequest(d, meta)
+	request, err, apply_info := buildMongoDBShardingCreateRequest(d, meta)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
+	log.Printf("[DEBUG] mongodb sharding create apply_info: %#v", apply_info)
 
 	raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 		return client.CreateShardingDBInstance(request)
@@ -332,6 +524,87 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 
 	if err := ddsService.WaitForMongoDBInstance(d.Id(), Running, DefaultLongTimeout); err != nil {
 		return errmsgs.WrapError(err)
+	}
+	request_public := client.NewCommonRequest("POST", "Dds", "2015-12-01", "AllocatePublicNetworkAddress", "")
+	request_private := client.NewCommonRequest("POST", "Dds", "2015-12-01", "AllocateNodePrivateNetworkAddress", "")
+	instance, _ := ddsService.DescribeMongoDBInstance(d.Id())
+	node_id := ""
+	for _, item := range apply_info {
+		index, _ := item["index"].(int)
+		if item["public_enable"] == true {
+			if item["node_type"] == "mongo" {
+				node_id = instance.MongosList.MongosAttribute[index].NodeId
+			} else if item["node_type"] == "shard" {
+				node_id = instance.ShardList.ShardAttribute[index].NodeId
+			} else if item["node_type"] == "configserver" {
+				node_id = instance.ConfigserverList.ConfigserverAttribute[index].NodeId
+			} else {
+			}
+
+			request_public.QueryParams["DBInstanceId"] = d.Id()
+			request_public.QueryParams["NodeId"] = node_id
+
+			bresponse, err := client.ProcessCommonRequest(request_public)
+			if err != nil {
+				if bresponse == nil {
+					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+				}
+				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_mongo_db_shardinginstance", "AllocatePublicNetworkAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+			addDebug("AllocatePublicNetworkAddress", bresponse, request, request.QueryParams)
+			_, err = ddsService.DoWaitDdsShardDbinstanceRunningRequest(d.Id() + COLON_SEPARATED)
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DoWaitDdsShardDbinstanceRunningRequest", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+			cns, _ := item["connect_string_public"].(string)
+			pt, _ := item["port_public"].(string)
+			log.Printf("[DEBUG] mongodb update_public_address: %#v  %#v", cns, pt)
+			update_public_address(d.Id()+COLON_SEPARATED+node_id, "Public", cns, pt, meta)
+			_, err = ddsService.DoWaitDdsShardDbinstanceRunningRequest(d.Id() + COLON_SEPARATED)
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "update_public_address", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+
+		}
+		if item["private_enable"] == true {
+			if item["node_type"] == "mongo" {
+				node_id = instance.MongosList.MongosAttribute[index].NodeId
+			} else if item["node_type"] == "shard" {
+				node_id = instance.ShardList.ShardAttribute[index].NodeId
+			} else if item["node_type"] == "configserver" {
+				node_id = instance.ConfigserverList.ConfigserverAttribute[index].NodeId
+			} else {
+			}
+			if item["node_type"] != "mongo" {
+				request_private.QueryParams["DBInstanceId"] = d.Id()
+				request_private.QueryParams["NodeId"] = node_id
+				request_private.QueryParams["AccountName"] = item["account_name"].(string)
+				request_private.QueryParams["AccountPassword"] = item["account_password"].(string)
+
+				bresponse, err := client.ProcessCommonRequest(request_private)
+				if err != nil {
+					if bresponse == nil {
+						return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+					}
+					errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_mongo_db_shardinginstance", "AllocatePrivateNetworkAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				}
+				addDebug("AllocatePrivateNetworkAddress", bresponse, request, request.QueryParams)
+				_, err = ddsService.DoWaitDdsShardDbinstanceRunningRequest(d.Id() + COLON_SEPARATED)
+				if err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DoWaitDdsShardDbinstanceRunningRequest", errmsgs.AlibabacloudStackSdkGoERROR)
+				}
+
+			}
+			cns, _ := item["connect_string_private"].(string)
+			pt, _ := item["port_private"].(string)
+			update_public_address(d.Id()+COLON_SEPARATED+node_id, "Classic", cns, pt, meta)
+			_, err = ddsService.DoWaitDdsShardDbinstanceRunningRequest(d.Id() + COLON_SEPARATED)
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "update_public_address", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+		}
 	}
 
 	return nil
@@ -372,14 +645,27 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		d.Set("period", period)
 	}
 	d.Set("vswitch_id", instance.VSwitchId)
-
+	response, err := ddsService.DoDdsDescribeshardingnetworkaddressRequest(d.Id() + COLON_SEPARATED)
 	mongosList := []map[string]interface{}{}
 	for _, item := range instance.MongosList.MongosAttribute {
 		mongo := map[string]interface{}{
-			"node_class":     item.NodeClass,
-			"node_id":        item.NodeId,
-			"port":           item.Port,
-			"connect_string": item.ConnectSting,
+			"node_class": item.NodeClass,
+			"node_id":    item.NodeId,
+		}
+		for _, data := range response.NetworkAddresses.NetworkAddress {
+			log.Printf("mongosList data.NodeId:%s,item.NodeId:%s", data.NodeId, item.NodeId)
+			if data.NodeId == item.NodeId {
+				if data.NetworkType == "Public" {
+					mongo["public_enable"] = true
+					mongo["port_public"] = data.Port
+					mongo["connect_string_public"] = strings.Split(data.NetworkAddress, ".")[0]
+				} else {
+					mongo["private_enable"] = true
+					mongo["port_private"] = data.Port
+					mongo["connect_string_private"] = strings.Split(data.NetworkAddress, ".")[0]
+				}
+
+			}
 		}
 		mongosList = append(mongosList, mongo)
 	}
@@ -395,9 +681,52 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 			"node_storage": item.NodeStorage,
 			"node_class":   item.NodeClass,
 		}
+		for _, data := range response.NetworkAddresses.NetworkAddress {
+			log.Printf("shardList data.NodeId:%s,item.NodeId:%s", data.NodeId, item.NodeId)
+			if data.NodeId == item.NodeId {
+				if data.NetworkType == "Public" {
+					shard["public_enable"] = true
+					shard["port_public"] = data.Port
+					shard["connect_string_public"] = strings.Split(data.NetworkAddress, ".")[0]
+				} else {
+					shard["private_enable"] = true
+					shard["port_private"] = data.Port
+					shard["connect_string_private"] = strings.Split(data.NetworkAddress, ".")[0]
+
+				}
+			}
+		}
 		shardList = append(shardList, shard)
 	}
 	err = d.Set("shard_list", shardList)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	configserver_list := []map[string]interface{}{}
+	for _, item := range instance.ConfigserverList.ConfigserverAttribute {
+		configserver := map[string]interface{}{
+			"node_id":      item.NodeId,
+			"node_storage": item.NodeStorage,
+			"node_class":   item.NodeClass,
+		}
+		for _, data := range response.NetworkAddresses.NetworkAddress {
+			log.Printf("configserver_list data.NodeId:%s,item.NodeId:%s", data.NodeId, item.NodeId)
+			if data.NodeId == item.NodeId {
+				if data.NetworkType == "Public" {
+					configserver["public_enable"] = true
+					configserver["port_public"] = data.Port
+					configserver["connect_string_public"] = strings.Split(data.NetworkAddress, ".")[0]
+				} else {
+					configserver["private_enable"] = true
+					configserver["port_private"] = data.Port
+					configserver["connect_string_private"] = strings.Split(data.NetworkAddress, ".")[0]
+
+				}
+			}
+		}
+		configserver_list = append(configserver_list, configserver)
+	}
+	err = d.Set("configserver_list", configserver_list)
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -462,7 +791,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 	}
 
 	if _, ok := d.GetOk("audit_filter"); ok && d.Get("audit_status").(string) == "Enable" && d.HasChange("audit_filter") {
-		if err :=ddsService.ModifyAuditLogFilter(d); err!= nil{
+		if err := ddsService.ModifyAuditLogFilter(d); err != nil {
 			return err
 		}
 	}
@@ -525,7 +854,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 
 	if d.HasChange("shard_list") {
 		state, diff := d.GetChange("shard_list")
-		err := ddsService.ModifyMongodbShardingInstanceNode(d.Id(), MongoDBShardingNodeShard, state.([]interface{}), diff.([]interface{}))
+		err := ddsService.ModifyMongodbShardingInstanceNode(d.Id(), MongoDBShardingNodeShard, state.([]interface{}), diff.([]interface{}), meta)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -534,7 +863,16 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 
 	if d.HasChange("mongo_list") {
 		state, diff := d.GetChange("mongo_list")
-		err := ddsService.ModifyMongodbShardingInstanceNode(d.Id(), MongoDBShardingNodeMongos, state.([]interface{}), diff.([]interface{}))
+		err := ddsService.ModifyMongodbShardingInstanceNode(d.Id(), MongoDBShardingNodeMongos, state.([]interface{}), diff.([]interface{}), meta)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		//d.SetPartial("mongo_list")
+	}
+
+	if d.HasChange("configserver_list") {
+		state, diff := d.GetChange("configserver_list")
+		err := ddsService.ModifyMongodbShardingInstanceNode(d.Id(), MongoDBShardingNodeCs, state.([]interface{}), diff.([]interface{}), meta)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -604,40 +942,41 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 }
 
 func resourceAlibabacloudStackMongoDBShardingInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	ddsService := MongoDBService{client}
+	return nil
+	// client := meta.(*connectivity.AlibabacloudStackClient)
+	// ddsService := MongoDBService{client}
 
-	request := dds.CreateDeleteDBInstanceRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.DBInstanceId = d.Id()
+	// request := dds.CreateDeleteDBInstanceRequest()
+	// client.InitRpcRequest(*request.RpcRequest)
+	// request.DBInstanceId = d.Id()
 
-	err := resource.Retry(10*5*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-			return ddsClient.DeleteDBInstance(request)
-		})
+	// err := resource.Retry(10*5*time.Minute, func() *resource.RetryError {
+	// 	raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
+	// 		return ddsClient.DeleteDBInstance(request)
+	// 	})
 
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-				return resource.NonRetryableError(err)
-			}
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*dds.DeleteDBInstanceResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-			}
-			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		return nil
-	})
+	// 	if err != nil {
+	// 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+	// 			return resource.NonRetryableError(err)
+	// 		}
+	// 		errmsg := ""
+	// 		if raw != nil {
+	// 			response, ok := raw.(*dds.DeleteDBInstanceResponse)
+	// 			if ok {
+	// 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+	// 			}
+	// 		}
+	// 		return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+	// 	}
+	// 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	// 	return nil
+	// })
 
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return nil
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	return errmsgs.WrapError(ddsService.WaitForMongoDBInstance(d.Id(), Deleted, DefaultTimeout))
+	// if err != nil {
+	// 	if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+	// 		return nil
+	// 	}
+	// 	return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	// }
+	// return errmsgs.WrapError(ddsService.WaitForMongoDBInstance(d.Id(), Deleted, DefaultTimeout))
 }

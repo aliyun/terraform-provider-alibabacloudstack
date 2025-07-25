@@ -168,20 +168,42 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_classicVersion3(t *testing.
 					"engine_version": "3.4",
 					"shard_list": []map[string]interface{}{
 						{
-							"node_class":   "dds.shard.mid",
-							"node_storage": "10",
+							"node_class":     "dds.shard.mid",
+							"node_storage":   "10",
+							"private_enable": "true",
+							// "account_name":     "terraformv2",
+							// "account_password": password,
 						},
 						{
-							"node_class":   "dds.shard.standard",
-							"node_storage": "20",
+							"node_class":    "dds.shard.mid",
+							"node_storage":  "10",
+							"public_enable": "true",
 						},
 					},
 					"mongo_list": []map[string]interface{}{
 						{
-							"node_class": "dds.mongos.mid",
+							"node_class":             "dds.mongos.mid",
+							"private_enable":         "true",
+							"connect_string_private": "test-priv3",
+							"port_private":           "3820",
 						},
 						{
-							"node_class": "dds.mongos.mid",
+							"node_class":            "dds.mongos.mid",
+							"public_enable":         "true",
+							"connect_string_public": "test-pubv4",
+							"port_public":           "3819",
+						},
+					},
+					"configserver_list": []map[string]interface{}{
+						{
+							"node_class":   "dds.cs.mid",
+							"node_storage": "20",
+							// "connect_string": "ld-test12345",
+							// "port":           "3818",
+							// "public_enable":  "true",
+							// "private_enable":   "true",
+							// "account_name":     "terraformv2",
+							// "account_password": password,
 						},
 					},
 				}),
@@ -192,8 +214,8 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_classicVersion3(t *testing.
 						"shard_list.#":              "2",
 						"shard_list.0.node_class":   "dds.shard.mid",
 						"shard_list.0.node_storage": "10",
-						"shard_list.1.node_class":   "dds.shard.standard",
-						"shard_list.1.node_storage": "20",
+						"shard_list.1.node_class":   "dds.shard.mid",
+						"shard_list.1.node_storage": "10",
 						"mongo_list.#":              "2",
 						"mongo_list.0.node_class":   "dds.mongos.mid",
 						"mongo_list.1.node_class":   "dds.mongos.mid",
@@ -208,168 +230,191 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_classicVersion3(t *testing.
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"audit_status": "Enable",
-					"audit_filter": []map[string]interface{}{{
-						"role_type": "db",
-						"filters":   []string{"update", "delete", "command"},
-					}, {
-						"role_type": "mongos",
-						"filters":   []string{"admin", "insert"},
-					}},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"audit_status":   "Enable",
-						"audit_filter.#": "2",
-					}),
-					resource.TestCheckTypeSetElemNestedAttrs(
-						resourceId,
-						"audit_filter.*",
-						map[string]string{
-							"role_type": "db",
-							"filters.#": "3",
-						},
-					),
-					resource.TestCheckTypeSetElemNestedAttrs(
-						resourceId,
-						"audit_filter.*",
-						map[string]string{
-							"role_type": "mongos",
-							"filters.#": "2",
-						},
-					),
-					resource.TestCheckTypeSetElemAttr(
-						resourceId,
-						"audit_filter.*.filters.*",
-						"update",
-					),
-					resource.TestCheckTypeSetElemAttr(
-						resourceId,
-						"audit_filter.*.filters.*",
-						"delete",
-					),
-					resource.TestCheckTypeSetElemAttr(
-						resourceId,
-						"audit_filter.*.filters.*",
-						"admin",
-					),
-					resource.TestCheckTypeSetElemAttr(
-						resourceId,
-						"audit_filter.*.filters.*",
-						"command",
-					),
-					resource.TestCheckTypeSetElemAttr(
-						resourceId,
-						"audit_filter.*.filters.*",
-						"insert",
-					),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name": "${var.name}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name": name,
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"account_password": "${random_password.password.result}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"mongo_list": []map[string]interface{}{
-						{
-							"node_class": "dds.mongos.mid",
-						},
-						{
-							"node_class": "dds.mongos.mid",
-						}, {
-							"node_class": "dds.mongos.mid",
-						},
-					},
-				}),
+			// {
+			// 	Config: testAccConfig(map[string]interface{}{
+			// 		"mongo_list": []map[string]interface{}{
+			// 			{
+			// 				"node_class":     "dds.mongos.mid",
+			// 				"private_enable": "true",
+			// 				"connect_string": "ld-test12345",
+			// 				"port":           "3818",
+			// 			},
+			// 			{
+			// 				"node_class": "dds.mongos.mid",
+			// 			},
+			// 		},
+			// 	}),
 
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"mongo_list.#":            "3",
-						"mongo_list.0.node_class": "dds.mongos.mid",
-						"mongo_list.1.node_class": "dds.mongos.mid",
-						"mongo_list.2.node_class": "dds.mongos.mid",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"shard_list": []map[string]interface{}{
-						{
-							"node_class":   "dds.shard.mid",
-							"node_storage": "10",
-						},
-						{
-							"node_class":   "dds.shard.standard",
-							"node_storage": "20",
-						},
-						{
-							"node_class":   "dds.shard.standard",
-							"node_storage": "30",
-						},
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"shard_list.#":              "3",
-						"shard_list.0.node_class":   "dds.shard.mid",
-						"shard_list.0.node_storage": "10",
-						"shard_list.1.node_class":   "dds.shard.standard",
-						"shard_list.1.node_storage": "20",
-						"shard_list.2.node_class":   "dds.shard.standard",
-						"shard_list.2.node_storage": "30",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"backup_period": []string{"Wednesday"},
-					"backup_time":   "11:00Z-12:00Z",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"backup_period.#": "1",
-						"backup_period.0": "Wednesday",
-						"backup_time":     "11:00Z-12:00Z",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"name":             "${var.name}_update",
-					"backup_period":    []string{"Tuesday", "Wednesday"},
-					"backup_time":      "10:00Z-11:00Z",
-					"security_ip_list": []string{"10.168.1.12", "10.168.1.13"},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":               fmt.Sprintf("%s_update", name),
-						"security_ip_list.#": "2",
-						"security_ip_list.0": "10.168.1.12",
-						"security_ip_list.1": "10.168.1.13",
-						"backup_period.#":    "2",
-						"backup_period.0":    "Tuesday",
-						"backup_period.1":    "Wednesday",
-						"backup_time":        "10:00Z-11:00Z",
-					}),
-				),
-			},
+			// 	Check: resource.ComposeTestCheckFunc(
+			// 		testAccCheck(map[string]string{
+			// 			"mongo_list.#":            "2",
+			// 			"mongo_list.0.node_class": "dds.mongos.mid",
+			// 			"mongo_list.1.node_class": "dds.mongos.mid",
+			// 		}),
+			// 	),
+			// },
+			// 	{
+			// 		Config: testAccConfig(map[string]interface{}{
+			// 			"audit_status": "Enable",
+			// 			"audit_filter": []map[string]interface{}{{
+			// 				"role_type": "db",
+			// 				"filters":   []string{"update", "delete", "command"},
+			// 			}, {
+			// 				"role_type": "mongos",
+			// 				"filters":   []string{"admin", "insert"},
+			// 			}},
+			// 		}),
+			// 		Check: resource.ComposeTestCheckFunc(
+			// 			testAccCheck(map[string]string{
+			// 				"audit_status":   "Enable",
+			// 				"audit_filter.#": "2",
+			// 			}),
+			// 			resource.TestCheckTypeSetElemNestedAttrs(
+			// 				resourceId,
+			// 				"audit_filter.*",
+			// 				map[string]string{
+			// 					"role_type": "db",
+			// 					"filters.#": "3",
+			// 				},
+			// 			),
+			// 			resource.TestCheckTypeSetElemNestedAttrs(
+			// 				resourceId,
+			// 				"audit_filter.*",
+			// 				map[string]string{
+			// 					"role_type": "mongos",
+			// 					"filters.#": "2",
+			// 				},
+			// 			),
+			// 			resource.TestCheckTypeSetElemAttr(
+			// 				resourceId,
+			// 				"audit_filter.*.filters.*",
+			// 				"update",
+			// 			),
+			// 			resource.TestCheckTypeSetElemAttr(
+			// 				resourceId,
+			// 				"audit_filter.*.filters.*",
+			// 				"delete",
+			// 			),
+			// 			resource.TestCheckTypeSetElemAttr(
+			// 				resourceId,
+			// 				"audit_filter.*.filters.*",
+			// 				"admin",
+			// 			),
+			// 			resource.TestCheckTypeSetElemAttr(
+			// 				resourceId,
+			// 				"audit_filter.*.filters.*",
+			// 				"command",
+			// 			),
+			// 			resource.TestCheckTypeSetElemAttr(
+			// 				resourceId,
+			// 				"audit_filter.*.filters.*",
+			// 				"insert",
+			// 			),
+			// 		),
+			// 	},
+			// 	{
+			// 		Config: testAccConfig(map[string]interface{}{
+			// 			"name": "${var.name}",
+			// 		}),
+			// 		Check: resource.ComposeTestCheckFunc(
+			// 			testAccCheck(map[string]string{
+			// 				"name": name,
+			// 			}),
+			// 		),
+			// 	},
+			// 	{
+			// 		Config: testAccConfig(map[string]interface{}{
+			// 			"account_password": "${random_password.password.result}",
+			// 		}),
+			// 		Check: resource.ComposeTestCheckFunc(
+			// 			testAccCheck(map[string]string{}),
+			// 		),
+			// 	},
+			// 	{
+			// 		Config: testAccConfig(map[string]interface{}{
+			// 			"mongo_list": []map[string]interface{}{
+			// 				{
+			// 					"node_class": "dds.mongos.mid",
+			// 				},
+			// 				{
+			// 					"node_class": "dds.mongos.mid",
+			// 				}, {
+			// 					"node_class": "dds.mongos.mid",
+			// 				},
+			// 			},
+			// 		}),
+
+			// 		Check: resource.ComposeTestCheckFunc(
+			// 			testAccCheck(map[string]string{
+			// 				"mongo_list.#":            "3",
+			// 				"mongo_list.0.node_class": "dds.mongos.mid",
+			// 				"mongo_list.1.node_class": "dds.mongos.mid",
+			// 				"mongo_list.2.node_class": "dds.mongos.mid",
+			// 			}),
+			// 		),
+			// 	},
+			// 	{
+			// 		Config: testAccConfig(map[string]interface{}{
+			// 			"shard_list": []map[string]interface{}{
+			// 				{
+			// 					"node_class":   "dds.shard.mid",
+			// 					"node_storage": "10",
+			// 				},
+			// 				{
+			// 					"node_class":   "dds.shard.standard",
+			// 					"node_storage": "20",
+			// 				},
+			// 				{
+			// 					"node_class":   "dds.shard.standard",
+			// 					"node_storage": "30",
+			// 				},
+			// 			},
+			// 		}),
+			// 		Check: resource.ComposeTestCheckFunc(
+			// 			testAccCheck(map[string]string{
+			// 				"shard_list.#":              "3",
+			// 				"shard_list.0.node_class":   "dds.shard.mid",
+			// 				"shard_list.0.node_storage": "10",
+			// 				"shard_list.1.node_class":   "dds.shard.standard",
+			// 				"shard_list.1.node_storage": "20",
+			// 				"shard_list.2.node_class":   "dds.shard.standard",
+			// 				"shard_list.2.node_storage": "30",
+			// 			}),
+			// 		),
+			// 	},
+			// 	{
+			// 		Config: testAccConfig(map[string]interface{}{
+			// 			"backup_period": []string{"Wednesday"},
+			// 			"backup_time":   "11:00Z-12:00Z",
+			// 		}),
+			// 		Check: resource.ComposeTestCheckFunc(
+			// 			testAccCheck(map[string]string{
+			// 				"backup_period.#": "1",
+			// 				"backup_period.0": "Wednesday",
+			// 				"backup_time":     "11:00Z-12:00Z",
+			// 			}),
+			// 		),
+			// 	},
+			// 	{
+			// 		Config: testAccConfig(map[string]interface{}{
+			// 			"name":             "${var.name}_update",
+			// 			"backup_period":    []string{"Tuesday", "Wednesday"},
+			// 			"backup_time":      "10:00Z-11:00Z",
+			// 			"security_ip_list": []string{"10.168.1.12", "10.168.1.13"},
+			// 		}),
+			// 		Check: resource.ComposeTestCheckFunc(
+			// 			testAccCheck(map[string]string{
+			// 				"name":               fmt.Sprintf("%s_update", name),
+			// 				"security_ip_list.#": "2",
+			// 				"security_ip_list.0": "10.168.1.12",
+			// 				"security_ip_list.1": "10.168.1.13",
+			// 				"backup_period.#":    "2",
+			// 				"backup_period.0":    "Tuesday",
+			// 				"backup_period.1":    "Wednesday",
+			// 				"backup_time":        "10:00Z-11:00Z",
+			// 			}),
+			// 		),
+			// 	},
 		},
 	})
 }

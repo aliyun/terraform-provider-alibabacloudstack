@@ -83,10 +83,10 @@ func resourceAlibabacloudStackMongodbShardingnetworkpublicaddress() *schema.Reso
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackMongodbShardingnetworkpublicaddressCreate,
-		resourceAlibabacloudStackMongodbShardingnetworkpublicaddressRead,
-		resourceAlibabacloudStackMongodbShardingnetworkpublicaddressUpdate,
-		resourceAlibabacloudStackMongodbShardingnetworkpublicaddressDelete)
+	// setResourceFunc(resource, resourceAlibabacloudStackMongodbShardingnetworkpublicaddressCreate,
+	// 	resourceAlibabacloudStackMongodbShardingnetworkpublicaddressRead,
+	// 	// resourceAlibabacloudStackMongodbShardingnetworkpublicaddressUpdate,
+	// 	resourceAlibabacloudStackMongodbShardingnetworkpublicaddressDelete)
 	return resource
 }
 
@@ -126,57 +126,57 @@ func resourceAlibabacloudStackMongodbShardingnetworkpublicaddressCreate(d *schem
 
 }
 
-func resourceAlibabacloudStackMongodbShardingnetworkpublicaddressUpdate(d *schema.ResourceData, meta interface{}) error {
+func update_public_address(id string, network_type string, nas string, pt string, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	mongo_dbsharding_network_public_addressservice := MongoDBService{client}
-	parts := strings.Split(d.Id(), COLON_SEPARATED)
+	parts := strings.Split(id, COLON_SEPARATED)
 	db_instance_id := parts[0]
 	node_id := parts[1]
-	if !d.IsNewResource() && d.HasChanges("network_address", "port") {
-		request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "")
-		response, err := mongo_dbsharding_network_public_addressservice.DoDdsDescribeshardingnetworkaddressRequest(d.Id())
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_shardingnetworkpublicaddress", errmsgs.AlibabacloudStackSdkGoERROR)
+	if nas == "" && pt == "" {
+		return nil
+	}
+	// if !d.IsNewResource() && d.HasChanges("network_address", "port") {
+	request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "")
+	response, err := mongo_dbsharding_network_public_addressservice.DoDdsDescribeshardingnetworkaddressRequest(id)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_shardingnetworkpublicaddress", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	network_address := response.NetworkAddresses.NetworkAddress
+	current_network_address := ""
+	for _, v := range network_address {
+		if v.NetworkType == network_type && v.NodeId == node_id {
+			current_network_address = v.NetworkAddress
 		}
-		network_address := response.NetworkAddresses.NetworkAddress
-		current_network_address := ""
-		for _, v := range network_address {
-			if v.NetworkType == "Public" && v.NodeId == node_id {
-				current_network_address = v.NetworkAddress
-			}
-		}
-		if current_network_address == "" {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "No network address found for node %s", node_id, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		if v, ok := d.GetOk("network_address"); ok {
-			request.QueryParams["NewConnectionString"] = v.(string)
-			request.QueryParams["CurrentConnectionString"] = current_network_address
-		}
-		if v, ok := d.GetOk("port"); ok {
-			request.QueryParams["NewPort"] = v.(string)
-		}
-		DdsResetaccountpasswordResponseObj := DdsResetaccountpasswordResponse{}
+	}
+	if current_network_address == "" {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "No network address found for node %s", node_id, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	if nas != "" {
+		request.QueryParams["NewConnectionString"] = nas
+		request.QueryParams["CurrentConnectionString"] = current_network_address
+	}
+	if pt != "" {
+		request.QueryParams["NewPort"] = pt
+	}
+	DdsResetaccountpasswordResponseObj := DdsResetaccountpasswordResponse{}
+	request.QueryParams["NodeId"] = node_id
 
-		request.QueryParams["NodeId"] = node_id
+	request.QueryParams["DBInstanceId"] = db_instance_id
 
-		request.QueryParams["DBInstanceId"] = db_instance_id
-
-		bresponse, err := client.ProcessCommonRequest(request)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_mongodb_sharding_network_public_address", "ModifyDBInstanceConnectionString", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	bresponse, err := client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+			"alibabacloudstack_mongodb_sharding_network_public_address", "ModifyDBInstanceConnectionString", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
 
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsResetaccountpasswordResponseObj)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_mongodb_sharding_network_public_address", "ModifyDBInstanceConnectionString", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsResetaccountpasswordResponseObj)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+			"alibabacloudstack_mongodb_sharding_network_public_address", "ModifyDBInstanceConnectionString", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil
 }

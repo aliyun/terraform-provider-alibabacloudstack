@@ -234,7 +234,7 @@ func (s *MongoDBService) DescribeMongoDBSecurityGroupId(id string) (*dds.Describ
 }
 
 func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
-	instanceID string, nodeType MongoDBShardingNodeType, stateList, diffList []interface{}) error {
+	instanceID string, nodeType MongoDBShardingNodeType, stateList, diffList []interface{}, meta interface{}) error {
 	client := server.client
 
 	err := server.WaitForMongoDBInstance(instanceID, Running, DefaultLongTimeout)
@@ -358,6 +358,7 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -919,6 +920,7 @@ func (s *MongoDBService) DoDdsDescribeshardingnetworkaddressRequest(id string) (
 }
 
 func (s *MongoDBService) DoWaitDdsShardDbinstanceRunningRequest(id string) (*DdsDescribeDBInstancesResponse, error) {
+	time.Sleep(time.Second * 10)
 	deadline := time.Now().Add(time.Duration(300) * time.Second)
 	for {
 		request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeDBInstances", "")

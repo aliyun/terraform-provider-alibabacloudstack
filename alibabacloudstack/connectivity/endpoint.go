@@ -276,8 +276,8 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"dataworks-public.{{.region}}.{{.domain}}",
 	},
 	DDSCode: PopEndpoint{
-		"mongodb.{{.domain}}",
-		"mongodb.{{.region}}.{{.domain}}",
+		"mongodb-vpc.{{.domain}}",
+		"mongodb-vpc.{{.region}}.{{.domain}}",
 	},
 	RAMCode: PopEndpoint{
 		"ram.{{.domain}}",

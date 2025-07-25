@@ -15,6 +15,7 @@ type MongoDBShardingNodeType string
 const (
 	MongoDBShardingNodeMongos = MongoDBShardingNodeType("mongos")
 	MongoDBShardingNodeShard  = MongoDBShardingNodeType("shard")
+	MongoDBShardingNodeCs     = MongoDBShardingNodeType("configserver")
 )
 
 func auditFilterSchema(availableRoleType []string) *schema.Schema {
