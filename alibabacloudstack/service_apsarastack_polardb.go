@@ -1595,7 +1595,7 @@ type PolardbDescribedbproxyResponse struct {
 
 func (s *PolardbService) DoPolardbDescribedbproxyRequest(id string) (*PolardbDescribedbproxyResponse, error) {
 	// api: Polardb - 2014-08-15 - DescribeDBProxy
-	request := s.client.NewCommonRequest("POST", "polardb", "2024-01-30", "DescribeDBProxy", "")
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBProxy", "")
 	PolardbDescribedbproxyResponseObj := &PolardbDescribedbproxyResponse{}
 
 	request.QueryParams["DBInstanceId"] = id
