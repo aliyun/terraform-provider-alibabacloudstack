@@ -14,41 +14,23 @@ description: |-
 ## 示例用法
 
 ```hcl
-data "alibabacloudstack_zones" default {
-  available_resource_creation = "VSwitch"
-  enable_details = true
-}
+	variable "name" {
+		default = "%v"
+	}
 
-resource "alibabacloudstack_vpc_vpc" "default" {
-  vpc_name = "${var.name}_vpc"
-  cidr_block = "172.16.0.0/16"
-}
+	resource "alibabacloudstack_polardb_dbinstance" "default" {
+	instance_storage = "5"
+	instance_name = "${var.name}"
+	storage_type = "local_ssd"
+	engine = "MySQL"
+	engine_version = "5.7"
+	instance_type = "rds.mysql.t1.small"
+	}
 
-resource "alibabacloudstack_vpc_vswitch" "default" {
-  name = "${var.name}_vsw"
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  cidr_block = "172.16.0.0/24"
-  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
-}
-
-variable "name" {
-  default = "tf-testaccdbinstanceconfig"
-}
-
-resource "alibabacloudstack_security_group" "default" {
-  name   = "${var.name}"
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-}
-
-resource "alibabacloudstack_polardb_dbinstance" "default" {
-  instance_storage = "5"
-  instance_name = "${var.name}"
-  vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
-  storage_type = "local_ssd"
-  engine = "MySQL"
-  engine_version = "5.7"
-  instance_type = "rds.mysql.t1.small"
-}
+	resource "alibabacloudstack_polardb_proxy" "default" {
+		db_instance_id = "${alibabacloudstack_polardb_dbinstance.default.id}"
+		polardb_proxy_instance_num = "1"
+	}
 ```
 
 ## 参数说明

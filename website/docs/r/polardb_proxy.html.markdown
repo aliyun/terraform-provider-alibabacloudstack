@@ -1,86 +1,41 @@
 ---
-subcategory: "RDS"
+subcategory: "polardb"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_rds_dbproxy"
-sidebar_current: "docs-Alibabacloudstack-rds-dbproxy"
+page_title: "Alibabacloudstack: alibabacloudstack_polardb_proxy"
+sidebar_current: "docs-Alibabacloudstack-polardb-proxy"
 description: |-
-  Provides a rds Dbproxy resource.
+  Provides a polardb proxy resource.
 ---
 
-# alibabacloudstack\_rds\_dbproxy
+# alibabacloudstack\_polardb\_proxy
 
-Provides a rds Dbproxy resource.
+Provides a polardb proxy resource.
 
 ## Example Usage
 ```
-variable "name" {
-		default = "tf-testaccdbproxy867443"
+	variable "name" {
+		default = "%v"
 	}
-	
-	
-data "alibabacloudstack_zones" default {
-  available_resource_creation = "VSwitch"
-  enable_details = true
-}
 
+	resource "alibabacloudstack_polardb_dbinstance" "default" {
+	instance_storage = "5"
+	instance_name = "${var.name}"
+	storage_type = "local_ssd"
+	engine = "MySQL"
+	engine_version = "5.7"
+	instance_type = "rds.mysql.t1.small"
+	}
 
-resource "alibabacloudstack_vpc_vpc" "default" {
-  vpc_name = "${var.name}_vpc"
-  cidr_block = "172.16.0.0/16"
-}
-
-resource "alibabacloudstack_vpc_vswitch" "default" {
-  name = "${var.name}_vsw"
-  vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-  cidr_block = "172.16.1.0/24"
-  zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
-}
-
-
-	
-variable "rds_instance_type" {
-  type      = string
-  default   = ""
-  sensitive = true
-}
-
-data "alibabacloudstack_rds_instance_types" "default" {
-  ids                  = var.rds_instance_type != "" ? [var.rds_instance_type] : null
-  engine               = "MySQL"
-  engine_version       = "5.7"
-  sorted_by            = "CPU"
-  series               = "dual_ha"
-}
-
-resource "alibabacloudstack_db_instance" "default" {
-  engine               = data.alibabacloudstack_rds_instance_types.default.instance_types.0.engine
-  engine_version       = data.alibabacloudstack_rds_instance_types.default.instance_types.0.engine_version
-  instance_type        = data.alibabacloudstack_rds_instance_types.default.instance_types.0.id
-  instance_storage     = data.alibabacloudstack_rds_instance_types.default.instance_types.0.storage_min
-  instance_charge_type = "Postpaid"
-  instance_name        = "${var.name}"
-  vswitch_id           = "${alibabacloudstack_vpc_vswitch.default.id}"
-  monitoring_period    = "60"
-  storage_type         = data.alibabacloudstack_rds_instance_types.default.instance_types.0.storage_type
-}
-
-
-locals {
-  thrity_seconds_after = formatdate("YYYY-MM-DD'T'hh:mm:ssZ", timeadd(timestamp(), "30s"))
-}
-
-	
-
-resource "alibabacloudstack_db_proxy" "default" {
-  db_proxy_instance_num = "1"
-  db_instance_id = "${alibabacloudstack_db_instance.default.id}"
-}
+	resource "alibabacloudstack_polardb_proxy" "default" {
+		db_instance_id = "${alibabacloudstack_polardb_dbinstance.default.id}"
+		polardb_proxy_instance_num = "1"
+	}
 ```
 
 ## Argument Reference
 
 The following arguments are supported:
-  * `db_instance_id` - (Required) - The ID of the RDS instance.
+  * `db_instance_id` - (Required) - The ID of the polardb instance.
   * `db_proxy_connect_string` - (Optional) - The connection string of the database proxy.
   * `db_proxy_connect_string_port` - (Optional) - The port of the database proxy.
   * `db_proxy_instance_num` - (Optional) - The number of the database proxy instance.

@@ -157,12 +157,12 @@ func resourceAlibabacloudStackPolardbproxyCreate(d *schema.ResourceData, meta in
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_db_proxy", "ModifyDBProxy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_proxy", "ModifyDBProxy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	d.SetId(db_instance_id)
-	rdsdb_proxyservice := PolardbService{client}
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rdsdb_proxyservice.PolardbProxyStateRefreshFunc(db_instance_id, []string{""}))
+	polardb_proxyservice := PolardbService{client}
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardb_proxyservice.PolardbProxyStateRefreshFunc(db_instance_id, []string{""}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -196,7 +196,7 @@ func resourceAlibabacloudStackPolardbproxyUpdate(d *schema.ResourceData, meta in
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_rds_db_proxy", "ModifyDBProxyEndpoint", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_polardb_proxy", "ModifyDBProxyEndpoint", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 	}
@@ -217,7 +217,7 @@ func resourceAlibabacloudStackPolardbproxyUpdate(d *schema.ResourceData, meta in
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_rds_db_proxy", "ModifyDBProxyEndpoint", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_polardb_proxy", "ModifyDBProxyEndpoint", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 	}
@@ -237,10 +237,10 @@ func resourceAlibabacloudStackPolardbproxyUpdate(d *schema.ResourceData, meta in
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_rds_db_proxy", "ModifyDBProxyEndpointAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_polardb_proxy", "ModifyDBProxyEndpointAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		rdsdb_proxyservice := PolardbService{client}
-		stateConf := BuildStateConf([]string{"NET_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rdsdb_proxyservice.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
+		polardb_proxyservice := PolardbService{client}
+		stateConf := BuildStateConf([]string{"NET_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardb_proxyservice.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -262,10 +262,10 @@ func resourceAlibabacloudStackPolardbproxyUpdate(d *schema.ResourceData, meta in
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_rds_db_proxy", "ModifyDBProxyEndpointAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_polardb_proxy", "ModifyDBProxyEndpointAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		rdsdb_proxyservice := PolardbService{client}
-		stateConf := BuildStateConf([]string{"NET_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rdsdb_proxyservice.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
+		polardb_proxyservice := PolardbService{client}
+		stateConf := BuildStateConf([]string{"NET_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardb_proxyservice.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -301,10 +301,10 @@ func resourceAlibabacloudStackPolardbproxyUpdate(d *schema.ResourceData, meta in
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_rds_db_proxy", "ModifyDBProxyInstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_polardb_proxy", "ModifyDBProxyInstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		rdsdb_proxyservice := PolardbService{client}
-		stateConf := BuildStateConf([]string{"DBInstanceClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rdsdb_proxyservice.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
+		polardb_proxyservice := PolardbService{client}
+		stateConf := BuildStateConf([]string{"DBInstanceClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, polardb_proxyservice.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -317,10 +317,10 @@ func resourceAlibabacloudStackPolardbproxyUpdate(d *schema.ResourceData, meta in
 
 func resourceAlibabacloudStackPolardbproxyRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	rdsdb_proxyservice := PolardbService{client}
-	response, err := rdsdb_proxyservice.DoPolardbDescribedbproxyRequest(d.Id())
+	polardb_proxyservice := PolardbService{client}
+	response, err := polardb_proxyservice.DoPolardbDescribedbproxyRequest(d.Id())
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_rds_dbproxy", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardb_proxy", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	data := response
 
@@ -338,7 +338,7 @@ func resourceAlibabacloudStackPolardbproxyRead(d *schema.ResourceData, meta inte
 
 	d.Set("db_instance_id", d.Id())
 
-	if v, err := rdsdb_proxyservice.DoDescribeDBProxyEndpointRequest(d.Id()); err != nil {
+	if v, err := polardb_proxyservice.DoDescribeDBProxyEndpointRequest(d.Id()); err != nil {
 		return err
 	} else {
 		d.Set("db_proxy_connect_string_port", v.DBProxyConnectStringPort)
@@ -387,10 +387,10 @@ func resourceAlibabacloudStackPolardbproxyDelete(d *schema.ResourceData, meta in
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_db_proxy", "ModifyDBProxy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_proxy", "ModifyDBProxy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	rdsdb_proxyservice := PolardbService{client}
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{""}, d.Timeout(schema.TimeoutUpdate), 1*time.Second, rdsdb_proxyservice.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
+	polardb_proxyservice := PolardbService{client}
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{""}, d.Timeout(schema.TimeoutUpdate), 1*time.Second, polardb_proxyservice.PolardbProxyStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

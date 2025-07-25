@@ -1,20 +1,20 @@
 ---
-subcategory: "RDS"
+subcategory: "PolarDB"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_rds_dbproxy"
-sidebar_current: "docs-Alibabacloudstack-rds-dbproxy"
+page_title: "Alibabacloudstack: alibabacloudstack_polardb_proxy"
+sidebar_current: "docs-Alibabacloudstack-polardb-proxy"
 description: |-
-  Provides a rds Dbproxy resource.
+  Provides a polardb Dbproxy resource.
 ---
 
-# alibabacloudstack\_rds\_dbproxy
+# alibabacloudstack\_polardb\_proxy
 
-Provides a rds Dbproxy resource.
+Provides a polardb Dbproxy resource.
 
 ## 示例用法
 ```
 variable "name" {
-		default = "tf-testaccdbproxy867443"
+		default = "tf-testaccproxy867443"
 	}
 	
 	
@@ -38,14 +38,14 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 
 
 	
-variable "rds_instance_type" {
+variable "polardb_instance_type" {
   type      = string
   default   = ""
   sensitive = true
 }
 
-data "alibabacloudstack_rds_instance_types" "default" {
-  ids                  = var.rds_instance_type != "" ? [var.rds_instance_type] : null
+data "alibabacloudstack_polardb_instance_types" "default" {
+  ids                  = var.polardb_instance_type != "" ? [var.polardb_instance_type] : null
   engine               = "MySQL"
   engine_version       = "5.7"
   sorted_by            = "CPU"
@@ -53,15 +53,15 @@ data "alibabacloudstack_rds_instance_types" "default" {
 }
 
 resource "alibabacloudstack_db_instance" "default" {
-  engine               = data.alibabacloudstack_rds_instance_types.default.instance_types.0.engine
-  engine_version       = data.alibabacloudstack_rds_instance_types.default.instance_types.0.engine_version
-  instance_type        = data.alibabacloudstack_rds_instance_types.default.instance_types.0.id
-  instance_storage     = data.alibabacloudstack_rds_instance_types.default.instance_types.0.storage_min
+  engine               = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.engine
+  engine_version       = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.engine_version
+  instance_type        = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.id
+  instance_storage     = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_min
   instance_charge_type = "Postpaid"
   instance_name        = "${var.name}"
   vswitch_id           = "${alibabacloudstack_vpc_vswitch.default.id}"
   monitoring_period    = "60"
-  storage_type         = data.alibabacloudstack_rds_instance_types.default.instance_types.0.storage_type
+  storage_type         = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_type
 }
 
 
