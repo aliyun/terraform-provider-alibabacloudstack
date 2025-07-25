@@ -37,7 +37,6 @@ func TestAccAlibabacloudStackPolardbProxy_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"db_instance_id":        "${alibabacloudstack_polardb_dbinstance.default.id}",
 					"db_proxy_instance_num": "1",
-					"instance_network_type": "Classic",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -60,11 +59,21 @@ func TestAccAlibabacloudStackPolardbProxy_basic(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"persistent_connection_status": "Enabled",
+					"connection_persist": "1",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"persistent_connection_status": "Enabled",
+						"connection_persist": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"causal_consist_read": "2",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"causal_consist_read": "2",
 					}),
 				),
 			},
@@ -83,6 +92,8 @@ func TestAccAlibabacloudStackPolardbProxy_basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				//  effective_time effective_specific_time is Execution parameters
+				ImportStateVerifyIgnore: []string{"effective_time", "effective_specific_time"},
 			},
 		},
 	})
@@ -90,7 +101,7 @@ func TestAccAlibabacloudStackPolardbProxy_basic(t *testing.T) {
 
 func resourcePolardbProxyConfigDependence(name string) string {
 	now := time.Now().UTC()
-	oneminago := now.Add(+1 * time.Minute)
+	one_minute_later := now.Add(+1 * time.Minute)
 	return fmt.Sprintf(`
 	variable "name" {
 		default = "%v"
@@ -108,5 +119,5 @@ func resourcePolardbProxyConfigDependence(name string) string {
 	engine_version = "5.7"
 	instance_type = "rds.mysql.t1.small"
 	}
-	`, name, oneminago.Format("2006-01-02T15:04:05Z"))
+	`, name, one_minute_later.Format("2006-01-02T15:04:05Z"))
 }

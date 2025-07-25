@@ -1638,3 +1638,38 @@ func (s *PolardbService) PolardbProxyStateRefreshFunc(id string, failStates []st
 		return object, object.DBProxyInstanceStatus, nil
 	}
 }
+
+type PolarDBProxyEndpoint struct {
+	ReadOnlyInstanceDistributionType string `json:"ReadOnlyInstanceDistributionType"`
+	DBProxyConnectString             string `json:"DBProxyConnectString"`
+	DBProxyEndpointId                string `json:"DBProxyEndpointId"`
+	DBProxyFeatures                  string `json:"DBProxyFeatures"`
+	ReadOnlyInstanceWeight           string `json:"ReadOnlyInstanceWeight"`
+	ReadOnlyInstanceMaxDelayTime     string `json:"ReadOnlyInstanceMaxDelayTime"`
+	DBProxyConnectStringNetType      string `json:"DBProxyConnectStringNetType"`
+	DBProxyConnectStringPort         string `json:"DBProxyConnectStringPort"`
+}
+
+func (s *PolardbService) DoDescribeDBProxyEndpointRequest(instanceId string) (*PolarDBProxyEndpoint, error) {
+	// api: R-kvstore - 2015-01-01 - DescribeBackupTasks
+	request := s.client.NewCommonRequest("GET", "polardb", "2024-01-30", "DescribeDBProxyEndpoint", "")
+	dBProxyEndpoint := &PolarDBProxyEndpoint{}
+	request.QueryParams["DBInstanceId"] = instanceId
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeBackupTasks", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &dBProxyEndpoint)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeBackupTasks", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return dBProxyEndpoint, nil
+}
