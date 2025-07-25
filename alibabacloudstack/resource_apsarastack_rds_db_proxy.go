@@ -38,41 +38,6 @@ func resourceAlibabacloudStackRdsDbproxy() *schema.Resource {
 				Computed: true,
 			},
 
-			"db_proxy_connect_string_items": {
-				Type:     schema.TypeList,
-				Computed: true,
-
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-
-						"db_proxy_connect_string": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"db_proxy_connect_string_net_type": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"db_proxy_connect_string_net_work_type": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-
-						"db_proxy_connect_string_port": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"db_proxy_endpoint_id": {
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
-					},
-				},
-			},
-
 			"db_proxy_instance_current_minor_version": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -94,42 +59,28 @@ func resourceAlibabacloudStackRdsDbproxy() *schema.Resource {
 				Optional: true,
 				Computed: true,
 			},
-
-			"db_proxy_endpoint_items": {
-				Type:     schema.TypeList,
+			"db_proxy_endpoint_aliases": {
+				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-
-						"db_proxy_endpoint_aliases": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-
-						"db_proxy_endpoint_name": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-
-						"db_proxy_endpoint_type": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-
-						"db_proxy_read_write_mode": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-					},
-				},
 			},
 
+			"db_proxy_endpoint_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+
+			"db_proxy_endpoint_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"db_proxy_read_write_mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
 			"db_proxy_instance_type": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -152,11 +103,11 @@ func resourceAlibabacloudStackRdsDbproxy() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Immediate", "MaintainTime", "SpecificTime"}, false),
 			},
 
-			"instance_network_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Classic", "Public"}, false),
-			},
+			//			"instance_network_type": {
+			//				Type:         schema.TypeString,
+			//				Optional:     true,
+			//				ValidateFunc: validation.StringInSlice([]string{"Classic", "VPC", "Public"}, false),
+			//			},
 
 			"connection_persist": {
 				Type:         schema.TypeString,
@@ -187,21 +138,25 @@ func resourceAlibabacloudStackRdsDbproxy() *schema.Resource {
 
 func resourceAlibabacloudStackRdsDbproxyCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	//	rdsService := RdsService{client}
 
+	db_instance_id := d.Get("db_instance_id").(string)
 	// api: Rds - 2014-08-15 - ModifyDBProxy
 	request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBProxy", "")
 
 	request.QueryParams["ConfigDBProxyService"] = "Startup"
 
-	request.QueryParams["DBInstanceId"] = d.Get("db_instance_id").(string)
+	request.QueryParams["DBInstanceId"] = db_instance_id
 
 	if v, ok := d.GetOk("db_proxy_instance_num"); ok {
 		request.QueryParams["DBProxyInstanceNum"] = strconv.Itoa(v.(int))
 	}
 
-	if v, ok := d.GetOk("instance_network_type"); ok {
-		request.QueryParams["InstanceNetworkType"] = v.(string)
-	}
+	//	if instance, err := rdsService.DescribeDBInstance(db_instance_id); err != nil {
+	//		return err
+	//	} else {
+	//		request.QueryParams["InstanceNetworkType"] = instance.InstanceNetworkType
+	//	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -213,11 +168,9 @@ func resourceAlibabacloudStackRdsDbproxyCreate(d *schema.ResourceData, meta inte
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_db_proxy", "ModifyDBProxy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	db_instance_id := d.Get("db_instance_id").(string)
-
 	d.SetId(db_instance_id)
 	rdsdb_proxyservice := RdsService{client}
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, rdsdb_proxyservice.RdsProxyStateRefreshFunc(db_instance_id, []string{""}))
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rdsdb_proxyservice.RdsProxyStateRefreshFunc(db_instance_id, []string{""}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -311,33 +264,36 @@ func resourceAlibabacloudStackRdsDbproxyUpdate(d *schema.ResourceData, meta inte
 	// DBProxyConnectStringItems
 
 	// api: Rds - 2014-08-15 - ModifyDBProxyEndpointAddress
-	if d.HasChanges("db_proxy_connect_string_port", "db_proxy_connect_string") {
+	if d.HasChanges("db_proxy_connect_string_port") {
 		request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBProxyEndpointAddress", "")
 
 		request.QueryParams["DBInstanceId"] = d.Id()
-		var endpoint_name string
-		if db_proxy_endpoint_items := d.Get("db_proxy_endpoint_items").([]interface{}); len(db_proxy_endpoint_items) > 0 {
-			db_proxy_endpoint := db_proxy_endpoint_items[0].(map[string]interface{})
-			endpoint_name = db_proxy_endpoint["db_proxy_endpoint_name"].(string)
-		} else {
-			rdsdb_proxyservice := RdsService{client}
-			data, err := rdsdb_proxyservice.DoRdsDescribedbproxyRequest(d.Id())
-			if err != nil {
-				return nil
-			}
-			endpoint_name = data.DBProxyEndpointItems.DBProxyEndpointItems[0].DBProxyEndpointName
-		}
 		request.QueryParams["DBProxyEndpointId"] = dBProxyEndpoint.DBProxyEndpointId
-		request.QueryParams["DBProxyConnectStringNetType"] = endpoint_name
-		if v, ok := d.GetOk("instance_network_type"); ok {
-			request.QueryParams["DBProxyConnectStringNetType"] = v.(string)
+		request.QueryParams["DBProxyNewConnectStringPort"] = d.Get("db_proxy_connect_string_port").(string)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_rds_db_proxy", "ModifyDBProxyEndpointAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		if d.HasChange("db_proxy_connect_string_port") {
-			request.QueryParams["DBProxyNewConnectStringPort"] = d.Get("db_proxy_connect_string_port").(string)
+		rdsdb_proxyservice := RdsService{client}
+		stateConf := BuildStateConf([]string{"NET_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rdsdb_proxyservice.RdsProxyStateRefreshFunc(d.Id(), []string{}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
-		if d.HasChange("db_proxy_connect_string") {
-			request.QueryParams["DBProxyNewConnectString"] = d.Get("db_proxy_connect_string").(string)
-		}
+	}
+	
+	// Cannot be modified simultaneously with db_proxy_connect_string
+	if d.HasChanges("db_proxy_connect_string") {
+		request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBProxyEndpointAddress", "")
+
+		request.QueryParams["DBInstanceId"] = d.Id()
+		request.QueryParams["DBProxyEndpointId"] = dBProxyEndpoint.DBProxyEndpointId
+		request.QueryParams["DBProxyNewConnectString"] = d.Get("db_proxy_connect_string").(string)
 
 		bresponse, err := client.ProcessCommonRequest(request)
 		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -349,7 +305,11 @@ func resourceAlibabacloudStackRdsDbproxyUpdate(d *schema.ResourceData, meta inte
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_rds_db_proxy", "ModifyDBProxyEndpointAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-
+		rdsdb_proxyservice := RdsService{client}
+		stateConf := BuildStateConf([]string{"NET_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rdsdb_proxyservice.RdsProxyStateRefreshFunc(d.Id(), []string{}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
 	}
 
 	// api: Rds - 2014-08-15 - ModifyDBProxyInstance
@@ -382,7 +342,7 @@ func resourceAlibabacloudStackRdsDbproxyUpdate(d *schema.ResourceData, meta inte
 				"alibabacloudstack_rds_db_proxy", "ModifyDBProxyInstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		rdsdb_proxyservice := RdsService{client}
-		stateConf := BuildStateConf([]string{"DBInstanceClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 1*time.Minute, rdsdb_proxyservice.RdsProxyStateRefreshFunc(d.Id(), []string{}))
+		stateConf := BuildStateConf([]string{"DBInstanceClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, rdsdb_proxyservice.RdsProxyStateRefreshFunc(d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -414,18 +374,6 @@ func resourceAlibabacloudStackRdsDbproxyRead(d *schema.ResourceData, meta interf
 
 	d.Set("db_proxy_instance_type", data.DBProxyInstanceType)
 
-	db_proxy_connect_string_items := make([]map[string]interface{}, 0)
-	for _, item := range data.DBProxyConnectStringItems.DBProxyConnectStringItems {
-		db_proxy_connect_string_items = append(db_proxy_connect_string_items, map[string]interface{}{
-			"db_proxy_connect_string":               item.DBProxyConnectString,
-			"db_proxy_connect_string_port":          item.DBProxyConnectStringPort,
-			"db_proxy_connect_string_net_type":      item.DBProxyConnectStringNetType,
-			"db_proxy_connect_string_net_work_type": item.DBProxyConnectStringNetWorkType,
-			"db_proxy_endpoint_id":                  item.DBProxyEndpointId,
-		})
-	}
-	d.Set("db_proxy_connect_string_items", db_proxy_connect_string_items)
-
 	if v, err := rdsdb_proxyservice.DoDescribeDBProxyEndpointRequest(d.Id()); err != nil {
 		return err
 	} else {
@@ -444,21 +392,19 @@ func resourceAlibabacloudStackRdsDbproxyRead(d *schema.ResourceData, meta interf
 		}
 	}
 
-	db_proxy_endpoint_items := make([]map[string]interface{}, 0)
 	for _, item := range data.DBProxyEndpointItems.DBProxyEndpointItems {
-		db_proxy_endpoint_items = append(db_proxy_endpoint_items, map[string]interface{}{
-			"db_proxy_endpoint_name":    item.DBProxyEndpointName,
-			"db_proxy_endpoint_type":    item.DBProxyEndpointType,
-			"db_proxy_endpoint_aliases": item.DBProxyEndpointAliases,
-			"db_proxy_read_write_mode":  item.DBProxyReadWriteMode,
-		})
+		// Only has one items
+		d.Set("db_proxy_endpoint_name", item.DBProxyEndpointName)
+		d.Set("db_proxy_endpoint_type", item.DBProxyEndpointType)
+		d.Set("db_proxy_endpoint_aliases", item.DBProxyEndpointAliases)
+		d.Set("db_proxy_read_write_mode", item.DBProxyReadWriteMode)
 	}
-	d.Set("db_proxy_endpoint_items", db_proxy_endpoint_items)
 	return nil
 }
 
 func resourceAlibabacloudStackRdsDbproxyDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	//	rdsService := RdsService{client}
 	request := client.NewCommonRequest("POST", "Rds", "2014-08-15", "ModifyDBProxy", "")
 	request.QueryParams["ConfigDBProxyService"] = "Shutdown"
 
@@ -467,10 +413,11 @@ func resourceAlibabacloudStackRdsDbproxyDelete(d *schema.ResourceData, meta inte
 	if v, ok := d.GetOk("db_proxy_instance_num"); ok {
 		request.QueryParams["DBProxyInstanceNum"] = strconv.Itoa(v.(int))
 	}
-
-	if v, ok := d.GetOk("instance_network_type"); ok {
-		request.QueryParams["InstanceNetworkType"] = v.(string)
-	}
+	//	if instance, err := rdsService.DescribeDBInstance(d.Id()); err != nil {
+	//		return err
+	//	} else {
+	//		request.QueryParams["InstanceNetworkType"] = instance.InstanceNetworkType
+	//	}
 
 	bresponse, err := client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -482,7 +429,7 @@ func resourceAlibabacloudStackRdsDbproxyDelete(d *schema.ResourceData, meta inte
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_rds_db_proxy", "ModifyDBProxy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	rdsdb_proxyservice := RdsService{client}
-	stateConf := BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutUpdate), 1*time.Second, rdsdb_proxyservice.RdsProxyStateRefreshFunc(d.Id(), []string{}))
+	stateConf := BuildStateConf([]string{"Deleting"}, []string{""}, d.Timeout(schema.TimeoutUpdate), 1*time.Second, rdsdb_proxyservice.RdsProxyStateRefreshFunc(d.Id(), []string{}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}

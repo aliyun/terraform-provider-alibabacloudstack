@@ -59,7 +59,6 @@ variable "name" {
 resource "alibabacloudstack_db_proxy" "default" {
 	db_instance_id = "${alibabacloudstack_db_instance.default.id}"
 	db_proxy_instance_num = "1"
-	instance_network_type = "Classic"
 }
 
  `, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase())

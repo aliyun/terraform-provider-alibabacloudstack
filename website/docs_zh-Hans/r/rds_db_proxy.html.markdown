@@ -53,19 +53,12 @@ resource "alibabacloudstack_db_proxy" "default" {
 除了上述所有参数外，还导出了以下属性：
   * `db_proxy_connect_string` - 数据库连接信息字符串。
   * `db_proxy_connect_string_port` - 数据库连接端口。
-  * `db_proxy_connect_string_items` - 数据库连接信息。
-    * `db_proxy_connect_string` - 数据库连接。
-    * `db_proxy_connect_string_port` - 数据库连接端口。
-    * `db_proxy_connect_string_net_type` - 数据库连接类型。
-    * `db_proxy_connect_string_net_work_type` - 数据库连接网络类型。
-    * `db_proxy_endpoint_id` - 数据库连接ID.
   * `db_proxy_instance_current_minor_version` - 当前数据库连接版本。
   * `db_proxy_instance_latest_minor_version` - 最后一个数据库连接版本。
   * `db_proxy_instance_status` - 数据库连接状态。
-  * `db_proxy_endpoint_items` - 代理终端信息列表。
-    * `db_proxy_endpoint_aliases` - 代理终端的备注信息。
-    * `db_proxy_endpoint_name` - 代理终端ID。
-    * `db_proxy_endpoint_type` - 代理终端类型，取值：* **RWSplit**：默认代理终端。* **Custom**：自定义代理终端。
-    * `db_proxy_read_write_mode` - 代理终端模式，取值：* **ReadWrite**：读写模式。* **ReadOnly**：只读模式。
+  * `db_proxy_endpoint_aliases` - 代理终端的备注信息。
+  * `db_proxy_endpoint_name` - 代理终端ID。
+  * `db_proxy_endpoint_type` - 代理终端类型，取值：* **RWSplit**：默认代理终端。* **Custom**：自定义代理终端。
+  * `db_proxy_read_write_mode` - 代理终端模式，取值：* **ReadWrite**：读写模式。* **ReadOnly**：只读模式。
   * `db_proxy_instance_type` - 数据库代理实例类型，取值：- **common**：通用型代理- **exclusive**：独享型代理（默认值）
   * `db_proxy_service_status` - 数据库独享代理功能开关状态，取值：* **Startup**：开启。* **Shutdown**：关闭。

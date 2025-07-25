@@ -51,19 +51,12 @@ The following arguments are supported:
 The following attributes are exported in addition to the arguments listed above:
   * `db_proxy_connect_string` - The connection string.
   * `db_proxy_connect_string_port` - The connection port.
-  * `db_proxy_connect_string_items` - The connection information.
-    * `db_proxy_connect_string` - The connection string.
-    * `db_proxy_connect_string_port` - The connection port.
-    * `db_proxy_connect_string_net_type` -The connection type.
-    * `db_proxy_connect_string_net_work_type` - The connection network type.
-    * `db_proxy_endpoint_id` - The connection ID.
   * `db_proxy_instance_current_minor_version` - The db proxy instance current minor version.
   * `db_proxy_instance_latest_minor_version` - The db proxy instance latest minor version.
   * `db_proxy_instance_status` - The db proxy instance status.
-  * `db_proxy_endpoint_items` - List of proxy terminal information.
-    * `db_proxy_endpoint_aliases` - Note information of the proxy terminal.
-    * `db_proxy_endpoint_name` - The ID of the proxy terminal.
-    * `db_proxy_endpoint_type` - Proxy terminal type, value:* **RWSplit**: the default proxy terminal.**Custom**: Custom proxy terminal.
-    * `db_proxy_read_write_mode` - Proxy terminal mode, value:* **ReadWrite**: read/write mode.* **ReadOnly**: Read-only mode.
+  * `db_proxy_endpoint_aliases` - Note information of the proxy terminal.
+  * `db_proxy_endpoint_name` - The ID of the proxy terminal.
+  * `db_proxy_endpoint_type` - Proxy terminal type, value:* **RWSplit**: the default proxy terminal.**Custom**: Custom proxy terminal.
+  * `db_proxy_read_write_mode` - Proxy terminal mode, value:* **ReadWrite**: read/write mode.* **ReadOnly**: Read-only mode.
   * `db_proxy_instance_type` - Database proxy instance type, value:-**common**: General Purpose Agent-**exclusive**: exclusive proxy (default)
   * `db_proxy_service_status` - Database exclusive proxy function switch status, value:* **Startup**: Enable.* **Shutdown**: closed.

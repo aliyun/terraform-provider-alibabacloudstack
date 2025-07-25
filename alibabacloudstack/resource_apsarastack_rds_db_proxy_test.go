@@ -13,7 +13,21 @@ func TestAccAlibabacloudStackRdsDbProxy_basic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 999999)
 	name := fmt.Sprintf("tf-testaccdbproxy%d", rand)
 	resourceId := "alibabacloudstack_db_proxy.default"
-	ra := resourceAttrInit(resourceId, map[string]string{})
+	ra := resourceAttrInit(resourceId, map[string]string{
+		"db_proxy_connect_string":                 CHECKSET,
+		"db_proxy_connect_string_port":            CHECKSET,
+		"db_proxy_instance_current_minor_version": CHECKSET,
+		"db_proxy_instance_latest_minor_version":  CHECKSET,
+		"db_proxy_instance_status":                CHECKSET,
+		"db_proxy_endpoint_aliases":               CHECKSET,
+		"db_proxy_endpoint_name":                  CHECKSET,
+		"db_proxy_endpoint_type":                  CHECKSET,
+		"db_proxy_read_write_mode":                CHECKSET,
+		"db_proxy_instance_type":                  CHECKSET,
+		"db_proxy_service_status":                 CHECKSET,
+		"connection_persist":                      CHECKSET,
+		"causal_consist_read":                     CHECKSET,
+	})
 	serviceFunc := func() interface{} {
 		return &RdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
@@ -36,12 +50,23 @@ func TestAccAlibabacloudStackRdsDbProxy_basic(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"db_instance_id":        "${alibabacloudstack_db_instance.default.id}",
 					"db_proxy_instance_num": "1",
-					"instance_network_type": "Classic",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"db_proxy_instance_num":  "1",
 						"db_proxy_instance_type": CHECKSET,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"db_proxy_connect_string_port": "8000",
+					"db_proxy_connect_string":      "${var.name}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"db_proxy_connect_string_port": "8000",
+						"db_proxy_connect_string":      name,
 					}),
 				),
 			},
@@ -57,16 +82,16 @@ func TestAccAlibabacloudStackRdsDbProxy_basic(t *testing.T) {
 					}),
 				),
 			},
-//			{
-//				Config: testAccConfig(map[string]interface{}{
-//					"persistent_connection_status": "Enabled",
-//				}),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheck(map[string]string{
-//						"persistent_connection_status": "Enabled",
-//					}),
-//				),
-//			},
+			//			{
+			//				Config: testAccConfig(map[string]interface{}{
+			//					"persistent_connection_status": "Enabled",
+			//				}),
+			//				Check: resource.ComposeTestCheckFunc(
+			//					testAccCheck(map[string]string{
+			//						"persistent_connection_status": "Enabled",
+			//					}),
+			//				),
+			//			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"connection_persist": "1",
@@ -84,17 +109,6 @@ func TestAccAlibabacloudStackRdsDbProxy_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"causal_consist_read": "2",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"db_proxy_connect_string_port": "8000",
-					"db_proxy_connect_string":      "${var.name}",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"db_proxy_connect_string": name,
 					}),
 				),
 			},
