@@ -217,7 +217,7 @@ func resourceAlibabacloudStackPolardbReadWriteSplittingConnectionUpdate(d *schem
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_db_instance", "AllocateInstancePublicConnection", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Running"}, d.Timeout(schema.TimeoutDelete), 5*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Failed"}))
+		stateConf := BuildStateConf([]string{"Modifying"}, []string{"Running"}, d.Timeout(schema.TimeoutDelete), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}

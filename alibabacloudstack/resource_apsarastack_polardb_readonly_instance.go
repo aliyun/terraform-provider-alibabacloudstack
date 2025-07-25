@@ -245,7 +245,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceCreate(d *schema.ResourceDa
 	d.SetId(PolardbCreatereadonlydbinstanceResponse.DBInstanceId)
 
 	// wait instance status change from Creating to running
-	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 5*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
+	stateConf := BuildStateConf([]string{"Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -315,7 +315,7 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 
 		// wait instance status is running before modifying
 		request.QueryParams["PayType"] = string(Postpaid)
-		stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Minute, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
+		stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
 		_, err := stateConf.WaitForState()
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -336,6 +336,10 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSpec", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
+		// wait instance status change from Creating to running
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
 	}
 	if d.HasChange("enable_ssl") {
 		ssl := d.Get("enable_ssl").(bool)
@@ -346,27 +350,10 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 		ssl_req := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceSSL", "")
 		ssl_req.QueryParams["DBInstanceId"] = d.Id()
 		ssl_req.QueryParams["ConnectionString"] = d.Get("connection_string").(string)
-		var target, process string
-		engine := Trim(d.Get("engine").(string))
 		if ssl == true {
 			ssl_req.QueryParams["SSLEnabled"] = "1"
-			if engine == "MySQL" {
-				target = "Yes"
-				process = "No"
-			} else {
-				target = "on"
-				process = "off"
-			}
-
 		} else {
 			ssl_req.QueryParams["SSLEnabled"] = "0"
-			if engine == "MySQL" {
-				target = "off"
-				process = "on"
-			} else {
-				target = "No"
-				process = "Yes"
-			}
 		}
 		bresponse, err := client.ProcessCommonRequest(ssl_req)
 		if err != nil {
@@ -376,14 +363,11 @@ func resourceAlibabacloudStackPolardbReadonlyInstanceUpdate(d *schema.ResourceDa
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_account", "DeleteAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
+		stateConf := BuildStateConf([]string{"SSL_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
 
-		if err := PolardbService.WaitForDBInstance(d.Id(), Running, DefaultLongTimeout); err != nil {
-			return errmsgs.WrapError(err)
-		}
 		if ssl == true {
 			log.Print("Updated SSL to true")
 		} else {

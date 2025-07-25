@@ -865,7 +865,6 @@ resource "alibabacloudstack_polardb_dbinstance" "default" {
   engine_version       = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.engine_version
   instance_type        = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.id
   instance_storage     = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_min
-  instance_charge_type = "Postpaid"
   instance_name        = "${var.name}"
   %s
   storage_type         = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_type
