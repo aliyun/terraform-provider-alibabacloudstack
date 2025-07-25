@@ -116,6 +116,8 @@ func TestAccAlibabacloudStackRdsDbProxy_basic(t *testing.T) {
 				ResourceName:      resourceId,
 				ImportState:       true,
 				ImportStateVerify: true,
+				//  effective_time effective_specific_time is Execution parameters
+				ImportStateVerifyIgnore: []string{"effective_time", "effective_specific_time"},
 			},
 		},
 	})
