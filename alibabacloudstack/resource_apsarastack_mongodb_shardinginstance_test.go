@@ -150,7 +150,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_classicVersion3(t *testing.
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	// password := getAccTestPassword(12)
+	password := getAccTestPassword(12)
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBShardingInstance_classic_base)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -168,42 +168,41 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_classicVersion3(t *testing.
 					"engine_version": "3.4",
 					"shard_list": []map[string]interface{}{
 						{
-							"node_class":     "dds.shard.mid",
-							"node_storage":   "10",
-							"private_enable": "true",
-							// "account_name":     "terraformv2",
-							// "account_password": password,
+							"node_class":       "dds.shard.mid",
+							"node_storage":     "10",
+							"private_enable":   "true",
+							"account_name":     "terraform",
+							"account_password": password,
 						},
 						{
-							"node_class":    "dds.shard.mid",
-							"node_storage":  "10",
-							"public_enable": "true",
+							"node_class":     "dds.shard.mid",
+							"node_storage":   "10",
+							"public_enable":  "true",
+							"private_enable": "false",
 						},
 					},
 					"mongo_list": []map[string]interface{}{
 						{
 							"node_class":             "dds.mongos.mid",
 							"private_enable":         "true",
-							"connect_string_private": "test-priv3",
-							"port_private":           "3820",
+							"connect_string_private": "test-priv1",
+							"port_private":           "3826",
 						},
 						{
 							"node_class":            "dds.mongos.mid",
 							"public_enable":         "true",
-							"connect_string_public": "test-pubv4",
-							"port_public":           "3819",
+							"connect_string_public": "test-pubv122",
+							"port_public":           "3827",
 						},
 					},
 					"configserver_list": []map[string]interface{}{
 						{
-							"node_class":   "dds.cs.mid",
-							"node_storage": "20",
-							// "connect_string": "ld-test12345",
-							// "port":           "3818",
-							// "public_enable":  "true",
-							// "private_enable":   "true",
-							// "account_name":     "terraformv2",
-							// "account_password": password,
+							"node_class":       "dds.cs.mid",
+							"node_storage":     "20",
+							"public_enable":    "true",
+							"private_enable":   "true",
+							"account_name":     "terraform_1",
+							"account_password": password,
 						},
 					},
 				}),
@@ -226,9 +225,10 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_classicVersion3(t *testing.
 				),
 			},
 			{
-				ResourceName:      resourceId,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            resourceId,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"account_name", "account_password"},
 			},
 			// {
 			// 	Config: testAccConfig(map[string]interface{}{

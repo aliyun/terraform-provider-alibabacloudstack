@@ -4,7 +4,9 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
@@ -159,15 +161,21 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"connect_string": {
+						"connect_string_public": {
 							Type:     schema.TypeString,
-							Optional: true,
 							Computed: true,
 						},
-						"port": {
+						"connect_string_private": {
 							Type:     schema.TypeString,
 							Computed: true,
-							Optional: true,
+						},
+						"port_public": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"port_private": {
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"public_enable": {
 							Type:     schema.TypeBool,
@@ -182,11 +190,13 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 						"account_name": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 
 						"account_password": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -261,14 +271,20 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"connect_string": {
+						"connect_string_public": {
 							Type:     schema.TypeString,
-							Optional: true,
 							Computed: true,
 						},
-						"port": {
+						"connect_string_private": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Computed: true,
+						},
+						"port_public": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"port_private": {
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"public_enable": {
@@ -284,11 +300,13 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 						"account_name": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 
 						"account_password": {
 							Type:     schema.TypeString,
 							Optional: true,
+							Computed: true,
 						},
 					},
 				},
@@ -352,7 +370,7 @@ func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{})
 				"index":                  i,
 				"node_type":              "shard",
 				"public_enable":          false,
-				"private_enable":         true,
+				"private_enable":         false,
 				"connect_string_public":  "",
 				"connect_string_private": "",
 				"port_public":            "",
@@ -426,7 +444,7 @@ func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{})
 				"node_type":              "configserver",
 				"index":                  i,
 				"public_enable":          false,
-				"private_enable":         true,
+				"private_enable":         false,
 				"connect_string_public":  "",
 				"connect_string_private": "",
 				"port_public":            "",
@@ -591,11 +609,11 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_mongo_db_shardinginstance", "AllocatePrivateNetworkAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 				}
 				addDebug("AllocatePrivateNetworkAddress", bresponse, request, request.QueryParams)
-				_, err = ddsService.DoWaitDdsShardDbinstanceRunningRequest(d.Id() + COLON_SEPARATED)
-				if err != nil {
-					return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DoWaitDdsShardDbinstanceRunningRequest", errmsgs.AlibabacloudStackSdkGoERROR)
-				}
 
+			}
+			_, err = ddsService.DoWaitDdsShardDbinstanceRunningRequest(d.Id() + COLON_SEPARATED)
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DoWaitDdsShardDbinstanceRunningRequest", errmsgs.AlibabacloudStackSdkGoERROR)
 			}
 			cns, _ := item["connect_string_private"].(string)
 			pt, _ := item["port_private"].(string)
@@ -942,41 +960,40 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 }
 
 func resourceAlibabacloudStackMongoDBShardingInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	return nil
-	// client := meta.(*connectivity.AlibabacloudStackClient)
-	// ddsService := MongoDBService{client}
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	ddsService := MongoDBService{client}
 
-	// request := dds.CreateDeleteDBInstanceRequest()
-	// client.InitRpcRequest(*request.RpcRequest)
-	// request.DBInstanceId = d.Id()
+	request := dds.CreateDeleteDBInstanceRequest()
+	client.InitRpcRequest(*request.RpcRequest)
+	request.DBInstanceId = d.Id()
 
-	// err := resource.Retry(10*5*time.Minute, func() *resource.RetryError {
-	// 	raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-	// 		return ddsClient.DeleteDBInstance(request)
-	// 	})
+	err := resource.Retry(10*5*time.Minute, func() *resource.RetryError {
+		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
+			return ddsClient.DeleteDBInstance(request)
+		})
 
-	// 	if err != nil {
-	// 		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-	// 			return resource.NonRetryableError(err)
-	// 		}
-	// 		errmsg := ""
-	// 		if raw != nil {
-	// 			response, ok := raw.(*dds.DeleteDBInstanceResponse)
-	// 			if ok {
-	// 				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-	// 			}
-	// 		}
-	// 		return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-	// 	}
-	// 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	// 	return nil
-	// })
+		if err != nil {
+			if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+				return resource.NonRetryableError(err)
+			}
+			errmsg := ""
+			if raw != nil {
+				response, ok := raw.(*dds.DeleteDBInstanceResponse)
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+				}
+			}
+			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
+		}
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		return nil
+	})
 
-	// if err != nil {
-	// 	if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-	// 		return nil
-	// 	}
-	// 	return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-	// }
-	// return errmsgs.WrapError(ddsService.WaitForMongoDBInstance(d.Id(), Deleted, DefaultTimeout))
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
+			return nil
+		}
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	return errmsgs.WrapError(ddsService.WaitForMongoDBInstance(d.Id(), Deleted, DefaultTimeout))
 }

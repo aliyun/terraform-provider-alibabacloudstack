@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -158,26 +159,34 @@ func update_public_address(id string, network_type string, nas string, pt string
 	if pt != "" {
 		request.QueryParams["NewPort"] = pt
 	}
-	DdsResetaccountpasswordResponseObj := DdsResetaccountpasswordResponse{}
+	// DdsResetaccountpasswordResponseObj := DdsResetaccountpasswordResponse{}
 	request.QueryParams["NodeId"] = node_id
 
 	request.QueryParams["DBInstanceId"] = db_instance_id
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	for i := 0; i < 30; i++ {
+		_, err := client.ProcessCommonRequest(request)
+		if err != nil {
+			time.Sleep(time.Duration(10) * time.Millisecond)
+			i += 1
+			continue
+		} else {
+			break
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-			"alibabacloudstack_mongodb_sharding_network_public_address", "ModifyDBInstanceConnectionString", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
+	// if err != nil {
+	// 	if bresponse == nil {
+	// 		return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	// 	}
+	// 	errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	// 	return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+	// 		"alibabacloudstack_mongodb_sharding_network_public_address", "ModifyDBInstanceConnectionString", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	// }
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsResetaccountpasswordResponseObj)
-	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_mongodb_sharding_network_public_address", "ModifyDBInstanceConnectionString", errmsgs.AlibabacloudStackSdkGoERROR)
-	}
+	// err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsResetaccountpasswordResponseObj)
+	// if err != nil {
+	// 	return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+	// 		"alibabacloudstack_mongodb_sharding_network_public_address", "ModifyDBInstanceConnectionString", errmsgs.AlibabacloudStackSdkGoERROR)
+	// }
 	return nil
 }
 
