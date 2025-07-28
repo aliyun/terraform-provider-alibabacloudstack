@@ -1,18 +1,19 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"log"
-	"strconv"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -31,20 +32,20 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				Computed:     true,
 				ForceNew:     true,
 			},
-			"instance_charge_type": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
-				Optional:     true,
-				ForceNew:     true,
-				Computed:     true,
-			},
-			"period": {
-				Type:             schema.TypeInt,
-				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
-				Optional:         true,
-				Computed:         true,
-				DiffSuppressFunc: PostPaidDiffSuppressFunc,
-			},
+//			"instance_charge_type": {
+//				Type:         schema.TypeString,
+//				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
+//				Optional:     true,
+//				ForceNew:     true,
+//				Default:     string(PostPaid),
+//			},
+//			"period": {
+//				Type:             schema.TypeInt,
+//				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
+//				Optional:         true,
+//				Computed:         true,
+//				DiffSuppressFunc: PostPaidDiffSuppressFunc,
+//			},
 			"zone_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -145,7 +146,7 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				Computed: true,
 			},
 			"shard_list": {
-				Type: schema.TypeList,
+				Type: schema.TypeSet,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"node_class": {
@@ -155,6 +156,29 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 						"node_storage": {
 							Type:     schema.TypeInt,
 							Required: true,
+						},
+						"description": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[\p{L}_-][\w\p{L}-]{1,255}$`), "The value must be 2 to 256 characters in length, and can contain letters, digits, underscores (_), and hyphen (-). It must start with a letter, and cannot start with http:// or https://."),
+						},
+						"public_enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"private_enable": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
+						"account_name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"account_password": {
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 						//Computed
 						"node_id": {
@@ -170,35 +194,20 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Computed: true,
 						},
 						"port_public": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 						"port_private": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"public_enable": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-						},
-						"private_enable": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-						},
-						"account_name": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-
-						"account_password": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 					},
+				},
+				Set: func(v interface{}) int {
+					m := v.(map[string]interface{})
+					hashString := fmt.Sprintf("%s:%d:%s:%v:%v:%s", m["node_class"].(string), m["node_storage"].(int),
+						m["description"].(string), m["public_enable"].(bool), m["private_enable"].(bool), m["account_name"].(string))
+					return hashcode.String(hashString)
 				},
 				Required: true,
 				MinItems: 2,
@@ -206,56 +215,71 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 			},
 
 			"mongo_list": {
-				Type: schema.TypeList,
+				Type: schema.TypeSet,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"node_class": {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						//Computed
-						"node_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"connect_string_public": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"connect_string_private": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"port_public": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-						"port_private": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
+						"description": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[\p{L}_-][\w\p{L}-]{1,255}$`), "The value must be 2 to 256 characters in length, and can contain letters, digits, underscores (_), and hyphen (-). It must start with a letter, and cannot start with http:// or https://."),
 						},
 						"public_enable": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
 						},
-						"private_enable": {
-							Type:     schema.TypeBool,
+						"connect_string_private_prefix": {
+							Type:     schema.TypeString,
 							Optional: true,
-							Default:  true,
+							Computed: true,
+						},
+						"connect_string_public_prefix": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+						},
+						"port_public": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+						},
+						"port_private": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+						},
+						//Computed
+						"node_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"connect_string_private": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"connect_string_public": {
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 					},
+				},
+				Set: func(v interface{}) int {
+					m := v.(map[string]interface{})
+					hashString := fmt.Sprintf("%s:%s:%v:%s:%s:%d:%d", m["node_class"].(string), m["description"].(string),
+						m["public_enable"].(bool), m["connect_string_private_prefix"].(string), m["connect_string_public_prefix"].(string),
+						m["port_public"].(int), m["port_private"].(int))
+					return hashcode.String(hashString)
 				},
 				Required: true,
 				MinItems: 2,
 				MaxItems: 32,
 			},
 			"configserver_list": {
-				Type: schema.TypeList,
+				Type: schema.TypeSet,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"node_class": {
@@ -266,26 +290,10 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Type:     schema.TypeInt,
 							Required: true,
 						},
-						//Computed
-						"node_id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"connect_string_public": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"connect_string_private": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"port_public": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"port_private": {
-							Type:     schema.TypeString,
-							Computed: true,
+						"description": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[\p{L}_-][\w\p{L}-]{1,255}$`), "The value must be 2 to 256 characters in length, and can contain letters, digits, underscores (_), and hyphen (-). It must start with a letter, and cannot start with http:// or https://."),
 						},
 						"public_enable": {
 							Type:     schema.TypeBool,
@@ -300,15 +308,39 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 						"account_name": {
 							Type:     schema.TypeString,
 							Optional: true,
-							Computed: true,
 						},
-
 						"account_password": {
 							Type:     schema.TypeString,
 							Optional: true,
+						},
+						//Computed
+						"node_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"connect_string_public": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"connect_string_private": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"port_public": {
+							Type:     schema.TypeInt,
+							Computed: true,
+						},
+						"port_private": {
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 					},
+				},
+				Set: func(v interface{}) int {
+					m := v.(map[string]interface{})
+					hashString := fmt.Sprintf("%s:%d:%s:%v:%v:%s", m["node_class"].(string), m["node_storage"].(int),
+						m["description"].(string), m["public_enable"].(bool), m["private_enable"].(bool), m["account_name"].(string))
+					return hashcode.String(hashString)
 				},
 				Required: true,
 				MinItems: 1,
@@ -330,301 +362,113 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 	return resource
 }
 
-func buildMongoDBShardingCreateRequest(d *schema.ResourceData, meta interface{}) (*dds.CreateShardingDBInstanceRequest, error, []map[string]interface{}) {
+func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	request := dds.CreateCreateShardingDBInstanceRequest()
-	client.InitRpcRequest(*request.RpcRequest)
+	ddsService := MongoDBService{client}
 
-	request.EngineVersion = Trim(d.Get("engine_version").(string))
-	request.Engine = "MongoDB"
-	request.DBInstanceDescription = connectivity.GetResourceData(d, "db_instance_description", "name").(string)
+	reqQuery := map[string]interface{}{
+		"EngineVersion":         d.Get("engine_version").(string),
+		"Engine":                "MongoDB",
+		"DBInstanceDescription": connectivity.GetResourceData(d, "db_instance_description", "name").(string),
+		"ZoneId":                d.Get("zone_id").(string),
+		"ChargeType":            string(PostPaid),//d.Get("instance_charge_type").(string),
+	}
 
-	request.AccountPassword = d.Get("account_password").(string)
-	apply_info := []map[string]interface{}{}
-	if request.AccountPassword == "" {
+	reqQuery["AccountPassword"] = d.Get("account_password").(string)
+	if reqQuery["AccountPassword"].(string) == "" {
 		if v := d.Get("kms_encrypted_password").(string); v != "" {
 			kmsService := KmsService{client}
 			decryptResp, err := kmsService.Decrypt(v, d.Get("kms_encryption_context").(map[string]interface{}))
 			if err != nil {
-				return request, errmsgs.WrapError(err), apply_info
+				return errmsgs.WrapError(err)
 			}
-			request.AccountPassword = decryptResp.Plaintext
+			reqQuery["AccountPassword"] = decryptResp.Plaintext
 		}
 	}
 
-	request.ZoneId = d.Get("zone_id").(string)
-
-	shardList, ok := d.GetOk("shard_list")
-	if ok {
-		i := 0
-		replicaSets := []dds.CreateShardingDBInstanceReplicaSet{}
-		for _, rew := range shardList.([]interface{}) {
-			item := rew.(map[string]interface{})
-			class := item["node_class"].(string)
-			nodeStorage := item["node_storage"].(int)
-			var csr dds.CreateShardingDBInstanceReplicaSet
-			csr.Class = class
-			csr.Storage = strconv.Itoa(nodeStorage)
-			replicaSets = append(replicaSets, csr)
-			apply_item := map[string]interface{}{
-				"index":                  i,
-				"node_type":              "shard",
-				"public_enable":          false,
-				"private_enable":         false,
-				"connect_string_public":  "",
-				"connect_string_private": "",
-				"port_public":            "",
-				"port_private":           "",
-			}
-			if item["public_enable"] == true {
-				apply_item["public_enable"] = true
-				apply_item["connect_string_public"] = item["connect_string_public"]
-				apply_item["port_public"] = item["port_public"]
-			}
-			if item["private_enable"] == true {
-				apply_item["private_enable"] = true
-				apply_item["connect_string_private"] = item["connect_string_private"]
-				apply_item["port_private"] = item["port_private"]
-				apply_item["account_name"] = item["account_name"]
-				apply_item["account_password"] = item["account_password"]
-			}
-			apply_info = append(apply_info, apply_item)
-			i += 1
+	shardList := []map[string]interface{}{}
+	for _, d := range d.Get("shard_list").(*schema.Set).List() {
+		item := d.(map[string]interface{})
+		shardNode := map[string]interface{}{
+			"Class":       item["node_class"],
+			"Storage":     item["node_storage"],
+			"Description": item["description"],
 		}
-		request.ReplicaSet = &replicaSets
+		shardList = append(shardList, shardNode)
 	}
+	reqQuery["ReplicaSet"] = shardList
 
-	mongoList, ok := d.GetOk("mongo_list")
-	if ok {
-		mongos := []dds.CreateShardingDBInstanceMongos{}
-		i := 0
-		for _, rew := range mongoList.([]interface{}) {
-			item := rew.(map[string]interface{})
-			class := item["node_class"].(string)
-			mongos = append(mongos, dds.CreateShardingDBInstanceMongos{class})
-			apply_item := map[string]interface{}{
-				"index":                  i,
-				"node_type":              "mongo",
-				"public_enable":          false,
-				"private_enable":         true,
-				"connect_string_public":  "",
-				"connect_string_private": "",
-				"port_public":            "",
-				"port_private":           "",
-			}
-			if item["public_enable"] == true {
-				apply_item["public_enable"] = true
-				apply_item["connect_string_public"] = item["connect_string_public"]
-				apply_item["port_public"] = item["port_public"]
-			}
-			if item["private_enable"] == true {
-				apply_item["private_enable"] = true
-				apply_item["connect_string_private"] = item["connect_string_private"]
-				apply_item["port_private"] = item["port_private"]
-			}
-			apply_info = append(apply_info, apply_item)
-			i += 1
+	mongoList := []map[string]interface{}{}
+	for _, d := range d.Get("mongo_list").(*schema.Set).List() {
+		item := d.(map[string]interface{})
+		mongoNode := map[string]interface{}{
+			"Class":       item["node_class"],
+			"Description": item["description"],
 		}
-		request.Mongos = &mongos
+		mongoList = append(mongoList, mongoNode)
 	}
+	reqQuery["Mongos"] = mongoList
 
-	configservers, ok := d.GetOk("configserver_list")
-	if ok {
-		i := 0
-		configserver := []dds.CreateShardingDBInstanceConfigServer{}
-		for _, rew := range configservers.([]interface{}) {
-			item := rew.(map[string]interface{})
-			class := item["node_class"].(string)
-			nodeStorage := item["node_storage"].(int)
-			var csr dds.CreateShardingDBInstanceConfigServer
-			csr.Class = class
-			csr.Storage = strconv.Itoa(nodeStorage)
-			configserver = append(configserver, csr)
-			apply_item := map[string]interface{}{
-				"node_type":              "configserver",
-				"index":                  i,
-				"public_enable":          false,
-				"private_enable":         false,
-				"connect_string_public":  "",
-				"connect_string_private": "",
-				"port_public":            "",
-				"port_private":           "",
-			}
-			if item["public_enable"] == true {
-				apply_item["public_enable"] = true
-				apply_item["connect_string_public"] = item["connect_string_public"]
-				apply_item["port_public"] = item["port_public"]
-			}
-			if item["private_enable"] == true {
-				apply_item["private_enable"] = true
-				apply_item["connect_string_private"] = item["connect_string_private"]
-				apply_item["port_private"] = item["port_private"]
-				apply_item["account_name"] = item["account_name"]
-				apply_item["account_password"] = item["account_password"]
-			}
-			apply_info = append(apply_info, apply_item)
-			i += 1
+	csList := []map[string]interface{}{}
+	for _, d := range d.Get("configserver_list").(*schema.Set).List() {
+		item := d.(map[string]interface{})
+		csNode := map[string]interface{}{
+			"Class":       item["node_class"],
+			"Storage":     item["node_storage"],
+			"Description": item["description"],
 		}
-		request.ConfigServer = &configserver
+		csList = append(csList, csNode)
 	}
+	reqQuery["ConfigServer"] = csList
 
-	// request.ConfigServer = &[]dds.CreateShardingDBInstanceConfigServer{{"20", "dds.cs.mid"}}
-
-	request.NetworkType = string(Classic)
 	vswitchId := Trim(d.Get("vswitch_id").(string))
 	if vswitchId != "" {
 		// check vswitchId in zone
 		vpcService := VpcService{client}
 		vsw, err := vpcService.DescribeVSwitch(vswitchId)
 		if err != nil {
-			return nil, errmsgs.WrapError(err), apply_info
+			return errmsgs.WrapError(err)
 		}
-
-		if request.ZoneId == "" {
-			request.ZoneId = vsw.ZoneId
-		} else if strings.Contains(request.ZoneId, MULTI_IZ_SYMBOL) {
-			zonestr := strings.Split(strings.SplitAfter(request.ZoneId, "(")[1], ")")[0]
+		zoneId := reqQuery["ZoneId"].(string)
+		if zoneId == "" {
+			zoneId = vsw.ZoneId
+		} else if strings.Contains(zoneId, MULTI_IZ_SYMBOL) {
+			zonestr := strings.Split(strings.SplitAfter(zoneId, "(")[1], ")")[0]
 			if !strings.Contains(zonestr, string([]byte(vsw.ZoneId)[len(vsw.ZoneId)-1])) {
-				return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch " + vsw.VSwitchId + " isn't in multi the zone " + request.ZoneId)), apply_info
+				return errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in multi the zone %s", vsw.VSwitchId, zoneId))
 			}
-		} else if request.ZoneId != vsw.ZoneId {
-			return nil, errmsgs.WrapError(errmsgs.Error("The specified vswitch " + vsw.VSwitchId + " isn't in the zone " + request.ZoneId)), apply_info
+		} else if zoneId != vsw.ZoneId {
+			return errmsgs.WrapError(errmsgs.Error("The specified vswitch %s isn't in the zone %s", vsw.VSwitchId, zoneId))
 		}
-		request.VSwitchId = vswitchId
-		request.NetworkType = strings.ToUpper(string(Vpc))
-		request.VpcId = vsw.VpcId
+		reqQuery["VSwitchId"] = vswitchId
+		reqQuery["NetworkType"] = strings.ToUpper(string(Vpc))
+		reqQuery["VpcId"] = vsw.VpcId
+	} else {
+		reqQuery["NetworkType"] = string(Classic)
 	}
 
-	request.ChargeType = d.Get("instance_charge_type").(string)
-	period, ok := d.GetOk("period")
-	if ok && PayType(request.ChargeType) == PrePaid {
-		request.Period = requests.NewInteger(period.(int))
-	}
+//	if period, ok := d.GetOk("period"); ok && PayType(reqQuery["ChargeType"].(string)) == PrePaid {
+//		reqQuery["Period"] = period.(int)
+//	}
 
-	request.SecurityIPList = LOCAL_HOST_IP
 	if len(d.Get("security_ip_list").(*schema.Set).List()) > 0 {
-		request.SecurityIPList = strings.Join(expandStringList(d.Get("security_ip_list").(*schema.Set).List()), COMMA_SEPARATED)
+		reqQuery["SecurityIPList"] = strings.Join(expandStringList(d.Get("security_ip_list").(*schema.Set).List()), COMMA_SEPARATED)
+	} else {
+		reqQuery["SecurityIPList"] = LOCAL_HOST_IP
 	}
-
-	request.ClientToken = buildClientToken(request.GetActionName())
-	return request, nil, apply_info
-}
-
-func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	ddsService := MongoDBService{client}
-
-	request, err, apply_info := buildMongoDBShardingCreateRequest(d, meta)
+	response, err := client.DoTeaRequest("POST", "Dds", "2015-12-01", "CreateShardingDBInstance", "", nil, reqQuery, nil)
 	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	log.Printf("[DEBUG] mongodb sharding create apply_info: %#v", apply_info)
-
-	raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
-		return client.CreateShardingDBInstance(request)
-	})
-
-	if err != nil {
-		errmsg := ""
-		if raw != nil {
-			response, ok := raw.(*dds.CreateShardingDBInstanceResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_mongodb_sharding_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return err
 	}
 
-	response, _ := raw.(*dds.CreateShardingDBInstanceResponse)
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	d.SetId(response["DBInstanceId"].(string))
 
-	d.SetId(response.DBInstanceId)
+	stateConf := BuildStateConf([]string{"Creating"},
+		[]string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, ddsService.MongoDbInstanceStateRefreshFunc(d.Id(), []string{"failed"}))
 
-	if err := ddsService.WaitForMongoDBInstance(d.Id(), Running, DefaultLongTimeout); err != nil {
-		return errmsgs.WrapError(err)
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
-	request_public := client.NewCommonRequest("POST", "Dds", "2015-12-01", "AllocatePublicNetworkAddress", "")
-	request_private := client.NewCommonRequest("POST", "Dds", "2015-12-01", "AllocateNodePrivateNetworkAddress", "")
-	instance, _ := ddsService.DescribeMongoDBInstance(d.Id())
-	node_id := ""
-	for _, item := range apply_info {
-		index, _ := item["index"].(int)
-		if item["public_enable"] == true {
-			if item["node_type"] == "mongo" {
-				node_id = instance.MongosList.MongosAttribute[index].NodeId
-			} else if item["node_type"] == "shard" {
-				node_id = instance.ShardList.ShardAttribute[index].NodeId
-			} else if item["node_type"] == "configserver" {
-				node_id = instance.ConfigserverList.ConfigserverAttribute[index].NodeId
-			} else {
-			}
-
-			request_public.QueryParams["DBInstanceId"] = d.Id()
-			request_public.QueryParams["NodeId"] = node_id
-
-			bresponse, err := client.ProcessCommonRequest(request_public)
-			if err != nil {
-				if bresponse == nil {
-					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-				}
-				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_mongo_db_shardinginstance", "AllocatePublicNetworkAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
-			addDebug("AllocatePublicNetworkAddress", bresponse, request, request.QueryParams)
-			_, err = ddsService.DoWaitDdsShardDbinstanceRunningRequest(d.Id() + COLON_SEPARATED)
-			if err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DoWaitDdsShardDbinstanceRunningRequest", errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-			cns, _ := item["connect_string_public"].(string)
-			pt, _ := item["port_public"].(string)
-			log.Printf("[DEBUG] mongodb update_public_address: %#v  %#v", cns, pt)
-			update_public_address(d.Id()+COLON_SEPARATED+node_id, "Public", cns, pt, meta)
-			_, err = ddsService.DoWaitDdsShardDbinstanceRunningRequest(d.Id() + COLON_SEPARATED)
-			if err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "update_public_address", errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-
-		}
-		if item["private_enable"] == true {
-			if item["node_type"] == "mongo" {
-				node_id = instance.MongosList.MongosAttribute[index].NodeId
-			} else if item["node_type"] == "shard" {
-				node_id = instance.ShardList.ShardAttribute[index].NodeId
-			} else if item["node_type"] == "configserver" {
-				node_id = instance.ConfigserverList.ConfigserverAttribute[index].NodeId
-			} else {
-			}
-			if item["node_type"] != "mongo" {
-				request_private.QueryParams["DBInstanceId"] = d.Id()
-				request_private.QueryParams["NodeId"] = node_id
-				request_private.QueryParams["AccountName"] = item["account_name"].(string)
-				request_private.QueryParams["AccountPassword"] = item["account_password"].(string)
-
-				bresponse, err := client.ProcessCommonRequest(request_private)
-				if err != nil {
-					if bresponse == nil {
-						return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-					}
-					errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_mongo_db_shardinginstance", "AllocatePrivateNetworkAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-				}
-				addDebug("AllocatePrivateNetworkAddress", bresponse, request, request.QueryParams)
-
-			}
-			_, err = ddsService.DoWaitDdsShardDbinstanceRunningRequest(d.Id() + COLON_SEPARATED)
-			if err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DoWaitDdsShardDbinstanceRunningRequest", errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-			cns, _ := item["connect_string_private"].(string)
-			pt, _ := item["port_private"].(string)
-			update_public_address(d.Id()+COLON_SEPARATED+node_id, "Classic", cns, pt, meta)
-			_, err = ddsService.DoWaitDdsShardDbinstanceRunningRequest(d.Id() + COLON_SEPARATED)
-			if err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "update_public_address", errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-		}
-	}
-
 	return nil
 }
 
@@ -654,14 +498,14 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 	d.Set("engine_version", instance.EngineVersion)
 	d.Set("storage_engine", instance.StorageEngine)
 	d.Set("zone_id", instance.ZoneId)
-	d.Set("instance_charge_type", instance.ChargeType)
-	if instance.ChargeType == "PrePaid" {
-		period, err := computePeriodByUnit(instance.CreationTime, instance.ExpireTime, d.Get("period").(int), "Month")
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		d.Set("period", period)
-	}
+//	d.Set("instance_charge_type", instance.ChargeType)
+//	if instance.ChargeType == "PrePaid" {
+//		period, err := computePeriodByUnit(instance.CreationTime, instance.ExpireTime, d.Get("period").(int), "Month")
+//		if err != nil {
+//			return errmsgs.WrapError(err)
+//		}
+//		d.Set("period", period)
+//	}
 	d.Set("vswitch_id", instance.VSwitchId)
 	response, err := ddsService.DoDdsDescribeshardingnetworkaddressRequest(d.Id() + COLON_SEPARATED)
 	mongosList := []map[string]interface{}{}
@@ -866,35 +710,17 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		//d.SetPartial("security_group_id")
 	}
 
+	for _, param := range []string{"shard_list", "mongo_list", "configserver_list"} {
+		if d.HasChange(param) {
+			err := ddsService.ModifyMongodbShardingInstanceNode(d, param)
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+		}
+	}
+
 	if d.IsNewResource() {
 		return nil
-	}
-
-	if d.HasChange("shard_list") {
-		state, diff := d.GetChange("shard_list")
-		err := ddsService.ModifyMongodbShardingInstanceNode(d.Id(), MongoDBShardingNodeShard, state.([]interface{}), diff.([]interface{}), meta)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		//d.SetPartial("shard_list")
-	}
-
-	if d.HasChange("mongo_list") {
-		state, diff := d.GetChange("mongo_list")
-		err := ddsService.ModifyMongodbShardingInstanceNode(d.Id(), MongoDBShardingNodeMongos, state.([]interface{}), diff.([]interface{}), meta)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		//d.SetPartial("mongo_list")
-	}
-
-	if d.HasChange("configserver_list") {
-		state, diff := d.GetChange("configserver_list")
-		err := ddsService.ModifyMongodbShardingInstanceNode(d.Id(), MongoDBShardingNodeCs, state.([]interface{}), diff.([]interface{}), meta)
-		if err != nil {
-			return errmsgs.WrapError(err)
-		}
-		//d.SetPartial("mongo_list")
 	}
 
 	if d.HasChanges("db_instance_description", "name") {
@@ -995,5 +821,11 @@ func resourceAlibabacloudStackMongoDBShardingInstanceDelete(d *schema.ResourceDa
 		}
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	return errmsgs.WrapError(ddsService.WaitForMongoDBInstance(d.Id(), Deleted, DefaultTimeout))
+	stateConf := BuildStateConf([]string{"Deleting"},
+		[]string{""}, d.Timeout(schema.TimeoutCreate), 10*time.Second, ddsService.MongoDbInstanceStateRefreshFunc(d.Id(), []string{"failed"}))
+
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+	return nil
 }

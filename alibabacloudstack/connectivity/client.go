@@ -1127,6 +1127,14 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 	request.QueryParams = client.defaultQueryParams()
 }
 
+func buildClientToken(popcode, version, action string) string {
+	token := strings.TrimSpace(fmt.Sprintf("TF_%s_%s_%s_%d", popcode, version, action, time.Now().Unix(), ))
+	if len(token) > 64 {
+		token = token[0:64]
+	}
+	return token
+}
+
 func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, apiname, pathpattern string, headers map[string]string, query, body map[string]interface{}) (_result map[string]interface{}, _err error) {
 	ServiceCodeStr := strings.ReplaceAll(strings.ToUpper(popcode), "-", "_")
 	endpoint := client.Config.Endpoints[ServiceCode(ServiceCodeStr)]
@@ -1155,6 +1163,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 		}
 	}
 	query["Product"] = popcode
+	query["ClientToken"] = buildClientToken(popcode, version, apiname)
 
 	var protocol string
 	if strings.ToLower(client.Config.Protocol) == "https" {

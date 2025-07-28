@@ -85,38 +85,23 @@ func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInst
 	return bresponse.DBInstances.DBInstance[0], nil
 }
 
-// WaitForInstance waits for instance to given statusid
-func (s *MongoDBService) WaitForMongoDBInstance(instanceId string, status Status, timeout int) error {
-	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
-
-	for {
-		instance, err := s.DescribeMongoDBInstance(instanceId)
+func (s *MongoDBService) MongoDbInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeMongoDBInstance(id)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
-				if status == Deleted {
-					return nil
-				}
-			} else {
-				return errmsgs.WrapError(err)
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if object.DBInstanceStatus == failState {
+				return object, object.DBInstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.DBInstanceStatus))
 			}
 		}
-
-		if instance.DBInstanceStatus == string(status) {
-			return nil
-		}
-
-		if status == Updating {
-			if instance.DBInstanceStatus == "NodeCreating" ||
-				instance.DBInstanceStatus == "NodeDeleting" ||
-				instance.DBInstanceStatus == "DBInstanceClassChanging" {
-				return nil
-			}
-		}
-
-		if time.Now().After(deadline) {
-			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, instance.DBInstanceStatus, string(status), errmsgs.ProviderERROR)
-		}
-		time.Sleep(DefaultIntervalShort * time.Second)
+		return object, object.DBInstanceStatus, nil
 	}
 }
 
@@ -202,9 +187,6 @@ func (s *MongoDBService) ModifyMongoDBSecurityIps(instanceId, ips string) error 
 
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-	if err := s.WaitForMongoDBInstance(instanceId, Running, DefaultTimeoutMedium); err != nil {
-		return errmsgs.WrapError(err)
-	}
 	return nil
 }
 
@@ -213,9 +195,6 @@ func (s *MongoDBService) DescribeMongoDBSecurityGroupId(id string) (*dds.Describ
 	request := dds.CreateDescribeSecurityGroupConfigurationRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	if err := s.WaitForMongoDBInstance(id, Running, DefaultTimeoutMedium); err != nil {
-		return response, errmsgs.WrapError(err)
-	}
 	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 		return client.DescribeSecurityGroupConfiguration(request)
 	})
@@ -233,110 +212,120 @@ func (s *MongoDBService) DescribeMongoDBSecurityGroupId(id string) (*dds.Describ
 	return response, nil
 }
 
-func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
-	instanceID string, nodeType MongoDBShardingNodeType, stateList, diffList []interface{}, meta interface{}) error {
-	client := server.client
+func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.ResourceData, param string) error {
 
-	err := server.WaitForMongoDBInstance(instanceID, Running, DefaultLongTimeout)
-	if err != nil {
-		return errmsgs.WrapError(err)
+	instanceID := d.Id()
+	nodeType := map[string]string{
+		"mongo_list":        string(MongoDBShardingNodeMongos),
+		"shard_list":        string(MongoDBShardingNodeShard),
+		"configserver_list": string(MongoDBShardingNodeCs),
+	}[param]
+
+	stateConf := BuildStateConf([]string{"NodeCreating","NodeDeleting" ,"DBInstanceClassChanging" ,"NET_DELETING","NET_CREATING", "NET_MODIFYING"}, 
+			[]string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, server.MongoDbInstanceStateRefreshFunc(d.Id(), []string{"failed"}))
+
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	//create node
-	if len(stateList) < len(diffList) {
-		createList := diffList[len(stateList):]
-		diffList = diffList[:len(stateList)]
+	var oldMap map[string]interface{}
+	var newMap map[string]interface{}
 
-		for _, item := range createList {
-			node := item.(map[string]interface{})
+	old, new := d.GetChange(param)
+	for _, n := range new.(*schema.Set).List() {
+		item := n.(map[string]interface{})
+		newMap[item["description"].(string)] = item
+	}
+	if !d.IsNewResource() {
+		for _, o := range old.(*schema.Set).List() {
+			item := o.(map[string]interface{})
+			oldMap[item["description"].(string)] = item
+		}
+		// create new node
+		for key, value := range newMap {
+			if _, exist := oldMap[key]; !exist {
+				node := value.(map[string]interface{})
+				request := dds.CreateCreateNodeRequest()
+				server.client.InitRpcRequest(*request.RpcRequest)
+				request.DBInstanceId = instanceID
+				request.NodeClass = node["node_class"].(string)
+				request.NodeType = nodeType
+				request.ClientToken = buildClientToken(request.GetActionName())
 
-			request := dds.CreateCreateNodeRequest()
-			server.client.InitRpcRequest(*request.RpcRequest)
-			request.DBInstanceId = instanceID
-			request.NodeClass = node["node_class"].(string)
-			request.NodeType = string(nodeType)
-			request.ClientToken = buildClientToken(request.GetActionName())
-
-			if nodeType == MongoDBShardingNodeShard {
-				request.NodeStorage = requests.NewInteger(node["node_storage"].(int))
-			}
-
-			raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
-				return client.CreateNode(request)
-			})
-			bresponse, ok := raw.(*dds.CreateNodeResponse)
-			if err != nil {
-				errmsg := ""
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				if param != "mongo_list" {
+					request.NodeStorage = requests.NewInteger(node["node_storage"].(int))
 				}
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceID, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
-			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-			err = server.WaitForMongoDBInstance(instanceID, Updating, DefaultLongTimeout)
-			if err != nil {
-				return errmsgs.WrapError(err)
-			}
+				raw, err := server.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+					return client.CreateNode(request)
+				})
+				bresponse, ok := raw.(*dds.CreateNodeResponse)
+				if err != nil {
+					errmsg := ""
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+					}
+					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceID, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				}
+				addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-			err = server.WaitForMongoDBInstance(instanceID, Running, DefaultLongTimeout)
-			if err != nil {
-				return errmsgs.WrapError(err)
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
 			}
 		}
-	} else if len(stateList) > len(diffList) {
-		deleteList := stateList[len(diffList):]
-		stateList = stateList[:len(diffList)]
 
-		for _, item := range deleteList {
-			node := item.(map[string]interface{})
+		// remove old node
+		for key, value := range oldMap {
+			if _, exist := newMap[key]; !exist {
+				node := value.(map[string]interface{})
 
-			request := dds.CreateDeleteNodeRequest()
-			server.client.InitRpcRequest(*request.RpcRequest)
-			request.DBInstanceId = instanceID
-			request.NodeId = node["node_id"].(string)
-			request.ClientToken = buildClientToken(request.GetActionName())
+				request := dds.CreateDeleteNodeRequest()
+				server.client.InitRpcRequest(*request.RpcRequest)
+				request.DBInstanceId = instanceID
+				request.NodeId = node["node_id"].(string)
+				request.ClientToken = buildClientToken(request.GetActionName())
 
-			raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
-				return client.DeleteNode(request)
-			})
-			bresponse, ok := raw.(*dds.DeleteNodeResponse)
-			if err != nil {
-				errmsg := ""
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				raw, err := server.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+					return client.DeleteNode(request)
+				})
+				bresponse, ok := raw.(*dds.DeleteNodeResponse)
+				if err != nil {
+					errmsg := ""
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+					}
+					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceID, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 				}
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceID, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
 
-			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+				addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 
-			err = server.WaitForMongoDBInstance(instanceID, Running, DefaultLongTimeout)
-			if err != nil {
-				return errmsgs.WrapError(err)
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
 			}
 		}
 	}
 
 	//modify node
-	for key := 0; key < len(stateList); key++ {
-		state := stateList[key].(map[string]interface{})
-		diff := diffList[key].(map[string]interface{})
+	for key, value := range newMap {
+		newNode := value.(map[string]interface{})
+		oldNode := oldMap[key].(map[string]interface{})
 
-		if state["node_class"] != diff["node_class"] ||
-			state["node_storage"] != diff["node_storage"] {
+		if _, exist := oldMap[key]; exist && newNode["node_class"].(string) != oldNode["node_class"].(string) ||
+			newNode["node_storage"] != oldNode["node_storage"] {
 			request := dds.CreateModifyNodeSpecRequest()
 			server.client.InitRpcRequest(*request.RpcRequest)
 			request.DBInstanceId = instanceID
-			request.NodeClass = diff["node_class"].(string)
+			request.NodeClass = newNode["node_class"].(string)
 			request.ClientToken = buildClientToken(request.GetActionName())
 
-			if nodeType == MongoDBShardingNodeShard {
-				request.NodeStorage = requests.NewInteger(diff["node_storage"].(int))
+			if param != "mongo_list" {
+				request.NodeStorage = requests.NewInteger(newNode["node_storage"].(int))
 			}
-			request.NodeId = state["node_id"].(string)
+			request.NodeId = newNode["node_id"].(string)
 
-			raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+			raw, err := server.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 				return client.ModifyNodeSpec(request)
 			})
 			bresponse, ok := raw.(*dds.ModifyNodeSpecResponse)
@@ -347,18 +336,112 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(
 				}
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceID, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-			err = server.WaitForMongoDBInstance(instanceID, Updating, DefaultLongTimeout)
-			if err != nil {
-				return errmsgs.WrapError(err)
+			if _, err := stateConf.WaitForState(); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
-			err = server.WaitForMongoDBInstance(instanceID, Running, DefaultLongTimeout)
-			if err != nil {
-				return errmsgs.WrapError(err)
+		}
+
+		if param == "mongo_list" && newNode["connect_string_private_prefix"].(string)!= "" &&  (
+			newNode["connect_string_private_prefix"].(string) != oldNode["connect_string_private_prefix"].(string) ||
+			newNode["port_private"].(int) != oldNode["port_private"].(int)) {
+			reqQuery := map[string]interface{}{
+				"DBInstanceId":            d.Id(),
+				"NodeId":                  newNode["node_id"].(string),
+				"NewConnectionString":     newNode["connect_string_private_prefix"],
+				"CurrentConnectionString": oldNode["connect_string_private"],
+				"NewPort":                 newNode["port_private"],
+				"OldPort":                 oldNode["port_private"],
+			}
+			if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil); err != nil {
+				return err
+			}
+			if _, err := stateConf.WaitForState(); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+			}
+		}
+
+		if param != "mongo_list" && newNode["private_enable"].(bool) != oldNode["private_enable"].(bool) {
+			if newNode["private_enable"] == true {
+				reqQuery := map[string]interface{}{
+					"DBInstanceId": d.Id(),
+					"NodeId":       newNode["node_id"].(string),
+				}
+				if newNode["account_name"].(string) != "" {
+					if newNode["account_password"].(string) == "" {
+						return fmt.Errorf("account_password can not be empty while account_name is set")
+					}
+					reqQuery["AccountName"] = newNode["account_name"].(string)
+					reqQuery["AccountPassword"] = newNode["account_password"].(string)
+				}
+				if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "AllocateNodePrivateNetworkAddress", "", nil, reqQuery, nil); err != nil {
+					return err
+				}
+
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
+			} else if oldNode["connect_string_private"].(string) != "" {
+				reqQuery := map[string]interface{}{
+					"DBInstanceId": d.Id(),
+					"NodeId":       newNode["node_id"].(string),
+				}
+				if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ReleaseNodePrivateNetworkAddress", "", nil, reqQuery, nil); err != nil {
+					return err
+				}
+
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
+			}
+		}
+
+		if newNode["public_enable"].(bool) != oldNode["public_enable"].(bool) {
+			if newNode["public_enable"] == true {
+				reqQuery := map[string]interface{}{
+					"DBInstanceId": d.Id(),
+					"NodeId":       newNode["node_id"].(string),
+				}
+				if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "AllocatePublicNetworkAddress", "", nil, reqQuery, nil); err != nil {
+					return err
+				}
+
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
+			} else if oldNode["connect_string_public"].(string) != "" {
+				reqQuery := map[string]interface{}{
+					"DBInstanceId": d.Id(),
+					"NodeId":       newNode["node_id"].(string),
+				}
+				if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ReleasePublicNetworkAddress", "", nil, reqQuery, nil); err != nil {
+					return err
+				}
+
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
+			}
+		}
+
+		if param == "mongo_list" && newNode["public_enable"].(bool) && newNode["connect_string_public_prefix"].(string) != "" &&
+			(newNode["connect_string_public_prefix"].(string) != oldNode["connect_string_public_prefix"].(string) ||
+				newNode["port_public"].(int) != oldNode["port_public"].(int)) {
+			reqQuery := map[string]interface{}{
+				"DBInstanceId":            d.Id(),
+				"NodeId":                  newNode["node_id"].(string),
+				"NewConnectionString":     newNode["connect_string_public_prefix"],
+				"CurrentConnectionString": oldNode["connect_string_public"],
+				"NewPort":                 newNode["port_public"],
+				"OldPort":                 oldNode["port_public"],
+			}
+			if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil); err != nil {
+				return err
+			}
+			if _, err := stateConf.WaitForState(); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -389,9 +472,11 @@ func (s *MongoDBService) DescribeMongoDBTDEInfo(id string) (*dds.DescribeDBInsta
 	request := dds.CreateDescribeDBInstanceTDEInfoRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = id
-	statErr := s.WaitForMongoDBInstance(id, Running, DefaultLongTimeout)
-	if statErr != nil {
-		return response, errmsgs.WrapError(statErr)
+	stateConf := BuildStateConf([]string{"NodeCreating","NodeDeleting" ,"DBInstanceClassChanging" ,"NET_DELETING","NET_CREATING", "NET_MODIFYING"}, 
+			[]string{"Running"}, 15*time.Minute, 10*time.Second, s.MongoDbInstanceStateRefreshFunc(id, []string{"failed"}))
+
+	if _, err := stateConf.WaitForState(); err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.IdMsg, id)
 	}
 	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 		return client.DescribeDBInstanceTDEInfo(request)
@@ -450,8 +535,11 @@ func (s *MongoDBService) DescribeDBInstanceSSL(id string) (*dds.DescribeDBInstan
 }
 
 func (s *MongoDBService) MotifyMongoDBBackupPolicy(d *schema.ResourceData) error {
-	if err := s.WaitForMongoDBInstance(d.Id(), Running, DefaultTimeoutMedium); err != nil {
-		return errmsgs.WrapError(err)
+	stateConf := BuildStateConf([]string{"NodeCreating","NodeDeleting" ,"DBInstanceClassChanging" ,"NET_DELETING","NET_CREATING", "NET_MODIFYING"}, 
+			[]string{"Running"}, 15*time.Minute, 10*time.Second, s.MongoDbInstanceStateRefreshFunc(d.Id(), []string{"failed"}))
+
+	if _, err := stateConf.WaitForState(); err != nil {
+		return  errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	periodList := expandStringList(connectivity.GetResourceData(d, "preferred_backup_period", "backup_period").(*schema.Set).List())
 	backupPeriod := fmt.Sprintf("%s", strings.Join(periodList[:], COMMA_SEPARATED))
@@ -474,8 +562,9 @@ func (s *MongoDBService) MotifyMongoDBBackupPolicy(d *schema.ResourceData) error
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-	if err := s.WaitForMongoDBInstance(d.Id(), Running, DefaultTimeoutMedium); err != nil {
-		return errmsgs.WrapError(err)
+
+	if _, err := stateConf.WaitForState(); err != nil {
+		return  errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	return nil
 }
@@ -917,45 +1006,6 @@ func (s *MongoDBService) DoDdsDescribeshardingnetworkaddressRequest(id string) (
 	}
 
 	return DdsDescribeshardingnetworkaddressResponseObj, nil
-}
-
-func (s *MongoDBService) DoWaitDdsShardDbinstanceRunningRequest(id string) (*DdsDescribeDBInstancesResponse, error) {
-	time.Sleep(time.Second * 10)
-	deadline := time.Now().Add(time.Duration(300) * time.Second)
-	for {
-		request := s.client.NewCommonRequest("GET", "Dds", "2015-12-01", "DescribeDBInstances", "")
-		//调用request_params_handler
-		parts := strings.Split(id, COLON_SEPARATED)
-		db_instance_id := parts[0]
-		request.QueryParams["DBInstanceId"] = db_instance_id
-		request.QueryParams["DBInstanceType"] = "sharding"
-		DdsWaitShardDbInstanceRuningResponseObj := &DdsDescribeDBInstancesResponse{}
-		for i := 0; i < 100; i++ {
-		}
-		bresponse, err := s.client.ProcessCommonRequest(request)
-		if err != nil {
-			if bresponse == nil {
-				return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeShardingNetworkAddress", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-
-		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DdsWaitShardDbInstanceRuningResponseObj)
-
-		if err != nil {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeShardingNetworkAddress", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		log.Printf("dbinstance status is %s", DdsWaitShardDbInstanceRuningResponseObj.DBInstances.DBInstance[0].DBInstanceStatus)
-		if DdsWaitShardDbInstanceRuningResponseObj.DBInstances.DBInstance[0].DBInstanceStatus == "Running" {
-			return DdsWaitShardDbInstanceRuningResponseObj, nil
-
-		}
-		if time.Now().After(deadline) {
-			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DoWaitDdsShardDbinstanceRunningRequest timeout", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		time.Sleep(DefaultIntervalShort * time.Second)
-	}
 }
 
 func (s *MongoDBService) ModifyAuditLogFilter(d *schema.ResourceData) error {
