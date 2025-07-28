@@ -436,6 +436,10 @@ func valueConvert(indentation int, val reflect.Value) string {
 		return valueConvert(indentation, reflect.ValueOf(val.Interface()))
 	case reflect.String:
 		return fmt.Sprintf("\"%s\"", val.String())
+	case reflect.Int:
+			return fmt.Sprintf("%d", val.Int())
+	case reflect.Bool:
+		return fmt.Sprintf("%v", val.Bool())
 	case reflect.Slice:
 		return listValue(indentation, val)
 	case reflect.Map:
