@@ -1657,6 +1657,7 @@ func (s *PolardbService) DoDescribeDBProxyEndpointRequest(instanceId string) (*P
 	request.QueryParams["DBInstanceId"] = instanceId
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")

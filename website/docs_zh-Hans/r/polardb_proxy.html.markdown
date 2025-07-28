@@ -93,6 +93,12 @@ resource "alibabacloudstack_db_proxy" "default" {
   * `effective_time` - (选填) - 生效时间，取值：* **Immediate**：立即生效。* **MaintainTime**：在可运维时间段内生效，请参见ModifyDBInstanceMaintainTime。* **SpecificTime**：指定时间生效。默认值：**MaintainTime**。
   * `connection_persist` - (选填) - 连接池。取值：- **0**：关闭 - **1**：开启会话级连接池 - **2**：开启事务级连接池。
   * `causal_consist_read` - (选填) - 一致性参数。取值：- **0**：始终一致 - **1**：开启会话一致性 - **2**：开启全局一致性。
+  * `read_write_spliting` - (选填) - 读写分离。取值：- **0**：关闭 - **1**：开启。
+  * `read_only_instance_max_delay_time` - (选填) - 只读实例流量分配的阈值（秒）。
+  * `read_only_instance_weight` - (选填) - 实例的权重分配，不设置时则由系统分配。
+    * `db_instance_id` - (选填) - 实例ID.
+    * `weight` - (选填) - 实例权重(0-100).
+
 ## 属性参考
 
 除了上述所有参数外，还导出了以下属性：
