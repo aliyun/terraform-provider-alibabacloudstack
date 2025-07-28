@@ -175,11 +175,13 @@ func TestAccAlibabacloudStackPolardbProxy_ReadWriteSpliting(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"read_write_spliting": "0",
+					"read_write_spliting":       "0",
+					"read_only_instance_weight": REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"read_write_spliting": "0",
+						"read_write_spliting":         "0",
+						"read_only_instance_weight.#": "0",
 					}),
 				),
 			},
