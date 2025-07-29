@@ -208,7 +208,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basic(t *testing.T) {
 						},
 					},
 					"vswitch_id":        "${alibabacloudstack_vpc_vswitch.default.id}",
-					"security_group_id": "${alibabacloudstack_ecs_securitygroup.default.id}",
+//					"security_group_id": "${alibabacloudstack_ecs_securitygroup.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -404,7 +404,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basic(t *testing.T) {
 func testMongoDBShardingInstance_base(enableVpc bool) func(string) string {
 	var vpcString string
 	if enableVpc {
-		vpcString = SecurityGroupCommonTestCase
+		vpcString = VSwitchCommonTestCase
 	}
 	return func(name string) string {
 		return fmt.Sprintf(`

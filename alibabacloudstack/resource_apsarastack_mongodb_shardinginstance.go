@@ -77,11 +77,11 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
-			"security_group_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
-			},
+//			"security_group_id": {
+//				Type:     schema.TypeString,
+//				Computed: true,
+//				Optional: true,
+//			},
 			"account_password": {
 				Type:      schema.TypeString,
 				Optional:  true,
@@ -687,28 +687,28 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		//d.SetPartial("tde_status")
 	}
 
-	if d.HasChange("security_group_id") {
-		request := dds.CreateModifySecurityGroupConfigurationRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.DBInstanceId = d.Id()
-		request.SecurityGroupId = d.Get("security_group_id").(string)
-
-		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
-			return client.ModifySecurityGroupConfiguration(request)
-		})
-		if err != nil {
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*dds.ModifySecurityGroupConfigurationResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("security_group_id")
-	}
+//	if d.HasChange("security_group_id") {
+//		request := dds.CreateModifySecurityGroupConfigurationRequest()
+//		client.InitRpcRequest(*request.RpcRequest)
+//		request.DBInstanceId = d.Id()
+//		request.SecurityGroupId = d.Get("security_group_id").(string)
+//
+//		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+//			return client.ModifySecurityGroupConfiguration(request)
+//		})
+//		if err != nil {
+//			errmsg := ""
+//			if raw != nil {
+//				response, ok := raw.(*dds.ModifySecurityGroupConfigurationResponse)
+//				if ok {
+//					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+//				}
+//			}
+//			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+//		}
+//		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+//		//d.SetPartial("security_group_id")
+//	}
 
 	for _, param := range []string{"shard_list", "mongo_list", "configserver_list"} {
 		if d.HasChange(param) {

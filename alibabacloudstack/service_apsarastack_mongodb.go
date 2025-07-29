@@ -69,6 +69,9 @@ func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInst
 	})
 	bresponse, ok := raw.(*dds.DescribeDBInstanceAttributeResponse)
 	if err != nil {
+		if sdkErr, ok := err.(*errors.ServerError); ok &&  sdkErr.ErrorCode() == "InvalidDBInstanceId.NotFound" {
+			return instance, errmsgs.GetNotFoundErrorFromString("Mongodb Instance "+ id +" Not Found")
+		}
 		errmsg := ""
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
@@ -228,8 +231,8 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	var oldMap map[string]interface{}
-	var newMap map[string]interface{}
+	oldMap:=map[string]interface{}{}
+	newMap:=map[string]interface{}{}
 
 	old, new := d.GetChange(param)
 	for _, n := range new.(*schema.Set).List() {

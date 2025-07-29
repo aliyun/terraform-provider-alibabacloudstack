@@ -136,21 +136,22 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tfaccount%d", rand)
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBInstanceClassicBase)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBInstanceClassicBase(true))
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
 		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckMongoDBInstanceDestroy,
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      testAccCheckMongoDBInstanceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"zone_id":                 "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"db_instance_description": "${var.name}",
-					"engine_version":          "3.4",
+					"engine_version":          "4.0",
 					"db_instance_storage":     "10",
 					"db_instance_class":       "dds.mongo.mid",
 					"audit_status":            "Enable",
@@ -158,10 +159,11 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 						"role_type": "db",
 						"filters":   []string{"update", "delete"},
 					}},
+					"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine_version":          "3.4",
+						"engine_version":          "4.0",
 						"db_instance_storage":     "10",
 						"db_instance_class":       "dds.mongo.mid",
 						"db_instance_description": name,
@@ -170,7 +172,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 						"replication_factor":      "3",
 						"audit_status":            "Enable",
 						"audit_filter.#":          "1",
-					}), 
+					}),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						resourceId,
 						"audit_filter.*",
@@ -200,8 +202,8 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"audit_status":            "Enable",
-						"audit_filter.#":          "1",
+						"audit_status":   "Enable",
+						"audit_filter.#": "1",
 					}),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						resourceId,
@@ -265,26 +267,32 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 					}),
 				),
 			},
-			//			{
-			//				Config: testMongoDBInstance_classic_tags,
-			//				Check: resource.ComposeTestCheckFunc(
-			//					testAccCheck(map[string]string{
-			//						"tags.%":       "2",
-			//						"tags.Created": "TF",
-			//						"tags.For":     "acceptance test",
-			//					}),
-			//				),
-			//			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"tags": map[string]string{
+						"Created": "TF",
+						"For":     "acceptance test",
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"tags.%":       "2",
+						"tags.Created": "TF",
+						"tags.For":     "acceptance test",
+					}),
+				),
+			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"db_instance_description": "tf-testAccMongoDBInstance_test",
+					"tags":                    REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"db_instance_description": "tf-testAccMongoDBInstance_test",
-						//						"tags.%":       REMOVEKEY,
-						//						"tags.Created": REMOVEKEY,
-						//						"tags.For":     REMOVEKEY,
+						"tags.%":                  REMOVEKEY,
+						"tags.Created":            REMOVEKEY,
+						"tags.For":                REMOVEKEY,
 					}),
 				),
 			},
@@ -300,192 +308,29 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 					}),
 				),
 			},
-			// {
-			// 	Config: testMongoDBInstance_classic_account_password,
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"account_password": "inputYourCodeHere",
-			// 		}),
-			// 	),
-			// },
-			// {
-			// 	Config: testMongoDBInstance_classic_security_ip_list,
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"security_ip_list.#": "1",
-			// 			"security_ip_list.0": "10.168.1.12",
-			// 		}),
-			// 	),
-			// },
-			//			{
-			//				Config: testMongoDBInstance_classic_security_group_id,
-			//				Check: resource.ComposeTestCheckFunc(
-			//					testAccCheck(map[string]string{
-			//						"security_group_id": CHECKSET,
-			//					}),
-			//				),
-			//			},
-			// {
-			// 	Config: testMongoDBInstance_classic_backup,
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"backup_period.#": "1",
-			// 			"backup_period.0": "Wednesday",
-			// 			"backup_time":     "11:00Z-12:00Z",
-			// 		}),
-			// 	),
-			// },
-			// {
-			// 	Config: testMongoDBInstance_classic_maintain_time,
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"maintain_start_time": "02:00Z",
-			// 			"maintain_end_time":   "03:00Z",
-			// 		}),
-			// 	),
-			// },
-			// {
-			// 	Config: testMongoDBInstance_classic_together,
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
-			// 			"name":                "tf-testAccMongoDBInstance_test_together",
-			// 			"account_password":    "inputYourCodeHere",
-			// 			"security_ip_list.#":  "2",
-			// 			"security_ip_list.0":  "10.168.1.12",
-			// 			"security_ip_list.1":  "10.168.1.13",
-			// 			"db_instance_storage": "30",
-			// 			"db_instance_class":   "dds.mongo.standard",
-			// 			"backup_period.#":     "2",
-			// 			"backup_period.0":     "Tuesday",
-			// 			"backup_period.1":     "Wednesday",
-			// 			"backup_time":         "10:00Z-11:00Z",
-			// 			"maintain_start_time": REMOVEKEY,
-			// 			"maintain_end_time":   REMOVEKEY,
-			// 			"ssl_status":          "Open",
-			// 		}),
-			// 	),
-			// },
-		},
-	})
-}
-
-func TestAccAlibabacloudStackMongoDBInstance_Version4(t *testing.T) {
-	var v dds.DBInstance
-	resourceId := "alibabacloudstack_mongodb_instance.default"
-	serverFunc := func() interface{} {
-		return &MongoDBService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
-	ra := resourceAttrInit(resourceId, nil)
-	rac := resourceAttrCheckInit(rc, ra)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckMongoDBInstanceDestroy,
-		Steps: []resource.TestStep{
 			{
-				Config: testMongoDBInstance_classic_base4,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"engine_version":       "4.0",
-						"db_instance_storage":  "10",
-						"db_instance_class":    "dds.mongo.mid",
-						"name":                 "",
-						"storage_engine":       "WiredTiger",
-						"instance_charge_type": "PostPaid",
-						"replication_factor":   "3",
-					}),
-				),
-			},
-			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ssl_action"},
-			},
-			{
-				Config: testMongoDBInstance_classic_tde,
+				Config: testAccConfig(map[string]interface{}{
+					"tde_status": "enabled",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"tde_status": "enabled",
 					}),
 				),
 			},
-		},
-	})
-}
 
-func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
-	var v dds.DBInstance
-	resourceId := "alibabacloudstack_mongodb_instance.default"
-	serverFunc := func() interface{} {
-		return &MongoDBService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
-	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
-	ra := resourceAttrInit(resourceId, nil)
-	rac := resourceAttrCheckInit(rc, ra)
-	password := getAccTestPassword(12)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckWithNoDefaultVpc(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckMongoDBInstanceDestroy,
-		Steps: []resource.TestStep{
+			//			 {
+			//			 	Config: testMongoDBInstance_classic_account_password,
+			//			 	Check: resource.ComposeTestCheckFunc(
+			//			 		testAccCheck(map[string]string{
+			//			 			"account_password": "inputYourCodeHere",
+			//			 		}),
+			//			 	),
+			//			 },
 			{
-				Config: testMongoDBInstance_vpc_base,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"engine_version":       "3.4",
-						"db_instance_storage":  "10",
-						"db_instance_class":    "dds.mongo.mid",
-						"name":                 "",
-						"storage_engine":       "WiredTiger",
-						"instance_charge_type": "PostPaid",
-						"replication_factor":   "3",
-					}),
-				),
-			},
-			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ssl_action"},
-			},
-			{
-				Config: testMongoDBInstance_vpc_name,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name": "tf-testAccMongoDBInstance_test",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_vpc_configure,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"db_instance_storage": "30",
-						"db_instance_class":   "dds.mongo.standard",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_vpc_account_password(password),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"account_password": "inputYourCodeHere",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_vpc_security_ip_list(password),
+				Config: testAccConfig(map[string]interface{}{
+					"security_ip_list": []string{"10.168.1.12"},
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"security_ip_list.#": "1",
@@ -493,8 +338,19 @@ func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
 					}),
 				),
 			},
+			//						{
+			//							Config: testMongoDBInstance_classic_security_group_id,
+			//							Check: resource.ComposeTestCheckFunc(
+			//								testAccCheck(map[string]string{
+			//									"security_group_id": CHECKSET,
+			//								}),
+			//							),
+			//						},
 			{
-				Config: testMongoDBInstance_vpc_backup(password),
+				Config: testAccConfig(map[string]interface{}{
+					"backup_period": []string{"Wednesday"},
+					"backup_time":   "11:00Z-12:00Z",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"backup_period.#": "1",
@@ -504,23 +360,18 @@ func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				Config: testMongoDBInstance_vpc_together(password),
+				Config: testAccConfig(map[string]interface{}{
+					"maintain_start_time": "02:00Z",
+					"maintain_end_time":   "03:00Z",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"name":                "tf-testAccMongoDBInstance_test_together",
-						"account_password":    "inputYourCodeHere",
-						"security_ip_list.#":  "2",
-						"security_ip_list.0":  "10.168.1.12",
-						"security_ip_list.1":  "10.168.1.13",
-						"db_instance_storage": "30",
-						"db_instance_class":   "dds.mongo.standard",
-						"backup_period.#":     "2",
-						"backup_period.0":     "Tuesday",
-						"backup_period.1":     "Wednesday",
-						"backup_time":         "10:00Z-11:00Z",
+						"maintain_start_time": "02:00Z",
+						"maintain_end_time":   "03:00Z",
 					}),
 				),
-			}},
+			},
+		},
 	})
 }
 
@@ -629,483 +480,24 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackMongoDBInstance_multi_instance(t *testing.T) {
-	var v dds.DBInstance
-	resourceId := "alibabacloudstack_mongodb_instance.default.2"
-	serverFunc := func() interface{} {
-		return &MongoDBService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+func testMongoDBInstanceClassicBase(enableVpc bool) func(string) string {
+	var vpcString string
+	if enableVpc {
+		vpcString = VSwitchCommonTestCase
 	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
-	ra := resourceAttrInit(resourceId, nil)
-	rac := resourceAttrCheckInit(rc, ra)
-	password := getAccTestPassword(12)
-	testAccCheck := rac.resourceAttrMapUpdateSet()
-	ResourceTest(t, resource.TestCase{
-		PreCheck: func() {
-			testAccPreCheck(t)
-			testAccPreCheckWithNoDefaultVpc(t)
-		},
-		IDRefreshName: resourceId,
-		Providers:     testAccProviders,
-		CheckDestroy:  testAccCheckMongoDBInstanceDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testMongoDBInstance_multi_instance_base,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"engine_version":       "3.4",
-						"db_instance_storage":  "10",
-						"db_instance_class":    "dds.mongo.mid",
-						"name":                 "",
-						"storage_engine":       "WiredTiger",
-						"instance_charge_type": "PostPaid",
-						"replication_factor":   "3",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_multi_instance_name,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name": "tf-testAccMongoDBInstance_test",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_multi_instance_configure,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"db_instance_storage": "30",
-						"db_instance_class":   "dds.mongo.standard",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_multi_instance_account_password(password),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"account_password": "inputYourCodeHere",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_multi_instance_security_ip_list(password),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"security_ip_list.#": "1",
-						"security_ip_list.0": "10.168.1.12",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_multi_instance_backup(password),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"backup_period.#": "1",
-						"backup_period.0": "Wednesday",
-						"backup_time":     "11:00Z-12:00Z",
-					}),
-				),
-			},
-			{
-				Config: testMongoDBInstance_multi_instance_together(password),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"name":                "tf-testAccMongoDBInstance_test_together",
-						"account_password":    "inputYourCodeHere",
-						"security_ip_list.#":  "2",
-						"security_ip_list.0":  "10.168.1.12",
-						"security_ip_list.1":  "10.168.1.13",
-						"db_instance_storage": "30",
-						"db_instance_class":   "dds.mongo.standard",
-						"backup_period.#":     "2",
-						"backup_period.0":     "Tuesday",
-						"backup_period.1":     "Wednesday",
-						"backup_time":         "10:00Z-11:00Z",
-					}),
-				),
-			}},
-	})
-}
-
-func testMongoDBInstanceClassicBase(name string) string {
-	return fmt.Sprintf(`
+	return func(name string) string {
+		return fmt.Sprintf(`
+	
 variable "name" {
-default="%s"
-}
-%s`, name, DataZoneCommonTestCase)
-}
+	  default = "%s"
+	}
+	
+%s
 
-const testMongoDBInstance_classic_base4 = `
+%s
 
-data "alibabacloudstack_zones" "default" {
-  
-}
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "4.0"
-  db_instance_storage = 10
-  db_instance_class   = "dds.mongo.mid"
-}`
-
-const testMongoDBInstance_classic_tags = `
-
-data "alibabacloudstack_zones" "default" {
-  
-}
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 10
-  db_instance_class   = "dds.mongo.mid"
-  ssl_action          = "Close"
-  tags = {
-    Created = "TF"
-    For     = "acceptance test"
-  }
-}`
-
-func testMongoDBInstance_classic_account_password(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  
-}
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "%s"
-  ssl_action          = "Close"
-}`, password)
-}
-
-const testMongoDBInstance_classic_tde = `
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "4.0"
-  db_instance_storage = 10
-  db_instance_class   = "dds.mongo.mid"
-  tde_status    = "enabled"
-}`
-
-func testMongoDBInstance_classic_security_ip_list(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "%s"
-  security_ip_list    = ["10.168.1.12"]
-  ssl_action          = "Close"
-}`, password)
-}
-
-func testMongoDBInstance_classic_security_group_id(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-data "alibabacloudstack_security_groups" "default" {
-}
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "%s"
-  security_group_id    = "${data.alibabacloudstack_security_groups.default.groups.0.id}"
-  ssl_action          = "Close"
-}`, password)
-}
-
-func testMongoDBInstance_classic_backup(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "%s"
-  security_ip_list    = ["10.168.1.12"]
-  backup_period       = ["Wednesday"]
-  backup_time         = "11:00Z-12:00Z"
-  ssl_action          = "Close"
-}`, password)
-}
-
-func testMongoDBInstance_classic_maintain_time(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "%s"
-  security_ip_list    = ["10.168.1.12"]
-  backup_period       = ["Wednesday"]
-  backup_time         = "11:00Z-12:00Z"
-  maintain_start_time = "02:00Z"
-  maintain_end_time   = "03:00Z"
-  ssl_action          = "Close"
-}`, password)
-}
-
-func testMongoDBInstance_classic_together(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test_together"
-  account_password    = "%s"
-  security_ip_list    = ["10.168.1.12", "10.168.1.13"]
-  backup_period       = ["Tuesday", "Wednesday"]
-  backup_time         = "10:00Z-11:00Z"
-  ssl_action          = "Open"
-}`, password)
-}
-
-const testMongoDBInstance_vpc_base = `
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-variable "name" {
-  default = "tf-testAccMongoDBInstance_vpc"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
-  db_instance_storage = 10
-  db_instance_class   = "dds.mongo.mid"
-}`
-
-const testMongoDBInstance_vpc_name = `
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-variable "name" {
-  default = "tf-testAccMongoDBInstance_vpc"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
-  db_instance_storage = 10
-  db_instance_class   = "dds.mongo.mid"
-  name                = "tf-testAccMongoDBInstance_test"
-}`
-
-const testMongoDBInstance_vpc_configure = `
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-variable "name" {
-  default = "tf-testAccMongoDBInstance_vpc"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-}`
-
-func testMongoDBInstance_vpc_account_password(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-variable "name" {
-  default = "tf-testAccMongoDBInstance_vpc"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "%s"
-}`, password)
-}
-
-func testMongoDBInstance_vpc_security_ip_list(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-variable "name" {
-  default = "tf-testAccMongoDBInstance_vpc"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "%s"
-  security_ip_list    = ["10.168.1.12"]
-}`, password)
-}
-
-func testMongoDBInstance_vpc_backup(password string) string {
-	return fmt.Sprintf(`
-data "alibabacloudstack_zones" "default" {
-  
-}
-
-variable "name" {
-  default = "tf-testAccMongoDBInstance_vpc"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "%s"
-  security_ip_list    = ["10.168.1.12"]
-  backup_period       = ["Wednesday"]
-  backup_time         = "11:00Z-12:00Z"
-}`, password)
-}
-
-func testMongoDBInstance_vpc_together(password string) string {
-	return fmt.Sprintf(`
-
-data "alibabacloudstack_zones" "default" {
-  
-}
-variable "name" {
-  default = "tf-testAccMongoDBInstance_vpc"
-}
-
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test_together"
-  account_password    = "%s"
-  security_ip_list    = ["10.168.1.12", "10.168.1.13"]
-  backup_period       = ["Tuesday", "Wednesday"]
-  backup_time         = "10:00Z-11:00Z"
-}`, password)
+`, name, RandomPasswordTestCase(12), vpcString)
+	}
 }
 
 const testMongoDBInstance_multiAZ_base = `
@@ -1324,220 +716,6 @@ resource "alibabacloudstack_vswitch" "default" {
 resource "alibabacloudstack_mongodb_instance" "default" {
   vswitch_id          = alibabacloudstack_vswitch.default.id
   zone_id             = data.alibabacloudstack_zones.default.zones[0].id
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test_together"
-  account_password    = "%s"
-  security_ip_list    = ["10.168.1.12", "10.168.1.13"]
-  backup_period       = ["Tuesday", "Wednesday"]
-  backup_time         = "10:00Z-11:00Z"
-}`, password)
-}
-
-const testMongoDBInstance_multi_instance_base = `
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBInstance_multi_instance"
-}
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  count               = 3
-  engine_version      = "3.4"
-  db_instance_storage = 10
-  db_instance_class   = "dds.mongo.mid"
-}`
-
-const testMongoDBInstance_multi_instance_name = `
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBInstance_multi_instance"
-}
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  count               = 3
-  engine_version      = "3.4"
-  db_instance_storage = 10
-  db_instance_class   = "dds.mongo.mid"
-  name                = "tf-testAccMongoDBInstance_test"
-}`
-
-const testMongoDBInstance_multi_instance_configure = `
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBInstance_multi_instance"
-}
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  count               = 3
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-}`
-
-func testMongoDBInstance_multi_instance_account_password(password string) string {
-	return fmt.Sprintf(`
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBInstance_multi_instance"
-}
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  count               = 3
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "%s"
-}`, password)
-}
-
-func testMongoDBInstance_multi_instance_security_ip_list(password string) string {
-	return fmt.Sprintf(`
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBInstance_multi_instance"
-}
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  count               = 3
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "%s"
-  security_ip_list    = ["10.168.1.12"]
-}`, password)
-}
-
-func testMongoDBInstance_multi_instance_backup(password string) string {
-	return fmt.Sprintf(`
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBInstance_multi_instance"
-}
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  count               = 3
-  engine_version      = "3.4"
-  db_instance_storage = 30
-  db_instance_class   = "dds.mongo.standard"
-  name                = "tf-testAccMongoDBInstance_test"
-  account_password    = "%s"
-  security_ip_list    = ["10.168.1.12"]
-  backup_period       = ["Wednesday"]
-  backup_time         = "11:00Z-12:00Z"
-}`, password)
-}
-
-func testMongoDBInstance_multi_instance_together(password string) string {
-	return fmt.Sprintf(`
-
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
-}
-variable "name" {
-  default = "tf-testAccMongoDBInstance_multi_instance"
-}
-resource "alibabacloudstack_vpc" "default" {
-  name       = "${var.name}"
-  cidr_block = "172.16.0.0/16"
-}
-resource "alibabacloudstack_vswitch" "default" {
-  vpc_id            = "${alibabacloudstack_vpc.default.id}"
-  cidr_block        = "172.16.0.0/24"
-  availability_zone = "${data.alibabacloudstack_zones.default.zones.0.id}"
-  name              = "${var.name}"
-}
-
-resource "alibabacloudstack_mongodb_instance" "default" {
-  vswitch_id          = alibabacloudstack_vswitch.default.id
-  count               = 3
   engine_version      = "3.4"
   db_instance_storage = 30
   db_instance_class   = "dds.mongo.standard"

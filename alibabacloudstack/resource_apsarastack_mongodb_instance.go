@@ -97,11 +97,11 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
-			"security_group_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
-			},
+//			"security_group_id": {
+//				Type:     schema.TypeString,
+//				Computed: true,
+//				Optional: true,
+//			},
 			"account_password": {
 				Type:      schema.TypeString,
 				Optional:  true,
