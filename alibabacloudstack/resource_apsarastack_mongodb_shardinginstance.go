@@ -2,8 +2,6 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"log"
-	"regexp"
 	"strings"
 	"time"
 
@@ -32,20 +30,20 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				Computed:     true,
 				ForceNew:     true,
 			},
-//			"instance_charge_type": {
-//				Type:         schema.TypeString,
-//				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
-//				Optional:     true,
-//				ForceNew:     true,
-//				Default:     string(PostPaid),
-//			},
-//			"period": {
-//				Type:             schema.TypeInt,
-//				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
-//				Optional:         true,
-//				Computed:         true,
-//				DiffSuppressFunc: PostPaidDiffSuppressFunc,
-//			},
+			//			"instance_charge_type": {
+			//				Type:         schema.TypeString,
+			//				ValidateFunc: validation.StringInSlice([]string{string(PrePaid), string(PostPaid)}, false),
+			//				Optional:     true,
+			//				ForceNew:     true,
+			//				Default:     string(PostPaid),
+			//			},
+			//			"period": {
+			//				Type:             schema.TypeInt,
+			//				ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
+			//				Optional:         true,
+			//				Computed:         true,
+			//				DiffSuppressFunc: PostPaidDiffSuppressFunc,
+			//			},
 			"zone_id": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -77,11 +75,11 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
-//			"security_group_id": {
-//				Type:     schema.TypeString,
-//				Computed: true,
-//				Optional: true,
-//			},
+			//			"security_group_id": {
+			//				Type:     schema.TypeString,
+			//				Computed: true,
+			//				Optional: true,
+			//			},
 			"account_password": {
 				Type:      schema.TypeString,
 				Optional:  true,
@@ -160,7 +158,7 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 						"description": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[\p{L}_-][\w\p{L}-]{1,255}$`), "The value must be 2 to 256 characters in length, and can contain letters, digits, underscores (_), and hyphen (-). It must start with a letter, and cannot start with http:// or https://."),
+							ValidateFunc: validateShardeNodeDescription(),
 						},
 						"public_enable": {
 							Type:     schema.TypeBool,
@@ -205,8 +203,8 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				},
 				Set: func(v interface{}) int {
 					m := v.(map[string]interface{})
-					hashString := fmt.Sprintf("%s:%d:%s:%v:%v:%s", m["node_class"].(string), m["node_storage"].(int),
-						m["description"].(string), m["public_enable"].(bool), m["private_enable"].(bool), m["account_name"].(string))
+					hashString := fmt.Sprintf("%s:%d:%s:%v:%v", m["node_class"].(string), m["node_storage"].(int),
+						m["description"].(string), m["public_enable"].(bool), m["private_enable"].(bool))
 					return hashcode.String(hashString)
 				},
 				Required: true,
@@ -225,7 +223,7 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 						"description": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[\p{L}_-][\w\p{L}-]{1,255}$`), "The value must be 2 to 256 characters in length, and can contain letters, digits, underscores (_), and hyphen (-). It must start with a letter, and cannot start with http:// or https://."),
+							ValidateFunc: validateShardeNodeDescription(),
 						},
 						"public_enable": {
 							Type:     schema.TypeBool,
@@ -236,11 +234,13 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
+							ValidateFunc: validateShardeNodeConnectionString(),
 						},
 						"connect_string_public_prefix": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
+							ValidateFunc: validateShardeNodeConnectionString(),
 						},
 						"port_public": {
 							Type:     schema.TypeInt,
@@ -293,7 +293,7 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 						"description": {
 							Type:         schema.TypeString,
 							Required:     true,
-							ValidateFunc: validation.StringMatch(regexp.MustCompile(`^[\p{L}_-][\w\p{L}-]{1,255}$`), "The value must be 2 to 256 characters in length, and can contain letters, digits, underscores (_), and hyphen (-). It must start with a letter, and cannot start with http:// or https://."),
+							ValidateFunc: validateShardeNodeDescription(),
 						},
 						"public_enable": {
 							Type:     schema.TypeBool,
@@ -338,8 +338,8 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				},
 				Set: func(v interface{}) int {
 					m := v.(map[string]interface{})
-					hashString := fmt.Sprintf("%s:%d:%s:%v:%v:%s", m["node_class"].(string), m["node_storage"].(int),
-						m["description"].(string), m["public_enable"].(bool), m["private_enable"].(bool), m["account_name"].(string))
+					hashString := fmt.Sprintf("%s:%d:%s:%v:%v", m["node_class"].(string), m["node_storage"].(int),
+						m["description"].(string), m["public_enable"].(bool), m["private_enable"].(bool))
 					return hashcode.String(hashString)
 				},
 				Required: true,
@@ -371,7 +371,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 		"Engine":                "MongoDB",
 		"DBInstanceDescription": connectivity.GetResourceData(d, "db_instance_description", "name").(string),
 		"ZoneId":                d.Get("zone_id").(string),
-		"ChargeType":            string(PostPaid),//d.Get("instance_charge_type").(string),
+		"ChargeType":            string(PostPaid), //d.Get("instance_charge_type").(string),
 	}
 
 	reqQuery["AccountPassword"] = d.Get("account_password").(string)
@@ -447,9 +447,9 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 		reqQuery["NetworkType"] = string(Classic)
 	}
 
-//	if period, ok := d.GetOk("period"); ok && PayType(reqQuery["ChargeType"].(string)) == PrePaid {
-//		reqQuery["Period"] = period.(int)
-//	}
+	//	if period, ok := d.GetOk("period"); ok && PayType(reqQuery["ChargeType"].(string)) == PrePaid {
+	//		reqQuery["Period"] = period.(int)
+	//	}
 
 	if len(d.Get("security_ip_list").(*schema.Set).List()) > 0 {
 		reqQuery["SecurityIPList"] = strings.Join(expandStringList(d.Get("security_ip_list").(*schema.Set).List()), COMMA_SEPARATED)
@@ -476,137 +476,62 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
 
-	instance, err := ddsService.DescribeMongoDBInstance(d.Id())
-	if err != nil {
+	if instance, err := ddsService.DescribeMongoDBInstance(d.Id()); err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
+	} else {
+		// backupPolicy, err := ddsService.DescribeMongoDBBackupPolicy(d.Id())
+		// if err != nil {
+		// 	return errmsgs.WrapError(err)
+		// }
+		// connectivity.SetResourceData(d, backupPolicy.PreferredBackupTime, "preferred_backup_time", "backup_time")
+		// connectivity.SetResourceData(d, backupPolicy.PreferredBackupPeriod, "preferred_backup_period", "backup_period")
+		// retention_period, _ := strconv.Atoi(backupPolicy.BackupRetentionPeriod)
+		// d.Set("retention_period", retention_period)
+	
+		connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "name")
+		d.Set("engine_version", instance.EngineVersion)
+		d.Set("storage_engine", instance.StorageEngine)
+		d.Set("zone_id", instance.ZoneId)
+		//	d.Set("instance_charge_type", instance.ChargeType)
+		//	if instance.ChargeType == "PrePaid" {
+		//		period, err := computePeriodByUnit(instance.CreationTime, instance.ExpireTime, d.Get("period").(int), "Month")
+		//		if err != nil {
+		//			return errmsgs.WrapError(err)
+		//		}
+		//		d.Set("period", period)
+		//	}
+		d.Set("vswitch_id", instance.VSwitchId)
 	}
 
-	// backupPolicy, err := ddsService.DescribeMongoDBBackupPolicy(d.Id())
-	// if err != nil {
-	// 	return errmsgs.WrapError(err)
-	// }
-	// connectivity.SetResourceData(d, backupPolicy.PreferredBackupTime, "preferred_backup_time", "backup_time")
-	// connectivity.SetResourceData(d, backupPolicy.PreferredBackupPeriod, "preferred_backup_period", "backup_period")
-	// retention_period, _ := strconv.Atoi(backupPolicy.BackupRetentionPeriod)
-	// d.Set("retention_period", retention_period)
-
-	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "name")
-	d.Set("engine_version", instance.EngineVersion)
-	d.Set("storage_engine", instance.StorageEngine)
-	d.Set("zone_id", instance.ZoneId)
-//	d.Set("instance_charge_type", instance.ChargeType)
-//	if instance.ChargeType == "PrePaid" {
-//		period, err := computePeriodByUnit(instance.CreationTime, instance.ExpireTime, d.Get("period").(int), "Month")
-//		if err != nil {
-//			return errmsgs.WrapError(err)
-//		}
-//		d.Set("period", period)
-//	}
-	d.Set("vswitch_id", instance.VSwitchId)
-	response, err := ddsService.DoDdsDescribeshardingnetworkaddressRequest(d.Id() + COLON_SEPARATED)
-	mongosList := []map[string]interface{}{}
-	for _, item := range instance.MongosList.MongosAttribute {
-		mongo := map[string]interface{}{
-			"node_class": item.NodeClass,
-			"node_id":    item.NodeId,
-		}
-		for _, data := range response.NetworkAddresses.NetworkAddress {
-			log.Printf("mongosList data.NodeId:%s,item.NodeId:%s", data.NodeId, item.NodeId)
-			if data.NodeId == item.NodeId {
-				if data.NetworkType == "Public" {
-					mongo["public_enable"] = true
-					mongo["port_public"] = data.Port
-					mongo["connect_string_public"] = strings.Split(data.NetworkAddress, ".")[0]
-				} else {
-					mongo["private_enable"] = true
-					mongo["port_private"] = data.Port
-					mongo["connect_string_private"] = strings.Split(data.NetworkAddress, ".")[0]
-				}
-
+	if nodes, err := ddsService.DdsDescribeShardingInstanceNodes(d.Id()); err != nil {
+		return err
+	} else {
+		for key, info := range nodes {
+			data := []map[string]interface{}{}
+			for _, v := range info {
+				data = append(data, v.(map[string]interface{}))
 			}
+			d.Set(key, data)
 		}
-		mongosList = append(mongosList, mongo)
-	}
-	err = d.Set("mongo_list", mongosList)
-	if err != nil {
-		return errmsgs.WrapError(err)
 	}
 
-	shardList := []map[string]interface{}{}
-	for _, item := range instance.ShardList.ShardAttribute {
-		shard := map[string]interface{}{
-			"node_id":      item.NodeId,
-			"node_storage": item.NodeStorage,
-			"node_class":   item.NodeClass,
+	if tdeInfo, err := ddsService.DescribeMongoDBTDEInfo(d.Id()); err != nil {
+		return errmsgs.WrapError(err)
+	} else {
+		if !(d.Get("tde_status") == "" && tdeInfo.TDEStatus == "disabled") {
+			d.Set("tde_status", tdeInfo.TDEStatus)
 		}
-		for _, data := range response.NetworkAddresses.NetworkAddress {
-			log.Printf("shardList data.NodeId:%s,item.NodeId:%s", data.NodeId, item.NodeId)
-			if data.NodeId == item.NodeId {
-				if data.NetworkType == "Public" {
-					shard["public_enable"] = true
-					shard["port_public"] = data.Port
-					shard["connect_string_public"] = strings.Split(data.NetworkAddress, ".")[0]
-				} else {
-					shard["private_enable"] = true
-					shard["port_private"] = data.Port
-					shard["connect_string_private"] = strings.Split(data.NetworkAddress, ".")[0]
-
-				}
-			}
-		}
-		shardList = append(shardList, shard)
 	}
-	err = d.Set("shard_list", shardList)
-	if err != nil {
+
+	if ips, err := ddsService.DescribeMongoDBSecurityIps(d.Id()); err != nil {
 		return errmsgs.WrapError(err)
+	} else {
+		d.Set("security_ip_list", ips)
 	}
-	configserver_list := []map[string]interface{}{}
-	for _, item := range instance.ConfigserverList.ConfigserverAttribute {
-		configserver := map[string]interface{}{
-			"node_id":      item.NodeId,
-			"node_storage": item.NodeStorage,
-			"node_class":   item.NodeClass,
-		}
-		for _, data := range response.NetworkAddresses.NetworkAddress {
-			log.Printf("configserver_list data.NodeId:%s,item.NodeId:%s", data.NodeId, item.NodeId)
-			if data.NodeId == item.NodeId {
-				if data.NetworkType == "Public" {
-					configserver["public_enable"] = true
-					configserver["port_public"] = data.Port
-					configserver["connect_string_public"] = strings.Split(data.NetworkAddress, ".")[0]
-				} else {
-					configserver["private_enable"] = true
-					configserver["port_private"] = data.Port
-					configserver["connect_string_private"] = strings.Split(data.NetworkAddress, ".")[0]
-
-				}
-			}
-		}
-		configserver_list = append(configserver_list, configserver)
-	}
-	err = d.Set("configserver_list", configserver_list)
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	tdeInfo, err := ddsService.DescribeMongoDBTDEInfo(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-
-	if !(d.Get("tde_status") == "" && tdeInfo.TDEStatus == "disabled") {
-		d.Set("tde_status", tdeInfo.TDEStatus)
-	}
-
-	ips, err := ddsService.DescribeMongoDBSecurityIps(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-
-	d.Set("security_ip_list", ips)
 	// 混合云不支持
 	//	groupIp, err := ddsService.DescribeMongoDBSecurityGroupId(d.Id())
 	//	if err != nil {
@@ -687,28 +612,28 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		//d.SetPartial("tde_status")
 	}
 
-//	if d.HasChange("security_group_id") {
-//		request := dds.CreateModifySecurityGroupConfigurationRequest()
-//		client.InitRpcRequest(*request.RpcRequest)
-//		request.DBInstanceId = d.Id()
-//		request.SecurityGroupId = d.Get("security_group_id").(string)
-//
-//		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
-//			return client.ModifySecurityGroupConfiguration(request)
-//		})
-//		if err != nil {
-//			errmsg := ""
-//			if raw != nil {
-//				response, ok := raw.(*dds.ModifySecurityGroupConfigurationResponse)
-//				if ok {
-//					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-//				}
-//			}
-//			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-//		}
-//		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-//		//d.SetPartial("security_group_id")
-//	}
+	//	if d.HasChange("security_group_id") {
+	//		request := dds.CreateModifySecurityGroupConfigurationRequest()
+	//		client.InitRpcRequest(*request.RpcRequest)
+	//		request.DBInstanceId = d.Id()
+	//		request.SecurityGroupId = d.Get("security_group_id").(string)
+	//
+	//		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+	//			return client.ModifySecurityGroupConfiguration(request)
+	//		})
+	//		if err != nil {
+	//			errmsg := ""
+	//			if raw != nil {
+	//				response, ok := raw.(*dds.ModifySecurityGroupConfigurationResponse)
+	//				if ok {
+	//					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
+	//				}
+	//			}
+	//			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	//		}
+	//		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	//		//d.SetPartial("security_group_id")
+	//	}
 
 	for _, param := range []string{"shard_list", "mongo_list", "configserver_list"} {
 		if d.HasChange(param) {

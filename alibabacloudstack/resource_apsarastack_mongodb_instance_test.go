@@ -123,7 +123,7 @@ func testSweepMongoDBInstances(region string) error {
 	return nil
 }
 
-func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
+func TestAccAlibabacloudStackMongoDBInstance_classicv3(t *testing.T) {
 	var v dds.DBInstance
 	resourceId := "alibabacloudstack_mongodb_instance.default"
 	serverFunc := func() interface{} {
@@ -134,7 +134,73 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 	rac := resourceAttrCheckInit(rc, ra)
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tfaccount%d", rand)
+	name := fmt.Sprintf("tf-accdbinstance%d", rand)
+
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBInstanceClassicBase(false))
+	testAccCheck := rac.resourceAttrMapUpdateSet()
+	ResourceTest(t, resource.TestCase{
+		PreCheck: func() {
+
+		},
+		IDRefreshName:     resourceId,
+		Providers:         testAccProviders,
+		ExternalProviders: testAccExternalProviders,
+		CheckDestroy:      testAccCheckMongoDBInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"zone_id":                 "${data.alibabacloudstack_zones.default.zones[0].id}",
+					"db_instance_description": "${var.name}",
+					"engine_version":          "3.4",
+					"db_instance_storage":     "10",
+					"db_instance_class":       "dds.mongo.mid",
+					"security_ip_list":                      []string{"192.168.1.1"},
+					"primary_connect_string_private_prefix": name+"-ppr",
+					"primary_connect_port_private":          3777,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"engine_version":                        "3.4",
+						"db_instance_storage":                   "10",
+						"db_instance_class":                     "dds.mongo.mid",
+						"db_instance_description":               name,
+						"storage_engine":                        "WiredTiger",
+						"instance_charge_type":                  "PostPaid",
+						"replication_factor":                    "3",
+						"primary_connect_string_private_prefix": name+"-ppr",
+						"primary_connect_port_private":          "3777",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable_public_connection":               true,
+					"secondary_connect_string_public_prefix": name+"-spu",
+					"secondary_connect_port_public":          3778,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"enable_public_connection":               "true",
+						"secondary_connect_string_public_prefix": name+"-spu",
+						"secondary_connect_port_public":          "3778",
+					})),
+			},
+		},
+	})
+}
+
+func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
+	var v dds.DBInstance
+	resourceId := "alibabacloudstack_mongodb_instance.default"
+	serverFunc := func() interface{} {
+		return &MongoDBService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+	}
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
+	ra := resourceAttrInit(resourceId, nil)
+	rac := resourceAttrCheckInit(rc, ra)
+
+	rand := getAccTestRandInt(10000, 99999)
+	name := fmt.Sprintf("tf-accdbinstance%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBInstanceClassicBase(true))
 	testAccCheck := rac.resourceAttrMapUpdateSet()
@@ -159,19 +225,20 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 						"role_type": "db",
 						"filters":   []string{"update", "delete"},
 					}},
-					"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
+					"security_ip_list":                      []string{"192.168.1.1"},
+					"vswitch_id":                            "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine_version":          "4.0",
-						"db_instance_storage":     "10",
-						"db_instance_class":       "dds.mongo.mid",
-						"db_instance_description": name,
-						"storage_engine":          "WiredTiger",
-						"instance_charge_type":    "PostPaid",
-						"replication_factor":      "3",
-						"audit_status":            "Enable",
-						"audit_filter.#":          "1",
+						"engine_version":                        "4.0",
+						"db_instance_storage":                   "10",
+						"db_instance_class":                     "dds.mongo.mid",
+						"db_instance_description":               name,
+						"storage_engine":                        "WiredTiger",
+						"instance_charge_type":                  "PostPaid",
+						"replication_factor":                    "3",
+						"audit_status":                          "Enable",
+						"audit_filter.#":                        "1",
 					}),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						resourceId,
@@ -192,6 +259,15 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 						"delete",
 					),
 				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable_public_connection":               true,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"enable_public_connection":               "true",
+					})),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -234,7 +310,6 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ssl_action"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -267,32 +342,32 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 					}),
 				),
 			},
-//			{
-//				Config: testAccConfig(map[string]interface{}{
-//					"tags": map[string]string{
-//						"Created": "TF",
-//						"For":     "acceptance test",
-//					},
-//				}),
-//				Check: resource.ComposeTestCheckFunc(
-//					testAccCheck(map[string]string{
-//						"tags.%":       "2",
-//						"tags.Created": "TF",
-//						"tags.For":     "acceptance test",
-//					}),
-//				),
-//			},
+			//			{
+			//				Config: testAccConfig(map[string]interface{}{
+			//					"tags": map[string]string{
+			//						"Created": "TF",
+			//						"For":     "acceptance test",
+			//					},
+			//				}),
+			//				Check: resource.ComposeTestCheckFunc(
+			//					testAccCheck(map[string]string{
+			//						"tags.%":       "2",
+			//						"tags.Created": "TF",
+			//						"tags.For":     "acceptance test",
+			//					}),
+			//				),
+			//			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"db_instance_description": "tf-testAccMongoDBInstance_test",
-//					"tags":                    REMOVEKEY,
+					//					"tags":                    REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"db_instance_description": "tf-testAccMongoDBInstance_test",
-//						"tags.%":                  REMOVEKEY,
-//						"tags.Created":            REMOVEKEY,
-//						"tags.For":                REMOVEKEY,
+						//						"tags.%":                  REMOVEKEY,
+						//						"tags.Created":            REMOVEKEY,
+						//						"tags.For":                REMOVEKEY,
 					}),
 				),
 			},
@@ -374,6 +449,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 		},
 	})
 }
+
 
 func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 	var v dds.DBInstance
@@ -484,6 +560,8 @@ func testMongoDBInstanceClassicBase(enableVpc bool) func(string) string {
 	var vpcString string
 	if enableVpc {
 		vpcString = VSwitchCommonTestCase
+	} else {
+		vpcString = DataZoneCommonTestCase
 	}
 	return func(name string) string {
 		return fmt.Sprintf(`

@@ -97,11 +97,11 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Computed: true,
 				Optional: true,
 			},
-//			"security_group_id": {
-//				Type:     schema.TypeString,
-//				Computed: true,
-//				Optional: true,
-//			},
+			//			"security_group_id": {
+			//				Type:     schema.TypeString,
+			//				Computed: true,
+			//				Optional: true,
+			//			},
 			"account_password": {
 				Type:      schema.TypeString,
 				Optional:  true,
@@ -186,8 +186,8 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-// need ascm api
-//			"tags": tagsSchema(),
+			// need ascm api
+			//			"tags": tagsSchema(),
 			"audit_status": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -195,6 +195,71 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Enable", "Disabled"}, false),
 			},
 			"audit_filter": auditFilterSchema([]string{"db"}),
+			"enable_public_connection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"primary_connect_string_public_prefix": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateShardeNodeConnectionString(),
+			},
+			"primary_connect_string_private_prefix": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateShardeNodeConnectionString(),
+			},
+			"primary_connect_string_public": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"primary_connect_string_private": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"primary_connect_port_public": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			"primary_connect_port_private": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			"secondary_connect_string_public_prefix": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateShardeNodeConnectionString(),
+			},
+			"secondary_connect_string_private_prefix": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validateShardeNodeConnectionString(),
+			},
+			"secondary_connect_string_public": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"secondary_connect_string_private": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"secondary_connect_port_public": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
+			"secondary_connect_port_private": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackMongoDBInstanceCreate, resourceAlibabacloudStackMongoDBInstanceRead, resourceAlibabacloudStackMongoDBInstanceUpdate, resourceAlibabacloudStackMongoDBInstanceDelete)
@@ -307,67 +372,67 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
 
-	instance, err := ddsService.DescribeMongoDBInstance(d.Id())
-	if err != nil {
+	if instance, err := ddsService.DescribeMongoDBInstance(d.Id()); err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
-	}
+	} else {
 
-	backupPolicy, err := ddsService.DescribeMongoDBBackupPolicy(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	connectivity.SetResourceData(d, backupPolicy.PreferredBackupTime, "preferred_backup_time", "backup_time")
-	connectivity.SetResourceData(d, strings.Split(backupPolicy.PreferredBackupPeriod, ","), "preferred_backup_period", "backup_period")
-	retention_period, _ := strconv.Atoi(backupPolicy.BackupRetentionPeriod)
-	d.Set("retention_period", retention_period)
-
-	ips, err := ddsService.DescribeMongoDBSecurityIps(d.Id())
-	if err != nil {
-		return errmsgs.WrapError(err)
-	}
-	d.Set("security_ip_list", ips)
-
-	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "name")
-	d.Set("engine_version", instance.EngineVersion)
-	d.Set("db_instance_class", instance.DBInstanceClass)
-	d.Set("db_instance_storage", instance.DBInstanceStorage)
-	d.Set("zone_id", instance.ZoneId)
-	d.Set("instance_charge_type", instance.ChargeType)
-	if instance.ChargeType == "PrePaid" {
-		period, err := computePeriodByUnit(instance.CreationTime, instance.ExpireTime, d.Get("period").(int), "Month")
-		if err != nil {
-			return errmsgs.WrapError(err)
+		connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "name")
+		d.Set("engine_version", instance.EngineVersion)
+		d.Set("db_instance_class", instance.DBInstanceClass)
+		d.Set("db_instance_storage", instance.DBInstanceStorage)
+		d.Set("zone_id", instance.ZoneId)
+		d.Set("instance_charge_type", instance.ChargeType)
+		if instance.ChargeType == "PrePaid" {
+			period, err := computePeriodByUnit(instance.CreationTime, instance.ExpireTime, d.Get("period").(int), "Month")
+			if err != nil {
+				return errmsgs.WrapError(err)
+			}
+			d.Set("period", period)
 		}
-		d.Set("period", period)
+		d.Set("vswitch_id", instance.VSwitchId)
+		d.Set("storage_engine", instance.StorageEngine)
+		d.Set("maintain_start_time", instance.MaintainStartTime)
+		d.Set("maintain_end_time", instance.MaintainEndTime)
+		d.Set("replica_set_name", instance.ReplicaSetName)
+		if replication_factor, err := strconv.Atoi(instance.ReplicationFactor); err == nil {
+			d.Set("replication_factor", replication_factor)
+		}
 	}
-	d.Set("vswitch_id", instance.VSwitchId)
-	d.Set("storage_engine", instance.StorageEngine)
-	d.Set("maintain_start_time", instance.MaintainStartTime)
-	d.Set("maintain_end_time", instance.MaintainEndTime)
-	d.Set("replica_set_name", instance.ReplicaSetName)
 
-	sslAction, err := ddsService.DescribeDBInstanceSSL(d.Id())
-	if err != nil {
+	if backupPolicy, err := ddsService.DescribeMongoDBBackupPolicy(d.Id()); err != nil {
 		return errmsgs.WrapError(err)
+	} else {
+		connectivity.SetResourceData(d, backupPolicy.PreferredBackupTime, "preferred_backup_time", "backup_time")
+		connectivity.SetResourceData(d, strings.Split(backupPolicy.PreferredBackupPeriod, ","), "preferred_backup_period", "backup_period")
+		retention_period, _ := strconv.Atoi(backupPolicy.BackupRetentionPeriod)
+		d.Set("retention_period", retention_period)
 	}
-	d.Set("ssl_status", sslAction.SSLStatus)
 
-	if replication_factor, err := strconv.Atoi(instance.ReplicationFactor); err == nil {
-		d.Set("replication_factor", replication_factor)
-	}
-	tdeInfo, err := ddsService.DescribeMongoDBTDEInfo(d.Id())
-	if err != nil {
+	if ips, err := ddsService.DescribeMongoDBSecurityIps(d.Id()); err != nil {
 		return errmsgs.WrapError(err)
-	}
-	if !(d.Get("tde_status") == "" && tdeInfo.TDEStatus == "disabled") {
-		d.Set("tde_status", tdeInfo.TDEStatus)
+	} else {
+		d.Set("security_ip_list", ips)
 	}
 
-//	d.Set("tags", ddsService.tagsInAttributeToMap(instance.Tags.Tag))
+	if sslAction, err := ddsService.DescribeDBInstanceSSL(d.Id()); err != nil {
+		return errmsgs.WrapError(err)
+	} else {
+		d.Set("ssl_status", sslAction.SSLStatus)
+	}
+
+	if tdeInfo, err := ddsService.DescribeMongoDBTDEInfo(d.Id()); err != nil {
+		return errmsgs.WrapError(err)
+	} else {
+		if !(d.Get("tde_status") == "" && tdeInfo.TDEStatus == "disabled") {
+			d.Set("tde_status", tdeInfo.TDEStatus)
+		}
+	}
+
+	//	d.Set("tags", ddsService.tagsInAttributeToMap(instance.Tags.Tag))
 
 	if response, err := ddsService.DoDdsDescribeauditpolicyRequest(d.Id()); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_auditpolicy", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -380,12 +445,44 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 	} else {
 		d.Set("audit_filter", auditFilters)
 	}
+
+	if response, err := client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeReplicaSetRole", "", nil, map[string]interface{}{"DBInstanceId": d.Id()}, nil); err != nil {
+		return err
+	} else {
+		enablePublicConnection := false
+		for _, v := range response["ReplicaSets"].(map[string]interface{})["ReplicaSet"].([]interface{}) {
+			data := v.(map[string]interface{})
+			port, err := strconv.Atoi(data["ConnectionPort"].(string))
+			if err != nil {
+				return err
+			}
+			var suffix, prefix string
+			if data["NetworkType"].(string) == "Public" {
+				enablePublicConnection = true
+				suffix = "public"
+			} else {
+				suffix = "private"
+			}
+			if data["ReplicaSetRole"].(string) == "Primary" {
+				prefix = "primary"
+			} else {
+				prefix = "secondary"
+			}
+			parts := strings.Split(data["ConnectionDomain"].(string), ".")
+			d.Set(prefix+"_connect_string_"+suffix+"_prefix", parts[0])
+			d.Set(prefix+"_connect_string_"+suffix, data["ConnectionDomain"])
+			d.Set(prefix+"_connect_port_"+suffix, port)
+		}
+		d.Set("enable_public_connection", enablePublicConnection)
+	}
+
 	return nil
 }
 
 func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
+	stateConf := BuildStateConf(MongoDBChangingStatus, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 
 	if d.HasChanges("audit_status") && d.Get("audit_status").(string) != "" {
 		request := client.NewCommonRequest("POST", "Dds", "2015-12-01", "ModifyAuditPolicy", "")
@@ -431,7 +528,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		}
 		addDebug(prePaidRequest.GetActionName(), raw, prePaidRequest.RpcRequest, prePaidRequest)
 		// wait instance status is running after modifying
-		stateConf := BuildStateConf([]string{"DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 0, ddsService.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -509,9 +605,111 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		//d.SetPartial("security_group_id")
 	}
 
-//	if err := ddsService.setInstanceTags(d); err != nil {
-//		return errmsgs.WrapError(err)
-//	}
+	//	if err := ddsService.setInstanceTags(d); err != nil {
+	//		return errmsgs.WrapError(err)
+	//	}
+
+	if d.HasChange("ssl_action") {
+		request := dds.CreateModifyDBInstanceSSLRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+		request.DBInstanceId = d.Id()
+		request.SSLAction = d.Get("ssl_action").(string)
+
+		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
+			return ddsClient.ModifyDBInstanceSSL(request)
+		})
+
+		if err != nil {
+			errmsg := ""
+			if bresponse, ok := raw.(*dds.ModifyDBInstanceSSLResponse); ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+		//d.SetPartial("ssl_action")
+	}
+
+	oldConnectionString := map[string]map[string]string{
+		"primary":   {"public": "", "private": ""},
+		"secondary": {"public": "", "private": ""},
+	}
+	enablePublicConnection := false
+	if response, err := client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeReplicaSetRole", "", nil, map[string]interface{}{"DBInstanceId": d.Id()}, nil); err != nil {
+		return err
+	} else {
+		for _, v := range response["ReplicaSets"].(map[string]interface{})["ReplicaSet"].([]interface{}) {
+			data := v.(map[string]interface{})
+			if data["NetworkType"].(string) == "Public" {
+				enablePublicConnection = true
+				break
+			}
+		}
+	}
+	if d.Get("enable_public_connection").(bool) != enablePublicConnection {
+		var actionName string
+		if d.Get("enable_public_connection").(bool) {
+			actionName = "AllocatePublicNetworkAddress"
+		} else {
+			actionName = "ReleasePublicNetworkAddress"
+		}
+		if _, err := client.DoTeaRequest("POST", "Dds", "2015-12-01", actionName, "", nil, map[string]interface{}{"DBInstanceId": d.Id()}, nil); err != nil {
+			return err
+		}
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapError(err)
+		}
+	}
+	if response, err := client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeReplicaSetRole", "", nil, map[string]interface{}{"DBInstanceId": d.Id()}, nil); err != nil {
+		return err
+	} else {
+		for _, v := range response["ReplicaSets"].(map[string]interface{})["ReplicaSet"].([]interface{}) {
+			data := v.(map[string]interface{})
+			var suffix, prefix string
+			if data["NetworkType"].(string) == "Public" {
+				suffix = "public"
+			} else {
+				suffix = "private"
+			}
+			if data["ReplicaSetRole"].(string) == "Primary" {
+				prefix = "primary"
+			} else {
+				prefix = "secondary"
+			}
+			oldConnectionString[prefix][suffix] = data["ConnectionDomain"].(string)
+		}
+	}
+	connectionChanged := false
+	for _, prefix := range []string{"primary", "secondary"} {
+		for _, suffix := range []string{"public", "private"} {
+			if d.HasChanges(prefix+"_connect_string_"+suffix+"_prefix", prefix+"_connect_port_"+suffix) {
+				if oldConnectionString[prefix][suffix] == "" {
+					return fmt.Errorf("%s_connect_string_%s lost old config",prefix, suffix)
+				}
+				connectionChanged =true
+				oldPort, newPort := d.GetChange(prefix + "_connect_port_" + suffix)
+				reqQuery := map[string]interface{}{
+					"DBInstanceId":            d.Id(),
+					"NodeId":                  nil,
+					"NewConnectionString":     d.Get(prefix + "_connect_string_" + suffix + "_prefix"),
+					"CurrentConnectionString": oldConnectionString[prefix][suffix],
+					"NewPort":                 newPort,
+					"OldPort":                 oldPort,
+				}
+				if _, err := client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil); err != nil {
+					return err
+				}
+
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapError(err)
+				}
+			}
+		}
+	}
+	if connectionChanged {
+		// wait primary and secondary switch
+		time.Sleep(15*time.Second)
+	}
 
 	if d.IsNewResource() {
 		return nil
@@ -571,27 +769,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
-	}
-
-	if d.HasChange("ssl_action") {
-		request := dds.CreateModifyDBInstanceSSLRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.DBInstanceId = d.Id()
-		request.SSLAction = d.Get("ssl_action").(string)
-
-		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-			return ddsClient.ModifyDBInstanceSSL(request)
-		})
-
-		if err != nil {
-			errmsg := ""
-			if bresponse, ok := raw.(*dds.ModifyDBInstanceSSLResponse); ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		//d.SetPartial("ssl_action")
 	}
 
 	if d.HasChange("db_instance_storage") ||

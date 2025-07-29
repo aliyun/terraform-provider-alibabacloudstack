@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -19,9 +20,21 @@ const (
 )
 
 var (
-MongoDBChangingStatus = []string{"NodeCreating", "NodeDeleting", "DBInstanceClassChanging", 
+MongoDBChangingStatus = []string{"NodeCreating", "NodeDeleting", "DBInstanceClassChanging", "DBInstanceNetTypeChanging",
 	"NET_DELETING", "NET_CREATING", "NET_MODIFYING", "TDEModifying", "CONFIG_SWITCHING"}
 )
+
+func validateShardeNodeDescription() schema.SchemaValidateFunc{
+	regex := regexp.MustCompile(`^[\p{L}_-][\w\p{L}-]{1,255}$`)
+	errmesg :="The value must be 2 to 256 characters in length, and can contain letters, digits, underscores (_), and hyphen (-). It must start with a letter, and cannot start with http:// or https://."
+	return validation.StringMatch(regex, errmesg)
+}
+
+func validateShardeNodeConnectionString() schema.SchemaValidateFunc{
+	regex := regexp.MustCompile(`^[a-z]([a-z0-9-]{6,62})[a-z0-9]$`)
+	errmesg :="The connection string must be 8 to 64 characters in length and can contain lowercase letters, digits, and hyphens (-). It must start with a lowercase letter and end with a lowercase letter or digit."
+	return validation.StringMatch(regex, errmesg)
+}
 
 func auditFilterSchema(availableRoleType []string) *schema.Schema {
 	return &schema.Schema{
