@@ -186,7 +186,8 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"tags": tagsSchema(),
+// need ascm api
+//			"tags": tagsSchema(),
 			"audit_status": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -366,7 +367,7 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 		d.Set("tde_status", tdeInfo.TDEStatus)
 	}
 
-	d.Set("tags", ddsService.tagsInAttributeToMap(instance.Tags.Tag))
+//	d.Set("tags", ddsService.tagsInAttributeToMap(instance.Tags.Tag))
 
 	if response, err := ddsService.DoDdsDescribeauditpolicyRequest(d.Id()); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_auditpolicy", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -508,9 +509,9 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		//d.SetPartial("security_group_id")
 	}
 
-	if err := ddsService.setInstanceTags(d); err != nil {
-		return errmsgs.WrapError(err)
-	}
+//	if err := ddsService.setInstanceTags(d); err != nil {
+//		return errmsgs.WrapError(err)
+//	}
 
 	if d.IsNewResource() {
 		return nil

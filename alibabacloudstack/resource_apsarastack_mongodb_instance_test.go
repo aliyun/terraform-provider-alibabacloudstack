@@ -267,32 +267,32 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 					}),
 				),
 			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"tags": map[string]string{
-						"Created": "TF",
-						"For":     "acceptance test",
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"tags.%":       "2",
-						"tags.Created": "TF",
-						"tags.For":     "acceptance test",
-					}),
-				),
-			},
+//			{
+//				Config: testAccConfig(map[string]interface{}{
+//					"tags": map[string]string{
+//						"Created": "TF",
+//						"For":     "acceptance test",
+//					},
+//				}),
+//				Check: resource.ComposeTestCheckFunc(
+//					testAccCheck(map[string]string{
+//						"tags.%":       "2",
+//						"tags.Created": "TF",
+//						"tags.For":     "acceptance test",
+//					}),
+//				),
+//			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"db_instance_description": "tf-testAccMongoDBInstance_test",
-					"tags":                    REMOVEKEY,
+//					"tags":                    REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"db_instance_description": "tf-testAccMongoDBInstance_test",
-						"tags.%":                  REMOVEKEY,
-						"tags.Created":            REMOVEKEY,
-						"tags.For":                REMOVEKEY,
+//						"tags.%":                  REMOVEKEY,
+//						"tags.Created":            REMOVEKEY,
+//						"tags.For":                REMOVEKEY,
 					}),
 				),
 			},

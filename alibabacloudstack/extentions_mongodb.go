@@ -18,6 +18,11 @@ const (
 	MongoDBShardingNodeCs     = MongoDBShardingNodeType("configserver")
 )
 
+var (
+MongoDBChangingStatus = []string{"NodeCreating", "NodeDeleting", "DBInstanceClassChanging", 
+	"NET_DELETING", "NET_CREATING", "NET_MODIFYING", "TDEModifying", "CONFIG_SWITCHING"}
+)
+
 func auditFilterSchema(availableRoleType []string) *schema.Schema {
 	return &schema.Schema{
 		Type: schema.TypeSet,
