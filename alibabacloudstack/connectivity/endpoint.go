@@ -350,6 +350,11 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 		"dncs-api.console.{{.region}}.{{.domain}}",
 		"dncs-api.console.{{.region}}.{{.domain}}",
 	},
+	//cbn endpoint
+	CbnCode: PopEndpoint{
+		"cbn.{{.domain}}",
+		"cbn.{{.region}}.{{.domain}}",
+	},
 	// 3.18.3新局点将不会开放
 	OneRouterCode: PopEndpoint{
 		"public.asapi.{{.region}}.{{.domain}}",
