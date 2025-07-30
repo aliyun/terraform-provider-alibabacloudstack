@@ -15,7 +15,7 @@ description: |-
 ## 示例用法
 
 ```hcl
-data "alibabacloudstack_zones" default {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
   enable_details             = true
 }

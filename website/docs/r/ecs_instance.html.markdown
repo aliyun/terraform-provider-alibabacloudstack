@@ -15,7 +15,7 @@ Provides a ecs Instance resource.
 ## Example Usage
 
 ```hcl
-data "alibabacloudstack_zones" default {
+data "alibabacloudstack_zones" "default" {
   available_resource_creation = "VSwitch"
   enable_details             = true
 }

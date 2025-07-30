@@ -264,6 +264,12 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Computed: true,
 				MinItems: 2,
 				MaxItems: 2,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					if ! d.Get("enable_public_connection").(bool) {
+						return true
+					}
+					return oldValue == newValue
+				},
 			},
 		},
 	}
@@ -701,7 +707,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		ddsService.UpdateInstanceConnection(d.Id(), existedPrivateConnections, targetConnections)
 	}
 
-	if v, ok := d.GetOk("private_connections"); ok && d.Get("enable_public_connection").(bool) {
+	if v, ok := d.GetOk("public_connections"); ok && d.Get("enable_public_connection").(bool) {
 		targetConnections := map[string]map[string]interface{}{}
 		for _, item := range v.(*schema.Set).List() {
 			info := item.(map[string]interface{})
