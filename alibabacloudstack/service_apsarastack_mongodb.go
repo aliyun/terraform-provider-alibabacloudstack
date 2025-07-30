@@ -12,6 +12,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
@@ -350,116 +351,6 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				}
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceID, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
-			if _, err := stateConf.WaitForState(); err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-			}
-		}
-
-		if param == "mongo_list" && newNode["private_connect_string_prefix"].(string) != "" && (newNode["private_connect_string_prefix"].(string) != oldNode["private_connect_string_prefix"].(string) ||
-			newNode["private_connect_port"].(int) != oldNode["private_connect_port"].(int)) {
-			// mongos connect_string_private_prefix changed
-			reqQuery := map[string]interface{}{
-				"DBInstanceId":            d.Id(),
-				"NodeId":                  oldNode["node_id"].(string),
-				"NewConnectionString":     newNode["private_connect_string_prefix"],
-				"CurrentConnectionString": oldNode["private_connect_string"],
-				"NewPort":                 newNode["private_connect_port"],
-				"OldPort":                 oldNode["private_connect_port"],
-			}
-			if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil); err != nil {
-				return err
-			}
-			if _, err := stateConf.WaitForState(); err != nil {
-				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-			}
-		}
-
-		if param != "mongo_list" && newNode["enable_private_connection"].(bool) != oldNode["enable_private_connection"].(bool) {
-			if newNode["enable_private_connection"] == true {
-				reqQuery := map[string]interface{}{
-					"DBInstanceId": d.Id(),
-					"NodeId":       oldNode["node_id"].(string),
-					"ZoneId":       d.Get("zone_id").(string),
-				}
-				if newNode["account_name"].(string) != "" {
-					if newNode["account_password"].(string) == "" {
-						return fmt.Errorf("account_password can not be empty while account_name is set")
-					}
-					reqQuery["AccountName"] = newNode["account_name"].(string)
-					reqQuery["AccountPassword"] = newNode["account_password"].(string)
-				}
-				if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "AllocateNodePrivateNetworkAddress", "", nil, reqQuery, nil); err != nil {
-					return err
-				}
-
-				if _, err := stateConf.WaitForState(); err != nil {
-					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-				}
-			} else if oldNode["private_connect_string"].(string) != "" {
-				reqQuery := map[string]interface{}{
-					"DBInstanceId": d.Id(),
-					"NodeId":       oldNode["node_id"].(string),
-				}
-				if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ReleaseNodePrivateNetworkAddress", "", nil, reqQuery, nil); err != nil {
-					return err
-				}
-
-				if _, err := stateConf.WaitForState(); err != nil {
-					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-				}
-			}
-		}
-
-		if newNode["enable_public_connection"].(bool) != oldNode["enable_public_connection"].(bool) {
-			if newNode["enable_public_connection"] == true {
-				reqQuery := map[string]interface{}{
-					"DBInstanceId": d.Id(),
-					"NodeId":       oldNode["node_id"].(string),
-				}
-				if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "AllocatePublicNetworkAddress", "", nil, reqQuery, nil); err != nil {
-					return err
-				}
-
-				if _, err := stateConf.WaitForState(); err != nil {
-					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-				}
-
-				if response, err := server.DdsDescribeShardingInstanceNodes(instanceID); err != nil {
-					return err
-				} else {
-					oldMap = response[param]
-					oldNode = oldMap[key].(map[string]interface{})
-				}
-
-			} else if oldNode["public_connect_string"].(string) != "" {
-				reqQuery := map[string]interface{}{
-					"DBInstanceId": d.Id(),
-					"NodeId":       oldNode["node_id"].(string),
-				}
-				if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ReleasePublicNetworkAddress", "", nil, reqQuery, nil); err != nil {
-					return err
-				}
-
-				if _, err := stateConf.WaitForState(); err != nil {
-					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-				}
-			}
-		}
-
-		if param == "mongo_list" && newNode["enable_public_connection"].(bool) && newNode["public_connect_string_prefix"].(string) != "" &&
-			(!oldNode["enable_public_connection"].(bool) || newNode["public_connect_string_prefix"].(string) != oldNode["public_connect_string_prefix"].(string) ||
-				newNode["public_connect_port"].(int) != oldNode["public_connect_port"].(int)) {
-			reqQuery := map[string]interface{}{
-				"DBInstanceId":            d.Id(),
-				"NodeId":                  oldNode["node_id"].(string),
-				"NewConnectionString":     newNode["public_connect_string_prefix"],
-				"CurrentConnectionString": oldNode["public_connect_string"],
-				"NewPort":                 newNode["public_connect_port"],
-				"OldPort":                 oldNode["public_connect_port"],
-			}
-			if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil); err != nil {
-				return err
 			}
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -1120,81 +1011,30 @@ func (s *MongoDBService) DdsDescribeShardingInstanceNodes(id string) (map[string
 		"configserver_list": {},
 	}
 
-	typeMap := map[string]string{
-		"mongos": "mongo_list",
-		"db":     "shard_list",
-		"cs":     "configserver_list",
-	}
-
 	if response, err := s.DescribeMongoDBInstance(id); err != nil {
 		return result, err
 	} else {
 		for _, node := range response.MongosList.MongosAttribute {
 			result["mongo_list"][node.NodeDescription] = map[string]interface{}{
-				"node_class":    node.NodeClass,
-				"node_id":       node.NodeId,
-				"description":   node.NodeDescription,
-				"enable_public_connection": false,
+				"node_class":               node.NodeClass,
+				"node_id":                  node.NodeId,
+				"description":              node.NodeDescription,
 			}
 		}
 		for _, node := range response.ShardList.ShardAttribute {
 			result["shard_list"][node.NodeDescription] = map[string]interface{}{
-				"node_class":     node.NodeClass,
-				"node_id":        node.NodeId,
-				"description":    node.NodeDescription,
-				"node_storage":   node.NodeStorage,
-				"enable_public_connection":  false,
-				"enable_private_connection": false,
+				"node_class":                node.NodeClass,
+				"node_id":                   node.NodeId,
+				"description":               node.NodeDescription,
+				"node_storage":              node.NodeStorage,
 			}
 		}
 		for _, node := range response.ConfigserverList.ConfigserverAttribute {
 			result["configserver_list"][node.NodeDescription] = map[string]interface{}{
-				"node_class":     node.NodeClass,
-				"node_id":        node.NodeId,
-				"description":    node.NodeDescription,
-				"node_storage":   node.NodeStorage,
-				"enable_public_connection":  false,
-				"enable_private_connection": false,
-			}
-		}
-	}
-
-	reqQuery := map[string]interface{}{"DBInstanceId": id}
-	if response, err := s.client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeShardingNetworkAddress", "", nil, reqQuery, nil); err != nil {
-		return result, err
-	} else {
-		for _, v := range response["NetworkAddresses"].(map[string]interface{})["NetworkAddress"].([]interface{}) {
-			address := v.(map[string]interface{})
-			nodeType := typeMap[address["NodeType"].(string)]
-			nodes := result[nodeType]
-			for _, v := range nodes {
-				node := v.(map[string]interface{})
-				if node["node_id"].(string) != address["NodeId"].(string) {
-					continue
-				}
-				port, err := strconv.Atoi(address["Port"].(string))
-				if err != nil {
-					return result, err
-				}
-				networkAddres := address["NetworkAddress"].(string)
-				if address["NetworkType"] == "Public" {
-					node["enable_public_connection"] = true
-					if nodeType == "mongo_list" {
-						parts := strings.Split(networkAddres, ".")
-						node["public_connect_string_prefix"] = parts[0]
-					}
-					node["public_connect_string"] = address["NetworkAddress"].(string)
-					node["public_connect_port"] = port
-				} else {
-					if nodeType != "mongo_list" {
-						node["enable_private_connection"] = true
-					} else {
-						parts := strings.Split(networkAddres, ".")
-						node["private_connect_string_prefix"] = parts[0]
-					}
-					node["private_connect_string"] = networkAddres
-					node["private_connect_port"] = port
-				}
+				"node_class":                node.NodeClass,
+				"node_id":                   node.NodeId,
+				"description":               node.NodeDescription,
+				"node_storage":              node.NodeStorage,
 			}
 		}
 	}
@@ -1202,8 +1042,48 @@ func (s *MongoDBService) DdsDescribeShardingInstanceNodes(id string) (map[string
 	return result, nil
 }
 
+func (s *MongoDBService) DescribeShardingInstanceNode(id string) (map[string]interface{}, error) {
+	
+	result := map[string]interface{}{
+		"enable_public_connection" : false,
+		"enable_private_connection": false,
+	}
+	
+	parts := strings.SplitN(id, ":",2)
+	instanceId := parts[0]
+	nodeId :=parts[1]
+	
+	reqQuery := map[string]interface{}{"DBInstanceId": instanceId}
+	if response, err := s.client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeShardingNetworkAddress", "", nil, reqQuery, nil); err != nil {
+		return nil, err
+	} else {
+		for _, v := range response["NetworkAddresses"].(map[string]interface{})["NetworkAddress"].([]interface{}) {
+			address := v.(map[string]interface{})
+			if address["NodeId"].(string) != nodeId {
+				continue
+			}
+			port , err := strconv.Atoi(address["Port"].(string))
+			if err != nil {
+				return nil, err
+			}
+			if address["NetworkType"].(string) == "Public" {
+				result["enable_public_connection"] = true
+				result["public_connect_string"] = address["NetworkAddress"].(string)
+				result["public_connect_port"] = port
+			} else {
+				result["enable_private_connection"] = true
+				result["private_connect_string"] = address["NetworkAddress"].(string)
+				result["private_connect_port"] = port
+			}
+			
+		}
+	}
+
+	return result, nil
+}
+
+
 func (s *MongoDBService) UpdateInstanceConnection(id string, existedConnections, targetConnections map[string]map[string]interface{}) error {
-	stateConf := BuildStateConf(MongoDBChangingStatus, []string{"Running"}, 10*time.Minute, 10*time.Second, s.RdsMongodbDBInstanceStateRefreshFunc(id, []string{"Deleting"}))
 	updatedList1 := []map[string]interface{}{}
 	updatedList2 := []map[string]interface{}{}
 	for key, v := range targetConnections {
@@ -1222,7 +1102,7 @@ func (s *MongoDBService) UpdateInstanceConnection(id string, existedConnections,
 		return fmt.Errorf("The items to be updated are inconsistent")
 	}
 
-	for index:= range updatedList1 {
+	for index := range updatedList1 {
 		targetConnection := updatedList1[index]
 		existedConnection := updatedList2[index]
 		reqQuery := map[string]interface{}{
@@ -1233,13 +1113,36 @@ func (s *MongoDBService) UpdateInstanceConnection(id string, existedConnections,
 			"NewPort":                 targetConnection["connect_port"],
 			"OldPort":                 existedConnection["connect_port"],
 		}
-		if _, err := s.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil); err != nil {
-			return err
+		s.ModifyDBInstanceConnectionString(reqQuery)
+	}
+	return nil
+}
+
+func (s *MongoDBService) ModifyDBInstanceConnectionString(reqQuery map[string]interface{}) error {
+	id := reqQuery["DBInstanceId"].(string)
+	stateConf := BuildStateConf(MongoDBChangingStatus, []string{"Running"}, 10*time.Minute, 10*time.Second, s.RdsMongodbDBInstanceStateRefreshFunc(id, []string{"Deleting"}))
+
+	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
+		_, err := s.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil)
+
+		if err == nil {
+			return nil
 		}
 
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapError(err)
+		if sdkError, ok := err.(*tea.SDKError); ok && *sdkError.Code == "OperationDenied.DBInstanceStatus" {
+			time.Sleep(10 * time.Second)
+			return resource.RetryableError(err)
 		}
+
+		return resource.NonRetryableError(err)
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, id)
 	}
 	return nil
 }
