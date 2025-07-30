@@ -84,7 +84,7 @@ func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInst
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	if bresponse == nil || len(bresponse.DBInstances.DBInstance) == 0 {
-		return instance, errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("MongoDB Instance", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		return instance, errmsgs.WrapErrorf(errmsgs.GetNotFoundErrorFromString(errmsgs.GetNotFoundMessage("MongoDB Instance", id)), errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return bresponse.DBInstances.DBInstance[0], nil
 }
@@ -378,9 +378,9 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 		if param != "mongo_list" && newNode["private_enable"].(bool) != oldNode["private_enable"].(bool) {
 			if newNode["private_enable"] == true {
 				reqQuery := map[string]interface{}{
-					"DBInstanceId":    d.Id(),
-					"NodeId":          oldNode["node_id"].(string),
-					"ZoneId":          d.Get("zone_id").(string),
+					"DBInstanceId": d.Id(),
+					"NodeId":       oldNode["node_id"].(string),
+					"ZoneId":       d.Get("zone_id").(string),
 				}
 				if newNode["account_name"].(string) != "" {
 					if newNode["account_password"].(string) == "" {
@@ -424,14 +424,14 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 				if _, err := stateConf.WaitForState(); err != nil {
 					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 				}
-				
+
 				if response, err := server.DdsDescribeShardingInstanceNodes(instanceID); err != nil {
 					return err
 				} else {
 					oldMap = response[param]
 					oldNode = oldMap[key].(map[string]interface{})
 				}
-				
+
 			} else if oldNode["connect_string_public"].(string) != "" {
 				reqQuery := map[string]interface{}{
 					"DBInstanceId": d.Id(),
@@ -1200,4 +1200,46 @@ func (s *MongoDBService) DdsDescribeShardingInstanceNodes(id string) (map[string
 	}
 
 	return result, nil
+}
+
+func (s *MongoDBService) UpdateInstanceConnection(id string, existedConnections, targetConnections map[string]map[string]interface{}) error {
+	stateConf := BuildStateConf(MongoDBChangingStatus, []string{"Running"}, 10*time.Minute, 10*time.Second, s.RdsMongodbDBInstanceStateRefreshFunc(id, []string{"Deleting"}))
+	updatedList1 := []map[string]interface{}{}
+	updatedList2 := []map[string]interface{}{}
+	for key, v := range targetConnections {
+		if _, exist := existedConnections[key]; !exist {
+			updatedList1 = append(updatedList1, v)
+		}
+	}
+
+	for key, v := range existedConnections {
+		if _, exist := targetConnections[key]; !exist {
+			updatedList2 = append(updatedList2, v)
+		}
+	}
+
+	if len(updatedList1) != len(updatedList2) {
+		return fmt.Errorf("The items to be updated are inconsistent")
+	}
+
+	for index:= range updatedList1 {
+		targetConnection := updatedList1[index]
+		existedConnection := updatedList2[index]
+		reqQuery := map[string]interface{}{
+			"DBInstanceId":            id,
+			"NodeId":                  nil,
+			"NewConnectionString":     targetConnection["connect_string_prefix"],
+			"CurrentConnectionString": existedConnection["connect_string"],
+			"NewPort":                 targetConnection["connect_port"],
+			"OldPort":                 existedConnection["connect_port"],
+		}
+		if _, err := s.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil); err != nil {
+			return err
+		}
+
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapError(err)
+		}
+	}
+	return nil
 }

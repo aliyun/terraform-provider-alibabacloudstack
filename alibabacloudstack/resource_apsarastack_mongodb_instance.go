@@ -12,6 +12,7 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -195,82 +196,74 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Enable", "Disabled"}, false),
 			},
 			"audit_filter": auditFilterSchema([]string{"db"}),
+			"private_connections": {
+				Type: schema.TypeSet,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"connect_string_prefix": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validateShardeNodeConnectionString(),
+						},
+						"connect_string": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"connect_port": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.IntBetween(1, 65536),
+						},
+					},
+				},
+				Set: func(v interface{}) int {
+					m := v.(map[string]interface{})
+					hashString := fmt.Sprintf("%s:%d", m["connect_string_prefix"].(string), m["connect_port"].(int))
+					return hashcode.String(hashString)
+				},
+				Optional: true,
+				Computed: true,
+				MinItems: 2,
+				MaxItems: 2,
+			},
 			"enable_public_connection": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"primary_connect_string_public_prefix": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validateShardeNodeConnectionString(),
-				RequiredWith: []string{"primary_connect_port_public"},
-			},
-			"primary_connect_string_private_prefix": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validateShardeNodeConnectionString(),
-				RequiredWith: []string{"primary_connect_port_private"},
-			},
-			"primary_connect_string_public": {
-				Type:     schema.TypeString,
+			"public_connections": {
+				Type: schema.TypeSet,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"connect_string_prefix": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validateShardeNodeConnectionString(),
+						},
+						"connect_string": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"connect_port": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.IntBetween(1, 65536),
+						},
+					},
+				},
+				Set: func(v interface{}) int {
+					m := v.(map[string]interface{})
+					hashString := fmt.Sprintf("%s:%d", m["connect_string_prefix"].(string), m["connect_port"].(int))
+					return hashcode.String(hashString)
+				},
+				Optional: true,
 				Computed: true,
-			},
-			"primary_connect_string_private": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"primary_connect_port_public": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.IntBetween(1, 65536),
-				RequiredWith: []string{"primary_connect_string_public_prefix"},
-			},
-			"primary_connect_port_private": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.IntBetween(1, 65536),
-				RequiredWith: []string{"primary_connect_string_private_prefix"},
-			},
-			"secondary_connect_string_public_prefix": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validateShardeNodeConnectionString(),
-				RequiredWith: []string{"secondary_connect_port_public"},
-			},
-			"secondary_connect_string_private_prefix": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validateShardeNodeConnectionString(),
-				RequiredWith: []string{"secondary_connect_port_private"},
-			},
-			"secondary_connect_string_public": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"secondary_connect_string_private": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"secondary_connect_port_public": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.IntBetween(1, 65536),
-				RequiredWith: []string{"secondary_connect_string_public_prefix"},
-			},
-			"secondary_connect_port_private": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.IntBetween(1, 65536),
-				RequiredWith: []string{"secondary_connect_string_private_prefix"},
+				MinItems: 2,
+				MaxItems: 2,
 			},
 		},
 	}
@@ -462,30 +455,32 @@ func resourceAlibabacloudStackMongoDBInstanceRead(d *schema.ResourceData, meta i
 		return err
 	} else {
 		enablePublicConnection := false
+		publicConnections := []map[string]interface{}{}
+		privateConnections := []map[string]interface{}{}
+
 		for _, v := range response["ReplicaSets"].(map[string]interface{})["ReplicaSet"].([]interface{}) {
 			data := v.(map[string]interface{})
 			port, err := strconv.Atoi(data["ConnectionPort"].(string))
 			if err != nil {
 				return err
 			}
-			var suffix, prefix string
+			parts := strings.Split(data["ConnectionDomain"].(string), ".")
+			connectionInfo := map[string]interface{}{
+				"connect_string_prefix": parts[0],
+				"connect_string":        data["ConnectionDomain"],
+				"connect_port":          port,
+			}
+
 			if data["NetworkType"].(string) == "Public" {
 				enablePublicConnection = true
-				suffix = "public"
+				publicConnections = append(publicConnections, connectionInfo)
 			} else {
-				suffix = "private"
+				privateConnections = append(privateConnections, connectionInfo)
 			}
-			if data["ReplicaSetRole"].(string) == "Primary" {
-				prefix = "primary"
-			} else {
-				prefix = "secondary"
-			}
-			parts := strings.Split(data["ConnectionDomain"].(string), ".")
-			d.Set(prefix+"_connect_string_"+suffix+"_prefix", parts[0])
-			d.Set(prefix+"_connect_string_"+suffix, data["ConnectionDomain"])
-			d.Set(prefix+"_connect_port_"+suffix, port)
 		}
 		d.Set("enable_public_connection", enablePublicConnection)
+		d.Set("public_connections", publicConnections)
+		d.Set("private_connections", privateConnections)
 	}
 
 	return nil
@@ -642,10 +637,6 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 		//d.SetPartial("ssl_action")
 	}
 
-	oldConnectionString := map[string]map[string]string{
-		"primary":   {"public": "", "private": ""},
-		"secondary": {"public": "", "private": ""},
-	}
 	enablePublicConnection := false
 	if response, err := client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeReplicaSetRole", "", nil, map[string]interface{}{"DBInstanceId": d.Id()}, nil); err != nil {
 		return err
@@ -672,75 +663,88 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			return errmsgs.WrapError(err)
 		}
 	}
+	existedPublicConnections := map[string]map[string]interface{}{}
+	existedPrivateConnections := map[string]map[string]interface{}{}
 	if response, err := client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeReplicaSetRole", "", nil, map[string]interface{}{"DBInstanceId": d.Id()}, nil); err != nil {
 		return err
 	} else {
 		for _, v := range response["ReplicaSets"].(map[string]interface{})["ReplicaSet"].([]interface{}) {
 			data := v.(map[string]interface{})
-			var suffix, prefix string
+			port, err := strconv.Atoi(data["ConnectionPort"].(string))
+			if err != nil {
+				return err
+			}
+			parts := strings.Split(data["ConnectionDomain"].(string), ".")
+			connectionInfo := map[string]interface{}{
+				"connect_string_prefix": parts[0],
+				"connect_string":        data["ConnectionDomain"],
+				"connect_port":          port,
+			}
+			key := fmt.Sprintf("%s:%d", parts[0], port)
+
 			if data["NetworkType"].(string) == "Public" {
-				suffix = "public"
+				enablePublicConnection = true
+				existedPublicConnections[key] = connectionInfo
 			} else {
-				suffix = "private"
+				existedPrivateConnections[key] = connectionInfo
 			}
-			if data["ReplicaSetRole"].(string) == "Primary" {
-				prefix = "primary"
-			} else {
-				prefix = "secondary"
-			}
-			oldConnectionString[prefix][suffix] = data["ConnectionDomain"].(string)
 		}
 	}
-	for _, prefix := range []string{"secondary", "primary"} {
-		for _, suffix := range []string{"public", "private"} {
-			if d.HasChanges(prefix+"_connect_string_"+suffix+"_prefix", prefix+"_connect_port_"+suffix) {
-				if oldConnectionString[prefix][suffix] == "" {
-					return fmt.Errorf("%s_connect_string_%s lost old config", prefix, suffix)
-				}
-				oldPort, newPort := d.GetChange(prefix + "_connect_port_" + suffix)
-				reqQuery := map[string]interface{}{
-					"DBInstanceId":            d.Id(),
-					"NodeId":                  nil,
-					"NewConnectionString":     d.Get(prefix + "_connect_string_" + suffix + "_prefix"),
-					"CurrentConnectionString": oldConnectionString[prefix][suffix],
-					"NewPort":                 newPort,
-					"OldPort":                 oldPort,
-				}
-				if _, err := client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil); err != nil {
-					return err
-				}
 
-				if _, err := stateConf.WaitForState(); err != nil {
-					return errmsgs.WrapError(err)
-				}
+	if v, ok := d.GetOk("private_connections"); ok {
+		targetConnections := map[string]map[string]interface{}{}
+		for _, item := range v.(*schema.Set).List() {
+			info := item.(map[string]interface{})
+			key := fmt.Sprintf("%s:%d", info["connect_string_prefix"].(string), info["connect_port"].(int))
+			targetConnections[key] = info
+		}
+		ddsService.UpdateInstanceConnection(d.Id(), existedPrivateConnections, targetConnections)
+	}
 
-				resource.Retry(15*time.Minute, func() *resource.RetryError {
-					if response, err := client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeReplicaSetRole", "", nil, map[string]interface{}{"DBInstanceId": d.Id()}, nil); err != nil {
-						return resource.RetryableError(err)
-					} else {
-						for _, v := range response["ReplicaSets"].(map[string]interface{})["ReplicaSet"].([]interface{}) {
-							data := v.(map[string]interface{})
-							if data["NetworkType"].(string) == "Public" && suffix != "public" {
-								continue
-							} else if data["NetworkType"].(string) != "Public" && suffix != "private" {
-								continue
-							}
-							if data["ReplicaSetRole"].(string) == "Primary" && prefix != "primary" {
-								continue
-							} else if data["ReplicaSetRole"].(string) != "Primary" && prefix != "secondary" {
-								continue
-							}
-							parts := strings.Split(data["ConnectionDomain"].(string), ".")
-							if parts[0] == d.Get(prefix+"_connect_string_"+suffix+"_prefix") {
-								return nil
-							}
-						}
+	if v, ok := d.GetOk("private_connections"); ok && d.Get("enable_public_connection").(bool) {
+		targetConnections := map[string]map[string]interface{}{}
+		for _, item := range v.(*schema.Set).List() {
+			info := item.(map[string]interface{})
+			key := fmt.Sprintf("%s:%d", info["connect_string_prefix"].(string), info["connect_port"].(int))
+			targetConnections[key] = info
+		}
+		ddsService.UpdateInstanceConnection(d.Id(), existedPublicConnections, targetConnections)
+	}
+
+	resource.Retry(15*time.Minute, func() *resource.RetryError {
+		if response, err := client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeReplicaSetRole", "", nil, map[string]interface{}{"DBInstanceId": d.Id()}, nil); err != nil {
+			return resource.RetryableError(err)
+		} else {
+			oldConnectionCount := map[string]map[string]int{
+				"primary":   {"public": 0, "private": 0},
+				"secondary": {"public": 0, "private": 0},
+			}
+			for _, v := range response["ReplicaSets"].(map[string]interface{})["ReplicaSet"].([]interface{}) {
+				data := v.(map[string]interface{})
+				var suffix, prefix string
+				if data["NetworkType"].(string) == "Public" {
+					suffix = "public"
+				} else {
+					suffix = "private"
+				}
+				if data["ReplicaSetRole"].(string) == "Primary" {
+					prefix = "primary"
+				} else {
+					prefix = "secondary"
+				}
+				oldConnectionCount[prefix][suffix]++
+			}
+			for _, v := range oldConnectionCount {
+				for _, vv := range v {
+					if vv > 1 {
 						return resource.RetryableError(fmt.Errorf("ModifyDBInstanceConnectionString not successed"))
+
 					}
-				})
+				}
 			}
+			return nil
 		}
-	}
+	})
 
 	if d.IsNewResource() {
 		return nil

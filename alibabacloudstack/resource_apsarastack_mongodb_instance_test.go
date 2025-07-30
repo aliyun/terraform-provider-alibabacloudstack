@@ -149,54 +149,64 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv3(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"zone_id":                               "${data.alibabacloudstack_zones.default.zones[0].id}",
-					"db_instance_description":               "${var.name}",
-					"engine_version":                        "3.4",
-					"db_instance_storage":                   "10",
-					"db_instance_class":                     "dds.mongo.mid",
-					"security_ip_list":                      []string{"192.168.1.1"},
-					"primary_connect_string_private_prefix": name + "-ppr",
-					"primary_connect_port_private":          3777,
+					"zone_id":                 "${data.alibabacloudstack_zones.default.zones[0].id}",
+					"db_instance_description": "${var.name}",
+					"engine_version":          "3.4",
+					"db_instance_storage":     "10",
+					"db_instance_class":       "dds.mongo.mid",
+					"security_ip_list":        []string{"192.168.1.1"},
+					"private_connections": []map[string]interface{}{
+						{
+							"connect_string_prefix": name + "pr1",
+							"connect_port":          3778,
+						},
+						{
+							"connect_string_prefix": name + "pr2",
+							"connect_port":          3779,
+						},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine_version":                        "3.4",
-						"db_instance_storage":                   "10",
-						"db_instance_class":                     "dds.mongo.mid",
-						"db_instance_description":               name,
-						"storage_engine":                        "WiredTiger",
-						"instance_charge_type":                  "PostPaid",
-						"replication_factor":                    "3",
-						"primary_connect_string_private_prefix": name + "-ppr",
-						"primary_connect_port_private":          "3777",
+						"engine_version":          "3.4",
+						"db_instance_storage":     "10",
+						"db_instance_class":       "dds.mongo.mid",
+						"db_instance_description": name,
+						"storage_engine":          "WiredTiger",
+						"instance_charge_type":    "PostPaid",
+						"replication_factor":      "3",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"enable_public_connection":               true,
-					"secondary_connect_string_public_prefix": name + "-spu",
-					"secondary_connect_port_public":          3778,
+					"enable_public_connection": true,
+					"public_connections": []map[string]interface{}{
+						{
+							"connect_string_prefix": name + "pu1",
+							"connect_port":          3788,
+						},
+						{
+							"connect_string_prefix": name + "pu2",
+							"connect_port":          3789,
+						},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"enable_public_connection":               "true",
-						"secondary_connect_string_public_prefix": name + "-spu",
-						"secondary_connect_port_public":          "3778",
-					})),
+						"enable_public_connection": "true",
+					}),
+				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"enable_public_connection":               false,
-					"secondary_connect_string_public_prefix": REMOVEKEY,
-					"secondary_connect_port_public":          REMOVEKEY,
+					"enable_public_connection": false,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"enable_public_connection":               "false",
-						"secondary_connect_string_public_prefix": REMOVEKEY,
-						"secondary_connect_port_public":          REMOVEKEY,
-					})),
+						"enable_public_connection": "false",
+					}),
+				),
 			},
 		},
 	})
