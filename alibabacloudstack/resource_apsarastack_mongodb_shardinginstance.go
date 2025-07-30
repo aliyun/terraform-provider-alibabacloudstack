@@ -160,12 +160,12 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Required:     true,
 							ValidateFunc: validateShardeNodeDescription(),
 						},
-						"public_enable": {
+						"enable_public_connection": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
 						},
-						"private_enable": {
+						"enable_private_connection": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
@@ -183,19 +183,19 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"connect_string_public": {
+						"public_connect_string": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"connect_string_private": {
+						"private_connect_string": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"port_public": {
+						"public_connect_port": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"port_private": {
+						"private_connect_port": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
@@ -204,7 +204,7 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				Set: func(v interface{}) int {
 					m := v.(map[string]interface{})
 					hashString := fmt.Sprintf("%s:%d:%s:%v:%v", m["node_class"].(string), m["node_storage"].(int),
-						m["description"].(string), m["public_enable"].(bool), m["private_enable"].(bool))
+						m["description"].(string), m["enable_public_connection"].(bool), m["enable_private_connection"].(bool))
 					return hashcode.String(hashString)
 				},
 				Required: true,
@@ -225,43 +225,45 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Required:     true,
 							ValidateFunc: validateShardeNodeDescription(),
 						},
-						"public_enable": {
+						"enable_public_connection": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
 						},
-						"connect_string_private_prefix": {
+						"private_connect_string_prefix": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 							ValidateFunc: validateShardeNodeConnectionString(),
 						},
-						"connect_string_public_prefix": {
+						"public_connect_string_prefix": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Computed: true,
 							ValidateFunc: validateShardeNodeConnectionString(),
 						},
-						"port_public": {
+						"public_connect_port": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Computed: true,
+							ValidateFunc: validation.IntBetween(1, 65536),
 						},
-						"port_private": {
+						"private_connect_port": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Computed: true,
+							ValidateFunc: validation.IntBetween(1, 65536),
 						},
 						//Computed
 						"node_id": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"connect_string_private": {
+						"private_connect_string": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"connect_string_public": {
+						"public_connect_string": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
@@ -270,8 +272,8 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				Set: func(v interface{}) int {
 					m := v.(map[string]interface{})
 					hashString := fmt.Sprintf("%s:%s:%v:%s:%s:%d:%d", m["node_class"].(string), m["description"].(string),
-						m["public_enable"].(bool), m["connect_string_private_prefix"].(string), m["connect_string_public_prefix"].(string),
-						m["port_public"].(int), m["port_private"].(int))
+						m["enable_public_connection"].(bool), m["private_connect_string_prefix"].(string), m["public_connect_string_prefix"].(string),
+						m["public_connect_port"].(int), m["private_connect_port"].(int))
 					return hashcode.String(hashString)
 				},
 				Required: true,
@@ -295,12 +297,12 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Required:     true,
 							ValidateFunc: validateShardeNodeDescription(),
 						},
-						"public_enable": {
+						"enable_public_connection": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
 						},
-						"private_enable": {
+						"enable_private_connection": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
@@ -318,19 +320,19 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"connect_string_public": {
+						"public_connect_string": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"connect_string_private": {
+						"private_connect_string": {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
-						"port_public": {
+						"public_connect_port": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"port_private": {
+						"private_connect_port": {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
@@ -339,7 +341,7 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 				Set: func(v interface{}) int {
 					m := v.(map[string]interface{})
 					hashString := fmt.Sprintf("%s:%d:%s:%v:%v", m["node_class"].(string), m["node_storage"].(int),
-						m["description"].(string), m["public_enable"].(bool), m["private_enable"].(bool))
+						m["description"].(string), m["enable_public_connection"].(bool), m["enable_private_connection"].(bool))
 					return hashcode.String(hashString)
 				},
 				Required: true,

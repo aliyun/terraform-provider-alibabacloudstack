@@ -356,16 +356,16 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 			}
 		}
 
-		if param == "mongo_list" && newNode["connect_string_private_prefix"].(string) != "" && (newNode["connect_string_private_prefix"].(string) != oldNode["connect_string_private_prefix"].(string) ||
-			newNode["port_private"].(int) != oldNode["port_private"].(int)) {
+		if param == "mongo_list" && newNode["private_connect_string_prefix"].(string) != "" && (newNode["private_connect_string_prefix"].(string) != oldNode["private_connect_string_prefix"].(string) ||
+			newNode["private_connect_port"].(int) != oldNode["private_connect_port"].(int)) {
 			// mongos connect_string_private_prefix changed
 			reqQuery := map[string]interface{}{
 				"DBInstanceId":            d.Id(),
 				"NodeId":                  oldNode["node_id"].(string),
-				"NewConnectionString":     newNode["connect_string_private_prefix"],
-				"CurrentConnectionString": oldNode["connect_string_private"],
-				"NewPort":                 newNode["port_private"],
-				"OldPort":                 oldNode["port_private"],
+				"NewConnectionString":     newNode["private_connect_string_prefix"],
+				"CurrentConnectionString": oldNode["private_connect_string"],
+				"NewPort":                 newNode["private_connect_port"],
+				"OldPort":                 oldNode["private_connect_port"],
 			}
 			if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil); err != nil {
 				return err
@@ -375,8 +375,8 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 			}
 		}
 
-		if param != "mongo_list" && newNode["private_enable"].(bool) != oldNode["private_enable"].(bool) {
-			if newNode["private_enable"] == true {
+		if param != "mongo_list" && newNode["enable_private_connection"].(bool) != oldNode["enable_private_connection"].(bool) {
+			if newNode["enable_private_connection"] == true {
 				reqQuery := map[string]interface{}{
 					"DBInstanceId": d.Id(),
 					"NodeId":       oldNode["node_id"].(string),
@@ -396,7 +396,7 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 				if _, err := stateConf.WaitForState(); err != nil {
 					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 				}
-			} else if oldNode["connect_string_private"].(string) != "" {
+			} else if oldNode["private_connect_string"].(string) != "" {
 				reqQuery := map[string]interface{}{
 					"DBInstanceId": d.Id(),
 					"NodeId":       oldNode["node_id"].(string),
@@ -411,8 +411,8 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 			}
 		}
 
-		if newNode["public_enable"].(bool) != oldNode["public_enable"].(bool) {
-			if newNode["public_enable"] == true {
+		if newNode["enable_public_connection"].(bool) != oldNode["enable_public_connection"].(bool) {
+			if newNode["enable_public_connection"] == true {
 				reqQuery := map[string]interface{}{
 					"DBInstanceId": d.Id(),
 					"NodeId":       oldNode["node_id"].(string),
@@ -432,7 +432,7 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 					oldNode = oldMap[key].(map[string]interface{})
 				}
 
-			} else if oldNode["connect_string_public"].(string) != "" {
+			} else if oldNode["public_connect_string"].(string) != "" {
 				reqQuery := map[string]interface{}{
 					"DBInstanceId": d.Id(),
 					"NodeId":       oldNode["node_id"].(string),
@@ -447,16 +447,16 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 			}
 		}
 
-		if param == "mongo_list" && newNode["public_enable"].(bool) && newNode["connect_string_public_prefix"].(string) != "" &&
-			(!oldNode["public_enable"].(bool) || newNode["connect_string_public_prefix"].(string) != oldNode["connect_string_public_prefix"].(string) ||
-				newNode["port_public"].(int) != oldNode["port_public"].(int)) {
+		if param == "mongo_list" && newNode["enable_public_connection"].(bool) && newNode["public_connect_string_prefix"].(string) != "" &&
+			(!oldNode["enable_public_connection"].(bool) || newNode["public_connect_string_prefix"].(string) != oldNode["public_connect_string_prefix"].(string) ||
+				newNode["public_connect_port"].(int) != oldNode["public_connect_port"].(int)) {
 			reqQuery := map[string]interface{}{
 				"DBInstanceId":            d.Id(),
 				"NodeId":                  oldNode["node_id"].(string),
-				"NewConnectionString":     newNode["connect_string_public_prefix"],
-				"CurrentConnectionString": oldNode["connect_string_public"],
-				"NewPort":                 newNode["port_public"],
-				"OldPort":                 oldNode["port_public"],
+				"NewConnectionString":     newNode["public_connect_string_prefix"],
+				"CurrentConnectionString": oldNode["public_connect_string"],
+				"NewPort":                 newNode["public_connect_port"],
+				"OldPort":                 oldNode["public_connect_port"],
 			}
 			if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil); err != nil {
 				return err
@@ -1134,7 +1134,7 @@ func (s *MongoDBService) DdsDescribeShardingInstanceNodes(id string) (map[string
 				"node_class":    node.NodeClass,
 				"node_id":       node.NodeId,
 				"description":   node.NodeDescription,
-				"public_enable": false,
+				"enable_public_connection": false,
 			}
 		}
 		for _, node := range response.ShardList.ShardAttribute {
@@ -1143,8 +1143,8 @@ func (s *MongoDBService) DdsDescribeShardingInstanceNodes(id string) (map[string
 				"node_id":        node.NodeId,
 				"description":    node.NodeDescription,
 				"node_storage":   node.NodeStorage,
-				"public_enable":  false,
-				"private_enable": false,
+				"enable_public_connection":  false,
+				"enable_private_connection": false,
 			}
 		}
 		for _, node := range response.ConfigserverList.ConfigserverAttribute {
@@ -1153,8 +1153,8 @@ func (s *MongoDBService) DdsDescribeShardingInstanceNodes(id string) (map[string
 				"node_id":        node.NodeId,
 				"description":    node.NodeDescription,
 				"node_storage":   node.NodeStorage,
-				"public_enable":  false,
-				"private_enable": false,
+				"enable_public_connection":  false,
+				"enable_private_connection": false,
 			}
 		}
 	}
@@ -1178,22 +1178,22 @@ func (s *MongoDBService) DdsDescribeShardingInstanceNodes(id string) (map[string
 				}
 				networkAddres := address["NetworkAddress"].(string)
 				if address["NetworkType"] == "Public" {
-					node["public_enable"] = true
+					node["enable_public_connection"] = true
 					if nodeType == "mongo_list" {
 						parts := strings.Split(networkAddres, ".")
-						node["connect_string_public_prefix"] = parts[0]
+						node["public_connect_string_prefix"] = parts[0]
 					}
-					node["connect_string_public"] = address["NetworkAddress"].(string)
-					node["port_public"] = port
+					node["public_connect_string"] = address["NetworkAddress"].(string)
+					node["public_connect_port"] = port
 				} else {
 					if nodeType != "mongo_list" {
-						node["private_enable"] = true
+						node["enable_private_connection"] = true
 					} else {
 						parts := strings.Split(networkAddres, ".")
-						node["connect_string_private_prefix"] = parts[0]
+						node["private_connect_string_prefix"] = parts[0]
 					}
-					node["connect_string_private"] = networkAddres
-					node["port_private"] = port
+					node["private_connect_string"] = networkAddres
+					node["private_connect_port"] = port
 				}
 			}
 		}
