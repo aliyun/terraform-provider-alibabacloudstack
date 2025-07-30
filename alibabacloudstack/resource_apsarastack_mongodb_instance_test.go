@@ -149,13 +149,13 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv3(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"zone_id":                 "${data.alibabacloudstack_zones.default.zones[0].id}",
-					"db_instance_description": "${var.name}",
-					"engine_version":          "3.4",
-					"db_instance_storage":     "10",
-					"db_instance_class":       "dds.mongo.mid",
+					"zone_id":                               "${data.alibabacloudstack_zones.default.zones[0].id}",
+					"db_instance_description":               "${var.name}",
+					"engine_version":                        "3.4",
+					"db_instance_storage":                   "10",
+					"db_instance_class":                     "dds.mongo.mid",
 					"security_ip_list":                      []string{"192.168.1.1"},
-					"primary_connect_string_private_prefix": name+"-ppr",
+					"primary_connect_string_private_prefix": name + "-ppr",
 					"primary_connect_port_private":          3777,
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -167,7 +167,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv3(t *testing.T) {
 						"storage_engine":                        "WiredTiger",
 						"instance_charge_type":                  "PostPaid",
 						"replication_factor":                    "3",
-						"primary_connect_string_private_prefix": name+"-ppr",
+						"primary_connect_string_private_prefix": name + "-ppr",
 						"primary_connect_port_private":          "3777",
 					}),
 				),
@@ -175,14 +175,27 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv3(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"enable_public_connection":               true,
-					"secondary_connect_string_public_prefix": name+"-spu",
+					"secondary_connect_string_public_prefix": name + "-spu",
 					"secondary_connect_port_public":          3778,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"enable_public_connection":               "true",
-						"secondary_connect_string_public_prefix": name+"-spu",
+						"secondary_connect_string_public_prefix": name + "-spu",
 						"secondary_connect_port_public":          "3778",
+					})),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable_public_connection":               false,
+					"secondary_connect_string_public_prefix": REMOVEKEY,
+					"secondary_connect_port_public":          REMOVEKEY,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"enable_public_connection":               "false",
+						"secondary_connect_string_public_prefix": REMOVEKEY,
+						"secondary_connect_port_public":          REMOVEKEY,
 					})),
 			},
 		},
@@ -225,20 +238,20 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 						"role_type": "db",
 						"filters":   []string{"update", "delete"},
 					}},
-					"security_ip_list":                      []string{"192.168.1.1"},
-					"vswitch_id":                            "${alibabacloudstack_vpc_vswitch.default.id}",
+					"security_ip_list": []string{"192.168.1.1"},
+					"vswitch_id":       "${alibabacloudstack_vpc_vswitch.default.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine_version":                        "4.0",
-						"db_instance_storage":                   "10",
-						"db_instance_class":                     "dds.mongo.mid",
-						"db_instance_description":               name,
-						"storage_engine":                        "WiredTiger",
-						"instance_charge_type":                  "PostPaid",
-						"replication_factor":                    "3",
-						"audit_status":                          "Enable",
-						"audit_filter.#":                        "1",
+						"engine_version":          "4.0",
+						"db_instance_storage":     "10",
+						"db_instance_class":       "dds.mongo.mid",
+						"db_instance_description": name,
+						"storage_engine":          "WiredTiger",
+						"instance_charge_type":    "PostPaid",
+						"replication_factor":      "3",
+						"audit_status":            "Enable",
+						"audit_filter.#":          "1",
 					}),
 					resource.TestCheckTypeSetElemNestedAttrs(
 						resourceId,
@@ -262,11 +275,11 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"enable_public_connection":               true,
+					"enable_public_connection": true,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"enable_public_connection":               "true",
+						"enable_public_connection": "true",
 					})),
 			},
 			{
@@ -307,9 +320,9 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -449,7 +462,6 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 		},
 	})
 }
-
 
 func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 	var v dds.DBInstance

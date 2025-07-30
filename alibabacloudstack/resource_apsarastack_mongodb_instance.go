@@ -205,12 +205,14 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateShardeNodeConnectionString(),
+				RequiredWith: []string{"primary_connect_port_public"},
 			},
 			"primary_connect_string_private_prefix": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateShardeNodeConnectionString(),
+				RequiredWith: []string{"primary_connect_port_private"},
 			},
 			"primary_connect_string_public": {
 				Type:     schema.TypeString,
@@ -221,26 +223,32 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Computed: true,
 			},
 			"primary_connect_port_public": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 65536),
+				RequiredWith: []string{"primary_connect_string_public_prefix"},
 			},
 			"primary_connect_port_private": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 65536),
+				RequiredWith: []string{"primary_connect_string_private_prefix"},
 			},
 			"secondary_connect_string_public_prefix": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateShardeNodeConnectionString(),
+				RequiredWith: []string{"secondary_connect_port_public"},
 			},
 			"secondary_connect_string_private_prefix": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validateShardeNodeConnectionString(),
+				RequiredWith: []string{"secondary_connect_port_private"},
 			},
 			"secondary_connect_string_public": {
 				Type:     schema.TypeString,
@@ -251,14 +259,18 @@ func resourceAlibabacloudStackMongoDBInstance() *schema.Resource {
 				Computed: true,
 			},
 			"secondary_connect_port_public": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 65536),
+				RequiredWith: []string{"secondary_connect_string_public_prefix"},
 			},
 			"secondary_connect_port_private": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 65536),
+				RequiredWith: []string{"secondary_connect_string_private_prefix"},
 			},
 		},
 	}
@@ -679,14 +691,12 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			oldConnectionString[prefix][suffix] = data["ConnectionDomain"].(string)
 		}
 	}
-	connectionChanged := false
-	for _, prefix := range []string{"primary", "secondary"} {
+	for _, prefix := range []string{"secondary", "primary"} {
 		for _, suffix := range []string{"public", "private"} {
 			if d.HasChanges(prefix+"_connect_string_"+suffix+"_prefix", prefix+"_connect_port_"+suffix) {
 				if oldConnectionString[prefix][suffix] == "" {
-					return fmt.Errorf("%s_connect_string_%s lost old config",prefix, suffix)
+					return fmt.Errorf("%s_connect_string_%s lost old config", prefix, suffix)
 				}
-				connectionChanged =true
 				oldPort, newPort := d.GetChange(prefix + "_connect_port_" + suffix)
 				reqQuery := map[string]interface{}{
 					"DBInstanceId":            d.Id(),
@@ -703,12 +713,33 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 				if _, err := stateConf.WaitForState(); err != nil {
 					return errmsgs.WrapError(err)
 				}
+
+				resource.Retry(15*time.Minute, func() *resource.RetryError {
+					if response, err := client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeReplicaSetRole", "", nil, map[string]interface{}{"DBInstanceId": d.Id()}, nil); err != nil {
+						return resource.RetryableError(err)
+					} else {
+						for _, v := range response["ReplicaSets"].(map[string]interface{})["ReplicaSet"].([]interface{}) {
+							data := v.(map[string]interface{})
+							if data["NetworkType"].(string) == "Public" && suffix != "public" {
+								continue
+							} else if data["NetworkType"].(string) != "Public" && suffix != "private" {
+								continue
+							}
+							if data["ReplicaSetRole"].(string) == "Primary" && prefix != "primary" {
+								continue
+							} else if data["ReplicaSetRole"].(string) != "Primary" && prefix != "secondary" {
+								continue
+							}
+							parts := strings.Split(data["ConnectionDomain"].(string), ".")
+							if parts[0] == d.Get(prefix+"_connect_string_"+suffix+"_prefix") {
+								return nil
+							}
+						}
+						return resource.RetryableError(fmt.Errorf("ModifyDBInstanceConnectionString not successed"))
+					}
+				})
 			}
 		}
-	}
-	if connectionChanged {
-		// wait primary and secondary switch
-		time.Sleep(15*time.Second)
 	}
 
 	if d.IsNewResource() {
