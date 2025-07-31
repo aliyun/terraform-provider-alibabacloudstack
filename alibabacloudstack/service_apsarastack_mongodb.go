@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"regexp"
 	"sort"
 	"strconv"
@@ -240,23 +239,6 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 
 				if param == "shard_list" {
 					request.NodeStorage = requests.NewInteger(node["node_storage"].(int))
-					request.AccountName = "tf_autocreate"
-					request.AccountPassword = func() string {
-						charPools := []string{
-							"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-							"abcdefghijklmnopqrstuvwxyz",
-							"0123456789",
-							"!#$%^&*()_+=",
-						}
-
-						rand.Seed(time.Now().UnixNano())
-						var builder strings.Builder
-						for i := 0; i < rand.Intn(25)+8; i++ {
-							charpool := charPools[i%4]
-							builder.WriteByte(charpool[rand.Intn(len(charpool))])
-						}
-						return builder.String()
-					}()
 				}
 
 				raw, err := server.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
