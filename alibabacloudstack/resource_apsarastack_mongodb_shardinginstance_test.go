@@ -216,6 +216,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"db_account_password", "account_password"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{

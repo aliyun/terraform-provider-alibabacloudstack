@@ -492,7 +492,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 
 	// 第二阶段：并发获取其他数据
 	var wg sync.WaitGroup
-	errChan := make(chan error, 5) // 根据实际任务数调整缓冲区大小
+	errChan := make(chan error, 6) // 根据实际任务数调整缓冲区大小
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -576,7 +576,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		}
 	}()
 
-	// 并发任务5：审计过滤器
+	// 并发任务5：获取数据库用户
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -584,13 +584,38 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		case <-ctx.Done():
 			return
 		default:
-			auditFilters, err := ddsService.GetAuditLogFilter(d.Id())
-			if err != nil {
+			reqQuery := map[string]interface{} {"DBInstanceId":d.Id()}
+			if response, err:=client.DoTeaRequest("GET","Dds", "2015-12-01", "DescribeAccounts", "", nil, reqQuery, nil) ; err != nil {
 				errChan <- fmt.Errorf("GetAuditLogFilter: %w", err)
 				cancel()
 				return
+			} else {
+				for _, v := range response["Accounts"].(map[string]interface{})["Account"].([]interface{}) {
+					info := v.(map[string]interface{})
+					if info["CharacterType"].(string) == "db" {
+						d.Set("db_account_name", info["AccountName"])
+						break
+					}
+				}
 			}
-			d.Set("audit_filter", auditFilters)
+		}
+	}()
+	
+	// 并发任务4：审计策略
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			auditResponse, err := ddsService.DoDdsDescribeauditpolicyRequest(d.Id())
+			if err != nil {
+				errChan <- fmt.Errorf("DoDdsDescribeauditpolicyRequest: %w", err)
+				cancel()
+				return
+			}
+			d.Set("audit_status", auditResponse.LogAuditStatus)
 		}
 	}()
 
