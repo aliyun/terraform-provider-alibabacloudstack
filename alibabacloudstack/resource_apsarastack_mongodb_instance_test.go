@@ -136,7 +136,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv3(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-accdbinstance%d", rand)
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBInstanceClassicBase(false))
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBInstanceClassicBase(false, "3.4"))
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -151,9 +151,9 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv3(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"zone_id":                 "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"db_instance_description": "${var.name}",
-					"engine_version":          "3.4",
-					"db_instance_storage":     "10",
-					"db_instance_class":       "dds.mongo.mid",
+					"engine_version":          "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.0.engine_version}",
+					"db_instance_storage":     "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.0.storage_min}",
+					"db_instance_class":       "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.0.id}",
 					"security_ip_list":        []string{"192.168.1.1"},
 					"private_connections": []map[string]interface{}{
 						{
@@ -168,9 +168,6 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv3(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine_version":          "3.4",
-						"db_instance_storage":     "10",
-						"db_instance_class":       "dds.mongo.mid",
 						"db_instance_description": name,
 						"storage_engine":          "WiredTiger",
 						"instance_charge_type":    "PostPaid",
@@ -225,7 +222,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-accdbinstance%d", rand)
 
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBInstanceClassicBase(true))
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBInstanceClassicBase(true, "4.0"))
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -240,9 +237,9 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"zone_id":                 "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"db_instance_description": "${var.name}",
-					"engine_version":          "4.0",
-					"db_instance_storage":     "10",
-					"db_instance_class":       "dds.mongo.mid",
+					"engine_version":          "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.0.engine_version}",
+					"db_instance_storage":     "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.0.storage_min}",
+					"db_instance_class":       "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.0.id}",
 					"audit_status":            "Enable",
 					"audit_filter": []map[string]interface{}{{
 						"role_type": "db",
@@ -253,9 +250,6 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"engine_version":          "4.0",
-						"db_instance_storage":     "10",
-						"db_instance_class":       "dds.mongo.mid",
 						"db_instance_description": name,
 						"storage_engine":          "WiredTiger",
 						"instance_charge_type":    "PostPaid",
@@ -396,13 +390,11 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"db_instance_storage": "30",
-					"db_instance_class":   "dds.mongo.standard",
+					"db_instance_storage":     "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.1.storage_min}",
+					"db_instance_class":       "${data.alibabacloudstack_mongodb_instance_types.default.instance_types.1.id}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"db_instance_storage": "30",
-						"db_instance_class":   "dds.mongo.standard",
 					}),
 				),
 			},
@@ -578,7 +570,7 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 	})
 }
 
-func testMongoDBInstanceClassicBase(enableVpc bool) func(string) string {
+func testMongoDBInstanceClassicBase(enableVpc bool, engineVersion string) func(string) string {
 	var vpcString string
 	if enableVpc {
 		vpcString = VSwitchCommonTestCase
@@ -592,11 +584,15 @@ variable "name" {
 	  default = "%s"
 	}
 	
+	data "alibabacloudstack_mongodb_instance_types" "default" {
+		db_instnace_type = "replicate"
+		engine_version = "%s"
+	}
 %s
 
 %s
 
-`, name, RandomPasswordTestCase(12), vpcString)
+`, name, engineVersion, RandomPasswordTestCase(12), vpcString)
 	}
 }
 
