@@ -1058,6 +1058,8 @@ func (client *AlibabacloudStackClient) defaultHeaders(popcode string) map[string
 		"x-ascm-product-name":   popcode,
 		"EagleEye-TraceId":      client.Eagleeye.GetTraceId(),
 		"EagleEye-RpcId":        client.Eagleeye.GetRpcId(),
+		"x-acs-territory":       "US",
+		"x-acs-lang":            "EN",
 		//"x-acs-caller-sdk-source": "Terraform"
 		//"x-acs-asapi-gateway-version": "3.0"  这个是指定走ASAPI的v3网关流程，目前在维护的是v4，默认会走v4，指定了走v3。不建议走v3，除非有不兼容的地方必须走
 	}

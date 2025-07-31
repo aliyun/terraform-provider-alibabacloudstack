@@ -52,6 +52,8 @@ type Config struct {
 	MaxRetryTimeout          int
 }
 
+type Region string
+
 func (c *Config) getAuthCredential(stsSupported, ramSupported bool) auth.Credential {
 	if c.AccessKey != "" && c.SecretKey != "" {
 		if stsSupported && c.SecurityToken != "" {
