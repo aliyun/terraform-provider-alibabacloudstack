@@ -20,7 +20,7 @@ const (
 )
 
 var (
-MongoDBChangingStatus = []string{"NodeCreating", "NodeDeleting", "DBInstanceClassChanging", "DBInstanceNetTypeChanging",
+MongoDBChangingStatus = []string{"Creating","NodeCreating", "NodeDeleting", "DBInstanceClassChanging", "DBInstanceNetTypeChanging",
 	"NET_DELETING", "NET_CREATING", "NET_MODIFYING", "TDEModifying", "CONFIG_SWITCHING"}
 )
 

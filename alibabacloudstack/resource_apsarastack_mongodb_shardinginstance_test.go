@@ -150,7 +150,8 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBShardingInstance_base(true))
+	engine_version := "4.0"
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, testMongoDBShardingInstance_base(true, engine_version))
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 
@@ -164,43 +165,45 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 
 					"zone_id":        "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"engine_version": "4.0",
+					"engine_version": engine_version,
 					"shard_list": []map[string]interface{}{
 						{
 							"description":  "shard1",
-							"node_class":   "dds.shard.mid",
-							"node_storage": 10,
+							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.id}",
+							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.storage_min}",
 						},
 						{
 							"description":  "shard2",
-							"node_class":   "dds.shard.mid",
-							"node_storage": 10,
+							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.id}",
+							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.storage_min}",
 						},
 					},
 					"mongo_list": []map[string]interface{}{
 						{
 							"description": "mongo1",
-							"node_class":  "dds.mongos.mid",
+							"node_class":  "${data.alibabacloudstack_mongodb_instance_types.mongos.instance_types.0.id}",
 						},
 						{
 							"description": "mongo2",
-							"node_class":  "dds.mongos.mid",
+							"node_class":  "${data.alibabacloudstack_mongodb_instance_types.mongos.instance_types.0.id}",
 						},
 					},
 					"configserver_list": []map[string]interface{}{
 						{
 							"description":  "cs1",
-							"node_class":   "dds.cs.mid",
-							"node_storage": 20,
+							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.configserver.instance_types.0.id}",
+							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.configserver.instance_types.0.storage_min}",
 						},
 					},
 					"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
 					//					"security_group_id": "${alibabacloudstack_ecs_securitygroup.default.id}",
+					"db_account_name": "tf_testacc",
+					"db_account_password": "${random_password.password.0.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"zone_id":        CHECKSET,
-						"engine_version": "4.0",
+						"engine_version": engine_version,
 						"shard_list.#":   "2",
 						"mongo_list.#":   "2",
 						"name":           "",
@@ -213,18 +216,17 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"configserver_list.*.account_name", "configserver_list.*.account_password"},
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"mongo_list": []map[string]interface{}{
 						{
 							"description": "mongo1",
-							"node_class":  "dds.mongos.mid",
+							"node_class":  "${data.alibabacloudstack_mongodb_instance_types.mongos.instance_types.1.id}",
 						},
 						{
 							"description": "mongo3",
-							"node_class":  "dds.mongos.mid",
+							"node_class":  "${data.alibabacloudstack_mongodb_instance_types.mongos.instance_types.0.id}",
 						},
 					},
 				}),
@@ -240,18 +242,18 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 					"shard_list": []map[string]interface{}{
 						{
 							"description":  "shard1",
-							"node_class":   "dds.shard.mid",
-							"node_storage": "10",
+							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.1.id}",
+							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.1.storage_min}",
 						},
 						{
 							"description":  "shard3",
-							"node_class":   "dds.shard.mid",
-							"node_storage": "20",
+							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.id}",
+							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.storage_min}",
 						},
 						{
 							"description":  "shard4",
-							"node_class":   "dds.shard.mid",
-							"node_storage": "30",
+							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.id}",
+							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.storage_min}",
 						},
 					},
 				}),
@@ -266,8 +268,8 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 					"configserver_list": []map[string]interface{}{
 						{
 							"description":  "cs1",
-							"node_class":   "dds.cs.mid",
-							"node_storage": 30,
+							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.configserver.instance_types.1.id}",
+							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.configserver.instance_types.1.storage_min}",
 						},
 					},
 				}),
@@ -348,7 +350,15 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"account_password": "${random_password.password.result}",
+					"account_password": "${random_password.password.0.result}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"db_account_password": "${random_password.password.1.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{}),
@@ -401,7 +411,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 	})
 }
 
-func testMongoDBShardingInstance_base(enableVpc bool) func(string) string {
+func testMongoDBShardingInstance_base(enableVpc bool, engineVersion string) func(string) string {
 	var vpcString string
 	if enableVpc {
 		vpcString = VSwitchCommonTestCase
@@ -415,10 +425,39 @@ variable "name" {
 	  default = "%s"
 	}
 	
-%s
+	data "alibabacloudstack_mongodb_instance_types" "mongos" {
+	  db_instnace_type = "sharding"
+	  node_type = "mongos"
+	  sorted_by = "CPU"
+	  engine_version = "%s"
+	}
+	
+	data "alibabacloudstack_mongodb_instance_types" "configserver" {
+	  db_instnace_type = "sharding"
+	  node_type = "configserver"
+	  sorted_by = "CPU"
+	  engine_version = "%s"
+	}
+	
+	data "alibabacloudstack_mongodb_instance_types" "shard" {
+	  db_instnace_type = "sharding"
+	  node_type = "shard"
+	  sorted_by = "CPU"
+	  engine_version = "%s"
+	}
+	
+	resource "random_password" "password" {
+		count            = 2
+		length           = 12
+		special          = true
+		override_special = "!@#$^&*()_"
+		min_lower        = 1
+		min_upper        = 1
+		min_numeric      = 1
+	}
 
 %s
 
-`, name, RandomPasswordTestCase(12), vpcString)
+`, name, engineVersion, engineVersion, engineVersion, vpcString)
 	}
 }

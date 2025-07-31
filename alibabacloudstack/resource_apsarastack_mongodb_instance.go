@@ -806,7 +806,7 @@ func resourceAlibabacloudStackMongoDBInstanceUpdate(d *schema.ResourceData, meta
 			//d.SetPartial("kms_encryption_context")
 		}
 
-		err := ddsService.ResetAccountPassword(d, accountPassword)
+		err := ddsService.ResetAccountPassword(d, "root", accountPassword)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}

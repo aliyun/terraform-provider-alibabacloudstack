@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -82,8 +84,26 @@ func resourceAlibabacloudStackMongoDBShardingInstance() *schema.Resource {
 			//				Optional: true,
 			//			},
 			"account_password": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				Deprecated:    "Field 'account_password' is deprecated and will be removed in a future release. Please use new field 'cs_root_account_password' instead.",
+				ConflictsWith: []string{"cs_root_account_password"},
+			},
+			"cs_root_account_password": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"account_password"},
+			},
+			"db_account_name": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"db_account_password": {
 				Type:      schema.TypeString,
-				Optional:  true,
+				Required:  true,
 				Sensitive: true,
 			},
 			"kms_encrypted_password": {
@@ -268,7 +288,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 		"ChargeType":            string(PostPaid), //d.Get("instance_charge_type").(string),
 	}
 
-	reqQuery["AccountPassword"] = d.Get("account_password").(string)
+	reqQuery["AccountPassword"] = connectivity.GetResourceData(d, "cs_root_account_password", "account_password").(string)
 	if reqQuery["AccountPassword"].(string) == "" {
 		if v := d.Get("kms_encrypted_password").(string); v != "" {
 			kmsService := KmsService{client}
@@ -355,13 +375,98 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 		return err
 	}
 
-	d.SetId(response["DBInstanceId"].(string))
+	dbInstanceId := response["DBInstanceId"].(string)
+	d.SetId(dbInstanceId)
 
-	stateConf := BuildStateConf([]string{"Creating"},
-		[]string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, ddsService.MongoDbInstanceStateRefreshFunc(d.Id(), []string{"failed"}))
+	stateConf := BuildStateConf(MongoDBChangingStatus, []string{"Running"},
+		d.Timeout(schema.TimeoutCreate), 10*time.Second, ddsService.MongoDbInstanceStateRefreshFunc(d.Id(), []string{"failed"}))
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+
+	// create shard node account by create new shard node
+	reqQuery = map[string]interface{}{
+		"pageStart":      1,
+		"pageSize":       500,
+		"label":          "true",
+		"resourceType":   "dds",
+		"status":         "Available",
+		"dbInstanceType": "sharding",
+		"engine":         "MongoDB",
+		"engineVersion":  d.Get("engine_version"),
+		"nodeType":       "shard",
+	}
+
+	if response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select", nil, reqQuery, nil); err != nil {
+		return err
+	} else {
+		maxCpu := 1000
+		var nodeClass string
+		var storageMin int
+		for _, d := range response["data"].([]interface{}) {
+			data := d.(map[string]interface{})
+			if cpu, err := data["cpu"].(json.Number).Int64(); err != nil {
+				return err
+			} else if int(cpu) < maxCpu {
+				nodeClass = data["spec"].(string)
+				maxCpu = int(cpu)
+				if v, err := data["storageMin"].(json.Number).Int64(); err != nil {
+					return err
+				} else {
+					storageMin = int(v)
+				}
+			}
+		}
+		if nodeClass == "" {
+			return fmt.Errorf("No available shard node type found")
+		}
+		request := dds.CreateCreateNodeRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+		request.DBInstanceId = dbInstanceId
+		request.NodeClass = nodeClass
+		request.NodeType = "shard"
+		request.ClientToken = buildClientToken(request.GetActionName())
+		request.NodeStorage = requests.NewInteger(storageMin)
+		request.AccountName = d.Get("db_account_name").(string)
+		request.AccountPassword = d.Get("db_account_password").(string)
+
+		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+			return client.CreateNode(request)
+		})
+		bresponse, ok := raw.(*dds.CreateNodeResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, dbInstanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		} else {
+			request := dds.CreateDeleteNodeRequest()
+			client.InitRpcRequest(*request.RpcRequest)
+			request.DBInstanceId = dbInstanceId
+			request.NodeId = bresponse.NodeId
+			request.ClientToken = buildClientToken(request.GetActionName())
+
+			raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+				return client.DeleteNode(request)
+			})
+			bresponse, ok := raw.(*dds.DeleteNodeResponse)
+			if err != nil {
+				errmsg := ""
+				if ok {
+					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				}
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, dbInstanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
+
+			if _, err := stateConf.WaitForState(); err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+			}
+		}
 	}
 	return nil
 }
@@ -622,9 +727,9 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 		//d.SetPartial("db_instance_description")
 	}
 
-	if d.HasChanges("account_password", "kms_encrypted_password") {
+	if d.HasChanges("cs_root_account_password", "account_password", "kms_encrypted_password") {
 		var accountPassword string
-		if accountPassword = d.Get("account_password").(string); accountPassword != "" {
+		if accountPassword = connectivity.GetResourceData(d, "cs_root_account_password", "account_password").(string); accountPassword != "" {
 			//d.SetPartial("account_password")
 		} else if kmsPassword := d.Get("kms_encrypted_password").(string); kmsPassword != "" {
 			kmsService := KmsService{meta.(*connectivity.AlibabacloudStackClient)}
@@ -637,11 +742,18 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 			//d.SetPartial("kms_encryption_context")
 		}
 
-		err := ddsService.ResetAccountPassword(d, accountPassword)
+		err := ddsService.ResetAccountPassword(d, "root", accountPassword)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
 		//d.SetPartial("account_password")
+	}
+
+	if d.HasChange("db_account_password") {
+		err := ddsService.ResetAccountPassword(d, d.Get("db_account_account").(string), d.Get("db_account_password").(string))
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
 	}
 
 	if d.HasChange("security_ip_list") {

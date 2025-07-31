@@ -472,11 +472,11 @@ func (s *MongoDBService) MotifyMongoDBBackupPolicy(d *schema.ResourceData) error
 	return nil
 }
 
-func (s *MongoDBService) ResetAccountPassword(d *schema.ResourceData, password string) error {
+func (s *MongoDBService) ResetAccountPassword(d *schema.ResourceData, account, password string) error {
 	request := dds.CreateResetAccountPasswordRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
 	request.DBInstanceId = d.Id()
-	request.AccountName = "root"
+	request.AccountName = account
 	request.AccountPassword = password
 	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
 		return client.ResetAccountPassword(request)
