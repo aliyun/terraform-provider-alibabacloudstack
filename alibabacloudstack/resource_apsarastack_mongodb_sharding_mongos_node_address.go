@@ -58,7 +58,7 @@ func resourceAlibabacloudStackMongodbShardingMongosNodeAddress() *schema.Resourc
 		}
 
 		if !d.Get("enable_private_connection").(bool) {
-			return fmt.Errorf("mongos node no support close private connection", nodeId)
+			return fmt.Errorf("mongos node no support close private connection")
 		}
 
 		return nil

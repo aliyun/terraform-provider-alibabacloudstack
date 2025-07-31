@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"regexp"
 	"sort"
 	"strconv"
@@ -91,26 +92,6 @@ func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInst
 }
 
 func (s *MongoDBService) MongoDbInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
-	return func() (interface{}, string, error) {
-		object, err := s.DescribeMongoDBInstance(id)
-		if err != nil {
-			if errmsgs.NotFoundError(err) {
-				// Set this to nil as if we didn't find anything.
-				return nil, "", nil
-			}
-			return nil, "", errmsgs.WrapError(err)
-		}
-
-		for _, failState := range failStates {
-			if object.DBInstanceStatus == failState {
-				return object, object.DBInstanceStatus, errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, object.DBInstanceStatus))
-			}
-		}
-		return object, object.DBInstanceStatus, nil
-	}
-}
-
-func (s *MongoDBService) RdsMongodbDBInstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		object, err := s.DescribeMongoDBInstance(id)
 		if err != nil {
@@ -257,8 +238,25 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 				request.NodeType = nodeType
 				request.ClientToken = buildClientToken(request.GetActionName())
 
-				if param != "mongo_list" {
+				if param == "shard_list" {
 					request.NodeStorage = requests.NewInteger(node["node_storage"].(int))
+					request.AccountName = "tf_autocreate"
+					request.AccountPassword = func() string {
+						charPools := []string{
+							"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+							"abcdefghijklmnopqrstuvwxyz",
+							"0123456789",
+							"!#$%^&*()_+=",
+						}
+
+						rand.Seed(time.Now().UnixNano())
+						var builder strings.Builder
+						for i := 0; i < rand.Intn(25)+8; i++ {
+							charpool := charPools[i%4]
+							builder.WriteByte(charpool[rand.Intn(len(charpool))])
+						}
+						return builder.String()
+					}()
 				}
 
 				raw, err := server.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
@@ -276,6 +274,16 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 
 				if _, err := stateConf.WaitForState(); err != nil {
 					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
+
+				nodeId := bresponse.NodeId
+				reqQuery := map[string]interface{}{
+					"DBInstanceId":          instanceID,
+					"NodeId":                nodeId,
+					"DBInstanceDescription": key,
+				}
+				if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceDescription", "", nil, reqQuery, nil); err != nil {
+					return err
 				}
 			}
 		}
@@ -703,7 +711,7 @@ type DdsDescribeauditlogfilterResponse struct {
 
 func (s *MongoDBService) doDdsDescribeauditlogfilterRequest(id string) (*DdsDescribeauditlogfilterResponse, error) {
 	// api: Dds - 2015-12-01 - DescribeAuditLogFilter
-	stateConf := BuildStateConf([]string{"CONFIG_SWITCHING"}, []string{"Running"}, 10*time.Minute, 10*time.Second, s.RdsMongodbDBInstanceStateRefreshFunc(id, []string{"Deleting"}))
+	stateConf := BuildStateConf([]string{"CONFIG_SWITCHING"}, []string{"Running"}, 10*time.Minute, 10*time.Second, s.MongoDbInstanceStateRefreshFunc(id, []string{"Deleting"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return nil, errmsgs.WrapError(err)
 	}
@@ -922,7 +930,7 @@ func (s *MongoDBService) DoDdsDescribeshardingnetworkaddressRequest(id string) (
 }
 
 func (s *MongoDBService) ModifyAuditLogFilter(d *schema.ResourceData) error {
-	stateConf := BuildStateConf([]string{"CONFIG_SWITCHING"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, s.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+	stateConf := BuildStateConf([]string{"CONFIG_SWITCHING"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, s.MongoDbInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -971,7 +979,7 @@ func (s *MongoDBService) ModifyAuditLogFilter(d *schema.ResourceData) error {
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_mongo_db_audit_log_filter", "ModifyAuditLogFilter", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		stateConf := BuildStateConf([]string{"CONFIG_SWITCHING"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, s.RdsMongodbDBInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
+		stateConf := BuildStateConf([]string{"CONFIG_SWITCHING"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, s.MongoDbInstanceStateRefreshFunc(d.Id(), []string{"Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -1016,25 +1024,25 @@ func (s *MongoDBService) DdsDescribeShardingInstanceNodes(id string) (map[string
 	} else {
 		for _, node := range response.MongosList.MongosAttribute {
 			result["mongo_list"][node.NodeDescription] = map[string]interface{}{
-				"node_class":               node.NodeClass,
-				"node_id":                  node.NodeId,
-				"description":              node.NodeDescription,
+				"node_class":  node.NodeClass,
+				"node_id":     node.NodeId,
+				"description": node.NodeDescription,
 			}
 		}
 		for _, node := range response.ShardList.ShardAttribute {
 			result["shard_list"][node.NodeDescription] = map[string]interface{}{
-				"node_class":                node.NodeClass,
-				"node_id":                   node.NodeId,
-				"description":               node.NodeDescription,
-				"node_storage":              node.NodeStorage,
+				"node_class":   node.NodeClass,
+				"node_id":      node.NodeId,
+				"description":  node.NodeDescription,
+				"node_storage": node.NodeStorage,
 			}
 		}
 		for _, node := range response.ConfigserverList.ConfigserverAttribute {
 			result["configserver_list"][node.NodeDescription] = map[string]interface{}{
-				"node_class":                node.NodeClass,
-				"node_id":                   node.NodeId,
-				"description":               node.NodeDescription,
-				"node_storage":              node.NodeStorage,
+				"node_class":   node.NodeClass,
+				"node_id":      node.NodeId,
+				"description":  node.NodeDescription,
+				"node_storage": node.NodeStorage,
 			}
 		}
 	}
@@ -1043,16 +1051,16 @@ func (s *MongoDBService) DdsDescribeShardingInstanceNodes(id string) (map[string
 }
 
 func (s *MongoDBService) DescribeShardingInstanceNode(id string) (map[string]interface{}, error) {
-	
+
 	result := map[string]interface{}{
-		"enable_public_connection" : false,
+		"enable_public_connection":  false,
 		"enable_private_connection": false,
 	}
-	
-	parts := strings.SplitN(id, ":",2)
+
+	parts := strings.SplitN(id, ":", 2)
 	instanceId := parts[0]
-	nodeId :=parts[1]
-	
+	nodeId := parts[1]
+
 	reqQuery := map[string]interface{}{"DBInstanceId": instanceId}
 	if response, err := s.client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeShardingNetworkAddress", "", nil, reqQuery, nil); err != nil {
 		return nil, err
@@ -1062,7 +1070,7 @@ func (s *MongoDBService) DescribeShardingInstanceNode(id string) (map[string]int
 			if address["NodeId"].(string) != nodeId {
 				continue
 			}
-			port , err := strconv.Atoi(address["Port"].(string))
+			port, err := strconv.Atoi(address["Port"].(string))
 			if err != nil {
 				return nil, err
 			}
@@ -1075,13 +1083,12 @@ func (s *MongoDBService) DescribeShardingInstanceNode(id string) (map[string]int
 				result["private_connect_string"] = address["NetworkAddress"].(string)
 				result["private_connect_port"] = port
 			}
-			
+
 		}
 	}
 
 	return result, nil
 }
-
 
 func (s *MongoDBService) UpdateInstanceConnection(id string, existedConnections, targetConnections map[string]map[string]interface{}) error {
 	updatedList1 := []map[string]interface{}{}
@@ -1120,7 +1127,7 @@ func (s *MongoDBService) UpdateInstanceConnection(id string, existedConnections,
 
 func (s *MongoDBService) ModifyDBInstanceConnectionString(reqQuery map[string]interface{}) error {
 	id := reqQuery["DBInstanceId"].(string)
-	stateConf := BuildStateConf(MongoDBChangingStatus, []string{"Running"}, 10*time.Minute, 10*time.Second, s.RdsMongodbDBInstanceStateRefreshFunc(id, []string{"Deleting"}))
+	stateConf := BuildStateConf(MongoDBChangingStatus, []string{"Running"}, 10*time.Minute, 10*time.Second, s.MongoDbInstanceStateRefreshFunc(id, []string{"Deleting"}))
 
 	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
 		_, err := s.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceConnectionString", "", nil, reqQuery, nil)

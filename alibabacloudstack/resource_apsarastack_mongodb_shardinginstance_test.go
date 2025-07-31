@@ -237,6 +237,48 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"shard_list": []map[string]interface{}{
+						{
+							"description":  "shard1",
+							"node_class":   "dds.shard.mid",
+							"node_storage": "10",
+						},
+						{
+							"description":  "shard3",
+							"node_class":   "dds.shard.mid",
+							"node_storage": "20",
+						},
+						{
+							"description":  "shard4",
+							"node_class":   "dds.shard.mid",
+							"node_storage": "30",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"shard_list.#": "3",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"configserver_list": []map[string]interface{}{
+						{
+							"description":  "cs1",
+							"node_class":   "dds.cs.mid",
+							"node_storage": 30,
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"configserver_list.#": "1",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"audit_status": "Enable",
 					"audit_filter": []map[string]interface{}{{
 						"role_type": "db",
@@ -310,48 +352,6 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"shard_list": []map[string]interface{}{
-						{
-							"description":  "shard1",
-							"node_class":   "dds.shard.mid",
-							"node_storage": "10",
-						},
-						{
-							"description":  "shard3",
-							"node_class":   "dds.shard.standard",
-							"node_storage": "20",
-						},
-						{
-							"description":  "shard4",
-							"node_class":   "dds.shard.standard",
-							"node_storage": "30",
-						},
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"shard_list.#": "3",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"configserver_list": []map[string]interface{}{
-						{
-							"description":  "cs1",
-							"node_class":   "dds.cs.mid",
-							"node_storage": 30,
-						},
-					},
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"configserver_list.#": "1",
-					}),
 				),
 			},
 			{

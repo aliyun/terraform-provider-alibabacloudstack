@@ -1,11 +1,12 @@
 package alibabacloudstack
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dds"
@@ -369,80 +370,136 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	ddsService := MongoDBService{client}
 
-	if instance, err := ddsService.DescribeMongoDBInstance(d.Id()); err != nil {
+	// 第一阶段：获取基础实例信息（串行）
+	instance, err := ddsService.DescribeMongoDBInstance(d.Id())
+	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
-	} else {
-		// backupPolicy, err := ddsService.DescribeMongoDBBackupPolicy(d.Id())
-		// if err != nil {
-		// 	return errmsgs.WrapError(err)
-		// }
-		// connectivity.SetResourceData(d, backupPolicy.PreferredBackupTime, "preferred_backup_time", "backup_time")
-		// connectivity.SetResourceData(d, backupPolicy.PreferredBackupPeriod, "preferred_backup_period", "backup_period")
-		// retention_period, _ := strconv.Atoi(backupPolicy.BackupRetentionPeriod)
-		// d.Set("retention_period", retention_period)
-
-		connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "name")
-		d.Set("engine_version", instance.EngineVersion)
-		d.Set("storage_engine", instance.StorageEngine)
-		d.Set("zone_id", instance.ZoneId)
-		//	d.Set("instance_charge_type", instance.ChargeType)
-		//	if instance.ChargeType == "PrePaid" {
-		//		period, err := computePeriodByUnit(instance.CreationTime, instance.ExpireTime, d.Get("period").(int), "Month")
-		//		if err != nil {
-		//			return errmsgs.WrapError(err)
-		//		}
-		//		d.Set("period", period)
-		//	}
-		d.Set("vswitch_id", instance.VSwitchId)
 	}
+	connectivity.SetResourceData(d, instance.DBInstanceDescription, "db_instance_description", "name")
+	d.Set("engine_version", instance.EngineVersion)
+	d.Set("storage_engine", instance.StorageEngine)
+	d.Set("zone_id", instance.ZoneId)
+	d.Set("vswitch_id", instance.VSwitchId)
 
-	if nodes, err := ddsService.DdsDescribeShardingInstanceNodes(d.Id()); err != nil {
-		return err
-	} else {
-		for key, info := range nodes {
-			data := []map[string]interface{}{}
-			for _, v := range info {
-				data = append(data, v.(map[string]interface{}))
+	// 第二阶段：并发获取其他数据
+	var wg sync.WaitGroup
+	errChan := make(chan error, 5) // 根据实际任务数调整缓冲区大小
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// 并发任务1：节点信息
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			nodes, err := ddsService.DdsDescribeShardingInstanceNodes(d.Id())
+			if err != nil {
+				errChan <- fmt.Errorf("DdsDescribeShardingInstanceNodes: %w", err)
+				cancel()
+				return
 			}
-			d.Set(key, data)
+			for key, info := range nodes {
+				data := []map[string]interface{}{}
+				for _, v := range info {
+					data = append(data, v.(map[string]interface{}))
+				}
+				d.Set(key, data)
+			}
 		}
-	}
+	}()
 
-	if tdeInfo, err := ddsService.DescribeMongoDBTDEInfo(d.Id()); err != nil {
-		return errmsgs.WrapError(err)
-	} else {
-		if !(d.Get("tde_status") == "" && tdeInfo.TDEStatus == "disabled") {
-			d.Set("tde_status", tdeInfo.TDEStatus)
+	// 并发任务2：TDE状态
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			tdeInfo, err := ddsService.DescribeMongoDBTDEInfo(d.Id())
+			if err != nil {
+				errChan <- fmt.Errorf("DescribeMongoDBTDEInfo: %w", err)
+				cancel()
+				return
+			}
+			if !(d.Get("tde_status") == "" && tdeInfo.TDEStatus == "disabled") {
+				d.Set("tde_status", tdeInfo.TDEStatus)
+			}
 		}
-	}
+	}()
 
-	if ips, err := ddsService.DescribeMongoDBSecurityIps(d.Id()); err != nil {
-		return errmsgs.WrapError(err)
-	} else {
-		d.Set("security_ip_list", ips)
-	}
-	// 混合云不支持
-	//	groupIp, err := ddsService.DescribeMongoDBSecurityGroupId(d.Id())
-	//	if err != nil {
-	//		return errmsgs.WrapError(err)
-	//	}
-	//	if len(groupIp.Items.RdsEcsSecurityGroupRel) > 0 {
-	//		d.Set("security_group_id", groupIp.Items.RdsEcsSecurityRel[0].SecurityGroupId)
-	//	}
-	if response, err := ddsService.DoDdsDescribeauditpolicyRequest(d.Id()); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_auditpolicy", errmsgs.AlibabacloudStackSdkGoERROR)
-	} else {
-		d.Set("audit_status", response.LogAuditStatus)
-	}
+	// 并发任务3：安全IP列表
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			ips, err := ddsService.DescribeMongoDBSecurityIps(d.Id())
+			if err != nil {
+				errChan <- fmt.Errorf("DescribeMongoDBSecurityIps: %w", err)
+				cancel()
+				return
+			}
+			d.Set("security_ip_list", ips)
+		}
+	}()
 
-	if auditFilters, err := ddsService.GetAuditLogFilter(d.Id()); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_mongodb_auditlogfilter", errmsgs.AlibabacloudStackSdkGoERROR)
-	} else {
-		d.Set("audit_filter", auditFilters)
+	// 并发任务4：审计策略
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			auditResponse, err := ddsService.DoDdsDescribeauditpolicyRequest(d.Id())
+			if err != nil {
+				errChan <- fmt.Errorf("DoDdsDescribeauditpolicyRequest: %w", err)
+				cancel()
+				return
+			}
+			d.Set("audit_status", auditResponse.LogAuditStatus)
+		}
+	}()
+
+	// 并发任务5：审计过滤器
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			auditFilters, err := ddsService.GetAuditLogFilter(d.Id())
+			if err != nil {
+				errChan <- fmt.Errorf("GetAuditLogFilter: %w", err)
+				cancel()
+				return
+			}
+			d.Set("audit_filter", auditFilters)
+		}
+	}()
+
+	// 等待所有协程完成
+	go func() {
+		wg.Wait()
+		close(errChan)
+	}()
+
+	// 错误处理
+	for e := range errChan {
+		if e != nil {
+			return errmsgs.WrapError(e)
+		}
 	}
 
 	return nil
@@ -604,46 +661,5 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 }
 
 func resourceAlibabacloudStackMongoDBShardingInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	ddsService := MongoDBService{client}
-
-	request := dds.CreateDeleteDBInstanceRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.DBInstanceId = d.Id()
-
-	err := resource.Retry(10*5*time.Minute, func() *resource.RetryError {
-		raw, err := client.WithDdsClient(func(ddsClient *dds.Client) (interface{}, error) {
-			return ddsClient.DeleteDBInstance(request)
-		})
-
-		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-				return resource.NonRetryableError(err)
-			}
-			errmsg := ""
-			if raw != nil {
-				response, ok := raw.(*dds.DeleteDBInstanceResponse)
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-				}
-			}
-			return resource.RetryableError(errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg))
-		}
-		addDebug(request.GetActionName(), raw, request.RpcRequest, request)
-		return nil
-	})
-
-	if err != nil {
-		if errmsgs.IsExpectedErrors(err, []string{"InvalidDBInstanceId.NotFound"}) {
-			return nil
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
-	}
-	stateConf := BuildStateConf([]string{"Deleting"},
-		[]string{""}, d.Timeout(schema.TimeoutCreate), 10*time.Second, ddsService.MongoDbInstanceStateRefreshFunc(d.Id(), []string{"failed"}))
-
-	if _, err := stateConf.WaitForState(); err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	}
-	return nil
+	return resourceAlibabacloudStackMongoDBInstanceDelete(d, meta)
 }
