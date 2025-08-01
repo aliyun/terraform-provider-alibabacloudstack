@@ -320,27 +320,40 @@ func (server *MongoDBService) ModifyMongodbShardingInstanceNode(d *schema.Resour
 		if newNode["node_class"].(string) != oldNode["node_class"].(string) ||
 			newNode["node_storage"] != oldNode["node_storage"] {
 			// node specification change
-			request := dds.CreateModifyNodeSpecRequest()
-			server.client.InitRpcRequest(*request.RpcRequest)
-			request.DBInstanceId = instanceID
-			request.NodeClass = newNode["node_class"].(string)
-			request.ClientToken = buildClientToken(request.GetActionName())
-
-			if param != "mongo_list" {
-				request.NodeStorage = requests.NewInteger(newNode["node_storage"].(int))
-			}
-			request.NodeId = oldNode["node_id"].(string)
-
-			raw, err := server.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
-				return client.ModifyNodeSpec(request)
-			})
-			bresponse, ok := raw.(*dds.ModifyNodeSpecResponse)
-			if err != nil {
-				errmsg := ""
-				if ok {
-					errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if param == "configserver_list" {
+				nodesInfo := map[string]interface{}{
+					"ConfigSvrs": []map[string]interface{}{
+						{
+							"DBInstanceClass": newNode["node_class"],
+							"Storage":         newNode["node_storage"],
+							"DBInstanceName":  oldNode["node_id"],
+						},
+					},
 				}
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, instanceID, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				jsonByte, err := json.Marshal(nodesInfo)
+				if err != nil {
+					return err
+				}
+				reqQuery := map[string]interface{}{
+					"DBInstanceId": d.Id(),
+					"NodesInfo":    string(jsonByte),
+				}
+				if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyNodeSpecBatch", "", nil, reqQuery, nil); err != nil {
+					return err
+				}
+			} else {
+				reqQuery := map[string]interface{}{
+					"DBInstanceId": d.Id(),
+					"NodeClass":    newNode["node_class"],
+					"NodeId":       oldNode["node_id"],
+				}
+				if param == "shard_list" {
+					reqQuery["NodeStorage"] = newNode["node_storage"]
+				}
+				if _, err := server.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyNodeSpec", "", nil, reqQuery, nil); err != nil {
+					return err
+				}
+
 			}
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -472,10 +485,10 @@ func (s *MongoDBService) MotifyMongoDBBackupPolicy(d *schema.ResourceData) error
 	return nil
 }
 
-func (s *MongoDBService) ResetAccountPassword(d *schema.ResourceData, account, password string) error {
+func (s *MongoDBService) ResetAccountPassword(dbInstanceId, account, password string) error {
 	request := dds.CreateResetAccountPasswordRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
-	request.DBInstanceId = d.Id()
+	request.DBInstanceId = dbInstanceId
 	request.AccountName = account
 	request.AccountPassword = password
 	raw, err := s.client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
@@ -487,10 +500,24 @@ func (s *MongoDBService) ResetAccountPassword(d *schema.ResourceData, account, p
 		if ok {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, dbInstanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
 	return err
+}
+
+func (s *MongoDBService) ResetDbAccountPassword(dbInstanceId, nodeId, account, password string) error {
+	reqQuery := map[string]interface{}{
+		"DBInstanceId":    dbInstanceId,
+		"AccountName":     account,
+		"AccountPassword": password,
+		"CharacterType":   "db",
+		"NodeId":          nodeId,
+	}
+	if _, err := s.client.DoTeaRequest("POST", "Dds", "2015-12-01", "ResetAccountPassword", "", nil, reqQuery, nil); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *MongoDBService) setInstanceTags(d *schema.ResourceData) error {

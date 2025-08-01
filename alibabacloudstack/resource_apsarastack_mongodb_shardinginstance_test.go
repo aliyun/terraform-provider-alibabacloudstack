@@ -147,7 +147,9 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tfaccount%d", rand)
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serverFunc, "DescribeMongoDBInstance")
-	ra := resourceAttrInit(resourceId, nil)
+	ra := resourceAttrInit(resourceId, map[string]string{
+		"zone_id": CHECKSET,
+	})
 	rac := resourceAttrCheckInit(rc, ra)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	engine_version := "4.0"
@@ -197,7 +199,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 					},
 					"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
 					//					"security_group_id": "${alibabacloudstack_ecs_securitygroup.default.id}",
-					"db_account_name": "tf_testacc",
+					"db_account_name":     "tf_testacc",
 					"db_account_password": "${random_password.password.0.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -347,6 +349,14 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 					testAccCheck(map[string]string{
 						"name": name,
 					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"account_password": "${random_password.password.0.result}",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{}),
 				),
 			},
 			{

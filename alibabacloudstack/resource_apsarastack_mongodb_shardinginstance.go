@@ -767,7 +767,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 			//d.SetPartial("kms_encryption_context")
 		}
 
-		err := ddsService.ResetAccountPassword(d, "root", accountPassword)
+		err := ddsService.ResetAccountPassword(d.Id(), "root", accountPassword)
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -775,7 +775,8 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 	}
 
 	if d.HasChange("db_account_password") {
-		err := ddsService.ResetAccountPassword(d, d.Get("db_account_account").(string), d.Get("db_account_password").(string))
+		nodeId:=d.Get("shard_list").(*schema.Set).List()[0].(map[string]interface{})["node_id"].(string)
+		err := ddsService.ResetDbAccountPassword(d.Id(), nodeId, d.Get("db_account_name").(string), d.Get("db_account_password").(string))
 		if err != nil {
 			return errmsgs.WrapError(err)
 		}
@@ -798,5 +799,6 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 }
 
 func resourceAlibabacloudStackMongoDBShardingInstanceDelete(d *schema.ResourceData, meta interface{}) error {
+	return nil
 	return resourceAlibabacloudStackMongoDBInstanceDelete(d, meta)
 }
