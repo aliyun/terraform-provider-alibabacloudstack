@@ -16,6 +16,30 @@ func TestAccAlibabacloudStackCenInstancesDataSourceBasic(t *testing.T) {
 			"name_regex": `"${alibabacloudstack_cen_instance.default.cen_instance_name}_fake"`,
 		}),
 	}
+	transit_router_nameRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
+			"transit_router_name_regex": `"${alibabacloudstack_cen_instance.default.transit_router_name}"`,
+		}),
+		fakeConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
+			"transit_router_name_regex": `"${alibabacloudstack_cen_instance.default.transit_router_name}_fake"`,
+		}),
+	}
+	transit_router_descriptionRegexConf := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
+			"transit_router_description_regex": `"${alibabacloudstack_cen_instance.default.transit_router_description}"`,
+		}),
+		fakeConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
+			"transit_router_description_regex": `"${alibabacloudstack_cen_instance.default.transit_router_description}_fake"`,
+		}),
+	}
+	cirConf := dataSourceTestAccConfig{
+		existConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
+			"cidr": `"10.10.10.2/24"`,
+		}),
+		fakeConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
+			"cidr": `"10.10.10.2/24_fake"`,
+		}),
+	}
 	IdsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand, map[string]string{
 			"ids": `[ "${alibabacloudstack_cen_instance.default.id}" ]`,
@@ -47,7 +71,7 @@ func TestAccAlibabacloudStackCenInstancesDataSourceBasic(t *testing.T) {
 		}),
 	}
 
-	CenInstancesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, IdsConf, descriptionConf, allConf)
+	CenInstancesCheckInfo.dataSourceTestCheck(t, rand, nameRegexConf, IdsConf, descriptionConf, transit_router_nameRegexConf, transit_router_descriptionRegexConf, cirConf, allConf)
 }
 
 func testAccCheckAlibabacloudStackCenInstancesDataSourceConfig(rand int, attrMap map[string]string) string {
@@ -64,6 +88,9 @@ variable "name" {
 resource "alibabacloudstack_cen_instance" "default" {
     cen_instance_name = "${var.name}"
 	description = "${var.name}"
+	transit_router_name="${var.name}"
+	transit_router_description="${var.name}"
+	transit_router_cidrs=["10.10.10.2/24", "10.10.11.2/24"]
 }
 
 data "alibabacloudstack_cen_instances" "default" {

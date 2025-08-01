@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -36,6 +37,27 @@ type CbnDescribecensResponse struct {
 	RequestId string `json:"RequestId"`
 }
 
+type TransitRouterResponse struct {
+	TransitRouters []struct {
+		TransitRouterCidrList []struct {
+			Cidr                string `json:"Cidr"`
+			PublishCidrRoute    bool   `json:"PublishCidrRoute"`
+			TransitRouterCidrId string `json:"TransitRouterCidrId"`
+		} `json:"TransitRouterCidrList"`
+		CenId                    string `json:"CenId"`
+		CreationTime             string `json:"CreationTime"`
+		ServiceMode              string `json:"ServiceMode"`
+		RegionId                 string `json:"RegionId"`
+		SupportMulticast         bool   `json:"SupportMulticast"`
+		TransitRouterDescription string `json:"TransitRouterDescription"`
+		TransitRouterId          string `json:"TransitRouterId"`
+		Status                   string `json:"Status"`
+		TransitRouterName        string `json:"TransitRouterName"`
+		Type                     string `json:"Type"`
+	} `json:"TransitRouters"`
+	RequestId string `json:"RequestId"`
+}
+
 func (s *CenService) DoCbnDescribecensRequest(id string) (*CbnDescribecensResponse, error) {
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DescribeCens", "")
@@ -60,4 +82,56 @@ func (s *CenService) DoCbnDescribecensRequest(id string) (*CbnDescribecensRespon
 	}
 
 	return CbnDescribecensResponseObj, nil
+}
+
+func (s *CenService) DoCbnDescribeTransitRoutersRequest(id string) (*TransitRouterResponse, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouters", "")
+	TransitRouterResponseObj := &TransitRouterResponse{}
+	//调用request_params_handler
+	request.QueryParams["CenId"] = id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouters", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &TransitRouterResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouters", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return TransitRouterResponseObj, nil
+}
+
+func (s *CenService) WaitForTransitRouterInstance(instanceId string, status Status, timeout int) error {
+	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
+
+	for {
+		instance, err := s.DoCbnDescribeTransitRoutersRequest(instanceId)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				if status == Deleted {
+					return nil
+				}
+			} else {
+				return errmsgs.WrapError(err)
+			}
+		}
+
+		if instance.TransitRouters[0].Status == string(status) {
+			return nil
+		}
+
+		if time.Now().After(deadline) {
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, instance.TransitRouters[0].Status, string(status), errmsgs.ProviderERROR)
+		}
+		time.Sleep(DefaultIntervalShort * time.Second)
+	}
 }

@@ -32,6 +32,18 @@ func dataSourceAlibabacloudStackCenCenInstances() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"transit_router_name_regex": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"transit_router_description_regex": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"cidr": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 
 			"cens": {
 				Type:     schema.TypeList,
@@ -78,6 +90,23 @@ func dataSourceAlibabacloudStackCenCenInstances() *schema.Resource {
 							Type:     schema.TypeString,
 							Computed: true,
 						},
+						"transit_router_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"transit_router_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"transit_router_description": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"transit_router_cidrs": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+						},
 
 						"tags": {
 							// TypeList
@@ -110,7 +139,7 @@ func dataSourceAlibabacloudStackCenCenInstances() *schema.Resource {
 
 func dataSourceAlibabacloudStackCenCenInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
+	cencen_instanceservice := CenService{client}
 	// api: Cbn - 2017-09-12 - DescribeCens
 	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "DescribeCens", "")
 	CbnDescribecensResponseObj := CbnDescribecensResponse{}
@@ -199,6 +228,52 @@ func dataSourceAlibabacloudStackCenCenInstancesRead(d *schema.ResourceData, meta
 			"protection_level":          data.ProtectionLevel,
 			"status":                    data.Status,
 			"cen_bandwidth_package_ids": bandwidth_package_ids,
+		}
+		response_transitrouter, err := cencen_instanceservice.DoCbnDescribeTransitRoutersRequest(d.Id())
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_ceninstance", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		if len(response_transitrouter.TransitRouters) > 0 {
+			data := response_transitrouter.TransitRouters[0]
+			i["transit_router_id"] = data.TransitRouterId
+			if data.TransitRouterName != "" {
+				if nameRegex, ok := d.GetOk("transit_router_name_regex"); ok {
+					r := regexp.MustCompile(nameRegex.(string))
+					if !r.MatchString(data.TransitRouterName) {
+						continue
+					}
+				}
+
+				i["transit_router_name"] = data.TransitRouterName
+			}
+			if data.TransitRouterDescription != "" {
+				if descriptionRegex, ok := d.GetOk("transit_router_description_regex"); ok {
+					r := regexp.MustCompile(descriptionRegex.(string))
+					if !r.MatchString(data.TransitRouterDescription) {
+						continue
+					}
+				}
+				i["transit_router_description"] = data.TransitRouterDescription
+			}
+			if len(data.TransitRouterCidrList) > 0 {
+				cidrs := []string{}
+				for _, cidr := range data.TransitRouterCidrList {
+					cidrs = append(cidrs, cidr.Cidr)
+				}
+				i["transit_router_cidrs"] = cidrs
+				if cidr_check, ok := d.GetOk("cidr"); ok {
+					flag := false
+					for _, cidr := range cidrs {
+						if cidr_check == cidr {
+							flag = true
+							break
+						}
+					}
+					if flag == false {
+						continue
+					}
+				}
+			}
 		}
 		datas = append(datas, i)
 

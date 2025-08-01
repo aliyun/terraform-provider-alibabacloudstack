@@ -36,6 +36,15 @@ func TestAccAlibabacloudStackCenInstance0(t *testing.T) {
 		// CheckDestroy: rac.checkResourceDestroy(),
 
 		Steps: []resource.TestStep{
+			{
+				Config: testAccConfig(map[string]interface{}{}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"cen_id": CHECKSET,
+					}),
+				),
+			},
 
 			{
 				Config: testAccConfig(map[string]interface{}{
@@ -57,14 +66,43 @@ func TestAccAlibabacloudStackCenInstance0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"cen_instance_name": modify_name,
-					"description":       modify_name,
+					"transit_router_name":        modify_name,
+					"transit_router_description": modify_name,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"cen_instance_name": modify_name,
-						"description":       modify_name,
+						"transit_router_name":        modify_name,
+						"transit_router_description": modify_name,
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"transit_router_cidrs": []string{"10.10.10.2/24", "10.10.11.2/24"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"transit_router_cidrs.#": "2",
+						"transit_router_cidrs.0": "10.10.10.2/24",
+						"transit_router_cidrs.1": "10.10.11.2/24",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"transit_router_cidrs": []string{"10.10.10.2/24", "10.10.12.2/24", "10.10.13.2/24"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"transit_router_cidrs.#": "3",
+						"transit_router_cidrs.0": "10.10.10.2/24",
+						"transit_router_cidrs.1": "10.10.12.2/24",
+						"transit_router_cidrs.2": "10.10.13.2/24",
 					}),
 				),
 			},
@@ -85,9 +123,7 @@ var AlibabacloudTestAccCenInstanceCheckmap = map[string]string{
 
 	"create_time": CHECKSET,
 
-	"cen_id":            CHECKSET,
-	"cen_instance_name": CHECKSET,
-	"description":       CHECKSET,
+	"cen_id": CHECKSET,
 }
 
 func AlibabacloudTestAccCenInstanceBasicdependence(name string) string {
