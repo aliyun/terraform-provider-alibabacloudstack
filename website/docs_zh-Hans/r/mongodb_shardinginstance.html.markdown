@@ -17,50 +17,91 @@ description: |-
 ### 创建具有 VPC 配置的 MongoDB 分片实例
 
 ```hcl
-data "alibabacloudstack_zones" "default" {
-  available_resource_creation = "MongoDB"
+variable "name" {
 }
 
-variable "password" {}
+data "alibabacloudstack_mongodb_instance_types" "mongos" {
+  db_instnace_type = "sharding"
+  node_type        = "mongos"
+  sorted_by        = "CPU"
+  engine_version   = "4.0"
+}
 
-resource "alibabacloudstack_vpc" "example" {
-  name       = "tf-example-vpc"
+data "alibabacloudstack_mongodb_instance_types" "configserver" {
+  db_instnace_type = "sharding"
+  node_type        = "configserver"
+  sorted_by        = "CPU"
+  engine_version   = "4.0"
+}
+
+data "alibabacloudstack_mongodb_instance_types" "shard" {
+  db_instnace_type = "sharding"
+  node_type        = "shard"
+  sorted_by        = "CPU"
+  engine_version   = "4.0"
+}
+
+resource "random_password" "password" {
+  count            = 2
+  length           = 12
+  special          = true
+  override_special = "!@#$^&*()_"
+  min_lower        = 1
+  min_upper        = 1
+  min_numeric      = 1
+}
+
+
+data "alibabacloudstack_zones" "default" {
+  available_resource_creation = "VSwitch"
+  enable_details              = true
+}
+
+
+resource "alibabacloudstack_vpc_vpc" "default" {
+  vpc_name   = "${var.name}_vpc"
   cidr_block = "172.16.0.0/16"
 }
 
-resource "alibabacloudstack_vswitch" "example" {
-  vpc_id     = alibabacloudstack_vpc.example.id
-  cidr_block = "172.16.0.0/24"
-  zone_id    = data.alibabacloudstack_zones.default.zones[0].id
-  name       = "tf-example-vswitch"
+resource "alibabacloudstack_vpc_vswitch" "default" {
+  name       = "${var.name}_vsw"
+  vpc_id     = alibabacloudstack_vpc_vpc.default.id
+  cidr_block = "172.16.1.0/24"
+  zone_id    = data.alibabacloudstack_zones.default.zones.0.id
 }
 
 resource "alibabacloudstack_mongodb_sharding_instance" "default" {
-  zone_id        = data.alibabacloudstack_zones.default.zones[0].id
-  vswitch_id     = alibabacloudstack_vswitch.example.id
-  engine_version = "3.4"
-  storage_engine = "WiredTiger"
-  name           = "tf-example-instance"
-
+  db_account_password = random_password.password.0.result
+  zone_id             = data.alibabacloudstack_zones.default.zones.0.id
+  engine_version      = "4.0"
   shard_list {
-    node_class   = "dds.shard.mid"
-    node_storage = 10
+    node_storage = data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.storage_min
+    description  = "shard1"
+    node_class   = data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.id
   }
-
   shard_list {
-    node_class   = "dds.shard.standard"
-    node_storage = 20
+    description  = "shard2"
+    node_class   = data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.id
+    node_storage = data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.storage_min
   }
 
   mongo_list {
-    node_class = "dds.mongos.mid"
+    node_class  = data.alibabacloudstack_mongodb_instance_types.mongos.instance_types.0.id
+    description = "mongo1"
   }
-
   mongo_list {
-    node_class = "dds.mongos.large"
+    description = "mongo2"
+    node_class  = data.alibabacloudstack_mongodb_instance_types.mongos.instance_types.0.id
   }
 
-  account_password = var.password
+  configserver_list {
+    node_storage = data.alibabacloudstack_mongodb_instance_types.configserver.instance_types.0.storage_min
+    description  = "cs1"
+    node_class   = data.alibabacloudstack_mongodb_instance_types.configserver.instance_types.0.id
+  }
+
+  vswitch_id      = alibabacloudstack_vpc_vswitch.default.id
+  db_account_name = "tf_testacc"
 }
 ```
 
@@ -70,14 +111,13 @@ resource "alibabacloudstack_mongodb_sharding_instance" "default" {
 
 * `engine_version` - (必填，变更时重建) 数据库版本。值选项可以参考最新文档 [CreateDBInstance](https://www.alibabacloud.com/help/zh/doc-detail/61884.htm) 的 `EngineVersion`。
 * `storage_engine` - (选填，变更时重建) 实例的存储引擎类型。有效值：`WiredTiger`、`RocksDB`。默认值：`WiredTiger`。
-* `instance_charge_type` - (选填，变更时重建) 有效的值为 `PrePaid` 和 `PostPaid`。系统默认值为 `PostPaid`。**注意**：从 v1.141.0 版本开始，可以从 `PostPaid` 修改为 `PrePaid`。
-* `period` - (选填) 购买 DB 实例的时长(以月为单位)。当 `instance_charge_type` 为 `PrePaid` 时有效。有效值：[1~9]、12、24、36。系统默认值为 1。
 * `zone_id` - (选填，变更时重建) 启动 DB 实例的可用区。MongoDB 分片实例不支持多可用区。如果它是多可用区并且指定了 `vswitch_id`，交换机必须在其中一个可用区内。
 * `vswitch_id` - (选填，变更时重建) 用于在 VPC 中启动 DB 实例的虚拟交换机 ID。
 * `name` - (选填) DB 实例的名称。它是一个长度为 2 到 256 个字符的字符串。
 * `db_instance_description` - (选填) DB 实例的描述。它是一个长度为 2 到 256 个字符的字符串。
-* `security_group_id` - (选填) ECS 的安全组 ID。
-* `account_password` - (选填，敏感) root 账户的密码。它是一个长度为 6 到 32 个字符的字符串，由字母、数字和下划线组成。
+* `cs_root_account_password` - (选填，敏感) CS节点root 账户的密码。它是一个长度为 6 到 32 个字符的字符串，由字母、数字和下划线组成。
+* `db_account_name` - (必填) Shard节点帐号名称。
+* `db_account_password` - (必填，敏感) Shard节点账户的密码。它是一个长度为 6 到 32 个字符的字符串，由字母、数字和下划线组成。
 * `kms_encrypted_password` - (选填) 用于创建实例的 KMS 加密密码。如果填写了 `account_password`，此字段将被忽略。
 * `kms_encryption_context` - (选填) 用于在使用 `kms_encrypted_password` 创建或更新实例之前解密 `kms_encrypted_password` 的 KMS 加密上下文。参见 [加密上下文](https://www.alibabacloud.com/help/doc-detail/42975.htm)。当设置了 `kms_encrypted_password` 时有效。
 * `tde_status` - (选填，变更时重建) 透明数据加密 (TDE) 状态。有效值：`Enabled`、`Disabled`。
@@ -86,9 +126,14 @@ resource "alibabacloudstack_mongodb_sharding_instance" "default" {
 * `shard_list` - (必填) 分片节点列表。每个分片节点具有以下属性：
   * `node_class` - (必填) 节点规格。参见 [实例规格](https://www.alibabacloud.com/help/doc-detail/57141.htm)。
   * `node_storage` - (必填) 自定义存储空间；范围：[10, 1,000]，以 10 GB 为增量。单位：GB。
-  * `readonly_replicas` - (选填) 分片节点中的只读节点数量。有效值：0 到 5。默认值：0。
+  * `description` - (必填) 节点名称。
 * `mongo_list` - (必填) Mongo 节点列表。每个 Mongo 节点具有以下属性：
   * `node_class` - (必填) 节点规格。参见 [实例规格](https://www.alibabacloud.com/help/doc-detail/57141.htm)。
+  * `description` - (必填) 节点名称。
+* `configserver_list` - (必填) CS节点列表。每个分片节点具有以下属性：
+  * `node_class` - (必填) 节点规格。参见 [实例规格](https://www.alibabacloud.com/help/doc-detail/57141.htm)。
+  * `node_storage` - (必填) 自定义存储空间；范围：[10, 1,000]，以 10 GB 为增量。单位：GB。
+  * `description` - (必填) 节点名称。
 
 ## 属性说明
 

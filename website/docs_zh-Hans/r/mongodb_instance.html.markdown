@@ -61,16 +61,21 @@ resource "alibabacloudstack_mongodb_instance" "example" {
 * `instance_charge_type` - (选填) 实例的计费类型。有效值：`PrePaid`, `PostPaid`。默认值：`PostPaid`。
 * `period` - (选填) 购买 DB 实例的时长(以月为单位)。当 `instance_charge_type` 为 `PrePaid` 时有效。有效值：`[1~9], 12, 24, 36`。默认值：`1`。
 * `vswitch_id` - (选填，变更时重建) 启动 DB 实例所在 VPC 的虚拟交换机 ID。
-* `security_group_id` - (选填) ECS 的安全组 ID。一个实例最多可以绑定 10 个 ECS 安全组。
 * `account_password` - (选填) root 账户的密码。它是一个由字母、数字和下划线组成的 6 到 32 个字符的字符串。
 * `kms_encrypted_password` - (选填) 用于创建或更新实例的 KMS 加密密码。如果提供了 `account_password`，则此字段将被忽略。
 * `kms_encryption_context` - (选填) 用于在创建或更新实例之前解密 `kms_encrypted_password` 的 KMS 加密上下文。
 * `maintain_start_time` - (选填) 维护窗口的开始时间。指定 UTC 时间格式为 `HH:mmZ`。
 * `maintain_end_time` - (选填) 维护窗口的结束时间。指定 UTC 时间格式为 `HH:mmZ`。
-* `tags` - (选填，映射) 要分配给资源的标签映射。
 * `db_instance_description` - (选填) DB 实例的描述。
 * `audit_status` - (选填) 是否开启该实例的日志审计能力。 有效值包括：`Enable`, `Disabled`。
 * `audit_filter` - (选填) 需要审计的日志类型列表。有效值包括：`admin`, `slow`, `query`, `insert`, `update`, `delete`, `command`。
+* `private_connections` - (选填) Mongdodb的内网链接信息。
+  * `connect_string_prefix` - (选填) 链接地址前缀。
+  * `connect_port` - (选填) 链接地址端口。
+* `enable_public_connection` - (选填) 是否开启公网链接。
+* `public_connections` - (选填) Mongdodb的公网链接信息。
+  * `connect_string_prefix` - (选填) 链接地址前缀。
+  * `connect_port` - (选填) 链接地址端口。
 
 ## 属性说明
 
@@ -86,3 +91,7 @@ resource "alibabacloudstack_mongodb_instance" "example" {
 * `security_ip_list` - 允许访问 MongoDB 实例的 IP 地址列表。
 * `security_group_id` - ECS 的安全组 ID。
 * `backup_period` - MongoDB 实例的备份周期。
+* `private_connections` - Mongdodb的内网链接信息。
+  * `connect_string` - 完整的连接字串.
+* `public_connections` - Mongdodb的公网链接信息。
+  * `connect_string` - 完整的连接字串.

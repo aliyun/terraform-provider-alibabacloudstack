@@ -62,16 +62,22 @@ The following arguments are supported:
 * `instance_charge_type` - (Optional) The charge type of the instance. Valid values: `PrePaid`, `PostPaid`. Default: `PostPaid`.
 * `period` - (Optional) The duration that you will buy the DB instance (in months). It is valid when `instance_charge_type` is `PrePaid`. Valid values: `[1~9], 12, 24, 36`. Default: `1`.
 * `vswitch_id` - (Optional, ForceNew) The virtual switch ID to launch DB instances in one VPC.
-* `security_group_id` - (Optional) The Security Group ID of ECS. One instance can bind up to 10 ECS security groups.
 * `account_password` - (Optional) Password of the root account. It is a string of 6 to 32 characters and is composed of letters, numbers, and underlines.
 * `kms_encrypted_password` - (Optional) An KMS encrypted password used to create or update the instance. If `account_password` is provided, this field will be ignored.
 * `kms_encryption_context` - (Optional) An KMS encryption context used to decrypt `kms_encrypted_password` before creating or updating the instance.
 * `maintain_start_time` - (Optional) The start time of the maintenance window. Specify the time in the `HH:mmZ` format. The time must be in UTC.
 * `maintain_end_time` - (Optional) The end time of the maintenance window. Specify the time in the `HH:mmZ` format. The time must be in UTC.
-* `tags` - (Optional, Map) A mapping of tags to assign to the resource.
 * `db_instance_description` - (Optional) The description of the DB instance.
 * `audit_status` - (Optional) Enable or disable log audit for the DB instance. Valid values include: `Enable`, `Disabled`.
 * `audit_filter` - (Optional) Operation Type List for Audit Log Filter. Valid values include: `admin`, `slow`, `query`, `insert`, `update`, `delete`, `command`.
+* `private_connections` - (Optional) Internal connection information for MongoDB.
+  * `connect_string_prefix` - (Optional) Connection string prefix.
+  * `connect_port` - (Optional) Connection port number.
+* `enable_public_connection` - (Optional) Whether to enable public network connection.
+* `public_connections` - (Optional) Public connection information for MongoDB.
+  * `connect_string_prefix` - (Optional) Connection string prefix.
+  * `connect_port` - (Optional) Connection port number.
+
 
 ## Attributes Reference
 
@@ -87,3 +93,7 @@ The following attributes are exported in addition to the arguments listed above:
 * `security_ip_list` - A list of IP addresses that are allowed to access the MongoDB instance.
 * `security_group_id` - The Security Group ID of ECS.
 * `backup_period` - MongoDB Instance backup period.
+* `private_connections` - Internal connection information for MongoDB.
+  * `connect_string` - Complete connection string.
+* `public_connections` -  Public connection information for MongoDB.
+  * `connect_string` - Complete connection string.
