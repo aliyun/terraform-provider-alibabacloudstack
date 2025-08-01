@@ -799,6 +799,5 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 }
 
 func resourceAlibabacloudStackMongoDBShardingInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	return nil
 	return resourceAlibabacloudStackMongoDBInstanceDelete(d, meta)
 }

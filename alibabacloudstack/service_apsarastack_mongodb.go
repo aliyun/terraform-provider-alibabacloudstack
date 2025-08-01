@@ -62,7 +62,7 @@ func (s *MongoDBService) DescribeMongoDBInstance(id string) (instance dds.DBInst
 		})
 
 		if err != nil {
-			if sdkErr, ok := err.(*errors.ServerError); ok && sdkErr.ErrorCode() == "InternalError" {
+			if _, ok := err.(*errors.ServerError); ok {
 				return resource.RetryableError(err)
 			}
 			return resource.NonRetryableError(err)
