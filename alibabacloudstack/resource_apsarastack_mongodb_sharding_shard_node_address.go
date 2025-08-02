@@ -10,11 +10,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func resourceAlibabacloudStackMongodbShardingShardNodeAddress() *schema.Resource {
-	resource:= resourceAlibabacloudStackMongodbShardingCsNodeAddress()
-	resource.CustomizeDiff= func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func resourceAlibabacloudStackMongodbShardingInstanceShardNodeAddress() *schema.Resource {
+	resource := resourceAlibabacloudStackMongodbShardingInstanceCsNodeAddress()
+	resource.CustomizeDiff = func(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 		nodeId := d.Get("node_id").(string)
-		if ! strings.HasPrefix(nodeId, "d-") {
+		if nodeId != "" && !strings.HasPrefix(nodeId, "d-") {
 			return fmt.Errorf("node %s is not a shard node", nodeId)
 		}
 		return nil

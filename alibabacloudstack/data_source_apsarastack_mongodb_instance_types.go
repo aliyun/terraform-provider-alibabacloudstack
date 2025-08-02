@@ -165,62 +165,64 @@ func dataSourceAlibabacloudStackMongodbInstanceTypesRead(d *schema.ResourceData,
 		return err
 	}
 
-	for _, d := range response["data"].([]interface{}) {
-		data := d.(map[string]interface{})
-		id := data["spec"].(string)
-		if _, exists := filterIds[id]; len(filterIds) > 0 && !exists {
-			continue
-		}
-		if _, exists := existedId[id]; exists {
-			continue
-		}
-		cpu, err := data["cpu"].(json.Number).Int64()
-		if err != nil {
-			return err
-		}
-		memory, err := data["memory"].(json.Number).Int64()
-		if err != nil {
-			return err
-		}
-		var connections int
-		if v, ok := data["connections"].(json.Number); ok {
-			vv, err := v.Int64()
+	if v, ok := response["data"].([]interface{}); ok {
+		for _, d := range v {
+			data := d.(map[string]interface{})
+			id := data["spec"].(string)
+			if _, exists := filterIds[id]; len(filterIds) > 0 && !exists {
+				continue
+			}
+			if _, exists := existedId[id]; exists {
+				continue
+			}
+			cpu, err := data["cpu"].(json.Number).Int64()
 			if err != nil {
 				return err
 			}
-			connections = int(vv)
-		} else if v, ok := data["connections"].(string); ok {
-			if v == "Unlimited" {
-				connections = -1
-			} else {
-				vv, err := strconv.Atoi(v)
+			memory, err := data["memory"].(json.Number).Int64()
+			if err != nil {
+				return err
+			}
+			var connections int
+			if v, ok := data["connections"].(json.Number); ok {
+				vv, err := v.Int64()
 				if err != nil {
 					return err
 				}
-				connections = vv
+				connections = int(vv)
+			} else if v, ok := data["connections"].(string); ok {
+				if v == "Unlimited" {
+					connections = -1
+				} else {
+					vv, err := strconv.Atoi(v)
+					if err != nil {
+						return err
+					}
+					connections = vv
+				}
 			}
+			storageMin, err := data["storageMin"].(json.Number).Int64()
+			if err != nil {
+				return err
+			}
+			storageMax, err := data["storageMax"].(json.Number).Int64()
+			if err != nil {
+				return err
+			}
+			types = append(types, map[string]interface{}{
+				"id":             id,
+				"cpu":            cpu,
+				"memory":         memory,
+				"series":         data["seriesId"],
+				"engine_version": data["engineVersionLabel"],
+				"cpu_type":       data["cpuType"],
+				"connections":    connections,
+				"storage_min":    storageMin,
+				"storage_max":    storageMax,
+			})
+			existedId[id] = ""
+			ids = append(ids, id)
 		}
-		storageMin, err := data["storageMin"].(json.Number).Int64()
-		if err != nil {
-			return err
-		}
-		storageMax, err := data["storageMax"].(json.Number).Int64()
-		if err != nil {
-			return err
-		}
-		types = append(types, map[string]interface{}{
-			"id":             id,
-			"cpu":            cpu,
-			"memory":         memory,
-			"series":         data["seriesId"],
-			"engine_version": data["engineVersionLabel"],
-			"cpu_type":       data["cpuType"],
-			"connections":    connections,
-			"storage_min":    storageMin,
-			"storage_max":    storageMax,
-		})
-		existedId[id] = ""
-		ids = append(ids, id)
 	}
 
 	sortedBy := d.Get("sorted_by").(string)

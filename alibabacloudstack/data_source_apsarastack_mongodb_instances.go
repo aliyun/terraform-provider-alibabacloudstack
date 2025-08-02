@@ -118,7 +118,7 @@ func dataSourceAlibabacloudStackMongoDBInstances() *schema.Resource {
 							Type:     schema.TypeInt,
 							Computed: true,
 						},
-						"mongos": {
+						"mongo_list": {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
@@ -131,14 +131,14 @@ func dataSourceAlibabacloudStackMongoDBInstances() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"class": {
+									"node_class": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
 								},
 							},
 						},
-						"shards": {
+						"shard_list": {
 							Type:     schema.TypeList,
 							Computed: true,
 							Elem: &schema.Resource{
@@ -151,11 +151,35 @@ func dataSourceAlibabacloudStackMongoDBInstances() *schema.Resource {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"class": {
+									"node_class": {
 										Type:     schema.TypeString,
 										Computed: true,
 									},
-									"storage": {
+									"node_storage": {
+										Type:     schema.TypeInt,
+										Computed: true,
+									},
+								},
+							},
+						},
+						"configserver_list": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"node_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"description": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"node_class": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+									"node_storage": {
 										Type:     schema.TypeInt,
 										Computed: true,
 									},
@@ -294,27 +318,17 @@ func dataSourceAlibabacloudStackMongoDBInstancesRead(d *schema.ResourceData, met
 			"replication":       item.ReplicationFactor,
 			"tags":              ddsService.tagsToMap(item.Tags.Tag),
 		}
-		mongoList := []map[string]interface{}{}
-		for _, v := range item.MongosList.MongosAttribute {
-			mongo := map[string]interface{}{
-				"description": v.NodeDescription,
-				"node_id":     v.NodeId,
-				"class":       v.NodeClass,
-			}
-			mongoList = append(mongoList, mongo)
+		nodes, err := ddsService.DdsDescribeShardingInstanceNodes(item.DBInstanceId)
+		if err != nil {
+			return err
 		}
-		shardList := []map[string]interface{}{}
-		for _, v := range item.ShardList.ShardAttribute {
-			shard := map[string]interface{}{
-				"description": v.NodeDescription,
-				"node_id":     v.NodeId,
-				"class":       v.NodeClass,
-				"storage":     v.NodeStorage,
+		for key, info := range nodes {
+			data := []map[string]interface{}{}
+			for _, v := range info {
+				data = append(data, v.(map[string]interface{}))
 			}
-			shardList = append(shardList, shard)
+			mapping[key] = data
 		}
-		mapping["mongos"] = mongoList
-		mapping["shards"] = shardList
 		ids = append(ids, item.DBInstanceId)
 		names = append(names, item.DBInstanceDescription)
 		s = append(s, mapping)

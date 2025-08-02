@@ -110,6 +110,25 @@ func (s *MongoDBService) MongoDbInstanceStateRefreshFunc(id string, failStates [
 	}
 }
 
+func (s *MongoDBService) MongoDbInstanceNodeAddressStateRefreshFunc(nodeid, netType string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribeShardingInstanceNode(nodeid)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		if object["enable_"+netType+"_connection"].(bool) {
+			return object, "Enable", nil
+		}else {
+		return object, "Disable", nil
+		}
+
+	}
+}
+
 func (s *MongoDBService) DescribeMongoDBSecurityIps(instanceId string) (ips []string, err error) {
 	request := dds.CreateDescribeSecurityIpsRequest()
 	s.client.InitRpcRequest(*request.RpcRequest)
@@ -1065,7 +1084,6 @@ func (s *MongoDBService) DescribeShardingInstanceNode(id string) (map[string]int
 		"enable_public_connection":  false,
 		"enable_private_connection": false,
 	}
-
 	parts := strings.SplitN(id, ":", 2)
 	instanceId := parts[0]
 	nodeId := parts[1]
@@ -1083,6 +1101,7 @@ func (s *MongoDBService) DescribeShardingInstanceNode(id string) (map[string]int
 			if err != nil {
 				return nil, err
 			}
+
 			if address["NetworkType"].(string) == "Public" {
 				result["enable_public_connection"] = true
 				result["public_connect_string"] = address["NetworkAddress"].(string)
@@ -1095,7 +1114,6 @@ func (s *MongoDBService) DescribeShardingInstanceNode(id string) (map[string]int
 
 		}
 	}
-
 	return result, nil
 }
 
@@ -1161,4 +1179,25 @@ func (s *MongoDBService) ModifyDBInstanceConnectionString(reqQuery map[string]in
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, id)
 	}
 	return nil
+}
+
+func (s *MongoDBService) SwtichNodeConnection(action, dbInstanceId, nodeId string) error {
+	reqQuery := map[string]interface{}{
+		"DBInstanceId": dbInstanceId,
+		"NodeId":       nodeId,
+	}
+	return resource.Retry(10*time.Minute, func() *resource.RetryError {
+		_, err := s.client.DoTeaRequest("POST", "Dds", "2015-12-01", action, "", nil, reqQuery, nil)
+
+		if err == nil {
+			return nil
+		}
+
+		if sdkError, ok := err.(*tea.SDKError); ok && *sdkError.Code == "OperationDenied.DBInstanceStatus" {
+			time.Sleep(10 * time.Second)
+			return resource.RetryableError(err)
+		}
+
+		return resource.NonRetryableError(err)
+	})
 }
