@@ -14,14 +14,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlibabacloudStackMongodbShardingMongosNodeAddress() *schema.Resource {
-	resource := resourceAlibabacloudStackMongodbShardingCsNodeAddress()
+func resourceAlibabacloudStackMongodbShardingInstanceMongosNodeAddress() *schema.Resource {
+	resource := resourceAlibabacloudStackMongodbShardingInstanceCsNodeAddress()
 
 	resource.Schema["private_connect_string_prefix"] = &schema.Schema{
 		Type:         schema.TypeString,
 		Optional:     true,
 		Computed:     true,
 		ValidateFunc: validateShardeNodeConnectionString(),
+		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+			if !d.Get("enable_private_connection").(bool) {
+				return true
+			}
+			return oldValue == newValue
+		},
 	}
 	resource.Schema["private_connect_port"] = &schema.Schema{
 		Type:         schema.TypeInt,
@@ -29,12 +35,24 @@ func resourceAlibabacloudStackMongodbShardingMongosNodeAddress() *schema.Resourc
 		Computed:     true,
 		ValidateFunc: validation.IntBetween(1, 65536),
 		RequiredWith: []string{"public_connect_string_prefix"},
+		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+			if !d.Get("enable_private_connection").(bool) {
+				return true
+			}
+			return oldValue == newValue
+		},
 	}
 	resource.Schema["public_connect_string_prefix"] = &schema.Schema{
 		Type:         schema.TypeString,
 		Optional:     true,
 		Computed:     true,
 		ValidateFunc: validateShardeNodeConnectionString(),
+		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+			if !d.Get("enable_public_connection").(bool) {
+				return true
+			}
+			return oldValue == newValue
+		},
 	}
 
 	resource.Schema["public_connect_port"] = &schema.Schema{
@@ -43,6 +61,12 @@ func resourceAlibabacloudStackMongodbShardingMongosNodeAddress() *schema.Resourc
 		Computed:     true,
 		ValidateFunc: validation.IntBetween(1, 65536),
 		RequiredWith: []string{"public_connect_string_prefix"},
+		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+			if !d.Get("enable_public_connection").(bool) {
+				return true
+			}
+			return oldValue == newValue
+		},
 	}
 
 	resource.Schema["enable_private_connection"] = &schema.Schema{
@@ -63,19 +87,19 @@ func resourceAlibabacloudStackMongodbShardingMongosNodeAddress() *schema.Resourc
 
 		return nil
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackMongodbShardingMongosNodeCreate,
-		resourceAlibabacloudStackMongodbShardingMongosNodeRead,
-		resourceAlibabacloudStackMongodbShardingMongosNodeAddresUpdate,
-		resourceAlibabacloudStackMongodbShardingMongosNodeDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackMongodbShardingInstanceMongosNodeAddressCreate,
+		resourceAlibabacloudStackMongodbShardingInstanceMongosNodeAddressRead,
+		resourceAlibabacloudStackMongodbShardingInstanceMongosNodeAddresUpdate,
+		resourceAlibabacloudStackMongodbShardingInstanceMongosNodeAddressDelete)
 	return resource
 }
 
-func resourceAlibabacloudStackMongodbShardingMongosNodeCreate(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackMongodbShardingCsNodeAddressCreate(d, meta)
+func resourceAlibabacloudStackMongodbShardingInstanceMongosNodeAddressCreate(d *schema.ResourceData, meta interface{}) error {
+	return resourceAlibabacloudStackMongodbShardingInstanceCsNodeAddressCreate(d, meta)
 }
 
-func resourceAlibabacloudStackMongodbShardingMongosNodeAddresUpdate(d *schema.ResourceData, meta interface{}) error {
-	if err := resourceAlibabacloudStackMongodbShardingCsNodeAddressUpdate(d, meta); err != nil {
+func resourceAlibabacloudStackMongodbShardingInstanceMongosNodeAddresUpdate(d *schema.ResourceData, meta interface{}) error {
+	if err := resourceAlibabacloudStackMongodbShardingInstanceCsNodeAddressUpdate(d, meta); err != nil {
 		return err
 	}
 	client := meta.(*connectivity.AlibabacloudStackClient)
@@ -91,12 +115,12 @@ func resourceAlibabacloudStackMongodbShardingMongosNodeAddresUpdate(d *schema.Re
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 
-	statusNow, err := ddsService.DescribeShardingInstanceNode(instanceId)
+	statusNow, err := ddsService.DescribeShardingInstanceNode(d.Id())
 	if err != nil {
 		return err
 	}
 
-	if v, ok := d.GetOk("private_connect_string_prefix"); ok && (d.HasChange("private_connect_string_prefix") || d.HasChange("private_connect_port")) {
+	if v, ok := d.GetOk("private_connect_string_prefix"); d.Get("enable_private_connection").(bool) && ok && (d.HasChange("private_connect_string_prefix") || d.HasChange("private_connect_port")) {
 
 		reqQuery := map[string]interface{}{
 			"DBInstanceId":            instanceId,
@@ -114,7 +138,7 @@ func resourceAlibabacloudStackMongodbShardingMongosNodeAddresUpdate(d *schema.Re
 		}
 	}
 
-	if v, ok := d.GetOk("public_connect_string_prefix"); ok && (d.HasChange("public_connect_string_prefix") || d.HasChange("public_connect_port")) {
+	if v, ok := d.GetOk("public_connect_string_prefix"); d.Get("enable_public_connection").(bool) && ok && (d.HasChange("public_connect_string_prefix") || d.HasChange("public_connect_port")) {
 
 		reqQuery := map[string]interface{}{
 			"DBInstanceId":            instanceId,
@@ -135,8 +159,8 @@ func resourceAlibabacloudStackMongodbShardingMongosNodeAddresUpdate(d *schema.Re
 	return nil
 }
 
-func resourceAlibabacloudStackMongodbShardingMongosNodeRead(d *schema.ResourceData, meta interface{}) error {
-	if err := resourceAlibabacloudStackMongodbShardingCsNodeAddressRead(d, meta); err != nil {
+func resourceAlibabacloudStackMongodbShardingInstanceMongosNodeAddressRead(d *schema.ResourceData, meta interface{}) error {
+	if err := resourceAlibabacloudStackMongodbShardingInstanceCsNodeAddressRead(d, meta); err != nil {
 		return err
 	}
 
@@ -157,6 +181,6 @@ func resourceAlibabacloudStackMongodbShardingMongosNodeRead(d *schema.ResourceDa
 	return nil
 }
 
-func resourceAlibabacloudStackMongodbShardingMongosNodeDelete(d *schema.ResourceData, meta interface{}) error {
-	return resourceAlibabacloudStackMongodbShardingCsNodeAddressDelete(d, meta)
+func resourceAlibabacloudStackMongodbShardingInstanceMongosNodeAddressDelete(d *schema.ResourceData, meta interface{}) error {
+	return resourceAlibabacloudStackMongodbShardingInstanceCsNodeAddressDelete(d, meta)
 }
