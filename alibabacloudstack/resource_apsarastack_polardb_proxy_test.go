@@ -180,8 +180,12 @@ func TestAccAlibabacloudStackPolardbProxy_ReadWriteSpliting(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"read_write_spliting":         "0",
-						"read_only_instance_weight.#": "0",
+						"read_write_spliting":                        "0",
+						"read_only_instance_weight.#":                REMOVEKEY,
+						"read_only_instance_weight.0.db_instance_id": REMOVEKEY,
+						"read_only_instance_weight.0.weight":         REMOVEKEY,
+						"read_only_instance_weight.1.db_instance_id": REMOVEKEY,
+						"read_only_instance_weight.1.weight":         REMOVEKEY,
 					}),
 				),
 			},
@@ -208,15 +212,8 @@ func resourcePolardbProxyConfigDependence(name string) string {
 		default = "%v"
 	}
 
-	resource "alibabacloudstack_polardb_dbinstance" "default" {
-	instance_storage = "5"
-	instance_name = "${var.name}"
-	storage_type = "local_ssd"
-	engine = "MySQL"
-	engine_version = "5.7"
-	instance_type = "rds.mysql.t1.small"
-	}
-	`, name, one_minute_later.Format("2006-01-02T15:04:05Z"))
+	%s
+	`, name, one_minute_later.Format("2006-01-02T15:04:05Z"), PolarDBMysqlCommonTestCase(false))
 }
 
 func resourcePolardbProxyReadWriteSplitingDependence(name string) string {
@@ -225,14 +222,7 @@ func resourcePolardbProxyReadWriteSplitingDependence(name string) string {
 		default = "%v"
 	}
 
-	resource "alibabacloudstack_polardb_dbinstance" "default" {
-		instance_storage = "5"
-		instance_name = "${var.name}"
-		storage_type = "local_ssd"
-		engine = "MySQL"
-		engine_version = "5.7"
-		instance_type = "rds.mysql.t1.small"
-	}
+	%s
 
 	resource "alibabacloudstack_polardb_readonly_instance" "default" {
 		master_db_instance_id = "${alibabacloudstack_polardb_dbinstance.default.id}"
@@ -243,5 +233,5 @@ func resourcePolardbProxyReadWriteSplitingDependence(name string) string {
 		instance_name = "${var.name}"
 		db_instance_storage_type = "${alibabacloudstack_polardb_dbinstance.default.storage_type}"
 	}
-	`, name)
+	`, name, PolarDBMysqlCommonTestCase(false))
 }

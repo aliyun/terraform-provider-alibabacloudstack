@@ -155,6 +155,12 @@ func resourceAlibabacloudStackPolardbproxy() *schema.Resource {
 						},
 					},
 				},
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					if d.Get("read_write_spliting").(string) == "0" {
+						return true
+					}
+					return oldValue == newValue
+				},
 			},
 		},
 	}
@@ -413,7 +419,7 @@ func resourceAlibabacloudStackPolardbproxyRead(d *schema.ResourceData, meta inte
 		d.Set("db_proxy_connect_string", strings.Split(v.DBProxyConnectString, ".")[0])
 		d.Set("db_proxy_connect_address", v.DBProxyConnectString)
 		d.Set("read_only_instance_max_delay_time", v.ReadOnlyInstanceMaxDelayTime)
-		if v.ReadOnlyInstanceWeight != "" {
+		if v.ReadOnlyInstanceWeight != "" && v.ReadOnlyInstanceWeight != "null" {
 			read_only_instance_weight := make([]map[string]interface{}, 0)
 			instances_weights := make([]map[string]interface{}, 0)
 			err := json.Unmarshal([]byte(v.ReadOnlyInstanceWeight), &instances_weights)
