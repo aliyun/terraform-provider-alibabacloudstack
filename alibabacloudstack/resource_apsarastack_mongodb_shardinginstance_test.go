@@ -179,6 +179,11 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.id}",
 							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.storage_min}",
 						},
+						{
+							"description":  "shard3",
+							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.id}",
+							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.storage_min}",
+						},
 					},
 					"mongo_list": []map[string]interface{}{
 						{
@@ -247,11 +252,6 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 							"description":  "shard1",
 							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.1.id}",
 							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.1.storage_min}",
-						},
-						{
-							"description":  "shard3",
-							"node_class":   "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.id}",
-							"node_storage": "${data.alibabacloudstack_mongodb_instance_types.shard.instance_types.0.storage_min}",
 						},
 						{
 							"description":  "shard4",

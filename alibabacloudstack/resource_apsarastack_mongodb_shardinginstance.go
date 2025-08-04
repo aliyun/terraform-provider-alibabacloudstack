@@ -311,6 +311,12 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 		}
 		shardList = append(shardList, shardNode)
 	}
+	var lazyShardNode map[string]interface{}
+	if len(shardList) > 2 {
+		lastIndex := len(shardList) - 1
+		lazyShardNode = shardList[lastIndex]
+		shardList = shardList[:lastIndex]
+	}
 	reqQuery["ReplicaSet"] = shardList
 
 	mongoList := []map[string]interface{}{}
@@ -384,6 +390,42 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+
+	if lazyShardNode != nil {
+		request := dds.CreateCreateNodeRequest()
+		client.InitRpcRequest(*request.RpcRequest)
+		request.DBInstanceId = dbInstanceId
+		request.NodeClass = lazyShardNode["Class"].(string)
+		request.NodeType = "shard"
+		request.ClientToken = buildClientToken(request.GetActionName())
+		request.NodeStorage = requests.NewInteger( lazyShardNode["Storage"].(int))
+		request.AccountName = d.Get("db_account_name").(string)
+		request.AccountPassword = d.Get("db_account_password").(string)
+
+		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+			return client.CreateNode(request)
+		})
+		bresponse, ok := raw.(*dds.CreateNodeResponse)
+		if err != nil {
+			errmsg := ""
+			if ok {
+				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			}
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, dbInstanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+		nodeId := bresponse.NodeId
+		reqQuery := map[string]interface{}{
+			"DBInstanceId":          dbInstanceId,
+			"NodeId":                nodeId,
+			"DBInstanceDescription": lazyShardNode["Description"],
+		}
+		if _, err := client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceDescription", "", nil, reqQuery, nil); err != nil {
+			return err
+		}
 	}
 
 	// create shard node account by create new shard node
@@ -583,7 +625,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 			}
 			periods_set := schema.NewSet(schema.HashString, interfacePeriods)
 			connectivity.SetResourceData(d, periods_set, "preferred_backup_period", "backup_period")
-			
+
 		}
 	}()
 
@@ -595,8 +637,8 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		case <-ctx.Done():
 			return
 		default:
-			reqQuery := map[string]interface{} {"DBInstanceId":d.Id()}
-			if response, err:=client.DoTeaRequest("GET","Dds", "2015-12-01", "DescribeAccounts", "", nil, reqQuery, nil) ; err != nil {
+			reqQuery := map[string]interface{}{"DBInstanceId": d.Id()}
+			if response, err := client.DoTeaRequest("GET", "Dds", "2015-12-01", "DescribeAccounts", "", nil, reqQuery, nil); err != nil {
 				errChan <- fmt.Errorf("GetAuditLogFilter: %w", err)
 				cancel()
 				return
@@ -611,7 +653,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 			}
 		}
 	}()
-	
+
 	// 并发任务4：审计策略
 	wg.Add(1)
 	go func() {
@@ -786,7 +828,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceUpdate(d *schema.ResourceDa
 	}
 
 	if d.HasChange("db_account_password") {
-		nodeId:=d.Get("shard_list").(*schema.Set).List()[0].(map[string]interface{})["node_id"].(string)
+		nodeId := d.Get("shard_list").(*schema.Set).List()[0].(map[string]interface{})["node_id"].(string)
 		err := ddsService.ResetDbAccountPassword(d.Id(), nodeId, d.Get("db_account_name").(string), d.Get("db_account_password").(string))
 		if err != nil {
 			return errmsgs.WrapError(err)
