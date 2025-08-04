@@ -7,10 +7,11 @@ sidebar_current: "docs-Alibabacloudstack-mongodb-account" description: |-
 提供一个 MongoDB 账号资源。
 ---
 
-alibabacloudstack_mongodb_account
+# alibabacloudstack_mongodb_account
 提供一个 MongoDB 账号资源。
 
-示例用法
+### 示例用法
+```hcl
 variable "name" {
 	default = "tfaccount44135"
 }
@@ -51,6 +52,7 @@ resource "alibabacloudstack_mongodb_account" "default" {
   instance_id = "${alibabacloudstack_mongodb_instance.default.id}"
   account_name = "tfaccount44135"
 }
+```
 ## 参数说明
 以下参数被支持：
 
