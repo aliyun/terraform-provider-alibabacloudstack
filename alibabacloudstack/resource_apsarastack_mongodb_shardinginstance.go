@@ -399,7 +399,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 		request.NodeClass = lazyShardNode["Class"].(string)
 		request.NodeType = "shard"
 		request.ClientToken = buildClientToken(request.GetActionName())
-		request.NodeStorage = requests.NewInteger( lazyShardNode["Storage"].(int))
+		request.NodeStorage = requests.NewInteger(lazyShardNode["Storage"].(int))
 		request.AccountName = d.Get("db_account_name").(string)
 		request.AccountPassword = d.Get("db_account_password").(string)
 
@@ -426,78 +426,58 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 		if _, err := client.DoTeaRequest("POST", "Dds", "2015-12-01", "ModifyDBInstanceDescription", "", nil, reqQuery, nil); err != nil {
 			return err
 		}
-	}
-
-	// create shard node account by create new shard node
-	reqQuery = map[string]interface{}{
-		"pageStart":      1,
-		"pageSize":       500,
-		"label":          "true",
-		"resourceType":   "dds",
-		"status":         "Available",
-		"dbInstanceType": "sharding",
-		"engine":         "MongoDB",
-		"engineVersion":  d.Get("engine_version"),
-		"nodeType":       "shard",
-	}
-
-	if response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select", nil, reqQuery, nil); err != nil {
-		return err
 	} else {
-		maxCpu := 1000
-		var nodeClass string
-		var storageMin int
-		for _, d := range response["data"].([]interface{}) {
-			data := d.(map[string]interface{})
-			if cpu, err := data["cpu"].(json.Number).Int64(); err != nil {
-				return err
-			} else if int(cpu) < maxCpu {
-				nodeClass = data["spec"].(string)
-				maxCpu = int(cpu)
-				if v, err := data["storageMin"].(json.Number).Int64(); err != nil {
+
+		// create shard node account by create new shard node
+		reqQuery = map[string]interface{}{
+			"pageStart":      1,
+			"pageSize":       500,
+			"label":          "true",
+			"resourceType":   "dds",
+			"status":         "Available",
+			"dbInstanceType": "sharding",
+			"engine":         "MongoDB",
+			"engineVersion":  d.Get("engine_version"),
+			"nodeType":       "shard",
+		}
+
+		if response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", "SelectCommonSpec", "/ascm/manage/saleconf/commonSpec/select", nil, reqQuery, nil); err != nil {
+			return err
+		} else {
+			maxCpu := 1000
+			var nodeClass string
+			var storageMin int
+			for _, d := range response["data"].([]interface{}) {
+				data := d.(map[string]interface{})
+				if cpu, err := data["cpu"].(json.Number).Int64(); err != nil {
 					return err
-				} else {
-					storageMin = int(v)
+				} else if int(cpu) < maxCpu {
+					nodeClass = data["spec"].(string)
+					maxCpu = int(cpu)
+					if v, err := data["storageMin"].(json.Number).Int64(); err != nil {
+						return err
+					} else {
+						storageMin = int(v)
+					}
 				}
 			}
-		}
-		if nodeClass == "" {
-			return fmt.Errorf("No available shard node type found")
-		}
-		request := dds.CreateCreateNodeRequest()
-		client.InitRpcRequest(*request.RpcRequest)
-		request.DBInstanceId = dbInstanceId
-		request.NodeClass = nodeClass
-		request.NodeType = "shard"
-		request.ClientToken = buildClientToken(request.GetActionName())
-		request.NodeStorage = requests.NewInteger(storageMin)
-		request.AccountName = d.Get("db_account_name").(string)
-		request.AccountPassword = d.Get("db_account_password").(string)
-
-		raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
-			return client.CreateNode(request)
-		})
-		bresponse, ok := raw.(*dds.CreateNodeResponse)
-		if err != nil {
-			errmsg := ""
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			if nodeClass == "" {
+				return fmt.Errorf("No available shard node type found")
 			}
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, dbInstanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-		}
-		if _, err := stateConf.WaitForState(); err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-		} else {
-			request := dds.CreateDeleteNodeRequest()
+			request := dds.CreateCreateNodeRequest()
 			client.InitRpcRequest(*request.RpcRequest)
 			request.DBInstanceId = dbInstanceId
-			request.NodeId = bresponse.NodeId
+			request.NodeClass = nodeClass
+			request.NodeType = "shard"
 			request.ClientToken = buildClientToken(request.GetActionName())
+			request.NodeStorage = requests.NewInteger(storageMin)
+			request.AccountName = d.Get("db_account_name").(string)
+			request.AccountPassword = d.Get("db_account_password").(string)
 
 			raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
-				return client.DeleteNode(request)
+				return client.CreateNode(request)
 			})
-			bresponse, ok := raw.(*dds.DeleteNodeResponse)
+			bresponse, ok := raw.(*dds.CreateNodeResponse)
 			if err != nil {
 				errmsg := ""
 				if ok {
@@ -505,9 +485,30 @@ func resourceAlibabacloudStackMongoDBShardingInstanceCreate(d *schema.ResourceDa
 				}
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, dbInstanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-
 			if _, err := stateConf.WaitForState(); err != nil {
 				return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+			} else {
+				request := dds.CreateDeleteNodeRequest()
+				client.InitRpcRequest(*request.RpcRequest)
+				request.DBInstanceId = dbInstanceId
+				request.NodeId = bresponse.NodeId
+				request.ClientToken = buildClientToken(request.GetActionName())
+
+				raw, err := client.WithDdsClient(func(client *dds.Client) (interface{}, error) {
+					return client.DeleteNode(request)
+				})
+				bresponse, ok := raw.(*dds.DeleteNodeResponse)
+				if err != nil {
+					errmsg := ""
+					if ok {
+						errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+					}
+					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, dbInstanceId, request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				}
+
+				if _, err := stateConf.WaitForState(); err != nil {
+					return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+				}
 			}
 		}
 	}

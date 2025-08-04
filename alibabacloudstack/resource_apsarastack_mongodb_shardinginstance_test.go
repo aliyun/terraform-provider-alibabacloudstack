@@ -211,7 +211,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 					testAccCheck(map[string]string{
 						"zone_id":        CHECKSET,
 						"engine_version": engine_version,
-						"shard_list.#":   "2",
+						"shard_list.#":   "3",
 						"mongo_list.#":   "2",
 						"name":           "",
 						"storage_engine": "WiredTiger",
@@ -262,7 +262,7 @@ func TestAccAlibabacloudStackMongoDBShardingInstance_basicv4(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"shard_list.#": "3",
+						"shard_list.#": "2",
 					}),
 				),
 			},
