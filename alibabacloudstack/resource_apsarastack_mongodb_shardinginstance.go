@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -558,7 +559,7 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		}
 	}()
 
-	// 并发任务4：审计策略
+	// 并发任务4：备份策略
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -566,13 +567,23 @@ func resourceAlibabacloudStackMongoDBShardingInstanceRead(d *schema.ResourceData
 		case <-ctx.Done():
 			return
 		default:
-			auditResponse, err := ddsService.DoDdsDescribeauditpolicyRequest(d.Id())
+			backupPolicy, err := ddsService.DescribeMongoDBBackupPolicy(d.Id())
 			if err != nil {
 				errChan <- fmt.Errorf("DoDdsDescribeauditpolicyRequest: %w", err)
 				cancel()
 				return
 			}
-			d.Set("audit_status", auditResponse.LogAuditStatus)
+			connectivity.SetResourceData(d, backupPolicy.PreferredBackupTime, "preferred_backup_time", "backup_time")
+			retention_period, _ := strconv.Atoi(backupPolicy.BackupRetentionPeriod)
+			d.Set("retention_period", retention_period)
+			periods := strings.Split(backupPolicy.PreferredBackupPeriod, ",")
+			var interfacePeriods []interface{}
+			for _, period := range periods {
+				interfacePeriods = append(interfacePeriods, period)
+			}
+			periods_set := schema.NewSet(schema.HashString, interfacePeriods)
+			connectivity.SetResourceData(d, periods_set, "preferred_backup_period", "backup_period")
+			
 		}
 	}()
 
