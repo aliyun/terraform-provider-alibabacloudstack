@@ -97,6 +97,7 @@ func (s *CenService) DoCbnDescribecensRequest(id string) (*CbnDescribecensRespon
 	request.QueryParams["Filter.1.Value.1"] = id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -171,9 +172,12 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteEntriesRequest(id string) (*
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterRouteEntries", "")
 	CbnDescribeRouterRouteEntriesResponseObj := &CbnDescribeTransitRouterRouteEntriesResponse{}
 	//调用request_params_handler
-	request.QueryParams["TransitRouterRouteTableId"] = id
+	parts := strings.Split(id, ":")
+	route_table_id := parts[0]
+	request.QueryParams["TransitRouterRouteTableId"] = route_table_id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -201,6 +205,7 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTablesRequest(id string) (*C
 	request.QueryParams["TransitRouterId"] = transit_router_id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -216,4 +221,34 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTablesRequest(id string) (*C
 	}
 
 	return CbnDescribeRouterRouteTablesResponseObj, nil
+}
+
+func (s *CenService) WaitForTransitRouterTable(id string, status Status, timeout int) error {
+	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
+	parts := strings.Split(id, ":")
+	table_id := parts[1]
+	for {
+		tables, err := s.DoCbnDescribeTransitRouterRouteTablesRequest(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				if status == Deleted {
+					return nil
+				}
+			} else {
+				return errmsgs.WrapError(err)
+			}
+		}
+		table_status := ""
+		for _, table := range tables.TransitRouterRouteTables {
+			table_status = table.TransitRouterRouteTableStatus
+			if table.TransitRouterRouteTableId == table_id && table_status == string(status) {
+				return nil
+			}
+		}
+
+		if time.Now().After(deadline) {
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, table_id, GetFunc(1), timeout, table_status, string(status), errmsgs.ProviderERROR)
+		}
+		time.Sleep(DefaultIntervalShort * time.Second)
+	}
 }

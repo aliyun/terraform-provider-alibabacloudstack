@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func ResourceAlibabacloudStackCenTransitRouterRouterTable() *schema.Resource {
+func resourceAlibabacloudStackCenTransitRouterRouterTable() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"transit_router_id": {
@@ -84,7 +84,7 @@ func ResourceAlibabacloudStackCenTransitRouterRouterTable() *schema.Resource {
 
 func resourceAlibabacloudStackCenTransitRouterRouterTableCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
+	cencen_instanceservice := CenService{client}
 	// api: Cbn - 2017-09-12 - CreateCen
 	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "CreateTransitRouterRouteTable", "")
 	CbnCreateTransitRouterRouterTableResponseObj := CbnCreateTransitRouterRouterTableResponse{}
@@ -113,6 +113,12 @@ func resourceAlibabacloudStackCenTransitRouterRouterTableCreate(d *schema.Resour
 	route_table_id := CbnCreateTransitRouterRouterTableResponseObj.TransitRouterRouteTableId
 
 	d.SetId(fmt.Sprintf("%s:%s", d.Get("transit_router_id").(string), route_table_id))
+	err = cencen_instanceservice.WaitForTransitRouterTable(d.Id(), Active, 120)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+			"alibabacloudstack_cen_transit_router_route_table", "CreateTransitRouterRouteTable", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, err)
+
+	}
 	return nil
 }
 
