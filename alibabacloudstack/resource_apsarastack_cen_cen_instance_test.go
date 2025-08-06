@@ -10,7 +10,7 @@ import (
 )
 
 func TestAccAlibabacloudStackCenInstance0(t *testing.T) {
-	var v *CbnDescribecensResponse
+	var v *CenInstance
 
 	resourceId := "alibabacloudstack_cen_instance.default"
 	ra := resourceAttrInit(resourceId, AlibabacloudTestAccCenInstanceCheckmap)
@@ -21,8 +21,8 @@ func TestAccAlibabacloudStackCenInstance0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testacc%sceninstance%d", defaultRegionToTest, rand)
-	modify_name := fmt.Sprintf("tf-testacc%sceninstancemodify%d", defaultRegionToTest, rand)
+	name := fmt.Sprintf("tf-testaccceninstance%d" , rand)
+	modify_name := fmt.Sprintf("tf-testaccceninstancemodify%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCenInstanceBasicdependence)
 	ResourceTest(t, resource.TestCase{
@@ -37,35 +37,36 @@ func TestAccAlibabacloudStackCenInstance0(t *testing.T) {
 
 		Steps: []resource.TestStep{
 			{
-				Config: testAccConfig(map[string]interface{}{}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-
-						"cen_id": CHECKSET,
-					}),
-				),
-			},
-
-			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"cen_instance_name": name,
-
 					"description": name,
+					"transit_router_name":        name,
+					"transit_router_description": name,
+					"transit_router_cidrs": []string{"10.10.0.0/16"},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-
-						"cen_instance_name": name,
-
-						"description": name,
+						"cen_id": CHECKSET,
+						"transit_router_id":CHECKSET,
 					}),
 				),
 			},
 
 			{
 				Config: testAccConfig(map[string]interface{}{
+					"cen_instance_name": modify_name,
+					"description": modify_name,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"cen_instance_name": modify_name,
+						"description": modify_name,
+					}),
+				),
+			},
 
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"transit_router_name":        modify_name,
 					"transit_router_description": modify_name,
 				}),
@@ -79,7 +80,6 @@ func TestAccAlibabacloudStackCenInstance0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-
 					"transit_router_cidrs": []string{"10.10.10.2/24", "10.10.11.2/24"},
 				}),
 				Check: resource.ComposeTestCheckFunc(

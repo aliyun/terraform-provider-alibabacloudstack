@@ -17,23 +17,25 @@ type CenService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
+type CenInstance struct {
+	CenBandwidthPackageIds struct {
+		CenBandwidthPackageId []string `json:"CenBandwidthPackageId"`
+	} `json:"CenBandwidthPackageIds"`
+	CenId                           string `json:"CenId"`
+	CreationTime                    string `json:"CreationTime"`
+	Ipv6Level                       string `json:"Ipv6Level"`
+	ProtectionLevel                 string `json:"ProtectionLevel"`
+	SecurityLevelTag                string `json:"SecurityLevelTag"`
+	SecurityLevelTagBackgroundColer string `json:"SecurityLevelTagBackgroundColer"`
+	SecurityLevelTagTextColer       string `json:"SecurityLevelTagTextColer"`
+	Status                          string `json:"Status"`
+	Description                     string `json:"Description"`
+	Name                            string `json:"Name"`
+}
+
 type CbnDescribecensResponse struct {
 	Cens struct {
-		Cen []struct {
-			CenBandwidthPackageIds struct {
-				CenBandwidthPackageId []string `json:"CenBandwidthPackageId"`
-			} `json:"CenBandwidthPackageIds"`
-			CenId                           string `json:"CenId"`
-			CreationTime                    string `json:"CreationTime"`
-			Ipv6Level                       string `json:"Ipv6Level"`
-			ProtectionLevel                 string `json:"ProtectionLevel"`
-			SecurityLevelTag                string `json:"SecurityLevelTag"`
-			SecurityLevelTagBackgroundColer string `json:"SecurityLevelTagBackgroundColer"`
-			SecurityLevelTagTextColer       string `json:"SecurityLevelTagTextColer"`
-			Status                          string `json:"Status"`
-			Description                     string `json:"Description"`
-			Name                            string `json:"Name"`
-		} `json:"Cen"`
+		Cen []CenInstance `json:"Cen"`
 	} `json:"Cens"`
 	RequestId string `json:"RequestId"`
 }
@@ -88,10 +90,10 @@ type CbnDescribeTransitRouterRouteTablesResponse struct {
 	RequestId string `json:"RequestId"`
 }
 
-func (s *CenService) DoCbnDescribecensRequest(id string) (*CbnDescribecensResponse, error) {
+func (s *CenService) DoCbnDescribecensRequest(id string) (*CenInstance, error) {
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DescribeCens", "")
-	CbnDescribecensResponseObj := &CbnDescribecensResponse{}
+	cbnDescribecensResponseObj := &CbnDescribecensResponse{}
 	//调用request_params_handler
 	request.QueryParams["Filter.1.Key"] = "CenId"
 	request.QueryParams["Filter.1.Value.1"] = id
@@ -106,13 +108,17 @@ func (s *CenService) DoCbnDescribecensRequest(id string) (*CbnDescribecensRespon
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeCens", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
-	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnDescribecensResponseObj)
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &cbnDescribecensResponseObj)
 
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeCens", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
-	return CbnDescribecensResponseObj, nil
+	if len(cbnDescribecensResponseObj.Cens.Cen) < 1 {
+		return nil, errmsgs.GetNotFoundErrorFromString("Not Found Cent Instance "+ id)
+	}
+	
+	return &cbnDescribecensResponseObj.Cens.Cen[0], nil
 }
 
 func (s *CenService) DoCbnDescribeTransitRoutersRequest(id string) (*TransitRouterResponse, error) {
@@ -139,6 +145,32 @@ func (s *CenService) DoCbnDescribeTransitRoutersRequest(id string) (*TransitRout
 	}
 
 	return TransitRouterResponseObj, nil
+}
+
+func (s *CenService) WaitForCenInstance(instanceId string, status Status, timeout int) error {
+	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
+
+	for {
+		instance, err := s.DoCbnDescribecensRequest(instanceId)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				if status == Deleted {
+					return nil
+				}
+			} else {
+				return errmsgs.WrapError(err)
+			}
+		}
+
+		if instance.Status == string(status) {
+			return nil
+		}
+
+		if time.Now().After(deadline) {
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, instance.Status, string(status), errmsgs.ProviderERROR)
+		}
+		time.Sleep(DefaultIntervalShort * time.Second)
+	}
 }
 
 func (s *CenService) WaitForTransitRouterInstance(instanceId string, status Status, timeout int) error {

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -59,6 +58,7 @@ func resourceAlibabacloudStackCenCeninstance() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+				MaxItems: 5,
 			},
 			"transit_router_id": {
 				Type:     schema.TypeString,
@@ -76,6 +76,7 @@ func resourceAlibabacloudStackCenCeninstance() *schema.Resource {
 
 func resourceAlibabacloudStackCenCeninstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	cencen_instanceservice := CenService{client}
 
 	// api: Cbn - 2017-09-12 - CreateCen
 	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "CreateCen", "")
@@ -126,12 +127,52 @@ func resourceAlibabacloudStackCenCeninstanceCreate(d *schema.ResourceData, meta 
 	cen_id := CbnCreatecenResponseObj.CenId
 
 	d.SetId(fmt.Sprintf("%s", cen_id))
+	
+	if err := cencen_instanceservice.WaitForCenInstance(d.Id(), Active, 120); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
+	reqQuery := map[string]interface{}{
+		"CenId":            d.Id(),
+		"Type":             "Enterprise",
+		"SupportMulticast": true,
+	}
+
+	if v, ok := d.GetOk("transit_router_name"); ok {
+		reqQuery["TransitRouterName"] = v
+	}
+
+	if v, ok := d.GetOk("transit_router_description"); ok {
+		reqQuery["TransitRouterDescription"] = v
+	}
+
+	if v, ok := d.GetOk("transit_router_cidrs"); ok {
+		cidr := []map[string]interface{}{}
+		for _, i := range v.(*schema.Set).List() {
+			cidr = append(cidr, map[string]interface{}{
+				"Cidr": i,
+			})
+		}
+		reqQuery["TransitRouterCidrList"] = cidr
+	}
+
+	if _, err := client.DoTeaRequest("POST", "Cbn", "2017-09-12", "CreateTransitRouter", "", nil, reqQuery, nil); err != nil {
+		return err
+	}
+
+	if err := cencen_instanceservice.WaitForTransitRouterInstance(d.Id(), Active, 120); err != nil {
+		return errmsgs.WrapError(err)
+	}
+
 	return nil
 }
 
 func resourceAlibabacloudStackCenCeninstanceUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	cencen_instanceservice := CenService{client}
+	if d.IsNewResource() {
+		return nil
+	}
+	
 	// api: Cbn - 2017-09-12 - ModifyCenAttribute
 	if d.HasChanges("cen_instance_name", "description") {
 		request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "ModifyCenAttribute", "")
@@ -158,111 +199,84 @@ func resourceAlibabacloudStackCenCeninstanceUpdate(d *schema.ResourceData, meta 
 				"alibabacloudstack_cen_cen_instance", "ModifyCenAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
-	if d.HasChanges("transit_router_name", "transit_router_description", "transit_router_cidrs") {
-		response_transitrouter, err := cencen_instanceservice.DoCbnDescribeTransitRoutersRequest(d.Id())
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_ceninstance", errmsgs.AlibabacloudStackSdkGoERROR)
+
+	transitrouterId := d.Get("transit_router_id").(string)
+	if d.HasChanges("transit_router_name", "transit_router_description") {
+		request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "UpdateTransitRouter", "")
+		request.QueryParams["TransitRouterId"] = transitrouterId
+		if v, ok := d.GetOk("transit_router_description"); ok {
+			request.QueryParams["TransitRouterDescription"] = v.(string)
 		}
-		if len(response_transitrouter.TransitRouters) == 0 {
-			request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "CreateTransitRouter", "")
-			request.QueryParams["CenId"] = d.Id()
-			bresponse, err := client.ProcessCommonRequest(request)
-			addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if v, ok := d.GetOk("transit_router_name"); ok {
+			request.QueryParams["TransitRouterName"] = v.(string)
+		}
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_cen_cen_instance", "UpdateTransitRouter", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+	}
+	if d.HasChange("transit_router_cidrs") {
+		request_remove := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "DeleteTransitRouterCidr", "")
+		request_add := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "CreateTransitRouterCidr", "")
+		request_remove.QueryParams["TransitRouterId"] = transitrouterId
+		request_add.QueryParams["TransitRouterId"] = transitrouterId
+		old, new := d.GetChange("transit_router_cidrs")
+		log.Printf("[DEBUG] old:%v, new:%v", old, new)
+		for _, v := range old.(*schema.Set).List() {
+			matched := false
+			for _, vv := range new.(*schema.Set).List() {
+				if v == vv {
+					matched = true
+					break
+				}
+			}
+			if matched {
+				continue
+			}
+			request_remove.QueryParams["TransitRouterCidrId"] = v.(string)
+			bresponse, err := client.ProcessCommonRequest(request_remove)
+			addDebug(request_remove.GetActionName(), bresponse, request_remove, request_remove.QueryParams)
 			if err != nil {
 				if bresponse == nil {
 					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 				}
 				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-					"alibabacloudstack_cen_cen_instance", "CreateTransitRouter", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+					"alibabacloudstack_cen_cen_instance", "DeleteTransitRouterCidr", request_remove.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
-			if err := cencen_instanceservice.WaitForTransitRouterInstance(d.Id(), Active, 120); err != nil {
-				return errmsgs.WrapError(err)
-			}
-			// cencen_instanceservice.WaitForTransitRouterInstance(d.Id())
+
 		}
-		transitrouter_id := ""
-		for i := 0; i < 10; i++ {
-			response_transitrouter, err = cencen_instanceservice.DoCbnDescribeTransitRoutersRequest(d.Id())
-			if err != nil {
-				return errmsgs.WrapErrorf(err, "DoCbnDescribeTransitRoutersRequest")
+		for _, v := range new.(*schema.Set).List() {
+			matched := false
+			for _, vv := range old.(*schema.Set).List() {
+				if v == vv {
+					matched = true
+					break
+				}
 			}
-			if len(response_transitrouter.TransitRouters) > 0 {
-				transitrouter_id = response_transitrouter.TransitRouters[0].TransitRouterId
-				break
+			if matched {
+				continue
 			}
-			time.Sleep(time.Duration(2) * time.Second)
-		}
-		cidrs_map := make(map[string]string)
-		for _, cidr := range response_transitrouter.TransitRouters[0].TransitRouterCidrList {
-			cidrs_map[cidr.Cidr] = cidr.TransitRouterCidrId
-		}
-		if err != nil {
-			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_ceninstance", errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-		log.Printf("cidrs_map: %v", cidrs_map)
-		if d.HasChanges("transit_router_name", "transit_router_description") {
-			request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "UpdateTransitRouter", "")
-			request.QueryParams["TransitRouterId"] = transitrouter_id
-			if v, ok := d.GetOk("transit_router_description"); ok {
-				request.QueryParams["TransitRouterDescription"] = v.(string)
-			}
-			if v, ok := d.GetOk("transit_router_name"); ok {
-				request.QueryParams["TransitRouterName"] = v.(string)
-			}
-			bresponse, err := client.ProcessCommonRequest(request)
-			addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+			request_add.QueryParams["Cidr"] = v.(string)
+			bresponse, err := client.ProcessCommonRequest(request_add)
+			addDebug(request_add.GetActionName(), bresponse, request_add, request_add.QueryParams)
 			if err != nil {
 				if bresponse == nil {
 					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 				}
 				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-					"alibabacloudstack_cen_cen_instance", "UpdateTransitRouter", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
-		}
-		if d.HasChange("transit_router_cidrs") {
-			request_remove := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "DeleteTransitRouterCidr", "")
-			request_add := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "CreateTransitRouterCidr", "")
-			request_remove.QueryParams["TransitRouterId"] = transitrouter_id
-			request_add.QueryParams["TransitRouterId"] = transitrouter_id
-			old, new := d.GetChange("transit_router_cidrs")
-			log.Printf("[DEBUG] old:%v, new:%v", old, new)
-			for _, v := range old.(*schema.Set).List() {
-				log.Printf("[DEBUG] value: %v", v)
-				log.Printf("[DEBUG] cidrs_map: %v", cidrs_map)
-				cidr_id := cidrs_map[v.(string)]
-				request_remove.QueryParams["TransitRouterCidrId"] = cidr_id
-				bresponse, err := client.ProcessCommonRequest(request_remove)
-				addDebug(request_remove.GetActionName(), bresponse, request_remove, request_remove.QueryParams)
-				if err != nil {
-					if bresponse == nil {
-						return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-					}
-					errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-						"alibabacloudstack_cen_cen_instance", "DeleteTransitRouterCidr", request_remove.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-				}
-
-			}
-			for _, v := range new.(*schema.Set).List() {
-				log.Printf("[DEBUG] new value: %v", v)
-				log.Printf("[DEBUG] new cidrs_map: %v", cidrs_map)
-				request_add.QueryParams["Cidr"] = v.(string)
-				bresponse, err := client.ProcessCommonRequest(request_add)
-				addDebug(request_add.GetActionName(), bresponse, request_add, request_add.QueryParams)
-				if err != nil {
-					if bresponse == nil {
-						return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-					}
-					errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-						"alibabacloudstack_cen_cen_instance", "CreateTransitRouterCidr", request_add.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-				}
-
+					"alibabacloudstack_cen_cen_instance", "CreateTransitRouterCidr", request_add.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 
 		}
+
 	}
 	return nil
 }
@@ -270,24 +284,23 @@ func resourceAlibabacloudStackCenCeninstanceUpdate(d *schema.ResourceData, meta 
 func resourceAlibabacloudStackCenCeninstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cencen_instanceservice := CenService{client}
-	response, err := cencen_instanceservice.DoCbnDescribecensRequest(d.Id())
+	instance, err := cencen_instanceservice.DoCbnDescribecensRequest(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_ceninstance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	data := response.Cens.Cen[0]
-	d.Set("cen_id", data.CenId)
-	if data.Name != "" {
-		d.Set("cen_instance_name", data.Name)
+	d.Set("cen_id", instance.CenId)
+	if instance.Name != "" {
+		d.Set("cen_instance_name", instance.Name)
 	}
-	if data.Description != "" {
-		d.Set("description", data.Name)
+	if instance.Description != "" {
+		d.Set("description", instance.Name)
 	}
-	d.Set("create_time", data.CreationTime)
-	d.Set("protection_level", data.ProtectionLevel)
-	d.Set("status", data.Status)
+	d.Set("create_time", instance.CreationTime)
+	d.Set("protection_level", instance.ProtectionLevel)
+	d.Set("status", instance.Status)
 	bandwidth_package_ids := []string{}
 
-	for _, v := range data.CenBandwidthPackageIds.CenBandwidthPackageId {
+	for _, v := range instance.CenBandwidthPackageIds.CenBandwidthPackageId {
 		bandwidth_package_ids = append(bandwidth_package_ids, v)
 	}
 	d.Set("cen_bandwidth_package_ids", bandwidth_package_ids)
