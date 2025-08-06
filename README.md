@@ -1,152 +1,283 @@
-Terraform Provider For AlibabacloudStack Cloud
-==================
-
-
-
-- Website: https://www.terraform.io
-- [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
-- Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
-
-<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="400px"> 
-
+# Terraform Provider For AlibabacloudStack Cloud
 
 <img src="https://www.datocms-assets.com/2885/1506527326-color.svg" width="400px">
 
-Requirements
-------------
+## Documentation Language
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.13.x
--	[Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
--   [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports):
-    ```
-    go get golang.org/x/tools/cmd/goimports
-    ```
+[简体中文](./README_zh-CNS.md) | English
 
-Building The Provider
----------------------
+## Official Sites
 
-Clone repository to: `$GOPATH/src/github.com/aliyun/terraform-provider-alibabacloudstack`
+- [GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack)
+- [Alibaba Cloud Help Center](https://help.aliyun.com/apsara/index.html)
+- [Terraform Public Registry](https://registry.terraform.io/providers/aliyun/alibabacloudstack)
 
-```sh
-$ mkdir -p $GOPATH/src/github.com/apsara-stack; cd $GOPATH/src/github.com/apsara-stack
-$ git clone git@github.com:aliyun/terraform-provider-alibabacloudstack.git
+## Environment Configuration
+
+### Install Dependencies
+
+Download TF Core from [Terraform](https://www.terraform.io/downloads.html) or [OpenTofu](https://opentofu.org/docs/intro/install/) official websites, then install or extract it locally. It is recommended to add the installation path to the system `PATH` variable.
+
+> **Note**: Terraform requires version 0.13.x or higher. OpenTofu has no minimum version requirement.
+
+### Install Terraform Provider
+
+| Private Cloud Version | AlibabacloudStack Version |
+| ---  | ---  |
+| v3.16.2 | < 3.18.0 |
+| v3.18.x | >= 3.18.0 |
+
+**Option 1: Automatic Installation**
+
+> **Note**: Automatic installation requires your execution environment to have access to GitHub. This method requires no additional configuration, and TF Core will automatically install the Provider later.
+
+**Option 2: Mirror Site Installation**
+
+> **Description**: Mirror site installation effectively resolves installation failures caused by network isolation or instability.
+
+1. Create a `.terraformrc` or `terraform.rc` configuration file. The file location depends on the host operating system:
+   
+   > **Note**:
+   > 
+   > - On Windows: The file must be named `terraform.rc` and placed in the `%APPDATA%` directory of the relevant user. Use `$env:APPDATA` in PowerShell to locate this directory.
+   > 
+   > - On other systems: The file must be named `.terraformrc` and placed directly in the user's home directory.
+   > 
+   > - Alternatively, use the `TF_CLI_CONFIG_FILE` environment variable to specify the Terraform CLI configuration file location. Any such file should follow the naming pattern `*.tfrc`.
+
+2. Configure Mirror Site Information
+
+> **Note**: The following example uses [Alibaba Cloud Open Source Mirror Site](https://developer.aliyun.com/mirror/terraform)
+
+```hcl
+provider_installation {
+  network_mirror {
+    url = "https://mirrors.aliyun.com/terraform/"
+    // Restrict only AlibabacloudStack downloads from mirror
+    include = [
+      "registry.terraform.io/aliyun/alibabacloudstack",
+      "registry.terraform.io/hashicorp/alibabacloudstack",
+    ]
+  }
+  direct {
+    // Other providers maintain original download paths
+    exclude = [
+      "registry.terraform.io/aliyun/alibabacloudstack",
+      "registry.terraform.io/hashicorp/alibabacloudstack",
+    ]
+  }
+}
 ```
 
-Enter the provider directory and build the provider
+**Option 3: Manual Installation**
 
-```sh
-$ cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabacloudstack
-$ go build -o terraform-provider-alibabacloudstack
+Download the appropriate version of AlibabacloudStack from [GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack/releases/), create the directory structure according to the specified format under the selected installation path, and extract the Provider.
+
+> **Warning**: Incorrect directory structure will cause Provider loading failure.
+
+Standard Provider directory format:
+
+```
+XX(Plugin root path, e.g., ./terraform.d/providers/)
+└── <hostname>(Use registry.terraform.io for Terraform, registry.opentofu.org for Opentofu)
+    └── <Namespace>(e.g., hashicorp or aliyun)
+        └── <Provider Name>(alibabacloudstack)
+            └── <Provider Version>(e.g., 1.0.20)
+                └── <OS Arch>(e.g., windows_amd64)
+                    └── <Provider Bin>(terraform-provider-alibabacloudstack)
 ```
 
-Using the provider
-----------------------
-### Create the main.tf on working directory & add following portion to configure provider
+> **Note**: 
+>
+> - For the `namespace` layer, `hashicorp` is recommended. If using `aliyun`, ensure to explicitly declare it in subsequent Provider configurations.
+>
+> - Common system architectures: `windows_amd64`, `linux_amd64`, `linux_arm64`, `darwin_amd64`, `darwin_arm64`
+>
+> - The plugin root path can use the official default locations (auto-loaded during execution) or a custom path (requires manual specification during execution).
+>
+> Terraform scans and loads Providers from the following OS-specific paths:
+>
+>    *Windows*:
+>
+>        %APPDATA%/terraform.d/plugins
+>
+>        %APPDATA%/HashiCorp/Terraform/plugins
+> 
+>    *Mac OS X*:
+>
+>        $HOME/.terraform.d/plugins
+>
+>        ~/Library/Application Support/io.terraform/plugins
+>
+>        /Library/Application Support/io.terraform/plugins
+>    
+>    *Linux或其他类Unix系统*:
+>
+>        $HOME/.terraform.d/plugins
+>
+>        ~/.local/share/terraform/plugins
+>
+>        /usr/local/share/terraform/plugins
+>
+>        /usr/share/terraform/plugins
 
-````
+
+## Quick Start
+
+### Initialize Project
+
+1. **Create working directory**  
+   Create a new working directory and create a `provider.tf` file with the following content:
+
+```hcl
  terraform {
   required_providers {
     alibabacloudstack = {
       source = "aliyun/alibabacloudstack"
-      version = "1.0.1"
+      #version = ">=3.18.0"
     }
   }
 }
-
-# Configure the AlibabacloudStack Provider
- provider "alibabacloudstack" {
-  access_key = "ckhCs1K*********"
-  secret_key = "2lY9uNh***********************"
-  region =  "cn-xxxxxx-env00-d01"
-  proxy = "http://100.1.1.1:5001"
-  insecure = true
-  resource_group_set_name= "ResourceSet(wzw)"
-  domain = "server.asapi.cn-xxxxx-envXX-d01.intra.envXX.shuguang.com/asapi/v3"
-  protocol = "HTTP"
-}
-````                                               
-- Add following data in main.tf to create the resource vpc from terraform
 ```
-resource "alibabacloudstack_vpc" "default_vpc" {
+
+> **Note**: You can specify the version of the Provider according to your requirements. If not declared, the latest version will be used by default.
+
+2. Initialize the directory
+
+```bash
+terraform init
+```
+
+> **Note**: If you customized the plugin root path in the [Install Terraform Provider](#install-terraform-provider) section, you need to specify the path during initialization:
+>	```bash
+>	terraform init -plugin-dir=<YOUR PLUGIN ROOT PATH>
+>	```
+
+### Configure Cluster Connection Information
+
+**Option 1: Configuration File**
+
+Create a `provider.tf` file in your working directory and configure according to your environment:
+
+```hcl
+
+provider "alibabacloudstack" {
+  popgw_domain = "xxxx"
+  access_key   = "xxxx"
+  secret_key   = "xxxx"
+  region       = "xxxx"
+  proxy        = "xxxx"
+  protocol                = "xxxx"
+  insecure                = "xxxx"
+  resource_group_set_name = "xxxx"
+  role_arn                = "xxxx"
+}
+
+```
+
+**Option 2: Environment Variables** 
+
+Configure environment variables in the command execution terminal:
+
++ *Windows PowerShell*
+
+``` powershell
+$env:ALIBABACLOUDSTACK_POPGW_DOMAIN = "xxxx"
+$env:ALIBABACLOUDSTACK_REGION = "xxxx"
+$env:ALIBABACLOUDSTACK_RESOURCE_GROUP_SET = "xxxx"
+$env:ALIBABACLOUDSTACK_PROTOCOL = "xxxx"
+$env:ALIBABACLOUDSTACK_INSECURE = "xxxx"
+$env:ALIBABACLOUDSTACK_ACCESS_KEY = "xxxx"
+$env:ALIBABACLOUDSTACK_SECRET_KEY = "xxxx"
+```
+
++ *Unix-like Systems*
+
+```bash
+export ALIBABACLOUDSTACK_POPGW_DOMAIN="xxxx"
+export ALIBABACLOUDSTACK_REGION="xxxx"
+export ALIBABACLOUDSTACK_RESOURCE_GROUP_SET="xxxx"
+export ALIBABACLOUDSTACK_PROTOCOL="xxxx"
+export ALIBABACLOUDSTACK_INSECURE="xxxx"
+export ALIBABACLOUDSTACK_ACCESS_KEY="xxxx"
+export ALIBABACLOUDSTACK_SECRET_KEY="xxxx"
+```
+
+> For detailed parameter descriptions, refer to [AlibabacloudStack Provider Parameters Documentation](website/docs_zh/index.html.markdown)
+
+### Orchestrate Resources
+
+1. Create a `main.tf` file in your working directory.
+
+```hcl
+resource "alibabacloudstack_vpc_vpc" "default_vpc" {
   name       = "vpc-test"
   cidr_block = "172.16.0.0/12"
 }
 ```
 
-Developing the Provider
----------------------------
+2. Execute Orchestration
 
-If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.13+ is *required*). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
-
-To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
-
-```sh
-$ go build -o terraform-provider-alibabacloudstack
-...
-$ $GOPATH/bin/terraform-provider-alibabacloudstack
-...
+```bash
+terraform plan  # View execution plan
+terraform apply # Execute orchestration tasks
+terraform show  # View orchestration results
+terraform destroy # Destroy resources
 ```
 
-Running `make dev` or `make devlinux` or `devwin` will only build the specified developing provider which matches the local system.
-And then, it will unarchive the provider binary and then replace the local provider plugin.
+## Development Guide
 
-In order to test the provider, you can simply run `make test`.
+### Set Up Development Environment
 
-```sh
-$ make test
++ Install [Golang](https://golang.org/doc/install)  
+  > **Note**: Recommended version 1.21 for current project development.
+
++ Install [dlv](https://github.com/go-delve/delve/tree/master/Documentation/installation)  
+  > **Note**: dlv is a Golang debugger (optional)
+
+### Download Source Code and Compile
+
+```bash
+cd <YOUR WORKSPACE>
+git clone https://github.com/aliyun/terraform-provider-alibabacloudstack.git
+cd terraform-provider-alibabacloudstack
+git checkout <appropriate TAG and branch>  # e.g. v1.0.20
+go mod tidy
+go mod vendor
+go build
 ```
 
-In order to run the full suite of Acceptance tests, run `make testacc`.
+### Cross-compilation
 
-*Note:* Acceptance tests create real resources, and often cost money to run.
+> **Note**: When you need to compile AlibabacloudStack for target execution environments, perform cross-compilation after completing local compilation.
 
-```sh
-$ make testacc
+```bash
+GOOS=<OS> GOARCH=<ARCH> go build
 ```
 
-## Acceptance Testing
-Before making a release, the resources and data sources are tested automatically with acceptance tests (the tests are located in the alibabacloudstack/*_test.go files).
-You can run them by entering the following instructions in a terminal:
-```
-cd $GOPATH/src/github.com/apsara-stack/terraform-provider-alibabacloudstack
-export ALIBABACLOUDSTACK_ACCESS_KEY=xxx
-export ALIBABACLOUDSTACK_SECRET_KEY=xxx
-export ALIBABACLOUDSTACK_REGION=xxx
-export ALIBABACLOUDSTACK_POPGW_DOMAIN=xxx
-export ALIBABACLOUDSTACK_RESOURCE_GROUP_SET=xxx
-export outfile=gotest.out
-TF_ACC=1 TF_LOG=INFO go test ./alibabacloudstack -v -run=TestAccAlibabacloudStack -timeout=1440m | tee $outfile
-go2xunit -input $outfile -output $GOPATH/tests.xml
+  > **Note**: GOOS options has `windows`, `linux`, `darwin`, `freebsd`, `openbsd`, `solaris`
+  
+  > **Note**：GOARCH options has `amd64`, `'386'`, `arm`, `arm64`
+  
+  ### Source Code Testing
+
+1. Configure environment variables by following the *Environment Variables* method described in the [Configure Cluster Connection Information](#configure-cluster-connection-information) section
+2. Execute tests:
+   ```bash
+   TF_ACC=1 TF_LOG=INFO go test ./alibabacloudstack -v -run=TestAccAlibabacloudStack -timeout=0
 ```
 
+### Log Tracing
 
-## Refer
+> **Note**: Enable logging to trace API requests initiated by AlibabacloudStack.
 
-AlibabacloudStack Cloud Provider [Official Docs](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)
+```bash
+export DEBUG="terraform"
+export TF_LOG="TRACE"
+terraform apply
+```
 
+### Compatibility Statement
 
-## Current Provider Compatibility
-<!-- INSERT TABLE HERE -->
-
-
-:white_check_mark::当前功能被Provider支持
-:x::当前功能在该Provider存在风险
-:no_entry_sign::当前功能在该Provider下不可用
-| Rpc Name  | terraform-v1.0.11  | terraform-v1.1.9  | terraform-v1.2.9  | terraform-v1.3.10  | terraform-v1.4.7  | terraform-v1.5.7  | terraform-v1.6.6  | terraform-v1.7.5  | terraform-v1.8.5  | terraform-v1.9.3  | opentofu-v1.6.3  | opentofu-v1.7.3  | opentofu-v1.8.0 |
-| ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | --- |
-| GetSchema  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :x:  | :white_check_mark:  | :x:  | :x: |
-| PrepareProviderConfig  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| ValidateResourceTypeConfig  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| ValidateDataSourceConfig  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| UpgradeResourceState  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| Configure  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| ReadResource  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| PlanResourceChange  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| ApplyResourceChange  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| ImportResourceState  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| ReadDataSource  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :x:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| Stop  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
-| GetMetadata  |    |    |    |    |    |    | :white_check_mark:  | :white_check_mark:  | :x:  | :x:  |    | :x:  | :x: |
-| MoveResourceState  |    |    |    |    |    |    |    |    | :no_entry_sign:  | :no_entry_sign:  |    | :no_entry_sign:  | :no_entry_sign: |
-| GetFunctions  |    |    |    |    |    |    |    |    | :no_entry_sign:  | :no_entry_sign:  |    | :no_entry_sign:  | :no_entry_sign: |
-| CallFunction  |    |    |    |    |    |    |    |    | :no_entry_sign:  | :no_entry_sign:  |    | :no_entry_sign:  | :no_entry_sign: |
+:white_check_mark: All features of Terraform Core are supported by the Provider  
+:warning: Partial features of Terraform Core are **not** supported by the Provider
