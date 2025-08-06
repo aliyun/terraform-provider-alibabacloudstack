@@ -90,7 +90,12 @@ resource "alibabacloudstack_cen_instance" "default" {
 	description = "${var.name}"
 	transit_router_name="${var.name}"
 	transit_router_description="${var.name}"
-	transit_router_cidrs=["10.10.10.2/24", "10.10.11.2/24"]
+	transit_router_cidrs {
+		cidr="10.10.10.2/24"
+	} 
+	transit_router_cidrs {
+		cidr="10.10.11.2/24"
+	}
 }
 
 data "alibabacloudstack_cen_instances" "default" {

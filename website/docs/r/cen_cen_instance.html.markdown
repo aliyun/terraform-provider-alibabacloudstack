@@ -14,13 +14,12 @@ Provides a cen Ceninstance resource.
 ## Example Usage
 ```
 variable "name" {
-	default = "tf-testaccceninstance48958"
 }
 
 
 resource "alibabacloudstack_cen_instance" "default" {
-  description = "tf-testaccceninstance48958"
-  cen_instance_name = "tf-testaccceninstance48958"
+  description = var.name
+  cen_instance_name = var.name
 }
 ```
 

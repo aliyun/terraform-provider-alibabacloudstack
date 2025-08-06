@@ -152,7 +152,7 @@ func dataSourceAlibabacloudStackCenCenInstancesRead(d *schema.ResourceData, meta
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cencen_instanceservice := CenService{client}
 	// api: Cbn - 2017-09-12 - DescribeCens
-	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "DescribeCens", "")
+	request := client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DescribeCens", "")
 	CbnDescribecensResponseObj := CbnDescribecensResponse{}
 
 	//调用request_params_handler
@@ -206,6 +206,16 @@ func dataSourceAlibabacloudStackCenCenInstancesRead(d *schema.ResourceData, meta
 			idsMap[vv.(string)] = vv.(string)
 		}
 	}
+	var nameRegex, transitRouterNameRegex, transitRouterDescriptionRegex *regexp.Regexp
+	if v, ok := d.GetOk("name_regex"); ok {
+		nameRegex = regexp.MustCompile(v.(string))
+	}
+	if v, ok := d.GetOk("transit_router_name_regex"); ok {
+		transitRouterNameRegex = regexp.MustCompile(v.(string))
+	}
+	if v, ok := d.GetOk("transit_router_description_regex"); ok {
+		transitRouterDescriptionRegex = regexp.MustCompile(v.(string))
+	}
 	for _, data := range CbnDescribecensResponseObj.Cens.Cen {
 
 		if len(idsMap) > 0 {
@@ -220,11 +230,8 @@ func dataSourceAlibabacloudStackCenCenInstancesRead(d *schema.ResourceData, meta
 			}
 		}
 
-		if nameRegex, ok := d.GetOk("name_regex"); ok {
-			r := regexp.MustCompile(nameRegex.(string))
-			if !r.MatchString(data.Name) {
-				continue
-			}
+		if nameRegex != nil && !nameRegex.MatchString(data.Name) {
+			continue
 		}
 		bandwidth_package_ids := []string{}
 
@@ -240,54 +247,54 @@ func dataSourceAlibabacloudStackCenCenInstancesRead(d *schema.ResourceData, meta
 			"status":                    data.Status,
 			"cen_bandwidth_package_ids": bandwidth_package_ids,
 		}
-		response_transitrouter, err := cencen_instanceservice.DoCbnDescribeTransitRoutersRequest(d.Id())
+		response_transitrouter, err := cencen_instanceservice.DoCbnDescribeTransitRoutersRequest(data.CenId)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_ceninstance", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		if len(response_transitrouter.TransitRouters) > 0 {
-			data := response_transitrouter.TransitRouters[0]
-			i["transit_router_id"] = data.TransitRouterId
-			if data.TransitRouterName != "" {
-				if nameRegex, ok := d.GetOk("transit_router_name_regex"); ok {
-					r := regexp.MustCompile(nameRegex.(string))
-					if !r.MatchString(data.TransitRouterName) {
-						continue
-					}
-				}
+		matched := false
+		for _, data := range response_transitrouter.TransitRouters {
 
-				i["transit_router_name"] = data.TransitRouterName
+			if transitRouterNameRegex != nil && !transitRouterNameRegex.MatchString(data.TransitRouterName) {
+				continue
 			}
-			if data.TransitRouterDescription != "" {
-				if descriptionRegex, ok := d.GetOk("transit_router_description_regex"); ok {
-					r := regexp.MustCompile(descriptionRegex.(string))
-					if !r.MatchString(data.TransitRouterDescription) {
-						continue
-					}
-				}
-				i["transit_router_description"] = data.TransitRouterDescription
+			if transitRouterDescriptionRegex != nil && !transitRouterDescriptionRegex.MatchString(data.TransitRouterDescription) {
+				continue
 			}
+			cidrs := []map[string]interface{}{}
 			if len(data.TransitRouterCidrList) > 0 {
-				cidrs := []map[string]interface{}{}
 				for _, cidr := range data.TransitRouterCidrList {
 					cidrs = append(cidrs, map[string]interface{}{
 						"cidr":    cidr.Cidr,
 						"cidr_id": cidr.TransitRouterCidrId,
 					})
 				}
-				i["transit_router_cidrs"] = cidrs
-				if cidr_check, ok := d.GetOk("cidr"); ok {
-					flag := false
-					for _, cidr := range cidrs {
-						if cidr_check == cidr["cidr"].(string) {
-							flag = true
-							break
-						}
-					}
-					if flag == false {
-						continue
+			}
+
+			if cidr_check, ok := d.GetOk("cidr"); ok {
+				flag := false
+
+				for _, cidr := range cidrs {
+					if cidr_check == cidr["cidr"].(string) {
+						flag = true
+						break
 					}
 				}
+				if flag == false {
+					continue
+				}
 			}
+			i["transit_router_id"] = data.TransitRouterId
+			i["transit_router_name"] = data.TransitRouterName
+			i["transit_router_description"] = data.TransitRouterDescription
+			i["transit_router_cidrs"] = cidrs
+			matched = true
+			break
+		}
+		if _, ok := d.GetOk("cidr"); !ok && transitRouterNameRegex == nil && transitRouterDescriptionRegex == nil {
+			matched = true
+		}
+		if !matched {
+			continue
 		}
 		datas = append(datas, i)
 
