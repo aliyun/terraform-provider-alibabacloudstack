@@ -159,15 +159,14 @@ terraform init
 ```hcl
 
 provider "alibabacloudstack" {
-  popgw_domain = "xxxx"
+  popgw_domain = "xxx.xxx.com"
   access_key   = "xxxx"
   secret_key   = "xxxx"
   region       = "xxxx"
-  proxy        = "xxxx"
-  protocol                = "xxxx"
-  insecure                = "xxxx"
-  resource_group_set_name = "xxxx"
-  role_arn                = "xxxx"
+  proxy        = "HTTP://x.x.x.x:xxx"
+  protocol                = "HTTPS"
+  insecure                = "true"
+  resource_group_set_name = "ResourceSet(xxxx)"
 }
 
 ```
@@ -179,11 +178,11 @@ provider "alibabacloudstack" {
 + *Windows PowerShell*
 
 ``` powershell
-$env:ALIBABACLOUDSTACK_POPGW_DOMAIN = "xxxx"
+$env:ALIBABACLOUDSTACK_POPGW_DOMAIN = "xxx.xxx.com"
 $env:ALIBABACLOUDSTACK_REGION = "xxxx"
-$env:ALIBABACLOUDSTACK_RESOURCE_GROUP_SET = "xxxx"
-$env:ALIBABACLOUDSTACK_PROTOCOL = "xxxx"
-$env:ALIBABACLOUDSTACK_INSECURE = "xxxx"
+$env:ALIBABACLOUDSTACK_RESOURCE_GROUP_SET = "ResourceSet(xxxx)"
+$env:ALIBABACLOUDSTACK_PROTOCOL = "HTTPS"
+$env:ALIBABACLOUDSTACK_INSECURE = "true"
 $env:ALIBABACLOUDSTACK_ACCESS_KEY = "xxxx"
 $env:ALIBABACLOUDSTACK_SECRET_KEY = "xxxx"
 ```
@@ -191,11 +190,11 @@ $env:ALIBABACLOUDSTACK_SECRET_KEY = "xxxx"
 + *类Unix系统*
 
 ```bash
-export ALIBABACLOUDSTACK_POPGW_DOMAIN="xxxx"
+export ALIBABACLOUDSTACK_POPGW_DOMAIN="xxx.xxx.com"
 export ALIBABACLOUDSTACK_REGION="xxxx"
-export ALIBABACLOUDSTACK_RESOURCE_GROUP_SET="xxxx"
-export ALIBABACLOUDSTACK_PROTOCOL="xxxx"
-export ALIBABACLOUDSTACK_INSECURE="xxxx"
+export ALIBABACLOUDSTACK_RESOURCE_GROUP_SET="ResourceSet(xxxx)"
+export ALIBABACLOUDSTACK_PROTOCOL="HTTPS"
+export ALIBABACLOUDSTACK_INSECURE="true"
 export ALIBABACLOUDSTACK_ACCESS_KEY="xxxx"
 export ALIBABACLOUDSTACK_SECRET_KEY="xxxx"
 ```

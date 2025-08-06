@@ -53,7 +53,7 @@ provider "alibabacloudstack" {
 ```shell
 $ export ALIBABACLOUDSTACK_ACCESS_KEY="Your Access Key"
 $ export ALIBABACLOUDSTACK_SECRET_KEY="Your Asecret Key"
-$ export ALIBABACLOUDSTACK_REGION="region"
+$ export ALIBABACLOUDSTACK_REGION="Region Name"
 $ export ALIBABACLOUDSTACK_INSECURE= true
 $ export ALIBABACLOUDSTACK_PROXY= "http://IP:Port"
 $ terraform plan
