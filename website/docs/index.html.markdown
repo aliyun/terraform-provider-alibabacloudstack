@@ -6,174 +6,116 @@ description: |-
   The AlibabacloudStack provider is used to interact with many resources supported by AlibabacloudStack. The provider needs to be configured with the proper credentials before it can be used.
 ---
 
-# AlibabacloudStack Cloud Provider
+## Example Code
 
-The AlibabacloudStack Cloud provider is used to interact with the
-many resources supported by AlibabacloudStack Cloud. The provider needs to be configured
-with the proper credentials before it can be used.
-
-Use the navigation on the left to read about the available resources.
-
-
-| Apsara Version | AlibabacloudStack Provider Version |
-| --- | --- |
-| 3.16.2 | < 3.18.0 |
-| 3.18.x | > 3.18.0 |
-
-
-## Example Usage
+### Static Configuration
 
 ```hcl
+# Declare AlibabacloudStack Provider source and version
 terraform {
   required_providers {
     alibabacloudstack = {
-      source = "aliyun/alibabacloudstack"
-      version = "3.18.0"
+      source  = "aliyun/alibabacloudstack"
+      # version = ">= 3.18.0"
     }
   }
 }
 
-# Configure the AlibabacloudStack Provider
+# Configure AlibabacloudStack Provider
 provider "alibabacloudstack" {
-  access_key = "${var.access_key}"
-  secret_key = "${var.secret_key}"
-  region     = "${var.region}"
-  insecure    =  true
-  proxy      = "${var.proxy}"
-  resource_group_set_name ="${var.resource_group_set_name}"
-  popgw_domain = "${var.domain}"
-  protocol = "HTTPS"
-}
-
-
-data "alibabacloudstack_instance_types" "default" {
-  cpu_core_count = 2
-  memory_size    = 4
-}
-
-data "alibabacloudstack_images" "default" {
-  name_regex  = "^ubuntu"
-  most_recent = true
-  owners      = "system"
-}
-# Create a web server
-resource "alibabacloudstack_instance" "web" {
-  image_id              = "${data.alibabacloudstack_images.default.images.0.id}"
-  instance_type        = "${data.alibabacloudstack_instance_types.default .instance_types.0.id}"
-  system_disk_category = "cloud_efficiency"
-  security_groups      = ["${alibabacloudstack_security_group.default.id}"]
-  instance_name        = "web"
-  vswitch_id           = "vsw-abc12345"
-}
-
-# Create security group
-resource "alibabacloudstack_security_group" "default" {
-  name        = "default"
-  description = "default"
-  vpc_id      = "vpc-abc12345"
+  access_key               = var.access_key
+  secret_key               = var.secret_key
+  region                   = var.region
+  insecure                 = true
+  proxy                    = var.proxy
+  resource_group_set_name  = var.resource_group_set_name
+  popgw_domain             = var.domain
+  protocol                 = "HTTPS"
 }
 ```
 
-## Authentication
+### Environment Variable Configuration
 
-The AlibabacloudStack provider accepts several ways to enter credentials for authentication.
-The following methods are supported, in this order, and explained below:
+> The Provider supports configuring most parameters through environment variables.  
+> Basic environment variables such as `ALIBABACLOUDSTACK_ACCESS_KEY` and `ALIBABACLOUDSTACK_SECRET_KEY` provide platform access credentials for the AlibabacloudStack Provider.  
+> For other configurable environment variables, please refer to the **[Parameter Specifications](#parameter-specifications)** section.
 
-- Static credentials
-- Environment variables
 
-### Static credentials
-
-Static credentials can be provided by adding `access_key`, `secret_key` , `region` ,`insecure`,`proxy` and `domain` in-line in the
-alibabacloudstack provider block:
-
-Usage:
-
++ `main.tf` Configuration
 ```hcl
 provider "alibabacloudstack" {
-  access_key = "${var.access_key}"
-  secret_key = "${var.secret_key}"
-  region     = "${var.region}"
-  insecure    =  true
-  proxy      = "${var.proxy}"
-  resource_group_set_name ="${var.resource_group_set_name}"
-  endpoints {
-     vpc = "${var.endpoints}"  
-   }
-}
-
-```
-
-### Environment variables
-
-You can provide your credentials via `ALIBABACLOUDSTACK_ACCESS_KEY`,`ALIBABACLOUDSTACK_SECRET_KEY`,
-environment variables, representing your AlibabacloudStack access key and secret key respectively.
-`ALIBABACLOUDSTACK_PROXY`,`ALIBABACLOUDSTACK_REGION` is also used, if applicable:
-
-```hcl
-provider "alibabacloudstack" {
-    endpoints {
-         vpc = "${var.endpoints}"  
-       }
     resource_group_set_name ="${var.resource_group_set_name}"
 }
 ```
-Usage:
+
++ Terminal Environment Configuration
 
 ```shell
-$ export ALIBABACLOUDSTACK_ACCESS_KEY="anaccesskey"
-$ export ALIBABACLOUDSTACK_SECRET_KEY="asecretkey"
+$ export ALIBABACLOUDSTACK_ACCESS_KEY="Your Access Key"
+$ export ALIBABACLOUDSTACK_SECRET_KEY="Your Asecret Key"
 $ export ALIBABACLOUDSTACK_REGION="region"
 $ export ALIBABACLOUDSTACK_INSECURE= true
 $ export ALIBABACLOUDSTACK_PROXY= "http://IP:Port"
 $ terraform plan
 ```
 
-## Argument Reference
+## Parameter Specifications
 
-In addition to [generic `provider` arguments](https://www.terraform.io/docs/configuration/providers.html)
-(e.g. `alias` and `version`), the following arguments are supported in the AlibabacloudStack Cloud
- `provider` block:
+### Environment Parameters
 
-* `popgw_romain` - (Required) Cluster gateway standard domain suffix.
-Usually, the endpoint of Ecs can be queried to extract suffixes, such as ecs.inter.example.com, where the suffix is inter.example.com.
+| Parameter Name       | Environment Variable              | Type     | Description                              | How to Obtain                                                                                 | Remarks                                                              |
+|----------------------|------------------------------------|----------|------------------------------------------|------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
+| popgw_domain         | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | Private cloud platform standard suffix   | ASO Platform >> Top Profile Icon >> *Personal Info* >> **Private Cloud API Usage** >> `Internet Domain` | **Required**                                                        |
+| region               | ALIBABACLOUDSTACK_REGION          | string   | Platform Region information              | ASO Platform >> Top Region Information                                                        | **Required**                                                        |
+| is_center_region     | ALIBABACLOUDSTACK_CENTER_REGION   | bool     | Whether current region is central region | ASO Platform >> Top Profile Icon >> *Personal Info* >> **Private Cloud API Usage** >> `Is Current Region a Central Region` | Default: `true`                                                     |
+| protocol             | ALIBABACLOUDSTACK_PROTOCOL        | string   | Network protocol (`HTTP` or `HTTPS`)     | Determined by environment configuration                                                       | Default: `HTTP`                                                     |
+| insecure             | ALIBABACLOUDSTACK_INSECURE        | bool     | Skip HTTPS certificate verification      | Determined by environment configuration                                                       | Default: `false`<br>Effective only when protocol is `HTTPS`          |
+| proxy                | ALIBABACLOUDSTACK_PROXY           | string   | Proxy server address                     | Determined by environment configuration                                                       |                                                                      |
 
-* `access_key` - (Required) This is the AlibabacloudStack access key. It must be provided, but
-  it can also be sourced from the `ALIBABACLOUDSTACK_ACCESS_KEY` environment variable, or via
-  a dynamic access key if `ecs_role_name` is specified.
+### Credential Parameters
 
-* `secret_key` - (Required) This is the AlibabacloudStack secret key. It must be provided, but
-  it can also be sourced from the `ALIBABACLOUDSTACK_SECRET_KEY` environment variable, or via
-  a dynamic secret key if `ecs_role_name` is specified.
-  
-* `region` - This is the AlibabacloudStack region. It must be provided, but
-  it can also be sourced from the `ALIBABACLOUDSTACK_REGION` environment variables.
+> AlibabacloudStack Provider supports multiple credential types. Choose based on requirements.
 
-* `insecure` - (Optional) Use this to Trust self-signed certificates. It's typically used to allow insecure connections.
+#### 1. Account AK/SK
 
-* `department` - (Optional) Specifies the ID of the organization to which the orchestration resource belongs. When not configured, it will be searched through `resource_group_det_name`.
+> **Note**:  
+> - AK/SK parameters can be queried in ASCM interface.  
+> - Use `department` and `resource_group` instead of `resource_group_set_name` when resource group names are not unique.
 
-* `resource_group` - (Optional) Specifies the ID of the resource set to which the orchestration resource belongs. When not configured, it will be searched through `resource_group_det_name`.
+| Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
+|------------------------|------------------------------------|----------|---------------------------------|------------------------------------------------------------------|
+| access_key             | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | Account Access Key              | **Required**                                                     |
+| secret_key             | ALIBABACLOUDSTACK_SECRET_KEY      | string   | Account Secret Key              | **Required**                                                     |
+| department             | ALIBABACLOUDSTACK_DEPARTMENT      | string   | Authentication organization     | Required if `resource_group_set_name` is unavailable/unconfigured |
+| resource_group         | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | Authentication resource group   | Required if `resource_group_set_name` is unavailable/unconfigured |
+| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name      |                                                                  |
 
-* `resource_group_set_name` - (Optional) Use this to give resource_group_set_name for specific user organisation. When `resource_group_det_name` is not unique or not configured, `department` and `resource_group` need to be configured.
+#### 2. Account STS Token
 
-* `protocol` - (Optional) The Protocol of used by API request. Valid values: `HTTP` and `HTTPS`. Default to `HTTPS`.
+> **Note**:  
+> - Provider identifies AK/SK type by `security_token` configuration.  
+> - Temporary credentials must be obtained via API role assumption.
 
-* `proxy` -  (Optional) Use this to set proxy for AlibabacloudStack connection.
+| Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
+|------------------------|------------------------------------|----------|---------------------------------|------------------------------------------------------------------|
+| access_key             | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | Temporary Access Key            | **Required**                                                     |
+| secret_key             | ALIBABACLOUDSTACK_SECRET_KEY      | string   | Temporary Secret Key            | **Required**                                                     |
+| security_token         | ALIBABACLOUDSTACK_SECURITY_TOKEN  | string   | Temporary Security Token        | **Required**                                                     |
+| department             | ALIBABACLOUDSTACK_DEPARTMENT      | string   | Authentication organization     | Required if `resource_group_set_name` is unavailable/unconfigured |
+| resource_group         | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | Authentication resource group   | Required if `resource_group_set_name` is unavailable/unconfigured |
+| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name      |                                                                  |
 
-* `endpoints` - (Required) An `endpoints` block (documented below) to support alibabacloudstack custom endpoints.
+#### 3. Account Role Assumption
 
-Nested `endpoints` block supports the following:
-* `ecs` - (Optional) Use this to override the default endpoint URL constructed from the `region`. It's typically used to connect to custom ECS endpoints.
+> **Note**:  
+> - Provider determines whether role assumption is needed based on `role_arn` configuration.  
+> - Role assumption validity period: 3600 seconds.
 
-* `rds` - (Optional) Use this to override the default endpoint URL constructed from the `region`. It's typically used to connect to custom RDS endpoints.
-
-* `slb` - (Optional) Use this to override the default endpoint URL constructed from the `region`. It's typically used to connect to custom SLB endpoints.
-
-* `vpc` - (Optional) Use this to override the default endpoint URL constructed from the `region`. It's typically used to connect to custom VPC and VPN endpoints.
-
-* `ess` - (Optional) Use this to override the default endpoint URL constructed from the `region`. It's typically used to connect to custom Autoscaling endpoints.
-
-* `oss` - (Optional) Use this to override the default endpoint URL constructed from the `region`. It's typically used to connect to custom OSS endpoints.
-
-
+| Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
+|------------------------|------------------------------------|----------|---------------------------------|------------------------------------------------------------------|
+| access_key             | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | Account Access Key              | **Required**                                                     |
+| secret_key             | ALIBABACLOUDSTACK_SECRET_KEY      | string   | Account Secret Key              | **Required**                                                     |
+| role_arn               | ALIBABACLOUDSTACK_ASSUME_ROLE_ARN | string   | ARN of the role to assume       | **Required**                                                     |
+| department             | ALIBABACLOUDSTACK_DEPARTMENT      | string   | Authentication organization     | Required if `resource_group_set_name` is unavailable/unconfigured |
+| resource_group         | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | Authentication resource group   | Required if `resource_group_set_name` is unavailable/unconfigured |
+| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name      |   

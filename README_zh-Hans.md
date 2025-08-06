@@ -29,7 +29,7 @@
 
 **方案一 自动安装**
 
-> **注意**：只有你的执行环境可以正常访问Github可以使用自动安装安装，该方案不需要额外的配置，后续TF Core会自动安装Provider。
+> **注意**：只有你的执行环境可以正常访问Github可以使用自动安装，该方案不需要额外的配置，直接跳转到[快速开始](#快速开始)开始使用，后续TF Core会自动安装Provider。
 
 **方案二 镜像站点安装**
 
@@ -87,7 +87,7 @@ XX(插件根路径 如：./terraform.d/providers/)
                     └── <Provider文件>(terraform-provider-alibabacloudstack)
 ```
 
-> **注意**： namespace层，建议使用hashicorp，如果使用aliyun，在后续步骤编写Provider信息时要注意申明aliyun。
+> **注意**： 命名空间层，建议使用hashicorp，如果使用aliyun，在后续步骤编写Provider信息时要注意申明aliyun。
 
 > **注意**： 常见的系统架构有：windows_amd64，linux_amd64，linux_arm64，darwin_amd64，darwin_arm64
 
