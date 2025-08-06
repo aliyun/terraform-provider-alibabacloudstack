@@ -9,6 +9,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -57,7 +58,23 @@ func resourceAlibabacloudStackCenCeninstance() *schema.Resource {
 			"transit_router_cidrs": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"cidr": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"cidr_id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+				Set:func(i interface{}) int{
+					m := i.(map[string]interface{})
+					cidr := m["cidr"].(string)
+					return hashcode.String(cidr)
+				},
 				MaxItems: 5,
 			},
 			"transit_router_id": {
@@ -150,7 +167,7 @@ func resourceAlibabacloudStackCenCeninstanceCreate(d *schema.ResourceData, meta 
 		cidr := []map[string]interface{}{}
 		for _, i := range v.(*schema.Set).List() {
 			cidr = append(cidr, map[string]interface{}{
-				"Cidr": i,
+				"Cidr": i.(map[string]interface{})["cidr"].(string),
 			})
 		}
 		reqQuery["TransitRouterCidrList"] = cidr
@@ -227,19 +244,22 @@ func resourceAlibabacloudStackCenCeninstanceUpdate(d *schema.ResourceData, meta 
 		request_remove.QueryParams["TransitRouterId"] = transitrouterId
 		request_add.QueryParams["TransitRouterId"] = transitrouterId
 		old, new := d.GetChange("transit_router_cidrs")
+		oldMap:=map[string]string{}
+		newMap:=map[string]string{}
+		for _, v := range old.(*schema.Set).List(){
+			i := v.(map[string]interface{})
+			oldMap[i["cidr"].(string)]=i["cidr_id"].(string)
+		}
+		for _, v := range new.(*schema.Set).List(){
+			i := v.(map[string]interface{})
+			newMap[i["cidr"].(string)]=i["cidr_id"].(string)
+		}
 		log.Printf("[DEBUG] old:%v, new:%v", old, new)
-		for _, v := range old.(*schema.Set).List() {
-			matched := false
-			for _, vv := range new.(*schema.Set).List() {
-				if v == vv {
-					matched = true
-					break
-				}
-			}
-			if matched {
+		for key, value := range oldMap {
+			if _, existed := newMap[key]; existed {
 				continue
 			}
-			request_remove.QueryParams["TransitRouterCidrId"] = v.(string)
+			request_remove.QueryParams["TransitRouterCidrId"] = value
 			bresponse, err := client.ProcessCommonRequest(request_remove)
 			addDebug(request_remove.GetActionName(), bresponse, request_remove, request_remove.QueryParams)
 			if err != nil {
@@ -252,18 +272,11 @@ func resourceAlibabacloudStackCenCeninstanceUpdate(d *schema.ResourceData, meta 
 			}
 
 		}
-		for _, v := range new.(*schema.Set).List() {
-			matched := false
-			for _, vv := range old.(*schema.Set).List() {
-				if v == vv {
-					matched = true
-					break
-				}
-			}
-			if matched {
+		for key, _ := range newMap {
+			if _, existed := oldMap[key]; existed {
 				continue
 			}
-			request_add.QueryParams["Cidr"] = v.(string)
+			request_add.QueryParams["Cidr"] = key
 			bresponse, err := client.ProcessCommonRequest(request_add)
 			addDebug(request_add.GetActionName(), bresponse, request_add, request_add.QueryParams)
 			if err != nil {
@@ -318,9 +331,12 @@ func resourceAlibabacloudStackCenCeninstanceRead(d *schema.ResourceData, meta in
 			d.Set("transit_router_description", data.TransitRouterDescription)
 		}
 		if len(data.TransitRouterCidrList) > 0 {
-			cidrs := []string{}
+			cidrs := []map[string]interface{}{}
 			for _, cidr := range data.TransitRouterCidrList {
-				cidrs = append(cidrs, cidr.Cidr)
+				cidrs = append(cidrs, map[string]interface{}{
+					"cidr" :cidr.Cidr,
+					"cidr_id": cidr.TransitRouterCidrId,
+				})
 			}
 			d.Set("transit_router_cidrs", cidrs)
 		}

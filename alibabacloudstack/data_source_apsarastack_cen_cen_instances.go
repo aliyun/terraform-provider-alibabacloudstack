@@ -105,7 +105,18 @@ func dataSourceAlibabacloudStackCenCenInstances() *schema.Resource {
 						"transit_router_cidrs": {
 							Type:     schema.TypeSet,
 							Computed: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"cidr": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
+									"cidr_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
+								},
+							},
 						},
 
 						"tags": {
@@ -256,15 +267,18 @@ func dataSourceAlibabacloudStackCenCenInstancesRead(d *schema.ResourceData, meta
 				i["transit_router_description"] = data.TransitRouterDescription
 			}
 			if len(data.TransitRouterCidrList) > 0 {
-				cidrs := []string{}
+				cidrs := []map[string]interface{}{}
 				for _, cidr := range data.TransitRouterCidrList {
-					cidrs = append(cidrs, cidr.Cidr)
+					cidrs = append(cidrs, map[string]interface{}{
+						"cidr":    cidr.Cidr,
+						"cidr_id": cidr.TransitRouterCidrId,
+					})
 				}
 				i["transit_router_cidrs"] = cidrs
 				if cidr_check, ok := d.GetOk("cidr"); ok {
 					flag := false
 					for _, cidr := range cidrs {
-						if cidr_check == cidr {
+						if cidr_check == cidr["cidr"].(string) {
 							flag = true
 							break
 						}

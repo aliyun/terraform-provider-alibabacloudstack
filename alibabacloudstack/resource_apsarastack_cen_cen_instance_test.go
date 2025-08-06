@@ -21,7 +21,7 @@ func TestAccAlibabacloudStackCenInstance0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 
 	rand := getAccTestRandInt(10000, 99999)
-	name := fmt.Sprintf("tf-testaccceninstance%d" , rand)
+	name := fmt.Sprintf("tf-testaccceninstance%d", rand)
 	modify_name := fmt.Sprintf("tf-testaccceninstancemodify%d", rand)
 
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCenInstanceBasicdependence)
@@ -38,16 +38,18 @@ func TestAccAlibabacloudStackCenInstance0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"cen_instance_name": name,
-					"description": name,
+					"cen_instance_name":          name,
+					"description":                name,
 					"transit_router_name":        name,
 					"transit_router_description": name,
-					"transit_router_cidrs": []string{"10.10.0.0/16"},
+					"transit_router_cidrs": []map[string]interface{}{
+						{"cidr": "10.10.0.0/16"},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"cen_id": CHECKSET,
-						"transit_router_id":CHECKSET,
+						"cen_id":            CHECKSET,
+						"transit_router_id": CHECKSET,
 					}),
 				),
 			},
@@ -55,12 +57,12 @@ func TestAccAlibabacloudStackCenInstance0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"cen_instance_name": modify_name,
-					"description": modify_name,
+					"description":       modify_name,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"cen_instance_name": modify_name,
-						"description": modify_name,
+						"description":       modify_name,
 					}),
 				),
 			},
@@ -80,29 +82,31 @@ func TestAccAlibabacloudStackCenInstance0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"transit_router_cidrs": []string{"10.10.10.2/24", "10.10.11.2/24"},
+					"transit_router_cidrs": []map[string]interface{}{
+						{"cidr": "10.10.10.2/24"},
+						{"cidr": "10.10.11.2/24"},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"transit_router_cidrs.#": "2",
-						"transit_router_cidrs.0": "10.10.10.2/24",
-						"transit_router_cidrs.1": "10.10.11.2/24",
 					}),
 				),
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
 
-					"transit_router_cidrs": []string{"10.10.10.2/24", "10.10.12.2/24", "10.10.13.2/24"},
+					"transit_router_cidrs": []map[string]interface{}{
+						{"cidr": "10.10.10.2/24"},
+						{"cidr": "10.10.12.2/24"},
+						{"cidr": "10.10.13.2/24"},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
 						"transit_router_cidrs.#": "3",
-						"transit_router_cidrs.0": "10.10.10.2/24",
-						"transit_router_cidrs.1": "10.10.12.2/24",
-						"transit_router_cidrs.2": "10.10.13.2/24",
 					}),
 				),
 			},
