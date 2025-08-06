@@ -224,6 +224,9 @@ terraform apply # Execute orchestration tasks
 terraform show  # View orchestration results
 terraform destroy # Destroy resources
 ```
+## Changelog
+
+Please refer to [ReleaseNote](./ReleaseNote.md)
 
 ## Development Guide
 

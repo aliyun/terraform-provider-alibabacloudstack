@@ -225,6 +225,10 @@ terraform show # 查看编排结果
 terraform destroy # 销毁资源
 ```
 
+## 变更日志
+
+请查看[ReleaseNode](./ReleaseNote_zh_Hans.md)
+
 ## 开发教程
 
 ### 安装编译环境
