@@ -1,3 +1,34 @@
+# 3.18.12
+
+## Additions
+
+1. Added MongoDB account management capability (`mongodb_account`)
+2. Added MongoDB backup management capability (`mongodb_backup`)
+3. Added network connection management capability for CS nodes in MongoDB sharded instances (`mongodb_shardinginstance_csnode_address`)
+4. Added network connection management capability for Shard nodes in MongoDB sharded instances (`mongodb_shardinginstance_shardnode_address`)
+5. Added network connection management capability for Mongos nodes in MongoDB sharded instances (`mongodb_shardinginstance_mongonode_address`)
+6. Added DRDS private RDS instance management capability (`drds_rds_instance`)
+7. Added DRDS private database management capability (`drds_rds_instance`)
+8. Added DRDS account management capability (`drds_account`)
+9. Added DRDS instance series query capability (`drds_instance_series`)
+10. Added DRDS instance specifications query capability (`drds_instance_specifications`)
+11. Added DRDS private read-only instance management capability (`readonly_instance`)
+12. Added PolarDB backup management capability (`polardb_backup`)
+13. Added PolarDB instance type specifications query capability (`polardb_instance_types`)
+14. Added PolarDB read-only instance management capability (`polardb_readonly_instance`)
+15. Added PolarDB database proxy (including read/write splitting) management capability (`polardb_proxy`)
+16. Added RDS instance type specifications query capability (`rds_instance_types`)
+17. Added RDS backup management capability (`rds_backup`)
+18. Added RDS proxy management capability (`rds_backup`)
+19. Added database connection address management capability for MongoDB replica instances
+20. Added management capability for CS nodes in MongoDB sharded instances
+
+## Changes
+
+1. **Breaking Change**: Added support for setting descriptions on nodes in MongoDB sharded instances. This field is now **mandatory in Terraform (TF)** and must be **unique within the same instance**.
+
+---
+
 # 3.18.11
 
 ## Fixes

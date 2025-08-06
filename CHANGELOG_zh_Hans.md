@@ -1,3 +1,34 @@
+# 3.18.12
+
+## 新增
+
+1. 新增支持Mongodb帐号的管理能力（mongodb_account）
+2. 新增支持Mongodb备份的管理能力(mongodb_backup)
+3. 新增支持Mongodb分片实例cs节点网络连接的管理能力(mongodb_shardinginstance_csnode_address)
+4. 新增支持Mongodb分片实例shard节点网络连接的管理能力(mongodb_shardinginstance_shardnode_address)
+5. 新增支持Mongodb分片实例mongs节点网络连接的管理能力(mongodb_shardinginstance_mongonode_address)
+6. 新增支持DRDS私有RDS实例的管理能力（drds_rds_instance）
+7. 新增支持DRDS私有数据库的管理能力（drds_rds_instance）
+8. 新增支持DRDS私有帐号的管理能力（drds_account）
+9. 新增支持DRDS规格簇的查询能力（drds_instance_series）
+10. 新增支持DRDS规格的查询能力（drds_instance_specifications）
+11. 新增支持DRDS私有只读实例的管理能力（readonly_instance）
+12. 新增支持POLARDB备份的管理能力（polardb_backup）
+13. 新增支持POLARDB规格的查询能力（polardb_instance_types）
+14. 新增支持POLARDB只读实例的管理能力（polardb_readonly_instance）
+15. 新增支持POLARDB数据库代理（含读写分离）的管理能力（polardb_proxy）
+16. 新增支持RDS规格的查询能力（rds_instance_types）
+17. 新增支持RDS备份的管理能力（rds_backup）
+18. 新增支持RDS代理的管理能力（rds_backup）
+19. 新增加Mongodb副本实例的数据库连接地址的管理能力
+20. 新增加Mongodb分片实例csnode的管理能力
+
+## 变更
+
+1. 不兼容 新增加Mongodb分片实例各node支持设置描述，该字段在TF下为必填，且同一实例下需要唯一
+
+---
+
 # 3.18.11
 
 ## 修复
