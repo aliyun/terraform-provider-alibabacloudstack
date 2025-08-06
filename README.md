@@ -225,7 +225,7 @@ terraform destroy # Destroy resources
 ```
 ## Changelog
 
-Please refer to [ReleaseNote](./ReleaseNote.md)
+Please refer to [ReleaseNote](./CHANGELOG.md)
 
 ## Development Guide
 
