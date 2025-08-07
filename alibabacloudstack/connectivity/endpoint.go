@@ -70,6 +70,7 @@ const (
 	EBSCode              = ServiceCode("EBS")
 	YaochiOpsCode        = ServiceCode("YAOCHIOPS")
 	ACMCode              = ServiceCode("ACM")
+	POLARDBXCode         = ServiceCode("POLARDBX")
 	//undefined code 先添加
 	GDBCode             = ServiceCode("GDB")
 	ARMSCode            = ServiceCode("ARMS")
@@ -349,6 +350,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	ACMCode: PopEndpoint{
 		"dncs-api.console.{{.region}}.{{.domain}}",
 		"dncs-api.console.{{.region}}.{{.domain}}",
+	},
+	POLARDBXCode: PopEndpoint{
+		"polarx-vpc.{{.domain}}",
+		"polarx-vpc.{{.region}}.{{.domain}}",
 	},
 	//cbn endpoint
 	CbnCode: PopEndpoint{

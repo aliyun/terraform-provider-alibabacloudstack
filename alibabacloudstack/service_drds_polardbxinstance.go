@@ -2,9 +2,11 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -12,48 +14,38 @@ type PolardbxDescribedbinstanceattributeResponse struct {
 	RequestId string `json:"RequestId"`
 
 	DBInstance struct {
-		ReadDBInstances struct {
-			ReadDBInstance []string `json:"ReadDBInstance"`
-		} `json:"ReadDBInstances"`
+		ReadDBInstances []string `json:"ReadDBInstances"`
 
-		LTSVersions struct {
-			LTSVersion []string `json:"LTSVersion"`
-		} `json:"LTSVersions"`
+		LTSVersions []string `json:"LTSVersions"`
 
-		DBNodes struct {
-			DBNode []struct {
-				Id            string `json:"Id"`
-				NodeClass     string `json:"NodeClass"`
-				RegionId      string `json:"RegionId"`
-				ZoneId        string `json:"ZoneId"`
-				ComputeNodeId string `json:"ComputeNodeId"`
-				DataNodeId    string `json:"DataNodeId"`
-			} `json:"DBNode"`
+		DBNodes []struct {
+			Id            string `json:"Id"`
+			NodeClass     string `json:"NodeClass"`
+			RegionId      string `json:"RegionId"`
+			ZoneId        string `json:"ZoneId"`
+			ComputeNodeId string `json:"ComputeNodeId"`
+			DataNodeId    string `json:"DataNodeId"`
 		} `json:"DBNodes"`
 
-		ConnAddrs struct {
-			ConnAddr []struct {
-				ConnectionString string `json:"ConnectionString"`
-				Port             string `json:"Port"`
-				Type             string `json:"Type"`
-				VPCId            string `json:"VPCId"`
-				VSwitchId        string `json:"VSwitchId"`
-				VpcInstanceId    string `json:"VpcInstanceId"`
-			} `json:"ConnAddr"`
+		ConnAddrs []struct {
+			ConnectionString string `json:"ConnectionString"`
+			Port             int    `json:"Port"`
+			Type             string `json:"Type"`
+			VPCId            string `json:"VPCId"`
+			VSwitchId        string `json:"VSwitchId"`
+			VpcInstanceId    string `json:"VpcInstanceId"`
 		} `json:"ConnAddrs"`
 
-		TagSet struct {
-			TagSet []struct {
-				Key   string `json:"Key"`
-				Value string `json:"Value"`
-			} `json:"TagSet"`
+		TagSet []struct {
+			Key   string `json:"Key"`
+			Value string `json:"Value"`
 		} `json:"TagSet"`
 		Status                  string `json:"Status"`
 		Description             string `json:"Description"`
 		ZoneId                  string `json:"ZoneId"`
 		VPCId                   string `json:"VPCId"`
 		CreateTime              string `json:"CreateTime"`
-		Expired                 string `json:"Expired"`
+		Expired                 bool   `json:"Expired"`
 		PayType                 string `json:"PayType"`
 		DBType                  string `json:"DBType"`
 		LockMode                string `json:"LockMode"`
@@ -65,7 +57,7 @@ type PolardbxDescribedbinstanceattributeResponse struct {
 		Engine                  string `json:"Engine"`
 		Id                      string `json:"Id"`
 		ConnectionString        string `json:"ConnectionString"`
-		Port                    string `json:"Port"`
+		Port                    int    `json:"Port"`
 		MinorVersion            string `json:"MinorVersion"`
 		LatestMinorVersion      string `json:"LatestMinorVersion"`
 		DBNodeCount             int    `json:"DBNodeCount"`
@@ -82,7 +74,7 @@ type PolardbxDescribedbinstanceattributeResponse struct {
 		ExpireDate              string `json:"ExpireDate"`
 		Type                    string `json:"Type"`
 		DBNodeClass             string `json:"DBNodeClass"`
-		RightsSeparationStatus  bool   `json:"RightsSeparationStatus"`
+		RightsSeparationStatus  string `json:"RightsSeparationStatus"`
 		RightsSeparationEnabled bool   `json:"RightsSeparationEnabled"`
 		KindCode                int    `json:"KindCode"`
 		ResourceGroupId         string `json:"ResourceGroupId"`
@@ -101,6 +93,7 @@ func (s *DrdsService) DoPolardbxDescribedbinstanceattributeRequest(id string) (*
 	request.QueryParams["DBInstanceName"] = id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -116,6 +109,26 @@ func (s *DrdsService) DoPolardbxDescribedbinstanceattributeRequest(id string) (*
 	}
 
 	return PolardbxDescribedbinstanceattributeResponseObj, nil
+}
+
+func (s *DrdsService) PolardbxDescribedbinstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		response, err := s.DoPolardbxDescribedbinstanceattributeRequest(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+		object := response.DBInstance
+		for _, failState := range failStates {
+			if fmt.Sprint(object.Status) == failState {
+				return object, fmt.Sprint(object.Status), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(object.Status)))
+			}
+		}
+		return object, fmt.Sprint(object.Status), nil
+	}
 }
 
 type PolardbxDescribedbinstancesResponse struct {
@@ -186,6 +199,7 @@ func (s *DrdsService) DoPolardbxDescribedbinstancesRequest(d *schema.ResourceDat
 	PolardbxDescribedbinstancesResponseObj := &PolardbxDescribedbinstancesResponse{}
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")

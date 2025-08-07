@@ -10,15 +10,15 @@ import (
 )
 
 func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
-	var v map[string]interface{}
+	var v *PolardbxDescribedbinstanceattributeResponse
 
-	resourceId := "alibabacloudstack_drds_polardb_instance.default"
+	resourceId := "alibabacloudstack_drds_polardbx_instance.default"
 	ra := resourceAttrInit(resourceId, drdsPolardbxbasicMap)
 
 	serviceFunc := func() interface{} {
 		return &DrdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DoPolardbxDescribedbinstanceattributeRequest")
 
 	rac := resourceAttrCheckInit(rc, ra)
 
@@ -41,20 +41,21 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 					"series":         "enterprise",
 					"topology_type":  "1azone",
 					"zone_id":        "${data.alibabacloudstack_zones.default.zones.0.id}",
-					"arch":           "Intel",
 					"engine_version": "5.7",
-					"storage":        "20",
+					"storage":        "50",
 					"network_type":   "vpc",
 					"vpc_id":         "${alibabacloudstack_vpc_vpc.default.id}",
 					"vswitch_id":     "${alibabacloudstack_vpc_vswitch.default.id}",
-					"cn_class":       "polarx.xx4.large.2e",
+					"cn_node_class":  "polarx.xx4.large.2e",
 					"cn_node_count":  "2",
-					"dn_class":       "mysql.x4.large.25",
+					"dn_node_class":  "mysql.x4.large.25",
 					"dn_node_count":  "2",
+					// "db_node_class":  "polarx.xx4.large.2e",
+					// "db_node_count": "2",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"storage": "20",
+						"storage": "50",
 					}),
 				),
 			},
