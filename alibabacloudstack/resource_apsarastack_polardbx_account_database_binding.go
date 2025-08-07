@@ -8,6 +8,7 @@ import (
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
+	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
@@ -44,6 +45,11 @@ func resourceAlibabacloudStackPolardbxAccountDatabaseBinding() *schema.Resource 
 						},
 					},
 				},
+				Set: func(v interface{}) int {
+					m := v.(map[string]interface{})
+					hashString := m["db_name"].(string)
+					return hashcode.String(hashString)
+				},
 			},
 		},
 	}
@@ -62,9 +68,39 @@ func resourceAlibabacloudStackPolardbxAccountDatabaseBindingCreate(d *schema.Res
 
 func resourceAlibabacloudStackPolardbxAccountDatabaseBindingUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	privileges := d.Get("db_privileges").(*schema.Set).List()
 	Polardbxservice := PolardbXService{client}
-	return Polardbxservice.PolardbxAccountDatabaseBinding(d.Id(), privileges)
+	result := make([]interface{}, 0)
+	if d.IsNewResource() {
+		result = d.Get("db_privileges").(*schema.Set).List()
+	} else {
+		o, n := d.GetChange("db_privileges")
+		old := o.(*schema.Set).List()
+		new := n.(*schema.Set).List()
+		old_privileges := make(map[string]interface{})
+		new_privileges := make(map[string]interface{})
+		for _, v := range old {
+			old_privileges[v.(map[string]interface{})["db_name"].(string)] = v.(map[string]interface{})["privilege"].(string)
+		}
+		for _, v := range new {
+			new_privileges[v.(map[string]interface{})["db_name"].(string)] = v.(map[string]interface{})["privilege"].(string)
+		}
+		for old_dbname, old_privilege := range old_privileges {
+			privilege, ok := new_privileges[old_dbname]
+			if !ok {
+				result = append(result, map[string]interface{}{
+					"db_name":   old_dbname,
+					"privilege": "none",
+				})
+			} else if old_privilege != privilege {
+				result = append(result, map[string]interface{}{
+					"db_name":   old_dbname,
+					"privilege": privilege,
+				})
+			}
+
+		}
+	}
+	return Polardbxservice.PolardbxAccountDatabaseBinding(d.Id(), result)
 }
 
 func resourceAlibabacloudStackPolardbxAccountDatabaseBindingRead(d *schema.ResourceData, meta interface{}) error {
@@ -93,14 +129,13 @@ func resourceAlibabacloudStackPolardbxAccountDatabaseBindingDelete(d *schema.Res
 	if len(db_privileges) == 0 {
 		return nil
 	}
-	db_privilege := db_privileges[0].(map[string]interface{})
-	db_name := db_privilege["db_name"].(string)
+	privilege_data := make([]interface{}, 0)
 	Polardbxservice := PolardbXService{client}
-	privilege_data := []interface{}{
-		map[string]interface{}{
-			"db_name":   db_name,
+	for _, db_privilege := range db_privileges {
+		privilege_data = append(privilege_data, map[string]interface{}{
+			"db_name":   db_privilege.(map[string]interface{})["db_name"],
 			"privilege": "none",
-		},
+		})
 	}
 	return Polardbxservice.PolardbxAccountDatabaseBinding(d.Id(), privilege_data)
 }

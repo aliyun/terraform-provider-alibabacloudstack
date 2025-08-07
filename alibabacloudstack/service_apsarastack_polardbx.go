@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -552,7 +553,10 @@ func (s *PolardbXService) DescribePolardbXAccountDBPrivilege(id string) ([]map[s
 	if account.AccountPrivilege != "" {
 		privileges = strings.Split(account.AccountPrivilege, ",")
 	}
+	log.Printf("[DEBUG]  DBName: %s   ====================", account.DBName)
+	log.Printf("[DEBUG]  AccountPrivilege: %s   ====================", account.AccountPrivilege)
 	for i, db_name := range db_names {
+		log.Printf("[DEBUG]  db_name: %s   ====================    privilege: %s", db_name, privileges[i])
 		db_privileges = append(db_privileges, map[string]string{
 			"db_name":   db_name,
 			"privilege": privileges[i],
@@ -613,7 +617,6 @@ func (s *PolardbXService) PolardbxAccountDatabaseBinding(id string, privileges [
 		"DbName":           new_dbname_str,
 	}
 	_, err := s.client.DoTeaRequest("POST", "polardbx", "2020-02-02", "ModifyAccountPrivilege", "", nil, reqQuery, nil)
-	addDebug("ModifyAccountPrivilege", nil, reqQuery, nil)
 	if err != nil {
 		return err
 	}

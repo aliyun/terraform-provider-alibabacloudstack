@@ -51,15 +51,21 @@ func TestAccAlibabacloudStackPolardbxAccountDatabaseBinding_basic0(t *testing.T)
 							"db_name":   "${alibabacloudstack_polardbx_database.default1.database_name}",
 							"privilege": "ReadWrite",
 						},
+						{
+							"db_name":   "${alibabacloudstack_polardbx_database.default2.database_name}",
+							"privilege": "DDLOnly",
+						},
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"db_privileges.#":           "2",
+						"db_privileges.#":           "3",
 						"db_privileges.0.db_name":   fmt.Sprintf("%s0", name),
 						"db_privileges.0.privilege": "ReadOnly",
 						"db_privileges.1.db_name":   fmt.Sprintf("%s1", name),
 						"db_privileges.1.privilege": "ReadWrite",
+						"db_privileges.2.db_name":   fmt.Sprintf("%s2", name),
+						"db_privileges.2.privilege": "DDLOnly",
 					}),
 				),
 			},
@@ -73,15 +79,23 @@ func TestAccAlibabacloudStackPolardbxAccountDatabaseBinding_basic0(t *testing.T)
 					"db_privileges": []map[string]interface{}{
 						{
 							"db_name":   "${alibabacloudstack_polardbx_database.default0.database_name}",
-							"privilege": "ReadWrite",
+							"privilege": "DDLOnly",
+						},
+						{
+							"db_name":   "${alibabacloudstack_polardbx_database.default1.database_name}",
+							"privilege": "ReadOnly",
 						},
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"db_privileges.#":           "1",
-						"db_privileges.0.privilege": "ReadWrite",
-						"db_privileges.1":           REMOVEKEY,
+						"db_privileges.#":           "2",
+						"db_privileges.0.db_name":   fmt.Sprintf("%s0", name),
+						"db_privileges.0.privilege": "DDLOnly",
+						"db_privileges.1.db_name":   fmt.Sprintf("%s1", name),
+						"db_privileges.1.privilege": "ReadOnly",
+						"db_privileges.2.db_name":   REMOVEKEY,
+						"db_privileges.2.privilege": REMOVEKEY,
 					}),
 				),
 			},
@@ -98,9 +112,7 @@ variable "name" {
 variable "password" {
   default = "%s"
 }
-
 %s
-
 resource "alibabacloudstack_polardbx_instance" "default" {
     description = "testtf1111"
 	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
@@ -115,20 +127,11 @@ resource "alibabacloudstack_polardbx_instance" "default" {
 	dn_node_count = "2"
 }
 
-resource "alibabacloudstack_polardbx_account" "super" {
-    instance_id  = "${alibabacloudstack_polardbx_instance.default.id}"
-	account_name = "admin"
-	account_type = "Super"
-	password     = "${var.password}"
-	description  = "Super user"
-}
-
 resource "alibabacloudstack_polardbx_database" "default0" {
     instance_id  = "${alibabacloudstack_polardbx_instance.default.id}"
 	database_name = "${var.name}0"
 	encode = "utf8mb4"
 	mode = "auto"
-	depends_on = ["alibabacloudstack_polardbx_account.super"]
 }
 
 resource "alibabacloudstack_polardbx_database" "default1" {
@@ -136,7 +139,13 @@ resource "alibabacloudstack_polardbx_database" "default1" {
 	database_name = "${var.name}1"
 	encode = "utf8mb4"
 	mode = "auto"
-	depends_on = ["alibabacloudstack_polardbx_account.super"]
+}
+
+resource "alibabacloudstack_polardbx_database" "default2" {
+    instance_id  = "${alibabacloudstack_polardbx_instance.default.id}"
+	database_name = "${var.name}2"
+	encode = "utf8mb4"
+	mode = "auto"
 }
 
 resource "alibabacloudstack_polardbx_account" "default" {
@@ -145,7 +154,6 @@ resource "alibabacloudstack_polardbx_account" "default" {
 	account_type = "Normal"
 	password     = "${var.password}"
 	description  = "Normal user"
-	depends_on = ["alibabacloudstack_polardbx_account.super"]
 }
 
  `, name, getAccTestPassword(12), VSwitchCommonTestCase)
