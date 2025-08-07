@@ -39,7 +39,7 @@ func TestAccAlibabacloudStackDrdsPolardbxDatabase_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id":       "pxc-unrsf0s4lu6qa4",
+					"instance_id":       "${alibabacloudstack_drds_polardbx_instance.default.id}",
 					"database_name":     "${var.name}",
 					"encode":            "utf8mb4",
 					"description":       "${var.name}",
@@ -60,7 +60,7 @@ func TestAccAlibabacloudStackDrdsPolardbxDatabase_basic0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description": "${var.name}s_update",
+					"description": "${var.name}_update",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
