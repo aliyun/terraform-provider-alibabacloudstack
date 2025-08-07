@@ -79,6 +79,15 @@ resource "alibabacloudstack_polardbx_instance" "default" {
   * `vswitch_id` - (必填) - 交换机ID.
   * `vpc_id` - (必填) - VPC ID。
   * `zone_id` - (选填) - 可用区。
+  * `compute_parameters` - (可选) - 实例的计算资源配置。
+    * `name` - (必填) - 计算资源配置的名称。
+    * `value` - (必填) - 计算资源配置的值。
+  * `storage_parameters` - (可选) - 实例的存储配置。
+    * `name` - (必填) - 存储配置的名称。
+    * `value` - (必填) - 存储配置的值。
+  * `security_groups` - (可选) - 实例的安全IP组。
+    * `group_name` - (必填) - 安全IP组的名称。
+    * `ips` - (必填) - 安全IP。多个IP需要用","隔开，示例：`192.168.0.1,192.168.0.0/24`
 
 ## 属性参考
 

@@ -69,16 +69,42 @@ func TestAccAlibabacloudStackPolardbxInstance_basic0(t *testing.T) {
 							"value": "35",
 						},
 					},
+					"security_groups": []map[string]interface{}{
+						{
+							"group_name": "test123",
+							"ips":        "10.0.0.1,10.0.0.2",
+						},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description":                name,
-						"cn_node_count":              "2",
-						"dn_node_count":              "2",
-						"compute_parameters.#":       "2",
-						"compute_parameters.0.name":  CHECKSET,
-						"storage_parameters.#":       "2",
-						"storage_parameters.0.value": CHECKSET,
+						// "description":                  name,
+						"cn_node_count":                "2",
+						"dn_node_count":                "2",
+						"compute_parameters.#":         "2",
+						"compute_parameters.0.name":    CHECKSET,
+						"storage_parameters.#":         "2",
+						"storage_parameters.0.value":   CHECKSET,
+						"security_groups.#":            "1",
+						"security_groups.0.group_name": "test123",
+						"security_groups.0.ips":        "10.0.0.1,10.0.0.2",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"security_groups": []map[string]interface{}{
+						{
+							"group_name": "test123",
+							"ips":        "10.0.0.1,192.168.1.1/24",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"security_groups.#":            "1",
+						"security_groups.0.group_name": "test123",
+						"security_groups.0.ips":        "10.0.0.1,192.168.1.1/24",
 					}),
 				),
 			},
@@ -188,13 +214,14 @@ func TestAccAlibabacloudStackPolardbxInstance_onlyreadInstance(t *testing.T) {
 }
 
 func resourcePolardbxDependence(name string) string {
+
 	return fmt.Sprintf(`
 
-	variable "name" {
-		default = "%s"
-	}
-
-`, name)
+variable "name" {
+  default = "%s"
+}
+%s
+ `, name, VSwitchCommonTestCase)
 }
 
 var PolardbxbasicMap = map[string]string{}

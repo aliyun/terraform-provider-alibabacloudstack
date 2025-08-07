@@ -664,3 +664,99 @@ func (s *PolardbXService) DoPolardbxDescribeSecurityIpsRequest(id string) (*[]Po
 
 	return &DescribeSecurityIpsResponseObj.Data.GroupItems, nil
 }
+
+func (s *PolardbXService) ModifySecurityIps(instance_id string, old, new []interface{}) error {
+	old_securitygroup := make(map[string]interface{})
+	new_securitygroup := make(map[string]interface{})
+	requests := make([]map[string]interface{}, 0)
+	for _, v := range old {
+		old_securitygroup[v.(map[string]interface{})["group_name"].(string)] = v.(map[string]interface{})["ips"].(string)
+	}
+	for _, v := range new {
+		new_securitygroup[v.(map[string]interface{})["group_name"].(string)] = v.(map[string]interface{})["ips"].(string)
+	}
+	for old_group_name, old_ips := range old_securitygroup {
+		new_ips, ok := new_securitygroup[old_group_name]
+		if !ok {
+			requests = append(requests, map[string]interface{}{
+				"modifyMode":            "2",
+				"GroupName":             old_group_name,
+				"DBInstanceIPArrayName": old_group_name,
+				"SecurityIPList":        old_ips,
+				"DBInstanceName":        instance_id,
+			})
+		} else if old_ips != new_ips {
+			requests = append(requests, map[string]interface{}{
+				"modifyMode":     "0",
+				"GroupName":      old_group_name,
+				"SecurityIPList": new_ips,
+				"DBInstanceName": instance_id,
+			})
+		}
+
+	}
+	for new_group_name, new_ips := range new_securitygroup {
+		_, ok := new_securitygroup[new_group_name]
+		if !ok {
+			requests = append(requests, map[string]interface{}{
+				"modifyMode":     "1",
+				"DBInstanceName": instance_id,
+				"SecurityIPList": new_ips,
+				"GroupName":      new_group_name,
+			})
+		}
+	}
+	for _, request := range requests {
+		_, err := s.client.DoTeaRequest("POST", "polardbx", "2020-02-02", "ModifySecurityIps", "", nil, request, nil)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type PolardbXDBSecurityIPGroup struct {
+	GroupName      string `json:"GroupName"`
+	SecurityIPList string `json:"SecurityIPList"`
+}
+
+type PolardbXDBSecurityIPGroupResponse struct {
+	EagleEyeTraceId string `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool   `json:"asapiSuccess"`
+	AsapiRequestId  string `json:"asapiRequestId"`
+	RequestId       string `json:"RequestId"`
+	Message         string `json:"Message"`
+	Data            struct {
+		GroupItems     []PolardbXDBSecurityIPGroup `json:"GroupItems"`
+		DBInstanceName string                      `json:"DBInstanceName"`
+	} `json:"Data"`
+	Success bool `json:"Success"`
+}
+
+func (s *PolardbXService) DescribePolardbXDBSecurityIPGroup(instance_id string) ([]PolardbXDBSecurityIPGroup, error) {
+	PolardbXDBSecurityIPGroupResponseObj := PolardbXDBSecurityIPGroupResponse{}
+	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeSecurityIps", "")
+
+	//调用request_params_handler
+
+	request.QueryParams["DBInstanceName"] = instance_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeSecurityIps", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolardbXDBSecurityIPGroupResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeSecurityIps", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return PolardbXDBSecurityIPGroupResponseObj.Data.GroupItems, nil
+
+}

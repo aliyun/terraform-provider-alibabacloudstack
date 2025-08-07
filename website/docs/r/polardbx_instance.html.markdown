@@ -83,6 +83,15 @@ The following arguments are supported:
   * `vswitch_id` - (Required) -The VSwitch ID.
   * `vpc_id` - (Required) - The VPC ID.
   * `zone_id` - (Optional) - The ID of the zone to which the instance belongs.
+  * `compute_parameters` - (Optional) - The compute resource configuration of the instance.
+    * `name` - (Required) - The name of the compute resource configuration.
+    * `value` - (Required) - The value of the compute resource configuration.
+  * `storage_parameters` - (Optional) - The storage configuration of the instance.
+    * `name` - (Required) - The name of the storage configuration.
+    * `value` - (Required) - The value of the storage configuration.
+  * `security_groups` - (Optional) - The security ip group of the instance.
+    * `group_name` - (Required) - The name of the security ip group.
+    * `ips` - (Required) - The security ips. Multiple IPs need to be separated by ",", example: `192.168.0.1,192.168.0.0/24`
 
 ## Attributes Reference
 
