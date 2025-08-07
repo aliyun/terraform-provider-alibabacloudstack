@@ -992,8 +992,6 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 	internet_slbs := make([]map[string]interface{}, 0)
 	intranet_slb_id := ""
 	internet_slb_id := ""
-	intranet_external_traffic_policy := "Local"
-	internet_external_traffic_policy := "Local"
 	if response.App.SlbInfo != "" {
 		var slbinfos []interface{}
 		err = json.Unmarshal([]byte(response.App.SlbInfo), &slbinfos)
@@ -1005,7 +1003,7 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 			if slb["addressType"] == "intranet" {
 				intranet_slb_id = slb["slbId"].(string)
 				if v, ok := slb["externalTrafficPolicy"]; ok && v.(string) != "" {
-					intranet_external_traffic_policy = v.(string)
+					d.Set("intranet_external_traffic_policy", v.(string))
 				}
 				for _, service_port := range slb["portMappings"].([]interface{}) {
 					info := service_port.(map[string]interface{})
@@ -1020,7 +1018,7 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 			} else if slb["addressType"] == "internet" {
 				internet_slb_id = slb["slbId"].(string)
 				if v, ok := slb["externalTrafficPolicy"]; ok && v.(string) != "" {
-					internet_external_traffic_policy = v.(string)
+					d.Set("internet_external_traffic_policy", v.(string))
 				}
 				for _, service_port := range slb["portMappings"].([]interface{}) {
 					info := service_port.(map[string]interface{})
@@ -1035,7 +1033,6 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 		}
 	}
 	d.Set("intranet_slb_id", intranet_slb_id)
-	d.Set("intranet_external_traffic_policy", intranet_external_traffic_policy)
 	d.Set("intranet_service_port_infos", intranet_slbs)
 	if len(intranet_slbs) == 1 {
 		d.Set("intranet_slb_protocol", intranet_slbs[0]["protocol"].(string))
@@ -1047,7 +1044,6 @@ func resourceAlibabacloudStackEdasK8sApplicationRead(d *schema.ResourceData, met
 		d.Set("intranet_slb_port", nil)
 	}
 	d.Set("internet_slb_id", internet_slb_id)
-	d.Set("internet_external_traffic_policy", internet_external_traffic_policy)
 	d.Set("internet_service_port_infos", internet_slbs)
 	if len(internet_slbs) == 1 {
 		d.Set("internet_slb_protocol", internet_slbs[0]["protocol"].(string))
