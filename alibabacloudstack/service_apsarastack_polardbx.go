@@ -16,6 +16,66 @@ type PolardbXService struct {
 	client *connectivity.AlibabacloudStackClient
 }
 
+type PolardbxAccount struct {
+	AccountDescription string `json:"AccountDescription"`
+	AccountPrivilege   string `json:"AccountPrivilege,omitempty"`
+	DBName             string `json:"DBName,omitempty"`
+	AccountType        string `json:"AccountType"`
+	AccountName        string `json:"AccountName"`
+	DBInstanceName     string `json:"DBInstanceName"`
+}
+
+type DoPolardbxDescribeAccountListResponse struct {
+	EagleEyeTraceId string            `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool              `json:"asapiSuccess"`
+	AsapiRequestId  string            `json:"asapiRequestId"`
+	Message         string            `json:"Message"`
+	RequestID       string            `json:"RequestId"`
+	Data            []PolardbxAccount `json:"Data"`
+	Success         bool              `json:"Success"`
+}
+
+func (s *PolardbXService) DoPolardbxDescribeAccountListRequest(id string) (*PolardbxAccount, error) {
+	var instanceId, AccountName string
+	if parts, err := ParseResourceId(id, 2); err != nil {
+		return nil, err
+	} else {
+		instanceId = parts[0]
+		AccountName = parts[1]
+	}
+	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeAccountList", "")
+	DoPolardbxDescribeAccountListResponseObj := &DoPolardbxDescribeAccountListResponse{}
+
+	//调用request_params_handler
+
+	request.QueryParams["DBInstanceName"] = instanceId
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeDBInstanceAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DoPolardbxDescribeAccountListResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeDBInstanceAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	if len(DoPolardbxDescribeAccountListResponseObj.Data) > 0 {
+		for _, v := range DoPolardbxDescribeAccountListResponseObj.Data {
+			if v.AccountName == AccountName {
+				return &v, nil
+			}
+		}
+	}
+
+	return nil, errmsgs.Error(errmsgs.NotFoundMsg, "PolardbxAccount")
+}
+
 type PolardbxDescribedbinstanceattributeResponse struct {
 	RequestId string `json:"RequestId"`
 
