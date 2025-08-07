@@ -297,7 +297,7 @@ func (s *PolardbXService) ModifyParameters(d *schema.ResourceData, attribute str
 	return nil
 }
 
-func (s *PolardbXService) DoPolardbxDescribeParametersRequest(id, param_level string) ([]map[string]interface{}, error) {
+func (s *PolardbXService) DoPolardbxDescribeParametersRequest(id, param_level string) (map[string]interface{}, error) {
 	// api: polardbx - 2020-02-02 - DescribeDBInstances
 	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeParameters", "")
 	request.QueryParams["DBInstanceId"] = id
@@ -318,19 +318,48 @@ func (s *PolardbXService) DoPolardbxDescribeParametersRequest(id, param_level st
 	if err != nil {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DescribeParameters", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	parameters_value, err := jsonpath.Get("$.Data.RunningParameters", response)
-	if err != nil {
-		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "DescribeParameters", "$.Data.RunningParameters", response)
+	return response, nil
+}
+
+func (s *PolardbXService) RefreshParameters(d *schema.ResourceData, attribute string) error {
+	var param []map[string]interface{}
+	documented, ok := d.GetOk(fmt.Sprintf("%s_parameters", attribute))
+	if !ok {
+		d.Set(fmt.Sprintf("%s_parameters", attribute), param)
+		return nil
 	}
-	parameters := make([]map[string]interface{}, 0)
-	if parameters_value != nil {
-		for _, v := range parameters_value.([]interface{}) {
+	response, err := s.DoPolardbxDescribeParametersRequest(d.Id(), attribute)
+	if err != nil {
+		return errmsgs.WrapError(err)
+	}
+	running_parameters, err := jsonpath.Get("$.Data.RunningParameters", response)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "DescribeParameters", "$.Data.RunningParameters", response)
+	}
+	var parameters = make(map[string]interface{})
+	if running_parameters != nil {
+		for _, v := range running_parameters.([]interface{}) {
 			parameter := v.(map[string]interface{})
-			parameters = append(parameters, map[string]interface{}{
-				"name":  parameter["ParameterName"],
-				"value": parameter["ParameterValue"],
-			})
+			if _, ok := v.(map[string]interface{})["ParameterName"]; ok {
+				p := map[string]interface{}{
+					"name":  parameter["ParameterName"],
+					"value": parameter["ParameterValue"],
+				}
+				parameters[parameter["ParameterName"].(string)] = p
+			}
 		}
 	}
-	return parameters, nil
+	for _, parameter := range documented.(*schema.Set).List() {
+		name := parameter.(map[string]interface{})["name"]
+		for _, value := range parameters {
+			if value.(map[string]interface{})["name"] == name {
+				param = append(param, value.(map[string]interface{}))
+				break
+			}
+		}
+	}
+	if err := d.Set(fmt.Sprintf("%s_parameters", attribute), param); err != nil {
+		return errmsgs.WrapError(err)
+	}
+	return nil
 }

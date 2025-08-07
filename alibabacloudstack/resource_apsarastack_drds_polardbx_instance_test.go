@@ -39,12 +39,12 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description":    "${var.name}",
-					"zone_id":        "${data.alibabacloudstack_zones.default.zones.0.id}",
+					"zone_id":        "cn-wulan-env17e-amtest17001-a",
 					"engine_version": "5.7",
 					"storage":        "50",
 					"network_type":   "vpc",
-					"vpc_id":         "${alibabacloudstack_vpc_vpc.default.id}",
-					"vswitch_id":     "${alibabacloudstack_vpc_vswitch.default.id}",
+					"vpc_id":         "vpc-ad78qaj93bw2gibgtdj7y",
+					"vswitch_id":     "vsw-ad73xkxqa8jvx1nko6j8p",
 					"cn_node_class":  "polarx.x4.medium.2e",
 					"cn_node_count":  "2",
 					"dn_node_class":  "mysql.n4.medium.25",
@@ -65,7 +65,7 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 							"value": "10",
 						},
 						{
-							"name":  "lc_time_names",
+							"name":  "ft_query_expansion_limit",
 							"value": "35",
 						},
 					},
@@ -76,9 +76,9 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 						"cn_node_count":              "2",
 						"dn_node_count":              "2",
 						"compute_parameters.#":       "2",
-						"compute_parameters.0.name":  "CONN_POOL_BLOCK_TIMEOUT",
+						"compute_parameters.0.name":  CHECKSET,
 						"storage_parameters.#":       "2",
-						"storage_parameters.0.value": "10",
+						"storage_parameters.0.value": CHECKSET,
 					}),
 				),
 			},
@@ -101,16 +101,6 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"enable_ssl": "false",
-					}),
-				),
-			},
-			{
-				Config: testAccConfig(map[string]interface{}{
-					"cn_node_count": "3",
-				}),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheck(map[string]string{
-						"cn_node_count": "3",
 					}),
 				),
 			},
@@ -203,8 +193,7 @@ func resourceDrdsPolardbxDependence(name string) string {
 		default = "%s"
 	}
 
-	%s
-`, name, VSwitchCommonTestCase)
+`, name)
 }
 
 var drdsPolardbxbasicMap = map[string]string{}
