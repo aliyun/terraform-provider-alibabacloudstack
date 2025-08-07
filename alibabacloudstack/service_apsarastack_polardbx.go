@@ -10,6 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+type PolardbXService struct {
+	client *connectivity.AlibabacloudStackClient
+}
+
 type PolardbxDescribedbinstanceattributeResponse struct {
 	RequestId string `json:"RequestId"`
 
@@ -83,7 +87,7 @@ type PolardbxDescribedbinstanceattributeResponse struct {
 	} `json:"DBInstance"`
 }
 
-func (s *DrdsService) DoPolardbxDescribedbinstanceattributeRequest(id string) (*PolardbxDescribedbinstanceattributeResponse, error) {
+func (s *PolardbXService) DoPolardbxDescribedbinstanceattributeRequest(id string) (*PolardbxDescribedbinstanceattributeResponse, error) {
 	// api: polardbx - 2020-02-02 - DescribeDBInstanceAttribute
 	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeDBInstanceAttribute", "")
 	PolardbxDescribedbinstanceattributeResponseObj := &PolardbxDescribedbinstanceattributeResponse{}
@@ -111,7 +115,7 @@ func (s *DrdsService) DoPolardbxDescribedbinstanceattributeRequest(id string) (*
 	return PolardbxDescribedbinstanceattributeResponseObj, nil
 }
 
-func (s *DrdsService) PolardbxDescribedbinstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+func (s *PolardbXService) PolardbxDescribedbinstanceStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		response, err := s.DoPolardbxDescribedbinstanceattributeRequest(id)
 		if err != nil {
@@ -132,60 +136,52 @@ func (s *DrdsService) PolardbxDescribedbinstanceStateRefreshFunc(id string, fail
 }
 
 type PolardbxDescribedbinstancesResponse struct {
-	DBInstances struct {
-		DBInstance []struct {
-			ReadDBInstances struct {
-				ReadDBInstance []string `json:"ReadDBInstance"`
-			} `json:"ReadDBInstances"`
+	DBInstances []struct {
+		ReadDBInstances []string `json:"ReadDBInstances"`
 
-			Nodes struct {
-				PolarDBXNode []struct {
-					Id        string `json:"Id"`
-					ClassCode string `json:"ClassCode"`
-					RegionId  string `json:"RegionId"`
-					ZoneId    string `json:"ZoneId"`
-				} `json:"PolarDBXNode"`
-			} `json:"Nodes"`
+		Nodes []struct {
+			Id        string `json:"Id"`
+			ClassCode string `json:"ClassCode"`
+			RegionId  string `json:"RegionId"`
+			ZoneId    string `json:"ZoneId"`
+		} `json:"Nodes"`
 
-			TagSet struct {
-				TagSet []struct {
-					Key   string `json:"Key"`
-					Value string `json:"Value"`
-				} `json:"TagSet"`
-			} `json:"TagSet"`
-			Id              string `json:"Id"`
-			Description     string `json:"Description"`
-			PayType         string `json:"PayType"`
-			CreateTime      string `json:"CreateTime"`
-			ExpireTime      string `json:"ExpireTime"`
-			Expired         bool   `json:"Expired"`
-			RegionId        string `json:"RegionId"`
-			ZoneId          string `json:"ZoneId"`
-			Network         string `json:"Network"`
-			VPCId           string `json:"VPCId"`
-			Engine          string `json:"Engine"`
-			DBType          string `json:"DBType"`
-			DBVersion       string `json:"DBVersion"`
-			Status          string `json:"Status"`
-			LockMode        string `json:"LockMode"`
-			LockReason      string `json:"LockReason"`
-			NodeCount       int    `json:"NodeCount"`
-			NodeClass       string `json:"NodeClass"`
-			SpecSeries      string `json:"SpecSeries"`
-			DNNodeCount     int    `json:"DNNodeCount"`
-			DNNodeClass     string `json:"DNNodeClass"`
-			CNNodeCount     int    `json:"CNNodeCount"`
-			CNNodeClass     string `json:"CNNodeClass"`
-			StorageUsed     int    `json:"StorageUsed"`
-			Storage         int    `json:"Storage"`
-			CommodityCode   string `json:"CommodityCode"`
-			Type            string `json:"Type"`
-			MinorVersion    string `json:"MinorVersion"`
-			ResourceGroupId string `json:"ResourceGroupId"`
-			DBInstanceName  string `json:"DBInstanceName"`
-			Series          string `json:"Series"`
-			CpuType         string `json:"CpuType"`
-		} `json:"DBInstance"`
+		TagSet []struct {
+			Key   string `json:"Key"`
+			Value string `json:"Value"`
+		} `json:"TagSet"`
+		Id              string `json:"Id"`
+		Description     string `json:"Description"`
+		PayType         string `json:"PayType"`
+		CreateTime      string `json:"CreateTime"`
+		ExpireTime      string `json:"ExpireTime"`
+		Expired         bool   `json:"Expired"`
+		RegionId        string `json:"RegionId"`
+		ZoneId          string `json:"ZoneId"`
+		Network         string `json:"Network"`
+		VPCId           string `json:"VPCId"`
+		Engine          string `json:"Engine"`
+		DBType          string `json:"DBType"`
+		DBVersion       string `json:"DBVersion"`
+		Status          string `json:"Status"`
+		LockMode        string `json:"LockMode"`
+		LockReason      string `json:"LockReason"`
+		NodeCount       int    `json:"NodeCount"`
+		NodeClass       string `json:"NodeClass"`
+		SpecSeries      string `json:"SpecSeries"`
+		DNNodeCount     int    `json:"DNNodeCount"`
+		DNNodeClass     string `json:"DNNodeClass"`
+		CNNodeCount     int    `json:"CNNodeCount"`
+		CNNodeClass     string `json:"CNNodeClass"`
+		StorageUsed     int    `json:"StorageUsed"`
+		Storage         int    `json:"Storage"`
+		CommodityCode   string `json:"CommodityCode"`
+		Type            string `json:"Type"`
+		MinorVersion    string `json:"MinorVersion"`
+		ResourceGroupId string `json:"ResourceGroupId"`
+		DBInstanceName  string `json:"DBInstanceName"`
+		Series          string `json:"Series"`
+		CpuType         string `json:"CpuType"`
 	} `json:"DBInstances"`
 	RequestId   string `json:"RequestId"`
 	PageNumber  int    `json:"PageNumber"`
@@ -193,11 +189,10 @@ type PolardbxDescribedbinstancesResponse struct {
 	TotalNumber int    `json:"TotalNumber"`
 }
 
-func (s *DrdsService) DoPolardbxDescribedbinstancesRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbxDescribedbinstancesResponse, error) {
+func (s *PolardbXService) DoPolardbxDescribedbinstancesRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbxDescribedbinstancesResponse, error) {
 	// api: polardbx - 2020-02-02 - DescribeDBInstances
 	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeDBInstances", "")
 	PolardbxDescribedbinstancesResponseObj := &PolardbxDescribedbinstancesResponse{}
-
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {

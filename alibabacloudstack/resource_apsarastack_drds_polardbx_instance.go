@@ -179,7 +179,7 @@ func resourceAlibabacloudStackDrdspolardbxInstanceCreate(d *schema.ResourceData,
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	is_read_db_instance := d.Get("is_read_db_instance").(bool)
-	drdspolardbx_instanceservice := DrdsService{client}
+	drdspolardbx_instanceservice := PolardbXService{client}
 	// api: polardbx - 2020 - 02 - 02 - CreateDBInstance
 	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "CreateDBInstance", "")
 	PolardbxCreatedbinstanceResponseObj := PolardbxCreatedbinstanceResponse{}
@@ -315,7 +315,7 @@ func resourceAlibabacloudStackDrdspolardbxInstanceUpdate(d *schema.ResourceData,
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
 				"alibabacloudstack_drds_polardbx_instance", "UpdatepolardbxInstanceNode", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		drdspolardbx_instanceservice := DrdsService{client}
+		drdspolardbx_instanceservice := PolardbXService{client}
 		stateConf := BuildStateConf([]string{"ClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
@@ -350,7 +350,7 @@ func resourceAlibabacloudStackDrdspolardbxInstanceUpdate(d *schema.ResourceData,
 
 func resourceAlibabacloudStackDrdspolardbxInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	drdspolardbx_instanceservice := DrdsService{client}
+	drdspolardbx_instanceservice := PolardbXService{client}
 	response, err := drdspolardbx_instanceservice.DoPolardbxDescribedbinstanceattributeRequest(d.Id())
 	// READINS_MAINTAINING
 	if err != nil {
@@ -410,7 +410,7 @@ func resourceAlibabacloudStackDrdspolardbxInstanceDelete(d *schema.ResourceData,
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	// api: polardbx - 2020-02-02 - DeleteDBInstance
 	// Check instance status before deletion
-	drdspolardbx_instanceservice := DrdsService{client}
+	drdspolardbx_instanceservice := PolardbXService{client}
 	stateConf := BuildStateConf([]string{"ClassChanging", "READINS_MAINTAINING", "Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())

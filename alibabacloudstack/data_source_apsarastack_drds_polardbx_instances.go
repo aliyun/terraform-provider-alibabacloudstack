@@ -54,7 +54,7 @@ func dataSourceAlibabacloudStackDrdsPolarDbxInstances() *schema.Resource {
 						},
 
 						"storage": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeInt,
 							Computed: true,
 						},
 
@@ -202,6 +202,7 @@ func dataSourceAlibabacloudStackDrdsPolarDbxInstancesRead(d *schema.ResourceData
 	PolardbxDescribedbinstancesResponseObj := PolardbxDescribedbinstancesResponse{}
 
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
@@ -223,7 +224,7 @@ func dataSourceAlibabacloudStackDrdsPolarDbxInstancesRead(d *schema.ResourceData
 	}
 	var ids []string
 	datas := make([]interface{}, 0)
-	for _, data := range PolardbxDescribedbinstancesResponseObj.DBInstances.DBInstance {
+	for _, data := range PolardbxDescribedbinstancesResponseObj.DBInstances {
 
 		if description_regex, ok := connectivity.GetResourceDataOk(d, "description_regex", "name_regex"); ok {
 			r := regexp.MustCompile(description_regex.(string))
@@ -244,6 +245,8 @@ func dataSourceAlibabacloudStackDrdsPolarDbxInstancesRead(d *schema.ResourceData
 			"series": data.Series,
 
 			"storage": data.Storage,
+
+			"engine_version": data.DBVersion,
 
 			"description": data.Description,
 
