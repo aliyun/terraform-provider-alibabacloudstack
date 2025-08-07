@@ -4,6 +4,7 @@ package alibabacloudstack
 // Product DRDS Resouce Account
 import (
 	"fmt"
+	"log"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -26,16 +27,23 @@ func resourceAlibabacloudStackPolardbxAccountDatabaseBinding() *schema.Resource 
 				Required: true,
 				ForceNew: true,
 			},
-
-			"db_name": {
-				Type:     schema.TypeString,
+			"db_privileges": {
+				Type:     schema.TypeSet,
 				Required: true,
-				ForceNew: true,
-			},
-			"privilege": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"ReadOnly", "ReadWrite", "DMLOnly", "DDLOnly"}, false),
+				MinItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"db_name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"privilege": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"ReadOnly", "ReadWrite", "DMLOnly", "DDLOnly"}, false),
+						},
+					},
+				},
 			},
 		},
 	}
@@ -46,16 +54,17 @@ func resourceAlibabacloudStackPolardbxAccountDatabaseBinding() *schema.Resource 
 func resourceAlibabacloudStackPolardbxAccountDatabaseBindingCreate(d *schema.ResourceData, meta interface{}) error {
 	accountName := d.Get("account_name").(string)
 	instanceID := d.Get("instance_id").(string)
-	db_name := d.Get("db_name").(string)
-	d.SetId(fmt.Sprintf("%s:%s:%s", instanceID, accountName, db_name))
+	id := fmt.Sprintf("%s:%s", instanceID, accountName)
+	log.Printf("[DEBUG] alibabacloudstack_polardbx_account_database_binding id:%s $#########################################", id)
+	d.SetId(id)
 	return nil
 }
 
 func resourceAlibabacloudStackPolardbxAccountDatabaseBindingUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	privilege := d.Get("privilege").(string)
+	privileges := d.Get("db_privileges").(*schema.Set).List()
 	Polardbxservice := PolardbXService{client}
-	return Polardbxservice.PolardbxAccountDatabaseBinding(d.Id(), privilege)
+	return Polardbxservice.PolardbxAccountDatabaseBinding(d.Id(), privileges)
 }
 
 func resourceAlibabacloudStackPolardbxAccountDatabaseBindingRead(d *schema.ResourceData, meta interface{}) error {
@@ -63,22 +72,26 @@ func resourceAlibabacloudStackPolardbxAccountDatabaseBindingRead(d *schema.Resou
 	Polardbxservice := PolardbXService{client}
 	privilege, err := Polardbxservice.DescribePolardbXAccountDBPrivilege(d.Id())
 	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			d.SetId("")
-		}
 		return errmsgs.WrapError(err)
 	}
-
-	d.Set("instance_id", privilege.InstanceId)
-	d.Set("account_name", privilege.AccountName)
-	d.Set("db_name", privilege.DBName)
-	d.Set("privilege", privilege.Privilege)
+	d.Set("db_privileges", privilege)
 	return nil
 }
 
 func resourceAlibabacloudStackPolardbxAccountDatabaseBindingDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	privilege := "none"
+	db_privileges := d.Get("db_privileges").(*schema.Set).List()
+	if len(db_privileges) == 0 {
+		return nil
+	}
+	db_privilege := db_privileges[0].(map[string]interface{})
+	db_name := db_privilege["db_name"].(string)
 	Polardbxservice := PolardbXService{client}
-	return Polardbxservice.PolardbxAccountDatabaseBinding(d.Id(), privilege)
+	privilege_data := []interface{}{
+		map[string]interface{}{
+			"db_name":   db_name,
+			"privilege": "none",
+		},
+	}
+	return Polardbxservice.PolardbxAccountDatabaseBinding(d.Id(), privilege_data)
 }

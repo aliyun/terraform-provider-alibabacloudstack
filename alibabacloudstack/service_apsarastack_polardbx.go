@@ -531,21 +531,21 @@ type PolardbXAccountDBPrivilege struct {
 	Privilege   string
 }
 
-func (s *PolardbXService) DescribePolardbXAccountDBPrivilege(id string) (*PolardbXAccountDBPrivilege, error) {
+func (s *PolardbXService) DescribePolardbXAccountDBPrivilege(id string) ([]map[string]string, error) {
 	db_names := make([]string, 0)
 	privileges := make([]string, 0)
-	var instanceId, AccountName, DBName string
-	if parts, err := ParseResourceId(id, 3); err != nil {
+	var instanceId, AccountName string
+	if parts, err := ParseResourceId(id, 2); err != nil {
 		return nil, err
 	} else {
 		instanceId = parts[0]
 		AccountName = parts[1]
-		DBName = parts[2]
 	}
 	account, err := s.DoPolardbxDescribeAccountListRequest(fmt.Sprintf("%s:%s", instanceId, AccountName))
 	if err != nil {
 		return nil, err
 	}
+	db_privileges := make([]map[string]string, 0)
 	if account.DBName != "" {
 		db_names = strings.Split(account.DBName, ",")
 	}
@@ -553,16 +553,12 @@ func (s *PolardbXService) DescribePolardbXAccountDBPrivilege(id string) (*Polard
 		privileges = strings.Split(account.AccountPrivilege, ",")
 	}
 	for i, db_name := range db_names {
-		if db_name == DBName {
-			return &PolardbXAccountDBPrivilege{
-				AccountName: AccountName,
-				Privilege:   privileges[i],
-				DBName:      db_name,
-				InstanceId:  instanceId,
-			}, nil
-		}
+		db_privileges = append(db_privileges, map[string]string{
+			"db_name":   db_name,
+			"privilege": privileges[i],
+		})
 	}
-	return nil, errmsgs.Error(errmsgs.NotFoundMsg, "PolardbXAccountDBPrivilege")
+	return db_privileges, nil
 }
 
 func (s *PolardbXService) AccountPrivilegeHaschange(account *PolardbxAccount, db_name string, privilege string) (string, string, bool) {
@@ -593,38 +589,75 @@ func (s *PolardbXService) AccountPrivilegeHaschange(account *PolardbxAccount, db
 	}
 }
 
-func (s *PolardbXService) PolardbxAccountDatabaseBinding(id, privilege string) error {
-	var instanceId, accountName, dbBName string
-	if parts, err := ParseResourceId(id, 3); err != nil {
+func (s *PolardbXService) PolardbxAccountDatabaseBinding(id string, privileges []interface{}) error {
+	var instanceId, accountName string
+	if parts, err := ParseResourceId(id, 2); err != nil {
 		return err
 	} else {
 		instanceId = parts[0]
 		accountName = parts[1]
-		dbBName = parts[2]
 	}
-
-	//---------- 关键锁逻辑 ---------//
-	// 1. 获取或创建账户级锁
-	accountLock := getLock(accountName)
-	accountLock.Lock()
-	defer accountLock.Unlock() // 确保函数结束时释放锁
-	//-----------------------------//
-	account, err := s.DoPolardbxDescribeAccountListRequest(fmt.Sprintf("%s:%s", instanceId, accountName))
+	new_dbnames := make([]string, 0)
+	new_privileges := make([]string, 0)
+	for _, db_privilege := range privileges {
+		p := db_privilege.(map[string]interface{})
+		new_dbnames = append(new_dbnames, p["db_name"].(string))
+		new_privileges = append(new_privileges, p["privilege"].(string))
+	}
+	new_prprivilege_str := strings.Join(new_privileges, ",")
+	new_dbname_str := strings.Join(new_dbnames, ",")
+	reqQuery := map[string]interface{}{
+		"DBInstanceName":   instanceId,
+		"AccountName":      accountName,
+		"AccountPrivilege": new_prprivilege_str,
+		"DbName":           new_dbname_str,
+	}
+	_, err := s.client.DoTeaRequest("POST", "polardbx", "2020-02-02", "ModifyAccountPrivilege", "", nil, reqQuery, nil)
+	addDebug("ModifyAccountPrivilege", nil, reqQuery, nil)
 	if err != nil {
 		return err
 	}
-	new_dbname, new_prprivilege, isupdate := s.AccountPrivilegeHaschange(account, dbBName, privilege)
-	if isupdate {
-		reqQuery := map[string]interface{}{
-			"DBInstanceName":   instanceId,
-			"AccountName":      accountName,
-			"AccountPrivilege": new_prprivilege,
-			"DbName":           new_dbname,
-		}
-		_, err := s.client.DoTeaRequest("POST", "polardbx", "2020-02-02", "ModifyAccountPrivilege", "", nil, reqQuery, nil)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
+}
+
+type PolardbxSecurityIpGroupItems struct {
+	GroupName string `xml:"GroupName" json:"GroupName"`
+	IpLists   string `xml:"SecurityIPList" json:"SecurityIPList"`
+}
+
+type DescribeSecurityIpsResponse struct {
+	RequestId string `xml:"RequestId" json:"RequestId"`
+	Success   bool   `xml:"Success" json:"Success"`
+	Message   string `xml:"Message" json:"Message"`
+	Data      struct {
+		DBInstanceName string                         `xml:"DBInstanceName" json:"DBInstanceName"`
+		GroupItems     []PolardbxSecurityIpGroupItems `xml:"GroupItems" json:"GroupItems"`
+	} `xml:"Data" json:"Data"`
+}
+
+func (s *PolardbXService) DoPolardbxDescribeSecurityIpsRequest(id string) (*[]PolardbxSecurityIpGroupItems, error) {
+	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeAccountList", "")
+	DescribeSecurityIpsResponseObj := &DescribeSecurityIpsResponse{}
+
+	//调用request_params_handler
+
+	request.QueryParams["DBInstanceName"] = id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeAccountList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DescribeSecurityIpsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeAccountList", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return &DescribeSecurityIpsResponseObj.Data.GroupItems, nil
 }

@@ -541,44 +541,44 @@ func resourceAlibabacloudStackPolardbxInstanceRead(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackPolardbxInstanceDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	// api: polardbx - 2020-02-02 - DeleteDBInstance
-	// Check instance status before deletion
-	Polardbx_instanceservice := PolardbXService{client}
-	stateConf := BuildStateConf([]string{"ClassChanging", "READINS_MAINTAINING", "Creating", "SSL_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, Polardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
-	if _, err := stateConf.WaitForState(); err != nil {
-		if errmsgs.NotFoundError(err) {
-			return nil
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
-	}
-	time.Sleep(10 * time.Second)
-	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteDBInstance", "")
+	// client := meta.(*connectivity.AlibabacloudStackClient)
+	// // api: polardbx - 2020-02-02 - DeleteDBInstance
+	// // Check instance status before deletion
+	// Polardbx_instanceservice := PolardbXService{client}
+	// stateConf := BuildStateConf([]string{"ClassChanging", "READINS_MAINTAINING", "Creating", "SSL_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, Polardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+	// if _, err := stateConf.WaitForState(); err != nil {
+	// 	if errmsgs.NotFoundError(err) {
+	// 		return nil
+	// 	}
+	// 	return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	// }
+	// time.Sleep(10 * time.Second)
+	// request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteDBInstance", "")
 
-	request.QueryParams["DBInstanceName"] = d.Id()
-	retry := 5
-	for retry > 0 {
-		bresponse, err := client.ProcessCommonRequest(request)
-		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-		if err != nil {
-			if bresponse == nil {
-				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-			}
-			raw_data := make(map[string]interface{})
-			_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &raw_data)
-			code, ok := raw_data["Code"]
-			if ok && errmsgs.IsExpectedErrorCodes(code.(string), []string{"UnsupportedReadOrBakReadState"}) {
-				retry--
-				time.Sleep(10 * time.Second)
-			} else {
-				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-			}
-		} else {
-			break
-		}
-		retry = 0
-	}
+	// request.QueryParams["DBInstanceName"] = d.Id()
+	// retry := 5
+	// for retry > 0 {
+	// 	bresponse, err := client.ProcessCommonRequest(request)
+	// 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	// 	if err != nil {
+	// 		if bresponse == nil {
+	// 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+	// 		}
+	// 		raw_data := make(map[string]interface{})
+	// 		_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &raw_data)
+	// 		code, ok := raw_data["Code"]
+	// 		if ok && errmsgs.IsExpectedErrorCodes(code.(string), []string{"UnsupportedReadOrBakReadState"}) {
+	// 			retry--
+	// 			time.Sleep(10 * time.Second)
+	// 		} else {
+	// 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+	// 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	// 		}
+	// 	} else {
+	// 		break
+	// 	}
+	// 	retry = 0
+	// }
 	return nil
 }
 
