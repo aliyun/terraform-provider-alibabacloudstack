@@ -4,14 +4,15 @@ layout: "alibabacloudstack"
 page_title: "Alibabacloudstack: alibabacloudstack_polardbx_account_database_binding"
 sidebar_current: "docs-Alibabacloudstack-polardbx-account-database-binding"
 description: |-
-  Provides a PolarDBX Account Database Binding resource.
+  提供 PolarDBX 账户与数据库绑定关系资源。
 ---
 
 # alibabacloudstack_polardbx_account_database_binding
 
-Provides a PolarDBX Account Database Binding resource.
+提供 PolarDBX 账户与数据库绑定关系资源。
 
-## Example Usage
+## 示例用法
+
 ```
 variable "name" {
   default = "accdbbind90366"
@@ -88,12 +89,11 @@ resource "alibabacloudstack_polardbx_account_database_binding" "default" {
 }
 
 ```
+## 参数参考
 
-## Argument Reference
-
-The following arguments are supported:
-  * `account_name` - (Required) - The account name
-  * `instance_id` - (Required) -  The ID of the PolarDBX instance.
-  * `db_privileges` - The Database permissions of the account.
-    * `db_name` - The name of the database.
-    * `privilege` - The permissions of the target account on the database.
+支持以下参数：
+  * `account_name` - (必填) - 账户名称
+  * `instance_id` - (必填) - PolarDBX 实例的 ID。
+  * `db_privileges` - 账户的数据库权限。
+    * `db_name` - 数据库的名称。
+    * `privilege` - 目标账户在数据库上的权限。
