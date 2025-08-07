@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"math/rand"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -17,6 +18,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/aliyun/fc-go-sdk"
@@ -1083,4 +1085,38 @@ func noUpdatesAllowedCheck(d *schema.ResourceData, fields []string) error {
 		return errmsgs.Error(errmsgs.UpdateFailedErrorMsg, d.Id(), updatefieldsstr, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return nil
+}
+
+func GenerateRandomString(length int) string {
+	rand.Seed(time.Now().UnixNano())
+
+	// Character set to choose from
+	charset := "abcdefghijklmnopqrstuvwxyz0123456789_"
+
+	// Create byte slice to hold the result
+	result := make([]byte, length)
+	result[0] = charset[rand.Intn(26)]
+	// Generate random characters
+	for i := 1; i < length; i++ {
+		result[i] = charset[rand.Intn(len(charset))]
+	}
+
+	return string(result)
+}
+
+// 全局锁管理器：存储lockname的互斥锁
+var (
+	Locks   = make(map[string]*sync.Mutex)
+	LockRWM sync.RWMutex // 保护 Locks 的读写
+)
+
+// 获取lockname级锁（线程安全）
+func getLock(lockname string) *sync.Mutex {
+	LockRWM.Lock()
+	defer LockRWM.Unlock()
+
+	if _, exists := Locks[lockname]; !exists {
+		Locks[lockname] = &sync.Mutex{}
+	}
+	return Locks[lockname]
 }

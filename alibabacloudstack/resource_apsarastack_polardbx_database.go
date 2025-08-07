@@ -43,33 +43,6 @@ func resourceAlibabacloudStackPolardbxDatabase() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-
-			"account_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-
-			"account_privilege": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"ReadOnly", "ReadWrite", "DMLOnly", "DDLOnly"}, false),
-			},
-			"accounts": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"account_privilege": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"account_name": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
-			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackPolardbxDatabaseCreate, resourceAlibabacloudStackPolardbxDatabaseRead, resourceAlibabacloudStackPolardbxDatabaseUpdate, resourceAlibabacloudStackPolardbxDatabaseDelete)
@@ -78,13 +51,24 @@ func resourceAlibabacloudStackPolardbxDatabase() *schema.Resource {
 
 func resourceAlibabacloudStackPolardbxDatabaseCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
+	// Create a one-time account
+	account_name := fmt.Sprintf("%s_%s", GenerateRandomString(6), d.Get("database_name").(string))
+	password := fmt.Sprintf("%s@123", GenerateRandomString(8))
+	Polardbxservice := PolardbXService{client}
+	err := Polardbxservice.CreatePolardbxAccount(d.Get("instance_id").(string), account_name, password, "one-time", "Normal")
+	if err != nil {
+		return errmsgs.WrapErrorf(err, "Error Creating Polardbx one-time random Account %s", account_name)
+	}
+	defer func() {
+		Polardbxservice.DeletePolardbxAccount(d.Get("instance_id").(string), account_name)
+	}()
 	reqQuery := map[string]interface{}{
 		"DbName":           d.Get("database_name").(string),
 		"DBInstanceName":   d.Get("instance_id").(string),
 		"Charset":          d.Get("encode").(string),
 		"DbDescription":    d.Get("description").(string),
-		"AccountName":      d.Get("account_name").(string),
-		"AccountPrivilege": d.Get("account_privilege").(string),
+		"AccountName":      account_name,
+		"AccountPrivilege": "ReadWrite",
 		"Mode":             d.Get("mode").(string),
 	}
 	response, err := client.DoTeaRequest("POST", "polardbx", "2020-02-02", "CreateDB", "", nil, reqQuery, nil)
@@ -153,16 +137,6 @@ func resourceAlibabacloudStackPolardbxDatabaseRead(d *schema.ResourceData, meta 
 	d.Set("database_name", response.DBName)
 	d.Set("encode", response.CharacterSetName)
 	d.Set("description", response.DBDescription)
-	accounts := make([]map[string]interface{}, 0)
-	if len(response.Accounts) > 0 {
-		for _, account := range response.Accounts {
-			accounts = append(accounts, map[string]interface{}{
-				"account_name":      account.AccountName,
-				"account_privilege": account.AccountPrivilege,
-			})
-		}
-	}
-
 	return nil
 }
 

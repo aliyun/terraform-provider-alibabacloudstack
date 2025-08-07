@@ -46,25 +46,6 @@ func resourceAlibabacloudStackPolardbxAccount() *schema.Resource {
 				Required:  true,
 				Sensitive: true,
 			},
-
-			"db_privileges": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"db_name": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"privilege": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"ReadOnly", "ReadWrite", "DMLOnly", "DDLOnly"}, false),
-						},
-					},
-				},
-			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackPolardbxAccountCreate, resourceAlibabacloudStackPolardbxAccountRead, resourceAlibabacloudStackPolardbxAccountUpdate, resourceAlibabacloudStackPolardbxAccountDelete)
@@ -73,35 +54,17 @@ func resourceAlibabacloudStackPolardbxAccount() *schema.Resource {
 
 func resourceAlibabacloudStackPolardbxAccountCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	account_type := d.Get("account_type").(string)
-	action := "CreateAccount"
-	if account_type == "Super" {
-		action = "CreateSuperAccount"
-	}
-	reqQuery := map[string]interface{}{
-		"DBInstanceName":     d.Get("instance_id").(string),
-		"AccountName":        d.Get("account_name").(string),
-		"AccountType":        account_type,
-		"AccountPassword":    d.Get("password").(string),
-		"AccountDescription": d.Get("description").(string),
-	}
-
-	privileges := make([]string, 0)
-	dbname := make([]string, 0)
-	for _, d := range d.Get("db_privileges").(*schema.Set).List() {
-		dbPrivilege := d.(map[string]interface{})
-		privileges = append(privileges, dbPrivilege["privilege"].(string))
-		dbname = append(dbname, dbPrivilege["db_name"].(string))
-	}
-	reqQuery["AccountPrivilege"] = strings.Join(privileges, ",")
-	reqQuery["DBName"] = strings.Join(dbname, ",")
-
-	_, err := client.DoTeaRequest("POST", "polardbx", "2020-02-02", action, "", nil, reqQuery, nil)
+	Polardbxservice := PolardbXService{client}
+	instanceId := d.Get("instance_id").(string)
+	accountName := d.Get("account_name").(string)
+	accountPassword := d.Get("password").(string)
+	accountDescription := d.Get("description").(string)
+	accountType := d.Get("account_type").(string)
+	err := Polardbxservice.CreatePolardbxAccount(instanceId, accountName, accountPassword, accountDescription, accountType)
 	if err != nil {
 		return err
 	}
-
-	d.SetId(fmt.Sprintf("%s:%s", d.Get("instance_id").(string), d.Get("account_name").(string)))
+	d.SetId(fmt.Sprintf("%s:%s", instanceId, accountName))
 	return nil
 
 }
@@ -209,6 +172,7 @@ func resourceAlibabacloudStackPolardbxAccountRead(d *schema.ResourceData, meta i
 		return errmsgs.WrapError(err)
 	}
 
+	d.Set("instance_id", account.DBInstanceName)
 	d.Set("description", account.AccountDescription)
 	d.Set("account_name", account.AccountName)
 	switch account.AccountType {
@@ -217,52 +181,16 @@ func resourceAlibabacloudStackPolardbxAccountRead(d *schema.ResourceData, meta i
 	case "1":
 		d.Set("account_type", "Super")
 	}
-	db_names := make([]string, 0)
-	if account.DBName != "" {
-		db_names = strings.Split(account.DBName, ",")
-	}
-	privileges := make([]string, 0)
-	if account.AccountPrivilege != "" {
-		privileges = strings.Split(account.AccountPrivilege, ",")
-	}
-	if len(db_names) > 0 && len(privileges) > 0 {
-		db_privileges := make([]map[string]interface{}, 0)
-		for i, db_name := range db_names {
-			db_privileges = append(db_privileges, map[string]interface{}{
-				"db_name":   db_name,
-				"privilege": privileges[i],
-			})
-		}
-		d.Set("db_privileges", db_privileges)
-	}
 	return nil
 }
 
 func resourceAlibabacloudStackPolardbxAccountDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	// api: Drds - 2019-01-23 - RemoveInstanceAccount
-	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteAccount", "")
 	parts, err := ParseResourceId(d.Id(), 2)
 	if err != nil {
 		return err
 	}
-	//调用request_params_handler
-	request.QueryParams["DBInstanceName"] = parts[0]
-	request.QueryParams["AccountName"] = parts[1]
-
-	bresponse, err := client.ProcessCommonRequest(request)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_account", "DeleteAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-
-	return nil
-}
-
-type DrdsCreateAccountResponse struct {
-	RequestId string `json:"RequestId"`
-	Success   bool   `json:"Success"`
+	Polardbxservice := PolardbXService{client}
+	return Polardbxservice.DeletePolardbxAccount(parts[0], parts[1])
 }

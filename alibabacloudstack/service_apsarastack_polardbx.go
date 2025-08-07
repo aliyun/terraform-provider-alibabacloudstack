@@ -3,6 +3,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/PaesslerAG/jsonpath"
@@ -485,4 +486,145 @@ func (s *PolardbXService) DoPolardbxDescribeDbListRequest(id string) (*PolardbxD
 	} else {
 		return db, nil
 	}
+}
+
+func (s *PolardbXService) CreatePolardbxAccount(instanceId string, accountName string, accountPassword string, accountDescription string, accountType string) (err error) {
+
+	action := "CreateAccount"
+	if accountType == "Super" {
+		action = "CreateSuperAccount"
+	}
+	reqQuery := map[string]interface{}{
+		"DBInstanceName":     instanceId,
+		"AccountName":        accountName,
+		"AccountType":        accountType,
+		"AccountPassword":    accountPassword,
+		"AccountDescription": accountDescription,
+	}
+	_, err = s.client.DoTeaRequest("POST", "polardbx", "2020-02-02", action, "", nil, reqQuery, nil)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *PolardbXService) DeletePolardbxAccount(instance_id, account_name string) (err error) {
+	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteAccount", "")
+	request.QueryParams["DBInstanceName"] = instance_id
+	request.QueryParams["AccountName"] = account_name
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_account", "DeleteAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	return nil
+}
+
+type PolardbXAccountDBPrivilege struct {
+	InstanceId  string
+	AccountName string
+	DBName      string
+	Privilege   string
+}
+
+func (s *PolardbXService) DescribePolardbXAccountDBPrivilege(id string) (*PolardbXAccountDBPrivilege, error) {
+	db_names := make([]string, 0)
+	privileges := make([]string, 0)
+	var instanceId, AccountName, DBName string
+	if parts, err := ParseResourceId(id, 3); err != nil {
+		return nil, err
+	} else {
+		instanceId = parts[0]
+		AccountName = parts[1]
+		DBName = parts[2]
+	}
+	account, err := s.DoPolardbxDescribeAccountListRequest(fmt.Sprintf("%s:%s", instanceId, AccountName))
+	if err != nil {
+		return nil, err
+	}
+	if account.DBName != "" {
+		db_names = strings.Split(account.DBName, ",")
+	}
+	if account.AccountPrivilege != "" {
+		privileges = strings.Split(account.AccountPrivilege, ",")
+	}
+	for i, db_name := range db_names {
+		if db_name == DBName {
+			return &PolardbXAccountDBPrivilege{
+				AccountName: AccountName,
+				Privilege:   privileges[i],
+				DBName:      db_name,
+				InstanceId:  instanceId,
+			}, nil
+		}
+	}
+	return nil, errmsgs.Error(errmsgs.NotFoundMsg, "PolardbXAccountDBPrivilege")
+}
+
+func (s *PolardbXService) AccountPrivilegeHaschange(account *PolardbxAccount, db_name string, privilege string) (string, string, bool) {
+	if account.DBName == "" {
+		return db_name, privilege, true
+	} else {
+		old_db_names := strings.Split(account.DBName, ",")
+		old_privileges := strings.Split(account.AccountPrivilege, ",")
+		new_db_names := make([]string, 0)
+		new_privileges := make([]string, 0)
+		for index, name := range old_db_names {
+			if name == db_name {
+				if privilege == "none" {
+					continue
+				}
+				new_privileges = append(new_privileges, privilege)
+			} else {
+				new_privileges = append(new_privileges, old_privileges[index])
+			}
+			new_db_names = append(new_db_names, name)
+		}
+		new_db_name := strings.Join(new_db_names, ",")
+		new_privilege := strings.Join(new_privileges, ",")
+		if new_db_name == account.DBName && new_privilege == account.AccountPrivilege {
+			return new_db_name, new_privilege, false
+		}
+		return new_db_name, new_privilege, true
+	}
+}
+
+func (s *PolardbXService) PolardbxAccountDatabaseBinding(id, privilege string) error {
+	var instanceId, accountName, dbBName string
+	if parts, err := ParseResourceId(id, 3); err != nil {
+		return err
+	} else {
+		instanceId = parts[0]
+		accountName = parts[1]
+		dbBName = parts[2]
+	}
+
+	//---------- 关键锁逻辑 ---------//
+	// 1. 获取或创建账户级锁
+	accountLock := getLock(accountName)
+	accountLock.Lock()
+	defer accountLock.Unlock() // 确保函数结束时释放锁
+	//-----------------------------//
+	account, err := s.DoPolardbxDescribeAccountListRequest(fmt.Sprintf("%s:%s", instanceId, accountName))
+	if err != nil {
+		return err
+	}
+	new_dbname, new_prprivilege, isupdate := s.AccountPrivilegeHaschange(account, dbBName, privilege)
+	if isupdate {
+		reqQuery := map[string]interface{}{
+			"DBInstanceName":   instanceId,
+			"AccountName":      accountName,
+			"AccountPrivilege": new_prprivilege,
+			"DbName":           new_dbname,
+		}
+		_, err := s.client.DoTeaRequest("POST", "polardbx", "2020-02-02", "ModifyAccountPrivilege", "", nil, reqQuery, nil)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
