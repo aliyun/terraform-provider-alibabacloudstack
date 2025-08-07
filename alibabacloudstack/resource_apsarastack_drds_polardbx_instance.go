@@ -5,6 +5,7 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -19,13 +20,14 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 
 			"series": {
 				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Optional: true,
+				Computed: true,
 			},
 
 			"cpu_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 			},
 
 			"storage": {
@@ -36,7 +38,7 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 			"spec_series": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "SINGLE",
+				Computed: true,
 			},
 
 			"cidr_block": {
@@ -91,7 +93,6 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 			"engine_version": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "5.7",
 			},
 
 			"is_read_db_instance": {
@@ -101,7 +102,7 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 
 			"network_type": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 
 			// "payment_type": {
@@ -114,10 +115,9 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 				Optional: true,
 			},
 
-			"primary_db_instance_name": {
+			"primary_db_instance_id": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "null",
 			},
 
 			"primary_zone": {
@@ -147,7 +147,8 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 
 			"topology_type": {
 				Type:         schema.TypeString,
-				Required:     true,
+				Optional:     true,
+				Default:      "1azone",
 				ValidateFunc: validation.StringInSlice([]string{"1azone", "3azones"}, false),
 			},
 
@@ -159,12 +160,6 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 			"vpc_id": {
 				Type:     schema.TypeString,
 				Required: true,
-			},
-
-			"zone": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
 			},
 
 			"zone_id": {
@@ -183,9 +178,24 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 func resourceAlibabacloudStackDrdspolardbxInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
+	is_read_db_instance := d.Get("is_read_db_instance").(bool)
+	drdspolardbx_instanceservice := DrdsService{client}
 	// api: polardbx - 2020 - 02 - 02 - CreateDBInstance
 	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "CreateDBInstance", "")
 	PolardbxCreatedbinstanceResponseObj := PolardbxCreatedbinstanceResponse{}
+	if is_read_db_instance {
+		primary_db_instance_id := d.Get("primary_db_instance_id").(string)
+		primary_db_stateConf := BuildStateConf([]string{"ClassChanging", "READINS_MAINTAINING", "Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(primary_db_instance_id, []string{"Failed"}))
+		if _, err := primary_db_stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+		request.QueryParams["IsReadDBInstance"] = fmt.Sprint(is_read_db_instance)
+		if v, ok := d.GetOk("primary_db_instance_id"); ok {
+			request.QueryParams["PrimaryDBInstanceName"] = v.(string)
+		} else {
+			return errmsgs.WrapError(errmsgs.Error("PrimaryDBInstanceName is required when IsReadDBInstance is true"))
+		}
+	}
 
 	//调用request_params_handler
 
@@ -201,6 +211,10 @@ func resourceAlibabacloudStackDrdspolardbxInstanceCreate(d *schema.ResourceData,
 
 	if v, ok := d.GetOk("spec_series"); ok {
 		request.QueryParams["SpecSeries"] = v.(string)
+	}
+
+	if v, ok := d.GetOk("series"); ok {
+		request.QueryParams["Series"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("cidr_block"); ok {
@@ -231,28 +245,8 @@ func resourceAlibabacloudStackDrdspolardbxInstanceCreate(d *schema.ResourceData,
 		request.QueryParams["DNNodeCount"] = fmt.Sprint(v.(int))
 	}
 
-	if v, ok := d.GetOk("is_read_db_instance"); ok {
-		request.QueryParams["IsReadDBInstance"] = fmt.Sprint(v.(bool))
-	}
-
 	if v, ok := d.GetOk("network_type"); ok {
 		request.QueryParams["NetworkType"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("primary_db_instance_name"); ok {
-		request.QueryParams["PrimaryDBInstanceName"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("primary_zone"); ok {
-		request.QueryParams["PrimaryZone"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("secondary_zone"); ok {
-		request.QueryParams["SecondaryZone"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("tertiary_zone"); ok {
-		request.QueryParams["TertiaryZone"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("vswitch_id"); ok {
@@ -284,10 +278,9 @@ func resourceAlibabacloudStackDrdspolardbxInstanceCreate(d *schema.ResourceData,
 	}
 
 	polardbx_instance_id := PolardbxCreatedbinstanceResponseObj.DBInstanceName
-	// polardbx_instance_id := "pxc-unrs6xtrjekdyw"
+	// polardbx_instance_id := ""
 	d.SetId(polardbx_instance_id)
-	drdspolardbx_instanceservice := DrdsService{client}
-	stateConf := BuildStateConf([]string{"ClassChanging", "Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"ClassChanging", "Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
@@ -323,7 +316,7 @@ func resourceAlibabacloudStackDrdspolardbxInstanceUpdate(d *schema.ResourceData,
 				"alibabacloudstack_drds_polardbx_instance", "UpdatepolardbxInstanceNode", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 		drdspolardbx_instanceservice := DrdsService{client}
-		stateConf := BuildStateConf([]string{"ClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 5*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		stateConf := BuildStateConf([]string{"ClassChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -334,7 +327,7 @@ func resourceAlibabacloudStackDrdspolardbxInstanceUpdate(d *schema.ResourceData,
 		request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "ModifyDBInstanceDescription", "")
 
 		if v, ok := d.GetOk("description"); ok {
-			request.QueryParams["DBInstanceDescription"] = fmt.Sprint(v.(int))
+			request.QueryParams["DBInstanceDescription"] = fmt.Sprint(v.(string))
 		}
 
 		request.QueryParams["DBInstanceName"] = d.Id()
@@ -359,6 +352,7 @@ func resourceAlibabacloudStackDrdspolardbxInstanceRead(d *schema.ResourceData, m
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	drdspolardbx_instanceservice := DrdsService{client}
 	response, err := drdspolardbx_instanceservice.DoPolardbxDescribedbinstanceattributeRequest(d.Id())
+	// READINS_MAINTAINING
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_drds_polardbx_instance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
@@ -372,6 +366,8 @@ func resourceAlibabacloudStackDrdspolardbxInstanceRead(d *schema.ResourceData, m
 	d.Set("cpu_type", data.CpuType)
 
 	d.Set("description", data.Description)
+
+	d.Set("engine_version", data.DBVersion)
 
 	d.Set("cn_node_class", data.CNNodeClass)
 
@@ -387,9 +383,11 @@ func resourceAlibabacloudStackDrdspolardbxInstanceRead(d *schema.ResourceData, m
 
 	d.Set("dn_node_count", data.DNNodeCount)
 
-	d.Set("network_type", data.Network)
+	d.Set("network_type", strings.ToLower(data.Network))
 
 	// d.Set("payment_type", data.PayType)
+
+	// d.Set("primary_db_instance_id", data.)
 
 	d.Set("status", data.Status)
 
@@ -397,7 +395,13 @@ func resourceAlibabacloudStackDrdspolardbxInstanceRead(d *schema.ResourceData, m
 
 	d.Set("vpc_id", data.VPCId)
 
-	d.Set("zone", data.ZoneId)
+	d.Set("zone_id", data.ZoneId)
+
+	if data.DBInstanceType == "ReadOnly" {
+		d.Set("is_read_db_instance", true)
+	} else {
+		d.Set("is_read_db_instance", false)
+	}
 
 	return nil
 }
@@ -405,6 +409,13 @@ func resourceAlibabacloudStackDrdspolardbxInstanceRead(d *schema.ResourceData, m
 func resourceAlibabacloudStackDrdspolardbxInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	// api: polardbx - 2020-02-02 - DeleteDBInstance
+	// Check instance status before deletion
+	drdspolardbx_instanceservice := DrdsService{client}
+	stateConf := BuildStateConf([]string{"ClassChanging", "READINS_MAINTAINING", "Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
+	time.Sleep(10 * time.Second)
 	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteDBInstance", "")
 
 	request.QueryParams["DBInstanceName"] = d.Id()
@@ -426,22 +437,4 @@ type PolardbxCreatedbinstanceResponse struct {
 	RequestId      string `json:"RequestId"`
 	DBInstanceName string `json:"DBInstanceName"`
 	OrderId        int    `json:"OrderId"`
-}
-
-type PolardbxChangeresourcegroupResponse struct {
-	RequestId string `json:"RequestId"`
-}
-type PolardbxTagresourcesResponse struct {
-	RequestId string `json:"RequestId"`
-}
-type PolardbxUntagresourcesResponse struct {
-	RequestId string `json:"RequestId"`
-}
-type PolardbxUpdatepolardbx_instancenodeResponse struct {
-	RequestId string `json:"RequestId"`
-	OrderId   int    `json:"OrderId"`
-}
-
-type PolardbxDeletedbinstanceResponse struct {
-	RequestId string `json:"RequestId"`
 }

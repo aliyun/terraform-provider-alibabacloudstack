@@ -44,23 +44,23 @@ func TestAccAlibabacloudStackEcsSnapshotGroupsDataSource(t *testing.T) {
 
 	var existEcsSnapshotGroupsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":                            "1",
-			"ids.0":                            CHECKSET,
-			"snapshot_groups.#":             "1",
-			"snapshot_groups.0.description": fmt.Sprintf("tf-testAcc%sEcsSnapshotGroupsDataSource-%d", defaultRegionToTest, rand),
-			"snapshot_groups.0.create_time":   CHECKSET,
-			"snapshot_groups.0.instance_id": CHECKSET,
-			"snapshot_groups.0.snapshots.#":   "3",
-			"snapshot_groups.0.snapshots.0.instant_access":                    CHECKSET,
-			"snapshot_groups.0.snapshots.0.instant_access_retention_days":        CHECKSET,
-			"snapshot_groups.0.snapshot_group_id":      CHECKSET,
-			"snapshot_groups.0.snapshot_group_name":        CHECKSET,
+			"ids.#":                                        "1",
+			"ids.0":                                        CHECKSET,
+			"snapshot_groups.#":                            "1",
+			"snapshot_groups.0.description":                fmt.Sprintf("tf-testAcc%sEcsSnapshotGroupsDataSource-%d", defaultRegionToTest, rand),
+			"snapshot_groups.0.create_time":                CHECKSET,
+			"snapshot_groups.0.instance_id":                CHECKSET,
+			"snapshot_groups.0.snapshots.#":                "3",
+			"snapshot_groups.0.snapshots.0.instant_access": CHECKSET,
+			"snapshot_groups.0.snapshots.0.instant_access_retention_days": CHECKSET,
+			"snapshot_groups.0.snapshot_group_id":                         CHECKSET,
+			"snapshot_groups.0.snapshot_group_name":                       CHECKSET,
 		}
 	}
 
 	var fakeEcsSnapshotGroupsMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"ids.#":                "0",
+			"ids.#":             "0",
 			"snapshot_groups.#": "0",
 		}
 	}
