@@ -506,6 +506,8 @@ func resourceAlibabacloudStackDrdspolardbxInstanceRead(d *schema.ResourceData, m
 
 	// d.Set("primary_db_instance_id", data.)
 
+	// d.Set("primary_db_instance_id", data.)
+
 	d.Set("status", data.Status)
 
 	d.Set("vswitch_id", data.VSwitchId)

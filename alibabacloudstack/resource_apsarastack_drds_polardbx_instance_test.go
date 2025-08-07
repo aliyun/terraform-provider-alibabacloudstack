@@ -38,13 +38,13 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description":    "${var.name}",
-					"zone_id":        "cn-wulan-env17e-amtest17001-a",
+					"description":    "testtf1111",
+					"zone_id":        "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"engine_version": "5.7",
 					"storage":        "50",
 					"network_type":   "vpc",
-					"vpc_id":         "vpc-ad78qaj93bw2gibgtdj7y",
-					"vswitch_id":     "vsw-ad73xkxqa8jvx1nko6j8p",
+					"vpc_id":         "${alibabacloudstack_vpc_vpc.default.id}",
+					"vswitch_id":     "${alibabacloudstack_vpc_vswitch.default.id}",
 					"cn_node_class":  "polarx.x4.medium.2e",
 					"cn_node_count":  "2",
 					"dn_node_class":  "mysql.n4.medium.25",
