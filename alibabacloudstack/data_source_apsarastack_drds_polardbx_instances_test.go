@@ -5,49 +5,49 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStackDrdsPolarDbxInstancesDataSource(t *testing.T) {
+func TestAccAlibabacloudStackPolardbxInstancesDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000000, 9999999)
-	resourceId := "data.alibabacloudstack_drds_polardbx_instances.default"
+	resourceId := "data.alibabacloudstack_polardbx_instances.default"
 
 	testAccConfig := dataSourceTestAccConfigFunc(resourceId,
-		fmt.Sprintf("tf-testAcc%sDrdsPolarDbxInstancesDataSource-%d", defaultRegionToTest, rand),
-		dataSourceDrdsPolarDbxInstancesDependence)
+		fmt.Sprintf("tf-testAcc%sPolardbxInstancesDataSource-%d", defaultRegionToTest, rand),
+		dataSourcePolardbxInstancesDependence)
 
 	descriptionRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"description_regex": "${alibabacloudstack_drds_polardbx_instance.default.description}",
+			"description_regex": "${alibabacloudstack_polardbx_instance.default.description}",
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"description_regex": "${alibabacloudstack_drds_polardbx_instance.default.description}-fakeTestAcccc",
+			"description_regex": "${alibabacloudstack_polardbx_instance.default.description}-fakeTestAcccc",
 		}),
 	}
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_drds_polardbx_instance.default.id}"},
+			"ids": []string{"${alibabacloudstack_polardbx_instance.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"ids": []string{"${alibabacloudstack_drds_polardbx_instance.default.id}-fakeTestAcccc"},
+			"ids": []string{"${alibabacloudstack_polardbx_instance.default.id}-fakeTestAcccc"},
 		}),
 	}
 
 	allConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_drds_polardbx_instance.default.description}",
-			"ids":        []string{"${alibabacloudstack_drds_polardbx_instance.default.id}"},
+			"name_regex": "${alibabacloudstack_polardbx_instance.default.description}",
+			"ids":        []string{"${alibabacloudstack_polardbx_instance.default.id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"name_regex": "${alibabacloudstack_drds_polardbx_instance.default.description}-fakeTestAcccc",
-			"ids":        []string{"${alibabacloudstack_drds_polardbx_instance.default.id}-fakeTestAcccc"},
+			"name_regex": "${alibabacloudstack_polardbx_instance.default.description}-fakeTestAcccc",
+			"ids":        []string{"${alibabacloudstack_polardbx_instance.default.id}-fakeTestAcccc"},
 		}),
 	}
 
-	var existDrdsPolarDbxInstancesMapFunc = func(rand int) map[string]string {
+	var existPolardbxInstancesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                               "1",
 			"ids.0":                               CHECKSET,
 			"polardbx_instances.#":                "1",
-			"polardbx_instances.0.description":    fmt.Sprintf("tf-testAcc%sDrdsPolarDbxInstancesDataSource-%d", defaultRegionToTest, rand),
+			"polardbx_instances.0.description":    fmt.Sprintf("tf-testAcc%sPolardbxInstancesDataSource-%d", defaultRegionToTest, rand),
 			"polardbx_instances.0.create_time":    CHECKSET,
 			"polardbx_instances.0.storage":        CHECKSET,
 			"polardbx_instances.0.cpu_type":       CHECKSET,
@@ -60,23 +60,23 @@ func TestAccAlibabacloudStackDrdsPolarDbxInstancesDataSource(t *testing.T) {
 		}
 	}
 
-	var fakeDrdsPolarDbxInstancesMapFunc = func(rand int) map[string]string {
+	var fakePolardbxInstancesMapFunc = func(rand int) map[string]string {
 		return map[string]string{
 			"ids.#":                "0",
 			"polardbx_instances.#": "0",
 		}
 	}
 
-	var DrdsPolarDbxInstancesCheckInfo = dataSourceAttr{
+	var PolardbxInstancesCheckInfo = dataSourceAttr{
 		resourceId:   resourceId,
-		existMapFunc: existDrdsPolarDbxInstancesMapFunc,
-		fakeMapFunc:  fakeDrdsPolarDbxInstancesMapFunc,
+		existMapFunc: existPolardbxInstancesMapFunc,
+		fakeMapFunc:  fakePolardbxInstancesMapFunc,
 	}
 
-	DrdsPolarDbxInstancesCheckInfo.dataSourceTestCheck(t, rand, descriptionRegexConf, idsConf, allConf)
+	PolardbxInstancesCheckInfo.dataSourceTestCheck(t, rand, descriptionRegexConf, idsConf, allConf)
 }
 
-func dataSourceDrdsPolarDbxInstancesDependence(name string) string {
+func dataSourcePolardbxInstancesDependence(name string) string {
 	return fmt.Sprintf(`
 
 variable "name" {
@@ -85,7 +85,7 @@ variable "name" {
 
 %s
 
-resource "alibabacloudstack_drds_polardbx_instance" "default" {
+resource "alibabacloudstack_polardbx_instance" "default" {
   	description = "testtf1111"
 	series = "enterprise"
 	topology_type = "1azone"

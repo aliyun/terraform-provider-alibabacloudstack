@@ -9,11 +9,11 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
 
-func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
+func TestAccAlibabacloudStackPolardbxInstance_basic0(t *testing.T) {
 	var v *PolardbxDescribedbinstanceattributeResponse
 
-	resourceId := "alibabacloudstack_drds_polardbx_instance.default"
-	ra := resourceAttrInit(resourceId, drdsPolardbxbasicMap)
+	resourceId := "alibabacloudstack_polardbx_instance.default"
+	ra := resourceAttrInit(resourceId, PolardbxbasicMap)
 
 	serviceFunc := func() interface{} {
 		return &PolardbXService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -25,7 +25,7 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf_acc_drds_polardb_%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDrdsPolardbxDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbxDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -125,11 +125,11 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 	})
 }
 
-func TestAccAlibabacloudStackDrdsPolardbxInstance_onlyreadInstance(t *testing.T) {
+func TestAccAlibabacloudStackPolardbxInstance_onlyreadInstance(t *testing.T) {
 	var v *PolardbxDescribedbinstanceattributeResponse
 
-	resourceId := "alibabacloudstack_drds_polardbx_instance.onlyread_instance"
-	ra := resourceAttrInit(resourceId, drdsPolardbxbasicMap)
+	resourceId := "alibabacloudstack_polardbx_instance.onlyread_instance"
+	ra := resourceAttrInit(resourceId, PolardbxbasicMap)
 
 	serviceFunc := func() interface{} {
 		return &PolardbXService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -141,7 +141,7 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_onlyreadInstance(t *testing.T)
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf_acc_drds_polardb_%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDrdsPolardbxOnlyReadInstanceDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbxOnlyReadInstanceDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -155,7 +155,7 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_onlyreadInstance(t *testing.T)
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"is_read_db_instance":    "true",
-					"primary_db_instance_id": "${alibabacloudstack_drds_polardbx_instance.default.id}",
+					"primary_db_instance_id": "${alibabacloudstack_polardbx_instance.default.id}",
 					"description":            "${var.name}",
 					"zone_id":                "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"engine_version":         "5.7",
@@ -187,7 +187,7 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_onlyreadInstance(t *testing.T)
 	})
 }
 
-func resourceDrdsPolardbxDependence(name string) string {
+func resourcePolardbxDependence(name string) string {
 	return fmt.Sprintf(`
 
 	variable "name" {
@@ -197,16 +197,16 @@ func resourceDrdsPolardbxDependence(name string) string {
 `, name)
 }
 
-var drdsPolardbxbasicMap = map[string]string{}
+var PolardbxbasicMap = map[string]string{}
 
-func resourceDrdsPolardbxOnlyReadInstanceDependence(name string) string {
+func resourcePolardbxOnlyReadInstanceDependence(name string) string {
 	return fmt.Sprintf(`
 
 variable "name" {
   default = "%s"
 }
 %s
-resource "alibabacloudstack_drds_polardbx_instance" "default" {
+resource "alibabacloudstack_polardbx_instance" "default" {
  description = "testtf1111"
 	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 	engine_version = "5.7"

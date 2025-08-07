@@ -1,20 +1,20 @@
 ---
-subcategory: "DRDS"
+subcategory: "POLARDBX"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_drds_polardbxinstances"
-sidebar_current: "docs-Alibabacloudstack-datasource-drds-polardbxinstances"
+page_title: "Alibabacloudstack: alibabacloudstack_polardbx_instances"
+sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-instances"
 description: |-
-  Provides a list of drds polardbxinstances owned by an alibabacloudstack account.
+  Provides a list of polardbx instances owned by an alibabacloudstack account.
 ---
 
-# alibabacloudstack\_drds\_polardbxinstances
+# alibabacloudstack\_polardbx\_instances
 
-This data source provides a list of drds polardbxinstances in an alibabacloudstack account according to the specified filters.
+This data source provides a list of polardbx instances in an alibabacloudstack account according to the specified filters.
 
 ## Example Usage
 ```
 variable "name" {
-  default = "tf-testAccDrdsPolarDbxInstancesDataSource-3625795"
+  default = "tf-testAccPolardbxInstancesDataSource-3625795"
 }
 
 data "alibabacloudstack_zones" default {
@@ -34,7 +34,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
   zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 }
 
-resource "alibabacloudstack_drds_polardbx_instance" "default" {
+resource "alibabacloudstack_polardbx_instance" "default" {
   description = "testtf1111"
 	series = "enterprise"
 	topology_type = "1azone"
@@ -50,8 +50,8 @@ resource "alibabacloudstack_drds_polardbx_instance" "default" {
 	dn_node_count = "2"
 }
 
-data "alibabacloudstack_drds_polardbx_instances" "default" {
-  description_regex = "${alibabacloudstack_drds_polardbx_instance.default.description}"
+data "alibabacloudstack_polardbx_instances" "default" {
+  description_regex = "${alibabacloudstack_polardbx_instance.default.description}"
 }
 ```
 

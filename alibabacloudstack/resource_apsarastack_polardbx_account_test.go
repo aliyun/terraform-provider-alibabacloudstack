@@ -9,23 +9,23 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
 
-func TestAccAlibabacloudStackDrdsPolardbxAccount_basic0(t *testing.T) {
+func TestAccAlibabacloudStackPolardbxAccount_basic0(t *testing.T) {
 	var v *PolardbxAccount
 
-	resourceId := "alibabacloudstack_drds_polardbx_account.default"
-	ra := resourceAttrInit(resourceId, drdsPolardbxAccountbasicMap)
+	resourceId := "alibabacloudstack_polardbx_account.default"
+	ra := resourceAttrInit(resourceId, PolardbxAccountbasicMap)
 
 	serviceFunc := func() interface{} {
 		return &PolardbXService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rc := resourceCheckInit(resourceId, &v, serviceFunc)
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DoPolardbxDescribeAccountListRequest")
 
 	rac := resourceAttrCheckInit(rc, ra)
 
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
-	name := fmt.Sprintf("tf_acc_drds_polardbx_account_%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDrdsPolardbxAccountDependence)
+	name := fmt.Sprintf("tf_acc_pldbx_account_%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbxAccountDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackDrdsPolardbxAccount_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id":  "pxc-unr7emtdmlajc9",
+					"instance_id":  "pxc-unrxhglptl45ih",
 					"account_name": "${var.name}",
 					"password":     "${var.password}",
 					"description":  "${var.name}",
@@ -50,11 +50,11 @@ func TestAccAlibabacloudStackDrdsPolardbxAccount_basic0(t *testing.T) {
 						// 	"privilege": "ReadOnly",
 						// },
 						{
-							"db_name":   "testtf",
+							"db_name":   "${alibabacloudstack_polardbx_database.default1.database_name}",
 							"privilege": "ReadOnly",
 						},
 						{
-							"db_name":   "testtf2",
+							"db_name":   "${alibabacloudstack_polardbx_database.default2.database_name}",
 							"privilege": "ReadWrite",
 						},
 					},
@@ -64,9 +64,9 @@ func TestAccAlibabacloudStackDrdsPolardbxAccount_basic0(t *testing.T) {
 						"account_name":              name,
 						"description":               name,
 						"db_privileges.#":           "2",
-						"db_privileges.0.db_name":   "testtf",
+						"db_privileges.0.db_name":   CHECKSET,
 						"db_privileges.0.privilege": "ReadOnly",
-						"db_privileges.1.db_name":   "testtf2",
+						"db_privileges.1.db_name":   CHECKSET,
 						"db_privileges.1.privilege": "ReadWrite",
 					}),
 				),
@@ -90,11 +90,11 @@ func TestAccAlibabacloudStackDrdsPolardbxAccount_basic0(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"db_privileges": []map[string]string{
 						{
-							"db_name":   "testtf",
+							"db_name":   "${alibabacloudstack_polardbx_database.default1.database_name}",
 							"privilege": "ReadWrite",
 						},
 						{
-							"db_name":   "testtf2",
+							"db_name":   "${alibabacloudstack_polardbx_database.default2.database_name}",
 							"privilege": "DDLOnly",
 						},
 					},
@@ -120,7 +120,7 @@ func TestAccAlibabacloudStackDrdsPolardbxAccount_basic0(t *testing.T) {
 	})
 }
 
-func resourceDrdsPolardbxAccountDependence(name string) string {
+func resourcePolardbxAccountDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"
@@ -134,7 +134,7 @@ variable "password2" {
   default = "%s"
 }
 
-// resource "alibabacloudstack_drds_polardbx_instance" "default" {
+// resource "alibabacloudstack_polardbx_instance" "default" {
 //  description = "testtf1111"
 // 	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 // 	engine_version = "5.7"
@@ -148,10 +148,30 @@ variable "password2" {
 // 	dn_node_count = "2"
 // }
 
+resource "alibabacloudstack_polardbx_database" "default1" {
+    instance_id  = "pxc-unrxhglptl45ih"
+	database_name = "testtf1"
+	encode = "utf8mb4"
+	mode     = "auto"
+	description  = "testtf1"
+	account_name = "admin"
+	account_privilege = "ReadWrite"
+}
+
+resource "alibabacloudstack_polardbx_database" "default2" {
+    instance_id  = "pxc-unrxhglptl45ih"
+	database_name = "testtf2"
+	encode = "utf8mb4"
+	mode     = "auto"
+	description  = "testtf2"
+	account_name = "admin"
+	account_privilege = "ReadWrite"
+}
+
  `, name, getAccTestPassword(12), getAccTestPassword(10))
 }
 
-var drdsPolardbxAccountbasicMap = map[string]string{
+var PolardbxAccountbasicMap = map[string]string{
 	"instance_id":  CHECKSET,
 	"account_name": CHECKSET,
 	"account_type": CHECKSET,

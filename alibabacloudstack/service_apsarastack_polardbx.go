@@ -480,5 +480,9 @@ func (s *PolardbXService) DoPolardbxDescribeDbListRequest(id string) (*PolardbxD
 			break
 		}
 	}
-	return db, nil
+	if db == nil {
+		return nil, errmsgs.Error(errmsgs.NotFoundMsg, "PolardbxDatabase")
+	} else {
+		return db, nil
+	}
 }

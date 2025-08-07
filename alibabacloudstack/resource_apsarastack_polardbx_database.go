@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlibabacloudStackDrdsPolardbxDatabase() *schema.Resource {
+func resourceAlibabacloudStackPolardbxDatabase() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 
@@ -54,13 +54,29 @@ func resourceAlibabacloudStackDrdsPolardbxDatabase() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"ReadOnly", "ReadWrite", "DMLOnly", "DDLOnly"}, false),
 			},
+			"accounts": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"account_privilege": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"account_name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackDrdsPolardbxDatabaseCreate, resourceAlibabacloudStackDrdsPolardbxDatabaseRead, resourceAlibabacloudStackDrdsPolardbxDatabaseUpdate, resourceAlibabacloudStackDrdsPolardbxDatabaseDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackPolardbxDatabaseCreate, resourceAlibabacloudStackPolardbxDatabaseRead, resourceAlibabacloudStackPolardbxDatabaseUpdate, resourceAlibabacloudStackPolardbxDatabaseDelete)
 	return resource
 }
 
-func resourceAlibabacloudStackDrdsPolardbxDatabaseCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbxDatabaseCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	reqQuery := map[string]interface{}{
 		"DbName":           d.Get("database_name").(string),
@@ -78,7 +94,7 @@ func resourceAlibabacloudStackDrdsPolardbxDatabaseCreate(d *schema.ResourceData,
 		if response != nil {
 			errmsg = response["Message"].(string)
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_polardbx_database", "CreateDB", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_database", "CreateDB", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	drds_database_name := d.Get("database_name").(string)
@@ -90,7 +106,7 @@ func resourceAlibabacloudStackDrdsPolardbxDatabaseCreate(d *schema.ResourceData,
 
 }
 
-func resourceAlibabacloudStackDrdsPolardbxDatabaseUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbxDatabaseUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var InstanceId, databaseName string
 	if parts, err := ParseResourceId(d.Id(), 2); err != nil {
@@ -113,34 +129,44 @@ func resourceAlibabacloudStackDrdsPolardbxDatabaseUpdate(d *schema.ResourceData,
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_drds_polardbx_database", "ModifyDatabaseDescription", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_polardbx_database", "ModifyDatabaseDescription", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 	}
 	return nil
 }
 
-func resourceAlibabacloudStackDrdsPolardbxDatabaseRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbxDatabaseRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	polardbxservice := PolardbXService{client}
+	var InstanceId string
+	if parts, err := ParseResourceId(d.Id(), 2); err != nil {
+		return err
+	} else {
+		InstanceId = parts[0]
+	}
 	response, err := polardbxservice.DoPolardbxDescribeDbListRequest(d.Id())
 	if err != nil {
-		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_drds_polardbx_database", errmsgs.AlibabacloudStackSdkGoERROR)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardbx_database", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-
+	d.Set("instance_id", InstanceId)
 	d.Set("database_name", response.DBName)
 	d.Set("encode", response.CharacterSetName)
 	d.Set("description", response.DBDescription)
+	accounts := make([]map[string]interface{}, 0)
 	if len(response.Accounts) > 0 {
-		account := response.Accounts[0]
-		d.Set("account_name", account.AccountName)
-		d.Set("account_privilege", account.AccountPrivilege)
+		for _, account := range response.Accounts {
+			accounts = append(accounts, map[string]interface{}{
+				"account_name":      account.AccountName,
+				"account_privilege": account.AccountPrivilege,
+			})
+		}
 	}
 
 	return nil
 }
 
-func resourceAlibabacloudStackDrdsPolardbxDatabaseDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbxDatabaseDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteDB", "")
 
@@ -159,7 +185,7 @@ func resourceAlibabacloudStackDrdsPolardbxDatabaseDelete(d *schema.ResourceData,
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_polardbx_database", "DeleteDB", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_database", "DeleteDB", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	return nil
 }

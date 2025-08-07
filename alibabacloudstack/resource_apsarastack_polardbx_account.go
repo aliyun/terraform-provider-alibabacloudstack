@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func resourceAlibabacloudStackDrdsPolardbxAccount() *schema.Resource {
+func resourceAlibabacloudStackPolardbxAccount() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 
@@ -38,7 +38,7 @@ func resourceAlibabacloudStackDrdsPolardbxAccount() *schema.Resource {
 			"account_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Computed:     true,
+				Default:      "Normal",
 				ValidateFunc: validation.StringInSlice([]string{"Normal", "Super"}, false),
 			},
 			"password": {
@@ -67,11 +67,11 @@ func resourceAlibabacloudStackDrdsPolardbxAccount() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackDrdsPolardbxAccountCreate, resourceAlibabacloudStackDrdsPolardbxAccountRead, resourceAlibabacloudStackDrdsPolardbxAccountUpdate, resourceAlibabacloudStackDrdsPolardbxAccountDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackPolardbxAccountCreate, resourceAlibabacloudStackPolardbxAccountRead, resourceAlibabacloudStackPolardbxAccountUpdate, resourceAlibabacloudStackPolardbxAccountDelete)
 	return resource
 }
 
-func resourceAlibabacloudStackDrdsPolardbxAccountCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbxAccountCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	account_type := d.Get("account_type").(string)
 	action := "CreateAccount"
@@ -106,22 +106,22 @@ func resourceAlibabacloudStackDrdsPolardbxAccountCreate(d *schema.ResourceData, 
 
 }
 
-func resourceAlibabacloudStackDrdsPolardbxAccountUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbxAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
-	var instanceId, DrdsPolardbxAccountName string
+	var instanceId, PolardbxAccountName string
 	if parts, err := ParseResourceId(d.Id(), 2); err != nil {
 		return err
 	} else {
 		instanceId = parts[0]
-		DrdsPolardbxAccountName = parts[1]
+		PolardbxAccountName = parts[1]
 	}
 
 	if d.HasChanges("description") && d.Get("description").(string) != "" {
 		request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "ModifyAccountDescription", "")
 
 		request.QueryParams["AccountDescription"] = d.Get("description").(string)
-		request.QueryParams["AccountName"] = DrdsPolardbxAccountName
+		request.QueryParams["AccountName"] = PolardbxAccountName
 		request.QueryParams["DBInstanceName"] = instanceId
 
 		bresponse, err := client.ProcessCommonRequest(request)
@@ -131,7 +131,7 @@ func resourceAlibabacloudStackDrdsPolardbxAccountUpdate(d *schema.ResourceData, 
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_drds_polardbx_account", "ModifyAccountDescription", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_polardbx_account", "ModifyAccountDescription", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 	}
@@ -144,7 +144,7 @@ func resourceAlibabacloudStackDrdsPolardbxAccountUpdate(d *schema.ResourceData, 
 		request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "ResetAccountPassword", "")
 		DrdsChangeaccountpasswordResponse := DrdsChangeaccountpasswordResponse{}
 
-		request.QueryParams["AccountName"] = DrdsPolardbxAccountName
+		request.QueryParams["AccountName"] = PolardbxAccountName
 		request.QueryParams["DBInstanceName"] = instanceId
 
 		request.QueryParams["AccountPassword"] = d.Get("password").(string)
@@ -156,20 +156,20 @@ func resourceAlibabacloudStackDrdsPolardbxAccountUpdate(d *schema.ResourceData, 
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_drds_polardbx_account", "ResetAccountPassword", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_polardbx_account", "ResetAccountPassword", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
 		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DrdsChangeaccountpasswordResponse)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-				"alibabacloudstack_drds_polardbx_account", "ResetAccountPassword", errmsgs.AlibabacloudStackSdkGoERROR)
+				"alibabacloudstack_polardbx_account", "ResetAccountPassword", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
 
 	}
 
 	// DbPrivileges
 
-	// DrdsPolardbxAccountName
+	// PolardbxAccountName
 
 	// InstanceId
 
@@ -198,7 +198,7 @@ func resourceAlibabacloudStackDrdsPolardbxAccountUpdate(d *schema.ResourceData, 
 	return nil
 }
 
-func resourceAlibabacloudStackDrdsPolardbxAccountRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbxAccountRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	Polardbxservice := PolardbXService{client}
 	account, err := Polardbxservice.DoPolardbxDescribeAccountListRequest(d.Id())
@@ -238,7 +238,7 @@ func resourceAlibabacloudStackDrdsPolardbxAccountRead(d *schema.ResourceData, me
 	return nil
 }
 
-func resourceAlibabacloudStackDrdsPolardbxAccountDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbxAccountDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	// api: Drds - 2019-01-23 - RemoveInstanceAccount
 	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteAccount", "")
@@ -256,7 +256,7 @@ func resourceAlibabacloudStackDrdsPolardbxAccountDelete(d *schema.ResourceData, 
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_polardbx_account", "DeleteAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_account", "DeleteAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	return nil

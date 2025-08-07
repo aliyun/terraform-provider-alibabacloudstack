@@ -14,9 +14,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
-func dataSourceAlibabacloudStackDrdsPolardbxAccounts() *schema.Resource {
+func dataSourceAlibabacloudStackPolardbxAccounts() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlibabacloudStackDrdsPolardbxAccountsRead,
+		Read: dataSourceAlibabacloudStackPolardbxAccountsRead,
 		Schema: map[string]*schema.Schema{
 			"ids": {
 				Type:     schema.TypeList,
@@ -108,7 +108,7 @@ func dataSourceAlibabacloudStackDrdsPolardbxAccounts() *schema.Resource {
 	}
 }
 
-func dataSourceAlibabacloudStackDrdsPolardbxAccountsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceAlibabacloudStackPolardbxAccountsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	drdsService := DrdsService{client}
 
@@ -142,13 +142,13 @@ func dataSourceAlibabacloudStackDrdsPolardbxAccountsRead(d *schema.ResourceData,
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 		}
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_polardbx_accounts", "DescribeAccountList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_accounts", "DescribeAccountList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DoPolardbxDescribeAccountListResponseObj)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
-			"alibabacloudstack_drds_polardbx_accounts", "DescribeAccountList", errmsgs.AlibabacloudStackSdkGoERROR)
+			"alibabacloudstack_polardbx_accounts", "DescribeAccountList", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 
 	filterNames := map[string]string{}

@@ -1,15 +1,15 @@
 ---
-subcategory: "DRDS"
+subcategory: "POLARDBX"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_drds_polardbxinstance"
-sidebar_current: "docs-Alibabacloudstack-drds-polardbxinstance"
+page_title: "Alibabacloudstack: alibabacloudstack_polardbx_instance"
+sidebar_current: "docs-alibabacloudstack-polardbx-instance"
 description: |-
-  Provides a drds Polardbxinstance resource.
+  Provides a Polardbx instance resource.
 ---
 
-# alibabacloudstack\_drds\_polardbxinstance
+# alibabacloudstack\_polardbx\_instance
 
-Provides a drds Polardbxinstance resource.
+Provides a Polardbx instance resource.
 
 ## Example Usage
 ```
@@ -39,7 +39,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 
 
 
-resource "alibabacloudstack_drds_polardbx_instance" "default" {
+resource "alibabacloudstack_polardbx_instance" "default" {
   vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
   cn_node_count = "2"
   dn_node_class = "mysql.n4.medium.25"

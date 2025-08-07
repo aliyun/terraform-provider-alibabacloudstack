@@ -9,10 +9,10 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 )
 
-func TestAccAlibabacloudStackDrdsPolardbxDatabase_basic0(t *testing.T) {
+func TestAccAlibabacloudStackPolardbxDatabase_basic0(t *testing.T) {
 	var v *PolardbxDatabase
 
-	resourceId := "alibabacloudstack_drds_polardbx_database.default"
+	resourceId := "alibabacloudstack_polardbx_database.default"
 	ra := resourceAttrInit(resourceId, map[string]string{})
 
 	serviceFunc := func() interface{} {
@@ -24,7 +24,7 @@ func TestAccAlibabacloudStackDrdsPolardbxDatabase_basic0(t *testing.T) {
 	testAccCheck := rac.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf_acc_polardbx_db_%d", rand)
-	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceDrdsPolardbxDatabaseDependence)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourcePolardbxDatabaseDependence)
 
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -39,11 +39,11 @@ func TestAccAlibabacloudStackDrdsPolardbxDatabase_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id":       "${alibabacloudstack_drds_polardbx_instance.default.id}",
+					"instance_id":       "${alibabacloudstack_polardbx_instance.default.id}",
 					"database_name":     "${var.name}",
 					"encode":            "utf8mb4",
 					"description":       "${var.name}",
-					"account_name":      "${alibabacloudstack_drds_polardbx_account.default.account_name}",
+					"account_name":      "${alibabacloudstack_polardbx_account.default.account_name}",
 					"account_privilege": "ReadWrite",
 					"mode":              "auto",
 				}),
@@ -79,7 +79,7 @@ func TestAccAlibabacloudStackDrdsPolardbxDatabase_basic0(t *testing.T) {
 	})
 }
 
-func resourceDrdsPolardbxDatabaseDependence(name string) string {
+func resourcePolardbxDatabaseDependence(name string) string {
 	return fmt.Sprintf(`
 variable "name" {
   default = "%s"
@@ -89,7 +89,7 @@ variable "password" {
   default = "%s"
 }
 
-resource "alibabacloudstack_drds_polardbx_instance" "default" {
+resource "alibabacloudstack_polardbx_instance" "default" {
  description = "testtf1111"
 	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
 	engine_version = "5.7"
@@ -103,8 +103,8 @@ resource "alibabacloudstack_drds_polardbx_instance" "default" {
 	dn_node_count = "2"
 }
 
-resource "alibabacloudstack_drds_polardbx_account" "default" {
-    instance_id  = alibabacloudstack_drds_polardbx_instance.default.id
+resource "alibabacloudstack_polardbx_account" "default" {
+    instance_id  = alibabacloudstack_polardbx_instance.default.id
 	account_name = "testtf"
 	account_type = "Normal"
 	password     = "${var.password}"
