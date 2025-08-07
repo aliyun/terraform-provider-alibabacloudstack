@@ -16,7 +16,7 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 	ra := resourceAttrInit(resourceId, drdsPolardbxbasicMap)
 
 	serviceFunc := func() interface{} {
-		return &DrdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &PolardbXService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DoPolardbxDescribedbinstanceattributeRequest")
 
@@ -95,7 +95,7 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_onlyreadInstance(t *testing.T)
 	ra := resourceAttrInit(resourceId, drdsPolardbxbasicMap)
 
 	serviceFunc := func() interface{} {
-		return &DrdsService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
+		return &PolardbXService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
 	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DoPolardbxDescribedbinstanceattributeRequest")
 
