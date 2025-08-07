@@ -50,12 +50,21 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 					"cn_node_count":  "2",
 					"dn_node_class":  "mysql.x4.large.25",
 					"dn_node_count":  "2",
-					// "db_node_class":  "polarx.xx4.large.2e",
-					// "db_node_count": "2",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"storage": "50",
+						"cn_node_count": "2",
+						"dn_node_count": "2",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"cn_node_count": "3",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"cn_node_count": "3",
 					}),
 				),
 			},
