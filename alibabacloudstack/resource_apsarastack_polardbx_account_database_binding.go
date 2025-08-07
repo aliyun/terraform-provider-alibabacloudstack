@@ -74,6 +74,15 @@ func resourceAlibabacloudStackPolardbxAccountDatabaseBindingRead(d *schema.Resou
 	if err != nil {
 		return errmsgs.WrapError(err)
 	}
+	var instanceId, AccountName string
+	if parts, err := ParseResourceId(d.Id(), 2); err != nil {
+		return err
+	} else {
+		instanceId = parts[0]
+		AccountName = parts[1]
+	}
+	d.Set("instance_id", instanceId)
+	d.Set("account_name", AccountName)
 	d.Set("db_privileges", privilege)
 	return nil
 }
