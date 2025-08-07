@@ -423,3 +423,62 @@ func (s *PolardbXService) RefreshParameters(d *schema.ResourceData, attribute st
 	}
 	return nil
 }
+
+type PolardbxDBAccount struct {
+	AccountPrivilege string `json:"AccountPrivilege"`
+	AccountName      string `json:"AccountName"`
+}
+
+type PolardbxDatabase struct {
+	CharacterSetName string              `json:"CharacterSetName"`
+	DBDescription    string              `json:"DBDescription"`
+	DBName           string              `json:"DBName"`
+	Accounts         []PolardbxDBAccount `json:"Accounts"`
+	DBInstanceName   string              `json:"DBInstanceName"`
+}
+
+type PolardbxDescribeDbListResponse struct {
+	EagleEyeTraceId string             `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool               `json:"asapiSuccess"`
+	AsapiRequestId  string             `json:"asapiRequestId"`
+	RequestID       string             `json:"RequestId"`
+	Message         string             `json:"Message"`
+	Data            []PolardbxDatabase `json:"Data"`
+	Success         bool               `json:"Success"`
+}
+
+func (s *PolardbXService) DoPolardbxDescribeDbListRequest(id string) (*PolardbxDatabase, error) {
+	// api: polardbx - 2020-02-02 - DescribeDBInstances
+	var InstanceId, databaseName string
+	db := &PolardbxDatabase{}
+	if parts, err := ParseResourceId(id, 2); err != nil {
+		return db, err
+	} else {
+		InstanceId = parts[0]
+		databaseName = parts[1]
+	}
+	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeDbList", "")
+	request.QueryParams["DBInstanceName"] = InstanceId
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DescribeDbList", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	var response PolardbxDescribeDbListResponse
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DescribeDbList", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	for _, v := range response.Data {
+		if v.DBName == databaseName {
+			db = &v
+			break
+		}
+	}
+	return db, nil
+}

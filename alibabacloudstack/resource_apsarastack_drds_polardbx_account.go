@@ -49,9 +49,8 @@ func resourceAlibabacloudStackDrdsPolardbxAccount() *schema.Resource {
 
 			"db_privileges": {
 				Type:     schema.TypeSet,
-				Required: true,
-				MinItems: 1,
-
+				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"db_name": {

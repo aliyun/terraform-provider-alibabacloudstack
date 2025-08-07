@@ -523,6 +523,7 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cen_transit_router_route_tables":         dataSourceAlibabacloudStackCenTransitRouterRouterTables(),
 		"alibabacloudstack_cen_transit_router_route_entries":        dataSourceAlibabacloudStackCenTransitRouterRouteEntries(),
 		"alibabacloudstack_drds_polardbx_instances":                 dataSourceAlibabacloudStackDrdsPolarDbxInstances(),
+		"alibabacloudstack_drds_polardbx_accounts":                  dataSourceAlibabacloudStackDrdsPolardbxAccounts(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -898,6 +899,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_cen_transit_router_route_entry": resourceAlibabacloudStackCenTransitRouterRouteEntry(),
 		"alibabacloudstack_drds_polardbx_instance":         resourceAlibabacloudStackDrdspolardbxInstance(),
 		"alibabacloudstack_drds_polardbx_account":          resourceAlibabacloudStackDrdsPolardbxAccount(),
+		"alibabacloudstack_drds_polardbx_database":         resourceAlibabacloudStackDrdsPolardbxDatabase(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
