@@ -3,7 +3,9 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
+	"github.com/PaesslerAG/jsonpath"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -210,4 +212,125 @@ func (s *PolardbXService) DoPolardbxDescribedbinstancesRequest(d *schema.Resourc
 	}
 
 	return PolardbxDescribedbinstancesResponseObj, nil
+}
+
+func (s *PolardbXService) DoPolardbxDescribeDBInstanceSSLRequest(id string) (bool, error) {
+	// api: polardbx - 2020-02-02 - DescribeDBInstances
+	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeDBInstanceSSL", "")
+	request.QueryParams["DBInstanceName"] = id
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return false, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return false, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DescribeDBInstanceSSL", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	response := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+
+	if err != nil {
+		return false, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DescribeDBInstanceSSL", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	enable_ssl, err := jsonpath.Get("$.Data.SSLEnabled", response)
+	if err != nil {
+		return false, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "DescribeDBInstanceSSL", "$.Data.SSLEnabled", response)
+	}
+	return enable_ssl.(bool), nil
+}
+
+func (s *PolardbXService) DoPolardbxDescribeDBInstanceTDERequest(id string) (bool, error) {
+	// api: polardbx - 2020-02-02 - DescribeDBInstances
+	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeDBInstanceTDE", "")
+	request.QueryParams["DBInstanceName"] = id
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return false, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return false, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DescribeDBInstanceTDE", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	response := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+
+	if err != nil {
+		return false, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DescribeDBInstanceTDE", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	tde_status, err := jsonpath.Get("$.Data.TDEStatus", response)
+	if err != nil {
+		return false, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "DescribeDBInstanceTDE", "$.Data.TDEStatus", response)
+	}
+	return tde_status.(string) == "1", nil
+}
+
+func (s *PolardbXService) ModifyParameters(d *schema.ResourceData, attribute string) error {
+	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "ModifyParameter", "")
+	request.QueryParams["DBInstanceId"] = d.Id()
+	request.QueryParams["ParamLevel"] = attribute
+	config := make(map[string]string)
+	o, n := d.GetChange(fmt.Sprintf("%s_parameters", attribute))
+	os, ns := o.(*schema.Set), n.(*schema.Set)
+	add := ns.Difference(os).List()
+	if len(add) > 0 {
+		for _, i := range add {
+			key := i.(map[string]interface{})["name"].(string)
+			value := i.(map[string]interface{})["value"].(string)
+			config[key] = value
+		}
+		cfg, _ := json.Marshal(config)
+		request.QueryParams["Parameters"] = string(cfg)
+		// wait instance status is Normal before modifying
+		bresponse, err := s.client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			return errmsgs.WrapError(err)
+		}
+		stateConf := BuildStateConf([]string{"CONFIG_SWITCHING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, s.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
+	//d.SetPartial(attribute)
+	return nil
+}
+
+func (s *PolardbXService) DoPolardbxDescribeParametersRequest(id, param_level string) ([]map[string]interface{}, error) {
+	// api: polardbx - 2020-02-02 - DescribeDBInstances
+	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeParameters", "")
+	request.QueryParams["DBInstanceId"] = id
+	request.QueryParams["ParamLevel"] = param_level
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "DescribeParameters", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	response := make(map[string]interface{})
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "DescribeParameters", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	parameters_value, err := jsonpath.Get("$.Data.RunningParameters", response)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "DescribeParameters", "$.Data.RunningParameters", response)
+	}
+	parameters := make([]map[string]interface{}, 0)
+	if parameters_value != nil {
+		for _, v := range parameters_value.([]interface{}) {
+			parameter := v.(map[string]interface{})
+			parameters = append(parameters, map[string]interface{}{
+				"name":  parameter["ParameterName"],
+				"value": parameter["ParameterValue"],
+			})
+		}
+	}
+	return parameters, nil
 }

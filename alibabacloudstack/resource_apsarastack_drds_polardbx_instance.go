@@ -16,6 +16,12 @@ import (
 
 func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 	resource := &schema.Resource{
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(10 * time.Minute),
+		},
+
 		Schema: map[string]*schema.Schema{
 
 			"series": {
@@ -140,6 +146,11 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 				Computed: true,
 			},
 
+			"connection_string": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+
 			"tertiary_zone": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -150,6 +161,15 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 				Optional:     true,
 				Default:      "1azone",
 				ValidateFunc: validation.StringInSlice([]string{"1azone", "3azones"}, false),
+			},
+
+			"enable_tde": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
+			"enable_ssl": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 
 			"vswitch_id": {
@@ -166,6 +186,42 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"compute_parameters": {
+				Type: schema.TypeSet,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+				Set:      parameterToHash,
+				Optional: true,
+				Computed: true,
+			},
+			"storage_parameters": {
+				Type: schema.TypeSet,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"value": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+					},
+				},
+				Set:      parameterToHash,
+				Optional: true,
+				Computed: true,
+			},
 		},
 	}
 	setResourceFunc(resource, resourceAlibabacloudStackDrdspolardbxInstanceCreate,
@@ -177,15 +233,14 @@ func resourceAlibabacloudStackDrdspolardbxInstance() *schema.Resource {
 
 func resourceAlibabacloudStackDrdspolardbxInstanceCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
-	is_read_db_instance := d.Get("is_read_db_instance").(bool)
 	drdspolardbx_instanceservice := PolardbXService{client}
+	is_read_db_instance := d.Get("is_read_db_instance").(bool)
 	// api: polardbx - 2020 - 02 - 02 - CreateDBInstance
 	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "CreateDBInstance", "")
 	PolardbxCreatedbinstanceResponseObj := PolardbxCreatedbinstanceResponse{}
 	if is_read_db_instance {
 		primary_db_instance_id := d.Get("primary_db_instance_id").(string)
-		primary_db_stateConf := BuildStateConf([]string{"ClassChanging", "READINS_MAINTAINING", "Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(primary_db_instance_id, []string{"Failed"}))
+		primary_db_stateConf := BuildStateConf([]string{"ClassChanging", "READINS_MAINTAINING", "Creating", "SSL_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(primary_db_instance_id, []string{"Failed"}))
 		if _, err := primary_db_stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -278,7 +333,6 @@ func resourceAlibabacloudStackDrdspolardbxInstanceCreate(d *schema.ResourceData,
 	}
 
 	polardbx_instance_id := PolardbxCreatedbinstanceResponseObj.DBInstanceName
-	// polardbx_instance_id := ""
 	d.SetId(polardbx_instance_id)
 	stateConf := BuildStateConf([]string{"ClassChanging", "Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
@@ -340,9 +394,89 @@ func resourceAlibabacloudStackDrdspolardbxInstanceUpdate(d *schema.ResourceData,
 			}
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-				"alibabacloudstack_drds_polardbx_instance", "UpdatepolardbxInstanceNode", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				"alibabacloudstack_drds_polardbx_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
+	}
+	drdspolardbx_instanceservice := PolardbXService{client}
+	if !d.IsNewResource() || d.Get("enable_ssl").(bool) {
+		request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "UpdateDBInstanceSSL", "")
+
+		request.QueryParams["DBInstanceName"] = d.Id()
+		request.QueryParams["EnableSSL"] = fmt.Sprint(d.Get("enable_ssl").(bool))
+		request.QueryParams["CertCommonName"] = d.Get("common_name").(string)
+		request.QueryParams["Force"] = "true"
+		if d.Get("connection_string").(string) != "" {
+			request.QueryParams["CertCommonName"] = d.Get("connection_string").(string)
+		} else {
+			response, err := drdspolardbx_instanceservice.DoPolardbxDescribedbinstanceattributeRequest(d.Id())
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+					"alibabacloudstack_drds_polardbx_instance", "DescribeDBInstanceAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+			request.QueryParams["CertCommonName"] = response.DBInstance.ConnectionString
+		}
+
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_drds_polardbx_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		stateConf := BuildStateConf([]string{"SSL_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
+
+	if d.HasChange("enable_tde") && d.Get("enable_tde").(bool) {
+		request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "UpdateDBInstanceTDE", "")
+
+		request.QueryParams["DBInstanceName"] = d.Id()
+		request.QueryParams["EnableSSL"] = fmt.Sprint(d.Get("enable_ssl").(bool))
+		request.QueryParams["CertCommonName"] = d.Get("common_name").(string)
+		request.QueryParams["Force"] = "true"
+		if d.Get("connection_string").(string) != "" {
+			request.QueryParams["CertCommonName"] = d.Get("connection_string").(string)
+		} else {
+			response, err := drdspolardbx_instanceservice.DoPolardbxDescribedbinstanceattributeRequest(d.Id())
+			if err != nil {
+				return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+					"alibabacloudstack_drds_polardbx_instance", "DescribeDBInstanceAttribute", errmsgs.AlibabacloudStackSdkGoERROR)
+			}
+			request.QueryParams["CertCommonName"] = response.DBInstance.ConnectionString
+		}
+
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_drds_polardbx_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+		stateConf := BuildStateConf([]string{"TDE_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+		if _, err := stateConf.WaitForState(); err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
+
+	if d.HasChange("compute_parameters") {
+		if err := drdspolardbx_instanceservice.ModifyParameters(d, "compute"); err != nil {
+			return err
+		}
+	}
+
+	if d.HasChange("storage_parameters") {
+		if err := drdspolardbx_instanceservice.ModifyParameters(d, "storage"); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -385,7 +519,7 @@ func resourceAlibabacloudStackDrdspolardbxInstanceRead(d *schema.ResourceData, m
 
 	d.Set("network_type", strings.ToLower(data.Network))
 
-	// d.Set("payment_type", data.PayType)
+	d.Set("connection_string", data.ConnectionString)
 
 	// d.Set("primary_db_instance_id", data.)
 
@@ -402,7 +536,30 @@ func resourceAlibabacloudStackDrdspolardbxInstanceRead(d *schema.ResourceData, m
 	} else {
 		d.Set("is_read_db_instance", false)
 	}
-
+	enable_ssl, err := drdspolardbx_instanceservice.DoPolardbxDescribeDBInstanceSSLRequest(d.Id())
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_drds_polardbx_instance", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	d.Set("enable_ssl", enable_ssl)
+	enable_tde, err := drdspolardbx_instanceservice.DoPolardbxDescribeDBInstanceTDERequest(d.Id())
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_drds_polardbx_instance", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	d.Set("enable_tde", enable_tde)
+	storage_parameters, err := drdspolardbx_instanceservice.DoPolardbxDescribeParametersRequest(d.Id(), "storage")
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_drds_polardbx_instance", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	if storage_parameters != nil {
+		d.Set("storage_parameters", storage_parameters)
+	}
+	compute_parameters, err := drdspolardbx_instanceservice.DoPolardbxDescribeParametersRequest(d.Id(), "compute")
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_drds_polardbx_instance", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	if compute_parameters != nil {
+		d.Set("compute_parameters", compute_parameters)
+	}
 	return nil
 }
 
@@ -411,25 +568,40 @@ func resourceAlibabacloudStackDrdspolardbxInstanceDelete(d *schema.ResourceData,
 	// api: polardbx - 2020-02-02 - DeleteDBInstance
 	// Check instance status before deletion
 	drdspolardbx_instanceservice := PolardbXService{client}
-	stateConf := BuildStateConf([]string{"ClassChanging", "READINS_MAINTAINING", "Creating"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
+	stateConf := BuildStateConf([]string{"ClassChanging", "READINS_MAINTAINING", "Creating", "SSL_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, drdspolardbx_instanceservice.PolardbxDescribedbinstanceStateRefreshFunc(d.Id(), []string{"Failed"}))
 	if _, err := stateConf.WaitForState(); err != nil {
+		if errmsgs.NotFoundError(err) {
+			return nil
+		}
 		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 	}
 	time.Sleep(10 * time.Second)
 	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DeleteDBInstance", "")
 
 	request.QueryParams["DBInstanceName"] = d.Id()
+	retry := 5
+	for retry > 0 {
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			raw_data := make(map[string]interface{})
+			_ = json.Unmarshal(bresponse.GetHttpContentBytes(), &raw_data)
+			code, ok := raw_data["Code"]
+			if ok && errmsgs.IsExpectedErrorCodes(code.(string), []string{"UnsupportedReadOrBakReadState"}) {
+				retry--
+			} else {
+				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_polardbx_instance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			}
 
-	bresponse, err := client.ProcessCommonRequest(request)
-	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
-	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		} else {
+			retry = 0
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_drds_polardbx_instance", "DeleteDBInstance", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
 
+	}
 	return nil
 }
 

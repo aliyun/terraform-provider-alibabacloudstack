@@ -38,7 +38,7 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"description":    "testtf1111",
+					"description":    "${var.name}",
 					"zone_id":        "${data.alibabacloudstack_zones.default.zones.0.id}",
 					"engine_version": "5.7",
 					"storage":        "50",
@@ -49,12 +49,58 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 					"cn_node_count":  "2",
 					"dn_node_class":  "mysql.n4.medium.25",
 					"dn_node_count":  "2",
+					"compute_parameters": []map[string]interface{}{
+						{
+							"name":  "CONN_POOL_BLOCK_TIMEOUT",
+							"value": "40000",
+						},
+						{
+							"name":  "CONN_POOL_IDLE_TIMEOUT",
+							"value": "35",
+						},
+					},
+					"storage_parameters": []map[string]interface{}{
+						{
+							"name":  "innodb_stats_sample_pages",
+							"value": "10",
+						},
+						{
+							"name":  "lc_time_names",
+							"value": "35",
+						},
+					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"description":   name,
-						"cn_node_count": "2",
-						"dn_node_count": "2",
+						"description":                name,
+						"cn_node_count":              "2",
+						"dn_node_count":              "2",
+						"compute_parameters.#":       "2",
+						"compute_parameters.0.name":  "CONN_POOL_BLOCK_TIMEOUT",
+						"storage_parameters.#":       "2",
+						"storage_parameters.0.value": "10",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable_ssl": "true",
+					"enable_tde": "true",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"enable_ssl": "true",
+						"enable_tde": "true",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable_ssl": "false",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"enable_ssl": "false",
 					}),
 				),
 			},
