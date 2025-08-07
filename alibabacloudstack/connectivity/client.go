@@ -1,8 +1,9 @@
 package connectivity
 
 import (
-	"github.com/PaesslerAG/jsonpath"
 	"log"
+
+	"github.com/PaesslerAG/jsonpath"
 
 	roaCS "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
@@ -1128,7 +1129,7 @@ func (client *AlibabacloudStackClient) InitRoaRequest(request requests.RoaReques
 }
 
 func buildClientToken(popcode, version, action string) string {
-	token := strings.TrimSpace(fmt.Sprintf("TF_%s_%s_%s_%d", popcode, version, action, time.Now().Unix(), ))
+	token := strings.TrimSpace(fmt.Sprintf("TF_%s_%s_%s_%d", popcode, version, action, time.Now().Unix()))
 	if len(token) > 64 {
 		token = token[0:64]
 	}
@@ -1224,7 +1225,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method, popcode, version, ap
 			}()
 		}
 
-		log.Printf(" ================================ %s ======================================\n query %v \n request %v \n response: %v", apiname, query, body, response)
+		log.Printf(" ================================ %s ======================================\n query %#v \n request %#v \n response: %#v", apiname, query, body, response)
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				return resource.NonRetryableError(err)
