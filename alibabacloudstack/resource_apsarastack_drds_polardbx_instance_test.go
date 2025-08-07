@@ -115,10 +115,11 @@ func TestAccAlibabacloudStackDrdsPolardbxInstance_basic0(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"primary_db_instance_id", "topology_type"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
+				// "primary_db_instance_id", "topology_type" 不支持回读， "compute_parameters", "storage_parameters" 只支持回读本地更新的参数。
+				ImportStateVerifyIgnore: []string{"primary_db_instance_id", "topology_type", "compute_parameters", "storage_parameters"},
 			},
 		},
 	})
