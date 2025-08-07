@@ -90,6 +90,70 @@ type CbnDescribeTransitRouterRouteTablesResponse struct {
 	RequestId string `json:"RequestId"`
 }
 
+type ZoneMapping struct {
+	ZoneId             string `json:"ZoneId"`
+	VSwitchId          string `json:"VSwitchId"`
+	NetworkInterfaceId string `json:"NetworkInterfaceId"`
+}
+
+type CbnDescribeTransitRouterVpcAttachmentsResponse struct {
+	TransitRouterAttachments []struct {
+		Status                             string        `json:"Status"`
+		TransitRouterAttachmentId          string        `json:"TransitRouterAttachmentId"`
+		TransitRouterAttachmentName        string        `json:"TransitRouterAttachmentName"`
+		ResourceType                       string        `json:"ResourceType"`
+		ZoneMappings                       []ZoneMapping `json:"ZoneMappings"`
+		VpcOwnerId                         int64         `json:"VpcOwnerId"`
+		AutoPublishRouteEnabled            bool          `json:"AutoPublishRouteEnabled"`
+		VpcId                              string        `json:"VpcId"`
+		ChargeType                         string        `json:"ChargeType"`
+		CreationTime                       string        `json:"CreationTime"`
+		VpcRegionId                        string        `json:"VpcRegionId"`
+		TransitRouterAttachmentDescription string        `json:"TransitRouterAttachmentDescription"`
+		Tags                               []interface{} `json:"Tags"`
+		TransitRouterId                    string        `json:"TransitRouterId"`
+	} `json:"TransitRouterAttachments"`
+	RequestId string `json:"RequestId"`
+}
+
+type TransitRouterRouteTableAssociationsResponse struct {
+	TransitRouterAssociations []struct {
+		TransitRouterAttachmentId string `json:"TransitRouterAttachmentId"`
+		Status                    string `json:"Status"`
+		TransitRouterRouteTableId string `json:"TransitRouterRouteTableId"`
+		ResourceId                string `json:"ResourceId"`
+		ResourceType              string `json:"ResourceType"`
+	} `json:"TransitRouterAssociations"`
+	RequestId string `json:"RequestId"`
+}
+
+type TransitRouterRouteTablePropagationsResponse struct {
+	TransitRouterPropagations []struct {
+		Status                    string `json:"Status"`
+		TransitRouterAttachmentId string `json:"TransitRouterAttachmentId"`
+		TransitRouterRouteTableId string `json:"TransitRouterRouteTableId"`
+		ResourceId                string `json:"ResourceId"`
+		ResourceType              string `json:"ResourceType"`
+	} `json:"TransitRouterPropagations"`
+	RequestId string `json:"RequestId"`
+}
+
+type TransitRouterAttachmentsResponse struct {
+	TransitRouterAttachments []struct {
+		Status                             string      `json:"Status"`
+		TransitRouterAttachmentId          string      `json:"TransitRouterAttachmentId"`
+		ResourceRegionId                   string      `json:"ResourceRegionId"`
+		Association                        interface{} `json:"Association"`
+		ResourceId                         string      `json:"ResourceId"`
+		CreationTime                       string      `json:"CreationTime"`
+		TransitRouterAttachmentName        string      `json:"TransitRouterAttachmentName"`
+		ResourceType                       string      `json:"ResourceType"`
+		ResourceOwnerId                    int         `json:"ResourceOwnerId"`
+		TransitRouterAttachmentDescription string      `json:"TransitRouterAttachmentDescription"`
+	} `json:"TransitRouterAttachments"`
+	RequestId string `json:"RequestId"`
+}
+
 func (s *CenService) DoCbnDescribecensRequest(id string) (*CenInstance, error) {
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DescribeCens", "")
@@ -201,6 +265,7 @@ func (s *CenService) WaitForTransitRouterInstance(instanceId string, status Stat
 
 func (s *CenService) DoCbnDescribeTransitRouterRouteEntriesRequest(id string) (*CbnDescribeTransitRouterRouteEntriesResponse, error) {
 	// api: Dds - 2022-11-21 - DescribeAccounts
+
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterRouteEntries", "")
 	CbnDescribeRouterRouteEntriesResponseObj := &CbnDescribeTransitRouterRouteEntriesResponse{}
 	//调用request_params_handler
@@ -233,7 +298,8 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTablesRequest(id string) (*C
 	CbnDescribeRouterRouteTablesResponseObj := &CbnDescribeTransitRouterRouteTablesResponse{}
 	//调用request_params_handler
 	parts := strings.Split(id, ":")
-	transit_router_id := parts[0]
+	transit_router_id := ""
+	transit_router_id = parts[0]
 	request.QueryParams["TransitRouterId"] = transit_router_id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -284,3 +350,134 @@ func (s *CenService) WaitForTransitRouterTable(id string, status Status, timeout
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
 }
+
+func (s *CenService) DoCbnDescribeTransitRouterAttachmentsRequest(id string) (*TransitRouterAttachmentsResponse, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterAttachments", "")
+	DescribeRouterattachmentsResponseObj := &TransitRouterAttachmentsResponse{}
+	//调用request_params_handler
+	parts := strings.Split(id, ":")
+	cen_id := parts[0]
+	transit_router_id := parts[1]
+
+	request.QueryParams["TransitRouterId"] = transit_router_id
+	request.QueryParams["CenId"] = cen_id
+	request.QueryParams["ResourceTypes.1"] = "VPC"
+	request.QueryParams["ResourceTypes.2"] = "VPR"
+	request.QueryParams["ResourceTypes.3"] = "Connect"
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouterAttachments", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &DescribeRouterattachmentsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterAttachments", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return DescribeRouterattachmentsResponseObj, nil
+}
+
+func (s *CenService) DoCbnDescribeTransitRouterVpcAttachmentsRequest(id string) (*CbnDescribeTransitRouterVpcAttachmentsResponse, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterVpcAttachments", "")
+	CbnDescribeRouterVpcattachmentsResponseObj := &CbnDescribeTransitRouterVpcAttachmentsResponse{}
+	//调用request_params_handler
+	parts := strings.Split(id, ":")
+	cen_id := parts[0]
+	transit_router_id := parts[1]
+	attachment_id := parts[2]
+	request.QueryParams["TransitRouterId"] = transit_router_id
+	request.QueryParams["CenId"] = cen_id
+	request.QueryParams["TransitRouterAttachmentId"] = attachment_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouterVpcAttachments", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnDescribeRouterVpcattachmentsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterVpcAttachments", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return CbnDescribeRouterVpcattachmentsResponseObj, nil
+}
+
+func (s *CenService) DoCbnDescribeTransitRouterRouteTableAssociationsRequest(id string) (*TransitRouterRouteTableAssociationsResponse, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterRouteTableAssociations", "")
+	TransitRouterRouteTableAssociationsResponseObj := &TransitRouterRouteTableAssociationsResponse{}
+	//调用request_params_handler
+	parts := strings.Split(id, ":")
+	transit_router_table := parts[0]
+	attachment_id := parts[1]
+	request.QueryParams["TransitRouterRouteTableId"] = transit_router_table
+	request.QueryParams["TransitRouterAttachmentId"] = attachment_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouterRouteTableAssociations", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &TransitRouterRouteTableAssociationsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterRouteTableAssociations", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return TransitRouterRouteTableAssociationsResponseObj, nil
+}
+
+func (s *CenService) DoCbnDescribeTransitRouterRouteTablePropagationsRequest(id string) (*TransitRouterRouteTablePropagationsResponse, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterRouteTablePropagations", "")
+	TransitRouterRouteTablePropagationsResponseObj := &TransitRouterRouteTablePropagationsResponse{}
+	//调用request_params_handler
+	parts := strings.Split(id, ":")
+	transit_router_table := parts[0]
+	attachment_id := parts[1]
+	request.QueryParams["TransitRouterRouteTableId"] = transit_router_table
+	request.QueryParams["TransitRouterAttachmentId"] = attachment_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouterRouteTablePropagations", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &TransitRouterRouteTablePropagationsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterRouteTablePropagations", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return TransitRouterRouteTablePropagationsResponseObj, nil
+}
+
+// request_vpc_entris := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ListTransitRouterRouteTables", "")
+// request_vpc_entris := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeRouteEntryList", "")
+// request_routetable_associations := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ListTransitRouterRouteTableAssociations", "")
+// request_routetable_propagations := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ListTransitRouterRouteTablePropagations", "")

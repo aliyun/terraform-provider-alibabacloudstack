@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strings"
 	"time"
 
 	"encoding/json"
@@ -1847,8 +1848,8 @@ func (s *VpcService) DescribeExpressConnectVirtualBorderRouter(id string) (objec
 	var response map[string]interface{}
 	action := "DescribeVirtualBorderRouters"
 	reqQuery := map[string]interface{}{
-		"PageNumber":     1,
-		"PageSize":       50,
+		"PageNumber": 1,
+		"PageSize":   50,
 	}
 	idExist := false
 	for {
@@ -1918,6 +1919,32 @@ type VpcGetdhcpoptionssetResponse struct {
 	} `json:"DhcpOptions"`
 }
 
+type NextHop struct {
+	NextHopType        string      `json:"NextHopType"`
+	NextHopId          string      `json:"NextHopId"`
+	NextHopRelatedInfo interface{} `json:"NextHopRelatedInfo"`
+}
+
+type NextHops struct {
+	NextHop []NextHop `json:"NextHop"`
+}
+
+type VpcRouteEntryListResponse struct {
+	RouteEntrys struct {
+		RouteEntry []struct {
+			Status               string   `json:"Status"`
+			RouteEntryId         string   `json:"RouteEntryId"`
+			Type                 string   `json:"Type"`
+			RouteTableId         string   `json:"RouteTableId"`
+			Description          string   `json:"Description"`
+			IpVersion            string   `json:"IpVersion"`
+			NextHops             NextHops `json:"NextHops"`
+			RouteEntryName       string   `json:"RouteEntryName"`
+			DestinationCidrBlock string   `json:"DestinationCidrBlock"`
+		} `json:"RouteEntry"`
+	} `json:"RouteEntrys"`
+}
+
 func (s *VpcService) DoVpcGetdhcpoptionssetRequest(id string) (*VpcGetdhcpoptionssetResponse, error) {
 	// api: Vpc - 2016-04-28 - GetDhcpOptionsSet
 	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "GetDhcpOptionsSet", "")
@@ -1942,6 +1969,37 @@ func (s *VpcService) DoVpcGetdhcpoptionssetRequest(id string) (*VpcGetdhcpoption
 	}
 
 	return VpcGetdhcpoptionssetResponseObj, nil
+}
+
+func (s *VpcService) DoVpcRouteEntryListRequest(id string) (*VpcRouteEntryListResponse, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeRouteEntryList", "")
+	VpcRouteEntryListResponseObj := &VpcRouteEntryListResponse{}
+	//调用request_params_handler
+	parts := strings.Split(id, ":")
+	route_table_id := parts[0]
+	attachment_id := parts[1]
+	request.QueryParams["RouteTableId"] = route_table_id
+	request.QueryParams["RouteEntryType"] = "Custom"
+	request.QueryParams["NextHopId"] = attachment_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouterVpcAttachments", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &VpcRouteEntryListResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterVpcAttachments", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return VpcRouteEntryListResponseObj, nil
 }
 
 type NatgatewayService struct {

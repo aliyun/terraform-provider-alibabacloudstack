@@ -52,17 +52,17 @@ func Provider() *schema.Provider {
 				Deprecated:  "Field region_id is Deprecated, Please use parameter region replace it.",
 			},
 			"role_arn": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: descriptions["assume_role_role_arn"],
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ASSUME_ROLE_ARN", nil),
+				Type:          schema.TypeString,
+				Optional:      true,
+				Description:   descriptions["assume_role_role_arn"],
+				DefaultFunc:   schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ASSUME_ROLE_ARN", nil),
 				ConflictsWith: []string{"security_token"},
 			},
 			"security_token": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURITY_TOKEN", nil),
-				Description: descriptions["security_token"],
+				Type:          schema.TypeString,
+				Optional:      true,
+				DefaultFunc:   schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURITY_TOKEN", nil),
+				Description:   descriptions["security_token"],
 				ConflictsWith: []string{"role_arn"},
 			},
 			"ecs_role_name": {
@@ -521,9 +521,6 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_expressconnect_bgp_groups":               dataSourceAlibabacloudStackExpressconnectBgpGroups(),
 		"alibabacloudstack_expressconnect_bgp_peers":                dataSourceAlibabacloudStackExpressconnectBgpPeers(),
 		"alibabacloudstack_db_proxies":                              dataSourceAlibabacloudStackRdsDbProxies(),
-		"alibabacloudstack_cen_instances":                           dataSourceAlibabacloudStackCenCenInstances(),
-		"alibabacloudstack_cen_transit_router_route_tables":         dataSourceAlibabacloudStackCenTransitRouterRouterTables(),
-		"alibabacloudstack_cen_transit_router_route_entries":        dataSourceAlibabacloudStackCenTransitRouterRouteEntries(),
 		"alibabacloudstack_polardbx_instances":                      dataSourceAlibabacloudStackPolardbxInstances(),
 		"alibabacloudstack_polardbx_accounts":                       dataSourceAlibabacloudStackPolardbxAccounts(),
 		"alibabacloudstack_polardbx_databases":                      dataSourceAlibabacloudStackPolardbxDatabases(),
@@ -531,6 +528,10 @@ func getDataSourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardbx_backups":                        dataSourceAlibabacloudStackPolardbxBackups(),
 		"alibabacloudstack_polardbx_backup_policies":                dataSourceAlibabacloudStackPolardbxBackupPolicys(),
 		"alibabacloudstack_polardbx_cdc_classes":                    dataSourceAlibabacloudStackPolardbxCdcClasses(),
+		"alibabacloudstack_cen_instances":                           dataSourceAlibabacloudStackCenCenInstances(),
+		"alibabacloudstack_cen_transit_router_route_tables":         dataSourceAlibabacloudStackCenTransitRouterRouterTables(),
+		"alibabacloudstack_cen_transit_router_route_entries":        dataSourceAlibabacloudStackCenTransitRouterRouteEntries(),
+		"alibabacloudstack_cen_transit_router_vpc_attachments":      dataSourceAlibabacloudStackCenTransitRouterVpcAttachments(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
@@ -900,9 +901,6 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_expressconnect_bgp_group":                    resourceAlibabacloudStackExpressconnectBgpgroup(),
 		"alibabacloudstack_expressconnect_bgp_peer":                     resourceAlibabacloudStackExpressconnectBgppeer(),
 		"alibabacloudstack_db_proxy":                                    resourceAlibabacloudStackRdsDbproxy(),
-		"alibabacloudstack_cen_instance":                                resourceAlibabacloudStackCenCeninstance(),
-		"alibabacloudstack_cen_transit_router_route_table":              resourceAlibabacloudStackCenTransitRouterRouterTable(),
-		"alibabacloudstack_cen_transit_router_route_entry":              resourceAlibabacloudStackCenTransitRouterRouteEntry(),
 		"alibabacloudstack_polardbx_instance":                           resourceAlibabacloudStackPolardbxInstance(),
 		"alibabacloudstack_polardbx_readonly_instance":                  resourceAlibabacloudStackPolardbxReadonlyInstance(),
 		"alibabacloudstack_polardbx_account":                            resourceAlibabacloudStackPolardbxAccount(),
@@ -911,6 +909,10 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardbx_backup":                             resourceAlibabacloudStackPolardbxBackup(),
 		"alibabacloudstack_polardbx_backup_policy":                      resourceAlibabacloudStackPolardbxBackupPolicy(),
 		"alibabacloudstack_polardbx_log_engine":                         resourceAlibabacloudStackPolardbxLogEngine(),
+		"alibabacloudstack_cen_instance":                                resourceAlibabacloudStackCenCeninstance(),
+		"alibabacloudstack_cen_transit_router_route_table":              resourceAlibabacloudStackCenTransitRouterRouterTable(),
+		"alibabacloudstack_cen_transit_router_route_entry":              resourceAlibabacloudStackCenTransitRouterRouteEntry(),
+		"alibabacloudstack_cen_transit_router_vpc_attachment":           ResourceAlibabacloudStackCenTransitRouterVpcAttachment(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps
