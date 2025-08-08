@@ -44,7 +44,6 @@ func resourceAlibabacloudStackCenCeninstance() *schema.Resource {
 			},
 			"status": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 			"transit_router_name": {

@@ -33,8 +33,11 @@ The following arguments are supported:
   * `ids` - (Optional) - cen instance ids.
   * `name_regex` - (Optional) - cen instance name regex.
   * `description_regex` - (Optional) - cen instance description regex.
+  * `transit_router_name_regex` - (Optional) -cen instance transit router name regex.
+  * `transit_router_description_regex` - (Optional) - cen instance transit router description regex.
+  * `cidr` - (Optional) - cen instance router cidr.
 
 ## Attributes Reference
 
 The following attributes are exported in addition to the arguments listed above:
-  * `cens` - cen instances.
+  * `cens` - cen instances list.
