@@ -895,3 +895,52 @@ func (s *PolardbXService) DescribePolarDbXBackupStateRefreshFunc(id string, fail
 		return object, fmt.Sprint(object.Status), nil
 	}
 }
+
+type PolarDbXBackupConfigResponse struct {
+	EagleEyeTraceId string               `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool                 `json:"asapiSuccess"`
+	AsapiRequestId  string               `json:"asapiRequestId"`
+	Message         string               `json:"Message"`
+	RequestId       string               `json:"RequestId"`
+	Data            PolarDbXBackupConfig `json:"Data"`
+	Success         bool                 `json:"Success"`
+}
+
+type PolarDbXBackupConfig struct {
+	BackupPeriod               string `json:"BackupPeriod"`
+	IsEnabled                  int    `json:"IsEnabled"`
+	BackupSetRetention         int    `json:"BackupSetRetention"`
+	BackupPlanBegin            string `json:"BackupPlanBegin"`
+	ColdDataBackupInterval     int    `json:"ColdDataBackupInterval"`
+	RemoveLogRetention         int    `json:"RemoveLogRetention"`
+	LocalLogRetentionNumber    int    `json:"LocalLogRetentionNumber"`
+	ColdDataBackupRetention    int    `json:"ColdDataBackupRetention"`
+	ForceCleanOnHighSpaceUsage int    `json:"ForceCleanOnHighSpaceUsage"`
+	BackupWay                  string `json:"BackupWay"`
+	LocalLogRetention          int    `json:"LocalLogRetention"`
+	BackupType                 string `json:"BackupType"`
+	LogLocalRetentionSpace     int    `json:"LogLocalRetentionSpace"`
+	DBInstanceName             string `json:"DBInstanceName"`
+}
+
+func (s *PolardbXService) DescribePolarDbXBackupConfig(instanceId string) (*PolarDbXBackupConfig, error) {
+	PolarDbXBackupConfigResponseObj := PolarDbXBackupConfigResponse{}
+	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeBackupPolicy", "")
+	request.QueryParams["DBInstanceName"] = instanceId
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolarDbXBackupConfigResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardbx_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	return &PolarDbXBackupConfigResponseObj.Data, nil
+}
