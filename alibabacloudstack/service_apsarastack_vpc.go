@@ -1901,6 +1901,61 @@ func (s *VpcService) ExpressConnectVirtualBorderRouterStateRefreshFunc(id string
 	}
 }
 
+type DescribeRouteTableListResponse struct {
+	RouterTableList struct {
+		RouterTableListType []struct {
+			Status            string     `json:"Status"`
+			RouteTableId      string     `json:"RouteTableId"`
+			Description       string     `json:"Description"`
+			ResourceGroupId   string     `json:"ResourceGroupId"`
+			VSwitchIds        VSwitchIds `json:"VSwitchIds"`
+			RouterId          string     `json:"RouterId"`
+			AscmCreateUser    string     `json:"AscmCreateUser"`
+			RouteTableType    string     `json:"RouteTableType"`
+			Department        int        `json:"Department"`
+			VpcId             string     `json:"VpcId"`
+			OwnerId           int64      `json:"OwnerId"`
+			RouterType        string     `json:"RouterType"`
+			CreationTime      string     `json:"CreationTime"`
+			DepartmentName    string     `json:"DepartmentName"`
+			RegionId          string     `json:"RegionId"`
+			RouteTableName    string     `json:"RouteTableName"`
+			ResourceGroup     int        `json:"ResourceGroup"`
+			ResourceGroupName string     `json:"ResourceGroupName"`
+		}
+	}
+}
+
+type VSwitchIds struct {
+	VSwitchId []string `json:"VSwitchId"`
+}
+
+func (s *VpcService) DoDescribeRouteTableListRequest(id string) (*DescribeRouteTableListResponse, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("GET", "Vpc", "2016-04-28", "DescribeRouteTableList", "")
+	CbnDescribeRouterRouteTablesResponseObj := &DescribeRouteTableListResponse{}
+	//调用request_params_handler
+	request.QueryParams["VpcId"] = id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouterRouteTables", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnDescribeRouterRouteTablesResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterRouteTables", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return CbnDescribeRouterRouteTablesResponseObj, nil
+}
+
 type VpcGetdhcpoptionssetResponse struct {
 	AssociateVpcs []struct {
 		VpcId           string `json:"VpcId"`

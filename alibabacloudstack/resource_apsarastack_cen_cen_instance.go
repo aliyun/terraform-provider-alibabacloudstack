@@ -70,7 +70,7 @@ func resourceAlibabacloudStackCenCeninstance() *schema.Resource {
 						},
 					},
 				},
-				Set:func(i interface{}) int{
+				Set: func(i interface{}) int {
 					m := i.(map[string]interface{})
 					cidr := m["cidr"].(string)
 					return hashcode.String(cidr)
@@ -144,7 +144,7 @@ func resourceAlibabacloudStackCenCeninstanceCreate(d *schema.ResourceData, meta 
 	cen_id := CbnCreatecenResponseObj.CenId
 
 	d.SetId(fmt.Sprintf("%s", cen_id))
-	
+
 	if err := cencen_instanceservice.WaitForCenInstance(d.Id(), Active, 120); err != nil {
 		return errmsgs.WrapError(err)
 	}
@@ -189,7 +189,7 @@ func resourceAlibabacloudStackCenCeninstanceUpdate(d *schema.ResourceData, meta 
 	if d.IsNewResource() {
 		return nil
 	}
-	
+
 	// api: Cbn - 2017-09-12 - ModifyCenAttribute
 	if d.HasChanges("cen_instance_name", "description") {
 		request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "ModifyCenAttribute", "")
@@ -244,15 +244,15 @@ func resourceAlibabacloudStackCenCeninstanceUpdate(d *schema.ResourceData, meta 
 		request_remove.QueryParams["TransitRouterId"] = transitrouterId
 		request_add.QueryParams["TransitRouterId"] = transitrouterId
 		old, new := d.GetChange("transit_router_cidrs")
-		oldMap:=map[string]string{}
-		newMap:=map[string]string{}
-		for _, v := range old.(*schema.Set).List(){
+		oldMap := map[string]string{}
+		newMap := map[string]string{}
+		for _, v := range old.(*schema.Set).List() {
 			i := v.(map[string]interface{})
-			oldMap[i["cidr"].(string)]=i["cidr_id"].(string)
+			oldMap[i["cidr"].(string)] = i["cidr_id"].(string)
 		}
-		for _, v := range new.(*schema.Set).List(){
+		for _, v := range new.(*schema.Set).List() {
 			i := v.(map[string]interface{})
-			newMap[i["cidr"].(string)]=i["cidr_id"].(string)
+			newMap[i["cidr"].(string)] = i["cidr_id"].(string)
 		}
 		log.Printf("[DEBUG] old:%v, new:%v", old, new)
 		for key, value := range oldMap {
@@ -334,7 +334,7 @@ func resourceAlibabacloudStackCenCeninstanceRead(d *schema.ResourceData, meta in
 			cidrs := []map[string]interface{}{}
 			for _, cidr := range data.TransitRouterCidrList {
 				cidrs = append(cidrs, map[string]interface{}{
-					"cidr" :cidr.Cidr,
+					"cidr":    cidr.Cidr,
 					"cidr_id": cidr.TransitRouterCidrId,
 				})
 			}

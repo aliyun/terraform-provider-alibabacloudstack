@@ -164,6 +164,8 @@ const (
 
 	Enable = Status("Enable")
 	BINDED = Status("BINDED")
+
+	Attached = Status("Attached")
 )
 
 type IPType string

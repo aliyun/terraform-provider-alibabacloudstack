@@ -179,9 +179,9 @@ func (s *CenService) DoCbnDescribecensRequest(id string) (*CenInstance, error) {
 	}
 
 	if len(cbnDescribecensResponseObj.Cens.Cen) < 1 {
-		return nil, errmsgs.GetNotFoundErrorFromString("Not Found Cent Instance "+ id)
+		return nil, errmsgs.GetNotFoundErrorFromString("Not Found Cent Instance " + id)
 	}
-	
+
 	return &cbnDescribecensResponseObj.Cens.Cen[0], nil
 }
 
@@ -298,8 +298,7 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTablesRequest(id string) (*C
 	CbnDescribeRouterRouteTablesResponseObj := &CbnDescribeTransitRouterRouteTablesResponse{}
 	//调用request_params_handler
 	parts := strings.Split(id, ":")
-	transit_router_id := ""
-	transit_router_id = parts[0]
+	transit_router_id := parts[0]
 	request.QueryParams["TransitRouterId"] = transit_router_id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
@@ -437,7 +436,6 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTableAssociationsRequest(id 
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouterRouteTableAssociations", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &TransitRouterRouteTableAssociationsResponseObj)
 
 	if err != nil {
@@ -457,7 +455,6 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTablePropagationsRequest(id 
 	attachment_id := parts[1]
 	request.QueryParams["TransitRouterRouteTableId"] = transit_router_table
 	request.QueryParams["TransitRouterAttachmentId"] = attachment_id
-
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
@@ -477,7 +474,31 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTablePropagationsRequest(id 
 	return TransitRouterRouteTablePropagationsResponseObj, nil
 }
 
-// request_vpc_entris := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ListTransitRouterRouteTables", "")
-// request_vpc_entris := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "DescribeRouteEntryList", "")
-// request_routetable_associations := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ListTransitRouterRouteTableAssociations", "")
-// request_routetable_propagations := client.NewCommonRequest("POST", "Vpc", "2016-04-28", "ListTransitRouterRouteTablePropagations", "")
+func (s *CenService) WaitForAttachmentInstance(id string, status Status, timeout int) error {
+	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
+	parts := strings.Split(id, COLON_SEPARATED)
+	cen_id := parts[0]
+	transit_router_id := parts[1]
+	attach_ment_id := parts[2]
+	for {
+		instance, err := s.DoCbnDescribeTransitRouterAttachmentsRequest(cen_id + ":" + transit_router_id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				if status == Deleted {
+					return nil
+				}
+			} else {
+				return errmsgs.WrapError(err)
+			}
+		}
+		for _, v := range instance.TransitRouterAttachments {
+			if v.TransitRouterAttachmentId == attach_ment_id && v.Status == string(status) {
+				return nil
+			}
+		}
+		if time.Now().After(deadline) {
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+		}
+		time.Sleep(DefaultIntervalShort * time.Second)
+	}
+}

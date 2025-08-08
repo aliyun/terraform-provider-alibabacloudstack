@@ -5,7 +5,9 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -115,6 +117,10 @@ func ResourceAlibabacloudStackCenTransitRouterVpcAttachment() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
+						"zone_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
 						"network_interface_id": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -133,7 +139,7 @@ func ResourceAlibabacloudStackCenTransitRouterVpcAttachment() *schema.Resource {
 
 func resourceAlibabacloudStackCenTransitRouterVpcAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	// cencen_instanceservice := CenService{client}
+	cencen_instanceservice := CenService{client}
 	// api: Cbn - 2017-09-12 - CreateCen
 	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "CreateTransitRouterVpcAttachment", "")
 	CbnCreateTransitRouterVpcAttachmentResponseObj := CbnCreateTransitRouterVpcAttachmentResponse{}
@@ -142,17 +148,19 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentCreate(d *schema.Reso
 	i := 1
 	for _, v := range d.Get("zone_mappings").(*schema.Set).List() {
 		key := fmt.Sprintf("ZoneMappings.%d.VSwitchId", i)
-		request.QueryParams[key] = v.(string)
+		key2 := fmt.Sprintf("ZoneMappings.%d.ZoneId", i)
+		request.QueryParams[key] = v.(map[string]interface{})["vswitch_id"].(string)
+		request.QueryParams[key2] = v.(map[string]interface{})["zone_id"].(string)
 		i += 1
 	}
 	if v, ok := d.GetOk("auto_create_vpc_route"); ok {
-		request.QueryParams["AutoCreateVpcRoute"] = v.(string)
+		request.QueryParams["AutoCreateVpcRoute"] = fmt.Sprintf("%v", v)
 	}
 	if v, ok := d.GetOk("route_table_propagation_enabled"); ok {
-		request.QueryParams["RouteTablePropagationEnabled"] = v.(string)
+		request.QueryParams["RouteTablePropagationEnabled"] = fmt.Sprintf("%v", v)
 	}
 	if v, ok := d.GetOk("route_table_association_enabled"); ok {
-		request.QueryParams["RouteTableAssociationEnabled"] = v.(string)
+		request.QueryParams["RouteTableAssociationEnabled"] = fmt.Sprintf("%v", v)
 	}
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
@@ -168,10 +176,14 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentCreate(d *schema.Reso
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 			"alibabacloudstack_cen_transit_router_vpc_attachment", "CreateTransitRouterVpcAttachment", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-
 	attachment_id := CbnCreateTransitRouterVpcAttachmentResponseObj.TransitRouterAttachmentId
 
-	d.SetId(fmt.Sprintf("%s:%s:%s", d.Get("cen_id").(string), d.Get("transit_router_id").(string), attachment_id))
+	d.SetId(fmt.Sprintf("%s:%s:%s:%s", d.Get("cen_id").(string), d.Get("transit_router_id").(string), attachment_id, d.Get("vpc_id").(string)))
+	err = cencen_instanceservice.WaitForAttachmentInstance(d.Id(), Attached, 120)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+			"alibabacloudstack_cen_transit_router_vpc_attachment", "CreateTransitRouterVpcAttachment", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
 	return nil
 }
 
@@ -187,7 +199,7 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentUpdate(d *schema.Reso
 				request.QueryParams["TransitRouterAttachmentName"] = v.(string)
 			}
 			if v, ok := d.GetOk("transit_router_attachment_description"); ok {
-				request.QueryParams["TransitRouterAttachmentId"] = v.(string)
+				request.QueryParams["TransitRouterAttachmentDescription"] = v.(string)
 			}
 			request.QueryParams["Status"] = "Attached"
 			request.QueryParams["TransitRouterAttachmentId"] = attachment_id
@@ -203,23 +215,27 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentUpdate(d *schema.Reso
 					"alibabacloudstack_cen_transit_router_vpc_attachment", "UpdateTransitRouterVpcAttachmentAttribute", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 			}
 		}
-		if d.HasChanges("zone_mappings") {
+		if !d.IsNewResource() && d.HasChanges("zone_mappings") {
 			request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "UpdateTransitRouterVpcAttachmentZones", "")
-			oraw, nraw := d.GetChange("db_instance_ip_array")
+			oraw, nraw := d.GetChange("zone_mappings")
 			o := oraw.(*schema.Set)
 			n := nraw.(*schema.Set)
 			remove := o.Difference(n).List()
 			create := n.Difference(o).List()
 			create_index := 1
 			remove_index := 1
+			zoneMapping := d.Get("zone_mappings").(*schema.Set).List()[0].(map[string]interface{})
+			zone_id := zoneMapping["zone_id"]
 			for _, t := range remove {
 				key := fmt.Sprintf("RemoveZoneMappings.%d.VSwitchId", remove_index)
 				request.QueryParams[key] = t.(map[string]interface{})["vswitch_id"].(string)
+				request.QueryParams[fmt.Sprintf("RemoveZoneMappings.%d.ZoneId", remove_index)] = zone_id.(string)
 				remove_index += 1
 			}
 			for _, t := range create {
 				key := fmt.Sprintf("AddZoneMappings.%d.VSwitchId", create_index)
 				request.QueryParams[key] = t.(map[string]interface{})["vswitch_id"].(string)
+				request.QueryParams[fmt.Sprintf("AddZoneMappings.%d.ZoneId", create_index)] = zone_id.(string)
 				create_index += 1
 			}
 			request.QueryParams["TransitRouterAttachmentId"] = attachment_id
@@ -241,6 +257,11 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentUpdate(d *schema.Reso
 func resourceAlibabacloudStackCenTransitRouterVpcAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	cencen_instanceservice := CenService{client}
+	err := cencen_instanceservice.WaitForAttachmentInstance(d.Id(), Attached, 120)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
+			"alibabacloudstack_cen_transit_router_vpc_attachment", "CreateTransitRouterVpcAttachment", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
 	response, err := cencen_instanceservice.DoCbnDescribeTransitRouterVpcAttachmentsRequest(d.Id())
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachment", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -252,7 +273,7 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentRead(d *schema.Resour
 			d.Set("transit_router_id", v.TransitRouterId)
 			d.Set("transit_router_attachment_id", v.TransitRouterAttachmentId)
 			d.Set("vpc_id", v.VpcId)
-			d.Set("vpc_owner_id", v.VpcOwnerId)
+			d.Set("vpc_owner_id", fmt.Sprintf("%d", v.VpcOwnerId))
 			d.Set("auto_publish_route_enabled", v.AutoPublishRouteEnabled)
 			d.Set("transit_router_attachment_name", v.TransitRouterAttachmentName)
 			d.Set("transit_router_attachment_description", v.TransitRouterAttachmentDescription)
@@ -265,6 +286,7 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentRead(d *schema.Resour
 				zone_mappings = append(zone_mappings, map[string]interface{}{
 					"vswitch_id":           v.VSwitchId,
 					"network_interface_id": v.NetworkInterfaceId,
+					"zone_id":              v.ZoneId,
 				})
 			}
 			d.Set("zone_mappings", zone_mappings)
@@ -281,17 +303,34 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentDelete(d *schema.Reso
 	vpc_service := VpcService{client}
 	parts := strings.Split(d.Id(), ":")
 	cen_id := parts[0]
-	route_id := parts[1]
+	router_id := parts[1]
 	attach_ment_id := parts[2]
-	response, err := cencen_instanceservice.DoCbnDescribeTransitRouterRouteTablesRequest(route_id + ":")
+	vpc_id := parts[3]
+	response, err := vpc_service.DoDescribeRouteTableListRequest(vpc_id)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, "DoCbnDescribeTransitRouterRouteTablesRequest")
 	}
 	route_table_ids := []string{}
-	for _, data := range response.TransitRouterRouteTables {
-		route_table_ids = append(route_table_ids, data.TransitRouterRouteTableId)
+	for _, data := range response.RouterTableList.RouterTableListType {
+		route_table_ids = append(route_table_ids, data.RouteTableId)
 	}
+	log.Printf("[DEBUG] route_table_ids is %v#", route_table_ids)
 	for _, route_table_id := range route_table_ids {
+		for i := 0; i < 20; i++ {
+			response_vpc_entries, _ := vpc_service.DoVpcRouteEntryListRequest(route_table_id + ":" + attach_ment_id)
+			if len(response_vpc_entries.RouteEntrys.RouteEntry) > 0 {
+				status := []string{}
+				for _, data := range response_vpc_entries.RouteEntrys.RouteEntry {
+					if data.Status == "Available" {
+						status = append(status, data.Status)
+					}
+				}
+				if len(status) == len(response_vpc_entries.RouteEntrys.RouteEntry) {
+					break
+				}
+			}
+			time.Sleep(3 * time.Second)
+		}
 		response_vpc_entries, err := vpc_service.DoVpcRouteEntryListRequest(route_table_id + ":" + attach_ment_id)
 		if err != nil {
 			return errmsgs.WrapErrorf(err, "DoVpcRouteEntryListRequest")
@@ -314,45 +353,90 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentDelete(d *schema.Reso
 			}
 
 		}
-		response_ass, err := cencen_instanceservice.DoCbnDescribeTransitRouterRouteTableAssociationsRequest(route_table_id + ":" + attach_ment_id)
+		response, err := cencen_instanceservice.DoCbnDescribeTransitRouterRouteTablesRequest(router_id + ":")
 		if err != nil {
 			return errmsgs.WrapErrorf(err, "DoVpcRouteEntryListRequest")
 		}
-		for _, data := range response_ass.TransitRouterAssociations {
-			request := client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DissociateTransitRouterAttachmentFromRouteTable", "")
-			request.QueryParams["TransitRouterAttachmentId"] = data.TransitRouterAttachmentId
-			request.QueryParams["TransitRouterRouteTableId"] = data.TransitRouterRouteTableId
-			bresponse, err := client.ProcessCommonRequest(request)
+		table_id := response.TransitRouterRouteTables[0].TransitRouterRouteTableId
+
+		for i := 0; i < 10; i++ {
+			response_ass, err := cencen_instanceservice.DoCbnDescribeTransitRouterRouteTableAssociationsRequest(table_id + ":" + attach_ment_id)
 			if err != nil {
-				if bresponse == nil {
-					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-				}
-				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachment", "DissociateTransitRouterAttachmentFromRouteTable", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				return errmsgs.WrapErrorf(err, "DoVpcRouteEntryListRequest")
 			}
+			if len(response_ass.TransitRouterAssociations) == 0 {
+				break
+			}
+			for _, data := range response_ass.TransitRouterAssociations {
+				if data.Status == string(Active) {
+					request := client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DissociateTransitRouterAttachmentFromRouteTable", "")
+					request.QueryParams["TransitRouterAttachmentId"] = data.TransitRouterAttachmentId
+					request.QueryParams["TransitRouterRouteTableId"] = data.TransitRouterRouteTableId
+					log.Printf("[DEBUG] TransitRouterAttachmentId is %v#", data.TransitRouterAttachmentId)
+					bresponse, err := client.ProcessCommonRequest(request)
+					if err != nil {
+						if bresponse == nil {
+							return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+						}
+						errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+						return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachment", "DissociateTransitRouterAttachmentFromRouteTable", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+					}
+				}
+			}
+			time.Sleep(2 * time.Second)
 		}
-		response_pro, err := cencen_instanceservice.DoCbnDescribeTransitRouterRouteTablePropagationsRequest(route_table_id + ":" + attach_ment_id)
-		if err != nil {
-			return errmsgs.WrapErrorf(err, "DoVpcRouteEntryListRequest")
-		}
-		for _, data := range response_pro.TransitRouterPropagations {
-			request := client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DisableTransitRouterRouteTablePropagation", "")
-			request.QueryParams["TransitRouterAttachmentId"] = data.TransitRouterAttachmentId
-			request.QueryParams["TransitRouterRouteTableId"] = data.TransitRouterRouteTableId
-			bresponse, err := client.ProcessCommonRequest(request)
+
+		for i := 0; i < 10; i++ {
+			response_pro, err := cencen_instanceservice.DoCbnDescribeTransitRouterRouteTablePropagationsRequest(table_id + ":" + attach_ment_id)
 			if err != nil {
-				if bresponse == nil {
-					return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-				}
-				errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-				return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachment", "DisableTransitRouterRouteTablePropagation", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+				return errmsgs.WrapErrorf(err, "DoVpcRouteEntryListRequest")
 			}
+			if len(response_pro.TransitRouterPropagations) == 0 {
+				break
+			}
+			for _, data := range response_pro.TransitRouterPropagations {
+				if data.Status == string(Active) {
+					request := client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DisableTransitRouterRouteTablePropagation", "")
+					request.QueryParams["TransitRouterAttachmentId"] = data.TransitRouterAttachmentId
+					request.QueryParams["TransitRouterRouteTableId"] = data.TransitRouterRouteTableId
+					bresponse, err := client.ProcessCommonRequest(request)
+					log.Printf("[DEBUG] DisableTransitRouterRouteTablePropagation is %v#", data.TransitRouterAttachmentId)
+					if err != nil {
+						if bresponse == nil {
+							return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+						}
+						errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+						return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachment", "DisableTransitRouterRouteTablePropagation", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+					}
+				}
+			}
+			time.Sleep(2 * time.Second)
+		}
+		for i := 0; i < 20; i++ {
+			response_vpc_entries, err := vpc_service.DoVpcRouteEntryListRequest(route_table_id + ":" + attach_ment_id)
+			if err != nil {
+				return errmsgs.WrapErrorf(err, "DoVpcRouteEntryListRequest")
+			}
+			entries_count := len(response_vpc_entries.RouteEntrys.RouteEntry)
+			// response_ass, err := cencen_instanceservice.DoCbnDescribeTransitRouterRouteTableAssociationsRequest(table_id + ":" + attach_ment_id)
+			// if err != nil {
+			// 	return errmsgs.WrapErrorf(err, "DoVpcRouteEntryListRequest")
+			// }
+			// ass_count := len(response_ass.TransitRouterAssociations)
+			// response_pro, err := cencen_instanceservice.DoCbnDescribeTransitRouterRouteTablePropagationsRequest(table_id + ":" + attach_ment_id)
+			// if err != nil {
+			// 	return errmsgs.WrapErrorf(err, "DoVpcRouteEntryListRequest")
+			// }
+			// pro_count := len(response_pro.TransitRouterPropagations)
+			if entries_count == 0 {
+				break
+			}
+			time.Sleep(time.Duration(3) * time.Second)
+
 		}
 
 	}
 	// api: Cbn - 2017-09-12 - DeleteCen
-
-	// CbnDeletecenResponseObj := CbnDeletecenResponse{}
 	request := client.NewCommonRequest("POST", "Cbn", "2017-09-12", "DeleteTransitRouterVpcAttachment", "")
 	request.QueryParams["CenId"] = cen_id
 	request.QueryParams["TransitRouterAttachmentId"] = attach_ment_id
@@ -365,7 +449,16 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentDelete(d *schema.Reso
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachment", "DeleteTransitRouterVpcAttachment", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
+	for i := 0; i < 40; i++ {
+		response, err := cencen_instanceservice.DoCbnDescribeTransitRouterVpcAttachmentsRequest(d.Id())
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachment", errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		if len(response.TransitRouterAttachments) == 0 {
+			break
+		}
+		time.Sleep(3 * time.Second)
+	}
 	return nil
 }
 

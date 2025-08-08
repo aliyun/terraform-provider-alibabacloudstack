@@ -27,6 +27,10 @@ func dataSourceAlibabacloudStackCenTransitRouterVpcAttachments() *schema.Resourc
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"tags": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -56,11 +60,15 @@ func dataSourceAlibabacloudStackCenTransitRouterVpcAttachments() *schema.Resourc
 				Optional: true,
 			},
 
-			"TransitRouterAttachments": {
+			"transitrouterattachments": {
 				Type:     schema.TypeSet,
-				Required: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
 						"creation_time": {
 							Type:     schema.TypeString,
 							Computed: true,
@@ -110,6 +118,10 @@ func dataSourceAlibabacloudStackCenTransitRouterVpcAttachments() *schema.Resourc
 										Type:     schema.TypeString,
 										Computed: true,
 									},
+									"zone_id": {
+										Type:     schema.TypeString,
+										Computed: true,
+									},
 									"network_interface_id": {
 										Type:     schema.TypeString,
 										Computed: true,
@@ -129,6 +141,7 @@ func dataSourceAlibabacloudStackCenTransitRouterVpcAttachmentsRead(d *schema.Res
 	cencen_instanceservice := CenService{client}
 	cen_id := d.Get("cen_id").(string)
 	transit_router_id := d.Get("transit_router_id").(string)
+	vpc_id := d.Get("vpc_id").(string)
 	response, err := cencen_instanceservice.DoCbnDescribeTransitRouterAttachmentsRequest(cen_id + ":" + transit_router_id)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachments", errmsgs.AlibabacloudStackSdkGoERROR)
@@ -150,7 +163,7 @@ func dataSourceAlibabacloudStackCenTransitRouterVpcAttachmentsRead(d *schema.Res
 	datas := make([]interface{}, 0)
 	for _, data := range response.TransitRouterAttachments {
 		if len(idsMap) > 0 {
-			key := fmt.Sprintf("%s:%s:%s", cen_id, transit_router_id, data.TransitRouterAttachmentId)
+			key := fmt.Sprintf("%s:%s:%s:%s", cen_id, transit_router_id, data.TransitRouterAttachmentId, vpc_id)
 			if _, ok := idsMap[key]; !ok {
 				continue
 			}
@@ -178,6 +191,7 @@ func dataSourceAlibabacloudStackCenTransitRouterVpcAttachmentsRead(d *schema.Res
 			zone_mappings = append(zone_mappings, map[string]interface{}{
 				"vswitch_id":           v.VSwitchId,
 				"network_interface_id": v.NetworkInterfaceId,
+				"zone_id":              v.ZoneId,
 			})
 		}
 
@@ -201,7 +215,7 @@ func dataSourceAlibabacloudStackCenTransitRouterVpcAttachmentsRead(d *schema.Res
 	}
 
 	d.SetId(dataResourceIdHash(ids))
-	if err := d.Set("TransitRouterAttachments", datas); err != nil {
+	if err := d.Set("transitrouterattachments", datas); err != nil {
 		return err
 	}
 	if err := d.Set("ids", ids); err != nil {

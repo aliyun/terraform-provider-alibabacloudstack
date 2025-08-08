@@ -39,19 +39,14 @@ func TestAccAlibabacloudStackCenTransitRouterVpcAttachment0(t *testing.T) {
 
 			{
 				Config: testAccConfig(map[string]interface{}{
-
-					// "cen_id": "${alibabacloudstack_cen_instance.default.transit_router_id}",
-					// "vpc_id": "${alibabacloudstack_cen_instance.default.transit_router_id}",
-					// "zone_mappings": []map[string]string{
-					// 	{"vswitch_id": "${alibabacloudstack_drds_database.default.0.drds_database_name}"},
-					// },
-					// "auto_create_vpc_route":           true,
-					// "route_table_association_enabled": name,
-					// "route_table_propagation_enabled": name,
-					"cen_id": "cen-s1o6nsvvs9wc40p87v",
-					"vpc_id": "vpc-j1p9canwb1cb7z9d6opol",
+					"cen_id":            "${alibabacloudstack_cen_instance.default.id}",
+					"vpc_id":            "${alibabacloudstack_vpc_vswitch.default.vpc_id}",
+					"transit_router_id": "${alibabacloudstack_cen_instance.default.transit_router_id}",
 					"zone_mappings": []map[string]string{
-						{"vswitch_id": "vsw-j1py5biwrpd81rkd6gl4b"},
+						{
+							"vswitch_id": "${alibabacloudstack_vpc_vswitch.default.id}",
+							"zone_id":    "${alibabacloudstack_vpc_vswitch.default.zone_id}",
+						},
 					},
 					"auto_create_vpc_route":           "true",
 					"route_table_association_enabled": "true",
@@ -60,10 +55,8 @@ func TestAccAlibabacloudStackCenTransitRouterVpcAttachment0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"status": CHECKSET,
-
-						"resource_type": CHECKSET,
-						// "transit_router_route_table_type": CHECKSET,
+						"zone_mappings.0.vswitch_id": CHECKSET,
+						"zone_mappings.#":            "1",
 					}),
 				),
 			},
@@ -82,23 +75,29 @@ func TestAccAlibabacloudStackCenTransitRouterVpcAttachment0(t *testing.T) {
 					}),
 				),
 			},
-			// {
-			// 	Config: testAccConfig(map[string]interface{}{
+			{
+				Config: testAccConfig(map[string]interface{}{
 
-			// 		"transit_router_route_table_name": modify_name,
-			// 	}),
-			// 	Check: resource.ComposeTestCheckFunc(
-			// 		testAccCheck(map[string]string{
+					"zone_mappings": []map[string]string{
+						{
+							"vswitch_id": "${alibabacloudstack_vpc_vswitch.vswitchv2.id}",
+							"zone_id":    "${alibabacloudstack_vpc_vswitch.vswitchv2.zone_id}",
+						},
+					},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
 
-			// 			"transit_router_route_table_name": modify_name,
-			// 		}),
-			// 	),
-			// },
+						"zone_mappings.0.vswitch_id": CHECKSET,
+						"zone_mappings.#":            "1",
+					}),
+				),
+			},
 			{
 				ResourceName:            resourceId,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cen_id"},
+				ImportStateVerifyIgnore: []string{"cen_id", "auto_create_vpc_route", "route_table_association_enabled", "route_table_propagation_enabled"},
 			},
 		},
 	})
@@ -106,19 +105,21 @@ func TestAccAlibabacloudStackCenTransitRouterVpcAttachment0(t *testing.T) {
 
 var AlibabacloudTestAccCenTransitRouterVpcAttachmentCheckmap = map[string]string{
 
-	// "status": CHECKSET,
+	"status": CHECKSET,
 
-	// "source_cidr": CHECKSET,
+	"creation_time": CHECKSET,
 
-	// "snat_ip": CHECKSET,
+	"charge_type": CHECKSET,
 
-	// "snat_table_id": CHECKSET,
+	"resource_type": "VPC",
 
-	// "source_vswitch_id": CHECKSET,
+	"auto_publish_route_enabled": CHECKSET,
 
-	// "snat_entry_name": CHECKSET,
+	"vpc_owner_id": CHECKSET,
 
-	// "snat_entry_id": CHECKSET,
+	"vpc_id":                       CHECKSET,
+	"transit_router_attachment_id": CHECKSET,
+	"transit_router_id":            CHECKSET,
 }
 
 func AlibabacloudTestAccCenTransitRouterVpcAttachmentBasicdependence(name string) string {
@@ -127,5 +128,23 @@ func AlibabacloudTestAccCenTransitRouterVpcAttachmentBasicdependence(name string
 variable "name" {
 	default = "%s"
 }
-`, name)
+
+%s
+
+
+resource "alibabacloudstack_vpc_vswitch" "vswitchv2" {
+	name = "${var.name}v2"
+	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
+	cidr_block = "172.16.0.0/24"
+	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
+  }
+
+resource "alibabacloudstack_cen_instance" "default" {
+	cen_instance_name = "${var.name}"
+	description = "${var.name}"
+	transit_router_name = "${var.name}"
+	transit_router_description = "${var.name}"
+}
+
+`, name, VSwitchCommonTestCase)
 }
