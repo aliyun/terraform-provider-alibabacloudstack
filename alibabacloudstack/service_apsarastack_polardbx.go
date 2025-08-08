@@ -781,5 +781,117 @@ func (s *PolardbXService) DescribePolardbXDBSecurityIPGroup(instance_id string) 
 	}
 
 	return PolardbXDBSecurityIPGroupResponseObj.Data.GroupItems, nil
+}
 
+// BackupResponse 备份响应结构体
+type PolarDbXBackupResponse struct {
+	EagleEyeTraceId string               `json:"eagleEyeTraceId"`
+	AsapiSuccess    bool                 `json:"asapiSuccess"`
+	AsapiRequestId  string               `json:"asapiRequestId"`
+	Message         string               `json:"Message"`
+	RequestId       string               `json:"RequestId"`
+	PageSize        int                  `json:"PageSize"`
+	PageNumber      int                  `json:"PageNumber"`
+	TotalNumber     int                  `json:"TotalNumber"`
+	Data            []PolarDbXBackupData `json:"Data"`
+	Success         bool                 `json:"Success"`
+}
+
+// BackupData 备份数据结构体
+type PolarDbXBackupData struct {
+	BackupModel   int    `json:"BackupModel"`
+	Status        int    `json:"Status"`
+	EndTime       int    `json:"EndTime,omitempty"`
+	BeginTime     int    `json:"BeginTime"`
+	BackupType    int    `json:"BackupType"`
+	BackupSetId   string `json:"BackupSetId"`
+	BackupSetSize int    `json:"BackupSetSize"`
+}
+
+func (s *PolardbXService) DescribePolarDbXBackups(instance_id string) ([]PolarDbXBackupData, error) {
+	PolarDbXBackupResponseObj := PolarDbXBackupResponse{}
+	polardbx_backups := make([]PolarDbXBackupData, 0)
+	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeBackupSetList", "")
+	page := 1
+	page_size := 50
+	for {
+		request.QueryParams["PageNumber"] = fmt.Sprint(page)
+		request.QueryParams["PageSize"] = fmt.Sprint(page_size)
+		request.QueryParams["DBInstanceName"] = instance_id
+		bresponse, err := s.client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+			}
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardbx_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		}
+
+		err = json.Unmarshal(bresponse.GetHttpContentBytes(), &PolarDbXBackupResponseObj)
+
+		if err != nil {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardbx_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		polardbx_backups = append(polardbx_backups, PolarDbXBackupResponseObj.Data...)
+		if page*page_size >= PolarDbXBackupResponseObj.TotalNumber {
+			break
+		}
+		page++
+	}
+	return polardbx_backups, nil
+}
+
+func (s *PolardbXService) CheckPolarDbXBackupTaskExists(instance_id string) (bool, error) {
+	backup_list, err := s.DescribePolarDbXBackups(instance_id)
+	if err != nil {
+		return false, err
+	}
+	for _, backup := range backup_list {
+		if backup.Status == 0 {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (s *PolardbXService) DescribePolarDbXBackup(backup_id string) (*PolarDbXBackupData, error) {
+	var instanceId, backupSetId string
+	if parts, err := ParseResourceId(backup_id, 2); err != nil {
+		return nil, err
+	} else {
+		instanceId = parts[0]
+		backupSetId = parts[1]
+	}
+	backup_list, err := s.DescribePolarDbXBackups(instanceId)
+	if err != nil {
+		return nil, err
+	}
+	for _, backup := range backup_list {
+		if backup.BackupSetId == backupSetId {
+			return &backup, nil
+		}
+	}
+
+	return nil, errmsgs.Error(fmt.Sprintf(errmsgs.NotFoundMsg, "PolarDbXBackup"))
+}
+
+func (s *PolardbXService) DescribePolarDbXBackupStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		object, err := s.DescribePolarDbXBackup(id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				// Set this to nil as if we didn't find anything.
+				return nil, "", nil
+			}
+			return nil, "", errmsgs.WrapError(err)
+		}
+
+		for _, failState := range failStates {
+			if fmt.Sprint(object.Status) == failState {
+				return object, fmt.Sprint(object.Status), errmsgs.WrapError(errmsgs.Error(errmsgs.FailedToReachTargetStatus, fmt.Sprint(object.Status)))
+			}
+		}
+		return object, fmt.Sprint(object.Status), nil
+	}
 }
