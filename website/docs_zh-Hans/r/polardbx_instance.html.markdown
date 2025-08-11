@@ -66,18 +66,16 @@ resource "alibabacloudstack_polardbx_instance" "default" {
   * `db_node_count` - (选填) - 实例节点数量，最小为2。
   * `dn_node_class` - (必填) - 实例节点规格。
   * `dn_node_count` - (必填) - 存储节点个数。
+  * `gms_node_class` - (选填) - 元数据节点规格。
   * `engine_version` - (选填) - 5.7
-  * `is_read_db_instance` - (选填) - 是否是只读实例。
   * `network_type` - (选填) - 网络类型，仅支持VPC网络。
   * `polardbx_instance_id` - (选填) - polardbx 实例ID.
-  * `primary_db_instance_id` - (选填) - 主实例ID。
   * `primary_zone` - (选填) - 主可用区。
   * `resource_type` - (选填) - 资源类型，目前仅支持PolarDB-X 2.0实例一种类型的资源。
   * `secondary_zone` - (选填) - 次可用区。
   * `tertiary_zone` - (选填) - 第三可用区。
   * `topology_type` - (选填) - 拓扑类型：- **3azones**：三可用区；- **1azone**：单可用区。
   * `vswitch_id` - (必填) - 交换机ID.
-  * `vpc_id` - (必填) - VPC ID。
   * `zone_id` - (选填) - 可用区。
   * `compute_parameters` - (可选) - 实例的计算资源配置。
     * `name` - (必填) - 计算资源配置的名称。

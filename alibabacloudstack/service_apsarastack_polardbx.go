@@ -45,7 +45,7 @@ func (s *PolardbXService) DoPolardbxDescribeAccountListRequest(id string) (*Pola
 		instanceId = parts[0]
 		AccountName = parts[1]
 	}
-	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeAccountList", "")
+	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeAccountList", "")
 	DoPolardbxDescribeAccountListResponseObj := &DoPolardbxDescribeAccountListResponse{}
 
 	//调用request_params_handler
@@ -153,7 +153,7 @@ type PolardbxDescribedbinstanceattributeResponse struct {
 
 func (s *PolardbXService) DoPolardbxDescribedbinstanceattributeRequest(id string) (*PolardbxDescribedbinstanceattributeResponse, error) {
 	// api: polardbx - 2020-02-02 - DescribeDBInstanceAttribute
-	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeDBInstanceAttribute", "")
+	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDBInstanceAttribute", "")
 	PolardbxDescribedbinstanceattributeResponseObj := &PolardbxDescribedbinstanceattributeResponse{}
 
 	//调用request_params_handler
@@ -255,7 +255,7 @@ type PolardbxDescribedbinstancesResponse struct {
 
 func (s *PolardbXService) DoPolardbxDescribedbinstancesRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbxDescribedbinstancesResponse, error) {
 	// api: polardbx - 2020-02-02 - DescribeDBInstances
-	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeDBInstances", "")
+	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDBInstances", "")
 	PolardbxDescribedbinstancesResponseObj := &PolardbxDescribedbinstancesResponse{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -278,7 +278,7 @@ func (s *PolardbXService) DoPolardbxDescribedbinstancesRequest(d *schema.Resourc
 
 func (s *PolardbXService) DoPolardbxDescribeDBInstanceSSLRequest(id string) (bool, error) {
 	// api: polardbx - 2020-02-02 - DescribeDBInstances
-	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeDBInstanceSSL", "")
+	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDBInstanceSSL", "")
 	request.QueryParams["DBInstanceName"] = id
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -304,7 +304,7 @@ func (s *PolardbXService) DoPolardbxDescribeDBInstanceSSLRequest(id string) (boo
 
 func (s *PolardbXService) DoPolardbxDescribeDBInstanceTDERequest(id string) (bool, error) {
 	// api: polardbx - 2020-02-02 - DescribeDBInstances
-	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeDBInstanceTDE", "")
+	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDBInstanceTDE", "")
 	request.QueryParams["DBInstanceName"] = id
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -336,11 +336,34 @@ func (s *PolardbXService) ModifyParameters(d *schema.ResourceData, attribute str
 	o, n := d.GetChange(fmt.Sprintf("%s_parameters", attribute))
 	os, ns := o.(*schema.Set), n.(*schema.Set)
 	add := ns.Difference(os).List()
+	var parameters = make(map[string]string)
+	if response, err := s.DoPolardbxDescribeParametersRequest(d.Id(), attribute); err != nil {
+		return errmsgs.WrapError(err)
+	} else {
+		running_parameters, err := jsonpath.Get("$.Data.RunningParameters", response)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "DescribeParameters", "$.Data.RunningParameters", response)
+		}
+		if running_parameters != nil {
+			for _, v := range running_parameters.([]interface{}) {
+				parameter := v.(map[string]interface{})
+				if vv, ok := parameter["ParameterName"]; ok {
+					parameters[vv.(string)] =parameter["ParameterValue"].(string)
+				}
+			}
+		}
+	}
 	if len(add) > 0 {
 		for _, i := range add {
 			key := i.(map[string]interface{})["name"].(string)
 			value := i.(map[string]interface{})["value"].(string)
+			if parameters[key] == value {
+				continue
+			}
 			config[key] = value
+		}
+		if len(config) == 0 {
+			return nil
 		}
 		cfg, _ := json.Marshal(config)
 		request.QueryParams["Parameters"] = string(cfg)
@@ -361,7 +384,7 @@ func (s *PolardbXService) ModifyParameters(d *schema.ResourceData, attribute str
 
 func (s *PolardbXService) DoPolardbxDescribeParametersRequest(id, param_level string) (map[string]interface{}, error) {
 	// api: polardbx - 2020-02-02 - DescribeDBInstances
-	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeParameters", "")
+	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeParameters", "")
 	request.QueryParams["DBInstanceId"] = id
 	request.QueryParams["ParamLevel"] = param_level
 
@@ -459,7 +482,7 @@ func (s *PolardbXService) DoPolardbxDescribeDbListRequest(id string) (*PolardbxD
 		InstanceId = parts[0]
 		databaseName = parts[1]
 	}
-	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeDbList", "")
+	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDbList", "")
 	request.QueryParams["DBInstanceName"] = InstanceId
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -639,7 +662,7 @@ type DescribeSecurityIpsResponse struct {
 }
 
 func (s *PolardbXService) DoPolardbxDescribeSecurityIpsRequest(id string) (*[]PolardbxSecurityIpGroupItems, error) {
-	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeAccountList", "")
+	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeAccountList", "")
 	DescribeSecurityIpsResponseObj := &DescribeSecurityIpsResponse{}
 
 	//调用request_params_handler
@@ -735,7 +758,7 @@ type PolardbXDBSecurityIPGroupResponse struct {
 
 func (s *PolardbXService) DescribePolardbXDBSecurityIPGroup(instance_id string) ([]PolardbXDBSecurityIPGroup, error) {
 	PolardbXDBSecurityIPGroupResponseObj := PolardbXDBSecurityIPGroupResponse{}
-	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeSecurityIps", "")
+	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeSecurityIps", "")
 
 	//调用request_params_handler
 

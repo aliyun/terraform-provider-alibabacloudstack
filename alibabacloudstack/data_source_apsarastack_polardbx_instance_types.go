@@ -61,6 +61,7 @@ func dataSourceAlibabacloudStackPolardbxInstanceTypes() *schema.Resource {
 			"series": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Default:      "enterprise",
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"enterprise", "standard"}, false),
 			},

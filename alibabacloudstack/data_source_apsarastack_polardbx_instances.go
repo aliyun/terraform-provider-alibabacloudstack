@@ -22,7 +22,6 @@ func dataSourceAlibabacloudStackPolardbxInstances() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
-				MinItems: 1,
 			},
 			"name_regex": {
 				Type:          schema.TypeString,
@@ -37,7 +36,6 @@ func dataSourceAlibabacloudStackPolardbxInstances() *schema.Resource {
 				ValidateFunc:  validation.StringIsValidRegExp,
 				ConflictsWith: []string{"name_regex"},
 			},
-
 			"polardbx_instances": {
 				Type:     schema.TypeList,
 				Computed: true,

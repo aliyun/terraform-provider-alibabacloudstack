@@ -168,6 +168,15 @@ func IsExpectedErrors(err error, expectCodes []string) bool {
 	if err == nil {
 		return false
 	}
+	
+	if e, ok := err.(*tea.SDKError); ok {
+		for _, code := range expectCodes {
+			if *e.Code == code || strings.Contains(*e.Code, code) {
+				return true
+			}
+		}
+		return false
+	}
 
 	if e, ok := err.(*ComplexError); ok {
 		return IsExpectedErrors(e.Cause, expectCodes)

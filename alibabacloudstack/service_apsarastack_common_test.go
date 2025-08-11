@@ -326,7 +326,7 @@ func (ra *resourceAttr) resourceAttrMapCheck() resource.TestCheckFunc {
 		if len(errorStrSlice) == 1 {
 			return nil
 		}
-		return errmsgs.WrapError(fmt.Errorf(strings.Join(errorStrSlice, "\n")))
+		return errmsgs.WrapError(fmt.Errorf("%s", strings.Join(errorStrSlice, "\n")))
 	}
 }
 
@@ -437,7 +437,7 @@ func valueConvert(indentation int, val reflect.Value) string {
 	case reflect.String:
 		return fmt.Sprintf("\"%s\"", val.String())
 	case reflect.Int:
-			return fmt.Sprintf("%d", val.Int())
+		return fmt.Sprintf("%d", val.Int())
 	case reflect.Bool:
 		return fmt.Sprintf("%v", val.Bool())
 	case reflect.Slice:
@@ -550,10 +550,10 @@ func (dsa *dataSourceAttr) dataSourceTestCheckWithPreCheck(t *testing.T, rand in
 		steps = append(steps, conf.buildDataSourceSteps(t, dsa, rand)...)
 	}
 	ResourceTest(t, resource.TestCase{
-		PreCheck:  preCheck,
-		Providers: testAccProviders,
+		PreCheck:          preCheck,
+		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
-		Steps:     steps,
+		Steps:             steps,
 	})
 }
 
@@ -573,7 +573,7 @@ type dataSourceTestAccConfig struct {
 }
 
 // build test cases for each attribute
-func (conf *dataSourceTestAccConfig) buildDataSourceSteps(t *testing.T, info *dataSourceAttr, rand int) []resource.TestStep {
+func (conf *dataSourceTestAccConfig) buildDataSourceSteps(_ *testing.T, info *dataSourceAttr, rand int) []resource.TestStep {
 	testAccCheckExist, testAccCheckEmpty := info.checkDataSourceAttr(rand)
 	var steps []resource.TestStep
 	if conf.existConfig != "" {
@@ -841,7 +841,7 @@ resource "alibabacloudstack_db_instance" "default" {
   monitoring_period    = "60"
   storage_type         = data.alibabacloudstack_rds_instance_types.default.instance_types.0.storage_type
 }
-` ,  os.Getenv("ALIBABACLOUDSTACK_TEST_RDS_INSTNCE_TYPE")) 
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_RDS_INSTNCE_TYPE"))
 }
 
 func PolarDBMysqlCommonTestCase(enableVpc bool) string {
@@ -873,8 +873,71 @@ resource "alibabacloudstack_polardb_dbinstance" "default" {
   %s
   storage_type         = data.alibabacloudstack_polardb_instance_types.default.instance_types.0.storage_type
 }
-` ,  os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_INSTNCE_TYPE"), vswtichId) 
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_POLARDB_INSTNCE_TYPE"), vswtichId)
 }
+
+const PolardbxCommonTestCase = `
+data "alibabacloudstack_polardbx_instance_types" "cn" {
+	sorted_by = "CPU"
+	spec_type = "CN"
+}
+
+data "alibabacloudstack_polardbx_instance_types" "dn" {
+	sorted_by = "CPU"
+	spec_type = "DN"
+}
+
+resource "alibabacloudstack_polardbx_instance" "default" {
+	zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	engine_version = "5.7"
+	storage        = 50
+	vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
+	cn_node_class  = "${data.alibabacloudstack_polardbx_instance_types.cn.instance_types.0.id}"
+	cn_node_count  = "2"
+	dn_node_class  = "${data.alibabacloudstack_polardbx_instance_types.dn.instance_types.0.id}"
+	dn_node_count  = "2"
+}
+`
+
+func PolardbxReadOrCreateCommonTestCase() string {
+	return fmt.Sprintf(`
+variable "existed_polardbx_id" {
+	type      = string
+	default   = "%s"
+}
+
+data "alibabacloudstack_polardbx_instance_types" "cn" {
+	sorted_by = "CPU"
+	spec_type = "CN"
+}
+
+data "alibabacloudstack_polardbx_instance_types" "dn" {
+	sorted_by = "CPU"
+	spec_type = "DN"
+}
+
+data "alibabacloudstack_polardbx_instances" "default" {
+	ids = var.existed_polardbx_id == "" ? [] : ["${var.existed_polardbx_id}",]
+}
+
+resource "alibabacloudstack_polardbx_instance" "default" {
+	count          = length(data.alibabacloudstack_polardbx_instances.default.polardbx_instances) == 0 ? 1 : 0
+	zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
+	engine_version = "5.7"
+	storage        = 50
+	vswitch_id     = "${alibabacloudstack_vpc_vswitch.default.id}"
+	cn_node_class  = "${data.alibabacloudstack_polardbx_instance_types.cn.instance_types.0.id}"
+	cn_node_count  = "2"
+	dn_node_class  = "${data.alibabacloudstack_polardbx_instance_types.dn.instance_types.0.id}"
+	dn_node_count  = "2"
+}
+locals {
+	polardbx_instance = length(data.alibabacloudstack_polardbx_instances.default.polardbx_instances) == 0 ? alibabacloudstack_polardbx_instance.default.0 : data.alibabacloudstack_polardbx_instances.default.polardbx_instances.0
+}
+
+`, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_POLARDBX_ID"))
+}
+
 const AdbCommonTestCase = `
 resource "alibabacloudstack_vpc" "default" {
  name = "${var.name}"
@@ -1265,7 +1328,7 @@ resource "alibabacloudstack_vpc_vpc" "default" {
 }
 `
 
-func RandomPasswordTestCase(passwordLen int) string{
+func RandomPasswordTestCase(passwordLen int) string {
 	return fmt.Sprintf(`
 resource "random_password" "password" {
 	length           = %d
@@ -1287,7 +1350,7 @@ resource "alibabacloudstack_vpc_vswitch" "default" {
 
 `
 
-const VpnGatewayCommonTestCase =VSwitchCommonTestCase + `
+const VpnGatewayCommonTestCase = VSwitchCommonTestCase + `
 resource "alibabacloudstack_vpn_gateway" "default" {
  name                 = "${var.name}"
  vpc_id               = "${alibabacloudstack_vpc_vpc.default.id}"
@@ -1461,7 +1524,7 @@ resource "alibabacloudstack_kms_key" "key" {
 
 `
 
-func ServerCertificateTestCase() string{
+func ServerCertificateTestCase() string {
 	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err == nil && v {
 		if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_SENSITIVE")); err == nil && v {
 			return `-----BEGIN CERTIFICATE-----\nMIIDRjCCAq*******<Your Server Certificate String>*****bJJyOm5LqoiA=\n-----END CERTIFICATE-----`
@@ -1492,8 +1555,7 @@ EOF
 `
 }
 
-
-func RsaPrivateKeyTestCase() string{
+func RsaPrivateKeyTestCase() string {
 	if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_TEST")); err == nil && v {
 		if v, err := stringToBool(os.Getenv("ALIBABACLOUDSTACK_DRYRUN_SENSITIVE")); err == nil && v {
 			return `-----BEGIN RSA PRIVATE KEY-----\nMIIDRjCCAq******<Your RSA PRIVATE KEY String>******bJJyOm5LqoiA=\n-----END RSA PRIVATE KEY-----`

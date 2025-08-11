@@ -70,18 +70,15 @@ The following arguments are supported:
   * `db_node_count` - (Optional) - The number of instance nodes. The minimum number is 2.
   * `dn_node_class` - (Required) - Class of computing nodes.
   * `dn_node_count` - (Required) - The number of storage nodes.
-  * `engine_version` - (Optional) - Fixed as 2.0 and cannot be changed.
+  * `gms_node_class` - (Optional) - Class of GMS nodes.
   * `is_read_db_instance` - (Optional) - If true, the instance is a read-only instance.
-  * `network_type` - (Optional) - The network type. Only the VPC network is supported.
   * `polardbx_instance_id` - (Optional) - The ID of the PolarDB-X 2.0 instance.
-  * `primary_db_instance_id` - (Optional) -  The ID of the primary instance.
   * `primary_zone` - (Optional) - Primary Availability Zone.
   * `resource_type` - (Optional) - Resource type. Currently, only one type of resource for PolarDB-X 2.0 instance is supported.
   * `secondary_zone` - (Optional) - Secondary availability zone.
   * `tertiary_zone` - (Optional) - Third Availability Zone.
   * `topology_type` - (Optional) - Topology type:-**3azones**: three available areas;-**1azone**: Single zone.
   * `vswitch_id` - (Required) -The VSwitch ID.
-  * `vpc_id` - (Required) - The VPC ID.
   * `zone_id` - (Optional) - The ID of the zone to which the instance belongs.
   * `compute_parameters` - (Optional) - The compute resource configuration of the instance.
     * `name` - (Required) - The name of the compute resource configuration.
