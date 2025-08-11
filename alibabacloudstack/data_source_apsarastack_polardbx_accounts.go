@@ -11,7 +11,6 @@ import (
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func dataSourceAlibabacloudStackPolardbxAccounts() *schema.Resource {
@@ -32,14 +31,6 @@ func dataSourceAlibabacloudStackPolardbxAccounts() *schema.Resource {
 				MinItems: 1,
 			},
 
-			"account_type": {
-				// TypeInt
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Default:      "Normal",
-				ValidateFunc: validation.StringInSlice([]string{"Normal", "Super"}, false),
-			},
-
 			"instance_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -52,12 +43,6 @@ func dataSourceAlibabacloudStackPolardbxAccounts() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"id": {
 							Type:     schema.TypeString,
-							Computed: true,
-						},
-
-						"account_type": {
-							// TypeInt
-							Type:     schema.TypeInt,
 							Computed: true,
 						},
 
@@ -110,9 +95,9 @@ func dataSourceAlibabacloudStackPolardbxAccounts() *schema.Resource {
 
 func dataSourceAlibabacloudStackPolardbxAccountsRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	drdsService := DrdsService{client}
+	polardbxService := PolardbXService{client}
 
-	if _, err := drdsService.DescribeDrdsInstance(d.Get("instance_id").(string)); err != nil {
+	if _, err := polardbxService.DoPolardbxDescribedbinstanceattributeRequest(d.Get("instance_id").(string)); err != nil {
 		// 需要先判断instance_id，不存在时直接返回空
 		ids := []string{}
 		datas := []interface{}{}
@@ -168,11 +153,7 @@ func dataSourceAlibabacloudStackPolardbxAccountsRead(d *schema.ResourceData, met
 				continue
 			}
 		}
-		account_type := "Normal"
-		if data.AccountType == "1" {
-			account_type = "Super"
-		}
-		if v, ok := d.GetOk("account_type"); ok && account_type != v.(string) {
+		if data.AccountType != "0" {
 			continue
 		}
 		db_privileges := make([]map[string]interface{}, 0)
@@ -195,9 +176,8 @@ func dataSourceAlibabacloudStackPolardbxAccountsRead(d *schema.ResourceData, met
 		id := fmt.Sprintf("%s:%s", d.Get("instance_id").(string), data.AccountName)
 		i := map[string]interface{}{
 			"id":                id,
-			"account_type":      account_type,
 			"description":       data.AccountDescription,
-			"drds_account_name": data.AccountName,
+			"account_name": data.AccountName,
 			"instance_id":       d.Get("instance_id").(string),
 			"db_privileges":     db_privileges,
 		}

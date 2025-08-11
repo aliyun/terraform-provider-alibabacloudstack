@@ -253,7 +253,7 @@ type PolardbxDescribedbinstancesResponse struct {
 	TotalNumber int    `json:"TotalNumber"`
 }
 
-func (s *PolardbXService) DoPolardbxDescribedbinstancesRequest(d *schema.ResourceData, client *connectivity.AlibabacloudStackClient) (*PolardbxDescribedbinstancesResponse, error) {
+func (s *PolardbXService) DoPolardbxDescribedbinstancesRequest() (*PolardbxDescribedbinstancesResponse, error) {
 	// api: polardbx - 2020-02-02 - DescribeDBInstances
 	request := s.client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDBInstances", "")
 	PolardbxDescribedbinstancesResponseObj := &PolardbxDescribedbinstancesResponse{}

@@ -5,12 +5,10 @@ package alibabacloudstack
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackPolardbxAccount() *schema.Resource {
@@ -35,12 +33,12 @@ func resourceAlibabacloudStackPolardbxAccount() *schema.Resource {
 				Computed: true,
 			},
 
-			"account_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "Normal",
-				ValidateFunc: validation.StringInSlice([]string{"Normal", "Super"}, false),
-			},
+//			"account_type": {
+//				Type:         schema.TypeString,
+//				Optional:     true,
+//				Default:      "Normal",
+//				ValidateFunc: validation.StringInSlice([]string{"Normal", "Super"}, false),
+//			},
 			"password": {
 				Type:      schema.TypeString,
 				Required:  true,
@@ -59,7 +57,7 @@ func resourceAlibabacloudStackPolardbxAccountCreate(d *schema.ResourceData, meta
 	accountName := d.Get("account_name").(string)
 	accountPassword := d.Get("password").(string)
 	accountDescription := d.Get("description").(string)
-	accountType := d.Get("account_type").(string)
+	accountType := "Normal"//d.Get("account_type").(string)
 	err := Polardbxservice.CreatePolardbxAccount(instanceId, accountName, accountPassword, accountDescription, accountType)
 	if err != nil {
 		return err
@@ -130,34 +128,6 @@ func resourceAlibabacloudStackPolardbxAccountUpdate(d *schema.ResourceData, meta
 
 	}
 
-	// DbPrivileges
-
-	// PolardbxAccountName
-
-	// InstanceId
-
-	// api: Drds - 2019-01-23 - ModifyAccountPrivilege
-	if d.HasChanges("db_privileges") {
-		reqQuery := map[string]interface{}{
-			"DBInstanceName": d.Get("instance_id").(string),
-			"AccountName":    d.Get("drds_account_name").(string),
-		}
-
-		privileges := make([]string, 0)
-		dbname := make([]string, 0)
-		for _, d := range d.Get("db_privileges").(*schema.Set).List() {
-			dbPrivilege := d.(map[string]interface{})
-			privileges = append(privileges, dbPrivilege["privilege"].(string))
-			dbname = append(dbname, dbPrivilege["db_name"].(string))
-		}
-		reqQuery["AccountPrivilege"] = strings.Join(privileges, ",")
-		reqQuery["DBName"] = strings.Join(dbname, ",")
-		_, err := client.DoTeaRequest("POST", "polardbx", "2020-02-02", "ModifyAccountPrivilege", "", nil, reqQuery, nil)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -175,12 +145,6 @@ func resourceAlibabacloudStackPolardbxAccountRead(d *schema.ResourceData, meta i
 	d.Set("instance_id", account.DBInstanceName)
 	d.Set("description", account.AccountDescription)
 	d.Set("account_name", account.AccountName)
-	switch account.AccountType {
-	case "0":
-		d.Set("account_type", "Normal")
-	case "1":
-		d.Set("account_type", "Super")
-	}
 	return nil
 }
 

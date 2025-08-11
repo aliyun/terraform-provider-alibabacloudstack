@@ -9,9 +9,9 @@ import (
 func TestAccAlibabacloudStackPolardbxAccountsDataSource(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	name := fmt.Sprintf("tf_acc_polardbx_account_%d", rand)
-	drdsInstanceIdRegexConf := dataSourceTestAccConfig{
+	instanceIdRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackPolardbxAccountsSourceConfig(name, map[string]string{
-			"instance_id": `"${alibabacloudstack_polardbx_account.default.id}"`,
+			"instance_id": `"${alibabacloudstack_polardbx_account.default.instance_id}"`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudStackPolardbxAccountsSourceConfig(name, map[string]string{
 			"instance_id": `"drdsusrztw1cfake"`,
@@ -19,36 +19,12 @@ func TestAccAlibabacloudStackPolardbxAccountsDataSource(t *testing.T) {
 	}
 	namesRegexConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStackPolardbxAccountsSourceConfig(name, map[string]string{
-			"instance_id": `"${alibabacloudstack_polardbx_account.default.id}"`,
+			"instance_id": `"${alibabacloudstack_polardbx_account.default.instance_id}"`,
 			"names":       `["${var.name}",]`,
 		}),
 		fakeConfig: testAccCheckAlibabacloudStackPolardbxAccountsSourceConfig(name, map[string]string{
-			"instance_id": `"${alibabacloudstack_polardbx_account.default.id}"`,
+			"instance_id": `"${alibabacloudstack_polardbx_account.default.instance_id}"`,
 			"names":       `["${var.name}_fake",]`,
-		}),
-	}
-	defaultAccountTypeRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackPolardbxAccountsSourceConfig(name, map[string]string{
-			"instance_id":  `"${alibabacloudstack_polardbx_account.default.id}"`,
-			"names":        `["${var.name}_db",]`,
-			"account_type": "Normal",
-		}),
-		fakeConfig: testAccCheckAlibabacloudStackPolardbxAccountsSourceConfig(name, map[string]string{
-			"instance_id":  `"${alibabacloudstack_polardbx_account.default.id}"`,
-			"names":        `["${var.name}_db",]`,
-			"account_type": "Super",
-		}),
-	}
-	userAccountTypeRegexConf := dataSourceTestAccConfig{
-		existConfig: testAccCheckAlibabacloudStackPolardbxAccountsSourceConfig(name, map[string]string{
-			"instance_id":  `"${alibabacloudstack_polardbx_account.default.id}"`,
-			"names":        `["${var.name}",]`,
-			"account_type": "Super",
-		}),
-		fakeConfig: testAccCheckAlibabacloudStackPolardbxAccountsSourceConfig(name, map[string]string{
-			"instance_id":  `"${alibabacloudstack_polardbx_account.default.id}"`,
-			"names":        `["${var.name}",]`,
-			"account_type": "Normal",
 		}),
 	}
 
@@ -61,9 +37,9 @@ func TestAccAlibabacloudStackPolardbxAccountsDataSource(t *testing.T) {
 	}
 	var fakeMapFunc = func(rand int) map[string]string {
 		return map[string]string{
-			"accounts.#": "Normal",
-			"ids.#":      "Normal",
-			"names.#":    "Normal",
+			"accounts.#": "0",
+			"ids.#":      "0",
+			"names.#":    "0",
 		}
 	}
 
@@ -74,7 +50,7 @@ func TestAccAlibabacloudStackPolardbxAccountsDataSource(t *testing.T) {
 	}
 	preCheck := func() {
 	}
-	CheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, drdsInstanceIdRegexConf, namesRegexConf, defaultAccountTypeRegexConf, userAccountTypeRegexConf)
+	CheckInfo.dataSourceTestCheckWithPreCheck(t, rand, preCheck, instanceIdRegexConf, namesRegexConf,)
 }
 
 func testAccCheckAlibabacloudStackPolardbxAccountsSourceConfig(name string, attrMap map[string]string) string {
@@ -87,47 +63,23 @@ variable "name" {
 	default = "%s"
 }
 
-variable "password" {
-	default = "%s"
-}
 %s
 
-resource "alibabacloudstack_polardbx_instance" "default" {
-  	description = "testtf1111"
-	series = "enterprise"
-	topology_type = "1azone"
-	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	engine_version = "5.7"
-	storage = "50"
-	network_type = "vpc"
-	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-	vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
-	cn_node_class = "polarx.x4.medium.2e"
-	cn_node_count = "2"
-	dn_node_class = "mysql.n4.medium.25"
-	dn_node_count = "2"
-}
+%s
 
-resource "alibabacloudstack_polardbx_database" "default" {
-	instance_id        = "${alibabacloudstack_polardbx_instance.default.id}"
-	name = "${var.name}_db"
-	password           = "${var.password}"
-}
+%s
+
 
 resource "alibabacloudstack_polardbx_account" "default" {
-	instance_id       = alibabacloudstack_polardbx_instance.default.id
+	instance_id  = local.polardbx_instance.id
 	account_name = var.name
-	password          = "${var.password}"
-	description       = var.name
-	db_privileges {
-		db_name   = alibabacloudstack_polardbx_database.default.name
-		privilege = "ReadWrite"
-	}
+	password     = "${random_password.password.0.result}"
+	description  = var.name
 }
 	
 data "alibabacloudstack_polardbx_accounts" "default" {
   %s
 }
-`, name, getAccTestPassword(12), VSwitchCommonTestCase, strings.Join(pairs, "\n  "))
+`, name, RandomPasswordTestCase(12,1), VSwitchCommonTestCase, PolardbxReadOrCreateCommonTestCase(), strings.Join(pairs, "\n  "))
 	return config
 }
