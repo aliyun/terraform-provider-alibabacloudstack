@@ -13,7 +13,7 @@ func TestAccAlibabacloudStackPolardbxInstance_basic0(t *testing.T) {
 	var v *PolardbxDescribedbinstanceattributeResponse
 
 	resourceId := "alibabacloudstack_polardbx_instance.default"
-	ra := resourceAttrInit(resourceId, map[string]string{"private_connection_string":CHECKSET})
+	ra := resourceAttrInit(resourceId, map[string]string{"private_connection_string": CHECKSET})
 
 	serviceFunc := func() interface{} {
 		return &PolardbXService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
@@ -92,6 +92,17 @@ func TestAccAlibabacloudStackPolardbxInstance_basic0(t *testing.T) {
 						"security_groups.#":            "1",
 						"security_groups.0.group_name": "test123",
 						"security_groups.0.ips":        "10.0.0.1,10.0.0.2",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"enable_public_connection": false,
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"public_connection_string_prefix": REMOVEKEY,
+						"public_connection_port":          REMOVEKEY,
 					}),
 				),
 			},

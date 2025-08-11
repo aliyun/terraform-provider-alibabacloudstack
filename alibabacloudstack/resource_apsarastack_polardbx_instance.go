@@ -27,12 +27,6 @@ func resourceAlibabacloudStackPolardbxInstance() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 
-			"series": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-
 			"cpu_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -42,17 +36,6 @@ func resourceAlibabacloudStackPolardbxInstance() *schema.Resource {
 			"storage": {
 				Type:     schema.TypeInt,
 				Required: true,
-			},
-
-			"spec_series": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-
-			"cidr_block": {
-				Type:     schema.TypeString,
-				Optional: true,
 			},
 
 			"description": {
@@ -341,18 +324,6 @@ func resourceAlibabacloudStackPolardbxInstanceCreate(d *schema.ResourceData, met
 
 	if v, ok := d.GetOk("cpu_type"); ok {
 		request.QueryParams["Arch"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("spec_series"); ok {
-		request.QueryParams["SpecSeries"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("series"); ok {
-		request.QueryParams["Series"] = v.(string)
-	}
-
-	if v, ok := d.GetOk("cidr_block"); ok {
-		request.QueryParams["CidrBlock"] = v.(string)
 	}
 
 	if v, ok := d.GetOk("cn_node_class"); ok {
@@ -783,9 +754,6 @@ func resourceAlibabacloudStackPolardbxInstanceRead(d *schema.ResourceData, meta 
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardbx_instance", errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	data := response.DBInstance
-	d.Set("series", data.Series)
-
-	d.Set("spec_series", data.SpecSeries)
 
 	d.Set("storage", data.Storage)
 

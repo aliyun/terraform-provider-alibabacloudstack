@@ -44,15 +44,15 @@ func TestAccAlibabacloudStackPolardbxAccountDatabaseBinding_basic0(t *testing.T)
 					"account_name": "${alibabacloudstack_polardbx_account.default.account_name}",
 					"db_privileges": []map[string]interface{}{
 						{
-							"db_name":   "${alibabacloudstack_polardbx_database.default0.database_name}",
+							"db_name":   "${alibabacloudstack_polardbx_database.default.0.database_name}",
 							"privilege": "ReadOnly",
 						},
 						{
-							"db_name":   "${alibabacloudstack_polardbx_database.default1.database_name}",
+							"db_name":   "${alibabacloudstack_polardbx_database.default.1.database_name}",
 							"privilege": "ReadWrite",
 						},
 						{
-							"db_name":   "${alibabacloudstack_polardbx_database.default2.database_name}",
+							"db_name":   "${alibabacloudstack_polardbx_database.default.2.database_name}",
 							"privilege": "DDLOnly",
 						},
 					},
@@ -78,11 +78,11 @@ func TestAccAlibabacloudStackPolardbxAccountDatabaseBinding_basic0(t *testing.T)
 				Config: testAccConfig(map[string]interface{}{
 					"db_privileges": []map[string]interface{}{
 						{
-							"db_name":   "${alibabacloudstack_polardbx_database.default0.database_name}",
+							"db_name":   "${alibabacloudstack_polardbx_database.default.0.database_name}",
 							"privilege": "DDLOnly",
 						},
 						{
-							"db_name":   "${alibabacloudstack_polardbx_database.default1.database_name}",
+							"db_name":   "${alibabacloudstack_polardbx_database.default.1.database_name}",
 							"privilege": "ReadOnly",
 						},
 					},
@@ -115,25 +115,12 @@ variable "name" {
 
 %s
 
-resource "alibabacloudstack_polardbx_database" "default0" {
-    instance_id  = "${local.polardbx_instance.id}"
-	database_name = "${var.name}0"
-	encode = "utf8mb4"
-	mode = "auto"
-}
-
-resource "alibabacloudstack_polardbx_database" "default1" {
-    instance_id  = "${local.polardbx_instance.id}"
-	database_name = "${var.name}1"
-	encode = "utf8mb4"
-	mode = "auto"
-}
-
-resource "alibabacloudstack_polardbx_database" "default2" {
-    instance_id  = "${local.polardbx_instance.id}"
-	database_name = "${var.name}2"
-	encode = "utf8mb4"
-	mode = "auto"
+resource "alibabacloudstack_polardbx_database" "default" {
+	count         = 3
+    instance_id   = "${local.polardbx_instance.id}"
+	database_name = "${var.name}${count.index}"
+	encode        = "utf8mb4"
+	mode          = "auto"
 }
 
 resource "alibabacloudstack_polardbx_account" "default" {
