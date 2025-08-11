@@ -4,15 +4,21 @@
 
 ## 文档语言
 
+---
+
 简体中文|[English](./README.md)
 
 ## 官方站点
+
+---
 
 - [GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack)
 - [阿里云帮助中心](https://help.aliyun.com/apsara/index.html)
 - [Terraform Public Registry](https://registry.terraform.io/providers/aliyun/alibabacloudstack)
 
 ## 环境配置
+
+---
 
 ### 安装依赖
 
@@ -21,6 +27,12 @@
 > **注意**：Terraform需要版本不低于0.13.x，OpenTofu无最低版本要求。
 
 ### 安装Terraform Provider
+
+> 请根据专有云版本选择合适的AlibabacloudStack版本。
+
+> 如果专有云版本为3.16.2, AlibabacloudStack版本为 3.16.x，获取最新版本可用使用`< 3.18.0`声明版本号。
+
+> 如果专有云版本为3.18.x(3.18.0,3.18.1,3.18.2,3.18.6), AlibabacloudStack版本为 3.18.x，获取最新版本可用使用`>= 3.18.0`声明版本号。
 
 | 专有云版本 | AlibabacloudStack版本 |
 | ---  | ---  |
@@ -122,9 +134,11 @@ XX(插件根路径 如：./terraform.d/providers/)
 
 ## 快速开始
 
+---
+
 ### 初始化项目
 
-1. 新建工作目录，并创建`Provider.tf`文件
+1. 新建工作目录，并创建`provider.tf`文件
 
 ```hcl
  terraform {
@@ -205,6 +219,8 @@ export ALIBABACLOUDSTACK_SECRET_KEY="xxxx"
 
 1. 在工作目录下创建`main.tf`文件。
 
+> 更多示例请查看[官方手册](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)
+
 ```hcl
 resource "alibabacloudstack_vpc_vpc" "default_vpc" {
   name       = "vpc-test"
@@ -226,9 +242,13 @@ terraform destroy # 销毁资源
 
 ## 变更日志
 
+---
+
 请查看[ReleaseNode](./CHANGELOG_zh_Hans.md)
 
 ## 开发教程
+
+---
 
 ### 安装编译环境
 

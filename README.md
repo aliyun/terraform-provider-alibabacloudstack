@@ -4,15 +4,22 @@
 
 ## Documentation Language
 
-[简体中文](./README_zh-CNS.md) | English
+---
+
+[简体中文](./README_zh-Hans.md) | English
 
 ## Official Sites
+
+---
+
 
 - [GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack)
 - [Alibaba Cloud Help Center](https://help.aliyun.com/apsara/index.html)
 - [Terraform Public Registry](https://registry.terraform.io/providers/aliyun/alibabacloudstack)
 
 ## Environment Configuration
+
+---
 
 ### Install Dependencies
 
@@ -21,6 +28,12 @@ Download TF Core from [Terraform](https://www.terraform.io/downloads.html) or [O
 > **Note**: Terraform requires version 0.13.x or higher. OpenTofu has no minimum version requirement.
 
 ### Install Terraform Provider
+
+> Select the appropriate AlibabacloudStack version based on your proprietary cloud version.
+
+> If the proprietary cloud version is 3.16.2, the AlibabacloudStack version should be 3.16.x. Use `< 3.18.0` to declare the version number when obtaining the latest version.
+
+> If the proprietary cloud version is 3.18.x (including 3.18.0, 3.18.1, 3.18.2, 3.18.6), the AlibabacloudStack version should be 3.18.x. Use `>= 3.18.0` to declare the version number when obtaining the latest version.
 
 | Private Cloud Version | AlibabacloudStack Version |
 | ---  | ---  |
@@ -124,6 +137,8 @@ XX(Plugin root path, e.g., ./terraform.d/providers/)
 
 ## Quick Start
 
+---
+
 ### Initialize Project
 
 1. **Create working directory**  
@@ -208,6 +223,8 @@ export ALIBABACLOUDSTACK_SECRET_KEY="xxxx"
 
 1. Create a `main.tf` file in your working directory.
 
+> For more examples, please refer to the [official documentation](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)
+
 ```hcl
 resource "alibabacloudstack_vpc_vpc" "default_vpc" {
   name       = "vpc-test"
@@ -223,11 +240,16 @@ terraform apply # Execute orchestration tasks
 terraform show  # View orchestration results
 terraform destroy # Destroy resources
 ```
+
 ## Changelog
+
+---
 
 Please refer to [ReleaseNote](./CHANGELOG.md)
 
 ## Development Guide
+
+---
 
 ### Set Up Development Environment
 
