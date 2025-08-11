@@ -126,7 +126,7 @@ data "alibabacloudstack_zones" "default" {
 }
 
 data "alibabacloudstack_mongodb_instances" "default" {
-  ids = var.existed_db_instance_id == "" ? [] : ["${var.existed_db_instance_id}",]
+  ids = var.existed_db_instance_id == "" ? [" ",] : ["${var.existed_db_instance_id}",]
   instance_type = "sharding"
 }
 

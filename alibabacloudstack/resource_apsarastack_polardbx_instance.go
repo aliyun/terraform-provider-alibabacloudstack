@@ -250,6 +250,9 @@ func resourceAlibabacloudStackPolardbxInstance() *schema.Resource {
 					if oldValue == "" || oldValue == "0" {
 						return newValue == "3306"
 					}
+					if oldValue == "3306" && newValue == "" {
+						return true
+					}
 					return oldValue == newValue
 				},
 			},
@@ -263,7 +266,7 @@ func resourceAlibabacloudStackPolardbxInstance() *schema.Resource {
 				Optional: true,
 				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 					if !d.Get("enable_public_connection").(bool) {
-						return false
+						return true
 					}
 					if newValue == "" {
 						return true
@@ -282,10 +285,13 @@ func resourceAlibabacloudStackPolardbxInstance() *schema.Resource {
 				ValidateFunc: validation.IntBetween(3000, 6000),
 				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 					if !d.Get("enable_public_connection").(bool) {
-						return false
+						return true
 					}
-					if oldValue == "" || oldValue == "0" {
+					if oldValue == "" {
 						return newValue == "3306"
+					}
+					if oldValue == "3306" && newValue == "" {
+						return true
 					}
 					return oldValue == newValue
 				},

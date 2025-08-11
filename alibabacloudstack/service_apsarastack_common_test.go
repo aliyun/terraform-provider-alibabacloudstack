@@ -888,6 +888,7 @@ data "alibabacloudstack_polardbx_instance_types" "dn" {
 }
 
 resource "alibabacloudstack_polardbx_instance" "default" {
+	description    = "${var.name}"
 	zone_id        = "${data.alibabacloudstack_zones.default.zones.0.id}"
 	engine_version = "5.7"
 	storage        = 50
@@ -917,7 +918,7 @@ data "alibabacloudstack_polardbx_instance_types" "dn" {
 }
 
 data "alibabacloudstack_polardbx_instances" "default" {
-	ids = var.existed_polardbx_id == "" ? [] : ["${var.existed_polardbx_id}",]
+	ids = var.existed_polardbx_id == "" ? [" ",] : ["${var.existed_polardbx_id}",]
 }
 
 resource "alibabacloudstack_polardbx_instance" "default" {

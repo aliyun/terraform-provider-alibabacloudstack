@@ -23,18 +23,10 @@ func dataSourceAlibabacloudStackPolardbxInstances() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			"name_regex": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ValidateFunc:  validation.StringIsValidRegExp,
-				Deprecated:    "Field 'name_regex' is deprecated and will be removed in a future release. Please use new field 'description_regex' instead.",
-				ConflictsWith: []string{"description_regex"},
-			},
 			"description_regex": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ValidateFunc:  validation.StringIsValidRegExp,
-				ConflictsWith: []string{"name_regex"},
 			},
 			"polardbx_instances": {
 				Type:     schema.TypeList,
