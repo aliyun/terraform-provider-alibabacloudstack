@@ -1329,16 +1329,17 @@ resource "alibabacloudstack_vpc_vpc" "default" {
 }
 `
 
-func RandomPasswordTestCase(passwordLen int) string {
+func RandomPasswordTestCase(passwordLen, count int) string {
 	return fmt.Sprintf(`
 resource "random_password" "password" {
+	count            = %d
 	length           = %d
 	special          = true
 	override_special = "!@#$^&*()_"
 	min_lower        = 1
 	min_upper        = 1
 	min_numeric      = 1
-}`, passwordLen)
+}`, count, passwordLen)
 }
 
 const VSwitchCommonTestCase = DataZoneCommonTestCase + VpcCommonTestCase + `

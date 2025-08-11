@@ -36,7 +36,7 @@ func TestAccAlibabacloudStackDBAccountUpdate(t *testing.T) {
 		// module name
 		IDRefreshName: resourceId,
 
-		Providers: testAccProviders,
+		Providers:         testAccProviders,
 		ExternalProviders: testAccExternalProviders,
 		// CheckDestroy: rac.checkResourceDestroy(),
 		Steps: []resource.TestStep{
@@ -44,16 +44,16 @@ func TestAccAlibabacloudStackDBAccountUpdate(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"instance_id": "${alibabacloudstack_db_instance.default.id}",
 					"name":        "tftestnormal",
-					"password": "${random_password.password.0.result}",
+					"password":    "${random_password.password.0.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(nil),
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 				// password敏感字段设置后不回显
 				ImportStateVerifyIgnore: []string{"password"},
 			},
@@ -70,7 +70,7 @@ func TestAccAlibabacloudStackDBAccountUpdate(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"description": "tf test",
-					"password": "${random_password.password.1.result}",
+					"password":    "${random_password.password.1.result}",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
@@ -93,18 +93,10 @@ func resourceDBAccountConfigDependence(name string) string {
 		default = "%v"
 	}
 	
-	resource "random_password" "password" {
-		count            = 2
-		length           = 12
-		special          = true
-		override_special = "!@#$^&*()_"
-		min_lower        = 1
-		min_upper        = 1
-		min_numeric      = 1
-	}
+	%s
 	
 	%s
 	%s
 
-	`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase())
+	`, name, RandomPasswordTestCase(12, 2), VSwitchCommonTestCase, RdsMysqlCommonTestCase())
 }

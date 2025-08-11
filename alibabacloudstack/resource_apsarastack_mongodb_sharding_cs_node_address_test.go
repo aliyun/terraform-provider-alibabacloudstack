@@ -109,15 +109,7 @@ data "alibabacloudstack_mongodb_instance_types" "shard" {
   engine_version   = "4.0"
 }
 
-resource "random_password" "password" {
-  count            = 2
-  length           = 12
-  special          = true
-  override_special = "!@#$^&*()_"
-  min_lower        = 1
-  min_upper        = 1
-  min_numeric      = 1
-}
+%s
 
 
 data "alibabacloudstack_zones" "default" {
@@ -169,5 +161,5 @@ locals {
     shard_instance = length(data.alibabacloudstack_mongodb_instances.default.instances) == 0 ? alibabacloudstack_mongodb_sharding_instance.default.0 : data.alibabacloudstack_mongodb_instances.default.instances.0
 }
 
-`, name, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_MONGOS_SHARD_ID"))
+`, name, os.Getenv("ALIBABACLOUDSTACK_TEST_EXISTED_MONGOS_SHARD_ID"), RandomPasswordTestCase(12,2))
 }

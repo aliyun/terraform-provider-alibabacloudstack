@@ -109,14 +109,7 @@ func resourceDBAccountPrivilegeConfigDependenceForMySql(name string) string {
 
 %s
 
-resource "random_password" "password" {
-	length           = 12
-	special          = true
-	override_special = "!@#$^&*()_"
-	min_lower        = 1
-	min_upper        = 1
-	min_numeric      = 1
-}
+%s
 
 
 	resource "alibabacloudstack_db_database" "default" {
@@ -130,10 +123,10 @@ resource "random_password" "password" {
 	resource "alibabacloudstack_db_account" "default" {
 	  instance_id = "${alibabacloudstack_db_instance.default.id}"
 	  name = "tftestprivilege"
-	  password = random_password.password.result
+	  password = random_password.password.0.result
 	  description = "from terraform"
 	}
-`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase())
+`, name, VSwitchCommonTestCase, RdsMysqlCommonTestCase(), RandomPasswordTestCase(12,1))
 }
 
 //func TestAccAlibabacloudStackDBAccountPrivilege_PostgreSql(t *testing.T) {

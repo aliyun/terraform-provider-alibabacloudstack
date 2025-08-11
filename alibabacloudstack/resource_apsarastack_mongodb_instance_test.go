@@ -592,7 +592,7 @@ variable "name" {
 
 %s
 
-`, name, engineVersion, RandomPasswordTestCase(12), vpcString)
+`, name, engineVersion, RandomPasswordTestCase(12, 1), vpcString)
 	}
 }
 

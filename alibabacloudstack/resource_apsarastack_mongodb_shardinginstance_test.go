@@ -457,18 +457,10 @@ variable "name" {
 	  engine_version = "%s"
 	}
 	
-	resource "random_password" "password" {
-		count            = 2
-		length           = 12
-		special          = true
-		override_special = "!@#$^&*()_"
-		min_lower        = 1
-		min_upper        = 1
-		min_numeric      = 1
-	}
+%s
 
 %s
 
-`, name, engineVersion, engineVersion, engineVersion, vpcString)
+`, name, engineVersion, engineVersion, engineVersion, vpcString, RandomPasswordTestCase(12,2))
 	}
 }
