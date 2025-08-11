@@ -423,9 +423,11 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTableAssociationsRequest(id 
 	//调用request_params_handler
 	parts := strings.Split(id, ":")
 	transit_router_table := parts[0]
-	attachment_id := parts[1]
+	if len(parts) > 1 {
+		attachment_id := parts[1]
+		request.QueryParams["TransitRouterAttachmentId"] = attachment_id
+	}
 	request.QueryParams["TransitRouterRouteTableId"] = transit_router_table
-	request.QueryParams["TransitRouterAttachmentId"] = attachment_id
 
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
@@ -452,9 +454,11 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTablePropagationsRequest(id 
 	//调用request_params_handler
 	parts := strings.Split(id, ":")
 	transit_router_table := parts[0]
-	attachment_id := parts[1]
+	if len(parts) > 1 {
+		attachment_id := parts[1]
+		request.QueryParams["TransitRouterAttachmentId"] = attachment_id
+	}
 	request.QueryParams["TransitRouterRouteTableId"] = transit_router_table
-	request.QueryParams["TransitRouterAttachmentId"] = attachment_id
 	bresponse, err := s.client.ProcessCommonRequest(request)
 	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
@@ -492,6 +496,37 @@ func (s *CenService) WaitForAttachmentInstance(id string, status Status, timeout
 			}
 		}
 		for _, v := range instance.TransitRouterAttachments {
+			if v.TransitRouterAttachmentId == attach_ment_id && v.Status == string(status) {
+				return nil
+			}
+		}
+		if time.Now().After(deadline) {
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+		}
+		time.Sleep(DefaultIntervalShort * time.Second)
+	}
+}
+
+func (s *CenService) WaitForTransitRouterTableAssociation(id string, status Status, timeout int) error {
+	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
+	parts := strings.Split(id, COLON_SEPARATED)
+	transit_router_table_id := parts[0]
+	attach_ment_id := parts[1]
+	for {
+		instance, err := s.DoCbnDescribeTransitRouterRouteTableAssociationsRequest(transit_router_table_id + ":" + attach_ment_id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				if status == Deleted {
+					return nil
+				}
+			} else {
+				return errmsgs.WrapError(err)
+			}
+		}
+		if len(instance.TransitRouterAssociations) == 0 && status == Deleted {
+			return nil
+		}
+		for _, v := range instance.TransitRouterAssociations {
 			if v.TransitRouterAttachmentId == attach_ment_id && v.Status == string(status) {
 				return nil
 			}
