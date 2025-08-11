@@ -88,6 +88,7 @@ variable "name" {
 variable "password" {
   default = "%s"
 }
+%s
 
 resource "alibabacloudstack_polardbx_instance" "default" {
  description = "testtf1111"
@@ -111,5 +112,5 @@ resource "alibabacloudstack_polardbx_account" "default" {
 	description  = "Normal user"
 }
 
- `, name, getAccTestPassword(12))
+ `, name, getAccTestPassword(12), VSwitchCommonTestCase)
 }

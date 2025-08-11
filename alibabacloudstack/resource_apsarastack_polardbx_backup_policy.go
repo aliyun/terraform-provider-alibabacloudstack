@@ -2,121 +2,77 @@ package alibabacloudstack
 
 import (
 	"fmt"
-	"strconv"
+	"slices"
 	"strings"
-	"time"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/rds"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceAlibabacloudStackPolardbxBackupPolicy() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"instance_id": {
+			"db_instance_id": {
 				Type:     schema.TypeString,
-				ForceNew: true,
 				Required: true,
 			},
-			"preferred_backup_period": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-				Computed: true,
+			"backup_period": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
-
-			"preferred_backup_time": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice(BACKUP_TIME, false),
-				Optional:     true,
-				Default:      "02:00Z-03:00Z",
-			},
-
-			"backup_retention_period": {
+			"backup_set_retention": {
 				Type:         schema.TypeInt,
-				Optional:     true,
-				Default:      7,
+				Required:     true,
 				ValidateFunc: validation.IntBetween(7, 730),
 			},
-
-			"enable_backup_log": {
-				Type:     schema.TypeBool,
-				Computed: true,
-				Optional: true,
-			},
-
-			"log_backup_retention_period": {
-				Type:             schema.TypeInt,
-				ValidateFunc:     validation.IntBetween(7, 730),
-				Optional:         true,
-				Computed:         true,
-				DiffSuppressFunc: logRetentionPeriodDiffSuppressFunc,
-			},
-
-			"local_log_retention_hours": {
-				Type:             schema.TypeInt,
-				ValidateFunc:     validation.IntBetween(0, 7*24),
-				Computed:         true,
-				Optional:         true,
-				DiffSuppressFunc: enableBackupLogDiffSuppressFunc,
-			},
-
-			"local_log_retention_space": {
-				Type:             schema.TypeInt,
-				ValidateFunc:     validation.IntBetween(5, 50),
-				Computed:         true,
-				Optional:         true,
-				DiffSuppressFunc: enableBackupLogDiffSuppressFunc,
-			},
-
-			"high_space_usage_protection": {
-				Type:             schema.TypeString,
-				ValidateFunc:     validation.StringInSlice([]string{"Enable", "Disable"}, false),
-				Default:          "Enable",
-				Optional:         true,
-				DiffSuppressFunc: enableBackupLogDiffSuppressFunc,
-			},
-
-			"log_backup_frequency": {
+			"backup_plan_begin": {
 				Type:     schema.TypeString,
+				Required: true,
+			},
+			"remove_log_retention": {
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntBetween(7, 730),
+			},
+			"cold_data_backup_interval": {
+				Type:     schema.TypeInt,
 				Computed: true,
-				Optional: true,
 			},
-
-			"compress_type": {
-				Type:         schema.TypeString,
-				ValidateFunc: validation.StringInSlice([]string{"1", "4", "8"}, false),
-				Computed:     true,
+			"local_log_retention_number": {
+				Type:         schema.TypeInt,
 				Optional:     true,
+				Default:      60,
+				ValidateFunc: validation.IntBetween(6, 100),
 			},
-
-			"archive_backup_retention_period": {
-				Type:             schema.TypeInt,
-				Computed:         true,
-				Optional:         true,
-				DiffSuppressFunc: archiveBackupPeriodDiffSuppressFunc,
+			"cold_data_backup_retention": {
+				Type:     schema.TypeInt,
+				Computed: true,
 			},
-
-			"archive_backup_keep_count": {
-				Type:             schema.TypeInt,
-				ValidateFunc:     validation.IntBetween(1, 31),
-				Computed:         true,
-				Optional:         true,
-				DiffSuppressFunc: enableBackupLogDiffSuppressFunc,
+			"force_clean_on_high_space_usage": {
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntInSlice([]int{0, 1}),
 			},
-
-			"archive_backup_keep_policy": {
-				Type:             schema.TypeString,
-				ValidateFunc:     validation.StringInSlice([]string{"ByMonth", "ByWeek", "KeepAll"}, false),
-				Computed:         true,
-				Optional:         true,
-				DiffSuppressFunc: enableBackupLogDiffSuppressFunc,
+			"backup_way": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "P",
+			},
+			"local_log_retention": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
+			"backup_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "0",
+			},
+			"log_local_retention_space": {
+				Type:         schema.TypeInt,
+				Required:     true,
+				ValidateFunc: validation.IntBetween(0, 100),
 			},
 		},
 	}
@@ -127,139 +83,97 @@ func resourceAlibabacloudStackPolardbxBackupPolicy() *schema.Resource {
 }
 
 func resourceAlibabacloudStackPolardbxBackupPolicyCreate(d *schema.ResourceData, meta interface{}) error {
-	d.SetId(d.Get("instance_id").(string))
+	d.SetId(d.Get("db_instance_id").(string))
 	return resourceAlibabacloudStackPolardbxBackupPolicyUpdate(d, meta)
-}
-
-func resourceAlibabacloudStackPolardbxBackupPolicyRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	rdsService := RdsService{client}
-	object, err := rdsService.DescribeBackupPolicy(d.Id())
-	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			d.SetId("")
-			return nil
-		}
-		return errmsgs.WrapError(err)
-	}
-	d.Set("instance_id", d.Id())
-	d.Set("preferred_backup_time", object.PreferredBackupTime)
-	d.Set("preferred_backup_period", strings.Split(object.PreferredBackupPeriod, ","))
-	d.Set("backup_retention_period", object.BackupRetentionPeriod)
-	d.Set("enable_backup_log", object.EnableBackupLog == "1")
-	d.Set("log_backup_retention_period", object.LogBackupRetentionPeriod)
-	d.Set("local_log_retention_hours", object.LocalLogRetentionHours)
-	if localLogRetentionSpaceInt, err := strconv.Atoi(object.LocalLogRetentionSpace); err != nil {
-		return errmsgs.WrapError(fmt.Errorf("failed to convert LocalLogRetentionSpace to integer: %v", err))
-	} else {
-		d.Set("local_log_retention_space", localLogRetentionSpaceInt)
-	}
-	instance, err := rdsService.DescribeDBInstance(d.Id())
-	if err != nil {
-		if errmsgs.NotFoundError(err) {
-			d.SetId("")
-			return nil
-		}
-		return errmsgs.WrapError(err)
-	}
-	if instance.Engine == "SQLServer" {
-		d.Set("high_space_usage_protection", "Enable")
-	} else {
-		d.Set("high_space_usage_protection", object.HighSpaceUsageProtection)
-	}
-	d.Set("log_backup_frequency", object.LogBackupFrequency)
-	d.Set("compress_type", object.CompressType)
-	if archiveBackupRetentionPeriodInt, err := strconv.Atoi(object.ArchiveBackupRetentionPeriod); err != nil {
-		return errmsgs.WrapError(fmt.Errorf("failed to convert ArchiveBackupRetentionPeriod to integer: %v", err))
-	} else {
-		d.Set("archive_backup_retention_period", archiveBackupRetentionPeriodInt)
-	}
-	if archiveBackupKeepCountdInt, err := strconv.Atoi(object.ArchiveBackupKeepCount); err != nil {
-		return errmsgs.WrapError(fmt.Errorf("failed to convert ArchiveBackupRetentionPeriod to integer: %v", err))
-	} else {
-		d.Set("archive_backup_keep_count", archiveBackupKeepCountdInt)
-	}
-	d.Set("archive_backup_keep_policy", object.ArchiveBackupKeepPolicy)
-	return nil
 }
 
 func resourceAlibabacloudStackPolardbxBackupPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	rdsService := RdsService{client}
-
-	updateForData := false
-	updateForLog := false
-	if d.HasChanges("preferred_backup_period", "preferred_backup_time", "backup_retention_period",
-		"compress_type", "log_backup_frequency", "archive_backup_retention_period",
-		"archive_backup_keep_count", "archive_backup_keep_policy") {
-		updateForData = true
-	}
-
-	if d.HasChanges("enable_backup_log", "log_backup_retention_period", "local_log_retention_hours",
-		"local_log_retention_space", "high_space_usage_protection") {
-		updateForLog = true
-	}
-
-	if updateForData || updateForLog {
-		if err := rdsService.WaitForDBInstance(d.Id(), Running, DefaultTimeoutMedium); err != nil {
-			return errmsgs.WrapError(err)
-		}
-		if err := resource.Retry(5*time.Minute, func() *resource.RetryError {
-			if err := rdsService.ModifyPolardbxBackupPolicy(d, updateForData, updateForLog); err != nil {
-				if errmsgs.IsExpectedErrors(err, errmsgs.OperationDeniedDBStatus) {
-					return resource.RetryableError(err)
-				}
-				return resource.NonRetryableError(err)
+	if d.HasChanges("backup_period", "backup_set_retention",
+		"backup_plan_begin", "remove_log_retention", "local_log_retention_number",
+		"force_clean_on_high_space_usage", "local_log_retention", "log_local_retention_space") {
+		request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "UpdateBackupPolicy", "")
+		request.QueryParams["IsEnabled"] = "1"
+		request.QueryParams["BackupType"] = d.Get("backup_type").(string)
+		request.QueryParams["BackupWay"] = d.Get("backup_way").(string)
+		request.QueryParams["DBInstanceName"] = d.Get("db_instance_id").(string)
+		request.QueryParams["BackupSetRetention"] = fmt.Sprint(d.Get("backup_set_retention").(int))
+		request.QueryParams["BackupPlanBegin"] = d.Get("backup_plan_begin").(string)
+		request.QueryParams["BackupPeriod"] = SetBackupPeriod(d.Get("backup_period").(string))
+		request.QueryParams["RemoveLogRetention"] = fmt.Sprint(d.Get("remove_log_retention").(int))
+		request.QueryParams["LocalLogRetentionNumber"] = fmt.Sprint(d.Get("local_log_retention_number").(int))
+		request.QueryParams["ForceCleanOnHighSpaceUsage"] = fmt.Sprint(d.Get("force_clean_on_high_space_usage").(int))
+		request.QueryParams["LocalLogRetention"] = fmt.Sprint(d.Get("local_log_retention").(int))
+		request.QueryParams["LogLocalRetentionSpace"] = fmt.Sprint(d.Get("log_local_retention_space").(int))
+		// {"BackupType":"0","BackupSetRetention":30,"RemoveLogRetention":30,"BackupPeriod":"1001000","BackupWay":"P","BackupPlanBegin":"03:00Z","IsEnabled":1,"LogLocalRetentionSpace":30,"LocalLogRetention":7,"ForceCleanOnHighSpaceUsage":1,"LocalLogRetentionNumber":60,"DBInstanceName":"pxc-unr6vlauoszezq","RegionId":"cn-wulan-env17e-d01"}
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+		if err != nil {
+			if bresponse == nil {
+				return errmsgs.WrapErrorf(err, "Process Common Request Failed")
 			}
-			return nil
-		}); err != nil {
-			return errmsgs.WrapError(err)
+			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+				"alibabacloudstack_polardbx_backup_policy", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 	}
 
 	return nil
 }
 
-func resourceAlibabacloudStackPolardbxBackupPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlibabacloudStackPolardbxBackupPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	rdsService := RdsService{client}
-	request := rds.CreateModifyBackupPolicyRequest()
-	client.InitRpcRequest(*request.RpcRequest)
-	request.DBInstanceId = d.Id()
-	request.PreferredBackupPeriod = "Tuesday,Thursday,Saturday"
-	request.BackupRetentionPeriod = "7"
-	request.PreferredBackupTime = "02:00Z-03:00Z"
-	request.EnableBackupLog = "1"
-	instance, err := rdsService.DescribeDBInstance(d.Id())
+	polardbxService := PolardbXService{client}
+	object, err := polardbxService.DescribePolarDbXBackupConfig(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
+			d.SetId("")
 			return nil
 		}
 		return errmsgs.WrapError(err)
 	}
-	if instance.Engine != "SQLServer" {
-		request.LogBackupRetentionPeriod = "7"
-	}
-	if instance.Engine == "MySQL" && instance.DBInstanceStorageType == "local_ssd" {
-		request.ArchiveBackupRetentionPeriod = "0"
-		request.ArchiveBackupKeepCount = "1"
-		request.ArchiveBackupKeepPolicy = "ByMonth"
-	}
+	d.Set("db_instance_id", d.Id())
+	d.Set("backup_period", GetBackupPeriod(object.BackupPeriod))
+	d.Set("backup_set_retention", object.BackupSetRetention)
+	d.Set("backup_plan_begin", object.BackupPlanBegin)
+	d.Set("cold_data_backup_interval", object.ColdDataBackupInterval)
+	d.Set("remove_log_retention", object.RemoveLogRetention)
+	d.Set("local_log_retention_number", object.LocalLogRetentionNumber)
+	d.Set("cold_data_backup_retention", object.ColdDataBackupRetention)
+	d.Set("force_clean_on_high_space_usage", object.ForceCleanOnHighSpaceUsage)
+	d.Set("backup_way", object.BackupWay)
+	d.Set("local_log_retention", object.LocalLogRetention)
+	d.Set("backup_type", object.BackupType)
+	d.Set("log_local_retention_space", object.LogLocalRetentionSpace)
+	return nil
+}
 
-	raw, err := client.WithRdsClient(func(rdsClient *rds.Client) (interface{}, error) {
-		return rdsClient.ModifyBackupPolicy(request)
-	})
-	if err != nil {
-		errmsg := ""
-		if raw != nil {
-			response, ok := raw.(*rds.ModifyBackupPolicyResponse)
-			if ok {
-				errmsg = errmsgs.GetBaseResponseErrorMessage(response.BaseResponse)
-			}
+func resourceAlibabacloudStackPolardbxBackupPolicyDelete(d *schema.ResourceData, meta interface{}) error {
+	return nil
+}
+
+func SetBackupPeriod(backupPeriod string) string {
+	standard := []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
+	backupPeriods := strings.Split(backupPeriod, ",")
+	result := make([]string, 0)
+	for _, v := range standard {
+		if slices.Contains(backupPeriods, v) {
+			result = append(result, "1")
+		} else {
+			result = append(result, "0")
+
 		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Id(), request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-	addDebug(request.GetActionName(), raw, request.RpcRequest, request)
+	return strings.Join(result, "")
+}
 
-	return rdsService.WaitForDBInstance(d.Id(), Running, DefaultTimeoutMedium)
+func GetBackupPeriod(backupPeriodCode string) string {
+	standard := []string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"}
+	result := make([]string, 0)
+	for i, v := range backupPeriodCode {
+		if v == '1' {
+			result = append(result, standard[i])
+		}
+	}
+	return strings.Join(result, ",")
 }
