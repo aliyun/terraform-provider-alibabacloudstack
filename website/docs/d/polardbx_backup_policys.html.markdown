@@ -1,13 +1,13 @@
 ---
 subcategory: "PolarDBX"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_polardbx_backup_policys"
-sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-backup-policys"
+page_title: "Alibabacloudstack: alibabacloudstack_polardbx_backup_policies"
+sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-backup-policies"
 description: |-
   Provides a list of PolarDBX backup policies owned by an Alibaba Cloud Stack account.
 ---
 
-# alibabacloudstack\_polardbx\_backup\_policys
+# alibabacloudstack\_polardbx\_backup\_policies
 
 This data source provides a list of PolarDBX backup policies in an Alibaba Cloud Stack account according to the specified filters.
 
@@ -51,7 +51,7 @@ resource "alibabacloudstack_polardbx_instance" "default" {
   dn_node_count    = "2"
 }
 
-data "alibabacloudstack_polardbx_backup_policys" "default" {
+data "alibabacloudstack_polardbx_backup_policies" "default" {
   db_instance_id = alibabacloudstack_polardbx_instance.default.id
 }
 ```

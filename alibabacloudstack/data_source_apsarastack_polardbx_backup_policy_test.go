@@ -1,12 +1,15 @@
 package alibabacloudstack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccAlibabacloudStackPolardbxBackupPolicysDataSource(t *testing.T) {
+func TestAccAlibabacloudStackPolardbxBackupPoliciesDataSource(t *testing.T) {
+	rand := getAccTestRandInt(10000, 20000)
+	name := fmt.Sprintf("tf-testAccPolardbxBackupplicies%v", rand)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -14,29 +17,39 @@ func TestAccAlibabacloudStackPolardbxBackupPolicysDataSource(t *testing.T) {
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAlibabacloudStackPolardbxBackupPolicysDataSource,
+				Config: testAccCheckAlibabacloudStackPolardbxBackupPolicysDataSource(name),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_polardbx_backup_policys.default"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "backup_period"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "backup_set_retention"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "backup_plan_begin"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "remove_log_retention"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "cold_data_backup_interval"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "local_log_retention_number"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "cold_data_backup_retention"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "force_clean_on_high_space_usage"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "backup_way"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "local_log_retention"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "backup_type"),
-					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policys.default", "log_local_retention_space"),
+					testAccCheckAlibabacloudStackDataSourceID("data.alibabacloudstack_polardbx_backup_policies.default"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "backup_period"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "backup_set_retention"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "backup_plan_begin"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "remove_log_retention"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "cold_data_backup_interval"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "local_log_retention_number"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "cold_data_backup_retention"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "force_clean_on_high_space_usage"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "backup_way"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "local_log_retention"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "backup_type"),
+					resource.TestCheckResourceAttrSet("data.alibabacloudstack_polardbx_backup_policies.default", "log_local_retention_space"),
 				),
 			},
 		},
 	})
 }
 
-const testAccCheckAlibabacloudStackPolardbxBackupPolicysDataSource = `
-data "alibabacloudstack_polardbx_backup_policys" "default" {
-	db_instance_id = "pxc-unrpi3i87xv25d"
+func testAccCheckAlibabacloudStackPolardbxBackupPolicysDataSource(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+  default = "%s"
 }
-`
+
+%s
+
+%s
+
+data "alibabacloudstack_polardbx_backup_policies" "default" {
+	db_instance_id = "${local.polardbx_instance.id}"
+}
+`, name, VSwitchCommonTestCase, PolardbxReadOrCreateCommonTestCase())
+}

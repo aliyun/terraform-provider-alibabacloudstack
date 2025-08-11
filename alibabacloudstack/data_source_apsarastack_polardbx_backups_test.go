@@ -17,32 +17,32 @@ func TestAccAlibabacloudStackPolardbxBackupsDataSource_basic(t *testing.T) {
 
 	idsConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardbx_instance.default.id}",
+			"db_instance_id": "${alibabacloudstack_polardbx_backup.default.instance_id}",
 			"ids":            []string{"${alibabacloudstack_polardbx_backup.default.backup_set_id}"},
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardbx_instance.default.id}",
+			"db_instance_id": "${alibabacloudstack_polardbx_backup.default.instance_id}",
 			"ids":            []string{"${alibabacloudstack_polardbx_backup.default.backup_set_id}_fake"},
 		}),
 	}
 	startTimeConf := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardbx_instance.default.id}",
+			"db_instance_id": "${alibabacloudstack_polardbx_backup.default.instance_id}",
 			"start_time":     yesterDay.Format("2006-01-02T15:04Z"),
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardbx_instance.default.id}",
-			"start_time":     createTime.Format("2006-01-02T15:04Z"),
+			"db_instance_id": "${alibabacloudstack_polardbx_backup.default.instance_id}",
+			"start_time":     tomorrow.Format("2006-01-02T15:04Z"),
 		}),
 	}
 	endTimeConfig := dataSourceTestAccConfig{
 		existConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardbx_instance.default.id}",
+			"db_instance_id": "${alibabacloudstack_polardbx_backup.default.instance_id}",
 			"end_time":       tomorrow.Format("2006-01-02T15:04Z"),
 		}),
 		fakeConfig: testAccConfig(map[string]interface{}{
-			"db_instance_id": "${alibabacloudstack_polardbx_instance.default.id}",
-			"end_time":       createTime.Format("2006-01-02T15:04Z"),
+			"db_instance_id": "${alibabacloudstack_polardbx_backup.default.instance_id}",
+			"end_time":       yesterDay.Format("2006-01-02T15:04Z"),
 		}),
 	}
 	var existDBbackupsMapFunc = func(rand int) map[string]string {
@@ -84,17 +84,10 @@ variable "name" {
 
 %s
 
-resource "alibabacloudstack_polardbx_instance" "default" {
-  instance_storage = "5"
-  instance_name = "${var.name}"
-  storage_type = "local_ssd"
-  engine = "MySQL"
-  engine_version = "5.7"
-  instance_type = "rds.mysql.t1.small"
-}
-  
+%s
+
 resource "alibabacloudstack_polardbx_backup" "default" {
-  instance_id = "${alibabacloudstack_polardbx_instance.default.id}"
+  instance_id = "${local.polardbx_instance.id}"
 }
-`, name, VSwitchCommonTestCase)
+`, name, VSwitchCommonTestCase,PolardbxReadOrCreateCommonTestCase())
 }

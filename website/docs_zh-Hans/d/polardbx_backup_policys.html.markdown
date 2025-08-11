@@ -1,13 +1,13 @@
 ---
 subcategory: "PolarDBX"
 layout: "alibabacloudstack"
-page_title: "Alibabacloudstack: alibabacloudstack_polardbx_backup_policys"
-sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-backup-policys"
+page_title: "Alibabacloudstack: alibabacloudstack_polardbx_backup_policies"
+sidebar_current: "docs-Alibabacloudstack-datasource-polardbx-backup-policies"
 description: |-
   提供阿里云栈账户拥有的PolarDBX备份策略列表。
 ---
 
-# alibabacloudstack\_polardbx\_backup\_policys
+# alibabacloudstack\_polardbx\_backup\_policies
 
 此数据源根据指定的过滤条件提供阿里云栈账户中的PolarDBX备份策略列表。
 
@@ -51,7 +51,7 @@ resource "alibabacloudstack_polardbx_instance" "default" {
   dn_node_count    = "2"
 }
 
-data "alibabacloudstack_polardbx_backup_policys" "default" {
+data "alibabacloudstack_polardbx_backup_policies" "default" {
   db_instance_id = alibabacloudstack_polardbx_instance.default.id
 }
 ```

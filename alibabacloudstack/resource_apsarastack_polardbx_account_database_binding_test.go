@@ -40,7 +40,7 @@ func TestAccAlibabacloudStackPolardbxAccountDatabaseBinding_basic0(t *testing.T)
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"instance_id":  "${alibabacloudstack_polardbx_instance.default.id}",
+					"instance_id":  "${local.polardbx_instance.id}",
 					"account_name": "${alibabacloudstack_polardbx_account.default.account_name}",
 					"db_privileges": []map[string]interface{}{
 						{
@@ -109,52 +109,39 @@ variable "name" {
   default = "%s"
 }
 
-variable "password" {
-  default = "%s"
-}
 %s
-resource "alibabacloudstack_polardbx_instance" "default" {
-    description = "testtf1111"
-	zone_id = "${data.alibabacloudstack_zones.default.zones.0.id}"
-	engine_version = "5.7"
-	storage = "50"
-	network_type = "vpc"
-	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-	vswitch_id = "${alibabacloudstack_vpc_vswitch.default.id}"
-	cn_node_class = "polarx.x4.medium.2e"
-	cn_node_count = "2"
-	dn_node_class = "mysql.n4.medium.25"
-	dn_node_count = "2"
-}
+
+%s
+
+%s
 
 resource "alibabacloudstack_polardbx_database" "default0" {
-    instance_id  = "${alibabacloudstack_polardbx_instance.default.id}"
+    instance_id  = "${local.polardbx_instance.id}"
 	database_name = "${var.name}0"
 	encode = "utf8mb4"
 	mode = "auto"
 }
 
 resource "alibabacloudstack_polardbx_database" "default1" {
-    instance_id  = "${alibabacloudstack_polardbx_instance.default.id}"
+    instance_id  = "${local.polardbx_instance.id}"
 	database_name = "${var.name}1"
 	encode = "utf8mb4"
 	mode = "auto"
 }
 
 resource "alibabacloudstack_polardbx_database" "default2" {
-    instance_id  = "${alibabacloudstack_polardbx_instance.default.id}"
+    instance_id  = "${local.polardbx_instance.id}"
 	database_name = "${var.name}2"
 	encode = "utf8mb4"
 	mode = "auto"
 }
 
 resource "alibabacloudstack_polardbx_account" "default" {
-    instance_id  = "${alibabacloudstack_polardbx_instance.default.id}"
+    instance_id  = "${local.polardbx_instance.id}"
 	account_name = "${var.name}"
-	account_type = "Normal"
-	password     = "${var.password}"
+	password     = "${random_password.password.0.result}"
 	description  = "Normal user"
 }
 
- `, name, getAccTestPassword(12), VSwitchCommonTestCase)
+ `, name, RandomPasswordTestCase(12,1), VSwitchCommonTestCase, PolardbxReadOrCreateCommonTestCase())
 }
