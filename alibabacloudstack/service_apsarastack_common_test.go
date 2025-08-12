@@ -539,6 +539,7 @@ func (dsa *dataSourceAttr) dataSourceTestCheck(t *testing.T, rand int, configs .
 			testAccPreCheck(t)
 		},
 		Providers: testAccProviders,
+		ExternalProviders: testAccExternalProviders,
 		Steps:     steps,
 	})
 }
