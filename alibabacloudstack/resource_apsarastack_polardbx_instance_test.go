@@ -98,6 +98,8 @@ func TestAccAlibabacloudStackPolardbxInstance_basic0(t *testing.T) {
 			{
 				Config: testAccConfig(map[string]interface{}{
 					"enable_public_connection": false,
+					"public_connection_string_prefix": REMOVEKEY,
+					"public_connection_port":          REMOVEKEY,
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{

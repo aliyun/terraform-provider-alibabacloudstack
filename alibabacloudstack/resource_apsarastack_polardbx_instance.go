@@ -805,6 +805,11 @@ func resourceAlibabacloudStackPolardbxInstanceRead(d *schema.ResourceData, meta 
 			d.Set("public_connection_port", v.Port)
 		}
 	}
+	if !enablePublicConnection {
+		d.Set("public_connection_string_prefix", nil)
+		d.Set("public_connection_string", nil)
+		d.Set("public_connection_port", nil)
+	}
 	d.Set("enable_public_connection", enablePublicConnection)
 
 	enable_ssl, err := polardbxService.DoPolardbxDescribeDBInstanceSSLRequest(d.Id())
