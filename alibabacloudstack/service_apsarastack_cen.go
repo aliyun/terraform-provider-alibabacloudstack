@@ -537,3 +537,34 @@ func (s *CenService) WaitForTransitRouterTableAssociation(id string, status Stat
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
 }
+
+func (s *CenService) WaitForTransitRouterTablePropagation(id string, status Status, timeout int) error {
+	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
+	parts := strings.Split(id, COLON_SEPARATED)
+	transit_router_table_id := parts[0]
+	attach_ment_id := parts[1]
+	for {
+		instance, err := s.DoCbnDescribeTransitRouterRouteTablePropagationsRequest(transit_router_table_id + ":" + attach_ment_id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				if status == Deleted {
+					return nil
+				}
+			} else {
+				return errmsgs.WrapError(err)
+			}
+		}
+		if len(instance.TransitRouterPropagations) == 0 && status == Deleted {
+			return nil
+		}
+		for _, v := range instance.TransitRouterPropagations {
+			if v.TransitRouterAttachmentId == attach_ment_id && v.Status == string(status) {
+				return nil
+			}
+		}
+		if time.Now().After(deadline) {
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, attach_ment_id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+		}
+		time.Sleep(DefaultIntervalShort * time.Second)
+	}
+}
