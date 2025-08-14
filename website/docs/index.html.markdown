@@ -39,7 +39,7 @@ provider "alibabacloudstack" {
 ### Environment Variable Configuration
 
 > The Provider supports configuring most parameters through environment variables.  
-> Basic environment variables such as `ALIBABACLOUDSTACK_ACCESS_KEY` and `ALIBABACLOUDSTACK_SECRET_KEY` provide platform access credentials for the AlibabacloudStack Provider.  
+> Basic environment variables such as `ALIBABACLOUDSTACK_ACCESS_KEY` and `ALIBABACLOUDSTACK_SECRET_KEY` and `ALIBABACLOUDSTACK_ASSUME_ROLE_ARN` provide platform access credentials for the AlibabacloudStack Provider.  
 > For other configurable environment variables, please refer to the **[Parameter Specifications](#parameter-specifications)** section.
 
 
@@ -68,7 +68,7 @@ terraform plan
 
 | Parameter Name       | Environment Variable              | Type     | Description                              | How to Obtain                                                                                 | Remarks                                                              |
 |----------------------|------------------------------------|----------|------------------------------------------|------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| popgw_domain         | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | Private cloud platform standard suffix   | ASO Platform >> Top Profile Icon >> *Personal Info* >> **Private Cloud API Usage** >> `Internet Domain` | **Required**                                                        |
+| popgw_domain         | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | AlibabaCloud ApsaraStack platform Service Endpoint suffix   | ASO Platform >> Top Profile Icon >> *Personal Info* >> **Private Cloud API Usage** >> `Internet Domain` | **Required**                                                        |
 | region               | ALIBABACLOUDSTACK_REGION          | string   | Platform Region information              | ASO Platform >> Top Region Information                                                        | **Required**                                                        |
 | is_center_region     | ALIBABACLOUDSTACK_CENTER_REGION   | bool     | Whether current region is central region | ASO Platform >> Top Profile Icon >> *Personal Info* >> **Private Cloud API Usage** >> `Is Current Region a Central Region` | Default: `true`                                                     |
 | protocol             | ALIBABACLOUDSTACK_PROTOCOL        | string   | Network protocol (`HTTP` or `HTTPS`)     | Determined by environment configuration                                                       | Default: `HTTP`                                                     |

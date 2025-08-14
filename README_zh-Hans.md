@@ -178,16 +178,16 @@ terraform init
 ```hcl
 
 provider "alibabacloudstack" {
-  popgw_domain = "xxx.xxx.com"
-  access_key   = "xxxx"
-  secret_key   = "xxxx"
-  role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
+  popgw_domain = "xxx.xxx.com" # 阿里云专有云飞天企业版服务地址标准后缀
+  access_key   = "xxxx" # 账号 AK
+  secret_key   = "xxxx" # 账号 SK
+  role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx" # 待扮演角色的Ram Role
   # security_token = "xxxxxxxx"
-  region       = "xxxx"
-  proxy        = "HTTP://x.x.x.x:xxx"
-  protocol                = "HTTPS"
-  insecure                = "true"
-  resource_group_set_name = "ResourceSet(xxxx)"
+  region       = "xxxx" # 平台 Region 信息
+  proxy        = "HTTP://x.x.x.x:xxx" # 平台 Region 信息
+  protocol                = "HTTPS" # 网络协议（可选 `HTTP` 或 `HTTPS`）
+  insecure                = "true" # 是否跳过 HTTPS 证书校验
+  resource_group_set_name = "ResourceSet(xxxx)" # 资源集名称
 }
 
 ```

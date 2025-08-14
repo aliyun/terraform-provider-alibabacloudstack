@@ -182,16 +182,16 @@ Create a `provider.tf` file in your working directory and configure according to
 ```hcl
 
 provider "alibabacloudstack" {
-  popgw_domain = "xxx.xxx.com"
-  access_key   = "xxxx"
-  secret_key   = "xxxx"
-  # role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
+  popgw_domain = "xxx.xxx.com" # AlibabaCloud ApsaraStack platform Service Endpoint suffix
+  access_key   = "xxxx" # Account Access Key
+  secret_key   = "xxxx" # Account Secret Key
+  # role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx" # RAM Role to be assumed
   # security_token = "xxxxxxxx"
-  region       = "xxxx"
-  proxy        = "HTTP://x.x.x.x:xxx"
-  protocol                = "HTTPS"
-  insecure                = "true"
-  resource_group_set_name = "ResourceSet(xxxx)"
+  region       = "xxxx" # Platform Region information
+  proxy        = "HTTP://x.x.x.x:xxx" # Proxy server address
+  protocol                = "HTTPS" # Network protocol (`HTTP` or `HTTPS`)
+  insecure                = "true" # Skip HTTPS certificate verification
+  resource_group_set_name = "ResourceSet(xxxx)" # Resource group set name
 }
 
 ```
