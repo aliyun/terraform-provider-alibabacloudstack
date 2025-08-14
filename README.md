@@ -35,7 +35,7 @@ Download TF Core from [Terraform](https://www.terraform.io/downloads.html) or [O
 
 > If the proprietary cloud version is 3.18.x (including 3.18.0, 3.18.1, 3.18.2, 3.18.6), the AlibabacloudStack version should be 3.18.x. Use `>= 3.18.0` to declare the version number when obtaining the latest version.
 
-| Private Cloud Version | AlibabacloudStack Version |
+| AlibabaCloud ApsaraStack Version | AlibabacloudStack Version |
 | ---  | ---  |
 | v3.16.2 | < 3.18.0 |
 | v3.18.x | >= 3.18.0 |
@@ -175,9 +175,9 @@ terraform init
 Create a `provider.tf` file in your working directory and configure according to your environment:
 
 > AlibabacloudStack supports both AK/SK authentication and STS authentication. It is recommended to use STS authentication.
-> + When configuring `access_key` and `secret_key`, AK/SK authentication will be used;
-> + When configuring `access_key`, `secret_key`, and `role_arn`, AlibabacloudStack will perform role assumption and use the generated STS Token for authentication;
-> + When configuring `access_key`, `secret_key`, and `security_token`, AlibabacloudStack will use the specified STS Token for authentication;
+> + [STS authentication] When configuring `access_key`, `secret_key`, and `role_arn`, AlibabacloudStack will perform role assumption and use the generated STS Token for authentication;
+> + [STS authentication] When configuring `access_key`, `secret_key`, and `security_token`, AlibabacloudStack will use the specified STS Token for authentication;
+> + [AK/SK authentication] When configuring `access_key` and `secret_key`, AK/SK authentication will be used;
 
 ```hcl
 
@@ -196,9 +196,16 @@ provider "alibabacloudstack" {
 
 ```
 
+> For detailed parameter descriptions, refer to [AlibabacloudStack Provider Parameters Documentation](website/docs/index.html.markdown)
+
 **Option 2: Environment Variables** 
 
 Configure environment variables in the command execution terminal:
+
+> AlibabacloudStack supports both AK/SK authentication and STS authentication. It is recommended to use STS authentication.
+> + [STS authentication] When configuring `ALIBABACLOUDSTACK_ACCESS_KEY`, `ALIBABACLOUDSTACK_SECRET_KEY`, and `ALIBABACLOUDSTACK_ASSUME_ROLE_ARN`, AlibabacloudStack will perform role assumption and use the generated STS Token for authentication;
+> + [STS authentication] When configuring `ALIBABACLOUDSTACK_ACCESS_KEY`, `ALIBABACLOUDSTACK_SECRET_KEY`, and `ALIBABACLOUDSTACK_SECURITY_TOKEN`, AlibabacloudStack will use the specified STS Token for authentication;
+> + [AK/SK authentication] When configuring `ALIBABACLOUDSTACK_ACCESS_KEY` and `ALIBABACLOUDSTACK_SECRET_KEY`, AK/SK authentication will be used;
 
 + *Windows PowerShell*
 
@@ -224,7 +231,7 @@ export ALIBABACLOUDSTACK_ACCESS_KEY="xxxx"
 export ALIBABACLOUDSTACK_SECRET_KEY="xxxx"
 ```
 
-> For detailed parameter descriptions, refer to [AlibabacloudStack Provider Parameters Documentation](website/docs_zh/index.html.markdown)
+> For detailed parameter descriptions, refer to [AlibabacloudStack Provider Parameters Documentation](website/docs/index.html.markdown)
 
 ### Orchestrate Resources
 

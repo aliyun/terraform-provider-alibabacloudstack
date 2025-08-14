@@ -1,4 +1,4 @@
-# 阿里云专有云Terraform Provider
+# 阿里云专有云飞天企业版Terraform Provider
 
 <img src="https://www.datocms-assets.com/2885/1506527326-color.svg" width="400px">
 
@@ -171,9 +171,9 @@ terraform init
 在工作目录下创建`provider.tf`文件，并根据环境进行进行配置。
 
 > AlibabacloudStack支持AK/SK验证和STS两种验证方式，建议使用STS验证。
-> + 当配置access_key和secret_key时使用AK/SK验证;
-> + 当配置access_key、secret_key和role_arn时，由AlibabacloudStack进行角色扮演，并使用扮演产生的STS Token进行鉴权;
-> + 当配置access_key、secret_key和security_token时，由AlibabacloudStack使用指定的STS Token进行鉴权;
+> + [STS验证方式一] 当配置`access_key`、`secret_key`和`role_arn`时，由AlibabacloudStack进行角色扮演，并使用扮演产生的STS Token进行鉴权;
+> + [STS验证方式二] 当配置`access_key`、`secret_key`和`security_token`时，由AlibabacloudStack使用指定的STS Token进行鉴权;
+> + [AK/SK验证] 当配置`access_key`和`secret_key`时使用AK/SK验证;
 
 ```hcl
 
@@ -181,7 +181,7 @@ provider "alibabacloudstack" {
   popgw_domain = "xxx.xxx.com"
   access_key   = "xxxx"
   secret_key   = "xxxx"
-  # role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
+  role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
   # security_token = "xxxxxxxx"
   region       = "xxxx"
   proxy        = "HTTP://x.x.x.x:xxx"
@@ -192,9 +192,16 @@ provider "alibabacloudstack" {
 
 ```
 
+> 详细的参数说明可以参考[AlibabacloudStack Provider参数说明](website/docs_zh-Hans/index.html.markdown)
+
 **方案二 环境变量**
 
 在为命令的执行终端配置环境变量。
+
+> AlibabacloudStack支持AK/SK验证和STS两种验证方式，建议使用STS验证。
+> + [STS验证方式一] 当配置`ALIBABACLOUDSTACK_ACCESS_KEY`、`ALIBABACLOUDSTACK_SECRET_KEY`和`ALIBABACLOUDSTACK_ASSUME_ROLE_ARN`时，由AlibabacloudStack进行角色扮演，并使用扮演产生的STS Token进行鉴权;
+> + [STS验证方式二] 当配置`ALIBABACLOUDSTACK_ACCESS_KEY`、`ALIBABACLOUDSTACK_SECRET_KEY`和`ALIBABACLOUDSTACK_SECURITY_TOKEN`时，由AlibabacloudStack使用指定的STS Token进行鉴权;
+> + [AK/SK验证] 当配置`ALIBABACLOUDSTACK_ACCESS_KEY`和`ALIBABACLOUDSTACK_SECRET_KEY`时使用AK/SK验证;
 
 + *Windows PowerShell*
 
@@ -206,6 +213,7 @@ $env:ALIBABACLOUDSTACK_PROTOCOL = "HTTPS"
 $env:ALIBABACLOUDSTACK_INSECURE = "true"
 $env:ALIBABACLOUDSTACK_ACCESS_KEY = "xxxx"
 $env:ALIBABACLOUDSTACK_SECRET_KEY = "xxxx"
+$env:ALIBABACLOUDSTACK_ASSUME_ROLE_ARN = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
 ```
 
 + *类Unix系统*
@@ -218,6 +226,7 @@ export ALIBABACLOUDSTACK_PROTOCOL="HTTPS"
 export ALIBABACLOUDSTACK_INSECURE="true"
 export ALIBABACLOUDSTACK_ACCESS_KEY="xxxx"
 export ALIBABACLOUDSTACK_SECRET_KEY="xxxx"
+export ALIBABACLOUDSTACK_ASSUME_ROLE_ARN = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
 ```
 
 > 详细的参数说明可以参考[AlibabacloudStack Provider参数说明](website/docs_zh-Hans/index.html.markdown)

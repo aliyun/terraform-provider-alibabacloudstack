@@ -29,6 +29,8 @@ terraform {
 provider "alibabacloudstack" {
   access_key               = var.access_key
   secret_key               = var.secret_key
+  role_arn                 = var.role_arn
+  # security_token         = var.security_token
   region                   = var.region
   insecure                 = true
   proxy                    = var.proxy
@@ -54,12 +56,13 @@ provider "alibabacloudstack" {
 + 执行终端配置
 
 ```shell
-$ export ALIBABACLOUDSTACK_ACCESS_KEY="Your Access Key"
-$ export ALIBABACLOUDSTACK_SECRET_KEY="Your Asecret Key"
-$ export ALIBABACLOUDSTACK_REGION="Region Name"
-$ export ALIBABACLOUDSTACK_INSECURE= true
-$ export ALIBABACLOUDSTACK_PROXY= "http://IP:Port"
-$ terraform plan
+export ALIBABACLOUDSTACK_ACCESS_KEY="Your Access Key"
+export ALIBABACLOUDSTACK_SECRET_KEY="Your Asecret Key"
+export ALIBABACLOUDSTACK_ASSUME_ROLE_ARN = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
+export ALIBABACLOUDSTACK_REGION="Region Name"
+export ALIBABACLOUDSTACK_INSECURE= true
+export ALIBABACLOUDSTACK_PROXY= "http://IP:Port"
+terraform plan
 ```
 
 ## 参数说明
@@ -81,27 +84,27 @@ $ terraform plan
 
 > AlibabacloudStack Provider 支持多种访问凭证，请根据实际需求选择。
 
-#### 1. 账号 AK/SK
+#### 1. 账号扮演
 
 > **注意**：  
-> - 账号 AK/SK 相关参数可在 ASCM 页面上查询。  
-> - 若部分版本的组织和资源集名称不唯一，需使用 `department` 和 `resource_group` 替代 `resource_group_set_name`。
+> - Provider 通过是否配置 `role_arn` 判断是不需要进行帐号扮演。
+> - `role_arn` 可在 ASCM 页面的*个人信息*页，通过点击**查看当前角色策略**，获取用户在特定组织下的`RAM Role`。
+> - 账号扮演有效时间为3600秒。
 
 | 参数名                  | 环境变量名                        | 参数类型 | 参数含义                | 备注                                                                 |
 |-------------------------|-----------------------------------|----------|-------------------------|----------------------------------------------------------------------|
-| access_key              | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | 账号 AK                 | **必填**                                                             |
-| secret_key              | ALIBABACLOUDSTACK_SECRET_KEY      | string   | 账号 SK                 | **必填**                                                             |
+| access_key              | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | 账号 AK             | **必填**                                                             |
+| secret_key              | ALIBABACLOUDSTACK_SECRET_KEY      | string   | 账号 SK             | **必填**                                                             |
+| role_arn                | ALIBABACLOUDSTACK_ASSUME_ROLE_ARN  | string  | 待扮演的角色(Ram Role)  | **必填**                                                             |
 | department              | ALIBABACLOUDSTACK_DEPARTMENT      | string   | 凭证登录时的组织        | `resource_group_set_name` 不可用或未配置时必填                       |
 | resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集      | `resource_group_set_name` 不可用或未配置时必填                       |
 | resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |                                                                      |
-
----
 
 #### 2. 账号 STS Token
 
 > **注意**：  
 > - Provider 通过是否配置 `security_token` 判断 AK/SK 类型。  
-> - 需通过 API 接口使用角色扮演获取临时凭证。
+> - 需通过API "Sts 2015-04-01 AssumeRole"接口使用角色扮演获取临时凭证。
 
 | 参数名                  | 环境变量名                        | 参数类型 | 参数含义                | 备注                                                                 |
 |-------------------------|-----------------------------------|----------|-------------------------|----------------------------------------------------------------------|
@@ -112,17 +115,16 @@ $ terraform plan
 | resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集      | `resource_group_set_name` 不可用或未配置时必填                       |
 | resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |                                                                      |
 
-#### 3. 账号扮演
+#### 3. 账号 AK/SK
 
 > **注意**：  
-> - Provider 通过是否配置 `role_arn` 判断是不需要进行帐号扮演。
-> - 账号扮演有效时间为3600秒。
+> - 账号 AK/SK 相关参数可在 ASCM 页面上查询。  
+> - 若部分版本的组织和资源集名称不唯一，需使用 `department` 和 `resource_group` 替代 `resource_group_set_name`。
 
 | 参数名                  | 环境变量名                        | 参数类型 | 参数含义                | 备注                                                                 |
 |-------------------------|-----------------------------------|----------|-------------------------|----------------------------------------------------------------------|
-| access_key              | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | 账号 AK             | **必填**                                                             |
-| secret_key              | ALIBABACLOUDSTACK_SECRET_KEY      | string   | 账号 SK             | **必填**                                                             |
-| role_arn                | ALIBABACLOUDSTACK_ASSUME_ROLE_ARN  | string   | 待扮演的帐号ARN          | **必填**                                                             |
+| access_key              | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | 账号 AK                 | **必填**                                                             |
+| secret_key              | ALIBABACLOUDSTACK_SECRET_KEY      | string   | 账号 SK                 | **必填**                                                             |
 | department              | ALIBABACLOUDSTACK_DEPARTMENT      | string   | 凭证登录时的组织        | `resource_group_set_name` 不可用或未配置时必填                       |
 | resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集      | `resource_group_set_name` 不可用或未配置时必填                       |
 | resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |                                                                      |
