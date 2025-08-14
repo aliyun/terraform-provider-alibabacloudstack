@@ -20,7 +20,7 @@ terraform {
   required_providers {
     alibabacloudstack = {
       source  = "aliyun/alibabacloudstack"
-      # version = ">= 3.18.0"
+      # version = "< 3.19.0"
     }
   }
 }
@@ -33,7 +33,7 @@ provider "alibabacloudstack" {
   # security_token         = "Your STS Token"
   region                   = "Region Name"
   insecure                 = true
-  # proxy                    = "http://IP:Port"
+  # proxy                  = "http://IP:Port"
   resource_group_set_name  = "Your Resource Group Set Name"
   popgw_domain             = "xxx.xxx.com"
   protocol                 = "HTTPS"
@@ -58,10 +58,10 @@ provider "alibabacloudstack" {
 ```shell
 export ALIBABACLOUDSTACK_ACCESS_KEY="Your Access Key"
 export ALIBABACLOUDSTACK_SECRET_KEY="Your Secret Key"
-export ALIBABACLOUDSTACK_ASSUME_ROLE_ARN = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
+export ALIBABACLOUDSTACK_ASSUME_ROLE_ARN="acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
 export ALIBABACLOUDSTACK_REGION="Region Name"
-export ALIBABACLOUDSTACK_INSECURE= true
-export ALIBABACLOUDSTACK_PROXY= "http://IP:Port"
+export ALIBABACLOUDSTACK_INSECURE=true
+export ALIBABACLOUDSTACK_PROXY="http://IP:Port"
 export ALIBABACLOUDSTACK_POPGW_DOMAIN="xxx.xxx.com"
 terraform plan
 ```
@@ -98,8 +98,8 @@ terraform plan
 | access_key              | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | 账号 AK             | **必填**                                                             |
 | secret_key              | ALIBABACLOUDSTACK_SECRET_KEY      | string   | 账号 SK             | **必填**                                                             |
 | role_arn                | ALIBABACLOUDSTACK_ASSUME_ROLE_ARN  | string  | 待扮演的角色(Ram Role)  | **必填**                                                             |
-| department              | ALIBABACLOUDSTACK_DEPARTMENT      | string   | 凭证登录时的组织        | `resource_group_set_name` 不可用或未配置时必填                       |
-| resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集      | `resource_group_set_name` 不可用或未配置时必填                       |
+| department              | ALIBABACLOUDSTACK_DEPARTMENT      | string   | 凭证登录时的组织ID        | `resource_group_set_name` 不可用或未配置时必填                       |
+| resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集ID      | `resource_group_set_name` 不可用或未配置时必填                       |
 | resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |                                                                      |
 
 #### 2. 账号 STS Token
@@ -114,9 +114,9 @@ terraform plan
 | access_key              | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | 临时凭证 AK             | **必填**                                                             |
 | secret_key              | ALIBABACLOUDSTACK_SECRET_KEY      | string   | 临时凭证 SK             | **必填**                                                             |
 | security_token          | ALIBABACLOUDSTACK_SECURITY_TOKEN  | string   | 临时凭证 Token          | **必填**                                                             |
-| department              | ALIBABACLOUDSTACK_DEPARTMENT      | string   | 凭证登录时的组织        | `resource_group_set_name` 不可用或未配置时必填                       |
-| resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集      | `resource_group_set_name` 不可用或未配置时必填                       |
-| resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |                                                                      |
+| department              | ALIBABACLOUDSTACK_DEPARTMENT      | string   | 凭证登录时的组织ID        | `resource_group_set_name`不可用(冲突)或未配置时必填                     |
+| resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集ID      | `resource_group_set_name`不可用(冲突)或未配置时必填                      |
+| resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |                                                                       |
 
 #### 3. 账号 AK/SK
 
@@ -128,6 +128,6 @@ terraform plan
 |-------------------------|-----------------------------------|----------|-------------------------|----------------------------------------------------------------------|
 | access_key              | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | 账号 AK                 | **必填**                                                             |
 | secret_key              | ALIBABACLOUDSTACK_SECRET_KEY      | string   | 账号 SK                 | **必填**                                                             |
-| department              | ALIBABACLOUDSTACK_DEPARTMENT      | string   | 凭证登录时的组织        | `resource_group_set_name` 不可用或未配置时必填                       |
-| resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集      | `resource_group_set_name` 不可用或未配置时必填                       |
-| resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |                                                                      |
+| department              | ALIBABACLOUDSTACK_DEPARTMENT      | string   | 凭证登录时的组织ID        | `resource_group_set_name` 不可用(冲突)或未配置时必填                     |
+| resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集ID      | `resource_group_set_name` 不可用(冲突)或未配置时必填                      |
+| resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |                                                                        |

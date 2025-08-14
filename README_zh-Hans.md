@@ -12,9 +12,9 @@
 
 ---
 
-- [GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack)
 - [阿里云帮助中心](https://help.aliyun.com/apsara/index.html)
 - [Terraform Public Registry](https://registry.terraform.io/providers/aliyun/alibabacloudstack)
+- [GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack)
 
 ## 环境配置
 
@@ -22,40 +22,42 @@
 
 ### 安装依赖
 
-从[Terraform](https://www.terraform.io/downloads.html)官网或[OpenTofu](https://opentofu.org/docs/intro/install/)官网下载TF Core，并安装或解压到本地。推荐将安装路径配置到系统`PATH`变量中。
+从[Terraform](https://www.terraform.io/downloads.html)官网或[OpenTofu](https://opentofu.org/docs/intro/install/)官网下载TF Core，并安装到本地。推荐将安装路径添加到系统`PATH`变量中。
 
 > **注意**：Terraform需要版本不低于0.13.x，OpenTofu无最低版本要求。
 
 ### 安装Terraform Provider
 
 > 请根据专有云版本选择合适的AlibabacloudStack版本。
+>
+> + 如果阿里云专有云飞天企业版版本为3.16.2, AlibabacloudStack版本为 3.16.x，获取最新版本可使用`< 3.18.0`声明版本号。**注意**，因版本差异，请使用对应版本文档。
+>
+> + 如果阿里云专有云飞天企业版版本为3.18.x(3.18.0,3.18.1,3.18.2,3.18.6), AlibabacloudStack版本为 3.18.x，获取最新版本可使用`< 3.19.0`声明版本号。
+>
+> + 其他阿里云专有云飞天企业版的Terraform Provider版本请咨询阿里云专有云服务人员。
 
-> 如果专有云版本为3.16.2, AlibabacloudStack版本为 3.16.x，获取最新版本可用使用`< 3.18.0`声明版本号。
-
-> 如果专有云版本为3.18.x(3.18.0,3.18.1,3.18.2,3.18.6), AlibabacloudStack版本为 3.18.x，获取最新版本可用使用`>= 3.18.0`声明版本号。
-
-| 专有云版本 | AlibabacloudStack版本 |
+| 阿里云专有云飞天企业版版本 | AlibabacloudStack版本 |
 | ---  | ---  |
 | v3.16.2 | < 3.18.0 |
-| v3.18.x | >= 3.18.0 |
+| v3.18.x | < 3.19.0 |
 
 **方案一 自动安装**
 
-> **注意**：只有你的执行环境可以正常访问Github可以使用自动安装，该方案不需要额外的配置，直接跳转到[快速开始](#快速开始)开始使用，后续TF Core会自动安装Provider。
+> **注意**：只有当执行环境可以正常访问Github时，可以使用自动安装方案。该方案不需要额外的配置，直接跳转到[快速开始](#快速开始)开始使用，后续TF Core会自动安装AlibabacloudStack。
 
 **方案二 镜像站点安装**
 
-> **说明**：镜像站点安装可以有效解决网络隔离或网络不稳定导致的安装失败的问题。
+> **说明**：镜像站点通过本地化下载源，解决因网络隔离或不稳定导致的安装问题。
 
-1. 创建.terraformrc 或terraform.rc配置文件，文件位置取决于主机的操作系统。
+1. 创建Terraform配置文件，文件位置取决于主机的操作系统。
    
    > **说明**：
    > 
-   > 在 Windows 环境上，文件必须命名为terraform.rc，并放置在相关用户的%APPDATA%目录中。这个目录的物理位置取决于Windows 版本和系统配置；在 PowerShell 中使用 $env:APPDATA 可以找到其在系统上的位置。
+   > 在 Windows 环境上，文件必须命名为`terraform.rc`，并放置在相关用户的%APPDATA%目录中。这个目录的位置取决于Windows版本和系统配置；在 PowerShell 中使用`$env:APPDATA`可以找到其在系统上的位置。
    > 
-   > 在所有其他系统上，必须将该文件命名为.terraformrc，并直接放在相关用户的主目录中。
+   > 在所有其他系统上，必须将该文件命名为`.terraformrc`，并直接放在相关用户的主目录中。
    > 
-   > 另外，你也可以使用TF_CLI_CONFIG_FILE环境变量指定 Terraform CLI 配置文件的位置，任何此类文件都应遵循命名模式`*.tfrc`。
+   > 此外，你还可以通过设置`TF_CLI_CONFIG_FILE`环境变量来自定义Terraform配置文件的路径。通过此方式指定的配置文件需采用`.tfrc`的后缀名命名文件。
 
 2. 配置镜像站点信息
 
@@ -65,7 +67,7 @@
 provider_installation {
   network_mirror {
     url = "https://mirrors.aliyun.com/terraform/"
-    // 限制只有AlibabacloudStack从镜像源下载
+    // 仅允许AlibabacloudStack从镜像源下载
     include = [
       "registry.terraform.io/aliyun/alibabacloudstack",
       "registry.terraform.io/hashicorp/alibabacloudstack",
@@ -83,28 +85,28 @@ provider_installation {
 
 **方案三 手动安装**
 
-从[GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack/releases/)下载合适版本的AlibabacloudStack，在选定安装路径下依照指定的格式创建目录架构，并解压Provider。
+从[GitHub](https://github.com/aliyun/terraform-provider-alibabacloudstack/releases/)下载所需的AlibabacloudStack版本。在选定的安装路径下，依照指定格式创建目录结构，并解压Provider。
 
 > **注意**： 错误的目录结构会导致Provider加载失败
 
-Provider标准目录格式：
+Provider标准目录结构：
 
 ```
-XX(插件根路径 如：./terraform.d/providers/)
+XX(Provider仓库路径 如：./terraform.d/providers/)
 └── <hostname>(Terraform用registry.terraform.io，Opentofu用registry.opentofu.org)
-    └── <命名空间>(如： hashicorp或aliyun)
+    └── <命名空间>(aliyun)
         └── <Provider名称>(alibabacloudstack)
             └── <Provider版本>(如： 1.0.20)
                 └── <系统架构>(如： windows_amd64)
                     └── <Provider文件>(terraform-provider-alibabacloudstack)
 ```
 
-> **注意**： 命名空间层，建议使用hashicorp，如果使用aliyun，在后续步骤编写Provider信息时要注意申明aliyun。
+> **注意**： 命名空间，建议使用aliyun。并在[初始化项目](#初始化项目)步骤编写`provider.tf`文件时声明alibabacloudstack的`source`为"aliyun/alibabacloudstack"。
 
 > **注意**： 常见的系统架构有：windows_amd64，linux_amd64，linux_arm64，darwin_amd64，darwin_arm64
 
 >
-> **注意**： 插件根路径可以选择官方默认路径下，在每次执行时自动加载，也可以安装到自定义路径下，但需要在每次执行时手动指定路径。
+> **注意**： Provider仓库路径可以选择官方默认路径，实现在每次执行时自动加载；也可以安装到自定义路径下，但需要在每次执行时手动指定路径。
 > 
 > 根据不同的系统，Terraform会依次尝试从多个路径中进行扫描并加载Provider。
 > 
@@ -141,11 +143,11 @@ XX(插件根路径 如：./terraform.d/providers/)
 1. 新建工作目录，并创建`provider.tf`文件
 
 ```hcl
- terraform {
+terraform {
   required_providers {
     alibabacloudstack = {
       source = "aliyun/alibabacloudstack"
-      #version = ">=3.18.0"
+      #version = "< 3.19.0"
     }
   }
 }
@@ -159,21 +161,21 @@ XX(插件根路径 如：./terraform.d/providers/)
 terraform init
 ```
 
-> **注意**：如果在《安装Terraform Provider》章节中，自定义了插件根路径，初始化时需要指定相关路径
+> **注意**：如果在《安装Terraform Provider》章节中，使用非官方的Provider仓库路径，初始化时需要指定相关路径
 >	```bash
->	terraform init -plugin-dir=<YOUR PLUGIN ROOT PATH>
+>	terraform init -plugin-dir=<插件根路径>
 >	```
 
 ### 配置集群链接信息
 
 **方案一 配置文件**
 
-在工作目录下创建`provider.tf`文件，并根据环境进行进行配置。
+在工作目录下创建`provider.tf`文件，并根据实际环境配置相关参数。
 
 > AlibabacloudStack支持AK/SK验证和STS两种验证方式，建议使用STS验证。
-> + [STS验证方式一] 当配置`access_key`、`secret_key`和`role_arn`时，由AlibabacloudStack进行角色扮演，并使用扮演产生的STS Token进行鉴权;
-> + [STS验证方式二] 当配置`access_key`、`secret_key`和`security_token`时，由AlibabacloudStack使用指定的STS Token进行鉴权;
-> + [AK/SK验证] 当配置`access_key`和`secret_key`时使用AK/SK验证;
+> + [STS验证方式一] 当配置`access_key`、`secret_key`和`role_arn`时，由AlibabacloudStack进行角色扮演，并使用扮演产生的STS Token进行鉴权。
+> + [STS验证方式二] 当配置`access_key`、`secret_key`和`security_token`时，由AlibabacloudStack使用指定的STS Token进行鉴权。
+> + [AK/SK验证] 当配置`access_key`和`secret_key`时使用AK/SK验证。
 
 ```hcl
 
@@ -183,10 +185,10 @@ provider "alibabacloudstack" {
   secret_key   = "xxxx" # 账号 SK
   role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx" # 待扮演角色的Ram Role
   # security_token = "xxxxxxxx"
-  region       = "xxxx" # 平台 Region 信息
-  proxy        = "HTTP://x.x.x.x:xxx" # 平台 Region 信息
+  region       = "xxxx" # 阿里云专有云平台的Region信息
+  proxy        = "HTTP://x.x.x.x:xxx" # 代理服务器地址
   protocol                = "HTTPS" # 网络协议（可选 `HTTP` 或 `HTTPS`）
-  insecure                = "true" # 是否跳过 HTTPS 证书校验
+  insecure                = "true" # 是否跳过 HTTPS 证书校验（值为字符串 "true" 或 "false"）
   resource_group_set_name = "ResourceSet(xxxx)" # 资源集名称
 }
 
@@ -199,9 +201,9 @@ provider "alibabacloudstack" {
 在为命令的执行终端配置环境变量。
 
 > AlibabacloudStack支持AK/SK验证和STS两种验证方式，建议使用STS验证。
-> + [STS验证方式一] 当配置`ALIBABACLOUDSTACK_ACCESS_KEY`、`ALIBABACLOUDSTACK_SECRET_KEY`和`ALIBABACLOUDSTACK_ASSUME_ROLE_ARN`时，由AlibabacloudStack进行角色扮演，并使用扮演产生的STS Token进行鉴权;
-> + [STS验证方式二] 当配置`ALIBABACLOUDSTACK_ACCESS_KEY`、`ALIBABACLOUDSTACK_SECRET_KEY`和`ALIBABACLOUDSTACK_SECURITY_TOKEN`时，由AlibabacloudStack使用指定的STS Token进行鉴权;
-> + [AK/SK验证] 当配置`ALIBABACLOUDSTACK_ACCESS_KEY`和`ALIBABACLOUDSTACK_SECRET_KEY`时使用AK/SK验证;
+> + [STS验证方式一] 当配置`ALIBABACLOUDSTACK_ACCESS_KEY`、`ALIBABACLOUDSTACK_SECRET_KEY`和`ALIBABACLOUDSTACK_ASSUME_ROLE_ARN`时，由AlibabacloudStack进行角色扮演，并使用扮演产生的STS Token进行鉴权。
+> + [STS验证方式二] 当配置`ALIBABACLOUDSTACK_ACCESS_KEY`、`ALIBABACLOUDSTACK_SECRET_KEY`和`ALIBABACLOUDSTACK_SECURITY_TOKEN`时，由AlibabacloudStack使用指定的STS Token进行鉴权。
+> + [AK/SK验证] 当配置`ALIBABACLOUDSTACK_ACCESS_KEY`和`ALIBABACLOUDSTACK_SECRET_KEY`时使用AK/SK验证。
 
 + *Windows PowerShell*
 
@@ -226,7 +228,7 @@ export ALIBABACLOUDSTACK_PROTOCOL="HTTPS"
 export ALIBABACLOUDSTACK_INSECURE="true"
 export ALIBABACLOUDSTACK_ACCESS_KEY="xxxx"
 export ALIBABACLOUDSTACK_SECRET_KEY="xxxx"
-export ALIBABACLOUDSTACK_ASSUME_ROLE_ARN = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
+export ALIBABACLOUDSTACK_ASSUME_ROLE_ARN="acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
 ```
 
 > 详细的参数说明可以参考[AlibabacloudStack Provider参数说明](website/docs_zh-Hans/index.html.markdown)
@@ -260,7 +262,7 @@ terraform destroy # 销毁资源
 
 ---
 
-请查看[ReleaseNode](./CHANGELOG_zh_Hans.md)
+请查看[变更日志](./CHANGELOG_zh_Hans.md)
 
 ## 开发教程
 
@@ -310,7 +312,7 @@ GOOS=<OS> GOARCH=<ARCH> go build
 
 ### 日志追踪
 
-> **说明**： 当你对AlibabacloudStack所发起的API进行追逐时可以打开日志进行日志的追踪。
+> **说明**： 当你需要追踪AlibabacloudStack发起的API请求时，可开启日志追踪功能。
 
 ```bash
 export DEBUG="terraform"
@@ -324,7 +326,7 @@ terraform apply
 
 :warning:：Terraform Core的部分能力不被Provider支持
 
-| Rpc Name  | terraform-v1.0.11  | terraform-v1.1.9  | terraform-v1.2.9  | terraform-v1.3.10  | terraform-v1.4.7  | terraform-v1.5.7  | terraform-v1.6.6  | terraform-v1.7.5  | terraform-v1.8.5  | terraform-v1.9.3  | opentofu-v1.6.3  | opentofu-v1.7.3  | opentofu-v1.8.0 |
+| RPC Name  | terraform-v1.0.11  | terraform-v1.1.9  | terraform-v1.2.9  | terraform-v1.3.10  | terraform-v1.4.7  | terraform-v1.5.7  | terraform-v1.6.6  | terraform-v1.7.5  | terraform-v1.8.5  | terraform-v1.9.3  | opentofu-v1.6.3  | opentofu-v1.7.3  | opentofu-v1.8.0 |
 | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | ---  | --- |
 | GetSchema  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :warning:  | :warning:  | :white_check_mark:  | :warning:  | :warning: |
 | PrepareProviderConfig  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark:  | :white_check_mark: |
