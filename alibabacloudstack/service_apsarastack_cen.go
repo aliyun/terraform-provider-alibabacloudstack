@@ -154,6 +154,92 @@ type TransitRouterAttachmentsResponse struct {
 	RequestId string `json:"RequestId"`
 }
 
+type SourceRegionIds struct {
+	SourceRegionId []string `json:"SourceRegionId"`
+}
+
+type DestinationChildInstanceTypes struct {
+	DestinationChildInstanceType []string `json:"DestinationChildInstanceType"`
+}
+type SourceChildInstanceTypes struct {
+	SourceChildInstanceType []string `json:"SourceChildInstanceType"`
+}
+type DestinationRouteTableIds struct {
+	DestinationRouteTableId []string `json:"DestinationRouteTableId"`
+}
+type SourceInstanceIds struct {
+	SourceInstanceId []string `json:"SourceInstanceId"`
+}
+
+type DestinationCidrBlocks struct {
+	DestinationCidrBlock []string `json:"DestinationCidrBlock"`
+}
+type RouteTypes struct {
+	RouteType []string `json:"RouteType"`
+}
+
+type MatchAsns struct {
+	MatchAsn []int `json:"MatchAsn"`
+}
+
+type PrependAsPath struct {
+	AsPath []string `json:"AsPath"`
+}
+
+type OperateCommunitySet struct {
+	OperateCommunity []string `json:"OperateCommunity"`
+}
+
+type MatchCommunitySet struct {
+	MatchCommunity []string `json:"MatchCommunity"`
+}
+
+type DestinationInstanceIds struct {
+	DestinationInstanceId []string `json:"DestinationInstanceId"`
+}
+
+type SourceRouteTableIds struct {
+	SourceRouteTableId []string `json:"SourceRouteTableId"`
+}
+
+type CbnDescribeCenRouteMapsResponse struct {
+	RouteMaps struct {
+		RouteMap []struct {
+			Status                             string                        `json:"Status"`
+			TransitRouterRouteTableId          string                        `json:"TransitRouterRouteTableId"`
+			Preference                         int                           `json:"Preference,omitempty"`
+			Priority                           int                           `json:"Priority"`
+			TransmitDirection                  string                        `json:"TransmitDirection"`
+			CenId                              string                        `json:"CenId"`
+			NextPriority                       int                           `json:"NextPriority,omitempty"`
+			CenRegionId                        string                        `json:"CenRegionId"`
+			RouteMapId                         string                        `json:"RouteMapId"`
+			Description                        string                        `json:"Description"`
+			MapResult                          string                        `json:"MapResult"`
+			CommunityOperateMode               string                        `json:"CommunityOperateMode"`
+			MatchAsns                          MatchAsns                     `json:"MatchAsns,omitempty"`
+			MatchAddressType                   string                        `json:"MatchAddressType"`
+			AsPathMatchMode                    string                        `json:"AsPathMatchMode"`
+			CidrMatchMode                      string                        `json:"CidrMatchMode"`
+			CommunityMatchMode                 string                        `json:"CommunityMatchMode"`
+			SourceInstanceIdsReverseMatch      bool                          `json:"SourceInstanceIdsReverseMatch"`
+			DestinationInstanceIdsReverseMatch bool                          `json:"DestinationInstanceIdsReverseMatch"`
+			RouteTypes                         RouteTypes                    `json:"RouteTypes,omitempty"`
+			SourceRegionIds                    SourceRegionIds               `json:"SourceRegionIds,omitempty"`
+			PrependAsPath                      PrependAsPath                 `json:"PrependAsPath,omitempty"`
+			OperateCommunitySet                OperateCommunitySet           `json:"OperateCommunitySet,omitempty"`
+			MatchCommunitySet                  MatchCommunitySet             `json:"MatchCommunitySet,omitempty"`
+			DestinationInstanceIds             DestinationInstanceIds        `json:"DestinationInstanceIds,omitempty"`
+			DestinationChildInstanceTypes      DestinationChildInstanceTypes `json:"DestinationChildInstanceTypes,omitempty"`
+			DestinationRouteTableIds           DestinationRouteTableIds      `json:"DestinationRouteTableIds,omitempty"`
+			SourceRouteTableIds                SourceRouteTableIds           `json:"SourceRouteTableIds,omitempty"`
+			DestinationCidrBlocks              DestinationCidrBlocks         `json:"DestinationCidrBlocks,omitempty"`
+			SourceChildInstanceTypes           SourceChildInstanceTypes      `json:"SourceChildInstanceTypes,omitempty"`
+			SourceInstanceIds                  SourceInstanceIds             `json:"SourceInstanceIds,omitempty"`
+		} `json:"RouteMap"`
+	} `json:"RouteMaps"`
+}
+
 func (s *CenService) DoCbnDescribecensRequest(id string) (*CenInstance, error) {
 	// api: Dds - 2022-11-21 - DescribeAccounts
 	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DescribeCens", "")
@@ -567,4 +653,34 @@ func (s *CenService) WaitForTransitRouterTablePropagation(id string, status Stat
 		}
 		time.Sleep(DefaultIntervalShort * time.Second)
 	}
+}
+
+func (s *CenService) DoCbnDescribeCenRouteMapsRequest(id string) (*CbnDescribeCenRouteMapsResponse, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "DescribeCenRouteMaps", "")
+	CbnDescribeRouteMapsResponseObj := &CbnDescribeCenRouteMapsResponse{}
+	//调用request_params_handler
+	parts := strings.Split(id, ":")
+	cen_id := parts[0]
+	route_table_id := parts[2]
+	request.QueryParams["CenId"] = cen_id
+	request.QueryParams["TransitRouterRouteTableId"] = route_table_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "DescribeCenRouteMaps", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnDescribeRouteMapsResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "DescribeCenRouteMaps", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return CbnDescribeRouteMapsResponseObj, nil
 }
