@@ -14,7 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func ResourceAlibabacloudStackCenTransitRouterVpcAttachment() *schema.Resource {
+func resourceAlibabacloudStackCenTransitRouterVpcAttachment() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"auto_publish_route_enabled": {
