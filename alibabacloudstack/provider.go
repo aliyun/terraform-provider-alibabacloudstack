@@ -908,6 +908,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardbx_account_database_binding":           resourceAlibabacloudStackPolardbxAccountDatabaseBinding(),
 		"alibabacloudstack_polardbx_backup":                             resourceAlibabacloudStackPolardbxBackup(),
 		"alibabacloudstack_polardbx_backup_policy":                      resourceAlibabacloudStackPolardbxBackupPolicy(),
+		"alibabacloudstack_polardbx_log_engine":                         resourceAlibabacloudStackPolardbxLogEngine(),
 	}
 	if v, err := stringToBool(os.Getenv("APSARASTACK_IN_ALIBABACLOUDSTACK")); err != nil && !v {
 		return maps

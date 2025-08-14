@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/PaesslerAG/jsonpath"
+	"github.com/alibabacloud-go/tea/tea"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -348,7 +349,7 @@ func (s *PolardbXService) ModifyParameters(d *schema.ResourceData, attribute str
 			for _, v := range running_parameters.([]interface{}) {
 				parameter := v.(map[string]interface{})
 				if vv, ok := parameter["ParameterName"]; ok {
-					parameters[vv.(string)] =parameter["ParameterValue"].(string)
+					parameters[vv.(string)] = parameter["ParameterValue"].(string)
 				}
 			}
 		}
@@ -873,7 +874,7 @@ func (s *PolardbXService) DescribePolarDbXBackup(backup_id string) (*PolarDbXBac
 		}
 	}
 
-	return nil, errmsgs.Error(fmt.Sprintf(errmsgs.NotFoundMsg, "PolarDbXBackup"))
+	return nil, errmsgs.Error(errmsgs.NotFoundMsg, "PolarDbXBackup")
 }
 
 func (s *PolardbXService) DescribePolarDbXBackupStateRefreshFunc(id string, failStates []string) resource.StateRefreshFunc {
@@ -943,4 +944,89 @@ func (s *PolardbXService) DescribePolarDbXBackupConfig(instanceId string) (*Pola
 		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_polardbx_backup", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	return &PolarDbXBackupConfigResponseObj.Data, nil
+}
+
+type PolarDbXLogEngineInfo struct {
+	InstanceName string `json:"InstanceName"`
+	GroupName    string `json:"GroupName"`
+	Comment      string `json:"Comment"`
+	HashLevel    string `json:"HashLevel"`
+	ClusterType  string `json:"ClusterType"`
+	NodeClass    string `json:"NodeClass"`
+	NodeCount    int    `json:"NodeCount"`
+}
+
+func (s *PolardbXService) DescribePolardbxLogEngine(instanceId string) ([]PolarDbXLogEngineInfo, error) {
+	var result []PolarDbXLogEngineInfo
+	if response, err := s.client.DoTeaRequest("GET", "polardbx", "2020-02-02", "DescribeCdcInfo", "", nil, map[string]interface{}{"DBInstanceName": instanceId}, nil); err != nil {
+		return result, err
+	} else {
+		for _, item := range response["Data"].(map[string]interface{})["InstanceTopologyList"].([]interface{}) {
+			data := item.(map[string]interface{})
+			var info PolarDbXLogEngineInfo
+			if _, ok := data["GroupName"]; ok {
+				info = PolarDbXLogEngineInfo{
+					InstanceName: data["InstanceName"].(string),
+					GroupName:    data["GroupName"].(string),
+					Comment:      data["Comment"].(string),
+					HashLevel:    data["HashLevel"].(string),
+					NodeClass:    data["PhysicalNodes"].([]interface{})[0].(map[string]interface{})["NodeClass"].(string),
+					NodeCount:    len(data["PhysicalNodes"].([]interface{})),
+					ClusterType:  data["ClusterType"].(string),
+				}
+			} else {
+				info = PolarDbXLogEngineInfo{
+					InstanceName: data["InstanceName"].(string),
+					Comment:      data["Comment"].(string),
+					NodeClass:    data["PhysicalNodes"].([]interface{})[0].(map[string]interface{})["NodeClass"].(string),
+					NodeCount:    len(data["PhysicalNodes"].([]interface{})),
+				}
+			}
+			result = append(result, info)
+		}
+	}
+	return result, nil
+}
+
+func (s *PolardbXService) WaitCdcNodeReady(instanceId string) error {
+	time.Sleep(10 * time.Second)
+	err := resource.Retry(10*time.Minute, func() *resource.RetryError {
+		if response, err := s.client.DoTeaRequest("GET", "polardbx", "2020-02-02", "DescribeCdcInfo", "", nil, map[string]interface{}{"DBInstanceName": instanceId}, nil); err != nil {
+			if errmsgs.NotFoundError(err) {
+				return resource.NonRetryableError(err)
+			}
+			return resource.RetryableError(err)
+		} else {
+			for _, item := range response["Data"].(map[string]interface{})["InstanceTopologyList"].([]interface{}) {
+				nodes := item.(map[string]interface{})
+				for _, node := range nodes["PhysicalNodes"].([]interface{}) {
+					info := node.(map[string]interface{})
+					if info["Status"].(string) != "ACTIVATION" {
+						time.Sleep(5 * time.Second)
+						return resource.RetryableError(fmt.Errorf("Node for instance %s is not ready", nodes["InstanceName"].(string)))
+					}
+				}
+			}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *PolardbXService) ModifyCdcClass(reqQuery map[string]interface{}) error {
+	if _, err := s.client.DoTeaRequest("POST", "polardbx", "2020-02-02", "ModifyCdcClass", "", nil, reqQuery, nil); err != nil {
+		if sdkError, ok := err.(*errmsgs.ComplexError); ok {
+			err = sdkError.Cause
+		}
+		if sdkError, ok := err.(*tea.SDKError); !ok || *sdkError.Code != "IncorrectTargetClasscode" {
+			return err
+		}
+	}
+	if err := s.WaitCdcNodeReady(reqQuery["DBInstanceName"].(string)); err != nil {
+		return err
+	}
+	return nil
 }

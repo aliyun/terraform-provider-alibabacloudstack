@@ -188,7 +188,7 @@ func dataSourceAlibabacloudStackPolardbxInstancesRead(d *schema.ResourceData, me
 	client := meta.(*connectivity.AlibabacloudStackClient)
 
 	// api: polardbx - 2020-02-02 - DescribeDBInstances
-	request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "DescribeDBInstances", "")
+	request := client.NewCommonRequest("GET", "polardbx", "2020-02-02", "DescribeDBInstances", "")
 	PolardbxDescribedbinstancesResponseObj := PolardbxDescribedbinstancesResponse{}
 
 	bresponse, err := client.ProcessCommonRequest(request)
