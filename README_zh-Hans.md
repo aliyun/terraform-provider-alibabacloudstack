@@ -170,12 +170,19 @@ terraform init
 
 在工作目录下创建`provider.tf`文件，并根据环境进行进行配置。
 
+> AlibabacloudStack支持AK/SK验证和STS两种验证方式，建议使用STS验证。
+> + 当配置access_key和secret_key时使用AK/SK验证;
+> + 当配置access_key、secret_key和role_arn时，由AlibabacloudStack进行角色扮演，并使用扮演产生的STS Token进行鉴权;
+> + 当配置access_key、secret_key和security_token时，由AlibabacloudStack使用指定的STS Token进行鉴权;
+
 ```hcl
 
 provider "alibabacloudstack" {
   popgw_domain = "xxx.xxx.com"
   access_key   = "xxxx"
   secret_key   = "xxxx"
+  # role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
+  # security_token = "xxxxxxxx"
   region       = "xxxx"
   proxy        = "HTTP://x.x.x.x:xxx"
   protocol                = "HTTPS"

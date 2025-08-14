@@ -56,12 +56,14 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Description: descriptions["assume_role_role_arn"],
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_ASSUME_ROLE_ARN", nil),
+				ConflictsWith: []string{"security_token"},
 			},
 			"security_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ALIBABACLOUDSTACK_SECURITY_TOKEN", nil),
 				Description: descriptions["security_token"],
+				ConflictsWith: []string{"role_arn"},
 			},
 			"ecs_role_name": {
 				Type:        schema.TypeString,

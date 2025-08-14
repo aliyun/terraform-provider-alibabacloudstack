@@ -1,4 +1,4 @@
-# Terraform Provider For AlibabacloudStack
+# Terraform Provider For AlibabaCloud ApsaraStack
 
 <img src="https://www.datocms-assets.com/2885/1506527326-color.svg" width="400px">
 
@@ -174,12 +174,19 @@ terraform init
 
 Create a `provider.tf` file in your working directory and configure according to your environment:
 
+> AlibabacloudStack supports both AK/SK authentication and STS authentication. It is recommended to use STS authentication.
+> + When configuring `access_key` and `secret_key`, AK/SK authentication will be used;
+> + When configuring `access_key`, `secret_key`, and `role_arn`, AlibabacloudStack will perform role assumption and use the generated STS Token for authentication;
+> + When configuring `access_key`, `secret_key`, and `security_token`, AlibabacloudStack will use the specified STS Token for authentication;
+
 ```hcl
 
 provider "alibabacloudstack" {
   popgw_domain = "xxx.xxx.com"
   access_key   = "xxxx"
   secret_key   = "xxxx"
+  # role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
+  # security_token = "xxxxxxxx"
   region       = "xxxx"
   proxy        = "HTTP://x.x.x.x:xxx"
   protocol                = "HTTPS"

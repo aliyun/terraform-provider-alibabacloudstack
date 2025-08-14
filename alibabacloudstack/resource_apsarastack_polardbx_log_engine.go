@@ -181,13 +181,13 @@ func resourceAlibabacloudStackPolardbxLogEngineUpdate(d *schema.ResourceData, me
 			if _, err := client.DoTeaRequest("POST", "polardbx", "2020-02-02", "DeleteBinlogX", "", nil, reqQuery, nil); err != nil {
 				return err
 			}
-			if err := polardbXService.WaitCdcNodeReady(d.Id()); err != nil {
-				return err
-			}
 		}
 		for _, key := range removed {
 			delete(oldMap, key)
 		}
+			if err := polardbXService.WaitCdcNodeReady(d.Id()); err != nil {
+				return err
+			}
 		for key, value := range newMap {
 			if _, exist := oldMap[key]; !exist {
 				dnCount := 2
