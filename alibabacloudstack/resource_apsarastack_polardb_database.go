@@ -14,36 +14,6 @@ import (
 func resourceAlibabacloudStackPolardbDatabase() *schema.Resource {
 	resource := &schema.Resource{
 		Schema: map[string]*schema.Schema{
-
-			"accounts": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Computed: true,
-
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-
-						"account": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-
-						"account_privilege": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-
-						"account_privilege_detail": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-					},
-				},
-			},
-
 			"character_set_name": {
 				Type:     schema.TypeString,
 				Required: true,

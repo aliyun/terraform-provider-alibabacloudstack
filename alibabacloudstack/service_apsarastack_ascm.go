@@ -2,10 +2,10 @@ package alibabacloudstack
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
-	"fmt"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
@@ -264,7 +264,7 @@ func (s *AscmService) DescribeAscmUserGroupResourceSet(id string) (response *Lis
 func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*MembersInsideResourceSet, error) {
 
 	var err error
-	var resourceSetId, userGroupId string 
+	var resourceSetId, userGroupId string
 	id_infos := strings.Split(id, ":")
 	if len(id_infos) == 3 {
 		resourceSetId = id_infos[0]
@@ -272,10 +272,10 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*Membe
 	} else {
 		return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	
+
 	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListMembersInsideResourceSet", "/ascm/auth/user/listMembersInsideResourceGroup")
 	request.QueryParams["resourceSetId"] = resourceSetId
-	
+
 	var resp = &MembersInsideResourceSet{}
 	bresponse, err := s.client.ProcessCommonRequest(request)
 
@@ -284,22 +284,22 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*Membe
 		if bresponse != nil {
 			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		} else {
-			return nil,err
+			return nil, err
 		}
 		if errmsgs.IsExpectedErrors(err, []string{"ErrorUserGroupNotFound"}) {
-			return nil,errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		return nil,errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUserGroups", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, id, "ListUserGroups", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	addDebug("ListUserGroups", bresponse, request, request.QueryParams)
 
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), resp)
 	if err != nil {
-		return nil,errmsgs.WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 
 	if len(resp.Data) < 1 || resp.Code != "200" {
-		return nil,errmsgs.WrapError(err)
+		return nil, errmsgs.WrapError(err)
 	}
 
 	for _, data := range resp.Data {
@@ -309,9 +309,9 @@ func (s *AscmService) DescribeAscmUserGroupResourceSetBinding(id string) (*Membe
 		if strconv.Itoa(data.AuthorizedId) != userGroupId {
 			continue
 		}
-		
+
 		resp.Data = []MembersInsideResourceData{data}
-		
+
 		return resp, nil
 	}
 	return resp, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -729,4 +729,79 @@ func (s *AscmService) ExportInitPasswordByLoginName(loginname string) (initPassw
 	}
 	log.Printf("ExportInitPasswordByLoginNameList initPassword:%v", initPassword)
 	return initPassword, err
+}
+
+type RAMServiceRoleData struct {
+	ID                       int    `json:"id"`
+	Arn                      string `json:"arn"`
+	Region                   string `json:"region"`
+	Product                  string `json:"product"`
+	RoleId                   string `json:"roleId"`
+	RoleName                 string `json:"roleName"`
+	RoleType                 string `json:"roleType"`
+	Description              string `json:"description"`
+	AliyunUserId             int    `json:"aliyunUserId"`
+	AssumeRolePolicyDocument string `json:"assumeRolePolicyDocument"`
+	OrganizationId           int    `json:"organizationId"`
+	OrganizationName         string `json:"organizationName"`
+	Policies                 []struct {
+		ID              int    `json:"id"`
+		Region          string `json:"region"`
+		PolicyName      string `json:"policyName"`
+		Description     string `json:"description"`
+		PolicyDocument  string `json:"policyDocument"`
+		PolicyType      string `json:"policyType"`
+		DefaultVersion  string `json:"defaultVersion"`
+		AliyunUserId    int    `json:"aliyunUserId"`
+		RamGroupId      int    `json:"ramGroupId"`
+		AscmRamPolicyId int    `json:"ascmRamPolicyId"`
+		AttachDate      int64  `json:"attachDate"`
+		ResourceSetId   int    `json:"resourceSetId"`
+		PrivilegeId     int    `json:"privilegeId"`
+		RamRoleId       int    `json:"ramRoleId"`
+	} `json:"policies"`
+}
+
+type ListRAMServiceRolesResponse struct {
+	Code         string               `json:"code"`
+	Cost         int                  `json:"cost"`
+	Message      string               `json:"message"`
+	PureListData bool                 `json:"pureListData"`
+	Redirect     bool                 `json:"redirect"`
+	Success      bool                 `json:"success"`
+	Data         []RAMServiceRoleData `json:"data"`
+	PageInfo     struct {
+		CurrentPage int `json:"currentPage"`
+		PageSize    int `json:"pageSize"`
+		Total       int `json:"total"`
+		TotalPage   int `json:"totalPage"`
+	} `json:"pageInfo"`
+}
+
+func (s *AscmService) ListRAMServiceRoles(id string) (*ListRAMServiceRolesResponse, error) {
+
+	request := s.client.NewCommonRequest("POST", "ascm", "2019-05-10", "ListRAMServiceRoles", "/ascm/auth/role/listRAMServiceRoles")
+	params := strings.Split(id, ":")
+	request.QueryParams["organizationId"] = params[0]
+	request.QueryParams["OrganizationId"] = params[0]
+	request.QueryParams["productName"] = params[1]
+	var response ListRAMServiceRolesResponse
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		errmsg := ""
+		if bresponse != nil {
+			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		} else {
+			return nil, err
+		}
+		log.Printf("ListRAMServiceRoles err:%v", err)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListRAMServiceRoles", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+	addDebug("ListRAMServiceRoles", bresponse, request, request.QueryParams)
+	e := json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if e != nil {
+		log.Printf("ListRAMServiceRoles err:%v", e)
+		return nil, errmsgs.WrapErrorf(e, errmsgs.DefaultErrorMsg, "", "ListRAMServiceRoles", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	return &response, nil
 }

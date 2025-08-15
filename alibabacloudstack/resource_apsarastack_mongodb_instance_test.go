@@ -156,16 +156,15 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ssl_action"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testMongoDBInstance_classic_ssl_action,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"ssl_status": "Open",
+						"ssl_action": "Open",
 					}),
 				),
 			},
@@ -173,7 +172,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 				Config: testMongoDBInstance_classic_ssl_action_update,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"ssl_status": "Closed",
+						"ssl_action": "Close",
 					}),
 				),
 			},
@@ -268,7 +267,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classic(t *testing.T) {
 			// 			"backup_time":         "10:00Z-11:00Z",
 			// 			"maintain_start_time": REMOVEKEY,
 			// 			"maintain_end_time":   REMOVEKEY,
-			// 			"ssl_status":          "Open",
+			// 			"ssl_action":          "Open",
 			// 		}),
 			// 	),
 			// },
@@ -309,10 +308,9 @@ func TestAccAlibabacloudStackMongoDBInstance_Version4(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ssl_action"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testMongoDBInstance_classic_tde,
@@ -361,10 +359,9 @@ func TestAccAlibabacloudStackMongoDBInstance_vpc(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ssl_action"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testMongoDBInstance_vpc_name,
@@ -466,10 +463,9 @@ func TestAccAlibabacloudStackMongoDBInstance_multiAZ(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceId,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ssl_action"},
+				ResourceName:      resourceId,
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testMongoDBInstance_multiAZ_name,
@@ -744,6 +740,19 @@ resource "alibabacloudstack_mongodb_instance" "default" {
   ssl_action          = "Close"
 }`, password)
 }
+
+const testMongoDBInstance_classic_tde34 = `
+data "alibabacloudstack_zones" "default" {
+  
+}
+
+resource "alibabacloudstack_mongodb_instance" "default" {
+  zone_id             = data.alibabacloudstack_zones.default.zones[0].id
+  engine_version      = "3.4"
+  db_instance_storage = 10
+  db_instance_class   = "dds.mongo.mid"
+  tde_status    = "enabled"
+}`
 
 const testMongoDBInstance_classic_tde = `
 data "alibabacloudstack_zones" "default" {

@@ -1397,3 +1397,15 @@ resource "alibabacloudstack_kms_key" "key" {
 }
 
 `
+
+func RandomPasswordTestCase(passwordLen int) string {
+	return fmt.Sprintf(`
+resource "random_password" "password" {
+	length           = %d
+	special          = true
+	override_special = "!@#$^&*()_"
+	min_lower        = 1
+	min_upper        = 1
+	min_numeric      = 1
+}`, passwordLen)
+}

@@ -1236,7 +1236,7 @@ func (client *AlibabacloudStackClient) DoTeaRequest(method string, popcode strin
 			}()
 		}
 
-		log.Printf(" ================================ %s ======================================\n query %v \n request %v \n response: %v", apiname, query, body, response)
+		log.Printf(" ================================ %s ======================================\n query %v \n request %v \n response: %v", apiname, fmt.Sprint(query), fmt.Sprint(body), fmt.Sprint(response))
 		if err != nil {
 			if errmsgs.NotFoundError(err) {
 				return resource.NonRetryableError(err)
@@ -1268,7 +1268,7 @@ func (client *AlibabacloudStackClient) getConnectClient(popcode ServiceCode) (*s
 }
 
 func (client *AlibabacloudStackClient) ProcessCommonRequest(request *requests.CommonRequest) (*responses.CommonResponse, error) {
-	popcode := ServiceCode(strings.ReplaceAll(strings.ToUpper(request.Product),"-","_"))
+	popcode := ServiceCode(strings.ReplaceAll(strings.ToUpper(request.Product), "-", "_"))
 
 	conn, err := client.getConnectClient(popcode)
 	if err != nil {

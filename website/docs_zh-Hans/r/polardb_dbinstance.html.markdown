@@ -88,7 +88,8 @@ resource "alibabacloudstack_polardb_dbinstance" "default" {
   * `parameters` - (选填) 实例内核参数配置。
   * `force_restart` - (选填) 指定是否强制重启实例。
   * `tags` - (选填) 要分配给资源的标签映射。
-  
+  * `acl` - (Optional) SSL连接的ACL模式. 取值:`prefer`, `require`, `verify-ca`, `verify-full`, `cert`.
+  * `cpu_type` - (Optional) CPU类型。
 ## 属性参考
 
 除了上述所有参数外，还导出了以下属性：

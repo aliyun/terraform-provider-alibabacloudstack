@@ -121,9 +121,9 @@ func TestAccAlibabacloudStackPolardbInstanceMysql(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"tags.%":              "2",
-						"tags.created":        "tf",
-						"tags.for":            "test acc",
+						"tags.%":       "2",
+						"tags.created": "tf",
+						"tags.for":     "test acc",
 					}),
 				),
 			},
@@ -180,20 +180,6 @@ variable "name" {
 	default = "%s"
 }
 
-resource "alibabacloudstack_security_group" "default" {
-	name   = "${var.name}"
-	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
-}
-`, VSwitchCommonTestCase, name)
-}
-
-func resourcePolardbInstanceMysqlAZConfigDependence(name string) string {
-	return fmt.Sprintf(`
-%s
-
-variable "name" {
-	default = "%s"
-}
 resource "alibabacloudstack_security_group" "default" {
 	name   = "${var.name}"
 	vpc_id = "${alibabacloudstack_vpc_vpc.default.id}"
@@ -296,11 +282,12 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 					"zone_id":                  "${data.alibabacloudstack_zones.default.zones[0].id}",
 					"instance_name":            "${var.name}",
 					"db_instance_storage_type": "local_ssd",
+					"cpu_type":                 "intel",
 					"enable_ssl":               "true",
+					"acl":                      "require",
 					"tde_status":               "true",
 					"encryption":               "true",
 					"encryption_key":           "${alibabacloudstack_kms_key.key.id}",
-					"vswitch_id":               "${alibabacloudstack_vpc_vswitch.default.id}",
 					"parameters": []map[string]interface{}{{
 						"name":  "polar_px_interconnect_transmit_timeout",
 						"value": "4000",
@@ -309,6 +296,8 @@ func TestAccAlibabacloudStackPolardbInstancePGSql(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"instance_name": name,
+						"cpu_type":      "intel",
+						"acl":           "require",
 						"encryption":    "true",
 						"tde_status":    "true",
 						"enable_ssl":    "true",
@@ -333,17 +322,14 @@ func resourcePolardbInstanceClassicConfigDependence(name string) string {
 variable "name" {
 	default = "%s"
 }
-
+%s
 resource "alibabacloudstack_kms_key" "key" {
   description             = "Hello KMS"
   pending_window_in_days  = "7"
   key_state               = "Enabled"
 }
 
-
-%s
-
-`, name, VSwitchCommonTestCase)
+`, name, DataZoneCommonTestCase)
 }
 
 var PolardbinstanceBasicMap = map[string]string{

@@ -42,32 +42,6 @@ func resourceAlibabacloudStackPolardbAccount() *schema.Resource {
 				Required: true,
 			},
 
-			"database_privileges": {
-				Type:     schema.TypeList,
-				Optional: true,
-
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-
-						"account_privilege": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-
-						"account_privilege_detail": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-						},
-
-						"data_base_name": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
-			},
-
 			"priv_exceeded": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -144,134 +118,6 @@ func resourceAlibabacloudStackPolardbAccountCreate(d *schema.ResourceData, meta 
 
 func resourceAlibabacloudStackPolardbAccountUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	if d.HasChanges("database_privileges") {
-		o, n := d.GetChange("database_privileges")
-		oldPrivileges := o.([]interface{})
-		newPrivileges := n.([]interface{})
-
-		newPrivilegesMap := make(map[string]string)
-		oldPrivilegesMap := make(map[string]string)
-		for _, np := range newPrivileges {
-			privilege := np.(map[string]interface{})
-			dbName := privilege["data_base_name"].(string)
-			accountPrivilege := privilege["account_privilege"].(string)
-			if dbName != "" && accountPrivilege != "" {
-				newPrivilegesMap[dbName] = accountPrivilege
-			}
-		}
-
-		for _, op := range oldPrivileges {
-			privilege := op.(map[string]interface{})
-			dbName := privilege["data_base_name"].(string)
-			accountPrivilege := privilege["account_privilege"].(string)
-			if dbName != "" && accountPrivilege != "" {
-				oldPrivilegesMap[dbName] = accountPrivilege
-			}
-		}
-
-		//新增权限的情况:新增dbname或者之前dbname的privilege有更新
-		grant_database_privilegesList := make([]map[string]interface{}, 0)
-		for dbName, accountPrivilege := range newPrivilegesMap {
-			if _, ok := oldPrivilegesMap[dbName]; !ok || oldPrivilegesMap[dbName] != accountPrivilege {
-				grant_database_privilegesList = append(grant_database_privilegesList, map[string]interface{}{
-					"account_privilege": accountPrivilege,
-					"data_base_name":    dbName,
-				})
-			}
-		}
-		fmt.Println("grant_database_privilegesList", grant_database_privilegesList)
-
-		revoke_database_privilegesList := make([]map[string]interface{}, 0)
-		for dbName, accountPrivilege := range oldPrivilegesMap {
-			if _, ok := newPrivilegesMap[dbName]; !ok || newPrivilegesMap[dbName] != accountPrivilege {
-				revoke_database_privilegesList = append(revoke_database_privilegesList, map[string]interface{}{
-					"account_privilege": accountPrivilege,
-					"data_base_name":    dbName,
-				})
-			}
-		}
-
-		fmt.Println("revoke_database_privilegesList", revoke_database_privilegesList)
-		if len(grant_database_privilegesList) > 0 {
-			request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "GrantAccountPrivilege", "")
-			if v, ok := d.GetOk("account_name"); ok {
-				request.QueryParams["AccountName"] = v.(string)
-			} else {
-				return fmt.Errorf("AccountName is required")
-			}
-
-			if v, ok := d.GetOk("data_base_instance_id"); ok {
-				request.QueryParams["DBInstanceId"] = v.(string)
-			} else {
-				return fmt.Errorf("DataBaseInstanceId is required")
-			}
-
-			for _, item := range grant_database_privilegesList {
-				if v, ok := item["account_privilege"]; ok && v != "" {
-					request.QueryParams["AccountPrivilege"] = v.(string)
-				} else {
-					return fmt.Errorf("AccountPrivilege is required")
-				}
-
-				if v, ok := item["data_base_name"]; ok && v != "" {
-					request.QueryParams["DBName"] = v.(string)
-				} else {
-					return fmt.Errorf("DataBaseName is required")
-				}
-				bresponse, err := client.ProcessCommonRequest(request)
-				if err != nil {
-					if bresponse == nil {
-						return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-					}
-					errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-						"alibabacloudstack_polardb_account", "GrantAccountPrivilege", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-				}
-			}
-
-		}
-
-		//撤销权限的情况:新增dbname或者之前dbname的privilege有更新
-		if len(revoke_database_privilegesList) > 0 {
-			request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "RevokeAccountPrivilege", "")
-
-			if v, ok := d.GetOk("account_name"); ok {
-				request.QueryParams["AccountName"] = v.(string)
-			} else {
-				return fmt.Errorf("AccountName is required")
-			}
-
-			if v, ok := d.GetOk("data_base_instance_id"); ok {
-				request.QueryParams["DBInstanceId"] = v.(string)
-			} else {
-				return fmt.Errorf("DataBaseInstanceId is required")
-			}
-
-			for _, item := range revoke_database_privilegesList {
-				if v, ok := item["account_privilege"]; ok && v != "" {
-					request.QueryParams["AccountPrivilege"] = v.(string)
-				} else {
-					return fmt.Errorf("AccountPrivilege is required")
-				}
-
-				if v, ok := item["data_base_name"]; ok && v != "" {
-					request.QueryParams["DBName"] = v.(string)
-				} else {
-					return fmt.Errorf("DataBaseName is required")
-				}
-				bresponse, err := client.ProcessCommonRequest(request)
-				if err != nil {
-					if bresponse == nil {
-						return errmsgs.WrapErrorf(err, "Process Common Request Failed")
-					}
-					errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-					return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
-						"alibabacloudstack_polardb_account", "GrantAccountPrivilege", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-				}
-			}
-
-		}
-	}
 
 	if !d.IsNewResource() && d.HasChanges("account_description") {
 		request := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyAccountDescription", "")
@@ -362,17 +208,6 @@ func resourceAlibabacloudStackPolardbAccountRead(d *schema.ResourceData, meta in
 	d.Set("priv_exceeded", data.Accounts.DBInstanceAccount[0].PrivExceeded)
 
 	d.Set("status", data.Accounts.DBInstanceAccount[0].AccountStatus)
-
-	var databasePrivileges []map[string]interface{}
-	for _, dbPrivilege := range data.Accounts.DBInstanceAccount[0].DatabasePrivileges.DatabasePrivilege {
-		privilege := map[string]interface{}{
-			"account_privilege":        dbPrivilege.AccountPrivilege,
-			"account_privilege_detail": dbPrivilege.AccountPrivilegeDetail,
-			"data_base_name":           dbPrivilege.DBName,
-		}
-		databasePrivileges = append(databasePrivileges, privilege)
-	}
-	d.Set("database_privileges", databasePrivileges)
 
 	return nil
 }
