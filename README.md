@@ -281,7 +281,7 @@ Please refer to [ReleaseNote](./CHANGELOG.md)
 cd <YOUR WORKSPACE>
 git clone https://github.com/aliyun/terraform-provider-alibabacloudstack.git
 cd terraform-provider-alibabacloudstack
-git checkout <appropriate TAG and branch>  # e.g. v1.0.20
+git checkout <appropriate TAG and branch>  # e.g. v3.16.16
 go mod tidy
 go mod vendor
 go build
