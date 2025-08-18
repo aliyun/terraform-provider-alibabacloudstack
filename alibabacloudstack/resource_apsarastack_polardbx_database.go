@@ -55,7 +55,7 @@ func resourceAlibabacloudStackPolardbxDatabaseCreate(d *schema.ResourceData, met
 	account_name := fmt.Sprintf("%s_%s", GenerateRandomString(6), d.Get("database_name").(string))
 	password := fmt.Sprintf("%s@123", GenerateRandomString(8))
 	Polardbxservice := PolardbXService{client}
-	err := Polardbxservice.CreatePolardbxAccount(d.Get("instance_id").(string), account_name, password, "one-time", "Normal")
+	err := Polardbxservice.CreatePolardbxAccount(d.Get("instance_id").(string), account_name, password, "one-time")
 	if err != nil {
 		return errmsgs.WrapErrorf(err, "Error Creating Polardbx one-time random Account %s", account_name)
 	}

@@ -57,8 +57,7 @@ func resourceAlibabacloudStackPolardbxAccountCreate(d *schema.ResourceData, meta
 	accountName := d.Get("account_name").(string)
 	accountPassword := d.Get("password").(string)
 	accountDescription := d.Get("description").(string)
-	accountType := "Normal"//d.Get("account_type").(string)
-	err := Polardbxservice.CreatePolardbxAccount(instanceId, accountName, accountPassword, accountDescription, accountType)
+	err := Polardbxservice.CreatePolardbxAccount(instanceId, accountName, accountPassword, accountDescription)
 	if err != nil {
 		return err
 	}
@@ -78,6 +77,10 @@ func resourceAlibabacloudStackPolardbxAccountUpdate(d *schema.ResourceData, meta
 		PolardbxAccountName = parts[1]
 	}
 
+	if d.IsNewResource() {
+		return nil
+	}
+	
 	if d.HasChanges("description") && d.Get("description").(string) != "" {
 		request := client.NewCommonRequest("POST", "polardbx", "2020-02-02", "ModifyAccountDescription", "")
 
@@ -95,10 +98,6 @@ func resourceAlibabacloudStackPolardbxAccountUpdate(d *schema.ResourceData, meta
 				"alibabacloudstack_polardbx_account", "ModifyAccountDescription", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
 
-	}
-
-	if d.IsNewResource() {
-		return nil
 	}
 
 	if d.HasChanges("password") {
@@ -134,7 +133,7 @@ func resourceAlibabacloudStackPolardbxAccountUpdate(d *schema.ResourceData, meta
 func resourceAlibabacloudStackPolardbxAccountRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	Polardbxservice := PolardbXService{client}
-	account, err := Polardbxservice.DoPolardbxDescribeAccountListRequest(d.Id())
+	account, err := Polardbxservice.DoPolardbxDescribeAccountRequest(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			d.SetId("")

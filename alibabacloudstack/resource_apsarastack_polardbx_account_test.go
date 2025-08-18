@@ -18,7 +18,7 @@ func TestAccAlibabacloudStackPolardbxAccount_basic0(t *testing.T) {
 	serviceFunc := func() interface{} {
 		return &PolardbXService{testAccProvider.Meta().(*connectivity.AlibabacloudStackClient)}
 	}
-	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DoPolardbxDescribeAccountListRequest")
+	rc := resourceCheckInitWithDescribeMethod(resourceId, &v, serviceFunc, "DoPolardbxDescribeAccountRequest")
 
 	rac := resourceAttrCheckInit(rc, ra)
 

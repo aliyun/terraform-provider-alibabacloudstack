@@ -38,7 +38,7 @@ type DoPolardbxDescribeAccountListResponse struct {
 	Success         bool              `json:"Success"`
 }
 
-func (s *PolardbXService) DoPolardbxDescribeAccountListRequest(id string) (*PolardbxAccount, error) {
+func (s *PolardbXService) DoPolardbxDescribeAccountRequest(id string) (*PolardbxAccount, error) {
 	var instanceId, AccountName string
 	if parts, err := ParseResourceId(id, 2); err != nil {
 		return nil, err
@@ -513,16 +513,13 @@ func (s *PolardbXService) DoPolardbxDescribeDbListRequest(id string) (*PolardbxD
 	}
 }
 
-func (s *PolardbXService) CreatePolardbxAccount(instanceId string, accountName string, accountPassword string, accountDescription string, accountType string) (err error) {
+func (s *PolardbXService) CreatePolardbxAccount(instanceId , accountName , accountPassword , accountDescription string) (err error) {
 
 	action := "CreateAccount"
-	if accountType == "Super" {
-		action = "CreateSuperAccount"
-	}
 	reqQuery := map[string]interface{}{
 		"DBInstanceName":     instanceId,
 		"AccountName":        accountName,
-		"AccountType":        accountType,
+		"AccountType":        "Normal",
 		"AccountPassword":    accountPassword,
 		"AccountDescription": accountDescription,
 	}
@@ -566,7 +563,7 @@ func (s *PolardbXService) DescribePolardbXAccountDBPrivilege(id string) ([]map[s
 		instanceId = parts[0]
 		AccountName = parts[1]
 	}
-	account, err := s.DoPolardbxDescribeAccountListRequest(fmt.Sprintf("%s:%s", instanceId, AccountName))
+	account, err := s.DoPolardbxDescribeAccountRequest(fmt.Sprintf("%s:%s", instanceId, AccountName))
 	if err != nil {
 		return nil, err
 	}
