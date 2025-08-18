@@ -90,6 +90,18 @@ type CbnDescribeTransitRouterRouteTablesResponse struct {
 	RequestId string `json:"RequestId"`
 }
 
+type CbnDescribeTransitRouterMulticastDomainsResponse struct {
+	TransitRouterMulticastDomains []struct {
+		Status                                  string        `json:"Status"`
+		TransitRouterMulticastDomainId          string        `json:"TransitRouterMulticastDomainId"`
+		TransitRouterMulticastDomainName        string        `json:"TransitRouterMulticastDomainName,omitempty"`
+		TransitRouterMulticastDomainDescription string        `json:"TransitRouterMulticastDomainDescription,omitempty"`
+		Tags                                    []interface{} `json:"Tags"`
+		TransitRouterId                         string        `json:"TransitRouterId"`
+	} `json:"TransitRouterMulticastDomains"`
+	RequestId string `json:"RequestId"`
+}
+
 type ZoneMapping struct {
 	ZoneId             string `json:"ZoneId"`
 	VSwitchId          string `json:"VSwitchId"`
@@ -349,6 +361,35 @@ func (s *CenService) WaitForTransitRouterInstance(instanceId string, status Stat
 	}
 }
 
+func (s *CenService) WaitForTransitRouterMulticastDomain(instanceId string, status Status, timeout int) error {
+	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
+	parts := strings.Split(instanceId, COLON_SEPARATED)
+	domain_id := parts[1]
+	for {
+		instance, err := s.DoCbnDescribeTransitRouterMuliticastDomainsRequest(instanceId)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				if status == Deleted {
+					return nil
+				}
+			} else {
+				return errmsgs.WrapError(err)
+			}
+		}
+		for _, domain := range instance.TransitRouterMulticastDomains {
+			if domain.TransitRouterMulticastDomainId == domain_id && domain.Status == string(status) {
+				return nil
+
+			}
+		}
+
+		if time.Now().After(deadline) {
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, instanceId, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+		}
+		time.Sleep(DefaultIntervalShort * time.Second)
+	}
+}
+
 func (s *CenService) DoCbnDescribeTransitRouterRouteEntriesRequest(id string) (*CbnDescribeTransitRouterRouteEntriesResponse, error) {
 	// api: Dds - 2022-11-21 - DescribeAccounts
 
@@ -404,6 +445,34 @@ func (s *CenService) DoCbnDescribeTransitRouterRouteTablesRequest(id string) (*C
 	}
 
 	return CbnDescribeRouterRouteTablesResponseObj, nil
+}
+
+func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainsRequest(id string) (*CbnDescribeTransitRouterMulticastDomainsResponse, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterMulticastDomains", "")
+	CbnDescribeRouterMulticastDomainResponseObj := &CbnDescribeTransitRouterMulticastDomainsResponse{}
+	//调用request_params_handler
+	parts := strings.Split(id, ":")
+	transit_router_id := parts[0]
+	request.QueryParams["TransitRouterId"] = transit_router_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouterMulticastDomains", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnDescribeRouterMulticastDomainResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterMulticastDomains", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return CbnDescribeRouterMulticastDomainResponseObj, nil
 }
 
 func (s *CenService) WaitForTransitRouterTable(id string, status Status, timeout int) error {
