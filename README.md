@@ -33,7 +33,7 @@ Download TF Core from [Terraform](https://www.terraform.io/downloads.html) or [O
 
 > If the proprietary cloud version is 3.16.2, the AlibabacloudStack version should be 3.16.x. Use `< 3.18.0` to declare the version number when obtaining the latest version.
 
-> If the proprietary cloud version is 3.18.x (including 3.18.0, 3.18.1, 3.18.2, 3.18.6), the AlibabacloudStack version should be 3.18.x. Use `>= 3.18.0` to declare the version number when obtaining the latest version.
+> If the proprietary cloud version is 3.18.x (including 3.18.0, 3.18.1, 3.18.2, 3.18.6), the AlibabacloudStack version should be 3.18.x. Use `>= 3.18.0` to declare the version number when obtaining the latest version. **Note**: Please use the corresponding version documentation due to version differences.
 
 | AlibabaCloud ApsaraStack Version | AlibabacloudStack Version |
 | ---  | ---  |
