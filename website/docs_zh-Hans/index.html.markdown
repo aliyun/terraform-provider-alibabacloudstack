@@ -3,159 +3,132 @@ layout: "alibabacloudstack"
 page_title: "Provider: alibabacloudstack"
 sidebar_current: "docs-alibabacloudstack-index"
 description: |-
-  The AlibabacloudStack provider is used to interact with many resources supported by AlibabacloudStack. The provider needs to be configured with the proper credentials before it can be used.
+  AlibabacloudStack Provider 用于通过 Terraform 管理阿里云私有云平台的各类资源。使用前需配置访问云平台的正确凭证。
 ---
 
 # AlibabacloudStack Provider
 
-AlibabacloudStack Provider用于Terraform管理阿里云私有云平台下的多种资源。在使用前，需配置该Provider访问云平台的正确凭证。
-使用左侧导航栏查看支持的列表。
+AlibabacloudStack Provider 用于通过 Terraform 管理阿里云私有云平台下的多种资源。在使用前，需配置该 Provider 访问云平台的正确凭证。
 
 ## 示例代码
 
+### 静态配置
+
 ```hcl
+# 声明 AlibabacloudStack Provider 来源与版本
 terraform {
   required_providers {
     alibabacloudstack = {
-      source = "aliyun/alibabacloudstack"
-      #version = "3.16.0"
+      source  = "aliyun/alibabacloudstack"
+      # version = ">= 3.18.0"
     }
   }
 }
 
 # 配置 AlibabacloudStack Provider
 provider "alibabacloudstack" {
-  access_key = "${var.access_key}"
-  secret_key = "${var.secret_key}"
-  region     = "${var.region}"
-  insecure    =  true
-  proxy      = "${var.proxy}"
-  resource_group_set_name ="${var.resource_group_set_name}"
-  domain = "${var.domain}"
-  protocol = "HTTPS"
-}
-
-
-data "alibabacloudstack_instance_types" "default" {
-  cpu_core_count = 2
-  memory_size    = 4
-}
-
-data "alibabacloudstack_images" "default" {
-  name_regex  = "^ubuntu"
-  most_recent = true
-  owners      = "system"
-}
-# 创建 Web 服务器实例
-resource "alibabacloudstack_instance" "web" {
-  image_id              = "${data.alibabacloudstack_images.default.images.0.id}"
-  instance_type        = "${data.alibabacloudstack_instance_types.default .instance_types.0.id}"
-  system_disk_category = "cloud_efficiency"
-  security_groups      = ["${alibabacloudstack_security_group.default.id}"]
-  instance_name        = "web"
-  vswitch_id           = "vsw-abc12345"
-}
-
-# 创建安全组
-resource "alibabacloudstack_security_group" "default" {
-  name        = "default"
-  description = "default"
-  vpc_id      = "vpc-abc12345"
+  access_key               = "Your Access Key"
+  secret_key               = "Your Secret Key"
+  role_arn                 = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
+  # security_token         = "Your STS Token"
+  region                   = "Region Name"
+  insecure                 = true
+  # proxy                    = "http://IP:Port"
+  resource_group_set_name  = "Your Resource Group Set Name"
+  popgw_domain             = "xxx.xxx.com"
+  protocol                 = "HTTPS"
 }
 ```
 
-## 凭证配置
+### 环境变量配置
 
-AlibabacloudStack Provider支持以下凭证认证方式：
+> Provider 支持通过环境变量配置大部分参数。  
+> 基础环境变量如 `ALIBABACLOUDSTACK_ACCESS_KEY`、 `ALIBABACLOUDSTACK_SECRET_KEY`和`ALIBABACLOUDSTACK_ASSUME_ROLE_ARN` 用于为 AlibabacloudStack Provider 提供平台访问凭证。  
+> 其他可配置环境请参考 **[参数说明](#参数说明)** 章节。
 
-- 静态凭证
-- 环境变量
-
-
-### 静态凭证
-
-在模板的alibabacloudstack provider 代码块中配置 `access_key`, `secret_key` , `region` ,`insecure`,`proxy` 和 `domain` 等信息，
-为AlibabacloudStack Provider平台访问凭证。
-
-Usage:
-
++ `main.tf`配置
 ```hcl
 provider "alibabacloudstack" {
-  access_key = "${var.access_key}"
-  secret_key = "${var.secret_key}"
-  region     = "${var.region}"
-  insecure    =  true
-  proxy      = "${var.proxy}"
-  resource_group_set_name ="${var.resource_group_set_name}"
-  endpoints {
-     vpc = "${var.endpoints}"  
-   }
-}
-
-```
-
-### 环境变量
-
-通过环境变量 `ALIBABACLOUDSTACK_ACCESS_KEY`,`ALIBABACLOUDSTACK_SECRET_KEY`,
-为AlibabacloudStack Provider提供平台访问凭证。
-同时也可以配置`ALIBABACLOUDSTACK_PROXY`,`ALIBABACLOUDSTACK_REGION` 等环境变量。
-
-```hcl
-provider "alibabacloudstack" {
-    endpoints {
-         vpc = "${var.endpoints}"
-       }
-    resource_group_set_name ="${var.resource_group_set_name}"
+    resource_group_set_name ="Your Resource Group Set Name"
 }
 ```
-Usage:
+
++ 执行终端配置
 
 ```shell
-$ export ALIBABACLOUDSTACK_ACCESS_KEY="anaccesskey"
-$ export ALIBABACLOUDSTACK_SECRET_KEY="asecretkey"
-$ export ALIBABACLOUDSTACK_REGION="region"
-$ export ALIBABACLOUDSTACK_INSECURE= true
-$ export ALIBABACLOUDSTACK_PROXY= "http://IP:Port"
-$ terraform plan
+export ALIBABACLOUDSTACK_ACCESS_KEY="Your Access Key"
+export ALIBABACLOUDSTACK_SECRET_KEY="Your Secret Key"
+export ALIBABACLOUDSTACK_ASSUME_ROLE_ARN = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
+export ALIBABACLOUDSTACK_REGION="Region Name"
+export ALIBABACLOUDSTACK_INSECURE= true
+export ALIBABACLOUDSTACK_PROXY= "http://IP:Port"
+export ALIBABACLOUDSTACK_POPGW_DOMAIN="xxx.xxx.com"
+terraform plan
 ```
 
 ## 参数说明
 
-除[Terraform通用参数](https://www.terraform.io/docs/configuration/providers.html)(如. `alias` 和 `version`)外, 
-AlibabacloudStack 的 provider 配置块支持以下参数：
+### 环境参数
 
-* `access_key` - (必填) 访问密钥。也可通过ALIBABACLOUDSTACK_ACCESS_KEY环境变量获取。
+| 参数名            | 环境变量名                        | 参数类型 | 参数含义                                | 获取方式                                                                                     | 备注                                                                 |
+|-------------------|-----------------------------------|----------|-----------------------------------------|----------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
+| popgw_domain      | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | 阿里云专有云飞天企业版服务地址标准后缀        | ASO平台 >> 顶部个人头像 >> *个人信息* >> **专有云 API 调用使用** >> `Internet Domain`         | **必填**                                                             |
+| domain      | ALIBABACLOUDSTACK_DOMAIN    | string   | 阿里云专有云飞天企业版ASAPI网关服务地址标准后缀        | ASO平台 >> 飞天基础运维平台>> *系统报表* >> **服务注册变量** >> `asapi.public.endpoint`       |                                                                  |
+| region            | ALIBABACLOUDSTACK_REGION          | string   | 平台 Region 信息                        | ASO平台 >> 顶部 Region 信息                                                                  | **必填**                                                             |
+| is_center_region  | ALIBABACLOUDSTACK_CENTER_REGION   | bool     | 当前 Region 是否为中心 Region           | ASO平台 >> 顶部个人头像 >> *个人信息* >> **专有云 API 调用使用** >> `当前 Region 是否为中心 Region` | 默认值为 `true`                                                      |
+| protocol          | ALIBABACLOUDSTACK_PROTOCOL        | string   | 网络协议（可选 `HTTP` 或 `HTTPS`）      | 根据环境实际情况确定                                                                         | 默认值 `HTTP`                                                        |
+| insecure          | ALIBABACLOUDSTACK_INSECURE        | bool     | 是否跳过 HTTPS 证书校验                 | 根据环境实际情况确定                                                                         | 默认值 `false`<br>仅当 protocol 为 `HTTPS` 时生效                     |
+| proxy             | ALIBABACLOUDSTACK_PROXY           | string   | 代理服务器地址                          | 根据环境实际情况确定                                                                         |                                                                      |
 
-* `secret_key` - (必填) 秘密密钥。也可通过ALIBABACLOUDSTACK_SECRET_KEY环境变量获取。
-  
-* `region` - (必填) 专有云区域信息。也可通过ALIBABACLOUDSTACK_REGION环境变量获取。
+---
 
-* `insecure` - (可选) 允许自签名证书，用于启用不安全连接。
+### 凭证参数
 
-* `department` - (可选) 指定编排资源所隶属的组织的ID。为配置时会通过`resource_group_set_name`查找。
+> AlibabacloudStack Provider 支持多种访问凭证，请根据实际需求选择。
 
-* `resource_group` - (可选) 指定编排资源所隶属的资源集的ID。为配置时会通过`resource_group_set_name`查找。
+#### 1. 账号扮演
 
-* `resource_group_set_name` - (可选) 指定编排资源所隶属的资源集的名称。当`resource_group_set_name`不唯一或未配置时需要配置`department`和`resource_group`。
+> **注意**：  
+> - Provider 通过是否配置 `role_arn` 判断是不需要进行帐号扮演。
+> - `role_arn` 可在 ASCM 平台的*个人信息*页，通过点击**查看当前角色策略**，获取用户在特定组织下的`RAM Role`。
+> - 账号扮演有效时间为3600秒。
+> - 若Region下资源集名称不唯一，需使用 `department` 和 `resource_group` 替代 `resource_group_set_name`。
 
-* `protocol` - (可选) API 请求协议。可选值：HTTP/HTTPS，默认为HTTPS。
+| 参数名                  | 环境变量名                        | 参数类型 | 参数含义                | 备注                                                                 |
+|-------------------------|-----------------------------------|----------|-------------------------|----------------------------------------------------------------------|
+| access_key              | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | 账号 AK             | **必填**                                                             |
+| secret_key              | ALIBABACLOUDSTACK_SECRET_KEY      | string   | 账号 SK             | **必填**                                                             |
+| role_arn                | ALIBABACLOUDSTACK_ASSUME_ROLE_ARN  | string  | 待扮演的角色(Ram Role)  | **必填**                                                             |
+| department              | ALIBABACLOUDSTACK_DEPARTMENT      | string   | 凭证登录时的组织        | `resource_group_set_name` 不可用或未配置时必填                       |
+| resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集      | `resource_group_set_name` 不可用或未配置时必填                       |
+| resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |                                                                      |
 
-* `proxy` - (可选) 设置AlibabacloudStack连接的代理。
+#### 2. 账号 STS Token
 
-* `endpoints` - (可选) 自定义端点配置块，用于覆盖默认区域端点。
+> **注意**：  
+> - Provider 通过是否配置 `security_token` 判断 AK/SK 类型。  
+> - 需通过API "Sts 2015-04-01 AssumeRole"接口使用角色扮演获取临时凭证。
+> - 若Region下资源集名称不唯一，需使用 `department` 和 `resource_group` 替代 `resource_group_set_name`。
 
-嵌套 endpoints 块支持以下参数：
+| 参数名                  | 环境变量名                        | 参数类型 | 参数含义                | 备注                                                                 |
+|-------------------------|-----------------------------------|----------|-------------------------|----------------------------------------------------------------------|
+| access_key              | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | 临时凭证 AK             | **必填**                                                             |
+| secret_key              | ALIBABACLOUDSTACK_SECRET_KEY      | string   | 临时凭证 SK             | **必填**                                                             |
+| security_token          | ALIBABACLOUDSTACK_SECURITY_TOKEN  | string   | 临时凭证 Token          | **必填**                                                             |
+| department              | ALIBABACLOUDSTACK_DEPARTMENT      | string   | 凭证登录时的组织        | `resource_group_set_name` 不可用或未配置时必填                       |
+| resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集      | `resource_group_set_name` 不可用或未配置时必填                       |
+| resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |                                                                      |
 
-* `ecs` - (可选) 覆盖默认 ecs 服务地址配置。
+#### 3. 账号 AK/SK
 
-* `rds` - (可选) 覆盖默认 rds 服务地址配置。
+> **注意**：  
+> - 账号 AK/SK 相关参数可在 ASCM 页面上查询。  
+> - 若Region下资源集名称不唯一，需使用 `department` 和 `resource_group` 替代 `resource_group_set_name`。
 
-* `slb` - (可选) 覆盖默认 slb 服务地址配置。
-
-* `vpc` - (可选) 覆盖默认 vpc 服务地址配置。
-
-* `ess` - (可选) 覆盖默认 ess 服务地址配置。
-
-* `oss` - (可选) 覆盖默认 oss 服务地址配置。
-
-
+| 参数名                  | 环境变量名                        | 参数类型 | 参数含义                | 备注                                                                 |
+|-------------------------|-----------------------------------|----------|-------------------------|----------------------------------------------------------------------|
+| access_key              | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | 账号 AK                 | **必填**                                                             |
+| secret_key              | ALIBABACLOUDSTACK_SECRET_KEY      | string   | 账号 SK                 | **必填**                                                             |
+| department              | ALIBABACLOUDSTACK_DEPARTMENT      | string   | 凭证登录时的组织        | `resource_group_set_name` 不可用或未配置时必填                       |
+| resource_group          | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | 凭证登录时的资源集      | `resource_group_set_name` 不可用或未配置时必填                       |
+| resource_group_set_name | ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | 凭证登录时的资源集名称  |                                                                      |
