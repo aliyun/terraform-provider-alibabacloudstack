@@ -345,7 +345,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"ssl_status": "Open",
+						"ssl_action": "Open",
 					}),
 				),
 			},
@@ -355,7 +355,7 @@ func TestAccAlibabacloudStackMongoDBInstance_classicv4(t *testing.T) {
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"ssl_status": "Closed",
+						"ssl_action": "Close",
 					}),
 				),
 			},

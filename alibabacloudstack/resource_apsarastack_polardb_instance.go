@@ -519,15 +519,15 @@ func resourceAlibabacloudStackPolardbInstanceCreate(d *schema.ResourceData, meta
 			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
 				"alibabacloudstack_polardb_db_instance", "ModifyDBInstanceSSL", errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		var target, process string
-		if engine == "MySQL" {
-			target = "Yes"
-			process = "No"
-		} else {
-			target = "on"
-			process = "off"
-		}
-		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutCreate), 10*time.Second, PolardbService.PolardbDBInstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
+		// var target, process string
+		// if engine == "MySQL" {
+		// 	target = "Yes"
+		// 	process = "No"
+		// } else {
+		// 	target = "on"
+		// 	process = "off"
+		// }
+		stateConf := BuildStateConf([]string{"SSL_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -672,27 +672,27 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 		ssl_req := client.NewCommonRequest("POST", "polardb", "2024-01-30", "ModifyDBInstanceSSL", "")
 		ssl_req.QueryParams["DBInstanceId"] = d.Id()
 		ssl_req.QueryParams["ConnectionString"] = d.Get("connection_string").(string)
-		var target, process string
-		if ssl {
-			ssl_req.QueryParams["SSLEnabled"] = "1"
-			if engine == "MySQL" {
-				target = "Yes"
-				process = "No"
-			} else {
-				target = "on"
-				process = "off"
-			}
+		// var target, process string
+		// if ssl {
+		// 	ssl_req.QueryParams["SSLEnabled"] = "1"
+		// 	if engine == "MySQL" {
+		// 		target = "Yes"
+		// 		process = "No"
+		// 	} else {
+		// 		target = "on"
+		// 		process = "off"
+		// 	}
 
-		} else {
-			ssl_req.QueryParams["SSLEnabled"] = "0"
-			if engine == "MySQL" {
-				target = "No"
-				process = "Yes"
-			} else {
-				target = "off"
-				process = "on"
-			}
-		}
+		// } else {
+		// 	ssl_req.QueryParams["SSLEnabled"] = "0"
+		// 	if engine == "MySQL" {
+		// 		target = "No"
+		// 		process = "Yes"
+		// 	} else {
+		// 		target = "off"
+		// 		process = "on"
+		// 	}
+		// }
 		bresponse, err := client.ProcessCommonRequest(ssl_req)
 		if err != nil {
 			if bresponse == nil {
@@ -701,7 +701,7 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_dbinstance", ssl_req.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		stateConf := BuildStateConf([]string{process}, []string{target}, d.Timeout(schema.TimeoutCreate), 2*time.Minute, PolardbService.PolardbDBInstanceSslStateRefreshFunc(d, client, d.Id(), []string{}))
+		stateConf := BuildStateConf([]string{"SSL_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -862,7 +862,7 @@ func resourceAlibabacloudStackPolardbInstanceUpdate(d *schema.ResourceData, meta
 			errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_dbinstance", "DeleteAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 		}
-		stateConf := BuildStateConf([]string{"Disabled"}, []string{"Enabled"}, d.Timeout(schema.TimeoutCreate), 10*time.Second, PolardbService.PolardbDBInstanceTdeStateRefreshFunc(d, client, d.Id(), []string{}))
+		stateConf := BuildStateConf([]string{"TDE_MODIFYING"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{"Deleting"}))
 		if _, err := stateConf.WaitForState(); err != nil {
 			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
 		}
@@ -966,7 +966,10 @@ func resourceAlibabacloudStackPolardbInstanceRead(d *schema.ResourceData, meta i
 func resourceAlibabacloudStackPolardbInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	PolardbService := PolardbService{client}
-
+	stateConf := BuildStateConf([]string{"SSL_MODIFYING", "TDE_MODIFYING", "DBInstanceClassChanging", "DBInstanceNetTypeChanging"}, []string{"Running"}, d.Timeout(schema.TimeoutUpdate), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+	}
 	instance, err := PolardbService.DoPolardbDescribedbinstanceattributeRequest(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
@@ -989,8 +992,13 @@ func resourceAlibabacloudStackPolardbInstanceDelete(d *schema.ResourceData, meta
 		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
 		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_polardb_dbinstance", "DeleteAccount", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
-	return PolardbService.WaitForDBInstance(d.Id(), Deleted, DefaultLongTimeout)
+	stateConf = BuildStateConf([]string{"Deleting"}, []string{}, d.Timeout(schema.TimeoutDelete), 10*time.Second, PolardbService.PolardbDBInstanceStateRefreshFunc(d, client, d.Id(), []string{}))
+	if _, err := stateConf.WaitForState(); err != nil {
+		if !errmsgs.NotFoundError(err) {
+			return errmsgs.WrapErrorf(err, errmsgs.IdMsg, d.Id())
+		}
+	}
+	return nil
 }
 
 type PolardbCreatedbinstanceResponse struct {
