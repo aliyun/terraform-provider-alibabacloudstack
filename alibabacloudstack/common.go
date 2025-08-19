@@ -137,6 +137,7 @@ const (
 
 	Associating   = Status("Associating")
 	Unassociating = Status("Unassociating")
+	Associated    = Status("Associated")
 	InUse         = Status("InUse")
 	DiskInUse     = Status("In_use")
 

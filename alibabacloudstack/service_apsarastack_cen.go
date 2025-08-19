@@ -102,6 +102,19 @@ type CbnDescribeTransitRouterMulticastDomainsResponse struct {
 	RequestId string `json:"RequestId"`
 }
 
+type CbnDescribeTransitRouterMulticastDomainAssociationsResponse struct {
+	TransitRouterMulticastAssociations []struct {
+		TransitRouterAttachmentId      string `json:"TransitRouterAttachmentId"`
+		Status                         string `json:"Status"`
+		ResourceId                     string `json:"ResourceId"`
+		TransitRouterMulticastDomainId string `json:"TransitRouterMulticastDomainId"`
+		VSwitchId                      string `json:"VSwitchId"`
+		ResourceType                   string `json:"ResourceType"`
+		ResourceOwnerId                int64  `json:"ResourceOwnerId"`
+	} `json:"TransitRouterMulticastAssociations"`
+	RequestId string `json:"RequestId"`
+}
+
 type ZoneMapping struct {
 	ZoneId             string `json:"ZoneId"`
 	VSwitchId          string `json:"VSwitchId"`
@@ -473,6 +486,71 @@ func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainsRequest(id strin
 	}
 
 	return CbnDescribeRouterMulticastDomainResponseObj, nil
+}
+
+func (s *CenService) DoCbnDescribeTransitRouterMuliticastDomainAssociationsRequest(id string) (*CbnDescribeTransitRouterMulticastDomainAssociationsResponse, error) {
+	// api: Dds - 2022-11-21 - DescribeAccounts
+	request := s.client.NewCommonRequest("GET", "Cbn", "2017-09-12", "ListTransitRouterMulticastDomainAssociations", "")
+	CbnDescribeRouterMulticastDomainAssociationResponseObj := &CbnDescribeTransitRouterMulticastDomainAssociationsResponse{}
+	//调用request_params_handler
+	parts := strings.Split(id, ":")
+	domain_id := parts[1]
+	request.QueryParams["TransitRouterMulticastDomainId"] = domain_id
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
+	if err != nil {
+		if bresponse == nil {
+			return nil, errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "", "ListTransitRouterMulticastDomainAssociations", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+	}
+
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnDescribeRouterMulticastDomainAssociationResponseObj)
+
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "", "ListTransitRouterMulticastDomainAssociations", errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+
+	return CbnDescribeRouterMulticastDomainAssociationResponseObj, nil
+}
+
+func (s *CenService) WaitForTransitRouterMulticastDomainAssociation(id string, status Status, timeout int) error {
+	deadline := time.Now().Add(time.Duration(timeout) * time.Second)
+	parts := strings.Split(id, ":")
+	attchment_id := parts[0]
+	domain_id := parts[1]
+	vswithch_id := parts[2]
+	for {
+		domain_associations, err := s.DoCbnDescribeTransitRouterMuliticastDomainAssociationsRequest(":" + domain_id)
+		if err != nil {
+			if errmsgs.NotFoundError(err) {
+				if status == Deleted {
+					return nil
+				}
+			} else {
+				return errmsgs.WrapError(err)
+			}
+		}
+		delete := true
+		for _, domain_association := range domain_associations.TransitRouterMulticastAssociations {
+			if domain_association.TransitRouterAttachmentId == attchment_id && domain_association.VSwitchId == vswithch_id && domain_association.TransitRouterMulticastDomainId == domain_id {
+				delete = false
+				if domain_association.Status == string(status) {
+					return nil
+				}
+			}
+		}
+		if status == Deleted && delete == true {
+			return nil
+		}
+
+		if time.Now().After(deadline) {
+			return errmsgs.WrapErrorf(err, errmsgs.WaitTimeoutMsg, id, GetFunc(1), timeout, string(status), string(status), errmsgs.ProviderERROR)
+		}
+		time.Sleep(DefaultIntervalShort * time.Second)
+	}
 }
 
 func (s *CenService) WaitForTransitRouterTable(id string, status Status, timeout int) error {
