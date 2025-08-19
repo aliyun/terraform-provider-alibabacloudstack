@@ -237,14 +237,15 @@ export ALIBABACLOUDSTACK_ASSUME_ROLE_ARN="acs:ram::xxxxxxx:role/ascm-role-x-x-xx
 
 1. 在工作目录下创建`main.tf`文件。
 
-> 更多示例请查看[官方手册](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)
-
 ```hcl
 resource "alibabacloudstack_vpc_vpc" "default_vpc" {
   name       = "vpc-test"
   cidr_block = "172.16.0.0/12"
 }
 ```
+
+> 本示例以VPC资源配置为例，演示Terraform的基础配置和操作流程。
+> 完整支持的资源类型、参数规范及配置示例请参阅[阿里云专有云飞天企业版Terraform Provider官方手册](https://registry.terraform.io/providers/aliyun/alibabacloudstack/latest/docs)
 
 2. 执行编排
 
