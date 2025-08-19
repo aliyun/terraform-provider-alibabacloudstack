@@ -37,7 +37,7 @@ resource "alibabacloudstack_disk" "default" {
 
 支持以下参数：
 
-* `zone_id` - (选填, 变更时重建) - 创建按量付费磁盘的可用区 ID。如果您不设置 `InstanceId`，则 `ZoneId` 为必填参数。您不能同时指定 `ZoneId` 和 `InstanceId`。
+* `zone_id` - (选填, 变更时重建) - 创建按量付费磁盘的可用区 ID。如果您不设置 `availability_zone`，则 `zone_id` 为必填参数。您不能同时指定 `zone_id` 和 `availability_zone`。
 * `name` - (选填) - 磁盘名称。长度为2~128个字符，必须包含字母或数字，可以包含短划线(-)、点(.)、下划线(_)。不能以短划线、点或下划线开头或结尾，且不能以 `http://` 或 `https://` 开头。默认值为空。
 * `disk_name` - (选填) - 磁盘名称。长度为2~128个字符，支持Unicode中letter分类下的字符(其中包括英文、中文和数字等)。可以包含冒号(:)、下划线(_)、句号(.)或者短划线(-)。
 * `description` - (选填) - 磁盘描述。长度为2~256个字符，不能以 `http://` 或 `https://` 开头。默认值为空。
@@ -110,7 +110,7 @@ resource "alibabacloudstack_disk" "default" {
 除了上述所有参数外，还导出了以下属性：
 
 * `availability_zone` - 磁盘所隶属的可用区。
-* `zone_id` - 在指定可用区内创建一块按量付费磁盘。如果您不设置 `InstanceId`，则 `ZoneId` 为必填参数。您不能同时指定 `ZoneId` 和 `InstanceId`。
+* `zone_id` - 在指定可用区内创建一块按量付费磁盘。如果您不设置 `availability_zone`，则 `zone_id` 为必填参数。您不能同时指定 `zone_id` 和 `availability_zone`。
 * `name` - 磁盘名称。
 * `disk_name` - 磁盘名称。长度为2~128个字符，支持Unicode中letter分类下的字符(其中包括英文、中文和数字等)。可以包含冒号(:)、下划线(_)、句号(.)或者短划线(-)。默认值：空。
 * `status` - 磁盘状态。更多信息，请参见[云盘状态](https://help.aliyun.com/document_detail/25689.html)。取值范围：

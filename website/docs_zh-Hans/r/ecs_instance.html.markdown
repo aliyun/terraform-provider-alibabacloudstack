@@ -101,19 +101,17 @@ resource "alibabacloudstack_ecs_instance" "default" {
   ipv6_address_count  = 3
 
   # 数据盘
-  data_disks = [
-    {
+  data_disks {
       category         = "cloud_efficiency"
       size             = 50
       delete_with_instance = true
-    },
-    {
+    }
+  data_disks {
       category         = "cloud_ssd"
       size             = 100
       snapshot_id      = "snap-12345678"
       delete_with_instance = false
     }
-  ]
 }
 ```
 
