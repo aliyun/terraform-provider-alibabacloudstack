@@ -1084,7 +1084,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 			}
 		}
 	}
-	config.Endpoints["ascm"] = "internal.asapi.cn-wulan-env149-d01.intra.env149.shuguang.com"
 	if endpoints, ok := d.GetOk("endpoints"); ok {
 
 		endpointsSet := endpoints.(*schema.Set)
