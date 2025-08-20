@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStacRouteMapsDataSourceBasic(t *testing.T) {
+func TestAccAlibabacloudStackCenRouteMapsDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	IdsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStacRouteMapsDataSourceConfig(rand, map[string]string{

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAccAlibabacloudStacMulticastDomainAssociationsDataSourceBasic(t *testing.T) {
+func TestAccAlibabacloudStackCenTransitMulticastDomainAssociationsDataSourceBasic(t *testing.T) {
 	rand := getAccTestRandInt(10000, 20000)
 	IdsConf := dataSourceTestAccConfig{
 		existConfig: testAccCheckAlibabacloudStacMulticastDomainAssociationsDataSourceConfig(rand, map[string]string{
