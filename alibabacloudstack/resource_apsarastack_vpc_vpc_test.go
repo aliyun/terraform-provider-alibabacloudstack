@@ -205,7 +205,18 @@ func TestAccAlibabacloudStackVpcVpc2(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccConfig(map[string]interface{}{
-
+					"cidr_block":  "192.168.0.0/16",
+					"enable_ipv6": "true",
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"cidr_block":  "192.168.0.0/16",
+						"enable_ipv6": "true",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
 					"enable_ipv6": "false",
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -328,9 +339,9 @@ func TestAccAlibabacloudStackVpcVpc3(t *testing.T) {
 				Config: testAccConfig(map[string]interface{}{
 					"ipv6_cidr_blocks": []map[string]interface{}{
 						{
-								"ipv6_isp":        "${data.alibabacloudstack_vpc_ipv6_isps.default.ipv6_isps[0].service_provider}",
-								"ipv6_cidr_block": "${local.subnet0_ipv6_cidr_update}",
-							},
+							"ipv6_isp":        "${data.alibabacloudstack_vpc_ipv6_isps.default.ipv6_isps[0].service_provider}",
+							"ipv6_cidr_block": "${local.subnet0_ipv6_cidr_update}",
+						},
 					},
 				}),
 				Check: resource.ComposeTestCheckFunc(
@@ -361,7 +372,6 @@ variable "name" {
 `, name)
 }
 
-
 func AlibabacloudTestAccVpcVpcIpv6Basicdependence(name string) string {
 
 	//  TODO  检查依赖变量
@@ -378,4 +388,3 @@ locals {
 }
 `, AlibabacloudTestAccVpcVpcBasicdependence(name))
 }
-

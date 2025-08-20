@@ -26,7 +26,6 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 				Optional:      true,
 				Default:       "172.16.0.0/12",
 				ValidateFunc:  validateCIDRNetworkAddress,
-				ConflictsWith: []string{"enable_ipv6"},
 			},
 			"name": {
 				Type:          schema.TypeString,
@@ -99,6 +98,7 @@ func resourceAlibabacloudStackVpc() *schema.Resource {
 						},
 					},
 				},
+				ConflictsWith: []string{"enable_ipv6"},
 			},
 			"status": {
 				Type:     schema.TypeString,
