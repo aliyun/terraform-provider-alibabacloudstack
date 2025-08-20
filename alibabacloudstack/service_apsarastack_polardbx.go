@@ -513,7 +513,7 @@ func (s *PolardbXService) DoPolardbxDescribeDbListRequest(id string) (*PolardbxD
 	}
 }
 
-func (s *PolardbXService) CreatePolardbxAccount(instanceId , accountName , accountPassword , accountDescription string) (err error) {
+func (s *PolardbXService) CreatePolardbxAccount(instanceId, accountName, accountPassword, accountDescription string) (err error) {
 
 	action := "CreateAccount"
 	reqQuery := map[string]interface{}{
@@ -1024,6 +1024,36 @@ func (s *PolardbXService) ModifyCdcClass(reqQuery map[string]interface{}) error 
 	}
 	if err := s.WaitCdcNodeReady(reqQuery["DBInstanceName"].(string)); err != nil {
 		return err
+	}
+	return nil
+}
+func (s *PolardbXService) ModifyAccountPassword(instanceId, accountName, accountPassword string) error {
+	reqQuery := map[string]interface{}{
+		"AccountName":     accountName,
+		"DBInstanceName":  instanceId,
+		"AccountPassword": accountPassword,
+	}
+	if _, err := s.client.DoTeaRequest("POST", "polardbx", "2020-02-02", "ResetAccountPassword", "", nil, reqQuery, nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *PolardbXService) ModifyAccountDescription(instanceId, accountName, description string) error {
+	request := s.client.NewCommonRequest("POST", "polardbx", "2020-02-02", "ModifyAccountDescription", "")
+
+	request.QueryParams["AccountDescription"] = description
+	request.QueryParams["AccountName"] = accountName
+	request.QueryParams["DBInstanceName"] = instanceId
+
+	bresponse, err := s.client.ProcessCommonRequest(request)
+	if err != nil {
+		if bresponse == nil {
+			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		}
+		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
+		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg,
+			"alibabacloudstack_polardbx_account", "ModifyAccountDescription", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
 	return nil
 }
