@@ -3,8 +3,10 @@ layout: "alibabacloudstack"
 page_title: "Provider: alibabacloudstack"
 sidebar_current: "docs-alibabacloudstack-index"
 description: |-
-  The AlibabacloudStack provider is used to interact with many resources supported by AlibabacloudStack. The provider needs to be configured with the proper credentials before it can be used.
+  The AlibabacloudStack provider is used to interact with many resources supported by Apsara Stack Enterprise. The provider needs to be configured with the proper credentials before it can be used.
 ---
+
+# AlibabacloudStack Provider
 
 ## Example Code
 
@@ -23,15 +25,15 @@ terraform {
 
 # Configure AlibabacloudStack Provider
 provider "alibabacloudstack" {
-  access_key               = var.access_key
-  secret_key               = var.secret_key
-  region                   = var.region
-  role_arn                 = var.role_arn
-  # security_token         = var.security_token
+  access_key               = "Your Access Key"
+  secret_key               = "Your Secret Key"
+  role_arn                 = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx"
+  # security_token         = "Your STS Token"
+  region                   = "Region Name"
   insecure                 = true
-  proxy                    = var.proxy
-  resource_group_set_name  = var.resource_group_set_name
-  popgw_domain             = var.domain
+  # proxy                  = "http://IP:Port"
+  resource_group_set_name  = "Your Resource Group Set Name"
+  popgw_domain             = "xxx.xxx.com"
   protocol                 = "HTTPS"
 }
 ```
@@ -59,6 +61,7 @@ export ALIBABACLOUDSTACK_ASSUME_ROLE_ARN = "acs:ram::xxxxxxx:role/ascm-role-x-x-
 export ALIBABACLOUDSTACK_REGION="Region Name"
 export ALIBABACLOUDSTACK_INSECURE= true
 export ALIBABACLOUDSTACK_PROXY= "http://IP:Port"
+export ALIBABACLOUDSTACK_POPGW_DOMAIN="xxx.xxx.com"
 terraform plan
 ```
 
@@ -85,21 +88,23 @@ terraform plan
 > - Provider determines whether role assumption is needed based on `role_arn` configuration.  
 > - The `role_arn` can be obtained by accessing the *User Information* page in ASCM, clicking **View Current Role Policy**, and retrieving the `RAM Role` for the user under a specific organization.
 > - Role assumption validity period: 3600 seconds.
+> - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group parameters` as replacements for `resource_group_set_name`.
 
 | Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
 |------------------------|------------------------------------|----------|---------------------------------|------------------------------------------------------------------|
 | access_key             | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | Account Access Key              | **Required**                                                     |
 | secret_key             | ALIBABACLOUDSTACK_SECRET_KEY      | string   | Account Secret Key              | **Required**                                                     |
-| role_arn               | ALIBABACLOUDSTACK_ASSUME_ROLE_ARN | string   | RAM Role to be assumed          | **Required**                                                     |
+| role_arn               | ALIBABACLOUDSTACK_ASSUME_ROLE_ARN | string   | RAM Role to be assumed          | **Required**, Example: `acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx` |
 | department             | ALIBABACLOUDSTACK_DEPARTMENT      | string   | Authentication organization     | Required if `resource_group_set_name` is unavailable/unconfigured |
 | resource_group         | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | Authentication resource group   | Required if `resource_group_set_name` is unavailable/unconfigured |
-| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name      |   
+| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name        | Example: `ResourceSet(xxxx)`                                    |
 
 #### 2. Account STS Token
 
 > **Note**:  
 > - Provider identifies AK/SK type by `security_token` configuration.  
 > - Requires invoking the "Sts 2015-04-01 AssumeRole" API to obtain temporary credentials through role assumption.
+> - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group parameters` as replacements for `resource_group_set_name`.
 
 | Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
 |------------------------|------------------------------------|----------|---------------------------------|------------------------------------------------------------------|
@@ -108,13 +113,14 @@ terraform plan
 | security_token         | ALIBABACLOUDSTACK_SECURITY_TOKEN  | string   | Temporary Security Token        | **Required**                                                     |
 | department             | ALIBABACLOUDSTACK_DEPARTMENT      | string   | Authentication organization     | Required if `resource_group_set_name` is unavailable/unconfigured |
 | resource_group         | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | Authentication resource group   | Required if `resource_group_set_name` is unavailable/unconfigured |
-| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name      |                                                                  |
+| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name        |   Example: `ResourceSet(xxxx)`                                    |
 
 #### 3. Account AK/SK
 
 > **Note**:  
 > - AK/SK parameters can be queried in ASCM interface.  
 > - Use `department` and `resource_group` instead of `resource_group_set_name` when resource group names are not unique.
+> - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group parameters` as replacements for `resource_group_set_name`.
 
 | Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
 |------------------------|------------------------------------|----------|---------------------------------|------------------------------------------------------------------|
@@ -122,4 +128,4 @@ terraform plan
 | secret_key             | ALIBABACLOUDSTACK_SECRET_KEY      | string   | Account Secret Key              | **Required**                                                     |
 | department             | ALIBABACLOUDSTACK_DEPARTMENT      | string   | Authentication organization     | Required if `resource_group_set_name` is unavailable/unconfigured |
 | resource_group         | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | Authentication resource group   | Required if `resource_group_set_name` is unavailable/unconfigured |
-| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name      |                                                                  |
+| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name        | Example: `ResourceSet(xxxx)`                                    |

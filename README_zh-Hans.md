@@ -308,7 +308,16 @@ GOOS=<OS> GOARCH=<ARCH> go build
 1. 参考《配置集群链接信息》章节中的*环境变量*配置方案，配置环境变量
 2. 执行测试
    ```bash
+   cd 
    TF_ACC=1 TF_LOG=INFO go test ./alibabacloudstack -v -run=TestAccAlibabacloudStack -timeout=0
+   ```
+   
+### 源码调试
+
+1. 参考《配置集群链接信息》章节中的*环境变量*配置方案，配置环境变量
+2. 调试测试用例
+   ```bash
+   TF_ACC=1 dlv test ./alibabacloudstack -- -test.v -test.run="TestAccAlibabacloudStackxxxxx"
    ```
 
 ### 日志追踪
