@@ -79,6 +79,41 @@ func (s *PolardbXService) DoPolardbxDescribeAccountRequest(id string) (*Polardbx
 	return nil, errmsgs.Error(errmsgs.NotFoundMsg, "PolardbxAccount")
 }
 
+func (s *PolardbXService) DoPolardbxDescribeSuperAccountRequest(id string) ([]PolardbxAccount, error) {
+	var adminAccount, securityAccount, auditAccount *PolardbxAccount
+	if response, err := s.client.DoTeaRequest("GET", "polardbx", "2020-02-02", "DescribeAccountList", "", nil, map[string]interface{}{"DBInstanceName": id}, nil); err != nil {
+		return nil, err
+	} else {
+		for _, a := range response["Data"].([]interface{}) {
+			data := a.(map[string]interface{})
+			if data["AccountType"].(string) == "0" {
+				continue
+			} else {
+				account := PolardbxAccount{
+					AccountType:    data["AccountType"].(string),
+					AccountName:    data["AccountName"].(string),
+					DBInstanceName: data["DBInstanceName"].(string),
+				}
+				if v, exist := data["AccountDescription"]; exist {
+					account.AccountDescription = v.(string)
+				}
+				if data["AccountType"].(string) == "1" || data["AccountType"].(string) == "2" {
+					adminAccount = &account
+				} else if data["AccountType"].(string) == "3" {
+					securityAccount = &account
+				} else if data["AccountType"].(string) == "4" {
+					auditAccount = &account
+				}
+			}
+		}
+	}
+	if securityAccount != nil && auditAccount != nil {
+		return []PolardbxAccount{*adminAccount, *securityAccount, *auditAccount}, nil
+	} else {
+		return []PolardbxAccount{*adminAccount}, nil
+	}
+}
+
 type PolardbxDescribedbinstanceattributeResponse struct {
 	RequestId string `json:"RequestId"`
 

@@ -909,6 +909,7 @@ func getResourcesMap() map[string]*schema.Resource {
 		"alibabacloudstack_polardbx_instance":                               resourceAlibabacloudStackPolardbxInstance(),
 		"alibabacloudstack_polardbx_readonly_instance":                      resourceAlibabacloudStackPolardbxReadonlyInstance(),
 		"alibabacloudstack_polardbx_account":                                resourceAlibabacloudStackPolardbxAccount(),
+		"alibabacloudstack_polardbx_super_account":                          resourceAlibabacloudStackPolardbxSuperAccount(),
 		"alibabacloudstack_polardbx_database":                               resourceAlibabacloudStackPolardbxDatabase(),
 		"alibabacloudstack_polardbx_account_database_binding":               resourceAlibabacloudStackPolardbxAccountDatabaseBinding(),
 		"alibabacloudstack_polardbx_backup":                                 resourceAlibabacloudStackPolardbxBackup(),
