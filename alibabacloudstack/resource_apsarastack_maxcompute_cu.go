@@ -4,10 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,11 +19,6 @@ func resourceAlibabacloudStackMaxcomputeCu() *schema.Resource {
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"id": {
-				Type:     schema.TypeString,
-				Computed: true,
-				ForceNew: true,
-			},
 			"cu_name": {
 				Type:         schema.TypeString,
 				Required:     true,
@@ -35,7 +29,6 @@ func resourceAlibabacloudStackMaxcomputeCu() *schema.Resource {
 				Type:         schema.TypeInt,
 				ValidateFunc: validation.IntAtLeast(1),
 				Required:     true,
-				ForceNew:     true,
 			},
 			"cluster_name": {
 				Type:     schema.TypeString,
@@ -44,62 +37,68 @@ func resourceAlibabacloudStackMaxcomputeCu() *schema.Resource {
 			},
 		},
 	}
-	setResourceFunc(resource, resourceAlibabacloudStackMaxcomputeCuCreate, resourceAlibabacloudStackMaxcomputeCuRead, nil, resourceAlibabacloudStackMaxcomputeCuDelete)
+	setResourceFunc(resource, resourceAlibabacloudStackMaxcomputeCuCreate, resourceAlibabacloudStackMaxcomputeCuRead, resourceAlibabacloudStackMaxcomputeCuUpdate, resourceAlibabacloudStackMaxcomputeCuDelete)
 	return resource
 }
 
 func resourceAlibabacloudStackMaxcomputeCuCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	action := "CreateUpdateOdpsCu"
+	action := "CreateUpdateOdpsCuForAscm"
 	response := make(map[string]interface{})
-	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", action, "")
+	request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", action, "")
 	mergeMaps(request.QueryParams, map[string]string{
-		"CuName":          d.Get("cu_name").(string),
-		"CuNum":           fmt.Sprintf("%v", d.Get("cu_num").(int)),
-		"ClusterName":     d.Get("cluster_name").(string),
-		"ResourceGroupId": fmt.Sprintf("%v", client.ResourceGroup),
-		"RegionName":      client.RegionId,
-		"Share":           "0",
+		"Region":      client.RegionId,
+		"Action":      "CreateUpdateOdpsCuForAscm",
+		"AccessKeyId": client.AccessKey,
+		"CuName":      d.Get("cu_name").(string),
+		"CuNum":       fmt.Sprintf("%v", d.Get("cu_num").(int)),
+		"Cluster":     d.Get("cluster_name").(string),
+		"ClusterName": d.Get("cluster_name").(string),
+		"Share":       "0",
 	})
-	request.Headers["x-acs-content-type"] = "application/json"
-	request.Headers["Content-Type"] = "application/json"
 
-	raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-		return ecsClient.ProcessCommonRequest(request)
-	})
-	bresponse, ok := raw.(*responses.CommonResponse)
-	addDebug(action, raw, request)
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(action, bresponse, request, request.QueryParams)
 	if err != nil {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_cu", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
-	}
-	if bresponse.GetHttpStatus() != 200 {
-		errmsg := ""
-		if ok {
-			errmsg = errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		}
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_maxcompute_cu", action, errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_cu", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_cu", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		return errmsgs.WrapError(errmsgs.Error("CreateUpdateOdpsCu failed for " + response["asapiErrorMessage"].(string)))
+	data := response["Data"].(map[string]interface{})
+	d.SetId(data["CuId"].(string))
+
+	return nil
+}
+
+func resourceAlibabacloudStackMaxcomputeCuUpdate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*connectivity.AlibabacloudStackClient)
+	if !d.IsNewResource() && d.HasChange("cu_num") {
+		action := "CreateUpdateOdpsCuForAscm"
+		request := client.NewCommonRequest("POST", "dataworks-private-cloud", "2019-01-17", action, "")
+		mergeMaps(request.QueryParams, map[string]string{
+			"Region":      client.RegionId,
+			"Action":      "CreateUpdateOdpsCuForAscm",
+			"AccessKeyId": client.AccessKey,
+			"CuName":      d.Get("cu_name").(string),
+			"CuNum":       fmt.Sprintf("%v", d.Get("cu_num").(int)),
+			"Cluster":     d.Get("cluster_name").(string),
+			"CuId":        d.Id(),
+		})
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(action, bresponse, request, request.QueryParams)
+		if err != nil {
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_cu", action, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
 	}
-
-	d.Set("cu_name", d.Get("cu_name").(string))
-
 	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeCuRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	maxcomputeService := MaxcomputeService{client}
-	object, err := maxcomputeService.DescribeMaxcomputeCu(d.Get("cu_name").(string))
+	object, err := maxcomputeService.DescribeMaxcomputeCu(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_maxcompute_project maxcomputeService.DescribeMaxcomputeCu Failed!!! %s", err)
@@ -108,47 +107,50 @@ func resourceAlibabacloudStackMaxcomputeCuRead(d *schema.ResourceData, meta inte
 		}
 		return errmsgs.WrapError(err)
 	}
-
-	var data map[string]interface{}
-	datas := object["data"].([]interface{})
-	if datas == nil || len(datas) < 1 {
-		d.SetId(d.Get("id").(string))
-		d.Set("cluster_name", d.Get("cluster_name").(string))
-	}
-	s := d.Get("cu_name").(string)
-	for _, element := range datas {
-		data = element.(map[string]interface{})
-		if data["quota_name"].(string) != s {
-			continue
-		}
-		d.SetId(data["id"].(string))
-		max_cu, err := data["max_cu"].(json.Number).Float64()
+	var cu_num int
+	switch v := object["max_cu"].(type) {
+	case string:
+		cu_num, err = strconv.Atoi(v)
 		if err != nil {
 			return errmsgs.WrapError(errmsgs.Error("illegal max_cu value"))
 		}
-		d.Set("cu_num", int64(max_cu))
-		d.Set("cluster_name", data["cluster"].(string))
-		break
+	case json.Number:
+		var floatVal float64
+		floatVal, err = v.Float64()
+		if err != nil {
+			return errmsgs.WrapError(errmsgs.Error("illegal max_cu value"))
+		}
+		cu_num = int(floatVal)
+	case int:
+		cu_num = v
+	case float64:
+		cu_num = int(v)
+	default:
+		return errmsgs.WrapError(errmsgs.Error("illegal max_cu value type"))
 	}
+	d.Set("cu_num", cu_num)
+	d.Set("cu_name", object["quota_name"].(string))
+	d.Set("cluster_name", object["cluster"].(string))
 	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeCuDelete(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	action := "DeleteOdpsCu"
-	request := make(map[string]interface{})
-	request["CuId"] = d.Id()
-	request["CuName"] = d.Get("cu_name")
-	request["ClusterName"] = d.Get("cluster_name")
+	action := "DeleteOdpsCuForAscm"
+	request := map[string]interface{}{
+		"Region":      client.RegionId,
+		"Action":      "CreateUpdateOdpsCuForAscm",
+		"AccessKeyId": client.AccessKey,
+		"CuName":      d.Get("cu_name").(string),
+		"CuNum":       d.Get("cu_num").(int),
+		"Cluster":     d.Get("cluster_name").(string),
+		"CuId":        d.Id(),
+	}
 
-	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, nil, request)
-	
+	_, err := client.DoTeaRequest("POST", "dataworks-private-cloud", "2019-01-17", action, "", nil, request, nil)
+
 	if err != nil {
 		return err
 	}
-	if fmt.Sprintf("%v", response["code"]) == "102" || fmt.Sprintf("%v", response["code"]) == "403" {
-		return nil
-	}
-
 	return nil
 }

@@ -58,36 +58,36 @@ func (s *MaxcomputeService) DescribeMaxcomputeProject(name string) (object *MaxC
 	return resp, nil
 }
 
-func (s *MaxcomputeService) DescribeMaxcomputeCu(name string) (object map[string]interface{}, err error) {
-	request := make(map[string]interface{})
-	request["RegionName"] = s.client.RegionId
-	request["Product"] = "ascm"
-	request["OrganizationId"] = s.client.Department
-	request["ResourceGroupId"] = s.client.ResourceGroup
-	request["Department"] = s.client.Department
+func (s *MaxcomputeService) DescribeMaxcomputeCu(id string) (object map[string]interface{}, err error) {
+	request := map[string]interface{}{
+		"Region":      s.client.RegionId,
+		"Action":      "ListOdpsCusForAscm",
+		"AccessKeyId": s.client.AccessKey,
+		"CuId":        id,
+	}
 
-	response, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "ListOdpsCus", "/ascm/manage/odps/list_cus", nil, nil, request)
-	addDebug("ListOdpsCus", response, request)
+	response, err := s.client.DoTeaRequest("GET", "dataworks-private-cloud", "2019-01-17", "ListOdpsCusForAscm", "", nil, request, nil)
+	addDebug("ListOdpsCusForAscm", response, request)
 	if err != nil {
-		err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, name, "ListOdpsCus", errmsgs.AlibabacloudStackSdkGoERROR)
+		err = errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_cu", "ListOdpsCusForAscm", errmsgs.AlibabacloudStackSdkGoERROR)
 		return
 	}
-
-	if errmsgs.IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
-		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("MaxcomputeProject", name)), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-		return object, err
-	}
-	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		err = errmsgs.Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
+	if fmt.Sprintf(`%v`, response["HttpStatusCode"]) != "200" {
+		err = errmsgs.Error("ListOdpsCusForAscm failed for " + response["asapiErrorMessage"].(string))
 		return object, err
 	}
 
-	v, err := jsonpath.Get("$", response)
+	v, err := jsonpath.Get("$.Data.data", response)
 	if err != nil {
-		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, name, "$", response)
+		return object, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$", response)
 	}
-	object = v.(map[string]interface{})
-	return object, nil
+	datas := v.([]interface{})
+	for _, element := range datas {
+		if element.(map[string]interface{})["id"].(string) == id {
+			return element.(map[string]interface{}), nil
+		}
+	}
+	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("Maxcompute", id))
 }
 
 func (s *MaxcomputeService) DescribeMaxcomputeUser(name string) (response *OdpsUser, err error) {
@@ -99,6 +99,9 @@ func (s *MaxcomputeService) DescribeMaxcomputeUser(name string) (response *OdpsU
 
 	request := make(map[string]interface{})
 	request["UserName"] = name
+	request["Region"] = s.client.RegionId
+	request["Action"] = "GetOdpsUserList"
+	request["AccessKeyId"] = s.client.AccessKey
 	request["x-acs-roleid"] = strconv.Itoa(roleId)
 
 	responseData, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "GetOdpsUserList", "/ascm/manage/resource_mgmt/listOdpsUser", nil, nil, request)

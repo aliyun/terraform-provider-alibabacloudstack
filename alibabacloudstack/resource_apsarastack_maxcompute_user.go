@@ -66,16 +66,16 @@ func resourceAlibabacloudStackMaxcomputeUserCreate(d *schema.ResourceData, meta 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 	action := "CreateOdpsUser"
-	request := make(map[string]interface{})
-	request["UserName"] = d.Get("user_name")
-	if v, ok := d.GetOk("organization_id"); ok {
-		request["OrganizationId"] = v
-	} else {
-		request["OrganizationId"] = client.Department
+	request := map[string]interface{}{
+		"Region":         client.RegionId,
+		"Action":         action,
+		"AccessKeyId":    client.AccessKey,
+		"UserName":       d.Get("user_name"),
+		"OrganizationId": client.Department,
+		"Description":    d.Get("description"),
 	}
-	request["Description"] = d.Get("description")
 
-	response, err = client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, nil, request)
+	response, err = client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, request, request)
 
 	if err != nil {
 		return err
@@ -141,9 +141,12 @@ func resourceAlibabacloudStackMaxcomputeUserUpdate(d *schema.ResourceData, meta 
 		} else {
 			OrganizationId = client.Department
 		}
-
+		action := "UpdateOdpsUser"
 		commonRequest := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateOdpsUser", "/ascm/manage/resource_mgmt/updateOdpsUser")
 		mergeMaps(commonRequest.QueryParams, map[string]string{
+			"Region":           client.RegionId,
+			"Action":           action,
+			"AccessKeyId":      client.AccessKey,
 			"Id":               d.Get("id").(string),
 			"UserId":           d.Get("user_id").(string),
 			"UserName":         d.Get("user_name").(string),
@@ -170,8 +173,6 @@ func resourceAlibabacloudStackMaxcomputeUserUpdate(d *schema.ResourceData, meta 
 }
 
 func resourceAlibabacloudStackMaxcomputeUserDelete(d *schema.ResourceData, meta interface{}) error {
-	// ASCM does not support deletion
-	return nil
 
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	action := "DeleteOdpsCu"
@@ -179,6 +180,9 @@ func resourceAlibabacloudStackMaxcomputeUserDelete(d *schema.ResourceData, meta 
 	request["CuId"] = d.Id()
 	request["CuName"] = d.Get("cu_name")
 	request["ClusterName"] = d.Get("cluster_name")
+	request["Region"] = client.RegionId
+	request["Action"] = action
+	request["AccessKeyId"] = client.AccessKey
 
 	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, nil, request)
 

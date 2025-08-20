@@ -108,17 +108,21 @@ func DescribeMaxcomputeProject(meta interface{}) ([]interface{}, error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	var response map[string]interface{}
 
-	roleId, err := client.RoleIds()
-	if err != nil {
-		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-		return nil, err
-	}
+	// roleId, err := client.RoleIds()
+	// if err != nil {
+	// 	err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
+	// 	return nil, err
+	// }
 
 	request := map[string]interface{}{
-		"CurrentRoleId": roleId,
+		// "CurrentRoleId": roleId,
+		"Region":      client.RegionId,
+		"Action":      "ListOdpsClustersForAscm",
+		"AccessKeyId": client.AccessKey,
 	}
 
-	response, err = client.DoTeaRequest("POST", "ASCM", "2019-05-10", "ListOdpsClusters", "/ascm/manage/resource_mgmt/getOdpsClusters", nil, nil, request)
+	// response, err := client.DoTeaRequest("POST", "ASCM", "2019-05-10", "ListOdpsClusters", "/ascm/manage/resource_mgmt/getOdpsClusters", nil, nil, request)
+	response, err := client.DoTeaRequest("GET", "dataworks-private-cloud", "2019-01-17", "ListOdpsClustersForAscm", "", nil, request, nil)
 
 	if err != nil {
 		if errmsgs.IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
@@ -126,17 +130,14 @@ func DescribeMaxcomputeProject(meta interface{}) ([]interface{}, error) {
 		}
 		return nil, err
 	}
-	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		err = errmsgs.Error("ListOdpsCus failed for " + response["asapiErrorMessage"].(string))
+	if fmt.Sprintf(`%v`, response["HttpStatusCode"]) != "200" {
+		errmsg := errmsgs.GetAsapiErrorMessage(response)
+		err = errmsgs.Error("ListOdpsCus failed for " + errmsg)
 		return nil, err
 	}
 	v, err := jsonpath.Get("$", response)
 	if err != nil {
-		errmsg := ""
-		if response != nil {
-			errmsg = errmsgs.GetAsapiErrorMessage(response)
-		}
-		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "ListOdpsClusters", "$", response, errmsg)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, "ListOdpsClusters", "$", response)
 	}
-	return v.(map[string]interface{})["data"].([]interface{}), nil
+	return v.(map[string]interface{})["Data"].([]interface{}), nil
 }

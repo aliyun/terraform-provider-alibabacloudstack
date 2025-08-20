@@ -72,20 +72,21 @@ const (
 	ACMCode              = ServiceCode("ACM")
 	POLARDBXCode         = ServiceCode("POLARDBX")
 	//undefined code 先添加
-	GDBCode             = ServiceCode("GDB")
-	ARMSCode            = ServiceCode("ARMS")
-	CSBCode             = ServiceCode("CSB")
-	DBSCode             = ServiceCode("DBS")
-	DTSCode             = ServiceCode("DTS")
-	SLSCode             = ServiceCode("SLS")
-	HitsdbCode          = ServiceCode("HITSDB")
-	RosCode             = ServiceCode("ROS")
-	QuickbiCode         = ServiceCode("QUICKBI")
-	DataworkspublicCode = ServiceCode("DATAWORKSPUBLIC")
-	OneRouterCode       = ServiceCode("ONEROUTER")
-	BastionHostCode     = ServiceCode("BASTIONHOSTPRIVATE")
-	WAFONECSCode        = ServiceCode("WAF_ONECS")
-	ALIKAFKACode        = ServiceCode("ALIKAFKA")
+	GDBCode                   = ServiceCode("GDB")
+	ARMSCode                  = ServiceCode("ARMS")
+	CSBCode                   = ServiceCode("CSB")
+	DBSCode                   = ServiceCode("DBS")
+	DTSCode                   = ServiceCode("DTS")
+	SLSCode                   = ServiceCode("SLS")
+	HitsdbCode                = ServiceCode("HITSDB")
+	RosCode                   = ServiceCode("ROS")
+	QuickbiCode               = ServiceCode("QUICKBI")
+	DataworkspublicCode       = ServiceCode("DATAWORKSPUBLIC")
+	OneRouterCode             = ServiceCode("ONEROUTER")
+	BastionHostCode           = ServiceCode("BASTIONHOSTPRIVATE")
+	WAFONECSCode              = ServiceCode("WAF_ONECS")
+	ALIKAFKACode              = ServiceCode("ALIKAFKA")
+	DataworksPrivateCloudCode = ServiceCode("DATAWORKS_PRIVATE_CLOUD")
 	//自建网关虚假Code
 	OssDataCode = ServiceCode("OSSDATA")
 	SlSDataCode = ServiceCode("SLSDATA")
@@ -354,6 +355,10 @@ var PopEndpoints = map[ServiceCode]PopEndpoint{
 	POLARDBXCode: PopEndpoint{
 		"polarx-vpc.{{.domain}}",
 		"polarx-vpc.{{.region}}.{{.domain}}",
+	},
+	DataworksPrivateCloudCode: PopEndpoint{
+		"dataworks-vpc.{{.domain}}",
+		"dataworks-vpc.{{.region}}.{{.domain}}",
 	},
 	//cbn endpoint
 	CbnCode: PopEndpoint{

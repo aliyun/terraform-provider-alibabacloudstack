@@ -1,6 +1,7 @@
 package connectivity
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/PaesslerAG/jsonpath"
@@ -556,7 +557,25 @@ func (client *AlibabacloudStackClient) GetCallerDefaultRole() (int, error) {
 	if err != nil {
 		return 1, err
 	}
-	roleId := resp["defaultRole"].(map[string]interface{})["id"].(int)
+	defaultRole, ok := resp["defaultRole"].(map[string]interface{})
+	if !ok {
+		return 0, fmt.Errorf("defaultRole is not a map")
+	}
+
+	var role string
+	switch v := defaultRole["id"].(type) {
+	case string:
+		role = v
+	case json.Number:
+		role = v.String()
+	default:
+		return 0, fmt.Errorf("unexpected type for role id: %T", v)
+	}
+
+	roleId, err := strconv.Atoi(role)
+	if err != nil {
+		return 0, err
+	}
 
 	if roleId == 0 {
 		return 0, fmt.Errorf("default roleId not found")
