@@ -43,7 +43,7 @@ Download TF Core from the [Terraform](https://www.terraform.io/downloads.html) o
 
 **Solution 1: Automatic installation**
 
-> **Note**: Automatic installation is supported only when your environment can access GitHub. This solution does not require additional configurations. You can skip the following content of this section and proceed with the [Getting Started](#GettingStarted) section to get started with the Terraform provider. TF Core will automatically install AlibabacloudStack. 
+> **Note**: Automatic installation is supported only when your environment can access GitHub. This solution does not require additional configurations. You can skip the following content of this section and proceed with the [Getting Started](#getting-started) section to get started with the Terraform provider. TF Core will automatically install AlibabacloudStack. 
 
 **Solution 2: Installation from the mirror site**
 
@@ -99,7 +99,7 @@ XX(The provider repository path, such as./terraform.d/providers/)
                 └── <system architecture>(such as windows_amd64)
                     └── <provider file>(terraform-provider-alibabacloudstack)
 ```
-> **Note**: We recommend that you use the aliyun namespace. In the [Initialize a project](#Initialize a project) step, we recommend that you declare the `source` of AlibabacloudStack as aliyun/alibabacloudstack when you write the `provider.tf` file. 
+> **Note**: We recommend that you use the aliyun namespace. In the [Initialize a project](#initialize-a-project) step, we recommend that you declare the `source` of AlibabacloudStack as aliyun/alibabacloudstack when you write the `provider.tf` file. 
 
 > **Note**: Common system architectures include `windows_amd64`, `linux_amd64`, `linux_arm64`, `darwin_amd64`, and `darwin_arm64`.
 
@@ -159,7 +159,7 @@ terraform {
 terraform init
 ```
 
-> **Note**: If you specify a third-party provider repository path in the [Install the Terraform provider](#InstallTheTerraformProvider) section, you must specify the path during directory initialization.
+> **Note**: If you specify a third-party provider repository path in the [Install the Terraform provider](#install-the-terraform-provider) section, you must specify the path during directory initialization.
 >	```bash
 >	terraform init -plugin-dir=<provider repository path>
 >	```
