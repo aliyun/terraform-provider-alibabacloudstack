@@ -335,7 +335,7 @@ func resourceAlibabacloudStackCenRouteMapUpdate(d *schema.ResourceData, meta int
 			i := 1
 			for _, value := range v.(*schema.Set).List() {
 				key := fmt.Sprintf("%s.%d", "PrependAsPath", i)
-				request.QueryParams[key] = value.(string)
+				request.QueryParams[key] = strconv.Itoa(value.(int))
 				i += 1
 			}
 		}
@@ -522,7 +522,7 @@ func resourceAlibabacloudStackCenRouteMapRead(d *schema.ResourceData, meta inter
 				d.Set("source_child_instance_types", values)
 			}
 			if len(v.PrependAsPath.AsPath) != 0 {
-				values := make([]string, 0)
+				values := make([]int, 0)
 				for _, v := range v.PrependAsPath.AsPath {
 					values = append(values, v)
 				}

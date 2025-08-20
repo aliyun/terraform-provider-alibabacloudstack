@@ -2,6 +2,7 @@ package alibabacloudstack
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
@@ -23,7 +24,7 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 	rand := getAccTestRandInt(10000, 99999)
 	name := fmt.Sprintf("tf-testacc%sroute_map%d", defaultRegionToTest, rand)
 	modify_name := fmt.Sprintf("tf-testacc%sroute_map%d", defaultRegionToTest, rand)
-
+	region := os.Getenv("ALIBABACLOUDSTACK_REGION")
 	testAccConfig := resourceTestAccConfigFunc(resourceId, name, AlibabacloudTestAccCenRouteMapsBasicdependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
@@ -55,6 +56,19 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 						"priority":                      "3",
 						"transmit_direction":            "RegionIn",
 						"map_result":                    "Deny",
+					}),
+				),
+			},
+			{
+				Config: testAccConfig(map[string]interface{}{
+
+					"source_region_ids": []string{region},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+
+						"source_region_ids.#": "1",
+						"source_region_ids.0": region,
 					}),
 				),
 			},
@@ -97,9 +111,9 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 						"destination_instance_ids_reverse_match": "true",
 						"destination_instance_ids.#":             "1",
 						"destination_instance_ids.0":             "bbbbb",
-						"source_instance_ids.#":                 "0",
-						"source_instance_ids.0": REMOVEKEY,
-						"source_instance_ids_reverse_match": REMOVEKEY,
+						"source_instance_ids.#":                  "0",
+						"source_instance_ids.0":                  REMOVEKEY,
+						"source_instance_ids_reverse_match":      REMOVEKEY,
 					}),
 				),
 			},
@@ -113,11 +127,11 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"destination_route_table_ids.#": "1",
-						"destination_route_table_ids.0": "cccccc",
+						"destination_route_table_ids.#":          "1",
+						"destination_route_table_ids.0":          "cccccc",
 						"destination_instance_ids_reverse_match": REMOVEKEY,
-						"destination_instance_ids.#":      "0",
-						"destination_instance_ids.0":      REMOVEKEY,
+						"destination_instance_ids.#":             "0",
+						"destination_instance_ids.0":             REMOVEKEY,
 					}),
 				),
 			},
@@ -152,8 +166,8 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 						"destination_child_instance_types.0": "VBR",
 						"destination_child_instance_types.1": "VPC",
 						"source_child_instance_types.#":      "0",
-						"source_child_instance_types.0": REMOVEKEY,
-						"source_child_instance_types.1": REMOVEKEY,
+						"source_child_instance_types.0":      REMOVEKEY,
+						"source_child_instance_types.1":      REMOVEKEY,
 					}),
 				),
 			},
@@ -167,7 +181,7 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"match_address_type": "IPv6",
+						"match_address_type":                 "IPv6",
 						"destination_child_instance_types.#": "0",
 						"destination_child_instance_types.0": REMOVEKEY,
 						"destination_child_instance_types.1": REMOVEKEY,
@@ -188,7 +202,7 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 						"cidr_match_mode":           "Include",
 						"destination_cidr_blocks.#": "1",
 						"destination_cidr_blocks.0": "11.11.0.0/16",
-						"match_address_type": REMOVEKEY,
+						"match_address_type":        REMOVEKEY,
 					}),
 				),
 			},
@@ -215,10 +229,10 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 
-						"route_types.#": "2",
-						"route_types.0": "Custom",
-						"route_types.1": "System",
-						"cidr_match_mode": REMOVEKEY,
+						"route_types.#":             "2",
+						"route_types.0":             "Custom",
+						"route_types.1":             "System",
+						"cidr_match_mode":           REMOVEKEY,
 						"destination_cidr_blocks.#": "0",
 						"destination_cidr_blocks.0": REMOVEKEY,
 					}),
@@ -238,9 +252,9 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 						"match_asns.0":       "16100",
 						"match_asns.1":       "17100",
 						"as_path_match_mode": "Include",
-						"route_types.#": "0",
-						"route_types.0": REMOVEKEY,
-						"route_types.1": REMOVEKEY,
+						"route_types.#":      "0",
+						"route_types.0":      REMOVEKEY,
+						"route_types.1":      REMOVEKEY,
 					}),
 				),
 			},
@@ -272,10 +286,10 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 						"match_community_set.0": "16100:111",
 						"match_community_set.1": "17100:111",
 						"community_match_mode":  "Complete",
-						"as_path_match_mode":   REMOVEKEY,
-						"match_asns.#": "0",
-						"match_asns.0":REMOVEKEY,
-						"match_asns.1":REMOVEKEY,
+						"as_path_match_mode":    REMOVEKEY,
+						"match_asns.#":          "0",
+						"match_asns.0":          REMOVEKEY,
+						"match_asns.1":          REMOVEKEY,
 					}),
 				),
 			},
@@ -314,17 +328,17 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 			},
 			{
 				Config: testAccConfig(map[string]interface{}{
-					"preference":            REMOVEKEY,
-					"operate_community_set": []string{"16100:111", "17100:111"},
-					"community_operate_mode":  "Additive",
+					"preference":             REMOVEKEY,
+					"operate_community_set":  []string{"16100:111", "17100:111"},
+					"community_operate_mode": "Additive",
 				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"operate_community_set.#": "2",
 						"operate_community_set.0": "16100:111",
 						"operate_community_set.1": "17100:111",
-						"community_operate_mode":    "Additive",
-						"preference":            REMOVEKEY,
+						"community_operate_mode":  "Additive",
+						"preference":              REMOVEKEY,
 					}),
 				),
 			},
@@ -335,6 +349,33 @@ func TestAccAlibabacloudStackCenRouteMap0(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"community_operate_mode": "Replace",
+					}),
+				),
+			},
+
+			{
+				Config: testAccConfig(map[string]interface{}{
+					"community_operate_mode": REMOVEKEY,
+					"operate_community_set":  REMOVEKEY,
+					"prepend_as_path":        []string{"16100"},
+					"match_community_set":    REMOVEKEY,
+					"community_match_mode":   REMOVEKEY,
+					"source_instance_ids":    []string{"bbbbb"},
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheck(map[string]string{
+						"community_operate_mode":  REMOVEKEY,
+						"operate_community_set.#": "0",
+						"operate_community_set.0": REMOVEKEY,
+						"operate_community_set.1": REMOVEKEY,
+						"match_community_set.#":   "0",
+						"match_community_set.0":   REMOVEKEY,
+						"match_community_set.1":   REMOVEKEY,
+						"source_instance_ids.#":   "1",
+						"source_instance_ids.0":   "bbbbb",
+						"prepend_as_path.#":       "1",
+						"prepend_as_path.0":       "16100",
+						"community_match_mode":    REMOVEKEY,
 					}),
 				),
 			},
