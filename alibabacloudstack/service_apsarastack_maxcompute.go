@@ -90,22 +90,15 @@ func (s *MaxcomputeService) DescribeMaxcomputeCu(id string) (object map[string]i
 	return nil, errmsgs.Error(errmsgs.GetNotFoundMessage("Maxcompute", id))
 }
 
-func (s *MaxcomputeService) DescribeMaxcomputeUser(name string) (response *OdpsUser, err error) {
-	roleId, err := s.client.RoleIds()
-	if err != nil {
-		err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-		return nil, err
-	}
-
+func (s *MaxcomputeService) DescribeMaxcomputeUsers(organization_id string) (response []interface{}, err error) {
 	request := make(map[string]interface{})
-	request["UserName"] = name
+	request["Department"] = organization_id
 	request["Region"] = s.client.RegionId
 	request["Action"] = "GetOdpsUserList"
 	request["AccessKeyId"] = s.client.AccessKey
-	request["x-acs-roleid"] = strconv.Itoa(roleId)
 
-	responseData, err := s.client.DoTeaRequest("POST", "ascm", "2019-05-10", "GetOdpsUserList", "/ascm/manage/resource_mgmt/listOdpsUser", nil, nil, request)
-	addDebug("GetOdpsUserList", responseData, request)
+	responseData, err := s.client.DoTeaRequest("GET", "ascm", "2019-05-10", "GetOdpsUserList", "", nil, request, nil)
+	addDebug("GetOdpsUserList", responseData, request, request)
 	if err != nil {
 		if errmsgs.IsExpectedErrors(err, []string{"Error OdpsUser Not Found"}) {
 			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
@@ -113,18 +106,43 @@ func (s *MaxcomputeService) DescribeMaxcomputeUser(name string) (response *OdpsU
 		return nil, err
 	}
 
-	resp := &OdpsUser{}
-	body, ok := responseData["Body"].(string)
-	if !ok {
-		return resp, errmsgs.WrapError(err)
-	}
-	err = json.Unmarshal([]byte(body), resp)
+	datas, err := jsonpath.Get("$.data", responseData)
 	if err != nil {
-		return resp, errmsgs.WrapError(err)
+		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, organization_id, "$.data", response)
+	}
+	if datas != nil {
+		return datas.([]interface{}), nil
+	}
+	return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+}
+
+func (s *MaxcomputeService) DescribeMaxcomputeUser(id string) (response map[string]interface{}, err error) {
+	params := strings.Split(id, ":")
+	request := make(map[string]interface{})
+	request["Department"] = params[0]
+	request["Id"] = params[1]
+	request["Region"] = s.client.RegionId
+	request["Action"] = "GetOdpsUserList"
+	request["AccessKeyId"] = s.client.AccessKey
+
+	responseData, err := s.client.DoTeaRequest("GET", "ascm", "2019-05-10", "GetOdpsUserList", "", nil, request, nil)
+	addDebug("GetOdpsUserList", responseData, request, request)
+	if err != nil {
+		if errmsgs.IsExpectedErrors(err, []string{"Error OdpsUser Not Found"}) {
+			return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
+		}
+		return nil, err
 	}
 
-	if len(resp.Data) < 1 || resp.Code == "200" {
-		return resp, errmsgs.WrapError(err)
+	datas, err := jsonpath.Get("$.data", responseData)
+	if err != nil {
+		return nil, errmsgs.WrapErrorf(err, errmsgs.FailedGetAttributeMsg, id, "$.data", response)
 	}
-	return resp, nil
+	for _, v := range datas.([]interface{}) {
+		data := v.(map[string]interface{})
+		if fmt.Sprint(data["id"]) == params[1] {
+			return data, nil
+		}
+	}
+	return nil, errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
 }

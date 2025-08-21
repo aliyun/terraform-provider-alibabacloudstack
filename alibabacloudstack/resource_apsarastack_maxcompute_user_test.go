@@ -13,8 +13,8 @@ func TestAccAlibabacloudStackMaxcomputeUser(t *testing.T) {
 	ra := resourceAttrInit(resourceId, nil)
 	testAccCheck := ra.resourceAttrMapUpdateSet()
 	rand := getAccTestRandInt(1000, 9999)
-	name := fmt.Sprintf("tf_testAccAlibabacloudStack%d", rand)
-
+	name := fmt.Sprintf("tf_testAcck%d", rand)
+	testAccConfig := resourceTestAccConfigFunc(resourceId, name, resourceMaxcomputeUserDependence)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -24,7 +24,10 @@ func TestAccAlibabacloudStackMaxcomputeUser(t *testing.T) {
 		Providers:     testAccProviders,
 		Steps: []resource.TestStep{
 			{
-				Config: fmt.Sprintf(testAccMaxcomputeUser, name),
+				Config: testAccConfig(map[string]interface{}{
+					"user_name":   "${var.name}",
+					"description": "TestAccAlibabacloudStackMaxcomputeUser",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
 						"user_name":   name,
@@ -33,11 +36,14 @@ func TestAccAlibabacloudStackMaxcomputeUser(t *testing.T) {
 				),
 			},
 			{
-				Config: fmt.Sprintf(testAccMaxcomputeUserUpdate, name),
+				Config: testAccConfig(map[string]interface{}{
+					"user_name":   "${var.name}_update",
+					"description": "TestAccAlibabacloudStackMaxcomputeUser_update",
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheck(map[string]string{
-						"user_name":   name,
-						"description": "TestAccAlibabacloudStackMaxcomputeUserUpdate",
+						"user_name":   fmt.Sprintf("%s_update", name),
+						"description": "TestAccAlibabacloudStackMaxcomputeUser_update",
 					}),
 				),
 			},
@@ -50,26 +56,11 @@ func TestAccAlibabacloudStackMaxcomputeUser(t *testing.T) {
 	})
 }
 
-const testAccMaxcomputeUser = `
-resource "alibabacloudstack_maxcompute_user" "default"{
-  user_name             = "%s"
-  description           = "TestAccAlibabacloudStackMaxcomputeUser"
-  lifecycle {
-    ignore_changes = [
-      organization_id,
-    ]
-  }
+func resourceMaxcomputeUserDependence(name string) string {
+	return fmt.Sprintf(`
+variable "name" {
+	default = "%s"
 }
-`
 
-const testAccMaxcomputeUserUpdate = `
-resource "alibabacloudstack_maxcompute_user" "default"{
-  user_name             = "%s"
-  description           = "TestAccAlibabacloudStackMaxcomputeUserUpdate"
-  lifecycle {
-    ignore_changes = [
-      organization_id,
-    ]
-  }
+`, name)
 }
-`

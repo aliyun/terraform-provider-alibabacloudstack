@@ -1,12 +1,12 @@
 package alibabacloudstack
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
+	"strings"
 	"time"
 
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/connectivity"
 	"github.com/aliyun/terraform-provider-alibabacloudstack/alibabacloudstack/errmsgs"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,8 +19,8 @@ func resourceAlibabacloudStackMaxcomputeUser() *schema.Resource {
 			Delete: schema.DefaultTimeout(2 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"id": {
-				Type:     schema.TypeString,
+			"account_id": {
+				Type:     schema.TypeInt,
 				Computed: true,
 				ForceNew: true,
 			},
@@ -46,6 +46,7 @@ func resourceAlibabacloudStackMaxcomputeUser() *schema.Resource {
 			"organization_id": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 			},
 			"organization_name": {
 				Type:     schema.TypeString,
@@ -64,33 +65,54 @@ func resourceAlibabacloudStackMaxcomputeUser() *schema.Resource {
 
 func resourceAlibabacloudStackMaxcomputeUserCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-	var response map[string]interface{}
+
+	organization_id := client.Department
+	if v, ok := d.GetOk("organization_id"); ok {
+		organization_id = fmt.Sprint(v.(int))
+	}
+	user_name := d.Get("user_name").(string)
 	action := "CreateOdpsUser"
-	request := map[string]interface{}{
+	request := client.NewCommonRequest("POST", "ascm", "2019-05-10", action, "")
+	mergeMaps(request.QueryParams, map[string]string{
 		"Region":         client.RegionId,
 		"Action":         action,
 		"AccessKeyId":    client.AccessKey,
-		"UserName":       d.Get("user_name"),
-		"OrganizationId": client.Department,
-		"Description":    d.Get("description"),
-	}
-
-	response, err = client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, request, request)
-
+		"UserName":       user_name,
+		"OrganizationId": organization_id,
+		"Description":    d.Get("description").(string),
+	})
+	response := make(map[string]interface{})
+	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(action, bresponse, request, request.QueryParams)
 	if err != nil {
-		return err
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		return errmsgs.WrapError(errmsgs.Error("CreateUpdateOdpsUser failed for "))
+	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &response)
+	if err != nil {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
 	}
-
+	maxcomputeService := MaxcomputeService{client}
+	users, err := maxcomputeService.DescribeMaxcomputeUsers(organization_id)
+	if err != nil || len(users) == 0 {
+		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
+	}
+	var userid json.Number
+	for _, user := range users {
+		user_map := user.(map[string]interface{})
+		if user_map["userName"].(string) == user_name {
+			userid = user_map["id"].(json.Number)
+			break
+		}
+	}
+	id := fmt.Sprintf("%s:%v", organization_id, userid)
+	d.SetId(id)
 	return
 }
 
 func resourceAlibabacloudStackMaxcomputeUserRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
 	maxcomputeService := MaxcomputeService{client}
-	object, err := maxcomputeService.DescribeMaxcomputeUser(d.Get("user_name").(string))
+	object, err := maxcomputeService.DescribeMaxcomputeUser(d.Id())
 	if err != nil {
 		if errmsgs.NotFoundError(err) {
 			log.Printf("[DEBUG] Resource alibabacloudstack_maxcompute_project_user maxcomputeService.DescribeMaxcomputeUser Failed!!! %s", err)
@@ -99,101 +121,45 @@ func resourceAlibabacloudStackMaxcomputeUserRead(d *schema.ResourceData, meta in
 		}
 		return errmsgs.WrapError(err)
 	}
-
-	d.SetId(strconv.Itoa(object.Data[0].ID))
-	d.Set("user_id", object.Data[0].UserID)
-	d.Set("user_pk", object.Data[0].UserPK)
-	d.Set("user_name", object.Data[0].UserName)
-	d.Set("user_type", object.Data[0].UserType)
-	d.Set("organization_id", object.Data[0].OrganizationId)
-	d.Set("organization_name", object.Data[0].OrganizationName)
-	d.Set("description", object.Data[0].Description)
+	d.Set("account_id", object["id"].(json.Number))
+	d.Set("user_id", object["userId"].(string))
+	d.Set("user_pk", object["aasPk"].(string))
+	d.Set("user_name", object["userName"].(string))
+	d.Set("user_type", object["userType"].(string))
+	d.Set("organization_id", object["organizationId"].(json.Number))
+	d.Set("organization_name", object["organizationName"].(string))
+	d.Set("description", object["description"].(string))
 	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeUserUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*connectivity.AlibabacloudStackClient)
-
-	update := false
-	if d.HasChange("user_name") {
-		update = true
-	}
-	if d.HasChange("organization_id") {
-		update = true
-	}
-	if d.HasChange("organization_name") {
-		update = true
-	}
-	if d.HasChange("description") {
-		update = true
-	}
-	if update {
-		var requestInfo *ecs.Client
-		roleId, err := client.RoleIds()
-		if err != nil {
-			err = errmsgs.WrapErrorf(errmsgs.Error(errmsgs.GetNotFoundMessage("ASCM User", "defaultRoleId")), errmsgs.NotFoundMsg, errmsgs.ProviderERROR)
-			return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-		}
-
-		OrganizationId := ""
-		if v, ok := d.GetOk("organization_id"); ok {
-			OrganizationId = strconv.Itoa(v.(int))
-		} else {
-			OrganizationId = client.Department
-		}
+	if !d.IsNewResource() && d.HasChanges("user_name", "description") {
+		params := strings.Split(d.Id(), ":")
 		action := "UpdateOdpsUser"
-		commonRequest := client.NewCommonRequest("POST", "ascm", "2019-05-10", "UpdateOdpsUser", "/ascm/manage/resource_mgmt/updateOdpsUser")
-		mergeMaps(commonRequest.QueryParams, map[string]string{
-			"Region":           client.RegionId,
-			"Action":           action,
-			"AccessKeyId":      client.AccessKey,
-			"Id":               d.Get("id").(string),
-			"UserId":           d.Get("user_id").(string),
-			"UserName":         d.Get("user_name").(string),
-			"UserType":         d.Get("user_type").(string),
-			"OrganizationId":   OrganizationId,
-			"OrganizationName": d.Get("organization_name").(string),
-			"Description":      d.Get("description").(string),
+		user_name := d.Get("user_name").(string)
+		request := client.NewCommonRequest("POST", "ascm", "2019-05-10", action, "")
+		mergeMaps(request.QueryParams, map[string]string{
+			"Region":         client.RegionId,
+			"Action":         action,
+			"AccessKeyId":    client.AccessKey,
+			"UserName":       user_name,
+			"Id":             params[1],
+			"UserId":         d.Get("user_id").(string),
+			"OrganizationId": params[0],
+			"Description":    d.Get("description").(string),
 		})
-		commonRequest.Headers["x-acs-roleid"] = strconv.Itoa(roleId)
 
-		raw, err := client.WithEcsClient(func(ecsClient *ecs.Client) (interface{}, error) {
-			return ecsClient.ProcessCommonRequest(commonRequest)
-		})
+		// response, err = client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, request, request)
+		bresponse, err := client.ProcessCommonRequest(request)
+		addDebug(action, bresponse, request, request.QueryParams)
 		if err != nil {
-			if errmsgs.IsExpectedErrors(err, []string{"Error OdpsUser Not Found"}) {
-				return errmsgs.WrapErrorf(err, errmsgs.NotFoundMsg, errmsgs.AlibabacloudStackSdkGoERROR)
-			}
-			errmsg := ""
-			return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, d.Get("user_name").(string), "UpdateOdpsUser", errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
+			return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg, "alibabacloudstack_maxcompute_user", action, errmsgs.AlibabacloudStackSdkGoERROR)
 		}
-		addDebug("UpdateOdpsUser", raw, requestInfo, commonRequest)
 	}
 	return nil
 }
 
 func resourceAlibabacloudStackMaxcomputeUserDelete(d *schema.ResourceData, meta interface{}) error {
-
-	client := meta.(*connectivity.AlibabacloudStackClient)
-	action := "DeleteOdpsCu"
-	request := make(map[string]interface{})
-	request["CuId"] = d.Id()
-	request["CuName"] = d.Get("cu_name")
-	request["ClusterName"] = d.Get("cluster_name")
-	request["Region"] = client.RegionId
-	request["Action"] = action
-	request["AccessKeyId"] = client.AccessKey
-
-	response, err := client.DoTeaRequest("POST", "ascm", "2019-05-10", action, "", nil, nil, request)
-
-	if err != nil {
-		return err
-	}
-	if errmsgs.IsExpectedErrorCodes(fmt.Sprintf("%v", response["code"]), []string{"102", "403"}) {
-		return nil
-	}
-	if fmt.Sprintf(`%v`, response["code"]) != "200" {
-		return errmsgs.WrapError(errmsgs.Error("DeleteOdpsCu failed for " + response["Message"].(string)))
-	}
 	return nil
 }

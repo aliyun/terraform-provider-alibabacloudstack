@@ -3,13 +3,14 @@ package alibabacloudstack
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
 func TestAccAlibabacloudStackAscmMaxcomputeUserDataSource(t *testing.T) {
 	rand := getAccTestRandInt(1000, 9999)
-	name := fmt.Sprintf("tf_testAccAlibabacloudStack%d", rand)
+	name := fmt.Sprintf("tf_testAcck%d", rand)
 	ResourceTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
@@ -37,13 +38,9 @@ const datasourceAlibabacloudstackMaxcomputeUsers = `
 resource "alibabacloudstack_maxcompute_user" "default"{
   user_name             = "%s"
   description           = "TestAccAlibabacloudStackMaxcomputeUser"
-  lifecycle {
-    ignore_changes = [
-      organization_id,
-    ]
-  }
 }
+
 data "alibabacloudstack_maxcompute_users" "default"{
-	name_regex = "tf_testAccAlibabacloudStack"
+	name_regex = "tf_testAcck"
 }
 `
