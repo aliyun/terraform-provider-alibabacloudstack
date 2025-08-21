@@ -53,6 +53,7 @@ func resourceAlibabacloudStackCenTransitRouterMulticastDomainAssociationCreate(d
 	request.QueryParams["TransitRouterMulticastDomainId"] = domain_id
 	request.QueryParams["VSwitchIds.1"] = vswitch_id
 	bresponse, err := client.ProcessCommonRequest(request)
+	addDebug(request.GetActionName(), bresponse, request, request.QueryParams)
 	if err != nil {
 		if bresponse == nil {
 			return errmsgs.WrapErrorf(err, "Process Common Request Failed")

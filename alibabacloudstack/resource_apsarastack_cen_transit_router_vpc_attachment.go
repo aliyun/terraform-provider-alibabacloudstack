@@ -164,13 +164,14 @@ func resourceAlibabacloudStackCenTransitRouterVpcAttachmentCreate(d *schema.Reso
 	}
 	bresponse, err := client.ProcessCommonRequest(request)
 	if err != nil {
-		if bresponse == nil {
-			return errmsgs.WrapErrorf(err, "Process Common Request Failed")
+		for i := 1; i <= 5; i++ {
+			bresponse, err = client.ProcessCommonRequest(request)
+			if err != nil {
+				time.Sleep(3 * time.Second)
+				continue
+			}
 		}
-		errmsg := errmsgs.GetBaseResponseErrorMessage(bresponse.BaseResponse)
-		return errmsgs.WrapErrorf(err, errmsgs.RequestV1ErrorMsg, "alibabacloudstack_cen_transit_router_vpc_attachment", "CreateTransitRouterVpcAttachment", request.GetActionName(), errmsgs.AlibabacloudStackSdkGoERROR, errmsg)
 	}
-
 	err = json.Unmarshal(bresponse.GetHttpContentBytes(), &CbnCreateTransitRouterVpcAttachmentResponseObj)
 	if err != nil {
 		return errmsgs.WrapErrorf(err, errmsgs.DefaultErrorMsg,
