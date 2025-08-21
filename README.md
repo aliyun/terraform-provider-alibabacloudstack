@@ -1,4 +1,4 @@
-# Apsara Stack Enterprise Terraform Provider
+# AlibabaCloud ApsaraStack Enterprise Terraform Provider
 
 <img src="https://www.datocms-assets.com/2885/1506527326-color.svg" width="400px">
 
@@ -30,13 +30,13 @@ Download TF Core from the [Terraform](https://www.terraform.io/downloads.html) o
 
 > Select an appropriate AlibabacloudStack version based on your Apsara Stack version.
 >
-> + If you use Apsara Stack Enterprise V3.16.2, the compatible version of AlibabaCloudStack should correspondingly be V3.16.x. You can use `< 3.18.0` to declare the version number if you want to obtain the latest version. **Note**: Multiple Apsara Stack Enterprise versions are released. Refer to the documentation version corresponding to the Apsara Stack Enterprise version. 
+> + If you use AlibabaCloud ApsaraStack Enterprise V3.16.2, the compatible version of AlibabaCloudStack should correspondingly be V3.16.x. You can use `< 3.18.0` to declare the version number if you want to obtain the latest version. **Note**: Multiple AlibabaCloud ApsaraStack Enterprise versions are released. Refer to the documentation version corresponding to the AlibabaCloud ApsaraStack Enterprise version. 
 >
-> + If you use Apsara Stack Enterprise V3.18.x (such as V3.18.0, V3.18.1, V3.18.2, and V3.18.6), the compatible version of AlibabaCloudStack should correspondingly be 3.18.x. You can use `< 3.19.0` to declare the version number if you want to obtain the latest version. 
+> + If you use AlibabaCloud ApsaraStack Enterprise V3.18.x (such as V3.18.0, V3.18.1, V3.18.2, and V3.18.6), the compatible version of AlibabaCloudStack should correspondingly be 3.18.x. You can use `< 3.19.0` to declare the version number if you want to obtain the latest version. 
 >
-> + To obtain the Terraform provider versions for other Apsara Stack Enterprise versions, contact Apsara Stack customer service.
+> + To obtain the Terraform provider versions for other AlibabaCloud ApsaraStack Enterprise versions, contact Apsara Stack customer service.
 
-| Apsara Stack Enterprise version | AlibabacloudStack version |
+| AlibabaCloud ApsaraStack Enterprise version | AlibabacloudStack version |
 | ---  | ---  |
 | v3.16.2 | < 3.18.0 |
 | v3.18.x | < 3.19.0 |
@@ -164,7 +164,7 @@ terraform init
 >	terraform init -plugin-dir=<provider repository path>
 >	```
 
-### Configure the Apsara Stack Enterprise Cluster Info
+### Configure the AlibabaCloud ApsaraStack Enterprise Cluster Info
 
 **Solution 1: Use a configuration file**
 
@@ -178,7 +178,7 @@ Create a `provider.tf` file in the working directory and configure the parameter
 ```hcl
 
 provider "alibabacloudstack" {
-  popgw_domain = "xxx.xxx.com" # The standard suffix in the service address of Apsara Stack Enterprise.
+  popgw_domain = "xxx.xxx.com" # The standard suffix in the service address of AlibabaCloud ApsaraStack Enterprise.
   access_key   = "xxxx" # The AccessKey ID of the account.
   secret_key   = "xxxx" # The AccessKey secret of the account.
   role_arn   = "acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx" # The Resource Access Management (RAM) role to be assumed.
@@ -304,7 +304,7 @@ GOOS=<OS> GOARCH=<ARCH> go build
 
 ### Test the source code
 
-1. For more information, see the environment variable configuration methods in the <Configure the Apsara Stack Enterprise Cluster Info> section.
+1. For more information, see the environment variable configuration methods in the <Configure the AlibabaCloud ApsaraStack Enterprise Cluster Info> section.
 2. Run the testcase.
    ```bash
    TF_ACC=1 TF_LOG=INFO go test ./alibabacloudstack -v -run="TestAccAlibabacloudStackxxxxx" -timeout=0
@@ -312,7 +312,7 @@ GOOS=<OS> GOARCH=<ARCH> go build
 
 ### Debug the source code
 
-1. For more information, see the environment variable configuration methods in the <Configure the Apsara Stack Enterprise Cluster Info> section.
+1. For more information, see the environment variable configuration methods in the <Configure the AlibabaCloud ApsaraStack Enterprise Cluster Info> section.
 2. Debug the testcase.
    ```bash
    TF_ACC=1 dlv test ./alibabacloudstack -- -test.v -test.run="TestAccAlibabacloudStackxxxxx"
