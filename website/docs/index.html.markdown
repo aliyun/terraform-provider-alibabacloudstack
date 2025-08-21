@@ -3,10 +3,12 @@ layout: "alibabacloudstack"
 page_title: "Provider: alibabacloudstack"
 sidebar_current: "docs-alibabacloudstack-index"
 description: |-
-  The AlibabacloudStack provider is used to interact with many resources supported by Apsara Stack Enterprise. The provider needs to be configured with the proper credentials before it can be used.
+  The AlibabacloudStack provider is used to interact with many resources supported by Alibaba Cloud ApsaraStack. The provider must be configured with valid authentication credentials before it can be used.
 ---
 
 # AlibabacloudStack Provider
+
+The AlibabacloudStack provider is used to interact with resources supported by Alibaba Cloud ApsaraStack. The provider must be configured with valid authentication credentials before it can be used.
 
 ## Example Code
 
@@ -40,8 +42,8 @@ provider "alibabacloudstack" {
 
 ### Environment Variable Configuration
 
-> The Provider supports configuring most parameters through environment variables.  
-> Basic environment variables such as `ALIBABACLOUDSTACK_ACCESS_KEY` and `ALIBABACLOUDSTACK_SECRET_KEY` and `ALIBABACLOUDSTACK_ASSUME_ROLE_ARN` provide platform access credentials for the AlibabacloudStack Provider.  
+> The Provider supports configuring parameters through environment variables.  
+> Environment variables such as `ALIBABACLOUDSTACK_ACCESS_KEY` and `ALIBABACLOUDSTACK_SECRET_KEY` and `ALIBABACLOUDSTACK_ASSUME_ROLE_ARN` provide platform access credentials for the AlibabacloudStack Provider.  
 > For other configurable environment variables, please refer to the **[Parameter Specifications](#parameter-specifications)** section.
 
 
@@ -71,9 +73,9 @@ terraform plan
 
 | Parameter Name       | Environment Variable              | Type     | Description                              | How to Obtain                                                                                 | Remarks                                                              |
 |----------------------|------------------------------------|----------|------------------------------------------|------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| popgw_domain         | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | AlibabaCloud ApsaraStack platform Service Endpoint suffix   | ASO Platform >> Top Profile Icon >> *Personal Info* >> **Private Cloud API Usage** >> `Internet Domain` | **Required**                                                        |
-| region               | ALIBABACLOUDSTACK_REGION          | string   | Platform Region information              | ASO Platform >> Top Region Information                                                        | **Required**                                                        |
-| is_center_region     | ALIBABACLOUDSTACK_CENTER_REGION   | bool     | Whether current region is central region | ASO Platform >> Top Profile Icon >> *Personal Info* >> **Private Cloud API Usage** >> `Is Current Region a Central Region` | Default: `true`                                                     |
+| popgw_domain         | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | AlibabaCloud ApsaraStack platform Service Endpoint suffix   | Apsara Uni-manager Operations Console >> Top Profile Icon >> *User Information* >> **Apsara Stack API calls** >> `Internet Domain` | **Required**                                                        |
+| region               | ALIBABACLOUDSTACK_REGION          | string   | Platform Region information              | Apsara Uni-manager Operations Console >> Top Region Information                                                        | **Required**                                                        |
+| is_center_region     | ALIBABACLOUDSTACK_CENTER_REGION   | bool     | Whether current region is central region | Apsara Uni-manager Operations Console >> Top Profile Icon >> *User Information* >> **Apsara Stack API calls** >> `Central Region or Not` | Default: `true`                                                     |
 | protocol             | ALIBABACLOUDSTACK_PROTOCOL        | string   | Network protocol (`HTTP` or `HTTPS`)     | Determined by environment configuration                                                       | Default: `HTTP`                                                     |
 | insecure             | ALIBABACLOUDSTACK_INSECURE        | bool     | Skip HTTPS certificate verification      | Determined by environment configuration                                                       | Default: `false`<br>Effective only when protocol is `HTTPS`          |
 | proxy                | ALIBABACLOUDSTACK_PROXY           | string   | Proxy server address                     | Determined by environment configuration                                                       |                                                                      |
@@ -94,17 +96,17 @@ terraform plan
 |------------------------|------------------------------------|----------|---------------------------------|------------------------------------------------------------------|
 | access_key             | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | Account Access Key              | **Required**                                                     |
 | secret_key             | ALIBABACLOUDSTACK_SECRET_KEY      | string   | Account Secret Key              | **Required**                                                     |
-| role_arn               | ALIBABACLOUDSTACK_ASSUME_ROLE_ARN | string   | RAM Role to be assumed          | **Required**, Example: `acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx` |
+| role_arn               | ALIBABACLOUDSTACK_ASSUME_ROLE_ARN | string   | RAM Role to be assumed          | **Required**, e.g. `acs:ram::xxxxxxx:role/ascm-role-x-x-xxxx` |
 | department             | ALIBABACLOUDSTACK_DEPARTMENT      | string   | Authentication organization     | Required if `resource_group_set_name` is unavailable/unconfigured |
 | resource_group         | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | Authentication resource group   | Required if `resource_group_set_name` is unavailable/unconfigured |
-| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name        | Example: `ResourceSet(xxxx)`                                    |
+| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name        | e.g. `ResourceSet(xxxx)`                                    |
 
 #### 2. Account STS Token
 
 > **Note**:  
 > - Provider identifies AK/SK type by `security_token` configuration.  
 > - Requires invoking the "Sts 2015-04-01 AssumeRole" API to obtain temporary credentials through role assumption.
-> - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group parameters` as replacements for `resource_group_set_name`.
+> - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group` parameters as replacements for `resource_group_set_name`.
 
 | Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
 |------------------------|------------------------------------|----------|---------------------------------|------------------------------------------------------------------|
@@ -113,14 +115,14 @@ terraform plan
 | security_token         | ALIBABACLOUDSTACK_SECURITY_TOKEN  | string   | Temporary Security Token        | **Required**                                                     |
 | department             | ALIBABACLOUDSTACK_DEPARTMENT      | string   | Authentication organization     | Required if `resource_group_set_name` is unavailable/unconfigured |
 | resource_group         | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | Authentication resource group   | Required if `resource_group_set_name` is unavailable/unconfigured |
-| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name        |   Example: `ResourceSet(xxxx)`                                    |
+| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name        | e.g. `ResourceSet(xxxx)`                                    |
 
 #### 3. Account AK/SK
 
 > **Note**:  
 > - AK/SK parameters can be queried in ASCM interface.  
 > - Use `department` and `resource_group` instead of `resource_group_set_name` when resource group names are not unique.
-> - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group parameters` as replacements for `resource_group_set_name`.
+> - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group` parameters as replacements for `resource_group_set_name`.
 
 | Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
 |------------------------|------------------------------------|----------|---------------------------------|------------------------------------------------------------------|
@@ -128,4 +130,4 @@ terraform plan
 | secret_key             | ALIBABACLOUDSTACK_SECRET_KEY      | string   | Account Secret Key              | **Required**                                                     |
 | department             | ALIBABACLOUDSTACK_DEPARTMENT      | string   | Authentication organization     | Required if `resource_group_set_name` is unavailable/unconfigured |
 | resource_group         | ALIBABACLOUDSTACK_RESOURCE_GROUP  | string   | Authentication resource group   | Required if `resource_group_set_name` is unavailable/unconfigured |
-| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name        | Example: `ResourceSet(xxxx)`                                    |
+| resource_group_set_name| ALIBABACLOUDSTACK_RESOURCE_GROUP_SET | string | Resource group set name        | e.g. `ResourceSet(xxxx)`                                    |

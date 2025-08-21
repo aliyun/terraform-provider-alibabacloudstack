@@ -3,12 +3,12 @@ layout: "alibabacloudstack"
 page_title: "Provider: alibabacloudstack"
 sidebar_current: "docs-alibabacloudstack-index"
 description: |-
-  AlibabacloudStack Provider 用于通过 Terraform 管理阿里云私有云平台的各类资源。使用前需配置访问云平台的正确凭证。
+  AlibabacloudStack Provider 用于通过 Terraform 管理阿里云专有云飞天企业版的各类资源。使用前，需配置访问该平台的正确凭证。
 ---
 
 # AlibabacloudStack Provider
 
-AlibabacloudStack Provider 用于通过 Terraform 管理阿里云私有云平台下的多种资源。在使用前，需配置该 Provider 访问云平台的正确凭证。
+AlibabacloudStack Provider 用于通过 Terraform 管理阿里云专有云飞天企业版的各类资源。使用前，需配置访问该平台的正确凭证。
 
 ## 示例代码
 

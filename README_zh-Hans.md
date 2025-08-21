@@ -161,7 +161,7 @@ terraform {
 terraform init
 ```
 
-> **注意**：如果在《安装Terraform Provider》章节中，使用非官方的Provider仓库路径，初始化时需要指定相关路径
+> **注意**：如果在[安装Terraform Provider](#安装terraform-provider)章节中，使用非官方的Provider仓库路径，初始化时需要指定相关路径
 >	```bash
 >	terraform init -plugin-dir=<插件根路径>
 >	```
@@ -305,16 +305,16 @@ GOOS=<OS> GOARCH=<ARCH> go build
 
 ### 源码测试
 
-1. 参考《配置集群链接信息》章节中的*环境变量*配置方案，配置环境变量
+1. 参考[配置集群链接信息](#配置集群链接信息)章节中的*环境变量*配置方案，配置环境变量
 2. 执行测试
    ```bash
    cd 
-   TF_ACC=1 TF_LOG=INFO go test ./alibabacloudstack -v -run=TestAccAlibabacloudStack -timeout=0
+   TF_ACC=1 TF_LOG=INFO go test ./alibabacloudstack -v -run="TestAccAlibabacloudStackxxxxx" -timeout=0
    ```
    
 ### 源码调试
 
-1. 参考《配置集群链接信息》章节中的*环境变量*配置方案，配置环境变量
+1. 参考[配置集群链接信息](#配置集群链接信息)章节中的*环境变量*配置方案，配置环境变量
 2. 调试测试用例
    ```bash
    TF_ACC=1 dlv test ./alibabacloudstack -- -test.v -test.run="TestAccAlibabacloudStackxxxxx"
