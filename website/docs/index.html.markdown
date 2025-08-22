@@ -43,7 +43,7 @@ provider "alibabacloudstack" {
 ### Environment Variable Configuration
 
 > The Provider supports configuring parameters through environment variables.  
-> Environment variables such as `ALIBABACLOUDSTACK_ACCESS_KEY` and `ALIBABACLOUDSTACK_SECRET_KEY` and `ALIBABACLOUDSTACK_ASSUME_ROLE_ARN` provide platform access credentials for the AlibabacloudStack Provider.  
+> Environment variables such as `ALIBABACLOUDSTACK_ACCESS_KEY`, `ALIBABACLOUDSTACK_SECRET_KEY` and `ALIBABACLOUDSTACK_ASSUME_ROLE_ARN` provide platform access credentials for the AlibabacloudStack Provider.  
 > For other configurable environment variables, please refer to the **[Parameter Specifications](#parameter-specifications)** section.
 
 
@@ -73,22 +73,22 @@ terraform plan
 
 | Parameter Name       | Environment Variable              | Type     | Description                              | How to Obtain                                                                                 | Remarks                                                              |
 |----------------------|------------------------------------|----------|------------------------------------------|------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| popgw_domain         | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | AlibabaCloud ApsaraStack platform Service Endpoint suffix   | Apsara Uni-manager Operations Console >> Top Profile Icon >> *User Information* >> **Apsara Stack API calls** >> `Internet Domain` | **Required**                                                        |
+| popgw_domain         | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | AlibabaCloud ApsaraStack platform Service Endpoint suffix   | Apsara Uni-manager Operations Console >> Top Profile Icon >> *User Information* >> **Apsara Stack API calls** >> **Internet Domain** | **Required**                                                        |
 | region               | ALIBABACLOUDSTACK_REGION          | string   | Platform Region information              | Apsara Uni-manager Operations Console >> Top Region Information                                                        | **Required**                                                        |
-| is_center_region     | ALIBABACLOUDSTACK_CENTER_REGION   | bool     | Whether current region is central region | Apsara Uni-manager Operations Console >> Top Profile Icon >> *User Information* >> **Apsara Stack API calls** >> `Central Region or Not` | Default: `true`                                                     |
-| protocol             | ALIBABACLOUDSTACK_PROTOCOL        | string   | Network protocol (`HTTP` or `HTTPS`)     | Determined by environment configuration                                                       | Default: `HTTP`                                                     |
-| insecure             | ALIBABACLOUDSTACK_INSECURE        | bool     | Skip HTTPS certificate verification      | Determined by environment configuration                                                       | Default: `false`<br>Effective only when protocol is `HTTPS`          |
-| proxy                | ALIBABACLOUDSTACK_PROXY           | string   | Proxy server address                     | Determined by environment configuration                                                       |                                                                      |
+| is_center_region     | ALIBABACLOUDSTACK_CENTER_REGION   | bool     | Specifies whether current region is central region | Apsara Uni-manager Operations Console >> Top Profile Icon >> *User Information* >> **Apsara Stack API calls** >> **Central Region or Not** | Default: `true`                                                     |
+| protocol             | ALIBABACLOUDSTACK_PROTOCOL        | string   | The Network protocol used to access the environment      | Determined by environment configuration                                                       | Default: `HTTP`    (Valid values: `HTTP` or `HTTPS`)                                                 |
+| insecure             | ALIBABACLOUDSTACK_INSECURE        | bool     | Specifies whether to ignore insecure HTTPS certificates      | Determined by environment configuration                                                       | Default: `false`<br>Effective only when protocol is `HTTPS`          |
+| proxy                | ALIBABACLOUDSTACK_PROXY           | string   | The proxy endpoint that is used to access the environment    | Determined by environment configuration                                                       |                                                                      |
 
 ### Credential Parameters
 
 > AlibabacloudStack Provider supports multiple credential types. Choose based on requirements.
 
-#### 1. Account Role Assumption
+#### 1. Role Assumption
 
 > **Note**:  
 > - Provider determines whether role assumption is needed based on `role_arn` configuration.  
-> - The `role_arn` can be obtained by accessing the *User Information* page in ASCM, clicking **View Current Role Policy**, and retrieving the `RAM Role` for the user under a specific organization.
+> - The `role_arn` can be obtained by accessing the *User Information* page in Apsara Uni-manager Management Console, clicking *View Current Role Policy*, and retrieving the **RAM Role** for the user under a specific organization.
 > - Role assumption validity period: 3600 seconds.
 > - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group parameters` as replacements for `resource_group_set_name`.
 
@@ -120,12 +120,12 @@ terraform plan
 #### 3. Account AK/SK
 
 > **Note**:  
-> - AK/SK parameters can be queried in ASCM interface.  
+> - AK/SK parameters can be queried in Apsara Uni-manager Management Console.  
 > - Use `department` and `resource_group` instead of `resource_group_set_name` when resource group names are not unique.
 > - When resource set names within a Region lack uniqueness, implement the `department` and `resource_group` parameters as replacements for `resource_group_set_name`.
 
 | Parameter Name         | Environment Variable              | Type     | Description                     | Remarks                                                          |
-|------------------------|------------------------------------|----------|---------------------------------|------------------------------------------------------------------|
+|------------------------|-----------------------------------|----------|---------------------------------|------------------------------------------------------------------|
 | access_key             | ALIBABACLOUDSTACK_ACCESS_KEY      | string   | Account Access Key              | **Required**                                                     |
 | secret_key             | ALIBABACLOUDSTACK_SECRET_KEY      | string   | Account Secret Key              | **Required**                                                     |
 | department             | ALIBABACLOUDSTACK_DEPARTMENT      | string   | Authentication organization     | Required if `resource_group_set_name` is unavailable/unconfigured |

@@ -72,12 +72,12 @@ terraform plan
 
 | 参数名            | 环境变量名                        | 参数类型 | 参数含义                                | 获取方式                                                                                     | 备注                                                                 |
 |-------------------|-----------------------------------|----------|-----------------------------------------|----------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
-| popgw_domain      | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | 阿里云专有云飞天企业版服务地址标准后缀        | ASO平台 >> 顶部个人头像 >> *个人信息* >> **专有云 API 调用使用** >> `Internet Domain`         | **必填**                                                             |
-| region            | ALIBABACLOUDSTACK_REGION          | string   | 平台 Region 信息                        | ASO平台 >> 顶部 Region 信息                                                                  | **必填**                                                             |
-| is_center_region  | ALIBABACLOUDSTACK_CENTER_REGION   | bool     | 当前 Region 是否为中心 Region           | ASO平台 >> 顶部个人头像 >> *个人信息* >> **专有云 API 调用使用** >> `当前 Region 是否为中心 Region` | 默认值为 `true`                                                      |
-| protocol          | ALIBABACLOUDSTACK_PROTOCOL        | string   | 网络协议（可选 `HTTP` 或 `HTTPS`）      | 根据环境实际情况确定                                                                         | 默认值 `HTTP`                                                        |
-| insecure          | ALIBABACLOUDSTACK_INSECURE        | bool     | 是否跳过 HTTPS 证书校验                 | 根据环境实际情况确定                                                                         | 默认值 `false`<br>仅当 protocol 为 `HTTPS` 时生效                     |
-| proxy             | ALIBABACLOUDSTACK_PROXY           | string   | 代理服务器地址                          | 根据环境实际情况确定                                                                         |                                                                      |
+| popgw_domain      | ALIBABACLOUDSTACK_POPGW_DOMAIN    | string   | 阿里云专有云飞天企业版服务地址标准后缀        | 专有云运维平台 >> 顶部个人头像 >> *个人信息* >> **专有云 API 调用使用** >> **Internet Domain**         | **必填**                                                             |
+| region            | ALIBABACLOUDSTACK_REGION          | string   | 平台 Region 信息                        | 专有云运维平台 >> 顶部 Region 信息                                                                  | **必填**                                                             |
+| is_center_region  | ALIBABACLOUDSTACK_CENTER_REGION   | bool     | 当前 Region 是否为中心 Region           | 专有云运维平台 >> 顶部个人头像 >> *个人信息* >> **专有云 API 调用使用** >> **当前 Region 是否为中心 Region** | 默认值为 `true`                                                      |
+| protocol          | ALIBABACLOUDSTACK_PROTOCOL        | string   | 访问环境时使用的网络协议                  | 根据环境实际情况确定                                                                         | 默认值 `HTTP`, 可选 `HTTP` 或 `HTTPS`                                                        |
+| insecure          | ALIBABACLOUDSTACK_INSECURE        | bool     | 访问环境时是否跳过 HTTPS 证书校验          | 根据环境实际情况确定                                                                         | 默认值 `false`<br>仅当 protocol 为 `HTTPS` 时生效                     |
+| proxy             | ALIBABACLOUDSTACK_PROXY           | string   | 访问环境时的代理服务器地址                 | 根据环境实际情况确定                                                                         |                                                                      |
 
 ---
 
@@ -85,11 +85,11 @@ terraform plan
 
 > AlibabacloudStack Provider 支持多种访问凭证，请根据实际需求选择。
 
-#### 1. 账号扮演
+#### 1. 角色扮演
 
 > **注意**：  
-> - Provider 通过是否配置 `role_arn` 判断是不需要进行帐号扮演。
-> - `role_arn` 可在 ASCM 平台的*个人信息*页，通过点击**查看当前角色策略**，获取用户在特定组织下的`RAM Role`。
+> - Provider 通过是否配置 `role_arn` 判断是不需要进行角色扮演。
+> - `role_arn` 可在统一云管平台的*个人信息*页，通过点击*查看当前角色策略*，获取用户在特定组织下的**RAM Role**。
 > - 账号扮演有效时间为3600秒。
 > - 若Region下资源集名称不唯一，需使用 `department` 和 `resource_group` 替代 `resource_group_set_name`。
 
@@ -121,7 +121,7 @@ terraform plan
 #### 3. 账号 AK/SK
 
 > **注意**：  
-> - 账号 AK/SK 相关参数可在 ASCM 页面上查询。  
+> - 账号 AK/SK 相关参数可在统一云管平台页面上查询。  
 > - 若Region下资源集名称不唯一，需使用 `department` 和 `resource_group` 替代 `resource_group_set_name`。
 
 | 参数名                  | 环境变量名                        | 参数类型 | 参数含义                | 备注                                                                 |
