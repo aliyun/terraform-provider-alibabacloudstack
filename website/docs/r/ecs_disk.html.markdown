@@ -42,7 +42,8 @@ resource "alibabacloudstack_disk" "example" {
 
 The following arguments are supported:
 
-* `zone_id` - (Optional, ForceNew) The ID of the zone in which to create the pay-as-you-go disk. If you do not specify `instance_id`, you must specify `zone_id`. You cannot specify both `zone_id` and `instance_id` in a request.
+* `availability_zone` - (Optional, ForceNew) The availability zone of the disk.
+* `zone_id` - (Optional, ForceNew) The ID of the zone in which to create the pay-as-you-go disk. If you do not specify `availability_zone`, you must specify `zone_id`. You cannot specify both `zone_id` and `availability_zone` in a request.
 * `name` - (Optional) Name of the ECS disk. This name can have a string of 2 to 128 characters, must contain only alphanumeric characters or hyphens, such as "-", ".", "_", and must not begin or end with a hyphen, and must not begin with `http://` or `https://`. Default value is null.
 * `disk_name` - (Optional) The name of the disk. The name must be 2 to 128 characters in length and can contain Unicode characters under the Decimal Number category and the categories whose names contain Letter. The name can also contain colons (:), underscores (\_), periods (.), and hyphens (-).
 * `description` - (Optional) Description of the disk. This description can have a string of 2 to 256 characters, It cannot begin with `http://` or `https://`. Default value is null.
